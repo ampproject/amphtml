@@ -21,13 +21,13 @@ import {LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {toggle} from '../../src/style';
-import {toggleExperiment} from '../../src/experiments';
+import {toggleExperiment, isExperimentOn} from '../../src/experiments';
 
 describe('amp-img', () => {
   let sandbox;
   let screenWidth;
   let windowWidth;
-  let iframeFixture;
+  let iframe;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -40,6 +40,10 @@ describe('amp-img', () => {
         getWidth: () => windowWidth,
       };
     });
+
+    return createIframePromise().then(iframeFixture => {
+      iframe = iframeFixture;
+    });
   });
 
   afterEach(() => {
@@ -47,25 +51,22 @@ describe('amp-img', () => {
   });
 
   function getImg(attributes, children) {
-    return createIframePromise().then(iframe => {
-      iframeFixture = iframe;
-      installImg(iframe.win);
-      Object.defineProperty(iframe.win.screen, 'width', {
-        get: () => screenWidth,
-      });
-
-      const img = iframe.doc.createElement('amp-img');
-      for (const key in attributes) {
-        img.setAttribute(key, attributes[key]);
-      }
-
-      if (children != null) {
-        for (const key in children) {
-          img.appendChild(children[key]);
-        }
-      }
-      return iframe.addElement(img);
+    installImg(iframe.win);
+    Object.defineProperty(iframe.win.screen, 'width', {
+      get: () => screenWidth,
     });
+
+    const img = iframe.doc.createElement('amp-img');
+    for (const key in attributes) {
+      img.setAttribute(key, attributes[key]);
+    }
+
+    if (children != null) {
+      for (const key in children) {
+        img.appendChild(children[key]);
+      }
+    }
+    return Promise.resolve(iframe.addElement(img));
   }
 
   it('should load an img with more attributes', () => {
@@ -210,35 +211,37 @@ describe('amp-img', () => {
   });
 
   it('should propagate srcset and sizes', () => {
+    toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
-      src: 'test.jpg',
-      srcset: 'large.jpg 2000w, small.jpg 1000w',
-      sizes: '(min-width: 320px) 320px, 100vw',
-      width: 300,
-      height: 200,
+      src: '/examples/img/sample.jpg',
+      srcset: '/examples/img/hero@1x.jpg 641w, /examples/img/hero@2x.jpg 1282w',
+      sizes: '(max-width: 320px) 640px, 100vw',
+      width: 320,
+      height: 240,
     }).then(ampImg => {
-      toggleExperiment(iframeFixture.win, 'amp-img-native-srcset', true);
+      expect(isExperimentOn(iframe.win, 'amp-img-native-srcset')).to.equal(true);
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('srcset')).to
-          .equal('large.jpg 2000w, small.jpg 1000w');
+          .equal('/examples/img/hero@1x.jpg 641w, /examples/img/hero@2x.jpg 1282w');
       expect(img.getAttribute('sizes')).to
-          .equal('(min-width: 320px) 320px, 100vw');
+          .equal('(max-width: 320px) 640px, 100vw');
     });
   });
 
   it('should propagate native-sizes as sizes when it exists', () => {
+    toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
-      src: 'test.jpg',
-      srcset: 'large.jpg 2000w, small.jpg 1000w',
+      src: '/examples/img/sample.jpg',
+      srcset: '/examples/img/hero@1x.jpg 641w, /examples/img/hero@2x.jpg 1282w',
       sizes: '(min-width: 320px) 320px, 100vw',
       'native-sizes': '(min-width: 320px) 300px, 100vw',
-      width: 300,
-      height: 200,
+      width: 320,
+      height: 240,
     }).then(ampImg => {
-      toggleExperiment(iframeFixture.win, 'amp-img-native-srcset', true);
+      expect(isExperimentOn(iframe.win, 'amp-img-native-srcset')).to.equal(true);
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('srcset')).to
-          .equal('large.jpg 2000w, small.jpg 1000w');
+          .equal('/examples/img/hero@1x.jpg 641w, /examples/img/hero@2x.jpg 1282w');
       expect(img.getAttribute('sizes')).to
           .equal('(min-width: 320px) 300px, 100vw');
     });
