@@ -15,13 +15,13 @@
  */
 
 import {Services} from '../../../src/services';
+import {childElementByTag} from '../../../src/dom';
 import {getAmpdoc} from '../../../src/service';
 import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
-export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
-
+export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
 
 export class AmpStoryRequestService {
   constructor(win, storyElement) {
@@ -52,11 +52,14 @@ export class AmpStoryRequestService {
    * @private
    */
   loadJsonFromAttribute_(attributeName) {
-    if (!this.storyElement_.hasAttribute(attributeName)) {
+    const bookendEl = childElementByTag(this.storyElement_,
+        'amp-story-bookend');
+
+    if (!bookendEl || !bookendEl.hasAttribute(attributeName)) {
       return Promise.resolve(null);
     }
 
-    const rawUrl = this.storyElement_.getAttribute(attributeName);
+    const rawUrl = bookendEl.getAttribute(attributeName);
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
