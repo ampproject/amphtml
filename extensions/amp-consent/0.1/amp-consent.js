@@ -286,10 +286,18 @@ export class AmpConsent extends AMP.BaseElement {
       let isConsentRequiredPromise;
 
       if (this.consentConfig_[instanceId]['checkConsentHref']) {
-        isConsentRequiredPromise = this.getConsentRemote_(instanceId).then(
-            response => {
-              this.parseConsentResponse_(instanceId, response);
-            });
+        const remoteConsentPromise = this.getConsentRemote_(instanceId);
+        isConsentRequiredPromise = remoteConsentPromise.then(response => {
+          return this.parseConsentResponse_(instanceId, response);
+        });
+        const sharedDataPromise = remoteConsentPromise.then(response => {
+          if (!response || response['sharedData'] === undefined) {
+            return null;
+          }
+          return response['sharedData'];
+        });
+        this.consentStateManager_.setConsentInstanceSharedData(
+            instanceId, sharedDataPromise);
       } else {
         const geoGroup =
             this.consentConfig_[instanceId]['promptIfUnknownForGeoGroup'];
