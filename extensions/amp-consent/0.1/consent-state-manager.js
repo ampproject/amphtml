@@ -118,7 +118,7 @@ export class ConsentStateManager {
    * from the remote endpoint.
    *
    * @param {string} instanceId
-   * @param {Promise<?Object>} sharedDataPromise
+   * @param {Promise<?Object|undefined>} sharedDataPromise
    */
   setConsentInstanceSharedData(instanceId, sharedDataPromise) {
     dev().assert(this.instances_[instanceId],
