@@ -19,6 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import * as sinon from 'sinon';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -711,6 +712,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   });
 
   describe('#unlayoutCallback', () => {
+    let sandbox;
+
     beforeEach(() => {
       const setup = createImplTag({
         width: '300',
@@ -731,7 +734,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.element.appendChild(placeholder);
       impl.element.appendChild(fallback);
       impl.size_ = {width: 123, height: 456};
+      sandbox = sinon.sandbox.create();
     });
+
+    afterEach(() => sandbox.restore());
 
     it('should reset state to null on non-FIE unlayoutCallback', () => {
       impl.onCreativeRender();
@@ -817,6 +823,15 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(impl.element.getAttribute('data-amp-slot-index'))
               .to.equal('1');
         });
+
+    it('should call #unobserve on refreshManager', () => {
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
+      impl.refreshManager_ = {
+        unobserve: sandbox.spy(),
+      };
+      impl.unlayoutCallback();
+      expect(impl.refreshManager_.unobserve).to.be.calledOnce;
+    });
   });
 
   describe('#getNetworkId', () => {
