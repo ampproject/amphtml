@@ -122,7 +122,14 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    const ampdoc = this.ampdocService.getAmpDoc();
+    // The isSingleDoc check is required because if in shadow mode, this will
+    // throw a console error because the shellShadowDoc_ is not set when
+    // fetching the amp doc. So either the test-bind-impl or test pre setup in
+    // shadow mode tests needs to be fixed or there is a bug in ampdoc impl
+    // getAmpDoc.
+    // TODO(alabiaga): This should be investigated and fixed.
+    const ampdoc = this.ampdocService.isSingleDoc() ?
+      this.ampdocService.getAmpDoc(this.win.document) : null;
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -165,7 +172,7 @@ export class Xhr {
    * @param {string} input The URL of the XHR which may get intercepted.
    * @param {!FetchInitDef} init The options of the XHR which may get
    *     intercepted.
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {?./ampdoc-impl.AmpDoc} ampdoc
    * @return {!Promise<!FetchResponse|!Response|undefined>}
    *     A response returned by the interceptor if XHR is intercepted or
    *     `Promise<undefined>` otherwise.
