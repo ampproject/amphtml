@@ -60,16 +60,20 @@ export function batchFetchJsonFor(
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
     if (opt_urlReplacement == UrlReplacementPolicy.OPT_IN) {
-      urlReplacements.collectUnwhitelistedVars(element).then(unwhitelisted => {
-        if (unwhitelisted.length > 0) {
+      return urlReplacements.collectUnwhitelistedVars(element).then(invalid => {
+        if (invalid.length > 0) {
           const TAG = element.tagName;
           throw user().createError('URL variable substitutions in CORS ' +
               'fetches from dynamic URLs (e.g. via amp-bind) require opt-in. ' +
-              `Please add data-amp-replace="${unwhitelisted.join(' ')}" to ` +
+              `Please add data-amp-replace="${invalid.join(' ')}" to ` +
               `the <${TAG}> element. See "bit.ly/amp-var-subs" for details.`);
+        } else {
+          return src;
         }
       });
     }
+    return src;
+  }).then(src => {
     const opts = {};
     if (element.hasAttribute('credentials')) {
       opts.credentials = element.getAttribute('credentials');
