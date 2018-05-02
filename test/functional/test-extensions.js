@@ -27,11 +27,13 @@ import {
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 import {getServiceForDoc} from '../../src/service';
+import {installTimerService} from '../../src/service/timer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {registerServiceBuilder} from '../../src/service';
 import {
   resetScheduledElementForTesting,
 } from '../../src/service/custom-element-registry';
+
 
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
@@ -49,6 +51,7 @@ describes.sandboxed('Extensions', {}, () => {
         timeoutCallback = cb;
       };
       installDocService(win, /* isSingleDoc */ true);
+      installTimerService(win);
       extensions = new Extensions(win);
       installRuntimeStylesTo(win.document.head);
     });

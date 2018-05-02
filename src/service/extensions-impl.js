@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../services';
-import {Timer} from './timer-impl';
 import {
   adoptServiceForEmbed,
   adoptServiceForEmbedIfEmbeddable,
@@ -182,8 +181,7 @@ export class Extensions {
    * @return {!Promise<?ExtensionDef>}
    */
   waitForExtension(win, extensionId, opt_timeout) {
-    // Note we can't use Services.timerFor, it's a circular ref.
-    const timer = new Timer(win);
+    const timer = Services.timerFor(win);
     return /** @type {!Promise<?ExtensionDef>} */ (
       timer.timeoutPromise(opt_timeout || LOAD_TIMEOUT,
           this.waitFor_(
