@@ -182,7 +182,7 @@ export class Extensions {
    * @return {!Promise<?ExtensionDef>}
    */
   waitForExtension(win, extensionId, opt_timeout) {
-    // Note we can't use timeout service becuase it's not instantiated yet.
+    // Note we can't use Services.timerFor, it's a circular ref.
     const timer = new Timer(win);
     return /** @type {!Promise<?ExtensionDef>} */ (
       timer.timeoutPromise(opt_timeout || LOAD_TIMEOUT,

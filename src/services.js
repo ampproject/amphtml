@@ -32,13 +32,6 @@ import {
 /** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
 export let SubscriptionService;
 
-/**
- * Array of stubbed elements, moved here from ./element-stub
- * to avoid circular dependency.
- */
-/** @type {!Array} */
-export const stubbedElements = [];
-
 export class Services {
   /**
    * Hint: Add extensions folder path to compile.js with
@@ -479,20 +472,6 @@ export class Services {
    * @return {!Promise<?Object<string,(string|Array<string>)>>}
    */
   static geoForOrNull(win) {
-    /**
-     * If there is a stubbed amp-geo extension wait for it to load before trying
-     * to get the service.  Prevents a race condition when everything but
-     * amp-geo is in cache.  If there is no stub then it's either loaded,
-     * not present, or the 'geo' service was defiend by a test. In those cases
-     * we don't wait around for an extension that may not exist.
-     */
-    if (stubbedElements.includes['amp-geo']) {
-      const extensions = Services.extensionsFor(win);
-      return /** @type {!Promise<?Object<string,(string|Array<string>)>>} */ (
-        extensions.waitForExtension(win, 'amp-geo')
-            .then(() => /** @type {!Promise<?Object<string,(string|Array<string>)>>} */
-              (getElementServiceIfAvailable(win, 'geo', 'amp-geo', true))));
-    }
     return /** @type {!Promise<?Object<string,(string|Array<string>)>>} */ (
       getElementServiceIfAvailable(win, 'geo', 'amp-geo', true));
   }

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {ElementStub} from '../element-stub';
+import {ElementStub, stubbedElements} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
 import {reportError} from '../error';
-import {stubbedElements} from '../services';
 import {user} from '../log';
 
 

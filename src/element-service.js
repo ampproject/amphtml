@@ -18,12 +18,14 @@ import * as dom from './dom';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
+  getService,
   getServicePromise,
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
   getTopWindow,
 } from './service';
+import {stubbedElementNames} from './element-stub-data';
 import {toWin} from './types';
 import {user} from './log';
 
@@ -62,6 +64,19 @@ export function getElementServiceIfAvailable(win, id, extension, opt_element) {
   const s = getServicePromiseOrNull(win, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
+  }
+  /**
+   * If there is (or was) a stubbed extension wait for it to load before trying
+   * to get the service.  Prevents a race condition when everything but
+   * the extensions is in cache.  If there is no stub then it's either loaded,
+   * not present, or the service was defined by a test. In those cases
+   * we don't wait around for an extension that may not exist.
+   */
+  if (stubbedElementNames.includes(extension)) {
+    const extensions = getService(win, 'extensions');
+    return /** @type {!Promise<?Object>} */ (
+      extensions.waitForExtension(win, extension).then(() =>
+        getElementServicePromiseOrNull(win, id, extension, opt_element)));
   }
   return getElementServicePromiseOrNull(win, id, extension, opt_element);
 }
