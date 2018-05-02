@@ -20,7 +20,7 @@
  */
 
 import {InaboxMessagingHost} from './inabox-messaging-host';
-import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {dev, initLogConstructor, setReportError, user} from '../../src/log';
 import {reportError} from '../../src/error';
 
 /** @const {string} */
@@ -70,6 +70,11 @@ export class InaboxHost {
     if (queuedMsgs) {
       if (Array.isArray(queuedMsgs)) {
         queuedMsgs.forEach(message => {
+          // Pending messages are added by external scripts.
+          // Validate their data types to avoid client errors.
+          if (!validateMessage(message)) {
+            return;
+          }
           try {
             host.processMessage(message);
           } catch (err) {
@@ -85,6 +90,15 @@ export class InaboxHost {
     win[PENDING_MESSAGES]['push'] = () => {};
     win.addEventListener('message', host.processMessage.bind(host));
   }
+}
+
+function validateMessage(message) {
+  const valid = message.source && message.source.postMessage;
+  if (!valid) {
+    user().error(TAG,
+        'Missing message.source. message.data=' + JSON.stringify(message.data));
+  }
+  return valid;
 }
 
 new InaboxHost(self);
