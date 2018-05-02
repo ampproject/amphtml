@@ -134,7 +134,8 @@ describe('refresh', () => {
       });
     });
 
-    it('should execute the refresh event correctly', () => {
+    // TODO(#15029): unskip flaky test
+    it.skip('should execute the refresh event correctly', () => {
       // Attach element to DOM, as is necessary for request ampdoc.
       window.document.body.appendChild(mockA4a.element);
       const refreshSpy = sandbox.spy(mockA4a, 'refresh');
