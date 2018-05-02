@@ -823,7 +823,7 @@ function performBuild(watch) {
  */
 function checkBinarySize(compiled) {
   const file = compiled ? './dist/v0.js' : './dist/amp.js';
-  const size = compiled ? '77.05KB' : '336.72KB';
+  const size = compiled ? '77.05KB' : '336.76KB';
   const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
   log(green('Running ') + cyan(cmd) + green('...\n'));
   const p = exec(cmd);
