@@ -159,12 +159,6 @@ export class AmpForm {
     /** @const @private {?string} */
     this.xhrVerify_ = this.getXhrUrl_('verify-xhr');
 
-    /**
-     * Indicates that the action will submit to canonical or not.
-     * @private {boolean|undefined}
-     */
-    this.isCanonicalAction_ = undefined;
-
     /** @const @private {boolean} */
     this.shouldValidate_ = !this.form_.hasAttribute('novalidate');
     // Need to disable browser validation in order to allow us to take full
