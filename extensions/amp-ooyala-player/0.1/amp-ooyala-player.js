@@ -270,6 +270,11 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;

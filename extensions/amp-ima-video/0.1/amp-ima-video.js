@@ -359,6 +359,11 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     return this.playerData_.currentTime;
   }
