@@ -109,7 +109,18 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
-    this.ampdocService = Services.ampdocServiceFor(win);
+    /** @private */
+    const ampdocService = Services.ampdocServiceFor(win);
+
+    // The isSingleDoc check is required because if in shadow mode, this will
+    // throw a console error because the shellShadowDoc_ is not set when
+    // fetching the amp doc. So either the test-bind-impl or test pre setup in
+    // shadow mode tests needs to be fixed or there is a bug in ampdoc impl
+    // getAmpDoc.
+    // TODO(alabiaga): This should be investigated and fixed
+    /** @private {?./ampdoc-impl.AmpDoc} */
+    this.ampdocSingle_ =
+        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
   }
 
   /**
@@ -122,14 +133,6 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    // The isSingleDoc check is required because if in shadow mode, this will
-    // throw a console error because the shellShadowDoc_ is not set when
-    // fetching the amp doc. So either the test-bind-impl or test pre setup in
-    // shadow mode tests needs to be fixed or there is a bug in ampdoc impl
-    // getAmpDoc.
-    // TODO(alabiaga): This should be investigated and fixed.
-    const ampdoc = this.ampdocService.isSingleDoc() ?
-      this.ampdocService.getAmpDoc(this.win.document) : null;
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -137,7 +140,7 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
-    return this.maybeIntercept_(input, init, ampdoc)
+    return this.maybeIntercept_(input, init)
         .then(interceptorResponse => {
           if (interceptorResponse) {
             return interceptorResponse;
@@ -172,25 +175,21 @@ export class Xhr {
    * @param {string} input The URL of the XHR which may get intercepted.
    * @param {!FetchInitDef} init The options of the XHR which may get
    *     intercepted.
-   * @param {?./ampdoc-impl.AmpDoc} ampdoc
    * @return {!Promise<!FetchResponse|!Response|undefined>}
    *     A response returned by the interceptor if XHR is intercepted or
    *     `Promise<undefined>` otherwise.
    * @private
    */
-  maybeIntercept_(input, init, ampdoc) {
-    if (!this.ampdocService.isSingleDoc()) {
+  maybeIntercept_(input, init) {
+    if (!this.ampdocSingle_) {
       return Promise.resolve();
     }
-    const htmlElement = ampdoc.getRootNode().documentElement;
-    const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
-    if (!docOptedIn) {
-      return Promise.resolve();
-    }
-    const viewer = Services.viewerForDoc(ampdoc);
+    const viewer = Services.viewerForDoc(this.ampdocSingle_);
     return viewer.whenFirstVisible()
         .then(() => {
-          if (!viewer.hasCapability('xhrInterceptor')) {
+          const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
+          const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
+          if (!docOptedIn || !viewer.hasCapability('xhrInterceptor')) {
             return Promise.resolve();
           }
           return viewer.isTrustedViewer().then(viewerTrusted => {
