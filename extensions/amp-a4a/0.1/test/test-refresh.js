@@ -48,9 +48,7 @@ describe('refresh', () => {
     mockA4a = {
       win: window,
       element: getTestElement(),
-      refresh: () => {
-
-      },
+      refresh: () => {},
     };
   });
 
