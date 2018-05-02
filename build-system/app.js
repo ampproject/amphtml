@@ -552,7 +552,7 @@ app.post('/get-consent-v1/', (req, res) => {
   assertCors(req, res, ['POST']);
   const body = {
     'promptIfUnknown': true,
-    'sharedDataPromise': {
+    'sharedData': {
       'tfua': true,
       'coppa': true,
     },

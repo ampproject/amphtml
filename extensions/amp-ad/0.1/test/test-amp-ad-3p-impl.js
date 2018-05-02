@@ -153,7 +153,7 @@ describes.realWin('amp-ad-3p-impl', {
         expect(data._context.initialConsentState)
             .to.equal(consent.CONSENT_POLICY_STATE.SUFFICIENT);
         expect(data._context.consentSharedData)
-            .to.equal({a: 1, b: 2});
+            .to.deep.equal({a: 1, b: 2});
       });
     });
 

@@ -117,13 +117,13 @@ export class ConsentStateManager {
    * Sets a promise which resolves to a shareData object that is to be returned
    * from the remote endpoint.
    *
-   * @param instanceId
-   * @param sharedData
+   * @param {string} instanceId
+   * @param {Promise<?Object>} sharedDataPromise
    */
-  setConsentInstanceSharedData(instanceId, sharedData) {
+  setConsentInstanceSharedData(instanceId, sharedDataPromise) {
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
-    this.instances_[instanceId].sharedDataPromise = sharedData;
+    this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
   }
 
   /**
@@ -131,7 +131,7 @@ export class ConsentStateManager {
    * from the remote endpoint.
    *
    * @param {string} instanceId
-   * @return {Promise<?Object>}
+   * @return {?Promise<?Object>}
    */
   getConsentInstanceSharedData(instanceId) {
     dev().assert(this.instances_[instanceId],

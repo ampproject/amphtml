@@ -110,7 +110,10 @@ export class ConsentPolicyManager {
   }
 
   /**
-   * Get shared data of a policy.
+   * Get shared data of a policy. If multiple consent instances return
+   * sharedData, a merge will be done. For any conflict keys, the value from
+   * later consent instance (as defined in the policy config) will override
+   * the previous ones.
    *
    * @param {string} policyId
    * @return {!Promise<Object>}
@@ -177,7 +180,7 @@ export class ConsentPolicyInstance {
     }
   }
 
-  /** @returns {Array} */
+  /** @returns {Array<string>} */
   getConsentInstanceIds() {
     return Object.keys(this.itemToConsentState_);
   }
