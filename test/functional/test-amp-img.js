@@ -210,6 +210,8 @@ describe('amp-img', () => {
     });
   });
 
+  // The following tests are relevant to the amp-img-native-srcset experiment
+
   it('should propagate srcset and sizes', () => {
     toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
@@ -244,6 +246,19 @@ describe('amp-img', () => {
           .equal('/examples/img/hero@1x.jpg 641w, /examples/img/hero@2x.jpg 1282w');
       expect(img.getAttribute('sizes')).to
           .equal('(min-width: 320px) 300px, 100vw');
+    });
+  });
+
+  it('should define a src when only srcset is present', () => {
+    toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
+    return getImg({
+      srcset: '/examples/img/hero@1x.jpg 641w, /examples/img/hero@2x.jpg 1282w',
+      width: 320,
+      height: 240,
+    }).then(ampImg => {
+      expect(isExperimentOn(iframe.win, 'amp-img-native-srcset')).to.equal(true);
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('src')).to.equal('/examples/img/hero@1x.jpg');
     });
   });
 
