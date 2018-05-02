@@ -110,11 +110,11 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should fail registration without promise', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         extensions.registerExtension('amp-ext', () => {
           throw new Error('intentional');
         }, {});
-      }).to.throw(/intentional/); });
+      }).to.throw(/intentional/);
       expect(extensions.currentExtensionId_).to.be.null;
 
       const holder = extensions.extensions_['amp-ext'];
@@ -136,11 +136,11 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should fail registration with promise', () => {
       const promise = extensions.waitForExtension(win , 'amp-ext');
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         extensions.registerExtension('amp-ext', () => {
           throw new Error('intentional');
         }, {});
-      }).to.throw(/intentional/); });
+      }).to.throw(/intentional/);
       expect(extensions.currentExtensionId_).to.be.null;
 
       const holder = extensions.extensions_['amp-ext'];
