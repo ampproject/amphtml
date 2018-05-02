@@ -115,6 +115,17 @@ export class VideoInterface {
 
   /**
    * If this returns true then it will be assumed that the player implements
+   * a feature to enter fullscreen on device rotation internally, so that the
+   * video manager does not override it. If not, the video manager will
+   * implement this feature automatically for videos with the attribute
+   * `rotate-to-fullscreen`.
+   *
+   * @return {boolean}
+   */
+  preimplementsAutoFullscreen() {}
+
+  /**
+   * If this returns true then it will be assumed that the player implements
    * the MediaSession API internally so that the video manager does not override
    * it. If not, the video manager will use the metadata variable as well as
    * inferred meta-data to update the video's Media Session notification.
