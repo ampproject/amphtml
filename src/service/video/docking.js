@@ -68,7 +68,7 @@ const FLOAT_TOLERANCE = 0.02;
 const BASE_CLASS_NAME = 'i-amphtml-docked';
 
 /** @private @const {number} */
-const REVERT_TO_INLINE_RATIO = 0.95;
+const REVERT_TO_INLINE_RATIO = 0.9;
 
 /** @private @enum */
 const RelativeX = {LEFT: 0, RIGHT: 1};
@@ -278,18 +278,11 @@ export class VideoDocking {
             </div>
           </div>`)));
 
-    /** @private {boolean} */
-    // Dismissal is final.
-    this.dismissed_ = false;
+    /** @private {?../../video-interface.VideoInterface} */
+    this.lastDismissed_ = null;
 
-    /** @private {boolean} */
-    this.playingBeforeNudge_ = false;
-
-    /**
-     * Stack of videos that have been nudged out of view.
-     * @private {?Array<!../../video-interface.VideoInterface>}
-     */
-    this.nudged_ = null;
+    /** @private {?RelativeY} */
+    this.lastDismissedPosY_ = null;
 
     /**
      * Unlisteners for the currently minimized video.
@@ -500,58 +493,64 @@ export class VideoDocking {
    * @private
    */
   onPositionChange_(video) {
-    if (this.dismissed_) {
-      // Docking can no longer happen.
+    if (this.ignoreDueToSize_(video) ||
+        this.ignoreDueToDocked_(video) ||
+        this.undockBecauseVisible_(video) ||
+        this.ignoreDueToNotPlayingManually_(video)) {
       return;
     }
 
+    const posY = this.maybeGetRelativeY_(video);
+    if (posY === null) {
+      return;
+    }
+
+    this.dock_(video, this.getRelativeX_(), posY);
+  }
+
+  /**
+   * @param  {!../../video-interface.VideoInterface} video
+   * @return {boolean}
+   */
+  undockBecauseVisible_(video, ratio = 1) {
+    if (!this.currentlyDocked_ || !this.isVisible_(video.element, ratio)) {
+      return false;
+    }
+    this.undock_(video);
+    return true;
+  }
+
+  /**
+   * @param  {!../../video-interface.VideoInterface} video
+   * @return {boolean}
+   */
+  ignoreDueToNotPlayingManually_(video) {
+    return !this.currentlyDocked_ &&
+        this.manager_.getPlayingState(video) != PlayingStates.PLAYING_MANUAL;
+  }
+
+  /**
+   * @param  {!../../video-interface.VideoInterface} video
+   * @return {boolean}
+   */
+  ignoreDueToDocked_(video) {
+    return this.currentlyDocked_ && !this.isCurrentlyDocked_(video);
+  }
+
+  /**
+   * @param  {!../../video-interface.VideoInterface} video
+   * @return {boolean}
+   */
+  ignoreDueToSize_(video) {
+    const {width, height} = this.getLayoutBox_(video);
+    const aspectRatio = width / height;
+    if (aspectRatio < 1) { // ignore portrait
+      return true;
+    }
     if (this.getAreaWidth_() < MIN_VIEWPORT_WIDTH) {
-      return;
+      return true;
     }
-
-    const {element} = video;
-    const intersectionChangeEntry = element.getIntersectionChangeEntry();
-
-    const {intersectionRatio} = intersectionChangeEntry;
-    if (intersectionRatio < FLOAT_TOLERANCE &&
-        !this.isCurrentlyDocked_(video)) {
-      // TODO(alanorozco): Transition in cases where the element went out
-      // of view too quickly.
-      return;
-    }
-
-    if (this.isCurrentlyDocked_(video) &&
-        this.isVisible_(element)) {
-      this.undock_(video);
-      return;
-    }
-
-    const isPlayingManually =
-        this.manager_.getPlayingState(video) == PlayingStates.PLAYING_MANUAL;
-    if (!isPlayingManually && !this.isCurrentlyDocked_(video)) {
-      return;
-    }
-
-    const {intersectionRect} = intersectionChangeEntry;
-    if (this.currentlyDocked_ &&
-        !this.isCurrentlyDocked_(video) &&
-        this.nudgeWith_(intersectionRect)) {
-      return;
-    }
-
-    const posY = this.getRelativeY_(video);
-    if (posY === null ||
-        this.currentlyDocked_ && posY !== this.currentlyDocked_.posY) {
-      return;
-    }
-
-    if (this.currentlyDocked_ && !this.isCurrentlyDocked_(video)) {
-      // TODO(alanorozco): Handle swap case.
-      this.undock_(this.currentlyDocked_.video);
-    }
-
-    const posX = this.getRelativeX_();
-    this.dock_(video, posX, posY);
+    return false;
   }
 
   /**
@@ -591,7 +590,7 @@ export class VideoDocking {
    * @return {?RelativeY}
    * @private
    */
-  getRelativeY_(video) {
+  maybeGetRelativeY_(video) {
     if (this.isCurrentlyDocked_(video)) {
       return dev().assert(this.currentlyDocked_).posY;
     }
@@ -633,89 +632,6 @@ export class VideoDocking {
   }
 
   /**
-   * Nudge with a given box if it pushes the docked video's boundaries.
-   * @param {{top: number, bottom: number, right: number, left: number}} box
-   * @return {boolean} Whether the docked video was nudged by the given box.
-   */
-  nudgeWith_(box) {
-    if (!this.intersectsWithDocked_(box)) {
-      return this.resetAfterNudge_();
-    }
-
-    const {top, bottom} = box;
-    const {video, posX, posY} = this.currentlyDocked_;
-
-    let {targetHeight} = this.getTargetArea_(video, posX, posY);
-
-    targetHeight += this.getMargin_() * 2;
-
-    const topThreshold = this.getTopEdge_() + targetHeight;
-    if (posY == RelativeY.TOP &&
-        top <= topThreshold &&
-        top > this.getTopEdge_()) {
-      return this.nudge_(top - topThreshold);
-    }
-
-    const bottomThreshold = this.getBottomEdge_() - targetHeight;
-    if (posY == RelativeY.BOTTOM &&
-        bottom >= bottomThreshold &&
-        bottom < this.getBottomEdge_()) {
-      return this.nudge_(bottom - bottomThreshold);
-    }
-
-    return this.resetAfterNudge_();
-  }
-
-  /**
-   * @param {number} offsetY
-   * @return {boolean}
-   */
-  nudge_(offsetY) {
-    this.playingBeforeNudge_ = this.playingBeforeNudge_ || this.isPlaying_();
-
-    const video = this.getDockedVideo_();
-    video.pause();
-
-    this.nudged_ = this.nudged_ || [];
-
-    if (this.nudged_.length < 1 ||
-        this.nudged_[this.nudged_.length - 1] != video) {
-      this.nudged_.push(video);
-    }
-
-    this.hideControls_();
-    this.offset_(/* x */ 0, offsetY);
-
-    asBaseElement(video).mutateElement(() => {
-      this.getOverlay_().classList.add('amp-docked-video-nudged');
-    });
-
-    return true;
-  }
-
-  /**
-   * @private
-   * @return {boolean} For the convenience of `nudge_()`.
-   */
-  // TODO(alanorozco): Re-dock
-  resetAfterNudge_() {
-    if (!this.getOverlay_().classList.contains('amp-docked-video-nudged')) {
-      return false;
-    }
-    const video = this.getDockedVideo_();
-    if (this.playingBeforeNudge_) {
-      video.play(/* auto */ false);
-    }
-    this.offset_(0, 0);
-    this.nudged_.pop();
-    this.playingBeforeNudge_ = false;
-    asBaseElement(video).mutateElement(() => {
-      this.getOverlay_().classList.remove('amp-docked-video-nudged');
-    });
-    return false;
-  }
-
-  /**
    * @return {boolean}
    * @private
    */
@@ -724,34 +640,15 @@ export class VideoDocking {
     return this.manager_.getPlayingState(video) != PlayingStates.PAUSED;
   }
 
-  /**
-   * @return {boolean}
-   * @private
-   */
-  intersectsWithDocked_(box) {
-    if (!this.currentlyDocked_) {
-      return false;
-    }
-    const {video, posX, posY} = this.currentlyDocked_;
-    const {x, y, targetWidth, targetHeight} =
-        this.getTargetArea_(video, posX, posY);
-
-    const bottom = y + targetHeight + this.getMargin_();
-    const right = x + targetWidth + this.getMargin_();
-
-    return !(box.left > right
-        || box.right < x
-        || box.top > bottom
-        || box.bottom < y);
-  }
-
   /** @private */
   dismiss_(dirX = 0, dirY = 0) {
     // TODO(alanorozco): Docking can no longer happen, so clean up.
     const video = this.getDockedVideo_();
+    const {posY} = this.currentlyDocked_;
     video.pause();
+    this.lastDismissed_ = video;
+    this.lastDismissedPosY_ = posY;
     this.undock_(video, dirX, dirY);
-    this.dismissed_ = true;
   }
 
   /**
@@ -759,48 +656,126 @@ export class VideoDocking {
    * @private
    */
   currentPositionMatchesScroll_() {
-    const currentPosY = this.currentlyDocked_.posY;
+    if (!this.currentlyDocked_) {
+      return false;
+    }
+    return this.positionMatchesScroll_(this.currentlyDocked_.posY);
+  }
+
+  /**
+   * @param {!RelativeY} posY
+   * @return {boolean}
+   * @private
+   */
+  positionMatchesScroll_(posY) {
     const direction = this.scrollDirection_;
     return (
-      currentPosY == RelativeY.TOP && direction == Direction.UP ||
-      currentPosY == RelativeY.BOTTOM && direction == Direction.DOWN);
+      posY == RelativeY.TOP && direction == Direction.UP ||
+      posY == RelativeY.BOTTOM && direction == Direction.DOWN);
   }
 
   /**
    * @param {!../../video-interface.VideoInterface} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
-   * @param {?number=} optTransitionDurationMs
    * @param {boolean=} finalize
    * @private
    */
-  dock_(video, posX, posY, optTransitionDurationMs = null, finalize = false) {
+  dock_(video, posX, posY, finalize = false) {
     const {element} = video;
 
-    const reachedEndOfTransition =
-      this.isCurrentlyDocked_(video) &&
-      this.currentPositionMatchesScroll_() &&
-      this.currentlyDocked_.step >= (1 - FLOAT_TOLERANCE);
-    if (reachedEndOfTransition) {
+    if (this.ignoreDueToTransitionEnd_() ||
+        this.ignoreDueToDismissal_(video)) {
       return;
     }
 
-    // Assume/jump to 1 when scrolling quickly to avoid rescale when inline,
-    // otherwise calculate based on visible height.
-    // TODO(alanorozco): Interpolate when jumping
-    const scrollingQuickly = this.lastScrollDelta_ > 100;
-    const {intersectionRatio} = element.getIntersectionChangeEntry();
-    const step = finalize || scrollingQuickly ? 1 : 1 - intersectionRatio;
+    const step = this.calculateStep_(element, finalize);
 
     const {x, y, scale} = this.getDims_(video, posX, posY, step);
 
     video.hideControls();
 
-    this.placeAt_(video, x, y, scale, step, optTransitionDurationMs);
+    this.placeAt_(video, x, y, scale, step);
 
     this.setCurrentlyDocked_(video, posX, posY, step);
 
     this.getDockingTimeout_().trigger(DOCKING_TIMEOUT, video);
+  }
+
+  /**
+   * @param  {!../../video-interface.VideoInterface} video
+   * @return {boolean}
+   * @private
+   */
+  ignoreDueToDismissal_(video) {
+    if (this.lastDismissed_ != video ||
+        !this.positionMatchesScroll_(this.lastDismissedPosY_)) {
+      return false;
+    }
+    if (!this.isVisible_(video.element, 0)) {
+      this.resetDismissed_();
+    }
+    return true;
+  }
+
+  /** @private */
+  resetDismissed_() {
+    this.lastDismissed_ = null;
+    this.lastDismissedPosY_ = null;
+  }
+
+  /**
+   * Prevents jump when the transition was timed out before user finished
+   * scrolling component out of view.
+   * @return {boolean}
+   */
+  ignoreDueToTransitionEnd_() {
+    return this.hasTransitionCompleted_(1 - FLOAT_TOLERANCE) &&
+        this.currentPositionMatchesScroll_();
+  }
+
+  /**
+   * @param {!AmpElement} element
+   * @param {boolean=} finalize
+   * @return {number}
+   * @private
+   */
+  calculateStep_(element, finalize = false) {
+    if (finalize || this.isScrollingQuickly_()) {
+      return 1;
+    }
+    const {intersectionRatio} = element.getIntersectionChangeEntry();
+    return (1 - intersectionRatio);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isScrollingQuickly_() {
+    return this.lastScrollDelta_ > 100;
+  }
+
+  /**
+   * @param {number} step
+   * @return {number}
+   */
+  calculateTransitionDuration_(step) {
+    const maxAutoTransitionDurationMs = 800;
+    if (!this.currentlyDocked_) {
+      // Don't animate first frame. Browsers sometimes behave weirdly and use
+      // a stale transform value, thus causing it to visually jump.
+      return 0;
+    }
+    const remaining = Math.abs(step - this.currentlyDocked_.step);
+    return remaining * maxAutoTransitionDurationMs;
+  }
+
+  alreadyPlacedAt_(x, y, scale) {
+    return this.placedAt_ &&
+        this.placedAt_.x == x &&
+        this.placedAt_.y == y &&
+        this.placedAt_.scale == scale;
   }
 
   /**
@@ -809,28 +784,16 @@ export class VideoDocking {
    * @param {number} y
    * @param {number} scale
    * @param {number} step in [0..1]
-   * @param {?number=} optTransitionDurationMs
    * @private
    */
   placeAt_(video, x, y, scale, step, optTransitionDurationMs = null) {
-    const maxAutoTransitionDurationMs = 500;
-    const hasSetTransitionDuration = optTransitionDurationMs !== null;
-    const transitionDurationMs =
-      hasSetTransitionDuration ?
-        dev().assertNumber(optTransitionDurationMs) :
-        // If transition duration is unset, calculate it from the difference
-        // with the previously executed docking step.
-        (this.isCurrentlyDocked_(video) ?
-          (Math.abs(step - this.currentlyDocked_.step) *
-            maxAutoTransitionDurationMs) :
-          0);
-
-    if (this.placedAt_ &&
-        this.placedAt_.x == x &&
-        this.placedAt_.y == y &&
-        this.placedAt_.scale == scale) {
+    if (this.alreadyPlacedAt_(x, y, scale)) {
       return;
     }
+
+    const transitionDurationMs = optTransitionDurationMs ?
+      dev().assertNumber(optTransitionDurationMs) :
+      this.calculateTransitionDuration_(step);
 
     const {width, height} = this.getLayoutBox_(video);
 
@@ -840,7 +803,7 @@ export class VideoDocking {
         // Auto-transitions are supposed to smooth-out PositionObserver
         // frequency, so it makes sense to use 'linear'. When the transition
         // duration is otherwise set, 'ease-out' looks much nicer.
-        hasSetTransitionDuration ? 'ease-out' : 'linear';
+        transitionDurationMs > 100 ? 'ease-out' : 'linear';
 
     const positioningStyles = {
       'width': px(width),
@@ -958,31 +921,16 @@ export class VideoDocking {
    * @private
    */
   onDockingTimeout_(video) {
-    const {element} = video;
-    const internalElement = this.getInternalElementFor_(element);
-    const isStillDocked = internalElement.classList.contains(BASE_CLASS_NAME);
-    if (!isStillDocked) {
-      return;
-    }
-
-    if (this.currentlyDocked_ && !this.isCurrentlyDocked_(video)) {
-      return;
-    }
-
-    if (this.isVisible_(element, REVERT_TO_INLINE_RATIO) &&
-        this.isCurrentlyDocked_(video)) {
-      this.undock_(this.currentlyDocked_.video);
+    if (this.ignoreDueToDocked_(video) ||
+        this.undockBecauseVisible_(video, REVERT_TO_INLINE_RATIO) ||
+        !this.currentlyDocked_) {
       return;
     }
 
     const currentlyDocked = dev().assert(this.currentlyDocked_);
-    const {step, posX, posY} = currentlyDocked;
-    const minTransitionTimeMs = 100;
-    const maxTransitionTimeMs = 500;
-    const transitionTimeMs =
-        mapStep(step, maxTransitionTimeMs, minTransitionTimeMs);
+    const {posX, posY} = currentlyDocked;
 
-    this.dock_(video, posX, posY, transitionTimeMs, /* finalize */ true);
+    this.dock_(video, posX, posY, /* finalize */ true);
   }
 
   /**
@@ -1137,7 +1085,7 @@ export class VideoDocking {
     const {x, y, scale} =
         this.getDims_(video, closestCornerX, closestCornerY, step);
 
-    this.placeAt_(video, x, y, scale, step, 100);
+    this.placeAt_(video, x, y, scale, step, /* optTransitionDurationMs */ 200);
 
     return false;
   }
