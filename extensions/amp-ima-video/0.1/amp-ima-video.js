@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {getConsentPolicyState} from '../../../src/consent-state';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -29,6 +28,7 @@ import {
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getConsentPolicyState} from '../../../src/consent-state';
 import {
   getData,
   listen,
@@ -174,7 +174,7 @@ class AmpImaVideo extends AMP.BaseElement {
     getConsentPolicyState(this.getAmpDoc(), super.getConsentPolicy()).then(
         resolution => {
           this.sendCommand_('consentResolved', {'consentState': resolution});
-    });
+        });
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
