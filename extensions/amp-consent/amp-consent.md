@@ -78,11 +78,7 @@ Example:
   "consents": {
     "my-consent": {
       "checkConsentHref": "https://example.com/api/show-consent",
-      "promptUI": "consent-ui",
-      "timeout": {
-        "seconds": 5,
-        "fallbackState": "rejected"/"unknown"
-      }
+      "promptUI": "consent-ui"
     }
   }
 }
@@ -149,14 +145,6 @@ Unlike consent state, this `shareData` is not persisted in client side storage.
 #### promptUI
 
 `promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. See the [Prompt UI](#prompt-ui) section for details on how a user interacts with the prompt UI.
-
-#### timeout
-`timeout`: Specifies the maximum number of seconds that the prompt UI is 
-displayed to the user. If user does not respond within the specified time,
-the prompt UI will be automatically closed, leaving consent state to be either
- `rejected` or `unknown` depending on the configuration.
- 
-`timeout` can be set to `0` to not show the prompt UI at all.
 
 ## Consent Management
 
