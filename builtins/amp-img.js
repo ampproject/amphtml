@@ -18,13 +18,14 @@ import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
 import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
+import {isExperimentOn} from '../src/experiments';
 
 /**
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-  'aria-describedby', 'aria-labelledby', 'srcset', 'sizes'];
+  'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
 
@@ -43,6 +44,9 @@ export class AmpImg extends BaseElement {
 
     /** @private {?../src/srcset.Srcset} */
     this.srcset_ = null;
+
+    /** @private @const {boolean} */
+    this.useNativeSrcset_ = isExperimentOn(this.win, 'amp-img-native-srcset');
   }
 
   /** @override */
@@ -142,10 +146,14 @@ export class AmpImg extends BaseElement {
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
 
-    const nativeSizes = this.element.getAttribute('native-sizes');
-    if (nativeSizes) {
-      // Otherwise sizes will be propagated normally if defined
-      this.img_.setAttribute('sizes', nativeSizes);
+    if (this.useNativeSrcset_) {
+      this.propagateAttributes(['src', 'srcset', 'sizes'], this.img_);
+
+      const nativeSizes = this.element.getAttribute('native-sizes');
+      if (nativeSizes) {
+        // Otherwise sizes will be propagated normally if defined
+        this.img_.setAttribute('sizes', nativeSizes);
+      }
     }
 
     this.applyFillContent(this.img_, true);
@@ -194,7 +202,7 @@ export class AmpImg extends BaseElement {
       return Promise.resolve();
     }
 
-    const src = this.element.getAttribute('src') || this.srcset_.select(
+    const src = this.srcset_.select(
         // The width should never be 0, but we fall back to the screen width
         // just in case.
         this.getViewport().getWidth() || this.win.screen.width,
@@ -204,6 +212,13 @@ export class AmpImg extends BaseElement {
     }
 
     this.img_.setAttribute('src', src);
+
+    if (this.useNativeSrcset_) {
+      const originalSrc = this.element.getAttribute('src');
+      if (originalSrc) {
+        this.img_.setAttribute('src', originalSrc);
+      }
+    }
 
     return this.loadPromise(this.img_).then(() => {
       // Clean up the fallback if the src has changed.

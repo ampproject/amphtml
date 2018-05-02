@@ -20,11 +20,14 @@ import {BaseElement} from '../../src/base-element';
 import {LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
+import {toggle} from '../../src/style';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('amp-img', () => {
   let sandbox;
   let screenWidth;
   let windowWidth;
+  let iframeFixture;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -45,6 +48,7 @@ describe('amp-img', () => {
 
   function getImg(attributes, children) {
     return createIframePromise().then(iframe => {
+      iframeFixture = iframe;
       installImg(iframe.win);
       Object.defineProperty(iframe.win.screen, 'width', {
         get: () => screenWidth,
@@ -213,6 +217,7 @@ describe('amp-img', () => {
       width: 300,
       height: 200,
     }).then(ampImg => {
+      toggleExperiment(iframeFixture.win, 'amp-img-native-srcset', true);
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('srcset')).to
           .equal('large.jpg 2000w, small.jpg 1000w');
@@ -230,6 +235,7 @@ describe('amp-img', () => {
       width: 300,
       height: 200,
     }).then(ampImg => {
+      toggleExperiment(iframeFixture.win, 'amp-img-native-srcset', true);
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('srcset')).to
           .equal('large.jpg 2000w, small.jpg 1000w');
