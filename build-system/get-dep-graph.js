@@ -28,8 +28,8 @@ var findPackageJsonPath = require('find-root');
 const TopologicalSort = require('topological-sort');
 
 // Override to local closure compiler JAR
-//ClosureCompiler.JAR_PATH = require.resolve(
-    //'./third_party/closure-compiler/closure-compiler-1.0-SNAPSHOT.jar');
+ClosureCompiler.JAR_PATH = require.resolve(
+    './runner/dist/runner.jar');
 
 exports.splittable = function(config) {
 
@@ -61,7 +61,7 @@ exports.splittable = function(config) {
 exports.getFlags = function(config) {
   // Reasonable defaults.
   var flags = {
-    compilation_level: 'ADVANCED',
+    compilation_level: 'SIMPLE_OPTIMIZATIONS',
     process_common_js_modules: true,
     rewrite_polyfills: true,
     create_source_map: '%outname%.map',
@@ -72,11 +72,12 @@ exports.getFlags = function(config) {
       'splittable-build/browser/|/',
       '|/',
     ],
-    new_type_inf: true,
+    //new_type_inf: true,
     language_in: 'ES6',
     language_out: 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     externs: path.dirname(module.filename) + '/splittable.extern.js',
+    define: ['PSEUDO_NAMES=true'],
     jscomp_off: [
       'accessControls',
       'globalThis',
@@ -325,12 +326,12 @@ exports.getGraph = function(entryModules, config) {
         var relPathtoDep = unifyPath(relativePath(process.cwd(), row.deps[dep]));
 
         // Non relative module path. Find the package.json.
-        if (!/^\./.test(dep)) {
-          var packageJson = findPackageJson(depId);
-          if (packageJson) {
-            graph.packages[packageJson] = true;
-          }
-        }
+        //if (!/^\./.test(dep)) {
+          //var packageJson = findPackageJson(depId);
+          //if (packageJson) {
+            //graph.packages[packageJson] = true;
+          //}
+        //}
         return relPathtoDep;
       });
       graph.deps[id] = deps;
@@ -536,9 +537,11 @@ exports.getFlags({
       //return `./extensions/amp-audio-${i + 1}/0.1/amp-audio-${i + 1}.js`;
     //}),
   modules: [
-    './extensions/amp-audio-1/0.1/amp-audio-1.js',
+    './src/amp.js',
+    './extensions/amp-audio/0.1/amp-audio.js',
     //'./extensions/amp-audio-2/0.1/amp-audio-2.js',
     './extensions/amp-live-list/0.1/amp-live-list.js',
+    //'./extensions/amp-user-notification/0.1/amp-user-notification.js',
     //'./src/amp.js',
   ],
   writeTo: './sample/out/',

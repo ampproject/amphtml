@@ -25,8 +25,8 @@ import {install as installObjectAssign} from './polyfills/object-assign';
 //import {install as installPromise} from './polyfills/promise';
 // Importing the document-register-element module has the side effect
 // of installing the custom elements polyfill if necessary.
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+//import installCustomElements from
+  //'document-register-element/build/document-register-element.node';
 
 /**
   Only install in closure binary and not in babel/browserify binary, since in
@@ -35,9 +35,9 @@ import installCustomElements from
   sure to not `install` it during dev since the `install` is done as a side
   effect in importing the module.
 */
-if (!getMode().localDev) {
-  installCustomElements(self, 'auto');
-}
+//if (!getMode().localDev) {
+  //installCustomElements(self, 'auto');
+//}
 installDOMTokenListToggle(self);
 installMathSign(self);
 installObjectAssign(self);
