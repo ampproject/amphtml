@@ -550,7 +550,7 @@ export class VideoDocking {
    * @return {boolean}
    */
   ignoreDueToDocked_(video) {
-    return this.currentlyDocked_ && !this.isCurrentlyDocked_(video);
+    return !!this.currentlyDocked_ && !this.isCurrentlyDocked_(video);
   }
 
   /**
@@ -724,7 +724,7 @@ export class VideoDocking {
    * @private
    */
   ignoreDueToDismissal_(video) {
-    if (this.lastDismissed_ != video ||
+    if (this.lastDismissed_ != video || this.lastDismissedPosY_ !== null &&
         !this.positionMatchesScroll_(this.lastDismissedPosY_)) {
       return false;
     }
@@ -966,7 +966,7 @@ export class VideoDocking {
    * @private
    */
   hasTransitionCompleted_(amount = 1) {
-    return this.currentlyDocked_ && this.currentlyDocked_.step >= amount;
+    return !!this.currentlyDocked_ && this.currentlyDocked_.step >= amount;
   }
 
   /**
