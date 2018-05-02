@@ -396,5 +396,25 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
       });
     });
+
+    it('should be able to use get-consent-state API', () => {
+      adImpl.getConsentState = () => Promise.resolve(2);
+      iframe.postMessageToParent({
+        type: 'get-consent-state',
+        sentinel: 'amp3ptest' + testIndex,
+        messageId: 3,
+      });
+      return iframe.expectMessageFromParent(
+          'get-consent-state-result').then(data => {
+        expect(data).to.jsonEqual({
+          type: 'get-consent-state-result',
+          sentinel: 'amp3ptest' + testIndex,
+          messageId: 3,
+          content: {
+            consentState: 2,
+          },
+        });
+      });
+    });
   });
 });
