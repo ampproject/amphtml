@@ -286,7 +286,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should prefer original title for TITLE', () => {
-    return expandUrlAsync('?title=TITLE', /*opt_bindings*/undefined, {withOriginalTitle: true}).then(res => {
+    return expandUrlAsync('?title=TITLE',
+        /*opt_bindings*/undefined, {withOriginalTitle: true}).then(res => {
       expect(res).to.equal('?title=Original%20Pixel%20Test');
     });
   });

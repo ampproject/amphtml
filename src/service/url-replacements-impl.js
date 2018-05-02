@@ -195,7 +195,8 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the title of this AMP document.
     this.set('TITLE', () => {
-      return this.ampdoc.win.document.originalTitle || this.ampdoc.win.document.title;
+      return this.ampdoc.win.document.originalTitle ||
+          this.ampdoc.win.document.title;
     });
 
     // Returns the URL for this AMP document.
