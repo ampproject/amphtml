@@ -710,7 +710,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Handle focus events in the document.
-   * @param {!Element} target
+   * @param {!Event} e
    * @private
    */
   handleFocus_(e) {
@@ -720,7 +720,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   /**
    * Switch between selecting the start and end dates,
    * and when to open and close the date picker.
-   * @param {*} target
+   * @param {!Element} target
    */
   maybeTransitionWithFocusChange_(target) {
     if (this.isDateField_(target)) {
