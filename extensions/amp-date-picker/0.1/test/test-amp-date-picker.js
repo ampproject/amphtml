@@ -19,6 +19,8 @@ import {createElementWithAttributes} from '../../../../src/dom.js';
 import {requireExternal} from '../../../../src/module';
 import {toggleExperiment} from '../../../../src/experiments';
 
+// TODO(cvializ): use fake time instead of real time
+
 describes.realWin('amp-date-picker', {
   amp: {
     runtimeOn: false,
@@ -128,7 +130,7 @@ describes.realWin('amp-date-picker', {
       });
 
       return buildCallback().then(() => {
-        expect(picker.state_.date.isSame('2018-01-01 08Z')).to.be.true;
+        expect(picker.state_.date.isSame('2018-01-01')).to.be.true;
       });
     });
 
@@ -152,8 +154,8 @@ describes.realWin('amp-date-picker', {
       });
 
       return buildCallback().then(() => {
-        expect(picker.state_.startDate.isSame('2018-01-01 08Z')).to.be.true;
-        expect(picker.state_.endDate.isSame('2018-01-02 08Z')).to.be.true;
+        expect(picker.state_.startDate.isSame('2018-01-01')).to.be.true;
+        expect(picker.state_.endDate.isSame('2018-01-02')).to.be.true;
       });
     });
 
@@ -165,7 +167,7 @@ describes.realWin('amp-date-picker', {
       sandbox.stub(picker, 'fetchSrc_').resolves({'date': '2018-01-01 08Z'});
 
       return layoutCallback().then(() => {
-        expect(picker.state_.date.isSame('2018-01-01 08Z')).to.be.true;
+        expect(picker.state_.date.isSame('2018-01-01')).to.be.true;
       });
     });
 
@@ -181,8 +183,8 @@ describes.realWin('amp-date-picker', {
       });
 
       return layoutCallback().then(() => {
-        expect(picker.state_.startDate.isSame('2018-01-01 08Z')).to.be.true;
-        expect(picker.state_.endDate.isSame('2018-01-02 08Z')).to.be.true;
+        expect(picker.state_.startDate.isSame('2018-01-01')).to.be.true;
+        expect(picker.state_.endDate.isSame('2018-01-02')).to.be.true;
       });
     });
   });
