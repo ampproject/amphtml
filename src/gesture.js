@@ -323,9 +323,11 @@ export class Gestures {
    * recognizer to proceed.
    * @param {!GestureRecognizer} recognizer
    * @param {number} offset
+   * @private
    * @restricted
+   * @visibleForTesting
    */
-  signalReady(recognizer, offset) {
+  signalReady_(recognizer, offset) {
     // Somebody got here first.
     if (this.eventing_) {
       recognizer.acceptCancel();
@@ -351,8 +353,11 @@ export class Gestures {
    * will be canceled.
    * @param {!GestureRecognizer} recognizer
    * @param {number} timeLeft
+   * @private
+   * @restricted
+   * @visibleForTesting
    */
-  signalPending(recognizer, timeLeft) {
+  signalPending_(recognizer, timeLeft) {
     // Somebody got here first.
     if (this.eventing_) {
       recognizer.acceptCancel();
@@ -371,9 +376,11 @@ export class Gestures {
    * Callback for a gesture recognizer to communicate that it's done
    * emitting gestures.
    * @param {!GestureRecognizer} recognizer
+   * @private
    * @restricted
+   * @visibleForTesting
    */
-  signalEnd(recognizer) {
+  signalEnd_(recognizer) {
     if (this.eventing_ == recognizer) {
       this.eventing_ = null;
       this.wasEventing_ = true;
@@ -386,9 +393,11 @@ export class Gestures {
    * @param {!GestureRecognizer} recognizer
    * @param {*} data
    * @param {?Event} event
+   * @private
    * @restricted
+   * @visibleForTesting
    */
-  signalEmit(recognizer, data, event) {
+  signalEmit_(recognizer, data, event) {
     dev().assert(this.eventing_ == recognizer,
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
@@ -584,7 +593,7 @@ export class GestureRecognizer {
    * @param {time} offset
    */
   signalReady(offset) {
-    this.manager_.signalReady(this, offset);
+    this.manager_.signalReady_(this, offset);
   }
 
   /**
@@ -596,7 +605,7 @@ export class GestureRecognizer {
    * @param {time} timeLeft
    */
   signalPending(timeLeft) {
-    this.manager_.signalPending(this, timeLeft);
+    this.manager_.signalPending_(this, timeLeft);
   }
 
   /**
@@ -606,7 +615,7 @@ export class GestureRecognizer {
    * {@link acceptStart} call.
    */
   signalEnd() {
-    this.manager_.signalEnd(this);
+    this.manager_.signalEnd_(this);
   }
 
   /**
@@ -617,7 +626,7 @@ export class GestureRecognizer {
    * @param {?Event} event
    */
   signalEmit(data, event) {
-    this.manager_.signalEmit(this, data, event);
+    this.manager_.signalEmit_(this, data, event);
   }
 
   /**
