@@ -78,7 +78,11 @@ Example:
   "consents": {
     "my-consent": {
       "checkConsentHref": "https://example.com/api/show-consent",
-      "promptUI": "consent-ui"
+      "promptUI": "consent-ui",
+      "timeout": {
+        "seconds": 5,
+        "fallbackState": "rejected"/"unknown"
+      }
     }
   }
 }
@@ -120,10 +124,39 @@ If the response doesn't have `promptIfUnknown` set or has `promptIfUnknown` set 
 
 Currently, AMP will not show consent prompt with a known consent state (i.e. the user has already accepted or rejected the consent), and will only show a prompt if `promptIfUnknown = true` with a unknown consent state, or upon user action.  See below for details on how to display a prompt.
 
+Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
+
+
+```html
+{
+  "promptIfUnknown": true/false,
+  "sharedData": {
+    "a-key": "some-string-value",
+    "key-with-bool-value": true,
+    "key-with-numeric-value": 123
+  }
+}
+```
+
+The `sharedData` is made available to other AMP extensions just like the consent
+state. It's up to the 3rd party vendor extensions and the `checkConsentHref` 
+remote endpoint to agree on particular meaning of those key-value pairs. One
+example use case is for the remote endpoint to convey extra privacy info of the
+current user to the 3rd party vendor extensions.
+
+Unlike consent state, this `shareData` is not persisted in client side storage.
+
 #### promptUI
 
 `promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. See the [Prompt UI](#prompt-ui) section for details on how a user interacts with the prompt UI.
 
+#### timeout
+`timeout`: Specifies the maximum number of seconds that the prompt UI is 
+displayed to the user. If user does not respond within the specified time,
+the prompt UI will be automatically closed, leaving consent state to be either
+ `rejected` or `unknown` depending on the configuration.
+ 
+`timeout` can be set to `0` to not show the prompt UI at all.
 
 ## Consent Management
 

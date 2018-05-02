@@ -36,3 +36,8 @@ If the vendor wants to customize an AMP extension behaviors based on user contro
 * `CONSENT_POLICY_STATE.SUFFICIENT` : The consent is accepted
 * `CONSENT_POLICY_STATE.INSUFFICIENT` : The consent is rejected
 * `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED` : The consent state is unknown, and `<amp-consent>` is informed to not prompt UI.
+
+In addition to the consent state, the vendor can also use the 
+`getConsentPolicySharedData` API to require extra privacy information about 
+the user from the page owner. Read [this](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response) 
+to understand where the `shareData` is from.
