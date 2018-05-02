@@ -549,6 +549,11 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     if (this.info_) {
       return this.info_.currentTime;
