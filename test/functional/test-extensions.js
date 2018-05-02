@@ -160,6 +160,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should fail on timeout', () => {
+      timeoutCallback = null;
       const promise = extensions.waitForExtension(win , 'amp-ext');
       expect(timeoutCallback).to.be.a('function');
       timeoutCallback();
