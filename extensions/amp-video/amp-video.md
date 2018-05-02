@@ -65,6 +65,10 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 </div>
 
+## Analytics
+
+`amp-video` supports analytics out of the box. See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md) for more information.
+
 ## Attributes
 
 ##### src
@@ -80,13 +84,9 @@ Alternatively, you can present a click-to-play overlay. For details, see the [Cl
 
 ##### autoplay
 
-If this attribute is present, and the browser supports autoplay:
-
-* the video is automatically muted before autoplay starts
-* when the video is scrolled out of view, the video is paused
-* when the video is scrolled into view, the video resumes playback
-* when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
 
 ##### controls
 
@@ -111,6 +111,10 @@ Determines whether the media element is allowed to have a remote playback UI suc
 ##### muted (deprecated)
 
 The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.
+
+##### rotate-to-fullscreen
+
+If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#rotate-to-fullscreen).
 
 ##### common attributes
 
