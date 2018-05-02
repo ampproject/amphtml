@@ -105,6 +105,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-PAGE"
+    child_tag_name_oneof: "AMP-STORY-BOOKEND"
   }
 }
 tags: {  # <amp-story> without metadata (deprecated)
@@ -303,6 +304,20 @@ tags: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
+}
+tags: {  # <amp-story-bookend>
+  html_format: AMP
+  tag_name: "AMP-STORY-BOOKEND"
+  mandatory_ancestor: "AMP-STORY"
+  mandatory_last_child: true
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allow_relative: false
+    }
+  }
 }
 tags: {  # <amp-story-cta-layer>
   html_format: AMP
