@@ -33,7 +33,8 @@ import {
 export let SubscriptionService;
 
 /**
- * Array of stubbed elements, moved here to avoid circular dependency
+ * Array of stubbed elements, moved here from ./element-stub
+ * to avoid circular dependency.
  */
 /** @type {!Array} */
 export const stubbedElements = [];
@@ -482,8 +483,8 @@ export class Services {
      * If there is a stubbed amp-geo extension wait for it to load before trying
      * to get the service.  Prevents a race condition when everything but
      * amp-geo is in cache.  If there is no stub then it's either loaded,
-     * not present or the 'geo' service was defiend by a test so don't wait
-     * around for an extension that may not exist.
+     * not present, or the 'geo' service was defiend by a test. In those cases
+     * we don't wait around for an extension that may not exist.
      */
     if (stubbedElements.includes['amp-geo']) {
       const extensions = Services.extensionsFor(win);

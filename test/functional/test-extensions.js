@@ -89,7 +89,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should register successfully with promise', () => {
       const promise = extensions.waitForExtension(win, 'amp-ext');
-      extensions.registerExtension(extensions, 'amp-ext', () => {}, {});
+      extensions.registerExtension('amp-ext', () => {}, {});
       expect(extensions.currentExtensionId_).to.be.null;
 
       const holder = extensions.extensions_['amp-ext'];

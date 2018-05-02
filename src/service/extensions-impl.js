@@ -178,18 +178,18 @@ export class Extensions {
    * loading/registration.
    * @param {!Window} win
    * @param {string} extensionId
+   * @param {number=} opt_timeout
    * @return {!Promise<?ExtensionDef>}
    */
-  waitForExtension(win, extensionId) {
+  waitForExtension(win, extensionId, opt_timeout) {
     // Note we can't use timeout service becuase it's not instantiated yet.
     const timer = new Timer(win);
     return /** @type {!Promise<?ExtensionDef>} */ (
-      timer.timeoutPromise(LOAD_TIMEOUT,
+      timer.timeoutPromise(opt_timeout || LOAD_TIMEOUT,
           this.waitFor_(
               this.getExtensionHolder_(extensionId, /* auto */ false)),
           `Render timeout waiting for extension ${extensionId} to be load.`));
   }
-
 
   /**
    * Returns the promise that will be resolved when the extension has been
