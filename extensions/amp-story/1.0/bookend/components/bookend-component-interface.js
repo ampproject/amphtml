@@ -15,17 +15,16 @@
  */
 
 /**
- * Abstract class implemented by the bookend components.
- * @abstract
+ * Interface implemented by the bookend components.
+ * @interface
  */
-export class AbstractBookendComponent {
+export class BookendComponentInterface {
 
   /**
-   * Checks if the component is valid.
+   * Asserts whether the comopnent is valid.
    * @param {../bookend-component.BookendComponentDef} opt_componentJson
-   * @return {boolean}
    */
-  isValid(opt_componentJson) {}
+  assertValidity(opt_componentJson) {}
 
   /**
    * Builds the component.

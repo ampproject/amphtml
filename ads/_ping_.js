@@ -83,6 +83,10 @@ export function _ping_(global, data) {
     global.context.getConsentState(function(consentState) {
       dev().info('GET-CONSENT-STATE', consentState);
     });
+    if (global.context.consentSharedData) {
+      const TAG = 'consentSharedData';
+      dev().info(TAG, global.context.consentSharedData);
+    }
   } else {
     global.setTimeout(() => {
       global.context.noContentAvailable();

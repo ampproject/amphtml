@@ -264,6 +264,11 @@ export class AmpAdXOriginIframeHandler {
     return Promise.race([iframeLoadPromise, noContentPromise]);
   }
 
+  /**
+   * @param {string} requestType
+   * @param {function(*)} getter
+   * @private
+   */
   handleOneTimeRequest_(requestType, getter) {
     this.unlisteners_.push(listenFor(this.iframe, requestType,
         (info, source, origin) => {
@@ -279,7 +284,7 @@ export class AmpAdXOriginIframeHandler {
             result[CONSTANTS.messageIdFieldName] = messageId;
             result[CONSTANTS.contentFieldName] = content;
             postMessageToWindows(
-                this.iframe, [{win: source, origin}],
+                /** @type {!Element} */(this.iframe), [{win: source, origin}],
                 requestType + CONSTANTS.responseTypeSuffix,
                 result, true
             );

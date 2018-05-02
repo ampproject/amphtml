@@ -23,7 +23,7 @@ import {Observable} from '../src/observable';
 import {dev} from '../src/log';
 import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
-import {map} from '../src/utils/object';
+import {dict, map} from '../src/utils/object';
 
 export class IframeMessagingClient {
 
@@ -51,6 +51,29 @@ export class IframeMessagingClient {
   }
 
   /**
+   * Retrieves data from host.
+   *
+   * @param {string} requestType
+   * @param {?Object} payload
+   * @param {function(*)} callback
+   */
+  getData(requestType, payload, callback) {
+    const responseType = requestType + CONSTANTS.responseTypeSuffix;
+    const messageId = this.nextMessageId_++;
+    const unlisten = this.registerCallback(responseType, result => {
+      if (result[CONSTANTS.messageIdFieldName]
+          && (result[CONSTANTS.messageIdFieldName] === messageId)) {
+        unlisten();
+        callback(result[CONSTANTS.contentFieldName]);
+      }
+    });
+    const data = dict();
+    data[CONSTANTS.payloadFieldName] = payload;
+    data[CONSTANTS.messageIdFieldName] = messageId;
+    this.sendMessage(requestType, data);
+  }
+
+  /**
    * Make an event listening request to the host window.
    *
    * @param {string} requestType The type of the request message.
@@ -62,19 +85,6 @@ export class IframeMessagingClient {
     const unlisten = this.registerCallback(responseType, callback);
     this.sendMessage(requestType);
     return unlisten;
-  }
-
-  makeOneTimeRequest(requestType, payload, callback) {
-    const responseType = requestType + CONSTANTS.responseTypeSuffix;
-    const messageId = this.nextMessageId_++;
-    const unlisten = this.registerCallback(responseType, result => {
-      if (result[CONSTANTS.messageIdFieldName]
-          && (result[CONSTANTS.messageIdFieldName] === messageId)) {
-        unlisten();
-        callback(result[CONSTANTS.contentFieldName]);
-      }
-    });
-    this.sendMessage(requestType, {payload, messageId});
   }
 
   /**
