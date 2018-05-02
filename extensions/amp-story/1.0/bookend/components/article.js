@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {AbstractBookendComponent} from './abstract';
+import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor} from '../../../../../src/static-template';
 import {isProtocolValid, parseUrl} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
-
-const TAG = 'amp-story';
 
 /**
  * @typedef {{
@@ -33,39 +31,36 @@ const TAG = 'amp-story';
  */
 export let BookendArticleComponentDef;
 
+const TAG = 'amp-story-bookend';
+
 /**
  * Builder class for the small article component.
+ * @implements {BookendComponentInterface}
  */
-export class ArticleComponent extends AbstractBookendComponent {
-
+export class ArticleComponent {
   /** @override */
-  static isValid(articleJson) {
+  assertValidity(articleJson) {
     if (!articleJson['title'] || !articleJson['url']) {
-      user().error(TAG,
-          'Articles must contain `title` and `url` fields, skipping invalid.');
-      return false;
+      user().error(TAG, 'Articles must contain `title` and `url` ' +
+        'fields, skipping invalid.');
     }
 
     if (!isProtocolValid(articleJson['url'])) {
-      user().error(TAG,
-          `Unsupported protocol for article URL ${articleJson['url']}`);
-      return false;
+      user().error(TAG, 'Unsupported protocol for article URL ' +
+        `${articleJson['url']}`);
     }
 
     if (!isProtocolValid(articleJson['image'])) {
-      user().error(TAG,
-          `Unsupported protocol for article image URL ${articleJson['image']}`);
-      return false;
+      user().error(TAG, 'Unsupported protocol for article image URL' +
+      ` ${articleJson['image']}`);
     }
-    return true;
   }
 
   /**
    * @override
    * @return {!BookendArticleComponentDef}
    * */
-  static build(articleJson) {
-
+  build(articleJson) {
     const article = {
       type: 'small',
       title: articleJson['title'],
@@ -81,9 +76,10 @@ export class ArticleComponent extends AbstractBookendComponent {
   }
 
   /** @override */
-  static buildTemplate(articleData, doc) {
+  buildTemplate(articleData, doc) {
 
     const html = htmlFor(doc);
+    //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const template =
         html`
         <a class="i-amphtml-story-bookend-article"
@@ -129,21 +125,20 @@ export let BookendArticleTitleComponentDef;
 
 /**
  * Builder class for the article titles used to separate article sets.
+ * @implements {BookendComponentInterface}
  */
-export class ArticleTitle extends AbstractBookendComponent {
+export class ArticleTitleComponent {
 
   /** @override */
-  static isValid(titleJson) {
+  assertValidity(titleJson) {
     if (!titleJson['title']) {
-      user().error(TAG,
-          'Titles must contain `title` field, skipping invalid.');
-      return false;
+      user().error(TAG, 'Titles must contain `title` field, skipping' +
+      ' invalid.');
     }
-    return true;
   }
 
   /** @override */
-  static build(titleJson) {
+  build(titleJson) {
     const title = {
       type: 'article-set-title',
       heading: titleJson.title,
@@ -152,7 +147,7 @@ export class ArticleTitle extends AbstractBookendComponent {
   }
 
   /** @override */
-  static buildTemplate(titleData, doc) {
+  buildTemplate(titleData, doc) {
     const html = htmlFor(doc);
     const template = html`<h3 class="i-amphtml-story-bookend-heading"></h3>`;
 

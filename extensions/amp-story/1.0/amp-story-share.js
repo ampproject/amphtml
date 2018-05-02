@@ -22,7 +22,7 @@ import {
 } from '../../../src/clipboard';
 import {dev, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
-import {isObject} from '../../../src/types';
+import {isArray, isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
@@ -325,34 +325,36 @@ export class ShareWidget {
    * TODO(#14591): Remove when bookend API v0.1 is deprecated.
    * If using the bookend API v1.0, converts the contents to match with the bookend API v0.1.
    * @param {!Array<!Object|string>} providers
-   * @return {!Object<string, boolean|!Object<string, string>>}
+   * @return {!Object<string, (!JsonObject|boolean)>}
    */
   parseToClassicApi_(providers) {
     const providersMap = {};
 
     providers.forEach(currentProvider => {
-      if (isObject(currentProvider) &&
-          currentProvider['provider'] == 'facebook') {
-        providersMap['facebook'] = ({'app_id': currentProvider['app-id']});
-      } else if (isObject(currentProvider)) {
-        providersMap[currentProvider['provider']] = true;
-      } else {
+      if (!isObject(currentProvider)) {
         providersMap[currentProvider] = true;
+        return;
       }
+      if (currentProvider['provider'] == 'facebook') {
+        providersMap['facebook'] = ({'app_id': currentProvider['app-id']});
+        return;
+      }
+      providersMap[currentProvider['provider']] = true;
     });
 
     return providersMap;
   }
 
   /**
-   * @param {(!Object<string, (!JsonObject|boolean)> | !Array<!JsonObject|string>)} providers
+   * @param {(!Object<string, (!JsonObject|boolean)> | !Array<!Object|string>)} providers
    * @private
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
     // TODO(#14591): Check if using bookend API v1.0 and convert it to be v0.1 compatible if so.
-    if (Array.isArray(providers)) {
-      providers = this.parseToClassicApi_(providers);
+    if (providers && isArray(providers)) {
+      providers = this.parseToClassicApi_(
+          /** @type !Array<!Object|string> */ (providers));
     }
 
     Object.keys(providers).forEach(type => {

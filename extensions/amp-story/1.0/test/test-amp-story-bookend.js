@@ -17,7 +17,6 @@
 import {AmpStory} from '../amp-story';
 import {ArticleComponent} from '../bookend/components/article';
 import {Bookend} from '../bookend/amp-story-bookend';
-import {dict} from '../../../../src/utils/object';
 import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {
@@ -45,7 +44,7 @@ describes.realWin('amp-story-bookend', {
     },
   ];
 
-  const metadata = dict({
+  const metadata = {
     '@context': 'http://schema.org',
     '@type': 'NewsArticle',
     'mainEntityOfPage': {
@@ -69,7 +68,7 @@ describes.realWin('amp-story-bookend', {
       },
     },
     'description': 'My Story',
-  });
+  };
 
   beforeEach(() => {
     win = env.win;
@@ -81,7 +80,7 @@ describes.realWin('amp-story-bookend', {
   });
 
   it('should build the users json', () => {
-    const userJson = dict({
+    const userJson = {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
@@ -100,7 +99,7 @@ describes.realWin('amp-story-bookend', {
           'image': 'http://placehold.it/256x128',
         },
       ],
-    });
+    };
 
     sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
@@ -108,15 +107,15 @@ describes.realWin('amp-story-bookend', {
 
     bookend.build();
     return bookend.loadConfig().then(config => {
-      const components = config.components;
-      for (let i = 0; i < components.length; i++) {
-        return expect(components[i]).to.deep.equal(expectedComponents[i]);
-      }
+      config.components.forEach((currentComponent, index) => {
+        return expect(currentComponent).to.deep
+            .equal(expectedComponents[index]);
+      });
     });
   });
 
   it('should build the users json with share-providers alternative', () => {
-    const userJson = dict({
+    const userJson = {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
@@ -135,7 +134,7 @@ describes.realWin('amp-story-bookend', {
           'image': 'http://placehold.it/256x128',
         },
       ],
-    });
+    };
 
     sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
@@ -143,15 +142,16 @@ describes.realWin('amp-story-bookend', {
 
     bookend.build();
     return bookend.loadConfig().then(config => {
-      const components = config.components;
-      for (let i = 0; i < components.length; i++) {
-        return expect(components[i]).to.deep.equal(expectedComponents[i]);
-      }
+      config.components.forEach((currentComponent, index) => {
+        return expect(currentComponent).to.deep
+            .equal(expectedComponents[index]);
+      });
     });
   });
 
   it('should reject invalid user json for article', () => {
-    const userJson = dict({
+    const articleComponent = new ArticleComponent();
+    const userJson = {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
@@ -169,15 +169,15 @@ describes.realWin('amp-story-bookend', {
           'image': 'http://placehold.it/256x128',
         },
       ],
-    });
+    };
 
     const userErrLogSpy = sandbox.spy(user(), 'error');
 
     allowConsoleError(() => {
-      expect(ArticleComponent.isValid(userJson)).to.be.false;
+      articleComponent.assertValidity(userJson);
       expect(userErrLogSpy).to.be.calledOnce;
-      expect(userErrLogSpy.getCall(0).args[1]).to.have.string('Articles must ' +
-          'contain `title` and `url` fields, skipping invalid.');
+      expect(userErrLogSpy.getCall(0).args[1]).to.have.string(
+          'Articles must contain `title` and `url` fields, skipping invalid.');
     });
   });
 });
