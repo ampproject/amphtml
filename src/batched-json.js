@@ -16,7 +16,7 @@
 
 import {Services} from './services';
 import {assertHttpsUrl} from './url';
-import {dev, user} from './log';
+import {user} from './log';
 import {getValueForExpr} from './json';
 
 /**
@@ -37,8 +37,8 @@ export const UrlReplacementPolicy = {
  * @param {!Element} element
  * @param {string=} opt_expr Dot-syntax reference to subdata of JSON result
  *     to return. If not specified, entire JSON result is returned.
- * @param {UrlReplacementPolicy=} opt_urlReplacement If ALL, replaces all URL vars.
- *     If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
+ * @param {UrlReplacementPolicy=} opt_urlReplacement If ALL, replaces all URL
+ *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
@@ -63,12 +63,10 @@ export function batchFetchJsonFor(
       urlReplacements.collectUnwhitelistedVars(element).then(unwhitelisted => {
         if (unwhitelisted.length > 0) {
           const TAG = element.tagName;
-          user().error(TAG, 'URL variable substitutions in CORS fetches ' +
-              'triggered by amp-bind will soon require opt-in. Please add ' +
-              `data-amp-replace="${unwhitelisted.join(' ')}" to the ` +
-              `<${TAG}> element. See "bit.ly/amp-var-subs" for details.`);
-          // For tracking in error reporting.
-          dev().expectedError(TAG, 'amp-bind CORS fetch without opt-in!');
+          throw user().createError('URL variable substitutions in CORS ' +
+              'fetches from dynamic URLs (e.g. via amp-bind) require opt-in. ' +
+              `Please add data-amp-replace="${unwhitelisted.join(' ')}" to ` +
+              `the <${TAG}> element. See "bit.ly/amp-var-subs" for details.`);
         }
       });
     }
