@@ -28,6 +28,7 @@ import {
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
+  asBaseElement,
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoServiceSync} from './video-service-sync-impl';
@@ -200,15 +201,17 @@ export class VideoManager {
     const entry = new VideoEntry(this, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.entries_.push(entry);
-    video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
+
+    const {element} = entry.video;
+    element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    video.element.signals().signal(VideoEvents.REGISTERED);
+    element.signals().signal(VideoEvents.REGISTERED);
 
     // Add a class to element to indicate it implements the video interface.
-    video.element.classList.add('i-amphtml-video-interface');
+    element.classList.add('i-amphtml-video-interface');
   }
 
   /** @override */
@@ -228,15 +231,19 @@ export class VideoManager {
    * @private
    */
   registerCommonActions_(video) {
+    const videoImpl = asBaseElement(video);
+
     // Only require ActionTrust.LOW for video actions to defer to platform
     // specific handling (e.g. user gesture requirement for unmuted playback).
-    video.registerAction('play',
-        video.play.bind(video, /* isAutoplay */ false), ActionTrust.LOW);
-    video.registerAction('pause', video.pause.bind(video), ActionTrust.LOW);
-    video.registerAction('mute', video.mute.bind(video), ActionTrust.LOW);
-    video.registerAction('unmute', video.unmute.bind(video), ActionTrust.LOW);
-    video.registerAction('fullscreen', video.fullscreenEnter.bind(video),
-        ActionTrust.LOW);
+    const trust = ActionTrust.LOW;
+
+    videoImpl.registerAction('play', () => video.play(/* isAutoplay */ false),
+        trust);
+    videoImpl.registerAction('pause', () => video.pause(), trust);
+    videoImpl.registerAction('mute', () => video.mute(), trust);
+    videoImpl.registerAction('unmute', () => video.unmute(), trust);
+    videoImpl.registerAction('fullscreen', () => video.fullscreenEnter(),
+        trust);
   }
 
   /**
@@ -250,7 +257,9 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    listen(entry.video.element, VideoEvents.VISIBILITY, details => {
+    const element = entry.video.element;
+
+    listen(element, VideoEvents.VISIBILITY, details => {
       const data = getData(details);
       if (data && data['visible'] == true) {
         entry.updateVisibility(/* opt_forceVisible */ true);
@@ -259,7 +268,7 @@ export class VideoManager {
       }
     });
 
-    listen(entry.video.element, VideoEvents.RELOAD, () => {
+    listen(element, VideoEvents.RELOAD, () => {
       entry.videoLoaded();
     });
 
@@ -346,13 +355,26 @@ export class VideoManager {
   }
 }
 
+
+/**
+ * This union type allows the compiler to treat VideoInterface objects as
+ * `BaseElement`s, which they should be anyway.
+ *
+ * WARNING: Don't use this at the service level. Its `register` method should
+ * only allow `VideoInterface` as a guarding measure.
+ *
+ * @typedef {!../video-interface.VideoInterface|!../base-element.BaseElement}
+ */
+let VideoOrBaseElementDef;
+
+
 /**
  * VideoEntry represents an entry in the VideoManager's list.
  */
 class VideoEntry {
   /**
    * @param {!VideoManager} manager
-   * @param {!../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    */
   constructor(manager, video) {
     /** @private @const {!VideoManager} */
@@ -361,7 +383,7 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
-    /** @package @const {!../video-interface.VideoInterface} */
+    /** @package @const {!VideoOrBaseElementDef} */
     this.video = video;
 
     /** @private {boolean} */
@@ -394,8 +416,6 @@ class VideoEntry {
       return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
     };
 
-    const element = dev().assert(video.element);
-
     // Autoplay Variables
 
     /** @private {boolean} */
@@ -413,22 +433,22 @@ class VideoEntry {
     /** @private {boolean} */
     this.muted_ = false;
 
-    this.hasAutoplay = element.hasAttribute(VideoAttributes.AUTOPLAY);
+    this.hasAutoplay = video.element.hasAttribute(VideoAttributes.AUTOPLAY);
 
     // Media Session API Variables
 
     /** @private {!../mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
-    listenOncePromise(element, VideoEvents.LOAD)
+    listenOncePromise(video.element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
-    listen(element, VideoEvents.PAUSE, () => this.videoPaused_());
-    listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
-    listen(element, VideoEvents.MUTED, () => this.muted_ = true);
-    listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
-    listen(element, VideoEvents.ENDED, () => this.videoEnded_());
+    listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
+    listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
+    listen(video.element, VideoEvents.MUTED, () => this.muted_ = true);
+    listen(video.element, VideoEvents.UNMUTED, () => this.muted_ = false);
+    listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    element.signals().whenSignal(VideoEvents.REGISTERED)
+    video.element.signals().whenSignal(VideoEvents.REGISTERED)
         .then(() => this.onRegister_());
   }
 
@@ -530,7 +550,6 @@ class VideoEntry {
   videoLoaded() {
     this.loaded_ = true;
 
-    // Get the internal element (the actual video/iframe)
     this.internalElement_ = this.video.element.querySelector('video, iframe');
 
     this.fillMediaSessionMetadata_();
@@ -654,7 +673,7 @@ class VideoEntry {
    */
   autoplayInteractiveVideoBuilt_() {
     const toggleAnimation = playing => {
-      this.getVideoForVsync_().mutateElement(() => {
+      this.video.mutateElement(() => {
         animation.classList.toggle('amp-video-eq-play', playing);
       });
     };
@@ -665,7 +684,7 @@ class VideoEntry {
     // Create autoplay animation and the mask to detect user interaction.
     const animation = this.createAutoplayAnimation_();
     const mask = this.createAutoplayMask_();
-    this.getVideoForVsync_().mutateElement(() => {
+    this.video.mutateElement(() => {
       this.video.element.appendChild(animation);
       this.video.element.appendChild(mask);
     });
@@ -802,7 +821,7 @@ class VideoEntry {
   updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
-    this.getVideoForVsync_().measureMutateElement(() => {
+    this.video.measureMutateElement(() => {
       if (opt_forceVisible == true) {
         this.isVisible_ = true;
       } else {
@@ -854,7 +873,7 @@ class VideoEntry {
   getAnalyticsDetails() {
     const video = this.video;
     return this.supportsAutoplay_().then(supportsAutoplay => {
-      const {width, height} = this.video.element.getLayoutBox();
+      const {width, height} = video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
       const playedRanges = video.getPlayedRanges();
       const playedTotal = playedRanges.reduce(
@@ -874,11 +893,6 @@ class VideoEntry {
         'width': width,
       };
     });
-  }
-
-  /** @return {!../base-element.BaseElement} */
-  getVideoForVsync_() {
-    return /** @type {!../base-element.BaseElement} */ (this.video);
   }
 }
 
@@ -1037,7 +1051,7 @@ export class AutoFullscreenManager {
 
   /**
    * Scrolls to a video if it's not in view.
-   * @param {!../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @param {?string=} optPos
    * @private
    */

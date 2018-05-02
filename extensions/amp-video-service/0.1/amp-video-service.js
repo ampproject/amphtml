@@ -26,6 +26,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {asBaseElement} from '../../../src/video-interface';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {isFiniteNumber} from '../../../src/types';
@@ -91,7 +92,7 @@ export class VideoService {
 
   /** @param {!../../../src/video-interface.VideoInterface} video */
   register(video) {
-    const {element} = video;
+    const {element} = asBaseElement(video);
 
     if (this.getEntryOrNull(element)) {
       return dev().assert(this.getEntryOrNull(element));
@@ -155,6 +156,18 @@ export class VideoService {
 
 
 /**
+ * This union type allows the compiler to treat VideoInterface objects as
+ * `BaseElement`s, which they should be anyway.
+ *
+ * WARNING: Don't use this at the service level. Its `register` method should
+ * only allow `VideoInterface` as a guarding measure.
+ *
+ * @typedef {!../../../src/video-interface.VideoInterface|!AMP.BaseElement}
+ */
+let VideoOrBaseElementDef;
+
+
+/**
  * Handler for a registered video component.
  * @visibleForTesting
  */
@@ -163,7 +176,7 @@ export class VideoEntry {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!VideoService} videoService
-   * @param {!../../../src/video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    */
   constructor(ampdoc, videoService, video) {
 
@@ -173,7 +186,7 @@ export class VideoEntry {
     /** @private @const {!VideoService} */
     this.service_ = videoService;
 
-    /** @private @const {!../../../src/video-interface.VideoInterface} */
+    /** @private @const {!VideoOrBaseElementDef} */
     this.video_ = video;
 
     /** @private {boolean} */
@@ -183,7 +196,7 @@ export class VideoEntry {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!VideoService} videoService
-   * @param {!../../../src/video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    */
   static create(ampdoc, videoService, video) {
     const entry = new VideoEntry(ampdoc, videoService, video);
