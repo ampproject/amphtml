@@ -133,7 +133,8 @@ export class LocalSubscriptionPlatformRenderer {
             this.serviceAdapter_.decorateServiceAction(
                 candidate,
                 candidate.getAttribute('subscriptions-service'),
-                candidate.getAttribute('subscriptions-action')
+                candidate.getAttribute('subscriptions-action'),
+                null
             );
           }
         } else {

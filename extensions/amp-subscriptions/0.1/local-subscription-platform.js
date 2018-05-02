@@ -237,7 +237,7 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
-  decorateUI(unusedNode, unusedOptions) {}
+  decorateUI(unusedNode, unusedAction, unusedOptions) {}
 }
 
 /**

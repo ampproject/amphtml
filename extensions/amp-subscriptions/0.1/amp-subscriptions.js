@@ -445,10 +445,9 @@ export class SubscriptionService {
    * Delegates an action to specified platform.
    * @param {string} action
    * @param {string} serviceId
-   * @param {?JsonObject} options
    * @return {!Promise<boolean>}
    */
-  delegateActionToService(action, serviceId, options) {
+  delegateActionToService(action, serviceId) {
     return new Promise(resolve => {
       this.platformStore_.onPlatformResolves(serviceId, platform => {
         dev().assert(platform, 'Platform is not registered');
@@ -459,7 +458,7 @@ export class SubscriptionService {
               serviceId,
             }
         );
-        resolve(platform.executeAction(action, options));
+        resolve(platform.executeAction(action));
       });
     });
   }
@@ -469,11 +468,12 @@ export class SubscriptionService {
    * @param {!Element} element
    * @param {string} serviceId
    * @param {string} action
+   * @param {?JsonObject} options
    */
-  decorateServiceAction(element, serviceId, action) {
+  decorateServiceAction(element, serviceId, action, options) {
     this.platformStore_.onPlatformResolves(serviceId, platform => {
       dev().assert(platform, 'Platform is not registered');
-      platform.decorateUI(element, action);
+      platform.decorateUI(element, action, options);
     });
   }
 }

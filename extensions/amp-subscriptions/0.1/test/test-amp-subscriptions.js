@@ -551,7 +551,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           (serviceId, callback) => callback(platform));
       const decorateUIStub = sandbox.stub(platform,
           'decorateUI');
-      subscriptionService.decorateServiceAction(element, 'swg-google', 'login')
+      subscriptionService.decorateServiceAction(element, 'swg-google', 'login');
       expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
       expect(decorateUIStub).to.be.calledWith(element);
     });
