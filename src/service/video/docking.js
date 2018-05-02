@@ -94,6 +94,7 @@ let DockedDef;
 /**
  * @struct @typedef {{
  *   container: !Element,
+ *   dismissButton: !Element,
  *   playButton: !Element,
  *   pauseButton: !Element,
  *   muteButton: !Element,
@@ -222,7 +223,8 @@ export class VideoDocking {
 
     /** @private @const {function():!Timeout} */
     this.getControlsTimeout_ = once(() =>
-      new Timeout(this.ampdoc_.win, () => this.hideControls_()));
+      new Timeout(this.ampdoc_.win, () =>
+        this.hideControls_(/* respectSticky */ true)));
 
     /** @private {!RelativeX} */
     // Overriden when user drags the video to a corner.
@@ -276,6 +278,11 @@ export class VideoDocking {
               <div role="button" ref="fullscreenButton"
                   class="amp-docked-video-fullscreen"></div>
             </div>
+            <div class="amp-docked-video-button-group
+                amp-docked-video-dismiss-group">
+              <div role="button" ref="dismissButton"
+                  class="amp-docked-video-dismiss"></div>
+            </div>
           </div>`)));
 
     /** @private {?../../video-interface.VideoInterface} */
@@ -305,6 +312,9 @@ export class VideoDocking {
     /** @private {number} */
     this.lastScrollDelta_ = 0;
 
+    /** @private {boolean} */
+    this.stickyControls_ = false;
+
     // It would be nice if the viewport service provided scroll direction
     // and speed.
     this.viewport_.onScroll(
@@ -328,9 +338,8 @@ export class VideoDocking {
     const {element} = video;
     const fidelity = PositionObserverFidelity.HIGH;
 
-    this.getPositionObserver_().observe(element, fidelity, () => {
-      this.onPositionChange_(video);
-    });
+    this.getPositionObserver_().observe(element, fidelity,
+        throttle(this.ampdoc_.win, () => this.onPositionChange_(video), 40));
   }
 
   /** @private */
@@ -425,10 +434,10 @@ export class VideoDocking {
    */
   addDragListeners_(element) {
     listen(element, 'touchstart', e =>
-      this.startDragging_(/** @type {!TouchEvent} */ (e)));
+      this.drag_(/** @type {!TouchEvent} */ (e)));
 
     listen(element, 'mousedown', e =>
-      this.startDragging_(/** @type {!TouchEvent} */ (e)));
+      this.drag_(/** @type {!TouchEvent} */ (e)));
 
     return element;
   }
@@ -442,6 +451,7 @@ export class VideoDocking {
     const controls = htmlRefs(container);
 
     const {
+      dismissButton,
       playButton,
       pauseButton,
       unmuteButton,
@@ -451,6 +461,7 @@ export class VideoDocking {
 
     Object.assign(controls, {container});
 
+    listen(dismissButton, 'click', () => this.dismissOnTap_());
     listen(playButton, 'click', () =>
       this.getDockedVideo_().play(/* auto */ false));
     listen(pauseButton, 'click', () => this.getDockedVideo_().pause());
@@ -458,12 +469,17 @@ export class VideoDocking {
     listen(unmuteButton, 'click', () => this.getDockedVideo_().unmute());
     listen(fullscreenButton, 'click', () => this.enterFullscreen_());
 
-    listen(container, 'click', () =>
+    listen(container, 'mouseup', () =>
       this.hideControlsOnTimeout_(CONTROLS_TIMEOUT_AFTER_IX));
 
     this.addDragListeners_(container);
 
     return /** @type {!ControlsDef} */ (controls);
+  }
+
+  /** @private */
+  dismissOnTap_() {
+    this.undock_(this.getDockedVideo_());
   }
 
   /**
@@ -879,12 +895,14 @@ export class VideoDocking {
   /** @private */
   onPlay_() {
     const {playButton, pauseButton} = this.getControls_();
+    this.stickyControls_ = false;
     swap(playButton, pauseButton);
   }
 
   /** @private */
   onPause_() {
     const {pauseButton, playButton} = this.getControls_();
+    this.stickyControls_ = true;
     swap(pauseButton, playButton);
   }
 
@@ -940,53 +958,79 @@ export class VideoDocking {
    */
   isVisible_(element, minRatio = 1) {
     const {intersectionRatio} = element.getIntersectionChangeEntry();
-    return intersectionRatio >= (minRatio - FLOAT_TOLERANCE);
+    return intersectionRatio > (minRatio - FLOAT_TOLERANCE);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasTransitionCompleted_(amount = 1) {
+    return this.currentlyDocked_ && this.currentlyDocked_.step >= amount;
   }
 
   /**
    * @param {!MouseEvent|!TouchEvent} e
    * @private
    */
-  startDragging_(e) {
+  drag_(e) {
     if (!this.currentlyDocked_) {
       return;
     }
+
+    // Don't allow dragging videos that are too early in their transition phase.
+    // This allows the user to keep scrolling while touching the inline/almost
+    // inline video area.
+    if (!this.hasTransitionCompleted_(0.75)) {
+      return;
+    }
+
     const {x, y} = pointerCoords(e);
-    const startX = x;
-    const startY = y;
 
-    let offsetX = 0;
-    let offsetY = 0;
+    const offset = {x: 0, y: 0};
 
-    const onDrag = e => {
-      e.preventDefault();
-      e.stopPropagation();
-      const {x, y} = pointerCoords(e);
-      offsetX = x - startX;
-      offsetY = y - startY;
-      this.offset_(offsetX, offsetY);
-    };
-
-    const onDragEnd = () => {
-      unlisteners.forEach(unlisten => unlisten.call());
-
-      this.viewport_.resetScroll();
-
-      if (this.dismissOnDragEnd_(offsetX, offsetY)) {
-        return;
-      }
-      this.snapToCorner_(offsetX, offsetY);
-    };
+    const onDragMove = e => this.onDragMove_(e, x, y, offset);
+    const onDragEnd = () => this.onDragEnd_(unlisteners, offset);
 
     const root = this.ampdoc_.getRootNode();
     const unlisteners = [
-      listen(root, 'touchmove', onDrag),
-      listen(root, 'mousemove', onDrag),
+      listen(root, 'touchmove', onDragMove),
+      listen(root, 'mousemove', onDragMove),
       listenOnce(root, 'touchend', onDragEnd),
       listenOnce(root, 'mouseup', onDragEnd),
     ];
 
     this.viewport_.disableScroll();
+  }
+
+  /**
+   * @param {!MouseEvent|!TouchEvent} e
+   * @param {number} startX
+   * @param {number} startY
+   * @param {{x: number, y: number}} offset
+   * @private
+   */
+  onDragMove_(e, startX, startY, offset) {
+    const {x, y} = pointerCoords(e);
+    offset.x = x - startX;
+    offset.y = y - startY;
+    this.offset_(offset.x, offset.y);
+  }
+
+  /**
+   * @param {!Array<!UnlistenDef>} unlisteners
+   * @param {{x: number, y: number}} offset
+   * @private
+   */
+  onDragEnd_(unlisteners, offset) {
+    unlisteners.forEach(unlisten => unlisten.call());
+
+    this.viewport_.resetScroll();
+
+    if (this.dismissOnDragEnd_(offset.x, offset.y)) {
+      return;
+    }
+    this.snapToCorner_(offset.x, offset.y);
   }
 
   /**
@@ -1204,7 +1248,10 @@ export class VideoDocking {
   }
 
   /** @private */
-  hideControls_() {
+  hideControls_(respectSticky = false) {
+    if (respectSticky && this.stickyControls_) {
+      return;
+    }
     const {container} = this.getControls_();
     const overlay = this.getOverlay_();
     overlay.classList.remove('amp-docked-video-controls-bg');
