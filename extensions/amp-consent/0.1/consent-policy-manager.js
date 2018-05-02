@@ -20,6 +20,8 @@ import {dev, user} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn, map} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
+import {isFiniteNumber} from '../../../src/types';
+import {isObject} from '../../../src/types';
 
 export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -51,7 +53,11 @@ export class ConsentPolicyManager {
    * {
    *   "waitFor": {
    *     "consentABC": [], // Can't support array now. All items will be treated as an empty array
-   *     "consentDEF": []
+   *     "consentDEF": [],
+   *   }
+   *   "timeout": {
+   *     "interval": 1,
+   *     "defaultState": 'rejected'/'unknown'
    *   }
    * }
    *
@@ -65,7 +71,7 @@ export class ConsentPolicyManager {
 
     const waitFor = Object.keys(config['waitFor'] || {});
 
-    const instance = new ConsentPolicyInstance(waitFor);
+    const instance = new ConsentPolicyInstance(config);
 
     this.instances_[policyId] = instance;
 
@@ -75,18 +81,33 @@ export class ConsentPolicyManager {
       this.policyInstancePromises_[policyId] = null;
     }
 
+    const initPromises = [];
+
     this.ConsentStateManagerPromise_.then(manager => {
       for (let i = 0; i < waitFor.length; i++) {
         const consentId = waitFor[i];
+        let resolver;
+        const instanceInitValuePromise = new Promise(resolve => {
+          resolver = resolve;
+        });
+
         manager.whenConsentReady(consentId).then(() => {
           manager.onConsentStateChange(consentId, state => {
+            if (resolver) {
+              resolver();
+              resolver = null;
+            }
             instance.consentStateChangeHandler(consentId, state);
           });
         });
+        initPromises.push(instanceInitValuePromise);
       }
+    }).then(() => {
+      Promise.all(initPromises).then(() => {
+        instance.startTimeout(this.ampdoc_.win);
+      });
     });
   }
-
 
   /**
    * Used to wait for policy to resolve;
@@ -153,7 +174,12 @@ export class ConsentPolicyManager {
 }
 
 export class ConsentPolicyInstance {
-  constructor(pendingItems) {
+  constructor(config) {
+    /** !Array<string> */
+    const pendingItems = Object.keys(config['waitFor'] || {});
+
+    /** @private {!JsonObject} */
+    this.config_ = config;
 
     /** @private {!Object<string, ?CONSENT_ITEM_STATE>} */
     this.itemToConsentState_ = map();
@@ -168,6 +194,7 @@ export class ConsentPolicyInstance {
 
     /** @private {CONSENT_POLICY_STATE} */
     this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
+
     this.init_(pendingItems);
   }
 
@@ -183,6 +210,48 @@ export class ConsentPolicyInstance {
   /** @returns {Array<string>} */
   getConsentInstanceIds() {
     return Object.keys(this.itemToConsentState_);
+  }
+
+  /**
+   * @param {Window} win
+   */
+  startTimeout(win) {
+    const timeoutConfig = this.config_['timeout'];
+
+    let timeoutInterval = null;
+    let fallbackState;
+
+    if (timeoutConfig != undefined) {
+      // timeoutConfig could equal to 0;
+      if (isObject(timeoutConfig)) {
+        /**
+         * "timeout": {
+         *   "interval" : 1,
+         *   "defaultState": "rejected"/"unknown"
+         * }
+         */
+        timeoutInterval = timeoutConfig['interval'];
+        if (timeoutConfig['defaultState'] &&
+            timeoutConfig['defaultState'] == 'rejected') {
+          fallbackState = CONSENT_ITEM_STATE.REJECTED;
+        } else {
+          user().error(
+              `unsupported defaultState ${timeoutConfig['defaultState']}`);
+        }
+        timeoutInterval = timeoutConfig['interval'];
+      } else {
+        timeoutInterval = timeoutConfig;
+      }
+      user().assert(isFiniteNumber(timeoutInterval),
+          `invalid timeout value ${timeoutInterval}`);
+    }
+
+    if (timeoutInterval != null) {
+      win.setTimeout(() => {
+        this.evaluate_(true, fallbackState);
+      }, timeoutInterval * 1000);
+    }
+
   }
 
   /**
@@ -222,8 +291,12 @@ export class ConsentPolicyInstance {
     this.evaluate_();
   }
 
-
-  evaluate_() {
+  /**
+   *
+   * @param {boolean} isForce
+   * @param {CONSENT_ITEM_STATE=} opt_fallbackState
+   */
+  evaluate_(isForce = false, opt_fallbackState) {
     // All consent instances need to be granted
     let isSufficient = true;
 
@@ -239,7 +312,13 @@ export class ConsentPolicyInstance {
     for (let i = 0; i < items.length; i++) {
       const consentId = items[i];
       if (this.itemToConsentState_[consentId] === null) {
-        return;
+        if (isForce) {
+          // Force evaluate on timeout
+          const fallbackState = opt_fallbackState || CONSENT_ITEM_STATE.UNKNOWN;
+          this.itemToConsentState_[consentId] = fallbackState;
+        } else {
+          return;
+        }
       }
 
       if (this.itemToConsentState_[consentId] ==

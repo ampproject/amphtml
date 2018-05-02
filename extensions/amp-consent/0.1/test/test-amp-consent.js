@@ -232,6 +232,8 @@ describes.realWin('amp-consent', {
   describe('policy config', () => {
     let defaultConfig;
     let ampConsent;
+    let scriptElement;
+    let consentElement;
     beforeEach(() => {
       defaultConfig = {
         'consents': {
@@ -243,10 +245,10 @@ describes.realWin('amp-consent', {
           },
         },
       };
-      const consentElement = doc.createElement('amp-consent');
+      consentElement = doc.createElement('amp-consent');
       consentElement.setAttribute('id', 'amp-consent');
       consentElement.setAttribute('layout', 'nodisplay');
-      const scriptElement = doc.createElement('script');
+      scriptElement = doc.createElement('script');
       scriptElement.setAttribute('type', 'application/json');
       scriptElement.textContent = JSON.stringify(defaultConfig);
       consentElement.appendChild(scriptElement);
@@ -262,6 +264,37 @@ describes.realWin('amp-consent', {
           'waitFor': {
             'ABC': undefined,
             'DEF': undefined,
+          },
+        },
+      });
+    });
+
+    it('override default policy', function* () {
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': 'response1',
+          },
+          'DEF': {
+            'checkConsentHref': 'response1',
+          },
+        },
+        'policy': {
+          'default': {
+            'waitFor': {
+              'ABC': [],
+            },
+          },
+        },
+      };
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      ampConsent = new AmpConsent(consentElement);
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_).to.deep.equal({
+        'default': {
+          'waitFor': {
+            'ABC': [],
           },
         },
       });
