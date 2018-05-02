@@ -112,6 +112,33 @@ export class ConsentStateManager {
     return unlistener;
   }
 
+
+  /**
+   * Sets a promise which resolves to a shareData object that is to be returned
+   * from the remote endpoint.
+   *
+   * @param {string} instanceId
+   * @param {Promise<?Object>} sharedDataPromise
+   */
+  setConsentInstanceSharedData(instanceId, sharedDataPromise) {
+    dev().assert(this.instances_[instanceId],
+        `${TAG}: cannot find this instance`);
+    this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
+  }
+
+  /**
+   * Returns a promise that resolves to a shareData object that is returned
+   * from the remote endpoint.
+   *
+   * @param {string} instanceId
+   * @return {?Promise<?Object>}
+   */
+  getConsentInstanceSharedData(instanceId) {
+    dev().assert(this.instances_[instanceId],
+        `${TAG}: cannot find this instance`);
+    return this.instances_[instanceId].sharedDataPromise;
+  }
+
   /**
    * Returns a promise that's resolved when consent instance is ready.
    * @param {string} instanceId
@@ -134,6 +161,9 @@ export class ConsentStateManager {
  */
 export class ConsentInstance {
   constructor(ampdoc, id) {
+    /** @public {?Promise<Object>} */
+    this.sharedDataPromise = null;
+
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 

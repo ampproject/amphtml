@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,5 @@
  * limitations under the License.
  */
 
-const background = chrome.extension.getBackgroundPage(); // eslint-disable-line no-undef
-
-function toggleProxy(unusedE) {
-  background.disabled = !background.disabled;
-  background.updateBadge();
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  const switchButton = document.querySelector('input[type="checkbox"]');
-  switchButton.addEventListener('change', toggleProxy);
-  if (!background.disabled) {
-    switchButton.checked = true;
-  }
-});
+/** Class corresponding to the <amp-story-bookend> DOM element tag.  */
+export class AmpStoryBookend extends AMP.BaseElement {}

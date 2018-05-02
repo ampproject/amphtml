@@ -29,7 +29,8 @@ export function adsense(global, data) {
   // TODO: check mandatory fields
   validateData(data, [],
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
-        'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth', 'package']);
+        'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth', 'package',
+        'npaOnUnknownConsent']);
 
   if (data['autoFormat'] == 'rspv') {
     user().assert(data.hasOwnProperty('fullWidth'),
@@ -68,6 +69,17 @@ export function adsense(global, data) {
     height: '100%',
   });
   const initializer = {};
+  switch (global.context.initialConsentState) {
+    case 0: // CONSENT_POLICY_STATE.UNKNOWN
+      if (data['npaOnUnknownConsent'] != 'true') {
+        // Unknown w/o NPA results in no ad request.
+        return;
+      }
+    case 2: // CONSENT_POLICY_STATE.INSUFFICIENT
+      (global.adsbygoogle = global.adsbygoogle || [])
+          ['requestNonPersonalizedAds'] = true;
+      break;
+  }
   if (data['experimentId']) {
     const experimentIdList = data['experimentId'].split(',');
     if (experimentIdList) {

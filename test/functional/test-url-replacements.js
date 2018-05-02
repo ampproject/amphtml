@@ -116,6 +116,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
                     opt_options.withViewerIntegrationVariableService);
               });
         }
+        if (opt_options.withOriginalTitle) {
+          iframe.doc.originalTitle = 'Original Pixel Test';
+        }
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
       replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
@@ -279,6 +282,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace TITLE', () => {
     return expandUrlAsync('?title=TITLE').then(res => {
       expect(res).to.equal('?title=Pixel%20Test');
+    });
+  });
+
+  it('should prefer original title for TITLE', () => {
+    return expandUrlAsync('?title=TITLE',
+        /*opt_bindings*/undefined, {withOriginalTitle: true}).then(res => {
+      expect(res).to.equal('?title=Original%20Pixel%20Test');
     });
   });
 
