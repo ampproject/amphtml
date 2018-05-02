@@ -335,7 +335,7 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Blindly pass sharedData
    * @param {string} instanceId
-   * @param {!Promise<?JsonObject>} responsePromise
+   * @param {!Promise<!JsonObject>} responsePromise
    */
   passSharedData_(instanceId, responsePromise) {
     const sharedDataPromise = responsePromise.then(response => {
@@ -343,10 +343,10 @@ export class AmpConsent extends AMP.BaseElement {
         return null;
       }
       return response['sharedData'];
-    })
+    });
 
     this.consentStateManager_.setConsentInstanceSharedData(
-          instanceId, sharedDataPromise);
+        instanceId, sharedDataPromise);
   }
 
   /**

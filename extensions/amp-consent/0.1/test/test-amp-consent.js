@@ -49,6 +49,7 @@ describes.realWin('amp-consent', {
     jsonMockResponses = {
       'response1': '{"promptIfUnknown": true}',
       'response2': '{}',
+      'response3': '{"promptIfUnknown": false}',
     };
 
     resetServiceForTesting(win, 'xhr');
@@ -250,6 +251,24 @@ describes.realWin('amp-consent', {
       expect(ampConsent.consentRequired_['ABC']).to.equal(true);
     });
 
+    it('promptIfUnknow override geo with false value', function* () {
+      ISOCountryGroups = ['unknown'];
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': 'response3',
+            'promptIfUnknownForGeoGroup': 'unknown',
+          },
+        },
+      };
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      ampConsent = new AmpConsent(consentElement);
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.consentRequired_['ABC']).to.equal(false);
+    });
+
     it('checkConsentHref w/o promptIfUnknow not override geo', function* () {
       ISOCountryGroups = ['testGroup'];
       defaultConfig = {
@@ -267,8 +286,6 @@ describes.realWin('amp-consent', {
       yield macroTask();
       expect(ampConsent.consentRequired_['ABC']).to.equal(true);
     });
-
-
   });
 
   describe('policy config', () => {
