@@ -192,19 +192,19 @@ export class Xhr {
           if (!docOptedIn || !viewer.hasCapability('xhrInterceptor')) {
             return Promise.resolve();
           }
-          return viewer.isTrustedViewer().then(viewerTrusted => {
-            if (!viewerTrusted && !getMode(this.win).development) {
-              return;
-            }
+          return viewer.isTrustedViewer();
+        }).then(viewerTrusted => {
+          if (!viewerTrusted && !getMode(this.win).development) {
+            return;
+          }
 
-            const messagePayload = dict({
-              'originalRequest': this.toStructuredCloneable_(input, init),
-            });
-
-            return viewer.sendMessageAwaitResponse('xhr', messagePayload)
-                .then(response =>
-                  this.fromStructuredCloneable_(response, init.responseType));
+          const messagePayload = dict({
+            'originalRequest': this.toStructuredCloneable_(input, init),
           });
+
+          return viewer.sendMessageAwaitResponse('xhr', messagePayload)
+              .then(response =>
+                this.fromStructuredCloneable_(response, init.responseType));
         });
   }
 
