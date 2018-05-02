@@ -28,9 +28,6 @@ describe('amp-img', () => {
   let windowWidth;
   let iframe;
 
-  const SRCSET_STRING = `/examples/img/hero@1x.jpg 641w,
-                        /examples/img/hero@2x.jpg 1282w`;
-
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     screenWidth = 320;
@@ -218,7 +215,7 @@ describe('amp-img', () => {
     toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
       src: '/examples/img/sample.jpg',
-      srcset: SRCSET_STRING,
+      srcset: 'hero@1x.jpg 641w, hero@2x.jpg 1282w',
       sizes: '(max-width: 320px) 640px, 100vw',
       width: 320,
       height: 240,
@@ -226,7 +223,8 @@ describe('amp-img', () => {
       expect(isExperimentOn(iframe.win, 'amp-img-native-srcset'))
           .to.equal(true);
       const img = ampImg.querySelector('img');
-      expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
+      expect(img.getAttribute('srcset')).to
+          .equal('hero@1x.jpg 641w, hero@2x.jpg 1282w');
       expect(img.getAttribute('sizes')).to
           .equal('(max-width: 320px) 640px, 100vw');
     });
@@ -236,7 +234,7 @@ describe('amp-img', () => {
     toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
       src: '/examples/img/sample.jpg',
-      srcset: SRCSET_STRING,
+      srcset: 'hero@1x.jpg 641w, hero@2x.jpg 1282w',
       sizes: '(min-width: 320px) 320px, 100vw',
       'native-sizes': '(min-width: 320px) 300px, 100vw',
       width: 320,
@@ -245,7 +243,8 @@ describe('amp-img', () => {
       expect(isExperimentOn(iframe.win, 'amp-img-native-srcset'))
           .to.equal(true);
       const img = ampImg.querySelector('img');
-      expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
+      expect(img.getAttribute('srcset')).to
+          .equal('hero@1x.jpg 641w, hero@2x.jpg 1282w');
       expect(img.getAttribute('sizes')).to
           .equal('(min-width: 320px) 300px, 100vw');
     });
@@ -255,7 +254,7 @@ describe('amp-img', () => {
     toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
       srcset: `/examples/img/hero@1x.jpg 641w,
-               /examples/img/hero@2x.jpg 1282w`,
+      /examples/img/hero@2x.jpg 1282w`,
       width: 320,
       height: 240,
     }).then(ampImg => {

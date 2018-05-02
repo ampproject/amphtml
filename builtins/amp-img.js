@@ -15,10 +15,10 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
 import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
-import {isExperimentOn} from '../src/experiments';
 
 /**
  * Attributes to propagate to internal image when changed externally.
