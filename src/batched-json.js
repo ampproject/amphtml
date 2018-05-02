@@ -16,8 +16,8 @@
 
 import {Services} from './services';
 import {assertHttpsUrl} from './url';
-import {user} from './log';
 import {getValueForExpr} from './json';
+import {user} from './log';
 
 /**
  * @enum {number}
