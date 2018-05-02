@@ -64,8 +64,8 @@ export class ConsentPolicyManager {
    *     "consentDEF": [],
    *   }
    *   "timeout": {
-   *     "interval": 1,
-   *     "defaultState": 'rejected'/'unknown'
+   *     "seconds": 1,
+   *     "fallbackState": 'rejected'
    *   }
    * }
    *
@@ -237,7 +237,7 @@ export class ConsentPolicyInstance {
   startTimeout(win) {
     const timeoutConfig = this.config_['timeout'];
 
-    let timeoutInterval = null;
+    let timeoutSecond = null;
     let fallbackState;
 
     if (timeoutConfig != undefined) {
@@ -245,29 +245,29 @@ export class ConsentPolicyInstance {
       if (isObject(timeoutConfig)) {
         /**
          * "timeout": {
-         *   "interval" : 1,
-         *   "defaultState": "rejected"/"unknown"
+         *   "seconds" : 1,
+         *   "fallbackState": "rejected"
          * }
          */
-        if (timeoutConfig['defaultState'] &&
-            timeoutConfig['defaultState'] == 'rejected') {
+        if (timeoutConfig['fallbackState'] &&
+            timeoutConfig['fallbackState'] == 'rejected') {
           fallbackState = CONSENT_ITEM_STATE.REJECTED;
         } else {
           user().error(TAG,
-              `unsupported defaultState ${timeoutConfig['defaultState']}`);
+              `unsupported fallbackState ${timeoutConfig['fallbackState']}`);
         }
-        timeoutInterval = timeoutConfig['interval'];
+        timeoutSecond = timeoutConfig['seconds'];
       } else {
-        timeoutInterval = timeoutConfig;
+        timeoutSecond = timeoutConfig;
       }
-      user().assert(isFiniteNumber(timeoutInterval),
-          `invalid timeout value ${timeoutInterval}`);
+      user().assert(isFiniteNumber(timeoutSecond),
+          `invalid timeout value ${timeoutSecond}`);
     }
 
-    if (timeoutInterval != null) {
+    if (timeoutSecond != null) {
       win.setTimeout(() => {
         this.evaluate_(true, fallbackState);
-      }, timeoutInterval * 1000);
+      }, timeoutSecond * 1000);
     }
 
   }
