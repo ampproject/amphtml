@@ -43,7 +43,6 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage} from './amp-story-page';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
-import {Bookend} from './bookend/amp-story-bookend';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
@@ -209,8 +208,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @const {!Bookend} */
-    this.bookend_ = new Bookend(this.win, this.element);
+    /** @private @const {?AmpStoryBookend} */
+    this.bookend_ = null;
 
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
     this.shareMenu_ = new ShareMenu(this.win, this.element);
@@ -554,6 +553,11 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
+
+    this.element.querySelector('amp-story-bookend').getImpl().then(
+        bookendImpl => {
+          this.bookend_ = bookendImpl;
+        });
 
     if (!this.paginationButtons_) {
       this.buildPaginationButtons_();
@@ -1327,10 +1331,7 @@ export class AmpStory extends AMP.BaseElement {
 
     return this.bookend_.loadConfig(false /** applyConfig */).then(
         config => {
-          // TODO(#14591): Remove config.relatedArticles references when bookend API v0.1 is deprecated.
-          return !!(config && (config.relatedArticles &&
-            config.relatedArticles.length) ||
-            (config.components && config.components.length));
+          return !!(config && config.components && config.components.length);
         });
   }
 

@@ -15,8 +15,8 @@
  */
 
 import {AmpStory} from '../amp-story';
+import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {ArticleComponent} from '../bookend/components/article';
-import {Bookend} from '../bookend/amp-story-bookend';
 import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {
@@ -28,7 +28,7 @@ describes.realWin('amp-story-bookend', {
   let win;
   let storyElem;
   let bookend;
-  let story;
+  let bookendElem;
 
   const expectedComponents = [
     {
@@ -75,8 +75,10 @@ describes.realWin('amp-story-bookend', {
     storyElem = win.document.createElement('amp-story');
     storyElem.appendChild(win.document.createElement('amp-story-page'));
     win.document.body.appendChild(storyElem);
-    story = new AmpStory(storyElem);
-    bookend = new Bookend(win, story.element);
+    new AmpStory(storyElem);
+    bookendElem = win.document.createElement('amp-story-bookend');
+    storyElem.appendChild(bookendElem);
+    bookend = new AmpStoryBookend(bookendElem);
   });
 
   it('should build the users json', () => {
