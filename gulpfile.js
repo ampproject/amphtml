@@ -1176,8 +1176,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(
         bundler.bundle()
             .on('error', function(err) {
-              // Drop the node_modules call stack, which begins with '    at'.
-              const message = err.stack.replace(/    at[^]*/, '').trim();
+              let message = err;
+              if (err.stack) {
+                // Drop the node_modules call stack, which begins with '    at'.
+                message = err.stack.replace(/    at[^]*/, '').trim();
+              }
               console.error(red(message));
               if (failOnError) {
                 process.exit(1);
