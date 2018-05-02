@@ -443,7 +443,7 @@ class VideoEntry {
 
   /** @private */
   onRegister_() {
-    if (this.hasAutoFullscreen_()) {
+    if (this.requiresAutoFullscreen_()) {
       this.manager_.registerForAutoFullscreen(this);
     }
 
@@ -457,9 +457,10 @@ class VideoEntry {
    * @retun {boolean}
    * @private
    */
-  hasAutoFullscreen_() {
-    const {element} = this.video;
-    if (!element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN)) {
+  requiresAutoFullscreen_() {
+    const element = this.video.element;
+    if (this.video.preimplementsAutoFullscreen() ||
+        !element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN)) {
       return false;
     }
     return user().assert(this.video.isInteractive(),
