@@ -875,12 +875,20 @@ export class AmpDatePicker extends AMP.BaseElement {
         return;
       }
 
-      const startDate = json['startDate'];
-      const endDate = json['endDate'];
-      const date = json['date'];
+      // We should only set the value if the field is empty or absent.
+      const shouldSetDate = !this.dateField_ || !this.dateField_.value;
+      const shouldSetStartDate =
+          !this.startDateField_ || !this.startDateField_.value;
+      const shouldSetEndDate = !this.endDateField_ || !this.endDateField_.value;
+
+      const date = shouldSetDate ? json['date'] : null;
+      const startDate = shouldSetStartDate ? json['startDate'] : null;
+      const endDate = shouldSetEndDate ? json['endDate'] : null;
+
       if (date) {
         this.handleSetDate_(date);
       }
+
       if (startDate || endDate) {
         this.handleSetDates_(startDate, endDate);
       }
