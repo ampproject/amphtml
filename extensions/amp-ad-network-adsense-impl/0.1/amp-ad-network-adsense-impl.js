@@ -66,13 +66,6 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-<<<<<<< HEAD
-import {isExperimentOn} from '../../../src/experiments';
-=======
-import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
->>>>>>> Using randomlySelectUnsetExperiments.
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 
