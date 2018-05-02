@@ -92,7 +92,6 @@ export class ConsentPolicyManager {
     const initPromises = [];
 
     this.ConsentStateManagerPromise_.then(manager => {
-      console.error("dafsdf");
       for (let i = 0; i < waitFor.length; i++) {
         const consentId = waitFor[i];
         let resolver;
@@ -105,7 +104,6 @@ export class ConsentPolicyManager {
             if (resolver) {
               resolver();
               resolver = null;
-              console.error('rightrightright');
             }
             instance.consentStateChangeHandler(consentId, state);
           });
@@ -255,7 +253,7 @@ export class ConsentPolicyInstance {
             timeoutConfig['defaultState'] == 'rejected') {
           fallbackState = CONSENT_ITEM_STATE.REJECTED;
         } else {
-          user().error(
+          user().error(TAG,
               `unsupported defaultState ${timeoutConfig['defaultState']}`);
         }
         timeoutInterval = timeoutConfig['interval'];
