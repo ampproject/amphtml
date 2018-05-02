@@ -188,7 +188,6 @@ describes.realWin('amp-consent', {
       yield macroTask();
       expect(parseSpy).to.be.calledWith('ABC', {
         'promptIfUnknown': true,
-        'prompt': true,
       });
     });
   });
