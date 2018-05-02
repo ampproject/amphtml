@@ -358,7 +358,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.setupListeners_();
 
     if (this.element.contains(this.document_.activeElement)) {
-      this.handleFocus_(this.document_.activeElement);
+      this.maybeTransitionWithFocusChange_(this.document_.activeElement);
     }
 
     // Make sure it's rendered and measured properly. Then if possible, attempt
@@ -673,8 +673,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
     this.listen_(root, 'input', this.handleInput_.bind(this));
     // TODO(cvializ): Add aria message to use down arrow to trigger calendar.
-    this.listen_(root, 'focusin',
-        e => this.handleFocus_(dev().assertElement(e.target)));
+    this.listen_(root, 'focusin', this.handleFocus_.bind(this));
     this.listen_(root, 'keydown', this.handleKeydown_.bind(this));
   }
 
@@ -710,12 +709,20 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Handle focus events in the document to switch between selecting the start
-   * and end dates, and when to open and close the date picker.
+   * Handle focus events in the document.
    * @param {!Element} target
    * @private
    */
-  handleFocus_(target) {
+  handleFocus_(e) {
+    this.maybeTransitionWithFocusChange_(dev().assertElement(e.target));
+  }
+
+  /**
+   * Switch between selecting the start and end dates,
+   * and when to open and close the date picker.
+   * @param {*} target
+   */
+  maybeTransitionWithFocusChange_(target) {
     if (this.isDateField_(target)) {
       if (target == this.startDateField_) {
         this.updateDateFieldFocus_(this.startDateField_);
