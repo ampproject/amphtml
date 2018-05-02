@@ -291,7 +291,10 @@ export class AmpConsent extends AMP.BaseElement {
           return this.parseConsentResponse_(instanceId, response);
         });
         const sharedDataPromise = remoteConsentPromise.then(response => {
-          return response ? response['sharedData'] : null;
+          if (!response || response['sharedData'] === undefined) {
+            return null;
+          }
+          return response['sharedData'];
         });
         this.consentStateManager_.setConsentInstanceSharedData(
             instanceId, sharedDataPromise);
