@@ -110,6 +110,31 @@ export class ConsentPolicyManager {
   }
 
   /**
+   * Get shared data of a policy. If multiple consent instances return
+   * sharedData, a merge will be done. For any conflict keys, the value from
+   * later consent instance (as defined in the policy config) will override
+   * the previous ones.
+   *
+   * @param {string} policyId
+   * @return {!Promise<Object>}
+   */
+  getMergedSharedData(policyId) {
+    return this.whenPolicyResolved(policyId)
+        .then(() => this.ConsentStateManagerPromise_)
+        .then(manager => {
+          const promises = this.instances_[policyId].getConsentInstanceIds()
+              .map(consentId =>
+                manager.getConsentInstanceSharedData(consentId));
+          return Promise.all(promises);
+        }).then(sharedDatas => {
+          // preprend an empty object
+          // since Object.assign does not accept null as first argument
+          sharedDatas.unshift({});
+          return Object.assign.apply(null, sharedDatas);
+        });
+  }
+
+  /**
    * Wait for policy instance to be ready.
    * @param {string} policyId
    * @return {!Promise}
@@ -153,6 +178,11 @@ export class ConsentPolicyInstance {
     for (let i = 0; i < pendingItems.length; i++) {
       this.itemToConsentState_[pendingItems[i]] = null;
     }
+  }
+
+  /** @returns {Array<string>} */
+  getConsentInstanceIds() {
+    return Object.keys(this.itemToConsentState_);
   }
 
   /**

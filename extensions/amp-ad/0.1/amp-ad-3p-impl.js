@@ -32,7 +32,10 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from './concurrent-load';
-import {getConsentPolicyState} from '../../../src/consent-state';
+import {
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent-state';
 import {getIframe} from '../../../src/3p-frame';
 import {
   googleLifecycleReporterFactory,
@@ -313,16 +316,21 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'position:fixed: %s', this.element);
 
     const consentPolicyId = super.getConsentPolicy();
-    const consentPromise = consentPolicyId
-      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
-      : Promise.resolve(null);
+    let consentPromise = Promise.resolve(null);
+    let sharedDataPromise = Promise.resolve(null);
+    if (consentPolicyId) {
+      consentPromise = getConsentPolicyState(this.getAmpDoc(), consentPolicyId);
+      sharedDataPromise =
+          getConsentPolicySharedData(this.getAmpDoc(), consentPolicyId);
+    }
 
     this.layoutPromise_ = Promise.all(
-        [getAdCid(this), consentPromise]).then(consents => {
+        [getAdCid(this), consentPromise, sharedDataPromise]).then(consents => {
       const opt_context = {
         clientId: consents[0] || null,
         container: this.container_,
         initialConsentState: consents[1],
+        consentSharedData: consents[2],
       };
 
       // In this path, the request and render start events are entangled,
