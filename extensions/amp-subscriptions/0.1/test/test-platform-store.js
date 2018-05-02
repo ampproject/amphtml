@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReasons} from '../entitlement';
 
 import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
@@ -23,22 +23,16 @@ import {user} from '../../../../src/log';
 describes.realWin('Platform store', {}, () => {
   let platformStore;
   const serviceIds = ['service1', 'service2'];
-  const currentProduct = 'currentProductId';
   const entitlementsForService1 = new Entitlement({source: serviceIds[0],
-    raw: '', service: serviceIds[0],
-    products: ['currentProductId'], subscriptionToken: '', loggedIn: false});
+    raw: '', service: serviceIds[0], granted: true});
   const entitlementsForService2 = new Entitlement({source: serviceIds[1],
-    raw: '', service: serviceIds[1],
-    products: ['product3'], subscriptionToken: '', loggedIn: false});
-  entitlementsForService1.setCurrentProduct(currentProduct);
-  entitlementsForService2.setCurrentProduct(currentProduct);
+    raw: '', service: serviceIds[1], granted: false});
   const fallbackEntitlement = new Entitlement({
     source: 'local',
     raw: 'raw',
     service: 'local',
-    products: [currentProduct],
-    subscriptionToken: 'token',
-    loggedIn: false,
+    granted: true,
+    grantReason: GrantReasons.SUBSCRIBED,
   });
 
   beforeEach(() => {
@@ -56,7 +50,11 @@ describes.realWin('Platform store', {}, () => {
         'fire');
     platformStore.onChange(cb);
     platformStore.resolveEntitlement('service2',
-        new Entitlement('service2', ['product1'], ''));
+        new Entitlement({
+          service: 'service2',
+          granted: false,
+        })
+    );
     expect(cb).to.be.calledOnce;
   });
 
@@ -93,9 +91,7 @@ describes.realWin('Platform store', {}, () => {
       const negativeEntitlements = new Entitlement({source: serviceIds[0],
         raw: '',
         service: serviceIds[0],
-        products: ['product1'],
-        subscriptionToken: ''});
-      negativeEntitlements.setCurrentProduct(currentProduct);
+      });
       platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       platformStore.entitlements_[serviceIds[1]] = entitlementsForService2;
       platformStore.getGrantStatus()
@@ -113,9 +109,7 @@ describes.realWin('Platform store', {}, () => {
       const negativeEntitlements = new Entitlement({source: serviceIds[0],
         raw: '',
         service: serviceIds[0],
-        products: ['product1'],
-        subscriptionToken: ''});
-      negativeEntitlements.setCurrentProduct(currentProduct);
+      });
       platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       platformStore.getGrantStatus()
           .then(entitlements => {
@@ -186,6 +180,7 @@ describes.realWin('Platform store', {}, () => {
       platformStore.resolvePlatform('local', localPlatform);
       platformStore.resolvePlatform('another', anotherPlatform);
     });
+
     it('should choose a platform based on subscription', () => {
       sandbox.stub(localPlatform, 'supportsCurrentViewer')
           .callsFake(() => false);
@@ -195,15 +190,12 @@ describes.realWin('Platform store', {}, () => {
         source: 'local',
         raw: '',
         service: 'local',
-        products: ['product1'],
-        subscriptionToken: 'token',
+        grantReason: GrantReasons.SUBSCRIBED,
       }));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another',
         raw: '',
         service: 'another',
-        products: ['product2'],
-        subscriptionToken: null,
       }));
       expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
           .equal(localPlatform.getServiceId());
@@ -211,15 +203,12 @@ describes.realWin('Platform store', {}, () => {
         source: 'local',
         raw: '',
         service: 'local',
-        products: ['product1'],
-        subscriptionToken: null,
       }));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another',
         raw: '',
         service: 'another',
-        products: ['product2'],
-        subscriptionToken: 'token',
+        grantReason: GrantReasons.SUBSCRIBED,
       }));
       expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
           .equal(anotherPlatform.getServiceId());
@@ -232,11 +221,9 @@ describes.realWin('Platform store', {}, () => {
       sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
           .callsFake(() => true);
       platformStore.resolveEntitlement('local', new Entitlement({
-        source: 'local', raw: '', service: 'local', products: ['product1'],
-        subscriptionToken: null}));
+        source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
-        source: 'another', raw: '', service: 'another', products: ['product2'],
-        subscriptionToken: null}));
+        source: 'another', raw: '', service: 'another'}));
       expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
           .equal(anotherPlatform.getServiceId());
     });
@@ -248,11 +235,9 @@ describes.realWin('Platform store', {}, () => {
       sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
           .callsFake(() => true);
       platformStore.resolveEntitlement('local', new Entitlement({
-        source: 'local', raw: '', service: 'local', products: ['product1'],
-        subscriptionToken: null}));
+        source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
-        source: 'another', raw: '', service: 'another', products: ['product2'],
-        subscriptionToken: null}));
+        source: 'another', raw: '', service: 'another'}));
       platformStore.scoreConfig_ = {supportsViewer: 0};
       expect(platformStore.selectApplicablePlatform_().getServiceId())
           .to.be.equal(localPlatform.getServiceId());
@@ -264,11 +249,9 @@ describes.realWin('Platform store', {}, () => {
       sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
           .callsFake(() => false);
       platformStore.resolveEntitlement('local', new Entitlement({
-        source: 'local', raw: '', service: 'local', products: ['product1'],
-        subscriptionToken: null}));
+        source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
-        source: 'another', raw: '', service: 'another', products: ['product2'],
-        subscriptionToken: null}));
+        source: 'another', raw: '', service: 'another'}));
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(localPlatform.getServiceId());
     });
@@ -281,11 +264,9 @@ describes.realWin('Platform store', {}, () => {
       localPlatformBaseScore = 1;
       anotherPlatformBaseScore = 10;
       platformStore.resolveEntitlement('local', new Entitlement({
-        source: 'local', raw: '', service: 'local', products: ['product1'],
-        subscriptionToken: null}));
+        source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
-        source: 'another', raw: '', service: 'another', products: ['product2'],
-        subscriptionToken: null}));
+        source: 'another', raw: '', service: 'another'}));
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(anotherPlatform.getServiceId());
     });

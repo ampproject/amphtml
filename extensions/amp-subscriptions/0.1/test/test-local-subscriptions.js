@@ -15,7 +15,7 @@
  */
 
 import {Dialog} from '../dialog';
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReasons} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
@@ -34,14 +34,11 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   const source = 'sample-source';
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
-  const subscriptionToken = 'token';
-  const loggedIn = true;
   const json = {
     service,
     source,
-    products,
-    subscriptionToken,
-    loggedIn,
+    granted: true,
+    grantReason: GrantReasons.SUBSCRIBED,
   };
   const entitlement = Entitlement.parseFromJson(json);
   entitlement.setCurrentProduct(products[0]);
