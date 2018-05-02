@@ -339,7 +339,7 @@ describe('amp-mustache template', () => {
   it('should catch attribute value whitespace variations', () => {
     const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
-        'value = a<a href=" j\na\tv\ra s&#00;cript:alert">b</a>';
+        'value = a<a href=" j\na\tv\ra s&#160;cript:&#32;alert">b</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
     allowConsoleError(() => {
