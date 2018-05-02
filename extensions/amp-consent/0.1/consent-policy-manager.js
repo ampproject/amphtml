@@ -45,6 +45,14 @@ export class ConsentPolicyManager {
     /** @private {!Promise} */
     this.ConsentStateManagerPromise_ =
         getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
+
+    /** @private {?function()} */
+    this.allConsentInitatedResolver_ = null;
+
+    /** @private {!Promise} */
+    this.allConsentInitated_ = new Promise(resolve => {
+      this.allConsentInitatedResolver_ = resolve;
+    });
   }
 
   /**
@@ -84,6 +92,7 @@ export class ConsentPolicyManager {
     const initPromises = [];
 
     this.ConsentStateManagerPromise_.then(manager => {
+      console.error("dafsdf");
       for (let i = 0; i < waitFor.length; i++) {
         const consentId = waitFor[i];
         let resolver;
@@ -96,17 +105,29 @@ export class ConsentPolicyManager {
             if (resolver) {
               resolver();
               resolver = null;
+              console.error('rightrightright');
             }
             instance.consentStateChangeHandler(consentId, state);
           });
         });
         initPromises.push(instanceInitValuePromise);
       }
-    }).then(() => {
-      Promise.all(initPromises).then(() => {
-        instance.startTimeout(this.ampdoc_.win);
+
+      this.allConsentInitated_.then(() => {
+        Promise.all(initPromises).then(() => {
+          instance.startTimeout(this.ampdoc_.win);
+        });
       });
     });
+  }
+
+  // Inform consent policy manager that all consent instances
+  // state has been initiated with remote value. And ready to start timeout
+  enableTimeout() {
+    if (this.allConsentInitatedResolver_) {
+      this.allConsentInitatedResolver_();
+    }
+    this.allConsentInitatedResolver_ = null;
   }
 
   /**
@@ -230,7 +251,6 @@ export class ConsentPolicyInstance {
          *   "defaultState": "rejected"/"unknown"
          * }
          */
-        timeoutInterval = timeoutConfig['interval'];
         if (timeoutConfig['defaultState'] &&
             timeoutConfig['defaultState'] == 'rejected') {
           fallbackState = CONSENT_ITEM_STATE.REJECTED;

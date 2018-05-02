@@ -131,12 +131,16 @@ export class AmpConsent extends AMP.BaseElement {
     // TODO: Decide what to do with incorrect configuration.
     this.assertAndParseConfig_();
 
-    const consentPolicyManagerPromise =
-        getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANAGER)
-            .then(manager => {
-              this.consentPolicyManager_ = manager;
-              this.generateDefaultPolicy_();
-            });
+    const consentPolicyManagerPromise = getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANAGER)
+        .then(manager => {
+          this.consentPolicyManager_ = manager;
+          this.generateDefaultPolicy_();
+          const policyKeys = Object.keys(this.policyConfig_);
+          for (let i = 0; i < policyKeys.length; i++) {
+            this.consentPolicyManager_.registerConsentPolicyInstance(
+                policyKeys[i], this.policyConfig_[policyKeys[i]]);
+          }
+        });
 
     const consentStateManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_STATE_MANAGER)
@@ -320,8 +324,8 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     Promise.all(initPromptPromises).then(() => {
-      this.initConsentPolicy_();
       this.handlePostPromptUI_();
+      this.consentPolicyManager_.enableTimeout();
     });
 
     this.enableInteractions_();
