@@ -15,7 +15,7 @@
  */
 
 
-import {Entitlement} from './entitlement';
+import {Entitlement, GrantReasons} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
@@ -122,26 +122,30 @@ export class ViewerSubscriptionPlatform {
       let entitlement = Entitlement.empty('local');
       if (Array.isArray(entitlements)) {
         for (let index = 0; index < entitlements.length; index++) {
-          const entitlementObject =
-              Entitlement.parseFromJson(entitlements[index], token);
-          if (entitlementObject.enables(currentProductId)) {
-            entitlement = entitlementObject;
+          if (entitlements[index].products.indexOf(currentProductId) !== -1) {
+            entitlement = entitlements[index];
             break;
           }
         }
-      } else if (decodedData['metering'] && !decodedData['entitlements']) { // No entitlements
+      } else if (decodedData['metering'] && !decodedData['entitlements']) {
+        // Special case where viewer gives metering but no entitlement
         dev().assert(this.currentProductId_, 'Current product is not set');
         entitlement = new Entitlement({
           source: decodedData['iss'] || '',
           raw: token,
-          service: 'local',
-          products: [this.currentProductId_],
-          subscriptionToken: null,
-          loggedIn: false,
-          metering: decodedData['metering'],
+          granted: true,
+          grantReason: GrantReasons.METERING,
+          data: decodedData['metering'],
         });
       } else if (entitlements) { // Not null
-        entitlement = Entitlement.parseFromJson(entitlements, token);
+        entitlement = new Entitlement({
+          source: 'viewer',
+          raw: token,
+          granted: entitlements.products.indexOf(this.currentProductId_),
+          grantReason: entitlements.subscriptionToken ?
+            GrantReasons.SUBSCRIBED : '',
+          data: entitlements,
+        });
       }
 
       entitlement.service = 'local';

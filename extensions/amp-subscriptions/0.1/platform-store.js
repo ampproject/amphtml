@@ -168,7 +168,7 @@ export class PlatformStore {
       // Check if current entitlements unblocks the reader
       for (const key in this.entitlements_) {
         const entitlement = (this.entitlements_[key]);
-        if (entitlement.enablesThis()) {
+        if (entitlement.granted) {
           this.saveGrantEntitlement_(entitlement);
           return resolve(true);
         }
@@ -180,7 +180,7 @@ export class PlatformStore {
       } else {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(({entitlement}) => {
-          if (entitlement.enablesThis()) {
+          if (entitlement.granted) {
             this.saveGrantEntitlement_(entitlement);
             resolve(true);
           } else if (this.areAllPlatformsResolved_()) {
@@ -201,9 +201,10 @@ export class PlatformStore {
   saveGrantEntitlement_(entitlement) {
     // The entitlement will be stored either if its the first one
     // or last one was metered and new one has full subscription.
-    if ((!this.grantStatusEntitlement_) || (this.grantStatusEntitlement_
-      && (this.grantStatusEntitlement_.metering
-          && entitlement.subscriptionToken))) {
+    if ((!this.grantStatusEntitlement_ && entitlement.granted)
+        || (this.grantStatusEntitlement_
+          && !this.grantStatusEntitlement_.isSubscribed()
+          && entitlement.isSubscribed())) {
       this.grantStatusEntitlement_ = entitlement;
       this.onGrantStateResolvedCallbacks_.fire();
     }
@@ -219,13 +220,12 @@ export class PlatformStore {
     }
 
     this.grantStatusEntitlementPromise_ = new Promise(resolve => {
-      if ((this.grantStatusEntitlement_
-          && this.grantStatusEntitlement_.subscriptionToken)
+      if ((this.grantStatusEntitlement_ && this.grantStatusEntitlement_.granted)
           || this.areAllPlatformsResolved_()) {
         resolve(this.grantStatusEntitlement_);
       } else {
         this.onGrantStateResolvedCallbacks_.add(() => {
-          if (this.grantStatusEntitlement_.subscriptionToken
+          if (this.grantStatusEntitlement_.granted
               || this.areAllPlatformsResolved_()) {
             resolve(this.grantStatusEntitlement_);
           }
@@ -334,7 +334,7 @@ export class PlatformStore {
           this.getResolvedEntitlementFor(platform.getServiceId());
 
       // Subscriber wins immediatly.
-      if (!!entitlement.subscriptionToken) {
+      if (!!entitlement.isSubscribed()) {
         weight += 100000;
       }
 

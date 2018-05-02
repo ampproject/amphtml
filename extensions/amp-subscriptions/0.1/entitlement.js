@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
-/** @typedef {{left: number, total: number, resetTime: number, durationUnit: string, token: string}} */
-export let MeteringData;
+export const GrantReasons = {
+  'SUBSCRIBED': 'SUBSCRIBED',
+  'METERING': 'METERING',
+};
 
 /**
  * The single entitlement object.
@@ -33,10 +34,7 @@ export class Entitlement {
       source: '',
       raw: '',
       service,
-      products: [],
-      subscriptionToken: null,
-      loggedIn: false,
-      metering: null,
+      granted: false,
     });
   }
 
@@ -45,13 +43,12 @@ export class Entitlement {
    * @param {string} [input.source]
    * @param {string} [input.raw]
    * @param {string} [input.service]
-   * @param {!Array<string>} [input.products]
-   * @param {?string} [input.subscriptionToken]
-   * @param {boolean} [input.loggedIn]
-   * @param {?MeteringData} [input.metering]
+   * @param {boolean} [input.granted]
+   * @param {?GrantReasons} [input.grantReason]
+   * @param {?JsonObject} [input.data]
    */
   constructor({source, raw = '', service, granted = false,
-    grantReason = '', loggedIn = false, metering = null}) {
+    grantReason = '', data}) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -62,12 +59,8 @@ export class Entitlement {
     this.granted = granted;
     /** @const {?string} */
     this.grantReason = grantReason;
-    /** @const {boolean} */
-    this.loggedIn = loggedIn;
-    /** @const {?MeteringData} */
-    this.metering = metering;
-    /** @private {?string} */
-    this.product_ = null;
+    /** @const {?JsonObject} */
+    this.data = data;
   }
 
   /**
@@ -79,10 +72,9 @@ export class Entitlement {
       'raw': this.raw,
       'source': this.source,
       'service': this.service,
-      'products': this.products,
-      'loggedIn': this.loggedIn,
-      'subscriptionToken': this.subscriptionToken,
-      'metering': this.metering,
+      'granted': this.granted,
+      'grantReason': this.grantReason,
+      'data': this.data,
     });
     return (entitlementJson);
   }
@@ -96,38 +88,8 @@ export class Entitlement {
     return dict({
       'raw': this.raw,
       'source': this.source,
-      'grantState': this.enablesThis(),
+      'grantState': this.granted,
     });
-  }
-
-  /**
-   * @param {?string} product
-   * @return {boolean}
-   */
-  enables(product) {
-    if (!product) {
-      return false;
-    }
-    return this.products.includes(product);
-  }
-
-  /**
-   * @return {boolean}
-   */
-  enablesThis() {
-    if (this.products.length === 0) {
-      return false;
-    }
-    dev().assert(this.product_, 'Current Product is not set');
-    return this.enables(this.product_);
-  }
-
-  /**
-   * Sets the current product
-   * @param {string} product
-   */
-  setCurrentProduct(product) {
-    this.product_ = product;
   }
 
   /**
@@ -141,21 +103,18 @@ export class Entitlement {
     }
     const raw = rawData || JSON.stringify(json);
     const source = json['source'] || '';
-    const products = json['products'] || [];
-    const subscriptionToken = json['subscriptionToken'];
-    const loggedIn = json['loggedIn'];
-    const meteringData = json['metering'];
-    let metering = null;
-    if (meteringData) {
-      metering = {
-        left: meteringData['left'],
-        total: meteringData['total'],
-        resetTime: meteringData['resetTime'],
-        durationUnit: meteringData['durationUnit'],
-        token: meteringData['token'],
-      };
-    }
+    const granted = json['granted'] || [];
+    const grantReason = json['grantReason'];
+    const data = json['data'];
     return new Entitlement({source, raw, service: '',
-      products, subscriptionToken, loggedIn, metering});
+      granted, grantReason, data});
+  }
+
+  /**
+   * Returns if the user is a subscriber.
+   * @return {boolean}
+   */
+  isSubscribed() {
+    return this.grantReason === GrantReasons.SUBSCRIBED;
   }
 }
