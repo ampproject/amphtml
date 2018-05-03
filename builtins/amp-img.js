@@ -27,8 +27,9 @@ import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
   'aria-describedby', 'aria-labelledby'];
 
-
-const EXPERIMENTAL_ATTRIBUTES = ['srcset', 'src', 'sizes'];
+const EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE = ['alt', 'title',
+  'referrerpolicy', 'aria-label','aria-describedby', 'aria-labelledby',
+  'srcset', 'src', 'sizes'];
 
 /**
  * Regex for finding the first url in a srcset.
@@ -80,7 +81,7 @@ export class AmpImg extends BaseElement {
 
     if (this.img_) {
       const propAttrs = this.useNativeSrcset_ ?
-        ATTRIBUTES_TO_PROPAGATE.concat(EXPERIMENTAL_ATTRIBUTES) :
+        EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE :
         ATTRIBUTES_TO_PROPAGATE;
       const attrs = propAttrs.filter(
           value => mutations[value] !== undefined);
@@ -162,11 +163,13 @@ export class AmpImg extends BaseElement {
         'be correctly propagated for the underlying <img> element.');
     }
 
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
 
     if (this.useNativeSrcset_) {
-      this.propagateAttributes(EXPERIMENTAL_ATTRIBUTES, this.img_);
+      this.propagateAttributes(EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE,
+          this.img_);
       this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
+    } else {
+      this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     }
 
     this.applyFillContent(this.img_, true);
