@@ -24,6 +24,7 @@ import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
 /** @const */
@@ -41,6 +42,7 @@ const MUSTACHE_TAG = 'amp-mustache';
 /** @const */
 const TIMEOUT_LIMIT = 10000; // 10 seconds
 
+/** @const */
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
 /** @const */
@@ -70,6 +72,27 @@ const ALLOWED_AD_TYPES = map({
   'doubleclick': true,
 });
 
+/** @enum {string} */
+const EVENTS = {
+  AD_REQUESTED: 'story-ad-request',
+  AD_LOADED: 'story-ad-load',
+  AD_INSERTED: 'story-ad-insert',
+  AD_VIEWED: 'story-ad-view',
+  AD_CLICKED: 'story-ad-click',
+  AD_EXITED: 'story-ad-exit',
+  AD_DESTROYED: 'story-ad-destroy',
+};
+
+/** @enum {string} */
+const VARS = {
+  AD_REQUESTED: 'requestTime',
+  AD_LOADED: 'loadTime',
+  AD_INSERTED: 'insertTime',
+  AD_VIEWED: 'viewTime',
+  AD_CLICKED: 'clickTime',
+  AD_EXITED: 'exitTime',
+  AD_DESTROYED: 'destroyTime',
+};
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
 
@@ -110,6 +133,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {Object<string, string>} */
     this.config_ = {};
 
+    /** @private {Object<string, *>} */
+    this.analyticsData_ = {};
+
+
     /**
      * Version of the story store service depends on which version of amp-story
      * the publisher is loading. They all have the same implementation.
@@ -134,9 +161,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           `<${TAG}> should be child of <amp-story>`);
 
       const ampdoc = this.getAmpDoc();
-      Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+      const extensionService = Services.extensionsFor(this.win);
+      extensionService./*OK*/installExtensionForDoc(
           ampdoc, AD_TAG);
-      Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+      extensionService./*OK*/installExtensionForDoc(
           ampdoc, MUSTACHE_TAG);
 
       return ampStoryElement.getImpl().then(impl => {
@@ -230,6 +258,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adPageEls_.push(page);
 
     this.ampStory_.element.appendChild(page);
+    this.analyticsEvent_(EVENTS.AD_REQUESTED,
+        {[VARS.AD_REQUESTED]: Date.now()});
 
     page.getImpl().then(impl => {
       this.ampStory_.addPage(impl);
@@ -267,6 +297,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const signals = impl.signals();
       return signals.whenSignal(CommonSignals.INI_LOAD);
     }).then(() => {
+      this.analyticsEvent_(EVENTS.AD_LOADED,
+          {[VARS.AD_LOADED]: Date.now()});
       this.isCurrentAdLoaded_ = true;
     });
 
@@ -403,12 +435,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.PLACED) {
+        this.analyticsEvent_(EVENTS.AD_INSERTED,
+            {[VARS.AD_INSERTED]: Date.now()});
         this.adsPlaced_++;
         // start loading next ad
         this.startNextPage_();
       }
 
       if (adState === AD_STATE.FAILED) {
+        this.analyticsEvent_(EVENTS.AD_DESTROYED,
+            {[VARS.AD_DESTROYED]: Date.now()});
         this.startNextPage_();
       }
     }
@@ -465,9 +501,25 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   adTimedOut_() {
     return (Date.now() - this.timeCurrentPageCreated_) > TIMEOUT_LIMIT;
   }
+
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>=} vars A map of vars and their values.
+   * @private
+   */
+  analyticsEvent_(eventType, vars) {
+    const adIndex = this.adPagesCreated_.toString();
+    if (!hasOwn(this.analyticsData_, adIndex)) {
+      this.analyticsData_[adIndex] = {adIndex};
+    }
+    this.analyticsData_[adIndex] = Object.assign(this.analyticsData_[adIndex],
+        vars);
+    triggerAnalyticsEvent(this.element, eventType,
+        this.analyticsData_[adIndex]);
+  }
 }
 
 AMP.extension('amp-story-auto-ads', '0.1', AMP => {
   AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds, CSS);
 });
-
