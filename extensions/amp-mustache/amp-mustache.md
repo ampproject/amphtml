@@ -74,8 +74,7 @@ that among other things, you can't use `amp-mustache` to:
 
 - Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
 - Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
-- Output arbitrary HTML using `{{{unescaped}}}`. The output of "triple-mustache" is sanitized to only allow
-formatting tags such as `<b>`, `<i>`, and so on.
+- Output arbitrary HTML using `{{{unescaped}}}`. The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `colgroup`, `code`, `del`, `div`, `em`, `i`, `ins`, `mark`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`.
 
 Notice also that because the body of the template has to be specified within the `template` element, it is
 impossible to specify `{{&var}}` expressions - they will always be escaped as `{{&amp;var}}`. The triple-mustache
