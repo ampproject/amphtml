@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust'; // eslint-disable-line no-unused-vars
-
 /**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
@@ -117,6 +115,17 @@ export class VideoInterface {
 
   /**
    * If this returns true then it will be assumed that the player implements
+   * a feature to enter fullscreen on device rotation internally, so that the
+   * video manager does not override it. If not, the video manager will
+   * implement this feature automatically for videos with the attribute
+   * `rotate-to-fullscreen`.
+   *
+   * @return {boolean}
+   */
+  preimplementsAutoFullscreen() {}
+
+  /**
+   * If this returns true then it will be assumed that the player implements
    * the MediaSession API internally so that the video manager does not override
    * it. If not, the video manager will use the metadata variable as well as
    * inferred meta-data to update the video's Media Session notification.
@@ -124,21 +133,6 @@ export class VideoInterface {
    * @return {boolean}
    */
   preimplementsMediaSessionAPI() {}
-
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @return {!AmpElement}
-   */
-  get element() {}
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @return {boolean}
-   */
-  isInViewport() {}
 
   /**
    * Enables fullscreen on the internal video element
@@ -161,16 +155,6 @@ export class VideoInterface {
    * @return {boolean}
    */
   isFullscreen() {}
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @param {string} unusedMethod
-   * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
-   * @param {ActionTrust} unusedMinTrust
-   * @public
-   */
-  registerAction(unusedMethod, unusedHandler, unusedMinTrust) {}
 }
 
 

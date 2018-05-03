@@ -216,6 +216,11 @@ The `<amp-consent>` element can be used to block any other AMP components on the
 
 To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if the consent prompt has been skipped by the `checkConsentHref` response when consent is unknown. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
+AMP may support more advanced customizing blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved for now, please don't specify a value to the attribute.
+
+Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
+
+
 *Example: Blocking the analytics until user accepts consent*
 
 ```html
@@ -224,9 +229,74 @@ To block components, add the `data-block-on-consent` attribute to the AMP compon
 </amp-analytics>
 ```
 
-AMP may support customizing blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved for now, please don't specify a value to the attribute.
+### Advanced Consent Blocking Behaviors
+An optional `policy` object can be added to the `<amp-consent>` element's JSON configuration object to customize consent blocking behaviors.
 
-Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
+```html
+<amp-consent layout="nodisplay" id="consent-element">
+  <script type="application/json">
+  {
+    "consents": {
+      "my-consent": {
+        "checkConsentHref": "https://example.com/api/show-consent"
+      }
+    }
+    "policy": {
+      "default": {
+        "waitFor": {
+          "my-consent": []
+        }
+        "timeout": {
+          "seconds": 5,
+          "fallbackState": "rejected"
+        }
+      }
+    }
+  }
+  </script>
+</amp-consent>
+```
+Right now only customizing the `default` policy instance is supported. The "default" behavior policy applies to every component that is blocked by consent with `data-block-on-consent` attribute.
+
+### Policy Instance (optional)
+
+#### waitFor
+`waitFor` object specifies the consent instance that needs to wait. Each consent instance requires an array value. AMP may support sub item lists under an consent instance, but right now only empty array is expected, and the value will be ignored.
+
+#### timeout (optional)
+`timeout` can be used to inform components the current consent state status after specified time.
+
+When used as a single value, `timeout` equals the timeout value in second.
+
+```html
+  "default": {
+    "waitFor": {
+      "my-consent": []
+    }
+    "timeout": 2
+  }
+```
+
+When used as an object. `timeout` object supports two attributes
+* `seconds`: timeout value in second
+* `fallbackState` (optional): the fallback consent state at timeout if the state is unknown. Right now the only fallback value supported is `rejected`. Note the fallback consent state at timeout will not be stored on client side.
+
+```html
+  "default": {
+    "waitFor": {
+      "my-consent": []
+    }
+    "timeout": {
+      "seconds": 2,
+      "fallbackState": "rejected"
+    }
+  }
+```
+
+
+
+
+
 
 
 

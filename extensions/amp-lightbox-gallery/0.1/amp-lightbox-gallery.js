@@ -157,9 +157,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private  {?Element} */
     this.topBar_ = null;
 
-    /** @private  {?Element} */
-    this.topGradient_ = null;
-
     /** @private {!LightboxControlsModes} */
     this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
 
@@ -522,8 +519,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       prevButton.classList.add('i-amphtml-screen-reader');
       nextButton.classList.add('i-amphtml-screen-reader');
     }
-    this.navControls_.appendChild(nextButton);
     this.navControls_.appendChild(prevButton);
+    this.navControls_.appendChild(nextButton);
     this.controlsContainer_.appendChild(this.navControls_);
   }
   /**

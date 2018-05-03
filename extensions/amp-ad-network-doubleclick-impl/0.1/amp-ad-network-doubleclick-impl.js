@@ -55,6 +55,7 @@ import {
   experimentFeatureEnabled,
 } from './doubleclick-a4a-config';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
@@ -87,9 +88,6 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
 import {isCancellation} from '../../../src/error';
 import {
   isInManualExperiment,
@@ -918,6 +916,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return false;
         }
     }
+    if (this.refreshManager_) {
+      this.refreshManager_.unobserve();
+    }
     if (!this.useSra && this.isAmpCreative_) {
       // Allow non-AMP creatives to remain unless SRA.
       return false;
@@ -962,7 +963,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);
-      installAnchorClickInterceptor(
+      Navigation.installAnchorClickInterceptor(
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
@@ -1312,8 +1313,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     dev().assert(creativeSize, 'this.getCreativeSize returned null');
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
-            this, this.isFluid_, this.initialSize_,
-            /** @type {{height, width}} */(creativeSize),
+            this, this.isFluid_, /** @type {{height, width}} */(creativeSize),
             this.fluidImpressionUrl_);
 
     return this.safeframeApi_.getSafeframeNameAttr();

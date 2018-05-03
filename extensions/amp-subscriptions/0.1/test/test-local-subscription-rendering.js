@@ -17,13 +17,14 @@ import * as sinon from 'sinon';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
+import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
   let win, doc, ampdoc;
   let renderer;
-  let dialog;
+  let dialog, serviceAdapter;
   let entitlementsForService1;
 
   beforeEach(() => {
@@ -31,7 +32,9 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     doc = win.document;
     ampdoc = env.ampdoc;
     dialog = new Dialog(ampdoc);
-    renderer = new LocalSubscriptionPlatformRenderer(ampdoc, dialog);
+    serviceAdapter = new ServiceAdapter(null);
+    renderer = new LocalSubscriptionPlatformRenderer(
+        ampdoc, dialog, serviceAdapter);
     const serviceIds = ['service1', 'service2'];
     const currentProduct = 'currentProductId';
     const sampleEntitlement1 =
@@ -54,6 +57,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
   describe('action rendering', () => {
     let actions1, actions2;
     let elements;
+    let delegateUIStub;
     beforeEach(() => {
       actions1 = createElementWithAttributes(doc, 'div', {
         id: 'actions1',
@@ -64,6 +68,9 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
         id: 'actions2',
         'subscriptions-section': 'actions',
         'subscriptions-display': 'subscribed',
+        'subscriptions-action': 'login',
+        'subscriptions-service': 'service',
+        'subscriptions-decorate': '',
       });
       elements = [
         actions1, actions2,
@@ -71,6 +78,10 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       elements.forEach(element => {
         doc.body.appendChild(element);
       });
+    });
+
+    beforeEach(() => {
+      delegateUIStub = sandbox.stub(serviceAdapter, 'decorateServiceAction');
     });
 
     function isDisplayed(el) {
@@ -96,6 +107,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     it('should display actions and action-sections', () => {
       return renderer.render({subscribed: true}).then(() => {
         displayed([actions2]);
+        expect(delegateUIStub).to.be.called;
       });
     });
   });
