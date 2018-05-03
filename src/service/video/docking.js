@@ -169,20 +169,6 @@ function orderLayers(...layers) {
 
 /**
  * @param {!Element} element
- * @return {boolean}
- * @restricted
- */
-function canFullScreen(win, element) {
-  const platform = Services.platformFor(win);
-  if (platform.isIos() || platform.isSafari()) {
-    return element.tagName.toLowercase() == 'video';
-  }
-  return true;
-}
-
-
-/**
- * @param {!Element} element
  * @return {!Element}
  * @restricted
  */
@@ -370,12 +356,6 @@ export class VideoDocking {
   /** @param {!VideoOrBaseElementDef} video */
   register(video) {
     const {element} = video;
-    const internalElement = getInternalElementFor(element);
-
-    if (!canFullScreen(this.ampdoc_.win, internalElement)) {
-      return;
-    }
-
     const fidelity = PositionObserverFidelity.HIGH;
 
     this.install_();
