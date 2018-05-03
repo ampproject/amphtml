@@ -40,6 +40,10 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {Services} from '../../../src/services';
+import {
+  addExperimentIdToElement,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
@@ -58,10 +62,7 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {isExperimentOn} from '../../../src/experiments';
-import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 
@@ -252,13 +253,24 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         isInManualExperiment(this.element);
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
-    // Need to ensure these are numbers since width can be set to 'auto'.
-    // Checking height just in case.
-    const useDefinedSizes = isExperimentOn(this.win, 'as-use-attr-for-format')
-        && !this.isResponsive_()
-        && !isNaN(width) && width > 0
-        && !isNaN(height) && height > 0;
-    this.size_ = useDefinedSizes
+
+    const adsenseFormatExpName = 'as-use-attr-for-format';
+    const experimentInfoMap =
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({});
+    experimentInfoMap[adsenseFormatExpName] = {
+      isTrafficEligible: () => !this.isResponsive_() &&
+        !isNaN(width) && width > 0 &&
+        !isNaN(height) && height > 0,
+      branches: ['21062003', '21062004'],
+    };
+
+    const adsenseFormatExpId =
+        randomlySelectUnsetExperiments(
+            this.win, experimentInfoMap)[adsenseFormatExpName];
+    addExperimentIdToElement(adsenseFormatExpId, this.element);
+
+    this.size_ = adsenseFormatExpId == '21062004'
       ? {width, height}
       : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
