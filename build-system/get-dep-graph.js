@@ -177,6 +177,7 @@ exports.getBundleFlags = function(g) {
   flagsArray.push('--js_module_root', './splittable-build/transformed/');
   flagsArray.push('--js_module_root', './splittable-build/browser/');
   flagsArray.push('--js_module_root', './');
+  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return flagsArray;
 }
 
@@ -539,6 +540,7 @@ exports.getFlags({
   modules: [
     './src/amp.js',
     './extensions/amp-audio/0.1/amp-audio.js',
+    './extensions/amp-ad/1.0/amp-ad.js',
     //'./extensions/amp-audio-2/0.1/amp-audio-2.js',
     './extensions/amp-live-list/0.1/amp-live-list.js',
     //'./extensions/amp-user-notification/0.1/amp-user-notification.js',

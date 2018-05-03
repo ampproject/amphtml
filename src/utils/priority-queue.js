@@ -95,7 +95,7 @@ export default class PriorityQueue {
    * The number of items in the queue.
    * @return {number}
    */
-  get length() {
+  length() {
     return this.queue_.length;
   }
 }
