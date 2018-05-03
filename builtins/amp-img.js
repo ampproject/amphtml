@@ -27,6 +27,15 @@ import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
   'aria-describedby', 'aria-labelledby'];
 
+
+const EXPERIMENTAL_ATTRIBUTES = ['srcset', 'src', 'sizes'];
+
+/**
+ * Regex for finding the first url in a srcset.
+ * @type {!RegExp}
+ */
+const FIRST_SRCSET_URL = /https?:\/\/\S+/;
+
 export class AmpImg extends BaseElement {
 
   /** @param {!AmpElement} element */
@@ -52,27 +61,36 @@ export class AmpImg extends BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     let mutated = false;
-    if (mutations['srcset'] !== undefined) {
-      // `srcset` mutations take precedence over `src` mutations.
-      this.srcset_ = srcsetFromElement(this.element);
-      mutated = true;
-    } else if (mutations['src'] !== undefined) {
-      // If only `src` is mutated, then ignore the existing `srcset` attribute
-      // value (may be set automatically as cache optimization).
-      this.srcset_ = srcsetFromSrc(this.element.getAttribute('src'));
-      mutated = true;
-    }
-
-    // This element may not have been laid out yet.
-    if (mutated && this.img_) {
-      this.updateImageSrc_();
+    if (!this.useNativeSrcset_) {
+      if (mutations['srcset'] !== undefined) {
+        // `srcset` mutations take precedence over `src` mutations.
+        this.srcset_ = srcsetFromElement(this.element);
+        mutated = true;
+      } else if (mutations['src'] !== undefined) {
+        // If only `src` is mutated, then ignore the existing `srcset` attribute
+        // value (may be set automatically as cache optimization).
+        this.srcset_ = srcsetFromSrc(this.element.getAttribute('src'));
+        mutated = true;
+      }
+      // This element may not have been laid out yet.
+      if (mutated && this.img_) {
+        this.updateImageSrc_();
+      }
     }
 
     if (this.img_) {
-      const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
+      const propAttrs = this.useNativeSrcset_ ?
+        ATTRIBUTES_TO_PROPAGATE.concat(EXPERIMENTAL_ATTRIBUTES) :
+        ATTRIBUTES_TO_PROPAGATE;
+      const attrs = propAttrs.filter(
           value => mutations[value] !== undefined);
       this.propagateAttributes(
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
+
+      if (this.useNativeSrcset_) {
+        this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
+      }
+
     }
   }
 
@@ -90,7 +108,7 @@ export class AmpImg extends BaseElement {
         return;
       }
       // We try to find the first url in the srcset
-      const srcseturl = /https?:\/\/\S+/.exec(srcset);
+      const srcseturl = FIRST_SRCSET_URL.exec(srcset);
       // Connect to the first url if it exists
       if (srcseturl) {
         this.preconnect.url(srcseturl[0], onLayout);
@@ -116,7 +134,7 @@ export class AmpImg extends BaseElement {
     if (this.img_) {
       return;
     }
-    if (!this.srcset_) {
+    if (!this.useNativeSrcset_ && !this.srcset_) {
       this.srcset_ = srcsetFromElement(this.element);
     }
     // If this amp-img IS the fallback then don't allow it to have its own
@@ -147,13 +165,15 @@ export class AmpImg extends BaseElement {
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
 
     if (this.useNativeSrcset_) {
-      this.propagateAttributes(['src', 'srcset', 'sizes'], this.img_);
+      this.propagateAttributes(EXPERIMENTAL_ATTRIBUTES, this.img_);
 
       const nativeSizes = this.element.getAttribute('native-sizes');
       if (nativeSizes) {
         // Otherwise sizes will be propagated normally if defined
         this.img_.setAttribute('sizes', nativeSizes);
       }
+
+      this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
     }
 
     this.applyFillContent(this.img_, true);
@@ -194,6 +214,21 @@ export class AmpImg extends BaseElement {
   }
 
   /**
+   * Sets the img src to the first url in the srcset if srcset is defined but
+   * src is not.
+   * @private
+   */
+  guaranteeSrcForSrcsetUnsupportedBrowsers_() {
+    if (!this.img_.hasAttribute('src') && 'srcset' in this.img_ == false) {
+      const srcset = this.element.getAttribute('srcset');
+      const srcseturl = FIRST_SRCSET_URL.exec(srcset);
+      if (srcseturl) {
+        this.img_.setAttribute('src', srcseturl[0]);
+      }
+    }
+  }
+
+  /**
    * @return {!Promise}
    * @private
    */
@@ -202,22 +237,17 @@ export class AmpImg extends BaseElement {
       return Promise.resolve();
     }
 
-    const src = this.srcset_.select(
-        // The width should never be 0, but we fall back to the screen width
-        // just in case.
-        this.getViewport().getWidth() || this.win.screen.width,
-        this.getDpr());
-    if (src == this.img_.getAttribute('src')) {
-      return Promise.resolve();
-    }
-
-    this.img_.setAttribute('src', src);
-
-    if (this.useNativeSrcset_) {
-      const originalSrc = this.element.getAttribute('src');
-      if (originalSrc) {
-        this.img_.setAttribute('src', originalSrc);
+    if (!this.useNativeSrcset_) {
+      const src = this.srcset_.select(
+          // The width should never be 0, but we fall back to the screen width
+          // just in case.
+          this.getViewport().getWidth() || this.win.screen.width,
+          this.getDpr());
+      if (src == this.img_.getAttribute('src')) {
+        return Promise.resolve();
       }
+
+      this.img_.setAttribute('src', src);
     }
 
     return this.loadPromise(this.img_).then(() => {
