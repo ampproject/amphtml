@@ -113,7 +113,7 @@ export class Navigation {
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
     this.rootNode_.addEventListener('click', this.boundHandle_);
-
+    this.rootNode_.addEventListener('contextmenu', this.boundHandle_);
     /** @private {boolean} */
     this.appendExtraParams_ = false;
     shouldAppendExtraParams(this.ampdoc).then(res => {
@@ -150,6 +150,7 @@ export class Navigation {
   cleanup() {
     if (this.boundHandle_) {
       this.rootNode_.removeEventListener('click', this.boundHandle_);
+      this.rootNode_.removeEventListener('contextmenu', this.boundHandle_);
     }
   }
 
@@ -213,7 +214,7 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-
+    const isRightClick = (e.type == 'contextmenu');
     const target = closestByTag(dev().assertElement(e.target), 'A');
     if (!target || !target.href) {
       return;
@@ -231,13 +232,18 @@ export class Navigation {
 
     const location = this.parseUrl_(target.href);
 
-    // Handle AMP-to-AMP navigation if rel=amphtml.
-    if (this.handleA2AClick_(e, target, location)) {
+    // Handle AMP-to-AMP navigation if rel=amphtml. Note that
+    // we ignore handling if it is invoked via a right click.
+    // See github issue #14768.
+    if (this.handleA2AClick_(e, target, location && !isRightClick)) {
       return;
     }
 
     // Handle navigating to custom protocol if applicable.
-    if (this.handleCustomProtocolClick_(e, target, location)) {
+    // Note that we ignore handling if it is invoked via a right click.
+    // See github issue #14768.
+    if (this.handleCustomProtocolClick_(e, target, location)
+        && !isRightClick) {
       return;
     }
 

@@ -31,6 +31,7 @@ describes.sandboxed('Navigation', {}, () => {
     event = {
       target: null,
       defaultPrevented: false,
+      type: 'click',
     };
     event.preventDefault = function() {
       event.defaultPrevented = true;
@@ -141,6 +142,13 @@ describes.sandboxed('Navigation', {}, () => {
         expect(handleNavSpy).to.not.be.called;
         expect(handleCustomProtocolSpy).to.not.be.called;
       });
+
+      it('should NOT handle custom protocol when right clicked', () => {
+        event.type = 'contextmenu';
+        handler.isIframed_ = true;
+        handler.handle_(event);
+        expect(handleCustomProtocolSpy).to.not.be.called;
+      });
     });
 
     describe('link expansion', () => {
@@ -157,6 +165,15 @@ describes.sandboxed('Navigation', {}, () => {
         handler.handle_(event);
         expect(anchor.href).to.equal(
             'https://www.google.com/link?out=QUERY_PARAM(hello)');
+        expect(handleNavSpy).to.be.calledOnce;
+      });
+
+      it('should expand link if event type is right click', () => {
+        anchor.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+        anchor.setAttribute('data-amp-replace', 'QUERY_PARAM');
+        event.type = 'contextmenu';
+        handler.handle_(event);
+        expect(anchor.href).to.equal('https://www.google.com/link?out=world');
         expect(handleNavSpy).to.be.calledOnce;
       });
     });
@@ -488,6 +505,15 @@ describes.sandboxed('Navigation', {}, () => {
         // handle nav ourselves.
         expect(event.defaultPrevented).to.be.false;
         expect(handleNavSpy).to.be.calledOnce;
+      });
+
+      it('should ignore if event type is right click', () => {
+        const stub =
+            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(false);
+        event.type = 'contextmenu';
+        handler.handle_(event);
+
+        expect(stub).to.not.be.called;
       });
     });
 
