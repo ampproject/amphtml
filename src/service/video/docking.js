@@ -22,7 +22,6 @@ import {
   PositionObserver, // eslint-disable-line no-unused-vars
 } from '../position-observer/position-observer-impl';
 import {Services} from '../../services';
-import {asBaseElement} from '../../video-interface';
 // Source for this constant is css/video-docking.css
 import {cssText} from '../../../build/video-docking.css.js';
 import {dev} from '../../log';
@@ -70,19 +69,26 @@ const BASE_CLASS_NAME = 'i-amphtml-docked';
 /** @private @const {number} */
 const REVERT_TO_INLINE_RATIO = 0.9;
 
-/** @private @enum */
-const RelativeX = {LEFT: 0, RIGHT: 1};
+/** @enum */
+export const RelativeX = {LEFT: 0, RIGHT: 1};
 
-/** @private @enum */
-const RelativeY = {TOP: 0, BOTTOM: 1};
+/** @enum */
+export const RelativeY = {TOP: 0, BOTTOM: 1};
 
-/** @private @enum */
-const Direction = {UP: 1, DOWN: -1};
+/** @enum */
+export const Direction = {UP: 1, DOWN: -1};
+
+
+/**
+ * @typedef
+ * {!../../video-interface.VideoInterface|!../../base-element.BaseElement}
+ */
+let VideoOrBaseElementDef;
 
 
 /**
  * @struct @typedef {{
- *  video: !../../video-interface.VideoInterface,
+ *  video: !VideoOrBaseElementDef,
  *  posX: !RelativeX,
  *  posY: !RelativeY,
  *  step: number,
@@ -309,7 +315,7 @@ export class VideoDocking {
             </div>
           </div>`)));
 
-    /** @private {?../../video-interface.VideoInterface} */
+    /** @private {?VideoOrBaseElementDef} */
     this.lastDismissed_ = null;
 
     /** @private {?RelativeY} */
@@ -361,7 +367,7 @@ export class VideoDocking {
         /* opt_ext */ 'amp-video-docking');
   }
 
-  /** @param {!../../video-interface.VideoInterface} video */
+  /** @param {!VideoOrBaseElementDef} video */
   register(video) {
     const {element} = video;
     const internalElement = getInternalElementFor(element);
@@ -519,7 +525,7 @@ export class VideoDocking {
   }
 
   /**
-   * @return {!../../video-interface.VideoInterface}
+   * @return {!VideoOrBaseElementDef}
    * @private
    */
   getDockedVideo_() {
@@ -541,7 +547,7 @@ export class VideoDocking {
   /**
    * Reconciliates the state of a docked or potentially dockable video when
    * its position changes.
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @private
    */
   onPositionChange_(video) {
@@ -561,7 +567,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!../../video-interface.VideoInterface} video
+   * @param  {!VideoOrBaseElementDef} video
    * @return {boolean}
    */
   undockBecauseVisible_(video, ratio = 1) {
@@ -573,7 +579,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!../../video-interface.VideoInterface} video
+   * @param  {!VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreDueToNotPlayingManually_(video) {
@@ -582,7 +588,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!../../video-interface.VideoInterface} video
+   * @param  {!VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreDueToDocked_(video) {
@@ -590,11 +596,11 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!../../video-interface.VideoInterface} video
+   * @param  {!VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreDueToSize_(video) {
-    const {width, height} = this.getLayoutBox_(video);
+    const {width, height} = video.getLayoutBox();
     const aspectRatio = width / height;
     if (aspectRatio < 1) { // ignore portrait
       return true;
@@ -638,7 +644,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @return {?RelativeY}
    * @private
    */
@@ -727,7 +733,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @param {boolean=} finalize
@@ -755,7 +761,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!../../video-interface.VideoInterface} video
+   * @param  {!VideoOrBaseElementDef} video
    * @return {boolean}
    * @private
    */
@@ -831,7 +837,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @param {number} x
    * @param {number} y
    * @param {number} scale
@@ -847,7 +853,7 @@ export class VideoDocking {
       dev().assertNumber(optTransitionDurationMs) :
       this.calculateTransitionDuration_(step);
 
-    const {width, height} = this.getLayoutBox_(video);
+    const {width, height} = video.getLayoutBox();
 
     this.placedAt_ = {x, y, scale};
 
@@ -870,7 +876,7 @@ export class VideoDocking {
     const overlay = this.getOverlay_();
     const controls = this.getControls_().container;
 
-    asBaseElement(video).mutateElement(() => {
+    video.mutateElement(() => {
       internalElement.classList.add(BASE_CLASS_NAME);
       shadowLayer.removeAttribute('hidden');
       overlay.removeAttribute('hidden');
@@ -891,7 +897,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @return {boolean}
    */
   isCurrentlyDocked_(video) {
@@ -899,7 +905,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @param {number} step
@@ -971,7 +977,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @private
    */
   onDockingTimeout_(video) {
@@ -1101,25 +1107,13 @@ export class VideoDocking {
   getCenter_(offsetX, offsetY) {
     const {posX, posY, step} = this.currentlyDocked_;
     const video = this.getDockedVideo_();
-    const {width, height} = this.getLayoutBox_(video);
+    const {width, height} = video.getLayoutBox();
     const {x, y, scale} = this.getDims_(video, posX, posY, step);
 
     const centerX = x + offsetX + (width * scale / 2);
     const centerY = y + offsetY + (height * scale / 2);
 
     return {centerX, centerY};
-  }
-
-  /**
-   * @param {!../../video-interface.VideoInterface=} opt_video
-   * @return {!../../layout-rect.LayoutRectDef}
-   */
-  getLayoutBox_(opt_video) {
-    const video =
-      asBaseElement(opt_video ?
-        dev().assert(opt_video) :
-        this.getDockedVideo_());
-    return video.getLayoutBox();
   }
 
   /**
@@ -1171,13 +1165,13 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @return {{x: number, y: number, targetWidth: number, targetHeight: number}}
    */
   getTargetArea_(video, posX, posY) {
-    const {width, height} = this.getLayoutBox_(video);
+    const {width, height} = video.getLayoutBox();
     const margin = this.getMargin_();
     const aspectRatio = width / height;
     const targetWidth = Math.max(MIN_WIDTH, this.getAreaWidth_() * 0.25);
@@ -1197,14 +1191,14 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @param {number} step in [0..1]
    * @return {{x: number, y: number, scale: number}}
    */
   getDims_(video, posX, posY, step) {
-    const {left, width, height} = this.getLayoutBox_(video);
+    const {left, width, height} = video.getLayoutBox();
     const {x, y, targetWidth} = this.getTargetArea_(video, posX, posY);
     const currentX = mapStep(step, left, x);
     const currentWidth = mapStep(step, width, targetWidth);
@@ -1231,7 +1225,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @private
    */
   undock_(video, dismissDirX = 0, dismissDirY = 0) {
@@ -1252,13 +1246,13 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoInterface} video
+   * @param {!VideoOrBaseElementDef} video
    * @private
    */
   resetUndocked_(video) {
     const internalElement = getInternalElementFor(video.element);
 
-    asBaseElement(video).mutateElement(() => {
+    video.mutateElement(() => {
       this.hideControls_();
       video.showControls();
       this.placedAt_ = null;
