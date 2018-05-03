@@ -170,7 +170,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   waitToPreloadShell_(shellUrl) {
-    this.whenReadyAndVisiblePromise_().then(() => {
+    return this.whenReadyAndVisiblePromise_().then(() => {
       this.mutateElement(() => this.preloadShell_(shellUrl));
     });
   }
