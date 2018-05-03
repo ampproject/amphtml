@@ -856,6 +856,54 @@ describe('experiment branch tests', () => {
       expect(isExperimentOn(sandbox.win, 'fooExpt')).to.be.false;
       expect(getExperimentBranch(sandbox.win, 'fooExpt')).to.not.be.ok;
     });
+
+    it('returns empty experiments map', () => {
+      // Opt out of experiment.
+      toggleExperiment(sandbox.win, 'testExperimentId', false, true);
+      const exps = randomlySelectUnsetExperiments(sandbox.win, {});
+      expect(exps).to.be.empty;
+    });
+
+    it('returns map with experiment diverted path 1', () => {
+      // Force experiment on.
+      toggleExperiment(sandbox.win, 'testExperimentId', true, true);
+      // force the control branch to be chosen by making the accurate PRNG
+      // return a value < 0.5.
+      RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
+      const exps =
+          randomlySelectUnsetExperiments(sandbox.win, testExperimentSet);
+      expect(exps).to.deep.equal({'testExperimentId': 'branch1_id'});
+    });
+
+    it('returns map with multiple experiments with multi-way branches', () => {
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      toggleExperiment(sandbox.win, 'expt_1', false, true);
+      toggleExperiment(sandbox.win, 'expt_2', true, true);
+      toggleExperiment(sandbox.win, 'expt_3', true, true);
+
+      const experimentInfo = {
+        'expt_0': {
+          isTrafficEligible: () => true,
+          branches: ['0_0', '0_1', '0_2', '0_3', '0_4'],
+        },
+        'expt_1': {
+          isTrafficEligible: () => true,
+          branches: ['1_0', '1_1', '1_2', '1_3', '1_4'],
+        },
+        'expt_2': {
+          isTrafficEligible: () => true,
+          branches: ['2_0', '2_1', '2_2', '2_3', '2_4'],
+        },
+      };
+      RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.7);
+      RANDOM_NUMBER_GENERATORS.accuratePrng.onSecondCall().returns(0.3);
+      const exps = randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+
+      expect(exps).to.deep.equal({
+        'expt_0': '0_3',
+        'expt_2': '2_1',
+      });
+    });
   });
 });
 

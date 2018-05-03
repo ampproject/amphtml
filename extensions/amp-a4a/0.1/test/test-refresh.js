@@ -138,7 +138,16 @@ describe('refresh', () => {
       // Attach element to DOM, as is necessary for request ampdoc.
       window.document.body.appendChild(mockA4a.element);
       const refreshSpy = sandbox.spy(mockA4a, 'refresh');
+
+      // Ensure initial call to initiateRefreshCycle doesn't trigger refresh, as
+      // this can have flaky results.
+      const initiateRefreshCycle =
+          RefreshManager.prototype.initiateRefreshCycle;
+      RefreshManager.prototype.initiateRefreshCycle = () => {};
+
       const refreshManager = new RefreshManager(mockA4a, config, 30000);
+      refreshManager.initiateRefreshCycle = initiateRefreshCycle;
+
       // So the test doesn't hang for the required minimum 30s interval, or the
       // 1s ActiveView visibility definition.
       refreshManager.config_ = {
@@ -148,8 +157,7 @@ describe('refresh', () => {
       refreshManager.refreshInterval_ = 0;
       refreshManager.initiateRefreshCycle();
       return Services.timerFor(window).promise(500).then(() => {
-        // Twice because constructor calls initiateRefreshCycle().
-        expect(refreshSpy).to.be.calledTwice;
+        expect(refreshSpy).to.be.calledOnce;
         window.document.body.removeChild(mockA4a.element);
       });
     });
