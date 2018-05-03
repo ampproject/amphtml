@@ -32,8 +32,6 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   };
   const service = 'sample-service';
   const source = 'sample-source';
-  const products = ['scenic-2017.appspot.com:news',
-    'scenic-2017.appspot.com:product2'];
   const json = {
     service,
     source,
@@ -41,7 +39,6 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     grantReason: GrantReasons.SUBSCRIBED,
   };
   const entitlement = Entitlement.parseFromJson(json);
-  entitlement.setCurrentProduct(products[0]);
   const authUrl = 'https://lipsum.com/login/authorize';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {

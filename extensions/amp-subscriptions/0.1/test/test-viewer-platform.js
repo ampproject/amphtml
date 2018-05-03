@@ -16,7 +16,7 @@
 
 
 import {Dialog} from '../dialog';
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReasons} from '../entitlement';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionAnalytics} from '../analytics';
@@ -30,9 +30,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   const currentProductId = 'example.org:basic';
   const origin = 'origin';
   const entitlementData = {source: 'local', raw: 'raw',
-    service: 'local', products: [currentProductId], subscriptionToken: 'token'};
-  const entitlement = new Entitlement(entitlementData);
-  entitlement.setCurrentProduct(currentProductId);
+    service: 'local', granted: true, grantReason: GrantReasons.SUBSCRIBED};
   const fakeAuthToken = {
     'authorization': 'faketoken',
   };
