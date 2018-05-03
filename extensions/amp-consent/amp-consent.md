@@ -279,7 +279,7 @@ When used as a single value, `timeout` equals the timeout value in second.
 
 When used as an object. `timeout` object supports two attributes
 * `seconds`: timeout value in second
-* `fallbackState` (optinal): the fallback consent state at timeout if the state is unknown. Right now the only fallback value supported is `rejected`. Note the fallback consent state at timeout will not be stored on client side.
+* `fallbackState` (optional): the fallback consent state at timeout if the state is unknown. Right now the only fallback value supported is `rejected`. Note the fallback consent state at timeout will not be stored on client side.
 
 ```html
   "default": {
