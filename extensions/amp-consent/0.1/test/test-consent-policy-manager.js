@@ -244,7 +244,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
           },
           'timeout': {
             'seconds': 2,
-            'fallbackState': 'rejected',
+            'fallbackAction': 'reject',
           },
         };
 
