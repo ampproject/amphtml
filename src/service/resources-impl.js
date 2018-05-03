@@ -1012,7 +1012,7 @@ export class Resources {
     return this.vsync_.runPromise({
       measure: measurer || undefined,
       mutate: () => {
-        // TODO: Audit this system. Did this cause a layer invalidation (new
+        // TODO(jridgewell): Audit this system. Did this cause a layer invalidation (new
         // layer, or removal of old layer)? Right now, we're only dirtying
         // the measurements.
         mutator();
