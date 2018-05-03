@@ -509,8 +509,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    const adIndex = this.adPagesCreated_.toString();
-    if (!hasOwn(this.analyticsData_, adIndex)) {
+    const adIndex = this.adPagesCreated_;
+    if (!hasOwn(this.analyticsData_, adIndex.toString())) {
       this.analyticsData_[adIndex] = {adIndex};
     }
     this.analyticsData_[adIndex] = Object.assign(this.analyticsData_[adIndex],
