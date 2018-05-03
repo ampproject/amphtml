@@ -20,7 +20,7 @@ checkMinVersion();
 
 const $$ = require('gulp-load-plugins')();
 const applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
-const babel = require('babelify');
+const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
@@ -1139,8 +1139,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
+  const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
-      .transform(babel, {
+      .transform(babelify, {
         presets: [
           ['env', {
             targets: {
@@ -1148,6 +1149,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             },
           }],
         ],
+      })
+      .once('transform', () => {
+        endBuildStep('Transformed', srcFilename, startTime);
       });
   if (options.watch) {
     bundler = watchify(bundler);
