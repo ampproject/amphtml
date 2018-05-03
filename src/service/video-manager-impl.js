@@ -913,15 +913,16 @@ const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
 
 
 /**
+ * @param {!Window} win
  * @param {!AmpElement} video
  * @return {boolean}
  * @restricted
  */
 function canFullScreen(win, video) {
   // Safari and iOS can only fullscreen <video> elements directly. In cases
-  // where the player component is implemented via an iframe, we need to rely
+  // where the player component is implemented via an <iframe>, we need to rely
   // on a postMessage API to fullscreen. Such an API is not necessarily provided
-  // by all players.
+  // by every player.
   const internalElement = getInternalElementFor(video);
   if (internalElement.tagName.toLowerCase() == 'video') {
     return true;
