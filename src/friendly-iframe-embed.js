@@ -93,7 +93,6 @@ function isSrcdocSupported() {
  * whether the embed is currently in the viewport.
  * @param {!FriendlyIframeEmbed} embed
  * @param {boolean} visible
- * @restricted
  * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
  */
 export function setFriendlyIframeEmbedVisible(embed, visible) {
@@ -406,7 +405,10 @@ export class FriendlyIframeEmbed {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
   }
 
-  /** @private */
+  /**
+   * @private
+   * @restricted
+   */
   startRender_() {
     if (this.host) {
       this.host.renderStarted();
@@ -464,6 +466,7 @@ export class FriendlyIframeEmbed {
   /**
    * @param {boolean} visible
    * @private
+   * @restricted
    */
   setVisible_(visible) {
     if (this.visible_ != visible) {
