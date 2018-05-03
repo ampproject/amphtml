@@ -208,7 +208,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @const {?AmpStoryBookend} */
+    /** @private {?AmpStoryBookend} */
     this.bookend_ = null;
 
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
@@ -1304,7 +1304,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds, fetches and sets the bookend publisher configuration.
-   * @return {!Promise<(?./bookend/amp-story-bookend.BookendConfigDef|./bookend/bookend-component.BookendDataDef)>}
+   * @return {!Promise<?./bookend/bookend-component.BookendDataDef>}
    * @private
    */
   buildAndPreloadBookend_() {

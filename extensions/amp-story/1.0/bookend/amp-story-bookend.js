@@ -131,8 +131,8 @@ export class AmpStoryBookend extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?BookendConfigDef|?./bookend-component.BookendDataDef|undefined} */
-    this.config_;
+    /** @private {?./bookend-component.BookendDataDef} */
+    this.config_ = null;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
@@ -164,7 +164,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
     /** @private @const {!../amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win);
 
-    /** @private @const {!Element} */
+    /** @private @const {?Element} */
     this.parentEl_ = element.parentElement;
 
     /** @private @const {!../../../../src/service/vsync-impl.Vsync} */
@@ -191,7 +191,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
     this.replayButton_ = this.buildReplayButton_();
 
-    const ampdoc = getAmpdoc(this.parentEl_);
+    let ampdoc;
+    if (this.parentEl_) {
+      ampdoc = getAmpdoc(this.parentEl_);
+    }
 
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
@@ -294,10 +297,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
    * will prerender the bookend DOM, but there are cases where we need it before
    * the component is built. Eg: the desktop share button needs the providers.
    * @param {boolean=} applyConfig  Whether the config should be set.
-   * @return {!Promise<(?BookendConfigDef|?./bookend-component.BookendDataDef)>}
+   * @return {!Promise<?./bookend-component.BookendDataDef>}
    */
   loadConfig(applyConfig = true) {
-    if (this.config_ !== undefined) {
+    if (this.config_) {
       if (applyConfig && this.config_) {
         this.setConfig_(this.config_);
       }
@@ -325,7 +328,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
           // Allows the config to be fetched before the component is built, for
           // cases like getting the share providers on desktop.
-          if (applyConfig) {
+          if (applyConfig && this.config_) {
             this.setConfig_(this.config_);
           }
 
@@ -486,7 +489,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
    * @private
    */
   getStoryMetadata_() {
-    const ampdoc = getAmpdoc(this.parentEl_);
+    let ampdoc;
+    if (this.parentEl_) {
+      ampdoc = getAmpdoc(this.parentEl_);
+    }
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {
