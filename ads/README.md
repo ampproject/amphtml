@@ -217,6 +217,28 @@ window.context.renderStart({width: 200, height: 100});
 
 Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height)` API. Details in [Ad Resizing](#ad-resizing).
 
+### amp-consent integration
+If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute 
+can be added to `amp-ad` element to respect the corresponding `amp-consent` policy.
+In that case, the `amp-ad` element will be blocked for loading until the consent 
+responded. Once `amp-ad` is unblocked, 3rd party ad scripts can access the consent 
+related information via the following 
+`window.context` APIs.
+
+<dl>
+  <dt><code>window.context.initialConsentState</code></dt>
+  <dd>
+    Provides the initial consent state when the ad is unblocked.
+    The states are integers defined <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#advanced-blocking-behaviors">here</a>
+    (<a href="https://github.com/ampproject/amphtml/blob/master/src/consent-state.js#L23">code</a>).
+  </dd>
+  <dt><code>window.context.consentSharedData</code></dt>
+  <dd>
+    Provides additional user privacy related data retrieved from publishers.
+    See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response">here</a> for details.
+  </dd>
+</dl>
+
 ### Optimizing ad performance
 
 #### JS reuse across iframes
