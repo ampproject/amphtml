@@ -29,6 +29,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
+  <tr>
+    <td class="col-fourty"><strong>Availability</td>
+    <td>Available for testing</td>
+  </tr>
 </table>
 
 [TOC]
