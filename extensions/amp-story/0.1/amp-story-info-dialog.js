@@ -18,6 +18,7 @@ import {Action, StateProperty} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-0.1.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
@@ -62,6 +63,9 @@ export class InfoDialog {
 
     /** @private {?Element} */
     this.moreInfoLinkEl_ = null;
+
+    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.parentEl_);
   }
 
   /**
@@ -164,8 +168,24 @@ export class InfoDialog {
    * @private
    */
   requestMoreInfoLink_() {
-    // TODO(newmuis): Ping the viewer to get the more info link.
-    return Promise.resolve(null);
+    const messagingPromise = this.viewer_.whenMessagingReady();
+
+    if (!messagingPromise) {
+      // There is no viewer to supply the more info URL.
+      return Promise.resolve(null);
+    }
+
+    return messagingPromise
+        .sendMessageAwaitResponse('moreInfoLinkUrl', /* data */ undefined)
+        .then(moreInfoUrl => {
+          if (!moreInfoUrl) {
+            console.log('no more info url');
+            return null;
+          }
+
+          console.log('more info url was', moreInfoUrl);
+          return assertAbsoluteHttpOrHttpsUrl(dev().assertString(moreInfoUrl));
+        });
   }
 
   /**
