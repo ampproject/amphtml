@@ -127,8 +127,10 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
             expect(resolvedEntitlement.service).to.equal(
                 entitlementData.service);
             expect(resolvedEntitlement.source).to.equal(entitlementData.source);
-            expect(resolvedEntitlement.products).to.deep
-                .equal(entitlementData.products);
+            expect(resolvedEntitlement.granted).to.be
+                .equal(entitlementData.granted);
+            expect(resolvedEntitlement.grantReason).to.be
+                .equal(entitlementData.grantReason);
             // raw should be the data which was resolved via sendMessageAwaitResponse.
             expect(resolvedEntitlement.raw).to
                 .equal('faketoken');

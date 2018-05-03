@@ -305,9 +305,8 @@ describes.realWin('Platform store', {}, () => {
     const subscribedMeteredEntitlement = new Entitlement({
       source: 'local',
       service: 'local',
-      products: ['local', 'another-product'],
-      subscriptionToken: 'subscribed',
-      loggedIn: false,
+      granted: true,
+      grantReason: GrantReasons.SUBSCRIBED,
     });
     it('should resolve with existing entitlement with subscriptions', () => {
       platformStore.grantStatusEntitlement_ = subscribedMeteredEntitlement;
@@ -321,13 +320,13 @@ describes.realWin('Platform store', {}, () => {
       const meteringEntitlement = new Entitlement({
         source: 'local',
         service: 'local',
-        products: ['local'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
+        granted: true,
+        data: {
+          metering: {
+            'left': 5,
+            'total': 10,
+            'token': 'token',
+          },
         },
       });
       platformStore.grantStatusEntitlement_ = meteringEntitlement;
@@ -343,14 +342,8 @@ describes.realWin('Platform store', {}, () => {
       const meteringEntitlement = new Entitlement({
         source: 'local',
         service: 'local',
-        products: ['local'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
-        },
+        granted: true,
+        grantReason: GrantReasons.METERING,
       });
       sandbox.stub(platformStore, 'areAllPlatformsResolved_')
           .callsFake(() => true);
@@ -363,57 +356,41 @@ describes.realWin('Platform store', {}, () => {
   });
 
   describe('saveGrantEntitlement_', () => {
-    it('should save first entitlement', () => {
-      const entitlement = new Entitlement({
+    it('should save first entitlement to grant', () => {
+      const entitlementData = {
         source: 'local',
         service: 'local',
-        products: ['local'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
-        },
-      });
+        granted: false,
+        grantReason: GrantReasons.METERING,
+      };
+      const entitlement = new Entitlement(entitlementData);
       platformStore.saveGrantEntitlement_(entitlement);
+      expect(platformStore.grantStatusEntitlement_).to.be.equal(null);
+      const anotherEntitlement = new Entitlement(
+          Object.assign({}, entitlementData, {granted: true}));
+      platformStore.saveGrantEntitlement_(anotherEntitlement);
       expect(platformStore.grantStatusEntitlement_.json())
-          .to.deep.equal(entitlement.json());
+          .to.deep.equal(anotherEntitlement.json());
     });
 
     it('should save further entitlement if new one has subscription '
         + 'and last one had metering', () => {
-      const entitlement = new Entitlement({
+      const entitlementData = {
         source: 'local',
         service: 'local',
-        products: ['local'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
-        },
-      });
-      const nextMeteredEntitlement = new Entitlement({
-        source: 'local',
-        service: 'local',
-        products: ['local', 'another-product'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
-        },
-      });
-      const subscribedMeteredEntitlement = new Entitlement({
-        source: 'local',
-        service: 'local',
-        products: ['local', 'another-product'],
-        subscriptionToken: 'subscribed',
-        loggedIn: false,
-      });
+        granted: true,
+      };
+      const entitlement = new Entitlement(entitlementData);
+      const nextMeteredEntitlement = new Entitlement(
+          Object.assign({}, entitlementData, {
+            grantReason: GrantReasons.METERING,
+          })
+      );
+      const subscribedMeteredEntitlement = new Entitlement(
+          Object.assign({}, entitlementData, {
+            grantReason: GrantReasons.SUBSCRIBED,
+          })
+      );
       platformStore.saveGrantEntitlement_(entitlement);
       expect(platformStore.grantStatusEntitlement_.json())
           .to.deep.equal(entitlement.json());
