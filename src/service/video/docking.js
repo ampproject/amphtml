@@ -161,6 +161,30 @@ function orderLayers(...layers) {
 }
 
 
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ * @restricted
+ */
+function canFullScreen(win, element) {
+  const platform = Services.platformFor(win);
+  if (platform.isIos() || platform.isSafari()) {
+    return element.tagName.toLowercase() == 'video';
+  }
+  return true;
+}
+
+
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ * @restricted
+ */
+function getInternalElementFor(element) {
+  return dev().assertElement(element.querySelector('video, iframe'));
+}
+
+
 /** Timeout that can be postponed, repeated or cancelled. */
 class Timeout {
   /**
@@ -315,12 +339,16 @@ export class VideoDocking {
     /** @private {boolean} */
     this.stickyControls_ = false;
 
-    // It would be nice if the viewport service provided scroll direction
-    // and speed.
-    this.viewport_.onScroll(
-        throttle(ampdoc.win, () => this.updateScroll_(), 100));
+    /** @private @const {!function()} */
+    // Lazily invoked.
+    this.install_ = once(() => {
+      // It would be nice if the viewport service provided scroll direction
+      // and speed.
+      this.viewport_.onScroll(
+          throttle(ampdoc.win, () => this.updateScroll_(), 100));
 
-    this.installStyles_();
+      this.installStyles_();
+    });
   }
 
   /** @private */
@@ -336,7 +364,15 @@ export class VideoDocking {
   /** @param {!../../video-interface.VideoInterface} video */
   register(video) {
     const {element} = video;
+    const internalElement = getInternalElementFor(element);
+
+    if (!canFullScreen(this.ampdoc_.win, internalElement)) {
+      return;
+    }
+
     const fidelity = PositionObserverFidelity.HIGH;
+
+    this.install_();
 
     this.getPositionObserver_().observe(element, fidelity,
         throttle(this.ampdoc_.win, () => this.onPositionChange_(video), 40));
@@ -829,7 +865,7 @@ export class VideoDocking {
       'transition-timing-function': transitionTiming,
     };
 
-    const internalElement = this.getInternalElementFor_(video.element);
+    const internalElement = getInternalElementFor(video.element);
     const shadowLayer = this.getShadowLayer_();
     const overlay = this.getOverlay_();
     const controls = this.getControls_().container;
@@ -1199,7 +1235,7 @@ export class VideoDocking {
    * @private
    */
   undock_(video, dismissDirX = 0, dismissDirY = 0) {
-    const internalElement = this.getInternalElementFor_(video.element);
+    const internalElement = getInternalElementFor(video.element);
     if (!internalElement.classList.contains('i-amphtml-docked')) {
       return;
     }
@@ -1220,7 +1256,7 @@ export class VideoDocking {
    * @private
    */
   resetUndocked_(video) {
-    const internalElement = this.getInternalElementFor_(video.element);
+    const internalElement = getInternalElementFor(video.element);
 
     asBaseElement(video).mutateElement(() => {
       this.hideControls_();
@@ -1264,10 +1300,5 @@ export class VideoDocking {
    */
   hideControlsOnTimeout_(time = CONTROLS_TIMEOUT) {
     this.getControlsTimeout_().trigger(time);
-  }
-
-  /** @private */
-  getInternalElementFor_(element) {
-    return element.querySelector('video, iframe');
   }
 }
