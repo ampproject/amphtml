@@ -223,6 +223,12 @@ the date picker automatically generates a hidden input field, and assigns it
 a name of `date` or `${id}-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
 
+When `amp-date-picker` loads, the input element's value is used to display the
+initially selected date.
+
+Specify the `date` property via the [`src` attribute](#src-optional) to set
+an initial date dynamically.
+
 ```html
 <amp-date-picker
     type="single"
@@ -240,6 +246,12 @@ the date picker automatically generates a hidden input field, and assigns it
 a name of `start-date` or `${id}-start-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
 
+When `amp-date-picker` loads, the input element's value is used to display the
+initially selected start date.
+
+Specify the `startDate` property via the [`src` attribute](#src-optional) to set
+an initial end date dynamically.
+
 ```html
 <amp-date-picker
     type="range"
@@ -255,6 +267,12 @@ A query selector for a date range picker's end date input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
 a name of `end-date` or `${id}-end-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
+
+When `amp-date-picker` loads, the input element's value is used to display the
+initially selected end date.
+
+Specify the `endDate` property via the [`src` attribute](#src-optional) to set
+an initial end date dynamically.
 
 ```html
 <amp-date-picker
@@ -334,12 +352,44 @@ By default, this attribute is not present.
 
 ##### src [optional]
 
-If present, `amp-date-picker` requests JSON data to populate the
-`highlighted` and `blocked` lists, as well as matching templates in the document
-to lists of dates.
+If present, `amp-date-picker` requests JSON data to populate certain attributes dynamically, as well as matching lists of dates to template `id`s for rendering days in the calendar.
 
-While waiting for the JSON response, the date picker renders the
-templates specified in the markup.
+If your calendar data is personalized for the user or updates often,
+these values should be specified in the `src` JSON response and not with their corresponding attributes on the `amp-date-picker` element.
+
+`src` property|Description
+--|--
+`blocked`|A list of dates to render as blocked in the calendar view. The user is prevented from selecting these dates.
+`date`|Specifies the initially selected date. In a date picker with `type="range"` this has no effect.
+`endDate`|Specifies the initially selected end date. In a date picker with `type="single"` this has no effect.
+`highlighted`|A list of dates to render as highlighted in the calendar view.
+`startDate`|Specifies the initially selected start date for a date range picker. In a date picker with `type="single"` this has no effect.
+`templates`|The templates property is an array of "template definition objects". These objects have an `id` property and a `dates` property.
+
+###### template definition objects
+The `dates` property is an array of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
+The `id` property specifies the `id` of a template that the date picker can use to
+render the specified dates in the calendar view.
+
+```json
+{
+  "id": "my-template-id",
+  "dates": [
+    "2018-01-02",
+    "FREQ=WEEKLY;DTSTART=20180101T000000Z;COUNT=52;WKST=SU;BYDAY=TU"
+  ]
+}
+```
+
+If no `dates` property is specified in a template definition object, the template
+with the given `id` will be used as the default template to render any dates
+that do not have an explicitly specified template.
+
+```json
+{"id": "my-default-template-id"}
+```
+
+*Example: Specifying properties via the `src` attribute*
 
 ```json
 {
@@ -353,16 +403,21 @@ templates specified in the markup.
     {
       "id": "my-second-template-id",
       "dates": [
-        "2018-01-01",
+        "2018-01-02",
         "FREQ=WEEKLY;DTSTART=20180101T000000Z;COUNT=52;WKST=SU;BYDAY=TU"
       ]
     },
     {
       "id": "my-default-template-id"
     }
-  ]
+  ],
+  "startDate": "2018-01-01",
+  "endDate": "2018-02-02",
+  "date": "2018-02-03"
 }
 ```
+
+*Example: Markup using the `src` attribute*
 
 ```html
 <amp-date-picker src="https://www.example.com/date-data.json">
@@ -533,12 +588,10 @@ rendered after the calendar view renders for the first time.
 </amp-date-picker>
 ```
 
-<!-- DO NOT SUBMIT(cvializ): add how to style this -->
-<!-- ## Styling -->
+<!-- ## TODO(cvializ): document styling -->
 
-<!--
-TODO(cvializ): uncomment with validation complete
+<!-- ## TODO(cvializ): document tooltips -->
+
 ## Validation
 
-See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-picker/validator-amp-date-picker.protoascii) in the AMP validator specification.
--->
+See [amp-date-picker rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-picker/validator-amp-date-picker.protoascii) in the AMP validator specification.

@@ -71,8 +71,8 @@
     open-after-select
   >
     <div>
-      <input type="tel" placeholder="Start date" id="start" />
-      <input type="tel" placeholder="End date" id="end" />
+      <input type="tel" placeholder="Start date" id="start">
+      <input type="tel" placeholder="End date" id="end">
       <button on="tap:drp.setDates(startDate='2018-02-01',endDate='2018-02-20')">Set date range</button>
       <button on="tap:drp.clear">Clear</button>
     </div>
@@ -92,11 +92,11 @@
       <span [text]="tacoTuesdays != null ? 'You chose ' + tacoTuesdays + ' taco tuesdays!' : ': )'">: )</span>
     </template>
   </amp-date-picker>
-  <h2>external <code>src</code></h2>
-  <input id="externalSrc" type="tel" placeholder="Pick a date"/>
+
+  <h2>external <code>src</code> static</h2>
+  <input id="externalSrc-static" type="tel" placeholder="Pick a date">
   <amp-date-picker
     type="single"
-    locale="fa"
     number-of-months="1"
     mode="static"
     src="date-picker.json"
@@ -104,12 +104,29 @@
     first-day-of-week="1"
     height="360"
     format="DD/MM/YYYY"
-    input-selector="#externalSrc"
+    input-selector="#externalSrc-static"
   >
     <template type="amp-mustache" date-template id="spooky">
       🙀
     </template>
   </amp-date-picker>
+
+  <h2>external <code>src</code> overlay</h2>
+  <amp-date-picker
+    type="single"
+    number-of-months="1"
+    mode="overlay"
+    src="date-picker.json"
+    first-day-of-week="1"
+    format="DD/MM/YYYY"
+    input-selector="#externalSrc-overlay"
+  >
+    <input id="externalSrc-overlay" type="tel" placeholder="Pick a date">
+    <template type="amp-mustache" date-template id="spooky">
+      🙀
+    </template>
+  </amp-date-picker>
+
 
   <amp-state id="sales">
     <script type="application/json">

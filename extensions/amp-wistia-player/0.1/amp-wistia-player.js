@@ -288,6 +288,13 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
+  preimplementsAutoFullscreen() {
+    // This player's iframe internally implements a feature that accomplishes
+    // essentially the same as AMP's `rotate-to-fullscreen`.
+    return true;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;

@@ -121,7 +121,7 @@ module.exports = {
     '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party}/**/*.*',
-    '!{testing,examples}/**/*.*',
+    '!examples/**/*.*',
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
     '!eslint-rules/**/*.*',
