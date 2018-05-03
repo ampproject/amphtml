@@ -248,7 +248,7 @@ An optional `policy` object can be added to the `<amp-consent>` element's JSON c
         }
         "timeout": {
           "seconds": 5,
-          "fallbackState": "rejected"
+          "fallbackAction": "reject"
         }
       }
     }
@@ -279,7 +279,7 @@ When used as a single value, `timeout` equals the timeout value in second.
 
 When used as an object. `timeout` object supports two attributes
 * `seconds`: timeout value in second
-* `fallbackState` (optional): the fallback consent state at timeout if the state is unknown. Right now the only fallback value supported is `rejected`. Note the fallback consent state at timeout will not be stored on client side.
+* `fallbackAction` (optional): the fallback action at timeout if no user action is taken and no state has been stored. The fallback actions supported are `reject` and `dismiss`. Default action is `dismiss` if not configured. Note the consent state changed due to fallback action at timeout will not be stored on client side.
 
 ```html
   "default": {
@@ -288,7 +288,7 @@ When used as an object. `timeout` object supports two attributes
     }
     "timeout": {
       "seconds": 2,
-      "fallbackState": "rejected"
+      "fallbackAction": "reject"
     }
   }
 ```
