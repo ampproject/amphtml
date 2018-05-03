@@ -61,8 +61,7 @@ export class IframeMessagingClient {
     const responseType = requestType + CONSTANTS.responseTypeSuffix;
     const messageId = this.nextMessageId_++;
     const unlisten = this.registerCallback(responseType, result => {
-      if (result[CONSTANTS.messageIdFieldName]
-          && (result[CONSTANTS.messageIdFieldName] === messageId)) {
+      if (result[CONSTANTS.messageIdFieldName] === messageId) {
         unlisten();
         callback(result[CONSTANTS.contentFieldName]);
       }

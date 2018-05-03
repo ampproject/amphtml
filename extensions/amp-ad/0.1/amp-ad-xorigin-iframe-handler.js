@@ -289,7 +289,7 @@ export class AmpAdXOriginIframeHandler {
                 result, true
             );
           });
-        }, true, false));
+        }, true /* opt_is3P */, false /* opt_includingNestedWindows */));
   }
 
   /**
