@@ -51,6 +51,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
+import {InfoDialog} from './amp-story-info-dialog';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {
@@ -206,11 +207,28 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
+    /** @private @const {!LocalizationService} */
+    this.localizationService_ = new LocalizationService(this.win);
+    this.localizationService_
+        .registerLocalizedStringBundle('default', LocalizedStringsDefault)
+        .registerLocalizedStringBundle('en', LocalizedStringsEn);
+
+    const enXaPseudoLocaleBundle =
+        createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
+    this.localizationService_
+        .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
+
+    registerServiceBuilder(
+        this.win, 'localization-v01', () => this.localizationService_);
+
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
 
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
     this.shareMenu_ = new ShareMenu(this.win, this.element);
+
+    /** @private @const {!InfoDialog} */
+    this.infoDialog_ = new InfoDialog(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
@@ -274,20 +292,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
-
-    /** @private @const {!LocalizationService} */
-    this.localizationService_ = new LocalizationService(this.win);
-    this.localizationService_
-        .registerLocalizedStringBundle('default', LocalizedStringsDefault)
-        .registerLocalizedStringBundle('en', LocalizedStringsEn);
-
-    const enXaPseudoLocaleBundle =
-        createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
-    this.localizationService_
-        .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
-
-    registerServiceBuilder(
-        this.win, 'localization-v01', () => this.localizationService_);
   }
 
 
@@ -586,6 +590,8 @@ export class AmpStory extends AMP.BaseElement {
           if (!this.storeService_.get(StateProperty.DESKTOP_STATE)) {
             this.shareMenu_.build();
           }
+
+          this.infoDialog_.build();
         });
 
     // Do not block the layout callback on the completion of these promises, as

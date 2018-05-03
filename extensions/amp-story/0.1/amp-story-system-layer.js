@@ -39,6 +39,9 @@ const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 /** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
+/** @private @const {string} */
+const INFO_CLASS = 'i-amphtml-story-info-control';
+
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
@@ -68,6 +71,13 @@ const TEMPLATE = {
           attrs: dict({
             'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': INFO_CLASS + ' i-amphtml-story-button',
           }),
         },
       ],
@@ -191,6 +201,8 @@ export class SystemLayer {
         this.onUnmuteAudioClick_();
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_();
+      } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
+        this.onInfoClick_();
       }
     });
 
@@ -312,6 +324,15 @@ export class SystemLayer {
   onShareClick_() {
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
+  }
+
+  /**
+   * Handles click events on the info button and toggles the info dialog.
+   * @private
+   */
+  onInfoClick_() {
+    const isOpen = this.storeService_.get(StateProperty.INFO_DIALOG_STATE);
+    this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, !isOpen);
   }
 
   /**
