@@ -110,6 +110,13 @@ export class Xhr {
     this.win = win;
 
     const ampdocService = Services.ampdocServiceFor(win);
+
+    // The isSingleDoc check is required because if in shadow mode, this will
+    // throw a console error because the shellShadowDoc_ is not set when
+    // fetching the amp doc. So either the test-bind-impl or test pre setup in
+    // shadow mode tests needs to be fixed or there is a bug in ampdoc impl
+    // getAmpDoc.
+    // TODO(alabiaga): This should be investigated and fixed
     /** @private {?./ampdoc-impl.AmpDoc} */
     this.ampdocSingle_ =
         ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
@@ -125,15 +132,6 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    if (!getMode().test &&
-        this.ampdocSingle_ &&
-        Math.random() < 0.01 &&
-        parseUrl(input).origin != this.win.location.origin &&
-        !Services.viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
-      dev().error('XHR', 'attempted to fetch %s before viewer was visible',
-          input);
-    }
-
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -141,27 +139,26 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
-
-    return this.maybeIntercept_(input, init).then(interceptorResponse => {
-      if (interceptorResponse) {
-        return interceptorResponse;
-      }
-
-      // After this point, both the native `fetch` and the `fetch` polyfill will
-      // expect a native `FormData` object in the `body` property, so the native
-      // `FormData` object needs to be unwrapped.
-      if (isFormDataWrapper(init.body)) {
-        init.body = init.body.getFormData();
-      }
-      // Fallback to xhr polyfill since `fetch` api does not support
-      // responseType = 'document'. We do this so we don't have to do any
-      // parsing and document construction on the UI thread which would be
-      // expensive.
-      if (init.responseType == 'document') {
-        return fetchPolyfill(input, init);
-      }
-      return (this.win.fetch || fetchPolyfill).apply(null, arguments);
-    });
+    return this.maybeIntercept_(input, init)
+        .then(interceptorResponse => {
+          if (interceptorResponse) {
+            return interceptorResponse;
+          }
+          // After this point, both the native `fetch` and the `fetch` polyfill will
+          // expect a native `FormData` object in the `body` property, so the native
+          // `FormData` object needs to be unwrapped.
+          if (isFormDataWrapper(init.body)) {
+            init.body = init.body.getFormData();
+          }
+          // Fallback to xhr polyfill since `fetch` api does not support
+          // responseType = 'document'. We do this so we don't have to do any
+          // parsing and document construction on the UI thread which would be
+          // expensive.
+          if (init.responseType == 'document') {
+            return fetchPolyfill(input, init);
+          }
+          return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+        });
   }
 
   /**
@@ -186,27 +183,26 @@ export class Xhr {
     if (!this.ampdocSingle_) {
       return Promise.resolve();
     }
-
+    const viewer = Services.viewerForDoc(this.ampdocSingle_);
+    const whenFirstVisible = viewer.whenFirstVisible();
+    if (!viewer.hasCapability('xhrInterceptor')) {
+      return whenFirstVisible;
+    }
     const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
     const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
+    const isDevMode = getMode(this.win).development;
     if (!docOptedIn) {
-      return Promise.resolve();
+      return whenFirstVisible;
     }
-
-    const viewer = Services.viewerForDoc(this.ampdocSingle_);
-    if (!viewer.hasCapability('xhrInterceptor')) {
-      return Promise.resolve();
-    }
-
-    return viewer.isTrustedViewer().then(viewerTrusted => {
-      if (!viewerTrusted && !getMode(this.win).development) {
+    return whenFirstVisible.then(() => {
+      return viewer.isTrustedViewer();
+    }).then(viewerTrusted => {
+      if (!viewerTrusted && !isDevMode) {
         return;
       }
-
       const messagePayload = dict({
         'originalRequest': this.toStructuredCloneable_(input, init),
       });
-
       return viewer.sendMessageAwaitResponse('xhr', messagePayload)
           .then(response =>
             this.fromStructuredCloneable_(response, init.responseType));
