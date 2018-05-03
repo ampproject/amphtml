@@ -234,6 +234,14 @@ export class GoogleSubscriptionsPlatform {
     //TODO: implement this
     return Promise.resolve(false);
   }
+
+  /** @override */
+  decorateUI(element, action, options) {
+    if (action === 'subscribe') {
+      element.textContent = '';
+      this.runtime_.attachButton(element, options, () => {});
+    }
+  }
 }
 
 
