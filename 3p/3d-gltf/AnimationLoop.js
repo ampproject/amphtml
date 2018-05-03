@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-function now() {
-  const performance = global.performance;
-  return performance && performance.now ? performance.now() : Date.now();
-}
-
 export default class AnimationLoop {
   constructor(task) {
-    /** @public {number} */
-    this.fpsLimit = Infinity;
-
     /** @private */
     this.task_ = task;
 
@@ -32,9 +24,6 @@ export default class AnimationLoop {
 
     /** @private {number} */
     this.currentRAF_ = 0;
-
-    /** @private {number} */
-    this.prevFrameTime_ = now();
 
     /** @public {boolean} */
     this.needsUpdate = true;
@@ -62,28 +51,15 @@ export default class AnimationLoop {
 
   /** @private */
   loop_() {
-    if (this.isNeedToRender_) {
+    if (!this.isRunning_) {
+      return;
+    }
+
+    if (this.needsUpdate) {
       this.task_();
-    }
-    if (this.isRunning_) {
-      this.currentRAF_ = requestAnimationFrame(this.loop_);
-    }
-  }
-
-  /** @private */
-  get isNeedToRender_() {
-    if (!this.needsUpdate) {
-      return false;
+      this.needsUpdate = false;
     }
 
-    const time = now();
-    const dt = time - this.prevFrameTime_;
-    const minFrameTime = 1000 / this.fpsLimit;
-    if (dt <= minFrameTime) {
-      return false;
-    }
-    this.prevFrameTime_ = time;
-    this.needsUpdate = false;
-    return true;
+    this.currentRAF_ = requestAnimationFrame(this.loop_);
   }
 }
