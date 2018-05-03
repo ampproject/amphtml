@@ -352,39 +352,21 @@ By default, this attribute is not present.
 
 ##### src [optional]
 
-If present, `amp-date-picker` requests JSON data to populate certain attributes
-dynamically, as well as matching lists of dates to template `id`s for
-rendering days in the calendar.
+If present, `amp-date-picker` requests JSON data to populate certain attributes dynamically, as well as matching lists of dates to template `id`s for rendering days in the calendar.
 
-###### blocked
+If your calendar data is personalized for the user or updates often,
+these values should be specified in the `src` JSON response and not with their corresponding attributes on the `amp-date-picker` element.
 
-A list of dates to render as blocked in the calendar view. The user is
-prevented from selecting these dates.
+`src` property|Description
+--|--
+`blocked`|A list of dates to render as blocked in the calendar view. The user is prevented from selecting these dates.
+`date`|Specifies the initially selected date. In a date picker with `type="range"` this has no effect.
+`endDate`|Specifies the initially selected end date. In a date picker with `type="single"` this has no effect.
+`highlighted`|A list of dates to render as highlighted in the calendar view.
+`startDate`|Specifies the initially selected start date for a date range picker. In a date picker with `type="single"` this has no effect.
+`templates`|The templates property is an array of "template definition objects". These objects have an `id` property and a `dates` property.
 
-###### date
-
-Specifies the initially selected date.
-In a date picker with this has no effect.
-
-###### endDate
-
-Specifies the initially selected end date.
-In a single date picker this has no effect.
-
-###### highlighted
-
-A list of dates to render as highlighted in the calendar view.
-
-###### startDate
-
-Specifies the initially selected start date for a date range picker.
-In a single date picker this has no effect.
-
-###### templates
-
-The templates property is an array of "template definition objects".
-These objects have an `id` property and a `dates` property.
-
+###### template definition objects
 The `dates` property is an array of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
 The `id` property specifies the `id` of a template that the date picker can use to
 render the specified dates in the calendar view.
@@ -434,6 +416,8 @@ that do not have an explicitly specified template.
   "date": "2018-02-03"
 }
 ```
+
+*Example: Markup using the `src` attribute*
 
 ```html
 <amp-date-picker src="https://www.example.com/date-data.json">
