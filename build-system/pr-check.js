@@ -533,6 +533,7 @@ function main() {
 
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
+    process.env['LOCAL_PR_CHECK'] = true;
     console.log(fileLogPrefix, 'Running all pr-check commands locally.');
     runAllCommandsLocally();
     stopTimer('pr-check.js', startTime);
