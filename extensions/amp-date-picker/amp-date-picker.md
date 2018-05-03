@@ -182,7 +182,7 @@ and the user can select a single date. This is the default selection type.
 </amp-date-picker>
 ```
 
-![A static single date picker](img/amp-date-picker-single-static.png)
+<img alt="A static single date picker" src="img/amp-date-picker-single-static.png" width="50%">
 
 ### `type="range"`
 
@@ -197,7 +197,7 @@ and the user can select a date range with a starting date and ending date.
 </amp-date-picker>
 ```
 
-![A static range date picker](img/amp-date-picker-range-static.png)
+<img alt="A static range date picker" src="img/amp-date-picker-range-static.png" width="50%">
 
 ## Attributes
 
@@ -457,7 +457,7 @@ This works best with `layout="fill"`.
 </amp-lightbox>
 ```
 
-![A fullscreen date picker](img/amp-date-picker-lightbox-fullscreen.png)
+<img alt="A fullscreen date picker" src="img/amp-date-picker-lightbox-fullscreen.png" width="50%">
 
 ##### open-after-select [optional]
 
