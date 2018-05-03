@@ -202,6 +202,7 @@ module.exports = {
       // Longer timeout on Travis; fail quickly at local.
       timeout: process.env.TRAVIS ? 10000 : 2000,
     },
+    travis: !!process.env.TRAVIS,
     // TODO(rsimha, #14432): Set to false after all tests are fixed.
     captureConsole: true,
   },
