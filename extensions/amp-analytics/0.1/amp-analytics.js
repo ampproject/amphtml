@@ -456,11 +456,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     const fetchConfig = {
       requireAmpResponseSourceOrigin: false,
       method: 'POST',
-      body: config
+      body: config,
+      credentials: 'include',
     };
-    if (this.element.hasAttribute('data-credentials')) {
-      fetchConfig.credentials = this.element.getAttribute('data-credentials');
-    }
     const ampdoc = this.getAmpDoc();
     return Services.urlReplacementsForDoc(this.element)
         .expandUrlAsync(remoteConfigUrl)
