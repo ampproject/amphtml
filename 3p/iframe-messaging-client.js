@@ -21,9 +21,9 @@ import {
 } from '../src/3p-frame-messaging';
 import {Observable} from '../src/observable';
 import {dev} from '../src/log';
+import {dict, map} from '../src/utils/object';
 import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
-import {dict, map} from '../src/utils/object';
 
 export class IframeMessagingClient {
 

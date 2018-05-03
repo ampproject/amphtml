@@ -284,7 +284,7 @@ export class AmpAdXOriginIframeHandler {
             result[CONSTANTS.messageIdFieldName] = messageId;
             result[CONSTANTS.contentFieldName] = content;
             postMessageToWindows(
-                /** @type {!Element} */(this.iframe), [{win: source, origin}],
+                dev().assertElement(this.iframe), [{win: source, origin}],
                 requestType + CONSTANTS.responseTypeSuffix,
                 result, true
             );
