@@ -152,7 +152,8 @@ export class Navigation {
   cleanup() {
     if (this.boundHandle_) {
       this.rootNode_.removeEventListener(EVENT_TYPE_CLICK, this.boundHandle_);
-      this.rootNode_.removeEventListener(EVENT_TYPE_RIGHT_CLICK, this.boundHandle_);
+      this.rootNode_.removeEventListener(
+          EVENT_TYPE_RIGHT_CLICK, this.boundHandle_);
     }
   }
 
