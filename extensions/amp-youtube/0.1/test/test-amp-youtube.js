@@ -89,45 +89,8 @@ describes.realWin('amp-youtube', {
       });
     });
 
-    it('monitors the YouTube player state', () => {
-      return getYt({'data-videoid': datasource}).then(yt => {
-        const iframe = yt.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-
-        expect(yt.implementation_.playerState_).to.equal(-1);
-
-        sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
-
-        expect(yt.implementation_.playerState_).to.equal(1);
-
-        // YouTube Player sometimes sends parsed-JSON data. Test that we're
-        // handling it correctly.
-        yt.implementation_.handleYoutubeMessages_({
-          origin: 'https://www.youtube.com',
-          source: iframe.contentWindow,
-          data: {
-            event: 'infoDelivery',
-            info: {playerState: 2},
-          },
-        });
-
-        expect(yt.implementation_.playerState_).to.equal(2);
-      });
-
-    });
-
-    it('should not pause when video not playing', () => {
-      return getYt({'data-videoid': datasource}).then(yt => {
-        sandbox.spy(yt.implementation_, 'pause');
-        yt.implementation_.pauseCallback();
-        expect(yt.implementation_.pause.called).to.be.false;
-      });
-
-    });
-
     it('should pause if the video is playing', () => {
       return getYt({'data-videoid': datasource}).then(yt => {
-        yt.implementation_.playerState_ = 1;
         sandbox.spy(yt.implementation_, 'pause');
         yt.implementation_.pauseCallback();
         expect(yt.implementation_.pause.called).to.be.true;
@@ -366,7 +329,6 @@ describes.realWin('amp-youtube', {
       expect(yt.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
       expect(placeholder.style.display).to.be.equal('');
-      expect(obj.playerState_).to.be.equal(2);
     });
   });
 
