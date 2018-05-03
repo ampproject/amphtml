@@ -122,8 +122,8 @@ function performNodeVersionCheck(latestLtsVersion) {
 
 // If yarn is being run, perform a version check and proceed with the install.
 function performYarnVersionCheck() {
-  const yarnVersion = getStdout('yarn --version').trim();
-  const yarnInfo = getStdout('yarn info --json yarn').trim();
+  const yarnVersion = getStdout('npx yarn --version').trim();
+  const yarnInfo = getStdout('npx yarn info --json yarn').trim();
   const yarnInfoJson = JSON.parse(yarnInfo.split('\n')[0]); // First line
   const stableVersion = getYarnStableVersion(yarnInfoJson);
   if (stableVersion === '') {
