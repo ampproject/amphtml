@@ -2063,19 +2063,19 @@ describes.realWin('amp-analytics', {
         'requests': {'foo': 'https://example.com/rewritten'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       });
-      let inlineConfig = {
+      const inlineConfig = {
         'requests': {'foo': 'https://example.com/inlined'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       };
 
       const analytics = getAnalyticsTag(inlineConfig,
-          {'type': 'rewrite', 'config': 'config-rv2',});
+          {'type': 'rewrite', 'config': 'config-rv2'});
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {
             'url': 'https://rewriter.com',
-          }
-        }
+          },
+        },
       };
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
@@ -2089,7 +2089,7 @@ describes.realWin('amp-analytics', {
         'requests': {'foo': 'https://example.com/rewritten'},
         'triggers': [{'on': 'visible', 'request': ['foo', 'bar']}],
       });
-      let inlineConfig = {
+      const inlineConfig = {
         'requests': {
           'foo': 'https://example.com/inlinedFoo',
           'baz': 'https://example.com/inlined',
@@ -2098,33 +2098,32 @@ describes.realWin('amp-analytics', {
       };
 
       const analytics = getAnalyticsTag(inlineConfig,
-          {'type': 'rewrite', 'config': 'config-rv2',});
+          {'type': 'rewrite', 'config': 'config-rv2'});
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {
             'url': configRewriterUrl,
             'defaults': {
               'requests': {'bar': 'https://example.com/defaults'},
-            }
+            },
           },
           'requests': {
             'foo': 'https://example.com/vendor',
-            'quz': 'https://example.com/vendor'
+            'quz': 'https://example.com/vendor',
           },
-        }
+        },
       };
       return waitForSendRequest(analytics).then(() => {
         jsonRequestConfigs[configRewriterUrl].should.not.be.undefined;
-        jsonRequestConfigs[configRewriterUrl].body.should.deep.equal(
-            {
-              'requests': {
-                'foo': 'https://example.com/remote',
-                'baz': 'https://example.com/inlined',
-              },
-              'triggers':
-                  [{'on': 'visible', 'request': 'foo'}]
-            }
-        );
+        jsonRequestConfigs[configRewriterUrl].body.should.deep.equal({
+          'requests': {
+            'foo': 'https://example.com/remote',
+            'baz': 'https://example.com/inlined',
+          },
+          'triggers': [
+            {'on': 'visible', 'request': 'foo'},
+          ],
+        });
 
         expect(sendRequestSpy.calledTwice).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
@@ -2139,21 +2138,21 @@ describes.realWin('amp-analytics', {
         'requests': {'foo': 'https://example.com/rewritten'},
         'triggers': [{'on': 'visible', 'request': ['foo', 'bar']}],
       });
-      let inlineConfig = {
+      const inlineConfig = {
         'requests': {'foo': 'https://example.com/inlined'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       };
 
       const analytics = getAnalyticsTag(inlineConfig,
-          {'type': 'rewrite', 'config': 'config-rv2',});
+          {'type': 'rewrite', 'config': 'config-rv2'});
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {
             'defaults': {
               'requests': {'bar': 'https://example.com/defaults'},
-            }
-          }
-        }
+            },
+          },
+        },
       };
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
@@ -2167,7 +2166,7 @@ describes.realWin('amp-analytics', {
         'requests': {'foo': 'https://example.com/rewritten'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       });
-      let inlineConfig = {
+      const inlineConfig = {
         'configRewriter': {
           'url': 'https://rewriter.com',
         },

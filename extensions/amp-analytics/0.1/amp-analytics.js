@@ -536,11 +536,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.mergeObjects_(expandConfigRequest(defaultConfig), config);
 
     if (this.rewrittenConfig_) {
-      let configRewriterDefaults = this.getConfigRewriter_()['defaults'] || {};
+      const configRewriterDefaults = this.getConfigRewriter_()['defaults']
+          || {};
       this.mergeObjects_(expandConfigRequest(configRewriterDefaults), config);
       this.mergeObjects_(expandConfigRequest(this.rewrittenConfig_), config);
     } else {
-      let inlineConfig = expandConfigRequest(this.getInlineConfigNoInline());
+      const inlineConfig = expandConfigRequest(this.getInlineConfigNoInline());
       this.validateTransport_(inlineConfig);
 
       this.mergeObjects_(expandConfigRequest(this.getTypeConfig_()), config,
