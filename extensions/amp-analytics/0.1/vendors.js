@@ -862,6 +862,90 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'optout': '_gaUserPrefs.ioo',
   },
 
+  'gtag': {
+    'configRewriter': {
+      'url': 'http://localhost:9980/gtag/amp',
+      "defaults": {
+        'vars': {
+          'eventValue': '0',
+          'documentLocation': 'SOURCE_URL',
+          'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
+          'dataSource': 'AMP',
+          'anonymizeIP': 'aip',
+          'errorParam': '${errorName}-${errorMessage}',
+        },
+        'requests': {
+          'uaHost': 'https://www.google-analytics.com',
+          'uaBasePrefix': ('v=1&' +
+              '_v=a1&' +
+              'ds=${dataSource}&' +
+              '${anonymizeIP}&' +
+              '_s=${requestCount}&' +
+              'dt=${title}&' +
+              'sr=${screenWidth}x${screenHeight}&' +
+              '_utmht=${timestamp}&' +
+              'cid=${clientId}&' +
+              'tid=${trackingId}&' +
+              'dl=${documentLocation}&' +
+              'dr=${externalReferrer}&' +
+              'sd=${screenColorDepth}&' +
+              'ul=${browserLanguage}&' +
+              'de=${documentCharset}'),
+          'uaBaseSuffix': ('&a=${pageViewId}&' +
+              'z=${random}'),
+          'uaPageview': ('${uaHost}/r/collect?${uaBasePrefix}&' +
+              't=pageview&' +
+              'jid=${random}&' +
+              '_r=1' +
+              '${uaBaseSuffix}'),
+          'uaEvent': ('${uaHost}/collect?${uaBasePrefix}&' +
+              'jid=&' +
+              '${uaBaseSuffix}'),
+          'uaTiming': ('${uaHost}/collect?${uaBasePrefix}&' +
+              'jid=&' +
+              'plt=${pageLoadTime}&' +
+              'dns=${domainLookupTime}&' +
+              'tcp=${tcpConnectTime}&' +
+              'rrt=${redirectTime}&' +
+              'srt=${serverResponseTime}&' +
+              'pdt=${pageDownloadTime}&' +
+              'clt=${contentLoadTime}&' +
+              'dit=${domInteractiveTime}' +
+              '${uaBaseSuffix}'),
+          'uaError': ('${uaHost}/collect?${uaBasePrefix}&' +
+              'exd=${errorParam}' +
+              '${uaBaseSuffix}'),
+          'awConversionPrefix': 'https://www.googleadservices.com/pagead/conversion/',
+          'awRemarketingPrefix':
+              'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
+          'awCommonParams': ('${conversionId}/?' +
+              'cv=amp2&' + // Increment when making changes.
+              'label=${conversionLabel}&' +
+              'random=${random}&' +
+              'url=${sourceUrl}&' +
+              'ref=${documentReferrer}&' +
+              'fst=${pageViewId}&' +
+              'num=${counter(googleadwords)}&' +
+              'fmt=3&' +
+              'async=1&' +
+              'u_h=${screenHeight}&u_w=${screenWidth}&' +
+              'u_ah=${availableScreenHeight}&u_aw=${availableScreenWidth}&' +
+              'u_cd=${screenColorDepth}&' +
+              'u_tz=${timezone}&' +
+              'tiba=${title}&' +
+              'guid=ON&script=0'),
+          'awConversion': '${awConversionPrefix}${awCommonParams}',
+          'awRemarketing': '${awRemarketingPrefix}${awCommonParams}',
+        },
+        'transport': {
+          'beacon': false,
+          'xhrpost': false,
+          'image': true,
+        },
+      }
+    }
+  },
+
   // USE WITH CAUTION (unless told by Google Analytics representatives)
   // googleanalytics-alpha configuration is not planned to be supported
   // long-term. Avoid use of this value for amp-analytics config attribute

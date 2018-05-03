@@ -60,13 +60,16 @@ describes.realWin('amp-analytics', {
   let ampdoc;
   let ins;
   let viewer;
+  let jsonRequestConfigs = {};
 
   const jsonMockResponses = {
     'invalidConfig': '{"transport": {"iframe": "fake.com"}}',
     'config1': '{"vars": {"title": "remote"}}',
     'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
     'config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
+    'https://rewriter.com': '{"vars": {"title": "rewritten"}}',
   };
+  const configRewriterUrl = 'https://rewriter.com';
 
   const trivialConfig = {
     'requests': {'foo': 'https://example.com/bar'},
@@ -80,8 +83,10 @@ describes.realWin('amp-analytics', {
     configWithCredentials = false;
     doc.title = 'Test Title';
     resetServiceForTesting(win, 'xhr');
+    jsonRequestConfigs = {};
     registerServiceBuilder(win, 'xhr', function() {
       return {fetchJson: (url, init) => {
+        jsonRequestConfigs[url] = init;
         expect(init.requireAmpResponseSourceOrigin).to.be.false;
         if (configWithCredentials) {
           expect(init.credentials).to.equal('include');
@@ -2036,6 +2041,146 @@ describes.realWin('amp-analytics', {
       config['triggers'][0]['on'] = 'visible';
       runResourceTimingTest(
           [entry], config, 'https://ping.example.com/endpoint?rt=');
+    });
+  });
+
+  describe('should re-write configuration if configured', () => {
+    let errorSpy;
+
+    beforeEach(() => {
+      errorSpy = sandbox.spy();
+      sandbox.stub(log, 'user').callsFake(() => {
+        return {
+          error: errorSpy,
+          assert: () => {
+          },
+        };
+      });
+    });
+
+    it('should fully rewrite a configuration', () => {
+      jsonMockResponses['https://rewriter.com'] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      });
+      let inlineConfig = {
+        'requests': {'foo': 'https://example.com/inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig,
+          {'type': 'rewrite', 'config': 'config-rv2',});
+      analytics.predefinedConfig_ = {
+        'rewrite': {
+          'configRewriter': {
+            'url': 'https://rewriter.com',
+          }
+        }
+      };
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/rewritten');
+      });
+    });
+
+    it('should merge rewritten configuration and use defaults', () => {
+      jsonMockResponses[configRewriterUrl] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': ['foo', 'bar']}],
+      });
+      let inlineConfig = {
+        'requests': {
+          'foo': 'https://example.com/inlinedFoo',
+          'baz': 'https://example.com/inlined',
+        },
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig,
+          {'type': 'rewrite', 'config': 'config-rv2',});
+      analytics.predefinedConfig_ = {
+        'rewrite': {
+          'configRewriter': {
+            'url': configRewriterUrl,
+            'defaults': {
+              'requests': {'bar': 'https://example.com/defaults'},
+            }
+          },
+          'requests': {
+            'foo': 'https://example.com/vendor',
+            'quz': 'https://example.com/vendor'
+          },
+        }
+      };
+      return waitForSendRequest(analytics).then(() => {
+        jsonRequestConfigs[configRewriterUrl].should.not.be.undefined;
+        jsonRequestConfigs[configRewriterUrl].body.should.deep.equal(
+            {
+              'requests': {
+                'foo': 'https://example.com/remote',
+                'baz': 'https://example.com/inlined',
+              },
+              'triggers':
+                  [{'on': 'visible', 'request': 'foo'}]
+            }
+        );
+
+        expect(sendRequestSpy.calledTwice).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/rewritten');
+        expect(sendRequestSpy.args[1][0]).to.equal(
+            'https://example.com/defaults');
+      });
+    });
+
+    it('should ignore config rewriter if no url provided', () => {
+      jsonMockResponses['https://rewriter.com'] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': ['foo', 'bar']}],
+      });
+      let inlineConfig = {
+        'requests': {'foo': 'https://example.com/inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig,
+          {'type': 'rewrite', 'config': 'config-rv2',});
+      analytics.predefinedConfig_ = {
+        'rewrite': {
+          'configRewriter': {
+            'defaults': {
+              'requests': {'bar': 'https://example.com/defaults'},
+            }
+          }
+        }
+      };
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/remote');
+      });
+    });
+
+    it('should only allow configRewriter in vendors configuration', () => {
+      jsonMockResponses['https://rewriter.com'] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      });
+      let inlineConfig = {
+        'configRewriter': {
+          'url': 'https://rewriter.com',
+        },
+        'requests': {'foo': 'https://example.com/inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/inlined');
+      });
     });
   });
 });

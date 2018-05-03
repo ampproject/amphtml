@@ -103,6 +103,11 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.remoteConfig_ = dict();
 
+    /**
+     * @private {?JsonObject}
+     */
+    this.rewrittenConfig_ = null;
+
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
 
@@ -222,7 +227,8 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
             })
-            .then(this.onFetchRemoteConfigSuccess_.bind(this));
+            .then(this.rewriteConfig_.bind(this))
+            .then(this.onConfigRewriteSuccess_.bind(this));
     return this.iniPromise_;
   }
 
@@ -231,7 +237,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!Promise|undefined}
    * @private
    */
-  onFetchRemoteConfigSuccess_() {
+  onConfigRewriteSuccess_() {
     this.config_ = this.mergeConfigs_();
 
     if (this.hasOptedOut_()) {
@@ -425,6 +431,53 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+   * Returns a promise that resolves when configuration is re-written if
+   * configRewriter is configured by a vendor.
+   *
+   * @private
+   * @return {!Promise<undefined>}
+   */
+  rewriteConfig_() {
+    const remoteConfigUrl = this.getConfigRewriter_()['url'];
+
+    if (!remoteConfigUrl || this.isSandbox_) {
+      // use default configuration merge.
+      return Promise.resolve();
+    }
+
+    assertHttpsUrl(remoteConfigUrl, this.element);
+    const TAG = this.getName_();
+    dev().fine(TAG, 'Rewriting config', remoteConfigUrl);
+
+    const config = {};
+    this.mergeObjects_(this.getInlineConfigNoInline(), config);
+    this.mergeObjects_(this.remoteConfig_, config);
+
+    const fetchConfig = {
+      requireAmpResponseSourceOrigin: false,
+      method: 'POST',
+      body: config
+    };
+    if (this.element.hasAttribute('data-credentials')) {
+      fetchConfig.credentials = this.element.getAttribute('data-credentials');
+    }
+    const ampdoc = this.getAmpDoc();
+    return Services.urlReplacementsForDoc(this.element)
+        .expandUrlAsync(remoteConfigUrl)
+        .then(expandedUrl => {
+          return Services.xhrFor(ampdoc.win).fetchJson(
+              expandedUrl, fetchConfig);
+        })
+        .then(res => res.json())
+        .then(jsonValue => {
+          this.rewrittenConfig_ = jsonValue;
+          dev().fine(TAG, 'Configuration re-written', remoteConfigUrl);
+        }, err => {
+          this.user().error(TAG,
+              'Error rewriting configuration: ', remoteConfigUrl, err);
+        });
+  }
+  /**
    * Returns a promise that resolves when remote config is ready (or
    * immediately if no remote config is specified.)
    * @private
@@ -475,16 +528,44 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   mergeConfigs_() {
-    const inlineConfig = expandConfigRequest(this.getInlineConfigNoInline());
     // Initialize config with analytics related vars.
     const config = dict({
       'vars': {
         'requestCount': 0,
       },
     });
-    const defaultConfig =
-        expandConfigRequest(this.predefinedConfig_['default'] || {});
+    const defaultConfig = this.predefinedConfig_['default'] || {};
+    this.mergeObjects_(expandConfigRequest(defaultConfig), config);
 
+    if (this.rewrittenConfig_) {
+      let configRewriterDefaults = this.getConfigRewriter_()['defaults'] || {};
+      this.mergeObjects_(expandConfigRequest(configRewriterDefaults), config);
+      this.mergeObjects_(expandConfigRequest(this.rewrittenConfig_), config);
+    } else {
+      let inlineConfig = expandConfigRequest(this.getInlineConfigNoInline());
+      this.validateTransport_(inlineConfig);
+
+      this.mergeObjects_(expandConfigRequest(this.getTypeConfig_()), config,
+          /* predefined */ true);
+      this.mergeObjects_(inlineConfig, config);
+      this.mergeObjects_(expandConfigRequest(this.remoteConfig_), config);
+    }
+    return config;
+  }
+
+  /**
+   * Reads configRewriter from a vendor config.
+   * @return {!JsonObject}
+   */
+  getConfigRewriter_() {
+    return this.getTypeConfig_()['configRewriter'] || {};
+  }
+
+  /**
+   * Reads a vendor configuration.
+   * @return {!JsonObject}
+   */
+  getTypeConfig_() {
     const type = this.element.getAttribute('type');
     if (type == 'googleanalytics-alpha') {
       const TAG = this.getName_();
@@ -493,7 +574,15 @@ export class AmpAnalytics extends AMP.BaseElement {
           'amp-analytics config attribute unless you plan to migrate before ' +
           'deprecation');
     }
-    const typeConfig = expandConfigRequest(this.predefinedConfig_[type] || {});
+    return this.predefinedConfig_[type] || {};
+  }
+
+  /**
+   * Validates transport configuration.
+   * @param {!JsonObject} inlineConfig
+   */
+  validateTransport_(inlineConfig) {
+    const type = this.element.getAttribute('type');
     if (this.predefinedConfig_[type]) {
       // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
@@ -518,14 +607,6 @@ export class AmpAnalytics extends AMP.BaseElement {
           'specify transport iframe');
       this.remoteConfig_['transport']['iframe'] = undefined;
     }
-
-    this.remoteConfig_ = expandConfigRequest(this.remoteConfig_);
-
-    this.mergeObjects_(defaultConfig, config);
-    this.mergeObjects_(typeConfig, config, /* predefined */ true);
-    this.mergeObjects_(inlineConfig, config);
-    this.mergeObjects_(this.remoteConfig_, config);
-    return config;
   }
 
   /**
