@@ -109,7 +109,6 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private */
     const ampdocService = Services.ampdocServiceFor(win);
 
     // The isSingleDoc check is required because if in shadow mode, this will
@@ -185,27 +184,29 @@ export class Xhr {
       return Promise.resolve();
     }
     const viewer = Services.viewerForDoc(this.ampdocSingle_);
-    return viewer.whenFirstVisible()
-        .then(() => {
-          const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
-          const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
-          if (!docOptedIn || !viewer.hasCapability('xhrInterceptor')) {
-            return Promise.resolve();
-          }
-          return viewer.isTrustedViewer();
-        }).then(viewerTrusted => {
-          if (!viewerTrusted && !getMode(this.win).development) {
-            return;
-          }
-
-          const messagePayload = dict({
-            'originalRequest': this.toStructuredCloneable_(input, init),
-          });
-
-          return viewer.sendMessageAwaitResponse('xhr', messagePayload)
-              .then(response =>
-                this.fromStructuredCloneable_(response, init.responseType));
-        });
+    const whenFirstVisible = viewer.whenFirstVisible();
+    if (!viewer.hasCapability('xhrInterceptor')) {
+      return whenFirstVisible;
+    }
+    const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
+    const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
+    const isDevMode = getMode(this.win).development;
+    if (!docOptedIn) {
+      return Promise.resolve();
+    }
+    return whenFirstVisible.then(() => {
+      return viewer.isTrustedViewer();
+    }).then(viewerTrusted => {
+      if (!viewerTrusted && !isDevMode) {
+        return;
+      }
+      const messagePayload = dict({
+        'originalRequest': this.toStructuredCloneable_(input, init),
+      });
+      return viewer.sendMessageAwaitResponse('xhr', messagePayload)
+          .then(response =>
+            this.fromStructuredCloneable_(response, init.responseType));
+    });
   }
 
   /**
