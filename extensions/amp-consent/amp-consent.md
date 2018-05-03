@@ -298,5 +298,15 @@ When used as an object. `timeout` object supports two attributes
 
 
 
+## Integrations and availablity 
+The table below lists the vendors and components that are integrated with amp-consent
+
+| Integration   | Prod Availability| Documentation|Ready For Testing
+| ------------- |------------------| -----| -----|
+| DoubleClick & AdSense Integration      | 05/10/18 | [Link](https://support.google.com/dfp_premium/answer/7678538) |Yes|
+| AMP IMA Video Integration   |  05/15/18  |   ||
+| AMP Geo |  05/10/18      |  [Link](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/) |Yes|
+| AMP Stories |   05/15/18     |    ||
+
 
 
