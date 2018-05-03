@@ -15,8 +15,11 @@
  */
 import '../../../../third_party/react-dates/bundle';
 import {AmpDatePicker} from '../amp-date-picker';
+import {createElementWithAttributes} from '../../../../src/dom.js';
 import {requireExternal} from '../../../../src/module';
 import {toggleExperiment} from '../../../../src/experiments';
+
+// TODO(cvializ): use fake time instead of real time
 
 describes.realWin('amp-date-picker', {
   amp: {
@@ -46,11 +49,9 @@ describes.realWin('amp-date-picker', {
   };
 
   function createDatePicker(opt_attrs, opt_parent = document.body) {
-    const element = document.createElement('amp-date-picker');
     const attrs = Object.assign({}, DEFAULT_ATTRS, opt_attrs);
-    for (const key in attrs) {
-      element.setAttribute(key, attrs[key]);
-    }
+    const element = createElementWithAttributes(
+        document, 'amp-date-picker', attrs);
 
     opt_parent.appendChild(element);
     const picker = new AmpDatePicker(element);
@@ -58,6 +59,9 @@ describes.realWin('amp-date-picker', {
     return {
       element,
       picker,
+      buildCallback() {
+        return Promise.resolve(picker.buildCallback());
+      },
       layoutCallback() {
         return Promise.resolve(picker.buildCallback())
             .then(() => picker.layoutCallback());
@@ -109,6 +113,79 @@ describes.realWin('amp-date-picker', {
     return layoutCallback().then(() => {
       const container = picker.container_;
       expect(container.children.length).to.be.greaterThan(0);
+    });
+  });
+
+  describe('initial dates', () => {
+    it('should use the value of a single input at load-time', () => {
+      const input = document.createElement('input');
+      input.id = 'date';
+      input.value = '2018-01-01 08Z';
+      document.body.appendChild(input);
+
+      const {picker, buildCallback} = createDatePicker({
+        'layout': 'fixed-height',
+        'height': '360',
+        'input-selector': '#date',
+      });
+
+      return buildCallback().then(() => {
+        expect(picker.state_.date.isSame('2018-01-01')).to.be.true;
+      });
+    });
+
+    it('should use the value of a range input at load-time', () => {
+      const startInput = document.createElement('input');
+      startInput.id = 'startdate';
+      startInput.value = '2018-01-01 08Z';
+      document.body.appendChild(startInput);
+
+      const endInput = document.createElement('input');
+      endInput.id = 'enddate';
+      endInput.value = '2018-01-02 08Z';
+      document.body.appendChild(endInput);
+
+      const {picker, buildCallback} = createDatePicker({
+        'layout': 'fixed-height',
+        'height': '360',
+        'type': 'range',
+        'start-input-selector': '#startdate',
+        'end-input-selector': '#enddate',
+      });
+
+      return buildCallback().then(() => {
+        expect(picker.state_.startDate.isSame('2018-01-01')).to.be.true;
+        expect(picker.state_.endDate.isSame('2018-01-02')).to.be.true;
+      });
+    });
+
+    it('should use the "date" value from src data', () => {
+      const {picker, layoutCallback} = createDatePicker({
+        'layout': 'fixed-height',
+        'height': '360',
+      });
+      sandbox.stub(picker, 'fetchSrc_').resolves({'date': '2018-01-01 08Z'});
+
+      return layoutCallback().then(() => {
+        expect(picker.state_.date.isSame('2018-01-01')).to.be.true;
+      });
+    });
+
+    it('should use the "startDate" and "endDate" values from src data', () => {
+      const {picker, layoutCallback} = createDatePicker({
+        'layout': 'fixed-height',
+        'height': '360',
+        'type': 'range',
+      });
+      sandbox.stub(picker, 'fetchSrc_').resolves({
+        'startDate': '2018-01-01 08Z',
+        'endDate': '2018-01-02 08Z',
+      });
+
+      return layoutCallback().then(() => {
+        expect(picker.state_.startDate.isSame('2018-01-01')).to.be.true;
+        expect(picker.state_.endDate.isSame('2018-01-02')).to.be.true;
+      });
     });
   });
 
