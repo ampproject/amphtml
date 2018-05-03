@@ -202,16 +202,29 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // of display none (e.g. user resizes viewport and media selector makes
   // visible).
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
-      r => (Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!r.element.querySelector(`amp-ad[type=${type}]`)) ||
-        (r.element.tagName == 'AMP-AD' &&
-          r.element.getAttribute('type') == type))
+      r => {
+        const isAmpAdType = r.element.tagName == 'AMP-AD' &&
+          r.element.getAttribute('type') == type;
+        if (isAmpAdType) {
+          return true;
+        }
+        const isAmpAdContainerElement =
+          Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
+          !!r.element.querySelector(`amp-ad[type=${type}]`);
+        return isAmpAdContainerElement;
+      })
       // Need to wait on any contained element resolution followed by build
       // of child ad.
       .then(resources => Promise.all(resources.map(
-          resource => resource.element.tagName == 'AMP-AD' ? resource.element :
-            whenUpgradedToCustomElement(dev().assertElement(
-                resource.element.querySelector(`amp-ad[type=${type}]`))))))
+          resource => {
+            if (resource.element.tagName == 'AMP-AD') {
+              return resource.element;
+            }
+            // Must be container element so need to wait for child amp-ad to
+            // be upgraded.
+            return whenUpgradedToCustomElement(dev().assertElement(
+                resource.element.querySelector(`amp-ad[type=${type}]`)));
+          })))
       // Group by networkId.
       .then(elements => elements.reduce((result, element) => {
         const groupId = groupFn(element);
