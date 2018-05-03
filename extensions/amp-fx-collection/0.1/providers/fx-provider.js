@@ -63,7 +63,7 @@ export class FxProvider {
   installOn(element) {
     const fxElement = new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
-        this.fxType_);
+        this.ampdoc_, this.fxType_);
     setStyles(element, installStyles(this.ampdoc_, element, this.fxType_,
         fxElement.getFlyInDistance()));
   }
@@ -79,7 +79,7 @@ export class FxElement {
    * @param {!../../../../src/service/viewport/viewport-impl.Viewport} viewport
    * @param {!../../../../src/service/resources-impl.Resources} resources
    */
-  constructor(element, positionObserver, viewport, resources, fxType) {
+  constructor(element, positionObserver, viewport, resources, ampdoc, fxType) {
 
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = positionObserver;
@@ -105,6 +105,9 @@ export class FxElement {
     /** @private @string */
     this.fxType_ = fxType;
 
+    /** @private @const  {!../../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     Presets[this.fxType_].userAsserts(element);
 
     /** @private {number} */
@@ -127,12 +130,12 @@ export class FxElement {
     /** @private {string} */
     this.duration_ = element.hasAttribute('data-duration') ?
       element.getAttribute('data-duration') :
-      defaultDurationValues(this.fxType_);
+      defaultDurationValues(this.ampdoc_, this.fxType_);
 
     /** @private {number} */
     this.flyInDistance_ = element.hasAttribute('data-fly-in-distance') ?
       parseFloat(element.getAttribute('data-fly-in-distance')) :
-      flyInDistanceValues(this.fxType_);
+      flyInDistanceValues(this.ampdoc_, this.fxType_);
 
     /** @private {boolean} */
     this.hasRepeat_ = element.hasAttribute('data-repeat');

@@ -94,33 +94,44 @@ export function installStyles(ampdoc, element, fxType, flyInDistance) {
   }
 }
 
-export function defaultDurationValues(fxType) {
+export function defaultDurationValues(ampdoc, fxType) {
   switch (fxType) {
     case 'fade-in':
       return '1000ms';
     case 'fly-in-bottom':
-      return '400ms';
     case 'fly-in-top':
-      return '400ms';
     case 'fly-in-left':
-      return '400ms';
     case 'fly-in-right':
-      return '400ms';
+      const screenWidth = ampdoc.win.screen.width;
+      if (screenWidth <= 480) {
+        return '400ms';
+      } else if (screenWidth > 480 && screenWidth < 1000) {
+        return '500ms';
+      } else {
+        return '600ms';
+      }
     default:
       return '1ms';
   }
 }
 
-export function flyInDistanceValues(fxType) {
+export function flyInDistanceValues(ampdoc, fxType) {
+  const screenWidth = ampdoc.win.screen.width;
   switch (fxType) {
     case 'fly-in-bottom':
-      return 10;
     case 'fly-in-top':
-      return 10;
+      if (screenWidth < 1000) {
+        return 25;
+      } else {
+        return 33;
+      }
     case 'fly-in-left':
-      return 5;
     case 'fly-in-right':
-      return 5;
+      if (screenWidth < 1000) {
+        return 25;
+      } else {
+        return 30;
+      }
     default:
       return 1;
   }
