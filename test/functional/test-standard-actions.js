@@ -245,7 +245,7 @@ describes.sandboxed('StandardActions', {}, () => {
     });
 
 
-    it.only('should implement optoutOfCid', function*() {
+    it('should implement optoutOfCid', function*() {
       const cid = cidServiceForDocForTesting(ampdoc);
       const optoutStub = sandbox.stub(cid, 'optOut');
       const invocation = {method: 'optoutOfCid', satisfiesTrust: () => true};
