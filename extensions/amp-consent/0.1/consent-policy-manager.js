@@ -65,7 +65,7 @@ export class ConsentPolicyManager {
    *   }
    *   "timeout": {
    *     "seconds": 1,
-   *     "fallbackState": 'rejected'
+   *     "fallbackAction": 'reject'
    *   }
    * }
    *
@@ -246,15 +246,16 @@ export class ConsentPolicyInstance {
         /**
          * "timeout": {
          *   "seconds" : 1,
-         *   "fallbackState": "rejected"
+         *   "fallbackAction": "reject"
          * }
          */
-        if (timeoutConfig['fallbackState'] &&
-            timeoutConfig['fallbackState'] == 'rejected') {
+        if (timeoutConfig['fallbackAction'] &&
+            timeoutConfig['fallbackAction'] == 'reject') {
           fallbackState = CONSENT_ITEM_STATE.REJECTED;
-        } else {
+        } else if (timeoutConfig['fallbackAction'] &&
+            timeoutConfig['fallbackAction'] != 'dismiss') {
           user().error(TAG,
-              `unsupported fallbackState ${timeoutConfig['fallbackState']}`);
+              `unsupported fallbackAction ${timeoutConfig['fallbackAction']}`);
         }
         timeoutSecond = timeoutConfig['seconds'];
       } else {
