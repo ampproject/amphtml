@@ -212,6 +212,13 @@ describe('all-traffic-experiments-tests', () => {
       expect(element.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('99,3');
     });
 
+    it('should do nothing to already valid single experiment', () => {
+      const element = document.createElement('div');
+      element.setAttribute(EXPERIMENT_ATTRIBUTE, '99');
+      addExperimentIdToElement(undefined, element);
+      expect(element.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('99');
+    });
+
     it('should append experiment to already valid multiple experiments', () => {
       const element = document.createElement('div');
       element.setAttribute(EXPERIMENT_ATTRIBUTE, '99,77,11,0122345');
