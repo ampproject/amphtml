@@ -37,6 +37,10 @@
   .spacer {
     margin-bottom: 360px;
   }
+
+  .amp-date-picker-resize-bug .DayPicker_transitionContainer {
+    /* min-height: 372px; */
+  }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
@@ -62,11 +66,10 @@
     locale="en"
     format="DD/MM/YYYY"
     number-of-months="1"
-    day-size="50"
+    day-size="42"
     start-input-selector="#start"
     end-input-selector="#end"
     mode="overlay"
-    layout="container"
     open-after-clear
     open-after-select
   >
@@ -197,6 +200,10 @@
 >
   <input type="date" id="start-date">
   <input type="date" id="end-date">
+</amp-date-picker>
+
+<p>Day size expand bug</p>
+<amp-date-picker id="expand-bug" layout="fixed-height" height="500" day-size="42">
 </amp-date-picker>
 
 <h2>Lightbox date picker</h2>
