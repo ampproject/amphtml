@@ -180,13 +180,8 @@ export class AmpDatePicker extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    this.timer_ = Services.timerFor(this.win);
-
     /** @private @const */
     this.document_ = this.element.ownerDocument;
-
-    /** @private @const */
-    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const */
     this.moment_ = requireExternal('moment');
@@ -199,9 +194,6 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private @const */
     this.reactRender_ = requireExternal('react-dom').render;
-
-    /** @private @const */
-    this.ReactDates_ = requireExternal('react-dates');
 
     /** @private @const */
     this.ReactDatesConstants_ = requireExternal('react-dates/constants');
@@ -348,8 +340,8 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private @const */
     this.props_ = this.getProps_();
 
-    /** @private @const */
-    this.state_ = this.getInitialState_();
+    /** @private {?Object} */
+    this.state_ = null;
   }
 
   /** @override */
@@ -362,12 +354,18 @@ export class AmpDatePicker extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.setupTemplates_();
+    this.setupSrcAttributes_();
     this.setupListeners_();
+
+    if (this.element.contains(this.document_.activeElement)) {
+      this.maybeTransitionWithFocusChange_(this.document_.activeElement);
+    }
+
     // Make sure it's rendered and measured properly. Then if possible, attempt
     // to adjust expand the height to fit the element for static pickers.
     return this.render(this.state_).then(() => {
       if (this.mode_ == DatePickerMode.STATIC) {
-        this.vsync_.measure(() => {
+        this.measureElement(() => {
           const scrollHeight = this.container_./*OK*/scrollHeight;
           const height = this.element./*OK*/offsetHeight;
           if (scrollHeight > height) {
@@ -452,17 +450,6 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.isRTL_ = isRTL(this.win.document);
 
-    this.vsync_.mutate(() => {
-      // NOTE(cvializ): There is no standard date format for just the first letter
-      // of the week-day. So we hack it in with this CSS class and don't apply the
-      // CSS class if there is a week-day-format specified.
-      this.element.classList.toggle(
-          DEFAULT_WEEK_DAY_FORMAT_CSS,
-          this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT);
-      this.element.classList.toggle(FULLSCREEN_CSS, this.fullscreen_);
-      this.element.appendChild(this.container_);
-    });
-
     if (this.type_ === DatePickerType.SINGLE) {
       this.dateField_ = this.setupDateField_(DateFieldType.DATE);
       if (this.mode_ == DatePickerMode.OVERLAY &&
@@ -485,9 +472,6 @@ export class AmpDatePicker extends AMP.BaseElement {
       user().error(TAG, 'Invalid date picker type', this.type_);
     }
 
-    this.setupListeners_();
-    this.render(this.state_);
-
     this.registerAction('setDate',
         invocation => this.handleSetDate_(invocation.args['date']));
     this.registerAction('setDates',
@@ -495,6 +479,21 @@ export class AmpDatePicker extends AMP.BaseElement {
             invocation.args['startDate'],
             invocation.args['endDate']));
     this.registerAction('clear', () => this.handleClear_());
+
+    return this.mutateElement(() => {
+      // NOTE(cvializ): There is no standard date format for just the first letter
+      // of the week-day. So we hack it in with this CSS class and don't apply the
+      // CSS class if there is a week-day-format specified.
+      this.element.classList.toggle(
+          DEFAULT_WEEK_DAY_FORMAT_CSS,
+          this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT);
+      this.element.classList.toggle(FULLSCREEN_CSS, this.fullscreen_);
+      this.element.appendChild(this.container_);
+
+      this.state_ = this.getInitialState_();
+      this.render(this.state_);
+      this.setupListeners_();
+    });
   }
 
   /**
@@ -512,8 +511,12 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Forgivingly parse an input string into a moment object, preferring the
    * date picker's configured format.
    * @param {string} input The input date string to parse
+   * @return {?moment}
    */
   createMoment_(input) {
+    if (!input) {
+      return null;
+    }
     const moment = this.moment_(input, this.format_);
     return moment.isValid() ? moment : this.moment_(input);
   }
@@ -572,19 +575,24 @@ export class AmpDatePicker extends AMP.BaseElement {
    * the AMP element.
    */
   getInitialState_() {
-    return map({
-      isOpen: this.mode_ == DatePickerMode.STATIC,
-      isFocused: false,
-      focused: this.mode_ == DatePickerMode.STATIC,
+    const date = this.dateField_ && this.dateField_.value ?
+      this.createMoment_(this.dateField_.value) :
+      null;
+    const startDate = this.startDateField_ && this.startDateField_.value ?
+      this.createMoment_(this.startDateField_.value) :
+      null;
+    const endDate = this.endDateField_ && this.endDateField_.value ?
+      this.createMoment_(this.endDateField_.value) :
+      null;
 
-      date: this.dateField_ ? this.createMoment_(this.dateField_.value) : null,
-      startDate: this.startDateField_ ?
-        this.createMoment_(this.startDateField_.value) :
-        null,
-      endDate: this.endDateField_ ?
-        this.createMoment_(this.endDateField_.value) :
-        null,
+    return map({
+      date,
+      endDate,
+      focused: this.mode_ == DatePickerMode.STATIC,
       focusedInput: this.ReactDatesConstants_.START_DATE,
+      isFocused: false,
+      isOpen: this.mode_ == DatePickerMode.STATIC,
+      startDate,
     });
   }
 
@@ -701,13 +709,20 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Handle focus events in the document to switch between selecting the start
-   * and end dates, and when to open and close the date picker.
+   * Handle focus events in the document.
    * @param {!Event} e
    * @private
    */
   handleFocus_(e) {
-    const target = dev().assertElement(e.target);
+    this.maybeTransitionWithFocusChange_(dev().assertElement(e.target));
+  }
+
+  /**
+   * Switch between selecting the start and end dates,
+   * and when to open and close the date picker.
+   * @param {!Element} target
+   */
+  maybeTransitionWithFocusChange_(target) {
     if (this.isDateField_(target)) {
       if (target == this.startDateField_) {
         this.updateDateFieldFocus_(this.startDateField_);
@@ -794,7 +809,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         this.triggerEvent_(DatePickerEvent.ACTIVATE);
         const toFocus = this.container_.querySelector('[tabindex="0"]');
         if (toFocus) {
-          this.vsync_.mutate(() => toFocus./*OK*/focus());
+          this.mutateElement(() => toFocus./*OK*/focus());
         }
       }
       e.preventDefault();
@@ -829,10 +844,11 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Fetch and parse any templates specified via the `src` attribute.
+   * @return {!Promise}
    * @private
    */
   setupTemplates_() {
-    return this.fetchSrcTemplates_()
+    return this.fetchSrc_()
         .then(json => this.parseSrcTemplates_(json))
         .then(parsedTemplates => {
           if (parsedTemplates) {
@@ -849,11 +865,48 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
+   * Fetch and parse any attributes specified via the `src` attribute.
+   * @return {!Promise}
+   * @private
+   */
+  setupSrcAttributes_() {
+    return this.fetchSrc_().then(json => {
+      if (!json) {
+        return;
+      }
+
+      // We should only set the value if the field is empty or absent.
+      const shouldSetDate = !this.dateField_ || !this.dateField_.value;
+      const shouldSetStartDate =
+          !this.startDateField_ || !this.startDateField_.value;
+      const shouldSetEndDate = !this.endDateField_ || !this.endDateField_.value;
+
+      const date = shouldSetDate ? json['date'] : null;
+      const startDate = shouldSetStartDate ? json['startDate'] : null;
+      const endDate = shouldSetEndDate ? json['endDate'] : null;
+
+      if (date) {
+        this.handleSetDate_(date);
+      }
+
+      if (startDate || endDate) {
+        this.handleSetDates_(startDate, endDate);
+      }
+
+      this.setState_({
+        date: this.createMoment_(date),
+        startDate: this.createMoment_(startDate),
+        endDate: this.createMoment_(endDate),
+      });
+    });
+  }
+
+  /**
    * Fetch the JSON from the URL specified in the src attribute.
    * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
    */
-  fetchSrcTemplates_() {
+  fetchSrc_() {
     return this.element.getAttribute('src') ?
       batchFetchJsonFor(this.getAmpDoc(), this.element) :
       Promise.resolve();
@@ -1098,7 +1151,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   toggleDateFieldClass_(field, className, value) {
     if (field) {
-      this.vsync_.mutate(() => field.classList.toggle(className, value));
+      this.mutateElement(() => field.classList.toggle(className, value), field);
     }
   }
 
@@ -1410,7 +1463,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Render the configured date picker component.
-   * @param {!Object=} opt_additionalProps
+   * @param {?Object=} opt_additionalProps
    * @return {!Promise}
    */
   render(opt_additionalProps) {
@@ -1418,7 +1471,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     const shouldBeOpen = props.isOpen || this.mode_ == DatePickerMode.STATIC;
     const Picker = shouldBeOpen ? this.pickerClass_ : null;
 
-    return this.vsync_.mutatePromise(() => {
+    return this.mutateElement(() => {
       if (Picker) {
         // TODO(cvializ): When rendered with React, the picker expands to fit the number of
         // weeks for that month. When rendered with Preact, the picker expands 1 behind where it
