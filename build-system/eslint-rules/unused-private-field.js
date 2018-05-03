@@ -30,28 +30,47 @@ module.exports = {
       return /\b(test|examples)\b/.test(context.getFilename());
     }
 
-    function shouldIgnoreDueToAnnotation(node, name) {
+    const checkers = {
+      '@visibleForTesting': visibleForTestingUse,
+      '@restricted': restrictedUse,
+      '@protected': uncheckableUse,
+      '@override': uncheckableUse,
+    };
+
+    function checkerForAnnotation(node) {
       const comments = context.getCommentsBefore(node);
-      const annotated = comments.some(comment => {
-        return /@(visibleForTesting|protected|override)\b/.test(comment.value);
-      });
-      if (annotated) {
-        return true;
+
+      for (let i = 0; i < comments.length; i++) {
+        const comment = comments[i].value;
+
+        for (const type in checkers) {
+          if (comment.includes(type)) {
+            return checkers[type];
+          }
+        }
       }
 
-      // Restricteds must be used in the file.
-      const restricted = comments.some(comment => {
-        return /@restricted\b/.test(comment.value);
-      });
-      if (!restricted) {
-        return false;
+      return unannotatedUse;
+    }
+
+    // Restricteds must be used in the file, but not in the class.
+    function restrictedUse(node, name, used) {
+      if (used) {
+        const message = [
+          `Used restricted private "${name}".`.padEnd(80),
+          "It's marked @restricted, but it's used in the class.",
+          'Please remove the @restricted annotation.',
+        ].join('\n\t');
+        context.report(node, message);
+        return;
       }
 
       const sourceCode = context.getSourceCode();
       const {text} = sourceCode;
 
       let index = -1;
-      while ((index = text.indexOf(name, index + 1))) {
+      while (true) {
+        index = text.indexOf(name, index + 1);
         if (index === -1) {
           break;
         }
@@ -65,12 +84,54 @@ module.exports = {
         if (parent.type === 'MemberExpression' &&
             shouldCheckMember(parent, false) &&
             !isAssignment(parent)) {
-          return true;
+          return;
         }
       }
 
-      return false;
+
+      const message = [
+        `Unused restricted private "${name}".`.padEnd(80),
+        "It's marked @restricted, but it's still unused in the file.",
+      ].join('\n\t');
+      context.report(node, message);
     }
+
+    // VisibleForTestings must not be used in the class.
+    function visibleForTestingUse(node, name, used) {
+      if (!used) {
+        return;
+      }
+
+      const message = [
+        `Used visibleForTesting private "${name}".`.padEnd(80),
+        "It's marked @visibleForTesting, but it's used in the class.",
+        'Please remove the @visibleForTesting annotation.',
+      ].join('\n\t');
+      context.report(node, message);
+    }
+
+    // Protected and Override are uncheckable. Let Closure handle that.
+    function uncheckableUse() {
+      // Noop.
+    }
+
+    // Unannotated fields must be used in the class
+    function unannotatedUse(node, name, used) {
+      if (used) {
+        return;
+      }
+
+      const message = [
+        `Unused private "${name}".`.padEnd(80), // Padding for alignment
+        'If this is used for testing, annotate with `@visibleForTesting`.',
+        'If this is a private used in the file, `@restricted`.',
+        'If this is used in a subclass, `@protected`.',
+        'If this is an override of a protected, `@override`.',
+        'If none of these exceptions applies, please contact @jridgewell.',
+      ].join('\n\t');
+      context.report(node, message);
+    }
+
 
 
     function shouldCheckMember(node, needsThis = true) {
@@ -86,6 +147,9 @@ module.exports = {
 
     function isAssignment(node) {
       const {parent} = node;
+      if (!parent) {
+        return false;
+      }
       return parent.type === 'AssignmentExpression' && parent.left === node;
     }
 
@@ -110,23 +174,8 @@ module.exports = {
         const {used, declared} = stack.pop();
 
         declared.forEach((node, name) => {
-          if (used.has(name)) {
-            return;
-          }
-
-          const message = [
-            `Unused private "${name}".`.padEnd(80), // Padding for alignment
-            'If this is used for testing, annotate with `@visibleForTesting`.',
-            'If this is a private used in the file, `@restricted`.',
-            'If this is used in a subclass, `@protected`.',
-            'If this is an override of a protected, `@override`.',
-            'If none of these exceptions applies, please contact @jridgewell.',
-          ].join('\n\t');
-
-          context.report({
-            node,
-            message,
-          });
+          const checker = checkerForAnnotation(node);
+          checker(node, name, used.has(name));
         });
       },
 
@@ -142,10 +191,6 @@ module.exports = {
         }
 
         const {name} = key;
-        if (shouldIgnoreDueToAnnotation(node, name)) {
-          return;
-        }
-
         const {declared} = current();
         declared.set(name, node);
       },
@@ -158,10 +203,6 @@ module.exports = {
         }
 
         const {name} = node.property;
-        if (shouldIgnoreDueToAnnotation(node, name)) {
-          return;
-        }
-
         const {declared} = current();
         declared.set(name, node.parent);
       },
