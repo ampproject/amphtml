@@ -65,19 +65,6 @@ export function getElementServiceIfAvailable(win, id, extension, opt_element) {
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
   }
-  /**
-   * If there is (or was) a stubbed extension wait for it to load before trying
-   * to get the service.  Prevents a race condition when everything but
-   * the extensions is in cache.  If there is no stub then it's either loaded,
-   * not present, or the service was defined by a test. In those cases
-   * we don't wait around for an extension that may not exist.
-   */
-  if (stubbedElementNames.includes(extension)) {
-    const extensions = getService(win, 'extensions');
-    return /** @type {!Promise<?Object>} */ (
-      extensions.waitForExtension(win, extension).then(() =>
-        getElementServicePromiseOrNull(win, id, extension, opt_element)));
-  }
   return getElementServicePromiseOrNull(win, id, extension, opt_element);
 }
 
@@ -130,28 +117,19 @@ export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
 export function getElementServiceIfAvailableForDoc(
   nodeOrDoc, id, extension, opt_element) {
   const ampdoc = getAmpdoc(nodeOrDoc);
-  const s = getServicePromiseOrNullForDoc(nodeOrDoc, id);
-  if (s) {
-    return /** @type {!Promise<?Object>} */ (s);
-  }
-  // Microtask is necessary to ensure that window.ampExtendedElements has been
-  // initialized.
-  return Promise.resolve().then(() => {
-    if (!opt_element && isElementScheduled(ampdoc.win, extension)) {
-      return getServicePromiseForDoc(nodeOrDoc, id);
-    }
-    // Wait for HEAD to fully form before denying access to the service.
-    return ampdoc.whenBodyAvailable().then(() => {
-      // If this service is provided by an element, then we can't depend on the
-      // service (they may not use the element).
-      if (opt_element) {
-        return getServicePromiseOrNullForDoc(nodeOrDoc, id);
-      } else if (isElementScheduled(ampdoc.win, extension)) {
-        return getServicePromiseForDoc(nodeOrDoc, id);
-      }
-      return null;
-    });
-  });
+
+  return ampdoc.whenBodyAvailable()
+      .then(() => waitForExtensionIfStubbed(ampdoc.win, extension))
+      .then(() => {
+        // If this service is provided by an element, then we can't depend on the
+        // service (they may not use the element).
+        if (opt_element) {
+          return getServicePromiseOrNullForDoc(nodeOrDoc, id);
+        } else if (isElementScheduled(ampdoc.win, extension)) {
+          return getServicePromiseForDoc(nodeOrDoc, id);
+        }
+        return null;
+      });
 }
 
 /**
@@ -205,6 +183,28 @@ function assertService(service, id, extension) {
 }
 
 /**
+ * Waits for an extension if a stub is present
+ * @param {Window} win
+ * @param {string} extension
+ * @return {Promise}
+ */
+function waitForExtensionIfStubbed(win, extension) {
+  /**
+   * If there is (or was) a stubbed extension wait for it to load before trying
+   * to get the service.  Prevents a race condition when everything but
+   * the extensions is in cache.  If there is no stub then it's either loaded,
+   * not present, or the service was defined by a test. In those cases
+   * we don't wait around for an extension that may not exist.
+   */
+  if (stubbedElementNames.includes(extension)) {
+    const extensions = getService(win, 'extensions');
+    return /** @type {!Promise<?Object>} */ (
+      extensions.waitForExtension(win, extension));
+  }
+  return Promise.resolve();
+}
+
+/**
  * Returns the promise for service with `id` on the given window if available.
  * Otherwise, resolves with null (service was not registered).
  * @param {!Window} win
@@ -215,22 +215,16 @@ function assertService(service, id, extension) {
  * @private
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
-  // Microtask is necessary to ensure that window.ampExtendedElements has been
-  // initialized.
-  return Promise.resolve().then(() => {
-    if (!opt_element && isElementScheduled(win, extension)) {
-      return getServicePromise(win, id);
-    }
-    // Wait for HEAD to fully form before denying access to the service.
-    return dom.waitForBodyPromise(win.document).then(() => {
-      // If this service is provided by an element, then we can't depend on the
-      // service (they may not use the element).
-      if (opt_element) {
-        return getServicePromiseOrNull(win, id);
-      } else if (isElementScheduled(win, extension)) {
-        return getServicePromise(win, id);
-      }
-      return null;
-    });
-  });
+  return dom.waitForBodyPromise(win.document)
+      .then(() => waitForExtensionIfStubbed(win, extension))
+      .then(() => {
+        // If this service is provided by an element, then we can't depend on the
+        // service (they may not use the element).
+        if (opt_element) {
+          return getServicePromiseOrNull(win, id);
+        } else if (isElementScheduled(win, extension)) {
+          return getServicePromise(win, id);
+        }
+        return null;
+      });
 }
