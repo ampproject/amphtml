@@ -134,6 +134,8 @@ THREE.Camera = class extends THREE.Object3D {
   constructor() {
     super();
     this.fov = 0;
+    this.far = 0;
+    this.near = 0;
     this.aspect = 0;
     this.zoom = 0;}};
 THREE.Camera.prototype.updateProjectionMatrix
