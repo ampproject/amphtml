@@ -166,13 +166,6 @@ export class AmpImg extends BaseElement {
 
     if (this.useNativeSrcset_) {
       this.propagateAttributes(EXPERIMENTAL_ATTRIBUTES, this.img_);
-
-      const nativeSizes = this.element.getAttribute('native-sizes');
-      if (nativeSizes) {
-        // Otherwise sizes will be propagated normally if defined
-        this.img_.setAttribute('sizes', nativeSizes);
-      }
-
       this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
     }
 
