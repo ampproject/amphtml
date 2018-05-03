@@ -253,9 +253,13 @@ Element styles are loaded when the element script itself is included in
 an AMP doc. You tell AMP which CSS belongs to this element when
 registering the element (see below).
 
-Class names prefixed with `-amp-` are considered private and
-publishers are not allowed to use to customize (enforced by AMP
-validator).
+Class names prefixed with `i-amphtml` are considered private. Publishers
+are not allowed to use them for customization (enforced by AMP validator).
+
+Class names prefixed with  `amp-` are public css classes that can be customized
+by publishers. All such classes should be documented in the component-specific
+`.md` file. All CSS classes in component stylesheets should be prefixed with
+either `i-amphtml-` or `amp-`.
 
 ## Register element with AMP
 
