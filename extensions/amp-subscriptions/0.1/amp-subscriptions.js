@@ -448,17 +448,33 @@ export class SubscriptionService {
    * @return {!Promise<boolean>}
    */
   delegateActionToService(action, serviceId) {
-    // TODO: add a promise to wait for resolve promise of a platform.
-    const platform = dev().assert(this.platformStore_.getPlatform(serviceId),
-        'Platform is not registered');
-    this.subscriptionAnalytics_.event(
-        SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-        {
-          action,
-          serviceId,
-        }
-    );
-    return platform.executeAction(action);
+    return new Promise(resolve => {
+      this.platformStore_.onPlatformResolves(serviceId, platform => {
+        dev().assert(platform, 'Platform is not registered');
+        this.subscriptionAnalytics_.event(
+            SubscriptionAnalyticsEvents.ACTION_DELEGATED,
+            {
+              action,
+              serviceId,
+            }
+        );
+        resolve(platform.executeAction(action));
+      });
+    });
+  }
+
+  /**
+   * Delegate UI decoration to another service.
+   * @param {!Element} element
+   * @param {string} serviceId
+   * @param {string} action
+   * @param {?JsonObject} options
+   */
+  decorateServiceAction(element, serviceId, action, options) {
+    this.platformStore_.onPlatformResolves(serviceId, platform => {
+      dev().assert(platform, 'Platform is not registered');
+      platform.decorateUI(element, action, options);
+    });
   }
 }
 

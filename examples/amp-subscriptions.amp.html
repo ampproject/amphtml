@@ -207,9 +207,13 @@
           </div>
         </div>
 
-        <section subscriptions-section="actions" class="login-section">
-          <div subscriptions-action="login" subscriptions-display="NOT loggedIn">Login</div>
-        </section>
+
+        <div subscriptions-action="login" subscriptions-display="NOT loggedIn">Login Local</div>
+
+        <div subscriptions-display="NOT loggedIn"
+          subscriptions-action="login"
+          subscriptions-service="subscribe.google.com"
+          subscriptions-decorate>Login</div>
 
         <section subscriptions-section="content-not-granted">
           Login or subscribe to read more.
