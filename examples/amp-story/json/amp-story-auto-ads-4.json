@@ -1,0 +1,10 @@
+{
+  "templateId": "image-template",
+  "data": {
+    "imgSrc": "https://www.ampbyexample.com/img/ad-coffee.jpg"
+  },
+  "vars": {
+    "ctaType": "SHOP",
+    "ctaUrl": "https://ampproject.org"
+  }
+}

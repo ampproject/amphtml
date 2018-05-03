@@ -1,0 +1,10 @@
+{
+  "templateId": "image-template",
+  "data": {
+    "imgSrc": "https://www.ampbyexample.com/img/ad-hangouts.jpg"
+  },
+  "vars": {
+    "ctaType": "INSTALL",
+    "ctaUrl": "https://ampproject.org"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "templateId": "image-template",
+  "data": {
+    "imgSrc": "https://www.ampbyexample.com/img/ad-youtube-tv.jpg"
+  },
+  "vars": {
+    "ctaType": "EXPLORE",
+    "ctaUrl": "https://ampproject.org"
+  }
+}
