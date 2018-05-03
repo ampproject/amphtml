@@ -13,6 +13,14 @@ before_install:
   - export DISPLAY=:99.0
   - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
   - sh -e /etc/init.d/xvfb start
+  - |
+      if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+        TRAVIS_COMMIT_RANGE="FETCH_HEAD...$TRAVIS_BRANCH"
+      fi
+      git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(\.md$)' || {
+        echo "Only docs were updated, stopping build process."
+        exit
+      }
 before_script:
   - pip install --user protobuf
   - gem install percy-capybara capybara selenium-webdriver chromedriver-helper rspec-retry
