@@ -48,7 +48,7 @@ export class ClickDelayFilter extends Filter {
             `Invalid performance timing event type ${spec.startTimingEvent}` +
             ', falling back to now');
       } else {
-        this.intervalStart_ =
+        this.intervalStart =
           win['performance']['timing'][spec.startTimingEvent];
       }
     }
@@ -59,7 +59,7 @@ export class ClickDelayFilter extends Filter {
 
   /** @override */
   filter() {
-    return (Date.now() - this.intervalStart_) >= this.delay_;
+    return (Date.now() - this.intervalStart) >= this.delay_;
   }
 }
 

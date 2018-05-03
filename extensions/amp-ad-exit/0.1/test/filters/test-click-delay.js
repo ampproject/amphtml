@@ -32,7 +32,7 @@ describe('click-delay', () => {
     const win = {performance: {timing: {'navigationStart': 456}}};
     sandbox.stub(Date, 'now').returns(123);
     expect(new ClickDelayFilter('foo', DEFAULT_CONFIG, win).intervalStart)
-        .to.equal(123);
+        .to.equal(456);
   });
 
   describe('spec validation', () => {
@@ -67,6 +67,14 @@ describe('click-delay', () => {
 
   describe('#filter', () => {
     it('should filter based on timing event', () => {
+      const filter = new ClickDelayFilter(
+          'foo', DEFAULT_CONFIG, {performance: {timing: {navigationStart: 1}}});
+      const nowStub = sandbox.stub(Date, 'now');
+      nowStub.onFirstCall().returns(1001);
+      expect(filter.filter()).to.be.true;
+    });
+
+    it('should filter based on timing event, second call', () => {
       const filter = new ClickDelayFilter(
           'foo', DEFAULT_CONFIG, {performance: {timing: {navigationStart: 1}}});
       const nowStub = sandbox.stub(Date, 'now');
