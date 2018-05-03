@@ -15,8 +15,27 @@
  */
 
 /*global THREE*/
-import {resolveURL} from './util';
 import AnimationLoop from './AnimationLoop';
+
+const isWebGLSupported = () => {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl')
+      || canvas.getContext('experimental-webgl');
+  return gl && gl instanceof WebGLRenderingContext;
+};
+
+const resolveURL = (url, path) => {
+  // Invalid URL
+  if (typeof url !== 'string' || url === '') {return '';}
+  // Absolute URL http://,https://,//
+  if (/^(https?:)?\/\//i.test(url)) {return url;}
+  // Data URI
+  if (/^data:.*,.*$/i.test(url)) {return url;}
+  // Blob URL
+  if (/^blob:.*$/i.test(url)) {return url;}
+  // Relative URL
+  return path + url;
+};
 
 /**
  * @param {JsonObject} options
@@ -39,8 +58,7 @@ export default function makeViewer(options, handlers) {
 
   const center = new THREE.Vector3();
   const size = new THREE.Vector3();
-  const setupCameraForObject = (viewer, object) => {
-    const camera = viewer.camera;
+  const setupCameraForObject = object => {
     const bbox = new THREE.Box3();
     bbox.setFromObject(object);
     bbox.getCenter(center);
@@ -55,11 +73,11 @@ export default function makeViewer(options, handlers) {
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
 
-    viewer.controls.target.copy(center);
+    controls.target.copy(center);
   };
 
 
-  const loadObject = (viewer, src) => {
+  const loadObject = src => {
     const baseUrl = THREE.LoaderUtils.extractUrlBase(
         options['hostUrl']
     );
@@ -76,14 +94,13 @@ export default function makeViewer(options, handlers) {
     loader.load(
         resolvedUrl,
         gltfData => {
-          setupCameraForObject(viewer, gltfData.scene);
-          viewer.gltfData = gltfData;
+          setupCameraForObject(gltfData.scene);
           gltfData.scene.children
               .slice()
               .forEach(child => {
-                viewer.scene.add(child);
+                scene.add(child);
               });
-          Object.assign(viewer.renderer.domElement.style, {
+          Object.assign(renderer.domElement.style, {
             position: 'absolute',
             left: 0,
             right: 0,
@@ -91,8 +108,8 @@ export default function makeViewer(options, handlers) {
             bottom: 0,
           });
 
-          document.body.appendChild(viewer.renderer.domElement);
-          viewer.animationLoop.needsUpdate = true;
+          document.body.appendChild(renderer.domElement);
+          animationLoop.needsUpdate = true;
           handlers.onload();
         },
         handlers.onprogress,
@@ -100,12 +117,7 @@ export default function makeViewer(options, handlers) {
     );
   };
 
-  const webglSupported = (() => {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl')
-        || canvas.getContext('experimental-webgl');
-    return gl && gl instanceof WebGLRenderingContext;
-  })();
+  const webglSupported = isWebGLSupported();
 
   if (!webglSupported) {
     return handlers.onerror(new Error('webgl is not supported'));
@@ -128,7 +140,6 @@ export default function makeViewer(options, handlers) {
 
   const step = () => {
     controls.update();
-    viewer.lastRenderCamera = camera;
     renderer.render(scene, camera);
   };
 
@@ -154,7 +165,6 @@ export default function makeViewer(options, handlers) {
   setSize(options['initialLayoutRect']);
 
   const viewer = {
-    animationLoop,
     scene,
     camera,
     renderer,
@@ -170,17 +180,17 @@ export default function makeViewer(options, handlers) {
     },
   };
 
-  loadObject(viewer, options['src']);
+  loadObject(options['src']);
 
   let ampInViewport = true;
   let ampPlay = true;
 
   const updateAnimationRun = () => {
     if (ampInViewport && ampPlay) {
-      viewer.animationLoop.needsUpdate = true;
-      viewer.animationLoop.run();
+      animationLoop.needsUpdate = true;
+      animationLoop.run();
     } else {
-      viewer.animationLoop.stop();
+      animationLoop.stop();
     }
   };
 

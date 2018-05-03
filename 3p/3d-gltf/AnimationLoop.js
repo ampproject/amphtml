@@ -22,15 +22,17 @@ function now() {
 export default class AnimationLoop {
   constructor(task) {
     /** @public {number} */
-    this.fpsLimit = 0;
+    this.fpsLimit = Infinity;
 
     /** @private */
     this.task_ = task;
 
     /** @private {boolean} */
     this.isRunning_ = false;
-    /** @private {(number)} */
+
+    /** @private {number} */
     this.currentRAF_ = 0;
+
     /** @private {number} */
     this.prevFrameTime_ = now();
 
@@ -63,7 +65,9 @@ export default class AnimationLoop {
     if (this.isNeedToRender_) {
       this.task_();
     }
-    this.currentRAF_ = requestAnimationFrame(this.loop_);
+    if (this.isRunning_) {
+      this.currentRAF_ = requestAnimationFrame(this.loop_);
+    }
   }
 
   /** @private */
@@ -72,15 +76,10 @@ export default class AnimationLoop {
       return false;
     }
 
-    if (!this.fpsLimit) {
-      this.needsUpdate = false;
-      return true;
-    }
-
     const time = now();
     const dt = time - this.prevFrameTime_;
-    const result = dt > 1000 / this.fpsLimit;
-    if (!result) {
+    const minFrameTime = 1000 / this.fpsLimit;
+    if (dt <= minFrameTime) {
       return false;
     }
     this.prevFrameTime_ = time;

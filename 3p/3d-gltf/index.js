@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../polyfills';
 import {dict} from '../../src/utils/object';
 import {listenParent, nonSensitiveDataPostMessage} from '../messaging';
 import {loadScript} from '../3p';

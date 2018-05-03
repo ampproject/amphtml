@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -60,6 +59,8 @@ export class Amp3dGltf extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     preloadBootstrap(this.win, this.preconnect);
     this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js', opt_onLayout);
+    this.preconnect.url('https://cdn.jsdelivr.net/npm/three@0.91/examples/js/loaders/GLTFLoader.js', opt_onLayout);
+    this.preconnect.url('https://cdn.jsdelivr.net/npm/three@0.91/examples/js/controls/OrbitControls.js', opt_onLayout);
   }
 
   /** @override */
@@ -118,15 +119,13 @@ export class Amp3dGltf extends AMP.BaseElement {
         this.win, this.element, '3d-gltf', this.context_
     );
 
-    return Services.vsyncFor(this.win)
-        .mutatePromise(() => {
-          this.applyFillContent(iframe, true);
-          this.iframe_ = iframe;
-          this.unlistenMessage_ = this.listenGltfViewerMessages_();
+    this.applyFillContent(iframe, true);
+    this.iframe_ = iframe;
+    this.unlistenMessage_ = this.listenGltfViewerMessages_();
 
-          this.element.appendChild(iframe);
-        })
-        .then(() => this.willBeLoaded_);
+    this.element.appendChild(iframe);
+
+    return this.willBeLoaded_;
   }
 
   /** @private */
@@ -153,7 +152,7 @@ export class Amp3dGltf extends AMP.BaseElement {
   }
 
   /**
-   * Sends a command to the player through postMessage.
+   * Sends a command to the viewer through postMessage.
    * @param {string} action
    * @param {(JsonObject|boolean)=} args
    * @private
