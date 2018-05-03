@@ -62,7 +62,7 @@ const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
  * Selectors for media elements
  * @enum {string}
  */
-const SELECTORS = {
+const Selectors = {
   // which media to wait for on page layout.
   ALL_AMP_MEDIA: 'amp-audio, amp-video, amp-img, amp-anim',
   ALL_MEDIA: 'audio, video',
@@ -273,7 +273,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   waitForMediaLayout_() {
-    const mediaSet = this.getMediaBySelector_(SELECTORS.ALL_AMP_MEDIA);
+    const mediaSet = this.getMediaBySelector_(Selectors.ALL_AMP_MEDIA);
 
     const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
       return new Promise(resolve => {
@@ -331,21 +331,21 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Gets all media elements on this page.
-   * @return {Array<!Element>}
+   * @return {!Array<?Element>}
    * @private
    */
   getAllMedia_() {
-    return this.getMediaBySelector_(SELECTORS.ALL_MEDIA);
+    return this.getMediaBySelector_(Selectors.ALL_MEDIA);
   }
 
 
   /**
    * Gets all video elements on this page.
-   * @return {Array<!Element>}
+   * @return {!Array<?Element>}
    * @private
    */
   getAllVideos_() {
-    return this.getMediaBySelector_(SELECTORS.ALL_VIDEO);
+    return this.getMediaBySelector_(Selectors.ALL_VIDEO);
   }
 
 
@@ -353,7 +353,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Gets media on page by given selector. Finds elements through friendly
    * iframe (if one exists).
    * @param {string} selector
-   * @return {Array<!Element>}
+   * @return {!Array<?Element>}
    */
   getMediaBySelector_(selector) {
     const iframe = this.element.querySelector('iframe');
