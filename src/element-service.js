@@ -117,6 +117,10 @@ export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
 export function getElementServiceIfAvailableForDoc(
   nodeOrDoc, id, extension, opt_element) {
   const ampdoc = getAmpdoc(nodeOrDoc);
+  const s = getServicePromiseOrNullForDoc(nodeOrDoc, id);
+  if (s) {
+    return /** @type {!Promise<?Object>} */ (s);
+  }
 
   return ampdoc.whenBodyAvailable()
       .then(() => waitForExtensionIfStubbed(ampdoc.win, extension))
