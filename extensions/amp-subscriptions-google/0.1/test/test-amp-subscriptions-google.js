@@ -316,9 +316,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const elem = env.win.document.createElement('div');
     const decorateStub = sandbox.stub(platform.runtime_.buttonApi_,
         'attach');
-    elem.innerHTML = 'some html';
-    platform.decorateUI(elem);
-    expect(elem.innerHTML).to.be.equal('');
+    elem.textContent = 'some html';
+    platform.decorateUI(elem, 'subscribe');
+    expect(elem.textContent).to.be.equal('');
     expect(decorateStub).to.be.calledWith(elem);
   });
 });
