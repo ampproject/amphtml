@@ -24,10 +24,19 @@ describe('click-delay', () => {
     delay: 123,
     startTimingEvent: 'navigationStart',
   };
+  let sandbox;
+  beforeEach(() => sandbox = sinon.sandbox.create());
+  afterEach(() => sandbox.restore());
 
-  describe('should fail on invalid configs', () => {
+  it('should use performance timing', () => {
+    const win = {performance: {timing: {'navigationStart': 456}}};
+    sandbox.stub(Date, 'now').returns(123);
+    expect(new ClickDelayFilter('foo', DEFAULT_CONFIG, win).intervalStart)
+        .to.equal(123);
+  });
+
+  describe('spec validation', () => {
     const invalid = 'Invalid ClickDelay spec';
-    const browserSupport = 'Browser does not support performance timing';
     const win = {performance: {timing: {'navigationStart': 456}}};
     const tests = [
       {config: {type: 'bar', delay: 123}, win, err: invalid},
@@ -35,30 +44,34 @@ describe('click-delay', () => {
       {config: {type: FilterType.CLICK_DELAY, delay: 0}, win, err: invalid},
       {config: {type: FilterType.CLICK_DELAY, delay: -1}, win, err: invalid},
       {config: {type: FilterType.CLICK_DELAY, delay: 'ac'}, win, err: invalid},
-      {config: DEFAULT_CONFIG, win: {}, err: browserSupport},
-      {config: DEFAULT_CONFIG, win: {performance: {}}, err: browserSupport},
-      {config: DEFAULT_CONFIG, win: {performance: {timing: {}}}, err:
-          'Invalid performance timing event type navigationStart​​​'},
+      {config: DEFAULT_CONFIG, win: {}},
+      {config: DEFAULT_CONFIG, win: {performance: {}}},
+      {config: DEFAULT_CONFIG, win: {performance: {timing: {}}}},
     ];
     tests.forEach(test => {
-      it(`should throw ${test.err} with config ` +
-         `${JSON.stringify(test.config)} and win ${JSON.stringify(test.win)}`,
-      () => allowConsoleError(() => expect(() => new ClickDelayFilter(
-          'foo', test.config, test.win)).to.throw(test.err)));
+      it(`should properly handle ${JSON.stringify(test.config)} and win ` +
+          `${JSON.stringify(test.win)}`,
+      () => {
+        if (test.err) {
+          allowConsoleError(() =>
+            expect(() => new ClickDelayFilter('foo', test.config, test.win))
+                .to.throw(win.err));
+        } else {
+          sandbox.stub(Date, 'now').returns(123);
+          expect(new ClickDelayFilter(
+              'foo', test.config, test.win).intervalStart).to.equal(123);
+        }
+      });
     });
   });
 
   describe('#filter', () => {
-    let sandbox;
-    beforeEach(() => sandbox = sinon.sandbox.create());
-    afterEach(() => sandbox.restore());
-
     it('should filter based on timing event', () => {
-      const nowStub = sandbox.stub(Date, 'now');
-      nowStub.onFirstCall().returns(2);
-      nowStub.onSecondCall().returns(125);
       const filter = new ClickDelayFilter(
           'foo', DEFAULT_CONFIG, {performance: {timing: {navigationStart: 1}}});
+      const nowStub = sandbox.stub(Date, 'now');
+      nowStub.onFirstCall().returns(1);
+      nowStub.onSecondCall().returns(125);
       expect(filter.filter()).to.be.false;
       expect(filter.filter()).to.be.true;
     });
