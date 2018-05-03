@@ -30,7 +30,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   const currentProductId = 'example.org:basic';
   const origin = 'origin';
   const entitlementData = {source: 'local', raw: 'raw',
-    service: 'local', granted: true, grantReason: GrantReasons.SUBSCRIBED};
+    service: 'local', products: [currentProductId], subscriptionToken: 'token'};
   const fakeAuthToken = {
     'authorization': 'faketoken',
   };
@@ -126,34 +126,39 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
             expect(resolvedEntitlement).to.be.not.undefined;
             expect(resolvedEntitlement.service).to.equal(
                 entitlementData.service);
-            expect(resolvedEntitlement.source).to.equal(entitlementData.source);
+            expect(resolvedEntitlement.source).to.equal('viewer');
             expect(resolvedEntitlement.granted).to.be
-                .equal(entitlementData.granted);
+                .equal(entitlementData.products.indexOf(currentProductId)
+                  !== -1);
             expect(resolvedEntitlement.grantReason).to.be
-                .equal(entitlementData.grantReason);
+                .equal(GrantReasons.SUBSCRIBED);
             // raw should be the data which was resolved via sendMessageAwaitResponse.
             expect(resolvedEntitlement.raw).to
                 .equal('faketoken');
           });
     });
 
-    it('should resolve empty entitlement, with metering and current product if '
+    it('should resolve granted entitlement, with metering in data if '
         + 'viewer only sends metering', () => {
       sandbox.stub(viewerPlatform.jwtHelper_, 'decode')
           .callsFake(() => {return {
             'aud': getWinOrigin(win),
             'exp': Math.floor(Date.now() / 1000) + 5 * 60,
-            'metering': {},
+            'metering': {
+              left: 3,
+            },
           };});
       return viewerPlatform.verifyAuthToken_('faketoken').then(
           resolvedEntitlement => {
             expect(resolvedEntitlement).to.be.not.undefined;
             expect(resolvedEntitlement.service).to.equal('local');
-            expect(resolvedEntitlement.products).to.deep
-                .equal([currentProductId]);
+            expect(resolvedEntitlement.granted).to.be.equal(true);
+            expect(resolvedEntitlement.grantReason).to.be
+                .equal(GrantReasons.METERING);
             // raw should be the data which was resolved via sendMessageAwaitResponse.
-            expect(resolvedEntitlement.metering).to.deep
-                .equal({});
+            expect(resolvedEntitlement.data).to.deep.equal({
+              left: 3,
+            });
           });
     });
   });

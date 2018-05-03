@@ -107,6 +107,10 @@ export class ViewerSubscriptionPlatform {
       const origin = getWinOrigin(this.ampdoc_.win);
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
       const decodedData = this.jwtHelper_.decode(token);
+      const currentProductId = /** @type {string} */ (user().assert(
+          this.pageConfig_.getProductId(),
+          'Product id is null'
+      ));
       if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
         throw user().createError(
             `The mismatching "aud" field: ${decodedData['aud']}`);
@@ -118,8 +122,16 @@ export class ViewerSubscriptionPlatform {
       let entitlement = Entitlement.empty('local');
       if (Array.isArray(entitlements)) {
         for (let index = 0; index < entitlements.length; index++) {
-          if (entitlements[index].granted) {
-            entitlement = entitlements[index];
+          if (entitlements[index].products.indexOf(currentProductId) !== -1) {
+            const entitlementObject = entitlements[index];
+            entitlement = new Entitlement({
+              source: 'viewer',
+              raw: token,
+              granted: true,
+              grantReason: entitlementObject.subscriptionToken ?
+                GrantReasons.SUBSCRIBED : '',
+              data: entitlementObject,
+            });
             break;
           }
         }
