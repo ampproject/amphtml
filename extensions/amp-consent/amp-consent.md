@@ -137,7 +137,7 @@ Optionally, additional key-value pairs can be returned in the response as the `s
 The `sharedData` is made available to other AMP extensions just like the consent
 state. It's up to the 3rd party vendor extensions and the `checkConsentHref` 
 remote endpoint to agree on particular meaning of those key-value pairs. One
-example use case is for the remote endpoint to convey extra privacy info of the
+example use case is for the remote endpoint to convey extra consent related info of the
 current user to the 3rd party vendor extensions.
 
 Unlike consent state, this `shareData` is not persisted in client side storage.
