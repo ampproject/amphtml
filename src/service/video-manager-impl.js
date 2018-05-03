@@ -922,15 +922,15 @@ function canFullScreen(win, video) {
   // where the player component is implemented via an iframe, we need to rely
   // on a postMessage API to fullscreen. Such an API is not necessarily provided
   // by all players.
+  const internalElement = getInternalElementFor(video);
+  if (internalElement.tagName.toLowerCase() == 'video') {
+    return true;
+  }
   const platform = Services.platformFor(win);
   if (!(platform.isIos() || platform.isSafari())) {
     return true;
   }
-  if (supportsFullscreenViaApi(video)) {
-    return true;
-  }
-  const internalElement = getInternalElementFor(video);
-  return internalElement.tagName.toLowerCase() == 'video';
+  return supportsFullscreenViaApi(video);
 }
 
 
