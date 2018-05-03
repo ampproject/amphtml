@@ -232,40 +232,6 @@ describe('amp-img', () => {
     });
   });
 
-  it('should propagate native-sizes as sizes when it exists', () => {
-    toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
-    return getImg({
-      src: '/examples/img/sample.jpg',
-      srcset: SRCSET_STRING,
-      sizes: '(min-width: 320px) 320px, 100vw',
-      'native-sizes': '(min-width: 320px) 300px, 100vw',
-      width: 320,
-      height: 240,
-    }).then(ampImg => {
-      expect(isExperimentOn(iframe.win, 'amp-img-native-srcset'))
-          .to.equal(true);
-      const img = ampImg.querySelector('img');
-      expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
-      expect(img.getAttribute('sizes')).to
-          .equal('(min-width: 320px) 300px, 100vw');
-    });
-  });
-
-  it('should define a src when only srcset is present', () => {
-    toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
-    return getImg({
-      srcset: `/examples/img/hero@1x.jpg 641w,
-               /examples/img/hero@2x.jpg 1282w`,
-      width: 320,
-      height: 240,
-    }).then(ampImg => {
-      expect(isExperimentOn(iframe.win, 'amp-img-native-srcset'))
-          .to.equal(true);
-      const img = ampImg.querySelector('img');
-      expect(img.getAttribute('src')).to.equal('/examples/img/hero@1x.jpg');
-    });
-  });
-
   describe('#fallback on initial load', () => {
     let el;
     let impl;
