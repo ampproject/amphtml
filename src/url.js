@@ -589,6 +589,7 @@ export function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
  */
 export function resolveUrlAttr(
   tag, tagName, attrName, attrValue, windowLocation) {
+  const TAG = tag;
   checkCorsUrl(attrValue);
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
@@ -611,7 +612,7 @@ export function resolveUrlAttr(
     } catch (e) {
       // Do not fail the whole template just because one srcset is broken.
       // An AMP element will pick it up and report properly.
-      user().error(tag, 'Failed to parse srcset: ', e);
+      user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
     return srcset.stringify(url => resolveImageUrlAttr(url, baseUrl,
