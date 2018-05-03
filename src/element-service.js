@@ -184,9 +184,10 @@ function assertService(service, id, extension) {
 
 /**
  * Waits for an extension if a stub is present
- * @param {Window} win
+ * @param {!Window} win
  * @param {string} extension
- * @return {Promise}
+ * @return {!Promise}
+ * @private
  */
 function waitForExtensionIfStubbed(win, extension) {
   /**
