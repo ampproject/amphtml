@@ -260,6 +260,28 @@ All actions work the same way: the popup window is opened for the specified URL.
 
 Notice, while not explicitly visible, any vendor service can also implement its own actions. Or it can delegate to the "login" service to execute "login" or "subscribe" action.
 
+### Action delegation
+
+In the markup the actions can be delegated to other services for them to execute the actions. This can be achieved by specifying `subscriptions-service` attribute.
+
+e.g. In order to ask google subscriptions to perform subscribe even when `local` platform is selected:
+```
+  <button subscriptions-action='subscribe' subscriptions-service='subscribe.google.com>Subscribe</button>
+```
+
+### Action decoration
+
+In addition to delegation of the action to another service, you can also ask another service to decorate the element. Just add the attribute `subsciptions-decorate` to get the element decorated.
+
+```
+  <button
+    subscriptions-action='subscribe'
+    subscriptions-service='subscribe.google.com
+    subscriptions-decorate
+  >
+    Subscribe
+  </button>
+```
 
 ## Showing/hiding premium and fallback content
 
