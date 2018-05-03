@@ -192,7 +192,7 @@ export class Xhr {
     const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
     const isDevMode = getMode(this.win).development;
     if (!docOptedIn) {
-      return Promise.resolve();
+      return whenFirstVisible;
     }
     return whenFirstVisible.then(() => {
       return viewer.isTrustedViewer();
