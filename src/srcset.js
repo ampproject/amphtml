@@ -34,7 +34,7 @@ let SrcsetSourceDef;
  * Example 2: "image1.png 2x, image2.png"
  * Example 3: "image1,100w.png 100w, image2.png 50w"
  */
-const srcsetRegex =
+export const srcsetRegex =
     /(\S+)(?:\s+(?:(-?\d+(?:\.\d+)?)([a-zA-Z]*)))?\s*(?:,|$)/g;
 
 /**

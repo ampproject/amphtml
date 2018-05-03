@@ -18,7 +18,7 @@ import {BaseElement} from '../src/base-element';
 import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
-import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
+import {srcsetFromElement, srcsetFromSrc, srcsetRegex} from '../src/srcset';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -30,12 +30,6 @@ const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
 const EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE = ['alt', 'title',
   'referrerpolicy', 'aria-label','aria-describedby', 'aria-labelledby',
   'srcset', 'src', 'sizes'];
-
-/**
- * Regex for finding the first url in a srcset.
- * @type {!RegExp}
- */
-const FIRST_SRCSET_URL = /https?:\/\/\S+/;
 
 export class AmpImg extends BaseElement {
 
@@ -109,7 +103,7 @@ export class AmpImg extends BaseElement {
         return;
       }
       // We try to find the first url in the srcset
-      const srcseturl = FIRST_SRCSET_URL.exec(srcset);
+      const srcseturl = /https?:\/\/\S+/.exec(srcset);
       // Connect to the first url if it exists
       if (srcseturl) {
         this.preconnect.url(srcseturl[0], onLayout);
@@ -217,7 +211,7 @@ export class AmpImg extends BaseElement {
   guaranteeSrcForSrcsetUnsupportedBrowsers_() {
     if (!this.img_.hasAttribute('src') && 'srcset' in this.img_ == false) {
       const srcset = this.element.getAttribute('srcset');
-      const srcseturl = FIRST_SRCSET_URL.exec(srcset);
+      const srcseturl = srcsetRegex.exec(srcset);
       if (srcseturl) {
         this.img_.setAttribute('src', srcseturl[0]);
       }
