@@ -40,9 +40,6 @@ export class AbstractAmpContext {
     /** @private {?string} */
     this.cachedFrameName_ = this.win_.name || null;
 
-    /** @type {?string} */
-    this.embedType_ = null;
-
     // ----------------------------------------------------
     // Please keep public attributes alphabetically sorted.
     // ----------------------------------------------------
@@ -306,8 +303,6 @@ export class AbstractAmpContext {
     this.sourceUrl = context.sourceUrl;
     this.startTime = context.startTime;
     this.tagName = context.tagName;
-
-    this.embedType_ = dataObject.type || null;
   }
 
   /**
