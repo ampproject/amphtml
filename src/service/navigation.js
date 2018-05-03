@@ -39,6 +39,8 @@ import {
 import {toWin} from '../types';
 
 const TAG = 'navigation';
+const EVENT_TYPE_CLICK = 'click';
+const EVENT_TYPE_RIGHT_CLICK = 'contextmenu';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -112,8 +114,8 @@ export class Navigation {
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
-    this.rootNode_.addEventListener('click', this.boundHandle_);
-    this.rootNode_.addEventListener('contextmenu', this.boundHandle_);
+    this.rootNode_.addEventListener(EVENT_TYPE_CLICK, this.boundHandle_);
+    this.rootNode_.addEventListener(EVENT_TYPE_RIGHT_CLICK, this.boundHandle_);
     /** @private {boolean} */
     this.appendExtraParams_ = false;
     shouldAppendExtraParams(this.ampdoc).then(res => {
@@ -149,8 +151,8 @@ export class Navigation {
    */
   cleanup() {
     if (this.boundHandle_) {
-      this.rootNode_.removeEventListener('click', this.boundHandle_);
-      this.rootNode_.removeEventListener('contextmenu', this.boundHandle_);
+      this.rootNode_.removeEventListener(EVENT_TYPE_CLICK, this.boundHandle_);
+      this.rootNode_.removeEventListener(EVENT_TYPE_RIGHT_CLICK, this.boundHandle_);
     }
   }
 
@@ -214,7 +216,7 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-    const isRightClick = (e.type == 'contextmenu');
+    const isRightClick = (e.type == EVENT_TYPE_RIGHT_CLICK);
     const target = closestByTag(dev().assertElement(e.target), 'A');
     if (!target || !target.href) {
       return;
@@ -232,19 +234,18 @@ export class Navigation {
 
     const location = this.parseUrl_(target.href);
 
-    // Handle AMP-to-AMP navigation if rel=amphtml. Note that
-    // we ignore handling if it is invoked via a right click.
-    // See github issue #14768.
-    if (this.handleA2AClick_(e, target, location && !isRightClick)) {
-      return;
-    }
+    // Ignore handling A2A and custom protocol if it is invoked via a right
+    // click. See github issue #14768.
+    if (!isRightClick) {
+      // Handle AMP-to-AMP navigation if rel=amphtml.
+      if (this.handleA2AClick_(e, target, location)) {
+        return;
+      }
 
-    // Handle navigating to custom protocol if applicable.
-    // Note that we ignore handling if it is invoked via a right click.
-    // See github issue #14768.
-    if (this.handleCustomProtocolClick_(e, target, location)
-        && !isRightClick) {
-      return;
+      // Handle navigating to custom protocol if applicable.
+      if (this.handleCustomProtocolClick_(e, target, location)) {
+        return;
+      }
     }
 
     // Finally, handle normal click-navigation behavior.
