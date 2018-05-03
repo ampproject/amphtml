@@ -179,11 +179,9 @@ export class InfoDialog {
         .sendMessageAwaitResponse('moreInfoLinkUrl', /* data */ undefined)
         .then(moreInfoUrl => {
           if (!moreInfoUrl) {
-            console.log('no more info url');
             return null;
           }
 
-          console.log('more info url was', moreInfoUrl);
           return assertAbsoluteHttpOrHttpsUrl(dev().assertString(moreInfoUrl));
         });
   }
