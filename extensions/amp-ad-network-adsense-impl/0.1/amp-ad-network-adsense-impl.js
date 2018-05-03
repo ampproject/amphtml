@@ -56,16 +56,13 @@ import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 
@@ -267,16 +264,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         !isNaN(height) && height > 0,
       branches: ['21062003', '21062004'],
     };
-    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    const adsenseFormatExpId =
-        getExperimentBranch(this.win, adsenseFormatExpName);
-    let useDefinedSizes = false;
-    if (adsenseFormatExpId) {
-      addExperimentIdToElement(adsenseFormatExpId, this.element);
-      useDefinedSizes = adsenseFormatExpId == '21062004';
-    }
 
-    this.size_ = useDefinedSizes
+    const adsenseFormatExpId =
+        randomlySelectUnsetExperiments(
+            this.win, experimentInfoMap)[adsenseFormatExpName];
+    addExperimentIdToElement(adsenseFormatExpId, this.element);
+
+    this.size_ = adsenseFormatExpId == '21062004'
       ? {width, height}
       : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
