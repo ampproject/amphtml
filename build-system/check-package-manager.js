@@ -20,6 +20,7 @@ const https = require('https');
 
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
 const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';
+const yarnExecutable = 'npx yarn';
 
 // Color formatting libraries may not be available when this script is run.
 function red(text) {return '\x1b[31m' + text + '\x1b[0m';}
@@ -122,8 +123,8 @@ function performNodeVersionCheck(latestLtsVersion) {
 
 // If yarn is being run, perform a version check and proceed with the install.
 function performYarnVersionCheck() {
-  const yarnVersion = getStdout('yarn --version').trim();
-  const yarnInfo = getStdout('yarn info --json yarn').trim();
+  const yarnVersion = getStdout(yarnExecutable + ' --version').trim();
+  const yarnInfo = getStdout(yarnExecutable + ' info --json yarn').trim();
   const yarnInfoJson = JSON.parse(yarnInfo.split('\n')[0]); // First line
   const stableVersion = getYarnStableVersion(yarnInfoJson);
   if (stableVersion === '') {
