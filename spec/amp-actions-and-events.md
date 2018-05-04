@@ -532,6 +532,10 @@ actions that apply to the whole document.
     <td>Opens the Print Dialog to print the current page.</td>
   </tr>
   <tr>
+    <td>optoutOfCid</td>
+    <td>Opts out of Client ID generation for all scopes.</td>
+  </tr>
+  <tr>
     <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>
     <td>
       <p>Requires <a href="https://www.ampproject.org/docs/reference/components/amp-bind.html#updating-state-with-ampsetstate">amp-bind</a>.</p>

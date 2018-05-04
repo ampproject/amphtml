@@ -350,6 +350,7 @@ const forbiddenTerms = {
       'src/ad-cid.js',
       'src/services.js',
       'src/service/cid-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-subscriptions/0.1/local-subscription-platform.js',
