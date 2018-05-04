@@ -445,6 +445,18 @@ export class ActionService {
   }
 
   /**
+   * Adds an action to the whitelist. Takes one string of the form
+   * "<targetType>.<method>", e.g. "amp-form.submit" or "AMP.print".
+   * @param {string} action
+   */
+  addToWhitelist(action) {
+    if (!this.whitelist_) {
+      this.whitelist_ = [];
+    }
+    this.whitelist_.push(action);
+  }
+
+  /**
    * @param {!Element} source
    * @param {string} actionEventType
    * @param {?ActionEventDef} event

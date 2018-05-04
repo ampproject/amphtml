@@ -1371,4 +1371,12 @@ describes.realWin('whitelist', {
     expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
         '(AMP.pushState,AMP.setState).');
   });
+
+  it('should allow adding actions to the whitelist', () => {
+    const i = new ActionInvocation(target, 'print', /* args */ null,
+        'source', 'caller', 'event', 0, 'AMP');
+    action.addToWhitelist('AMP.print');
+    action.invoke_(i);
+    expect(target.enqueAction).to.be.calledWithExactly(i);
+  });
 });
