@@ -29,7 +29,6 @@ const colors = require('ansi-colors');
 const createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
 const exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs-extra');
-const getStdout = require('./build-system/exec').getStdout;
 const gulp = $$.help(require('gulp'));
 const internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 const internalRuntimeVersion = require('./build-system/internal-version').VERSION;
@@ -62,7 +61,6 @@ const extensionAliasFilePath = {};
 const green = colors.green;
 const red = colors.red;
 const cyan = colors.cyan;
-const yellow = colors.yellow;
 
 const minifiedRuntimeTarget = 'dist/v0.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
@@ -821,42 +819,6 @@ function performBuild(watch) {
 }
 
 /**
- * @param {boolean} compiled
- */
-function checkBinarySize(compiled) {
-  const file = compiled ? './dist/v0.js' : './dist/amp.js';
-  const size = compiled ? '77.05KB' : '337.07KB';
-  const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
-  if (!process.env.TRAVIS) {
-    log('Running ' + cyan(cmd) + '...');
-  }
-  const output = getStdout(cmd);
-  const pass = output.match(/PASS .*/);
-  const fail = output.match(/FAIL .*/);
-  const error = output.match(/ERROR .*/);
-  if (error) {
-    log(yellow(error));
-  } else if (fail) {
-    log(red(fail));
-    log(red('ERROR:'), cyan('bundlesize'), 'found that ' + cyan(file) +
-        ' has exceeded its size cap.');
-    log('This is part of a new effort to reduce AMP\'s binary size (#14392).');
-    log('Please contact @choumx or @jridgewell for assistance.');
-    // Terminate Travis PR builds, but allow push builds to continue.
-    // TODO(erwinmombay, #15066): Terminate all builds once dist runs for PRs.
-    if (process.env.TRAVIS_PULL_REQUEST) {
-      process.exit(1);
-    }
-  } else if (pass) {
-    if (!process.env.TRAVIS) {
-      log(green(pass));
-    }
-  } else {
-    log(yellow(output));
-  }
-}
-
-/**
  * Enables watching for file changes in css, extensions.
  * @return {!Promise}
  */
@@ -871,9 +833,7 @@ function watch() {
  */
 function build() {
   const handlerProcess = createCtrlcHandler('build');
-  return performBuild()
-      .then(() => checkBinarySize(/* compiled */ false))
-      .then(() => exitCtrlcHandler(handlerProcess));
+  return performBuild().then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -925,9 +885,7 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
         }
-      })
-      .then(() => checkBinarySize(/* compiled */ true))
-      .then(() => exitCtrlcHandler(handlerProcess));
+      }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
