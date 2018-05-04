@@ -95,7 +95,9 @@ Example:
 Currently, the `consents` object only supports a single consent instance. A consent instance must have an ID specified within the `consents` object (in the example above, "my-consent" is the id). The consent instance ID is used to generate a key when storing the user consent state.
 
 #### checkConsentHref
-`checkConsentHref` (required): Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to determine if a prompt UI should be shown if the consent state is unknown.
+`checkConsentHref`: Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to determine if a prompt UI should be shown if the consent state is unknown.
+
+`checkConsentHref` is required if [`promptIfUnknownForGeoGroup`](#promptifunknownforgeogroup) is not defined.
 
 ##### Request
 AMP sends the consent instance ID in the `consentInstanceId` field with the POST request.
@@ -120,10 +122,38 @@ If the response doesn't have `promptIfUnknown` set or has `promptIfUnknown` set 
 
 Currently, AMP will not show consent prompt with a known consent state (i.e. the user has already accepted or rejected the consent), and will only show a prompt if `promptIfUnknown = true` with a unknown consent state, or upon user action.  See below for details on how to display a prompt.
 
+Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
+
+
+```html
+{
+  "promptIfUnknown": true/false,
+  "sharedData": {
+    "a-key": "some-string-value",
+    "key-with-bool-value": true,
+    "key-with-numeric-value": 123
+  }
+}
+```
+
+The `sharedData` is made available to other AMP extensions just like the consent
+state. It's up to the 3rd party vendor extensions and the `checkConsentHref`
+remote endpoint to agree on particular meaning of those key-value pairs. One
+example use case is for the remote endpoint to convey extra consent related info of the
+current user to the 3rd party vendor extensions.
+
+Unlike consent state, this `shareData` is not persisted in client side storage.
+
+#### promptIfUnknownForGeoGroup
+`promptIfUnknownForGeoGroup` Provides an alternative way to instruct AMP to display consent prompt or not when consent state is unknown.
+
+To use `promptIfUnknownForGeoGroup`, a `<amp-geo>` component must be included and properly configured. The `promptIfUnknownForGeoGroup` then accepts a key of a geo group of country codes. More details on how `<amp-geo>` works can be found [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md).
+
+In the case that `checkConsentHref` and `promptIfUnknownForGeoGroup` are both defined. `promptIfUnknown`'s value from response will be respected.
+
 #### promptUI
 
 `promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. See the [Prompt UI](#prompt-ui) section for details on how a user interacts with the prompt UI.
-
 
 ## Consent Management
 
@@ -216,6 +246,11 @@ The `<amp-consent>` element can be used to block any other AMP components on the
 
 To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if the consent prompt has been skipped by the `checkConsentHref` response when consent is unknown. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
+AMP may support more advanced customizing blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved for now, please don't specify a value to the attribute.
+
+Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
+
+
 *Example: Blocking the analytics until user accepts consent*
 
 ```html
@@ -224,9 +259,84 @@ To block components, add the `data-block-on-consent` attribute to the AMP compon
 </amp-analytics>
 ```
 
-AMP may support customizing blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved for now, please don't specify a value to the attribute.
+### Advanced Consent Blocking Behaviors
+An optional `policy` object can be added to the `<amp-consent>` element's JSON configuration object to customize consent blocking behaviors.
 
-Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
+```html
+<amp-consent layout="nodisplay" id="consent-element">
+  <script type="application/json">
+  {
+    "consents": {
+      "my-consent": {
+        "checkConsentHref": "https://example.com/api/show-consent"
+      }
+    }
+    "policy": {
+      "default": {
+        "waitFor": {
+          "my-consent": []
+        }
+        "timeout": {
+          "seconds": 5,
+          "fallbackAction": "reject"
+        }
+      }
+    }
+  }
+  </script>
+</amp-consent>
+```
+Right now only customizing the `default` policy instance is supported. The "default" behavior policy applies to every component that is blocked by consent with `data-block-on-consent` attribute.
+
+### Policy Instance (optional)
+
+#### waitFor
+`waitFor` object specifies the consent instance that needs to wait. Each consent instance requires an array value. AMP may support sub item lists under an consent instance, but right now only empty array is expected, and the value will be ignored.
+
+#### timeout (optional)
+`timeout` can be used to inform components the current consent state status after specified time.
+
+When used as a single value, `timeout` equals the timeout value in second.
+
+```html
+  "default": {
+    "waitFor": {
+      "my-consent": []
+    }
+    "timeout": 2
+  }
+```
+
+When used as an object. `timeout` object supports two attributes
+* `seconds`: timeout value in second
+* `fallbackAction` (optional): the fallback action at timeout if no user action is taken and no state has been stored. The fallback actions supported are `reject` and `dismiss`. Default action is `dismiss` if not configured. Note the consent state changed due to fallback action at timeout will not be stored on client side.
+
+```html
+  "default": {
+    "waitFor": {
+      "my-consent": []
+    }
+    "timeout": {
+      "seconds": 2,
+      "fallbackAction": "reject"
+    }
+  }
+```
+
+
+
+
+
+
+## Integrations and availablity
+The table below lists the vendors and components that are integrated with amp-consent
+
+| Integration   | Prod Availability| Documentation|Ready For Testing
+| ------------- |------------------| -----| -----|
+| DoubleClick & AdSense Integration      | 05/10/18 | [Link](https://support.google.com/dfp_premium/answer/7678538) |Yes|
+| AMP IMA Video Integration   |  05/15/18  |   ||
+| AMP Geo |  05/10/18      |  [Link](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/) |Yes|
+| AMP Stories |   05/15/18     |    ||
 
 
 

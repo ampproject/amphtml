@@ -16,6 +16,11 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
+import {
+  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent-state';
 import {LayoutPriority} from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
@@ -32,7 +37,6 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from './concurrent-load';
-import {getConsentPolicyState} from '../../../src/consent-state';
 import {getIframe} from '../../../src/3p-frame';
 import {
   googleLifecycleReporterFactory,
@@ -312,17 +316,19 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
 
+    const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
-    const consentPromise = consentPolicyId
-      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+    const sharedDataPromise = consentPolicyId
+      ? getConsentPolicySharedData(this.getAmpDoc(), consentPolicyId)
       : Promise.resolve(null);
 
     this.layoutPromise_ = Promise.all(
-        [getAdCid(this), consentPromise]).then(consents => {
+        [getAdCid(this), consentPromise, sharedDataPromise]).then(consents => {
       const opt_context = {
         clientId: consents[0] || null,
         container: this.container_,
         initialConsentState: consents[1],
+        consentSharedData: consents[2],
       };
 
       // In this path, the request and render start events are entangled,
@@ -363,6 +369,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     return this.uiHandler.createPlaceholder();
+  }
+
+  /**
+   * @returns {!Promise<?CONSENT_POLICY_STATE>}
+   */
+  getConsentState() {
+    const consentPolicyId = super.getConsentPolicy();
+    return consentPolicyId
+      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      : Promise.resolve(null);
   }
 
   /**

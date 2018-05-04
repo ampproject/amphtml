@@ -198,22 +198,20 @@ describes.realWin('amp-ad-exit', {
     const el = win.document.createElement('amp-ad-exit');
     el.appendChild(win.document.createElement('p'));
     win.document.body.appendChild(el);
-    return el.build().then(() => {
-      throw new Error('must have failed');
-    }, error => {
-      expect(error.message).to.match(/application\/json/);
-    });
+    let promise;
+    allowConsoleError(() => promise = el.build());
+    return promise.should.be.rejectedWith(/application\/json/);
   });
 
   it('should do nothing for missing targets', () => {
     const open = sandbox.stub(win, 'open');
     try {
-      element.implementation_.executeAction({
+      allowConsoleError(() => element.implementation_.executeAction({
         method: 'exit',
         args: {target: 'not-a-real-target'},
         event: makeClickEvent(1001),
         satisfiesTrust: () => true,
-      });
+      }));
       expect(open).to.not.have.been.called;
     } catch (expected) {}
   });
@@ -647,4 +645,3 @@ describes.realWin('amp-ad-exit', {
         .to.eventually.be.rejectedWith(/Unknown vendor/);
   });
 });
-

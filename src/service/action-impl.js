@@ -281,8 +281,9 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
-          const isTapEventRole = hasOwn(TAPPABLE_ARIA_ROLES,
-              element.getAttribute('role').toLowerCase());
+          const role = element.getAttribute('role');
+          const isTapEventRole =
+              (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
           if (!event.defaultPrevented && isTapEventRole) {
             event.preventDefault();
             this.trigger(element, name, event, ActionTrust.HIGH);
@@ -441,6 +442,18 @@ export class ActionService {
    */
   setWhitelist(whitelist) {
     this.whitelist_ = whitelist;
+  }
+
+  /**
+   * Adds an action to the whitelist. Takes one string of the form
+   * "<targetType>.<method>", e.g. "amp-form.submit" or "AMP.print".
+   * @param {string} action
+   */
+  addToWhitelist(action) {
+    if (!this.whitelist_) {
+      this.whitelist_ = [];
+    }
+    this.whitelist_.push(action);
   }
 
   /**
