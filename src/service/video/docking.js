@@ -532,9 +532,12 @@ export class VideoDocking {
    */
   onPositionChange_(video) {
     if (this.ignoreDueToSize_(video) ||
-        this.ignoreDueToDocked_(video) ||
-        this.undockBecauseVisible_(video) ||
+        this.ignoreBecauseAnotherDocked_(video) ||
         this.ignoreDueToNotPlayingManually_(video)) {
+      return;
+    }
+
+    if (this.undockBecauseVisible_(video)) {
       return;
     }
 
@@ -571,7 +574,7 @@ export class VideoDocking {
    * @param  {!VideoOrBaseElementDef} video
    * @return {boolean}
    */
-  ignoreDueToDocked_(video) {
+  ignoreBecauseAnotherDocked_(video) {
     return !!this.currentlyDocked_ && !this.isCurrentlyDocked_(video);
   }
 
@@ -961,7 +964,7 @@ export class VideoDocking {
    * @private
    */
   onDockingTimeout_(video) {
-    if (this.ignoreDueToDocked_(video) ||
+    if (this.ignoreBecauseAnotherDocked_(video) ||
         this.undockBecauseVisible_(video, REVERT_TO_INLINE_RATIO) ||
         !this.currentlyDocked_) {
       return;
