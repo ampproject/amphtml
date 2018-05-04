@@ -149,7 +149,7 @@ Unlike consent state, this `shareData` is not persisted in client side storage.
 
 To use `promptIfUnknownForGeoGroup`, a `<amp-geo>` component must be included and properly configured. The `promptIfUnknownForGeoGroup` then accepts a key of a geo group of country codes. More details on how `<amp-geo>` works can be found [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md).
 
-In the case that `checkConsentHref` and `promptIfUnknownForGeoGroup` are both defined. `promptIfUnknown`'s value from response will be respected if included.
+In the case that `checkConsentHref` and `promptIfUnknownForGeoGroup` are both defined. `promptIfUnknown`'s value from response will be respected.
 
 #### promptUI
 
