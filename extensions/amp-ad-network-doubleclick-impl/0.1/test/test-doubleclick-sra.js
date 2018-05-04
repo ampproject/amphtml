@@ -142,6 +142,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         const element1 =
           createElementWithAttributes(doc, 'amp-ad', config1);
         const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
+        sandbox.stub(impl1, 'getPageLayoutBox').returns({top: 123, left: 456});
         element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
         sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320')
             .returns('13579');
@@ -168,6 +169,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         const element2 =
           createElementWithAttributes(doc, 'amp-ad', config2);
         const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
+        sandbox.stub(impl2, 'getPageLayoutBox').returns({top: 789, left: 101});
         sandbox.stub(impl2, 'generateAdKey_').withArgs('250x300')
             .returns('2468');
         element2.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
@@ -181,6 +183,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
           co: '1',
           adtest: 'on',
+          adxs: '456,101',
+          adys: '123,789',
           tfcd: 'some_tfcd',
           eid: MANUAL_EXPERIMENT_ID,
           output: 'ldjh',
