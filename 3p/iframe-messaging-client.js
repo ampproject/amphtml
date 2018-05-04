@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Observable} from '../src/observable';
 import {
+  CONSTANTS,
   deserializeMessage,
   listen,
   serializeMessage,
 } from '../src/3p-frame-messaging';
+import {Observable} from '../src/observable';
 import {dev} from '../src/log';
+import {dict, map} from '../src/utils/object';
 import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
-import {map} from '../src/utils/object';
 
 export class IframeMessagingClient {
 
@@ -38,6 +39,8 @@ export class IframeMessagingClient {
     this.hostWindow_ = win.parent;
     /** @private {?string} */
     this.sentinel_ = null;
+    /** @type {number} */
+    this.nextMessageId_ = 1;
     /**
      * Map messageType keys to observables to be fired when messages of that
      * type are received.
@@ -45,6 +48,28 @@ export class IframeMessagingClient {
      */
     this.observableFor_ = map();
     this.setupEventListener_();
+  }
+
+  /**
+   * Retrieves data from host.
+   *
+   * @param {string} requestType
+   * @param {?Object} payload
+   * @param {function(*)} callback
+   */
+  getData(requestType, payload, callback) {
+    const responseType = requestType + CONSTANTS.responseTypeSuffix;
+    const messageId = this.nextMessageId_++;
+    const unlisten = this.registerCallback(responseType, result => {
+      if (result[CONSTANTS.messageIdFieldName] === messageId) {
+        unlisten();
+        callback(result[CONSTANTS.contentFieldName]);
+      }
+    });
+    const data = dict();
+    data[CONSTANTS.payloadFieldName] = payload;
+    data[CONSTANTS.messageIdFieldName] = messageId;
+    this.sendMessage(requestType, data);
   }
 
   /**
