@@ -43,6 +43,7 @@ export class FocusHistory {
 
     /** @private @const {function(!Event)} */
     this.captureFocus_ = e => {
+      // Hack (#15079) due to Firefox firing focus events on the entire page
       if (e.target && e.target.nodeType == 1) {
         this.pushFocus_(dev().assertElement(e.target));
       }
