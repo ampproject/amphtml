@@ -38,9 +38,11 @@
 .i-amphtml-docked-video-overlay {
   opacity: 0;
   transition: 0.3s opacity ease;
+  contain: strict !important;
 }
 
 .amp-docked-video-controls {
+  contain: strict !important;
   position: relative;
   display: flex;
   align-items: center;
