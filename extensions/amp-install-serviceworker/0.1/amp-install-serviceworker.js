@@ -81,7 +81,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         });
       }
     } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      this.whenLoadedAndVisiblePromise_(this.win).then(() => {
+      this.whenLoadedAndVisiblePromise_().then(() => {
         return install(this.win, src);
       });
     } else {
