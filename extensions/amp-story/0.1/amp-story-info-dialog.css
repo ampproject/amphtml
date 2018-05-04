@@ -70,16 +70,17 @@
 
 .i-amphtml-story-info-heading {
   display: block !important;
-  font-size: 1em !important;
+  font-size: 14px !important;
   font-weight: bold !important;
   margin: 0 0 8px !important;
 }
 
 .i-amphtml-story-info-link {
-  color: #757575 !important;
+  color: #000000 !important;
   display: block !important;
   margin: 0 !important;
-  font-size: 0.9em !important;
+  opacity: 0.64 !important;
+  font-size: 12px !important;
   text-decoration: none !important;
 }
 
@@ -87,8 +88,8 @@
   color: #4285F4 !important;
   display: none !important;
   font-family: 'Roboto-Medium', sans-serif !important;
-  font-size: 0.9em !important;
-  letter-spacing: 0.4px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.5px !important;
   margin: 16px 0 0;
   text-decoration: none !important;
 }
