@@ -120,10 +120,31 @@ If the response doesn't have `promptIfUnknown` set or has `promptIfUnknown` set 
 
 Currently, AMP will not show consent prompt with a known consent state (i.e. the user has already accepted or rejected the consent), and will only show a prompt if `promptIfUnknown = true` with a unknown consent state, or upon user action.  See below for details on how to display a prompt.
 
+Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
+
+
+```html
+{
+  "promptIfUnknown": true/false,
+  "sharedData": {
+    "a-key": "some-string-value",
+    "key-with-bool-value": true,
+    "key-with-numeric-value": 123
+  }
+}
+```
+
+The `sharedData` is made available to other AMP extensions just like the consent
+state. It's up to the 3rd party vendor extensions and the `checkConsentHref` 
+remote endpoint to agree on particular meaning of those key-value pairs. One
+example use case is for the remote endpoint to convey extra consent related info of the
+current user to the 3rd party vendor extensions.
+
+Unlike consent state, this `shareData` is not persisted in client side storage.
+
 #### promptUI
 
 `promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. See the [Prompt UI](#prompt-ui) section for details on how a user interacts with the prompt UI.
-
 
 ## Consent Management
 
