@@ -54,7 +54,7 @@ function isAutoplaySupportedImpl(win, isLiteViewer) {
     opacity: '0',
   });
 
-  new Promise(() => detectionElement.play()).catch(() => {
+  new Promise(resolve => resolve(detectionElement.play())).catch(() => {
     // Suppress any errors, useless to report as they are expected.
   });
 
