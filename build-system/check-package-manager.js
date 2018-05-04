@@ -153,6 +153,7 @@ function getYarnStableVersion(infoJson) {
 function checkGlobalGulp() {
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
+  const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
   if (globalGulp) {
     console.log(yellow('WARNING: Detected a global install of'),
         cyan('gulp') + yellow('. It is recommended that you use'),
@@ -162,6 +163,11 @@ function checkGlobalGulp() {
         cyan('"yarn global add gulp-cli"') + yellow('.'));
     console.log(yellow('⤷ See'), cyan(gulpHelpUrl),
         yellow('for more information.'));
+  } else if (!globalGulpCli) {
+    console.log(yellow('WARNING: Could not find'),
+        cyan('gulp-cli') + yellow('.'));
+    console.log(yellow('⤷ To install it, run'),
+        cyan('"yarn global add gulp-cli"') + yellow('.'));
   } else {
     const gulpVersions = getStdout(gulpExecutable + ' --version').trim();
     const gulpVersion = gulpVersions.match(/Local version (.*?)$/)[1];
