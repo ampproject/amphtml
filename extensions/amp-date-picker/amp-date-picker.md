@@ -182,7 +182,11 @@ and the user can select a single date. This is the default selection type.
 </amp-date-picker>
 ```
 
-<!-- TODO(cvializ): add image -->
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="320" height="356">
+  <noscript>
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png">
+  </noscript>
+</amp-img>
 
 ### `type="range"`
 
@@ -197,7 +201,11 @@ and the user can select a date range with a starting date and ending date.
 </amp-date-picker>
 ```
 
-<!-- TODO(cvializ): add image -->
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png" width="320" height="355">
+  <noscript>
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png">
+  </noscript>
+</amp-img>
 
 ## Attributes
 
@@ -253,6 +261,8 @@ Specify the `startDate` property via the [`src` attribute](#src-optional) to set
 an initial end date dynamically.
 
 ```html
+<input id="a2">
+<input id="b2">
 <amp-date-picker
     type="range"
     start-input-selector="#a2"
@@ -275,6 +285,8 @@ Specify the `endDate` property via the [`src` attribute](#src-optional) to set
 an initial end date dynamically.
 
 ```html
+<input id="a2">
+<input id="b2">
 <amp-date-picker
     type="range"
     start-input-selector="#a2"
@@ -359,11 +371,11 @@ these values should be specified in the `src` JSON response and not with their c
 
 `src` property|Description
 --|--
-`blocked`|A list of dates to render as blocked in the calendar view. The user is prevented from selecting these dates.
+`blocked`|An array of ISO 8601 single dates or RFC 5545 RRULE repeating dates to render as blocked in the calendar view. The user is prevented from selecting these dates.
 `date`|Specifies the initially selected date. In a date picker with `type="range"` this has no effect.
 `endDate`|Specifies the initially selected end date. In a date picker with `type="single"` this has no effect.
-`highlighted`|A list of dates to render as highlighted in the calendar view.
-`startDate`|Specifies the initially selected start date for a date range picker. In a date picker with `type="single"` this has no effect.
+`highlighted`|An array of ISO 8601 single dates or RFC 5545 RRULE repeating dates to render as highlighted in the calendar view.
+`startDate`|Specifies the initially selected start date for a date picker with `type="range"`. In a date picker with `type="single"` this has no effect.
 `templates`|The templates property is an array of "template definition objects". These objects have an `id` property and a `dates` property.
 
 ###### template definition objects
@@ -420,7 +432,8 @@ that do not have an explicitly specified template.
 *Example: Markup using the `src` attribute*
 
 ```html
-<amp-date-picker src="https://www.example.com/date-data.json">
+<amp-date-picker src="https://www.example.com/date-data.json"
+  layout="fixed-height" height="360">
   <template type="amp-mustache" date-template id="my-template-id">⚡️</template>
   <template type="amp-mustache" date-template id="my-second-template-id">🌮</template>
   <template type="amp-mustache" date-template id="my-default-template-id">{{D}}</template>
@@ -433,8 +446,8 @@ Renders the picker to fill the space available to it, like in a fullscreen light
 This works best with `layout="fill"`.
 
 ```html
-<input on="tap:lightbox.open" placeholder="Start" id="start"/>
-<input on="tap:lightbox.open" placeholder="End" id="end"/>
+<input on="tap:lightbox.open" placeholder="Start" id="start">
+<input on="tap:lightbox.open" placeholder="End" id="end">
 <button on="tap:dp.clear">Clear</button>
 <amp-lightbox id="lightbox" layout="nodisplay">
   <amp-date-picker
@@ -452,13 +465,15 @@ This works best with `layout="fill"`.
 </amp-lightbox>
 ```
 
-<!-- TODO(cvializ): add image -->
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
+  <noscript>
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png">
+  </noscript>
+</amp-img>
 
 ##### open-after-select [optional]
 
 If present, keeps the date picker overlay open after the user selects a date or dates. By default, this attribute is not present.
-
-<!-- TODO(cvializ): does it still trigger deactivate? -->
 
 ##### open-after-clear [optional]
 
@@ -555,7 +570,7 @@ These variables are ISO 8601 format string values e.g. `DD`, `D`, `X`, etc.
 rendered after the calendar view renders for the first time.
 
 ```html
-<amp-date-picker>
+<amp-date-picker layout="fixed-height" height="360">
   <!-- Render the "party" emoji on New Years Day 2018 -->
   <template type="amp-mustache" date-template dates="2018-01-01">🎉</template>
   <!-- Render the "taco" emoji every Tuesday for 52 weeks starting 2018-01-01 -->
@@ -581,7 +596,7 @@ the calendar view. `info-template`s may contain any valid AMP content and are on
 rendered after the calendar view renders for the first time.
 
 ```html
-<amp-date-picker>
+<amp-date-picker layout="fixed-height" height="360">
   <template type="amp-mustache" info-template>
     Warning: Tacos are only available on Tuesday
   </template>
