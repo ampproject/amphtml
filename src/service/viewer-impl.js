@@ -49,7 +49,7 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  * @private {!RegExp}
  */
 const TRIM_ORIGIN_PATTERN_ =
-  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp)\.)+/i;
+  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
