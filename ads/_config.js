@@ -735,7 +735,7 @@ export const adConfig = {
     preconnect: 'https://ampad.quora.com',
     renderStartImplemented: true,
   },
-  
+
   realclick: {
     prefetch: 'https://ssp.realclick.co.kr/amp/ad.js',
   },
