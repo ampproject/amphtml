@@ -37,6 +37,7 @@ describes.realWin('amp-install-serviceworker', {
   let container;
   let ampdoc;
   let maybeInstallUrlRewriteStub;
+  let whenVisible;
 
   beforeEach(() => {
     doc = env.win.document;
@@ -52,6 +53,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should install for same origin', () => {
     const install = doc.createElement('div');
     container.appendChild(install);
+    install.getAmpDoc = () => ampdoc;
     install.setAttribute('src', 'https://example.com/sw.js');
     const implementation = new AmpInstallServiceWorker(install);
     let calledSrc;
@@ -71,13 +73,21 @@ describes.realWin('amp-install-serviceworker', {
         },
       },
     };
+    whenVisible = Promise.resolve();
+    registerServiceBuilder(implementation.win, 'viewer', function() {
+      return {
+        whenFirstVisible: () => whenVisible,
+        isVisible: () => true,
+      };
+    });
     implementation.buildCallback();
     expect(calledSrc).to.be.undefined;
-    return loadPromise(implementation.win).then(() => {
-      expect(calledSrc).to.equal('https://example.com/sw.js');
-      // Should not be called before `register` resolves.
-      expect(maybeInstallUrlRewriteStub).to.not.be.called;
-    });
+    return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+        () => {
+          expect(calledSrc).to.equal('https://example.com/sw.js');
+          // Should not be called before `register` resolves.
+          expect(maybeInstallUrlRewriteStub).to.not.be.called;
+        });
   });
 
   it('should be ok without service worker.', () => {

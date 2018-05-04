@@ -76,12 +76,12 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
             'source (%s) or canonical URL (%s) of the AMP-document.',
             origin, sourceUrl.origin, canonicalUrl.origin);
         this.iframeSrc_ = iframeSrc;
-        this.whenReadyAndVisiblePromise_().then(() => {
+        this.whenLoadedAndVisiblePromise_().then(() => {
           return this.insertIframe_();
         });
       }
     } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      this.loadPromise(this.win).then(() => {
+      this.whenLoadedAndVisiblePromise_(this.win).then(() => {
         return install(this.win, src);
       });
     } else {
@@ -96,11 +96,11 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  whenReadyAndVisiblePromise_() {
-    const whenReady = this.loadPromise(this.win);
-    const whenVisible =
-        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
-    return Promise.all([whenReady, whenVisible]);
+  whenLoadedAndVisiblePromise_() {
+    return Promise.all([
+      this.loadPromise(this.win),
+      Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible(),
+    ]);
   }
 
   /**
@@ -170,7 +170,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   waitToPreloadShell_(shellUrl) {
-    return this.whenReadyAndVisiblePromise_().then(() => {
+    return this.whenLoadedAndVisiblePromise_().then(() => {
       this.mutateElement(() => this.preloadShell_(shellUrl));
     });
   }
