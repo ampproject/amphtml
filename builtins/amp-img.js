@@ -18,7 +18,7 @@ import {BaseElement} from '../src/base-element';
 import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
-import {srcsetFromElement, srcsetFromSrc, srcsetRegex} from '../src/srcset';
+import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -27,9 +27,8 @@ import {srcsetFromElement, srcsetFromSrc, srcsetRegex} from '../src/srcset';
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
   'aria-describedby', 'aria-labelledby'];
 
-const EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE = ['alt', 'title',
-  'referrerpolicy', 'aria-label','aria-describedby', 'aria-labelledby',
-  'srcset', 'src', 'sizes'];
+const EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE = ATTRIBUTES_TO_PROPAGATE
+    .concat(['srcset', 'src', 'sizes']);
 
 export class AmpImg extends BaseElement {
 
@@ -211,7 +210,8 @@ export class AmpImg extends BaseElement {
   guaranteeSrcForSrcsetUnsupportedBrowsers_() {
     if (!this.img_.hasAttribute('src') && 'srcset' in this.img_ == false) {
       const srcset = this.element.getAttribute('srcset');
-      const srcseturl = srcsetRegex.exec(srcset);
+
+      const srcseturl = /\S+/.match(srcset);
       if (srcseturl) {
         this.img_.setAttribute('src', srcseturl[0]);
       }
