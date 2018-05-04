@@ -751,7 +751,7 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ npx gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
 ## Type checking
@@ -764,7 +764,7 @@ your code. The following command should be run to ensure no type
 violations are introduced by your extension.
 
 ```shell
-$ npx gulp check-types
+$ gulp check-types
 ```
 
 ## Example PRs
