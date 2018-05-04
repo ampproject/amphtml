@@ -64,7 +64,7 @@ import {user} from '../../../src/log';
 const PADDING_LEFT = 0;
 const PADDING_RIGHT = 0;
 const PADDING_BOTTOM = 0;
-const PADDING_TOP = 64;
+const PADDING_TOP = 0;
 
 class AmpInstagram extends AMP.BaseElement {
 
@@ -211,8 +211,6 @@ class AmpInstagram extends AMP.BaseElement {
       const height = data['details']['height'];
       this.getVsync().measure(() => {
         if (this.iframe_ && this.iframe_./*OK*/offsetHeight !== height) {
-          // Height returned by Instagram includes header, so
-          // subtract 48px top padding
           this./*OK*/changeHeight(height - (PADDING_TOP + PADDING_BOTTOM));
         }
       });
