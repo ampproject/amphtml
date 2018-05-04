@@ -51,6 +51,13 @@ const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
 
 /**
+ * Default milliseconds to wait for all extensions to load before erroring.
+ * (8 seconds is the same as the CSS boilerplate timoeout)
+ * @const
+ */
+const LOAD_TIMEOUT = 8000;
+
+/**
  * The structure that contains the declaration of a custom element.
  *
  * @typedef {{
@@ -168,12 +175,17 @@ export class Extensions {
   /**
    * Waits for the previously included extension to complete
    * loading/registration.
+   * @param {!Window} win
    * @param {string} extensionId
-   * @return {!Promise<!ExtensionDef>}
+   * @param {number=} opt_timeout
+   * @return {!Promise<?ExtensionDef>}
    */
-  waitForExtension(extensionId) {
-    return this.waitFor_(this.getExtensionHolder_(
-        extensionId, /* auto */ false));
+  waitForExtension(win, extensionId, opt_timeout) {
+    return /** @type {!Promise<?ExtensionDef>} */ (
+      Services.timerFor(win).timeoutPromise(opt_timeout || LOAD_TIMEOUT,
+          this.waitFor_(
+              this.getExtensionHolder_(extensionId, /* auto */ false)),
+          `Render timeout waiting for extension ${extensionId} to be load.`));
   }
 
   /**

@@ -27,11 +27,13 @@ import {
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 import {getServiceForDoc} from '../../src/service';
+import {installTimerService} from '../../src/service/timer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {registerServiceBuilder} from '../../src/service';
 import {
   resetScheduledElementForTesting,
 } from '../../src/service/custom-element-registry';
+
 
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
@@ -41,10 +43,15 @@ describes.sandboxed('Extensions', {}, () => {
   describes.fakeWin('registerExtension', {}, env => {
     let win;
     let extensions;
+    let timeoutCallback;
 
     beforeEach(() => {
       win = env.win;
+      win.setTimeout = cb => {
+        timeoutCallback = cb;
+      };
       installDocService(win, /* isSingleDoc */ true);
+      installTimerService(win);
       extensions = new Extensions(win);
       installRuntimeStylesTo(win.document.head);
     });
@@ -81,14 +88,14 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.scriptPresent).to.be.undefined;
 
       // However, the promise is created lazily.
-      return extensions.waitForExtension('amp-ext').then(extension => {
+      return extensions.waitForExtension(win, 'amp-ext').then(extension => {
         expect(extension).to.exist;
         expect(extension.elements).to.exist;
       });
     });
 
     it('should register successfully with promise', () => {
-      const promise = extensions.waitForExtension('amp-ext');
+      const promise = extensions.waitForExtension(win, 'amp-ext');
       extensions.registerExtension('amp-ext', () => {}, {});
       expect(extensions.currentExtensionId_).to.be.null;
 
@@ -98,7 +105,6 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.resolve).to.exist;
       expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
-      expect(promise).to.equal(holder.promise);
 
       return promise.then(extension => {
         expect(extension).to.exist;
@@ -107,11 +113,11 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should fail registration without promise', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         extensions.registerExtension('amp-ext', () => {
           throw new Error('intentional');
         }, {});
-      }).to.throw(/intentional/); });
+      }).to.throw(/intentional/);
       expect(extensions.currentExtensionId_).to.be.null;
 
       const holder = extensions.extensions_['amp-ext'];
@@ -124,7 +130,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.promise).to.be.undefined;
 
       // However, the promise is created lazily.
-      return extensions.waitForExtension('amp-ext').then(() => {
+      return extensions.waitForExtension(win, 'amp-ext').then(() => {
         throw new Error('must have been rejected');
       }, reason => {
         expect(reason.message).to.equal('intentional');
@@ -132,12 +138,12 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should fail registration with promise', () => {
-      const promise = extensions.waitForExtension('amp-ext');
-      allowConsoleError(() => { expect(() => {
+      const promise = extensions.waitForExtension(win , 'amp-ext');
+      expect(() => {
         extensions.registerExtension('amp-ext', () => {
           throw new Error('intentional');
         }, {});
-      }).to.throw(/intentional/); });
+      }).to.throw(/intentional/);
       expect(extensions.currentExtensionId_).to.be.null;
 
       const holder = extensions.extensions_['amp-ext'];
@@ -147,12 +153,25 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.resolve).to.exist;
       expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
-      expect(promise).to.equal(holder.promise);
+      expect(promise).to.eventually.equal(holder.promise);
 
-      return extensions.waitForExtension('amp-ext').then(() => {
+      return extensions.waitForExtension(win, 'amp-ext').then(() => {
         throw new Error('must have been rejected');
       }, reason => {
         expect(reason.message).to.equal('intentional');
+      });
+    });
+
+    it('should fail on timeout', () => {
+      timeoutCallback = null;
+      const promise = extensions.waitForExtension(win , 'amp-ext');
+      expect(timeoutCallback).to.be.a('function');
+      timeoutCallback();
+
+      return promise.then(() => {
+        throw new Error('must have been rejected');
+      }, reason => {
+        expect(reason.message).to.match(/^Render timeout/);
       });
     });
 
@@ -161,7 +180,7 @@ describes.sandboxed('Extensions', {}, () => {
       extensions.registerExtension('amp-ext', () => {
         extensions.addElement('e1', ctor);
       }, {});
-      return extensions.waitForExtension('amp-ext').then(extension => {
+      return extensions.waitForExtension(win, 'amp-ext').then(extension => {
         expect(extension.elements['e1']).to.exist;
         expect(extension.elements['e1'].implementationClass).to.equal(ctor);
       });
