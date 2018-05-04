@@ -325,9 +325,6 @@ export class VideoDocking {
     /** @private {number} */
     this.lastScrollTop_ = this.viewport_.getScrollTop();
 
-    /** @private {number} */
-    this.lastScrollDelta_ = 0;
-
     /** @private {boolean} */
     this.stickyControls_ = false;
 
@@ -337,7 +334,7 @@ export class VideoDocking {
       // It would be nice if the viewport service provided scroll direction
       // and speed.
       this.viewport_.onScroll(
-          throttle(ampdoc.win, () => this.updateScroll_(), 100));
+          throttle(ampdoc.win, () => this.updateScroll_(), 50));
 
       this.installStyles_();
     });
@@ -370,7 +367,6 @@ export class VideoDocking {
     const scrollDirection = scrollTop > this.lastScrollTop_ ?
       Direction.UP :
       Direction.DOWN;
-    this.lastScrollDelta_ = Math.abs(this.lastScrollTop_ - scrollTop);
     this.scrollDirection_ = scrollDirection;
     this.lastScrollTop_ = scrollTop;
   }
@@ -536,16 +532,13 @@ export class VideoDocking {
         this.ignoreDueToNotPlayingManually_(video)) {
       return;
     }
-
     if (this.undockBecauseVisible_(video)) {
       return;
     }
-
     const posY = this.maybeGetRelativeY_(video);
     if (posY === null) {
       return;
     }
-
     this.dock_(video, this.getRelativeX_(), posY);
   }
 
@@ -730,7 +723,7 @@ export class VideoDocking {
       return;
     }
 
-    const step = this.calculateStep_(element, finalize);
+    const step = finalize ? 1 : this.calculateStep_(element);
 
     const {x, y, scale} = this.getDims_(video, posX, posY, step);
 
@@ -777,24 +770,12 @@ export class VideoDocking {
 
   /**
    * @param {!AmpElement} element
-   * @param {boolean=} finalize
    * @return {number}
    * @private
    */
-  calculateStep_(element, finalize = false) {
-    if (finalize || this.isScrollingQuickly_()) {
-      return 1;
-    }
+  calculateStep_(element) {
     const {intersectionRatio} = element.getIntersectionChangeEntry();
     return (1 - intersectionRatio);
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isScrollingQuickly_() {
-    return this.lastScrollDelta_ > 100;
   }
 
   /**
@@ -812,8 +793,14 @@ export class VideoDocking {
     return remaining * maxAutoTransitionDurationMs;
   }
 
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @param {number} scale
+   * @return {boolean}
+   */
   alreadyPlacedAt_(x, y, scale) {
-    return this.placedAt_ &&
+    return !!this.placedAt_ &&
         this.placedAt_.x == x &&
         this.placedAt_.y == y &&
         this.placedAt_.scale == scale;
