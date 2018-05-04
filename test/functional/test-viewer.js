@@ -1099,6 +1099,8 @@ describe('Viewer', () => {
       testHasRoughlySameOrigin('https://www.amp.google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://amp.www.google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://mobile.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://m.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://amp.m.google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://amp.mobile.google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://amp.mobile.google.co.uk', 'https://google.co.uk');
       testHasRoughlySameOrigin('https://www1.www2.www3.google.com', 'https://google.com');
