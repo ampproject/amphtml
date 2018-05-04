@@ -218,11 +218,11 @@ window.context.renderStart({width: 200, height: 100});
 Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height)` API. Details in [Ad Resizing](#ad-resizing).
 
 ### amp-consent integration
-If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute 
+If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute
 can be added to `amp-ad` element to respect the corresponding `amp-consent` policy.
-In that case, the `amp-ad` element will be blocked for loading until the consent 
-responded. Once `amp-ad` is unblocked, 3rd party ad scripts can access the consent 
-related information via the following 
+In that case, the `amp-ad` element will be blocked for loading until the consent
+responded. Once `amp-ad` is unblocked, 3rd party ad scripts can access the consent
+related information via the following
 `window.context` APIs.
 
 <dl>
@@ -254,7 +254,7 @@ Add the JS URLs that an ad **always** fetches or always connects to (if you know
 This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
 
 ### Ad markup
-Ads are loaded using the `<amp-ad>` tag containing the specified `type`  for the ad netowkr, and name value pairs of configuration. 
+Ads are loaded using the `<amp-ad>` tag containing the specified `type`  for the ad netowkr, and name value pairs of configuration.
 
 This is an example for the A9 network:
 
@@ -314,7 +314,7 @@ If you're adding support for a new third-party ad service, changes to the follow
 
 To verify the examples that you have put in `/examples/ads.amp.html`:
 
-1. Start a local gulp web server by running command `npx gulp`.
+1. Start a local gulp web server by running command `gulp`.
 2. Visit `http://localhost:8000/examples/ads.amp.html?type=yournetwork` in your browser to make sure the examples load ads.
 
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only will it be a more confident example for publishers to follow, but also allows the AMP team to catch any regression bug during AMP releases.
@@ -328,14 +328,15 @@ Please verify your ad is fully functioning, for example, by clicking on an ad. W
 Please make sure your changes pass the tests:
 
 ```
-npx gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
+gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
+
 ```
 
 If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/functional/ads/test-yournetwork.js` is highly recommended.
 
 ### Lint and type-check
 
-To speed up the review process, please run `npx gulp lint` and `npx gulp check-types`, then fix errors, if any, before sending out the PR.
+To speed up the review process, please run `gulp lint` and `gulp check-types`, then fix errors, if any, before sending out the PR.
 
 ### Other tips
 
@@ -344,6 +345,6 @@ To speed up the review process, please run `npx gulp lint` and `npx gulp check-t
   1. Using a different email address in the git commit.
   2. Not providing the exact company name in the PR thread.
 
-## Developer announcements for ads related API changes 
+## Developer announcements for ads related API changes
 
-For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, the AMP Project will notify the [amp-ads-announce@googlegroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes. 
+For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, the AMP Project will notify the [amp-ads-announce@googlegroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes.
