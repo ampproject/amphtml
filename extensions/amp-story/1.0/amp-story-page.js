@@ -36,6 +36,7 @@ import {PageScalingService} from './page-scaling';
 import {Services} from '../../../src/services';
 import {
   closestBySelector,
+  iterateCursor,
   matches,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -58,10 +59,15 @@ const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 
 
 /**
- * Selector for which media to wait for on page layout.
- * @const {string}
+ * Selectors for media elements
+ * @enum {string}
  */
-const PAGE_MEDIA_SELECTOR = 'amp-audio, amp-video, amp-img, amp-anim';
+const Selectors = {
+  // which media to wait for on page layout.
+  ALL_AMP_MEDIA: 'amp-audio, amp-video, amp-img, amp-anim',
+  ALL_MEDIA: 'audio, video',
+  ALL_VIDEO: 'video',
+};
 
 
 /** @private @const {string} */
@@ -267,7 +273,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   waitForMediaLayout_() {
-    const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
+    const mediaSet = this.getMediaBySelector_(Selectors.ALL_AMP_MEDIA);
+
     const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
       return new Promise(resolve => {
         switch (mediaEl.tagName.toLowerCase()) {
@@ -324,21 +331,45 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Gets all media elements on this page.
-   * @return {!NodeList<!Element>}
+   * @return {!Array<?Element>}
    * @private
    */
   getAllMedia_() {
-    return this.element.querySelectorAll('audio, video');
+    return this.getMediaBySelector_(Selectors.ALL_MEDIA);
   }
 
 
   /**
    * Gets all video elements on this page.
-   * @return {!NodeList<!Element>}
+   * @return {!Array<?Element>}
    * @private
    */
   getAllVideos_() {
-    return this.element.querySelectorAll('video');
+    return this.getMediaBySelector_(Selectors.ALL_VIDEO);
+  }
+
+
+  /**
+   * Gets media on page by given selector. Finds elements through friendly
+   * iframe (if one exists).
+   * @param {string} selector
+   * @return {!Array<?Element>}
+   */
+  getMediaBySelector_(selector) {
+    const iframe = this.element.querySelector('iframe');
+    const iframeDoc = iframe && iframe.contentDocument;
+    const mediaSet = [];
+
+    iterateCursor(scopedQuerySelectorAll(this.element, selector),
+        el => mediaSet.push(el));
+
+    if (!iframeDoc) {
+      return mediaSet;
+    }
+
+    iterateCursor(iframeDoc.querySelectorAll(selector),
+        el => mediaSet.push(el));
+    return mediaSet;
   }
 
 
