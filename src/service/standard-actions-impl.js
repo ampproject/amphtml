@@ -123,6 +123,9 @@ export class StandardActions {
 
       case 'print':
         return this.handleAmpPrint_(invocation);
+
+      case 'optoutOfCid':
+        return this.handleOptoutOfCid_(invocation);
     }
     throw user().createError('Unknown AMP action ', method);
   }
@@ -201,6 +204,21 @@ export class StandardActions {
     const win = (node.ownerDocument || node).defaultView;
     win.print();
     return null;
+  }
+
+  /**
+   * Opts the user out of cid issuance.
+   * @private
+   */
+  handleOptoutOfCid_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
+    return Services.cidForDoc(this.ampdoc)
+        .then(cid => cid.optOut())
+        .catch(reason => {
+          dev().error(TAG, 'Failed to opt out of Cid', reason);
+        });
   }
 
   /**

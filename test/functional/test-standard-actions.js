@@ -18,7 +18,10 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
 import {Services} from '../../src/services';
 import {StandardActions} from '../../src/service/standard-actions-impl';
+import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
+import {macroTask} from '../../testing/yield';
+
 import {setParentWindow} from '../../src/service';
 
 describes.sandboxed('StandardActions', {}, () => {
@@ -240,6 +243,17 @@ describes.sandboxed('StandardActions', {}, () => {
       standardActions.handleAmpTarget(invocation);
       expect(goBackStub).to.be.calledOnce;
     });
+
+
+    it('should implement optoutOfCid', function*() {
+      const cid = cidServiceForDocForTesting(ampdoc);
+      const optoutStub = sandbox.stub(cid, 'optOut');
+      const invocation = {method: 'optoutOfCid', satisfiesTrust: () => true};
+      standardActions.handleAmpTarget(invocation);
+      yield macroTask();
+      expect(optoutStub).to.be.calledOnce;
+    });
+
 
     it('should implement setState()', () => {
       const setStateWithExpression = sandbox.stub();
