@@ -21,6 +21,7 @@
 
 import {InaboxMessagingHost} from './inabox-messaging-host';
 import {dev, initLogConstructor, setReportError, user} from '../../src/log';
+import {getData} from '../../src/event-helper';
 import {reportError} from '../../src/error';
 
 /** @const {string} */
@@ -96,7 +97,8 @@ function validateMessage(message) {
   const valid = message.source && message.source.postMessage;
   if (!valid) {
     user().error(TAG,
-        'Missing message.source. message.data=' + JSON.stringify(message.data));
+        'Missing message.source. message.data='
+        + JSON.stringify(getData(message)));
   }
   return valid;
 }
