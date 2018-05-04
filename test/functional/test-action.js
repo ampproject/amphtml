@@ -1144,6 +1144,16 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.not.have.been.called;
   });
 
+  it('should NOT trigger tap event on key press if focused element DOES NOT ' +
+     'have any role', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('input');
+    const event = {target: element, keyCode: KeyCodes.ENTER};
+    handler(event);
+    expect(action.trigger).to.not.have.been.called;
+  });
+
   it('should trigger submit event', () => {
     expect(window.document.addEventListener).to.have.been.calledWith('submit');
     const handler = window.document.addEventListener.getCall(2).args[1];
@@ -1357,10 +1367,8 @@ describes.realWin('whitelist', {
     const i = new ActionInvocation(target, 'print', /* args */ null,
         'source', 'caller', 'event', 0, 'AMP');
     sandbox.stub(action, 'error_');
-    allowConsoleError(() => {
-      expect(action.invoke_(i)).to.be.null;
-      expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
-          '(AMP.pushState,AMP.setState).');
-    });
+    expect(action.invoke_(i)).to.be.null;
+    expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
+        '(AMP.pushState,AMP.setState).');
   });
 });
