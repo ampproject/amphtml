@@ -32,8 +32,6 @@ For most developers the instructions in the [Getting Started Quick Start Guide](
 
 The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setup) has instructions for installing Node.js, yarn, and Gulp which you'll need before running these commands.
 
-Note that if you don't install
-
 | Command                                                                 | Description                                                           |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | **`gulp`**                                                              | Runs "watch" and "serve". Use this for standard local dev.            |

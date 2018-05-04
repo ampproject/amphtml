@@ -190,16 +190,6 @@ Now that you have all of the files copied locally you can actually build the cod
    ```
    You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies, which are generally safe to ignore.
 
-* The AMP Project uses Gulp as our build system.   Gulp uses a configuration file ([gulpfile.js](https://github.com/ampproject/amphtml/blob/master/gulpfile.js)) to build amphtml (including the amphtml javascript) and to start up the Node.js server with the proper settings.  You don't really have to understand exactly what it is doing at this point--you just have to install it and use it.
-
-   You can install Gulp using Yarn:
-
-   ```
-   yarn global add gulp
-   ```
-
-   The preceding command might require elevated privileges using `sudo` on some platforms.
-
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
 ```
