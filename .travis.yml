@@ -9,6 +9,14 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
+  - |
+      if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+        TRAVIS_COMMIT_RANGE="FETCH_HEAD...$TRAVIS_BRANCH"
+      fi
+      git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '\.md$' || {
+        echo "Only docs were updated, stopping build process."
+        exit
+      }
   - export CHROME_BIN=google-chrome-stable
   - export DISPLAY=:99.0
   - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
