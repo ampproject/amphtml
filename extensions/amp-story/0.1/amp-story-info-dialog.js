@@ -29,7 +29,7 @@ import {htmlFor} from '../../../src/static-template';
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
 
 /** @const {string} Class to toggle the info dialog link. */
-const MOREINFO_VISIBLE_CLASS = 'i-amphtml-story-info-moreinfo-visible';
+export const MOREINFO_VISIBLE_CLASS = 'i-amphtml-story-info-moreinfo-visible';
 
 export class InfoDialog {
   /**
@@ -70,6 +70,7 @@ export class InfoDialog {
 
   /**
    * Builds and appends the component in the story.
+   * @return {!Promise}
    */
   build() {
     if (this.isBuilt()) {
@@ -91,7 +92,7 @@ export class InfoDialog {
     createShadowRootWithStyle(root, this.element_, CSS);
     this.initializeListeners_();
 
-    this.vsync_.run({
+    const appendPromise = this.vsync_.runPromise({
       mutate: () => {
         this.innerContainerEl_ =
             this.element_
@@ -104,10 +105,14 @@ export class InfoDialog {
 
     const pageUrl = Services.documentInfoForDoc(
         getAmpdoc(this.parentEl_)).canonicalUrl;
-    this.setHeading_();
-    this.setPageLink_(pageUrl);
-    this.requestMoreInfoLink_()
-        .then(moreInfoUrl => this.setMoreInfoLinkUrl_(moreInfoUrl));
+
+    return Promise.all([
+      appendPromise,
+      this.setHeading_(),
+      this.setPageLink_(pageUrl),
+      this.requestMoreInfoLink_()
+          .then(moreInfoUrl => this.setMoreInfoLinkUrl_(moreInfoUrl)),
+    ]);
   }
 
   /**
@@ -176,7 +181,10 @@ export class InfoDialog {
     }
 
     return messagingPromise
-        .sendMessageAwaitResponse('moreInfoLinkUrl', /* data */ undefined)
+        .then(() => {
+          return this.viewer_.sendMessageAwaitResponse('moreInfoLinkUrl',
+              /* data */ undefined);
+        })
         .then(moreInfoUrl => {
           if (!moreInfoUrl) {
             return null;
@@ -192,9 +200,16 @@ export class InfoDialog {
   setHeading_() {
     const label = this.localizationService_.getLocalizedString(
         LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL);
-    const headingEl = this.element_
-        .querySelector('.i-amphtml-story-info-heading');
-    headingEl.textContent = label;
+
+    return this.vsync_.runPromise({
+      measure: state => {
+        state.headingEl = this.element_
+            .querySelector('.i-amphtml-story-info-heading');
+      },
+      mutate: state => {
+        state.headingEl.textContent = label;
+      },
+    }, /* state */ {});
   }
 
   /**
@@ -202,13 +217,20 @@ export class InfoDialog {
    *     document.
    */
   setPageLink_(pageUrl) {
-    const linkEl = this.element_.querySelector('.i-amphtml-story-info-link');
-    linkEl.setAttribute('href', pageUrl);
-    linkEl.setAttribute('rel', 'amphtml');
+    return this.vsync_.runPromise({
+      measure: state => {
+        state.linkEl = this.element_
+            .querySelector('.i-amphtml-story-info-link');
+      },
+      mutate: state => {
+        state.linkEl.setAttribute('href', pageUrl);
+        state.linkEl.setAttribute('rel', 'amphtml');
 
-    // Add zero-width spaces after "." and "/" characters to help line-breaks
-    // occur more naturally.
-    linkEl.textContent = pageUrl.replace(/([/.]+)/gi, '$1\u200B');
+        // Add zero-width spaces after "." and "/" characters to help line-breaks
+        // occur more naturally.
+        state.linkEl.textContent = pageUrl.replace(/([/.]+)/gi, '$1\u200B');
+      },
+    }, /* state */ {});
   }
 
   /**
@@ -217,10 +239,10 @@ export class InfoDialog {
    */
   setMoreInfoLinkUrl_(moreInfoUrl) {
     if (!moreInfoUrl) {
-      return;
+      return Promise.resolve();
     }
 
-    this.vsync_.run({
+    return this.vsync_.runPromise({
       measure: () => {
         this.moreInfoLinkEl_ = this.element_
             .querySelector('.i-amphtml-story-info-moreinfo');
