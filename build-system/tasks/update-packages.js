@@ -22,6 +22,8 @@ const getStderr = require('../exec').getStderr;
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 
+const yarnExecutable = 'npx yarn';
+
 /**
  * Patches Web Animations API by wrapping its body into `install` function.
  * This gives us an option to call polyfill directly on the main window
@@ -54,8 +56,8 @@ function patchWebAnimations() {
 function installCustomEslintRules() {
   const customRuleDir = 'build-system/eslint-rules';
   const customRuleName = 'eslint-plugin-amphtml-internal';
-  exec('yarn link', {'stdio': 'ignore', 'cwd': customRuleDir});
-  exec('yarn link ' + customRuleName, {'stdio': 'ignore'});
+  exec(yarnExecutable + ' link', {'stdio': 'ignore', 'cwd': customRuleDir});
+  exec(yarnExecutable + ' link ' + customRuleName, {'stdio': 'ignore'});
   if (!process.env.TRAVIS) {
     log(colors.green('Installed lint rules from'), colors.cyan(customRuleDir));
   }
@@ -65,16 +67,15 @@ function installCustomEslintRules() {
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
  */
 function runYarnCheck() {
-  const integrityCmd = 'yarn check --integrity';
+  const integrityCmd = yarnExecutable + ' check --integrity';
   if (getStderr(integrityCmd).trim() != '') {
     log(colors.yellow('WARNING:'), 'The packages in',
         colors.cyan('node_modules'), 'do not match',
         colors.cyan('package.json.'));
-    const verifyTreeCmd = 'yarn check --verify-tree';
+    const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
-    const yarnCmd = 'yarn';
-    exec(yarnCmd);
+    exec(yarnExecutable);
   } else {
     log(colors.green('All packages in'),
         colors.cyan('node_modules'), colors.green('are up to date.'));
