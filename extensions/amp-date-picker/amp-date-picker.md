@@ -182,7 +182,11 @@ and the user can select a single date. This is the default selection type.
 </amp-date-picker>
 ```
 
-<img alt="A static single date picker" src="img/amp-date-picker-single-static.png" width="50%">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="320" height="356">
+  <noscript>
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png">
+  </noscript>
+</amp-img>
 
 ### `type="range"`
 
@@ -197,7 +201,11 @@ and the user can select a date range with a starting date and ending date.
 </amp-date-picker>
 ```
 
-<img alt="A static range date picker" src="img/amp-date-picker-range-static.png" width="50%">
+<amp-img alt="static single date picker" layout="fixed-height" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png" width="320" height="355">
+  <noscript>
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png">
+  </noscript>
+</amp-img>
 
 ## Attributes
 
@@ -438,8 +446,8 @@ Renders the picker to fill the space available to it, like in a fullscreen light
 This works best with `layout="fill"`.
 
 ```html
-<input on="tap:lightbox.open" placeholder="Start" id="start"/>
-<input on="tap:lightbox.open" placeholder="End" id="end"/>
+<input on="tap:lightbox.open" placeholder="Start" id="start">
+<input on="tap:lightbox.open" placeholder="End" id="end">
 <button on="tap:dp.clear">Clear</button>
 <amp-lightbox id="lightbox" layout="nodisplay">
   <amp-date-picker
@@ -457,7 +465,11 @@ This works best with `layout="fill"`.
 </amp-lightbox>
 ```
 
-<img alt="A fullscreen date picker" src="img/amp-date-picker-lightbox-fullscreen.png" width="50%">
+<amp-img alt="static single date picker" layout="fixed-height" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
+  <noscript>
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png">
+  </noscript>
+</amp-img>
 
 ##### open-after-select [optional]
 
