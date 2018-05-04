@@ -12,22 +12,17 @@
   on Github.
 -->
 <!doctype html>
-<html ⚡>
+<html ⚡ lang="en">
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="/amp_story_ads/amp-story-auto-ads/">
+  <link rel="canonical" href="ampconf.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <title>amp-story-auto-ads</title>
+  <title>Key Highlights of AMP Conf 2018</title>
 
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
-
-  <!-- ## Setup -->
-  <!--
-    Import the `amp-story-auto-ads` component.
-  -->
   <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"></script>
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -114,17 +109,19 @@
     amp-ad[template="image-template"] img {
       object-fit: cover;
     }
+
+    ::cue {
+      background-color: rgba(0, 0, 0, 0.75);
+      font-size: 24px;
+      line-height: 1.5;
+    }
   </style>
 </head>
   <body>
-    <amp-story standalone bookend-config-src="./json/bookend.json">
-      <!-- ## Configuration -->
-      <!-- Include the `amp-story-auto-ads` tag on your page. -->
-      <!-- It's first child should be a `script` tag with a JSON configuration object
-      that contains details for how ads should be fetched and displayed.
-      `ad-attributes` is a map of key-value pairs, which correspond to the
-      attributes of the amp-ad element to be inserted.
-      -->
+    <amp-story standalone
+        title="Key Highlights of AMP Conf 2018" publisher="The AMP team"
+        publisher-logo-src="./img/AMP-Brand-White-Icon.svg"
+        poster-portrait-src="./img/overview.jpg">
 
       <amp-story-auto-ads>
         <script type="application/json">
@@ -136,19 +133,10 @@
           }
         </script>
 
-        <!-- After the script tag then inline any templates that you wish to include.
-        These templates will be populated by a JSON response from the
-        server indicated by the `data-url` key above.
-        -->
-        <!-- This first example template would be used to create a simple ad with a
-        full size background image.-->
         <template type="amp-mustache" id="image-template">
           <amp-img class="fill-img" layout="fill" src="{{imgSrc}}"></amp-img>
         </template>
 
-        <!-- The second template is designed for a full screen video. You may
-        structure the templates however you wish, as long as they are valid
-        AMPHTML. -->
         <template type="amp-mustache" id="video-template">
           <amp-video autoplay loop
             width="400"
@@ -160,16 +148,6 @@
         </template>
       </amp-story-auto-ads>
 
-      <!-- See the full example below:
-       <div class="abe-story-preview">
-          <amp-iframe media="(min-width: 650px)"
-              src="https://amp-by-example-api.appspot.com/stories/monetization/amp-story-auto-ads/index.html"
-              width="440" height="732" sandbox="allow-scripts allow-popups allow-same-origin">
-            <div placeholder></div>
-          </amp-iframe>
-        </div> -->
-      <!-- -->
-
       <amp-story-page id="page-1">
         <amp-story-grid-layer template="fill">
           <amp-video autoplay loop
@@ -178,6 +156,7 @@
             poster="./img/poster0.png"
             layout="fill">
             <source src="./video/p1.mp4" type="video/mp4">
+            <track default src="./video/p1.vtt" srclang="en">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical" class="bottom">
@@ -230,22 +209,17 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-5">
+      <amp-story-page id="page-5" auto-advance-after="stamp-vid">
         <amp-story-grid-layer template="fill">
-          <amp-video autoplay loop
+          <amp-video autoplay
+            id="stamp-vid"
             width="400"
             height="750"
             poster="./img/poster2.jpg"
             layout="fill">
             <source src="./video/stamp.mp4" type="video/mp4">
+            <track default src="./video/stamp.vtt" srclang="en">
           </amp-video>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="thirds">
-          <div grid-area="lower-third" class="subtitle-page">
-            <p class="bold twenty-px center">
-              Telling stories with AMP.
-            </p>
-          </div>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -278,22 +252,17 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-8">
+      <amp-story-page id="page-8" auto-advance-after="gmail-vid">
         <amp-story-grid-layer template="fill">
-          <amp-video autoplay loop
+          <amp-video autoplay
+            id="gmail-vid"
             width="400"
             height="750"
             poster="./img/poster4.jpg"
             layout="fill">
             <source src="./video/gmail.mp4" type="video/mp4">
+            <track default src="./video/gmail.vtt" srclang="en">
           </amp-video>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="thirds">
-          <div grid-area="lower-third" class="subtitle-page">
-            <p class="bold twenty-px center lh30">
-              AMP for Email: <br/> A New Frontier for AMP
-            </p>
-          </div>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -319,22 +288,17 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-11">
+      <amp-story-page id="page-11" auto-advance-after="ecomm-vid">
         <amp-story-grid-layer template="fill">
-          <amp-video autoplay loop
+          <amp-video autoplay
+            id="ecomm-vid"
             width="400"
             height="750"
             poster="./img/poster5.jpg"
             layout="fill">
             <source src="./video/ecommerce.mp4" type="video/mp4">
+            <track default src="./video/ecommerce.vtt" srclang="en">
           </amp-video>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="thirds">
-          <div grid-area="lower-third" class="subtitle-page">
-            <p class="bold twenty-px center lh30">
-              Building an AMP e-commerce Experience
-            </p>
-          </div>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -351,6 +315,8 @@
           </a>
         </amp-story-cta-layer>
       </amp-story-page>
+
+      <amp-story-bookend src="./json/bookend.json" layout="nodisplay"></amp-story-bookend>
     </amp-story>
   </body>
 </html>
