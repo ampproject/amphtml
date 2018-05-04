@@ -16,6 +16,7 @@
 'use strict';
 
 require('./ava');
+require('./bundle-size');
 require('./changelog');
 require('./check-links');
 require('./clean');
