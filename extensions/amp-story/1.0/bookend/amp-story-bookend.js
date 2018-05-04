@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,14 +164,19 @@ export class AmpStoryBookend extends AMP.BaseElement {
     /** @private @const {!../amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win);
 
-    /** @private @const {?Element} */
-    this.parentEl_ = element.parentElement;
+    /** @private {?Element} */
+    this.parentEl_ = null;
 
     /** @private @const {!../../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
+  }
+
+  /** @override */
+  buildCallback() {
+    this.parentEl_ = this.element.parentElement;
   }
 
   /**

@@ -35,7 +35,7 @@ import {
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
-import {AmpStoryBookend} from './bookend/bookend-element';
+import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
@@ -71,6 +71,7 @@ import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
 import {
   childElement,
   closest,
+  createElementWithAttributes,
   escapeCssSelectorIdent,
   matches,
   removeElement,
@@ -84,6 +85,7 @@ import {
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
@@ -553,11 +555,6 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
-
-    this.element.querySelector('amp-story-bookend').getImpl().then(
-        bookendImpl => {
-          this.bookend_ = bookendImpl;
-        });
 
     if (!this.paginationButtons_) {
       this.buildPaginationButtons_();
@@ -1308,8 +1305,19 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildAndPreloadBookend_() {
-    this.bookend_.build();
-    return this.bookend_.loadConfig();
+    let bookendEl = this.element.querySelector('amp-story-bookend');
+    if (!bookendEl) {
+      bookendEl = createElementWithAttributes(this.win.document,
+          'amp-story-bookend', dict({'layout': 'nodisplay'}));
+      this.element.appendChild(bookendEl);
+    }
+
+    return bookendEl.getImpl().then(
+        bookendImpl => {
+          this.bookend_ = bookendImpl;
+          this.bookend_.build();
+          return this.bookend_.loadConfig();
+        });
   }
 
 

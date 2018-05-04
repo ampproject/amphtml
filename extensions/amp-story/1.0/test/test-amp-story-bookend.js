@@ -17,6 +17,7 @@
 import {AmpStory} from '../amp-story';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {ArticleComponent} from '../bookend/components/article';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {
@@ -76,7 +77,8 @@ describes.realWin('amp-story-bookend', {
     storyElem.appendChild(win.document.createElement('amp-story-page'));
     win.document.body.appendChild(storyElem);
     new AmpStory(storyElem);
-    bookendElem = win.document.createElement('amp-story-bookend');
+    bookendElem = createElementWithAttributes(win.document,
+        'amp-story-bookend', {'layout': 'nodisplay'});
     storyElem.appendChild(bookendElem);
     bookend = new AmpStoryBookend(bookendElem);
   });
@@ -107,6 +109,7 @@ describes.realWin('amp-story-bookend', {
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
 
+    bookend.buildCallback();
     bookend.build();
     return bookend.loadConfig().then(config => {
       config.components.forEach((currentComponent, index) => {
@@ -142,6 +145,7 @@ describes.realWin('amp-story-bookend', {
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
 
+    bookend.buildCallback();
     bookend.build();
     return bookend.loadConfig().then(config => {
       config.components.forEach((currentComponent, index) => {
