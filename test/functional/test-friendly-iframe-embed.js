@@ -329,6 +329,7 @@ describe('friendly-iframe-embed', () => {
     let blacklistedAd;
     let blacklistedAnalytics;
     let blacklistedPixel;
+    let blacklistedAmpAdExit;
 
     const context = document.createElement('div');
     document.body.appendChild(context);
@@ -341,6 +342,7 @@ describe('friendly-iframe-embed', () => {
           blacklistedAd = resource('amp-ad', 0),
           blacklistedAnalytics = resource('amp-analytics', 0),
           blacklistedPixel = resource('amp-pixel', 0),
+          blacklistedAmpAdExit = resource('amp-ad-exit', 0),
         ]))
         .once();
 
@@ -350,6 +352,7 @@ describe('friendly-iframe-embed', () => {
       expect(blacklistedAd.loadedComplete).to.be.false;
       expect(blacklistedAnalytics.loadedComplete).to.be.false;
       expect(blacklistedPixel.loadedComplete).to.be.false;
+      expect(blacklistedAmpAdExit.loadedComplete).to.be.false;
     });
   });
 
