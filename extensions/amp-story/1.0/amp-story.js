@@ -36,6 +36,7 @@ import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/bookend-element';
+import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
@@ -332,6 +333,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     // Disallow all actions in a (standalone) story.
+    // Components then add their own actions.
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
     actions.setWhitelist([]);
   }
@@ -1610,4 +1612,5 @@ AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-bookend', AmpStoryBookend);
+  AMP.registerElement('amp-story-consent', AmpStoryConsent);
 });
