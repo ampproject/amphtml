@@ -306,6 +306,7 @@ export class AbstractAmpContext {
     this.sourceUrl = context.sourceUrl;
     this.startTime = context.startTime;
     this.tagName = context.tagName;
+
     this.embedType_ = dataObject.type || null;
   }
 
