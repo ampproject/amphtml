@@ -201,7 +201,7 @@ and the user can select a date range with a starting date and ending date.
 </amp-date-picker>
 ```
 
-<amp-img alt="static single date picker" layout="fixed-height" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png" width="320" height="355">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png" width="320" height="355">
   <noscript>
     <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png">
   </noscript>
@@ -465,7 +465,7 @@ This works best with `layout="fill"`.
 </amp-lightbox>
 ```
 
-<amp-img alt="static single date picker" layout="fixed-height" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
   <noscript>
     <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png">
   </noscript>
