@@ -1367,10 +1367,8 @@ describes.realWin('whitelist', {
     const i = new ActionInvocation(target, 'print', /* args */ null,
         'source', 'caller', 'event', 0, 'AMP');
     sandbox.stub(action, 'error_');
-    allowConsoleError(() => {
-      expect(action.invoke_(i)).to.be.null;
-      expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
-          '(AMP.pushState,AMP.setState).');
-    });
+    expect(action.invoke_(i)).to.be.null;
+    expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
+        '(AMP.pushState,AMP.setState).');
   });
 });
