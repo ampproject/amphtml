@@ -38,7 +38,8 @@ import {toWin} from './types';
 const EMBED_PROP = '__AMP_EMBED__';
 
 /** @const {!Array<string>} */
-const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
+const EXCLUDE_INI_LOAD =
+    ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL', 'AMP-AD-EXIT'];
 
 
 /**
