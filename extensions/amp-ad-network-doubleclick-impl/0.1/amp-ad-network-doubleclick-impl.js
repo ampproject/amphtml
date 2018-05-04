@@ -243,6 +243,20 @@ const BLOCK_SRA_COMBINERS_ = [
     });
     return safeframeForced ? {'fsfs': forceSafeframes.join(',')} : null;
   },
+  instances => ({'adxs':
+    instances.map(instance => instance.getPageLayoutBox().left).join()}),
+  instances => ({'adys':
+    instances.map(instance => instance.getPageLayoutBox().top).join()}),
+  instances => {
+    let hasAmpContainer = false;
+    const result = [];
+    instances.forEach(instance => {
+      const containers = getEnclosingContainerTypes(instance.element);
+      result.push(containers.join());
+      hasAmpContainer = hasAmpContainer || !!containers.length;
+    });
+    return hasAmpContainer ? {'acts': result.join('|')} : null;
+  },
 ];
 
 
