@@ -281,8 +281,9 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
-          const isTapEventRole = hasOwn(TAPPABLE_ARIA_ROLES,
-              element.getAttribute('role').toLowerCase());
+          const role = element.getAttribute('role');
+          const isTapEventRole =
+              (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
           if (!event.defaultPrevented && isTapEventRole) {
             event.preventDefault();
             this.trigger(element, name, event, ActionTrust.HIGH);
