@@ -93,8 +93,15 @@ export class InaboxHost {
   }
 }
 
+/**
+ * Validates a message event and print errors if it does not contain expected
+ * fields.
+ *
+ * @param {!Event} message
+ * @returns {boolean} if the message is valid or not
+ */
 function validateMessage(message) {
-  const valid = message.source && message.source.postMessage;
+  const valid = !!(message.source && message.source.postMessage);
   if (!valid) {
     user().error(TAG,
         'Missing message.source. message.data='
