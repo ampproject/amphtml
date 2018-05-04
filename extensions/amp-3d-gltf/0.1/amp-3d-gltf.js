@@ -20,6 +20,13 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 
+const isWebGLSupported = () => {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl')
+      || canvas.getContext('experimental-webgl');
+  return gl && gl instanceof WebGLRenderingContext;
+};
+
 export class Amp3dGltf extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -110,6 +117,10 @@ export class Amp3dGltf extends AMP.BaseElement {
       },
       'hostUrl': this.win.location.href,
     });
+
+    if (!isWebGLSupported()) {
+      this.toggleFallback(true);
+    }
   }
 
   /** @override */

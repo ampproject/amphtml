@@ -20,7 +20,7 @@ import {loadScript} from '../3p';
 import {parseJson} from '../../src/json';
 import {user} from '../../src/log';
 
-import makeViewer from './viewer';
+import GltfViewer from './Viewer';
 
 const seq = (taskA, taskB) => cb => taskA(() => taskB(cb));
 const parallel = (taskA, taskB) => cb => {
@@ -58,7 +58,7 @@ export function gltfViewer(global) {
   const dataReceived = parseJson(global.name)['attributes']._context;
 
   loadThree(global, () => {
-    const viewer = makeViewer(dataReceived, {
+    const viewer = new GltfViewer(dataReceived, {
       onload: () => {
         nonSensitiveDataPostMessage('loaded');
       },
@@ -79,7 +79,7 @@ export function gltfViewer(global) {
       },
     });
     listenParent(global, 'action', msg => {
-      viewer[msg['action']](msg['args']);
+      viewer.actions[msg['action']](msg['args']);
     });
     nonSensitiveDataPostMessage('ready');
   });
