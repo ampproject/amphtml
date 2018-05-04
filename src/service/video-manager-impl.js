@@ -431,18 +431,17 @@ class VideoEntry {
     element.signals().whenSignal(VideoEvents.REGISTERED)
         .then(() => this.onRegister_());
 
-    //
-
     /**
      * Trigger event for first manual play.
      * @private @const {!function()}
      */
-    this.triggerFirstPlayOrNoop_ = once(() => {
+    this.firstPlayEventOrNoop_ = once(() => {
+      const firstPlay = 'firstPlay';
       const trust = ActionTrust.LOW;
-      const event = createCustomEvent(this.ampdoc_.win, 'firstPlay',
+      const event = createCustomEvent(this.ampdoc_.win, firstPlay,
         /* detail */ {});
       const actions = Services.actionServiceForDoc(this.ampdoc_);
-      actions.trigger(this.video.element, 'firstPlay', event, trust);
+      actions.trigger(this.video.element, firstPlay, event, trust);
     });
   }
 
@@ -490,7 +489,7 @@ class VideoEntry {
     this.isPlaying_ = true;
 
     if (this.getPlayingState() == PlayingStates.PLAYING_MANUAL) {
-      this.triggerFirstPlayOrNoop_();
+      this.firstPlayEventOrNoop_();
     }
 
     if (!this.video.preimplementsMediaSessionAPI()) {
@@ -706,7 +705,7 @@ class VideoEntry {
         adEnd.bind(this)));
 
     function onInteraction() {
-      this.triggerFirstPlayOrNoop_();
+      this.firstPlayEventOrNoop_();
       this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
