@@ -437,7 +437,7 @@ function runAllCommandsLocally() {
  * Makes sure package.json and yarn.lock are in sync.
  */
 function runYarnIntegrityCheck() {
-  const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
+  const yarnIntegrityCheck = getStderr('npx yarn check --integrity').trim();
   if (yarnIntegrityCheck.includes('error')) {
     console.error(fileLogPrefix, colors.red('ERROR:'),
         'Found the following', colors.cyan('yarn'), 'errors:\n' +
