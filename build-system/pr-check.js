@@ -294,8 +294,15 @@ const command = {
   buildRuntime: function() {
     timedExecOrDie('gulp build');
   },
-  buildRuntimeMinified: function() {
-    timedExecOrDie('gulp dist --fortesting');
+  buildRuntimeMinified: function(extensions) {
+    let cmd = 'gulp dist --fortesting';
+    if (!extensions) {
+      cmd = cmd + ' --noextensions';
+    }
+    timedExecOrDie(cmd);
+  },
+  runBundleSizeCheck: function() {
+    timedExecOrDie('gulp bundle-size');
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
@@ -401,7 +408,8 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
-    command.buildRuntimeMinified();
+    command.buildRuntimeMinified(/* extensions */ true);
+    command.runBundleSizeCheck();
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true);
   }
@@ -419,6 +427,8 @@ function runAllCommandsLocally() {
   if (!argv.nobuild) {
     command.cleanBuild();
     command.buildRuntime();
+    command.buildRuntimeMinified(/* extensions */ false);
+    command.runBundleSizeCheck();
   }
 
   // These tests need a build.
@@ -602,6 +612,8 @@ function main() {
         buildTargets.has('VISUAL_DIFF')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.buildRuntimeMinified(/* extensions */ false);
+      command.runBundleSizeCheck();
       command.runVisualDiffTests();
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
