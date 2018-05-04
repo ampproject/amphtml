@@ -51,11 +51,11 @@ const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
 
 /**
- * Maximum milliseconds to wait for all extensions to load before erroring.
- * (value is the same as render delaying extensions)
+ * Default milliseconds to wait for all extensions to load before erroring.
+ * (8 seconds is the same as the CSS boilerplate timoeout)
  * @const
  */
-const LOAD_TIMEOUT = 3000;
+const LOAD_TIMEOUT = 8000;
 
 /**
  * The structure that contains the declaration of a custom element.
