@@ -19,6 +19,7 @@ import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
+import {closestByTag} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
@@ -160,8 +161,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
   buildCallback() {
     this.assertAndParseConfig_();
 
-    const el = this.win.document.querySelector('[publisher-logo-src]');
-    const logoSrc = el && el.getAttribute('publisher-logo-src');
+    const storyEl = closestByTag(this.element, 'AMP-STORY');
+    const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
     if (!logoSrc) {
       user().warn(
@@ -186,7 +187,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return true;
+    return false;
   }
 
   /**

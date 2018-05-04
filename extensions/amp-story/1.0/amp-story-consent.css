@@ -48,8 +48,7 @@
 
 .i-amphtml-story-consent-container {
   position: relative !important;
-  margin: 88px auto 72px !important;
-  width: calc(100vw - 16px) !important;
+  margin: 88px 8px 72px !important;
   background: #FFFFFF !important;
   border-radius: 8px 8px 0 0 !important;
   color: rgba(0, 0, 0, 0.87) !important;
@@ -59,6 +58,7 @@
 }
 
 .i-amphtml-story-consent-fullbleed .i-amphtml-story-consent-container {
+  margin: 88px 0px 72px !important;
   padding: 0 8px !important;
   border-radius: initial !important;
 }
@@ -79,7 +79,8 @@
 .i-amphtml-story-consent-logo {
   position: absolute !important;
   bottom: -32px !important;
-  left: calc(50% - 32px) !important;
+  margin-left: -32px !important;
+  left: 50% !important;
   height: 64px !important;
   width: 64px !important;
   background: #F0F0F0 !important;

@@ -50,26 +50,26 @@
   </head>
 
   <body>
-    <amp-consent id='ABC' layout='nodisplay'>
-      <script type="application/json">{
-        "consents": {
-          "ABC": {
-            "checkConsentHref": "http://localhost:8000/get-consent-v1",
-            "promptUI": "ui0"
-          }
-        },
-        "story-consent": {
-          "color": "#0379c4",
-          "title": "Headline.",
-          "message": "This is some more information about this choice. Here's a list of items related to this choice.",
-          "vendors": ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10"]
-        },
-        "postPromptUI": "postPromptUI"
-      }</script>
-      <amp-story-consent id="ui0" layout="nodisplay"></amp-story-consent>
-    </amp-consent>
+    <amp-story standalone publisher-logo-src="https://placekitten.com/g/64/64">
+      <amp-consent id='ABC' layout='nodisplay'>
+        <script type="application/json">{
+          "consents": {
+            "ABC": {
+              "checkConsentHref": "http://localhost:8000/get-consent-v1",
+              "promptUI": "ui0"
+            }
+          },
+          "story-consent": {
+            "color": "#0379c4",
+            "title": "Headline.",
+            "message": "This is some more information about this choice. Here's a list of items related to this choice.",
+            "vendors": ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10"]
+          },
+          "postPromptUI": "postPromptUI"
+        }</script>
+        <amp-story-consent id="ui0" layout="nodisplay"></amp-story-consent>
+      </amp-consent>
 
-    <amp-story standalone publisher-logo-src="https://freshux.googleplex.com/amp/imgs/AMP-Brand-Blue-Icon@10x.png">
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">
           <h1>You just accepted or rejected the consent!</h1>
