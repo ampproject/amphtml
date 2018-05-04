@@ -453,12 +453,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.mergeObjects_(this.getInlineConfigNoInline(), config);
     this.mergeObjects_(this.remoteConfig_, config);
 
-    const fetchConfig = {
+    const fetchConfig = dict({
       requireAmpResponseSourceOrigin: false,
       method: 'POST',
       body: config,
       credentials: 'include',
-    };
+    });
     const ampdoc = this.getAmpDoc();
     return Services.urlReplacementsForDoc(this.element)
         .expandUrlAsync(remoteConfigUrl)
