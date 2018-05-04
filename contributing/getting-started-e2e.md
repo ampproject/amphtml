@@ -95,24 +95,24 @@ If you are new to Git it may seem surprising that there are three different repo
 
 * When you're done you'll push these changes to your fork on GitHub so that others can see your changes and review them before they become part of the amphtml repository.
 
-* When the changes have been approved by someone with permission to do so that person will handle merging your changes from your GitHub fork to the amphtml repository.
+* When the changes have been approved by someone with permission to do so, that person will handle merging your changes from your GitHub fork to the amphtml repository.
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase.  If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository.  Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease:  if you aren't currently a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) to the amphtml project you can't actually make changes to the amphtml repository directly--so go ahead and try out different Git commands without worrying you're going to break things for other people.
+One thing that might put your mind at ease:  if you aren't currently a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) to the amphtml project, you can't actually make changes to the amphtml repository directly. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 To create your fork on GitHub and your local copy of that fork:
 
-* Create a fork of the amphtml repository on GitHub by going to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and clicking the "Fork" button near the top.  Your GitHub fork will now be visible at `https://github.com/<your username>/amphtml`.
+* Create a fork of the amphtml repository on GitHub by going to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and clicking the "Fork" button near the top.  Your GitHub fork will now be visible at `https://github.com/<your username>/amphtml`. During local development, this will be referred to by `git` as `origin`.
 
 * Create your local copy (or *clone*) of your fork:
 
     * go to a local directory on your computer where you want to put a copy of the code, e.g. `~/src/ampproject`
 
-    * run the `git clone` command using the address for your remote repository (your GitHub fork)
+    * run the `git clone` command using the address for your remote repository (your GitHub fork):
 
-       ```shell
+       ```
        git clone git@github.com:<your username>/amphtml.git
        ```
 
@@ -156,25 +156,33 @@ git branch -u upstream/master master
 
 # Building AMP and starting a local server
 
-Now that you have all of the files copied locally you can actually build the code and run a local server to try things out.
+Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the Yarn package manager, and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.
 
-amphtml uses Node.js, the Yarn package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
-
-* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm).
-
-  On Mac and Linux, you can use [nvm](https://github.com/creationix/nvm), especially if you have other projects that require different versions of Node.
+* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). An easy way to do so is with `nvm` (Mac and Linux: [here](https://github.com/creationix/nvm), Windows: [here](https://github.com/coreybutler/nvm-windows))
 
    ```
    nvm install --lts
    ```
 
-* Install the stable version of [Yarn](https://yarnpkg.com/) (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
-
-  On Mac and Linux, you can do so like this.
+* Install the stable version of [Yarn](https://yarnpkg.com/) (Mac and Linux: [here](https://yarnpkg.com/en/docs/install), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
 
    ```
    curl -o- -L https://yarnpkg.com/install.sh | bash
    ```
+  An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
+
+* If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (See [this article](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md) for why.)
+
+   ```
+   yarn global remove gulp
+   ```
+
+* Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
+
+   ```
+   yarn global add gulp-cli
+   ```
+  An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local development. This will also use the version of `gulp` packaged with the amphtml repository.
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
@@ -182,21 +190,13 @@ amphtml uses Node.js, the Yarn package manager and the Gulp build system to buil
    ```
    You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies, which are generally safe to ignore.
 
-* For some local testing we refer to fake local URLs in order to simulate referencing third party URLs.  This requires extra setup so your browser will know that these URLs actually point to your local server.
-
-   You can do this by adding this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
-
-    ```
-    127.0.0.1 ads.localhost iframe.localhost
-    ```
-
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
 ```
-npx gulp
+gulp
 ```
 
-`npx` is a command that comes with Node.js that runs a command installed locally with `yarn`, as `gulp` is. Running the `npx gulp` command will compile the code and start up a Node.js server listening on port 8000.  Once you see a message like `Finished 'default'` you can access the local server in your browser at [http://localhost:8000](http://localhost:8000)
+Running the `gulp` command will compile the code and start up a Node.js server listening on port 8000.  Once you see a message like `Finished 'default'` you can access the local server in your browser at [http://localhost:8000](http://localhost:8000)
 
 You can browse the [http://localhost:8000/examples](http://localhost:8000/examples) directory to see some demo pages for various AMP components and combination of components.
 
@@ -208,7 +208,7 @@ Note that by default each of the pages in the /examples directory uses the unmin
 
 - [http://localhost:8000/serve_mode=compiled](http://localhost:8000/serve_mode=compiled)
 
-  Minified AMP JavaScript is served from the local server. This is only available after running `npx gulp dist --fortesting`.
+  Minified AMP JavaScript is served from the local server. This is only available after running `gulp dist --fortesting`.
 
 - [http://localhost:8000/serve_mode=cdn](http://localhost:8000/serve_mode=cdn)
 
@@ -344,12 +344,12 @@ Before sending your code changes for review, you will want to make sure that all
 Make sure you are in the branch that has your changes (`git checkout <branch name>`), pull in the latest changes from the remote amphtml repository and then simply run:
 
 ```
-npx gulp test
+gulp test
 ```
 
-You'll see some messages about stuff being compiled and then after a short time you will see a new Chrome window open up that says "Karma" at the top.  In the window where you ran `npx gulp test`, you'll see a bunch of tests scrolling by (`Executed NNNN of MMMM`) and hopefully a lot of `SUCCESS` messages.
+You'll see some messages about stuff being compiled and then after a short time you will see a new Chrome window open up that says "Karma" at the top.  In the window where you ran `gulp test`, you'll see a bunch of tests scrolling by (`Executed NNNN of MMMM`) and hopefully a lot of `SUCCESS` messages.
 
-By default `gulp test` runs tests on Chrome.  Depending on what your tests affect (e.g. if you're fixing a bug in a different browser), you may need to run `npx gulp test --firefox` or `npx gulp test --safari` to run in other browsers.
+By default `gulp test` runs tests on Chrome.  Depending on what your tests affect (e.g. if you're fixing a bug in a different browser), you may need to run `gulp test --firefox` or `gulp test --safari` to run in other browsers.
 
 If the tests have failed you will need to determine whether the failure is related to your change.
 
@@ -362,26 +362,26 @@ Fixing the tests will depend heavily on the change you are making and what tests
 Sometimes, it can be useful to pre-emptively eliminate errors in your pull request by running all the Travis CI checks on your local machine. You can do so by running:
 
 ```
-npx gulp pr-check
+gulp pr-check
 ```
 
 To run all Travis CI checks, but skip the `gulp build` step, you can run:
 
 ```
-npx gulp pr-check --nobuild
+gulp pr-check --nobuild
 ```
 
 To run all Travis CI checks, and restrict the unit tests and integration tests to just a subset of files, you can run:
 
 ```
-npx gulp pr-check --files=<test-files-path-glob>
+gulp pr-check --files=<test-files-path-glob>
 ```
 
 Notes:
 
 * This will force a clean build and run all the PR checks one by one.
 * Just like on Travis, a failing check will prevent subsequent checks from being run.
-* The `npx gulp visual-diff` check will be skipped unless you have set up a Percy account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#running-visual-diff-tests-locally).
+* The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#running-visual-diff-tests-locally).
 * The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#testing-on-sauce-labs).
 
 ## Adding tests for your change
@@ -390,15 +390,15 @@ If your change was not already covered by existing tests, you will generally be 
 
 The amphtml unit tests use the [Mocha](https://mochajs.org/) framework, the [Chai](http://chaijs.com/) assertion library and the [Sinon](http://sinonjs.org/) mocking library.  The specifics of the tests you will need to add will vary depending on the issue/feature you are working on.  If you are fixing a bug in an existing component there should already be tests in the test directory for that component that you can look at for guidance.  For example the [amp-video](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video/amp-video.md) component has [tests](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video/0.1/test/test-amp-video.js).
 
-You can run the tests in a single file by running `npx gulp test --files=<file to test>`, e.g. for amp-video:
+You can run the tests in a single file by running `gulp test --files=<file to test>`, e.g. for amp-video:
 
 ```
-npx gulp test --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
+gulp test --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
 ```
 
-Alternatively you can take advantage of a Mocha feature that allows for running only certain tests--`describe.only`.  Simply replace the `describe` in the Mocha tests you want to run with `describe.only` and only those tests will be run when you run `npx gulp test`.  Make sure to remove the `.only` and run all tests before sending your code for review.
+Alternatively you can take advantage of a Mocha feature that allows for running only certain tests--`describe.only`.  Simply replace the `describe` in the Mocha tests you want to run with `describe.only` and only those tests will be run when you run `gulp test`.  Make sure to remove the `.only` and run all tests before sending your code for review.
 
-To make running the tests more convenient you can also use the `--watch` flag in any `npx gulp test` command.  This will cause the tests you've indicated to automatically be rerun whenever a file is modified.
+To make running the tests more convenient you can also use the `--watch` flag in any `gulp test` command.  This will cause the tests you've indicated to automatically be rerun whenever a file is modified.
 
 If you are not sure how to create these tests you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 

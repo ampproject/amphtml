@@ -20,37 +20,57 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 # One-time Setup
 
-* [Create a GitHub account](https://help.github.com/articles/signing-up-for-a-new-github-account/) if you don't already have one
-* Set up [2 factor auth](https://help.github.com/articles/about-two-factor-authentication/) for your GitHub account
+* [Create a GitHub account](https://help.github.com/articles/signing-up-for-a-new-github-account/) if you don't already have one.
 
-* [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS
+* Set up [2 factor auth](https://help.github.com/articles/about-two-factor-authentication/) for your GitHub account.
 
-* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). [nvm](https://github.com/creationix/nvm) is a convenient way to do this on Mac and Linux
+* [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS.
 
-  On Mac and Linux, you can use [nvm](https://github.com/creationix/nvm), especially if you have other projects that require different versions of Node.
+* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). An easy way to do so is with `nvm`. (Mac and Linux: [here](https://github.com/creationix/nvm), Windows: [here](https://github.com/coreybutler/nvm-windows))
 
    ```
    nvm install --lts
    ```
 
-* Install the stable version of [Yarn](https://yarnpkg.com/) (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
-
-  On Mac and Linux, you can do so like this.
+* Install the stable version of [Yarn](https://yarnpkg.com/). (Mac and Linux: [here](https://yarnpkg.com/en/docs/install), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
 
    ```
    curl -o- -L https://yarnpkg.com/install.sh | bash
    ```
+  An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
 
-* Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
+* If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (See [this article](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md) for why.)
 
-    ```
-    127.0.0.1 ads.localhost iframe.localhost
-    ```
+   ```
+   yarn global remove gulp
+   ```
 
-* Fork the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI.
+* Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
 
-* Create your local repository: `git clone git@github.com:<your username>/amphtml.git`
-* Add an alias:  Go to the newly created local repository directory and run `git remote add upstream git@github.com:ampproject/amphtml.git` and then `git branch -u upstream/master master`
+   ```
+   yarn global add gulp-cli
+   ```
+  An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local development. This will also use the version of `gulp` packaged with the amphtml repository.
+
+* Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
+
+* Download your fork to a local repository.
+
+  ```
+  git clone git@github.com:<your username>/amphtml.git
+  ```
+
+* Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the newly created local repository directory and run:
+
+  ```
+  git remote add upstream git@github.com:ampproject/amphtml.git
+  ```
+
+* Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become outdated).
+
+  ```
+  git branch -u upstream/master master
+  ```
 
 # Branch (do this each time you want a new branch)
 
@@ -59,28 +79,27 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 # Build AMP & run a local server
 
 * Make sure you have the latest packages (after you pull): `yarn`
-* Start the server: `npx gulp`
+* Start the server: `gulp`
 * Access your server at [http://localhost:8000](http://localhost:8000)
 * Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
 
 # Test AMP
 
-* Run all tests: `npx gulp test`
-* Run only the unit tests: `npx gulp test --unit` (doesn't build the runtime)
-* Run only the integration tests: `npx gulp test --integration` (builds the runtime)
-* Run tests, but skip building after having done so previously: `npx gulp test --nobuild`
-* Run the tests in a specified set of files: `npx gulp test --files=<filename>`
-* Add the `--watch` flag to any `npx gulp test` command to automatically re-run the tests when a file changes
-* To run only a certain set of Mocha tests change  `describe` to `describe.only` for the tests you want to run; combine this with `npx gulp test --watch` to automatically rerun your test when files are changed   (but make sure to run all the tests before sending your change for review)
+* Run the unit tests: `gulp test --unit` (doesn't build the runtime)
+* Run the integration tests: `gulp test --integration` (builds the runtime)
+* Run tests, but skip building after having done so previously: `gulp test [--unit|--integration] --nobuild`
+* Run the tests in a specified set of files: `gulp test [--unit|--integration] --files=<test-files-path-glob>`
+* Add the `--watch` flag to any `gulp test` command to automatically re-run the tests when a file changes
+* To run only a certain set of Mocha tests, change  `describe` to `describe.only` for the tests you want to run; combine this with `gulp test --watch` to automatically rerun your test when files are changed   (but make sure to run all the tests before sending your change for review)
 
 # Create commits to contain your changes
 
 * Edit files in your favorite editor
 * if your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which will automatically update `package.json` and `yarn.lock`
-* if you manually edited `package.json`, run `yarn install` to install the dependency and generate an updated `yarn.lock` file
+* if you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
 * Add each file you change: `git add <file>`
 * Create a commit: `git commit -m "<your commit message>"`
-* Instead of `add`ing each file individually you can use the `-a` flag on the commit instead
+* To avoid having to run `git add` on each file, you can use `git commit -a -m "<your commit message>"` instead
 
 # Pull the latest changes
 
@@ -101,19 +120,18 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * For pushes after the first, just use `git push`
 * If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment
 * If you see visual diffs reported by [Percy](http://percy.io/ampproject/amphtml), and want to access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform).
-
 * Once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge)
 
 # Delete your branch after your changes are merged (optional)
 
 * Go to the master branch: `git checkout master`
 * Delete your local branch: `git branch -D <branch name>`
-* Delete the GitHub fork branch: `git push -d origin <branch name>`
+* Delete the corresponding GitHub fork branch: `git push -d origin <branch name>`
 
 # See your changes in production
 
 * If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.
-* If your change was to the code that runs on AMP pages across the web, you'll have to wait for the change to be included in a production release. Generally, it takes about 1-2 weeks for a change to be live for all users. Reference our [release schedule](release-schedule.md) for more specific details.
-* The [amphtml Releases page](https://github.com/ampproject/amphtml/releases) will list your PR in the first build that contains it.  `Pre-release` is the build on the Dev Channel, `Latest Release` is the build in production.
-* Opt-in to using the Dev Channel in a browser by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.
-* Find the AMP version being used on a page in the developer console, i.e. `Powered by AMP ⚡ HTML – Version <build number>`).
+* If your change was to the code that runs on AMP pages across the web, you'll have to wait for the change to be included in a production release. Generally, it takes about 1-2 weeks for a change to be live for all users. See the [release schedule](release-schedule.md) for more specific details.
+* The [amphtml Releases page](https://github.com/ampproject/amphtml/releases) will list your PR in the first build that contains it. `Pre-release` is the build on the Dev Channel, `Latest Release` is the build in production.
+* Opt in to using the Dev Channel in a browser by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.
+* Find the AMP version being used on a page in the developer console, i.e. `Powered by AMP ⚡ HTML – Version <build number>`.
