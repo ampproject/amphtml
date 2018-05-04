@@ -1142,6 +1142,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
       .transform(babelify, {
+        compact: false,
         presets: [
           ['env', {
             targets: {
