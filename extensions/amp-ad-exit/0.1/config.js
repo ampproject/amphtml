@@ -55,7 +55,8 @@ export let VariablesDef;
 /**
  * @typedef {{
  *   type: !FilterType,
- *   delay: number
+ *   delay: number,
+ *   startTimingEvent: (string|undefined)
  * }}
  */
 export let ClickDelayConfig;
