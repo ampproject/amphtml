@@ -122,7 +122,8 @@ export class ViewerSubscriptionPlatform {
       let entitlement = Entitlement.empty('local');
       if (Array.isArray(entitlements)) {
         for (let index = 0; index < entitlements.length; index++) {
-          if (entitlements[index].products.indexOf(currentProductId) !== -1) {
+          if (entitlements[index]['products'].indexOf(currentProductId)
+              !== -1) {
             const entitlementObject = entitlements[index];
             entitlement = new Entitlement({
               source: 'viewer',

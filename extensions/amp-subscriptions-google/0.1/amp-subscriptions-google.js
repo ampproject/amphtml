@@ -20,7 +20,7 @@ import {
   SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
-import {Entitlement} from '../../amp-subscriptions/0.1/entitlement';
+import {Entitlement, GrantReasons} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
@@ -175,9 +175,9 @@ export class GoogleSubscriptionsPlatform {
   activate(renderState) {
     // Offers or abbreviated offers may need to be shown depending on
     // whether the access has been granted and whether user is a subscriber.
-    if (!renderState.granted) {
+    if (!renderState['granted']) {
       this.runtime_.showOffers({list: 'amp'});
-    } else if (!renderState.subscribed) {
+    } else if (renderState['grantReason'] !== GrantReasons.SUBSCRIBED) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
   }

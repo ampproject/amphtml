@@ -190,6 +190,7 @@ describes.realWin('Platform store', {}, () => {
         source: 'local',
         raw: '',
         service: 'local',
+        granted: true,
         grantReason: GrantReasons.SUBSCRIBED,
       }));
       platformStore.resolveEntitlement('another', new Entitlement({
@@ -208,6 +209,7 @@ describes.realWin('Platform store', {}, () => {
         source: 'another',
         raw: '',
         service: 'another',
+        granted: true,
         grantReason: GrantReasons.SUBSCRIBED,
       }));
       expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be

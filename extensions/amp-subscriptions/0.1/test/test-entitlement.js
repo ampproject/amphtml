@@ -38,7 +38,6 @@ describes.realWin('EntitlementClass', {}, () => {
     expect(entitlement.json()).to.deep.equal({
       service,
       source,
-      raw,
       granted,
       grantReason,
       data,
@@ -83,8 +82,7 @@ describes.realWin('EntitlementClass', {}, () => {
     const entitlement = new Entitlement({source, raw, service, granted,
       grantReason, data});
     const pingbackData = entitlement.jsonForPingback();
-    expect(pingbackData.raw).to.be.equal(raw);
-    expect(pingbackData.source).to.be.equal(entitlement.source);
-    expect(pingbackData.grantState).to.be.equal(entitlement.granted);
+    expect(pingbackData).to.deep.equal(
+        Object.assign({raw}, entitlement.json()));
   });
 });

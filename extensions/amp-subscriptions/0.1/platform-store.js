@@ -243,8 +243,9 @@ export class PlatformStore {
     }
 
     this.grantStatusEntitlementPromise_ = new Promise(resolve => {
-      if ((this.grantStatusEntitlement_ && this.grantStatusEntitlement_.granted)
-          || this.areAllPlatformsResolved_()) {
+      if ((this.grantStatusEntitlement_
+          && this.grantStatusEntitlement_.isSubscribed())
+            || this.areAllPlatformsResolved_()) {
         resolve(this.grantStatusEntitlement_);
       } else {
         this.onGrantStateResolvedCallbacks_.add(() => {
@@ -357,7 +358,7 @@ export class PlatformStore {
           this.getResolvedEntitlementFor(platform.getServiceId());
 
       // Subscriber wins immediatly.
-      if (!!entitlement.isSubscribed()) {
+      if (entitlement.isSubscribed()) {
         weight += 100000;
       }
 

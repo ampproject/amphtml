@@ -40,9 +40,6 @@ const TAG = 'amp-subscriptions';
 /** @const */
 const SERVICE_TIMEOUT = 3000;
 
-/** @typedef {{granted: boolean, subscribed: boolean, entitlement: !JsonObject, }} */
-export let RenderState;
-
 export class SubscriptionService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -360,14 +357,8 @@ export class SubscriptionService {
       const selectedPlatform = resolvedValues[1];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
           selectedPlatform.getServiceId());
-      /** @type {!RenderState} */
-      const renderState = {
-        entitlement: selectedEntitlement.json(),
-        subscribed: !!selectedEntitlement.isSubscribed(),
-        granted: grantState,
-      };
 
-      selectedPlatform.activate(renderState);
+      selectedPlatform.activate(selectedEntitlement.json());
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId()

@@ -15,6 +15,7 @@
  */
 import {dict} from '../../../src/utils/object';
 
+/** @enum {string} */
 export const GrantReasons = {
   'SUBSCRIBED': 'SUBSCRIBED',
   'METERING': 'METERING',
@@ -69,7 +70,6 @@ export class Entitlement {
    */
   json() {
     const entitlementJson = dict({
-      'raw': this.raw,
       'source': this.source,
       'service': this.service,
       'granted': this.granted,
@@ -85,11 +85,9 @@ export class Entitlement {
    * @return {!JsonObject}
    */
   jsonForPingback() {
-    return dict({
-      'raw': this.raw,
-      'source': this.source,
-      'grantState': this.granted,
-    });
+    return /** @type {!JsonObject} */ (Object.assign({},
+        {'raw': this.raw},
+        this.json()));
   }
 
   /**
@@ -103,9 +101,9 @@ export class Entitlement {
     }
     const raw = rawData || JSON.stringify(json);
     const source = json['source'] || '';
-    const granted = json['granted'] || [];
+    const granted = json['granted'] || false;
     const grantReason = json['grantReason'];
-    const data = json['data'];
+    const data = json['data'] || null;
     return new Entitlement({source, raw, service: '',
       granted, grantReason, data});
   }
@@ -115,6 +113,6 @@ export class Entitlement {
    * @return {boolean}
    */
   isSubscribed() {
-    return this.grantReason === GrantReasons.SUBSCRIBED;
+    return this.granted && this.grantReason === GrantReasons.SUBSCRIBED;
   }
 }

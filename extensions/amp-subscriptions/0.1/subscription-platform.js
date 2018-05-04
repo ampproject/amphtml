@@ -38,7 +38,7 @@ export class SubscriptionPlatform {
 
   /**
    * Activates the subscription platform and hands over the control for rendering.
-   * @param {!./amp-subscriptions.RenderState} unusedRenderState
+   * @param {!JsonObject} unusedRenderState
    */
   activate(unusedRenderState) {}
 
