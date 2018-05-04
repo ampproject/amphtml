@@ -439,7 +439,7 @@ class VideoEntry {
       const firstPlay = 'firstPlay';
       const trust = ActionTrust.LOW;
       const event = createCustomEvent(this.ampdoc_.win, firstPlay,
-        /* detail */ {});
+          /* detail */ {});
       const actions = Services.actionServiceForDoc(this.ampdoc_);
       actions.trigger(this.video.element, firstPlay, event, trust);
     });
