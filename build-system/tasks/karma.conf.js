@@ -46,7 +46,7 @@ module.exports = {
     watch: true,
     debug: true,
     transform: [
-      ['babelify'],
+      ['babelify', {compact: false}],
     ],
     bundleDelay: 900,
   },
