@@ -112,7 +112,7 @@
     "karma-browserify": "5.2.0",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "2.2.0",
-    "karma-coverage": "1.1.1",
+    "karma-coverage": "1.1.2",
     "karma-edge-launcher": "0.4.2",
     "karma-firefox-launcher": "1.1.0",
     "karma-fixture": "0.2.6",
