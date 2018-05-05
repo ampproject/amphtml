@@ -22,20 +22,25 @@
  */
 export class Deferred {
   constructor() {
+    let resolve, reject;
+
     /**
      * @const {!Promise<T>}
      */
-    this.promise = new /*OK*/Promise((resolve, reject) => {
-      /**
-       * @const {function(T=)}
-       */
-      this.resolve = resolve;
-
-      /**
-       * @const {function(*=)}
-       */
-      this.reject = reject;
+    this.promise = new /*OK*/Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
     });
+
+    /**
+     * @const {function(T)}
+     */
+    this.resolve = resolve;
+
+    /**
+     * @const {function(*=)}
+     */
+    this.reject = reject;
   }
 }
 

@@ -183,13 +183,13 @@ class AnimationPlayer {
 
     const deferred = new Deferred();
 
-    /** @private {!Promise} */
+    /** @const @private */
     this.promise_ = deferred.promise;
 
-    /** @const {function()} */
+    /** @const @private */
     this.resolve_ = deferred.resolve;
 
-    /** @const {function()} */
+    /** @const @private */
     this.reject_ = deferred.reject;
 
     /** @const */
