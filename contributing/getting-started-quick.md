@@ -32,14 +32,14 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
    nvm install --lts
    ```
 
-* Install the stable version of [Yarn](https://yarnpkg.com/). (Mac and Linux: [here](https://yarnpkg.com/en/docs/install), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
+* Install the stable version of [Yarn](https://yarnpkg.com/). (Mac and Linux: [here](https://yarnpkg.com/en/docs/install#alternatives-stable), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
 
    ```
    curl -o- -L https://yarnpkg.com/install.sh | bash
    ```
   An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
 
-* If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (See [this article](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md) for why.)
+* If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
 
    ```
    yarn global remove gulp
