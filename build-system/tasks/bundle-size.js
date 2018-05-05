@@ -21,7 +21,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 
 const runtimeFile = './dist/v0.js';
-const maxSize = '77.15KB';
+const maxSize = '77.21KB';
 
 const green = colors.green;
 const red = colors.red;

@@ -300,6 +300,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
+  {
+    id: 'amp-img-native-srcset',
+    name: 'Enables native browser implementation of srcset and sizes',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/11575',
+  },
 ];
 
 if (getMode().localDev) {
