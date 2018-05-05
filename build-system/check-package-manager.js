@@ -74,7 +74,7 @@ function checkNodeVersion() {
         const latestLtsVersion = getNodeLatestLtsVersion(distributionsJson);
         if (latestLtsVersion === '') {
           console.log(yellow('WARNING: Something went wrong. ' +
-              'Could not determine latest LTS version of node.'));
+              'Could not determine the latest LTS version of node.'));
         } else if (nodeVersion !== latestLtsVersion) {
           console.log(yellow('WARNING: Detected node version'),
               cyan(nodeVersion) +
@@ -123,7 +123,7 @@ function checkYarnVersion() {
   const stableVersion = getYarnStableVersion(yarnInfoJson);
   if (stableVersion === '') {
     console.log(yellow('WARNING: Something went wrong. ' +
-        'Could not determine stable version of yarn.'));
+        'Could not determine the stable version of yarn.'));
   } else if (yarnVersion !== stableVersion) {
     console.log(yellow('WARNING: Detected yarn version'),
         cyan(yarnVersion) + yellow('. Recommended (stable) version is'),
@@ -170,9 +170,14 @@ function checkGlobalGulp() {
         cyan('"yarn global add gulp-cli"') + yellow('.'));
   } else {
     const gulpVersions = getStdout(gulpExecutable + ' --version').trim();
-    const gulpVersion = gulpVersions.match(/Local version (.*?)$/)[1];
-    console.log(green('Detected'), cyan('gulp'), green('version'),
-        cyan(gulpVersion) + green('.'));
+    const gulpVersion = gulpVersions.match(/Local version (.*?)$/);
+    if (gulpVersion && gulpVersion.length == 2) {
+      console.log(green('Detected'), cyan('gulp'), green('version'),
+          cyan(gulpVersion[1]) + green('.'));
+    } else {
+      console.log(yellow('WARNING: Something went wrong. ' +
+          'Could not determine the local version of gulp.'));
+    }
   }
 }
 
