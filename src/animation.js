@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './promise';
 import {Services} from './services';
 import {dev} from './log';
 import {getCurve} from './curve';
@@ -180,17 +181,16 @@ class AnimationPlayer {
     /** @private {!Object<string, *>} */
     this.state_ = {};
 
-    /** @const {function()} */
-    this.resolve_;
-
-    /** @const {function()} */
-    this.reject_;
+    const deferred = new Deferred();
 
     /** @private {!Promise} */
-    this.promise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    this.promise_ = deferred.promise;
+
+    /** @const {function()} */
+    this.resolve_ = deferred.resolve;
+
+    /** @const {function()} */
+    this.reject_ = deferred.reject;
 
     /** @const */
     this.task_ = this.vsync_.createAnimTask(this.contextNode_, {
