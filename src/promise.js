@@ -27,7 +27,7 @@ export class Deferred {
      */
     this.promise = new /*OK*/Promise((resolve, reject) => {
       /**
-       * @const {function((TYPE|IThenable<TYPE>|Thenable)=)}
+       * @const {function(T=)}
        */
       this.resolve = resolve;
 
