@@ -140,7 +140,7 @@
     "postcss-import": "11.1.0",
     "preact": "8.2.9",
     "preact-compat": "3.17.0",
-    "pretty-bytes": "4.0.2",
+    "pretty-bytes": "5.0.0",
     "prop-types": "15.6.1",
     "react": "16.3.2",
     "react-addons-shallow-compare": "15.6.2",
