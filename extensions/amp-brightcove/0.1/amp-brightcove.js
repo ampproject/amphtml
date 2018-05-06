@@ -392,6 +392,11 @@ class AmpBrightcove extends AMP.BaseElement {
     }
     return isFullscreenElement(dev().assertElement(this.iframe_));
   }
+  
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
 
   /** @override */
   getMetadata() {
