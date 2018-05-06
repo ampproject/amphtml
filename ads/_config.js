@@ -402,6 +402,11 @@ export const adConfig = {
 
   engageya: {},
 
+  epeex: {
+    renderStartImplemented: true,
+    prefetch: 'https://epeex.com/related/service/widget/amp/remote.js',
+  },
+
   eplanning: {
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
   },
