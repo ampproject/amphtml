@@ -30,6 +30,8 @@ const TopologicalSort = require('topological-sort');
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve(
     './runner/dist/runner.jar');
+//ClosureCompiler.JAR_PATH = require.resolve(
+    //'../third_party/closure-compiler/compiler.jar');
 
 exports.splittable = function(config) {
 
@@ -62,6 +64,7 @@ exports.getFlags = function(config) {
   // Reasonable defaults.
   var flags = {
     compilation_level: 'SIMPLE_OPTIMIZATIONS',
+    //compilation_level: 'WHITESPACE_ONLY',
     process_common_js_modules: true,
     rewrite_polyfills: true,
     create_source_map: '%outname%.map',
@@ -72,9 +75,11 @@ exports.getFlags = function(config) {
       'splittable-build/browser/|/',
       '|/',
     ],
-    //new_type_inf: true,
+    new_type_inf: true,
     language_in: 'ES6',
     language_out: 'ES5',
+    //formatting: 'PRETTY_PRINT',
+    //generate_pseudo_names: null,
     module_output_path_prefix: config.writeTo || 'out/',
     externs: path.dirname(module.filename) + '/splittable.extern.js',
     define: ['PSEUDO_NAMES=true'],
@@ -97,7 +102,11 @@ exports.getFlags = function(config) {
         flagsArray.push('--' + flag, item);
       })
     } else {
-      flagsArray.push('--' + flag, val);
+      if (val != null) {
+        flagsArray.push('--' + flag, val);
+      } else {
+        flagsArray.push('--' + flag);
+      }
     }
   });
 
@@ -123,6 +132,7 @@ exports.getBundleFlags = function(g) {
   var bundleKeys = Object.keys(g.bundles);
   bundleKeys.sort().forEach(function(name) {
     var isBase = name == '_base';
+    var isMain = name == 'src/amp.js';
     var extraModules = 0;
     var bundle = g.bundles[name];
     if (isBase || bundleKeys.length == 1) {
@@ -166,8 +176,13 @@ exports.getBundleFlags = function(g) {
         flagsArray.push('--module_wrapper', name + ':' +
             exports.baseBundleWrapper);
       } else {
-        flagsArray.push('--module_wrapper', name + ':' +
-            exports.bundleWrapper);
+        if (isMain) {
+          flagsArray.push('--module_wrapper', name + ':' +
+              exports.mainBinaryWrapper);
+        } else {
+          flagsArray.push('--module_wrapper', name + ':' +
+              exports.bundleWrapper);
+        }
       }
     } else {
       flagsArray.push('--module_wrapper', name + ':' +
@@ -494,6 +509,15 @@ var systemImport =
 
 var nodeEmulation = 'self.global=self;';
 
+exports.mainBinaryWrapper = 'try{(function(){%s})()}catch(e){' +
+  'setTimeout(function(){' +
+  'var s=document.body.style;' +
+  's.opacity=1;' +
+  's.visibility="visible";' +
+  's.animation="none";' +
+  's.WebkitAnimation="none;"},1000);throw e};' +
+  '//# sourceMappingURL=%basename%.map\n';
+
 exports.defaultWrapper = nodeEmulation + '%s\n' +
      '//# sourceMappingURL=%basename%.map\n';
 
@@ -514,7 +538,7 @@ exports.baseBundleWrapper =
 
 // Schedule or execute bundle via _S global.
 exports.bundleWrapper =
-    '(self._S=self._S||[]).push((function(){%s}));\n' +
+    '(self._S=self._S||[]).push((function(){(self.AMP=self.AMP||[]).push(function(){%s})}));\n' +
     '//# sourceMappingURL=%basename%.map\n';
 
 function bundleTrailModule(name) {
@@ -540,9 +564,10 @@ exports.getFlags({
   modules: [
     './src/amp.js',
     './extensions/amp-audio/0.1/amp-audio.js',
-    './extensions/amp-ad/1.0/amp-ad.js',
+    './extensions/amp-subscriptions/0.1/amp-subscriptions.js',
+    //'./extensions/amp-user-notification/0.1/amp-user-notification.js',
     //'./extensions/amp-audio-2/0.1/amp-audio-2.js',
-    './extensions/amp-live-list/0.1/amp-live-list.js',
+    //'./extensions/amp-live-list/0.1/amp-live-list.js',
     //'./extensions/amp-user-notification/0.1/amp-user-notification.js',
     //'./src/amp.js',
   ],
@@ -550,7 +575,7 @@ exports.getFlags({
   externs: externs,
 }).then(function(flagsArray) {
   return new Promise(function(resolve, reject) {
-    console.log(flagsArray);
+    //console.log(flagsArray);
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
       if (exitCode == 0) {
         resolve({
