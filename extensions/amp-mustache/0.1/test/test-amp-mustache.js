@@ -197,7 +197,7 @@ describe('amp-mustache template', () => {
           type: 'file',
         });
         expect(result./*OK*/innerHTML).to.equal(
-            'value = <input value="myid">');
+            'value = <input value="myid" type="file">');
       });
 
       allowConsoleError(() => {
