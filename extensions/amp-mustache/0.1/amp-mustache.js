@@ -31,6 +31,39 @@ setUnescapedSanitizier(sanitizeTagsForTripleMustache);
 /** @private @const {string} */
 const TAG = 'amp-mustache';
 
+/** @const {!Array<string>} */
+const BLACKLISTED_ATTR_VALUES = [
+  /*eslint no-script-url: 0*/ 'javascript:',
+  /*eslint no-script-url: 0*/ 'vbscript:',
+  /*eslint no-script-url: 0*/ 'data:',
+  /*eslint no-script-url: 0*/ '<script',
+  /*eslint no-script-url: 0*/ '</script',
+];
+
+/** @const {!Array<string>} */
+const BLACKLISTED_FIELDS_ATTR = [
+  'form',
+  'formaction',
+  'formmethod',
+  'formtarget',
+  'formnovalidate',
+  'formenctype',
+];
+
+/** @const {!Object<string, !Array<string>>} */
+const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
+  'input': BLACKLISTED_FIELDS_ATTR,
+  'textarea': BLACKLISTED_FIELDS_ATTR,
+  'select': BLACKLISTED_FIELDS_ATTR,
+});
+
+/** @const {!Object<string, !Object<string, !RegExp>>} */
+const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
+  'input': {
+    'type': /(?:image|file|button)/i,
+  },
+});
+
 /**
  * @const {!Object<string, boolean>}
  * See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
@@ -54,6 +87,16 @@ const BLACKLISTED_TAGS = dict({
   'svg': true,
   'video': true,
 });
+
+/**
+ * Test for invalid `style` attribute values. `!important` is a general AMP
+ * rule, while `position:fixed|sticky` is a current runtime limitation since
+ * FixedLayer only scans the amp-custom stylesheet for potential fixed/sticky
+ * elements.
+ * @const {!RegExp}
+ */
+const INVALID_INLINE_STYLE_REGEX =
+    /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
 /** @const {!Object<string, boolean>} */
 const SELF_CLOSING_TAGS = dict({
@@ -153,49 +196,6 @@ const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 /** @const {!Array<string>} */
 const WHITELISTED_TARGETS = ['_top', '_blank'];
 
-/** @const {!Array<string>} */
-const BLACKLISTED_ATTR_VALUES = [
-  /*eslint no-script-url: 0*/ 'javascript:',
-  /*eslint no-script-url: 0*/ 'vbscript:',
-  /*eslint no-script-url: 0*/ 'data:',
-  /*eslint no-script-url: 0*/ '<script',
-  /*eslint no-script-url: 0*/ '</script',
-];
-
-/** @const {!Object<string, !Object<string, !RegExp>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
-  'input': {
-    'type': /(?:image|file|button)/i,
-  },
-});
-
-/** @const {!Array<string>} */
-const BLACKLISTED_FIELDS_ATTR = [
-  'form',
-  'formaction',
-  'formmethod',
-  'formtarget',
-  'formnovalidate',
-  'formenctype',
-];
-
-/** @const {!Object<string, !Array<string>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
-  'input': BLACKLISTED_FIELDS_ATTR,
-  'textarea': BLACKLISTED_FIELDS_ATTR,
-  'select': BLACKLISTED_FIELDS_ATTR,
-});
-
-/**
- * Test for invalid `style` attribute values. `!important` is a general AMP
- * rule, while `position:fixed|sticky` is a current runtime limitation since
- * FixedLayer only scans the amp-custom stylesheet for potential fixed/sticky
- * elements.
- * @const {!RegExp}
- */
-const INVALID_INLINE_STYLE_REGEX =
-    /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
-
 /**
  * Implements an AMP template for Mustache.js.
  * See {@link https://github.com/janl/mustache.js/}.
@@ -240,7 +240,6 @@ export class AmpMustache extends AMP.BaseTemplate {
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }
-
 
 }
 
