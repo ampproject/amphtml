@@ -15,11 +15,13 @@
  */
 
 import {AmpStoryConsent} from '../amp-story-consent';
+import {Services} from '../../../../src/services';
 
-describes.realWin('amp-story-consent', {amp: true}, env => {
+describes.fakeWin('amp-story-consent', {amp: true}, env => {
   let win;
   let consentConfigEl;
   let defaultConfig;
+  let sandbox;
   let storyConsent;
   let storyConsentEl;
 
@@ -29,6 +31,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
+    sandbox = sinon.sandbox.create();
 
     defaultConfig = {
       consents: {ABC: {}},
@@ -38,6 +41,10 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
         'vendors': ['Item 1', 'Item 2'],
       },
     };
+
+    sandbox.stub(Services, 'localizationService').returns({
+      getLocalizedString: localizedStringId => `string(${localizedStringId})`,
+    });
 
     // Test DOM structure:
     // <fake-amp-consent>
@@ -57,6 +64,10 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     win.document.body.appendChild(consentEl);
 
     storyConsent = new AmpStoryConsent(storyConsentEl);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('should parse the config', () => {
