@@ -128,9 +128,9 @@ describe('AmpDocService', () => {
       if (!shadowRoot) {
         return;
       }
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         service.getAmpDoc(content);
-      }).to.throw(/No ampdoc found/); });
+      }).to.throw(/No ampdoc found/);
 
       const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
       const ampDoc = service.getAmpDoc(content);
@@ -146,9 +146,9 @@ describe('AmpDocService', () => {
       if (!shadowRoot) {
         return;
       }
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         service.getAmpDoc(host);
-      }).to.throw(/No ampdoc found/); });
+      }).to.throw(/No ampdoc found/);
     });
 
     it('should fail to install shadow doc twice', () => {

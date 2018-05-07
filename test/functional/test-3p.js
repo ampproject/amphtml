@@ -42,15 +42,15 @@ describe('3p', () => {
   describe('validateSrcPrefix()', () => {
 
     it('should throw when a string prefix does not match', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         validateSrcPrefix('https:', 'http://example.org');
-      }).to.throw(/Invalid src/); });
+      }).to.throw(/Invalid src/);
     });
 
     it('should throw when array prefixes do not match', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         validateSrcPrefix(['https:', 'ftp:'], 'http://example.org');
-      }).to.throw(/Invalid src/); });
+      }).to.throw(/Invalid src/);
     });
 
     it('should not throw when a string prefix matches', () => {
@@ -64,9 +64,9 @@ describe('3p', () => {
   });
 
   it('should throw an error if src does not contain addyn', () => {
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       validateSrcContains('/addyn/', 'http://adserver.adtechus.com/');
-    }).to.throw(/Invalid src/); });
+    }).to.throw(/Invalid src/);
   });
 
   it('should not throw if source contains /addyn/', () => {

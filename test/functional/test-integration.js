@@ -70,13 +70,13 @@ describe('3p integration.js', () => {
         const parent = {
           origin: 'abc',
         };
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           validateParentOrigin({
             location: {
               ancestorOrigins: ['xyz'],
             },
           }, parent);
-        }).to.throw(/Parent origin mismatch/); });
+        }).to.throw(/Parent origin mismatch/);
       });
 
   it('should parse JSON from fragment unencoded (most browsers)', () => {
@@ -185,9 +185,9 @@ describe('3p integration.js', () => {
         tagName: 'AMP-EMBED',
       },
     };
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       draw3p(win, data);
-    }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/); });
+    }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
   });
 
   it('should allow all types on localhost', () => {
@@ -225,9 +225,9 @@ describe('3p integration.js', () => {
     validateAllowedTypes(get('d-123.ampproject.net'), 'twitter');
     validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'adtech');
     validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'a9');
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/); });
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
   });
 
   it('should validate types on custom host', () => {
@@ -239,12 +239,12 @@ describe('3p integration.js', () => {
     validateAllowedTypes(defaultHost, 'twitter');
     validateAllowedTypes(defaultHost, 'facebook');
     validateAllowedTypes(defaultHost, 'doubleclick');
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       validateAllowedTypes(defaultHost, 'not present');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/); });
-    allowConsoleError(() => { expect(() => {
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    expect(() => {
       validateAllowedTypes(defaultHost, 'adtech');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/); });
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
     validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
   });
 
@@ -259,9 +259,9 @@ describe('3p integration.js', () => {
       },
     };
     win.parent = win;
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       ensureFramed(win);
-    }).to.throw(/Must be framed: sentinel/); });
+    }).to.throw(/Must be framed: sentinel/);
   });
 
   it('should validateAllowedEmbeddingOrigins: non-cache', () => {
@@ -274,9 +274,7 @@ describe('3p integration.js', () => {
       },
     };
     function invalid(fn) {
-      allowConsoleError(() => {
-        expect(fn).to.throw(/Invalid embedding hostname/);
-      });
+      expect(fn).to.throw(/Invalid embedding hostname/);
     }
     validateAllowedEmbeddingOrigins(win, ['foo.com']);
     validateAllowedEmbeddingOrigins(win, ['foo.net', 'foo.com']);
@@ -296,9 +294,7 @@ describe('3p integration.js', () => {
       },
     };
     function invalid(fn) {
-      allowConsoleError(() => {
-        expect(fn).to.throw(/Invalid embedding hostname/);
-      });
+      expect(fn).to.throw(/Invalid embedding hostname/);
     }
     validateAllowedEmbeddingOrigins(win, ['foo.com']);
     validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
@@ -318,9 +314,7 @@ describe('3p integration.js', () => {
       },
     };
     function invalid(fn) {
-      allowConsoleError(() => {
-        expect(fn).to.throw(/Invalid embedding hostname/);
-      });
+      expect(fn).to.throw(/Invalid embedding hostname/);
     }
     validateAllowedEmbeddingOrigins(win, ['foo.com']);
     validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
@@ -338,9 +332,7 @@ describe('3p integration.js', () => {
       },
     };
     function invalid(fn) {
-      allowConsoleError(() => {
-        expect(fn).to.throw(/Invalid embedding hostname/);
-      });
+      expect(fn).to.throw(/Invalid embedding hostname/);
     }
     validateAllowedEmbeddingOrigins(win, ['foo.com']);
     validateAllowedEmbeddingOrigins(win, ['www.foo.com']);

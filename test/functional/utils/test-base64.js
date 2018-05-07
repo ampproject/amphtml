@@ -105,15 +105,11 @@ describe('base64UrlDecodeToBytes', () => {
   });
 
   it('should signal an error with bad input characters', () => {
-    allowConsoleError(() => {
-      expect(() => base64UrlDecodeToBytes('@#*#')).to.throw();
-    });
+    expect(() => base64UrlDecodeToBytes('@#*#')).to.throw();
   });
 
   it('should signal an error with bad padding', () => {
-    allowConsoleError(() => {
-      expect(() => base64UrlDecodeToBytes('c3Vy.')).to.throw();
-    });
+    expect(() => base64UrlDecodeToBytes('c3Vy.')).to.throw();
   });
 });
 
@@ -136,15 +132,11 @@ describe('base64DecodeToBytes', () => {
   });
 
   it('should signal an error with bad input characters', () => {
-    allowConsoleError(() => {
-      expect(() => base64DecodeToBytes('@#*#')).to.throw();
-    });
+    expect(() => base64DecodeToBytes('@#*#')).to.throw();
   });
 
   it('should signal an error with bad padding', () => {
-    allowConsoleError(() => {
-      expect(() => base64DecodeToBytes('c3Vy=')).to.throw();
-    });
+    expect(() => base64DecodeToBytes('c3Vy=')).to.throw();
   });
 });
 

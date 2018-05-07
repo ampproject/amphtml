@@ -50,13 +50,13 @@ describes.sandboxed('allocateVariant', {}, () => {
   });
 
   it('should throw for invalid config', () => {
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       allocateVariant(ampdoc, 'name', null);
-    }).to.throw(); });
+    }).to.throw();
 
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       allocateVariant(ampdoc, 'name', undefined);
-    }).to.throw(); });
+    }).to.throw();
 
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {});
@@ -270,13 +270,13 @@ describes.sandboxed('allocateVariant', {}, () => {
     getNotificationStub.withArgs('notif-1')
         .returns(Promise.resolve(null));
 
-    allowConsoleError(() => { return expect(allocateVariant(ampdoc, 'name', {
+    return expect(allocateVariant(ampdoc, 'name', {
       consentNotificationId: 'notif-1',
       variants: {
         '-Variant_1': 50,
         '-Variant_2': 50,
       },
-    })).to.eventually.be.rejectedWith('Notification not found: notif-1'); });
+    })).to.eventually.be.rejectedWith('Notification not found: notif-1');
   });
 
   it('should have no variant allocated if consent is missing', () => {

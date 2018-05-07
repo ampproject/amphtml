@@ -920,9 +920,9 @@ describe('Viewer', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
       const viewer = new Viewer(ampdoc);
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         viewer.setMessageDeliverer(() => {});
-      }).to.throw(/message channel must have an origin/); });
+      }).to.throw(/message channel must have an origin/);
     });
 
     it('should allow channel without origin thats an empty string', () => {
@@ -971,9 +971,9 @@ describe('Viewer', () => {
         windowApi.location.hash = '#webview=1';
         windowApi.location.ancestorOrigins = [];
         const viewer = new Viewer(ampdoc);
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           viewer.setMessageDeliverer(() => {});
-        }).to.throw(/message channel must have an origin/); });
+        }).to.throw(/message channel must have an origin/);
       });
 
       it('should decide non-trusted on connection with wrong origin', () => {
@@ -1043,9 +1043,9 @@ describe('Viewer', () => {
         windowApi.location.hash = '#origin=g.com&webview=1';
         windowApi.location.ancestorOrigins = null;
         const viewer = new Viewer(ampdoc);
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           viewer.setMessageDeliverer(() => {});
-        }).to.throw(/message channel must have an origin/); });
+        }).to.throw(/message channel must have an origin/);
       });
 
       it('should decide non-trusted on connection with wrong origin', () => {

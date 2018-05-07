@@ -64,10 +64,10 @@ describe('iframe-transport-client', () => {
 
   it('fails to create iframeTransportClient if no window.name ', () => {
     const oldWindowName = window.name;
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       window.name = '';
       new IframeTransportClient(window);
-    }).to.throw(/Cannot read property/); });
+    }).to.throw(/Cannot read property/);
     window.name = oldWindowName;
   });
 

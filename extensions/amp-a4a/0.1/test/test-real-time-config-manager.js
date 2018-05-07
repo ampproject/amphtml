@@ -536,11 +536,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       {'vendors': {}, 'urls': []},
       {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
       it('should return null for rtcConfig missing required values', () => {
-        allowConsoleError(() => {
-          setRtcConfig(rtcConfig);
-          validatedRtcConfig = validateRtcConfig_(element);
-          expect(validatedRtcConfig).to.be.null;
-        });
+        setRtcConfig(rtcConfig);
+        validatedRtcConfig = validateRtcConfig_(element);
+        expect(validatedRtcConfig).to.be.null;
       });
     });
 

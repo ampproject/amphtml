@@ -367,9 +367,9 @@ describes.fakeWin('url rewriter', {
     it('should fail when mask is an invalid expression', () => {
       element.setAttribute('data-no-service-worker-fallback-url-match',
           '?');
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/Invalid/); });
+      }).to.throw(/Invalid/);
     });
   });
 

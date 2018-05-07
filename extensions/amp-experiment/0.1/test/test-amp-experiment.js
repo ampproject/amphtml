@@ -110,10 +110,10 @@ describes.realWin('amp-experiment', {
   });
 
   it('should throw if the child script element has non-JSON content', () => {
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
       experiment.buildCallback();
-    }).to.throw(); });
+    }).to.throw();
   });
 
   it('should add attributes to body element for the allocated variants', () => {

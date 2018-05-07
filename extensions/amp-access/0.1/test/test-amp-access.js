@@ -61,9 +61,9 @@ describes.fakeWin('AccessService', {
   });
 
   it('should fail if config is malformed', () => {
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       new AccessService(ampdoc);
-    }).to.throw(Error); });
+    }).to.throw(Error);
   });
 
   it('should default to "client" and fail if authorization is missing', () => {
