@@ -36,14 +36,15 @@ function checkBundleSize() {
   const pass = output.match(/PASS .*/);
   const fail = output.match(/FAIL .*/);
   const error = output.match(/ERROR .*/);
-  if (error) {
-    log(yellow(error));
+  if (error && error.length > 0) {
+    log(yellow(error[0]));
     if (!process.env.TRAVIS) {
-      log(yellow('You must run'), cyan('gulp dist'),
-          yellow('before running this task.'));
+      log(yellow('You must run'),
+          cyan('gulp dist --fortesting [--noextensions]'),
+          yellow('before running'), cyan('gulp bundle-size') + yellow('.'));
     }
-  } else if (fail) {
-    log(red(fail));
+  } else if (fail && fail.length > 0) {
+    log(red(fail[0]));
     log(red('ERROR:'), cyan('bundlesize'), red('found that'),
         cyan(runtimeFile), red('has exceeded its size cap of'),
         cyan(maxSize) + red('.'));
@@ -51,8 +52,8 @@ function checkBundleSize() {
         'This is part of a new effort to reduce AMP\'s binary size (#14392).'));
     log(red('Please contact @choumx or @jridgewell for assistance.'));
     process.exitCode = 1;
-  } else if (pass) {
-    log(green(pass));
+  } else if (pass && pass.length > 0) {
+    log(green(pass[0]));
   } else {
     log(yellow(output));
   }
