@@ -32,7 +32,7 @@ describes.realWin('Platform store', {}, () => {
     raw: 'raw',
     service: 'local',
     granted: true,
-    grantReason: GrantReasons.SUBSCRIBED,
+    grantReason: GrantReasons.SUBSCRIBER,
   });
 
   beforeEach(() => {
@@ -191,7 +191,7 @@ describes.realWin('Platform store', {}, () => {
         raw: '',
         service: 'local',
         granted: true,
-        grantReason: GrantReasons.SUBSCRIBED,
+        grantReason: GrantReasons.SUBSCRIBER,
       }));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another',
@@ -210,7 +210,7 @@ describes.realWin('Platform store', {}, () => {
         raw: '',
         service: 'another',
         granted: true,
-        grantReason: GrantReasons.SUBSCRIBED,
+        grantReason: GrantReasons.SUBSCRIBER,
       }));
       expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
           .equal(anotherPlatform.getServiceId());
@@ -308,7 +308,7 @@ describes.realWin('Platform store', {}, () => {
       source: 'local',
       service: 'local',
       granted: true,
-      grantReason: GrantReasons.SUBSCRIBED,
+      grantReason: GrantReasons.SUBSCRIBER,
     });
     it('should resolve with existing entitlement with subscriptions', () => {
       platformStore.grantStatusEntitlement_ = subscribedMeteredEntitlement;
@@ -390,7 +390,7 @@ describes.realWin('Platform store', {}, () => {
       );
       const subscribedMeteredEntitlement = new Entitlement(
           Object.assign({}, entitlementData, {
-            grantReason: GrantReasons.SUBSCRIBED,
+            grantReason: GrantReasons.SUBSCRIBER,
           })
       );
       platformStore.saveGrantEntitlement_(entitlement);

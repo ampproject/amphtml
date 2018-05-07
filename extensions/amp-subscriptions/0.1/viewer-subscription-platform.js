@@ -130,7 +130,7 @@ export class ViewerSubscriptionPlatform {
               raw: token,
               granted: true,
               grantReason: entitlementObject.subscriptionToken ?
-                GrantReasons.SUBSCRIBED : '',
+                GrantReasons.SUBSCRIBER : '',
               data: entitlementObject,
             });
             break;
@@ -151,7 +151,7 @@ export class ViewerSubscriptionPlatform {
           raw: token,
           granted: entitlements.granted,
           grantReason: entitlements.subscriptionToken ?
-            GrantReasons.SUBSCRIBED : '',
+            GrantReasons.SUBSCRIBER : '',
           data: entitlements,
         });
       }

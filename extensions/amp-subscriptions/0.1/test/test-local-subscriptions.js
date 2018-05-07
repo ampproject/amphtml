@@ -36,7 +36,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     service,
     source,
     granted: true,
-    grantReason: GrantReasons.SUBSCRIBED,
+    grantReason: GrantReasons.SUBSCRIBER,
   };
   const entitlement = Entitlement.parseFromJson(json);
   const authUrl = 'https://lipsum.com/login/authorize';

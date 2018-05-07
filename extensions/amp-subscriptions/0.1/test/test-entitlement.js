@@ -21,8 +21,8 @@ describes.realWin('EntitlementClass', {}, () => {
   const service = 'sample-service';
   const source = 'sample-source';
   const granted = true;
-  const grantReason = GrantReasons.SUBSCRIBED;
-  const data = {
+  const grantReason = GrantReasons.SUBSCRIBER;
+  const dataObject = {
     metering: {
       left: 1,
       total: 10,
@@ -34,13 +34,13 @@ describes.realWin('EntitlementClass', {}, () => {
   it('should give json representation of the object', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, granted,
-      grantReason, data});
+      grantReason, dataObject});
     expect(entitlement.json()).to.deep.equal({
       service,
       source,
       granted,
       grantReason,
-      data,
+      data: dataObject,
     });
   });
 
@@ -50,14 +50,14 @@ describes.realWin('EntitlementClass', {}, () => {
       source,
       granted,
       grantReason,
-      data,
+      data: dataObject,
     };
     const entitlement = Entitlement.parseFromJson(json);
     expect(entitlement.source).to.be.equal(source);
     expect(entitlement.granted).to.be.equal(granted);
     expect(entitlement.grantReason).to.be.equal(grantReason);
     expect(entitlement.raw).to.be.equal(JSON.stringify(json));
-    expect(entitlement.data).to.be.equal(data);
+    expect(entitlement.data).to.be.equal(dataObject);
   });
 
   it('should be able to parse raw from json', () => {
@@ -66,7 +66,7 @@ describes.realWin('EntitlementClass', {}, () => {
       source,
       granted,
       grantReason,
-      data,
+      data: dataObject,
     };
     const rawValue = 'rawValue';
     const entitlement = Entitlement.parseFromJson(json, rawValue);
@@ -74,13 +74,13 @@ describes.realWin('EntitlementClass', {}, () => {
     expect(entitlement.granted).to.be.equal(granted);
     expect(entitlement.grantReason).to.be.equal(grantReason);
     expect(entitlement.raw).to.equal(rawValue);
-    expect(entitlement.data).to.be.equal(data);
+    expect(entitlement.data).to.be.equal(dataObject);
   });
 
   it('should return raw, granStatus and source for pingback', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, granted,
-      grantReason, data});
+      grantReason, dataObject});
     const pingbackData = entitlement.jsonForPingback();
     expect(pingbackData).to.deep.equal(
         Object.assign({raw}, entitlement.json()));

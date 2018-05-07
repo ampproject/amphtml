@@ -226,8 +226,8 @@ export class PlatformStore {
     // or the new one has full subscription but the last one didn't.
     if ((!this.grantStatusEntitlement_ && entitlement.granted)
         || (this.grantStatusEntitlement_
-          && !this.grantStatusEntitlement_.isSubscribed()
-          && entitlement.isSubscribed())) {
+          && !this.grantStatusEntitlement_.isSubscriber()
+          && entitlement.isSubscriber())) {
       this.grantStatusEntitlement_ = entitlement;
       this.onGrantStateResolvedCallbacks_.fire();
     }
@@ -244,7 +244,7 @@ export class PlatformStore {
 
     this.grantStatusEntitlementPromise_ = new Promise(resolve => {
       if ((this.grantStatusEntitlement_
-          && this.grantStatusEntitlement_.isSubscribed())
+          && this.grantStatusEntitlement_.isSubscriber())
             || this.areAllPlatformsResolved_()) {
         resolve(this.grantStatusEntitlement_);
       } else {
@@ -358,7 +358,7 @@ export class PlatformStore {
           this.getResolvedEntitlementFor(platform.getServiceId());
 
       // Subscriber wins immediatly.
-      if (entitlement.isSubscribed()) {
+      if (entitlement.isSubscriber()) {
         weight += 100000;
       }
 

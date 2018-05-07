@@ -17,7 +17,7 @@ import {dict} from '../../../src/utils/object';
 
 /** @enum {string} */
 export const GrantReasons = {
-  'SUBSCRIBED': 'SUBSCRIBED',
+  'SUBSCRIBER': 'SUBSCRIBER',
   'METERING': 'METERING',
 };
 
@@ -46,10 +46,10 @@ export class Entitlement {
    * @param {string} [input.service]
    * @param {boolean} [input.granted]
    * @param {?GrantReasons} [input.grantReason]
-   * @param {?JsonObject} [input.data]
+   * @param {?JsonObject} [input.dataObject]
    */
   constructor({source, raw = '', service, granted = false,
-    grantReason = '', data}) {
+    grantReason = '', dataObject}) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -61,7 +61,7 @@ export class Entitlement {
     /** @const {?string} */
     this.grantReason = grantReason;
     /** @const {?JsonObject} */
-    this.data = data;
+    this.data = dataObject;
   }
 
   /**
@@ -103,16 +103,16 @@ export class Entitlement {
     const source = json['source'] || '';
     const granted = json['granted'] || false;
     const grantReason = json['grantReason'];
-    const data = json['data'] || null;
+    const dataObject = json['data'] || null;
     return new Entitlement({source, raw, service: '',
-      granted, grantReason, data});
+      granted, grantReason, dataObject});
   }
 
   /**
    * Returns if the user is a subscriber.
    * @return {boolean}
    */
-  isSubscribed() {
-    return this.granted && this.grantReason === GrantReasons.SUBSCRIBED;
+  isSubscriber() {
+    return this.granted && this.grantReason === GrantReasons.SUBSCRIBER;
   }
 }

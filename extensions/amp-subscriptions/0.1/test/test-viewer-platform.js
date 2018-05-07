@@ -131,7 +131,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
                 .equal(entitlementData.products.indexOf(currentProductId)
                   !== -1);
             expect(resolvedEntitlement.grantReason).to.be
-                .equal(GrantReasons.SUBSCRIBED);
+                .equal(GrantReasons.SUBSCRIBER);
             // raw should be the data which was resolved via sendMessageAwaitResponse.
             expect(resolvedEntitlement.raw).to
                 .equal('faketoken');
