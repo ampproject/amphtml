@@ -35,16 +35,17 @@ module.exports = {
   ],
 
   preprocessors: {
-    'test/fixtures/*.html': ['html2js'],
-    'test/**/*.js': ['browserify'],
-    'ads/**/test/test-*.js': ['browserify'],
-    'extensions/**/test/**/*.js': ['browserify'],
-    'testing/**/*.js': ['browserify'],
+    './test/fixtures/*.html': ['html2js'],
+    './test/**/*.js': ['browserify'],
+    './ads/**/test/test-*.js': ['browserify'],
+    './extensions/**/test/**/*.js': ['browserify'],
+    './testing/**/*.js': ['browserify'],
   },
 
   browserify: {
     watch: true,
     debug: true,
+    basedir: __dirname + '/../../',
     transform: [
       ['babelify', {compact: false}],
     ],
@@ -128,7 +129,7 @@ module.exports = {
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      flags: COMMON_CHROME_FLAGS,
+      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
