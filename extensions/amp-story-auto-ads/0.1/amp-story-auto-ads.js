@@ -80,18 +80,18 @@ const EVENTS = {
   AD_VIEWED: 'story-ad-view',
   AD_CLICKED: 'story-ad-click',
   AD_EXITED: 'story-ad-exit',
-  AD_DESTROYED: 'story-ad-destroy',
+  AD_DISCARDED: 'story-ad-discard',
 };
 
 /** @enum {string} */
 const VARS = {
-  AD_REQUESTED: 'requestTime',
-  AD_LOADED: 'loadTime',
-  AD_INSERTED: 'insertTime',
-  AD_VIEWED: 'viewTime',
-  AD_CLICKED: 'clickTime',
-  AD_EXITED: 'exitTime',
-  AD_DESTROYED: 'destroyTime',
+  AD_REQUESTED: 'requestTime', // when ad is requested
+  AD_LOADED: 'loadTime', // when ad emits `INI_LOAD` signal
+  AD_INSERTED: 'insertTime', // added as page after next
+  AD_VIEWED: 'viewTime', // page becomes active
+  AD_CLICKED: 'clickTime', // optional
+  AD_EXITED: 'exitTime', // page moves from active => inactive
+  AD_DISCARDED: 'discardTime', // discared due to bad metadata etc
 };
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
@@ -434,7 +434,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (this.uniquePagesCount_ > MIN_INTERVAL) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
-      if (adState === AD_STATE.PLACED) {
+      if (adState === AD_STATE.INSERTED) {
         this.analyticsEvent_(EVENTS.AD_INSERTED,
             {[VARS.AD_INSERTED]: Date.now()});
         this.adsPlaced_++;
@@ -443,8 +443,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       }
 
       if (adState === AD_STATE.FAILED) {
-        this.analyticsEvent_(EVENTS.AD_DESTROYED,
-            {[VARS.AD_DESTROYED]: Date.now()});
+        this.analyticsEvent_(EVENTS.AD_DISCARDED,
+            {[VARS.AD_DISCARDED]: Date.now()});
         this.startNextPage_();
       }
     }
@@ -490,7 +490,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
-    return AD_STATE.PLACED;
+    return AD_STATE.INSERTED;
   }
 
 
