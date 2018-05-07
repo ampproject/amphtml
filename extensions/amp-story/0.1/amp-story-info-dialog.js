@@ -74,7 +74,7 @@ export class InfoDialog {
    */
   build() {
     if (this.isBuilt()) {
-      return;
+      return Promise.resolve();
     }
 
     this.isBuilt_ = true;
@@ -177,7 +177,7 @@ export class InfoDialog {
 
     if (!messagingPromise) {
       // There is no viewer to supply the more info URL.
-      return Promise.resolve(null);
+      return Promise.resolve();
     }
 
     return messagingPromise
@@ -226,8 +226,8 @@ export class InfoDialog {
         state.linkEl.setAttribute('href', pageUrl);
         state.linkEl.setAttribute('rel', 'amphtml');
 
-        // Add zero-width spaces after "." and "/" characters to help line-breaks
-        // occur more naturally.
+        // Add zero-width space character (\u200B) after "." and "/" characters
+        // to help line-breaks occur more naturally.
         state.linkEl.textContent = pageUrl.replace(/([/.]+)/gi, '$1\u200B');
       },
     }, /* state */ {});
@@ -251,7 +251,8 @@ export class InfoDialog {
         const label = this.localizationService_.getLocalizedString(
             LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK);
         this.moreInfoLinkEl_.classList.add(MOREINFO_VISIBLE_CLASS);
-        this.moreInfoLinkEl_.setAttribute('href', moreInfoUrl);
+        this.moreInfoLinkEl_.setAttribute('href',
+            dev().assertString(moreInfoUrl));
         this.moreInfoLinkEl_.setAttribute('target', '_blank');
         this.moreInfoLinkEl_.textContent = label;
       },

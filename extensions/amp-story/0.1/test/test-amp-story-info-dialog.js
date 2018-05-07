@@ -20,8 +20,8 @@ import {
   StateProperty,
 } from '../amp-story-store-service';
 import {
-  InfoDialog,
   DIALOG_VISIBLE_CLASS,
+  InfoDialog,
   MOREINFO_VISIBLE_CLASS,
 } from '../amp-story-info-dialog';
 import {Services} from '../../../../src/services';
