@@ -33,7 +33,7 @@ export class Deferred {
     });
 
     /**
-     * @const {function(T)}
+     * @const {function(T=)}
      */
     this.resolve = resolve;
 
