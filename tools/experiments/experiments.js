@@ -301,11 +301,16 @@ const EXPERIMENTS = [
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
   {
+    id: 'amp-img-native-srcset',
+    name: 'Enables native browser implementation of srcset and sizes',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/11575',
+  },
+  {
     id: 'amp-fx-fly-in',
     name: 'Enables amp-fx="fly-in-{bottom,top,left,right}" - ' +
       'scroll triggered timed fly in animations',
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',    
   },
 ];
 

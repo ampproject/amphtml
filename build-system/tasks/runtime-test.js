@@ -169,7 +169,7 @@ function printArgvMessages() {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
     log(green('⤷ Use'), cyan('--nohelp'),
-        green('to silence these messages.)'));
+        green('to silence these messages.'));
     if (!argv.unit && !argv.integration && !argv.files && !argv.a4a) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
@@ -374,9 +374,13 @@ function runTests() {
           yellow('Karma test failed with exit code ' + exitCode));
     }
     // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-    setTimeout(() => {
-      process.exit(exitCode);
-    }, 5000);
+    if (process.env.TRAVIS) {
+      setTimeout(() => {
+        process.exit(exitCode);
+      }, 5000);
+    } else {
+      process.exitCode = exitCode;
+    }
     resolver();
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {

@@ -17,6 +17,8 @@
 import '../amp-ima-video';
 import * as imaVideoObj from '../../../../ads/google/imaVideo';
 
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+
 
 describes.realWin('amp-ima-video', {
   amp: {
@@ -30,6 +32,7 @@ describes.realWin('amp-ima-video', {
 
   beforeEach(() => {
     win = env.win;
+    win.context = {};
     doc = win.document;
   });
 
@@ -767,5 +770,95 @@ describes.realWin('amp-ima-video', {
 
     expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
         .to.eql('none');
+  });
+
+  it('handles unknown consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    imaVideoObj.imaLoadAllowed = true;
+    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.UNKNOWN);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().imaLoadAllowed).to.eql(false);
+  });
+
+  it('handles insufficient consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.INSUFFICIENT);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
+        .to.eql('vast.mxl&npa=1');
+  });
+
+  it('handles sufficient consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.SUFFICIENT);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
+        .to.eql('vast.mxl');
+  });
+
+  it('handles unknown_not_required consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setConsentStateForTesting(
+        CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
+        .to.eql('vast.mxl');
   });
 });

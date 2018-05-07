@@ -369,6 +369,16 @@ let VideoOrBaseElementDef;
 
 
 /**
+ * @param {!Element} element
+ * @return {!Element}
+ * @restricted
+ */
+function getInternalElementFor(element) {
+  return dev().assertElement(element.querySelector('video, iframe'));
+}
+
+
+/**
  * VideoEntry represents an entry in the VideoManager's list.
  */
 class VideoEntry {
@@ -450,6 +460,19 @@ class VideoEntry {
 
     video.element.signals().whenSignal(VideoEvents.REGISTERED)
         .then(() => this.onRegister_());
+
+    /**
+     * Trigger event for first manual play.
+     * @private @const {!function()}
+     */
+    this.firstPlayEventOrNoop_ = once(() => {
+      const firstPlay = 'firstPlay';
+      const trust = ActionTrust.LOW;
+      const event = createCustomEvent(this.ampdoc_.win, firstPlay,
+          /* detail */ {});
+      const actions = Services.actionServiceForDoc(this.ampdoc_);
+      actions.trigger(this.video.element, firstPlay, event, trust);
+    });
   }
 
   /** Delegates autoplay to a different module. */
@@ -495,6 +518,10 @@ class VideoEntry {
    */
   videoPlayed_() {
     this.isPlaying_ = true;
+
+    if (this.getPlayingState() == PlayingStates.PLAYING_MANUAL) {
+      this.firstPlayEventOrNoop_();
+    }
 
     if (!this.video.preimplementsMediaSessionAPI()) {
       const playHandler = () => {
@@ -551,7 +578,7 @@ class VideoEntry {
   videoLoaded() {
     this.loaded_ = true;
 
-    this.internalElement_ = this.video.element.querySelector('video, iframe');
+    this.internalElement_ = getInternalElementFor(this.video.element);
 
     this.fillMediaSessionMetadata_();
 
@@ -708,6 +735,7 @@ class VideoEntry {
         adEnd.bind(this)));
 
     function onInteraction() {
+      this.firstPlayEventOrNoop_();
       this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
@@ -902,6 +930,17 @@ class VideoEntry {
 const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
 
 
+/**
+ * @param {!AmpElement} video
+ * @return {boolean}
+ * @restricted
+ */
+function supportsFullscreenViaApi(video) {
+  // TODO(alanorozco): Determine this via a flag in the component itself.
+  return video.tagName.toLowerCase() == 'amp-dailymotion';
+}
+
+
 /** Manages rotate-to-fullscreen video. */
 export class AutoFullscreenManager {
 
@@ -944,6 +983,10 @@ export class AutoFullscreenManager {
 
   /** @param {!VideoEntry} entry */
   register(entry) {
+    if (!this.canFullscreen_(entry.video.element)) {
+      return;
+    }
+
     const id = this.nextId_++;
     const {element} = entry.video;
 
@@ -972,6 +1015,27 @@ export class AutoFullscreenManager {
     listen(root, 'mozfullscreenchange', exitHandler);
     listen(root, 'fullscreenchange', exitHandler);
     listen(root, 'MSFullscreenChange', exitHandler);
+  }
+
+  /**
+   * @param {!AmpElement} video
+   * @return {boolean}
+   * @private
+   */
+  canFullscreen_(video) {
+    // Safari and iOS can only fullscreen <video> elements directly. In cases
+    // where the player component is implemented via an <iframe>, we need to
+    // rely on a postMessage API to fullscreen. Such an API is not necessarily
+    // provided by every player.
+    const internalElement = getInternalElementFor(video);
+    if (internalElement.tagName.toLowerCase() == 'video') {
+      return true;
+    }
+    const platform = Services.platformFor(this.ampdoc_.win);
+    if (!(platform.isIos() || platform.isSafari())) {
+      return true;
+    }
+    return supportsFullscreenViaApi(video);
   }
 
   /** @private */

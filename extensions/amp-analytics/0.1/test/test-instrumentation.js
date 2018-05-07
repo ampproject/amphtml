@@ -116,9 +116,9 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       sandbox.stub(root, 'getTracker').callsFake(() => {
         throw new Error('intentional');
       });
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         group.addTrigger({on: 'click', selector: '*'});
-      }).to.throw(/intentional/); });
+      }).to.throw(/intentional/);
     });
 
     it('should delegate to deprecated addListener', () => {

@@ -568,10 +568,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       clock.tick(1);
       container.appendChild(element);
-      allowConsoleError(() => {
-        return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
-            /BLOCK_BY_CONSENT/);
-      });
+      return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
+          /BLOCK_BY_CONSENT/);
     });
 
 
@@ -584,10 +582,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.isBuilt()).to.be.false;
       expect(element).to.have.class('i-amphtml-notbuilt');
       expect(element).to.have.class('amp-notbuilt');
-      allowConsoleError(() => {
-        return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
-            /intentional/);
-      });
+      return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
+          /intentional/);
     });
 
     it('Element - build creates a placeholder if one does not exist' , () => {
