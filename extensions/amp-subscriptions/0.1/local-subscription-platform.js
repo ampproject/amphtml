@@ -88,9 +88,6 @@ export class LocalSubscriptionPlatform {
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
         serviceAdapter.getDialog(), this.serviceAdapter_);
 
-    /** @private {?Entitlement}*/
-    this.entitlement_ = null;
-
     /** @private @const {?string} */
     this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
 
@@ -193,9 +190,7 @@ export class LocalSubscriptionPlatform {
           this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
               .then(res => res.json())
               .then(resJson => {
-                const entitlement = Entitlement.parseFromJson(resJson);
-                this.entitlement_ = entitlement;
-                return entitlement;
+                return Entitlement.parseFromJson(resJson);
               }));
   }
 
