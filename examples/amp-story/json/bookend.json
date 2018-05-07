@@ -1,0 +1,106 @@
+{
+  "bookend-version": "v1.0",
+  "share-providers": [
+    "email",
+    {"provider": "facebook", "app-id": "254325784911610"},
+    "whatsapp"
+  ],
+  "components": [
+    {
+      "type": "article-set-title",
+      "title": "Getting Started"
+    },
+    {
+      "type": "small",
+      "title": "Hello World",
+      "url": "hello-world.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "Hello World with Bookend",
+      "url": "hello-world-bookend.html",
+      "image": "http://placehold.it/256x128"
+    },
+
+    {
+      "type": "article-set-title",
+      "title": "Animation Examples"
+    },
+    {
+      "type": "small",
+      "title": "Animation Presets",
+      "url": "animation-presets.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "Animation Sequence",
+      "url": "animation-presets.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "Visual Effects",
+      "url": "visual-effects.html",
+      "image": "http://placehold.it/256x128"
+    },
+
+    {
+      "type": "article-set-title",
+      "title": "Bookend Examples"
+    },
+    {
+      "type": "small",
+      "title": "Bookend v0.1",
+      "url": "bookend.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "Bookend v1.0",
+      "url": "bookendv1.html",
+      "image": "http://placehold.it/256x128"
+    },
+
+    {
+      "type": "article-set-title",
+      "title": "Layers"
+    },
+    {
+      "type": "small",
+      "title": "CTA (Call-to-Action) Layer",
+      "url": "cta-layer-outlink.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "Grid Layer Templates",
+      "url": "grid-layer-templates.html",
+      "image": "http://placehold.it/256x128"
+    },
+
+    {
+      "type": "article-set-title",
+      "title": "Miscellaneous"
+    },
+    {
+      "type": "small",
+      "title": "Analytics",
+      "url": "analytics.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "Progress Bar",
+      "url": "progress-bar.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "Desktop Backgrounds",
+      "url": "desktop-backgrounds.html",
+      "image": "http://placehold.it/256x128"
+    }
+  ]
+}
