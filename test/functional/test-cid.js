@@ -913,9 +913,7 @@ describes.fakeWin('cid optout:', {amp: true}, env => {
 
     it('should reject promise if storage set fails', () => {
       storageSetStub.returns(Promise.reject('failed!'));
-      allowConsoleError(() => {
-        return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
-      });
+      return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
     });
   });
 

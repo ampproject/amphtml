@@ -167,9 +167,9 @@ describes.realWin('Actions', {amp: true}, env => {
     }).then(() => {
       throw new Error('must have failed');
     }, reason => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         throw reason;
-      }).to.throw(/broken/); });
+      }).to.throw(/broken/);
       expect(actions.actionPromise_).to.be.null;
     });
   });

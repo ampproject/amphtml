@@ -596,9 +596,9 @@ describes.sandboxed('CSS resolve', {}, () => {
           .throws(new Error('intentional'))
           .once();
       const node = new ast.CssUrlNode('http://acme.org/non-secure');
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         node.calc(context);
-      }).to.throw(/intentional/); });
+      }).to.throw(/intentional/);
     });
   });
 
@@ -712,23 +712,21 @@ describes.sandboxed('CSS resolve', {}, () => {
     });
 
     it('should disallow a real-length node', () => {
-      allowConsoleError(() => {
-        expect(() => {
-          new ast.CssLengthNode(1, 'cm').norm(context);
-        }).to.throw(/unknown/);
-        expect(() => {
-          new ast.CssLengthNode(1, 'mm').norm(context);
-        }).to.throw(/unknown/);
-        expect(() => {
-          new ast.CssLengthNode(1, 'in').norm(context);
-        }).to.throw(/unknown/);
-        expect(() => {
-          new ast.CssLengthNode(1, 'pt').norm(context);
-        }).to.throw(/unknown/);
-        expect(() => {
-          new ast.CssLengthNode(1, 'q').norm(context);
-        }).to.throw(/unknown/);
-      });
+      expect(() => {
+        new ast.CssLengthNode(1, 'cm').norm(context);
+      }).to.throw(/unknown/);
+      expect(() => {
+        new ast.CssLengthNode(1, 'mm').norm(context);
+      }).to.throw(/unknown/);
+      expect(() => {
+        new ast.CssLengthNode(1, 'in').norm(context);
+      }).to.throw(/unknown/);
+      expect(() => {
+        new ast.CssLengthNode(1, 'pt').norm(context);
+      }).to.throw(/unknown/);
+      expect(() => {
+        new ast.CssLengthNode(1, 'q').norm(context);
+      }).to.throw(/unknown/);
     });
 
     it('should resolve a percent-length in w-direction', () => {
@@ -1080,7 +1078,7 @@ describes.sandboxed('CSS resolve', {}, () => {
     it('should be always a non-const and no css', () => {
       const node = new ast.CssDimSizeNode('?');
       expect(node.isConst()).to.be.false;
-      allowConsoleError(() => { expect(() => node.css()).to.throw(/no css/); });
+      expect(() => node.css()).to.throw(/no css/);
     });
 
     it('should resolve width on the current node', () => {
@@ -1123,7 +1121,7 @@ describes.sandboxed('CSS resolve', {}, () => {
     it('should always be a non-const and no css', () => {
       const node = new ast.CssNumConvertNode();
       expect(node.isConst()).to.equal(false);
-      allowConsoleError(() => { expect(() => node.css()).to.throw(/no css/); });
+      expect(() => node.css()).to.throw(/no css/);
     });
 
     it('should resolve num from a number', () => {
@@ -1216,7 +1214,7 @@ describes.sandboxed('CSS resolve', {}, () => {
     it('should always be a non-const and no css', () => {
       const node = new ast.CssRandNode();
       expect(node.isConst()).to.equal(false);
-      allowConsoleError(() => { expect(() => node.css()).to.throw(/no css/); });
+      expect(() => node.css()).to.throw(/no css/);
     });
 
     it('should resolve a no-arg rand', () => {
@@ -1299,18 +1297,18 @@ describes.sandboxed('CSS resolve', {}, () => {
       const node = new ast.CssRandNode(
           new ast.CssPassthroughNode('A'),
           new ast.CssPassthroughNode('B'));
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         resolvedCss(node);
-      }).to.throw(/both numerical/); });
+      }).to.throw(/both numerical/);
     });
 
     it('should only allow same-type', () => {
       const node = new ast.CssRandNode(
           new ast.CssLengthNode(30, 'px'),
           new ast.CssTimeNode(20, 's'));
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         resolvedCss(node);
-      }).to.throw(/same type/); });
+      }).to.throw(/same type/);
     });
 
     it('should normalize units', () => {
@@ -1333,7 +1331,7 @@ describes.sandboxed('CSS resolve', {}, () => {
       const node = new ast.CssIndexNode();
       expect(node.isConst()).to.be.false;
       expect(node.isConst(normalize)).to.be.false;
-      allowConsoleError(() => { expect(() => node.css()).to.throw(/no css/); });
+      expect(() => node.css()).to.throw(/no css/);
     });
 
     it('should resolve a no-arg', () => {
@@ -1540,9 +1538,9 @@ describes.sandboxed('CSS resolve', {}, () => {
             new ast.CssPassthroughNode('A'),
             new ast.CssPassthroughNode('B'),
             '+');
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           resolvedCss(node);
-        }).to.throw(/both numerical/); });
+        }).to.throw(/both numerical/);
       });
 
       it('should only allow same-type', () => {
@@ -1550,9 +1548,9 @@ describes.sandboxed('CSS resolve', {}, () => {
             new ast.CssLengthNode(30, 'px'),
             new ast.CssTimeNode(20, 's'),
             '+');
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           resolvedCss(node);
-        }).to.throw(/same type/); });
+        }).to.throw(/same type/);
       });
 
       it('should normalize units', () => {
@@ -1633,9 +1631,9 @@ describes.sandboxed('CSS resolve', {}, () => {
             new ast.CssPassthroughNode('A'),
             new ast.CssPassthroughNode('B'),
             '*');
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           resolvedCss(node);
-        }).to.throw(/both numerical/); });
+        }).to.throw(/both numerical/);
       });
 
       it('should multiply with right number', () => {
@@ -1683,9 +1681,9 @@ describes.sandboxed('CSS resolve', {}, () => {
             new ast.CssLengthNode(10, 'px'),
             new ast.CssLengthNode(20, 'px'),
             '*');
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           resolvedCss(node);
-        }).to.throw(/one of sides in multiplication must be a number/); });
+        }).to.throw(/one of sides in multiplication must be a number/);
       });
 
       it('should divide with right number', () => {
@@ -1723,9 +1721,9 @@ describes.sandboxed('CSS resolve', {}, () => {
             new ast.CssTimeNode(10, 's'),
             new ast.CssTimeNode(2, 's'),
             '/');
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           resolvedCss(node);
-        }).to.throw(/denominator must be a number/); });
+        }).to.throw(/denominator must be a number/);
       });
 
       it('should resolve divide-by-zero as null', () => {

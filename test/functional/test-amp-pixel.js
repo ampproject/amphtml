@@ -100,26 +100,20 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should disallow http URLs', () => {
     const url = 'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
-    allowConsoleError(() => {
-      return expect(trigger(url)).to.eventually.be.rejectedWith(
-          /src attribute must start with/);
-    });
+    return expect(trigger(url)).to.eventually.be.rejectedWith(
+        /src attribute must start with/);
   });
 
   it('should disallow relative URLs', () => {
     const url = '/activity;dc_iu=1/abc;ord=2';
-    allowConsoleError(() => {
-      return expect(trigger(url)).to.eventually.be.rejectedWith(
-          /src attribute must start with/);
-    });
+    return expect(trigger(url)).to.eventually.be.rejectedWith(
+        /src attribute must start with/);
   });
 
   it('should disallow fake-protocol URLs', () => {
     const url = 'https/activity;dc_iu=1/abc;ord=2';
-    allowConsoleError(() => {
-      return expect(trigger(url)).to.eventually.be.rejectedWith(
-          /src attribute must start with/);
-    });
+    return expect(trigger(url)).to.eventually.be.rejectedWith(
+        /src attribute must start with/);
   });
 
   it('should replace URL parameters', () => {

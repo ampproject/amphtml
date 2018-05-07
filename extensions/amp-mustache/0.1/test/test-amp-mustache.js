@@ -209,14 +209,12 @@ describe('amp-mustache template', () => {
             'value = <input value="myid">');
       });
 
-      allowConsoleError(() => {
-        const result = template.render({
-          value: 'myid',
-          type: 'password',
-        });
-        expect(result./*OK*/innerHTML).to.equal(
-            'value = <input value="myid" type="password">');
+      const result = template.render({
+        value: 'myid',
+        type: 'password',
       });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid" type="password">');
     });
 
     it('should allow text input type rendering', () => {

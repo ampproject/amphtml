@@ -74,29 +74,27 @@ describe('BindExpression', () => {
     });
 
     it('disallow: operators with side effects', () => {
-      allowConsoleError(() => {
-        expect(() => { evaluate('foo = 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo += 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo -= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo *= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo /= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo %= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo **= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo <<= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo >>= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo >>>= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo &= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo ^= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo |= 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo++', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo--', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('~foo', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo << 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo >> 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('foo >>> 1', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('new Object()', {foo: 0}); }).to.throw();
-        expect(() => { evaluate('delete foo', {foo: 0}); }).to.throw();
-      });
+      expect(() => { evaluate('foo = 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo += 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo -= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo *= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo /= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo %= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo **= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo <<= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo >>= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo >>>= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo &= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo ^= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo |= 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo++', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo--', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('~foo', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo << 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo >> 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('foo >>> 1', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('new Object()', {foo: 0}); }).to.throw();
+      expect(() => { evaluate('delete foo', {foo: 0}); }).to.throw();
     });
 
     /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators */
@@ -111,12 +109,10 @@ describe('BindExpression', () => {
       expect(evaluate('new')).to.be.null;
       expect(evaluate('super')).to.be.null;
 
-      allowConsoleError(() => {
-        expect(() => { evaluate('function*'); }).to.throw();
-        expect(() => { evaluate('/ab+c/i'); }).to.throw();
-        expect(() => { evaluate('yield*'); }).to.throw();
-        expect(() => { evaluate('async function*'); }).to.throw();
-      });
+      expect(() => { evaluate('function*'); }).to.throw();
+      expect(() => { evaluate('/ab+c/i'); }).to.throw();
+      expect(() => { evaluate('yield*'); }).to.throw();
+      expect(() => { evaluate('async function*'); }).to.throw();
     });
   });
 
@@ -304,9 +300,7 @@ describe('BindExpression', () => {
       expect(evaluate('{null: "b"}')).to.deep.equal({null: 'b'});
       // Unquoted string keys should _not_ be evaluated as expressions.
       expect(evaluate('{a: "b"}', {a: 'foo'})).to.deep.equal({a: 'b'});
-      allowConsoleError(() => {
-        expect(() => evaluate('{1+1: "b"}')).to.throw();
-      });
+      expect(() => evaluate('{1+1: "b"}')).to.throw();
     });
 
     it('computed property names', () => {
@@ -350,17 +344,17 @@ describe('BindExpression', () => {
       expect(evaluate('abs(-2) + abs', {abs: 2})).to.equal(4);
 
       // Don't support non-whitelisted functions.
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         evaluate('sin(0.5)');
-      }).to.throw(unsupportedFunctionError); });
-      allowConsoleError(() => { expect(() => {
+      }).to.throw(unsupportedFunctionError);
+      expect(() => {
         evaluate('pow(3, 2)');
-      }).to.throw(unsupportedFunctionError); });
+      }).to.throw(unsupportedFunctionError);
 
       // Don't support calling functions with `Math.` prefix.
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         evaluate('Math.abs(-1)', {Math});
-      }).to.throw(unsupportedFunctionError); });
+      }).to.throw(unsupportedFunctionError);
     });
 
     it('encodeURI and encodeURIComponent', () => {
@@ -372,10 +366,8 @@ describe('BindExpression', () => {
 
     it('splice()', () => {
       const a = [1, 2, 3];
-      allowConsoleError(() => {
-        expect(() => evaluate('splice()')).to.throw(/not an array/);
-        expect(() => evaluate('splice(x)', {x: 8472})).to.throw(/not an array/);
-      });
+      expect(() => evaluate('splice()')).to.throw(/not an array/);
+      expect(() => evaluate('splice(x)', {x: 8472})).to.throw(/not an array/);
       expect(evaluate('splice(a)', {a})).to.not.equal(a);
       expect(evaluate('splice(a)', {a})).to.deep.equal(a);
       expect(evaluate('splice(a, 1)', {a})).to.deep.equal([1]);
@@ -385,10 +377,8 @@ describe('BindExpression', () => {
 
     it('sort()', () => {
       const a = [2, 3, 1];
-      allowConsoleError(() => {
-        expect(() => evaluate('sort()')).to.throw(/not an array/);
-        expect(() => evaluate('sort("abc")')).to.throw(/not an array/);
-      });
+      expect(() => evaluate('sort()')).to.throw(/not an array/);
+      expect(() => evaluate('sort("abc")')).to.throw(/not an array/);
       expect(evaluate('sort(a)', {a})).to.not.equal(a);
       expect(evaluate('sort(a)', {a})).to.deep.equal([1, 2, 3]);
     });
@@ -418,16 +408,12 @@ describe('BindExpression', () => {
         qux: window.Function,
       };
       // baz() throws a parse error because functions must have a caller.
-      allowConsoleError(() => {
-        expect(() => { evaluate('baz()', scope); }).to.throw();
-      });
+      expect(() => { evaluate('baz()', scope); }).to.throw();
       expect(() => { evaluate('foo.bar()', scope); })
           .to.throw(Error, unsupportedFunctionError);
-      allowConsoleError(() => {
-        expect(() => {
-          evaluate('foo.qux("a", "return a")', scope);
-        }).to.throw(unsupportedFunctionError);
-      });
+      expect(() => {
+        evaluate('foo.qux("a", "return a")', scope);
+      }).to.throw(unsupportedFunctionError);
     });
 
     it('disallow: invocation of prototype functions', () => {
@@ -512,21 +498,19 @@ describe('BindExpression', () => {
     });
 
     it('disallow: loops', () => {
-      allowConsoleError(() => {
-        expect(() => { evaluate('if (foo) "bar"', {foo: 0}); }).to.throw();
-        expect(() => {
-          evaluate('switch (foo) { case 0: "bar" }', {foo: 0});
-        }).to.throw();
-        expect(() => { evaluate('for (;;) {}'); }).to.throw();
-        expect(() => { evaluate('while (true) {}'); }).to.throw();
-        expect(() => { evaluate('do {} while (true)'); }).to.throw();
-        expect(() => {
-          evaluate('for (var i in foo) {}', {foo: [1, 2, 3]});
-        }).to.throw();
-        expect(() => {
-          evaluate('for (var i of foo) {}', {foo: [1, 2, 3]});
-        }).to.throw();
-      });
+      expect(() => { evaluate('if (foo) "bar"', {foo: 0}); }).to.throw();
+      expect(() => {
+        evaluate('switch (foo) { case 0: "bar" }', {foo: 0});
+      }).to.throw();
+      expect(() => { evaluate('for (;;) {}'); }).to.throw();
+      expect(() => { evaluate('while (true) {}'); }).to.throw();
+      expect(() => { evaluate('do {} while (true)'); }).to.throw();
+      expect(() => {
+        evaluate('for (var i in foo) {}', {foo: [1, 2, 3]});
+      }).to.throw();
+      expect(() => {
+        evaluate('for (var i of foo) {}', {foo: [1, 2, 3]});
+      }).to.throw();
     });
 
     /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects */
@@ -538,18 +522,16 @@ describe('BindExpression', () => {
       expect(evaluate('NaN')).to.be.null;
       expect(evaluate('undefined')).to.be.null;
 
-      allowConsoleError(() => {
-        expect(() => { evaluate('eval()'); }).to.throw();
-        expect(() => { evaluate('uneval()'); }).to.throw();
-        expect(() => { evaluate('isFinite()'); }).to.throw();
-        expect(() => { evaluate('isNaN()'); }).to.throw();
-        expect(() => { evaluate('parseFloat()'); }).to.throw();
-        expect(() => { evaluate('parseInt()'); }).to.throw();
-        expect(() => { evaluate('decodeURI()'); }).to.throw();
-        expect(() => { evaluate('decodeURIComponent()'); }).to.throw();
-        expect(() => { evaluate('escape()'); }).to.throw();
-        expect(() => { evaluate('unescape()'); }).to.throw();
-      });
+      expect(() => { evaluate('eval()'); }).to.throw();
+      expect(() => { evaluate('uneval()'); }).to.throw();
+      expect(() => { evaluate('isFinite()'); }).to.throw();
+      expect(() => { evaluate('isNaN()'); }).to.throw();
+      expect(() => { evaluate('parseFloat()'); }).to.throw();
+      expect(() => { evaluate('parseInt()'); }).to.throw();
+      expect(() => { evaluate('decodeURI()'); }).to.throw();
+      expect(() => { evaluate('decodeURIComponent()'); }).to.throw();
+      expect(() => { evaluate('escape()'); }).to.throw();
+      expect(() => { evaluate('unescape()'); }).to.throw();
 
       expect(evaluate('Object')).to.be.null;
       expect(evaluate('Function')).to.be.null;
@@ -614,9 +596,9 @@ describe('BindExpression', () => {
 
       // The expression '1 + 1' should have an AST size of 3 -- one for each
       // literal, and a PLUS expression wrapping them.
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         new BindExpression('1 + 1', {}, /* maxAstSize */ 2);
-      }).to.throw(expressionSizeExceededError); });
+      }).to.throw(expressionSizeExceededError);
 
       // Test size computation for macros.
       const add = new BindMacro({
@@ -630,26 +612,24 @@ describe('BindExpression', () => {
       expect(new BindExpression('add(1, 1)', {add}, /* maxAstSize */ 3))
           .to.not.be.null;
 
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         new BindExpression('add(1, 1)', {add}, /* maxAstSize */ 2);
-      }).to.throw(expressionSizeExceededError); });
+      }).to.throw(expressionSizeExceededError);
 
       // The expression add(1, 1 + 1) should have an AST size of 5.
       expect(new BindExpression('add(1, 1 + 1)', {add}, /* maxAstSize */ 5))
           .to.not.be.null;
 
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         new BindExpression('add(1, 1 + 1)', {add}, /* maxAstSize */ 4);
-      }).to.throw(expressionSizeExceededError); });
+      }).to.throw(expressionSizeExceededError);
     });
   });
 
   describe('arrow functions', () => {
     it('known issue: single parameters with parentheses are ambiguous', () => {
       // Single parameters in parentheses are ambiguous to the parser.
-      allowConsoleError(() => {
-        expect(() => evaluate('[1, 2, 3].map((x) => x * x)')).to.throw();
-      });
+      expect(() => evaluate('[1, 2, 3].map((x) => x * x)')).to.throw();
     });
 
     it('Array#map()', () => {
@@ -668,9 +648,7 @@ describe('BindExpression', () => {
 
       // Only support arrow functions as the only parameter in applicable
       // function invocations (don't support optional `thisArg`, etc.).
-      allowConsoleError(() => {
-        expect(() => evaluate('a.reduce((x, y)) => x + y, 0)', {a})).to.throw();
-      });
+      expect(() => evaluate('a.reduce((x, y)) => x + y, 0)', {a})).to.throw();
     });
 
     it('Array#filter', () => {
@@ -685,19 +663,17 @@ describe('BindExpression', () => {
     });
 
     it('disallow: usage other than as function parameter', () => {
-      allowConsoleError(() => {
-        expect(() => { evaluate('() => 123'); }).to.throw();
-        expect(() => { evaluate('x => 123'); }).to.throw();
-        expect(() => { evaluate('(x, y) => 123'); }).to.throw();
+      expect(() => { evaluate('() => 123'); }).to.throw();
+      expect(() => { evaluate('x => 123'); }).to.throw();
+      expect(() => { evaluate('(x, y) => 123'); }).to.throw();
 
-        expect(() => { evaluate('(() => 123).constructor()'); }).to.throw();
-        expect(() => { evaluate('(x => 123).constructor()'); }).to.throw();
-        expect(() => { evaluate('((x, y) => 123).constructor()'); }).to.throw();
+      expect(() => { evaluate('(() => 123).constructor()'); }).to.throw();
+      expect(() => { evaluate('(x => 123).constructor()'); }).to.throw();
+      expect(() => { evaluate('((x, y) => 123).constructor()'); }).to.throw();
 
-        expect(() => { evaluate('(() => 123).name'); }).to.throw();
-        expect(() => { evaluate('(x => 123).name'); }).to.throw();
-        expect(() => { evaluate('((x, y) => 123).name'); }).to.throw();
-      });
+      expect(() => { evaluate('(() => 123).name'); }).to.throw();
+      expect(() => { evaluate('(x => 123).name'); }).to.throw();
+      expect(() => { evaluate('((x, y) => 123).name'); }).to.throw();
     });
 
     it('disallow: `arguments` or `this`', () => {

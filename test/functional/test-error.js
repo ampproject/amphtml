@@ -543,9 +543,9 @@ describes.sandboxed('reportError', {}, () => {
     expect(result.message).to.contain('error');
     expect(result.origError).to.be.equal('error');
     expect(result.reported).to.be.true;
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       clock.tick();
-    }).to.throw(/_reported_ Error reported incorrectly/); });
+    }).to.throw(/_reported_ Error reported incorrectly/);
   });
 
   it('should accept number and report incorrect use', () => {
@@ -555,9 +555,9 @@ describes.sandboxed('reportError', {}, () => {
     expect(result.message).to.contain('101');
     expect(result.origError).to.be.equal(101);
     expect(result.reported).to.be.true;
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       clock.tick();
-    }).to.throw(/_reported_ Error reported incorrectly/); });
+    }).to.throw(/_reported_ Error reported incorrectly/);
   });
 
   it('should accept null and report incorrect use', () => {
@@ -567,9 +567,9 @@ describes.sandboxed('reportError', {}, () => {
     expect(result.message).to.contain('Unknown error');
     expect(result.origError).to.be.undefined;
     expect(result.reported).to.be.true;
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       clock.tick();
-    }).to.throw(/_reported_ Error reported incorrectly/); });
+    }).to.throw(/_reported_ Error reported incorrectly/);
   });
 });
 
