@@ -70,7 +70,9 @@ There could be one or more services configured for `amp-subscriptions`. There co
  1. The product ID that the user must be granted to view the content.
  2. Whether this content requires this product at this time.
 
-### JSON-LD markup
+The JSON-LD and Microdata formats are supported.
+
+## JSON-LD markup
 
 Using JSON-LD, the markup would look like:
 
@@ -98,9 +100,28 @@ Thus, notice that:
  1. The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
  2. This document is currently locked (`"isAccessibleForFree": false`).
 
-### Microdata markup
 
-The support for microdata format is coming soon.
+## Microdata markup
+
+Using Microdata, the markup could look like this:
+
+```
+<div itemscope itemtype="http://schema.org/NewsArticle">
+  <meta itemprop="isAccessibleForFree" content="false"/>
+  <div itemprop="isPartOf" itemscope itemtype="http://schema.org/CreativeWork http://schema.org/Product">
+    <meta itemprop="name" content="The Norcal Tribune"/>
+    <meta itemprop="productID" content="norcal_tribute.com:basic"/>
+  </div>
+</div>
+```
+
+A usable configuration will provide `NewsArticle` typed item with `isAccessibleForFree` property and a subitem of type `Product` that specifies the `productID`.
+
+In this example:
+ 1. The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
+ 2. This document is currently locked (`"isAccessibleForFree": false`).
+
+The configuration is resolved as soon as `productID` and `isAccessibleForFree` are found. It is, therefore, advised to place the configuration as high up in the DOM tree as possible.
 
 
 ## Service configuration
@@ -112,20 +133,40 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
 {
   "services": [
     {
-      // Service 1
+      // Service 1 (local service)
     },
     {
-      // Service 2, etc
+      // Service 2 (a vendor service)
     }
   ],
-  "preferViewerSupport": true
+  "score": {
+    "supportsViewer": 10,
+  },
+  "fallbackEntitlement": {
+    "source": "fallback",
+    "service": "local",
+    "products": ["norcal_tribune.com:basic",...],
+    "subscriptionToken": "subscription-token",
+    "loggedIn": true/false,
+  }
 }
 </script>
 ```
 
-The key is the `services` property that contains an array of service configurations. There must be one "local" service and zero or more vendor services.
+The `services` property contains an array of service configurations. There must be one "local" service and zero or more vendor services.
 
-Based on `preferViewerSupport` (default: true) this document will give extra preference to the platform supported by the viewer.
+If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
+
+
+## Selecting platform
+So if no platforms are selected, we compete all the platforms based on platforms like
+
+1. Does the platform support the Viewer
+
+You can add `"baseScore"` < 100 key in any service configuration in case you want to increase `"baseScore"` of any platform so that it wins over other score evaluation factors.
+
+## Error fallback
+In case if all configured platforms fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` platform. The document's unblocking will be based on this fallback entitlement.
 
 ### The "local" service configuration
 
@@ -164,7 +205,7 @@ The vendor service configuration must reference the service ID and can contain a
   "services": [
     ...,
     {
-      "serviceId": "vendor id"
+      "serviceId": "subscribe.google.com"
     }
   ]
 }
@@ -219,6 +260,28 @@ All actions work the same way: the popup window is opened for the specified URL.
 
 Notice, while not explicitly visible, any vendor service can also implement its own actions. Or it can delegate to the "login" service to execute "login" or "subscribe" action.
 
+### Action delegation
+
+In the markup the actions can be delegated to other services for them to execute the actions. This can be achieved by specifying `subscriptions-service` attribute.
+
+e.g. In order to ask google subscriptions to perform subscribe even when `local` platform is selected:
+```
+  <button subscriptions-action='subscribe' subscriptions-service='subscribe.google.com>Subscribe</button>
+```
+
+### Action decoration
+
+In addition to delegation of the action to another service, you can also ask another service to decorate the element. Just add the attribute `subsciptions-decorate` to get the element decorated.
+
+```
+  <button
+    subscriptions-action='subscribe'
+    subscriptions-service='subscribe.google.com
+    subscriptions-decorate
+  >
+    Subscribe
+  </button>
+```
 
 ## Showing/hiding premium and fallback content
 

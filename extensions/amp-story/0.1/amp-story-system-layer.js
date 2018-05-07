@@ -36,6 +36,9 @@ const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 /** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 
+/** @private @const {string} */
+const SHARE_CLASS = 'i-amphtml-story-share-control';
+
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
@@ -58,6 +61,13 @@ const TEMPLATE = {
           attrs: dict({
             'role': 'button',
             'class': MUTE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
         },
       ],
@@ -109,7 +119,7 @@ export class SystemLayer {
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -147,6 +157,10 @@ export class SystemLayer {
       this.systemLayerEl_.classList.add('i-amphtml-story-ui-no-buttons');
     }
 
+    if (Services.platformFor(this.win_).isIos()) {
+      this.systemLayerEl_.setAttribute('ios', '');
+    }
+
     return this.getRoot();
   }
 
@@ -175,12 +189,18 @@ export class SystemLayer {
         this.onMuteAudioClick_();
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onUnmuteAudioClick_();
+      } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
+        this.onShareClick_();
       }
     });
 
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.onBookendStateUpdate_(isActive);
     });
+
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
+      this.onCanShowSharingUisUpdate_(show);
+    }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
@@ -217,6 +237,19 @@ export class SystemLayer {
   onBookendStateUpdate_(isActive) {
     this.getShadowRoot()
         .classList.toggle('i-amphtml-story-bookend-active', isActive);
+  }
+
+  /**
+   * Reacts to updates to whether sharing UIs may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowSharingUis
+   * @private
+   */
+  onCanShowSharingUisUpdate_(canShowSharingUis) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+    });
   }
 
   /**
@@ -270,6 +303,15 @@ export class SystemLayer {
    */
   onUnmuteAudioClick_() {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+  }
+
+  /**
+   * Handles click events on the share button and toggles the share menu.
+   * @private
+   */
+  onShareClick_() {
+    const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
+    this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
   }
 
   /**
@@ -351,18 +393,6 @@ export class SystemLayer {
     }
 
     this.developerLog_.setContextString(contextString);
-  }
-
-  /**
-   * Toggles the visibility of the developer log.
-   * @private
-   */
-  toggleDeveloperLog_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.toggle();
   }
 
   /**

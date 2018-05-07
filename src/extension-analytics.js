@@ -31,16 +31,17 @@ import {triggerAnalyticsEvent} from './analytics';
  * @param {!Element} parentElement
  * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
+ * @param {boolean=} disableImmediate
  * @return {!Element} created analytics element
  */
 export function insertAnalyticsElement(
-  parentElement, config, loadAnalytics = false) {
+  parentElement, config, loadAnalytics = false, disableImmediate = false) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
   const analyticsElem = createElementWithAttributes(
       doc,
       'amp-analytics', dict({
         'sandbox': 'true',
-        'trigger': 'immediate',
+        'trigger': disableImmediate ? '' : 'immediate',
       }));
   const scriptElem = createElementWithAttributes(
       doc,

@@ -16,7 +16,6 @@
 
 @import './amp-story-desktop.css';
 @import './amp-story-user-overridable.css';
-@import './amp-story-ads.css';
 @import './amp-story-share.css';
 
 /** Common */
@@ -164,6 +163,21 @@ amp-story:not([desktop]) >
   z-index: 2 !important;
 }
 
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+amp-story amp-video::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
 amp-story-cta-layer, amp-story-grid-layer {
   bottom: 0 !important;
   left: 0 !important;
@@ -188,6 +202,12 @@ amp-story-grid-layer {
 amp-story-grid-layer * {
   box-sizing: border-box !important;
   margin: 0 !important;
+}
+
+.i-amphtml-story-grid-template-with-full-bleed-animation {
+  position: absolute !important;
+  display: block !important;
+  padding: 0 !important;
 }
 
 .i-amphtml-story-grid-template-fill > :not(:first-child) {

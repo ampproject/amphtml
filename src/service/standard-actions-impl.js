@@ -61,47 +61,11 @@ export class StandardActions {
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
-    /** @const @private {!./url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
-
     /** @const @private {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    /** @private {?Array<string>} */
-    this.ampActionWhitelist_ = null;
-
     this.installActions_(this.actions_);
   }
-
-  /**
-   * Searches for a meta tag containing whitelist of actions on
-   * the special AMP target, e.g.,
-   * <meta name="amp-action-whitelist" content="AMP.setState,AMP.pushState">
-   * @return {?Array<string>} the whitelist of actions on the special AMP target.
-   * @private
-   */
-  getAmpActionWhitelist_() {
-    if (this.ampActionWhitelist_) {
-      return this.ampActionWhitelist_;
-    }
-
-    const head = this.ampdoc.getRootNode().head;
-    if (!head) {
-      return null;
-    }
-    // A meta[name="amp-action-whitelist"] tag, if present, contains,
-    // in its content attribute, a whitelist of actions on the special AMP target.
-    const meta =
-      head.querySelector('meta[name="amp-action-whitelist"]');
-    if (!meta) {
-      return null;
-    }
-
-    this.ampActionWhitelist_ = meta.getAttribute('content').split(',')
-        .map(action => action.trim());
-    return this.ampActionWhitelist_;
-  }
-
 
   /** @override */
   adoptEmbedWindow(embedWin) {
@@ -133,14 +97,9 @@ export class StandardActions {
    * @param {number=} opt_actionIndex
    * @param {!Array<!./action-impl.ActionInfoDef>=} opt_actionInfos
    * @return {?Promise}
-   * @throws {Error} If action is not recognized or is not whitelisted.
    */
   handleAmpTarget(invocation, opt_actionIndex, opt_actionInfos) {
     const method = invocation.method;
-    if (this.getAmpActionWhitelist_() &&
-      !this.getAmpActionWhitelist_().includes(`AMP.${method}`)) {
-      throw user().createError(`AMP.${method} is not whitelisted.`);
-    }
     switch (method) {
       case 'pushState':
       case 'setState':
@@ -164,6 +123,9 @@ export class StandardActions {
 
       case 'print':
         return this.handleAmpPrint_(invocation);
+
+      case 'optoutOfCid':
+        return this.handleOptoutOfCid_(invocation);
     }
     throw user().createError('Unknown AMP action ', method);
   }
@@ -242,6 +204,21 @@ export class StandardActions {
     const win = (node.ownerDocument || node).defaultView;
     win.print();
     return null;
+  }
+
+  /**
+   * Opts the user out of cid issuance.
+   * @private
+   */
+  handleOptoutOfCid_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
+    return Services.cidForDoc(this.ampdoc)
+        .then(cid => cid.optOut())
+        .catch(reason => {
+          dev().error(TAG, 'Failed to opt out of Cid', reason);
+        });
   }
 
   /**

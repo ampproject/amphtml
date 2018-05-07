@@ -28,6 +28,11 @@ export const CONSENT_ITEM_STATE = {
   UNKNOWN: 0,
   GRANTED: 1,
   REJECTED: 2,
+  DISMISSED: 3,
+  NOT_REQUIRED: 4,
+  // TODO(@zhouyx): Seperate UI state from consent state. Add consent requirement state
+  // ui_state = {pending, active, complete}
+  // consent_state = {unknown, granted, rejected}
 };
 
 export class ConsentStateManager {
@@ -65,31 +70,11 @@ export class ConsentStateManager {
   }
 
   /**
-   * Ignore a consent instance.
-   * @param {string} instanceId
-   */
-  ignoreConsentInstance(instanceId) {
-    // TODO: Add new CONSENT_ITEM_STATE.IGNORED
-    // TODO: Remove instance completely
-    dev().assert(this.instances_[instanceId],
-        `${TAG}: cannot find this instance`);
-
-    if (this.consentChangeObservables_[instanceId] === null) {
-      // This consent instance has been ignored before
-      return;
-    }
-    this.consentChangeObservables_[instanceId].fire(CONSENT_ITEM_STATE.GRANTED);
-    this.consentChangeObservables_[instanceId].removeAll();
-    this.consentChangeObservables_[instanceId] = null;
-  }
-
-  /**
    * Update consent instance state
    * @param {string} instanceId
    * @param {CONSENT_ITEM_STATE} state
    */
   updateConsentInstanceState(instanceId, state) {
-
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
     dev().assert(this.consentChangeObservables_[instanceId],
@@ -117,20 +102,41 @@ export class ConsentStateManager {
   onConsentStateChange(instanceId, handler) {
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
-    let unlistener = null;
-    if (this.consentChangeObservables_[instanceId] === null) {
-      // Do not need consent for this instance.
-      handler(CONSENT_ITEM_STATE.GRANTED);
-      return () => {};
-    } else {
-      unlistener = this.consentChangeObservables_[instanceId].add(handler);
-    }
+
+    const unlistener = this.consentChangeObservables_[instanceId].add(handler);
     // Fire first consent instance state.
     this.getConsentInstanceState(instanceId).then(state => {
       handler(state);
     });
 
     return unlistener;
+  }
+
+
+  /**
+   * Sets a promise which resolves to a shareData object that is to be returned
+   * from the remote endpoint.
+   *
+   * @param {string} instanceId
+   * @param {Promise<?Object>} sharedDataPromise
+   */
+  setConsentInstanceSharedData(instanceId, sharedDataPromise) {
+    dev().assert(this.instances_[instanceId],
+        `${TAG}: cannot find this instance`);
+    this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
+  }
+
+  /**
+   * Returns a promise that resolves to a shareData object that is returned
+   * from the remote endpoint.
+   *
+   * @param {string} instanceId
+   * @return {?Promise<?Object>}
+   */
+  getConsentInstanceSharedData(instanceId) {
+    dev().assert(this.instances_[instanceId],
+        `${TAG}: cannot find this instance`);
+    return this.instances_[instanceId].sharedDataPromise;
   }
 
   /**
@@ -155,6 +161,9 @@ export class ConsentStateManager {
  */
 export class ConsentInstance {
   constructor(ampdoc, id) {
+    /** @public {?Promise<Object>} */
+    this.sharedDataPromise = null;
+
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
@@ -174,11 +183,24 @@ export class ConsentInstance {
       state = CONSENT_ITEM_STATE.UNKNOWN;
     }
 
+    if (state == CONSENT_ITEM_STATE.DISMISSED) {
+      this.localValue_ = this.localValue_ || CONSENT_ITEM_STATE.UNKNOWN;
+      return;
+    }
+
+    if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
+      if (!this.localValue_ || this.localValue_ == CONSENT_ITEM_STATE.UNKNOWN) {
+        this.localValue_ = CONSENT_ITEM_STATE.NOT_REQUIRED;
+      }
+      return;
+    }
+
     if (state === this.localValue_) {
       return;
     }
 
     this.localValue_ = state;
+
     if (state == CONSENT_ITEM_STATE.UNKNOWN) {
       return;
     }

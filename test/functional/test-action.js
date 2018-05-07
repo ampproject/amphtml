@@ -27,6 +27,7 @@ import {ActionTrust} from '../../src/action-trust';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
+import {createElementWithAttributes} from '../../src/dom';
 import {setParentWindow} from '../../src/service';
 
 
@@ -363,67 +364,73 @@ describe('ActionService parseAction', () => {
   });
 
   it('should fail parse without event', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       parseAction('target1.method1');
-    }).to.throw(/expected \[\:\]/);
+    }).to.throw(/expected \[\:\]/); });
   });
 
   it('should fail parse without target', () => {
-    expect(() => {
-      parseAction('event1:');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('.method1');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event1:.method1');
-    }).to.throw(/Invalid action/);
+    allowConsoleError(() => {
+      expect(() => {
+        parseAction('event1:');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('.method1');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event1:.method1');
+      }).to.throw(/Invalid action/);
+    });
   });
 
   it('should fail parse with period in event or method', () => {
-    expect(() => {
-      parseAction('event.1:target1.method');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event:target1.method.1');
-    }).to.throw(/Invalid action/);
+    allowConsoleError(() => {
+      expect(() => {
+        parseAction('event.1:target1.method');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event:target1.method.1');
+      }).to.throw(/Invalid action/);
+    });
   });
 
   it('should fail parse with invalid args', () => {
-    // No args allowed without explicit action.
-    expect(() => {
-      parseAction('event:target1()');
-    }).to.throw(/Invalid action/);
-    // Missing parens
-    expect(() => {
-      parseAction('event:target1.method(');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event:target1.method(key = value');
-    }).to.throw(/Invalid action/);
-    // No arg value.
-    expect(() => {
-      parseAction('event:target1.method(key)');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event:target1.method(key=)');
-    }).to.throw(/Invalid action/);
-    // Missing quote
-    expect(() => {
-      parseAction('event:target1.method(key = "value)');
-    }).to.throw(/Invalid action/);
-    // Broken quotes.
-    expect(() => {
-      parseAction('event:target1.method(key = "value"")');
-    }).to.throw(/Invalid action/);
-    // Missing comma.
-    expect(() => {
-      parseAction('event:target1.method(key = value key2 = value2)');
-    }).to.throw(/Invalid action/);
-    // Empty (2...n)nd target
-    expect(() => {
-      parseAction('event:target1,');
-    }).to.throw(/Invalid action/);
+    allowConsoleError(() => {
+      // No args allowed without explicit action.
+      expect(() => {
+        parseAction('event:target1()');
+      }).to.throw(/Invalid action/);
+      // Missing parens
+      expect(() => {
+        parseAction('event:target1.method(');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event:target1.method(key = value');
+      }).to.throw(/Invalid action/);
+      // No arg value.
+      expect(() => {
+        parseAction('event:target1.method(key)');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event:target1.method(key=)');
+      }).to.throw(/Invalid action/);
+      // Missing quote
+      expect(() => {
+        parseAction('event:target1.method(key = "value)');
+      }).to.throw(/Invalid action/);
+      // Broken quotes.
+      expect(() => {
+        parseAction('event:target1.method(key = "value"")');
+      }).to.throw(/Invalid action/);
+      // Missing comma.
+      expect(() => {
+        parseAction('event:target1.method(key = value key2 = value2)');
+      }).to.throw(/Invalid action/);
+      // Empty (2...n)nd target
+      expect(() => {
+        parseAction('event:target1,');
+      }).to.throw(/Invalid action/);
+    });
   });
 });
 
@@ -592,6 +599,46 @@ describe('Action findAction', () => {
   });
 });
 
+describe('Action hasAction', () => {
+  let sandbox;
+  let action;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    action = actionService();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('returns true if the target element has the target action', () => {
+    const element = document.createElement('div');
+    element.setAttribute('on', 'event1:action1');
+    expect(action.hasAction(element, 'event1')).to.equal(true);
+  });
+
+  it('returns true if an intermediate element has target action', () => {
+    const child = document.createElement('div');
+    const element = document.createElement('div');
+    element.appendChild(child);
+    element.setAttribute('on', 'event1:action1');
+    const parent = document.createElement('div');
+    parent.appendChild(element);
+    parent.setAttribute('on', 'event2:action2');
+    expect(action.hasAction(element, 'event1', parent)).to.equal(true);
+    expect(action.hasAction(element, 'event2', parent)).to.equal(false);
+  });
+
+  it('returns false if the target element does not have the target action',
+      () => {
+        const element = document.createElement('div');
+        element.setAttribute('on', 'event1:action1');
+        expect(action.hasAction(element, 'event2')).to.equal(false);
+      });
+
+});
+
 
 describe('Action method', () => {
   let sandbox;
@@ -649,18 +696,18 @@ describe('Action method', () => {
   });
 
   it('should not allow invoke on non-AMP and non-whitelisted element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       action.invoke_(new ActionInvocation(document.createElement('img'),
           'method1', /* args */ null, 'source1', 'event1'));
-    }).to.throw(/Target element does not support provided action/);
+    }).to.throw(/doesn't support "method1" action/); });
     expect(onEnqueue).to.have.not.been.called;
   });
 
   it('should not allow invoke on unresolved AMP element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       action.invoke_(new ActionInvocation(document.createElement('amp-foo'),
           'method1', /* args */ null, 'source1', 'event1'));
-    }).to.throw(/Unrecognized AMP element/);
+    }).to.throw(/Unrecognized AMP element/); });
     expect(onEnqueue).to.have.not.been.called;
   });
 
@@ -719,9 +766,11 @@ describe('installActionHandler', () => {
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
 
-    action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'button', 'tap', ActionTrust.LOW));
-    expect(handlerSpy).to.not.be.called;
+    allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
+          'button', 'button', 'tap', ActionTrust.LOW));
+      expect(handlerSpy).to.not.be.called;
+    });
 
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
         'button', 'button', 'tap', ActionTrust.HIGH));
@@ -957,9 +1006,11 @@ describe('Action common handler', () => {
     const handler = sandbox.spy();
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
-    action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
-        'source1', 'caller1', 'event1', ActionTrust.LOW));
-    expect(handler).to.not.be.called;
+    allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
+          'source1', 'caller1', 'event1', ActionTrust.LOW));
+      expect(handler).to.not.be.called;
+    });
 
     action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
         'source1', 'caller1', 'event1', ActionTrust.HIGH));
@@ -1052,10 +1103,27 @@ describes.fakeWin('Core events', {amp: true}, env => {
 
   it('should trigger tap event on key press if focused element has ' +
      'role=button', () => {
-    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    expect(window.document.addEventListener).to.have.been.calledWith(
+        'keydown');
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'button');
+    const event = {
+      target: element,
+      keyCode: KeyCodes.ENTER,
+      preventDefault: sandbox.stub()};
+    handler(event);
+    expect(event.preventDefault).to.have.been.called;
+    expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
+  });
+
+  it('should trigger tap event on key press if focused element has ' +
+     'role=option', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith(
+        'keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('div');
+    element.setAttribute('role', 'option');
     const event = {
       target: element,
       keyCode: KeyCodes.ENTER,
@@ -1071,6 +1139,16 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'not-a-button');
+    const event = {target: element, keyCode: KeyCodes.ENTER};
+    handler(event);
+    expect(action.trigger).to.not.have.been.called;
+  });
+
+  it('should NOT trigger tap event on key press if focused element DOES NOT ' +
+     'have any role', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('input');
     const event = {target: element, keyCode: KeyCodes.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
@@ -1239,16 +1317,66 @@ describes.fakeWin('Core events', {amp: true}, env => {
       const errorText = 'cannot access native event functions';
 
       // Specifically test these commonly used functions
-      expect(() => deferredEvent.preventDefault()).to.throw(errorText);
-      expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
+      allowConsoleError(() => {
+        expect(() => deferredEvent.preventDefault()).to.throw(errorText);
+      });
+      allowConsoleError(() => {
+        expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
+      });
 
       // Test all functions
       for (const key in deferredEvent) {
         const value = deferredEvent[key];
         if (typeof value === 'function') {
-          expect(() => value()).to.throw(errorText);
+          allowConsoleError(() => {
+            expect(() => value()).to.throw(errorText);
+          });
         }
       }
     });
+  });
+});
+
+describes.realWin('whitelist', {
+  amp: {
+    ampdoc: 'single',
+  },
+}, env => {
+  let action;
+  let target;
+
+  beforeEach(() => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: 'AMP.pushState, AMP.setState',
+    });
+    env.win.document.head.appendChild(meta);
+
+    action = new ActionService(env.ampdoc, env.win.document);
+    target = createExecElement('foo', sandbox.spy());
+  });
+
+  it('should allow whitelisted actions', () => {
+    const i = new ActionInvocation(target, 'setState', /* args */ null,
+        'source', 'caller', 'event', 0, 'AMP');
+    action.invoke_(i);
+    expect(target.enqueAction).to.be.calledWithExactly(i);
+  });
+
+  it('should not allow non-whitelisted actions', () => {
+    const i = new ActionInvocation(target, 'print', /* args */ null,
+        'source', 'caller', 'event', 0, 'AMP');
+    sandbox.stub(action, 'error_');
+    expect(action.invoke_(i)).to.be.null;
+    expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
+        '(AMP.pushState,AMP.setState).');
+  });
+
+  it('should allow adding actions to the whitelist', () => {
+    const i = new ActionInvocation(target, 'print', /* args */ null,
+        'source', 'caller', 'event', 0, 'AMP');
+    action.addToWhitelist('AMP.print');
+    action.invoke_(i);
+    expect(target.enqueAction).to.be.calledWithExactly(i);
   });
 });

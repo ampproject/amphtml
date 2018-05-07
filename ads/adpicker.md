@@ -17,8 +17,6 @@ limitations under the License.
 
 # AdPicker
 
-Please visit our website (https://adpicker.net) for more details
-
 ## Example
 
 ```html
@@ -30,7 +28,8 @@ Please visit our website (https://adpicker.net) for more details
 
 ## Configuration
 
-Supported parameters:
+For details on the configuration semantics, visit [adpicker.net](https://adpicker.net).
 
-**Required**
-- data-ph:      the placement id
+### Required parameters
+
+- `data-ph`: the placement id

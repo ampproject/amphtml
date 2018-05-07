@@ -169,13 +169,22 @@ export class DoubleclickA4aEligibility {
         }
         return false;
       }
+
     } else {
-      // See if in holdback control/experiment.
       if (urlExperimentId != undefined) {
         experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-        dev().info(
-            TAG,
-            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        // For SRA experiments, do not include pages that are using refresh.
+        if ((experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL ||
+          experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA) &&
+          (win.document.querySelector('meta[name=amp-ad-enable-refresh]') ||
+           win.document.querySelector(
+               'amp-ad[type=doubleclick][data-enable-refresh]'))) {
+          experimentId = undefined;
+        } else {
+          dev().info(
+              TAG,
+              `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        }
       }
     }
     if (experimentId) {

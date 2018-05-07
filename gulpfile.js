@@ -20,7 +20,7 @@ checkMinVersion();
 
 const $$ = require('gulp-load-plugins')();
 const applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
-const babel = require('babelify');
+const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
@@ -71,6 +71,7 @@ const unminified3pTarget = 'dist.3p/current/integration.js';
 declareExtension('amp-3q-player', '0.1');
 declareExtension('amp-access', '0.1', {hasCss: true});
 declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
+declareExtension('amp-access-laterpay', '0.2', {hasCss: true});
 declareExtension('amp-access-scroll', '0.1', {hasCss: true});
 declareExtension('amp-accordion', '0.1');
 declareExtension('amp-ad', '0.1', {hasCss: true});
@@ -82,6 +83,7 @@ declareExtension('amp-ad-network-triplelift-impl', 0.1);
 declareExtension('amp-ad-network-cloudflare-impl', 0.1);
 declareExtension('amp-ad-network-gmossp-impl', 0.1);
 declareExtension('amp-ad-exit', 0.1);
+declareExtension('amp-addthis', '0.1');
 declareExtension('amp-analytics', '0.1');
 declareExtension('amp-anim', '0.1');
 declareExtension('amp-animation', '0.1');
@@ -89,6 +91,7 @@ declareExtension('amp-apester-media', '0.1', {hasCss: true});
 declareExtension('amp-app-banner', '0.1', {hasCss: true});
 declareExtension('amp-audio', '0.1');
 declareExtension('amp-auto-ads', '0.1');
+declareExtension('amp-beopinion', '0.1');
 declareExtension('amp-bind', '0.1');
 declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
 declareExtension('amp-brid-player', '0.1');
@@ -101,7 +104,6 @@ declareExtension('amp-compare-slider', '0.1');
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
-declareExtension('amp-document-recommendations', '0.1', {hasCss: true});
 declareExtension('amp-dynamic-css-classes', '0.1');
 declareExtension('amp-experiment', '0.1');
 declareExtension('amp-facebook', '0.1');
@@ -113,6 +115,7 @@ declareExtension('amp-font', '0.1');
 declareExtension('amp-form', '0.1', {hasCss: true});
 declareExtension('amp-fx-collection', '0.1');
 declareExtension('amp-fx-flying-carpet', '0.1', {hasCss: true});
+declareExtension('amp-geo', '0.1');
 declareExtension('amp-gfycat', '0.1');
 declareExtension('amp-gist', '0.1');
 declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
@@ -131,6 +134,7 @@ declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
 declareExtension('amp-mustache', '0.1');
+declareExtension('amp-next-page', '0.1', {hasCss: true});
 declareExtension('amp-nexxtv-player', '0.1');
 declareExtension('amp-o2-player', '0.1');
 declareExtension('amp-ooyala-player', '0.1');
@@ -152,10 +156,24 @@ declareExtension('amp-story', '0.1', {
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
     'amp-story-share',
+    'amp-story-share-menu',
     'amp-story-system-layer',
   ],
 });
-declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
+declareExtension('amp-story', '1.0', {
+  hasCss: true,
+  cssBinaries: [
+    'amp-story-bookend',
+    'amp-story-consent',
+    'amp-story-hint',
+    'amp-story-unsupported-browser-layer',
+    'amp-story-viewport-warning-layer',
+    'amp-story-share',
+    'amp-story-share-menu',
+    'amp-story-system-layer',
+  ],
+});
+declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
@@ -195,7 +213,7 @@ declareExtension('amp-video-service', '0.1', {
 declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
-    'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
+    'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
 
 
 /**
@@ -265,19 +283,27 @@ function declareExtension(name, version, options) {
  * the correct one to use.
  * @param {string} name
  * @param {string} version E.g. 0.1
- * @param {string} lastestVersion
- * @param {boolean} hasCss
+ * @param {string} latestVersion
+ * @param {!ExtensionOption} options extension options object.
  */
-function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
+function declareExtensionVersionAlias(name, version, latestVersion, options) {
   extensionAliasFilePath[name + '-' + version + '.js'] = {
     'name': name,
-    'file': name + '-' + lastestVersion + '.js',
+    'file': name + '-' + latestVersion + '.js',
   };
-  if (hasCss) {
+  if (options.hasCss) {
     extensionAliasFilePath[name + '-' + version + '.css'] = {
       'name': name,
-      'file': name + '-' + lastestVersion + '.css',
+      'file': name + '-' + latestVersion + '.css',
     };
+  }
+  if (options.cssBinaries) {
+    options.cssBinaries.forEach(cssBinaryName => {
+      extensionAliasFilePath[cssBinaryName + '-' + version + '.css'] = {
+        'name': cssBinaryName,
+        'file': cssBinaryName + '-' + latestVersion + '.css',
+      };
+    });
   }
 }
 
@@ -1088,22 +1114,20 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  const browsers = [];
-  if (process.env.TRAVIS) {
-    browsers.push('last 2 versions', 'safari >= 9');
-  } else {
-    browsers.push('Last 4 Chrome versions');
-  }
-
+  const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
-      .transform(babel, {
+      .transform(babelify, {
+        compact: false,
         presets: [
           ['env', {
             targets: {
-              browsers,
+              browsers: ['last 2 versions', 'safari >= 9'],
             },
           }],
         ],
+      })
+      .once('transform', () => {
+        endBuildStep('Transformed', srcFilename, startTime);
       });
   if (options.watch) {
     bundler = watchify(bundler);
@@ -1132,8 +1156,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(
         bundler.bundle()
             .on('error', function(err) {
-              // Drop the node_modules call stack, which begins with '    at'.
-              const message = err.stack.replace(/    at[^]*/, '').trim();
+              let message = err;
+              if (err.stack) {
+                // Drop the node_modules call stack, which begins with '    at'.
+                message = err.stack.replace(/    at[^]*/, '').trim();
+              }
               console.error(red(message));
               if (failOnError) {
                 process.exit(1);

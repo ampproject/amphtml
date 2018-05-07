@@ -144,7 +144,7 @@ export class AmpStoryHint {
     this.hintTimeout_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -207,6 +207,11 @@ export class AmpStoryHint {
    * Show navigation overlay DOM.
    */
   showNavigationOverlay() {
+    // Don't show the overlay if the share menu is open.
+    if (this.storeService_.get(StateProperty.SHARE_MENU_STATE)) {
+      return;
+    }
+
     this.showHint_(NAVIGATION_OVERLAY_CLASS);
   }
 

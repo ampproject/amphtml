@@ -21,7 +21,7 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-embed width=300 height=300
+<amp-embed width="300" height="300"
     type="plista"
     layout=responsive
     data-countrycode="de"
@@ -34,7 +34,7 @@ limitations under the License.
 ### With article information
 
 ```html
-<amp-embed width=300 height=300
+<amp-embed width="300" height="300"
     type="plista"
     layout=responsive
     data-countrycode="de"
@@ -49,20 +49,20 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://goo.gl/nm9f41).
+For semantics of configuration, please see [Plista's documentation](https://goo.gl/nm9f41).
 
 Supported parameters:
 
-- data-countrycode
-- data-publickey
-- data-widgetname
-- data-geo
-- data-urlprefix
-- data-categories
+- `data-countrycode`
+- `data-publickey`
+- `data-widgetname`
+- `data-geo`
+- `data-urlprefix`
+- `data-categories`
 
 Supported via `json` attribute:
 
-- item
+- `item`
 
 ## Layout
 

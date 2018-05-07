@@ -17,7 +17,7 @@
 import {Entitlement} from '../entitlement';
 
 
-describes.realWin('entitlement', {}, () => {
+describes.realWin('EntitlementClass', {}, () => {
   const service = 'sample-service';
   const source = 'sample-source';
   const products = ['scenic-2017.appspot.com:news',
@@ -64,6 +64,25 @@ describes.realWin('entitlement', {}, () => {
     expect(entitlement.metering).to.deep.equal(metering);
   });
 
+  it('should be able to parse raw from json', () => {
+    const json = {
+      service,
+      source,
+      products,
+      subscriptionToken,
+      loggedIn,
+      metering,
+    };
+    const rawValue = 'rawValue';
+    const entitlement = Entitlement.parseFromJson(json, rawValue);
+    expect(entitlement.source).to.be.equal(source);
+    expect(entitlement.products).to.be.equal(products);
+    expect(entitlement.subscriptionToken).to.be.equal(subscriptionToken);
+    expect(entitlement.raw).to.equal(rawValue);
+    expect(entitlement.loggedIn).to.be.equal(loggedIn);
+    expect(entitlement.metering).to.deep.equal(metering);
+  });
+
   it('should tell if current product is enabled', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, products,
@@ -72,5 +91,16 @@ describes.realWin('entitlement', {}, () => {
     expect(entitlement.enablesThis()).to.be.true;
     entitlement.setCurrentProduct('lipsum');
     expect(entitlement.enablesThis()).to.be.false;
+  });
+
+  it('should return raw, granStatus and source for pingback', () => {
+    const raw = 'raw';
+    const entitlement = new Entitlement({source, raw, service, products,
+      subscriptionToken, loggedIn});
+    entitlement.setCurrentProduct(products[0]);
+    const pingbackData = entitlement.jsonForPingback();
+    expect(pingbackData.raw).to.be.equal(raw);
+    expect(pingbackData.source).to.be.equal(entitlement.source);
+    expect(pingbackData.grantState).to.be.equal(entitlement.enablesThis());
   });
 });

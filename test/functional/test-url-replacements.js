@@ -116,6 +116,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
                     opt_options.withViewerIntegrationVariableService);
               });
         }
+        if (opt_options.withOriginalTitle) {
+          iframe.doc.originalTitle = 'Original Pixel Test';
+        }
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
       replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
@@ -279,6 +282,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace TITLE', () => {
     return expandUrlAsync('?title=TITLE').then(res => {
       expect(res).to.equal('?title=Pixel%20Test');
+    });
+  });
+
+  it('should prefer original title for TITLE', () => {
+    return expandUrlAsync('?title=TITLE',
+        /*opt_bindings*/undefined, {withOriginalTitle: true}).then(res => {
+      expect(res).to.equal('?title=Original%20Pixel%20Test');
     });
   });
 
@@ -881,9 +891,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
     const p = expect(replacements.expandUrlAsync('?a=ONE')).to.eventually
         .equal('?a=');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       clock.tick(1);
-    }).to.throw(/boom/);
+    }).to.throw(/boom/); });
     return p;
   });
 
@@ -896,9 +906,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return expect(replacements.expandUrlAsync('?a=ONE'))
         .to.eventually.equal('?a=')
         .then(() => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             clock.tick(1);
-          }).to.throw(/boom/);
+          }).to.throw(/boom/); });
         });
   });
 
@@ -1156,10 +1166,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should reject javascript protocol', () => {
       const win = getFakeWindow();
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         /*eslint no-script-url: 0*/
         urlReplacements.expandUrlSync('javascript://example.com/?r=RANDOM');
-      }).to.throw('invalid protocol');
+      }).to.throw('invalid protocol'); });
     });
   });
 
@@ -1470,8 +1480,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const input = document.createElement('textarea');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
-      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
-          /Input value expansion only works on hidden input fields/);
+      allowConsoleError(() => {
+        expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+            /Input value expansion only works on hidden input fields/);
+      });
       expect(input.value).to.equal('RANDOM');
     });
 
@@ -1481,8 +1493,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const input = document.createElement('input');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
-      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
-          /Input value expansion only works on hidden input fields/);
+      allowConsoleError(() => {
+        expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+            /Input value expansion only works on hidden input fields/);
+      });
       expect(input.value).to.equal('RANDOM');
     });
 

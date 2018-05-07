@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
+import {getStyle} from '../../../src/style';
 import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
@@ -54,8 +55,8 @@ export const SERVICE = {
   REGISTER_DONE: 'register_done',
   COLLAPSE_REQUEST: 'collapse_request',
   COLLAPSE_RESPONSE: 'collapse_response',
-  SHRINK_REQUEST: 'shrink_request',
-  SHRINK_RESPONSE: 'shrink_response',
+  RESIZE_REQUEST: 'resize_request',
+  RESIZE_RESPONSE: 'resize_response',
 };
 
 /** @private {string} */
@@ -121,12 +122,10 @@ export class SafeframeHostApi {
   /**
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    * @param {boolean} isFluid
-   * @param {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} initialSize
    * @param {{width:number, height:number}} creativeSize
    * @param {?string} fluidImpressionUrl
    */
-  constructor(baseInstance, isFluid, initialSize, creativeSize,
-    fluidImpressionUrl) {
+  constructor(baseInstance, isFluid, creativeSize, fluidImpressionUrl) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
@@ -153,9 +152,6 @@ export class SafeframeHostApi {
 
     /** @private {boolean} */
     this.isFluid_ = isFluid;
-
-    /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
-    this.slotSize_ = initialSize;
 
     /** @private {{width:number, height:number}} */
     this.creativeSize_ = creativeSize;
@@ -221,7 +217,12 @@ export class SafeframeHostApi {
             'sf_ver': this.baseInstance_.safeframeVersion,
             'ck_on': 1,
             'flash_ver': '26.0.0',
+            // Once GPT Safeframe is updated to look in amp object,
+            // remove this canonical_url here.
             'canonical_url': this.maybeGetCanonicalUrl(),
+            'amp': {
+              'canonical_url': this.maybeGetCanonicalUrl(),
+            },
           },
         }));
     attributes['reportCreativeGeometry'] = this.isFluid_;
@@ -273,14 +274,14 @@ export class SafeframeHostApi {
     const ampAdBox = this.baseInstance_.getPageLayoutBox();
     const heightOffset = (ampAdBox.height - this.creativeSize_.height) / 2;
     const widthOffset = (ampAdBox.width - this.creativeSize_.width) / 2;
-    const iframeBox = {
+    const iframeBox = /** @type {!../../../src/layout-rect.LayoutRectDef} */ ({
       top: ampAdBox.top + heightOffset,
       bottom: ampAdBox.bottom - heightOffset,
       left: ampAdBox.left + widthOffset,
       right: ampAdBox.right - widthOffset,
       height: this.initialCreativeSize_.height,
       width: this.initialCreativeSize_.width,
-    };
+    });
     return this.formatGeom_(iframeBox);
   }
 
@@ -359,23 +360,28 @@ export class SafeframeHostApi {
   /**
    * Builds geometry update format expected by GPT Safeframe.
    * Also sets this.currentGeometry as side effect.
-   * @param {!Object} iframeBox The elementRect for the safeframe.
+   * @param {!../../../src/layout-rect.LayoutRectDef} iframeBox The elementRect for the safeframe.
    * @return {string} Safeframe formatted changes.
    * @private
    */
   formatGeom_(iframeBox) {
-    const ampAdBox = this.baseInstance_.getPageLayoutBox();
     const viewportSize = this.viewport_.getSize();
+    const scrollLeft = this.viewport_.getScrollLeft();
+    const scrollTop = this.viewport_.getScrollTop();
     const currentGeometry = /** @type {JsonObject} */({
       'windowCoords_t': 0,
       'windowCoords_r': viewportSize.width,
       'windowCoords_b': viewportSize.height,
       'windowCoords_l': 0,
-      'frameCoords_t': ampAdBox.top,
-      'frameCoords_r': ampAdBox.right,
-      'frameCoords_b': ampAdBox.bottom,
-      'frameCoords_l': ampAdBox.left,
-      'styleZIndex': this.baseInstance_.element.style.zIndex,
+      'frameCoords_t': iframeBox.top + scrollTop,
+      'frameCoords_r': iframeBox.right + scrollLeft,
+      'frameCoords_b': iframeBox.bottom + scrollTop,
+      'frameCoords_l': iframeBox.left + scrollLeft,
+      'posCoords_t': iframeBox.top,
+      'posCoords_b': iframeBox.bottom,
+      'posCoords_r': iframeBox.right,
+      'posCoords_l': iframeBox.left,
+      'styleZIndex': getStyle(this.baseInstance_.element, 'zIndex'),
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
       'allowedExpansion_r': viewportSize.width -
@@ -452,8 +458,8 @@ export class SafeframeHostApi {
       case SERVICE.COLLAPSE_REQUEST:
         this.handleCollapseRequest_();
         break;
-      case SERVICE.SHRINK_REQUEST:
-        this.handleShrinkRequest_(payload);
+      case SERVICE.RESIZE_REQUEST:
+        this.handleResizeRequest_(payload);
       default:
         break;
     }
@@ -557,38 +563,40 @@ export class SafeframeHostApi {
    * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
-    if (!optIsCollapse &&
-        width <= this.slotSize_.width &&
-        height <= this.slotSize_.height) {
-      this.resizeSafeframe(height, width, messageType);
-    } else {
-      this.resizeAmpAdAndSafeframe(height, width, messageType);
-    }
+    return this.viewport_.getClientRectAsync(
+        this.baseInstance_.element).then(box => {
+      if (!optIsCollapse && width <= box.width && height <= box.height) {
+        this.resizeSafeframe(height, width, messageType);
+      } else {
+        this.resizeAmpAdAndSafeframe(height, width, messageType,
+            optIsCollapse);
+      }
+    });
   }
 
   /**
    * @param {!JsonObject} payload
    * @private
    */
-  handleShrinkRequest_(payload) {
+  handleResizeRequest_(payload) {
     if (!this.isRegistered_) {
       return;
     }
-    const shrinkHeight = Number(this.creativeSize_.height) -
-          (payload['shrink_b'] + payload['shrink_t']);
-    const shrinkWidth = Number(this.creativeSize_.width) -
-          (payload['shrink_r'] + payload['shrink_l']);
+    const resizeHeight = Number(this.creativeSize_.height) +
+          (payload['resize_b'] + payload['resize_t']);
+    const resizeWidth = Number(this.creativeSize_.width) +
+          (payload['resize_r'] + payload['resize_l']);
 
-    // Make sure we are actually shrinking here.
-    if (isNaN(shrinkWidth) || isNaN(shrinkHeight) ||
-        shrinkWidth > this.creativeSize_.width ||
-        shrinkHeight > this.creativeSize_.height) {
-      dev().error(TAG, 'Invalid shrink values.');
+    // Make sure we are actually resizing here.
+    if (isNaN(resizeWidth) || isNaN(resizeHeight) ||
+        resizeWidth > this.creativeSize_.width ||
+        resizeHeight > this.creativeSize_.height) {
+      dev().error(TAG, 'Invalid resize values.');
       return;
     }
 
-    this.resizeAmpAdAndSafeframe(shrinkHeight, shrinkWidth,
-        SERVICE.SHRINK_RESPONSE);
+    this.resizeAmpAdAndSafeframe(resizeHeight, resizeWidth,
+        SERVICE.RESIZE_RESPONSE, true);
   }
 
   /**
@@ -621,28 +629,23 @@ export class SafeframeHostApi {
    * @param {number} height
    * @param {number} width
    * @param {string} messageType
+   * @param {boolean=} opt_isShrinking True if collapsing or resizing smaller.
    */
-  resizeAmpAdAndSafeframe(height, width, messageType) {
+  resizeAmpAdAndSafeframe(height, width, messageType, opt_isShrinking) {
     // First, attempt to resize the Amp-Ad that is the parent of the
     // safeframe
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
       // If this resize succeeded, we always resize the safeframe.
       // resizeSafeframe also sends the resize response.
       this.resizeSafeframe(height, width, messageType);
-      // Update our stored record of what the amp-ad's size is. This
-      // is just for caching. Setting it here doesn't actually change
-      // the size of the amp-ad, the attempt change size above did that.
-      this.slotSize_.height = height;
-      this.slotSize_.width = width;
     }, /** REJECT CALLBACK */ () => {
       // If the resize initially failed, it may have been queued
       // as a pendingChangeSize, which will cause the size change
       // to execute upon the next user interaction. We don't want
       // that for safeframe, so we reset it here.
       this.baseInstance_.getResource().resetPendingChangeSize();
-      if (messageType == SERVICE.COLLAPSE_RESPONSE ||
-          messageType == SERVICE.SHRINK_RESPONSE) {
-        // If this is a collapse or shrink request, then even if resizing
+      if (opt_isShrinking) {
+        // If this is a collapse or resize request, then even if resizing
         // the amp-ad failed, still resize the iframe.
         // resizeSafeframe also sends the resize response.
         // Only register as collapsed if explicitly a collapse request.

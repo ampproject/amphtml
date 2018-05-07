@@ -168,6 +168,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-user-notification/**/*.js',
       // Needed for VideoService
       'extensions/amp-video-service/**/*.js',
+      // Needed to access ConsentPolicyManager from other extensions
+      'extensions/amp-consent/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',
@@ -196,6 +198,8 @@ function compile(entryModuleFilenames, outputDir,
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
       '!node_modules/core-js/modules/library/**.js',
+      // Don't include rollup configs
+      '!**/rollup.config.js',
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',

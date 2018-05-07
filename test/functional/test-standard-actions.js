@@ -18,8 +18,10 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
 import {Services} from '../../src/services';
 import {StandardActions} from '../../src/service/standard-actions-impl';
-import {createElementWithAttributes} from '../../src/dom';
+import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
+import {macroTask} from '../../testing/yield';
+
 import {setParentWindow} from '../../src/service';
 
 describes.sandboxed('StandardActions', {}, () => {
@@ -242,6 +244,17 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(goBackStub).to.be.calledOnce;
     });
 
+
+    it('should implement optoutOfCid', function*() {
+      const cid = cidServiceForDocForTesting(ampdoc);
+      const optoutStub = sandbox.stub(cid, 'optOut');
+      const invocation = {method: 'optoutOfCid', satisfiesTrust: () => true};
+      standardActions.handleAmpTarget(invocation);
+      yield macroTask();
+      expect(optoutStub).to.be.calledOnce;
+    });
+
+
     it('should implement setState()', () => {
       const setStateWithExpression = sandbox.stub();
       // Bind.setStateWithExpression() doesn't resolve with a value,
@@ -342,57 +355,6 @@ describes.sandboxed('StandardActions', {}, () => {
       standardActions.handleAmpTarget(invocation);
       expect(printStub).to.be.calledOnce;
     });
-  });
-
-  describes.realWin('whitelist of actions on the special AMP target', {
-    amp: {
-      ampdoc: 'single',
-    },
-  }, env => {
-    beforeEach(() => {
-      env.win.document.head.appendChild(
-          createElementWithAttributes(env.win.document, 'meta', {
-            name: 'amp-action-whitelist',
-            content: 'AMP.pushState,AMP.setState',
-          }));
-    });
-
-    it('should not implement print when not whitelisted', () => {
-      standardActions = new StandardActions(env.ampdoc);
-
-      const windowApi = {
-        print: () => {},
-      };
-      const printStub = sandbox.stub(windowApi, 'print');
-      const invocation = {
-        method: 'print',
-        satisfiesTrust: () => true,
-        target: {
-          ownerDocument: {
-            defaultView: windowApi,
-          },
-        },
-      };
-      expect(() => standardActions.handleAmpTarget(invocation)).to.throw();
-      expect(printStub).to.not.be.called;
-    });
-
-    it('should implement pushState when whitelisted', () => {
-      standardActions = new StandardActions(env.ampdoc);
-
-      const handleAmpBindActionStub =
-        sandbox.stub(standardActions, 'handleAmpBindAction_');
-      const invocation = {
-        method: 'pushState',
-        satisfiesTrust: () => true,
-        target: env.ampdoc,
-      };
-
-      expect(() =>
-        standardActions.handleAmpTarget(invocation, 0, [])).to.not.throw();
-      expect(handleAmpBindActionStub).to.be.calledOnce;
-    });
-
   });
 
   describes.fakeWin('adoptEmbedWindow', {}, env => {

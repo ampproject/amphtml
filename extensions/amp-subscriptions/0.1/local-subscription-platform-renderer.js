@@ -27,8 +27,9 @@ export class LocalSubscriptionPlatformRenderer {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!./dialog.Dialog} dialog
+   * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    */
-  constructor(ampdoc, dialog) {
+  constructor(ampdoc, dialog, serviceAdapter) {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
@@ -40,6 +41,9 @@ export class LocalSubscriptionPlatformRenderer {
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(ampdoc.win);
+
+    /** @private @const {!./service-adapter.ServiceAdapter} */
+    this.serviceAdapter_ = serviceAdapter;
   }
 
   /**
@@ -122,7 +126,19 @@ export class LocalSubscriptionPlatformRenderer {
         const expr = candidate.getAttribute('subscriptions-display');
         if (expr && evaluateExpr(expr,
             /** @type {!JsonObject} */(renderState))) {
-          candidate.setAttribute('i-amphtml-subs-display', '');
+          candidate.classList.add('i-amphtml-subs-display');
+          if (candidate.getAttribute('subscriptions-service')
+            && candidate.getAttribute('subscriptions-action')
+            && candidate.getAttribute('subscriptions-decorate') !== 'false') {
+            this.serviceAdapter_.decorateServiceAction(
+                candidate,
+                candidate.getAttribute('subscriptions-service'),
+                candidate.getAttribute('subscriptions-action'),
+                null
+            );
+          }
+        } else {
+          candidate.classList.remove('i-amphtml-subs-display');
         }
       }
       return rootNode;
