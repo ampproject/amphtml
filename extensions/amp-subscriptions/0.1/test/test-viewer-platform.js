@@ -16,7 +16,7 @@
 
 
 import {Dialog} from '../dialog';
-import {Entitlement, GrantReasons} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionAnalytics} from '../analytics';
@@ -131,7 +131,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
                 .equal(entitlementData.products.indexOf(currentProductId)
                   !== -1);
             expect(resolvedEntitlement.grantReason).to.be
-                .equal(GrantReasons.SUBSCRIBER);
+                .equal(GrantReason.SUBSCRIBER);
             // raw should be the data which was resolved via sendMessageAwaitResponse.
             expect(resolvedEntitlement.raw).to
                 .equal('faketoken');
@@ -154,7 +154,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
             expect(resolvedEntitlement.service).to.equal('local');
             expect(resolvedEntitlement.granted).to.be.equal(true);
             expect(resolvedEntitlement.grantReason).to.be
-                .equal(GrantReasons.METERING);
+                .equal(GrantReason.METERING);
             // raw should be the data which was resolved via sendMessageAwaitResponse.
             expect(resolvedEntitlement.data).to.deep.equal({
               left: 3,

@@ -15,7 +15,7 @@
  */
 
 import {Dialog} from '../dialog';
-import {Entitlement, GrantReasons} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
@@ -36,7 +36,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     service,
     source,
     granted: true,
-    grantReason: GrantReasons.SUBSCRIBER,
+    grantReason: GrantReason.SUBSCRIBER,
   };
   const entitlement = Entitlement.parseFromJson(json);
   const authUrl = 'https://lipsum.com/login/authorize';

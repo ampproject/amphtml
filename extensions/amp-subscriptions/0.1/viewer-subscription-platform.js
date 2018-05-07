@@ -15,7 +15,7 @@
  */
 
 
-import {Entitlement, GrantReasons} from './entitlement';
+import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
@@ -130,7 +130,7 @@ export class ViewerSubscriptionPlatform {
               raw: token,
               granted: true,
               grantReason: entitlementObject.subscriptionToken ?
-                GrantReasons.SUBSCRIBER : '',
+                GrantReason.SUBSCRIBER : '',
               dataObject: entitlementObject,
             });
             break;
@@ -142,7 +142,7 @@ export class ViewerSubscriptionPlatform {
           source: decodedData['iss'] || '',
           raw: token,
           granted: true,
-          grantReason: GrantReasons.METERING,
+          grantReason: GrantReason.METERING,
           dataObject: decodedData['metering'],
         });
       } else if (entitlements) { // Not null
@@ -151,7 +151,7 @@ export class ViewerSubscriptionPlatform {
           raw: token,
           granted: entitlements.granted,
           grantReason: entitlements.subscriptionToken ?
-            GrantReasons.SUBSCRIBER : '',
+            GrantReason.SUBSCRIBER : '',
           dataObject: entitlements,
         });
       }

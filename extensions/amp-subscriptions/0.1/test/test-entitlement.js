@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Entitlement, GrantReasons} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 
 
 describes.realWin('EntitlementClass', {}, () => {
   const service = 'sample-service';
   const source = 'sample-source';
   const granted = true;
-  const grantReason = GrantReasons.SUBSCRIBER;
+  const grantReason = GrantReason.SUBSCRIBER;
   const dataObject = {
     metering: {
       left: 1,

@@ -16,7 +16,7 @@
 import {dict} from '../../../src/utils/object';
 
 /** @enum {string} */
-export const GrantReasons = {
+export const GrantReason = {
   'SUBSCRIBER': 'SUBSCRIBER',
   'METERING': 'METERING',
 };
@@ -45,7 +45,7 @@ export class Entitlement {
    * @param {string} [input.raw]
    * @param {string} [input.service]
    * @param {boolean} [input.granted]
-   * @param {?GrantReasons} [input.grantReason]
+   * @param {?GrantReason} [input.grantReason]
    * @param {?JsonObject} [input.dataObject]
    */
   constructor({source, raw = '', service, granted = false,
@@ -113,6 +113,6 @@ export class Entitlement {
    * @return {boolean}
    */
   isSubscriber() {
-    return this.granted && this.grantReason === GrantReasons.SUBSCRIBER;
+    return this.granted && this.grantReason === GrantReason.SUBSCRIBER;
   }
 }

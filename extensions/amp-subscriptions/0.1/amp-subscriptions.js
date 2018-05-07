@@ -353,12 +353,11 @@ export class SubscriptionService {
     ]);
 
     return requireValuesPromise.then(resolvedValues => {
-      const grantState = resolvedValues[0];
       const selectedPlatform = resolvedValues[1];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
           selectedPlatform.getServiceId());
 
-      selectedPlatform.activate(selectedEntitlement.json());
+      selectedPlatform.activate(selectedEntitlement);
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId()

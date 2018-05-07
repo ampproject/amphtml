@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement, GrantReasons} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {
   PageConfig,
@@ -56,7 +56,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     ],
     fallbackEntitlement: {
       source: 'local',
-      grantReason: GrantReasons.SUBSCRIBER,
+      grantReason: GrantReason.SUBSCRIBER,
       granted: true,
     },
   };
@@ -189,7 +189,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     const serviceData = serviceConfig['services'][1];
     const platform = new SubscriptionPlatform();
     const entitlementData = {source: 'local', granted: true,
-      grantReason: GrantReasons.SUBSCRIBER};
+      grantReason: GrantReason.SUBSCRIBER};
     const entitlement = Entitlement.parseFromJson(entitlementData);
     const factoryStub = sandbox.stub().callsFake(() => platform);
 
@@ -285,7 +285,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
     function resolveRequiredPromises(subscriptionService) {
       const entitlement = new Entitlement({source: 'local', raw: 'raw',
-        granted: true, grantReason: GrantReasons.SUBSCRIBER});
+        granted: true, grantReason: GrantReason.SUBSCRIBER});
       const localPlatform =
         subscriptionService.platformStore_.getLocalPlatform();
       sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
@@ -374,7 +374,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
     it('should resolve entitlement if platform resolves', () => {
       const entitlement = new Entitlement({source: 'local', raw: 'raw',
-        granted: true, grantReason: GrantReasons.SUBSCRIBER});
+        granted: true, grantReason: GrantReason.SUBSCRIBER});
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => Promise.resolve(entitlement));
       const resolveStub = sandbox.stub(subscriptionService.platformStore_,
@@ -449,7 +449,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   describe('performPingback_', () => {
     it('should wait for viewer tracker', () => {
       const entitlementData = {source: 'local', granted: true,
-        grantReason: GrantReasons.SUBSCRIBER};
+        grantReason: GrantReason.SUBSCRIBER};
       const entitlement = Entitlement.parseFromJson(entitlementData);
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.platformStore_ = new PlatformStore(['local']);
@@ -464,7 +464,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
     it('should send pingback with resolved entitlement', () => {
       const entitlementData = {source: 'local',
-        granted: true, grantReason: GrantReasons.SUBSCRIBER};
+        granted: true, grantReason: GrantReason.SUBSCRIBER};
       const entitlement = Entitlement.parseFromJson(entitlementData);
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.platformStore_ = new PlatformStore(['local']);
