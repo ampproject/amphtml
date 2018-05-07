@@ -234,6 +234,7 @@ export class GoogleSubscriptionsPlatform {
     if (action === 'subscribe') {
       this.runtime_.showOffers({list: 'amp', isClosable: true});
     }
+    return Promise.resolve(true);
   }
 
   /** @override */
