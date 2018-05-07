@@ -100,34 +100,34 @@ const getTemplate = (config, consentId, logoSrc) => ({
                 },
               ],
             },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({'class': 'i-amphtml-story-consent-actions'}),
+          children: [
             {
-              tag: 'div',
-              attrs: dict({'class': 'i-amphtml-story-consent-actions'}),
-              children: [
-                {
-                  tag: 'button',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-consent-action ' +
-                        'i-amphtml-story-consent-action-reject',
-                    'on': `tap:${consentId}.reject`,
-                  }),
-                  children: [],
-                  unlocalizedString: 'Decline',
-                },
-                {
-                  tag: 'button',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-consent-action ' +
-                        'i-amphtml-story-consent-action-accept',
-                    'style': config.color ?
-                      `background-color: ${config.color} !important; ` +
-                          `border-color: ${config.color} !important;` : '',
-                    'on': `tap:${consentId}.accept`,
-                  }),
-                  children: [],
-                  unlocalizedString: 'Agree',
-                },
-              ],
+              tag: 'button',
+              attrs: dict({
+                'class': 'i-amphtml-story-consent-action ' +
+                    'i-amphtml-story-consent-action-reject',
+                'on': `tap:${consentId}.reject`,
+              }),
+              children: [],
+              unlocalizedString: 'Decline',
+            },
+            {
+              tag: 'button',
+              attrs: dict({
+                'class': 'i-amphtml-story-consent-action ' +
+                    'i-amphtml-story-consent-action-accept',
+                'style': config.color ?
+                  `background-color: ${config.color} !important; ` +
+                      `border-color: ${config.color} !important;` : '',
+                'on': `tap:${consentId}.accept`,
+              }),
+              children: [],
+              unlocalizedString: 'Agree',
             },
           ],
         },
