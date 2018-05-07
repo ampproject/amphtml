@@ -441,11 +441,14 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   renderComponents_(components) {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
+    const container = BookendComponent
+        .buildContainer(this.getInnerContainer_(), this.win.document);
     const fragment = BookendComponent
         .buildTemplates(components, this.win.document);
-    const container = this.getInnerContainer_();
-    this.resources_.mutateElement(container,
-        () => container.appendChild(fragment));
+    if (container) {
+      this.resources_.mutateElement(container,
+          () => container.appendChild(fragment));
+    }
   }
 
   /** @return {!Element} */

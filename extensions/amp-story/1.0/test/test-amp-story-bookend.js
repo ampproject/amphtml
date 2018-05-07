@@ -36,7 +36,7 @@ describes.realWin('amp-story-bookend', {
 
   const expectedComponents = [
     {
-      'type': 'article-set-title',
+      'type': 'heading',
       'heading': 'test',
     },
     {
@@ -109,7 +109,7 @@ describes.realWin('amp-story-bookend', {
       ],
       'components': [
         {
-          'type': 'article-set-title',
+          'type': 'heading',
           'title': 'test',
         },
         {
@@ -144,7 +144,7 @@ describes.realWin('amp-story-bookend', {
       ],
       'components': [
         {
-          'type': 'article-set-title',
+          'type': 'heading',
           'title': 'test',
         },
         {
@@ -180,7 +180,7 @@ describes.realWin('amp-story-bookend', {
       ],
       'components': [
         {
-          'type': 'article-set-title',
+          'type': 'heading',
           'title': 'test',
         },
         {

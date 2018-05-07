@@ -26,24 +26,24 @@ import {user} from '../../../../../src/log';
  *   type: string,
  *   title: string,
  *   url: string,
- *   image: (string|undefined)
+ *   image: string
  * }}
  */
-export let ArticleComponentDef;
+export let PortraitComponentDef;
 
 /** @type {string} */
 export const TAG = 'amp-story-bookend';
 
 /**
- * Builder class for the small article component.
+ * Builder class for the article titles used to separate article sets.
  * @implements {BookendComponentInterface}
  */
-export class ArticleComponent {
+export class PortraitComponent {
   /** @override */
   assertValidity(articleJson) {
-    if (!articleJson['title'] || !articleJson['url']) {
-      user().error(TAG, 'Articles must contain `title` and `url` ' +
-        'fields, skipping invalid.');
+    if (!articleJson['title'] || !articleJson['image'] || !articleJson['url']) {
+      user().error(TAG, 'Portrait component must contain `title`, `image`, ' +
+      'and `url` fields, skipping invalid.');
     }
 
     if (!isProtocolValid(articleJson['url'])) {
@@ -59,55 +59,47 @@ export class ArticleComponent {
 
   /**
    * @override
-   * @return {!ArticleComponentDef}
+   * @return {!PortraitComponentDef}
    * */
-  build(articleJson) {
-    const article = {
-      type: articleJson['type'],
-      title: articleJson['title'],
-      url: articleJson['url'],
-      domainName: parseUrl(articleJson['url']).hostname,
+  build(portraitJson) {
+    const portrait = {
+      type: 'portrait',
+      title: portraitJson.title,
+      url: portraitJson['url'],
+      domainName: parseUrl(portraitJson['url']).hostname,
+      image: portraitJson['image'],
     };
 
-    if (articleJson['image']) {
-      article.image = articleJson['image'];
-    }
-
-    return /** @type {!ArticleComponentDef} */ (article);
+    return portrait;
   }
 
   /** @override */
-  buildTemplate(articleData, doc) {
-
+  buildTemplate(portraitData, doc) {
     const html = htmlFor(doc);
-    //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const template =
         html`
-        <a class="i-amphtml-story-bookend-article"
+        <a class="i-amphtml-story-bookend-portrait"
           target="_top">
         </a>`;
-    addAttributesToElement(template, dict({'href': articleData.url}));
-
-    if (articleData.image) {
-      const ampImg =
-          html`
-          <amp-img class="i-amphtml-story-bookend-article-image"
-                  width="100"
-                  height="100">
-          </amp-img>`;
-
-      addAttributesToElement(ampImg, dict({'src': articleData.image}));
-      template.appendChild(ampImg);
-    }
+    addAttributesToElement(template, dict({'href': portraitData.url}));
 
     const heading =
-      html`<h2 class="i-amphtml-story-bookend-article-heading"></h2>`;
-    heading.textContent = articleData.title;
+    html`<h2 class="i-amphtml-story-bookend-portrait-heading"></h2>`;
+    heading.textContent = portraitData.title.toUpperCase();
     template.appendChild(heading);
 
+    const ampImg =
+        html`
+        <amp-img class="i-amphtml-story-bookend-portrait-image"
+                width="312"
+                height="416">
+        </amp-img>`;
+    addAttributesToElement(ampImg, dict({'src': portraitData.image}));
+    template.appendChild(ampImg);
+
     const articleMeta =
-      html`<div class="i-amphtml-story-bookend-article-meta"></div>`;
-    articleMeta.textContent = articleData.domainName;
+      html`<div class="i-amphtml-story-bookend-portrait-meta"></div>`;
+    articleMeta.textContent = portraitData.domainName;
     template.appendChild(articleMeta);
 
     return template;
