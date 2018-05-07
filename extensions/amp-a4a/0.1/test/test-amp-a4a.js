@@ -2045,9 +2045,9 @@ describe('amp-a4a', () => {
     });
 
     it('should rethrow cancellation', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         a4a.promiseErrorHandler_(cancellation());
-      }).to.throw(/CANCELLED/); });
+      }).to.throw(/CANCELLED/);
     });
 
     it('should create an error if needed', () => {
