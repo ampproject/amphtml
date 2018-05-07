@@ -62,11 +62,10 @@ export function batchFetchJsonFor(
     if (opt_urlReplacement == UrlReplacementPolicy.OPT_IN) {
       const invalid = urlReplacements.collectUnwhitelistedVarsSync(element);
       if (invalid.length > 0) {
-        const TAG = element.tagName;
         throw user().createError('URL variable substitutions in CORS ' +
             'fetches from dynamic URLs (e.g. via amp-bind) require opt-in. ' +
-            `Please add data-amp-replace="${invalid.join(' ')}" to ` +
-            `the <${TAG}> element. See "bit.ly/amp-var-subs" for details.`);
+            `Please add data-amp-replace="${invalid.join(' ')}" to the ` +
+            `<${element.tagName}> element. See https://bit.ly/amp-var-subs.`);
       }
     }
     const opts = {};

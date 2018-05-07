@@ -1117,7 +1117,6 @@ export class UrlReplacements {
    */
   collectUnwhitelistedVarsSync(element) {
     const url = element.getAttribute('src');
-
     const vars = Object.create(null);
     this.expandStringSync(url, /* opt_bindings */ undefined, vars);
     const varNames = Object.keys(vars);
