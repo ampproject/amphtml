@@ -15,6 +15,7 @@
  */
 
 import {rethrowAsync, user} from '../../log';
+import {tryResolve} from '../../promise';
 
 export const PARSER_IGNORE_FLAG = '`';
 
@@ -206,7 +207,7 @@ export class Expander {
           value = Promise.all(opt_args)
               .then(args => binding.apply(null, args));
         } else {
-          value = Promise.resolve(binding.apply(null, opt_args));
+          value = tryResolve(binding);
         }
       } else {
         value = Promise.resolve(binding);
