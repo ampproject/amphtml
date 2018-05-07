@@ -55,7 +55,7 @@ describes.repeated('', {
     let sandbox;
     const timer = Services.timerFor(window);
 
-    function getUnresolvedAmpForm(form, canonical = 'https://example.com/amps.html') {
+    function getAmpFormSync(form, canonical = 'https://example.com/amps.html') {
       new AmpFormService(env.ampdoc);
       Services.documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
       cidServiceForDocForTesting(env.ampdoc);
@@ -64,7 +64,7 @@ describes.repeated('', {
     }
 
     function getAmpForm(form, canonical = 'https://example.com/amps.html') {
-      return Promise.resolve(getUnresolvedAmpForm(form, canonical));
+      return Promise.resolve(getAmpFormSync(form, canonical));
     }
 
     function getForm(doc = document, button1 = true, button2 = false,
@@ -542,7 +542,7 @@ describes.repeated('', {
     });
 
     it('should allow rendering responses through inlined templates', () => {
-      const ampForm = getUnresolvedAmpForm(getForm(env.win.document, true));
+      const ampForm = getAmpFormSync(getForm(env.win.document, true));
       const form = ampForm.form_;
       // Add a div[submit-error] with a template child.
       const errorContainer = document.createElement('div');
