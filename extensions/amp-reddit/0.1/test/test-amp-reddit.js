@@ -100,17 +100,13 @@ describes.realWin('amp-reddit', {
   });
 
   it('requires data-src', () => {
-    allowConsoleError(() => {
-      return getReddit('', 'post').should.eventually.be.rejectedWith(
-          /The data-src attribute is required for/);
-    });
+    return getReddit('', 'post').should.eventually.be.rejectedWith(
+        /The data-src attribute is required for/);
   });
 
   it('requires data-embedtype', () => {
-    allowConsoleError(() => {
-      return getReddit('https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed', '')
-          .should.eventually.be.rejectedWith(
-              /The data-embedtype attribute is required for/);
-    });
+    return getReddit('https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed', '')
+        .should.eventually.be.rejectedWith(
+            /The data-embedtype attribute is required for/);
   });
 });
