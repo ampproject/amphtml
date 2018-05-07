@@ -54,6 +54,8 @@ function isAutoplaySupportedImpl(win, isLiteViewer) {
     opacity: '0',
   });
 
+  // Promise wrapped this way to catch both sync throws and async rejections.
+  // More info: https://github.com/tc39/proposal-promise-try
   new Promise(resolve => resolve(detectionElement.play())).catch(() => {
     // Suppress any errors, useless to report as they are expected.
   });
