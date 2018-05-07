@@ -384,7 +384,7 @@ export class Bind {
   addMacros_() {
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros =
-        /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
+    /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
           .split(',')
@@ -483,7 +483,6 @@ export class Bind {
    * @param {!Array<!Node>} nodes
    * @return {!Promise}
    * @private
-   * @visibleForTesting
    */
   removeBindingsForNodes_(nodes) {
     const before = (getMode().development) ? this.numberOfBindings() : 0;
@@ -865,7 +864,6 @@ export class Bind {
    * @param {!Element} element
    * @param {./bind-expression.BindExpressionResultDef} newValue
    * @return (?{name: string, value:./bind-expression.BindExpressionResultDef})
-   * @private
    */
   applyBinding_(boundProperty, element, newValue) {
     const property = boundProperty.property;
@@ -1106,9 +1104,7 @@ export class Bind {
    * @param {!Location=} opt_location
    * @return {string}
    */
-  rewriteAttributesForElement_(
-    element, attrName, attrValue, opt_location)
-  {
+  rewriteAttributesForElement_(element, attrName, attrValue, opt_location) {
     /** @private @const {string} */
     const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
     const tag = element.tagName.toLowerCase();
