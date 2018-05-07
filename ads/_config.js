@@ -835,6 +835,13 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  uzou: {
+    preconnect: [
+      'https://speee-ad.akamaized.net',
+    ],
+    renderStartImplemented: true,
+  },
+
   valuecommerce: {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [

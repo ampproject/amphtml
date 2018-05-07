@@ -317,6 +317,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Teads](../../ads/teads.md)
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
+- [UZOU](../../ads/uzou.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
 - [Videonow](../../ads/videonow.md)
 - [Viralize](../../ads/viralize.md)
