@@ -478,8 +478,17 @@ export class ActionService {
       const invokeAction = () => {
         // Use `this.root_` as the target for global targets e.g. "AMP".
         // Otherwise, targetType should be an element id.
-        const target = (this.globalTargets_[targetType]) ?
+        let target = (this.globalTargets_[targetType]) ?
           this.root_ : this.root_.getElementById(targetType);
+        if (!target) {
+          const doc = this.root_;
+          var allNodes = doc.getElementsByTagName('*');
+          for (var i = 0; i < allNodes.length; i++) {
+            if(allNodes[i].shadowRoot) {
+              target = allNodes[i].shadowRoot.getElementById(targetType);
+            }
+          }
+        }
         if (target) {
           const invocation = new ActionInvocation(target, actionInfo.method,
               args, source, action.node, event, trust, targetType, i);

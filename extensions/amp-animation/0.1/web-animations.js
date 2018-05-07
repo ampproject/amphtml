@@ -761,18 +761,37 @@ export class MeasureScanner extends Scanner {
           'Both "selector" and "target" are not allowed');
       targets = this.css_.queryElements(spec.selector);
       if (targets.length == 0) {
-        user().warn(TAG, `Target not found: "${spec.selector}"`);
+        const doc = this.css_.rootNode_;
+        var allNodes = doc.getElementsByTagName('*');
+        for (var i = 0; i < allNodes.length; i++) {
+          if(allNodes[i].shadowRoot) {
+            targets.push(allNodes[i].shadowRoot.querySelector(spec.selector));
+          }
+        }
+        if (targets.length == 0) {
+          user().warn(TAG, `Target not found: "${spec.selector}"`);          
+        }
       }
     } else if (spec.target) {
       if (typeof spec.target == 'string') {
         // TODO(dvoytenko, #9129): cleanup deprecated string targets.
         user().error(TAG, 'string targets are deprecated');
       }
-      const target = user().assertElement(
+      let target = user().assertElement(
           typeof spec.target == 'string' ?
             this.css_.getElementById(spec.target) :
             spec.target,
           `Target not found: "${spec.target}"`);
+      if (!target) {
+        const doc = this.css_.rootNode_;
+        var allNodes = doc.getElementsByTagName('*');
+        for (var i = 0; i < allNodes.length; i++) {
+          if(allNodes[i].shadowRoot) {
+            target = allNodes[i].shadowRoot.querySelector(spec.selector);
+          }
+        }
+      }
+      user().assertElement(target, `Target not found: "${spec.target}"`);
       targets = [target];
     } else if (this.target_) {
       targets = [this.target_];
