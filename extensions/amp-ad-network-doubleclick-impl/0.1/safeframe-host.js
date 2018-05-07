@@ -426,6 +426,9 @@ export class SafeframeHostApi {
   sendMessage_(payload, serviceName) {
     dev().assert(this.iframe_.contentWindow,
         'Frame contentWindow unavailable.');
+    if (!this.checkSafeframeStillCurrent) {
+      return;
+    }
     const message = dict();
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
     message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify(
@@ -435,6 +438,15 @@ export class SafeframeHostApi {
     message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
     this.iframe_.contentWindow./*OK*/postMessage(
         JSON.stringify(message), SAFEFRAME_ORIGIN);
+  }
+
+  /**
+   * Returns true if safeframe is still postMessage-able.
+   * @return {boolean}
+   */
+  checkSafeframeStillCurrent() {
+    return this.iframe_ && this.iframe_.contentWindow &&
+        this.iframe_.contentWindow.postMessage;
   }
 
   /**
@@ -689,6 +701,9 @@ export class SafeframeHostApi {
    * @private
    */
   onFluidResize_() {
+    if (!this.checkSafeframeStillCurrent()) {
+      return;
+    }
     if (this.fluidImpressionUrl_) {
       this.baseInstance_.fireDelayedImpressions(
           this.fluidImpressionUrl_);
