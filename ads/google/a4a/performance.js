@@ -131,12 +131,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   constructor(win, element, slotId) {
     super();
 
-    /** @private {!Window} @const */
-    this.win_ = win;
-
-    /** @private {!Element} @const */
-    this.element_ = element;
-
     /** @private {string} @const */
     this.namespace_ =
       element.getAttribute('data-a4a-upgrade-type') ? 'a4a' : 'amp';
@@ -146,9 +140,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
     /** @private {number} @const */
     this.correlator_ = getCorrelator(win, /* opt_cid */ undefined, element);
-
-    /** @private {string} @const */
-    this.slotName_ = this.namespace_ + '.' + this.slotId_;
 
     // Contortions to convince the type checker that we're type-safe.
     let initTime;
