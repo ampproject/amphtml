@@ -131,7 +131,7 @@ export class ViewerSubscriptionPlatform {
               granted: true,
               grantReason: entitlementObject.subscriptionToken ?
                 GrantReasons.SUBSCRIBER : '',
-              data: entitlementObject,
+              dataObject: entitlementObject,
             });
             break;
           }
@@ -143,7 +143,7 @@ export class ViewerSubscriptionPlatform {
           raw: token,
           granted: true,
           grantReason: GrantReasons.METERING,
-          data: decodedData['metering'],
+          dataObject: decodedData['metering'],
         });
       } else if (entitlements) { // Not null
         entitlement = new Entitlement({
@@ -152,7 +152,7 @@ export class ViewerSubscriptionPlatform {
           granted: entitlements.granted,
           grantReason: entitlements.subscriptionToken ?
             GrantReasons.SUBSCRIBER : '',
-          data: entitlements,
+          dataObject: entitlements,
         });
       }
 
