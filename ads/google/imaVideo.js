@@ -187,6 +187,9 @@ let adsRequested;
 // Flag that tracks if the user tapped and dragged on the big play button.
 let userTappedAndDragged;
 
+// User consent state.
+let consentState;
+
 /**
  * The business.
  */
@@ -402,6 +405,8 @@ export function imaVideo(global, data) {
         false);
   });
 
+  consentState = global.context.initialConsentState;
+
   /**
    * Set-up code that can't run until the IMA lib loads.
    */
@@ -548,11 +553,20 @@ function onBigPlayTouchMove() {
 export function requestAds() {
   adsRequested = true;
   adRequestFailed = false;
+  if (consentState == 0) { // UNKNOWN
+    // We're unaware of the user's consent state - do not request ads.
+    imaLoadAllowed = false;
+    return;
+  } else if (consentState == 2) { // INSUFFICIENT
+    // User has provided consent state but has not consented to personalized
+    // ads.
+    adsRequest.adTagUrl += '&npa=1';
+  }
   adsLoader.requestAds(adsRequest);
 }
 
 /**
- * Starts ad playback. If the ad request has not yte resolved, calls itself
+ * Starts ad playback. If the ad request has not yet resolved, calls itself
  * again after 250ms.
  *
  * @visibleForTesting
@@ -1064,9 +1078,9 @@ function onMessage(global, event) {
  */
 export function getPropertiesForTesting() {
   return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
-    adsManagerHeightOnLoad, contentComplete, controlsDiv, hideControlsTimeout,
-    interactEvent, playbackStarted, playerState,
-    PlayerStates, playPauseDiv, progressLine,
+    adsManagerHeightOnLoad, adsRequest, contentComplete, controlsDiv,
+    hideControlsTimeout, imaLoadAllowed, interactEvent, playbackStarted,
+    playerState, PlayerStates, playPauseDiv, progressLine,
     progressMarkerDiv, timeNode, uiTicker, videoPlayer};
 }
 
@@ -1114,6 +1128,15 @@ export function setAdRequestFailedForTesting(newValue) {
  */
 export function setAdsLoaderForTesting(newAdsLoader) {
   adsLoader = newAdsLoader;
+}
+
+/**
+ * Sets the ads request.
+ *
+ * @visibleForTesting
+ */
+export function setAdsRequestForTesting(newAdsRequest) {
+  adsRequest = newAdsRequest;
 }
 
 /**
@@ -1178,6 +1201,15 @@ export function setPlayerStateForTesting(newState) {
  */
 export function setHideControlsTimeoutForTesting(newTimeout) {
   hideControlsTimeout = newTimeout;
+}
+
+/**
+ * Sets the consent state.
+ *
+ * @visibleForTesting
+ */
+export function setConsentStateForTesting(newConsentState) {
+  consentState = newConsentState;
 }
 
 /**
