@@ -21,7 +21,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 
- export function epeex(global, data) {
+export function epeex(global, data) {
 
   // ensure we have valid value
   validateData(data, []);
