@@ -169,7 +169,7 @@ function printArgvMessages() {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
     log(green('⤷ Use'), cyan('--nohelp'),
-        green('to silence these messages.)'));
+        green('to silence these messages.'));
     if (!argv.unit && !argv.integration && !argv.files && !argv.a4a) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
