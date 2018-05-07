@@ -1986,6 +1986,27 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'custom': 'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
     },
   },
+'catchpoint': {
+    'requests': {
+      'endpoint': 'http://r.3gl.net/hawklogserver/r.p',
+      'pageview': 'http://r.3gl.net/hawklogserver/r.p' +
+        '&licenseKey=${licenseKey}' +
+        '&ampUrl=${ampdocUrl}' +
+        '&DNS=' +
+          '${navTiming(domainLookupEnd)-navTiming(domainLookupStart)}' +
+        '&Connect=${navTiming(connectStart)-navTiming(connectEnd)}',
+    },
+    'vars': {
+      'beacon': 'real_user_AMP',
+      'appId': [],
+      'licenseKey': '',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'ini-load',
+        'request': 'pageview',
+      },
+  },
   'ibeatanalytics': {
     'requests': {
       'host': 'https://ibeat.indiatimes.com',
