@@ -31,7 +31,7 @@ describe.configure().enableIe().run('simple-test', () => {
 
   describe('test that always passes (see #11494)', () => {
     it('should check that 2 + 2 = 4', () => {
-      expect(2 + 2).to.equal(4);
+      expect(2 + 3).to.equal(5);
     });
   });
 });
