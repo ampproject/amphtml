@@ -560,6 +560,8 @@ export class AmpStory extends AMP.BaseElement {
       this.buildPaginationButtons_();
     }
 
+    this.initializeBookend_();
+
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => {
@@ -1281,6 +1283,23 @@ export class AmpStory extends AMP.BaseElement {
         });
   }
 
+  /**
+   * Initializes bookend.
+   * @private
+   */
+  initializeBookend_() {
+    let bookendEl = this.element.querySelector('amp-story-bookend');
+    if (!bookendEl) {
+      bookendEl = createElementWithAttributes(this.win.document,
+          'amp-story-bookend', dict({'layout': 'nodisplay'}));
+      this.element.appendChild(bookendEl);
+    }
+
+    bookendEl.getImpl().then(
+        bookendImpl => {
+          this.bookend_ = bookendImpl;
+        });
+  }
 
   /**
    * Preloads the bookend config if on the last page.
@@ -1305,19 +1324,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildAndPreloadBookend_() {
-    let bookendEl = this.element.querySelector('amp-story-bookend');
-    if (!bookendEl) {
-      bookendEl = createElementWithAttributes(this.win.document,
-          'amp-story-bookend', dict({'layout': 'nodisplay'}));
-      this.element.appendChild(bookendEl);
-    }
-
-    return bookendEl.getImpl().then(
-        bookendImpl => {
-          this.bookend_ = bookendImpl;
-          this.bookend_.build();
-          return this.bookend_.loadConfig();
-        });
+    this.bookend_.build();
+    return this.bookend_.loadConfig();
   }
 
 
