@@ -855,7 +855,7 @@ export const adConfig = {
   uas: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
   },
-  
+
   uzou: {
     preconnect: [
       'https://speee-ad.akamaized.net',
