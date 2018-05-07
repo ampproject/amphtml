@@ -80,15 +80,15 @@ describes.realWin('amp-story-auto-ads', {
           {'insertTime': sinon.match.number});
     });
 
-    it('should fire upon destroyed ad', () => {
+    it('should fire upon discarded ad', () => {
       autoAds.uniquePagesCount_ = 10;
       sandbox.stub(autoAds, 'startNextPage_');
-      sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* placed */ 2);
+      sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* discard */ 2);
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.handleActivePageChange_(3, 'fakePage');
       expect(analyticsStub).to.be.called;
-      expect(analyticsStub).to.have.been.calledWithMatch('story-ad-destroy',
-          {'destroyTime': sinon.match.number});
+      expect(analyticsStub).to.have.been.calledWithMatch('story-ad-discard',
+          {'discardTime': sinon.match.number});
     });
 
     it('should fire upon ad load', function* () {

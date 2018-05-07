@@ -62,7 +62,7 @@ const CTA_TYPES = {
 /** @const */
 const AD_STATE = {
   PENDING: 0,
-  PLACED: 1,
+  INSERTED: 1,
   FAILED: 2,
 };
 
@@ -510,13 +510,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   analyticsEvent_(eventType, vars) {
     const adIndex = this.adPagesCreated_;
-    if (!hasOwn(this.analyticsData_, adIndex.toString())) {
-      this.analyticsData_[adIndex] = {adIndex};
+    if (this.analyticsData_['adIndex'] !== adIndex) {
+      this.analyticsData_ = {adIndex};
     }
-    this.analyticsData_[adIndex] = Object.assign(this.analyticsData_[adIndex],
+    this.analyticsData_ = Object.assign(this.analyticsData_,
         vars);
     triggerAnalyticsEvent(this.element, eventType,
-        this.analyticsData_[adIndex]);
+        this.analyticsData_);
   }
 }
 
