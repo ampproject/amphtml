@@ -208,8 +208,7 @@ app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   const fileData = req.files['myFile'][0];
   const contents = fileData.buffer.toString();
 
-  res.send({message: contents});
-  res.end();
+  res.json({message: contents});
 });
 
 app.use('/form/search-html/get', (req, res) => {

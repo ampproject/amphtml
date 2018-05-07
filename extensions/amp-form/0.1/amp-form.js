@@ -507,7 +507,7 @@ export class AmpForm {
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
 
     if (isHeadOrGet) {
-      this.assertNoInsecureFields_();
+      this.assertNoSensitiveFields_();
       const values = this.getFormAsObject_();
       if (opt_extraFields) {
         deepMerge(values, opt_extraFields);
@@ -586,7 +586,7 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
-    this.assertNoInsecureFields_();
+    this.assertNoSensitiveFields_();
     // Non-xhr GET requests replacement should happen synchronously.
     for (let i = 0; i < varSubsFields.length; i++) {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
@@ -599,7 +599,7 @@ export class AmpForm {
    * is called.
    * @private
    */
-  assertNoInsecureFields_() {
+  assertNoSensitiveFields_() {
     const fields = this.form_.querySelectorAll(
         'input[type=password],input[type=file]');
     user().assert(fields.length == 0,
