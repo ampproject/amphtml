@@ -191,3 +191,69 @@ attr_lists: {
     value: ""
   }
 }
+
+# HTML5, 4.11.3 The template element
+# The template element is also defined at
+# extensions/amp-mustache/validator-amp-mustache.protoascii
+tags: {
+  html_format: AMP
+  tag_name: "TEMPLATE"
+  spec_name: "amp-date-picker > template [date-template] [dates]"
+  mandatory_parent: "AMP-DATE-PICKER"
+  requires_extension: "amp-mustache"
+  attrs: {
+    name: "date-template"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "dates"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "amp-mustache"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "TEMPLATE"
+  spec_name: "amp-date-picker > template [date-template] [default]"
+  mandatory_parent: "AMP-DATE-PICKER"
+  requires_extension: "amp-mustache"
+  attrs: {
+    name: "date-template"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "default"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "amp-mustache"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "TEMPLATE"
+  spec_name: "amp-date-picker > template [info-template]"
+  mandatory_parent: "AMP-DATE-PICKER"
+  requires_extension: "amp-mustache"
+  attrs: {
+    name: "info-template"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "amp-mustache"
+  }
+}
