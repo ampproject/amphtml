@@ -686,29 +686,26 @@ export class Resource {
     if (multiplier === true || multiplier === false) {
       return multiplier;
     }
+    multiplier = Math.max(multiplier, 0);
+
+    if (this.useLayers_) {
+      const {element} = this;
+      return element.getLayers().iterateAncestry(element,
+          this.layersDistanceRatio_);
+    }
 
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewportBox = this.resources_.getViewport().getRect();
     const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
-    multiplier = Math.max(multiplier, 0);
     let scrollPenalty = 1;
     let distance = 0;
 
-    // TODO(jridgewell): Switch all viewport distance calculations to use
-    // Layer's definition of ancestry layer viewports.
-
-    if (this.useLayers_) {
-      distance += Math.max(0,
-          layoutBox.left - viewportBox.right,
-          viewportBox.left - layoutBox.right);
-    } else {
-      if (viewportBox.right < layoutBox.left ||
-          viewportBox.left > layoutBox.right) {
-        // If outside of viewport's x-axis, element is not in viewport.
-        return false;
-      }
+    if (viewportBox.right < layoutBox.left ||
+        viewportBox.left > layoutBox.right) {
+      // If outside of viewport's x-axis, element is not in viewport.
+      return false;
     }
 
     if (viewportBox.bottom < layoutBox.top) {
@@ -732,6 +729,24 @@ export class Resource {
       return true;
     }
     return distance < viewportBox.height * multiplier / scrollPenalty;
+  }
+
+  /**
+   * Calculates the layout's viewport distance ratio, using an iterative
+   * calculation based on tree depth and number of layer scrolls it would take
+   * to view the element.
+   *
+   * @param {number} currentScore
+   * @param {!./layers-impl.LayoutElement} layout
+   * @param {number} depth
+   * @return {number}
+   */
+  layersDistanceRatio_(currentScore, layout, depth) {
+    const depthPenalty = 1 + (depth / 10);
+    const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
+    const distance = layout.getHorizontalViewportsFromParent() +
+        layout.getVerticalViewportsFromParent();
+    return currentScore + (nonActivePenalty * depthPenalty * distance);
   }
 
   /**
