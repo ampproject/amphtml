@@ -57,7 +57,6 @@ const WHITELIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.HIDDEN,
 ];
 
-
 export class AmpAnalytics extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -117,6 +116,13 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
+
+    /**
+     * Maximum time (since epoch) to report resource timing metrics.
+     * We stop reporting after 1 minute.
+     * @private @const {number}
+     */
+    this.maxResourceTimingReportingTime_ = Date.now() + 60 * 1000;
   }
 
   /** @override */
@@ -687,21 +693,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     const dynamicBindings = {};
     const resourceTimingSpec = trigger['resourceTimingSpec'];
     if (resourceTimingSpec) {
-      const on = trigger['on'];
-      if (on == 'ini-load') {
+      // Check if we're done reporting resource timing metrics before binding
+      // before binding the resource timing variable.
+      if (!resourceTimingSpec['done'] &&
+          Date.now() < this.maxResourceTimingReportingTime_) {
         const binding = 'RESOURCE_TIMING';
         const analyticsVar = 'resourceTiming';
-        // TODO(warrengm): Consider limiting resource timings to avoid
-        // duplicates by excluding timings that were previously reported.
         dynamicBindings[binding] =
-            serializeResourceTiming(resourceTimingSpec, this.win);
+            serializeResourceTiming(this.win, resourceTimingSpec);
         expansionOptions.vars[analyticsVar] = binding;
-      } else {
-        // TODO(warrengm): Instead of limiting resource timing to ini-load,
-        // analytics should have throttling or de-dupe timings that have already
-        // been reported.
-        user().warn(
-            TAG, 'resource timing is only allowed on ini-load triggers');
       }
     }
     return dynamicBindings;

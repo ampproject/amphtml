@@ -101,6 +101,7 @@ import {
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
+import {tryResolve} from '../../../src/utils/promise';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
@@ -242,6 +243,20 @@ const BLOCK_SRA_COMBINERS_ = [
       forceSafeframes.push(Number(instance.forceSafeframe_));
     });
     return safeframeForced ? {'fsfs': forceSafeframes.join(',')} : null;
+  },
+  instances => ({'adxs':
+    instances.map(instance => instance.getPageLayoutBox().left).join()}),
+  instances => ({'adys':
+    instances.map(instance => instance.getPageLayoutBox().top).join()}),
+  instances => {
+    let hasAmpContainer = false;
+    const result = [];
+    instances.forEach(instance => {
+      const containers = getEnclosingContainerTypes(instance.element);
+      result.push(containers.join());
+      hasAmpContainer = hasAmpContainer || !!containers.length;
+    });
+    return hasAmpContainer ? {'acts': result.join('|')} : null;
   },
 ];
 
@@ -639,6 +654,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
     const urlPromise = Promise.all([opt_rtcResponsesPromise, identityPromise])
         .then(results => {
+          this.verifyStillCurrent();
           const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
           return googleAdUrl(
@@ -1216,7 +1232,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
                   ({
                     headers,
-                    arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
+                    arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
                   });
                     // Pop head off of the array of resolvers as the response
                     // should match the order of blocks declared in the ad url.

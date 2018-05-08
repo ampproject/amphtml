@@ -87,6 +87,7 @@ amp-lightbox-gallery .amp-carousel-button {
   width: 24px;
   height: 24px;
   padding: 16px;
+  box-sizing: content-box;
 }
 
 .i-amphtml-lbg {

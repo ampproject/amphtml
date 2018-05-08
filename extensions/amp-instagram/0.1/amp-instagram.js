@@ -56,16 +56,6 @@ import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
-/*
- * These padding values are specifc to intagram embeds with
- * ?cr=1&v=7 if you change to a different version of the embed
- * these will need to be recalculated.
- */
-const PADDING_LEFT = 0;
-const PADDING_RIGHT = 0;
-const PADDING_BOTTOM = 0;
-const PADDING_TOP = 64;
-
 class AmpInstagram extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -144,10 +134,10 @@ class AmpInstagram extends AMP.BaseElement {
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
     setStyles(image, {
-      'top': PADDING_TOP + 'px',
-      'bottom': PADDING_BOTTOM + 'px',
-      'left': PADDING_LEFT + 'px',
-      'right': PADDING_RIGHT + 'px',
+      'top': '0 px',
+      'bottom': '0 px',
+      'left': '0 px',
+      'right': '0 px',
     });
     placeholder.appendChild(image);
     return placeholder;
@@ -211,9 +201,7 @@ class AmpInstagram extends AMP.BaseElement {
       const height = data['details']['height'];
       this.getVsync().measure(() => {
         if (this.iframe_ && this.iframe_./*OK*/offsetHeight !== height) {
-          // Height returned by Instagram includes header, so
-          // subtract 48px top padding
-          this./*OK*/changeHeight(height - (PADDING_TOP + PADDING_BOTTOM));
+          this./*OK*/changeHeight(height);
         }
       });
     }
