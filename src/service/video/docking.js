@@ -860,7 +860,7 @@ export class VideoDocking {
    */
   placeAt_(video, x, y, scale, step, optTransitionDurationMs = null) {
     if (this.alreadyPlacedAt_(x, y, scale)) {
-      return 0;
+      return;
     }
 
     const transitionDurationMs = optTransitionDurationMs ?
@@ -874,8 +874,8 @@ export class VideoDocking {
     const transitionTiming =
         // Auto-transitions are supposed to smooth-out PositionObserver
         // frequency, so it makes sense to use 'linear'. When the transition
-        // duration is otherwise set, 'ease-in' looks much nicer.
-        transitionDurationMs > 100 ? 'ease-in' : 'linear';
+        // duration is otherwise larger, 'ease-in' looks much nicer.
+        transitionDurationMs > 200 ? 'ease-in' : 'linear';
 
     const positioningStyles = {
       'width': px(width),
@@ -908,7 +908,7 @@ export class VideoDocking {
       });
     });
 
-    return transitionDurationMs;
+    return;
   }
 
   /**
