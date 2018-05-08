@@ -101,6 +101,7 @@ import {
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
+import {tryResolve} from '../../../src/utils/promise';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
@@ -1230,7 +1231,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
                   ({
                     headers,
-                    arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
+                    arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
                   });
                     // Pop head off of the array of resolvers as the response
                     // should match the order of blocks declared in the ad url.

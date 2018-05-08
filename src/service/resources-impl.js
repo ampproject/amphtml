@@ -36,6 +36,7 @@ import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -465,7 +466,7 @@ export class Resources {
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
-      return Promise.resolve(resource.getPageLayoutBox());
+      return tryResolve(() => resource.getPageLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();

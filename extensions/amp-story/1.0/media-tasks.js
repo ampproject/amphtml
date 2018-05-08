@@ -16,6 +16,7 @@
 
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
+import {tryResolve} from '../../../src/utils/promise';
 
 
 
@@ -231,7 +232,7 @@ export class PlayTask extends MediaTask {
     // The play() invocation is wrapped in a Promise.resolve(...) due to the
     // fact that some browsers return a promise from media elements' play()
     // function, while others return a boolean.
-    return Promise.resolve(mediaEl.play());
+    return tryResolve(() => mediaEl.play());
   }
 }
 
