@@ -4597,6 +4597,10 @@ attr_lists: {
     name: "subscriptions-service"
     requires_extension: "amp-subscriptions"
   }
+  attrs: {
+    name: "subscriptions-decorate"
+    requires_extension: "amp-subscriptions"
+  }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
   attrs: { name: "[aria-atomic]" }
