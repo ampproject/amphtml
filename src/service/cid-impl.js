@@ -610,7 +610,8 @@ function getNewCidForCookie(win) {
   } else {
     // If our entropy is a pure random number, we can just directly turn it
     // into base 64
-    return tryResolve(() => base64UrlEncodeFromBytes(entropy)
+    const cast = /** @type {!Uint8Array} */(entropy);
+    return tryResolve(() => base64UrlEncodeFromBytes(cast)
         // Remove trailing padding
         .replace(/\.+$/, ''));
   }
