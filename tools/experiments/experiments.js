@@ -286,24 +286,30 @@ const EXPERIMENTS = [
     id: 'iframe-messaging',
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14263',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
     id: 'amp-fx-fade-in',
     name: 'Enables amp-fx="fade-in" - scroll triggered timed fade in animation',
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
   {
     id: 'amp-fx-fade-in-scroll',
     name: 'Enables amp-fx="fade-in-scroll" - a scroll dependent fade animation',
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
   {
     id: 'amp-img-native-srcset',
     name: 'Enables native browser implementation of srcset and sizes',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/11575',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
+  },
+  {
+    id: 'layers',
+    name: 'Enables the new Layers position/measurement system',
+    spec: 'https://github.com/ampproject/amphtml/issues/3434',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
 ];
 
