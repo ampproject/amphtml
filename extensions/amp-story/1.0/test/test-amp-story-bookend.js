@@ -111,7 +111,7 @@ describes.realWin('amp-story-bookend', {
 
     bookend.buildCallback();
     bookend.build();
-    return bookend.loadConfig().then(config => {
+    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       config.components.forEach((currentComponent, index) => {
         return expect(currentComponent).to.deep
             .equal(expectedComponents[index]);
@@ -147,7 +147,7 @@ describes.realWin('amp-story-bookend', {
 
     bookend.buildCallback();
     bookend.build();
-    return bookend.loadConfig().then(config => {
+    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       config.components.forEach((currentComponent, index) => {
         return expect(currentComponent).to.deep
             .equal(expectedComponents[index]);

@@ -1325,7 +1325,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildAndPreloadBookend_() {
     this.bookend_.build();
-    return this.bookend_.loadConfig();
+    return this.bookend_.loadConfigAndMaybeRenderBookend();
   }
 
 
@@ -1345,10 +1345,12 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve(true);
     }
 
-    return this.bookend_.loadConfig(false /** applyConfig */).then(
-        config => {
-          return !!(config && config.components && config.components.length);
-        });
+    return this.bookend_
+        .loadConfigAndMaybeRenderBookend(false /** renderBookend */).then(
+            config => {
+              return !!(config && config.components &&
+                config.components.length);
+            });
   }
 
 

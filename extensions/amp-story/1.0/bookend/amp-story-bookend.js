@@ -138,7 +138,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
     this.isBuilt_ = false;
 
     /** @private {boolean} */
-    this.isConfigRendered_ = false;
+    this.isBookendRendered_ = false;
 
     /** @private {?Element} */
     this.replayButton_ = null;
@@ -164,19 +164,11 @@ export class AmpStoryBookend extends AMP.BaseElement {
     /** @private @const {!../amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win);
 
-    /** @private {?Element} */
-    this.parentEl_ = null;
-
     /** @private @const {!../../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
-  }
-
-  /** @override */
-  buildCallback() {
-    this.parentEl_ = this.element.parentElement;
   }
 
   /**
@@ -196,18 +188,13 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
     this.replayButton_ = this.buildReplayButton_();
 
-    let ampdoc;
-    if (this.parentEl_) {
-      ampdoc = getAmpdoc(this.parentEl_);
-    }
-
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
-    innerContainer.appendChild(this.shareWidget_.build(ampdoc));
+    innerContainer.appendChild(this.shareWidget_.build(this.getAmpDoc()));
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      this.parentEl_.appendChild(this.getRoot());
+      this.element.parentElement.appendChild(this.getRoot());
     });
   }
 
@@ -298,17 +285,11 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * Retrieves the publisher bookend configuration. Applying the configuration
-   * will prerender the bookend DOM, but there are cases where we need it before
-   * the component is built. Eg: the desktop share button needs the providers.
-   * @param {boolean=} applyConfig  Whether the config should be set.
+   * Retrieves the publisher bookend configuration.
    * @return {!Promise<?./bookend-component.BookendDataDef>}
    */
-  loadConfig(applyConfig = true) {
+  loadConfig() {
     if (this.config_) {
-      if (applyConfig && this.config_) {
-        this.setConfig_(this.config_);
-      }
       return Promise.resolve(this.config_);
     }
 
@@ -317,7 +298,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
           if (!response) {
             return null;
           }
-
           if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_1) {
             this.config_ = /** @type {./bookend-component.BookendDataDef} */ ({
               [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
@@ -330,19 +310,31 @@ export class AmpStoryBookend extends AMP.BaseElement {
             dev().warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
             `-bookend is deprecated. Use ${BOOKEND_VERSION_1} instead.`);
           }
-
-          // Allows the config to be fetched before the component is built, for
-          // cases like getting the share providers on desktop.
-          if (applyConfig && this.config_) {
-            this.setConfig_(this.config_);
-          }
-
           return this.config_;
         })
         .catch(e => {
           user().error(TAG, 'Error fetching bookend configuration', e.message);
           return null;
         });
+  }
+
+  /**
+   * Retrieves the publisher bookend configuration. Applying the configuration
+   * will prerender the bookend DOM, but there are cases where we need it before
+   * the component is built. Eg: the desktop share button needs the providers.
+   * @param {boolean=} renderBookend  Whether the bookend should be rendered.
+   * When set to false it allows the config to be fetched before the component
+   * is built, for cases like getting the share providers
+   * on desktop.
+   * @return {!Promise<?./bookend-component.BookendDataDef>}
+   */
+  loadConfigAndMaybeRenderBookend(renderBookend = true) {
+    return this.loadConfig().then(config => {
+      if (renderBookend && config) {
+        this.renderBookend_(config);
+      }
+      return config;
+    });
   }
 
   /**
@@ -431,13 +423,13 @@ export class AmpStoryBookend extends AMP.BaseElement {
    * @param {!./bookend-component.BookendDataDef} bookendConfig
    * @private
    */
-  setConfig_(bookendConfig) {
-    if (this.isConfigRendered_) {
+  renderBookend_(bookendConfig) {
+    if (this.isBookendRendered_) {
       return;
     }
 
     this.assertBuilt_();
-    this.isConfigRendered_ = true;
+    this.isBookendRendered_ = true;
 
     this.renderComponents_(bookendConfig.components);
   }
@@ -494,11 +486,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
    * @private
    */
   getStoryMetadata_() {
-    let ampdoc;
-    if (this.parentEl_) {
-      ampdoc = getAmpdoc(this.parentEl_);
-    }
-    const jsonLd = getJsonLd(ampdoc.getRootNode());
+    const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
 
     const metadata = {
       title: jsonLd && jsonLd['headline'] ?
@@ -508,7 +496,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
             'Please set <title> or structured data (JSON-LD).').textContent,
 
       domainName: parseUrl(
-          Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,
+          Services.documentInfoForDoc(this.getAmpDoc()).canonicalUrl).hostname,
     };
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
