@@ -102,6 +102,7 @@ tags: {  # <amp-story>
   child_tags: {
     mandatory_min_num_child_tags: 1
     child_tag_name_oneof: "AMP-ANALYTICS"
+    child_tag_name_oneof: "AMP-CONSENT"
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-PAGE"
@@ -317,6 +318,22 @@ tags: {  # <amp-story-bookend>
       allowed_protocol: "https"
       allow_relative: false
     }
+  }
+}
+tags: {  # <amp-story-consent>
+  html_format: AMP
+  tag_name: "AMP-STORY-CONSENT"
+  requires_extension: "amp-consent"
+  mandatory_parent: "AMP-CONSENT"
+  child_tags: {
+    mandatory_num_child_tags: 0
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
   }
 }
 tags: {  # <amp-story-cta-layer>
