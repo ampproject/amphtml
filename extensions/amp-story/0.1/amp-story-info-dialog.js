@@ -58,8 +58,8 @@ export class InfoDialog {
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
+    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
     /** @private {?Element} */
     this.moreInfoLinkEl_ = null;
@@ -92,15 +92,11 @@ export class InfoDialog {
     createShadowRootWithStyle(root, this.element_, CSS);
     this.initializeListeners_();
 
-    const appendPromise = this.vsync_.runPromise({
-      mutate: () => {
-        this.innerContainerEl_ =
-            this.element_
-                .querySelector('.i-amphtml-story-info-dialog-container');
-      },
-      measure: () => {
-        this.parentEl_.appendChild(root);
-      },
+    this.innerContainerEl_ = this.element_
+        .querySelector('.i-amphtml-story-info-dialog-container');
+
+    const appendPromise = this.resources_.mutateElement(this.parentEl_, () => {
+      this.parentEl_.appendChild(root);
     });
 
     const pageUrl = Services.documentInfoForDoc(
@@ -142,7 +138,7 @@ export class InfoDialog {
    * @private
    */
   onInfoDialogStateUpdated_(isOpen) {
-    this.vsync_.mutate(() => {
+    this.resources_.mutateElement(dev().assertElement(this.element_), () => {
       this.element_.classList.toggle(DIALOG_VISIBLE_CLASS, isOpen);
     });
   }
@@ -200,16 +196,12 @@ export class InfoDialog {
   setHeading_() {
     const label = this.localizationService_.getLocalizedString(
         LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL);
+    const headingEl = dev().assertElement(
+        this.element_.querySelector('.i-amphtml-story-info-heading'));
 
-    return this.vsync_.runPromise({
-      measure: state => {
-        state.headingEl = this.element_
-            .querySelector('.i-amphtml-story-info-heading');
-      },
-      mutate: state => {
-        state.headingEl.textContent = label;
-      },
-    }, /* state */ {});
+    return this.resources_.mutateElement(headingEl, () => {
+      headingEl.textContent = label;
+    });
   }
 
   /**
@@ -217,20 +209,17 @@ export class InfoDialog {
    *     document.
    */
   setPageLink_(pageUrl) {
-    return this.vsync_.runPromise({
-      measure: state => {
-        state.linkEl = this.element_
-            .querySelector('.i-amphtml-story-info-link');
-      },
-      mutate: state => {
-        state.linkEl.setAttribute('href', pageUrl);
-        state.linkEl.setAttribute('rel', 'amphtml');
+    const linkEl = dev().assertElement(
+        this.element_.querySelector('.i-amphtml-story-info-link'));
 
-        // Add zero-width space character (\u200B) after "." and "/" characters
-        // to help line-breaks occur more naturally.
-        state.linkEl.textContent = pageUrl.replace(/([/.]+)/gi, '$1\u200B');
-      },
-    }, /* state */ {});
+    return this.resources_.mutateElement(linkEl, () => {
+      linkEl.setAttribute('href', pageUrl);
+      linkEl.setAttribute('rel', 'amphtml');
+
+      // Add zero-width space character (\u200B) after "." and "/" characters
+      // to help line-breaks occur more naturally.
+      linkEl.textContent = pageUrl.replace(/([/.]+)/gi, '$1\u200B');
+    });
   }
 
   /**
@@ -242,20 +231,17 @@ export class InfoDialog {
       return Promise.resolve();
     }
 
-    return this.vsync_.runPromise({
-      measure: () => {
-        this.moreInfoLinkEl_ = this.element_
-            .querySelector('.i-amphtml-story-info-moreinfo');
-      },
-      mutate: () => {
-        const label = this.localizationService_.getLocalizedString(
-            LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK);
-        this.moreInfoLinkEl_.classList.add(MOREINFO_VISIBLE_CLASS);
-        this.moreInfoLinkEl_.setAttribute('href',
-            dev().assertString(moreInfoUrl));
-        this.moreInfoLinkEl_.setAttribute('target', '_blank');
-        this.moreInfoLinkEl_.textContent = label;
-      },
+    this.moreInfoLinkEl_ = dev().assertElement(
+        this.element_.querySelector('.i-amphtml-story-info-moreinfo'));
+
+    return this.resources_.mutateElement(this.moreInfoLinkEl_, () => {
+      const label = this.localizationService_.getLocalizedString(
+          LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK);
+      this.moreInfoLinkEl_.classList.add(MOREINFO_VISIBLE_CLASS);
+      this.moreInfoLinkEl_.setAttribute('href',
+          dev().assertString(moreInfoUrl));
+      this.moreInfoLinkEl_.setAttribute('target', '_blank');
+      this.moreInfoLinkEl_.textContent = label;
     });
   }
 }
