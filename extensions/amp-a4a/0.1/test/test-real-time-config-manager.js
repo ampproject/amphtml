@@ -33,6 +33,7 @@ import {
 import {Services} from '../../../../src/services';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {dev} from '../../../../src/log';
 import {isFiniteNumber} from '../../../../src/types';
 
 describes.realWin('real-time-config-manager', {amp: true}, env => {
@@ -537,7 +538,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
       it('should return null for rtcConfig missing required values', () => {
         setRtcConfig(rtcConfig);
-        validatedRtcConfig = validateRtcConfig_(element);
+        allowConsoleError(() => {
+          dev().error('Error');
+          validatedRtcConfig = validateRtcConfig_(element);
+        });
         expect(validatedRtcConfig).to.be.null;
       });
     });
