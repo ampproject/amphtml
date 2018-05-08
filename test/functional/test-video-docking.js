@@ -59,7 +59,7 @@ describes.fakeWin('Video Docking', {amp: true}, env => {
     const dock = sandbox.spy(docking, 'dock_');
 
     sandbox.stub(docking, 'getAreaWidth_').returns(319);
-    stubLayoutBox(video, layoutRectLtwh(0, -400, 300, 400));
+    stubLayoutBox(video, layoutRectLtwh(0, -200, 400, 300));
 
     docking.onPositionChange_(video);
 
@@ -73,7 +73,10 @@ describes.fakeWin('Video Docking', {amp: true}, env => {
     sandbox.stub(docking, 'getAreaWidth_').returns(400);
     stubLayoutBox(video, layoutRectLtwh(0, -400, 300, 400));
 
-    docking.onPositionChange_(video);
+    allowConsoleError(() => {
+      // user().error() expected
+      docking.onPositionChange_(video);
+    });
 
     expect(dock).to.not.have.been.called;
   });
