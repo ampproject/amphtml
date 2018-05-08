@@ -32,6 +32,7 @@ import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Preconnect} from '../../../../src/preconnect';
 import {Services} from '../../../../src/services';
 import {
@@ -428,13 +429,14 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#getAdUrl', () => {
+    const adsenseFormatExpName = 'as-use-attr-for-format';
 
     beforeEach(() => {
       resetSharedState();
     });
 
     afterEach(() => {
-      toggleExperiment(impl.win, 'as-use-attr-for-format', false);
+      toggleExperiment(impl.win, adsenseFormatExpName, false);
       toggleExperiment(
           impl.win, 'ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME', false);
     });
@@ -474,24 +476,24 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
     });
     it('has correct format when as-use-attr-for-format is on', () => {
-      toggleExperiment(impl.win, 'as-use-attr-for-format', true);
+      forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
       return impl.getAdUrl().then(url =>
-        // With exp as-use-attr-for-format off, we can't test for specific
-        // numbers, but we know that the values should be numeric.
         expect(url).to.match(new RegExp(
             `format=${width}x${height}&w=${width}&h=${height}`)));
     });
-    it('has correct format when width=auto and as-use-attr-for-format is on',
+    it('has experiment eid in adsense frmt exp and width/height numeric',
         () => {
-          toggleExperiment(impl.win, 'as-use-attr-for-format', true);
-          element.setAttribute('width', 'auto');
-          expect(impl.element.getAttribute('width')).to.equal('auto');
-          return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
-            expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
+          forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+          return impl.getAdUrl().then(
+              url => expect(url).to.match(/eid=[^&]*21062004/));
         });
+    it('has control eid in adsense frmt exp and width/height numeric', () => {
+      forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
+      return impl.getAdUrl().then(
+          url => expect(url).to.match(/eid=[^&]*21062003/));
+    });
     it('includes eid when in amp-auto-ads holdout control', () => {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
@@ -601,7 +603,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(adUrl1).to.match(/ifi=1/);
         return impl2.getAdUrl().then(adUrl2 => {
           expect(adUrl2).to.match(/pv=1/);
-          expect(adUrl2).to.match(/prev_fmts=320x50/);
+          expect(adUrl2).to.match(/prev_fmts=\d+?x\d+?/);
           expect(adUrl2).to.not.match(/prev_slotnames/);
           expect(adUrl2).to.match(/ifi=2/);
           return impl3.getAdUrl().then(adUrl3 => {
@@ -611,7 +613,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
             // has a bounding rectangle of 0x0. The important thing to
             // test here is the number of previous formats.
             expect(adUrl3).to.match(
-                /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+                /prev_fmts=(\d+?x\d+?%2C\d+?x\d+?|\d+?x\d+?%2C\d+?x\d+?)/);
             expect(adUrl3).to.match(/prev_slotnames=slotname_foo/);
             expect(adUrl3).to.match(/ifi=3/);
           });
@@ -638,6 +640,26 @@ describes.realWin('amp-ad-network-adsense-impl', {
       element.setAttribute('data-package', 'package_code');
       return expect(impl.getAdUrl()).to.eventually
           .match(/pwprc=package_code(&|$)/);
+    });
+
+    it('should return empty string if unknown consentState', () => expect(
+        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(''));
+
+    it('should include npa=1 if unknown consent & explicit npa', () => {
+      impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
+      return expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually
+          .match(/(\?|&)npa=1(&|$)/);
+    });
+
+    it('should include npa=1 if insufficient consent', () =>
+      expect(impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT)).to.eventually
+          .match(/(\?|&)npa=1(&|$)/));
+
+    [CONSENT_POLICY_STATE.SUFFICIENT,
+      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED].forEach(consentState => {
+      it(`should not include npa=1 if ${consentState}`, () =>
+        expect(impl.getAdUrl(consentState)).to.eventually.not
+            .match(/(\?|&)npa=1(&|$)/));
     });
   });
 
@@ -932,5 +954,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(preloadSpy).to.be.calledOnce;
       expect(preloadSpy.args[0]).to.match(/nameframe/);
     });
+  });
+
+  describe('#getConsentPolicy', () => {
+    it('should return null', () =>
+      expect(AmpAdNetworkAdsenseImpl.prototype.getConsentPolicy()).to.be.null);
   });
 });

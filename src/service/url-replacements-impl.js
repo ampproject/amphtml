@@ -195,7 +195,10 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the title of this AMP document.
     this.set('TITLE', () => {
-      return this.ampdoc.win.document.title;
+      // The environment may override the title and set originalTitle. Prefer
+      // that if available.
+      return this.ampdoc.win.document['originalTitle'] ||
+          this.ampdoc.win.document.title;
     });
 
     // Returns the URL for this AMP document.
@@ -510,9 +513,9 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the incremental engaged time since the last push under the
     // same name.
-    this.setAsync('INCREMENTAL_ENGAGED_TIME', name => {
+    this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
       return Services.activityForDoc(this.ampdoc).then(activity => {
-        return activity.getIncrementalEngagedTime(name);
+        return activity.getIncrementalEngagedTime(name, reset !== 'false');
       });
     });
 

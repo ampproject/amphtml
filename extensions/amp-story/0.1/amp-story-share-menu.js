@@ -81,14 +81,11 @@ export class ShareMenu {
     /** @private {boolean} */
     this.isSystemShareSupported_ = false;
 
-    /** @private @const {!../../../src/service/platform-impl.Platform} */
-    this.platform_ = Services.platformFor(this.win_);
-
     /** @private @const {!ShareWidget} */
     this.shareWidget_ = ShareWidget.create(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;

@@ -42,8 +42,13 @@ import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
 let consoleErrorSandbox;
+let consoleErrorStub;
 let consoleInfoLogWarnSandbox;
 let testName;
+
+// Used to clean up global state between tests.
+let initialGlobalState;
+let initialWindowState;
 
 // All exposed describes.
 global.describes = describes;
@@ -275,6 +280,7 @@ function warnForConsoleError() {
   consoleErrorSandbox = sinon.sandbox.create();
   const originalConsoleError = console/*OK*/.error;
   consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
+    const errorMessage = messages.join(' ').split('\n', 1)[0]; // First line.
     const helpMessage = '    The test "' + testName + '"' +
         ' resulted in a call to console.error.\n' +
         '    ⤷ If this is not expected, fix the code that generated ' +
@@ -283,12 +289,29 @@ function warnForConsoleError() {
             'test code that generated the error:\n' +
         '        \'allowConsoleError(() => { <code that generated the ' +
             'error> });';
-    // TODO(rsimha, #14432): Throw an error here after all tests are fixed.
-    originalConsoleError(messages.join(' ') + '\'\n' + helpMessage);
+    // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
+    if (window.__karma__.config.failOnConsoleError) {
+      throw new Error(errorMessage + '\'\n' + helpMessage);
+    } else {
+      originalConsoleError(errorMessage + '\'\n' + helpMessage);
+    }
   });
   this.allowConsoleError = function(func) {
     dontWarnForConsoleError();
     func();
+    try {
+      expect(consoleErrorStub).to.have.been.called;
+    } catch (e) {
+      const helpMessage =
+          'The test "' + testName + '" contains an "allowConsoleError" block ' +
+          'that didn\'t result in a call to console.error.';
+      // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
+      if (window.__karma__.config.failOnConsoleError) {
+        throw new Error(helpMessage);
+      } else {
+        originalConsoleError(helpMessage);
+      }
+    }
     warnForConsoleError();
   };
 }
@@ -299,7 +322,8 @@ function dontWarnForConsoleError() {
     consoleErrorSandbox.restore();
   }
   consoleErrorSandbox = sinon.sandbox.create();
-  consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
+  consoleErrorStub =
+      consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
 }
 
 // Used to restore error level logging after each test.
@@ -329,6 +353,8 @@ beforeEach(function() {
   testName = this.currentTest.fullTitle();
   stubConsoleInfoLogWarn();
   warnForConsoleError();
+  initialGlobalState = Object.keys(global);
+  initialWindowState = Object.keys(window);
 });
 
 function beforeTest() {
@@ -349,6 +375,8 @@ function beforeTest() {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(function() {
+  const globalState = Object.keys(global);
+  const windowState = Object.keys(window);
   restoreConsoleError();
   restoreConsoleInfoLogWarn();
   this.timeout(BEFORE_AFTER_TIMEOUT);
@@ -372,6 +400,21 @@ afterEach(function() {
   window.context = undefined;
   window.AMP_MODE = undefined;
 
+  if (windowState.length != initialWindowState.length) {
+    for (let i = initialWindowState.length; i < windowState.length; ++i) {
+      if (window[windowState[i]]) {
+        delete window[windowState[i]];
+      }
+    }
+  }
+
+  if (initialGlobalState.length != globalState.length) {
+    for (let i = initialGlobalState.length; i < globalState.length; ++i) {
+      if (global[globalState[i]]) {
+        delete global[globalState[i]];
+      }
+    }
+  }
   const forgotGlobal = !!global.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a

@@ -15,6 +15,13 @@
  */
 'use strict';
 
+const COMMON_CHROME_FLAGS = [
+  // Dramatically speeds up iframe creation time.
+  '--disable-extensions',
+  // Allows simulating user actions (e.g unmute) which otherwise will be denied.
+  '--autoplay-policy=no-user-gesture-required',
+];
+
 /**
  * @param {!Object} config
  */
@@ -28,19 +35,19 @@ module.exports = {
   ],
 
   preprocessors: {
-    'test/fixtures/*.html': ['html2js'],
-    'src/**/*.js': ['browserify'],
-    'test/**/*.js': ['browserify'],
-    'ads/**/test/test-*.js': ['browserify'],
-    'extensions/**/test/**/*.js': ['browserify'],
-    'testing/**/*.js': ['browserify'],
+    './test/fixtures/*.html': ['html2js'],
+    './test/**/*.js': ['browserify'],
+    './ads/**/test/test-*.js': ['browserify'],
+    './extensions/**/test/**/*.js': ['browserify'],
+    './testing/**/*.js': ['browserify'],
   },
 
   browserify: {
     watch: true,
     debug: true,
+    basedir: __dirname + '/../../',
     transform: [
-      ['babelify'],
+      ['babelify', {compact: false}],
     ],
     bundleDelay: 900,
   },
@@ -114,16 +121,15 @@ module.exports = {
     /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
       base: 'Chrome',
-      flags: ['--no-sandbox', '--disable-extensions'],
+      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
     Chrome_no_extensions: {
       base: 'Chrome',
-      // Dramatically speeds up iframe creation time.
-      flags: ['--disable-extensions'],
+      flags: COMMON_CHROME_FLAGS,
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      flags: ['--disable-extensions'],
+      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
@@ -197,6 +203,8 @@ module.exports = {
       // Longer timeout on Travis; fail quickly at local.
       timeout: process.env.TRAVIS ? 10000 : 2000,
     },
+    // TODO(rsimha, #14406): Remove this after all tests are fixed.
+    failOnConsoleError: !process.env.TRAVIS && !process.env.LOCAL_PR_CHECK,
     // TODO(rsimha, #14432): Set to false after all tests are fixed.
     captureConsole: true,
   },
@@ -214,7 +222,6 @@ module.exports = {
     'karma-browserify',
     'karma-chai',
     'karma-chrome-launcher',
-    'karma-coverage',
     'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',

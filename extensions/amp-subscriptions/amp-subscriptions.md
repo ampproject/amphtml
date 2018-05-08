@@ -139,17 +139,34 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
       // Service 2 (a vendor service)
     }
   ],
-  "preferViewerSupport": true
+  "score": {
+    "supportsViewer": 10,
+  },
+  "fallbackEntitlement": {
+    "source": "fallback",
+    "service": "local",
+    "products": ["norcal_tribune.com:basic",...],
+    "subscriptionToken": "subscription-token",
+    "loggedIn": true/false,
+  }
 }
 </script>
 ```
 
-The key is the `services` property that contains an array of service configurations. There must be one "local" service and zero or more vendor services.
-
-Based on `preferViewerSupport` (default: true) this document will give extra preference to the platform supported by the viewer.
+The `services` property contains an array of service configurations. There must be one "local" service and zero or more vendor services.
 
 If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
 
+
+## Selecting platform
+So if no platforms are selected, we compete all the platforms based on platforms like
+
+1. Does the platform support the Viewer
+
+You can add `"baseScore"` < 100 key in any service configuration in case you want to increase `"baseScore"` of any platform so that it wins over other score evaluation factors.
+
+## Error fallback
+In case if all configured platforms fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` platform. The document's unblocking will be based on this fallback entitlement.
 
 ### The "local" service configuration
 
@@ -243,6 +260,28 @@ All actions work the same way: the popup window is opened for the specified URL.
 
 Notice, while not explicitly visible, any vendor service can also implement its own actions. Or it can delegate to the "login" service to execute "login" or "subscribe" action.
 
+### Action delegation
+
+In the markup the actions can be delegated to other services for them to execute the actions. This can be achieved by specifying `subscriptions-service` attribute.
+
+e.g. In order to ask google subscriptions to perform subscribe even when `local` platform is selected:
+```
+  <button subscriptions-action='subscribe' subscriptions-service='subscribe.google.com>Subscribe</button>
+```
+
+### Action decoration
+
+In addition to delegation of the action to another service, you can also ask another service to decorate the element. Just add the attribute `subsciptions-decorate` to get the element decorated.
+
+```
+  <button
+    subscriptions-action='subscribe'
+    subscriptions-service='subscribe.google.com
+    subscriptions-decorate
+  >
+    Subscribe
+  </button>
+```
 
 ## Showing/hiding premium and fallback content
 

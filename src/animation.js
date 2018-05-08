@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {Services} from './services';
 import {dev} from './log';
 import {getCurve} from './curve';
@@ -117,7 +118,6 @@ export class Animation {
   start(duration) {
     const player = new AnimationPlayer(this.vsync_, this.contextNode_,
         this.segments_, this.curve_, duration);
-    player.start_();
     return player;
   }
 }
@@ -167,36 +167,42 @@ class AnimationPlayer {
     this.duration_ = duration;
 
     /** @private {./time.timeDef} */
-    this.startTime_ = 0;
+    this.startTime_ = Date.now();
 
     /** @private {./time.normtimeDef} */
-    this.normLinearTime_ = 0;
+    // this.normLinearTime_ = 0;
 
     /** @private {./time.normtimeDef} */
-    this.normTime_ = 0;
+    // this.normTime_ = 0;
 
     /** @private {boolean} */
-    this.running_ = false;
+    this.running_ = true;
 
     /** @private {!Object<string, *>} */
     this.state_ = {};
 
-    /** @const {function()} */
-    this.resolve_;
+    const deferred = new Deferred();
 
-    /** @const {function()} */
-    this.reject_;
+    /** @const @private */
+    this.promise_ = deferred.promise;
 
-    /** @private {!Promise} */
-    this.promise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    /** @const @private */
+    this.resolve_ = deferred.resolve;
+
+    /** @const @private */
+    this.reject_ = deferred.reject;
 
     /** @const */
     this.task_ = this.vsync_.createAnimTask(this.contextNode_, {
       mutate: this.stepMutate_.bind(this),
     });
+
+    if (this.vsync_.canAnimate(this.contextNode_)) {
+      this.task_(this.state_);
+    } else {
+      dev().warn(TAG_, 'cannot animate');
+      this.complete_(/* success */ false, /* dir */ 0);
+    }
   }
 
   /**
@@ -235,20 +241,6 @@ class AnimationPlayer {
    */
   halt(opt_dir) {
     this.complete_(/* success */ false, /* dir */ opt_dir || 0);
-  }
-
-  /**
-   * @private
-   */
-  start_() {
-    this.startTime_ = Date.now();
-    this.running_ = true;
-    if (this.vsync_.canAnimate(this.contextNode_)) {
-      this.task_(this.state_);
-    } else {
-      dev().warn(TAG_, 'cannot animate');
-      this.complete_(/* success */ false, /* dir */ 0);
-    }
   }
 
   /**

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
+      const top = entry.positionRect ? entry.positionRect.top : null;
       // outside viewport
-      if (!entry.positionRect ||
-          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+      if (!top || top > fxElement.adjustedViewportHeight) {
         return;
       }
 
@@ -45,10 +45,9 @@ export const Presets = {
       // Also negating number since we are using tranformY so negative = upward,
       // positive = downward.
       const adjustedFactor = -(parseFloat(fxElement.getFactor()) - 1);
-      const top = entry.positionRect.top;
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
-      const offset = (fxElement.adjustedViewportHeight_ - top) * adjustedFactor;
+      const offset = (fxElement.adjustedViewportHeight - top) * adjustedFactor;
       fxElement.setOffset(offset);
 
       if (fxElement.isMutateScheduled()) {
@@ -69,25 +68,24 @@ export const Presets = {
   },
   'fade-in': {
     isFxTypeSupported(win) {
-      user().assert(isExperimentOn(win, 'amp-fx-fade-in'),
-          'amp-fx-fade-in experiment is not turned on.');
+      return isExperimentOn(win, 'amp-fx-fade-in');
     },
     userAsserts(element) {
-      if (!element.hasAttribute('data-margin')) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
         return;
       }
-      const margin = element.getAttribute('data-margin');
-      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
-          'data-margin must be a number and be between 0 and 1 for: %s',
-          element);
+      user().assert(marginStart >= 0 && marginStart < 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
+      const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!entry.positionRect ||
-          entry.positionRect.top >
-            (1 - fxElement.getMargin()) * fxElement.adjustedViewportHeight_) {
+      if (!top || top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight) {
         return;
       }
 
@@ -106,6 +104,69 @@ export const Presets = {
           'opacity': 1,
         });
       });
+    },
+  },
+  'fade-in-scroll': {
+    isFxTypeSupported(win) {
+      return isExperimentOn(win, 'amp-fx-fade-in-scroll');
+    },
+    userAsserts(element) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      const marginEnd = parseFloat(element.getAttribute('data-margin-end'));
+
+      if (!marginStart && !marginEnd) {
+        return;
+      }
+      user().assert(marginStart >= 0 && marginStart < 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
+      user().assert(marginEnd >= 0 && marginEnd < 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
+
+      user().assert(marginEnd > marginStart,
+          'data-margin-end must be greater than data-margin-start for: %s',
+          element);
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight);
+      const top = entry.positionRect ? entry.positionRect.top : null;
+      // Outside viewport or margins
+      if (!top || (top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight)) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // Early exit if the animation doesn't need to repeat and it is fully opaque.
+      if (!fxElement.hasRepeat() && fxElement.getOffset() >= 1) {
+        return;
+      }
+      // Translate the element offset pixels.
+      const marginDelta = fxElement.getMarginEnd() - fxElement.getMarginStart();
+      // Offset is how much extra to move the element which is position within
+      // viewport times adjusted factor.
+      const offset = 1 * (fxElement.adjustedViewportHeight - top -
+        (fxElement.getMarginStart() * fxElement.adjustedViewportHeight)) /
+        (marginDelta * fxElement.adjustedViewportHeight);
+      fxElement.setOffset(offset);
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.getResources().mutateElement(fxElement.getElement(),
+          function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {opacity: fxElement.getOffset()});
+          });
     },
   },
 };

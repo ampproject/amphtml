@@ -65,7 +65,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
+    /** @visibleForTesting {?Promise} */
     this.iframePromise_ = null;
 
     /** @private {?number} */
@@ -138,6 +138,12 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
+    if (this.element.hasAttribute('aria-label')) {
+      placeholder.setAttribute('aria-label', 'Loading - '
+          + this.element.getAttribute('aria-label'));
+    } else {
+      placeholder.setAttribute('aria-label', 'Loading interactive element');
+    }
     placeholder.setAttribute('placeholder', '');
     placeholder.appendChild(this.createPlaybuzzLoader_());
     return placeholder;

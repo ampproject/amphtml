@@ -35,7 +35,10 @@ import {
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
+import {AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryPage} from './amp-story-page';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
@@ -182,12 +185,13 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!AmpStoryStoreService} */
     this.storeService_ = new AmpStoryStoreService(this.win);
-    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
+    registerServiceBuilder(
+        this.win, 'story-store', () => this.storeService_);
 
     /** @private @const {!AmpStoryRequestService} */
     this.requestService_ = new AmpStoryRequestService(this.win, this.element);
     registerServiceBuilder(
-        this.win, 'story-request', () => this.requestService_);
+        this.win, 'story-request-v01', () => this.requestService_);
 
     /** @private {!NavigationState} */
     this.navigationState_ =
@@ -211,12 +215,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
 
-    /** @private @const {!ViewportWarningLayer} */
-    this.viewportWarningLayer_ =
-        new ViewportWarningLayer(this.win, this.element);
-
-    /** @private @const {!Array<string>} */
-    this.pageHistoryStack_ = [];
+    /** Instantiates the viewport warning layer. */
+    new ViewportWarningLayer(this.win, this.element);
 
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
@@ -283,8 +283,8 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_
         .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
 
-    registerServiceBuilder(this.win, 'localization',
-        () => this.localizationService_);
+    registerServiceBuilder(
+        this.win, 'localization-v01', () => this.localizationService_);
   }
 
 
@@ -1033,7 +1033,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return this.desktopMedia_.matches;
+    return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 
   /**
@@ -1239,6 +1239,13 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   preloadPagesByDistance_() {
+    if (this.platform_.isBot()) {
+      this.pages_.forEach(page => {
+        page.setDistance(0);
+      });
+      return;
+    }
+
     const pagesByDistance = this.getPagesByDistance_();
 
     this.mutateElement(() => {
@@ -1600,4 +1607,7 @@ export class AmpStory extends AMP.BaseElement {
 
 AMP.extension('amp-story', '0.1', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
+  AMP.registerElement('amp-story-page', AmpStoryPage);
+  AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
+  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
 });

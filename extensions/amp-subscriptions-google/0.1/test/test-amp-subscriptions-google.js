@@ -311,4 +311,20 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       expect(platform.isGoogleViewer_).to.be.true;
     });
   });
+
+  it('should attach button given to decorateUI', () => {
+    const elem = env.win.document.createElement('div');
+    const decorateStub = sandbox.stub(platform.runtime_.buttonApi_,
+        'attach');
+    elem.textContent = 'some html';
+    platform.decorateUI(elem, 'subscribe');
+    expect(elem.textContent).to.be.equal('');
+    expect(decorateStub).to.be.calledWith(elem);
+  });
+
+  it('should show offers if subscribe action is delegated', () => {
+    const executeStub = platform.runtime_.showOffers;
+    platform.executeAction('subscribe');
+    expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
+  });
 });

@@ -161,7 +161,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/';
     windowApi.location.hash = '#origin=g.com';
-    windowApi.location.search = '?amp_agsa=1';
+    windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.isCctEmbedded()).to.be.true;
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
@@ -172,7 +172,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#test=1';
     windowApi.location.hash = '#origin=g.com&test=1';
-    windowApi.location.search = '?amp_agsa=1';
+    windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
@@ -195,7 +195,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#click=abc';
     windowApi.location.hash = '#click=abc';
-    windowApi.location.search = '?amp_agsa=1';
+    windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         'http://www.example.com');
@@ -920,9 +920,9 @@ describe('Viewer', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
       const viewer = new Viewer(ampdoc);
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         viewer.setMessageDeliverer(() => {});
-      }).to.throw(/message channel must have an origin/); });
+      }).to.throw(/message channel must have an origin/);
     });
 
     it('should allow channel without origin thats an empty string', () => {
@@ -971,9 +971,9 @@ describe('Viewer', () => {
         windowApi.location.hash = '#webview=1';
         windowApi.location.ancestorOrigins = [];
         const viewer = new Viewer(ampdoc);
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           viewer.setMessageDeliverer(() => {});
-        }).to.throw(/message channel must have an origin/); });
+        }).to.throw(/message channel must have an origin/);
       });
 
       it('should decide non-trusted on connection with wrong origin', () => {
@@ -1043,9 +1043,9 @@ describe('Viewer', () => {
         windowApi.location.hash = '#origin=g.com&webview=1';
         windowApi.location.ancestorOrigins = null;
         const viewer = new Viewer(ampdoc);
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           viewer.setMessageDeliverer(() => {});
-        }).to.throw(/message channel must have an origin/); });
+        }).to.throw(/message channel must have an origin/);
       });
 
       it('should decide non-trusted on connection with wrong origin', () => {
@@ -1099,6 +1099,8 @@ describe('Viewer', () => {
       testHasRoughlySameOrigin('https://www.amp.google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://amp.www.google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://mobile.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://m.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://amp.m.google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://amp.mobile.google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://amp.mobile.google.co.uk', 'https://google.co.uk');
       testHasRoughlySameOrigin('https://www1.www2.www3.google.com', 'https://google.com');

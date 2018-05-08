@@ -1075,9 +1075,10 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   'mediator': {
     'requests': {
-      'host': '//collector.mediator.media/amp/?',
-      'prefix': '${host}cid=${mediator_id}&url=${canonicalUrl}' +
-                '&ref=${documentReferrer}&p=4&',
+      'host': '//collector.mediator.media/script/${mediator_id}/amp/',
+      'renderstart': '${host}init/?url=${canonicalUrl}',
+      'prefix': '${host}register/?url=${canonicalUrl}' +
+                '&ref=${documentReferrer}&',
       'suffix': 'vh=${viewportHeight}&sh=${scrollHeight}&st=${scrollTop}',
       'pageview': '${prefix}e=v',
       'timer': '${prefix}e=t&${suffix}',
@@ -1090,6 +1091,10 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'mediator_id': '',
     },
     'triggers': {
+      'renderStart': {
+        'on': 'render-start',
+        'request': 'renderstart',
+      },
       'trackPageview': {
         'on': 'visible',
         'request': 'pageview',
@@ -1428,6 +1433,15 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'defaultPageview': {
         'on': 'visible',
         'request': 'pageview',
+      },
+      'defaultHeartbeat': {
+        'on': 'timer',
+        'enabled': '${incrementalEngagedTime(parsely-js,false)}',
+        'timerSpec': {
+          'interval': 5,
+          'maxTimerLength': 7200,
+        },
+        'request': 'heartbeat',
       },
     },
     'transport': {

@@ -78,45 +78,50 @@ function logOnSameLine(message) {
  * @return {boolean}
  */
 function runLinter(path, stream, options) {
-  let errorsFound = false;
   if (!process.env.TRAVIS) {
     log(colors.green('Starting linter...'));
+  } else {
+    // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
+    log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
+    console./* OK*/log('travis_fold:start:lint_results\n');
   }
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
-        errorsFound = true;
-        logOnSameLine(colors.red('Linter error:') + msg + '\n');
+        logOnSameLine(msg.trim() + '\n');
       }))
       .pipe(gulpIf(isFixed, gulp.dest(path)))
       .pipe(eslint.result(function(result) {
         if (!process.env.TRAVIS) {
-          logOnSameLine(colors.green('Linting: ') + result.filePath);
+          logOnSameLine(colors.green('Linted: ') + result.filePath);
         }
       }))
       .pipe(eslint.results(function(results) {
-        if (results.errorCount == 0) {
+        // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
+        if (process.env.TRAVIS) {
+          console./* OK*/log('travis_fold:end:lint_results');
+        }
+        if (results.errorCount == 0 && results.warningCount == 0) {
           if (!process.env.TRAVIS) {
-            logOnSameLine(colors.green('Success: ') + 'No linter errors');
+            logOnSameLine(colors.green('SUCCESS: ') +
+                'No linter warnings or errors.');
           }
         } else {
-          logOnSameLine(colors.red('Error: ') + results.errorCount +
-              ' linter error(s) found.');
-          process.exit(1);
+          const prefix = results.errorCount == 0 ?
+            colors.yellow('WARNING: ') : colors.red('ERROR: ');
+          logOnSameLine(prefix + 'Found ' +
+              results.errorCount + ' error(s) and ' +
+              results.warningCount + ' warning(s).');
+          if (!options.fix) {
+            log(colors.yellow('NOTE 1:'),
+                'You may be able to automatically fix some of these warnings ' +
+                '/ errors by running', colors.cyan('gulp lint --fix') + '.');
+            log(colors.yellow('NOTE 2:'),
+                'Since this is a destructive operation (operates on the file',
+                'system), make sure you commit before running the command.');
+          }
         }
       }))
-      .pipe(eslint.failAfterError())
-      .on('error', function() {
-        if (errorsFound && !options.fix) {
-          log(colors.red('ERROR:'),
-              'Lint errors found.');
-          log(colors.yellow('NOTE:'),
-              'You can run', colors.cyan('gulp lint --fix'),
-              'to automatically fix some of these lint errors.');
-          log(colors.yellow('WARNING:'),
-              'Since this is a destructive operation (operates on the file',
-              'system), make sure you commit before running the command.');
-        }
-      });
+      .pipe(eslint.failAfterError());
 }
 
 /**

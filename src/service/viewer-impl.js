@@ -31,6 +31,7 @@ import {
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -49,7 +50,7 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  * @private {!RegExp}
  */
 const TRIM_ORIGIN_PATTERN_ =
-  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp)\.)+/i;
+  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -279,7 +280,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isCctEmbedded_ = !this.isIframed_ &&
-        parseQueryString(this.win.location.search)['amp_agsa'] === '1';
+        parseQueryString(this.win.location.search)['amp_gsa'] === '1';
 
     const url = parseUrl(this.ampdoc.win.location.href);
     /**
@@ -1040,7 +1041,7 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-        Promise.resolve(this.messageDeliverer_(
+        tryResolve(() => this.messageDeliverer_(
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
             awaitResponse)));

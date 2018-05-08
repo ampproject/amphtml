@@ -119,7 +119,7 @@ export class SystemLayer {
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -198,6 +198,10 @@ export class SystemLayer {
       this.onBookendStateUpdate_(isActive);
     });
 
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
+      this.onCanShowSharingUisUpdate_(show);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
@@ -233,6 +237,19 @@ export class SystemLayer {
   onBookendStateUpdate_(isActive) {
     this.getShadowRoot()
         .classList.toggle('i-amphtml-story-bookend-active', isActive);
+  }
+
+  /**
+   * Reacts to updates to whether sharing UIs may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowSharingUis
+   * @private
+   */
+  onCanShowSharingUisUpdate_(canShowSharingUis) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+    });
   }
 
   /**
@@ -376,18 +393,6 @@ export class SystemLayer {
     }
 
     this.developerLog_.setContextString(contextString);
-  }
-
-  /**
-   * Toggles the visibility of the developer log.
-   * @private
-   */
-  toggleDeveloperLog_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.toggle();
   }
 
   /**
