@@ -550,5 +550,22 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
             RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT);
       });
     });
+
+    it('should not send RTC if no longer current', () => {
+      const url = 'https://www.example.biz/';
+      const seenUrls = {};
+      const promiseArray = [];
+      const rtcStartTime = Date.now();
+      const timeoutMillis = 1000;
+      const macros = {};
+      // Simulate an unlayoutCallback call
+      inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
+          rtcStartTime, macros, timeoutMillis);
+      a4aElement.promiseId_++;
+      return promiseArray[0].then(errorResponse => {
+        expect(errorResponse).to.be.undefined;
+      });
+
+    });
   });
 });
