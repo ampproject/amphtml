@@ -187,10 +187,10 @@ export class LightboxManager {
             || (slide.hasAttribute('lightbox')
                 && slide.getAttribute('lightbox') !== lightboxGroupId);
         if (!shouldExcludeSlide) {
-          slide.setAttribute('lightbox', lightboxGroupId);
           if (this.seen_.includes(slide)) {
             return;
           }
+          slide.setAttribute('lightbox', lightboxGroupId);
           this.seen_.push(slide);
           this.processBaseLightboxElement_(slide, lightboxGroupId);
         }
