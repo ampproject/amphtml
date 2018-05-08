@@ -94,10 +94,26 @@
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
-.i-amphtml-story-bookend-article,
-.i-amphtml-story-bookend-portrait {
+.i-amphtml-story-bookend-portrait-meta {
+  margin-top: 8px;
+}
+
+.i-amphtml-story-bookend-article {
   box-sizing: border-box !important;
   display: block !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  overflow: hidden !important;
+  flex: 1 0 320px !important;
+  min-width: calc(33%) !important;
+  margin: 24px 0 !important;
+  padding: 0 32px !important;
+}
+
+.i-amphtml-story-bookend-portrait {
+  box-sizing: border-box !important;
+  display: flex;
+  flex-direction: column;
   text-decoration: none !important;
   color: inherit !important;
   overflow: hidden !important;
@@ -181,12 +197,6 @@
   float: right !important;
   margin-left: 24px !important;
   position: relative !important;
-}
-
-.i-amphtml-story-bookend-portrait-image {
-  float: left !important;
-  position: relative !important;
-  overflow: hidden;
 }
 
 .i-amphtml-story-bookend-replay {
