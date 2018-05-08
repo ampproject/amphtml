@@ -538,6 +538,7 @@ export class AmpConsent extends AMP.BaseElement {
    * Handles the display of postPromptUI
    */
   handlePostPromptUI_() {
+    const classList = this.element.classList;
     this.notificationUiManager_.onQueueEmpty(() => {
       if (!this.postPromptUI_) {
         return;
@@ -547,8 +548,8 @@ export class AmpConsent extends AMP.BaseElement {
           this.uiInit_ = true;
           toggle(this.element, true);
         }
-        this.element.classList.add('amp-active');
-        this.element.classList.remove('amp-hidden');
+        classList.add('amp-active');
+        classList.remove('amp-hidden');
         this.getViewport().addToFixedLayer(this.element);
         setImportantStyles(dev().assertElement(this.postPromptUI_),
             {display: 'block'});
@@ -561,8 +562,8 @@ export class AmpConsent extends AMP.BaseElement {
       }
       this.vsync_.mutate(() => {
         if (!this.currentDisplayInstance_) {
-          this.element.classList.add('amp-hidden');
-          this.element.classList.remove('amp-active');
+          classList.add('amp-hidden');
+          classList.remove('amp-active');
         }
         this.getViewport().removeFromFixedLayer(this.element);
         toggle(dev().assertElement(this.postPromptUI_), false);
