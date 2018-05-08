@@ -205,71 +205,66 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"AMP" global target', () => {
-    it('should implement navigateTo', () => {
-      const navigator = {navigateTo: sandbox.stub()};
-      sandbox.stub(Services, 'navigationForDoc').returns(navigator);
+    describe('navigateTo', () => {
+      let win;
+      let navigator;
+      let invocation;
 
-      const win = {};
-      const invocation = {
-        method: 'navigateTo',
-        args: {
-          url: 'http://bar.com',
-        },
-        node: {
-          ownerDocument: {
-            defaultView: win,
+      beforeEach(() => {
+        win = {};
+
+        navigator = {navigateTo: sandbox.stub()};
+        sandbox.stub(Services, 'navigationForDoc').returns(navigator);
+
+        // Fake ActionInvocation.
+        invocation = {
+          method: 'navigateTo',
+          args: {
+            url: 'http://bar.com',
           },
-        },
-      };
-
-      // Should check trust and fail.
-      invocation.satisfiesTrust = () => false;
-      standardActions.handleAmpTarget(invocation);
-      expect(navigator.navigateTo).to.be.not.called;
-
-      // Should succeed.
-      invocation.satisfiesTrust = () => true;
-      standardActions.handleAmpTarget(invocation);
-      expect(navigator.navigateTo).to.be.calledOnce;
-      expect(navigator.navigateTo).to.be.calledWithExactly(
-          win, 'http://bar.com', 'AMP.navigateTo');
-    });
-
-    it('should require sandbox="allow-top-navigation" for navigateTo ' +
-        'from <amp-iframe>', () => {
-      const navigator = {navigateTo: sandbox.stub()};
-      sandbox.stub(Services, 'navigationForDoc').returns(navigator);
-      const userError = sandbox.stub(user(), 'error');
-
-      const win = {};
-      const attributes = {};
-      const invocation = {
-        method: 'navigateTo',
-        args: {
-          url: 'http://bar.com',
-        },
-        target: {
-          getAttribute: attr => attributes[attr] || '',
-          ownerDocument: {
-            defaultView: win,
+          node: {
+            ownerDocument: {
+              defaultView: win,
+            },
           },
-          tagName: 'AMP-IFRAME',
-        },
-        satisfiesTrust: () => true,
-      };
+        };
+      });
 
-      // Should fail.
-      standardActions.handleAmpTarget(invocation);
-      expect(navigator.navigateTo).to.not.be.called;
-      expect(userError).to.be.calledWithMatch('STANDARD-ACTIONS',
-          '"AMP.navigateTo" is only allowed on <amp-iframe>');
+      it('should be implemented', () => {
+        // Should check trust and fail.
+        invocation.satisfiesTrust = () => false;
+        standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.not.called;
 
-      // Should succeed.
-      attributes['sandbox'] = 'allow-scripts allow-top-navigation';
-      standardActions.handleAmpTarget(invocation);
-      expect(navigator.navigateTo).to.be.calledOnce;
-      expect(navigator.navigateTo).to.be.calledWithExactly(
-          win, 'http://bar.com', 'AMP.navigateTo');
+        // Should succeed.
+        invocation.satisfiesTrust = () => true;
+        standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledOnce;
+        expect(navigator.navigateTo).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+      });
+
+      it('should require sandbox="allow-top-navigation" for amp-iframe', () => {
+        const userError = sandbox.stub(user(), 'error');
+
+        const attributes = {};
+        invocation.getAttribute = attr => attributes[attr] || '';
+        invocation.satisfiesTrust = () => true;
+        invocation.tagName = 'AMP-IFRAME';
+
+        // Should fail.
+        standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.not.be.called;
+        expect(userError).to.be.calledWithMatch('STANDARD-ACTIONS',
+            '"AMP.navigateTo" is only allowed on <amp-iframe>');
+
+        // Should succeed.
+        attributes['sandbox'] = 'allow-scripts allow-top-navigation';
+        standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledOnce;
+        expect(navigator.navigateTo).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+      });
     });
 
     it('should implement goBack', () => {
