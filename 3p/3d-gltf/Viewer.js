@@ -16,6 +16,7 @@
 
 /* global THREE */
 
+import {setStyle} from '../../src/style';
 import AnimationLoop from './AnimationLoop';
 
 const resolveURL = (url, path) => {
@@ -185,13 +186,13 @@ export default class GltfViewer {
               .forEach(child => {
                 this.scene_.add(child);
               });
-          Object.assign(this.renderer_.domElement.style, {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-          });
+
+          const el = this.renderer_.domElement;
+          setStyle(el, 'position', 'absolute');
+          setStyle(el, 'top', 0);
+          setStyle(el, 'right', 0);
+          setStyle(el, 'bottom', 0);
+          setStyle(el, 'left', 0);
 
           document.body.appendChild(this.renderer_.domElement);
           this.animationLoop_.needsUpdate = true;
