@@ -1013,17 +1013,38 @@ export class Resources {
     return this.vsync_.runPromise({
       measure: measurer || undefined,
       mutate: () => {
+        // TODO(jridgewell): Audit this system. Did this cause a layer invalidation (new
+        // layer, or removal of old layer)? Right now, we're only dirtying
+        // the measurements.
         mutator();
-
-        // TODO(jridgewell): This API needs to be audited. Common practice is
-        // to pass the amp-element in as the root even though we are only
-        // mutating children. If the amp-element is passed, we invalidate
-        // everything in the parent layer above it, where only invalidating the
-        // amp-element was necessary (only children were mutated, only
-        // amp-element's scroll box is affected).
-        this.layers_.dirty(element);
+        this.dirtyElement(element);
       },
     });
+  }
+
+  /**
+   * Dirties the cached element measurements after a mutation occurs.
+   *
+   * TODO(jridgewell): This API needs to be audited. Common practice is
+   * to pass the amp-element in as the root even though we are only
+   * mutating children. If the amp-element is passed, we invalidate
+   * everything in the parent layer above it, where only invalidating the
+   * amp-element was necessary (only children were mutated, only
+   * amp-element's scroll box is affected).
+   *
+   * @param {!Element} element
+   */
+  dirtyElement(element) {
+    if (this.useLayers_) {
+      this.layers_.dirty(element);
+    } else {
+      const isAmpElement = element.classList.contains('i-amphtml-element');
+      if (isAmpElement) {
+        const r = Resource.forElement(element);
+        this.setRelayoutTop_(r.getLayoutBox().top);
+      }
+      this.schedulePass(FOUR_FRAME_DELAY_, !isAmpElement);
+    }
   }
 
 
