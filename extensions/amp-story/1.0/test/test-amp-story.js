@@ -148,7 +148,7 @@ describes.realWin('amp-story', {
   });
 
   it('should prerender/load the share menu', () => {
-    createPages(story.element, 1, ['cover']);
+    createPages(story.element, 2);
 
     const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
 
@@ -159,7 +159,7 @@ describes.realWin('amp-story', {
   });
 
   it('should not prerender/load the share menu on desktop', () => {
-    createPages(story.element, 1, ['cover']);
+    createPages(story.element, 2);
 
     story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
 
