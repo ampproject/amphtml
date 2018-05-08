@@ -67,7 +67,7 @@ const CONTROLS_TIMEOUT_AFTER_IX = 1000;
 const FLOAT_TOLERANCE = 0.02;
 
 /** @private @const {string} */
-const BASE_CLASS_NAME = 'i-amphtml-docked';
+const BASE_CLASS_NAME = 'i-amphtml-video-docked';
 
 /** @private @const {number} */
 const REVERT_TO_INLINE_RATIO = 0.7;
@@ -200,6 +200,20 @@ function getInternalElementFor(element) {
 }
 
 
+/**
+ * @param {!Element} element
+ * @restricted
+ */
+function complainAboutPortrait(element) {
+  // Constant named `TAG` per lint rules.
+  const TAG = element.tagName.toUpperCase();
+  const attr = VideoAttributes.DOCK;
+  user().error(TAG,
+      `Minimize-to-corner (\`${attr}\`) does not support portrait video.`,
+      element);
+}
+
+
 /** Timeout that can be postponed, repeated or cancelled. */
 class Timeout {
   /**
@@ -230,7 +244,12 @@ class Timeout {
   cancel() {
     if (this.id_ !== null) {
       this.timer_.cancel(this.id_);
+      this.id_ = null;
     }
+  }
+
+  isWaiting() {
+    return this.id_ !== null;
   }
 }
 
@@ -285,7 +304,7 @@ export class VideoDocking {
      */
     this.getShadowLayer_ = once(() => this.append_(
         htmlFor(this.getDoc_())`
-          <div class="amp-docked-video-shadow" hidden></div>`));
+          <div class="amp-video-docked-shadow" hidden></div>`));
 
     /**
      * Returns an overlay to be used to capture different user events.
@@ -293,7 +312,7 @@ export class VideoDocking {
      */
     this.getOverlay_ = once(() => this.append_(this.installOverlay_(
         htmlFor(this.getDoc_())`
-          <div class="i-amphtml-docked-video-overlay" hidden></div>`)));
+          <div class="i-amphtml-video-docked-overlay" hidden></div>`)));
 
     /** @private @const {function():!ControlsDef} */
     this.getControls_ = once(() => this.installControls_(this.append_(
@@ -302,27 +321,27 @@ export class VideoDocking {
     // Upcoming fixes: #14657, #14658.
     // TODO(alanorozco): Cleanup markup for readability once fixes land.
         htmlFor(this.getDoc_())`
-          <div class="amp-docked-video-controls" hidden>
-            <div class="amp-docked-video-button-group">
+          <div class="amp-video-docked-controls" hidden>
+            <div class="amp-video-docked-button-group">
               <div role="button" ref="playButton"
-                  class="amp-docked-video-play"></div>
+                  class="amp-video-docked-play"></div>
               <div role="button" ref="pauseButton"
-                  class="amp-docked-video-pause"></div>
+                  class="amp-video-docked-pause"></div>
             </div>
-            <div class="amp-docked-video-button-group">
+            <div class="amp-video-docked-button-group">
               <div role="button" ref="muteButton"
-                class="amp-docked-video-mute"></div>
+                class="amp-video-docked-mute"></div>
               <div role="button" ref="unmuteButton"
-                  class="amp-docked-video-unmute"></div>
+                  class="amp-video-docked-unmute"></div>
             </div>
-            <div class="amp-docked-video-button-group">
+            <div class="amp-video-docked-button-group">
               <div role="button" ref="fullscreenButton"
-                  class="amp-docked-video-fullscreen"></div>
+                  class="amp-video-docked-fullscreen"></div>
             </div>
-            <div class="amp-docked-video-button-group
-                amp-docked-video-dismiss-group">
+            <div class="amp-video-docked-button-group
+                amp-video-docked-dismiss-group">
               <div role="button" ref="dismissButton"
-                  class="amp-docked-video-dismiss"></div>
+                  class="amp-video-docked-dismiss"></div>
             </div>
           </div>`)));
 
@@ -362,8 +381,6 @@ export class VideoDocking {
     /** @private @const {!function()} */
     // Lazily invoked.
     this.install_ = once(() => {
-      // It would be nice if the viewport service provided scroll direction
-      // and speed.
       this.viewport_.onScroll(
           throttleByAnimationFrame(this.ampdoc_.win,
               () => this.updateScroll_()));
@@ -450,7 +467,6 @@ export class VideoDocking {
   enterFullscreen_() {
     const video = this.getDockedVideo_();
     video.fullscreenEnter();
-    video.play(/* auto */ false);
   }
 
   /**
@@ -471,8 +487,8 @@ export class VideoDocking {
       const overlay = this.getOverlay_();
 
       container.removeAttribute('hidden');
-      container.classList.add('amp-docked-video-controls-shown');
-      overlay.classList.add('amp-docked-video-controls-bg');
+      container.classList.add('amp-video-docked-controls-shown');
+      overlay.classList.add('amp-video-docked-controls-bg');
 
       if (this.isPlaying_()) {
         swap(playButton, pauseButton);
@@ -593,10 +609,12 @@ export class VideoDocking {
    * @param  {!VideoOrBaseElementDef} video
    * @return {boolean}
    */
-  undockBecauseVisible_(video, ratio = 1, timeout = 100) {
+  undockBecauseVisible_(video, ratio = 1, timeout = 40) {
     const {element} = video;
     if (this.currentlyDocked_ && this.isVisible_(element, ratio)) {
-      this.getUndockingTimeout_().trigger(timeout);
+      if (!this.getUndockingTimeout_().isWaiting()) {
+        this.getUndockingTimeout_().trigger(timeout, video);
+      }
       return true;
     }
     this.getUndockingTimeout_().cancel();
@@ -608,8 +626,7 @@ export class VideoDocking {
    * @return {boolean}
    */
   ignoreDueToNotPlayingManually_(video) {
-    return !this.currentlyDocked_ &&
-        this.manager_.getPlayingState(video) != PlayingStates.PLAYING_MANUAL;
+    return !this.currentlyDocked_ && !this.isPlaying_(video);
   }
 
   /**
@@ -626,14 +643,8 @@ export class VideoDocking {
    */
   ignoreDueToSize_(video) {
     const {width, height} = video.getLayoutBox();
-    const aspectRatio = width / height;
-    if (aspectRatio < 1) {
-      const {element} = video;
-      const TAG = element.tagName.toUpperCase();
-      const attr = VideoAttributes.DOCK;
-      user().error(TAG,
-        `Minimize-to-corner (${attr}) does not support portrait video.`,
-        element);
+    if ((width / height) < 1) {
+      complainAboutPortrait(video.element);
       return true;
     }
     if (this.getAreaWidth_() < MIN_VIEWPORT_WIDTH) {
@@ -724,9 +735,9 @@ export class VideoDocking {
    * @return {boolean}
    * @private
    */
-  isPlaying_() {
-    const video = this.getDockedVideo_();
-    return this.manager_.getPlayingState(video) != PlayingStates.PAUSED;
+  isPlaying_(optVideo = null) {
+    const video = optVideo || this.getDockedVideo_();
+    return this.manager_.getPlayingState(video) == PlayingStates.PLAYING_MANUAL;
   }
 
   /** @private */
@@ -784,7 +795,6 @@ export class VideoDocking {
     const {x, y, scale} = this.getDims_(video, posX, posY, step);
 
     video.hideControls();
-    this.hideControls_();
 
     this.placeAt_(video, x, y, scale, step);
 
@@ -907,19 +917,17 @@ export class VideoDocking {
       internalElement.classList.add(BASE_CLASS_NAME);
       shadowLayer.removeAttribute('hidden');
       overlay.removeAttribute('hidden');
-      overlay.classList.remove('amp-docked-video-nudged');
       orderLayers(shadowLayer, internalElement, overlay, controls);
-      setImportantStyles(shadowLayer, {
-        'opacity': step,
-      });
-      setImportantStyles(controls, {
-        'transform': translate(x, y),
-        'width': px(width * scale),
-        'height': px(height * scale),
-      });
       setImportantStyles(internalElement, positioningStyles);
       setImportantStyles(shadowLayer, positioningStyles);
       setImportantStyles(overlay, positioningStyles);
+      setImportantStyles(shadowLayer, {
+        'opacity': step,
+      });
+      const halfScale = scale / 2;
+      setImportantStyles(controls, {
+        'transform': translate(x + width * halfScale, y + height * halfScale),
+      });
     });
 
     return transitionDurationMs;
@@ -1290,28 +1298,8 @@ export class VideoDocking {
    * @param {!VideoOrBaseElementDef} video
    * @private
    */
-  undock_(video, dismissDirX = 0, dismissDirY = 0) {
-    const internalElement = getInternalElementFor(video.element);
-    if (!internalElement.classList.contains('i-amphtml-docked')) {
-      return;
-    }
+  undock_(video, unusedDismissDirX = 0, unusedDismissDirY = 0) {
     // TODO(alanorozco): animate dismissal
-    if (dismissDirX != 0) {
-      this.resetUndocked_(video);
-      return;
-    }
-    if (dismissDirY != 0) {
-      this.resetUndocked_(video);
-      return;
-    }
-    this.resetUndocked_(video);
-  }
-
-  /**
-   * @param {!VideoOrBaseElementDef} video
-   * @private
-   */
-  resetUndocked_(video) {
     const internalElement = getInternalElementFor(video.element);
 
     video.mutateElement(() => {
@@ -1345,8 +1333,8 @@ export class VideoDocking {
     }
     const {container} = this.getControls_();
     const overlay = this.getOverlay_();
-    overlay.classList.remove('amp-docked-video-controls-bg');
-    container.classList.remove('amp-docked-video-controls-shown');
+    overlay.classList.remove('amp-video-docked-controls-bg');
+    container.classList.remove('amp-video-docked-controls-shown');
   }
 
   /**
