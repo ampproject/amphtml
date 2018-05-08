@@ -164,7 +164,7 @@ Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/
 
 ### Refreshing data
 
-The `amp-list` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes. 
+The `amp-list` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
 
 ```html
 <button on="tap:myList.refresh">Refresh List</button>
@@ -185,6 +185,8 @@ within this `amp-list`. This must be a CORS HTTP service. The URL's protocol mus
 {% call callout('Important', type='caution') %}
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
+
+The `src` attribute may be omitted if the `[src]` attribute exists. This is useful when rendering content as a result of a user gesture instead of on page load when working with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
 
 ##### credentials (optional)
 
@@ -232,6 +234,10 @@ The `items` array will be trucated to `max-items` entries if the returned value 
 
 Causes `amp-list` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
 `{items: {...}}` will behave as if it were `{items: [{...}]}`.
+
+#### reset-on-refresh (optional)
+
+Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
 
 ##### common attributes
 

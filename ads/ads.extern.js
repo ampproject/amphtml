@@ -177,6 +177,9 @@ data.ws;
 data.host;
 data.s;
 
+// adpicker.js
+data.ph;
+
 // adreactor.js
 data.zid;
 data.pid;
@@ -431,6 +434,17 @@ data.dfpSlot;
 data.nc;
 data.auid;
 
+// pixels.js
+var pixelsAd;
+var pixelsAMPAd;
+var pixelsAMPTag;
+pixelsAMPTag.renderAmp;
+data.origin;
+data.sid;
+data.tag;
+data.clickTracker;
+data.viewability;
+
 // plista.js
 data.widgetname;
 data.publickey;
@@ -438,6 +452,12 @@ data.urlprefix;
 data.item;
 data.geo;
 data.categories;
+
+// pubguru.js
+data.height;
+data.publisher;
+data.slot;
+data.width;
 
 // pubmatic.js
 data.kadpageurl;
@@ -451,24 +471,16 @@ data.section;
 window.PulsePointHeaderTag;
 
 // rubicon.js
-var rubicontag;
-rubicontag.setFPV;
-rubicontag.setFPI;
-rubicontag.getSlot;
-rubicontag.getAdServerTargeting;
-rubicontag.addKW;
-rubicontag.setUrl;
-rubicontag.setIntegration;
 data.method;
-data.overrideWidth;
 data.width;
-data.overrideHeight;
 data.height;
 data.account;
 data.kw;
 data.visitor;
 data.inventory;
 data.size;
+data.site;
+data.zone;
 data.callback;
 
 // sharethrough.js
@@ -511,6 +523,23 @@ data.tag;
 data.tag;
 data.tag.tta;
 data.tag.ttp;
+
+// uas.js
+var Phoenix;
+window.Phoenix;
+Phoenix.EQ;
+Phoenix.EQ.push;
+Phoenix.enableSingleRequestCallMode;
+Phoenix.setInfo;
+Phoenix.defineAdSlot;
+Phoenix.display;
+data.accId;
+data.adUnit;
+data.targetings;
+data.extraParams;
+data.slot.setVisibility;
+data.slot.setTargeting;
+data.slot.setExtraParameters;
 
 // webediads.js
 var wads;

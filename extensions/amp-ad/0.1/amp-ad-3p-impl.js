@@ -16,6 +16,12 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
+import {
+  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent-state';
+import {LayoutPriority} from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {
@@ -124,7 +130,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // Loads ads after other content,
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? 1 : 2;
+    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
   }
 
   renderOutsideViewport() {
@@ -148,6 +154,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
+  }
+
+  /** @override */
+  getConsentPolicy() {
+    return null;
   }
 
   /** @override */
@@ -304,10 +315,20 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
-    this.layoutPromise_ = getAdCid(this).then(cid => {
+
+    const consentPromise = this.getConsentState();
+    const consentPolicyId = super.getConsentPolicy();
+    const sharedDataPromise = consentPolicyId
+      ? getConsentPolicySharedData(this.getAmpDoc(), consentPolicyId)
+      : Promise.resolve(null);
+
+    this.layoutPromise_ = Promise.all(
+        [getAdCid(this), consentPromise, sharedDataPromise]).then(consents => {
       const opt_context = {
-        clientId: cid || null,
+        clientId: consents[0] || null,
         container: this.container_,
+        initialConsentState: consents[1],
+        consentSharedData: consents[2],
       };
 
       // In this path, the request and render start events are entangled,
@@ -348,6 +369,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     return this.uiHandler.createPlaceholder();
+  }
+
+  /**
+   * @returns {!Promise<?CONSENT_POLICY_STATE>}
+   */
+  getConsentState() {
+    const consentPolicyId = super.getConsentPolicy();
+    return consentPolicyId
+      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      : Promise.resolve(null);
   }
 
   /**

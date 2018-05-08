@@ -33,6 +33,7 @@ import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
 import {PageScalingService} from './page-scaling';
+import {Services} from '../../../src/services';
 import {
   closestBySelector,
   matches,
@@ -42,7 +43,11 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {listen} from '../../../src/event-helper';
+import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -116,6 +121,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
+
+    /**
+     * Whether the user agent matches a bot.  This is used to prevent resource
+     * optimizations that make the document less useful at crawl time, e.g.
+     * removing sources from videos.
+     * @private @const {boolean}
+     */
+    this.isBotUserAgent_ = Services.platformFor(this.win).isBot();
   }
 
 
@@ -138,6 +151,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
+    this.ownVideoAutoplay_();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
@@ -148,6 +162,25 @@ export class AmpStoryPage extends AMP.BaseElement {
         navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
+  }
+
+
+  /** @private */
+  ownVideoAutoplay_() {
+    const videos = this.element.querySelectorAll('amp-video');
+    if (videos.length < 1) {
+      return;
+    }
+
+    // This service gets installed by all video instances.
+    // Executions of `installVideoManagerForDoc` following the first are NOOPs,
+    // so this only takes care of a race condition when the service has not yet
+    // been installed.
+    installVideoManagerForDoc(this.getAmpDoc());
+
+    toArray(videos).forEach(el => {
+      Services.videoManagerForDoc(this.element).delegateAutoplay(el);
+    });
   }
 
 
@@ -337,8 +370,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   pauseAllMedia_(rewindToBeginning = false) {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.pause(
-          /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
+      if (this.isBotUserAgent_) {
+        mediaEl.pause();
+      } else {
+        return mediaPool.pause(
+            /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
+      }
     });
   }
 
@@ -350,7 +387,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        mediaEl.play();
+      } else {
+        return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -362,7 +403,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   preloadAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        // No-op.
+      } else {
+        return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -373,7 +418,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   muteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        mediaEl.muted = true;
+        mediaEl.setAttribute('muted', '');
+      } else {
+        return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -384,7 +434,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   unmuteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        mediaEl.muted = false;
+        mediaEl.removeAttribute('muted');
+      } else {
+        return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -396,7 +451,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        // No-op.
+      } else {
+        return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -461,7 +520,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   setDistance(distance) {
     // TODO(ccordry) refactor this when pages are managed
     if (this.isAd()) {
-      distance = Math.min(distance, 1);
+      distance = Math.min(distance, 2);
     }
 
     this.element.setAttribute('distance', distance);
@@ -594,8 +653,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   next(opt_isAutomaticAdvance) {
     const pageId = this.getNextPageId(opt_isAutomaticAdvance);
 
-    if (pageId === null) {
-      dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);
+    if (!pageId) {
       return;
     }
 
@@ -710,5 +768,3 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }
 }
-
-AMP.registerElement('amp-story-page', AmpStoryPage);

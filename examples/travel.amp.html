@@ -5,6 +5,7 @@
   <title>Travel date picker example</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="amp-experiments-opt-in" content="amp-date-picker">
   <style amp-custom>
   .DateRangePicker_picker {
     margin-top: -70px;
@@ -266,13 +267,13 @@
   <button class="lightbox-close" on="tap:lb.close" tabindex="0"></button>
   <div class="date-picker-wrapper">
     <amp-date-picker
+      layout="fill"
       class="date-picker"
       id="dp"
       type="range"
       number-of-months="12"
-      orientation="verticalScrollable"
-      with-full-screen-portal
-      keep-open-on-date-select
+      fullscreen
+      open-after-select
       src="travel.json"
       format="MM/DD/YYYY"
       week-day-format="dd"

@@ -22,11 +22,12 @@
     }
   }
   </script>
-  <script type="json" id="amp-subscriptions">
+  <script type="application/json" id="amp-subscriptions">
     {
       "services": [
         {
           "authorizationUrl": "//localhost:8000/subscription/2/entitlements",
+          "pingbackUrl": "//lipsum.com/pingback",
           "actions":{
             "login": "//lipsum.com/login",
             "subscribe": "//lipsum.com/subscribe"
@@ -206,9 +207,8 @@
           </div>
         </div>
 
-        <section subscriptions-section="actions" class="login-section">
-          <div subscriptions-action="login" subscriptions-display="NOT loggedIn">Login</div>
-        </section>
+
+        <div subscriptions-action="login" subscriptions-display="NOT loggedIn">Login</div>
 
         <section subscriptions-section="content-not-granted">
           Login or subscribe to read more.
@@ -333,7 +333,12 @@
     Dialog for logged in users
   </template>
   <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT loggedIn">
-    Dialog for non logged in users
+    <div>Dialog for non logged in users<div>
+    <div subscriptions-display="NOT loggedIn"
+      subscriptions-action="subscribe"
+      subscriptions-service="subscribe.google.com"
+      subscriptions-decorate>Login</div>
+    <div subscriptions-display="NOT subscribed">btw u are not subscribed</div>
   </template>
 </body>
 </html>

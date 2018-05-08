@@ -38,7 +38,8 @@ import {toWin} from './types';
 const EMBED_PROP = '__AMP_EMBED__';
 
 /** @const {!Array<string>} */
-const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
+const EXCLUDE_INI_LOAD =
+    ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL', 'AMP-AD-EXIT'];
 
 
 /**
@@ -93,7 +94,6 @@ function isSrcdocSupported() {
  * whether the embed is currently in the viewport.
  * @param {!FriendlyIframeEmbed} embed
  * @param {boolean} visible
- * @restricted
  * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
  */
 export function setFriendlyIframeEmbedVisible(embed, visible) {
@@ -406,7 +406,10 @@ export class FriendlyIframeEmbed {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
   }
 
-  /** @private */
+  /**
+   * @private
+   * @restricted
+   */
   startRender_() {
     if (this.host) {
       this.host.renderStarted();
@@ -464,6 +467,7 @@ export class FriendlyIframeEmbed {
   /**
    * @param {boolean} visible
    * @private
+   * @restricted
    */
   setVisible_(visible) {
     if (this.visible_ != visible) {
@@ -483,14 +487,6 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * @return {!./service/vsync-impl.Vsync}
-   * @visibleForTesting
-   */
-  getVsync() {
-    return Services.vsyncFor(this.win);
-  }
-
-  /**
    * @return {!./service/resources-impl.Resources}
    * @visibleForTesting
    */
@@ -501,51 +497,41 @@ export class FriendlyIframeEmbed {
   /**
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
-   * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
+   * @param {{measure: (function()|undefined), mutate: function()}} task
    * @param {!Object=} opt_state
    * @return {!Promise}
    * @private
    */
   runVsyncOnIframe_(task, opt_state) {
-    if (task.mutate && !task.measure) {
-      return this.getResources().mutateElement(this.iframe, () => {
-        task.mutate(opt_state);
-      });
-    }
-    return new Promise(resolve => {
-      this.getVsync().measure(() => {
-        task.measure(opt_state);
-
-        if (!task.mutate) {
-          return resolve();
-        }
-
-        this.runVsyncOnIframe_({mutate: task.mutate}, opt_state)
-            .then(resolve);
-      });
-    });
+    return this.getResources().measureMutateElement(this.iframe,
+        task.measure || null, task.mutate);
   }
 
   /**
    * @return {!Promise}
    */
   enterFullOverlayMode() {
+    const bodyStyle = {
+      'background': 'transparent',
+      'position': 'absolute',
+      'top': '',
+      'left': '',
+      'width': '',
+      'height': '',
+      'bottom': 'auto',
+      'right': 'auto',
+    };
     return this.runVsyncOnIframe_({
-      measure: state => {
+      measure: () => {
         const iframeRect = this.iframe./*OK*/getBoundingClientRect();
-
-        state.bodyStyle = {
-          'background': 'transparent',
-          'position': 'absolute',
+        Object.assign(bodyStyle, {
           'top': px(iframeRect.top),
           'left': px(iframeRect.left),
           'width': px(iframeRect.width),
           'height': px(iframeRect.height),
-          'bottom': 'auto',
-          'right': 'auto',
-        };
+        });
       },
-      mutate: state => {
+      mutate: () => {
         setStyles(this.iframe, {
           'position': 'fixed',
           'left': 0,
@@ -557,9 +543,9 @@ export class FriendlyIframeEmbed {
         });
 
         // We need to override runtime-level !important rules
-        setImportantStyles(this.getBodyElement(), state.bodyStyle);
+        setImportantStyles(this.getBodyElement(), bodyStyle);
       },
-    }, {});
+    });
   }
 
   /**

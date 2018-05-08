@@ -288,6 +288,19 @@ export class LayoutLayers {
   }
 
   /**
+   * Dirties the element's parent layer, so remeasures will happen.
+   *
+   * @parent {!Element} node
+   */
+  dirty(node) {
+    // Find a parent layer, or fall back to the root scrolling layer in cases
+    // where the node is the scrolling layer (which doesn't have a parent).
+    const layer = LayoutElement.getParentLayer(node) ||
+        LayoutElement.for(this.scrollingElement_);
+    layer.dirtyMeasurements();
+  }
+
+  /**
    * Eagerly creates a Layer for the element.
    *
    * @param {!Element} element
@@ -800,6 +813,24 @@ export class LayoutElement {
   }
 
   /**
+   * Gets the ratio of the element's horizontal distance over the parent's
+   * "viewport". Ie, "how many full scrolls horizontally does it take to
+   * intersect this element"
+   *
+   * @return {number}
+   */
+  getHorizontalViewportsFromParent() {
+    const distance = this.getHorizontalDistanceFromParent();
+    if (distance === 0) {
+      return 0;
+    }
+
+    const parent = this.getParentLayer();
+    const parentWidth = parent.getSize().width;
+    return distance / parentWidth;
+  }
+
+  /**
    * Gets the minimal vertical distance of this element from its parent's
    * "viewport".
    *
@@ -826,6 +857,24 @@ export class LayoutElement {
     }
     // Element intersects
     return 0;
+  }
+
+  /**
+   * Gets the ratio of the element's vertical distance over the parent's
+   * "viewport". Ie, "how many full scrolls vertical does it take to
+   * intersect this element"
+   *
+   * @return {number}
+   */
+  getVerticalViewportsFromParent() {
+    const distance = this.getVerticalDistanceFromParent();
+    if (distance === 0) {
+      return 0;
+    }
+
+    const parent = this.getParentLayer();
+    const parentHeight = parent.getSize().height;
+    return distance / parentHeight;
   }
 
   /*

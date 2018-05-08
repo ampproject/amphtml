@@ -126,11 +126,15 @@ describes.repeated('', {
       const form = getForm();
       document.body.appendChild(form);
       form.setAttribute('action-xhr', 'http://example.com');
-      expect(() => new AmpForm(form)).to.throw(
-          /form action-xhr must start with/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /form action-xhr must start with/);
+      });
       form.setAttribute('action-xhr', 'https://cdn.ampproject.org/example.com');
-      expect(() => new AmpForm(form)).to.throw(
-          /form action-xhr should not be on AMP CDN/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /form action-xhr should not be on AMP CDN/);
+      });
       form.setAttribute('action-xhr', 'https://example.com');
       expect(() => new AmpForm(form)).to.not.throw;
       document.body.removeChild(form);
@@ -144,8 +148,10 @@ describes.repeated('', {
       illegalInput.setAttribute('name', '__amp_source_origin');
       illegalInput.value = 'https://example.com';
       form.appendChild(illegalInput);
-      expect(() => new AmpForm(form)).to.throw(
-          /Illegal input name, __amp_source_origin found/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /Illegal input name, __amp_source_origin found/);
+      });
       document.body.removeChild(form);
     });
 
@@ -231,7 +237,9 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const errorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
-      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+      allowConsoleError(() => {
+        expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+      });
       expect(event.preventDefault).to.be.called;
       expect(ampForm.analyticsEvent_).to.have.not.been.called;
       document.body.removeChild(form);
@@ -291,7 +299,9 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const submitErrorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
-      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
+      allowConsoleError(() => {
+        expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
+      });
       expect(event.preventDefault).to.be.called;
       document.body.removeChild(form);
     });
@@ -1335,6 +1345,90 @@ describes.repeated('', {
       });
     });
 
+    it('should handle clear action and restore initial values', () => {
+      const form = getForm();
+      document.body.appendChild(form);
+
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('id', 'email');
+      emailInput.setAttribute('type', 'email');
+      emailInput.setAttribute('value', 'jack@poc.com');
+      form.appendChild(emailInput);
+
+      return getAmpForm(form).then(ampForm => {
+        const initalFormValues = ampForm.getFormAsObject_();
+
+        ampForm.form_.elements.name.value = 'Jack Sparrow';
+
+        sandbox.spy(ampForm, 'handleClearAction_');
+        ampForm.actionHandler_({method: 'anything'});
+        expect(ampForm.handleClearAction_).to.have.not.been.called;
+
+        expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
+        ampForm.actionHandler_({method: 'clear'});
+        expect(ampForm.handleClearAction_).to.have.been.called;
+
+        expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
+      });
+    });
+
+    it('should remove all form state classes when form is cleared', () => {
+      const form = getForm();
+      form.setAttribute('method', 'GET');
+      document.body.appendChild(form);
+
+      form.setAttribute('custom-validation-reporting', 'show-all-on-submit');
+
+      const fieldset = document.createElement('fieldset');
+      const usernameInput = document.createElement('input');
+      usernameInput.setAttribute('name', 'username');
+      usernameInput.setAttribute('id', 'username');
+      usernameInput.setAttribute('type', 'text');
+      usernameInput.setAttribute('required', '');
+      usernameInput.setAttribute('value', 'Jack Sparrow');
+      fieldset.appendChild(usernameInput);
+
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('id', 'email1');
+      emailInput.setAttribute('type', 'email');
+      emailInput.setAttribute('required', '');
+      emailInput.setAttribute('value', '');
+      fieldset.appendChild(emailInput);
+
+      const validationMessage = document.createElement('span');
+      validationMessage.setAttribute('visible-when-invalid', 'valueMissing');
+      validationMessage.setAttribute('validation-for', 'email1');
+      fieldset.appendChild(validationMessage);
+
+      form.appendChild(fieldset);
+
+      return getAmpForm(form).then(ampForm => {
+        // trigger form validations
+        ampForm.checkValidity_();
+        const formValidator = ampForm.validator_;
+        // show validity message
+        formValidator.report();
+
+        expect(usernameInput.className).to.contain('user-valid');
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(emailInput.className).to.contain('valueMissing');
+        expect(fieldset.className).to.contain('user-valid');
+        expect(ampForm.form_.className).to.contain('user-invalid');
+        expect(validationMessage.className).to.contain('visible');
+
+        ampForm.handleClearAction_();
+
+        expect(usernameInput.className).to.not.contain('user-valid');
+        expect(emailInput.className).to.not.contain('user-invalid');
+        expect(emailInput.className).to.not.contain('valueMissing');
+        expect(fieldset.className).to.not.contain('user-valid');
+        expect(ampForm.form_.className).to.contain('amp-form-initial');
+        expect(validationMessage.className).to.not.contain('visible');
+      });
+    });
+
     it('should submit after timeout of waiting for amp-selector', function() {
       this.timeout(3000);
       return getAmpForm(getForm()).then(ampForm => {
@@ -1673,6 +1767,27 @@ describes.repeated('', {
           expect(form.submit).to.have.not.been.called;
         });
       });
+
+      it('should not execute form submit with password field present', () => {
+        const form = getForm();
+        const input = document.createElement('input');
+        input.type = 'password';
+        form.appendChild(input);
+
+        return getAmpForm(form).then(ampForm => {
+          const form = ampForm.form_;
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = null;
+          sandbox.stub(form, 'submit');
+          sandbox.stub(form, 'checkValidity').returns(true);
+          sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+          allowConsoleError(() => {
+            expect(() => ampForm.handleSubmitAction_(/* invocation */ {}))
+                .to.throw('input[type=password]');
+          });
+          expect(form.submit).to.have.not.been.called;
+        });
+      });
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
@@ -1681,9 +1796,9 @@ describes.repeated('', {
         form.id = 'registration';
 
         const passwordInput = document.createElement('input');
-        passwordInput.setAttribute('name', 'password');
-        passwordInput.setAttribute('type', 'password');
-        passwordInput.setAttribute('value', 'god');
+        passwordInput.setAttribute('name', 'email');
+        passwordInput.setAttribute('type', 'email');
+        passwordInput.setAttribute('value', 'j@hnmiller.com');
         form.appendChild(passwordInput);
 
         const unnamedInput = document.createElement('input');
@@ -1701,7 +1816,7 @@ describes.repeated('', {
         const expectedFormData = {
           'formId': 'registration',
           'formFields[name]': 'John Miller',
-          'formFields[password]': 'god',
+          'formFields[email]': 'j@hnmiller.com',
         };
         expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(

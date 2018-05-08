@@ -25,25 +25,13 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {AmpEvents} from '../src/amp-events';
 import {
   IntegrationAmpContext,
-  masterSelection,
 } from './ampcontext-integration';
-import {MessageType} from '../src/3p-frame-messaging';
-import {
-  computeInMasterFrame,
-  nextTick,
-  register,
-  run,
-  setExperimentToggles,
-} from './3p';
 import {dict} from '../src/utils/object.js';
 import {endsWith} from '../src/string';
 import {
   getAmpConfig,
-  getAttributeData,
-  getContextState,
   getEmbedType,
   getLocation,
 } from './frame-metadata';
@@ -56,9 +44,12 @@ import {
   user,
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from './3p';
-import {listenParent, nonSensitiveDataPostMessage} from './messaging';
 import {parseJson} from '../src/json';
+import {
+  register,
+  run,
+  setExperimentToggles,
+} from './3p';
 import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
 
@@ -66,11 +57,12 @@ import {urls} from '../src/config';
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
+import {beopinion} from './beopinion';
+import {bodymovinanimation} from './bodymovinanimation';
 import {facebook} from './facebook';
 import {github} from './github';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
-import {beopinion} from './beopinion';
 import {twitter} from './twitter';
 
 import {_ping_} from '../ads/_ping_';
@@ -87,10 +79,13 @@ import {adform} from '../ads/adform';
 import {adfox} from '../ads/adfox';
 import {adgeneration} from '../ads/adgeneration';
 import {adhese} from '../ads/adhese';
+import {adincube} from '../ads/adincube';
 import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
+import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
+import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
@@ -128,7 +123,6 @@ import {dable} from '../ads/dable';
 import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
-import {doubleclick} from '../ads/google/doubleclick';
 import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
@@ -157,6 +151,7 @@ import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
+import {kuadio} from '../ads/kuadio';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
@@ -170,6 +165,7 @@ import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
+import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
@@ -179,11 +175,13 @@ import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {outbrain} from '../ads/outbrain';
+import {pixels} from '../ads/pixels';
 import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
 import {pubexchange} from '../ads/pubexchange';
+import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
@@ -193,6 +191,7 @@ import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rubicon} from '../ads/rubicon';
+import {sekindo} from '../ads/sekindo';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
@@ -210,6 +209,7 @@ import {teads} from '../ads/teads';
 import {tracdelight} from '../ads/tracdelight';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
+import {uas} from '../ads/uas';
 import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
@@ -241,6 +241,7 @@ const AMP_EMBED_ALLOWED = {
   bringhub: true,
   dable: true,
   engageya: true,
+  kuadio: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -252,12 +253,6 @@ const AMP_EMBED_ALLOWED = {
   taboola: true,
   zergnet: true,
 };
-
-
-// Need to cache iframeName as it will be potentially overwritten by
-// masterSelection, as per below.
-const iframeName = window.name;
-
 
 init(window);
 
@@ -278,10 +273,13 @@ register('adform', adform);
 register('adfox', adfox);
 register('adgeneration', adgeneration);
 register('adhese', adhese);
+register('adincube', adincube);
 register('adition', adition);
 register('adman', adman);
 register('admanmedia', admanmedia);
+register('admixer', admixer);
 register('adocean', adocean);
+register('adpicker', adpicker);
 register('adplugg', adplugg);
 register('adreactor', adreactor);
 register('adsense', adsense);
@@ -303,6 +301,7 @@ register('appvador', appvador);
 register('atomx', atomx);
 register('beopinion', beopinion);
 register('bidtellect', bidtellect);
+register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
 register('broadstreetads', broadstreetads);
@@ -320,7 +319,6 @@ register('dable', dable);
 register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
-register('doubleclick', doubleclick);
 register('eadv', eadv);
 register('eas', eas);
 register('engageya', engageya);
@@ -352,6 +350,7 @@ register('ix', ix);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
+register('kuadio', kuadio);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('loka', loka);
@@ -367,6 +366,7 @@ register('meg', meg);
 register('microad', microad);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
+register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativo', nativo);
 register('navegg', navegg);
@@ -376,11 +376,13 @@ register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
 register('outbrain', outbrain);
+register('pixels', pixels);
 register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
 register('pubexchange', pubexchange);
+register('pubguru', pubguru);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
@@ -391,6 +393,7 @@ register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rubicon', rubicon);
+register('sekindo', sekindo);
 register('sharethrough', sharethrough);
 register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
@@ -409,6 +412,7 @@ register('tracdelight', tracdelight);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
+register('uas', uas);
 register('valuecommerce', valuecommerce);
 register('videonow', videonow);
 register('viralize', viralize);
@@ -489,13 +493,6 @@ export function draw3p(win, data, configCallback) {
 }
 
 /**
- * @return {boolean} Whether this is the master iframe.
- */
-function isMaster() {
-  return window.context.master == window;
-}
-
-/**
  * Draws an embed, optionally synchronously, to the DOM.
  * @param {function(!Object, function(!Object))} opt_configCallback If provided
  *     will be invoked with two arguments:
@@ -510,7 +507,6 @@ function isMaster() {
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
   opt_allowedEmbeddingOrigins) {
   try {
-    const data = getAttributeData();
     const location = getLocation();
 
     ensureFramed(window);
@@ -519,28 +515,19 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    installContext(window, data);
+    window.context = new IntegrationAmpContext(window);
     manageWin(window);
     installEmbedStateListener();
 
-    if (isAmpContextExperimentOn()) {
-      // Ugly type annotation is due to Event.prototype.data being blacklisted
-      // and the compiler not being able to discern otherwise
-      // TODO(alanorozco): Do this more elegantly once old impl is cleaned up.
-      draw3p(
-          window,
-          (/** @type {!IntegrationAmpContext} */ (window.context)).data || {},
-          opt_configCallback);
+    // Ugly type annotation is due to Event.prototype.data being blacklisted
+    // and the compiler not being able to discern otherwise
+    // TODO(alanorozco): Do this more elegantly once old impl is cleaned up.
+    draw3p(
+        window,
+        (/** @type {!IntegrationAmpContext} */ (window.context)).data || {},
+        opt_configCallback);
 
-      window.context.bootstrapLoaded();
-    } else {
-      draw3p(window, data, opt_configCallback);
-      updateVisibilityState(window);
-
-      // Subscribe to page visibility updates.
-      nonSensitiveDataPostMessage('send-embed-state');
-      nonSensitiveDataPostMessage('bootstrap-loaded');
-    }
+    window.context.bootstrapLoaded();
   } catch (e) {
     if (window.context && window.context.report3pError) {
       // window.context has initiated yet
@@ -557,263 +544,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     }
   }
 };
-
-
-/** @return {boolean} */
-function isAmpContextExperimentOn() {
-  return isExperimentOn('3p-use-ampcontext');
-}
-
-
-/**
- * Installs window.context API.
- * @param {!Window} win
- * @param {!JsonObject} data
- */
-function installContext(win, data) {
-  if (isAmpContextExperimentOn()) {
-    installContextUsingExperimentalImpl(win);
-    return;
-  }
-
-  installContextUsingStandardImpl(win, data);
-}
-
-
-/**
- * Installs window.context API.
- * @param {!Window} win
- */
-function installContextUsingExperimentalImpl(win) {
-  win.context = new IntegrationAmpContext(win);
-}
-
-
-/**
- * Installs window.context using standard (to be deprecated) implementation.
- * @param {!Window} win
- * @param {!JsonObject} data
- */
-function installContextUsingStandardImpl(win, data) {
-  const embedType = getEmbedType();
-  const contextState = getContextState();
-
-  win.context = {
-    // read from context state
-    ampcontextFilepath: contextState.ampcontextFilepath,
-    ampcontextVersion: contextState.ampcontextVersion,
-    canary: contextState.canary,
-    canonicalUrl: contextState.canonicalUrl,
-    clientId: contextState.clientId,
-    container: contextState.container,
-    domFingerprint: contextState.domFingerprint,
-    hidden: contextState.hidden,
-    initialIntersection: contextState.initialIntersection,
-    initialLayoutRect: contextState.initialLayoutRect,
-    mode: contextState.mode,
-    pageViewId: contextState.pageViewId,
-    referrer: contextState.referrer,
-    sentinel: contextState.sentinel,
-    sourceUrl: contextState.sourceUrl,
-    startTime: contextState.startTime,
-    tagName: contextState.tagName,
-
-    // read from iframe name
-    data,
-    location: getLocation(),
-
-    // locally defined APIs
-    addContextToIframe: iframe => { iframe.name = iframeName; },
-    getHtml,
-    noContentAvailable: triggerNoContentAvailable,
-    onResizeDenied,
-    onResizeSuccess,
-    renderStart: triggerRenderStart,
-    reportRenderedEntityIdentifier,
-    requestResize: triggerResizeRequest,
-    report3pError,
-
-
-    // Using quotes due to bug related to imported variables in object property
-    // shorthand + object shorthand lint rule.
-    // https://github.com/google/closure-compiler/issues/2219
-    'computeInMasterFrame': computeInMasterFrame,
-  };
-
-  // Define master related properties to be lazily read.
-  Object.defineProperties(win.context, {
-    master: {
-      get: () => masterSelection(win, embedType),
-    },
-    isMaster: {
-      get: isMaster,
-    },
-  });
-
-  if (embedType === 'facebook' ||
-      embedType === 'twitter' ||
-      embedType === 'github') {
-    // Only make this available to selected embeds until the
-    // generic solution is available.
-    win.context.updateDimensions = triggerDimensions;
-  }
-
-  // This only actually works for ads.
-  win.context.observeIntersection = cb => {
-    const unlisten = observeIntersection(cb);
-    // Call the callback with the value that was transmitted when the
-    // iframe was drawn. Called in nextTick, so that callers don't
-    // have to specially handle the sync case.
-    nextTick(win, () => cb([contextState.initialIntersection]));
-    return unlisten;
-  };
-}
-
-
-function triggerNoContentAvailable() {
-  nonSensitiveDataPostMessage('no-content');
-}
-
-function triggerDimensions(width, height) {
-  nonSensitiveDataPostMessage('embed-size', dict({
-    'width': width,
-    'height': height,
-  }));
-}
-
-function triggerResizeRequest(width, height) {
-  nonSensitiveDataPostMessage('embed-size', dict({
-    'width': width,
-    'height': height,
-  }));
-}
-
-/**
- * @param {!JsonObject=} opt_data fields: width, height
- */
-function triggerRenderStart(opt_data) {
-  nonSensitiveDataPostMessage('render-start', opt_data);
-}
-
-/**
- * Id for getHtml postMessage.
- * @type {number}
- */
-let currentMessageId = 0;
-
-/**
- * See readme for window.context.getHtml
- * @param {string} selector - CSS selector of the node to take content from
- * @param {!Array<string>} attributes - tag attributes to be left in the stringified HTML
- * @param {!Function} callback
- */
-function getHtml(selector, attributes, callback) {
-  const messageId = currentMessageId++;
-  nonSensitiveDataPostMessage('get-html', dict({
-    'selector': selector,
-    'attributes': attributes,
-    'messageId': messageId,
-  }));
-
-  const unlisten = listenParent(window, 'get-html-result', data => {
-    if (data['messageId'] === messageId) {
-      callback(data['content']);
-      unlisten();
-    }
-  });
-}
-
-/**
- * Registers a callback for intersections of this iframe with the current
- * viewport.
- * The passed in array has entries that aim to be compatible with
- * the IntersectionObserver spec callback.
- * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
- * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
- * @returns {function()} A function which removes the event listener that
- *    observes for intersection messages.
- */
-function observeIntersection(observerCallback) {
-  // Send request to received records.
-  nonSensitiveDataPostMessage('send-intersections');
-  return listenParent(window, 'intersection', data => {
-    observerCallback(data['changes']);
-  });
-}
-
-/**
- * Listens for events via postMessage and updates `context.hidden` based on
- * it and forwards the event to a custom event called `amp:visibilitychange`.
- * @param {!Window} global
- */
-function updateVisibilityState(global) {
-  listenParent(window, 'embed-state', function(data) {
-    global.context.hidden = data['pageHidden'];
-    dispatchVisibilityChangeEvent(global, data['pageHidden']);
-  });
-}
-
-
-function dispatchVisibilityChangeEvent(win, isHidden) {
-  const event = win.document.createEvent('Event');
-  event.data = {hidden: isHidden};
-  event.initEvent(AmpEvents.VISIBILITY_CHANGE, true, true);
-  win.dispatchEvent(event);
-}
-
-/**
- * Registers a callback for communicating when a resize request succeeds.
- * @param {function(number, number)} observerCallback
- * @returns {function()} A function which removes the event listener that
- *    observes for resize status messages.
- */
-function onResizeSuccess(observerCallback) {
-  return listenParent(window, 'embed-size-changed', data => {
-    observerCallback(data['requestedHeight'], data['requestedWidth']);
-  });
-}
-
-/**
- * Registers a callback for communicating when a resize request is denied.
- * @param {function(number, number)} observerCallback
- * @returns {function()} A function which removes the event listener that
- *    observes for resize status messages.
- */
-function onResizeDenied(observerCallback) {
-  return listenParent(window, 'embed-size-denied', data => {
-    observerCallback(data['requestedHeight'], data['requestedWidth']);
-  });
-}
-
-/**
- * Reports the "entity" that was rendered to this frame to the parent for
- * reporting purposes.
- * The entityId MUST NOT contain user data or personal identifiable
- * information. One example for an acceptable data item would be the
- * creative id of an ad, while the user's location would not be
- * acceptable.
- * @param {string} entityId See comment above for content.
- */
-function reportRenderedEntityIdentifier(entityId) {
-  user().assert(typeof entityId == 'string',
-      'entityId should be a string %s', entityId);
-  nonSensitiveDataPostMessage('entity-id', dict({
-    'id': entityId,
-  }));
-}
-
-/**
- * Send 3p error to parent iframe
- * @param {!Error} e
- */
-function report3pError(e) {
-  if (!e.message) {
-    return;
-  }
-  nonSensitiveDataPostMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
-    'message': e.message,
-  }));
-}
 
 /**
  * Throws if the current frame's parent origin is not equal to

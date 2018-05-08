@@ -41,6 +41,46 @@ export class SubscriptionPlatform {
    * @param {!./amp-subscriptions.RenderState} unusedRenderState
    */
   activate(unusedRenderState) {}
+
+  /**
+   * Returns if pingback is enabled for this platform.
+   * @returns {boolean}
+   */
+  isPingbackEnabled() {}
+
+  /**
+   * Performs the pingback to the subscription platform.
+   * @param {!./entitlement.Entitlement} unusedSelectedPlatform
+   * @returns {!Promise|undefined}
+   */
+  pingback(unusedSelectedPlatform) {}
+
+  /**
+   * Tells if this platform supports the current viewer.
+   * @returns {boolean}
+   */
+  supportsCurrentViewer() {}
+
+  /**
+   * Executes action for the local platform.
+   * @param {string} unusedAction
+   * @returns {!Promise<boolean>}
+   */
+  executeAction(unusedAction) {}
+
+  /**
+   * Returns the base score configured for the platform.
+   * @returns {number}
+   */
+  getBaseScore() {}
+
+  /**
+   * Decorate the DomNode according to your platform
+   * @param {!Element} unusedElement
+   * @param {string} unusedAction
+   * @param {?JsonObject} unusedOptions
+   */
+  decorateUI(unusedElement, unusedAction, unusedOptions) {}
 }
 
 /**

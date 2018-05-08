@@ -37,6 +37,7 @@ const green = colors.green;
 const yellow = colors.yellow;
 const cyan = colors.cyan;
 const red = colors.red;
+const bold = colors.bold;
 
 const preTestTasks =
     argv.nobuild ? [] : ((argv.unit || argv.a4a) ? ['css'] : ['build']);
@@ -79,14 +80,15 @@ function getConfig() {
         'SL_Chrome_latest',
         'SL_Chrome_45',
         'SL_Firefox_latest',
-        'SL_Safari_latest',
-        'SL_Safari_10',
-        'SL_Safari_9',
-        'SL_iOS_latest',
-        'SL_iOS_10_0',
-        'SL_iOS_9_1',
-        'SL_Edge_latest',
-        'SL_IE_11',
+        // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
+        // 'SL_Safari_latest',
+        // 'SL_Safari_10',
+        // 'SL_Safari_9',
+        // 'SL_iOS_latest',
+        // 'SL_iOS_10_0',
+        // TODO(rsimha, #14374): Re-enable these after upgrading wd.
+        // 'SL_Edge_latest',
+        // 'SL_IE_11',
       ] : [
         // With --saucelabs_lite, a subset of the unit tests are run.
         // Only browsers that support chai-as-promised may be included below.
@@ -109,7 +111,7 @@ function getAdTypes() {
   };
 
   // Start with Google ad types
-  const adTypes = ['adsense', 'doubleclick'];
+  const adTypes = ['adsense'];
 
   // Add all other ad types
   const files = fs.readdirSync('./ads/');
@@ -167,7 +169,7 @@ function printArgvMessages() {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
     log(green('⤷ Use'), cyan('--nohelp'),
-        green('to silence these messages.)'));
+        green('to silence these messages.'));
     if (!argv.unit && !argv.integration && !argv.files && !argv.a4a) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
@@ -308,6 +310,7 @@ function runTests() {
     c.files = c.files.concat(config.coveragePaths);
     c.browserify.transform.push(
         ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
+    c.plugins.push('karma-coverage');
     c.reporters = c.reporters.concat(['coverage']);
     if (c.preprocessors['src/**/*.js']) {
       c.preprocessors['src/**/*.js'].push('coverage');
@@ -334,20 +337,14 @@ function runTests() {
   }
 
   // Run fake-server to test XHR responses.
-  const server = gulp.src(process.cwd())
-      .pipe(webserver({
-        port: 31862,
-        host: 'localhost',
-        directoryListing: true,
-        middleware: [app],
-      })
-          .on('kill', function() {
-            log(yellow(
-                'Shutting down test responses server on localhost:31862'));
-            process.nextTick(function() {
-              process.exit();
-            });
-          }));
+  const server = gulp.src(process.cwd()).pipe(webserver({
+    port: 31862,
+    host: 'localhost',
+    directoryListing: true,
+    middleware: [app],
+  }).on('kill', function() {
+    log(yellow('Shutting down test responses server on localhost:31862'));
+  }));
   log(yellow(
       'Started test responses server on localhost:31862'));
 
@@ -357,30 +354,52 @@ function runTests() {
   // Avoid Karma startup errors
   refreshKarmaWdCache();
 
+  // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
+  // reporter, since it likely contains copious amounts of logs.
+  const shouldCollapseSummary =
+      process.env.TRAVIS && c.reporters.includes('karmaSimpleReporter');
+  const sectionMarker =
+      (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
+
   let resolver;
   const deferred = new Promise(resolverIn => {resolver = resolverIn;});
   new Karma(c, function(exitCode) {
+    if (shouldCollapseSummary) {
+      console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
+    }
     server.emit('kill');
     if (exitCode) {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
-      process.exit(exitCode);
-    } else {
-      resolver();
     }
+    // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
+    if (process.env.TRAVIS) {
+      setTimeout(() => {
+        process.exit(exitCode);
+      }, 5000);
+    } else {
+      process.exitCode = exitCode;
+    }
+    resolver();
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
-      console./* OK*/log(green(
+      log(green(
           'Running tests in parallel on ' + c.browsers.length +
           ' Sauce Labs browser(s)...'));
     } else {
-      console./* OK*/log(green('Running tests locally...'));
+      log(green('Running tests locally...'));
+    }
+  }).on('run_complete', function() {
+    if (shouldCollapseSummary) {
+      console./* OK*/log(bold(red('Console errors:')),
+          'Expand this section and fix all errors printed by your tests.');
+      console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
     }
   }).on('browser_complete', function(browser) {
-    if (argv.saucelabs || argv.saucelabs_lite) {
+    if (shouldCollapseSummary) {
       const result = browser.lastResult;
-      let message = '\n' + browser.name + ': ';
+      let message = browser.name + ': ';
       message += 'Executed ' + (result.success + result.failed) +
           ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
       if (result.failed === 0) {
@@ -389,7 +408,8 @@ function runTests() {
         message += red(result.failed + ' FAILED');
       }
       message += '\n';
-      console./* OK*/log(message);
+      console./* OK*/log('\n');
+      log(message);
     }
   }).start();
   return deferred.then(() => exitCtrlcHandler(handlerProcess));

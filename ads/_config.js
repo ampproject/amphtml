@@ -119,6 +119,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adincube: {
+    renderStartImplemented: true,
+  },
+
   adition: {},
 
   adman: {},
@@ -127,7 +131,19 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  admixer: {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://inv-nets.admixer.net',
+      'https://cdn.admixer.net',
+    ],
+  },
+
   adocean: {},
+
+  adpicker: {
+    renderStartImplemented: true,
+  },
 
   adplugg: {
     prefetch: 'https://www.adplugg.com/serve/js/ad.js',
@@ -463,7 +479,6 @@ export const adConfig = {
     preconnect: 'https://spad.i-mobile.co.jp',
   },
   imonomy: {
-    prefetch: 'https://srv.imonomy.com/amp/amp.js',
     renderStartImplemented: true,
   },
   improvedigital: {},
@@ -506,6 +521,8 @@ export const adConfig = {
     prefetch: 'https://cdn.kixer.com/ad/load.js',
     renderStartImplemented: true,
   },
+
+  kuadio: {},
 
   ligatus: {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
@@ -602,6 +619,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  mytarget: {
+    prefetch: 'https://ad.mail.ru/static/ads-async.js',
+    renderStartImplemented: true,
+  },
+
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
@@ -656,6 +678,12 @@ export const adConfig = {
     ],
   },
 
+  pixels: {
+    prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
+    clientIdCookieName: '__AF',
+    renderStartImplemented: true,
+  },
+
   plista: {},
 
   polymorphicads: {
@@ -674,6 +702,10 @@ export const adConfig = {
   postquare: {},
 
   pubexchange: {},
+
+  pubguru: {
+    renderStartImplemented: true,
+  },
 
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
@@ -724,6 +756,10 @@ export const adConfig = {
   },
 
   rubicon: {},
+
+  sekindo: {
+    renderStartImplemented: true,
+  },
 
   sharethrough: {
     renderStartImplemented: true,
@@ -818,6 +854,10 @@ export const adConfig = {
   trugaze: {
     clientIdScope: '__tg_amp',
     renderStartImplemented: true,
+  },
+
+  uas: {
+    prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
   },
 
   valuecommerce: {

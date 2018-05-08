@@ -150,7 +150,9 @@ describe('3p ampcontext.js', () => {
 
   it('should throw error if sentinel invalid', () => {
     win.name = generateSerializedAttributes('foobar');
-    expect(() => new AmpContext(win)).to.throw('Incorrect sentinel format');
+    allowConsoleError(() => {
+      expect(() => new AmpContext(win)).to.throw('Incorrect sentinel format');
+    });
   });
 
   it('should throw error if metadata missing', () => {

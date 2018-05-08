@@ -17,6 +17,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import * as sinon from 'sinon';
 import {
   AmpA4A,
+  EXPERIMENT_FEATURE_HEADER_NAME,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
@@ -35,6 +36,7 @@ import {FetchResponseHeaders, Xhr} from '../../../../src/service/xhr-impl';
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
+import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dev} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
@@ -121,65 +123,80 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
   });
 
   describe('#constructSRABlockParameters', () => {
-    it('should combine for SRA request', () => {
-      const targeting1 = {
-        cookieOptOut: 1,
-        categoryExclusions: 'sports',
-        targeting: {foo: 'bar', names: ['x', 'y', 'z']},
-      };
-      targeting1[TFCD] = 'some_tfcd';
-      const config1 = {
-        type: 'doubleclick',
-        height: 320,
-        width: 50,
-        'data-slot': '/1234/abc/def',
-        'json': JSON.stringify(targeting1),
-      };
-      const element1 =
-        createElementWithAttributes(doc, 'amp-ad', config1);
-      const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
-      element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
-      sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320').returns('13579');
-      impl1.populateAdUrlState();
-      impl1.identityToken =
-        /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
-          token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
-        });
-      const targeting2 = {
-        cookieOptOut: 1,
-        categoryExclusions: 'food',
-        targeting: {hello: 'world'},
-      };
-      targeting2[TFCD] = 'some_other_tfcd';
-      const config2 = {
-        type: 'doubleclick',
-        height: 300,
-        width: 250,
-        'data-slot': '/1234/def/xyz',
-        'json': JSON.stringify(targeting2),
-      };
-      const element2 =
-        createElementWithAttributes(doc, 'amp-ad', config2);
-      const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
-      sandbox.stub(impl2, 'generateAdKey_').withArgs('250x300').returns('2468');
-      element2.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
-      impl2.populateAdUrlState();
-      expect(constructSRABlockParameters([impl1, impl2])).to.jsonEqual({
-        'iu_parts': '1234,abc,def,xyz',
-        'enc_prev_ius': '0/1/2,0/2/3',
-        adks: '13579,2468',
-        'prev_iu_szs': '50x320,250x300',
-        'prev_scp':
-          'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
-        co: '1',
-        adtest: 'on',
-        tfcd: 'some_tfcd',
-        eid: MANUAL_EXPERIMENT_ID,
-        output: 'ldjh',
-        impl: 'fifs',
-        adsid: 'abcdef',
-        jar: 'some_jar',
-        pucrd: 'some_pucrd',
+    [true, false].forEach(forceSafeFrame => {
+      it(`should combine for SRA, forceSafeframe ${forceSafeFrame}`, () => {
+        const targeting1 = {
+          cookieOptOut: 1,
+          categoryExclusions: 'sports',
+          targeting: {foo: 'bar', names: ['x', 'y', 'z']},
+        };
+        targeting1[TFCD] = 'some_tfcd';
+        const config1 = {
+          type: 'doubleclick',
+          height: 320,
+          width: 50,
+          'data-slot': '/1234/abc/def',
+          'json': JSON.stringify(targeting1),
+          'data-force-safeframe': forceSafeFrame ? '1' : '0',
+        };
+        const element1 =
+          createElementWithAttributes(doc, 'amp-ad', config1);
+        const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
+        sandbox.stub(impl1, 'getPageLayoutBox').returns({top: 123, left: 456});
+        element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
+        sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320')
+            .returns('13579');
+        impl1.populateAdUrlState();
+        impl1.identityToken =
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+            token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+          });
+        const targeting2 = {
+          cookieOptOut: 1,
+          categoryExclusions: 'food',
+          targeting: {hello: 'world'},
+        };
+        targeting2[TFCD] = 'some_other_tfcd';
+        const config2 = {
+          type: 'doubleclick',
+          height: 300,
+          width: 250,
+          'data-slot': '/1234/def/xyz',
+          'json': JSON.stringify(targeting2),
+          'data-multi-size-validation': 'false',
+          'data-multi-size': '1x2,3x4',
+        };
+        const element2 =
+          createElementWithAttributes(doc, 'amp-ad', config2);
+        const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
+        sandbox.stub(impl2, 'getPageLayoutBox').returns({top: 789, left: 101});
+        sandbox.stub(impl2, 'generateAdKey_').withArgs('250x300')
+            .returns('2468');
+        element2.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
+        impl2.populateAdUrlState();
+        const exp = {
+          'iu_parts': '1234,abc,def,xyz',
+          'enc_prev_ius': '0/1/2,0/2/3',
+          adks: '13579,2468',
+          'prev_iu_szs': '50x320,250x300|1x2|3x4',
+          'prev_scp':
+            'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
+          co: '1',
+          adtest: 'on',
+          adxs: '456,101',
+          adys: '123,789',
+          tfcd: 'some_tfcd',
+          eid: MANUAL_EXPERIMENT_ID,
+          output: 'ldjh',
+          impl: 'fifs',
+          adsid: 'abcdef',
+          jar: 'some_jar',
+          pucrd: 'some_pucrd',
+        };
+        if (forceSafeFrame) {
+          exp['fsfs'] = '1,0';
+        }
+        expect(constructSRABlockParameters([impl1, impl2])).to.jsonEqual(exp);
       });
     });
   });
@@ -253,8 +270,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     function generateNonSraXhrMockCall(impl, creative) {
       // Start with nameframe method, SRA will override to use safeframe.
-      const headers = {};
-      headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.NAMEFRAME;
+      const headers = {
+        [RENDERING_TYPE_HEADER]: XORIGIN_MODE.NAMEFRAME,
+        [EXPERIMENT_FEATURE_HEADER_NAME]: 'foo=bar',
+      };
       const iu = encodeURIComponent(impl.element.getAttribute('data-slot'));
       const urlRegexp = new RegExp(
           '^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
@@ -289,8 +308,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
      * @param {!Array<number|{{
      *    networkId:number,
      *    instances:number,
-     *    xhrFail:boolean|undefined,
-     *    invalidInstances:number}}>} items
+     *    xhrFail:(boolean|undefined),
+     *    invalidInstances:number,
+     *    nestHeaders:(boolean|undefined)}}>} items
      */
     function executeTest(items) {
       // Store if XHR will fail by networkId.
@@ -298,6 +318,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       // Store if all elements for a given network are invalid.
       const networkValidity = {};
       const doubleclickInstances = [];
+      const networkNestHeaders = [];
       const attemptCollapseSpy =
         sandbox.spy(BaseElement.prototype, 'attemptCollapse');
       let expectedAttemptCollapseCalls = 0;
@@ -321,6 +342,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         networkValidity[network.networkId] =
           network.invalidInstances && !network.instances;
         networkXhrFailure[network.networkId] = !!network.xhrFail;
+        networkNestHeaders[network.networkId] = network.nestHeaders;
         expectedAttemptCollapseCalls += network.xhrFail ? network.instances : 0;
       });
       const grouping = {};
@@ -344,6 +366,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             expect(impl.iframe).to.not.be.ok;
             return;
           }
+          expect(impl.postAdResponseExperimentFeatures['foo']).to.equal('bar');
           expect(impl.iframe).to.be.ok;
           const name = impl.iframe.getAttribute('name');
           if (isSra) {
@@ -364,7 +387,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         validInstances.forEach(impl => {
           const creative = `slot${idx++}`;
           if (isSra) {
-            sraResponses.push({creative, headers: {slot: idx}});
+            let headers = {
+              slot: idx,
+              [EXPERIMENT_FEATURE_HEADER_NAME]: 'foo=bar',
+            };
+            if (networkNestHeaders[networkId]) {
+              headers = {'nested': headers};
+            }
+            sraResponses.push({creative, headers});
           } else {
             generateNonSraXhrMockCall(impl, creative);
           }
@@ -384,18 +414,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     beforeEach(() => {
       xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
-      const xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
       sandbox.stub(AmpA4A.prototype,
           'getSigningServiceNames').returns(['google']);
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-          {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          }).returns(
-          Promise.resolve({keys: []}));
+      sandbox.stub(SignatureVerifier.prototype, 'loadKeyset')
+          .callsFake(() => {});
     });
 
     afterEach(() => {
@@ -409,6 +431,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     it('should correctly use SRA for multiple slots',
         () => executeTest([1234, 1234]));
+
+    it('should correctly handle SRA response with nested headers', () =>
+      executeTest([{networkId: 1234, instances: 2, nestHeaders: true}]));
 
     it('should not send SRA request if slots are invalid',
         () => executeTest([{networkId: 1234, invalidInstances: 2}]));

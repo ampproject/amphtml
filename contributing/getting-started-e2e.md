@@ -95,24 +95,24 @@ If you are new to Git it may seem surprising that there are three different repo
 
 * When you're done you'll push these changes to your fork on GitHub so that others can see your changes and review them before they become part of the amphtml repository.
 
-* When the changes have been approved by someone with permission to do so that person will handle merging your changes from your GitHub fork to the amphtml repository.
+* When the changes have been approved by someone with permission to do so, that person will handle merging your changes from your GitHub fork to the amphtml repository.
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase.  If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository.  Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease:  if you aren't currently a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) to the amphtml project you can't actually make changes to the amphtml repository directly--so go ahead and try out different Git commands without worrying you're going to break things for other people.
+One thing that might put your mind at ease:  if you aren't currently a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) to the amphtml project, you can't actually make changes to the amphtml repository directly. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 To create your fork on GitHub and your local copy of that fork:
 
-* Create a fork of the amphtml repository on GitHub by going to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and clicking the "Fork" button near the top.  Your GitHub fork will now be visible at `https://github.com/<your username>/amphtml`.
+* Create a fork of the amphtml repository on GitHub by going to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and clicking the "Fork" button near the top.  Your GitHub fork will now be visible at `https://github.com/<your username>/amphtml`. During local development, this will be referred to by `git` as `origin`.
 
 * Create your local copy (or *clone*) of your fork:
 
     * go to a local directory on your computer where you want to put a copy of the code, e.g. `~/src/ampproject`
 
-    * run the `git clone` command using the address for your remote repository (your GitHub fork)
+    * run the `git clone` command using the address for your remote repository (your GitHub fork):
 
-       ```shell
+       ```
        git clone git@github.com:<your username>/amphtml.git
        ```
 
@@ -156,43 +156,39 @@ git branch -u upstream/master master
 
 # Building AMP and starting a local server
 
-Now that you have all of the files copied locally you can actually build the code and run a local server to try things out.
+Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the Yarn package manager, and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.
 
-amphtml uses Node.js, the Yarn package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
-
-* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm).
-
-  On Mac and Linux, you can use [nvm](https://github.com/creationix/nvm), especially if you have other projects that require different versions of Node.
+* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). An easy way to do so is with `nvm` (Mac and Linux: [here](https://github.com/creationix/nvm), Windows: [here](https://github.com/coreybutler/nvm-windows))
 
    ```
    nvm install --lts
    ```
 
-* Install [Yarn](https://yarnpkg.com/) version >= 1.2.0 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
+* Install the stable version of [Yarn](https://yarnpkg.com/) (Mac and Linux: [here](https://yarnpkg.com/en/docs/install#alternatives-stable), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
+
+   ```
+   curl -o- -L https://yarnpkg.com/install.sh | bash
+   ```
+  An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
+
+* If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
+
+   ```
+   yarn global remove gulp
+   ```
+
+* Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
+
+   ```
+   yarn global add gulp-cli
+   ```
+  An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local development. This will also use the version of `gulp` packaged with the amphtml repository.
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
    yarn
    ```
    You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies, which are generally safe to ignore.
-
-* For some local testing we refer to fake local URLs in order to simulate referencing third party URLs.  This requires extra setup so your browser will know that these URLs actually point to your local server.
-
-   You can do this by adding this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
-
-    ```
-    127.0.0.1 ads.localhost iframe.localhost
-    ```
-
-* The AMP Project uses Gulp as our build system.   Gulp uses a configuration file ([gulpfile.js](https://github.com/ampproject/amphtml/blob/master/gulpfile.js)) to build amphtml (including the amphtml javascript) and to start up the Node.js server with the proper settings.  You don't really have to understand exactly what it is doing at this point--you just have to install it and use it.
-
-   You can install Gulp using Yarn:
-
-   ```
-   yarn global add gulp
-   ```
-
-   The preceding command might require elevated privileges using `sudo` on some platforms.
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 

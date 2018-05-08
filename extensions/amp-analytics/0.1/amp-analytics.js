@@ -27,12 +27,13 @@ import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
+import {LayoutPriority} from '../../../src/layout';
 import {
   RequestHandler,
   expandConfigRequest,
 } from './requests';
 import {Services} from '../../../src/services';
-import {appendEncodedParamStringToUrl, assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
@@ -78,12 +79,6 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.consentNotificationId_ = null;
 
-    /**
-     * @private {?string} Predefined type associated with the tag. If specified,
-     * the config from the predefined type is merged with the inline config
-     */
-    this.type_ = null;
-
     /** @private {boolean} */
     this.isSandbox_ = false;
 
@@ -127,7 +122,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? 0 : 1;
+    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
   }
 
   /** @override */
@@ -624,7 +619,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
-              this.getAmpDoc(), request, this.preconnect,
+              this.element, request, this.preconnect,
               this.sendRequest_.bind(this),
               this.isSandbox_);
         }
@@ -812,34 +807,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
             this.element).expandUrlAsync(key));
-  }
-
-  /**
-   * Adds parameters to URL. Similar to the function defined in url.js but with
-   * a different encoding method.
-   * @param {string} request
-   * @param {!Object<string, string>} params
-   * @return {string}
-   * @private
-   */
-  addParamsToUrl_(request, params) {
-    const s = [];
-    for (const k in params) {
-      const v = params[k];
-      if (v == null) {
-        continue;
-      } else {
-        const sv = this.variableService_.encodeVars(k, v);
-        s.push(`${encodeURIComponent(k)}=${sv}`);
-      }
-    }
-
-    const paramString = s.join('&');
-    if (request.indexOf('${extraUrlParams}') >= 0) {
-      return request.replace('${extraUrlParams}', paramString);
-    } else {
-      return appendEncodedParamStringToUrl(request, paramString);
-    }
   }
 
   /**

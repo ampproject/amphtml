@@ -23,6 +23,7 @@ import {
 } from './url';
 import {dict, map} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -79,37 +80,59 @@ const SELF_CLOSING_TAGS = dict({
 });
 
 /** @const {!Array<string>} */
-const WHITELISTED_FORMAT_TAGS = [
+const WHITELISTED_TAGS = [
+  'a',
   'b',
   'br',
+  'caption',
+  'colgroup',
   'code',
   'del',
+  'div',
   'em',
   'i',
   'ins',
   'mark',
+  'p',
   'q',
   's',
   'small',
+  'span',
   'strong',
   'sub',
   'sup',
+  'table',
+  'tbody',
   'time',
+  'td',
+  'th',
+  'thead',
+  'tfoot',
+  'tr',
   'u',
 ];
 
 /** @const {!Array<string>} */
 const WHITELISTED_ATTRS = [
+  /* AMP-only attributes that don't exist in HTML. */
   'fallback',
-  'href',
   'on',
-  'placeholder',
   'option',
+  'placeholder',
   'submit-success',
   'submit-error',
-  /* Attributes added for amp-bind */
-  // TODO(kmh287): Add more whitelisted attributes for bind?
+  /* HTML attributes that are scrubbed by Caja but we handle specially. */
+  'href',
+  'style',
+  /* Attributes for amp-bind that exist in "[foo]" form. */
   'text',
+  /* Attributes for amp-subscriptions. */
+  'subscriptions-action',
+  'subscriptions-actions',
+  'subscriptions-section',
+  'subscriptions-display',
+  'subscriptions-service',
+  'subscriptions-decorate',
 ];
 
 /** @const {!Object<string, !Array<string>>} */
@@ -148,7 +171,7 @@ const BLACKLISTED_ATTR_VALUES = [
 /** @const {!Object<string, !Object<string, !RegExp>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
-    'type': /(?:image|file|password|button)/i,
+    'type': /(?:image|file|button)/i,
   },
 });
 
@@ -170,6 +193,16 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 });
 
 /**
+ * Test for invalid `style` attribute values. `!important` is a general AMP
+ * rule, while `position:fixed|sticky` is a current runtime limitation since
+ * FixedLayer only scans the amp-custom stylesheet for potential fixed/sticky
+ * elements.
+ * @const {!RegExp}
+ */
+const INVALID_INLINE_STYLE_REGEX =
+    /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
+
+/**
  * Sanitizes the provided HTML.
  *
  * This function expects the HTML to be already pre-sanitized and thus it does
@@ -180,7 +213,8 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
  * @return {string}
  */
 export function sanitizeHtml(html) {
-  const tagPolicy = htmlSanitizer.makeTagPolicy();
+  const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
+    parsed.getScheme() === 'https' ? parsed : null);
   const output = [];
   let ignore = 0;
 
@@ -199,8 +233,8 @@ export function sanitizeHtml(html) {
         return;
       }
       const isBinding = map();
-      // Preprocess "binding" attributes (e.g. [attr]) by stripping enclosing
-      // brackets before custom validation and readding them afterwards.
+      // Preprocess "binding" attributes, e.g. [attr], by stripping enclosing
+      // brackets before custom validation and restoring them afterwards.
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
         if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
@@ -220,7 +254,7 @@ export function sanitizeHtml(html) {
         } else {
           attribs = scrubbed.attribs;
           // Restore some of the attributes that AMP is directly responsible
-          // for, such as "on"
+          // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
             const attrib = attribs[i];
             if (WHITELISTED_ATTRS.includes(attrib)) {
@@ -315,38 +349,21 @@ export function sanitizeHtml(html) {
 }
 
 /**
- * Sanitizes the provided formatting HTML. Only the most basic inline tags are
- * allowed, such as <b>, <i>, etc.
+ * Sanitizes user provided HTML to mustache templates, used in amp-mustache.
+ * WARNING: This method should not be used elsewhere as we do not strip out
+ * the style attribute in this method for the inline-style experiment.
+ * We do so in sanitizeHtml which occurs after this initial sanitizing.
  *
+ * @private
  * @param {string} html
  * @return {string}
  */
-export function sanitizeFormattingHtml(html) {
-  return htmlSanitizer.sanitizeWithPolicy(html,
-      function(tagName, attribs) {
-        if (tagName == 'template') {
-          for (let i = 0; i < attribs.length; i += 2) {
-            if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
-              return {
-                tagName,
-                attribs: ['type', 'amp-mustache'],
-              };
-            }
-          }
-        }
-        if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
-          return null;
-        }
-        return {
-          tagName,
-          attribs: [],
-        };
-      }
-  );
+export function sanitizeTagsForTripleMustache(html) {
+  return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
 }
 
 /**
- * Whether the attribute/value are valid.
+ * Whether the attribute/value is valid.
  * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
@@ -360,6 +377,9 @@ export function isValidAttr(tagName, attrName, attrValue) {
 
   // Inline styles are not allowed.
   if (attrName == 'style') {
+    if (isExperimentOn(self, 'inline-styles')) {
+      return !INVALID_INLINE_STYLE_REGEX.test(attrValue);
+    }
     return false;
   }
 
@@ -504,6 +524,32 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   }
 
   return attrValue;
+}
+
+/**
+ * Tag policy for handling what is valid html in templates.
+ * @param {string} tagName
+ * @param {!Array<string>} attribs
+ */
+function tripleMustacheTagPolicy(tagName, attribs) {
+  if (tagName == 'template') {
+    for (let i = 0; i < attribs.length; i += 2) {
+      if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
+        return {
+          tagName,
+          attribs: ['type', 'amp-mustache'],
+        };
+      }
+    }
+  }
+  const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
+  if (!isWhitelistedTag) {
+    return null;
+  }
+  return {
+    tagName,
+    attribs,
+  };
 }
 
 /**

@@ -120,7 +120,7 @@ export class AmpFont extends AMP.BaseElement {
    */
   startLoad_() {
     const fontConfig = {
-      style: this.fontStyle_,
+      fontStyle: this.fontStyle_,
       variant: this.fontVariant_,
       weight: this.fontWeight_,
       size: DEFAULT_SIZE_,

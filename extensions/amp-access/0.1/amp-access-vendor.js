@@ -42,8 +42,8 @@ export class AccessVendorAdapter {
     this.vendorName_ = user().assert(configJson['vendor'],
         '"vendor" name must be specified');
 
-    /** @const @private {JsonObject} */
-    this.vendorConfig_ = configJson[this.vendorName_];
+    /** @const @private {!JsonObject} */
+    this.vendorConfig_ = configJson[this.vendorName_] || {};
 
     /** @const @private {boolean} */
     this.isPingbackEnabled_ = !configJson['noPingback'];
@@ -100,5 +100,10 @@ export class AccessVendorAdapter {
     return this.vendorPromise_.then(vendor => {
       return vendor.pingback();
     });
+  }
+
+  /** @override */
+  postAction() {
+    // TODO(dvoytenko): delegate to vendor adapter.
   }
 }

@@ -21,7 +21,9 @@ import {dev, duplicateErrorIfNecessary} from '../log';
 import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
+  getFragment,
   getSourceOrigin,
+  isProxyOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -29,6 +31,7 @@ import {
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -40,6 +43,14 @@ const SENTINEL_ = '__AMP__';
  * @private {number}
  */
 const VIEWER_ORIGIN_TIMEOUT_ = 1000;
+
+/**
+ * Prefixes to remove when trimming a hostname for comparison.
+ * @const
+ * @private {!RegExp}
+ */
+const TRIM_ORIGIN_PATTERN_ =
+  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -241,6 +252,7 @@ export class Viewer {
     this.isWebviewEmbedded_ = !this.isIframed_ &&
         this.params_['webview'] == '1';
 
+
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe, or
      * a web view, or a shadow doc in PWA.
@@ -262,6 +274,20 @@ export class Viewer {
             || (this.win.location.search.indexOf('amp_js_v') != -1))
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
+
+    /**
+     * Whether the AMP document is embedded in a Chrome Custom Tab.
+     * @private @const {boolean}
+     */
+    this.isCctEmbedded_ = !this.isIframed_ &&
+        parseQueryString(this.win.location.search)['amp_gsa'] === '1';
+
+    const url = parseUrl(this.ampdoc.win.location.href);
+    /**
+     * Whether the AMP document was served by a proxy.
+     * @private @const {boolean}
+     */
+    this.isProxyOrigin_ = isProxyOrigin(url);
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -416,6 +442,10 @@ export class Viewer {
     // instance is constructed, the document is already `visible`.
     this.recheckVisibilityState_();
     this.onVisibilityChange_();
+
+    // This fragment may get cleared by impression tracking. If so, it will be
+    // restored afterward.
+    this.maybeUpdateFragmentForCct();
   }
 
   /**
@@ -497,6 +527,64 @@ export class Viewer {
    */
   isWebviewEmbedded() {
     return this.isWebviewEmbedded_;
+  }
+
+  /**
+   * Whether the document is embedded in a Chrome Custom Tab.
+   * @return {boolean}
+   */
+  isCctEmbedded() {
+    return this.isCctEmbedded_;
+  }
+
+  /**
+   * Whether the document was served by a proxy.
+   * @return {boolean}
+   */
+  isProxyOrigin() {
+    return this.isProxyOrigin_;
+  }
+
+  /**
+   * Update the URL fragment with data needed to support custom tabs. This will
+   * not clear query string parameters, but will clear the fragment.
+   */
+  maybeUpdateFragmentForCct() {
+    if (!this.isCctEmbedded_) {
+      return;
+    }
+    // CCT only works with versions of Chrome that support the history API.
+    if (!this.win.history.replaceState) {
+      return;
+    }
+    const sourceOrigin = getSourceOrigin(this.win.location.href);
+    const canonicalUrl = Services.documentInfoForDoc(this.ampdoc).canonicalUrl;
+    const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
+    if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
+      const oldFragment = getFragment(this.win.location.href);
+      const newFragment = 'ampshare=' + encodeURIComponent(canonicalUrl);
+      // Attempt to merge the fragments, if an old fragment was present.
+      this.win.history.replaceState({}, '',
+          oldFragment ? `${oldFragment}&${newFragment}` : `#${newFragment}`);
+    }
+  }
+
+  /**
+   * Compares URLs to determine if they match once common subdomains are
+   * removed. Everything else must match.
+   * @param {string} first Origin to compare.
+   * @param {string} second Origin to compare.
+   * @return {boolean} Whether the origins match without subdomains.
+   * @private
+   */
+  hasRoughlySameOrigin_(first, second) {
+    const trimOrigin = origin => {
+      if (origin.split('.').length > 2) {
+        return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
+      }
+      return origin;
+    };
+    return trimOrigin(first) == trimOrigin(second);
   }
 
   /**
@@ -953,7 +1041,7 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-        Promise.resolve(this.messageDeliverer_(
+        tryResolve(() => this.messageDeliverer_(
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
             awaitResponse)));
