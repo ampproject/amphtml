@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
 import {closestByTag} from '../../../src/dom';
@@ -114,7 +115,8 @@ const getTemplate = (config, consentId, logoSrc) => ({
                 'on': `tap:${consentId}.reject`,
               }),
               children: [],
-              unlocalizedString: 'Decline',
+              localizedStringId:
+                  LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL,
             },
             {
               tag: 'button',
@@ -127,7 +129,8 @@ const getTemplate = (config, consentId, logoSrc) => ({
                 'on': `tap:${consentId}.accept`,
               }),
               children: [],
-              unlocalizedString: 'Agree',
+              localizedStringId:
+                  LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL,
             },
           ],
         },
