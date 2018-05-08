@@ -53,7 +53,8 @@ describes.realWin('amp-brightcove', {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          'https://players.brightcove.net/1290862519001/default_default/index.html?videoId=ref:ampdemo');
+          'https://players.brightcove.net/1290862519001' +
+          '/default_default/index.html?videoId=ref:ampdemo&playsinline=true');
     });
   });
 
@@ -106,8 +107,8 @@ describes.realWin('amp-brightcove', {
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
 
-      expect(iframe.src).to.equal('https://players.brightcove.net/' +
-          '1290862519001/default_default/index.html?videoId=ref:ampdemo');
+      expect(iframe.src).to.equal('https://players.brightcove.net/1290862519001' +
+          '/default_default/index.html?videoId=ref:ampdemo&playsinline=true');
 
       bc.setAttribute('data-account', '12345');
       bc.setAttribute('data-video-id', 'abcdef');
@@ -117,7 +118,7 @@ describes.realWin('amp-brightcove', {
       });
 
       expect(iframe.src).to.equal('https://players.brightcove.net/' +
-          '12345/default_default/index.html?videoId=abcdef');
+          '12345/default_default/index.html?videoId=abcdef&playsinline=true');
     });
   });
 });
