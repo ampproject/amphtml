@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from './promise';
+import {Deferred} from './utils/promise';
 import {Services} from './services';
 import {dev} from './log';
 import {getCurve} from './curve';

@@ -28,6 +28,7 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
+import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
 const TAG = 'amp-analytics';
@@ -196,7 +197,7 @@ export class AnalyticsRoot {
     // Special case selectors. The selection method is irrelavant.
     // And no need to wait for document ready.
     if (selector == ':root') {
-      return Promise.resolve(this.getRootElement());
+      return tryResolve(() => this.getRootElement());
     }
     if (selector == ':host') {
       return new Promise(resolve => {

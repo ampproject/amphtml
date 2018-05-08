@@ -15,7 +15,7 @@
  */
 
 import {rethrowAsync, user} from '../../log';
-import {tryResolve} from '../../promise';
+import {tryResolve} from '../../utils/promise';
 
 export const PARSER_IGNORE_FLAG = '`';
 

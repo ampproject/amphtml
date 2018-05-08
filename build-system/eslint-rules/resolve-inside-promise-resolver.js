@@ -52,7 +52,7 @@ module.exports = function(context) {
       }
 
       context.report(node, 'Use the Promise constructor, ' +
-          'or tryResolve in the src/promise.js module.');
+          'or tryResolve in the src/utils/promise.js module.');
     },
 
     // new Promise(...)
@@ -107,7 +107,7 @@ module.exports = function(context) {
       const message = [
         'Must call the resolve param.',
         'If you are creating a pending promise to extract a resolve function',
-        'please use the Deferred class in the src/promise.js module instead.',
+        'please use Deferred in the src/utils/promise.js module instead.',
       ].join('\n\t');
       context.report(resolver, message);
     },
