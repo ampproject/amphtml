@@ -247,6 +247,45 @@ describes.realWin('amp-ad-exit', {
     expect(open).to.not.have.been.called;
   });
 
+  it('should not use default click protection', () => {
+    return makeElementWithConfig({
+      targets: {
+        halfSecondDelay: {
+          'finalUrl': 'http://localhost:8000/simple',
+          'filters': ['halfSecond'],
+        },
+      },
+      disableDefaultFilters: ['clickDelay'],
+      filters: {
+        'halfSecond': {
+          type: 'clickDelay',
+          delay: 500,
+        },
+      },
+    }).then(el => {
+      element = el;
+      const open = sandbox.stub(win, 'open');
+
+      element.implementation_.executeAction({
+        method: 'exit',
+        args: {target: 'halfSecondDelay'},
+        event: makeClickEvent(1),
+        satisfiesTrust: () => true,
+      });
+
+      expect(open).to.not.have.been.called;
+
+      element.implementation_.executeAction({
+        method: 'exit',
+        args: {target: 'halfSecondDelay'},
+        event: makeClickEvent(500),
+        satisfiesTrust: () => true,
+      });
+
+      expect(open).to.have.been.called;
+    });
+  });
+
   it('should attempt new-tab navigation', () => {
     const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};

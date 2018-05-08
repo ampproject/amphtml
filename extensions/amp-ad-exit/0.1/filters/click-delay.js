@@ -27,7 +27,7 @@ export class ClickDelayFilter extends Filter {
    * @param {!Window} win
    */
   constructor(name, spec, win) {
-    super(name);
+    super(name, spec.type);
     user().assert(spec.type == FilterType.CLICK_DELAY &&
       typeof spec.delay == 'number' && spec.delay > 0,
     'Invalid ClickDelay spec');

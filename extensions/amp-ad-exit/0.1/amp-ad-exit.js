@@ -26,6 +26,7 @@ import {dev, user} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
@@ -55,7 +56,7 @@ export class AmpAdExit extends AMP.BaseElement {
 
     /**
      * Filters to apply to every target.
-     * @private @const {!Array<!./filters/filter.Filter>}
+     * @private {!Array<!./filters/filter.Filter>}
      */
     this.defaultFilters_ = [];
 
@@ -251,9 +252,13 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
+      if (isArray(config.disableDefaultFilters)) {
+        this.defaultFilters_ = this.defaultFilters_.filter(
+            filter => !config.disableDefaultFilters.includes(filter.type));
+      }
       for (const name in config.filters) {
-        this.userFilters_[name] =
-            createFilter(name, config.filters[name], this);
+        const spec = config.filters[name];
+        this.userFilters_[name] = createFilter(name, spec, this);
       }
       for (const name in config.targets) {
         const target = config.targets[name];

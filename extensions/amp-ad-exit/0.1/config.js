@@ -24,7 +24,8 @@ import {user} from '../../../src/log';
  * @typedef {{
  *   targets: !Object<string, !NavigationTargetConfig>,
  *   filters: (!Object<string, !FilterConfig>|undefined),
- *   transport: (!Object<TransportMode, boolean>|undefined)
+ *   transport: (!Object<TransportMode, boolean>|undefined),
+ *   disableDefaultFilters: (!Array<!FilterType>|undefined)
  * }}
  */
 export let AmpAdExitConfig;
