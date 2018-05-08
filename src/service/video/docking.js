@@ -302,24 +302,22 @@ export class VideoDocking {
      * themselves.
      * @private @const {function():!Element}
      */
-    this.getShadowLayer_ = once(() => this.append_(
-        htmlFor(this.getDoc_())`
-          <div class="amp-video-docked-shadow" hidden></div>`));
+    this.getShadowLayer_ = once(() => this.append_(htmlFor(this.getDoc_())`
+      <div class="amp-video-docked-shadow" hidden></div>`));
 
     /**
      * Returns an overlay to be used to capture different user events.
      * @private @const {function():!Element}
      */
-    this.getOverlay_ = once(() => this.append_(this.installOverlay_(
-        htmlFor(this.getDoc_())`
-          <div class="i-amphtml-video-docked-overlay" hidden></div>`)));
+    this.getOverlay_ = once(() => this.installOverlay_(htmlFor(this.getDoc_())`
+      <div class="i-amphtml-video-docked-overlay" hidden></div>`));
 
     /** @private @const {function():!ControlsDef} */
-    this.getControls_ = once(() => this.installControls_(this.append_(
-    // This currently bloats the resulting binary with
-    // 1. some whitespace and 2. duplicate declarations of equal strings.
-    // Upcoming fixes: #14657, #14658.
-    // TODO(alanorozco): Cleanup markup for readability once fixes land.
+    this.getControls_ = once(() => this.installControls_(
+        // This currently bloats the resulting binary with
+        // 1. some whitespace and 2. duplicate declarations of equal strings.
+        // Upcoming fixes: #14657, #14658.
+        // TODO(alanorozco): Cleanup markup for readability once fixes land.
         htmlFor(this.getDoc_())`
           <div class="amp-video-docked-controls" hidden>
             <div class="amp-video-docked-button-group">
@@ -330,20 +328,21 @@ export class VideoDocking {
             </div>
             <div class="amp-video-docked-button-group">
               <div role="button" ref="muteButton"
-                class="amp-video-docked-mute"></div>
+                  class="amp-video-docked-mute"></div>
               <div role="button" ref="unmuteButton"
-                  class="amp-video-docked-unmute"></div>
+                  class="amp-video-docked-unmute">
+              </div>
             </div>
             <div class="amp-video-docked-button-group">
               <div role="button" ref="fullscreenButton"
-                  class="amp-video-docked-fullscreen"></div>
+                  class="amp-video-docked-fullscreen">
+              </div>
             </div>
-            <div class="amp-video-docked-button-group
-                amp-video-docked-dismiss-group">
+            <div class="amp-video-docked-button-group">
               <div role="button" ref="dismissButton"
                   class="amp-video-docked-dismiss"></div>
             </div>
-          </div>`)));
+          </div>`));
 
     /** @private {?VideoOrBaseElementDef} */
     this.lastDismissed_ = null;
@@ -460,6 +459,7 @@ export class VideoDocking {
    * @private
    */
   installOverlay_(overlay) {
+    this.append_(overlay);
     return this.showControlsOnTap_(this.addDragListeners_(overlay));
   }
 
@@ -554,6 +554,7 @@ export class VideoDocking {
       this.hideControlsOnTimeout_(CONTROLS_TIMEOUT_AFTER_IX));
 
     this.addDragListeners_(container);
+    this.append_(container);
 
     return /** @type {!ControlsDef} */ (controls);
   }
@@ -925,8 +926,10 @@ export class VideoDocking {
         'opacity': step,
       });
       const halfScale = scale / 2;
+      const centerX = x + width * halfScale;
+      const centerY = y + height * halfScale;
       setImportantStyles(controls, {
-        'transform': translate(x + width * halfScale, y + height * halfScale),
+        'transform': translate(centerX, centerY),
       });
     });
 
@@ -1107,6 +1110,13 @@ export class VideoDocking {
     const {x, y} = pointerCoords(e);
     offset.x = x - startX;
     offset.y = y - startY;
+
+    // Prevents dragging misfires.
+    const offsetDist = Math.sqrt(Math.pow(offset.x, 2) + Math.pow(offset.y, 2));
+    if (offsetDist <= 10) {
+      return;
+    }
+
     this.hideControls_();
     this.isDragging_ = true;
     this.offset_(offset.x, offset.y);
