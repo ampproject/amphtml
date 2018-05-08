@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import '../../src/polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import '../../src/polyfills';
 import '../../src/service/timer-impl';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
