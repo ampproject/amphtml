@@ -39,6 +39,29 @@
           "base": 36
         }
       }
+    },
+    "timer": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 1,
+        "maxTimerLength": 10
+      },
+      "request": "endpoint",
+      "extraUrlParams": {
+        "rt": "${resourceTiming}"
+      },
+      "resourceTimingSpec": {
+        "resources": {
+          "all": {
+            "host": ".*"
+          }
+        },
+        "encoding": {
+          "entry": "${key}.${startTime}",
+          "delim": "~",
+          "base": 36
+        }
+      }
     }
   }
 }
