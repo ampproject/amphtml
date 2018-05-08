@@ -469,18 +469,20 @@ export class FixedLayer {
   }
 
   /**
-   * If the given element has a `style` attribute, remove it and throw a user
-   * error. This is done since FixedLayer's implementation currently assumes
-   * that publisher-authored inline styles are impossible.
+   * If the given element has a `style` attribute with a top/bottom CSS rule,
+   * remove it and throw a user error. FixedLayer's implementation currently
+   * assumes that those rules cannot be set by the publisher.
    * @param {!Element} element
    * @private
    */
   removeStyleAttributeIfNecessary_(element) {
     if (isExperimentOn(this.ampdoc.win, 'inline-styles')) {
-      if (element.hasAttribute('style')) {
+      if (element.hasAttribute('style')
+          && (element.style.top || element.style.bottom)) {
         element.removeAttribute('style');
-        user().error(TAG, 'Inline styles are not supported yet for fixed ' +
-            'or sticky elements. Removing `style` attr from element:', element);
+        user().error(TAG, 'Inline styles with `top` or `bottom` rules are ' +
+            'not supported yet for fixed or sticky elements. Removing ' +
+            '`style` attribute from element:', element);
       }
     }
   }

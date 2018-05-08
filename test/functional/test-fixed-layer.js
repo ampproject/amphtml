@@ -1043,12 +1043,16 @@ describe('FixedLayer', () => {
     it('should remove inline style and throw user error', () => {
       toggleExperiment(ampdoc.win, 'inline-styles', true,
           /* opt_transientExperiment */ true);
-      element1.setAttribute('style', 'color:blue;');
+
+      // Set both attribute and property since element1 is a fake element.
+      element1.setAttribute('style', 'bottom: 10px');
+      element1.style.bottom = '10px';
+
       const userError = sandbox.stub(user(), 'error');
       fixedLayer.setup();
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch('FixedLayer',
-          /Inline styles are not supported/);
+          /Inline styles with `top` or `bottom` rules are not supported/);
       expect(element1.hasAttribute('style')).to.be.false;
     });
   });
@@ -1318,12 +1322,16 @@ describe('FixedLayer', () => {
     it('should remove inline style and throw user error', () => {
       toggleExperiment(ampdoc.win, 'inline-styles', true,
           /* opt_transientExperiment */ true);
-      element1.setAttribute('style', 'color:blue;');
+
+      // Set both attribute and property since element1 is a fake element.
+      element1.setAttribute('style', 'bottom: 10px');
+      element1.style.bottom = '10px';
+
       const userError = sandbox.stub(user(), 'error');
       fixedLayer.setup();
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch('FixedLayer',
-          /Inline styles are not supported/);
+          /Inline styles with `top` or `bottom` rules are not supported/);
       expect(element1.hasAttribute('style')).to.be.false;
     });
   });
