@@ -29,6 +29,7 @@ import {Services} from '../../services';
 // Source for this constant is css/video-docking.css
 import {cssText} from '../../../build/video-docking.css.js';
 import {dev, user} from '../../log';
+import {getInternalVideoElementFor} from '../../utils/video';
 import {getServiceForDoc} from '../../service';
 import {htmlFor, htmlRefs} from '../../static-template';
 import {
@@ -187,16 +188,6 @@ function orderLayers(...layers) {
     const offsetZ = -(layers.length - i);
     setImportantStyles(layers[i], {'z-index': (zIndex + offsetZ).toString()});
   }
-}
-
-
-/**
- * @param {!Element} element
- * @return {!Element}
- * @restricted
- */
-function getInternalElementFor(element) {
-  return dev().assertElement(element.querySelector('video, iframe'));
 }
 
 
@@ -909,7 +900,7 @@ export class VideoDocking {
       'transition-timing-function': transitionTiming,
     };
 
-    const internalElement = getInternalElementFor(video.element);
+    const internalElement = getInternalVideoElementFor(video.element);
     const shadowLayer = this.getShadowLayer_();
     const overlay = this.getOverlay_();
     const controls = this.getControls_().container;
@@ -1310,7 +1301,7 @@ export class VideoDocking {
    */
   undock_(video, unusedDismissDirX = 0, unusedDismissDirY = 0) {
     // TODO(alanorozco): animate dismissal
-    const internalElement = getInternalElementFor(video.element);
+    const internalElement = getInternalVideoElementFor(video.element);
 
     video.mutateElement(() => {
       this.hideControls_();

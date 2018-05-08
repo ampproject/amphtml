@@ -34,7 +34,7 @@ import {Services} from '../services';
 import {VideoDocking} from './video/docking';
 import {VideoServiceSync} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
-import {VideoUtils} from '../utils/video';
+import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {
   createCustomEvent,
   getData,
@@ -386,16 +386,6 @@ let VideoOrBaseElementDef;
 
 
 /**
- * @param {!Element} element
- * @return {!Element}
- * @restricted
- */
-function getInternalElementFor(element) {
-  return dev().assertElement(element.querySelector('video, iframe'));
-}
-
-
-/**
  * VideoEntry represents an entry in the VideoManager's list.
  */
 class VideoEntry {
@@ -612,7 +602,7 @@ class VideoEntry {
   videoLoaded() {
     this.loaded_ = true;
 
-    this.internalElement_ = getInternalElementFor(this.video.element);
+    this.internalElement_ = getInternalVideoElementFor(this.video.element);
 
     this.fillMediaSessionMetadata_();
 
@@ -1061,7 +1051,7 @@ export class AutoFullscreenManager {
     // where the player component is implemented via an <iframe>, we need to
     // rely on a postMessage API to fullscreen. Such an API is not necessarily
     // provided by every player.
-    const internalElement = getInternalElementFor(video);
+    const internalElement = getInternalVideoElementFor(video);
     if (internalElement.tagName.toLowerCase() == 'video') {
       return true;
     }
