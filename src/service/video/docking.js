@@ -451,7 +451,10 @@ export class VideoDocking {
    * @private
    */
   showControlsOnTap_(element) {
-    listen(element, 'click', () => {
+    listen(element, 'mouseup', () => {
+      if (this.isDragging_) {
+        return;
+      }
       const video = this.getDockedVideo_();
       const {
         container,
