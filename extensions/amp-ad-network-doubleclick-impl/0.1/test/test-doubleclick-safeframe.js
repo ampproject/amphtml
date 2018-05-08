@@ -409,6 +409,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       safeframeHost.baseInstance_.promiseId_++;
       return Services.timerFor(env.win).promise(1000).then(() => {
         expect(sendMessageStub).to.not.be.called;
+      });
+    });
 
     it('should get geometry when scrolled', () => {
 

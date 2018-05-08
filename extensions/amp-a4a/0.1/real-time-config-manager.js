@@ -253,10 +253,10 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     checkStillCurrent();
     timeoutMillis -= (urlReplacementStartTime - Date.now());
     return send(url);
-  }).catch(unused => {
+  }).catch(error => {
     return error.message == 'CANCELLED' ? undefined :
-    buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
-        callout, errorReportingUrl, win, ampDoc);
+      buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
+          callout, errorReportingUrl, win, ampDoc);
   }));
 }
 
