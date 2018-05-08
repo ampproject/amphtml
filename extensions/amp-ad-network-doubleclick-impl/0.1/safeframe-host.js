@@ -430,7 +430,7 @@ export class SafeframeHostApi {
    */
   sendMessage_(payload, serviceName) {
     if (!this.iframe_.contentWindow) {
-      dev().error('Frame contentWindow unavailable.');
+      dev().error(TAG, 'Frame contentWindow unavailable.');
       return;
     }
     const message = dict();

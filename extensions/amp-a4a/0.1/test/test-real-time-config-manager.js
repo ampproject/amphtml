@@ -539,7 +539,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       it('should return null for rtcConfig missing required values', () => {
         setRtcConfig(rtcConfig);
         allowConsoleError(() => {
-          dev().error('Error');
+          dev().error('RTCTESTS', 'Error');
           validatedRtcConfig = validateRtcConfig_(element);
         });
         expect(validatedRtcConfig).to.be.null;
