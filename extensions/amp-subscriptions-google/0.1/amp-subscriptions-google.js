@@ -230,8 +230,11 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  executeAction(unusedAction) {
-    //TODO: implement this
+  executeAction(action) {
+    if (action === 'subscribe') {
+      this.runtime_.showOffers({list: 'amp', isClosable: true});
+      return Promise.resolve(true);
+    }
     return Promise.resolve(false);
   }
 
