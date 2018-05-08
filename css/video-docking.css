@@ -128,3 +128,20 @@
   opacity: 1;
 }
 
+/*
+  Z-index ordering positions all right below amp-sidebar, which has a value of
+  2147483647.
+  Please keep this list in descending order.
+*/
+.amp-video-docked-controls {
+  z-index: 2147483646 !important;
+}
+.i-amphtml-video-docked-overlay {
+  z-index: 2147483645 !important;
+}
+.i-amphtml-video-docked {
+  z-index: 2147483644 !important;
+}
+.amp-video-docked-shadow {
+  z-index: 2147483643 !important;
+}

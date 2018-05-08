@@ -177,21 +177,6 @@ function mapStep(step, min, max) {
 
 
 /**
- * Order layers across the z-axis. First element passed in will be at the very
- * bottom of list, last element will be at the very top.
- * @param {...!Element} layers
- */
-function orderLayers(...layers) {
-  // This the z-index of <amp-sidebar> minus 1.
-  const zIndex = 2147483646;
-  for (let i = 0; i < layers.length; i++) {
-    const offsetZ = -(layers.length - i);
-    setImportantStyles(layers[i], {'z-index': (zIndex + offsetZ).toString()});
-  }
-}
-
-
-/**
  * @param {!Element} element
  * @restricted
  */
@@ -909,7 +894,6 @@ export class VideoDocking {
       internalElement.classList.add(BASE_CLASS_NAME);
       shadowLayer.removeAttribute('hidden');
       overlay.removeAttribute('hidden');
-      orderLayers(shadowLayer, internalElement, overlay, controls);
       setImportantStyles(internalElement, positioningStyles);
       setImportantStyles(shadowLayer, positioningStyles);
       setImportantStyles(overlay, positioningStyles);
