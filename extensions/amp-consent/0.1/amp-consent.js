@@ -216,11 +216,11 @@ export class AmpConsent extends AMP.BaseElement {
       if (!this.uiInit_) {
         this.uiInit_ = true;
         toggle(this.element, true);
-        this.getViewport().addToFixedLayer(this.element);
       }
 
       this.element.classList.remove('amp-hidden');
       this.element.classList.add('amp-active');
+      this.getViewport().addToFixedLayer(this.element);
 
       // Display the current instance
       this.currentDisplayInstance_ = instanceId;
@@ -242,10 +242,9 @@ export class AmpConsent extends AMP.BaseElement {
     this.vsync_.mutate(() => {
       this.element.classList.add('amp-hidden');
       this.element.classList.remove('amp-active');
-      // Do not remove from fixed layer because of invoke button
-      // this.getViewport().removeFromFixedLayer(this.element);
+      // Need to remove from fixed layer and add it back to update element's top
+      this.getViewport().removeFromFixedLayer(this.element);
       dev().assert(uiToHide, 'no consent UI to hide');
-
       toggle(uiToHide, false);
     });
     if (this.dialogResolver_[this.currentDisplayInstance_]) {
@@ -547,10 +546,10 @@ export class AmpConsent extends AMP.BaseElement {
         if (!this.uiInit_) {
           this.uiInit_ = true;
           toggle(this.element, true);
-          this.getViewport().addToFixedLayer(this.element);
         }
         this.element.classList.add('amp-active');
         this.element.classList.remove('amp-hidden');
+        this.getViewport().addToFixedLayer(this.element);
         setImportantStyles(dev().assertElement(this.postPromptUI_),
             {display: 'block'});
       });
@@ -565,6 +564,7 @@ export class AmpConsent extends AMP.BaseElement {
           this.element.classList.add('amp-hidden');
           this.element.classList.remove('amp-active');
         }
+        this.getViewport().removeFromFixedLayer(this.element);
         toggle(dev().assertElement(this.postPromptUI_), false);
       });
     });
