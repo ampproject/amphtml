@@ -46,7 +46,7 @@ describe('batchFetchJsonFor', () => {
 
     urlReplacements = {
       expandUrlAsync: sandbox.stub(),
-      collectUnwhitelistedVars: sandbox.stub(),
+      collectUnwhitelistedVarsSync: sandbox.stub(),
     };
     sandbox.stub(Services, 'urlReplacementsForDoc').returns(urlReplacements);
 
@@ -68,7 +68,7 @@ describe('batchFetchJsonFor', () => {
       return batchFetchJsonFor(ampdoc, el).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=FOO&y=BAR');
         expect(urlReplacements.expandUrlAsync).to.not.be.called;
-        expect(urlReplacements.collectUnwhitelistedVars).to.not.be.called;
+        expect(urlReplacements.collectUnwhitelistedVarsSync).to.not.be.called;
       });
     });
 
@@ -79,16 +79,15 @@ describe('batchFetchJsonFor', () => {
       urlReplacements.expandUrlAsync
           .withArgs('https://data.com?x=FOO&y=BAR')
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
-      urlReplacements.collectUnwhitelistedVars
+      urlReplacements.collectUnwhitelistedVarsSync
           .withArgs(el)
-          .returns(Promise.resolve(['BAR']));
-      const userError = sandbox.stub(user(), 'error');
+          .returns(['BAR']);
+
       const optIn = UrlReplacementPolicy.OPT_IN;
-      return batchFetchJsonFor(ampdoc, el, null, optIn).then(() => {
-        expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
-        expect(userError).calledWithMatch(
-            'AMP-LIST', /data-amp-replace="BAR"/);
-      });
+      const rejectError =
+          /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
+      return batchFetchJsonFor(ampdoc, el, null, optIn)
+          .should.eventually.be.rejectedWith(rejectError);
     });
 
     it('should replace all URL vars if opt_urlReplacement == ALL', () => {
@@ -97,11 +96,12 @@ describe('batchFetchJsonFor', () => {
       urlReplacements.expandUrlAsync
           .withArgs('https://data.com?x=FOO&y=BAR')
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
+
       const userError = sandbox.stub(user(), 'error');
       const all = UrlReplacementPolicy.ALL;
       return batchFetchJsonFor(ampdoc, el, null, all).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
-        expect(urlReplacements.collectUnwhitelistedVars).to.not.be.called;
+        expect(urlReplacements.collectUnwhitelistedVarsSync).to.not.be.called;
         expect(userError).to.not.be.called;
       });
     });
