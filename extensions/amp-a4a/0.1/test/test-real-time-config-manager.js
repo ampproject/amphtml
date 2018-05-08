@@ -33,6 +33,7 @@ import {
 import {Services} from '../../../../src/services';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {dev} from '../../../../src/log';
 import {isFiniteNumber} from '../../../../src/types';
 
 describes.realWin('real-time-config-manager', {amp: true}, env => {
@@ -537,7 +538,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
       it('should return null for rtcConfig missing required values', () => {
         setRtcConfig(rtcConfig);
-        validatedRtcConfig = validateRtcConfig_(element);
+        allowConsoleError(() => {
+          dev().error('RTCTESTS', 'Error');
+          validatedRtcConfig = validateRtcConfig_(element);
+        });
         expect(validatedRtcConfig).to.be.null;
       });
     });
@@ -571,6 +575,23 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         expect(errorResponse.error).to.equal(
             RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT);
       });
+    });
+
+    it('should not send RTC if no longer current', () => {
+      const url = 'https://www.example.biz/';
+      const seenUrls = {};
+      const promiseArray = [];
+      const rtcStartTime = Date.now();
+      const timeoutMillis = 1000;
+      const macros = {};
+      // Simulate an unlayoutCallback call
+      inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
+          rtcStartTime, macros, timeoutMillis);
+      a4aElement.promiseId_++;
+      return promiseArray[0].then(errorResponse => {
+        expect(errorResponse).to.be.undefined;
+      });
+
     });
   });
 
