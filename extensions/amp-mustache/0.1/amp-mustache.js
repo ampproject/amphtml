@@ -170,6 +170,8 @@ const WHITELISTED_ATTRS = [
   'subscriptions-actions',
   'subscriptions-section',
   'subscriptions-display',
+  'subscriptions-service',
+  'subscriptions-decorate',
 ];
 
 /** @const {!Object<string, !Array<string>>} */
