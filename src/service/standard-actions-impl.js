@@ -172,7 +172,18 @@ export class StandardActions {
       return null;
     }
     const node = invocation.node;
-    const win = (node.ownerDocument || node).defaultView;
+    // <amp-iframe> requires sandbox="allow-top-navigation" to prevent
+    // privilege escalation.
+    if (node.tagName == 'AMP-IFRAME') {
+      const sandbox = node.getAttribute('sandbox')
+          .split(' ').map(s => s.trim());
+      if (!sandbox.includes('allow-top-navigation')) {
+        user().error(TAG, '"AMP.navigateTo" is only allowed on <amp-iframe> ' +
+            'when its "sandbox" attribute contains "allow-top-navigation".');
+        return null;
+      }
+    }
+    const win = (target.ownerDocument || target).defaultView;
     const url = invocation.args['url'];
     const requestedBy = `AMP.${invocation.method}`;
     Services.navigationForDoc(this.ampdoc).navigateTo(win, url, requestedBy);

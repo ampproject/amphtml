@@ -21,8 +21,8 @@ import {StandardActions} from '../../src/service/standard-actions-impl';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
-
 import {setParentWindow} from '../../src/service';
+import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
@@ -229,6 +229,43 @@ describes.sandboxed('StandardActions', {}, () => {
 
       // Should succeed.
       invocation.satisfiesTrust = () => true;
+      standardActions.handleAmpTarget(invocation);
+      expect(navigator.navigateTo).to.be.calledOnce;
+      expect(navigator.navigateTo).to.be.calledWithExactly(
+          win, 'http://bar.com', 'AMP.navigateTo');
+    });
+
+    it('should require sandbox="allow-top-navigation" for navigateTo ' +
+        'from <amp-iframe>', () => {
+      const navigator = {navigateTo: sandbox.stub()};
+      sandbox.stub(Services, 'navigationForDoc').returns(navigator);
+      const userError = sandbox.stub(user(), 'error');
+
+      const win = {};
+      const attributes = {};
+      const invocation = {
+        method: 'navigateTo',
+        args: {
+          url: 'http://bar.com',
+        },
+        target: {
+          getAttribute: attr => attributes[attr] || '',
+          ownerDocument: {
+            defaultView: win,
+          },
+          tagName: 'AMP-IFRAME',
+        },
+        satisfiesTrust: () => true,
+      };
+
+      // Should fail.
+      standardActions.handleAmpTarget(invocation);
+      expect(navigator.navigateTo).to.not.be.called;
+      expect(userError).to.be.calledWithMatch('STANDARD-ACTIONS',
+          '"AMP.navigateTo" is only allowed on <amp-iframe>');
+
+      // Should succeed.
+      attributes['sandbox'] = 'allow-scripts allow-top-navigation';
       standardActions.handleAmpTarget(invocation);
       expect(navigator.navigateTo).to.be.calledOnce;
       expect(navigator.navigateTo).to.be.calledWithExactly(
