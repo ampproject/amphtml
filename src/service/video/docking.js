@@ -451,7 +451,6 @@ export class VideoDocking {
     const video = this.getDockedVideo_();
     video.fullscreenEnter();
     video.play(/* auto */ false);
-    video.unmute();
   }
 
   /**
