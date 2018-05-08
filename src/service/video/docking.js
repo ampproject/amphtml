@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {PlayingStates, VideoEvents} from '../../video-interface';
+import {
+  PlayingStates,
+  VideoAttributes,
+  VideoEvents,
+} from '../../video-interface';
 import {
   PositionInViewportEntryDef, // eslint-disable-line no-unused-vars
   PositionObserverFidelity,
@@ -24,7 +28,7 @@ import {
 import {Services} from '../../services';
 // Source for this constant is css/video-docking.css
 import {cssText} from '../../../build/video-docking.css.js';
-import {dev} from '../../log';
+import {dev, user} from '../../log';
 import {getServiceForDoc} from '../../service';
 import {htmlFor, htmlRefs} from '../../static-template';
 import {
@@ -36,7 +40,6 @@ import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
 import {once} from '../../utils/function';
 import {px, resetStyles, setImportantStyles, translate} from '../../style';
-import {throttle} from '../../utils/rate-limit';
 
 
 /** @private @const {number} */
@@ -77,21 +80,6 @@ export const RelativeY = {TOP: 0, BOTTOM: 1};
 
 /** @enum */
 export const Direction = {UP: 1, DOWN: -1};
-
-
-function throttleByAnimationFrame(win, fn) {
-  let running = false;
-  return (...args) => {
-    if (running) {
-      return;
-    }
-    running = true;
-    win.requestAnimationFrame(() => {
-      fn.apply(null, args);
-      running = false;
-    });
-  };
-}
 
 
 /**
@@ -138,6 +126,26 @@ const transform = (x, y, scale) => `translate(${x}px, ${y}px) scale(${scale})`;
 function swap(a, b) {
   a.setAttribute('hidden', '');
   b.removeAttribute('hidden');
+}
+
+
+/**
+ * @param {!Window} win
+ * @param {function(...*)} fn
+ * @return {function(...*)}
+ */
+function throttleByAnimationFrame(win, fn) {
+  let running = false;
+  return (...args) => {
+    if (running) {
+      return;
+    }
+    running = true;
+    win.requestAnimationFrame(() => {
+      fn.apply(null, args);
+      running = false;
+    });
+  };
 }
 
 
@@ -249,20 +257,22 @@ export class VideoDocking {
     this.currentlyDocked_ = null;
 
     /** @private @const {function():!Timeout} */
-    this.getDockingTimeout_ = once(() =>
-      new Timeout(this.ampdoc_.win, video => this.onDockingTimeout_(video)));
+    this.getDockingTimeout_ = this.lazyTimeout_(video =>
+      this.onDockingTimeout_(/** @type {!VideoOrBaseElementDef} */ (video)));
 
     /** @private @const {function():!Timeout} */
-    this.getControlsTimeout_ = once(() =>
-      new Timeout(this.ampdoc_.win, () =>
-        this.hideControls_(/* respectSticky */ true)));
+    this.getHideControlsTimeout_ = this.lazyTimeout_(() =>
+      this.hideControls_(/* respectSticky */ true));
+
+    /** @private @const {function():!Timeout} */
+    this.getUndockingTimeout_ = this.lazyTimeout_(video =>
+      this.undock_(/** @type {!VideoOrBaseElementDef} */ (video)));
 
     /** @private {!RelativeX} */
     // Overriden when user drags the video to a corner.
     // Y-corner is determined based on scroll direction.
     this.preferredCornerX_ =
         isRTL(this.getDoc_()) ? RelativeX.LEFT : RelativeX.RIGHT;
-
 
     /**
      * Returns an element representing a shadow under the docked video.
@@ -343,8 +353,11 @@ export class VideoDocking {
     /** @private {boolean} */
     this.stickyControls_ = false;
 
-    /** @private {?Timeout} */
-    this.undockingTimeout_ = null;
+    /** @private {boolean} */
+    this.isDragging_ = false;
+
+    /** @private {!Array<!VideoOrBaseElementDef>} */
+    this.observed_ = [];
 
     /** @private @const {!function()} */
     // Lazily invoked.
@@ -354,6 +367,8 @@ export class VideoDocking {
       this.viewport_.onScroll(
           throttleByAnimationFrame(this.ampdoc_.win,
               () => this.updateScroll_()));
+
+      this.viewport_.onResize(() => this.updateOnResize_());
 
       this.installStyles_();
     });
@@ -369,6 +384,20 @@ export class VideoDocking {
         /* opt_ext */ 'amp-video-docking');
   }
 
+  /**
+   * @param {function(...*)} fn
+   * @return {function():!Timeout}
+   * @private
+   */
+  lazyTimeout_(fn) {
+    return once(() => new Timeout(this.ampdoc_.win, fn));
+  }
+
+  /** @private */
+  updateOnResize_() {
+    this.observed_.forEach(video => this.onPositionChange_(video));
+  }
+
   /** @param {!VideoOrBaseElementDef} video */
   register(video) {
     this.install_();
@@ -377,6 +406,7 @@ export class VideoDocking {
     const fidelity = PositionObserverFidelity.HIGH;
     this.getPositionObserver_().observe(element, fidelity,
         () => this.onPositionChange_(video));
+    this.observed_.push(video);
   }
 
   /** @private */
@@ -567,17 +597,10 @@ export class VideoDocking {
   undockBecauseVisible_(video, ratio = 1, timeout = 100) {
     const {element} = video;
     if (this.currentlyDocked_ && this.isVisible_(element, ratio)) {
-      if (this.undockingTimeout_ === null) {
-        this.undockingTimeout_ =
-            new Timeout(this.ampdoc_.win, () => this.undock_(video));
-        this.undockingTimeout_.trigger(timeout);
-      }
+      this.getUndockingTimeout_().trigger(timeout);
       return true;
     }
-    if (this.undockingTimeout_ !== null) {
-      this.undockingTimeout_.cancel();
-      this.undockingTimeout_ = null;
-    }
+    this.getUndockingTimeout_().cancel();
     return false;
   }
 
@@ -605,7 +628,13 @@ export class VideoDocking {
   ignoreDueToSize_(video) {
     const {width, height} = video.getLayoutBox();
     const aspectRatio = width / height;
-    if (aspectRatio < 1) { // ignore portrait
+    if (aspectRatio < 1) {
+      const {element} = video;
+      const TAG = element.tagName.toUpperCase();
+      const attr = VideoAttributes.DOCK;
+      user().error(TAG,
+        `Minimize-to-corner (${attr}) does not support portrait video.`,
+        element);
       return true;
     }
     if (this.getAreaWidth_() < MIN_VIEWPORT_WIDTH) {
@@ -703,7 +732,6 @@ export class VideoDocking {
 
   /** @private */
   dismiss_(dirX = 0, dirY = 0) {
-    // TODO(alanorozco): Docking can no longer happen, so clean up.
     const video = this.getDockedVideo_();
     const {posY} = this.currentlyDocked_;
     video.pause();
@@ -776,7 +804,7 @@ export class VideoDocking {
         !this.positionMatchesScroll_(this.lastDismissedPosY_)) {
       return false;
     }
-    if (!this.isVisible_(video.element, 0)) {
+    if (!this.isVisible_(video.element, FLOAT_TOLERANCE)) {
       this.resetDismissed_();
     }
     return true;
@@ -991,6 +1019,10 @@ export class VideoDocking {
       return;
     }
 
+    if (this.isDragging_) {
+      return;
+    }
+
     const currentlyDocked = dev().assert(this.currentlyDocked_);
     const {posX, posY} = currentlyDocked;
 
@@ -1037,7 +1069,11 @@ export class VideoDocking {
     const offset = {x: 0, y: 0};
 
     const onDragMove = throttleByAnimationFrame(this.ampdoc_.win,
-        e => this.onDragMove_(e, /* initialX */ x, /* initialY */ y, offset));
+        e => this.onDragMove_(
+            /** @type {!TouchEvent|!MouseEvent} */ (e),
+            /* initialX */ x,
+            /* initialY */ y,
+            offset));
 
     const onDragEnd = () => this.onDragEnd_(unlisteners, offset);
 
@@ -1064,16 +1100,17 @@ export class VideoDocking {
     const {x, y} = pointerCoords(e);
     offset.x = x - startX;
     offset.y = y - startY;
+    this.hideControls_();
+    this.isDragging_ = true;
     this.offset_(offset.x, offset.y);
   }
 
   /**
    * Works around https://bugs.webkit.org/show_bug.cgi?id=184250
-   * @param {!Event} e
    * @return {!UnlistenDef}
    * @private
    */
-  workaroundWebkitDragAndScrollIssue_(e) {
+  workaroundWebkitDragAndScrollIssue_() {
     const {win} = this.ampdoc_;
     if (!Services.platformFor(win).isIos()) {
       return () => { /* NOOP */ };
@@ -1092,6 +1129,8 @@ export class VideoDocking {
     unlisteners.forEach(unlisten => unlisten.call());
 
     this.viewport_.resetScroll();
+
+    this.isDragging_ = false;
 
     if (this.dismissOnDragEnd_(offset.x, offset.y)) {
       return;
@@ -1253,30 +1292,20 @@ export class VideoDocking {
    * @private
    */
   undock_(video, dismissDirX = 0, dismissDirY = 0) {
-    const {boundingClientRect} = video.element.getIntersectionChangeEntry();
-    if (!boundingClientRect) {
-      // TODO(alanorozco): Transition
+    const internalElement = getInternalElementFor(video.element);
+    if (!internalElement.classList.contains('i-amphtml-docked')) {
+      return;
+    }
+    // TODO(alanorozco): animate dismissal
+    if (dismissDirX != 0) {
       this.resetUndocked_(video);
       return;
     }
-    const {top, left} = boundingClientRect;
-    const transitionDuration =
-        this.placeAt_(video, left, top, /* scale */ 1, /* step */ 0);
-    setTimeout(() => this.resetUndocked_(video), transitionDuration);
-    // const internalElement = getInternalElementFor(video.element);
-    // if (!internalElement.classList.contains('i-amphtml-docked')) {
-    //   return;
-    // }
-    // // TODO(alanorozco): animate dismissal
-    // if (dismissDirX != 0) {
-    //   this.resetUndocked_(video);
-    //   return;
-    // }
-    // if (dismissDirY != 0) {
-    //   this.resetUndocked_(video);
-    //   return;
-    // }
-    // this.resetUndocked_(video);
+    if (dismissDirY != 0) {
+      this.resetUndocked_(video);
+      return;
+    }
+    this.resetUndocked_(video);
   }
 
   /**
@@ -1326,6 +1355,6 @@ export class VideoDocking {
    * @private
    */
   hideControlsOnTimeout_(time = CONTROLS_TIMEOUT) {
-    this.getControlsTimeout_().trigger(time);
+    this.getHideControlsTimeout_().trigger(time);
   }
 }
