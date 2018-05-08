@@ -774,7 +774,9 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'push': 'not bool',
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(expandMessage);
+      allowConsoleError(() => {
+        receiveMessage(expandMessage);
+      });
       return Services.timerFor(env.win).promise(100).then(() => {
         expect(sendResizeResponseSpy).to.be.calledWith(
             false, SERVICE.EXPAND_RESPONSE);
