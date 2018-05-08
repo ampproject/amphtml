@@ -33,6 +33,12 @@ export class ClickDelayFilter extends Filter {
     'Invalid ClickDelay spec');
 
     /**
+     * @const {!../config.ClickDelayConfig}
+     * @visibleForTesting
+     */
+    this.spec = spec;
+
+    /**
     * @type {number}
     * @visibleForTesting
     */
@@ -52,17 +58,19 @@ export class ClickDelayFilter extends Filter {
           win['performance']['timing'][spec.startTimingEvent];
       }
     }
-
-    /** @private {number} */
-    this.delay_ = spec.delay;
   }
 
   /** @override */
   filter() {
-    return (Date.now() - this.intervalStart) >= this.delay_;
+    return (Date.now() - this.intervalStart) >= this.spec.delay;
   }
 }
 
-export function makeClickDelaySpec(delay) {
-  return {type: FilterType.CLICK_DELAY, delay};
+/**
+ * @param {number} delay
+ * @param {string=} startTimingEvent
+ * @return {!../config.ClickDelayConfig}
+ */
+export function makeClickDelaySpec(delay, startTimingEvent = undefined) {
+  return {type: FilterType.CLICK_DELAY, delay, startTimingEvent};
 }

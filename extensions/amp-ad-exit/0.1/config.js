@@ -22,10 +22,17 @@ import {user} from '../../../src/log';
 
 /**
  * @typedef {{
+ *   startTimingEvent: (string|undefined)
+ * }}
+ */
+export let AmpAdExitConfigOptions;
+
+/**
+ * @typedef {{
  *   targets: !Object<string, !NavigationTargetConfig>,
  *   filters: (!Object<string, !FilterConfig>|undefined),
  *   transport: (!Object<TransportMode, boolean>|undefined),
- *   disableDefaultFilters: (!Array<!FilterType>|undefined)
+ *   options: (!AmpAdExitConfigOptions|undefined)
  * }}
  */
 export let AmpAdExitConfig;

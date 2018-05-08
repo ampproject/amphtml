@@ -19,6 +19,7 @@ import {
   ANALYTICS_IFRAME_TRANSPORT_CONFIG,
 } from '../../../amp-analytics/0.1/vendors';
 import {AmpAdExit} from '../amp-ad-exit';
+import {FilterType} from '../filters/filter';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';
@@ -247,42 +248,15 @@ describes.realWin('amp-ad-exit', {
     expect(open).to.not.have.been.called;
   });
 
-  it('should not use default click protection', () => {
+  it('should use options.startTimingEvent', () => {
     return makeElementWithConfig({
-      targets: {
-        halfSecondDelay: {
-          'finalUrl': 'http://localhost:8000/simple',
-          'filters': ['halfSecond'],
-        },
-      },
-      disableDefaultFilters: ['clickDelay'],
-      filters: {
-        'halfSecond': {
-          type: 'clickDelay',
-          delay: 500,
-        },
-      },
+      targets: {navStart: {'finalUrl': 'http://localhost:8000/simple'}},
+      options: {'startTimingEvent': 'navigationStart'},
     }).then(el => {
-      element = el;
-      const open = sandbox.stub(win, 'open');
-
-      element.implementation_.executeAction({
-        method: 'exit',
-        args: {target: 'halfSecondDelay'},
-        event: makeClickEvent(1),
-        satisfiesTrust: () => true,
-      });
-
-      expect(open).to.not.have.been.called;
-
-      element.implementation_.executeAction({
-        method: 'exit',
-        args: {target: 'halfSecondDelay'},
-        event: makeClickEvent(500),
-        satisfiesTrust: () => true,
-      });
-
-      expect(open).to.have.been.called;
+      expect(el.implementation_.defaultFilters_.length).to.equal(2);
+      const clickFilter = el.implementation_.defaultFilters_[0];
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
     });
   });
 
