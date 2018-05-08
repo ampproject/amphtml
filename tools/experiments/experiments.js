@@ -310,7 +310,7 @@ const EXPERIMENTS = [
     name: 'Enables amp-fx="fly-in-{bottom,top,left,right}" - ' +
       'scroll triggered timed fly in animations',
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',    
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
 ];
 

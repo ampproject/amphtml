@@ -19,8 +19,9 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
-import {convertEasingKeyword, defaultDurationValues, flyInDistanceValues,
-  installStyles, marginValues, resolvePercentageToNumber}
+import {convertEasingKeyword, defaultDurationValues,
+  defaultEasingValues, defaultFlyInDistanceValues,
+  defaultMarginValues, installStyles, resolvePercentageToNumber}
   from './amp-fx-presets-utils';
 import {getServiceForDoc} from '../../../../src/service';
 import {
@@ -116,16 +117,16 @@ export class FxElement {
     /** @private {number} */
     this.marginStart_ = element.hasAttribute('data-margin-start') ?
       resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
-      marginValues(this.fxType_)['start'];
+      defaultMarginValues(this.fxType_)['start'];
 
     /** @private {number} */
     this.marginEnd_ = element.hasAttribute('data-margin-end') ?
       resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
-      marginValues(this.fxType_)['end'];
+      defaultMarginValues(this.fxType_)['end'];
 
     /** @private {string} */
     this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
-      element.getAttribute('data-easing') : 'ease-in');
+      element.getAttribute('data-easing') : defaultEasingValues(this.fxType_));
 
     /** @private {string} */
     this.duration_ = element.hasAttribute('data-duration') ?
@@ -135,7 +136,7 @@ export class FxElement {
     /** @private {number} */
     this.flyInDistance_ = element.hasAttribute('data-fly-in-distance') ?
       parseFloat(element.getAttribute('data-fly-in-distance')) :
-      flyInDistanceValues(this.ampdoc_, this.fxType_);
+      defaultFlyInDistanceValues(this.ampdoc_, this.fxType_);
 
     /** @private {boolean} */
     this.hasRepeat_ = element.hasAttribute('data-repeat');

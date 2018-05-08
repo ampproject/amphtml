@@ -162,7 +162,10 @@ The `fly-in` effects allow an element's position to be translated by a specified
 
 ##### data-duration (optional)
 
-This is the duration over which the animation takes places. The default value is `Xms`.
+This is the duration over which the animation takes places. The default value differs across device as follows:
+* Mobile - `400ms`,
+* Tablet - `500ms`,
+* Desktop - `600ms`.
 
 ##### data-easing (optional)
 
@@ -170,12 +173,44 @@ This parameter lets you vary the animation's speed over the course of its durati
 * “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
 * “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
 * “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00)
-* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
+* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00) (default)
 or specify a `custom-bezier()` input
 
 ##### data-fly-in-distance (optional)
 
-This parameter determines the translation to take place. The value is specified in `<percent>` of viewport. The default value is `X%`.
+This parameter determines the translation to take place. The value is specified in `<percent>` of viewport. The default value are as follows:
+<table>
+  <tr>
+    <th>amp-fx value</th>
+    <th>Mobile</th>
+    <th>Tablet</th>
+    <th>Desktop</th>
+  </tr>
+  <tr>
+    <td>fly-in-bottom</td>
+    <td>`25%`</td>
+    <td>`25%`</td>
+    <td>`33%`</td>
+  </tr>
+  <tr>
+    <td>fly-in-top</td>
+    <td>`25%`</td>
+    <td>`25%`</td>
+    <td>`33%`</td>
+  </tr>
+  <tr>
+    <td>fly-in-left</td>
+    <td>`100%`</td>
+    <td>`100%`</td>
+    <td>`100%`</td>
+  </tr>
+  <tr>
+    <td>fly-in-right</td>
+    <td>`100%`</td>
+    <td>`100%`</td>
+    <td>`100%`</td>
+  </tr>
+</table>
 
 In the below example, the element is translated along the Y axis across `20%` of the viewport. 
 
@@ -187,7 +222,7 @@ In the below example, the element is translated along the Y axis across `20%` of
 
 ##### data-margin-start (optional)
 
-This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the element has crossed that percentage of the viewport. The default value is `X%`.
+This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the element has crossed that percentage of the viewport. The default value is `5%`.
 
 ## Validation
 

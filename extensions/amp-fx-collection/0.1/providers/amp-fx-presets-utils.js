@@ -60,36 +60,43 @@ export function installStyles(ampdoc, element, fxType, flyInDistance) {
     case 'parallax':
       return {
         'will-change': 'transform',
+        'visibility': 'visible',
       };
     case 'fade-in':
       return {
         'will-change': 'opacity',
         'opacity': 0,
+        'visibility': 'visible',
       };
     case 'fade-in-scroll':
       return {
         'will-change': 'opacity',
         'opacity': 0,
+        'visibility': 'visible',
       };
     case 'fly-in-bottom':
       return {
         'will-change': 'transform',
         'top': 'calc(' + style.top + ' + ' + flyInDistance + 'vh)',
+        'visibility': 'visible',
       };
     case 'fly-in-top':
       return {
         'will-change': 'transform',
         'top': 'calc(' + style.top + ' - ' + flyInDistance + 'vh)',
+        'visibility': 'visible',
       };
     case 'fly-in-left':
       return {
         'will-change': 'transform',
         'left': 'calc(' + style.left + ' - ' + flyInDistance + 'vw)',
+        'visibility': 'visible',
       };
     case 'fly-in-right':
       return {
         'will-change': 'transform',
         'left': 'calc(' + style.left + ' + ' + flyInDistance + 'vw)',
+        'visibility': 'visible',
       };
   }
 }
@@ -115,11 +122,11 @@ export function defaultDurationValues(ampdoc, fxType) {
   }
 }
 
-export function flyInDistanceValues(ampdoc, fxType) {
-  const screenWidth = ampdoc.win.screen.width;
+export function defaultFlyInDistanceValues(ampdoc, fxType) {
   switch (fxType) {
     case 'fly-in-bottom':
     case 'fly-in-top':
+      const screenWidth = ampdoc.win.screen.width;
       if (screenWidth < 1000) {
         return 25;
       } else {
@@ -127,19 +134,20 @@ export function flyInDistanceValues(ampdoc, fxType) {
       }
     case 'fly-in-left':
     case 'fly-in-right':
-      if (screenWidth < 1000) {
-        return 25;
-      } else {
-        return 30;
-      }
+    // TODO: Should be 100%
+      return 70;
     default:
       return 1;
   }
 }
 
-export function marginValues(fxType) {
+export function defaultMarginValues(fxType) {
   switch (fxType) {
     case 'fade-in':
+    case 'fly-in-right':
+    case 'fly-in-left':
+    case 'fly-in-top':
+    case 'fly-in-bottom':
       return {
         'start': 0.05,
       };
@@ -153,5 +161,19 @@ export function marginValues(fxType) {
         'start': 0,
         'end': 1,
       };
+  }
+}
+
+export function defaultEasingValues(fxType) {
+  switch (fxType) {
+    case 'fade-in':
+      return 'ease-in';
+    case 'fly-in-right':
+    case 'fly-in-left':
+    case 'fly-in-top':
+    case 'fly-in-bottom':
+      return 'ease-out';
+    default:
+      return 'ease-in';
   }
 }
