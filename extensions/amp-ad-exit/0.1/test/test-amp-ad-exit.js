@@ -250,11 +250,26 @@ describes.realWin('amp-ad-exit', {
 
   it('should use options.startTimingEvent', () => {
     return makeElementWithConfig({
-      targets: {navStart: {'finalUrl': 'http://localhost:8000/simple'}},
+      targets: {
+        navStart: {
+          'finalUrl': 'http://localhost:8000/simple',
+          'filters': ['twoSecond'],
+        },
+      },
       options: {'startTimingEvent': 'navigationStart'},
+      filters: {
+        'twoSecond': {
+          type: 'clickDelay',
+          delay: 2000,
+        },
+      },
     }).then(el => {
       expect(el.implementation_.defaultFilters_.length).to.equal(2);
-      const clickFilter = el.implementation_.defaultFilters_[0];
+      let clickFilter = el.implementation_.defaultFilters_[0];
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
+      clickFilter = el.implementation_.userFilters_['twoSecond'];
+      expect(clickFilter).to.be.ok;
       expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
       expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
     });

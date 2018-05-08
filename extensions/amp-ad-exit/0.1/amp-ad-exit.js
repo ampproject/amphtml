@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FilterType} from './filters/filter';
 import {
   MessageType,
   deserializeMessage,
@@ -253,13 +254,19 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
+      let defaultClickStartTimingEvent;
       if (isObject(config.options) &&
           typeof config.options.startTimingEvent === 'string') {
+        defaultClickStartTimingEvent = config.options.startTimingEvent;
         this.defaultFilters_.splice(0, 1, createFilter('minDelay',
             makeClickDelaySpec(1000, config.options.startTimingEvent), this));
       }
       for (const name in config.filters) {
         const spec = config.filters[name];
+        if (spec.type == FilterType.CLICK_DELAY) {
+          spec.startTimingEvent =
+              spec.startTimingEvent || defaultClickStartTimingEvent;
+        }
         this.userFilters_[name] = createFilter(name, spec, this);
       }
       for (const name in config.targets) {
