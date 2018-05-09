@@ -20,7 +20,7 @@ import {
   SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
-import {Entitlement, GrantReasons} from '../../amp-subscriptions/0.1/entitlement';
+import {Entitlement, GrantReason} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
@@ -177,7 +177,7 @@ export class GoogleSubscriptionsPlatform {
     // whether the access has been granted and whether user is a subscriber.
     if (!entitlement.granted) {
       this.runtime_.showOffers({list: 'amp'});
-    } else if (entitlement.grantReason !== GrantReasons.SUBSCRIBED) {
+    } else if (entitlement.grantReason !== GrantReason.SUBSCRIBED) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
   }
