@@ -1,5 +1,5 @@
 <!---
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -147,6 +147,11 @@ The fields to specify in the configuration object:
         <li>data-* (i.e. any data attribute)</li>
       </ul>
     </td>
+  </tr>
+  <tr>
+    <td><code>adConstraints</code></td>
+    <td>AdConstraintsObj</td>
+    <td>An <em>optional</em> field that specifies the contraints that should be used when placing ads on the page.</td>
   </tr>
 </table>
 
@@ -305,6 +310,78 @@ The ENUM values for the `type` field in the `placements` configuration object:
     <td>BANNER</td>
     <td>1</td>
     <td>Placement describes a banner ad position.</td>
+  </tr>
+</table>
+
+#### AdConstraintsObj
+
+The fields to specify in the `adConstraints` configuration object: 
+
+<table>
+  <tr>
+    <th class="col-twenty">Field Name</th>
+    <th class="col-twenty">Type</th>
+    <th class="col-fourty" >Description</th>
+  </tr>
+  <tr>
+    <td><code>initialMinSpacing</code></td>
+    <td>string</td>
+    <td>
+      A <strong>required</strong> field that indicates the minimum distance that an ad should be from any ads already on the page (either manually placed or previously placed by amp-auto-ads) at the time of insertion.
+      Values are expressed as a number with a units prefix. E.g. "10px" means 10 pixels, or "0.5vp" means half a viewport. The supported units are:
+      <ul>
+        <li>px - pixels</li>
+        <li>vp - viewports</li>
+      </ul>
+      This value applies only when the number of ads already on the page is less than any <code>adCount</code> matcher specified in the subsequentMinSpacing field.
+    </td>
+  </tr>
+  <tr>
+    <td><code>subsequentMinSpacing</code></td>
+    <td>Array&lt;!SubsequentMinSpacingObj&gt;</td>
+    <td>
+      An <em>optional</em> field that specifies the ad spacings that should apply based on how many ads are already on the page at the time of insertion.
+    </td>
+  </tr>
+  <tr>
+    <td><code>maxAdCount</code></td>
+    <td>number</td>
+    <td>
+      A <strong>required</strong> field that specifies the maximum number of ads that <code>amp-auto-ads</code> can cause there to be on a page. Both manually placed ads, as well as those placed by <code>amp-auto-ads</code> count towards this total.
+      E.g. if this field were set to 5 and there were 3 manually placed ads on the page, then <code>amp-auto-ads</code> would place a maximum of 2 additional ads.
+    </td>
+  </tr>
+</table>
+
+#### SubsequentMinSpacingObj
+
+The fields to specify in the `subsequentMinSpacing` configuration object: 
+
+<table>
+  <tr>
+    <th class="col-twenty">Field Name</th>
+    <th class="col-twenty">Type</th>
+    <th class="col-fourty" >Description</th>
+  </tr>
+  <tr>
+    <td><code>adCount</code></td>
+    <td>number</td>
+    <td>
+      A <strong>required</strong> field.
+      If the next ad to be inserted would make the total ad count for the page n, then this rule applies where <code>adCount</code> &lt;= n, but no other <code>SubsequentMinSpacingObj</code> in the parent <code>Array</code> has an <code>adCount</code> that is greater and also &lt;= n.
+    </td>
+  </tr>
+  <tr>
+    <td><code>spacing</code></td>
+    <td>string</td>
+    <td>
+      A <strong>required</strong> field that specifies the minimum ad spacing that applies when this rule is matched based on the <code>adCount</code>.
+      Values are expressed as a number with a units prefix. E.g. "10px" means 10 pixels, or "0.5vp" means half a viewport. The supported units are:
+      <ul>
+        <li>px - pixels</li>
+        <li>vp - viewports</li>
+      </ul>
+    </td>
   </tr>
 </table>
 

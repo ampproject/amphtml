@@ -15,6 +15,11 @@
  */
 
 import {Services} from '../../../src/services';
+import {user} from '../../../src/log';
+
+/** @const */
+const TAG = 'amp-auto-ads';
+
 
 /**
  * Structure for defining contraints about the placement of ads.
@@ -43,6 +48,7 @@ import {Services} from '../../../src/services';
  * }}
  */
 export let AdConstraints;
+
 
 export class AdTracker {
 
@@ -169,4 +175,72 @@ export function getExistingAds(ampdoc) {
         }
         return true;
       });
+}
+
+/**
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Object<string, *>} configObj
+ * @return {?AdConstraints}
+ */
+export function getAdConstraintsFromConfigObj(ampdoc, configObj) {
+  if (!configObj['adConstraints']) {
+    return null;
+  }
+  const obj = configObj['adConstraints'];
+
+  const viewportHeight = Services.viewportForDoc(ampdoc).getSize().height;
+
+  const initialMinSpacing =
+      getValueFromString(obj['initialMinSpacing'], viewportHeight);
+  if (initialMinSpacing == null) {
+    user().warn(TAG, 'Invalid initial min spacing');
+    return null;
+  }
+
+  const subsequentMinSpacing = (obj['subsequentMinSpacing'] || []).map(item => {
+    const adCount = item['adCount'];
+    const spacing = getValueFromString(item['spacing'], viewportHeight);
+    if (spacing == null) {
+      user().warn(TAG, 'Invalid subsequent min spacing');
+      return null;
+    }
+    return {
+      adCount,
+      spacing,
+    };
+  });
+
+  if (subsequentMinSpacing.indexOf(null) != -1) {
+    return null;
+  }
+
+  return {
+    initialMinSpacing,
+    subsequentMinSpacing,
+    maxAdCount: obj['maxAdCount'],
+  };
+}
+
+/**
+ * Parses a string in the form "12px" (number of pixels) or "0.3vp"
+ * (number of viewports) into a number representing a number of pixels.
+ * @param {?string|undefined} strValue
+ * @param {number} viewportHeight
+ * @return {?number}
+ */
+function getValueFromString(strValue, viewportHeight) {
+  if (!strValue) {
+    return null;
+  }
+  const numValue = parseFloat(strValue);
+  if (isNaN(numValue)) {
+    return null;
+  }
+  if (strValue.endsWith('px')) {
+    return numValue;
+  }
+  if (strValue.endsWith('vp')) {
+    return numValue * viewportHeight;
+  }
+  return null;
 }
