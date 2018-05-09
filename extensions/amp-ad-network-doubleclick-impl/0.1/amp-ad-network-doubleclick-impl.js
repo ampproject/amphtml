@@ -1246,14 +1246,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     } else if (!!this.win.document.querySelector(
                         'meta[name=amp-ad-doubleclick-sra]')) {
                       assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
-                      this.user().error(TAG, 'SRA request failure', error);
+                      //this.user().error(TAG, 'SRA request failure', error);
                       // Publisher explicitly wants SRA so do not attempt to
                       // recover as SRA guarantees cannot be enforced.
                       typeInstances.forEach(instance => {
                         // Reset ad url to ensure layoutCallback does not fallback to
                         // frame get which would lose SRA guarantees.
-                        // TODO(keithwrightbos): publisher should indicate if
-                        // explicit is required!
                         instance.resetAdUrl();
                         instance.attemptCollapse();
                         instance.sraDeferred.reject(error);
