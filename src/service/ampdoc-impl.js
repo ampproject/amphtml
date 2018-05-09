@@ -441,25 +441,24 @@ export class AmpDocShadow extends AmpDoc {
     /** @private {?Element} */
     this.body_ = null;
 
-    const deferred = new Deferred();
+    const bodyDeferred = new Deferred();
 
     /** @private {!Promise<!Element>} */
-    this.bodyPromise_ = deferred.promise;
+    this.bodyPromise_ = bodyDeferred.promise;
 
     /** @private {function(!Element)|undefined} */
-    this.bodyResolver_ = deferred.resolve;
+    this.bodyResolver_ = bodyDeferred.resolve;
 
     /** @private {boolean} */
     this.ready_ = false;
 
-    /** @private {function()|undefined} */
-    this.readyResolver_ = undefined;
+    const readyDeferred = new Deferred();
 
     /** @private {!Promise} */
-    const deferred = new Deferred();
-    this.readyPromise_ = deferred.promise;
-    this.readyResolver_ = deferred.resolve;
+    this.readyPromise_ = readyDeferred.promise;
 
+    /** @private {function()|undefined} */
+    this.readyResolver_ = readyDeferred.resolve;
   }
 
   /** @override */
