@@ -163,11 +163,9 @@ export class LocalSubscriptionPlatform {
     }
   }
 
-  /**
-   * Renders the platform specific UI
-   * @param {!JsonObject} renderState
-   */
-  activate(renderState) {
+  /** @override */
+  activate(entitlement) {
+    const renderState = entitlement.json();
     this.urlBuilder_.setAuthResponse(renderState);
     this.actions_.build().then(() => {
       this.renderer_.render(renderState);
