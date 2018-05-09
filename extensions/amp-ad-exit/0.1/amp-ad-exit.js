@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FilterType} from './filters/filter';
 import {
   MessageType,
   deserializeMessage,
@@ -27,6 +28,7 @@ import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {isObject} from '../../../src/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
@@ -235,6 +237,7 @@ export class AmpAdExit extends AMP.BaseElement {
   buildCallback() {
     this.element.setAttribute('aria-hidden', 'true');
 
+    // Note that order is expected as part of applying default filter options.
     this.defaultFilters_.push(
         createFilter('minDelay', makeClickDelaySpec(1000), this));
     this.defaultFilters_.push(
@@ -251,9 +254,20 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
+      let defaultClickStartTimingEvent;
+      if (isObject(config.options) &&
+          typeof config.options.startTimingEvent === 'string') {
+        defaultClickStartTimingEvent = config.options.startTimingEvent;
+        this.defaultFilters_.splice(0, 1, createFilter('minDelay',
+            makeClickDelaySpec(1000, config.options.startTimingEvent), this));
+      }
       for (const name in config.filters) {
-        this.userFilters_[name] =
-            createFilter(name, config.filters[name], this);
+        const spec = config.filters[name];
+        if (spec.type == FilterType.CLICK_DELAY) {
+          spec.startTimingEvent =
+              spec.startTimingEvent || defaultClickStartTimingEvent;
+        }
+        this.userFilters_[name] = createFilter(name, spec, this);
       }
       for (const name in config.targets) {
         const target = config.targets[name];
