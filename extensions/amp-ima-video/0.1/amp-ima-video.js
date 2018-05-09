@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -177,9 +178,9 @@ class AmpImaVideo extends AMP.BaseElement {
 
       this.iframe_ = iframe;
 
-      this.playerReadyPromise_ = new Promise(resolve => {
-        this.playerReadyResolver_ = resolve;
-      });
+      const deferred = new Deferred();
+      this.playerReadyPromise_ = deferred.promise;
+      this.playerReadyResolver_ = deferred.resolve;
 
       this.unlistenMessage_ = listen(
           this.win,
@@ -211,9 +212,9 @@ class AmpImaVideo extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true;
   }
 
