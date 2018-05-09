@@ -187,7 +187,11 @@ export class LightboxManager {
             || (slide.hasAttribute('lightbox')
                 && slide.getAttribute('lightbox') !== lightboxGroupId);
         if (!shouldExcludeSlide) {
+          if (this.seen_.includes(slide)) {
+            return;
+          }
           slide.setAttribute('lightbox', lightboxGroupId);
+          this.seen_.push(slide);
           this.processBaseLightboxElement_(slide, lightboxGroupId);
         }
       });
@@ -253,8 +257,7 @@ export class LightboxManager {
       this.lightboxGroups_[lightboxGroupId] = [];
     }
 
-    this.lightboxGroups_[lightboxGroupId]
-        .push(dev().assertElement(element));
+    this.lightboxGroups_[lightboxGroupId].push(dev().assertElement(element));
     if (this.meetsHeuristicsForTap_(element)) {
       const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
       element.setAttribute('on', `tap:${gallery.id}.activate`);
