@@ -224,9 +224,9 @@ export class Navigation {
       return;
     }
     if (e.type == EVENT_TYPE_CLICK) {
-      this.handleClick(target);
+      this.handleClick(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
-      this.handleContextmenuClick(target, e);
+      this.handleContextmenuClick(target);
     }
   }
 

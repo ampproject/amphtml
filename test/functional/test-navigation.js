@@ -167,7 +167,6 @@ describes.sandboxed('Navigation', {}, () => {
         event.type = 'contextmenu';
         handler.handle_(event);
         expect(anchor.href).to.equal('https://www.google.com/link?out=world');
-        expect(handleNavSpy).to.be.calledOnce;
       });
     });
 
