@@ -1258,7 +1258,6 @@ export class Resources {
         /** @const {!Resource} */
         const resource = request.resource;
         const box = resource.getLayoutBox();
-        const iniBox = resource.getInitialLayoutBox();
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
@@ -1331,7 +1330,7 @@ export class Resources {
             this.requestsChangeSize_.push(request);
           }
           continue;
-        } else if (this.elementNearBottom_(box, iniBox)) {
+        } else if (this.elementNearBottom_(resource, box)) {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
@@ -1412,16 +1411,20 @@ export class Resources {
 
   /**
    * Returns true if element is within 15% and 1000px of document bottom.
-   * @param {!../layout-rect.LayoutRectDef} layoutBox
-   * @param {!../layout-rect.LayoutRectDef} initialLayoutBox
+   * Caller can provide current/initial layout boxes as an optimization.
+   * @param {!./resource.Resource} resource
+   * @param {!../layout-rect.LayoutRectDef=} opt_layoutBox
+   * @param {!../layout-rect.LayoutRectDef=} opt_initialLayoutBox
    * @returns {boolean}
    * @private
    */
-  elementNearBottom_(layoutBox, initialLayoutBox) {
+  elementNearBottom_(resource, opt_layoutBox, opt_initialLayoutBox) {
     const contentHeight = this.viewport_.getContentHeight();
     const threshold = Math.max(contentHeight * 0.85, contentHeight - 1000);
-    return layoutBox.bottom >= threshold ||
-        initialLayoutBox.bottom >= threshold;
+
+    const box = opt_layoutBox || resource.getLayoutBox();
+    const initialBox = opt_initialLayoutBox || resource.getInitialLayoutBox();
+    return box.bottom >= threshold || initialBox.bottom >= threshold;
   }
 
   /**
