@@ -49,7 +49,7 @@ export function adsense(global, data) {
     };
   }
   const s = global.document.createElement('script');
-  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+  s.src = 'http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
   global.document.body.appendChild(s);
 
   const i = global.document.createElement('ins');

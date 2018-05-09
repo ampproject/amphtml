@@ -154,7 +154,7 @@ export const adConfig = {
 
   adsense: {
     prefetch: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
-    preconnect: 'https://googleads.g.doubleclick.net',
+    preconnect: 'http://googleads.g.doubleclick.net',
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
     remoteHTMLDisabled: true,
