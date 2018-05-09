@@ -1040,7 +1040,7 @@ describe('FixedLayer', () => {
       expect(fe.element.style.transform).to.equal('');
     });
 
-    it('should remove inline style and throw user error', () => {
+    it('should user error when inline styles may be overriden', () => {
       toggleExperiment(ampdoc.win, 'inline-styles', true,
           /* opt_transientExperiment */ true);
 
@@ -1052,8 +1052,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch('FixedLayer',
-          /Inline styles with `top` or `bottom` rules are not supported/);
-      expect(element1.hasAttribute('style')).to.be.false;
+          /not supported yet for fixed or sticky elements/);
     });
   });
 
@@ -1319,7 +1318,7 @@ describe('FixedLayer', () => {
       expect(state['F0'].transferrable).to.equal(true);
     });
 
-    it('should remove inline style and throw user error', () => {
+    it('should user error when inline styles may be overriden', () => {
       toggleExperiment(ampdoc.win, 'inline-styles', true,
           /* opt_transientExperiment */ true);
 
@@ -1331,8 +1330,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch('FixedLayer',
-          /Inline styles with `top` or `bottom` rules are not supported/);
-      expect(element1.hasAttribute('style')).to.be.false;
+          /not supported yet for fixed or sticky elements/);
     });
   });
 });

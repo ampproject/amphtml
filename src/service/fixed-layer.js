@@ -452,7 +452,6 @@ export class FixedLayer {
           break;
         }
         const el = elements[j];
-        this.removeStyleAttributeIfNecessary_(el);
         this.setupElement_(el, fixedSelector, 'fixed');
       }
     }
@@ -462,7 +461,6 @@ export class FixedLayer {
           stickySelector);
       for (let j = 0; j < elements.length; j++) {
         const element = elements[j];
-        this.removeStyleAttributeIfNecessary_(element);
         this.setupElement_(element, stickySelector, 'sticky');
       }
     }
@@ -470,19 +468,18 @@ export class FixedLayer {
 
   /**
    * If the given element has a `style` attribute with a top/bottom CSS rule,
-   * remove it and throw a user error. FixedLayer's implementation currently
-   * assumes that those rules cannot be set by the publisher.
+   * display a user error. FixedLayer's implementation currently overrides
+   * top, bottom and a few other CSS rules.
    * @param {!Element} element
    * @private
    */
-  removeStyleAttributeIfNecessary_(element) {
+  warnAboutInlineStylesIfNecessary_(element) {
     if (isExperimentOn(this.ampdoc.win, 'inline-styles')) {
       if (element.hasAttribute('style')
           && (element.style.top || element.style.bottom)) {
-        element.removeAttribute('style');
-        user().error(TAG, 'Inline styles with `top` or `bottom` rules are ' +
-            'not supported yet for fixed or sticky elements. Removing ' +
-            '`style` attribute from element:', element);
+        user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
+            'CSS rules are not supported yet for fixed or sticky elements ' +
+            '(#14186). Unexpected behavior may occur.', element);
       }
     }
   }
@@ -500,6 +497,9 @@ export class FixedLayer {
    * @private
    */
   setupElement_(element, selector, position, opt_forceTransfer) {
+    // Warn that pub-authored inline styles may be overriden by FixedLayer.
+    this.warnAboutInlineStylesIfNecessary_(element);
+
     let fe = null;
     for (let i = 0; i < this.elements_.length; i++) {
       const el = this.elements_[i];
