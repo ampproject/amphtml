@@ -31,6 +31,7 @@ const TAG = 'amp-story';
  *    canshowpreviouspagehelp: boolean,
  *    canshowsharinguis: boolean,
  *    canshowsystemlayerbuttons: boolean,
+ *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
  *    hasaudiostate: boolean,
