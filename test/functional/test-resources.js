@@ -1919,7 +1919,6 @@ describe('Resources changeSize', () => {
 
       viewportRect = {top: 2, left: 0, right: 100, bottom: 200, height: 200};
       viewportMock.expects('getRect').returns(viewportRect).atLeast(1);
-      viewportMock.expects('getScrollHeight').returns(10000).atLeast(1);
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
         height: 50};
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
@@ -2069,6 +2068,8 @@ describe('Resources changeSize', () => {
 
     it('should NOT change size when top margin boundary within viewport ' +
         'and top margin changed', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
+
       const callback = sandbox.spy();
       resource1.layoutBox_ = {top: 100, left: 0, right: 100, bottom: 300,
         height: 200};
@@ -2114,6 +2115,7 @@ describe('Resources changeSize', () => {
 
     it('should NOT change size and call overflow callback if viewport not ' +
         'scrolled by user.', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       viewportRect.top = 1;
       resource1.layoutBox_ = {top: -50, left: 0, right: 100, bottom: 0,
         height: 51};
@@ -2256,6 +2258,7 @@ describe('Resources changeSize', () => {
     });
 
     it('in vp should NOT call overflowCallback if new height smaller', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resources.scheduleChangeSize_(resource1, 10, 11, undefined, false);
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
@@ -2285,6 +2288,7 @@ describe('Resources changeSize', () => {
 
     it('in viewport should NOT change size if in the last 15% but NOT ' +
         'in the last 1000px', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       viewportRect.top = 8600;
       viewportRect.bottom = 8800;
       resource1.layoutBox_ = {top: 8650, left: 0, right: 100, bottom: 8700,
@@ -2305,6 +2309,7 @@ describe('Resources changeSize', () => {
     });
 
     it('in viewport should NOT change size and calls overflowCallback', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resources.scheduleChangeSize_(resource1, 111, 222,
           {top: 1, right: 2, bottom: 3, left: 4}, false);
 
@@ -2325,6 +2330,7 @@ describe('Resources changeSize', () => {
 
     it('should NOT change size when resized margin in viewport and should ' +
         'call overflowCallback', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resource1.layoutBox_ = {top: -48, left: 0, right: 100, bottom: 2,
         height: 50};
       resource1.element.fakeComputedStyle = {
@@ -2387,6 +2393,7 @@ describe('Resources changeSize', () => {
     });
 
     it('should reset pending change size when rescheduling', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
       expect(resource1.getPendingChangeSize().height).to.equal(111);
@@ -2397,6 +2404,7 @@ describe('Resources changeSize', () => {
     });
 
     it('should force resize after focus', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
       expect(resource1.getPendingChangeSize()).to.jsonEqual(
@@ -2426,14 +2434,14 @@ describe('Resources changeSize', () => {
     });
 
     it('should NOT change size when far the bottom of the document', () => {
-      viewportMock.expects('getScrollHeight').returns(10000).once();
+      viewportMock.expects('getContentHeight').returns(10000).once();
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
       expect(resource1.changeSize).to.not.been.called;
     });
 
     it('should change size when close to the bottom of the document', () => {
-      viewportMock.expects('getScrollHeight').returns(110).once();
+      viewportMock.expects('getContentHeight').returns(110).once();
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
       expect(resource1.changeSize).to.be.calledOnce;
@@ -2651,9 +2659,9 @@ describe('Resources mutateElement and collapse', () => {
     let index = 0;
     sandbox.stub(resources.viewport_, 'getScrollHeight').callsFake(() => {
       // In change element size above viewport path, getScrollHeight will be
-      // called three times. And we care that the last measurement is correct,
+      // called twice. And we care that the last measurement is correct,
       // which requires it to be measured after element dispaly set to none.
-      if (index == 2) {
+      if (index == 1) {
         expect(resource1.completeCollapse).to.be.calledOnce;
         promiseResolve();
         return;
