@@ -900,6 +900,15 @@ export const adConfig = {
 
   widespace: {},
 
+  wpmedia: {
+    prefetch: 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js',
+    preconnect: [
+      'https://www.wp.pl',
+      'https://v.wpimg.pl',
+    ],
+    renderStartImplemented: true,
+  },
+
   xlift: {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
