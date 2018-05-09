@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpStory} from '../amp-story';
+import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {ArticleComponent} from '../bookend/components/article';
-import {Bookend} from '../bookend/amp-story-bookend';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {
@@ -28,7 +28,7 @@ describes.realWin('amp-story-bookend', {
   let win;
   let storyElem;
   let bookend;
-  let story;
+  let bookendElem;
 
   const expectedComponents = [
     {
@@ -75,8 +75,10 @@ describes.realWin('amp-story-bookend', {
     storyElem = win.document.createElement('amp-story');
     storyElem.appendChild(win.document.createElement('amp-story-page'));
     win.document.body.appendChild(storyElem);
-    story = new AmpStory(storyElem);
-    bookend = new Bookend(win, story.element);
+    bookendElem = createElementWithAttributes(win.document,
+        'amp-story-bookend', {'layout': 'nodisplay'});
+    storyElem.appendChild(bookendElem);
+    bookend = new AmpStoryBookend(bookendElem);
   });
 
   it('should build the users json', () => {
@@ -105,8 +107,9 @@ describes.realWin('amp-story-bookend', {
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
 
+    bookend.buildCallback();
     bookend.build();
-    return bookend.loadConfig().then(config => {
+    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       config.components.forEach((currentComponent, index) => {
         return expect(currentComponent).to.deep
             .equal(expectedComponents[index]);
@@ -140,8 +143,9 @@ describes.realWin('amp-story-bookend', {
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
 
+    bookend.buildCallback();
     bookend.build();
-    return bookend.loadConfig().then(config => {
+    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       config.components.forEach((currentComponent, index) => {
         return expect(currentComponent).to.deep
             .equal(expectedComponents[index]);

@@ -35,7 +35,7 @@ import {
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
-import {AmpStoryBookend} from './bookend/bookend-element';
+import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
@@ -43,7 +43,6 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage} from './amp-story-page';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
-import {Bookend} from './bookend/amp-story-bookend';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
@@ -74,6 +73,7 @@ import {
   childElementByTag,
   childElements,
   closest,
+  createElementWithAttributes,
   escapeCssSelectorIdent,
   matches,
   removeElement,
@@ -87,6 +87,7 @@ import {
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
@@ -211,8 +212,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @const {!Bookend} */
-    this.bookend_ = new Bookend(this.win, this.element);
+    /** @private {?AmpStoryBookend} */
+    this.bookend_ = null;
 
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
     this.shareMenu_ = new ShareMenu(this.win, this.element);
@@ -560,6 +561,8 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.paginationButtons_) {
       this.buildPaginationButtons_();
     }
+
+    this.initializeBookend_();
 
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
@@ -1309,6 +1312,23 @@ export class AmpStory extends AMP.BaseElement {
         });
   }
 
+  /**
+   * Initializes bookend.
+   * @private
+   */
+  initializeBookend_() {
+    let bookendEl = this.element.querySelector('amp-story-bookend');
+    if (!bookendEl) {
+      bookendEl = createElementWithAttributes(this.win.document,
+          'amp-story-bookend', dict({'layout': 'nodisplay'}));
+      this.element.appendChild(bookendEl);
+    }
+
+    bookendEl.getImpl().then(
+        bookendImpl => {
+          this.bookend_ = bookendImpl;
+        });
+  }
 
   /**
    * Preloads the bookend config if on the last page.
@@ -1329,12 +1349,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds, fetches and sets the bookend publisher configuration.
-   * @return {!Promise<(?./bookend/amp-story-bookend.BookendConfigDef|./bookend/bookend-component.BookendDataDef)>}
+   * @return {!Promise<?./bookend/bookend-component.BookendDataDef>}
    * @private
    */
   buildAndPreloadBookend_() {
     this.bookend_.build();
-    return this.bookend_.loadConfig();
+    return this.bookend_.loadConfigAndMaybeRenderBookend();
   }
 
 
@@ -1354,13 +1374,10 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve(true);
     }
 
-    return this.bookend_.loadConfig(false /** applyConfig */).then(
-        config => {
-          // TODO(#14591): Remove config.relatedArticles references when bookend API v0.1 is deprecated.
-          return !!(config && (config.relatedArticles &&
-            config.relatedArticles.length) ||
-            (config.components && config.components.length));
-        });
+    return this.bookend_
+        .loadConfigAndMaybeRenderBookend(false /** renderBookend */).then(
+            config => !!(config && config.components &&
+              config.components.length > 0));
   }
 
 
