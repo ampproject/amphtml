@@ -599,6 +599,9 @@ export class VideoDocking {
    * @private
    */
   onPositionChange_(video) {
+    if (this.isDragging_) {
+      return;
+    }
     if (this.ignoreDueToSize_(video) ||
         this.ignoreBecauseAnotherDocked_(video) ||
         this.ignoreDueToNotPlayingManually_(video)) {
