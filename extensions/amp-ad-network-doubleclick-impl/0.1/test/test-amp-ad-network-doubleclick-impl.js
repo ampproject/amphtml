@@ -1527,16 +1527,6 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           doc.body.appendChild(element);
           impl = new AmpAdNetworkDoubleclickImpl(element);
         });
-
-        it('should preload safeframe', () => {
-          const preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
-          // Note that this causes preconnection to tpc.googlesyndication.com
-          // due to preloading safeframe.
-          expect(impl.getPreconnectUrls()).to.deep.equal(
-              ['https://securepubads.g.doubleclick.net/']);
-          expect(preloadSpy).to.be.calledOnce;
-          expect(preloadSpy.args[0]).to.match(/safeframe/);
-        });
       });
 
       describe('#getConsentPolicy', () => {
