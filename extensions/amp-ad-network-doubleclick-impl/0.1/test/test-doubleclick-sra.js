@@ -201,7 +201,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     });
   });
 
-  describe.only('#initiateSraRequests', () => {
+  describe('#initiateSraRequests', () => {
     let xhrMock;
 
     function createA4aSraInstance(networkId) {
