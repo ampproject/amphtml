@@ -154,7 +154,7 @@ export class ActionInvocation {
    * `caller` is #div.
    * `event` is a "click" Event object.
    * `trust` depends on whether this action was a result of a user gesture.
-   * `targetOrTag` is "amp-form".
+   * `tagOrTarget` is "amp-form".
    * `index` is 0.
    *
    * @param {!Node} node Element whose action is being invoked.
@@ -164,11 +164,11 @@ export class ActionInvocation {
    * @param {?Element} caller Element that contains the invoked handler.
    * @param {?ActionEventDef} event The event that triggered this action.
    * @param {ActionTrust} trust The trust level of this invocation's trigger.
-   * @param {?string} targetOrTag The global target name or the element tagName.
+   * @param {?string} tagOrTarget The global target name or the element tagName.
    * @param {number} index Position in a sequence of actions.
    */
   constructor(node, method, args, source, caller, event, trust,
-    targetOrTag = null, index = 0) {
+    tagOrTarget = null, index = 0) {
     /** @const {!Node} */
     this.node = node;
     /** @const {string} */
@@ -184,7 +184,7 @@ export class ActionInvocation {
     /** @const {ActionTrust} */
     this.trust = trust;
     /** @const {string} */
-    this.targetOrTag = targetOrTag || node.tagName;
+    this.tagOrTarget = tagOrTarget || node.tagName;
     /** @const {number} */
     this.index = index;
   }
@@ -437,7 +437,7 @@ export class ActionService {
 
   /**
    * Overwrites the current action whitelist (if any). Takes an array of strings
-   * of the form "<targetOrTag>.<method>" e.g. "amp-form.submit" or "AMP.print".
+   * of the form "<tagOrTarget>.<method>" e.g. "amp-form.submit" or "AMP.print".
    * @param {!Array<string>} whitelist
    */
   setWhitelist(whitelist) {
@@ -446,7 +446,7 @@ export class ActionService {
 
   /**
    * Adds an action to the whitelist. Takes one string of the form
-   * "<targetOrTag>.<method>", e.g. "amp-form.submit" or "AMP.print".
+   * "<tagOrTarget>.<method>", e.g. "amp-form.submit" or "AMP.print".
    * @param {string} action
    */
   addToWhitelist(action) {
@@ -483,8 +483,9 @@ export class ActionService {
           ? this.root_
           : this.root_.getElementById(target);
         if (node) {
+          const tagOrTarget = node.tagName || target;
           const invocation = new ActionInvocation(node, actionInfo.method,
-              args, source, action.node, event, trust, node.tagName || target, i);
+              args, source, action.node, event, trust, tagOrTarget, i);
           return this.invoke_(invocation, action.actionInfos);
         } else {
           this.error_(`Target "${target}" not found for action ` +
@@ -525,11 +526,11 @@ export class ActionService {
    */
   invoke_(invocation, opt_actionInfos) {
     const method = invocation.method;
-    const targetOrTag = invocation.targetOrTag;
+    const tagOrTarget = invocation.tagOrTarget;
 
     // Check that this action is whitelisted (if a whitelist is set).
     if (this.whitelist_) {
-      const id = `${targetOrTag}.${method}`;
+      const id = `${tagOrTarget}.${method}`;
       if (!this.whitelist_.includes(id)) {
         this.error_(`"${id}" is not whitelisted (${this.whitelist_}).`);
         return null;
@@ -537,7 +538,7 @@ export class ActionService {
     }
 
     // Handle global targets e.g. "AMP".
-    const globalTarget = this.globalTargets_[targetOrTag];
+    const globalTarget = this.globalTargets_[tagOrTarget];
     if (globalTarget) {
       return globalTarget(invocation, invocation.index, opt_actionInfos);
     }
@@ -582,7 +583,7 @@ export class ActionService {
     }
 
     // Unsupported method.
-    this.error_(`Target (${targetOrTag}) doesn't support "${method}" action.`,
+    this.error_(`Target (${tagOrTarget}) doesn't support "${method}" action.`,
         invocation.caller);
 
     return null;
