@@ -218,39 +218,65 @@ export class Navigation {
       return;
     }
     const isRightClick = (e.type == EVENT_TYPE_RIGHT_CLICK);
+    if (isRightClick) {
+      this.handleRightClick_(e);
+    }
+
+    this.handleLeftClick_(e);
+  }
+
+  /**
+   * @param {!Event} e
+   */
+  handleLeftClick_(e) {
     const target = closestByTag(dev().assertElement(e.target), 'A');
     if (!target || !target.href) {
       return;
     }
 
-    // First check if need to handle external link decoration.
-    let defaultExpandParamsUrl = null;
-    if (this.appendExtraParams_ && !this.isEmbed_) {
-      // Only decorate outgoing link when needed to and is not in FIE.
-      defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, target);
-    }
-
-    const urlReplacements = Services.urlReplacementsForDoc(target);
-    urlReplacements.maybeExpandLink(target, defaultExpandParamsUrl);
+    this.handleUrlDecorationAndExpansion_(target);
 
     const location = this.parseUrl_(target.href);
 
-    // Ignore handling A2A and custom protocol if it is invoked via a right
-    // click. See github issue #14768.
-    if (!isRightClick) {
-      // Handle AMP-to-AMP navigation if rel=amphtml.
-      if (this.handleA2AClick_(e, target, location)) {
-        return;
-      }
+    // Handle AMP-to-AMP navigation if rel=amphtml.
+    if (this.handleA2AClick_(e, target, location)) {
+      return;
+    }
 
-      // Handle navigating to custom protocol if applicable.
-      if (this.handleCustomProtocolClick_(e, target, location)) {
-        return;
-      }
+    // Handle navigating to custom protocol if applicable.
+    if (this.handleCustomProtocolClick_(e, target, location)) {
+      return;
     }
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
+  }
+
+  /**
+   * @param {!Event} e
+   */
+  handleRightClick_(e) {
+    const target = closestByTag(dev().assertElement(e.target), 'A');
+    if (!target || !target.href) {
+      return;
+    }
+
+    this.handleUrlDecorationAndExpansion_(target);
+  }
+
+  /**
+   * @param {?Element} el
+   */
+  handleUrlDecorationAndExpansion_(el) {
+    // First check if need to handle external link decoration.
+    let defaultExpandParamsUrl = null;
+    if (this.appendExtraParams_ && !this.isEmbed_) {
+      // Only decorate outgoing link when needed to and is not in FIE.
+      defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, el);
+    }
+
+    const urlReplacements = Services.urlReplacementsForDoc(el);
+    urlReplacements.maybeExpandLink(el, defaultExpandParamsUrl);
   }
 
   /**
