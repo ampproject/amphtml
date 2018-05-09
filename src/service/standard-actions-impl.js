@@ -175,6 +175,7 @@ export class StandardActions {
     // <amp-iframe> requires sandbox="allow-top-navigation" to prevent
     // privilege escalation.
     if (node.tagName == 'AMP-IFRAME') {
+      /** @type {!Array<string>} */
       const sandbox = node.getAttribute('sandbox')
           .split(' ').map(s => s.trim());
       if (!sandbox.includes('allow-top-navigation')) {
