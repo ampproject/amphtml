@@ -24,7 +24,7 @@ limitations under the License.
         data-mode="inline"
         data-widget_id="[widget-id]"
         data-access_key="[access-key]">
-  </amp-ad>
+</amp-ad>
 ```
 
 ## Configuration
