@@ -322,6 +322,10 @@ i-amphtml-sizer {
   overflow-y: hidden !important;
 }
 
+.i-amphtml-select-disabled {
+  user-select: none !important;
+}
+
 /* "notbuild" classes are set as soon as an element is created and removed
    as soon as the element is built. */
 

@@ -521,13 +521,42 @@ export class VideoDocking {
 
     Object.assign(controls, {container});
 
-    listen(dismissButton, 'click', () => this.dismissOnTap_());
-    listen(playButton, 'click', () =>
-      this.getDockedVideo_().play(/* auto */ false));
-    listen(pauseButton, 'click', () => this.getDockedVideo_().pause());
-    listen(muteButton, 'click', () => this.getDockedVideo_().mute());
-    listen(unmuteButton, 'click', () => this.getDockedVideo_().unmute());
-    listen(fullscreenButton, 'click', () => this.enterFullscreen_());
+    listen(dismissButton, 'click', () => {
+      if (this.isDragging_) {
+        return;
+      }
+      this.dismissOnTap_();
+    });
+    listen(playButton, 'click', () => {
+      if (this.isDragging_) {
+        return;
+      }
+      this.getDockedVideo_().play(/* auto */ false);
+    });
+    listen(pauseButton, 'click', () => {
+      if (this.isDragging_) {
+        return;
+      }
+      this.getDockedVideo_().pause();
+    });
+    listen(muteButton, 'click', () => {
+      if (this.isDragging_) {
+        return;
+      }
+      this.getDockedVideo_().mute();
+    });
+    listen(unmuteButton, 'click', () => {
+      if (this.isDragging_) {
+        return;
+      }
+      this.getDockedVideo_().unmute();
+    });
+    listen(fullscreenButton, 'click', () => {
+      if (this.isDragging_) {
+        return;
+      }
+      this.enterFullscreen_();
+    });
 
     listen(container, 'mouseup', () =>
       this.hideControlsOnTimeout_(CONTROLS_TIMEOUT_AFTER_IX));
@@ -1067,14 +1096,34 @@ export class VideoDocking {
 
     const root = this.ampdoc_.getRootNode();
     const unlisteners = [
+      this.disableScroll_(),
+      this.disableUserSelect_(),
       this.workaroundWebkitDragAndScrollIssue_(),
       listen(root, 'touchmove', onDragMove),
       listen(root, 'mousemove', onDragMove),
       listenOnce(root, 'touchend', onDragEnd),
       listenOnce(root, 'mouseup', onDragEnd),
     ];
+  }
 
+  /**
+   * @return {!UnlistenDef}
+   * @private
+   */
+  disableUserSelect_() {
+    const docEl = dev().assertElement(this.getDoc_().documentElement);
+    const disabledClassName = 'i-amphtml-select-disabled';
+    docEl.classList.add(disabledClassName);
+    return () => docEl.classList.remove(disabledClassName);
+  }
+
+  /**
+   * @return {!UnlistenDef}
+   * @private
+   */
+  disableScroll_() {
     this.viewport_.disableScroll();
+    return this.viewport_.resetScroll.bind(this.viewport_);
   }
 
   /**
@@ -1126,13 +1175,12 @@ export class VideoDocking {
   onDragEnd_(unlisteners, offset) {
     unlisteners.forEach(unlisten => unlisten.call());
 
-    this.viewport_.resetScroll();
-
     this.isDragging_ = false;
 
     if (this.dismissOnDragEnd_(offset.x, offset.y)) {
       return;
     }
+
     this.snapToCorner_(offset.x, offset.y);
   }
 
