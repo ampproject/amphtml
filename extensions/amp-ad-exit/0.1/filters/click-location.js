@@ -24,7 +24,7 @@ export class ClickLocationFilter extends Filter {
    * @param {!../amp-ad-exit.AmpAdExit} adExitElement
    */
   constructor(name, spec, adExitElement) {
-    super(name);
+    super(name, spec.type);
     user().assert(isValidClickLocationSpec(spec), 'Invaid ClickLocation spec');
 
     /** @private {number} */
@@ -118,4 +118,3 @@ function isValidClickLocationSpec(spec) {
       (typeof spec.relativeTo === 'undefined' ||
        typeof spec.relativeTo === 'string') ;
 }
-
