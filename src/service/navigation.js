@@ -39,8 +39,10 @@ import {
 import {toWin} from '../types';
 
 const TAG = 'navigation';
+/** @private @const {string} */
 const EVENT_TYPE_CLICK = 'click';
-const EVENT_TYPE_RIGHT_CLICK = 'contextmenu';
+/** @private @const {string} */
+const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -115,7 +117,7 @@ export class Navigation {
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
     this.rootNode_.addEventListener(EVENT_TYPE_CLICK, this.boundHandle_);
-    this.rootNode_.addEventListener(EVENT_TYPE_RIGHT_CLICK, this.boundHandle_);
+    this.rootNode_.addEventListener(EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     /** @private {boolean} */
     this.appendExtraParams_ = false;
     shouldAppendExtraParams(this.ampdoc).then(res => {
@@ -153,7 +155,7 @@ export class Navigation {
     if (this.boundHandle_) {
       this.rootNode_.removeEventListener(EVENT_TYPE_CLICK, this.boundHandle_);
       this.rootNode_.removeEventListener(
-          EVENT_TYPE_RIGHT_CLICK, this.boundHandle_);
+          EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     }
   }
 
@@ -217,24 +219,23 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-    const isRightClick = (e.type == EVENT_TYPE_RIGHT_CLICK);
-    if (isRightClick) {
-      this.handleRightClick_(e);
-    }
-
-    this.handleLeftClick_(e);
-  }
-
-  /**
-   * @param {!Event} e
-   */
-  handleLeftClick_(e) {
     const target = closestByTag(dev().assertElement(e.target), 'A');
     if (!target || !target.href) {
       return;
     }
+    if (e.type == EVENT_TYPE_CLICK) {
+      this.handleContextmenuClick(target);
+    } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
+      this.handleClick(target, e);
+    }
+  }
 
-    this.handleUrlDecorationAndExpansion_(target);
+  /**
+   * @param {!Element} target
+   * @param {!Event} e
+   */
+  handleClick(target, e) {
+    this.expandVarsForAnchor_(target);
 
     const location = this.parseUrl_(target.href);
 
@@ -253,28 +254,23 @@ export class Navigation {
   }
 
   /**
-   * Handles right clicks. Note that currently the right click only
-   * deals with url variable substitution and expansion, as there is
+   * Handles contextmenu click. Note that currently this only deals
+   * with url variable substitution and expansion, as there is
    * straightforward way of determining what the user clicked in the
-   * right click context menu, required for A2A navigation and custom
-   * link protocol handling.
+   * context menu, required for A2A navigation and custom link protocol
+   * handling.
    * TODO(alabiaga): investigate fix for handling A2A and custom link
    * protocols.
-   * @param {!Event} e
+   * @param {!Element} target
    */
-  handleRightClick_(e) {
-    const target = closestByTag(dev().assertElement(e.target), 'A');
-    if (!target || !target.href) {
-      return;
-    }
-
-    this.handleUrlDecorationAndExpansion_(target);
+  handleContextmenuClick(target) {
+    this.expandVarsForAnchor_(target);
   }
 
   /**
    * @param {!Element} el
    */
-  handleUrlDecorationAndExpansion_(el) {
+  expandVarsForAnchor_(el) {
     // First check if need to handle external link decoration.
     let defaultExpandParamsUrl = null;
     if (this.appendExtraParams_ && !this.isEmbed_) {
