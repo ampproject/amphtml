@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,19 @@
  * limitations under the License.
  */
 
-/** Class corresponding to the <amp-story-bookend> DOM element tag.  */
-export class AmpStoryBookend extends AMP.BaseElement {}
+import {validateData, writeScript} from '../3p/3p';
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function wpmedia(global, data) {
+  validateData(data, ['slot','bunch'], ['sn','slots']);
+
+  // const url = 'http://localhost/wpjslib.js';
+  const url = 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js';
+
+  writeScript(global, url, function() {
+    window.run(data);
+  });
+}

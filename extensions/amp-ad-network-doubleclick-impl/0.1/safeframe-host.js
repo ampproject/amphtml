@@ -129,6 +129,10 @@ export class SafeframeHostApi {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
+    /** @private {!Function} */
+    this.checkStillCurrent_ = this.baseInstance_.verifyStillCurrent.bind(
+        this.baseInstance_)();
+
     /** @private {!Window} */
     this.win_ = this.baseInstance_.win;
 
@@ -349,12 +353,13 @@ export class SafeframeHostApi {
       return;
     }
     this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
+      this.checkStillCurrent_();
       const formattedGeom = this.formatGeom_(iframeBox);
       this.sendMessage_({
         newGeometry: formattedGeom,
         uid: this.uid_,
       }, SERVICE.GEOMETRY_UPDATE);
-    });
+    }).catch(err => dev().error(TAG, err));
   }
 
   /**
@@ -424,8 +429,10 @@ export class SafeframeHostApi {
    * @private
    */
   sendMessage_(payload, serviceName) {
-    dev().assert(this.iframe_.contentWindow,
-        'Frame contentWindow unavailable.');
+    if (!this.iframe_.contentWindow) {
+      dev().error(TAG, 'Frame contentWindow unavailable.');
+      return;
+    }
     const message = dict();
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
     message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify(
@@ -608,6 +615,7 @@ export class SafeframeHostApi {
       return;
     }
     this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
+      this.checkStillCurrent_();
       const formattedGeom = this.formatGeom_(iframeBox);
       this.sendMessage_({
         uid: this.uid_,
@@ -619,7 +627,7 @@ export class SafeframeHostApi {
         'expand_l': this.currentGeometry_['allowedExpansion_l'],
         push: true,
       }, messageType);
-    });
+    }).catch(err => dev().error(TAG, err));
   }
 
   /**
@@ -635,6 +643,7 @@ export class SafeframeHostApi {
     // First, attempt to resize the Amp-Ad that is the parent of the
     // safeframe
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
+      this.checkStillCurrent_();
       // If this resize succeeded, we always resize the safeframe.
       // resizeSafeframe also sends the resize response.
       this.resizeSafeframe(height, width, messageType);
@@ -658,6 +667,10 @@ export class SafeframeHostApi {
         this.sendResizeResponse(false, messageType);
       }
     }).catch(err => {
+      if (err.message == 'CANCELLED') {
+        dev().error(TAG, err);
+        return;
+      }
       dev().error(TAG, `Resizing failed: ${err}`);
       this.sendResizeResponse(false, messageType);
     });
@@ -676,8 +689,14 @@ export class SafeframeHostApi {
       return;
     }
     this.baseInstance_.attemptChangeHeight(newHeight)
-        .then(() => this.onFluidResize_())
-        .catch(() => {
+        .then(() => {
+          this.checkStillCurrent_();
+          this.onFluidResize_();
+        }).catch(err => {
+          if (err.message == 'CANCELLED') {
+            dev().error(TAG, err);
+            return;
+          }
           // TODO(levitzky) Add more error handling here
           this.baseInstance_.forceCollapse();
         });

@@ -95,7 +95,9 @@ Example:
 Currently, the `consents` object only supports a single consent instance. A consent instance must have an ID specified within the `consents` object (in the example above, "my-consent" is the id). The consent instance ID is used to generate a key when storing the user consent state.
 
 #### checkConsentHref
-`checkConsentHref` (required): Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to determine if a prompt UI should be shown if the consent state is unknown.
+`checkConsentHref`: Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to determine if a prompt UI should be shown if the consent state is unknown.
+
+`checkConsentHref` is required if [`promptIfUnknownForGeoGroup`](#promptifunknownforgeogroup) is not defined.
 
 ##### Request
 AMP sends the consent instance ID in the `consentInstanceId` field with the POST request.
@@ -120,10 +122,38 @@ If the response doesn't have `promptIfUnknown` set or has `promptIfUnknown` set 
 
 Currently, AMP will not show consent prompt with a known consent state (i.e. the user has already accepted or rejected the consent), and will only show a prompt if `promptIfUnknown = true` with a unknown consent state, or upon user action.  See below for details on how to display a prompt.
 
+Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
+
+
+```html
+{
+  "promptIfUnknown": true/false,
+  "sharedData": {
+    "a-key": "some-string-value",
+    "key-with-bool-value": true,
+    "key-with-numeric-value": 123
+  }
+}
+```
+
+The `sharedData` is made available to other AMP extensions just like the consent
+state. It's up to the 3rd party vendor extensions and the `checkConsentHref`
+remote endpoint to agree on particular meaning of those key-value pairs. One
+example use case is for the remote endpoint to convey extra consent related info of the
+current user to the 3rd party vendor extensions.
+
+Unlike consent state, this `shareData` is not persisted in client side storage.
+
+#### promptIfUnknownForGeoGroup
+`promptIfUnknownForGeoGroup` Provides an alternative way to instruct AMP to display consent prompt or not when consent state is unknown.
+
+To use `promptIfUnknownForGeoGroup`, a `<amp-geo>` component must be included and properly configured. The `promptIfUnknownForGeoGroup` then accepts a key of a geo group of country codes. More details on how `<amp-geo>` works can be found [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md).
+
+In the case that `checkConsentHref` and `promptIfUnknownForGeoGroup` are both defined. `promptIfUnknown`'s value from response will be respected.
+
 #### promptUI
 
 `promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. See the [Prompt UI](#prompt-ui) section for details on how a user interacts with the prompt UI.
-
 
 ## Consent Management
 
@@ -248,7 +278,7 @@ An optional `policy` object can be added to the `<amp-consent>` element's JSON c
         }
         "timeout": {
           "seconds": 5,
-          "fallbackState": "rejected"
+          "fallbackAction": "reject"
         }
       }
     }
@@ -279,7 +309,7 @@ When used as a single value, `timeout` equals the timeout value in second.
 
 When used as an object. `timeout` object supports two attributes
 * `seconds`: timeout value in second
-* `fallbackState` (optional): the fallback consent state at timeout if the state is unknown. Right now the only fallback value supported is `rejected`. Note the fallback consent state at timeout will not be stored on client side.
+* `fallbackAction` (optional): the fallback action at timeout if no user action is taken and no state has been stored. The fallback actions supported are `reject` and `dismiss`. Default action is `dismiss` if not configured. Note the consent state changed due to fallback action at timeout will not be stored on client side.
 
 ```html
   "default": {
@@ -288,7 +318,7 @@ When used as an object. `timeout` object supports two attributes
     }
     "timeout": {
       "seconds": 2,
-      "fallbackState": "rejected"
+      "fallbackAction": "reject"
     }
   }
 ```
@@ -297,6 +327,16 @@ When used as an object. `timeout` object supports two attributes
 
 
 
+
+## Integrations and availablity
+The table below lists the vendors and components that are integrated with amp-consent
+
+| Integration   | Prod Availability| Documentation|Ready For Testing
+| ------------- |------------------| -----| -----|
+| DoubleClick & AdSense Integration      | 05/10/18 | [Link](https://support.google.com/dfp_premium/answer/7678538) |Yes|
+| AMP IMA Video Integration   |  05/15/18  |   ||
+| AMP Geo |  05/10/18      |  [Link](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/) |Yes|
+| AMP Stories |   05/15/18     |    ||
 
 
 

@@ -45,6 +45,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     autoFullscreenManager = new AutoFullscreenManager(ampdoc);
+    sandbox.stub(autoFullscreenManager, 'canFullscreen_').returns(true);
   });
 
   it('should enter fullscreen if a video is centered in portrait', () => {

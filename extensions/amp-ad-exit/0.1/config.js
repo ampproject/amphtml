@@ -22,9 +22,17 @@ import {user} from '../../../src/log';
 
 /**
  * @typedef {{
+ *   startTimingEvent: (string|undefined)
+ * }}
+ */
+export let AmpAdExitConfigOptions;
+
+/**
+ * @typedef {{
  *   targets: !Object<string, !NavigationTargetConfig>,
  *   filters: (!Object<string, !FilterConfig>|undefined),
- *   transport: (!Object<TransportMode, boolean>|undefined)
+ *   transport: (!Object<TransportMode, boolean>|undefined),
+ *   options: (!AmpAdExitConfigOptions|undefined)
  * }}
  */
 export let AmpAdExitConfig;
@@ -55,7 +63,8 @@ export let VariablesDef;
 /**
  * @typedef {{
  *   type: !FilterType,
- *   delay: number
+ *   delay: number,
+ *   startTimingEvent: (string|undefined)
  * }}
  */
 export let ClickDelayConfig;
