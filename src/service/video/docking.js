@@ -1095,6 +1095,9 @@ export class VideoDocking {
       return;
     }
 
+    e.preventDefault();
+    e.stopPropagation();
+
     this.hideControls_();
     this.isDragging_ = true;
     this.offset_(offset.x, offset.y);
