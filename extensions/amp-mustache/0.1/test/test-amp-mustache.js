@@ -62,13 +62,11 @@ describe('amp-mustache template', () => {
         'value = <b style="color: red">abc</b>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <b style="color: red">abc</b>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <b style="color: red">abc</b>');
   });
 
   it('should ignore styles containing `!important`',() => {
@@ -135,13 +133,11 @@ describe('amp-mustache template', () => {
         'value = <a href="http://www.google.com">google</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a href="http://www.google.com/" target="_top">google</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a href="http://www.google.com/" target="_top">google</a>');
   });
 
   it('should output a valid target', () => {
@@ -150,13 +146,11 @@ describe('amp-mustache template', () => {
         'value = <a target="_top">a</a><a target="_blank">b</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a target="_top">a</a><a target="_blank">b</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a target="_top">a</a><a target="_blank">b</a>');
   });
 
   it('should output a valid target in different case', () => {
@@ -165,13 +159,11 @@ describe('amp-mustache template', () => {
         'value = <a target="_TOP">a</a><a target="_BLANK">b</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a target="_top">a</a><a target="_blank">b</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a target="_top">a</a><a target="_blank">b</a>');
   });
 
   it('should sanitize tags, removing unsafe attributes', () => {
@@ -181,12 +173,14 @@ describe('amp-mustache template', () => {
         + '<img src="x" onerror="alert(\'XSS\')" />';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
+    allowConsoleError(() => {
       const result = template.render({
         value: /*eslint no-script-url: 0*/ 'javascript:alert();',
       });
       expect(result./*OK*/innerHTML).to.equal(
           'value = <a target="_top">test</a>');
     });
+  });
 
   it('should override an unallowed target', () => {
     const templateElement = document.createElement('template');
@@ -198,17 +192,15 @@ describe('amp-mustache template', () => {
         + '<a target="other">other</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a target="_top">_self</a>'
-          + '<a target="_top">_parent</a>'
-          + '<a target="_top">_other</a>'
-          + '<a target="_top">_OTHER</a>'
-          + '<a target="_top">other</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a target="_top">_self</a>'
+        + '<a target="_top">_parent</a>'
+        + '<a target="_top">_other</a>'
+        + '<a target="_top">_OTHER</a>'
+        + '<a target="_top">other</a>');
   });
 
   it('should NOT output security-sensitive binding attributes', () => {
@@ -252,13 +244,11 @@ describe('amp-mustache template', () => {
         'value = <p [text]="foo" [class]="bar"></p>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <p [text]="foo" [class]="bar"></p>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <p [text]="foo" [class]="bar"></p>');
   });
 
   it('should apply html4/caja restrictions', () => {
@@ -269,15 +259,13 @@ describe('amp-mustache template', () => {
         + '<div class="c" src="d">b</div>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = ac'
-          + 'ac'
-          + '<div class="c" src="">b</div>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = ac'
+        + 'ac'
+        + '<div class="c" src="">b</div>');
   });
 
   it('should allow amp-subscriptions attributes', () => {
@@ -290,17 +278,15 @@ describe('amp-mustache template', () => {
         + '<div subscriptions-dialog="">link</div>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <div subscriptions-action="login">link</div>'
-          + '<div subscriptions-section="actions">link</div>'
-          + '<div subscriptions-actions="">link</div>'
-          + '<div subscriptions-display="">link</div>'
-          + '<div subscriptions-dialog="">link</div>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <div subscriptions-action="login">link</div>'
+        + '<div subscriptions-section="actions">link</div>'
+        + '<div subscriptions-actions="">link</div>'
+        + '<div subscriptions-display="">link</div>'
+        + '<div subscriptions-dialog="">link</div>');
   });
 
   it('should NOT rewrite values of binding attributes', () => {
@@ -310,13 +296,11 @@ describe('amp-mustache template', () => {
         'value = <a [href]="foo.bar">link</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a [href]="foo.bar" target="_top">link</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a [href]="foo.bar" target="_top">link</a>');
   });
 
   it('should allow source::src with vaild protocol', () => {
@@ -325,13 +309,11 @@ describe('amp-mustache template', () => {
         'value = <source src="https://www.foo.com/">';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <source src="https://www.foo.com/">');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <source src="https://www.foo.com/">');
   });
 
   it('should catch attribute value whitespace variations', () => {
@@ -356,14 +338,12 @@ describe('amp-mustache template', () => {
         + '<source src="<script>bad()</script>">';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <source src="">'
-          + '<source src="">');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <source src="">'
+        + '<source src="">');
   });
 
   it('should NOT output blacklisted values for class attributes', () => {
@@ -397,13 +377,11 @@ describe('amp-mustache template', () => {
         'value = a<a href="http://acme.com/">b</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = a<a href="http://acme.com/" target="_top">b</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = a<a href="http://acme.com/" target="_top">b</a>');
   });
 
   it('should output "rel" attribute', () => {
@@ -412,14 +390,12 @@ describe('amp-mustache template', () => {
         'value = a<a href="http://acme.com/" rel="amphtml">b</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = a<a href="http://acme.com/" rel="amphtml" '
-          + 'target="_top">b</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = a<a href="http://acme.com/" rel="amphtml" '
+        + 'target="_top">b</a>');
   });
 
   it('should NOT output security-sensitive attributes', () => {
@@ -444,12 +420,10 @@ describe('amp-mustache template', () => {
     templateElement./*OK*/innerHTML = 'value = a<a on="tap">b</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal('value = a<a on="tap">b</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal('value = a<a on="tap">b</a>');
   });
 
   it('should output "data-, aria-, and role" attributes', () => {
@@ -458,13 +432,11 @@ describe('amp-mustache template', () => {
         'value = <a data-foo="bar" aria-label="bar" role="button">b</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a data-foo="bar" aria-label="bar" role="button">b</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a data-foo="bar" aria-label="bar" role="button">b</a>');
   });
 
   it('should NOT output security-sensitive markup', () => {
@@ -483,23 +455,21 @@ describe('amp-mustache template', () => {
         + 'a<meta>c';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = ac'
-          + 'ac'
-          + 'ac'
-          + 'ac'
-          + 'ac'
-          + 'ac'
-          + 'ac'
-          + 'ac'
-          + 'ac'
-          + 'ac'
-          + 'ac');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac');
   });
 
   it('should NOT output security-sensitive markup when nested', () => {
@@ -510,15 +480,13 @@ describe('amp-mustache template', () => {
         + 'a<script><img></script>c';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = ac'
-          + 'ac'
-          + 'ac');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = ac'
+        + 'ac'
+        + 'ac');
   });
 
   it('should NOT output security-sensitive markup when broken', () => {
@@ -526,12 +494,10 @@ describe('amp-mustache template', () => {
     templateElement./*OK*/innerHTML = 'value = a<script>bc';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal('value = a');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal('value = a');
   });
 
   describe('Sanitizing data- attributes', () => {
