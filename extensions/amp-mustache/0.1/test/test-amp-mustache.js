@@ -181,14 +181,12 @@ describe('amp-mustache template', () => {
         + '<img src="x" onerror="alert(\'XSS\')" />';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
       const result = template.render({
         value: /*eslint no-script-url: 0*/ 'javascript:alert();',
       });
       expect(result./*OK*/innerHTML).to.equal(
           'value = <a target="_top">test</a>');
     });
-  });
 
   it('should override an unallowed target', () => {
     const templateElement = document.createElement('template');
