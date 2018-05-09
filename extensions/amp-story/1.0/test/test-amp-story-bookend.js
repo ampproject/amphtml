@@ -37,7 +37,7 @@ describes.realWin('amp-story-bookend', {
   const expectedComponents = [
     {
       'type': 'heading',
-      'heading': 'test',
+      'text': 'My Heading Title!',
     },
     {
       'type': 'small',
@@ -110,7 +110,7 @@ describes.realWin('amp-story-bookend', {
       'components': [
         {
           'type': 'heading',
-          'title': 'test',
+          'text': 'My Heading Title!',
         },
         {
           'type': 'small',
@@ -145,7 +145,7 @@ describes.realWin('amp-story-bookend', {
       'components': [
         {
           'type': 'heading',
-          'title': 'test',
+          'text': 'My Heading Title!',
         },
         {
           'type': 'small',
