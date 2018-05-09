@@ -451,8 +451,7 @@ export class FixedLayer {
           // We shouldn't have too many of `fixed` elements.
           break;
         }
-        const el = elements[j];
-        this.setupElement_(el, fixedSelector, 'fixed');
+        this.setupElement_(elements[j], fixedSelector, 'fixed');
       }
     }
     for (let i = 0; i < stickySelectors.length; i++) {
@@ -460,8 +459,7 @@ export class FixedLayer {
       const elements = this.ampdoc.getRootNode().querySelectorAll(
           stickySelector);
       for (let j = 0; j < elements.length; j++) {
-        const element = elements[j];
-        this.setupElement_(element, stickySelector, 'sticky');
+        this.setupElement_(elements[j], stickySelector, 'sticky');
       }
     }
   }
@@ -547,12 +545,11 @@ export class FixedLayer {
   removeElement_(element) {
     const removed = [];
     for (let i = 0; i < this.elements_.length; i++) {
-      const el = this.elements_[i];
-      if (el.element == element) {
+      const fe = this.elements_[i];
+      if (fe.element == element) {
         this.vsync_.mutate(() => {
           setStyle(element, 'top', '');
         });
-        const fe = el;
         this.elements_.splice(i, 1);
         removed.push(fe);
       }
