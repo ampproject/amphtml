@@ -195,6 +195,8 @@ let consentState;
  */
 export function imaVideo(global, data) {
 
+  // TODO: consume consentState here via lobal.context.initialConsentState
+
   videoWidth = global./*OK*/innerWidth;
   videoHeight = global./*OK*/innerHeight;
 
