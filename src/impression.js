@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {Services} from './services';
 import {
   addParamsToUrl,
@@ -58,9 +59,10 @@ export function resetTrackImpressionPromiseForTesting() {
 export function maybeTrackImpression(win) {
   let resolveImpression;
 
-  const promise = new Promise(resolve => {
-    resolveImpression = resolve;
-  });
+  const deferred = new Deferred();
+  const promise = deferred.promise;
+  resolveImpression = deferred.resolve;
+
 
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
       promise, 'TrackImpressionPromise timeout').catch(error => {
