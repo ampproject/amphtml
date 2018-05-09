@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpStory} from '../amp-story';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {ArticleComponent} from '../bookend/components/article';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -76,7 +75,6 @@ describes.realWin('amp-story-bookend', {
     storyElem = win.document.createElement('amp-story');
     storyElem.appendChild(win.document.createElement('amp-story-page'));
     win.document.body.appendChild(storyElem);
-    new AmpStory(storyElem);
     bookendElem = createElementWithAttributes(win.document,
         'amp-story-bookend', {'layout': 'nodisplay'});
     storyElem.appendChild(bookendElem);

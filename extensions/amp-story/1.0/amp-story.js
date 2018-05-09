@@ -1347,10 +1347,8 @@ export class AmpStory extends AMP.BaseElement {
 
     return this.bookend_
         .loadConfigAndMaybeRenderBookend(false /** renderBookend */).then(
-            config => {
-              return !!(config && config.components &&
-                config.components.length);
-            });
+            config => !!(config && config.components &&
+              config.components.length > 0));
   }
 
 
