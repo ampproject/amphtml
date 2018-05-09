@@ -142,13 +142,6 @@ describes.sandboxed('Navigation', {}, () => {
         expect(handleNavSpy).to.not.be.called;
         expect(handleCustomProtocolSpy).to.not.be.called;
       });
-
-      it('should NOT handle custom protocol when right clicked', () => {
-        event.type = 'contextmenu';
-        handler.isIframed_ = true;
-        handler.handle_(event);
-        expect(handleCustomProtocolSpy).to.not.be.called;
-      });
     });
 
     describe('link expansion', () => {
@@ -505,15 +498,6 @@ describes.sandboxed('Navigation', {}, () => {
         // handle nav ourselves.
         expect(event.defaultPrevented).to.be.false;
         expect(handleNavSpy).to.be.calledOnce;
-      });
-
-      it('should ignore if event type is right click', () => {
-        const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(false);
-        event.type = 'contextmenu';
-        handler.handle_(event);
-
-        expect(stub).to.not.be.called;
       });
     });
 

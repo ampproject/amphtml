@@ -253,6 +253,13 @@ export class Navigation {
   }
 
   /**
+   * Handles right clicks. Note that currently the right click only
+   * deals with url variable substitution and expansion, as there is
+   * straightforward way of determining what the user clicked in the
+   * right click context menu, required for A2A navigation and custom
+   * link protocol handling.
+   * TODO(alabiaga): investigate fix for handling A2A and custom link
+   * protocols.
    * @param {!Event} e
    */
   handleRightClick_(e) {
@@ -265,7 +272,7 @@ export class Navigation {
   }
 
   /**
-   * @param {?Element} el
+   * @param {!Element} el
    */
   handleUrlDecorationAndExpansion_(el) {
     // First check if need to handle external link decoration.
