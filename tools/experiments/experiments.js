@@ -135,11 +135,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
   {
-    id: 'amp-lightbox-gallery',
-    name: 'Enables a new lightbox experience via the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
