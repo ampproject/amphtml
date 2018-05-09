@@ -1150,6 +1150,25 @@ export class VideoDocking {
     this.hideControls_();
     this.isDragging_ = true;
     this.offset_(offset.x, offset.y);
+    this.updateDismissalAreaStyling_(offset.x, offset.y);
+  }
+
+  /**
+   * @param {number} offsetX
+   * @param {number} offsetY
+   * @private
+   */
+  updateDismissalAreaStyling_(offsetX, offsetY) {
+    const video = this.getDockedVideo_();
+    const {element} = video;
+    const internalElement = getInternalVideoElementFor(element);
+    const inDismissalArea = this.inDismissalArea_(offsetX, offsetY);
+
+    video.mutateElement(() => {
+      const className = 'amp-video-docked-almost-dismissed';
+      internalElement.classList.toggle(className, inDismissalArea);
+      this.getOverlay_().classList.toggle(className, inDismissalArea);
+    });
   }
 
   /**
@@ -1190,20 +1209,27 @@ export class VideoDocking {
    * @private
    */
   dismissOnDragEnd_(offsetX, offsetY) {
+    const inDimissalArea = this.inDismissalArea_(offsetX, offsetY);
+    if (inDimissalArea) {
+      this.dismiss_();
+    }
+    return inDimissalArea;
+  }
+
+  /**
+   * @param {number} offsetX
+   * @param {number} offsetY
+   * @return {boolean}
+   */
+  inDismissalArea_(offsetX, offsetY) {
     // TODO: Use topEdge/bottomEdge
+    const dismissToleranceFromCenterPx = 20;
     const {vw, vh} = this.getViewportSize_();
     const {centerX, centerY} = this.getCenter_(offsetX, offsetY);
-
-    const dismissToleranceFromCenterPx = 20;
-
-    if (centerX >= (vw - dismissToleranceFromCenterPx) ||
+    return centerX >= (vw - dismissToleranceFromCenterPx) ||
         centerX <= dismissToleranceFromCenterPx ||
         centerY >= (vh - dismissToleranceFromCenterPx) ||
-        centerY <= dismissToleranceFromCenterPx) {
-      this.dismiss_();
-      return true;
-    }
-    return false;
+        centerY <= dismissToleranceFromCenterPx;
   }
 
   /**
@@ -1348,6 +1374,9 @@ export class VideoDocking {
       internalElement.classList.remove(BASE_CLASS_NAME);
       const shadowLayer = this.getShadowLayer_();
       const overlay = this.getOverlay_();
+      const almostDismissed = 'amp-video-docked-almost-dismissed';
+      internalElement.classList.remove(almostDismissed);
+      overlay.classList.remove(almostDismissed);
       const stylesToReset = [
         'transform',
         'transition',
