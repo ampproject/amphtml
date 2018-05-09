@@ -1238,17 +1238,6 @@ export class Resources {
     const viewportRect = this.viewport_.getRect();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    /**
-     * @param {!../layout-rect.LayoutRectDef} layoutBox
-     * @param {!../layout-rect.LayoutRectDef} initialLayoutBox
-     * @returns True if element is within 15% and 1000px of document bottom.
-     */
-    const elementNearBottom = (layoutBox, initialLayoutBox) => {
-      const contentHeight = this.viewport_.getContentHeight();
-      const threshold = Math.max(contentHeight * 0.85, contentHeight - 1000);
-      return layoutBox.bottom >= threshold ||
-          initialLayoutBox.bottom >= threshold;
-    };
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
@@ -1342,7 +1331,7 @@ export class Resources {
             this.requestsChangeSize_.push(request);
           }
           continue;
-        } else if (elementNearBottom(box, iniBox)) {
+        } else if (this.elementNearBottom_(box, iniBox)) {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
@@ -1419,6 +1408,20 @@ export class Resources {
    */
   mutateWorkViaLayers_() {
     this.mutateWorkViaResources_();
+  }
+
+  /**
+   * Returns true if element is within 15% and 1000px of document bottom.
+   * @param {!../layout-rect.LayoutRectDef} layoutBox
+   * @param {!../layout-rect.LayoutRectDef} initialLayoutBox
+   * @returns {boolean}
+   * @private
+   */
+  elementNearBottom_(layoutBox, initialLayoutBox) {
+    const contentHeight = this.viewport_.getContentHeight();
+    const threshold = Math.max(contentHeight * 0.85, contentHeight - 1000);
+    return layoutBox.bottom >= threshold ||
+        initialLayoutBox.bottom >= threshold;
   }
 
   /**
