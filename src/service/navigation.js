@@ -226,13 +226,11 @@ export class Navigation {
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
-      /**
-        Handles contextmenu click. Note that currently this only deals
-        with url variable substitution and expansion, as there is
-        straightforward way of determining what the user clicked in the
-        context menu, required for A2A navigation and custom link protocol
-        handling.
-      */
+      // Handles contextmenu click. Note that currently this only deals
+      // with url variable substitution and expansion, as there is
+      // straightforward way of determining what the user clicked in the
+      // context menu, required for A2A navigation and custom link protocol
+      // handling.
       // TODO(alabiaga): investigate fix for handling A2A and custom link
       // protocols.
       this.expandVarsForAnchor_(target);
