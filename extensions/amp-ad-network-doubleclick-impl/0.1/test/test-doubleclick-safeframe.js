@@ -379,7 +379,41 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
     });
 
+
+    it('should handle cancellation', () => {
+      sandbox./*OK*/stub(safeframeHost.baseInstance_,
+          'getPageLayoutBox').returns({
+        top: 0,
+        left: 0,
+        right: 50,
+        bottom: 50,
+      });
+      // In this case, the safeframe is smaller than its containing
+      // amp-ad element.
+      const safeframeMock = createElementWithAttributes(doc, 'iframe', {
+        'class': 'safeframe',
+      });
+      const css = createElementWithAttributes(doc, 'style');
+      css.innerHTML = '.safeframe' +
+        '{height:10px!important;' +
+          'width:10px!important;' +
+          'background-color:blue!important;' +
+          'display:block!important;}';
+      doc.head.appendChild(css);
+      ampAd.appendChild(safeframeMock);
+      doubleclickImpl.iframe_ = safeframeMock;
+      safeframeHost.iframe_ = safeframeMock;
+      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+          'sendMessage_');
+      safeframeHost.updateGeometry_();
+      safeframeHost.baseInstance_.promiseId_++;
+      return Services.timerFor(env.win).promise(1000).then(() => {
+        expect(sendMessageStub).to.not.be.called;
+      });
+    });
+
     it('should get geometry when scrolled', () => {
+
       sandbox./*OK*/stub(safeframeHost.baseInstance_,
           'getPageLayoutBox').returns({
         top: 0,
@@ -506,6 +540,43 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       expect(parsedSfGU).to.deep.equal(expectedParsedSfGU);
       expect(safeframeHost.currentGeometry_).to.deep.equal(expectedParsedSfGU);
 
+    });
+  });
+
+  describe('sendResizeResponse', () => {
+    it('should handle cancellation', () => {
+      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+          'sendMessage_');
+      safeframeHost.sendResizeResponse(true, SERVICE.COLLAPSE_REQUEST);
+      safeframeHost.baseInstance_.promiseId_++;
+      return Services.timerFor(env.win).promise(0).then(() => {
+        expect(sendMessageStub).to.not.be.called;
+      });
+    });
+  });
+
+  describe('resizeAmpAdAndSafeframe', () => {
+    it('should handle cancellation', () => {
+      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+          'sendMessage_');
+      safeframeHost.resizeAmpAdAndSafeframe(
+          100, 100, SERVICE.COLLAPSE_REQUEST);
+      safeframeHost.baseInstance_.promiseId_++;
+      return Services.timerFor(env.win).promise(0).then(() => {
+        expect(sendMessageStub).to.not.be.called;
+      });
+    });
+  });
+
+  describe('handleFluidMessage', () => {
+    it('should handle cancellation', () => {
+      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+          'sendMessage_');
+      safeframeHost.handleFluidMessage_({height: 10});
+      safeframeHost.baseInstance_.promiseId_++;
+      return Services.timerFor(env.win).promise(0).then(() => {
+        expect(sendMessageStub).to.not.be.called;
+      });
     });
   });
 
@@ -703,7 +774,9 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'push': 'not bool',
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(expandMessage);
+      allowConsoleError(() => {
+        receiveMessage(expandMessage);
+      });
       return Services.timerFor(env.win).promise(100).then(() => {
         expect(sendResizeResponseSpy).to.be.calledWith(
             false, SERVICE.EXPAND_RESPONSE);

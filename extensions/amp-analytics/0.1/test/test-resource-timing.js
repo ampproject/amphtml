@@ -91,9 +91,10 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
   const runSerializeTest = function(
     fakeEntries, resourceTimingSpec, expectedResult) {
     sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
-    return serializeResourceTiming(resourceTimingSpec, win).then(result => {
-      expect(result).to.equal(expectedResult);
-    });
+    return serializeResourceTiming(win, resourceTimingSpec)
+        .then(result => {
+          expect(result).to.equal(expectedResult);
+        });
   };
 
   beforeEach(() => {
@@ -104,16 +105,16 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty if the performance API is not supported', () => {
     const fakeWin = {};
-    return serializeResourceTiming(newResourceTimingSpec(), fakeWin)
+    return serializeResourceTiming(fakeWin, newResourceTimingSpec(), 0)
         .then(result => {
           expect(result).to.equal('');
         });
   });
 
   it('should return empty when resource timing is not supported', () => {
-    // Performance API (fakeWin.performance)  oesn't support resource timing.
+    // Performance API (fakeWin.performance) doesn't support resource timing.
     const fakeWin = {performance: {}};
-    return serializeResourceTiming(newResourceTimingSpec(), fakeWin)
+    return serializeResourceTiming(fakeWin, newResourceTimingSpec(), 0)
         .then(result => {
           expect(result).to.equal('');
         });
@@ -317,7 +318,9 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${decodedBodySize}';
     spec['encoding']['base'] = 40;
-    return runSerializeTest([entry], spec, '');
+    return runSerializeTest([entry], spec, '').then(() => {
+      expect(spec['done']).to.be.true;
+    });
   });
 
   it('should not replace other analytics variables', () => {
@@ -344,4 +347,97 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
     return runSerializeTest(
         [entry1, entry2], spec, 'foo_bar?100,500:foo_bar?700,100');
   });
+
+  it('should only include resources downloaded after `responseAfter`', () => {
+    const entry1 = newPerformanceResourceTiming(
+        'http://foo.example.com/lib.js?v=123', 'script', 100, 200, 10 * 1000,
+        false);
+    const entry2 = newPerformanceResourceTiming(
+        'http://bar.example.com/lib.js', 'script', 200, 200, 80 * 1000, true);
+    const entry3 = newPerformanceResourceTiming(
+        'http://bar.example.com/lib.js', 'script', 300, 200, 80 * 1000, true);
+    const spec = newResourceTimingSpec();
+    spec['encoding']['entry'] = '${key}.${startTime}';
+    spec['encoding']['delim'] = '-';
+    spec['responseAfter'] = 350;
+    return runSerializeTest(
+        [entry1, entry2, entry3], spec, 'foo_bar.200-foo_bar.300');
+  });
+
+  it('should reject invalid (non-numeric) responseAfter fields', () => {
+    const entry = newPerformanceResourceTiming(
+        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
+        false);
+    const spec = newResourceTimingSpec();
+    spec['responseAfter'] = '100';
+    return runSerializeTest([entry], spec, '').then(() => {
+      expect(spec['done']).to.be.true;
+    });
+  });
+
+  it('should update responseAfter', () => {
+    const initialEntry = newPerformanceResourceTiming(
+        'https://example.com/lib.css', 'link', 100, 400, 5 * 1000, false);
+    const laterEntry = newPerformanceResourceTiming(
+        'https://bar.example.com/lib.js', 'script', 200, 500, 10 * 1000, false);
+
+    // Stub performance.now so that it returns a timestamp after the resource
+    // timing entry.
+    const nowStub = sandbox.stub(win.performance, 'now');
+    nowStub.onCall(0).returns(600);
+    nowStub.onCall(1).returns(800);
+
+    const getEntriesStub = sandbox.stub(win.performance, 'getEntriesByType');
+    getEntriesStub.onCall(0).returns([initialEntry]);
+    getEntriesStub.onCall(1).returns([initialEntry, laterEntry]);
+
+    const spec = newResourceTimingSpec();
+    spec['encoding']['entry'] = '${initiatorType}.${startTime}.${duration}';
+
+    return serializeResourceTiming(win, spec).then(result => {
+      expect(result).to.equal('link.100.400');
+      expect(spec['responseAfter']).to.equal(600);
+
+      // Check resource timings a second time.
+      return serializeResourceTiming(win, spec);
+    }).then(result => {
+      expect(result).to.equal('script.200.500');
+      expect(spec['responseAfter']).to.equal(800);
+    });
+  });
+
+  it('should not update responseAfter if greater', () => {
+    const spec = newResourceTimingSpec();
+    spec['responseAfter'] = 1000;
+    sandbox.stub(win.performance, 'now').returns(500);
+    return runSerializeTest([], spec, '').then(() => {
+      // responseAfter is greater than performance.now(), so it should not be
+      // modified.
+      expect(spec['responseAfter']).to.equal(1000);
+    });
+  });
+
+  it('should stop reporting after reaching the buffer limit', () => {
+    const entry = newPerformanceResourceTiming(
+        'http://does_not_match.com/lib.js', 'script', 100, 500, 10 * 1000,
+        false);
+    const entries = new Array(150).fill(entry);
+    // Stub performance.now so that it returns a timestamp after the resource
+    // timing entry.
+    sandbox.stub(win.performance, 'now').returns(700);
+    const spec = newResourceTimingSpec();
+    return runSerializeTest(entries, spec, '').then(() => {
+      expect(spec['done']).to.be.true;
+    });
+  });
+
+  it('should not report if resourceTimingSpec is done', () => {
+    const entry = newPerformanceResourceTiming(
+        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
+        false);
+    const spec = newResourceTimingSpec();
+    spec['done'] = true;
+    return runSerializeTest([entry], spec, '');
+  });
+
 });
