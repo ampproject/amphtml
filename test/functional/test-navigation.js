@@ -31,6 +31,7 @@ describes.sandboxed('Navigation', {}, () => {
     event = {
       target: null,
       defaultPrevented: false,
+      type: 'click',
     };
     event.preventDefault = function() {
       event.defaultPrevented = true;
@@ -158,6 +159,14 @@ describes.sandboxed('Navigation', {}, () => {
         expect(anchor.href).to.equal(
             'https://www.google.com/link?out=QUERY_PARAM(hello)');
         expect(handleNavSpy).to.be.calledOnce;
+      });
+
+      it('should expand link if event type is right click', () => {
+        anchor.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+        anchor.setAttribute('data-amp-replace', 'QUERY_PARAM');
+        event.type = 'contextmenu';
+        handler.handle_(event);
+        expect(anchor.href).to.equal('https://www.google.com/link?out=world');
       });
     });
 
