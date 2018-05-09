@@ -51,10 +51,12 @@ class AdNetworkConfigDef {
   getAttributes() {}
 
   /**
-   * Network specific constraints on the placement of ads on the page.
+   * Network specific constraints on the placement of ads on the page. Used
+   * when no ad constraints are specified in the over-the-wire config supplied
+   * by the ad network.
    * @return {!./ad-tracker.AdConstraints}
    */
-  getAdConstraints() {}
+  getDefaultAdConstraints() {}
 }
 
 /**
@@ -110,7 +112,7 @@ class AdSenseNetworkConfig {
   }
 
   /** @override */
-  getAdConstraints() {
+  getDefaultAdConstraints() {
     const viewportHeight =
         Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
     return {
