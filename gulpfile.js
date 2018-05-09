@@ -152,6 +152,7 @@ declareExtension('amp-story', '0.1', {
   hasCss: true,
   cssBinaries: [
     'amp-story-bookend',
+    'amp-story-consent',
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',

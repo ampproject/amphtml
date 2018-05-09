@@ -35,6 +35,7 @@ import {
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
+import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
@@ -70,6 +71,8 @@ import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
 import {
   childElement,
+  childElementByTag,
+  childElements,
   closest,
   escapeCssSelectorIdent,
   matches,
@@ -587,6 +590,8 @@ export class AmpStory extends AMP.BaseElement {
     storyLayoutPromise.then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
         .then(() => this.markStoryAsLoaded_());
 
+    this.validateConsent_();
+
     return storyLayoutPromise;
   }
 
@@ -618,6 +623,32 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
     });
+  }
+
+
+  /**
+   * Ensures publishers using amp-consent use amp-story-consent.
+   * @private
+   */
+  validateConsent_() {
+    const consentEl = this.element.querySelector('amp-consent');
+    if (!consentEl) {
+      return;
+    }
+
+    if (!childElementByTag(consentEl, 'amp-story-consent')) {
+      dev().error(TAG, 'amp-consent must have an amp-story-consent child');
+    }
+
+    const allowedTags = ['SCRIPT', 'AMP-STORY-CONSENT'];
+    const toRemoveChildren = childElements(
+        consentEl, el => allowedTags.indexOf(el.tagName) === -1);
+
+    if (toRemoveChildren.length === 0) {
+      return;
+    }
+    dev().error(TAG, `amp-consent only allows tags: ${allowedTags}`);
+    toRemoveChildren.forEach(el => consentEl.removeChild(el));
   }
 
 
@@ -1610,4 +1641,5 @@ AMP.extension('amp-story', '0.1', AMP => {
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
+  AMP.registerElement('amp-story-consent', AmpStoryConsent);
 });
