@@ -35,6 +35,10 @@
   display: none;
 }
 
+.i-amphtml-next-page-hidden {
+  display: none !important;
+}
+
 .i-amphtml-next-page {
   background: #FFFFFF;
 }
