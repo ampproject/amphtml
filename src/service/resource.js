@@ -15,6 +15,7 @@
  */
 
 import {AmpEvents} from '../amp-events';
+import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
@@ -195,13 +196,13 @@ export class Resource {
     /** @private {boolean} */
     this.loadedOnce_ = false;
 
-    /** @private {?Function} */
-    this.loadPromiseResolve_ = null;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise} */
-    this.loadPromise_ = new Promise(resolve => {
-      this.loadPromiseResolve_ = resolve;
-    });
+    this.loadPromise_ = deferred.promise;
+
+    /** @private {?Function} */
+    this.loadPromiseResolve_ = deferred.resolve;
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.hostWin, 'layers');
@@ -657,9 +658,9 @@ export class Resource {
     if (this.renderOutsideViewportPromise_) {
       return this.renderOutsideViewportPromise_;
     }
-    return this.renderOutsideViewportPromise_ = new Promise(resolver => {
-      this.renderOutsideViewportResolve_ = resolver;
-    });
+    const deferred = new Deferred();
+    this.renderOutsideViewportResolve_ = deferred.resolve;
+    return this.renderOutsideViewportPromise_ = deferred.promise;
   }
 
   /**
