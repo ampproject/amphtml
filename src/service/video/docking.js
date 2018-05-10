@@ -338,6 +338,9 @@ export class VideoDocking {
      */
     this.placedAt_ = null;
 
+    /** @private {?{x: number, y: number, scale: number}} */
+    this.sizedAt_ = null;
+
     /** @private {?Direction} */
     this.scrollDirection_ = null;
 
@@ -913,12 +916,17 @@ export class VideoDocking {
         transitionDurationMs > 200 ? 'ease-in' : 'linear';
 
     const positioningStyles = {
-      'width': px(width),
-      'height': px(height),
       'transform': transform(x, y, scale),
       'transition-duration': `${transitionDurationMs}ms`,
       'transition-timing-function': transitionTiming,
     };
+
+    if (this.boxNeedsSizing_()) {
+      Object.assign(positioningStyles, {
+        'width': px(width),
+        'height': px(height),
+      });
+    }
 
     const internalElement = getInternalVideoElementFor(video.element);
     const shadowLayer = this.getShadowLayer_();
@@ -944,6 +952,23 @@ export class VideoDocking {
     });
 
     return;
+  }
+
+  /**
+   * @param  {number} width
+   * @param  {number} height
+   * @return {boolean}
+   * @private
+   */
+  boxNeedsSizing_(width, height) {
+    const needsSizing =
+        !this.sizedAt_ ||
+        this.sizedAt_.width != width ||
+        this.sizedAt_.height != height;
+    if (needsSizing) {
+      this.sizedAt_ = {width, height};
+    }
+    return needsSizing;
   }
 
   /**
@@ -1374,6 +1399,7 @@ export class VideoDocking {
       this.hideControls_();
       video.showControls();
       this.placedAt_ = null;
+      this.sizedAt_ = null;
       internalElement.classList.remove(BASE_CLASS_NAME);
       const shadowLayer = this.getShadowLayer_();
       const overlay = this.getOverlay_();
@@ -1385,7 +1411,6 @@ export class VideoDocking {
         'transition',
         'width',
         'height',
-        'z-index',
         'opacity',
       ];
       shadowLayer.setAttribute('hidden', '');

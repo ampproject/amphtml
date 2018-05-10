@@ -116,6 +116,8 @@
 
   /* So (x, y) coordinates can be used in transforms: */
   transform-origin: left top !important;
+
+  will-change: width, height, transition, transform, opacity;
 }
 
 .i-amphtml-video-docked-overlay {
