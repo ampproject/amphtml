@@ -1743,7 +1743,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const {
         loadingContainer_: container,
         loadingElement_: indicator,
-      } = element ;
+      } = element;
       element.toggleLoading(true);
 
       expect(element.loadingContainer_).to.equal(container);

@@ -1065,7 +1065,7 @@ class CssContextImpl {
    * @protected
    */
   withTarget(target, index, callback) {
-    const {currentTarget_: prev, currentIndex_: prevIndex} = this ;
+    const {currentTarget_: prev, currentIndex_: prevIndex} = this;
     this.currentTarget_ = target;
     this.currentIndex_ = index;
     const result = callback(target);

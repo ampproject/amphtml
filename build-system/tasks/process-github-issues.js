@@ -129,7 +129,7 @@ function updateGitHubIssues() {
             assignee,
             'pull_request': pullRequest,
             'updated_at': issueLastUpdate,
-          } = issue ;
+          } = issue;
           let issueType;
           let milestoneTitle;
           let milestoneState;

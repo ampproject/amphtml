@@ -98,7 +98,7 @@ export class LoginDoneDialog {
    */
   buildStyles_() {
     const query = parseQueryString(this.win.location.search);
-    const {document: doc, navigator: nav} = this.win ;
+    const {document: doc, navigator: nav} = this.win;
     const langSet = [query['hl'], nav.language, nav.userLanguage, 'en-US'];
     for (let i = 0; i < langSet.length; i++) {
       const lang = langSet[i];

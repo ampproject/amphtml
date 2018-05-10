@@ -343,7 +343,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
     it('should return correct frame when intermediate xdomain frames', () => {
       const iframeObj = createNestedIframeMocks(6,3);
-      const {source: sourceMock, topWin: topWinMock} = iframeObj ;
+      const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock.parent.parent;
       host = new InaboxMessagingHost(win, [frameMock]);
@@ -353,7 +353,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
     it('should return correct frame when all frames friendly', () => {
       const iframeObj = createNestedIframeMocks(6);
-      const {source: sourceMock, topWin: topWinMock} = iframeObj ;
+      const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock;
       host = new InaboxMessagingHost(win, [frameMock]);
@@ -363,7 +363,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
     it('should return correct frame when many frames registered', () => {
       const iframeObj = createNestedIframeMocks(6);
-      const {source: sourceMock, topWin: topWinMock} = iframeObj ;
+      const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMockWrong1 = {};
       const frameMockWrong2 = {};
       const frameMock = topWinMock.document.querySelectorAll()[0];
@@ -394,7 +394,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
     it('should return null if frame is more than 10 levels deep', () => {
       const iframeObj = createNestedIframeMocks(12,1);
-      const {source: sourceMock, topWin: topWinMock} = iframeObj ;
+      const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMock = topWinMock.document.querySelectorAll()[0];
       host = new InaboxMessagingHost(win, [frameMock]);
       expect(host.getFrameElement_(sourceMock, sentinel)).to.be.null;

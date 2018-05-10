@@ -39,7 +39,7 @@ describe('base64 <> utf-8 encode/decode', () => {
       const {
         TextEncoder: oldTextEncoder,
         TextDecoder: oldTextDecoder,
-      } = window ;
+      } = window;
       beforeEach(() => {
         // Forces use of the TextEncoding polyfill
         if (scenario == 'PolyfillTextEncoding') {

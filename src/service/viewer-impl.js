@@ -1070,7 +1070,7 @@ export class Viewer {
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
       const deferred = new Deferred();
-      const {promise: responsePromise, resolve: responseResolver} = deferred ;
+      const {promise: responsePromise, resolve: responseResolver} = deferred;
 
       message = {
         eventType,

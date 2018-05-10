@@ -96,7 +96,7 @@ export class PositionObserver {
    * A  method to get viewport rect
    */
   getViewportRect() {
-    const {scrollingElement_: scrollingElement, win_: win} = this ;
+    const {scrollingElement_: scrollingElement, win_: win} = this;
 
     const scrollLeft = scrollingElement./*OK*/scrollLeft ||
         win./*OK*/pageXOffset;

@@ -72,7 +72,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   }
 
   function setupElementFunctions(div) {
-    const {innerWidth: width, innerHeight: height} = window ;
+    const {innerWidth: width, innerHeight: height} = window;
     div.getIntersectionChangeEntry = function() {
       return {
         time: 1234567888,
@@ -159,7 +159,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     div.setAttribute('width', '50');
     div.setAttribute('height', '100');
 
-    const {innerWidth: width, innerHeight: height} = window ;
+    const {innerWidth: width, innerHeight: height} = window;
     setupElementFunctions(div);
 
     const viewer = Services.viewerForDoc(window.document);

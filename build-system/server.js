@@ -31,7 +31,7 @@ const {
   SERVE_HOST: host,
   SERVE_PORT: port,
   SERVE_PROCESS_ID: gulpProcess,
-} = process.env ;
+} = process.env;
 
 const useHttps = process.env.SERVE_USEHTTPS == 'true';
 const quiet = process.env.SERVE_QUIET == 'true';

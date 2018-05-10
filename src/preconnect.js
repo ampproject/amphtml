@@ -155,7 +155,7 @@ class PreconnectService {
     const lastPreconnectTimeout = this.origins_[origin];
     if (lastPreconnectTimeout && now < lastPreconnectTimeout) {
       if (opt_alsoConnecting) {
-        this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS ;
+        this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS;
       }
       return;
     }

@@ -58,7 +58,7 @@ export function resetTrackImpressionPromiseForTesting() {
  */
 export function maybeTrackImpression(win) {
   const deferred = new Deferred();
-  const {promise, resolve: resolveImpression} = deferred ;
+  const {promise, resolve: resolveImpression} = deferred;
 
 
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
