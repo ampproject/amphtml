@@ -250,7 +250,7 @@ ValidatorTestCase.prototype.run = function() {
   }
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1' &&
       this.expectedOutputFile !== null) {
-    console.log('Updating ' +  this.expectedOutputFile + ' ...');
+    console/*OK*/.log('Updating ' +  this.expectedOutputFile + ' ...');
     fs.writeFileSync(absolutePathFor(this.expectedOutputFile), observed);
     return;
   }
@@ -679,6 +679,7 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-anim': 0,
         'amp-animation': 0,
         'amp-audio': 0,
+        'amp-bind': 0,
         'amp-carousel': 0,
         'amp-fit-text': 0,
         'amp-font': 0,
