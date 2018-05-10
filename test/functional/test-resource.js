@@ -151,6 +151,34 @@ describes.realWin('Resource', {amp: true}, env => {
     });
   });
 
+  it('should track dimension changes on measure', () => {
+    const box = layoutRectLtwh(0, 0, 100, 200);
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 11, top: 12, width: 111, height: 222})
+          .once();
+      resource.measure();
+      elementMock.expects('build').returns(Promise.resolve()).once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(box, /* measurementsChanged */ false)
+          .once();
+    });
+  });
+
+  it('should track dimension changes on measure', () => {
+    const box = layoutRectLtwh(0, 0, 100, 200);
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 0, top: 0, width: 100, height: 222})
+          .once();
+      resource.measure();
+      elementMock.expects('build').returns(Promise.resolve()).once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(box, /* measurementsChanged */ true)
+          .once();
+    });
+  });
+
   it('should allow to measure when not upgraded', () => {
     elementMock.expects('isUpgraded').returns(false).atLeast(1);
     const viewport = {

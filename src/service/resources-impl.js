@@ -975,11 +975,13 @@ export class Resources {
 
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
+          console.log('requested measure');
           r.requestMeasure();
         }
         const ampElements = element.getElementsByClassName('i-amphtml-element');
         for (let i = 0; i < ampElements.length; i++) {
           const r = Resource.forElement(ampElements[i]);
+          console.log('requested measure');
           r.requestMeasure();
         }
         if (relayoutTop != -1) {

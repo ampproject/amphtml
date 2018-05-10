@@ -323,7 +323,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.implementation_.layoutWidth_).to.equal(111);
     });
 
-    it('should tolerate erros in onLayoutMeasure', () => {
+    it('should tolerate errors in onLayoutMeasure', () => {
       const element = new ElementClass();
       sandbox.stub(element.implementation_, 'onLayoutMeasure').callsFake(() => {
         throw new Error('intentional');
@@ -332,6 +332,38 @@ describes.realWin('CustomElement', {amp: true}, env => {
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
         element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+        expect(element.layoutWidth_).to.equal(111);
+        expect(element.implementation_.layoutWidth_).to.equal(111);
+        expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+      });
+    });
+
+    it('should not call onMeasureChanged callback when element dimensions '
+        + 'have not changed', () => {
+      const element = new ElementClass();
+      const errorStub = sandbox.stub(element, 'dispatchCustomEventForTesting');
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        element.updateLayoutBox(
+            {top: 0, left: 0, width: 111, height: 51},
+            /* opt_hasMeasurementsChanged */ false
+        );
+        expect(element.layoutWidth_).to.equal(111);
+        expect(element.implementation_.layoutWidth_).to.equal(111);
+        expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+      });
+    });
+
+    it('should call onMeasureChanged callback when element dimensions '
+        + 'have changed', () => {
+      const element = new ElementClass();
+      const errorStub = sandbox.stub(element, 'dispatchCustomEventForTesting');
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        element.updateLayoutBox(
+            {top: 0, left: 0, width: 111, height: 51},
+            /* opt_hasMeasurementsChanged */ true
+        );
         expect(element.layoutWidth_).to.equal(111);
         expect(element.implementation_.layoutWidth_).to.equal(111);
         expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');

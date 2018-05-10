@@ -429,12 +429,13 @@ export class Resource {
     }
     const box = this.getPageLayoutBox();
 
+    let measurementsChanged = false;
     // Note that "left" doesn't affect readiness for the layout.
     if (this.state_ == ResourceState.NOT_LAID_OUT ||
           oldBox.top != box.top ||
           oldBox.width != box.width ||
           oldBox.height != box.height) {
-
+      measurementsChanged = true;
       if (this.element.isUpgraded() &&
               this.state_ != ResourceState.NOT_BUILT &&
               (this.state_ == ResourceState.NOT_LAID_OUT ||
@@ -447,7 +448,7 @@ export class Resource {
       this.initialLayoutBox_ = box;
     }
 
-    this.element.updateLayoutBox(box);
+    this.element.updateLayoutBox(box, measurementsChanged);
   }
 
   measureViaResources_() {
