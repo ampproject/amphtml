@@ -64,6 +64,9 @@ export class NextPageService {
     /** @private {?./config.AmpNextPageConfig} */
     this.config_ = null;
 
+    /** @private {string} */
+    this.hideSelector_;
+
     /** @private {?Element} */
     this.separator_ = null;
 
@@ -128,6 +131,10 @@ export class NextPageService {
     this.separator_ = separator || this.createDivider_();
     this.element_ = element;
 
+    if (this.config_.hideSelectors) {
+      this.hideSelector_ = this.config_.hideSelectors.join(',');
+    }
+
     this.viewer_ = Services.viewerForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
     this.resources_ = Services.resourcesForDoc(ampDoc);
@@ -166,6 +173,13 @@ export class NextPageService {
    * @return {?Object} Return value of {@link MultidocManager#attachShadowDoc}
    */
   attachShadowDoc_(shadowRoot, doc) {
+    if (this.hideSelector_) {
+      const elements = doc.querySelectorAll(this.hideSelector_);
+      for (let i = 0; i < elements.length; i++) {
+        elements[i].classList.add('i-amphtml-next-page-hidden');
+      }
+    }
+
     const amp =
         this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
     installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);

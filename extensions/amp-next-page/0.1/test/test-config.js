@@ -27,6 +27,10 @@ describe('amp-next-page config', () => {
           image: 'https://example.com/image.png',
           title: 'Article 1',
         }],
+        hideSelectors: [
+          '.header',
+          'footer',
+        ],
       };
       expect(() => assertConfig(config, origin, origin)).to.not.throw();
     });
@@ -192,6 +196,40 @@ describe('amp-next-page config', () => {
         expect(() => assertConfig(config, origin, origin))
             .to.throw(
                 'pages must be from the same origin as the current document');
+      });
+    });
+
+    it('throws on config with non-array "hideSelectors" key', () => {
+      const config = {
+        pages: [],
+        hideSelectors: {},
+      };
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, origin, origin))
+            .to.throw('amp-next-page hideSelectors should be an array');
+      });
+    });
+
+    it('throws for non-string hideSelector values', () => {
+      const config = {
+        pages: [],
+        hideSelectors: ['a', 2],
+      };
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, origin, origin))
+            .to.throw('amp-next-page hideSelector value 2 is not a string');
+      });
+    });
+
+    it('throws for hideSelector values for i-amphtml selectors', () => {
+      const config = {
+        pages: [],
+        hideSelectors: ['   .i-amphtml-something'],
+      };
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, origin, origin)).to.throw(
+            'amp-next-page hideSelector \'   .i-amphtml-something\' ' +
+            'not allowed');
       });
     });
   });
