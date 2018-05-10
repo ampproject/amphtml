@@ -1385,8 +1385,8 @@ export class VideoDocking {
   // destructuring.
   getViewportSize_() {
     const viewportSize = this.viewport_.getSize();
-    const vw = viewportSize.width;
-    const vh = viewportSize.height;
+    const {width: vw, height: vh} = viewportSize ;
+
     return {vw, vh};
   }
 

@@ -25,7 +25,6 @@ const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = $$.help(require('gulp'));
-const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
@@ -40,6 +39,7 @@ const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile'
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
+const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 const {transpileTs} = require('./build-system/typescript');
 
 const argv = minimist(
