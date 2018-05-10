@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
@@ -289,12 +290,12 @@ export class Templates {
       return this.templateClassMap_[type];
     }
 
-    let aResolve;
-    const promise = new Promise((resolve, unusedReject) => {
-      aResolve = resolve;
-    });
+    const deferred = new Deferred();
+    const promise = deferred.promise;
+    const resolve = deferred.resolve;
+
     this.templateClassMap_[type] = promise;
-    this.templateClassResolvers_[type] = aResolve;
+    this.templateClassResolvers_[type] = resolve;
     return promise;
   }
 

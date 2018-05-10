@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Signals} from '../utils/signals';
 import {dev} from '../log';
 import {
@@ -440,24 +441,24 @@ export class AmpDocShadow extends AmpDoc {
     /** @private {?Element} */
     this.body_ = null;
 
-    /** @private {function(!Element)|undefined} */
-    this.bodyResolver_ = undefined;
+    const bodyDeferred = new Deferred();
 
     /** @private {!Promise<!Element>} */
-    this.bodyPromise_ = new Promise(resolve => {
-      this.bodyResolver_ = resolve;
-    });
+    this.bodyPromise_ = bodyDeferred.promise;
+
+    /** @private {function(!Element)|undefined} */
+    this.bodyResolver_ = bodyDeferred.resolve;
 
     /** @private {boolean} */
     this.ready_ = false;
 
-    /** @private {function()|undefined} */
-    this.readyResolver_ = undefined;
+    const readyDeferred = new Deferred();
 
     /** @private {!Promise} */
-    this.readyPromise_ = new Promise(resolve => {
-      this.readyResolver_ = resolve;
-    });
+    this.readyPromise_ = readyDeferred.promise;
+
+    /** @private {function()|undefined} */
+    this.readyResolver_ = readyDeferred.resolve;
   }
 
   /** @override */

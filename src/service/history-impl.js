@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
@@ -205,12 +206,10 @@ export class History {
    * @private
    */
   enque_(callback, name) {
-    let resolve;
-    let reject;
-    const promise = new Promise((aResolve, aReject) => {
-      resolve = aResolve;
-      reject = aReject;
-    });
+    const deferred = new Deferred();
+    const promise = deferred.promise;
+    const resolve = deferred.resolve;
+    const reject = deferred.reject;
 
     // TODO(dvoytenko, #8785): cleanup after tracing.
     const trace = new Error('history trace for ' + name + ': ');

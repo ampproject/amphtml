@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './promise';
 import {map} from './object';
 
 
@@ -72,11 +73,11 @@ export class Signals {
       } else {
         // Allocate the promise/resolver for when the signal arrives in the
         // future.
-        let resolve, reject;
-        const promise = new Promise((aResolve, aReject) => {
-          resolve = aResolve;
-          reject = aReject;
-        });
+        const deferred = new Deferred();
+        const promise = deferred.promise;
+        const resolve = deferred.resolve;
+        const reject = deferred.reject;
+
         promiseStruct = {promise, resolve, reject};
       }
       if (!this.promiseMap_) {
