@@ -338,7 +338,7 @@ export class VideoDocking {
      */
     this.placedAt_ = null;
 
-    /** @private {?{x: number, y: number, scale: number}} */
+    /** @private {?{width: number, height: number}} */
     this.sizedAt_ = null;
 
     /** @private {?Direction} */
@@ -921,7 +921,10 @@ export class VideoDocking {
       'transition-timing-function': transitionTiming,
     };
 
-    if (this.boxNeedsSizing_()) {
+    if (this.boxNeedsSizing_(width, height)) {
+      // Setting explicit dimensions is needed to match the video's aspect
+      // ratio. However, we only do this once to prevent jank in subsequent
+      // frames.
       Object.assign(positioningStyles, {
         'width': px(width),
         'height': px(height),
