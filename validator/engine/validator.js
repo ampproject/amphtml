@@ -5843,22 +5843,30 @@ amp.validator.categorizeError = function(error) {
   }
   // E.g. "The attribute 'srcset' may not appear in tag 'amp-audio >
   // source'."
-  if ((error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE ||
-       error.code === amp.validator.ValidationError.Code.DISALLOWED_ATTR ||
-       error.code ===
-           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING)) {
-    if (goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
-      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
-    }
+  if (error.code === amp.validator.ValidationError.Code.DISALLOWED_ATTR) {
     if (goog.string./*OK*/ startsWith(error.params[1], 'on')) {
       return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
     }
-    if (error.params[1] === 'style' ||
+    // E.g. "The attribute 'async' may not appear in tag 'link
+    // rel=stylesheet for fonts'."
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+
+  // E.g. "The attribute '%1' in tag '%2' is set to the invalid value '%3'."
+  if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE) {
+    if (error.params[0] === 'href' &&
         error.params[1] === 'link rel=stylesheet for fonts') {
       return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
     }
-    // E.g. "The attribute 'async' may not appear in tag 'link
-    // rel=stylesheet for fonts'."
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+
+  // E.g. "The mandatory attribute '%1' is missing in tag '%2'."
+  if (error.code ===
+      amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING) {
+    if (goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // Like the previous example but the tag is params[0] here. This

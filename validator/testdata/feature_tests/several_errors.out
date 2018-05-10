@@ -28,7 +28,7 @@ feature_tests/several_errors.html:23:2 The attribute 'charset' in tag 'meta char
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script type='javascript'>
 >>   ^~~~~~~~~
-feature_tests/several_errors.html:26:2 Only AMP runtime 'script' tags are allowed, and only in the document head. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/several_errors.html:26:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |    // Let's go crazy. Uhm, no, hahaha.
 |    </script>
 |  </head>
@@ -45,7 +45,7 @@ feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is 
 |    </amp-ad>
 |    <amp-ad width="42" height="42" made_up_attribute="oh hi"></amp-ad>
 >>   ^~~~~~~~~
-feature_tests/several_errors.html:37:2 The attribute 'made_up_attribute' may not appear in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+feature_tests/several_errors.html:37:2 The attribute 'made_up_attribute' may not appear in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DISALLOWED_HTML]
 |    <!-- When rendering errors for attribute values, we collapse whitespace -
 |         even whitespace that is originally encoded.-->
 |    <amp-ad width="42" height="foo&#13;&#10;bar  baz">

@@ -53,64 +53,64 @@ amp-position-observer/0.1/test/validator-amp-position-observer.html:49:2 The imp
 |    <!-- Invalid: interesection-ratios not valid entries -->
 |    <amp-position-observer intersection-ratios="" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:51:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:51:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="1.1" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:52:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '1.1'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:52:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '1.1'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="0.b" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:53:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.b'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:53:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.b'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="foo" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:54:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value 'foo'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:54:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value 'foo'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="3" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:55:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '3'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:55:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '3'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="0.a 0.b" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:56:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.a 0.b'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:56:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.a 0.b'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="0.5 foo" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:57:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.5 foo'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:57:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.5 foo'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="0.5 1.1" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:58:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.5 1.1'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:58:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.5 1.1'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="0.5 4" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:59:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.5 4'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:59:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '0.5 4'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="foo 0.5" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:60:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value 'foo 0.5'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:60:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value 'foo 0.5'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="1.1 0.5" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:61:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '1.1 0.5'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:61:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '1.1 0.5'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer intersection-ratios="4 0.5" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:62:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '4 0.5'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:62:2 The attribute 'intersection-ratios' in tag 'amp-position-observer' is set to the invalid value '4 0.5'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <!-- Invalid: viewport-margins not valid entries -->
 |    <amp-position-observer viewport-margins="" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:64:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:64:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer viewport-margins="foo" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:65:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value 'foo'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:65:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value 'foo'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer viewport-margins="100fx" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:66:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100fx'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:66:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100fx'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer viewport-margins="100vx" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:67:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100vx'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:67:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100vx'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer viewport-margins="100 100vx" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:68:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100 100vx'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:68:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100 100vx'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer viewport-margins="100vh 100vx" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:69:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100vh 100vx'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:69:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100vh 100vx'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer viewport-margins="100fx 100vh" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:70:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100fx 100vh'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:70:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100fx 100vh'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |    <amp-position-observer viewport-margins="100vx 100px" layout="nodisplay"></amp-position-observer>
 >>   ^~~~~~~~~
-amp-position-observer/0.1/test/validator-amp-position-observer.html:71:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100vx 100px'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [AMP_TAG_PROBLEM]
+amp-position-observer/0.1/test/validator-amp-position-observer.html:71:2 The attribute 'viewport-margins' in tag 'amp-position-observer' is set to the invalid value '100vx 100px'. (see https://www.ampproject.org/docs/reference/components/amp-position-observer) [DISALLOWED_HTML]
 |  </body>
 |  </html>

@@ -38,14 +38,14 @@ FAIL
 |    <!-- invalid: data-site-id must be numeric -->
 |    <amp-springboard-player data-site-id="a261" data-mode="video"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:38:2 The attribute 'data-site-id' in tag 'amp-springboard-player' is set to the invalid value 'a261'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [AMP_TAG_PROBLEM]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:38:2 The attribute 'data-site-id' in tag 'amp-springboard-player' is set to the invalid value 'a261'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [DISALLOWED_HTML]
 |        data-content-id="1578473" data-player-id="test401"
 |        data-domain="test.com" data-items="10"
 |        layout="fixed"width="480" height="270"></amp-springboard-player>
 |    <!-- invalid: data-player-id must be alphanumeric -->
 |    <amp-springboard-player data-site-id="261" data-mode="playlist"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:43:2 The attribute 'data-player-id' in tag 'amp-springboard-player' is set to the invalid value 'test 401'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [AMP_TAG_PROBLEM]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:43:2 The attribute 'data-player-id' in tag 'amp-springboard-player' is set to the invalid value 'test 401'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [DISALLOWED_HTML]
 |        data-content-id="1578473" data-player-id="test 401"
 |        data-domain="test.com" data-items="10"
 |        layout="fixed" width="480" height="270"></amp-springboard-player>
