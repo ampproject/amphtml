@@ -554,6 +554,12 @@ function compileCss(watch, opt_compileAll) {
       .then(() => {
         endBuildStep('Recompiled CSS in', 'video-docking.css', startTime);
       })
+      .then(() => jsifyCssAsync('css/video-autoplay.css'))
+      .then(css => writeCss(css,
+          'video-autoplay.css', 'video-autoplay.css.js', 'video-autoplay.css'))
+      .then(() => {
+        endBuildStep('Recompiled CSS in', 'video-autoplay.css', startTime);
+      })
       .then(() => {
         return buildExtensions({
           bundleOnlyIfListedInFiles: false,

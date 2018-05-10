@@ -43,6 +43,7 @@ import {
 } from '../event-helper';
 import {dev, user} from '../log';
 import {getMode} from '../mode';
+import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
 import {map} from '../utils/object';
 import {once} from '../utils/function';
@@ -123,6 +124,10 @@ export class VideoManager {
 
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
+
+    /** @const */
+    this.installAutoplayStyles = once(() =>
+      installAutoplayStylesForDoc(this.ampdoc));
 
     /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
@@ -451,6 +456,10 @@ class VideoEntry {
     this.muted_ = false;
 
     this.hasAutoplay = video.element.hasAttribute(VideoAttributes.AUTOPLAY);
+
+    if (this.hasAutoplay) {
+      this.manager_.installAutoplayStyles();
+    }
 
     // Media Session API Variables
 
