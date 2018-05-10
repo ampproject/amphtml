@@ -45,7 +45,7 @@ feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is 
 |    </amp-ad>
 |    <amp-ad width="42" height="42" made_up_attribute="oh hi"></amp-ad>
 >>   ^~~~~~~~~
-feature_tests/several_errors.html:37:2 The attribute 'made_up_attribute' may not appear in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+feature_tests/several_errors.html:37:2 The attribute 'made_up_attribute' may not appear in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DISALLOWED_HTML]
 |    <!-- When rendering errors for attribute values, we collapse whitespace -
 |         even whitespace that is originally encoded.-->
 |    <amp-ad width="42" height="foo&#13;&#10;bar  baz">
