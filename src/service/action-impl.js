@@ -147,30 +147,30 @@ export class ActionInvocation {
    *     <button id="btn">Submit</button>
    *   </div>
    *
-   * `target` is #myForm.
+   * `node` is #myForm.
    * `method` is "submit".
    * `args` is {'foo': 'bar'}.
    * `source` is #btn.
    * `caller` is #div.
    * `event` is a "click" Event object.
    * `trust` depends on whether this action was a result of a user gesture.
-   * `targetType` is "amp-form".
+   * `tagOrTarget` is "amp-form".
    * `index` is 0.
    *
-   * @param {!Node} target Element whose action is being invoked.
+   * @param {!Node} node Element whose action is being invoked.
    * @param {string} method Name of the action being invoked.
    * @param {?JsonObject} args Named action arguments.
    * @param {?Element} source Element that generated the `event`.
    * @param {?Element} caller Element that contains the invoked handler.
    * @param {?ActionEventDef} event The event that triggered this action.
    * @param {ActionTrust} trust The trust level of this invocation's trigger.
-   * @param {?string} targetType The global target name or the element tagName.
+   * @param {?string} tagOrTarget The global target name or the element tagName.
    * @param {number} index Position in a sequence of actions.
    */
-  constructor(target, method, args, source, caller, event, trust,
-    targetType = null, index = 0) {
+  constructor(node, method, args, source, caller, event, trust,
+    tagOrTarget = null, index = 0) {
     /** @const {!Node} */
-    this.target = target;
+    this.node = node;
     /** @const {string} */
     this.method = method;
     /** @const {?JsonObject} */
@@ -184,7 +184,7 @@ export class ActionInvocation {
     /** @const {ActionTrust} */
     this.trust = trust;
     /** @const {string} */
-    this.targetType = targetType || target.tagName;
+    this.tagOrTarget = tagOrTarget || node.tagName;
     /** @const {number} */
     this.index = index;
   }
@@ -437,7 +437,7 @@ export class ActionService {
 
   /**
    * Overwrites the current action whitelist (if any). Takes an array of strings
-   * of the form "<targetType>.<method>", e.g. "amp-form.submit" or "AMP.print".
+   * of the form "<tagOrTarget>.<method>" e.g. "amp-form.submit" or "AMP.print".
    * @param {!Array<string>} whitelist
    */
   setWhitelist(whitelist) {
@@ -446,7 +446,7 @@ export class ActionService {
 
   /**
    * Adds an action to the whitelist. Takes one string of the form
-   * "<targetType>.<method>", e.g. "amp-form.submit" or "AMP.print".
+   * "<tagOrTarget>.<method>", e.g. "amp-form.submit" or "AMP.print".
    * @param {string} action
    */
   addToWhitelist(action) {
@@ -472,20 +472,23 @@ export class ActionService {
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
     action.actionInfos.forEach((actionInfo, i) => {
-      const targetType = actionInfo.target;
       // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
       const invokeAction = () => {
-        // Use `this.root_` as the target for global targets e.g. "AMP".
-        // Otherwise, targetType should be an element id.
-        const target = (this.globalTargets_[targetType]) ?
-          this.root_ : this.root_.getElementById(targetType);
-        if (target) {
-          const invocation = new ActionInvocation(target, actionInfo.method,
-              args, source, action.node, event, trust, targetType, i);
+        // Document root is the target node for global targets e.g. "AMP".
+        const target = actionInfo.target;
+        // If it isn't a global target, it should be an element id.
+        // Find the corresponding element.
+        const node = (this.globalTargets_[target])
+          ? this.root_
+          : this.root_.getElementById(target);
+        if (node) {
+          const tagOrTarget = node.tagName || target;
+          const invocation = new ActionInvocation(node, actionInfo.method,
+              args, source, action.node, event, trust, tagOrTarget, i);
           return this.invoke_(invocation, action.actionInfos);
         } else {
-          this.error_(`Target "${targetType}" not found for action ` +
+          this.error_(`Target "${target}" not found for action ` +
               `[${actionInfo.str}].`);
         }
       };
@@ -523,11 +526,11 @@ export class ActionService {
    */
   invoke_(invocation, opt_actionInfos) {
     const method = invocation.method;
-    const targetType = invocation.targetType;
+    const tagOrTarget = invocation.tagOrTarget;
 
     // Check that this action is whitelisted (if a whitelist is set).
     if (this.whitelist_) {
-      const id = `${targetType}.${method}`;
+      const id = `${tagOrTarget}.${method}`;
       if (!this.whitelist_.includes(id)) {
         this.error_(`"${id}" is not whitelisted (${this.whitelist_}).`);
         return null;
@@ -535,13 +538,13 @@ export class ActionService {
     }
 
     // Handle global targets e.g. "AMP".
-    const globalTarget = this.globalTargets_[targetType];
+    const globalTarget = this.globalTargets_[tagOrTarget];
     if (globalTarget) {
       return globalTarget(invocation, invocation.index, opt_actionInfos);
     }
 
     // Subsequent handlers assume that invocation target is an Element.
-    const target = dev().assertElement(invocation.target);
+    const node = dev().assertElement(invocation.node);
 
     // Handle global actions e.g. "<any-element-id>.toggle".
     const globalMethod = this.globalMethodHandlers_[method];
@@ -550,12 +553,12 @@ export class ActionService {
     }
 
     // Handle element-specific actions.
-    const lowerTagName = target.tagName.toLowerCase();
+    const lowerTagName = node.tagName.toLowerCase();
     if (lowerTagName.substring(0, 4) == 'amp-') {
-      if (target.enqueAction) {
-        target.enqueAction(invocation);
+      if (node.enqueAction) {
+        node.enqueAction(invocation);
       } else {
-        this.error_(`Unrecognized AMP element "${lowerTagName}".`, target);
+        this.error_(`Unrecognized AMP element "${lowerTagName}".`, node);
       }
       return null;
     }
@@ -563,24 +566,24 @@ export class ActionService {
     // Special elements with AMP ID or known supported actions.
     const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
-    const targetId = target.getAttribute('id') || '';
+    const targetId = node.getAttribute('id') || '';
     if ((targetId && targetId.substring(0, 4) == 'amp-') ||
         (supportedActions && supportedActions.indexOf(method) > -1)) {
-      const holder = target[ACTION_HANDLER_];
+      const holder = node[ACTION_HANDLER_];
       if (holder) {
         const {handler, minTrust} = holder;
         if (invocation.satisfiesTrust(minTrust)) {
           handler(invocation);
         }
       } else {
-        target[ACTION_QUEUE_] = target[ACTION_QUEUE_] || [];
-        target[ACTION_QUEUE_].push(invocation);
+        node[ACTION_QUEUE_] = node[ACTION_QUEUE_] || [];
+        node[ACTION_QUEUE_].push(invocation);
       }
       return null;
     }
 
     // Unsupported method.
-    this.error_(`Target (${targetType}) doesn't support "${method}" action.`,
+    this.error_(`Target (${tagOrTarget}) doesn't support "${method}" action.`,
         invocation.caller);
 
     return null;
