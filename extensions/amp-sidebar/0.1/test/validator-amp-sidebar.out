@@ -74,6 +74,6 @@ amp-sidebar/0.1/test/validator-amp-sidebar.html:60:4 Tag 'amp-sidebar > nav' mus
 |    <!-- Invalid: incorrect side value -->
 |    <amp-sidebar side="center" layout="nodisplay"></amp-sidebar>
 >>   ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:72:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://www.ampproject.org/docs/reference/components/amp-sidebar) [AMP_TAG_PROBLEM]
+amp-sidebar/0.1/test/validator-amp-sidebar.html:72:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://www.ampproject.org/docs/reference/components/amp-sidebar) [DISALLOWED_HTML]
 |  </body>
 |  </html>
