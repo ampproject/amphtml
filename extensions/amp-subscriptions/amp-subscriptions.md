@@ -144,7 +144,7 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
   },
   "fallbackEntitlement": {
     "source": "fallback",
-    "granted": true
+    "granted": true,
     "grantReason": "SUBSCRIBER/METERING",
     "data": {...}
   }
