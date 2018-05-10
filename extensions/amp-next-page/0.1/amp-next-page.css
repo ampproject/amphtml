@@ -52,6 +52,8 @@
   padding-bottom: 10px;
   height: 92px;
   width: 100%;
+  display: block;
+  text-decoration: none;
 }
 
 .i-amphtml-next-article-image {

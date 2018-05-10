@@ -303,12 +303,18 @@ export class NextPageService {
       const next = this.config_.pages[article];
       article++;
 
-      const articleHolder = doc.createElement('button');
+      const articleHolder = doc.createElement('a');
+      articleHolder.href = next.ampUrl;
       articleHolder.classList.add('i-amphtml-reco-holder-article');
-      articleHolder.addEventListener('click', () => {
+      articleHolder.addEventListener('click', e => {
         this.triggerAnalyticsEvent_(
             'amp-next-page-click', next.ampUrl, currentAmpUrl);
-        this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+        const a2a =
+            this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+        if (a2a) {
+          // A2A is enabled, don't navigate the browser.
+          e.preventDefault();
+        }
       });
 
       const imageElement = doc.createElement('div');
