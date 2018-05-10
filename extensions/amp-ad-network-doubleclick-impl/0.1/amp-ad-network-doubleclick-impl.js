@@ -1246,7 +1246,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     } else if (!!this.win.document.querySelector(
                         'meta[name=amp-ad-doubleclick-sra]')) {
                       assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
-                      //this.user().error(TAG, 'SRA request failure', error);
+                      this.user().error(TAG, 'SRA request failure', error);
                       // Publisher explicitly wants SRA so do not attempt to
                       // recover as SRA guarantees cannot be enforced.
                       typeInstances.forEach(instance => {
