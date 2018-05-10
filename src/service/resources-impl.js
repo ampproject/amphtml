@@ -50,7 +50,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -1237,11 +1236,8 @@ export class Resources {
     // the overflow callbacks are called.
     const now = Date.now();
     const viewportRect = this.viewport_.getRect();
-    const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
-    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
@@ -1262,7 +1258,6 @@ export class Resources {
         /** @const {!Resource} */
         const resource = request.resource;
         const box = resource.getLayoutBox();
-        const iniBox = resource.getInitialLayoutBox();
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
@@ -1335,8 +1330,7 @@ export class Resources {
             this.requestsChangeSize_.push(request);
           }
           continue;
-        } else if (iniBox.bottom >= docBottomOffset ||
-                      box.bottom >= docBottomOffset) {
+        } else if (this.elementNearBottom_(resource, box)) {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
@@ -1413,6 +1407,24 @@ export class Resources {
    */
   mutateWorkViaLayers_() {
     this.mutateWorkViaResources_();
+  }
+
+  /**
+   * Returns true if element is within 15% and 1000px of document bottom.
+   * Caller can provide current/initial layout boxes as an optimization.
+   * @param {!./resource.Resource} resource
+   * @param {!../layout-rect.LayoutRectDef=} opt_layoutBox
+   * @param {!../layout-rect.LayoutRectDef=} opt_initialLayoutBox
+   * @returns {boolean}
+   * @private
+   */
+  elementNearBottom_(resource, opt_layoutBox, opt_initialLayoutBox) {
+    const contentHeight = this.viewport_.getContentHeight();
+    const threshold = Math.max(contentHeight * 0.85, contentHeight - 1000);
+
+    const box = opt_layoutBox || resource.getLayoutBox();
+    const initialBox = opt_initialLayoutBox || resource.getInitialLayoutBox();
+    return box.bottom >= threshold || initialBox.bottom >= threshold;
   }
 
   /**
