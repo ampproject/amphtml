@@ -78,6 +78,8 @@ export class AmpGeo extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {boolean} */
+    this.mutated_ = false;
     /** @private {number} */
     this.mode_ = mode.GEO_HOT_PATCH;
     /** @private {string} */
@@ -106,6 +108,18 @@ export class AmpGeo extends AMP.BaseElement {
 
     /* resolve the service promise singleton we stashed earlier */
     geoResolver(geo);
+  }
+
+  /** @override */
+  layoutCallback() {
+    // Let the runtime know we just if we added/changed classes that
+    // may case a re-layout.
+    if (this.mutated_) {
+      return this.mutateElement(() => {
+        /** nothing to do here, we already mutated the body classes */
+      }, this.win.document.body);
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -217,8 +231,10 @@ export class AmpGeo extends AMP.BaseElement {
             doc.body.classList.add(GROUP_PREFIX + self.matchedGroups_[group]);
             states[self.matchedGroups_[group]] = true;
           }
-          doc.body.classList.add(COUNTRY_PREFIX + this.country_);
+          // add  classes to <body>
+          doc.body.classList.add(COUNTRY_PREFIX + self.country_);
           states.ISOCountryGroups = self.matchedGroups_;
+
 
           // Only include amp state if user requests it to avoid validator issue
           // with missing amp-bind js
@@ -232,6 +248,7 @@ export class AmpGeo extends AMP.BaseElement {
             state.id = GEO_ID;
             doc.body.appendChild(state);
           }
+          this.mutated_ = true;
           break;
         case mode.GEO_PRERENDER:
           break;
