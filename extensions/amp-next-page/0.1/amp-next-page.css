@@ -23,7 +23,6 @@
 
 .amp-next-page-text {
   color: #3c4043;
-  font-family: sans-serif;
   font-size: 17px;
 }
 
@@ -48,11 +47,9 @@
 }
 
 .i-amphtml-reco-holder-article {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  height: 92px;
-  width: 100%;
   display: block;
+  height: 72px;
+  padding: 10px 0;
   text-decoration: none;
 }
 
@@ -60,18 +57,15 @@
   width: 72px;
   height: 72px;
   float: left;
-  margin-left: 10px;
+  margin: 0 10px;
   background-size: cover;
   background-position: center;
 }
 
 .i-amphtml-next-article-title {
   position: relative;
-  left: 10px;
   top: 5px;
   height: 60px;
-  text-overflow: ellipsis;
   overflow: hidden;
   margin-right: 30px;
-  text-align: left;
 }
