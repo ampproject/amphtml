@@ -71,7 +71,7 @@ const BANNED_SELECTOR_PATTERNS = [
 function assertSelectors(selectors) {
   selectors.forEach(selector => {
     BANNED_SELECTOR_PATTERNS.forEach(pattern => {
-      user().assert(typeof selector === 'string',
+      user().assertString(selector,
           `amp-next-page hideSelector value ${selector} is not a string`);
       user().assert(!pattern.test(selector),
           `amp-next-page hideSelector '${selector}' not allowed`);
@@ -81,11 +81,11 @@ function assertSelectors(selectors) {
 
 function assertReco(reco, origin, sourceOrigin) {
   const url = parseUrl(reco.ampUrl);
-  user().assert(typeof reco.ampUrl == 'string', 'ampUrl must be a string');
+  user().assertString(reco.ampUrl, 'ampUrl must be a string');
   user().assert(url.origin === origin || url.origin === sourceOrigin,
       'pages must be from the same origin as the current document');
-  user().assert(typeof reco.image == 'string', 'image must be a string');
-  user().assert(typeof reco.title == 'string', 'title must be a string');
+  user().assertString(reco.image, 'image must be a string');
+  user().assertString(reco.title, 'title must be a string');
 
   if (sourceOrigin) {
     reco.ampUrl = reco.ampUrl.replace(url.origin, origin);
