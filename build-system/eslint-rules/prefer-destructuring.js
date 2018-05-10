@@ -111,7 +111,9 @@ module.exports = {
         }
 
         const {init} = node;
-        if (init.leadingComments) return;
+        if (init.leadingComments) {
+          return;
+        }
 
         context.report({
           node,
@@ -146,7 +148,9 @@ module.exports = {
             const decl = declarations[j];
             const {id, init} = decl;
 
-            if (init.leadingComments) continue;
+            if (init && init.leadingComments) {
+              continue;
+            }
 
             if (id.type === 'Identifier') {
               if (!shouldBeDestructure(decl)) {
@@ -156,7 +160,10 @@ module.exports = {
               const names = setStruct(variables, base, decl, node);
               names.add(id.name);
 
-            } else if (id.type === 'ObjectPattern') {
+              continue;
+            }
+
+            if (id.type === 'ObjectPattern') {
               const base = sourceCode.getText(init);
               const names = setStruct(variables, base, decl, node);
               const {properties} = id;

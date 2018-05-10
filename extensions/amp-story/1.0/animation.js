@@ -219,7 +219,7 @@ class AnimationRunner {
 
     if (this.animationDef_.startAfterId) {
       const startAfterId = /** @type {string} */(
-          this.animationDef_.startAfterId);
+        this.animationDef_.startAfterId);
       promise = promise.then(() => this.sequence_.waitFor(startAfterId));
     }
 
