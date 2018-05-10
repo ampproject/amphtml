@@ -166,7 +166,7 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
   </tr>
 </tbody>
 </table>
-  
+
 
 #### CSS animations and transitions
 
@@ -253,6 +253,7 @@ AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohib
 * [amp-anim](https://www.ampproject.org/docs/reference/components/amp-anim)
 * [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
 * [amp-audio](https://www.ampproject.org/docs/reference/components/amp-audio)
+* [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind)
 * [amp-carousel](https://www.ampproject.org/docs/reference/components/amp-carousel)
 * [amp-fit-text](https://www.ampproject.org/docs/reference/components/amp-fit-text)
 * [amp-font](https://www.ampproject.org/docs/reference/components/amp-font)
@@ -264,7 +265,7 @@ AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohib
 * [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer)
 * [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share)
 * [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
-* [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube) 
+* [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
 
 
 
