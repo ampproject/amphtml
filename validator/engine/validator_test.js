@@ -250,7 +250,7 @@ ValidatorTestCase.prototype.run = function() {
   }
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1' &&
       this.expectedOutputFile !== null) {
-    console/*OK*/.log('Updating ' +  this.expectedOutputFile + ' ...');
+    console.log('Updating ' +  this.expectedOutputFile + ' ...');
     fs.writeFileSync(absolutePathFor(this.expectedOutputFile), observed);
     return;
   }
@@ -294,18 +294,11 @@ describe('ValidatorOutput', () => {
     amp.validator.annotateWithErrorCategories(results);
     const observed =
         amp.validator.renderValidationResult(results, test.ampUrl).join('\n');
-    const expectedOutput = 'FAIL\n' +
-        'http://google.com/foo.html:28:3 Only AMP runtime \'script\' tags ' +
-        'are allowed, and only in the document head. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
-        '[CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
-        'http://google.com/foo.html:29:3 Only AMP runtime \'script\' tags ' +
-        'are allowed, and only in the document head. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
-        '[CUSTOM_JAVASCRIPT_DISALLOWED]';
-    if (observed !== expectedOutput)
+    const expectedSubstr = 'http://google.com/foo.html:28:3';
+    if (observed.indexOf(expectedSubstr) === -1)
       assert.fail(
-          '', '', 'expected:\n' + expectedOutput + '\nsaw:\n' + observed, '');
+          '', '', 'expectedSubstr:\n' + expectedSubstr +
+          '\nsaw:\n' + observed, '');
   });
 });
 
@@ -686,7 +679,6 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-anim': 0,
         'amp-animation': 0,
         'amp-audio': 0,
-        'amp-bind': 0,
         'amp-carousel': 0,
         'amp-fit-text': 0,
         'amp-font': 0,
