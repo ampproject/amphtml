@@ -90,7 +90,7 @@ feature_tests/urls.html:62:2 Multiple image candidates with the same width or pi
 |    <!-- invalid (URL has spaces that are not encoded) -->
 |    <amp-img srcset="image 1x.png 1x, image 2x.png 2x" layout="fill"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:64:2 The attribute 'srcset' in tag 'amp-img' is set to the invalid value 'image 1x.png 1x, image 2x.png 2x'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:64:2 The attribute 'srcset' in tag 'amp-img' is set to the invalid value 'image 1x.png 1x, image 2x.png 2x'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 |    <!-- valid (URL has encoded spaces) -->
 |    <amp-img srcset=", image%201x.png 1x, image%202x.png 2x" layout="fill"></amp-img>
 |    <a href="http://foobarbazexample.com\x10.com/">Interesting Case</a>
@@ -188,34 +188,34 @@ feature_tests/urls.html:104:2 Malformed URL 'https://[0:0:0:0:0:8.8.8.8:1]/' for
 feature_tests/urls.html:107:2 The attribute 'href' in tag 'a' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
 |    <amp-ad src="__amp_source_origin" width="42" height="42" type=""></amp-ad>
 >>   ^~~~~~~~~
-feature_tests/urls.html:108:2 The attribute 'src' in tag 'amp-ad' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:108:2 The attribute 'src' in tag 'amp-ad' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DISALLOWED_HTML]
 |    <amp-anim src="__amp_source_origin" width="42" height="42"></amp-anim>
 >>   ^~~~~~~~~
-feature_tests/urls.html:109:2 The attribute 'src' in tag 'amp-anim' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:109:2 The attribute 'src' in tag 'amp-anim' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
 feature_tests/urls.html:109:2 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-audio src="__amp_source_origin" layout="fixed" width="42"></amp-audio>
 >>   ^~~~~~~~~
-feature_tests/urls.html:110:2 The attribute 'src' in tag 'amp-audio' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:110:2 The attribute 'src' in tag 'amp-audio' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
 feature_tests/urls.html:110:2 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-iframe src="__amp_source_origin" width="42" height="42"></amp-iframe>
 >>   ^~~~~~~~~
-feature_tests/urls.html:111:2 The attribute 'src' in tag 'amp-iframe' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:111:2 The attribute 'src' in tag 'amp-iframe' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
 feature_tests/urls.html:111:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-img src="__amp_source_origin" layout="responsive" width="42" height="42"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:112:2 The attribute 'src' in tag 'amp-img' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:112:2 The attribute 'src' in tag 'amp-img' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 |    <amp-pixel src="__amp_source_origin" layout="fixed" width="42"></amp-pixel>
 >>   ^~~~~~~~~
-feature_tests/urls.html:113:2 The attribute 'src' in tag 'amp-pixel' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:113:2 The attribute 'src' in tag 'amp-pixel' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [DISALLOWED_HTML]
 |    <amp-video src="__amp_source_origin" width="42" height="42"></amp-video>
 >>   ^~~~~~~~~
-feature_tests/urls.html:114:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:114:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
 |    <amp-video src="%5f_amp_source%5forigin" width="42" height="42"></amp-video>
 >>   ^~~~~~~~~
-feature_tests/urls.html:115:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '%5f_amp_source%5forigin'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:115:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '%5f_amp_source%5forigin'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
 |  </body>
 |  </html>
 >>       ^~~~~~~~~

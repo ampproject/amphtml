@@ -105,8 +105,8 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-CONSENT"
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
-    child_tag_name_oneof: "AMP-STORY-PAGE"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
+    child_tag_name_oneof: "AMP-STORY-PAGE"
   }
 }
 tags: {  # <amp-story> without metadata (deprecated)
@@ -316,7 +316,6 @@ tags: {  # <amp-story-bookend>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: false
     }
   }
 }
@@ -325,12 +324,12 @@ tags: {  # <amp-story-consent>
   tag_name: "AMP-STORY-CONSENT"
   requires_extension: "amp-consent"
   mandatory_parent: "AMP-CONSENT"
-  child_tags: {
-    mandatory_num_child_tags: 0
-  }
   attrs: {
     name: "id"
     mandatory: true
+  }
+  child_tags: {
+    mandatory_num_child_tags: 0
   }
   amp_layout: {
     supported_layouts: NODISPLAY
