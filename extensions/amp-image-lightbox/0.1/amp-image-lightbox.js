@@ -223,7 +223,7 @@ export class ImageViewer {
     this.motion_ = null;
   }
 
-    /**
+  /**
    * Sets the source width and height based the natural dimensions of the
    * source image if loaded, and the offset dimensions of amp-img element
    * if not.
