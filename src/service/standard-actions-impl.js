@@ -22,6 +22,7 @@ import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {dict} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
+import {startsWith} from '../string';
 import {toWin} from '../types';
 import {tryFocus} from '../dom';
 
@@ -172,23 +173,23 @@ export class StandardActions {
       return null;
     }
     const node = invocation.node;
-    // <amp-iframe> requires sandbox="allow-top-navigation" to prevent
-    // privilege escalation.
-    if (node.tagName == 'AMP-IFRAME') {
-      /** @type {!Array<string>} */
-      const sandbox = node.getAttribute('sandbox')
-          .split(' ').map(s => s.trim());
-      if (!sandbox.includes('allow-top-navigation')) {
-        user().error(TAG, '"AMP.navigateTo" is only allowed on <amp-iframe> ' +
-            'when its "sandbox" attribute contains "allow-top-navigation".');
-        return null;
-      }
+    // Some components have additional constraints on allowing navigation.
+    let permission = Promise.resolve();
+    if (startsWith(node.tagName, 'AMP-')) {
+      permission = node.getImpl(impl => {
+        if (typeof impl.navigationError == 'function') {
+          throw impl.navigationError();
+        }
+      });
     }
-    const win = (target.ownerDocument || target).defaultView;
-    const url = invocation.args['url'];
-    const requestedBy = `AMP.${invocation.method}`;
-    Services.navigationForDoc(this.ampdoc).navigateTo(win, url, requestedBy);
-    return null;
+    return permission.then(() => {
+      const win = (node.ownerDocument || node).defaultView;
+      const url = invocation.args['url'];
+      const requestedBy = `AMP.${invocation.method}`;
+      Services.navigationForDoc(this.ampdoc).navigateTo(win, url, requestedBy);
+    }, /* onrejected */ e => {
+      user().error(TAG, e.message);
+    });
   }
 
   /**

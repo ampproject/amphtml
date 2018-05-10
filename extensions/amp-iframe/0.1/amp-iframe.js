@@ -487,6 +487,21 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /**
+   * Returns an error if window navigation is disallowed by this element.
+   * @returns {?Error}
+   */
+  navigationError() {
+    /** @type {!Array<string>} */
+    const tokens = this.sandbox_.split(' ').map(s => s.trim());
+    if (!tokens.includes('allow-top-navigation')) {
+      return user().createError('"AMP.navigateTo" is only allowed on ' +
+          '<amp-iframe> when its "sandbox" attribute contains ' +
+          '"allow-top-navigation".');
+    }
+    return null;
+  }
+
+  /**
    * Updates the element's dimensions to accommodate the iframe's
    *    requested dimensions.
    * @param {number|undefined} height
