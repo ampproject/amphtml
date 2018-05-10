@@ -1334,7 +1334,7 @@ function createBaseCustomElementClass(win) {
         this.implementation_.executeAction(invocation, deferred);
       } catch (e) {
         rethrowAsync('Action execution failed:', e,
-            invocation.target.tagName, invocation.method);
+            invocation.node.tagName, invocation.method);
       }
     }
 
