@@ -266,7 +266,7 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    const element = entry.video.element;
+    const {element} = entry.video;
 
     listen(element, VideoEvents.VISIBILITY, details => {
       const data = getData(details);
@@ -534,7 +534,7 @@ class VideoEntry {
    * @private
    */
   requiresAutoFullscreen_() {
-    const element = this.video.element;
+    const {element} = this.video;
     if (this.video.preimplementsAutoFullscreen() ||
         !element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN)) {
       return false;
@@ -933,7 +933,7 @@ class VideoEntry {
    * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
    */
   getAnalyticsDetails() {
-    const video = this.video;
+    const {video} = this;
     return this.supportsAutoplay_().then(supportsAutoplay => {
       const {width, height} = video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
@@ -1080,7 +1080,7 @@ export class AutoFullscreenManager {
   installOrientationObserver_() {
     // TODO(alanorozco) Update based on support
     const {win} = this.ampdoc_;
-    const screen = win.screen;
+    const {screen} = win;
     // Chrome considers 'orientationchange' to be an untrusted event, but
     // 'change' on screen.orientation is considered a user interaction.
     // We still need to listen to 'orientationchange' on Chrome in order to
@@ -1319,7 +1319,7 @@ function isLandscape(win) {
  * @private
  */
 function analyticsEvent(entry, eventType, opt_vars) {
-  const video = entry.video;
+  const {video} = entry;
   const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
     entry.getAnalyticsDetails();
 

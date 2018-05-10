@@ -367,7 +367,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     return this.render(this.state_).then(() => {
       if (this.mode_ == DatePickerMode.STATIC) {
         this.measureElement(() => {
-          const scrollHeight = this.container_./*OK*/scrollHeight;
+          const {scrollHeight} = this.container_;
           const height = this.element./*OK*/offsetHeight;
           if (scrollHeight > height) {
             // Add 1px to allow the bottom border to show
@@ -640,7 +640,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   getHiddenInputId_(form, type) {
-    const id = this.element.id;
+    const {id} = this.element;
     const name = DateFieldNameByType[type];
     if (!form) {
       return '';

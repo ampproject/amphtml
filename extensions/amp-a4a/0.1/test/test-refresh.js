@@ -141,8 +141,7 @@ describe('refresh', () => {
 
       // Ensure initial call to initiateRefreshCycle doesn't trigger refresh, as
       // this can have flaky results.
-      const initiateRefreshCycle =
-          RefreshManager.prototype.initiateRefreshCycle;
+      const {initiateRefreshCycle} = RefreshManager.prototype;
       RefreshManager.prototype.initiateRefreshCycle = () => {};
 
       const refreshManager = new RefreshManager(mockA4a, config, 30000);

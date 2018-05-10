@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-import {validateSrcPrefix, writeScript} from '../3p/3p';
-
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function ligatus(global, data) {
-  const {src} = data;
-  validateSrcPrefix('https://a-ssl.ligatus.com/', src);
-  writeScript(global, src);
-}
+module.exports = function(context) {
+  return {
+    ObjectPattern: function(node) {
+      if (node.parent.type !== 'Property') {
+        return;
+      }
+      context.report(node, 'No deep object destructuring allowed.');
+    },
+  };
+};

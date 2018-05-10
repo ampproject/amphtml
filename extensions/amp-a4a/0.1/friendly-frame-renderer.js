@@ -54,9 +54,9 @@ export class FriendlyFrameRenderer extends Renderer {
 
     creativeData = /** @type {CreativeData} */ (creativeData);
 
-    const size = context.size;
+    const {size} = context;
     const adUrl = context.requestUrl;
-    const creativeMetaData = creativeData.creativeMetaData;
+    const {creativeMetaData} = creativeData;
 
     dev().assert(size, 'missing creative size');
     dev().assert(adUrl, 'missing ad request url');

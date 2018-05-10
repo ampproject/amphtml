@@ -191,11 +191,11 @@ export class Messenger {
    */
   handleEvent_(e) {
     const event = /** @type {!MessageEvent} */ (e);
-    const data = event.data;
+    const {data} = event;
     if (!data || data['sentinel'] != SENTINEL) {
       return;
     }
-    const origin = /** @type {string} */ (event.origin);
+    const {origin} = event;
     const cmd = data['cmd'];
     const payload = data['payload'] || null;
     if (this.targetOrigin_ == null && cmd == 'start') {

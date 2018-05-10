@@ -176,7 +176,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
         () => 'MY-MOCK-FINGERPRINT');
 
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
-    const src = iframe.src;
+    const {src} = iframe;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
     const docInfo = Services.documentInfoForDoc(window.document);

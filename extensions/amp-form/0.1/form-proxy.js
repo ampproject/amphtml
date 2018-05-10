@@ -176,7 +176,7 @@ function setupLegacyProxy(form, proxy) {
           // The overriding input, if present, has to be removed and re-added
           // (renaming does NOT work). Completely insane, I know.
           const element = dev().assertElement(current);
-          const nextSibling = element.nextSibling;
+          const {nextSibling} = element;
           const parent = element.parentNode;
           parent.removeChild(element);
           try {

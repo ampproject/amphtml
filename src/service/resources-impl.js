@@ -1257,7 +1257,7 @@ export class Resources {
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
         /** @const {!Resource} */
-        const resource = request.resource;
+        const {resource} = request;
         const box = resource.getLayoutBox();
 
         let topMarginDiff = 0;

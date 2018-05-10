@@ -342,7 +342,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   // When we already have state in memory and user refreshes page, we flush
   // the dom we maintain on the server.
   if (!('amp_latest_update_time' in req.query) && liveListDoc) {
-    let outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
+    let {outerHTML} = liveListDoc.documentElement;
     outerHTML = replaceUrls(mode, outerHTML);
     res.send(`${doctype}${outerHTML}`);
     return;
@@ -389,7 +389,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
       return;
     }
   }
-  let outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
+  let {outerHTML} = liveListDoc.documentElement;
   outerHTML = replaceUrls(mode, outerHTML);
   liveListDoc.ctr++;
   res.send(`${doctype}${outerHTML}`);
@@ -615,7 +615,7 @@ app.get('/a4a_template/*', (req, res) => {
 // Example:
 // http://localhost:8000/iframe-echo-message?message=${payload}
 app.get('/iframe-echo-message', (req, res) => {
-  const message = req.query.message;
+  const {message} = req.query;
   res.send(
       `<!doctype html>
         <body style="background-color: yellow">

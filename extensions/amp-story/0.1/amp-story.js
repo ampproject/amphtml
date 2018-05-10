@@ -376,8 +376,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
-      const pageId = e.detail.pageId;
-      const progress = e.detail.progress;
+      const {pageId, progress} = e.detail;
 
       if (pageId !== this.activePage_.element.id) {
         // Ignore progress update events from inactive pages.
@@ -471,7 +470,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   lockBody_() {
-    const document = this.win.document;
+    const {document} = this.win;
     setImportantStyles(document.documentElement, {
       'overflow': 'hidden',
     });
@@ -487,7 +486,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   maybeLockScreenOrientation_() {
-    const screen = this.win.screen;
+    const {screen} = this.win;
     if (!screen || !this.canRotateToDesktopMedia_.matches) {
       return;
     }
@@ -983,7 +982,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const history = this.win.history;
+    const {history} = this.win;
     if (history.replaceState && this.getHistoryStatePageId_() !== pageId) {
       history.replaceState({
         ampStoryPageId: pageId,
@@ -997,7 +996,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {?string}
    */
   getHistoryStatePageId_() {
-    const history = this.win.history;
+    const {history} = this.win;
     if (history && history.state) {
       return history.state.ampStoryPageId;
     }

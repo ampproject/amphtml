@@ -262,7 +262,7 @@ export class WebAnimationRunner {
   getTotalDuration_() {
     let maxTotalDuration = 0;
     for (let i = 0; i < this.requests_.length; i++) {
-      const timing = this.requests_[i].timing;
+      const {timing} = this.requests_[i];
 
       user().assert(isFinite(timing.iterations), 'Animation has infinite ' +
       'timeline, we can not seek to a relative position within an infinite ' +

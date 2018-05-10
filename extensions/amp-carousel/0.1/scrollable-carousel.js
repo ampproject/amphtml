@@ -81,7 +81,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
         'scroll', this.scrollHandler_.bind(this));
 
     this.registerAction('goToSlide', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       if (args) {
         const index = parseInt(args['index'], 10);
         this.goToSlide_(index);
@@ -325,7 +325,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   hasNext() {
     // TODO(jridgewell): this could be using cached values from Layers.
     const containerWidth = this.getLayoutWidth();
-    const scrollWidth = this.container_./*OK*/scrollWidth;
+    const {scrollWidth} = this.container_;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;
   }

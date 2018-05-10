@@ -44,7 +44,7 @@ let WindowEventsDef;
  * @return {?Object<string, !Array<!WindowEventsDef>>}
  */
 function getListenFors(parentWin, opt_create) {
-  let listeningFors = parentWin.listeningFors;
+  let {listeningFors} = parentWin;
 
   if (!listeningFors && opt_create) {
     listeningFors = parentWin.listeningFors = Object.create(null);
@@ -82,7 +82,7 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
  */
 function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
-  const origin = parseUrl(iframe.src).origin;
+  const {origin} = parseUrl(iframe.src);
   const sentinel = getSentinel_(iframe, opt_is3P);
   const listenSentinel = getListenForSentinel(parentWin, sentinel, true);
 
@@ -128,7 +128,7 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
   let windowEvents;
   for (let i = 0; i < listenSentinel.length; i++) {
     const we = listenSentinel[i];
-    const contentWindow = we.frame.contentWindow;
+    const {contentWindow} = we.frame;
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
     } else if (sentinel === 'amp') {
@@ -178,7 +178,7 @@ function dropListenSentinel(listenSentinel) {
     if (!windowEvents.frame.contentWindow) {
       listenSentinel.splice(i, 1);
 
-      const events = windowEvents.events;
+      const {events} = windowEvents;
       for (const name in events) {
         // Splice here, so that each unlisten does not shift the array
         events[name].splice(0, Infinity).forEach(event => {

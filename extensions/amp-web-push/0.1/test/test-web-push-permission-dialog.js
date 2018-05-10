@@ -173,7 +173,7 @@ describes.realWin('web-push-permission-dialog', {
       const preTestString = '<div id="preload"/><div id="postload"/>';
       iframeWindow.document.body.innerHTML = preTestString;
       iframeWindow._ampWebPushPermissionDialog.showPostloadSection_();
-      const document = iframeWindow.document;
+      const {document} = iframeWindow;
       const preloadDom = document.querySelector('#preload');
       const postloadDom = document.querySelector('#postload');
       expect(preloadDom.classList.contains('invisible')).to.eq(true);
@@ -195,7 +195,7 @@ describes.realWin('web-push-permission-dialog', {
         '<div permission="denied"/>';
       iframeWindow.document.body.innerHTML = preTestString;
       iframeWindow._ampWebPushPermissionDialog.showTargetPermissionSection_();
-      const document = iframeWindow.document;
+      const {document} = iframeWindow;
       const defaultElement = document.querySelector('[permission=default]');
       const grantedElement = document.querySelector('[permission=granted]');
       const deniedElement = document.querySelector('[permission=denied]');
@@ -229,7 +229,7 @@ describes.realWin('web-push-permission-dialog', {
       const preTestString = '<div id="close"/>';
       iframeWindow.document.body.innerHTML = preTestString;
       iframeWindow._ampWebPushPermissionDialog.onCloseIconClick_();
-      const document = iframeWindow.document;
+      const {document} = iframeWindow;
       const closeElement = document.querySelector('#close');
       spy = sandbox./*OK*/spy(
           iframeWindow._ampWebPushPermissionDialog,

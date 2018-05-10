@@ -197,7 +197,7 @@ export class AmpAdXOriginIframeHandler {
       // exclusive. Whichever arrives first wins.
       listenForOncePromise(this.iframe,
           ['render-start', 'no-content'], true).then(info => {
-        const data = info.data;
+        const {data} = info;
         if (data['type'] == 'render-start') {
           this.renderStart_(info);
           renderStartResolve();

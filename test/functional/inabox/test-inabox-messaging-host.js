@@ -304,7 +304,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
   describe('getMeasureableFrame', () => {
     it('should return correct frame when many iframes at same level', () => {
-      const source = createNestedIframeMocks(6,3).source;
+      const {source} = createNestedIframeMocks(6,3);
       const expectedMeasureableWin = source.parent.parent;
       const correctFrame =
             expectedMeasureableWin.parent.document.querySelectorAll()[0];
@@ -319,20 +319,20 @@ describes.realWin('inabox-host:messaging', {}, env => {
     });
 
     it('should return correct frame multiple level of xdomain', () => {
-      const source = createNestedIframeMocks(6,3).source;
+      const {source} = createNestedIframeMocks(6,3);
       const expectedMeasurableWin = source.parent.parent;
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
           expectedMeasurableWin);
     });
 
     it('should return correct frame for single xdomain frame', () => {
-      const source = createNestedIframeMocks(10,1).source;
+      const {source} = createNestedIframeMocks(10,1);
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
           source);
     });
 
     it('should return correct frame for no xdomain frames', () => {
-      const source = createNestedIframeMocks(5).source;
+      const {source} = createNestedIframeMocks(5);
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
           source);
     });

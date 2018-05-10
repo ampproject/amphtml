@@ -150,7 +150,7 @@ export class LoginDoneDialog {
     const response = this.win.location.hash;
     let unlisten = () => {};
     return new Promise((resolve, reject) => {
-      const opener = this.win.opener;
+      const {opener} = this.win;
       if (!opener) {
         reject(new Error('Opener not available'));
         return;

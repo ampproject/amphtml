@@ -23,7 +23,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
-const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+const {GITHUB_ACCESS_TOKEN} = process.env;
 
 const isDryrun = argv.dryrun;
 
@@ -123,16 +123,14 @@ function updateGitHubIssues() {
       .then(issues => {
         const allIssues = issues;
         allIssues.forEach(function(issue) {
-          const labels = issue.labels;
+          const {labels, milestone, assignee} = issue;
           const pullRequest = issue.pull_request;
           let issueType;
-          const milestone = issue.milestone;
           let milestoneTitle;
           let milestoneState;
           let hasPriority = false;
           let hasCategory = false;
           let issueNewMilestone = MILESTONE_PENDING_TRIAGE;
-          const assignee = issue.assignee;
           let assigneeName = '';
           const issueLastUpdate = issue.updated_at;
           let biweeklyUpdate = true;

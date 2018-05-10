@@ -137,7 +137,7 @@ export class BindValidator {
     }
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blacklistedValueRegex = rules.blacklistedValueRegex;
+    const {blacklistedValueRegex} = rules;
     if (value && blacklistedValueRegex) {
       const re = new RegExp(blacklistedValueRegex, 'i');
       if (re.test(value)) {
@@ -157,7 +157,7 @@ export class BindValidator {
    */
   isUrlValid_(url, rules) {
     // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const allowedProtocols = rules.allowedProtocols;
+    const {allowedProtocols} = rules;
     if (allowedProtocols && url) {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(url);

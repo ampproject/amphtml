@@ -212,7 +212,7 @@ describes.realWin('amp-analytics', {
                 });
 
             const variables = variableServiceFor(ampdoc.win);
-            const encodeVars = variables.encodeVars;
+            const {encodeVars} = variables;
             sandbox.stub(variables, 'encodeVars').callsFake(
                 function(name, val) {
                   val = encodeVars.call(this, name, val);

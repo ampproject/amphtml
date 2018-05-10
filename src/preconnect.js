@@ -150,7 +150,7 @@ class PreconnectService {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
-    const origin = parseUrl(url).origin;
+    const {origin} = parseUrl(url);
     const now = Date.now();
     const lastPreconnectTimeout = this.origins_[origin];
     if (lastPreconnectTimeout && now < lastPreconnectTimeout) {

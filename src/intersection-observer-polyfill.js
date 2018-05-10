@@ -337,7 +337,7 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
-    const element = state.element;
+    const {element} = state;
 
     // Normalize container LayoutRect to be relative to page
     let ownerRect = null;

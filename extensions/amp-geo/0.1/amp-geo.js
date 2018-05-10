@@ -93,7 +93,7 @@ export class AmpGeo extends AMP.BaseElement {
   buildCallback() {
     // All geo config within the amp-geo component.
     // The validator only allows one amp-geo per page
-    const children = this.element.children;
+    const {children} = this.element;
 
     if (children.length) {
       user().assert(children.length === 1 &&
@@ -152,7 +152,7 @@ export class AmpGeo extends AMP.BaseElement {
     /* ISOCountryGroups are optional but if specified at least one must exist
     */
     /** @private @const {!Object<string, Array<string>>} */
-    const ISOCountryGroups = config.ISOCountryGroups;
+    const {ISOCountryGroups} = config;
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       user().assert(
