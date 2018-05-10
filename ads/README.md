@@ -232,6 +232,11 @@ related information via the following
     The states are integers defined <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#advanced-blocking-behaviors">here</a>
     (<a href="https://github.com/ampproject/amphtml/blob/master/src/consent-state.js#L23">code</a>).
   </dd>
+  <dt><code>window.context.getConsentState(callback)</code></dt>
+  <dd>
+    Queries the current consent state asynchronously. The `callback` function 
+    will be invoked with the current consent state.
+  </dd>
   <dt><code>window.context.consentSharedData</code></dt>
   <dd>
     Provides additional user privacy related data retrieved from publishers.
