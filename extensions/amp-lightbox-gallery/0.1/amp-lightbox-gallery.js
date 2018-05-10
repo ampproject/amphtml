@@ -827,8 +827,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const img = elementByTag(dev().assertElement(element), 'img');
     return this.measureElement(() => {
       const naturalAspectRatio = img.naturalWidth / img.naturalHeight;
-      const elementHeight = element./*OK*/offsetHeight;
-      const elementWidth = element./*OK*/offsetWidth;
+      const {offsetHeight: elementHeight, offsetWidth: elementWidth} = element ;
       const ampImageAspectRatio = elementWidth / elementHeight;
       return Math.abs(naturalAspectRatio - ampImageAspectRatio) < EPSILON;
     });

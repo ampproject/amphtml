@@ -103,8 +103,7 @@ export class ViewportBindingInabox {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    const boxWidth = win./*OK*/innerWidth;
-    const boxHeight = win./*OK*/innerHeight;
+    const {innerWidth: boxWidth, innerHeight: boxHeight} = win ;
 
     /**
      * The current viewport rect.

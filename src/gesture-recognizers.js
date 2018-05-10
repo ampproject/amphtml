@@ -282,8 +282,7 @@ class SwipeRecognizer extends GestureRecognizer {
   onTouchMove(e) {
     const {touches} = e;
     if (touches && touches.length == 1) {
-      const x = touches[0].clientX;
-      const y = touches[0].clientY;
+      const {clientX: x, clientY: y} = touches[0] ;
       this.lastX_ = x;
       this.lastY_ = y;
       if (this.eventing_) {

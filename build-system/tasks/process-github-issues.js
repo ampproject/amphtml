@@ -123,8 +123,13 @@ function updateGitHubIssues() {
       .then(issues => {
         const allIssues = issues;
         allIssues.forEach(function(issue) {
-          const {labels, milestone, assignee} = issue;
-          const pullRequest = issue.pull_request;
+          const {
+            labels,
+            milestone,
+            assignee,
+            'pull_request': pullRequest,
+            'updated_at': issueLastUpdate,
+          } = issue ;
           let issueType;
           let milestoneTitle;
           let milestoneState;
@@ -132,7 +137,6 @@ function updateGitHubIssues() {
           let hasCategory = false;
           let issueNewMilestone = MILESTONE_PENDING_TRIAGE;
           let assigneeName = '';
-          const issueLastUpdate = issue.updated_at;
           let biweeklyUpdate = true;
           let quartelyUpdate = true;
           // if an issue is a pull request, we'll skip it

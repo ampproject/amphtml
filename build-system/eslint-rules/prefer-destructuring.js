@@ -21,7 +21,7 @@ module.exports = {
   },
 
   create(context) {
-    function shouldBeDestructure(node) {
+    function shouldBeDestructure(node, renamable = false) {
       const {id, init} = node;
 
       if (!init ||
@@ -38,7 +38,7 @@ module.exports = {
         return false;
       }
 
-      return property.name === name;
+      return renamable || property.name === name;
     }
 
     function setStruct(map, key, node, declaration) {
@@ -153,12 +153,20 @@ module.exports = {
             }
 
             if (id.type === 'Identifier') {
-              if (!shouldBeDestructure(decl)) {
+              // Allow renaming here
+              if (!shouldBeDestructure(decl, true)) {
                 continue;
               }
+
               const base = sourceCode.getText(init.object);
               const names = setStruct(variables, base, decl, node);
-              names.add(id.name);
+
+              // Do we need to rename?
+              if (shouldBeDestructure(decl)) {
+                names.add(id.name);
+              } else {
+                names.add(`${init.property.name}: ${id.name}`);
+              }
 
               continue;
             }

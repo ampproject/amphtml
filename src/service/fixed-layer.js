@@ -582,8 +582,7 @@ export class FixedLayer {
    * @private
    */
   mutateElement_(fe, index, state) {
-    const {element} = fe;
-    const oldFixed = fe.fixedNow;
+    const {element, fixedNow: oldFixed} = fe ;
 
     fe.fixedNow = state.fixed;
     fe.stickyNow = state.sticky;
