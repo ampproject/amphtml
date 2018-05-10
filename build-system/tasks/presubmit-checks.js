@@ -282,6 +282,7 @@ const forbiddenTerms = {
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
+      'src/service/video/docking.js',
     ],
   },
   'initLogConstructor|setReportError': {
