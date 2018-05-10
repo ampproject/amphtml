@@ -213,10 +213,16 @@ export class Cid {
     const scope = getCidStruct.scope;
     /** @const {!Location} */
     const url = parseUrl(this.ampdoc.win.location.href);
+    let api = null;
     if (!isProxyOrigin(url)) {
+      api = this.cidApi_;
+    } else if (this.cacheCidApi_.isSupported()) {
+      api = this.cacheCidApi_;
+    }
+    if (api) {
       const apiKey = this.isScopeOptedIn_(scope);
       if (apiKey) {
-        return this.cidApi_.getScopedCid(apiKey, scope).then(scopedCid => {
+        return api.getScopedCid(apiKey, scope).then(scopedCid => {
           if (scopedCid == TokenStatus.OPT_OUT) {
             return null;
           }
@@ -229,13 +235,6 @@ export class Cid {
         });
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
-    }
-    if (this.cacheCidApi_.isSupported()) {
-      const apiKey = this.isScopeOptedIn_(scope);
-      if (!apiKey) {
-        return /** @type {!Promise<?string>} */ (Promise.resolve(null));
-      }
-      return this.cacheCidApi_.getScopedCid(scope);
     }
     return this.viewerCidApi_.isSupported().then(supported => {
       if (supported) {

@@ -74,10 +74,11 @@ export class CacheCidApi {
 
   /**
    * Returns scoped CID retrieved from the Viewer.
+   * @param {string} apiKey
    * @param {string} scope
    * @return {!Promise<?string>}
    */
-  getScopedCid(scope) {
+  getScopedCid(apiKey, scope) {
     if (!this.viewer_.isCctEmbedded()) {
       return /** @type {!Promise<?string>} */ (Promise.resolve(null));
     }
