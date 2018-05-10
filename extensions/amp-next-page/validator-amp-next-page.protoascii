@@ -48,8 +48,7 @@ tags: {
 tags: {  # <amp-next-page>
   html_format: AMP
   tag_name: "AMP-NEXT-PAGE"
-  mandatory_parent: "BODY"
-  mandatory_last_child: true
+  unique: true
   requires_extension: "amp-next-page"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
 }
