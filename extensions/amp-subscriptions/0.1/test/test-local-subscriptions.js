@@ -182,7 +182,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     it('should call renderer\'s render method', () => {
       const renderStub =
         sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
-      localSubscriptionPlatform.activate({entitlement});
+      localSubscriptionPlatform.activate(entitlement);
       return localSubscriptionPlatform.actions_.build().then(() => {
         expect(renderStub).to.be.calledOnce;
       });
