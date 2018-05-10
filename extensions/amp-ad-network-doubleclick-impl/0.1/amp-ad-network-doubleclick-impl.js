@@ -341,9 +341,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
     this.identityToken = null;
 
-    /** @private {boolean} */
-    this.preloadSafeframe_ = true;
-
     /** @private {!TroubleshootDataDef} */
     this.troubleshootData_ = /** @type {!TroubleshootDataDef} */ ({});
 
@@ -436,21 +433,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return;
     }
     this.win['dbclk_a4a_viz_change'] = true;
-
-    const sfPreloadExpName = 'a4a-safeframe-preloading-off';
-    const experimentInfoMap =
-        /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({});
-    experimentInfoMap[sfPreloadExpName] = {
-      isTrafficEligible: () => true,
-      branches: ['21061135', '21061136'],
-    };
-    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    const sfPreloadExpId = getExperimentBranch(this.win, sfPreloadExpName);
-    if (sfPreloadExpId) {
-      addExperimentIdToElement(sfPreloadExpId, this.element);
-      this.preloadSafeframe_ = sfPreloadExpId == '21061135';
-    }
 
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
@@ -1268,12 +1250,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getPreconnectUrls() {
-    // Note that this getter actually changes state by preloading safeframe.
-    // Plan to cleanup this API as part of generate amp-a4a modularization
-    // refactor.
-    if (this.preloadSafeframe_) {
-      this.preconnect.preload(this.getSafeframePath());
-    }
     return ['https://securepubads.g.doubleclick.net/'];
   }
 
