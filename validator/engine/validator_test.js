@@ -686,6 +686,7 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-anim': 0,
         'amp-animation': 0,
         'amp-audio': 0,
+        'amp-bind': 0,
         'amp-carousel': 0,
         'amp-fit-text': 0,
         'amp-font': 0,
