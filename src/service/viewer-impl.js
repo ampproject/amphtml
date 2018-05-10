@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
@@ -182,9 +183,6 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
-    /** @private {?function()} */
-    this.whenFirstVisibleResolve_ = null;
-
     /** @private {?Promise} */
     this.nextVisiblePromise_ = null;
 
@@ -206,15 +204,17 @@ export class Viewer {
     /** @private {?Function} */
     this.trustedViewerResolver_ = null;
 
+    const deferred = new Deferred();
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
      * `this.onVisibilityChange_()`.
      * @private @const {!Promise}
      */
-    this.whenFirstVisiblePromise_ = new Promise(resolve => {
-      this.whenFirstVisibleResolve_ = resolve;
-    });
+    this.whenFirstVisiblePromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.whenFirstVisibleResolve_ = deferred.resolve;
 
     // Params can be passed either directly in multi-doc environment or via
     // iframe hash/name with hash taking precedence.
@@ -343,10 +343,9 @@ export class Viewer {
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
     } else {
       // Wait for comms channel to confirm the origin.
-      trustedViewerResolved = undefined;
-      trustedViewerPromise = new Promise(resolve => {
-        this.trustedViewerResolver_ = resolve;
-      });
+      const deferred = new Deferred();
+      trustedViewerPromise = deferred.promise;
+      this.trustedViewerResolver_ = deferred.resolve;
     }
 
     /** @const @private {!Promise<boolean>} */
@@ -718,9 +717,9 @@ export class Viewer {
       return this.nextVisiblePromise_;
     }
 
-    return this.nextVisiblePromise_ = new Promise(resolve => {
-      this.nextVisibleResolve_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.nextVisibleResolve_ = deferred.resolve;
+    return this.nextVisiblePromise_ = deferred.promise;
   }
 
   /**
@@ -1070,10 +1069,10 @@ export class Viewer {
       message.data = data;
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
-      let responseResolver;
-      const responsePromise = new Promise(r => {
-        responseResolver = r;
-      });
+      const deferred = new Deferred();
+      const responsePromise = deferred.promise;
+      const responseResolver = deferred.resolve;
+
       message = {
         eventType,
         data,
