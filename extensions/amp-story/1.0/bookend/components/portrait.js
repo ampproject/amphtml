@@ -85,14 +85,13 @@ export class PortraitComponent {
 
     const heading =
     html`<h2 class="i-amphtml-story-bookend-portrait-heading"></h2>`;
-    heading.textContent = portraitData.title.toUpperCase();
+    heading.textContent = portraitData.title;
     template.appendChild(heading);
 
     const ampImg =
         html`
         <amp-img class="i-amphtml-story-bookend-portrait-image"
-                width="312"
-                height="416">
+            layout="fixed" width="0" height="0">
         </amp-img>`;
     addAttributesToElement(ampImg, dict({'src': portraitData.image}));
     template.appendChild(ampImg);
