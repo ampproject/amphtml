@@ -31,9 +31,10 @@ import {
   asBaseElement,
 } from '../video-interface';
 import {Services} from '../services';
+import {VideoDocking} from './video/docking';
 import {VideoServiceSync} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
-import {VideoUtils} from '../utils/video';
+import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {
   createCustomEvent,
   getData,
@@ -42,6 +43,7 @@ import {
 } from '../event-helper';
 import {dev, user} from '../log';
 import {getMode} from '../mode';
+import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
 import {map} from '../utils/object';
 import {once} from '../utils/function';
@@ -123,6 +125,10 @@ export class VideoManager {
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
 
+    /** @const */
+    this.installAutoplayStyles = once(() =>
+      installAutoplayStylesForDoc(this.ampdoc));
+
     /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
@@ -144,6 +150,9 @@ export class VideoManager {
     /** @private @const {function():!AutoFullscreenManager} */
     this.getAutoFullscreenManager_ =
         once(() => new AutoFullscreenManager(this.ampdoc));
+
+    /** @private @const {function():!VideoDocking} */
+    this.getDocking_ = once(() => new VideoDocking(this.ampdoc, this));
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -340,6 +349,14 @@ export class VideoManager {
   }
 
   /**
+   * @param {!../video-interface.VideoInterface} video
+   * @return {boolean}
+   */
+  isMuted(video) {
+    return this.getEntryForVideo_(video).isMuted();
+  }
+
+  /**
    * Returns whether the video was interacted with or not
    *
    * @param {!../video-interface.VideoInterface} video
@@ -352,6 +369,11 @@ export class VideoManager {
   /** @param {!VideoEntry} entry */
   registerForAutoFullscreen(entry) {
     this.getAutoFullscreenManager_().register(entry);
+  }
+
+  /** @param {!VideoEntry} entry */
+  registerForDocking(entry) {
+    this.getDocking_().register(entry.video);
   }
 }
 
@@ -366,16 +388,6 @@ export class VideoManager {
  * @typedef {!../video-interface.VideoInterface|!../base-element.BaseElement}
  */
 let VideoOrBaseElementDef;
-
-
-/**
- * @param {!Element} element
- * @return {!Element}
- * @restricted
- */
-function getInternalElementFor(element) {
-  return dev().assertElement(element.querySelector('video, iframe'));
-}
 
 
 /**
@@ -445,6 +457,10 @@ class VideoEntry {
 
     this.hasAutoplay = video.element.hasAttribute(VideoAttributes.AUTOPLAY);
 
+    if (this.hasAutoplay) {
+      this.manager_.installAutoplayStyles();
+    }
+
     // Media Session API Variables
 
     /** @private {!../mediasession-helper.MetadataDef} */
@@ -484,16 +500,33 @@ class VideoEntry {
     }
   }
 
+  /** @return {boolean} */
+  isMuted() {
+    return this.muted_;
+  }
+
   /** @private */
   onRegister_() {
     if (this.requiresAutoFullscreen_()) {
       this.manager_.registerForAutoFullscreen(this);
     }
 
+    if (this.isDockable_()) {
+      this.manager_.registerForDocking(this);
+    }
+
     this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
     }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isDockable_() {
+    return this.video.element.hasAttribute(VideoAttributes.DOCK);
   }
 
   /**
@@ -578,7 +611,7 @@ class VideoEntry {
   videoLoaded() {
     this.loaded_ = true;
 
-    this.internalElement_ = getInternalElementFor(this.video.element);
+    this.internalElement_ = getInternalVideoElementFor(this.video.element);
 
     this.fillMediaSessionMetadata_();
 
@@ -1027,7 +1060,7 @@ export class AutoFullscreenManager {
     // where the player component is implemented via an <iframe>, we need to
     // rely on a postMessage API to fullscreen. Such an API is not necessarily
     // provided by every player.
-    const internalElement = getInternalElementFor(video);
+    const internalElement = getInternalVideoElementFor(video);
     if (internalElement.tagName.toLowerCase() == 'video') {
       return true;
     }
