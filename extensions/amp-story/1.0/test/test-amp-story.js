@@ -454,6 +454,30 @@ describes.realWin('amp-story', {
       expect(unmuteStub).not.to.have.been.called;
       expect(playStub).not.to.have.been.called;
     });
+
+    it('should mute the page and unmute the next page upon navigation', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+      story.buildCallback();
+
+      let coverMuteStub;
+      let firstPageUnmuteStub;
+
+      return story.layoutCallback()
+          .then(() => {
+            coverMuteStub =
+                sandbox.stub(story.getPageById('cover'), 'muteAllMedia');
+            firstPageUnmuteStub =
+                sandbox.stub(story.getPageById('page-1'), 'unmuteAllMedia');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(coverMuteStub).to.have.been.calledOnce;
+            expect(firstPageUnmuteStub).to.have.been.calledOnce;
+          });
+    });
   });
 
   describe('#getMaxMediaElementCounts', () => {
