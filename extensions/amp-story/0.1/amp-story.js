@@ -227,8 +227,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
     this.shareMenu_ = new ShareMenu(this.win, this.element);
 
-    /** @private @const {!InfoDialog} */
-    this.infoDialog_ = new InfoDialog(this.win, this.element);
+    /** @private @const {?InfoDialog} */
+    this.infoDialog_ = Services.viewerForDoc(this.element).isEmbedded() ?
+      new InfoDialog(this.win, this.element) : null;
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
@@ -591,7 +592,9 @@ export class AmpStory extends AMP.BaseElement {
             this.shareMenu_.build();
           }
 
-          this.infoDialog_.build();
+          if (this.infoDialog_) {
+            this.infoDialog_.build();
+          }
         });
 
     // Do not block the layout callback on the completion of these promises, as
