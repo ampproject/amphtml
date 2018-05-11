@@ -45,43 +45,43 @@ export function getAmpAdTemplateHelper(win) {
 export class TemplateValidator extends Validator {
   /** @override */
   validate(context, unvalidatedBytes, headers) {
-
-    const creativeData = {};
-    const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
-
     if (!headers ||
         headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-      creativeData['creative'] = body;
       return Promise.resolve(
           /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
-            creativeData,
+            creativeData: {
+              creative: body,
+            },
             adResponseType: 'template',
             type: ValidatorResult.NON_AMP,
           }));
     }
 
+    const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
     const parsedResponseBody =
         /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
         tryParseJson(body) || {});
     return getAmpAdTemplateHelper()
         .fetch(parsedResponseBody.templateUrl)
         .then(template => {
-          const metadata = getAmpAdMetadata(template);
+          const creativeMetadata = getAmpAdMetadata(template);
           if (parsedResponseBody.analytics) {
             pushIfNotExist(
-                metadata['customElementExtensions'], 'amp-analytics');
+                creativeMetadata['customElementExtensions'], 'amp-analytics');
           }
-          pushIfNotExist(metadata['customElementExtensions'], 'amp-mustache');
+          pushIfNotExist(
+              creativeMetadata['customElementExtensions'], 'amp-mustache');
 
           const extensions = Services.extensionsFor(context.win);
-          metadata.customElementExtensions.forEach(
+          creativeMetadata.customElementExtensions.forEach(
               extensionId => extensions./*OK*/preloadExtension(extensionId));
           // TODO(levitzky) Add preload logic for fonts / images.
-          creativeData.templateData = parsedResponseBody;
-          creativeData.creativeMetadata = metadata;
           return Promise.resolve(
               /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
-                creativeData,
+                creativeData: {
+                  templateData: parsedResponseBody,
+                  creativeMetadata,
+                },
                 adResponseType: 'template',
                 type: ValidatorResult.AMP,
               }));
