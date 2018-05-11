@@ -23,14 +23,11 @@ import {
   getExperimentToglesFromCookieForTesting,
   isCanary,
   isExperimentOn,
-  isOriginExperimentOn,
   randomlySelectUnsetExperiments,
   resetExperimentTogglesForTesting,
   toggleExperiment,
 } from '../../src/experiments';
-import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
-import {installCryptoService} from '../../src/service/crypto-impl';
 
 describe('experimentToggles', () => {
   it('should return experiment status map', () => {
@@ -904,71 +901,5 @@ describe('experiment branch tests', () => {
         'expt_2': '2_1',
       });
     });
-  });
-});
-
-describes.fakeWin('isOriginExperimentOn', {amp: false}, env => {
-  // Token enables experiment "foo" for origin "https://origin.com".
-  /*eslint "max-len": 0*/
-  const token = 'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY';
-
-  let win;
-  let isPkcsAvailable;
-
-  beforeEach(() => {
-    win = env.win;
-    installCryptoService(win);
-    const crypto = Services.cryptoFor(win);
-    isPkcsAvailable = env.sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
-  });
-
-  function setupMetaTagWith(token) {
-    const meta = win.document.createElement('meta');
-    meta.setAttribute('name', 'amp-experiment-token');
-    meta.setAttribute('content', token);
-    win.document.head.appendChild(meta);
-  }
-
-  it('should return false if no token is found', () => {
-    return expect(isOriginExperimentOn(win, 'foo', true))
-        .to.eventually.be.false;
-  });
-
-  it('should return false if crypto is unavailable', () => {
-    isPkcsAvailable.returns(false);
-
-    return expect(isOriginExperimentOn(win, 'foo', true))
-        .to.eventually.be.false;
-  });
-
-  it('should return false for missing token', () => {
-    setupMetaTagWith('');
-
-    return expect(isOriginExperimentOn(win, 'foo', true))
-        .to.eventually.be.false;
-  });
-
-  it('should return false if origin does not match', () => {
-    setupMetaTagWith(token);
-    win.location.href = 'https://not-origin.com';
-
-    return expect(isOriginExperimentOn(win, 'foo', true))
-        .to.eventually.be.false;
-  });
-
-  it('should return true for valid token with matching origin', () => {
-    setupMetaTagWith(token);
-    win.location.href = 'https://origin.com';
-
-    return expect(isOriginExperimentOn(win, 'foo', true))
-        .to.eventually.be.true;
-  });
-
-  it('should return false if requested experiment is not in config', () => {
-    setupMetaTagWith(token);
-    win.location.href = 'https://origin.com';
-
-    return expect(isOriginExperimentOn(win, 'bar', true))
-        .to.eventually.be.false;
   });
 });
