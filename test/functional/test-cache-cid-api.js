@@ -80,7 +80,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
         });
         },
       }));
-      return api.getScopedCid('', 'AMP_ECID_GOOGLE').then(cid => {
+      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal('amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
         'rvvfkCif_N9oYLdZEB976uJDhYgL');
         expect(fetchJsonStub)
@@ -105,7 +105,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
 	  });
         },
       }));
-      return api.getScopedCid('', 'AMP_ECID_GOOGLE').then(cid => {
+      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal(null);
         expect(fetchJsonStub)
             .to.be.calledWith('https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
@@ -136,7 +136,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
           });
         },
       }));
-      return api.getScopedCid('', 'AMP_ECID_GOOGLE').then(cid => {
+      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal('amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
         'rvvfkCif_N9oYLdZEB976uJDhYgL');
         expect(fetchJsonStub.getCall(1).args[0]).to.equal(
@@ -157,7 +157,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
         }
         );
       });
-      const response = api.getScopedCid('', 'AMP_ECID_GOOGLE').then(cid => {
+      const response = api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal(null);
         expect(fetchJsonStub)
             .to.be.calledWith('https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
