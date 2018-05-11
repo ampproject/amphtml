@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
+import {OBJECT_STRING_ARGS_KEY} from '../../src/action-constants';
 import {Services} from '../../src/services';
 import {StandardActions} from '../../src/service/standard-actions-impl';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';

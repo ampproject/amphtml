@@ -19,11 +19,10 @@ import {
   ActionInvocation,
   ActionService,
   DeferredEvent,
-  OBJECT_STRING_ARGS_KEY,
   dereferenceExprsInArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
-import {ActionTrust} from '../../src/action-trust';
+import {ActionTrust, OBJECT_STRING_ARGS_KEY} from '../../src/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';

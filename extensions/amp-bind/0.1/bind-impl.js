@@ -232,7 +232,7 @@ export class Bind {
    * @returns {!Promise}
    */
   invoke(invocation) {
-    const {args, event, method, sequenceId} = invocation;
+    const {args, event, method, sequenceId, tagOrTarget} = invocation;
 
     // Store the sequenceId values of action invocations and only allow one
     // setState() or pushState() event per sequence.
@@ -255,13 +255,16 @@ export class Bind {
           return this.setStateWithExpression(expression, scope);
         case 'pushState':
           return this.pushStateWithExpression(expression, scope);
+        default:
+          return Promise.reject(dev().createError('Unrecognized method: ' +
+              `"${tagOrTarget}.${method}"`));
       }
     } else {
       user().error('AMP-BIND', 'Please use the object-literal syntax, '
           + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
           + '"AMP.setState(foo=\'bar\')".');
-      return Promise.resolve();
     }
+    return Promise.resolve();
   }
 
   /**
