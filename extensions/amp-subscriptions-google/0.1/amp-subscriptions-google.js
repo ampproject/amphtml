@@ -20,7 +20,7 @@ import {
   SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
-import {Entitlement, GrantReason} from '../../amp-subscriptions/0.1/entitlement';
+import {Entitlement} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
