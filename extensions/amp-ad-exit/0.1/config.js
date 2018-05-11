@@ -16,7 +16,7 @@
 
 import {
   ANALYTICS_IFRAME_TRANSPORT_CONFIG,
-} from '../../amp-analytics/0.1/vendors';
+} from '../../amp-analytics/0.1/iframe-transport-vendors';
 import {FilterType} from './filters/filter';
 import {user} from '../../../src/log';
 

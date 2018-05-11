@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG} from '../vendors';
+import {ANALYTICS_CONFIG} from '../vendors';
+import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from '../iframe-transport-vendors';
 import {isSecureUrl} from '../../../../src/url';
 
 describe('analytics vendors', () => {
