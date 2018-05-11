@@ -428,6 +428,12 @@ export class Bind {
         : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
+        // Measuring impact of possibly reducing the binding limit (#11434).
+        const numberOfBindings = this.numberOfBindings();
+        if (numberOfBindings > 1000) {
+          dev().expectedError(TAG, `Over 1000 bindings (${numberOfBindings}).`);
+        }
+
         const {
           boundElements, bindings, expressionToElements, limitExceeded,
         } = results;

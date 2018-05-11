@@ -42,6 +42,7 @@ import {
 } from '../url';
 import {isIframed} from '../dom';
 import {parseJson, tryParseJson} from '../json';
+import {tryResolve} from '../utils/promise';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -609,7 +610,8 @@ function getNewCidForCookie(win) {
   } else {
     // If our entropy is a pure random number, we can just directly turn it
     // into base 64
-    return Promise.resolve(base64UrlEncodeFromBytes(entropy)
+    const cast = /** @type {!Uint8Array} */(entropy);
+    return tryResolve(() => base64UrlEncodeFromBytes(cast)
         // Remove trailing padding
         .replace(/\.+$/, ''));
   }

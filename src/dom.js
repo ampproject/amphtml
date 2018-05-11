@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {dev} from './log';
 import {dict} from './utils/object';
@@ -816,9 +817,10 @@ export function whenUpgradedToCustomElement(element) {
   // If Element is still HTMLElement, wait for it to upgrade to customElement
   // Note: use pure string to avoid obfuscation between versions.
   if (!element[UPGRADE_TO_CUSTOMELEMENT_PROMISE]) {
-    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = new Promise(resolve => {
-      element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = resolve;
-    });
+    const deferred = new Deferred();
+    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = deferred.promise;
+    element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = deferred.resolve;
+
   }
 
   return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];

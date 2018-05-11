@@ -125,7 +125,7 @@ export function getCalloutParam_(url) {
 /**
  * For a given A4A Element, sends out Real Time Config requests to
  * any urls or vendors specified by the publisher.
- * @param {!AMP.BaseElement} a4aElement
+ * @param {!./amp-a4a.AmpA4A} a4aElement
  * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
  *   substitutions available to use.
  * @param {?CONSENT_POLICY_STATE} consentState
@@ -197,7 +197,7 @@ export function maybeExecuteRealTimeConfig_(
 }
 
 /**
- * @param {!AMP.BaseElement} a4aElement
+ * @param {!./amp-a4a.AmpA4A} a4aElement
  * @param {string} url
  * @param {!Object<string, boolean>} seenUrls
  * @param {!Array<!Promise<!rtcResponseDef>>} promiseArray
@@ -213,6 +213,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
   const callout = opt_vendor || getCalloutParam_(url);
+  const checkStillCurrent = a4aElement.verifyStillCurrent.bind(a4aElement)();
   /**
    * The time that it takes to substitute the macros into the URL can vary
    * depending on what the url requires to be substituted, i.e. a long
@@ -238,8 +239,8 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
       url = truncUrl_(url);
     }
     return sendRtcCallout_(
-        url, rtcStartTime, win, timeoutMillis,
-        callout, errorReportingUrl, ampDoc);
+        url, rtcStartTime, win, timeoutMillis, callout, checkStillCurrent,
+        errorReportingUrl, ampDoc);
   };
 
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
@@ -249,11 +250,13 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   promiseArray.push(Services.timerFor(win).timeoutPromise(
       timeoutMillis,
       urlReplacements.expandUrlAsync(url, macros, whitelist)).then(url => {
+    checkStillCurrent();
     timeoutMillis -= (urlReplacementStartTime - Date.now());
     return send(url);
-  }).catch(unused => {
-    return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
-        callout, errorReportingUrl, win, ampDoc);
+  }).catch(error => {
+    return error.message == 'CANCELLED' ? undefined :
+      buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
+          callout, errorReportingUrl, win, ampDoc);
   }));
 }
 
@@ -273,12 +276,14 @@ export function truncUrl_(url) {
  * @param {!Window} win
  * @param {number} timeoutMillis
  * @param {string} callout
+ * @param {!Function} checkStillCurrent
  * @param {string} errorReportingUrl
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
 function sendRtcCallout_(
-  url, rtcStartTime, win, timeoutMillis, callout, errorReportingUrl, ampDoc) {
+  url, rtcStartTime, win, timeoutMillis, callout, checkStillCurrent,
+  errorReportingUrl, ampDoc) {
   /**
    * Note: Timeout is enforced by timerFor, not the value of
    *   rtcTime. There are situations where rtcTime could thus
@@ -291,7 +296,9 @@ function sendRtcCallout_(
           // the request to be cached across sites but for now assume that
           // is not a required feature.
           url, {credentials: 'include'}).then(res => {
+        checkStillCurrent();
         return res.text().then(text => {
+          checkStillCurrent();
           const rtcTime = Date.now() - rtcStartTime;
           // An empty text response is allowed, not an error.
           if (!text) {
@@ -304,7 +311,7 @@ function sendRtcCallout_(
                 errorReportingUrl, win, ampDoc, rtcTime);
         });
       })).catch(error => {
-    return buildErrorResponse_(
+    return error.message == 'CANCELLED' ? undefined : buildErrorResponse_(
         // The relevant error message for timeout looks like it is
         // just 'message' but is in fact 'messageXXX' where the
         // X's are hidden special characters. That's why we use
