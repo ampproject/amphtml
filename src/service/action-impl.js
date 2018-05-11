@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-trust';
+import {ActionTrust} from '../action-constants';
 import {KeyCodes} from '../utils/key-codes';
-import {OBJECT_STRING_ARGS_KEY} from '../action-trust';
+import {OBJECT_STRING_ARGS_KEY} from '../action-constants';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
