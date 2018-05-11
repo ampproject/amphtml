@@ -149,6 +149,21 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
             .to.equal(AdResponseType.TEMPLATE);
       });
     });
+
+    it('should have the response body as the creative in creativeData', () => {
+      return validator.validate({win: env.win},
+          utf8Encode(JSON.stringify({templateUrl})),
+          {
+            get: name => null,
+          }).then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.creativeData).to.be.ok;
+        const creativeData = validatorOutput.creativeData;
+        expect(creativeData).to.be.ok;
+        expect(creativeData.creative).to.deep.equal(
+            '{"templateUrl":"https://adnetwork.com/amp-template.html"}');
+      });
+    });
   });
 });
 
