@@ -133,6 +133,9 @@ export class SystemLayer {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
+
+    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = ;
   }
 
   /**
@@ -169,6 +172,10 @@ export class SystemLayer {
 
     if (Services.platformFor(this.win_).isIos()) {
       this.systemLayerEl_.setAttribute('ios', '');
+    }
+
+    if (Services.viewerForDoc(this.systemLayerEl_).isEmbedded()) {
+      this.systemLayerEl_.classList.add('i-amphtml-embedded');
     }
 
     return this.getRoot();
