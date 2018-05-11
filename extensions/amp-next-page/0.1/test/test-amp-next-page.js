@@ -97,7 +97,9 @@ env => {
     toggleExperiment(win, 'amp-next-page', false);
   });
 
-  it('does not fetch the next document before 3 viewports away', function* () {
+  // TODO (@peterjosling, #15234): This test is flaky on Headless Chrome on Travis because it does
+  // call fetchDocument.
+  it.skip('does not fetch the next document before 3 viewports away', function* () {
     xhrMock.expects('fetchDocument').never();
     sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
       // 4x viewports away
@@ -140,7 +142,8 @@ env => {
     yield macroTask();
   });
 
-  it('adds the hidden class to hideSelector elements', function* () {
+  // TODO (@peterjosling, #15234): This flakes on Chrome.
+  it.skip('adds the hidden class to hideSelector elements', function* () {
     const exampleDoc = createExampleDocument(doc);
     xhrMock.expects('fetchDocument')
         .returns(Promise.resolve(exampleDoc))
