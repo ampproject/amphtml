@@ -56,6 +56,13 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
+            'class': INFO_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
             'class': UNMUTE_CLASS + ' i-amphtml-story-button',
           }),
         },
@@ -71,13 +78,6 @@ const TEMPLATE = {
           attrs: dict({
             'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': INFO_CLASS + ' i-amphtml-story-button',
           }),
         },
       ],
@@ -171,7 +171,7 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    if (Services.viewerForDoc(this.win_.document.documentElement)
+    if (!Services.viewerForDoc(this.win_.document.documentElement)
         .isEmbedded()) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
     }
