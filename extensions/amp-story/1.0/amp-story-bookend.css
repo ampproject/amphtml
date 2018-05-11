@@ -83,6 +83,7 @@
   font-weight: 700 !important;
   letter-spacing: 0.83px !important;
   line-height: 1.48 !important;
+  overflow: hidden !important;
 }
 
 .i-amphtml-story-bookend-article-meta,
@@ -145,12 +146,10 @@
   font-family: 'Roboto', sans-serif !important;
   font-weight: 400 !important;
   font-size: 16px !important;
-  text-overflow: ellipsis !important;
   overflow: hidden !important;
-  white-space: nowrap !important;
   color: #fff !important;
-  line-height: 1.4;
-  width: 50% !important;
+  line-height: 1.45em !important;
+  max-height: 4.35em !important;
   margin: 0 0 8px !important;
 }
 
