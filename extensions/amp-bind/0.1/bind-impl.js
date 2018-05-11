@@ -118,7 +118,10 @@ export class Bind {
     this.actionSequenceIds_ = [];
 
     /** @const @private {!Function} */
-    this.boundClearActionSequenceIds_ = this.clearActionSequenceIds_.bind(this);
+    this.eventuallyClearActionSequenceIds_ = debounce(this.win_,
+        () => {
+          this.actionSequenceIds_.length = 0;
+        }, 5000);
 
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
@@ -242,7 +245,7 @@ export class Bind {
     }
     this.actionSequenceIds_.push(sequenceId);
     // Flush stored sequence IDs five seconds after the last invoked action.
-    debounce(this.win_, this.boundClearActionSequenceIds_, 5000);
+    this.eventuallyClearActionSequenceIds_();
 
     const expression = args[OBJECT_STRING_ARGS_KEY];
     if (expression) {
@@ -1131,13 +1134,6 @@ export class Bind {
     }).then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
-  }
-
-  /**
-   * @private
-   */
-  clearActionSequenceIds_() {
-    this.actionSequenceIds_.length = 0;
   }
 
   /**
