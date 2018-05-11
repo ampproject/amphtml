@@ -155,6 +155,10 @@ export class NextPageService {
 
     this.viewport_.onScroll(() => this.scrollHandler_());
     this.viewport_.onResize(() => this.scrollHandler_());
+
+    // Check scroll position immediately to handle documents which are shorter
+    // than the viewport.
+    this.scrollHandler_();
   }
 
   /**
