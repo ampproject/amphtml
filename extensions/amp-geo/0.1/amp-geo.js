@@ -101,7 +101,7 @@ export class AmpGeo extends AMP.BaseElement {
       `${TAG} can only have one <script type="application/json"> child`);
     }
 
-    /** @private @const {!Promise<!Object<string, (string|Array<string>)>>} */
+    /** @type {!Promise<!Object<string, (string|Array<string>)>>} */
     const geo = this.addToBody_(
         children.length ?
           parseJson(children[0].textContent) : {});
@@ -121,7 +121,6 @@ export class AmpGeo extends AMP.BaseElement {
 
     if (preRenderMatch && !isProxyOrigin(doc.location)) {
       this.mode_ = mode.GEO_PRERENDER;
-      /** @private {string} */
       this.country_ = preRenderMatch[1];
     } else {
       this.mode_ = mode.GEO_HOT_PATCH;
@@ -151,7 +150,7 @@ export class AmpGeo extends AMP.BaseElement {
   matchCountryGroups_(config) {
     /* ISOCountryGroups are optional but if specified at least one must exist
     */
-    /** @private @const {!Object<string, Array<string>>} */
+    /** @const {!Object<string, Array<string>>} */
     const {ISOCountryGroups} = config;
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
@@ -200,7 +199,7 @@ export class AmpGeo extends AMP.BaseElement {
    */
   addToBody_(config) {
     const doc = this.win.document;
-    /** @private {Object} */
+    /** @type {Object} */
     const states = {};
     const self = this;
 

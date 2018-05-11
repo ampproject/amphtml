@@ -342,7 +342,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   // When we already have state in memory and user refreshes page, we flush
   // the dom we maintain on the server.
   if (!('amp_latest_update_time' in req.query) && liveListDoc) {
-    let {outerHTML} = liveListDoc.documentElement;
+    let outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
     outerHTML = replaceUrls(mode, outerHTML);
     res.send(`${doctype}${outerHTML}`);
     return;
@@ -389,7 +389,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
       return;
     }
   }
-  let {outerHTML} = liveListDoc.documentElement;
+  let outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
   outerHTML = replaceUrls(mode, outerHTML);
   liveListDoc.ctr++;
   res.send(`${doctype}${outerHTML}`);

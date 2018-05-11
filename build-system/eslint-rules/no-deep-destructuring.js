@@ -15,6 +15,14 @@
  */
 'use strict';
 
+/**
+ * Disallows deep object destructuring, because it's complicated and confusing.
+ *
+ * Bad:
+ *   const { x: { y } } = obj.prop;
+ * Good:
+ *   const { y } = obj.prop.x;
+ */
 module.exports = function(context) {
   return {
     ObjectPattern: function(node) {

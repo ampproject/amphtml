@@ -34,6 +34,7 @@ module.exports = {
       const {object, property, computed} = init;
       if (computed ||
         object.type === 'Super' ||
+        property.leadingComments ||
         property.type !== 'Identifier') {
         return false;
       }
