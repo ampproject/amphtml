@@ -43,12 +43,10 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
-    // Making sure the vsync tasks run synchronously.
-    sandbox.stub(Services, 'vsyncFor').returns({
-      mutate: fn => fn(),
-      runPromise: (vsyncTaskSpec, vsyncState) => {
-        vsyncTaskSpec.measure(vsyncState);
-        vsyncTaskSpec.mutate(vsyncState);
+    // Making sure resource tasks run synchronously.
+    sandbox.stub(Services, 'resourcesForDoc').returns({
+      mutateElement: (element, callback) => {
+        callback();
         return Promise.resolve();
       },
     });
@@ -74,7 +72,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   });
 
   it('should build the info dialog', () => {
-    infoDialog.build().then(() => {
+    return infoDialog.build().then(() => {
       expect(infoDialog.isBuilt()).to.be.true;
       expect(infoDialog.element_).to.exist;
     });
@@ -83,7 +81,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   it('should hide more info link when there is no viewer messaging', () => {
     messagingReadyPromise = null;
 
-    infoDialog.build().then(() => {
+    return infoDialog.build().then(() => {
       expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
           .not.to.have.class(MOREINFO_VISIBLE_CLASS);
     });
@@ -93,7 +91,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     messagingReadyPromise = Promise.resolve();
     moreInfoLinkUrl = null;
 
-    infoDialog.build().then(() => {
+    return infoDialog.build().then(() => {
       expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
           .not.to.have.class(MOREINFO_VISIBLE_CLASS);
     });
@@ -103,41 +101,42 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     messagingReadyPromise = Promise.resolve();
     moreInfoLinkUrl = 'https://example.com/more-info.html';
 
-    infoDialog.build().then(() => {
+    return infoDialog.build().then(() => {
       expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
           .to.have.class(MOREINFO_VISIBLE_CLASS);
     });
   });
 
   it('should append the info dialog in the parentEl on build', () => {
-    infoDialog.build().then(() => {
+    return infoDialog.build().then(() => {
       expect(parentEl.childElementCount).to.equal(1);
     });
   });
 
   it('should show the info dialog on store property update', () => {
-    infoDialog.build().then(() => {
+    return infoDialog.build().then(() => {
       storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
       expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
     });
   });
 
   it('should hide the info dialog on click on the overlay', () => {
-    infoDialog.build().then(() => {
-      storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    return infoDialog.build().then(() => {
+      storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
       infoDialog.element_.dispatchEvent(new Event('click'));
 
       expect(infoDialog.element_).not.to.have.class(DIALOG_VISIBLE_CLASS);
-      expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
+      expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.false;
     });
   });
 
   it('should not hide the info dialog on click on the inner container', () => {
-    infoDialog.build().then(() => {
-      storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    return infoDialog.build().then(() => {
+      storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
       infoDialog.innerContainerEl_.dispatchEvent(new Event('click'));
 
       expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
+      expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.true;
     });
   });
 });
