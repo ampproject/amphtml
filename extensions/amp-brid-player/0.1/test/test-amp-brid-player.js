@@ -87,7 +87,7 @@ describes.realWin('amp-brid-player', {
   });
 
   it('requires data-partner', () => {
-    allowConsoleError(() => { return getBridPlayer({
+    return allowConsoleError(() => { return getBridPlayer({
       'data-player': '4144',
       'data-video': '13663',
     }).should.eventually.be.rejectedWith(
@@ -96,7 +96,7 @@ describes.realWin('amp-brid-player', {
   });
 
   it('requires data-player', () => {
-    allowConsoleError(() => { return getBridPlayer({
+    return allowConsoleError(() => { return getBridPlayer({
       'data-partner': '264',
       'data-video': '13663',
     }).should.eventually.be.rejectedWith(
