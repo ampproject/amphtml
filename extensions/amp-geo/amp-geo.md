@@ -131,6 +131,24 @@ The game is called <span class='football'></span>!
 </div>
 ```
 
+### Render Blocking
+
+By default `amp-geo` is not render blocking. That is, the page will load and elements will render even if `amp-geo` has not yet loaded and executed. If it is important that certain elements are never rendered in a specifc geography the `amp-geo-pending` class may be used to provide selective render blocking. 
+
+This is implmented by the publisher adding `amp-geo-pending` to the `<body>` element. When it loads `amp-geo` will remove this class at the same time as it adds the `amp-iso-country...` and `amp-geo-group-...` classes.
+
+Example: To always suppress an element with the class `foo` in the United States a publisher would set `<body class="amp-geo-pending">` and in the CSS include
+
+```css
+.amp-geo-pending .foo,
+.amp-iso-country-us .foo {
+  display: none;
+}
+```
+
+This would hide the element until `amp-geo` has loaded and continue to hide it if the country is `us`. Note: Elements such as `amp-ad` and `amp-iframe` do not make external network requests when set to `display: none`.
+
+
 ### Integration with amp-bind
 
 If the `AMPBind` key is present in the configuration, `amp-geo` inserts an `amp-state` tag containing the current country and group information.  Using the football example above, set the  `AMPBind` flag to true to enable `amp-bind` integration.
