@@ -177,7 +177,7 @@ export class GoogleSubscriptionsPlatform {
     // whether the access has been granted and whether user is a subscriber.
     if (!entitlement.granted) {
       this.runtime_.showOffers({list: 'amp'});
-    } else if (entitlement.isSubscriber()) {
+    } else if (!entitlement.isSubscriber()) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
   }
