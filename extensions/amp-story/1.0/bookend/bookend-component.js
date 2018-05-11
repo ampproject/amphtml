@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {ArticleComponent, ArticleComponentDef} from './components/article';
 import {HeadingComponent, HeadingComponentDef} from './components/heading';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
+=======
+import {ArticleComponent, ArticleTitleComponent, BookendArticleComponentDef, BookendArticleTitleComponentDef} from './components/article';
+import {CtaLinkPairComponent} from './components/cta-link-pair';
+>>>>>>> Initial prototype for cta buttons in bookend.
 import {htmlFor} from '../../../../src/static-template';
 
 /** @type {string} */
@@ -32,17 +37,26 @@ export const TAG = 'amp-story-bookend';
 export let BookendDataDef;
 
 /**
+<<<<<<< HEAD
  * @typedef {
  *   (!ArticleComponentDef|
  *   !HeadingComponentDef|
  *   !PortraitComponentDef)
  * }
+=======
+ * @typedef {(!BookendArticleComponentDef|!BookendArticleTitleComponentDef|!CtaLinkPairDef)}
+>>>>>>> Initial prototype for cta buttons in bookend.
  */
 export let BookendComponentDef;
 
 const articleComponentBuilder = new ArticleComponent();
+<<<<<<< HEAD
 const headingComponentBuilder = new HeadingComponent();
 const portraitComponentBuilder = new PortraitComponent();
+=======
+const articleTitleComponentBuilder = new ArticleTitleComponent();
+const ctaLinkPairComponentBuilder = new CtaLinkPairComponent();
+>>>>>>> Initial prototype for cta buttons in bookend.
 
 /**
  * @typedef {(!ArticleComponent|!HeadingComponent|!PortraitComponent)}
@@ -62,6 +76,10 @@ function componentBuilderInstanceFor(componentType) {
       return headingComponentBuilder;
     case 'portrait':
       return portraitComponentBuilder;
+    case 'article-set-title':
+      return articleTitleComponentBuilder;
+    case 'cta-link-pair':
+      return ctaLinkPairComponentBuilder;
     default:
       return null;
   }
@@ -119,7 +137,6 @@ export class BookendComponent {
     const html = htmlFor(doc);
     const containerTemplate =
       html`<div class="i-amphtml-story-bookend-component-set"></div>`;
-
     element.appendChild(containerTemplate);
     return element.lastElementChild;
   }
