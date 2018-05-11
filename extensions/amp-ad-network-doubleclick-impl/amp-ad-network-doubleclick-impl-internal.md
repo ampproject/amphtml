@@ -85,7 +85,7 @@ limitations under the License.
     <td>When enabled, all eligible slots on the page will be serviced by a single ad request.</td>
     <td>Beta</td>
   </tr>
-  <td>
+  <tr>
     <td><a href="amp-consent.md">AMP Consent Integration</a></td>
     <td>Integration with AMP Consent extension.</td>
     <td>Launched</td>
