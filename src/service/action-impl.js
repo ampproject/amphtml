@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
+import {OBJECT_STRING_ARGS_KEY} from '../action-trust';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
@@ -29,12 +30,6 @@ import {
 import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {reportError} from '../error';
-
-/**
- * ActionInfoDef args key that maps to the an unparsed object literal string.
- * @const {string}
- */
-export const OBJECT_STRING_ARGS_KEY = '__AMP_OBJECT_STRING__';
 
 /** @const {string} */
 const TAG_ = 'Action';

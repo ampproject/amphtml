@@ -15,6 +15,20 @@
  */
 
 /**
+ * Key string in an action arguments map for an unparsed object literal string.
+ *
+ * E.g. for the action in <p on="tap:AMP.setState({foo: 'bar'})",
+ * then `args[OBJECT_STRING_ARGS_KEY]` is the string "{foo: 'bar'}".
+ *
+ * The action service delegates parsing of object literals to the corresponding
+ * extension (in the example above, amp-bind).
+ *
+ * @see ./service/action-impl.ActionInfoDef
+ * @const {string}
+ */
+export const OBJECT_STRING_ARGS_KEY = '__AMP_OBJECT_STRING__';
+
+/**
  * Trust level of an action.
  *
  * Corresponds to degree of user intent, i.e. events triggered with strong

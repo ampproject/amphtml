@@ -20,7 +20,7 @@ import {BindExpressionResultDef} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {BindingDef} from './bind-evaluator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {OBJECT_STRING_ARGS_KEY} from '../../../src/service/action-impl';
+import {OBJECT_STRING_ARGS_KEY} from '../../../src/action-trust';
 import {Services} from '../../../src/services';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
