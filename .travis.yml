@@ -6,6 +6,10 @@ node_js:
 python:
   - "2.7"
 notifications:
+  email:
+    recipients:
+      - amp-build-cop@grotations.appspotmail.com
+    on_success: change
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
@@ -38,8 +42,8 @@ addons:
     - fonts.googleapis.com
   apt:
     packages:
-    - protobuf-compiler
-    - python-protobuf
+      - protobuf-compiler
+      - python-protobuf
 matrix:
   include:
     # For non-greenkeeper branches, use the normal environment.
