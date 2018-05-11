@@ -107,11 +107,10 @@ function orientationChangeHandler(global, containerDiv) {
   // Save the height of the container before the event listener triggers
   const oldHeight = getStyle(containerDiv, 'height');
   global.setTimeout(() => {
-    // Force DOM reflow and repaint
-    /*eslint-disable no-unused-vars*/
+    // Force DOM reflow and repaint.
+    // eslint-disable-next-line no-unused-vars
     const ignore = global.document.body./*OK*/offsetHeight;
-    /*eslint-enable no-unused-vars*/
-    // Capture new height
+    // Capture new height.
     let newHeight = getStyle(containerDiv, 'height');
     // In older versions of iOS, this height will be different because the
     // container height is resized.
@@ -124,9 +123,9 @@ function orientationChangeHandler(global, containerDiv) {
       const overflow = global.document.getElementById('overflow');
       if (overflow) {
         overflow.onclick =
-            global.context.requestResize.bind(null, undefined, newHeight);
+            () => global.context.requestResize(undefined, newHeight);
       }
-      // Resize the container to the correct height
+      // Resize the container to the correct height.
       global.context.requestResize(undefined, newHeight);
     }
   }, 250); /* 250 is time in ms to wait before executing orientation */
@@ -292,7 +291,7 @@ export function resizeIframe(global, containerName) {
 function createOverflow(global, container, height) {
   const overflow = getOverflowElement(global);
   // When overflow is clicked, resize to full height
-  overflow.onclick = global.context.requestResize.bind(null, undefined, height);
+  overflow.onclick = () => global.context.requestResize(undefined, height);
   global.document.getElementById('c').appendChild(overflow);
   // Resize the CSA container to not conflict with overflow
   resizeCsa(container, currentAmpHeight - overflowHeight);
