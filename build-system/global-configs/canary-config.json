@@ -33,5 +33,6 @@
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
   "expUnconditionedCanonicalHoldback": 0.01,
-  "amp-consent": 1
+  "amp-consent": 1,
+  "amp-img-native-srcset": 1
 }
