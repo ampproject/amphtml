@@ -46,7 +46,7 @@ export class AmpAudio extends AMP.BaseElement {
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
-    /** @public {boolean} */
+    /** @private {boolean} */
     this.isPlaying = false;
 
   }
@@ -154,9 +154,9 @@ export class AmpAudio extends AMP.BaseElement {
    * @returns {boolean}
    * @VisibleForTesting
    */
-  setPlayingStateForTesting_(val) {
+  setPlayingStateForTesting_(isPlaying) {
     if (getMode().test) {
-      this.isPlaying = val;
+      this.isPlaying = isPlaying;
     }
   }
 
@@ -166,7 +166,7 @@ export class AmpAudio extends AMP.BaseElement {
    * @VisibleForTesting
    */
   isStoryDescendant_() {
-    return closestByTag(this.element, 'AMP-STORY') ? true : false;
+    return closestByTag(this.element, 'AMP-STORY');
   }
 
 
