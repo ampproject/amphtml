@@ -596,6 +596,10 @@ const forbiddenTerms = {
       'extensions/amp-access/0.1/iframe-api/access-controller.js',
     ],
   },
+  '(?<!return) allowConsoleError\\(\\(\\) => \\{[\\n\\r\\s]*return': {
+    message: 'The return value of `allowConsoleError` must be returned ' +
+        'to enable Promise chaining.',
+  },
 };
 
 const ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded' +
