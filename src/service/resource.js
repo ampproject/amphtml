@@ -19,13 +19,14 @@ import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
-import {isBlockedByConsent} from '../error';
-import {isExperimentOn} from '../experiments';
 import {
+  hasMeasurementChanges,
   layoutRectLtwh,
   layoutRectsOverlap,
   moveLayoutRect,
 } from '../layout-rect';
+import {isBlockedByConsent} from '../error';
+import {isExperimentOn} from '../experiments';
 import {startsWith} from '../string';
 import {toWin} from '../types';
 
@@ -429,13 +430,10 @@ export class Resource {
     }
     const box = this.getPageLayoutBox();
 
-    let measurementsChanged = false;
     // Note that "left" doesn't affect readiness for the layout.
+    const hasMeasurementChanges = hasMeasurementChanges(oldBox, box);
     if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top ||
-          oldBox.width != box.width ||
-          oldBox.height != box.height) {
-      measurementsChanged = true;
+          oldBox.top != box.top || hasMeasurementChanges) {
       if (this.element.isUpgraded() &&
               this.state_ != ResourceState.NOT_BUILT &&
               (this.state_ == ResourceState.NOT_LAID_OUT ||
@@ -448,7 +446,7 @@ export class Resource {
       this.initialLayoutBox_ = box;
     }
 
-    this.element.updateLayoutBox(box, measurementsChanged);
+    this.element.updateLayoutBox(box, hasMeasurementChanges);
   }
 
   measureViaResources_() {
