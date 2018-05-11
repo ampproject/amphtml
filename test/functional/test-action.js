@@ -53,10 +53,10 @@ function createExecElement(id, enqueAction) {
 }
 
 
-function assertInvocation(inv, target, method, source, caller, opt_event,
+function assertInvocation(inv, node, method, source, caller, opt_event,
   child, opt_args) {
 
-  expect(inv.target).to.equal(target);
+  expect(inv.node).to.equal(node);
   expect(inv.method).to.equal(method);
   expect(inv.caller).to.equal(caller);
 
@@ -674,7 +674,7 @@ describe('Action method', () => {
         'source1', 'caller1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
     expect(inv.caller).to.equal('caller1');
@@ -687,7 +687,7 @@ describe('Action method', () => {
         'source1', 'caller1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
     expect(inv.caller).to.equal('caller1');
@@ -715,7 +715,7 @@ describe('Action method', () => {
     action.trigger(child, 'tap', null);
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal(child);
     expect(inv.caller).to.equal(targetElement);
@@ -725,7 +725,7 @@ describe('Action method', () => {
     action.execute(execElement, 'method1', {'key1': 11}, child, null);
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.args['key1']).to.equal(11);
     expect(inv.source).to.equal(child);
@@ -753,7 +753,7 @@ describe('installActionHandler', () => {
         'button', 'button', 'tap', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
     const callArgs = handlerSpy.getCall(0).args[0];
-    expect(callArgs.target).to.be.equal(target);
+    expect(callArgs.node).to.be.equal(target);
     expect(callArgs.method).to.be.equal('submit');
     expect(callArgs.args).to.be.equal(null);
     expect(callArgs.source).to.be.equal('button');
@@ -906,14 +906,14 @@ describe('Action interceptor', () => {
     expect(queue).to.have.length(2);
 
     const inv0 = queue[0];
-    expect(inv0.target).to.equal(target);
+    expect(inv0.node).to.equal(target);
     expect(inv0.method).to.equal('method1');
     expect(inv0.source).to.equal('source1');
     expect(inv0.caller).to.equal('caller1');
     expect(inv0.event).to.equal('event1');
 
     const inv1 = queue[1];
-    expect(inv1.target).to.equal(target);
+    expect(inv1.node).to.equal(target);
     expect(inv1.method).to.equal('method2');
     expect(inv1.source).to.equal('source2');
     expect(inv1.caller).to.equal('caller2');
@@ -939,14 +939,14 @@ describe('Action interceptor', () => {
     expect(handler).to.have.callCount(2);
 
     const inv0 = handler.getCall(0).args[0];
-    expect(inv0.target).to.equal(target);
+    expect(inv0.node).to.equal(target);
     expect(inv0.method).to.equal('method1');
     expect(inv0.source).to.equal('source1');
     expect(inv0.caller).to.equal('caller1');
     expect(inv0.event).to.equal('event1');
 
     const inv1 = handler.getCall(1).args[0];
-    expect(inv1.target).to.equal(target);
+    expect(inv1.node).to.equal(target);
     expect(inv1.method).to.equal('method2');
     expect(inv1.source).to.equal('source2');
     expect(inv1.caller).to.equal('caller2');
@@ -956,7 +956,7 @@ describe('Action interceptor', () => {
         'source3', 'caller3', 'event3', ActionTrust.HIGH));
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
-    expect(inv2.target).to.equal(target);
+    expect(inv2.node).to.equal(target);
     expect(inv2.method).to.equal('method3');
     expect(inv2.source).to.equal('source3');
     expect(inv2.caller).to.equal('caller3');

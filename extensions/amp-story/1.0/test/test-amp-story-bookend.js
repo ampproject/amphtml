@@ -15,8 +15,12 @@
  */
 
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
+import {AmpStoryRequestService} from '../amp-story-request-service';
+import {AmpStoryStoreService} from '../amp-story-store-service';
 import {ArticleComponent} from '../bookend/components/article';
+import {LocalizationService} from '../localization';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {registerServiceBuilder} from '../../../../src/service';
 import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {
@@ -78,6 +82,16 @@ describes.realWin('amp-story-bookend', {
     bookendElem = createElementWithAttributes(win.document,
         'amp-story-bookend', {'layout': 'nodisplay'});
     storyElem.appendChild(bookendElem);
+
+    const requestService = new AmpStoryRequestService(win, storyElem);
+    registerServiceBuilder(win, 'story-request', () => requestService);
+
+    const storeService = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => storeService);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
+
     bookend = new AmpStoryBookend(bookendElem);
   });
 
@@ -107,7 +121,6 @@ describes.realWin('amp-story-bookend', {
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
 
-    bookend.buildCallback();
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       config.components.forEach((currentComponent, index) => {
@@ -143,7 +156,6 @@ describes.realWin('amp-story-bookend', {
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
 
-    bookend.buildCallback();
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       config.components.forEach((currentComponent, index) => {

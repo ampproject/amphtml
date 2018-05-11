@@ -20,7 +20,8 @@ import {user} from '../../../src/log';
 
 /**
  * @typedef {{
- *   pages: (!Array<!AmpNextPageItem>|undefined),
+ *   pages: !Array<!AmpNextPageItem>,
+ *   hideSelectors: (!Array<string>|undefined)
  * }}
  */
 export let AmpNextPageConfig;
@@ -35,9 +36,7 @@ export let AmpNextPageConfig;
 export let AmpNextPageItem;
 
 /**
- * Checks whether the object conforms to the AmpNextPageConfig
- * spec.
- *
+ * Checks whether the object conforms to the AmpNextPageConfig spec.
  * @param {*} config The config to validate.
  * @param {string} origin The origin of the current document
  *     (document.location.origin). All recommendations must be for the same
@@ -51,6 +50,13 @@ export function assertConfig(config, origin, sourceOrigin) {
   user().assert(config, 'amp-next-page config must be specified');
   user().assert(isArray(config.pages), 'pages must be an array');
   assertRecos(config.pages, origin, sourceOrigin);
+
+  if ('hideSelectors' in config) {
+    user().assert(isArray(config['hideSelectors']),
+        'amp-next-page hideSelectors should be an array');
+    assertSelectors(config['hideSelectors']);
+  }
+
   return /** @type {!AmpNextPageConfig} */ (config);
 }
 
@@ -58,13 +64,28 @@ function assertRecos(recos, origin, sourceOrigin) {
   recos.forEach(reco => assertReco(reco, origin, sourceOrigin));
 }
 
+const BANNED_SELECTOR_PATTERNS = [
+  /(^|\W)i-amphtml-/,
+];
+
+function assertSelectors(selectors) {
+  selectors.forEach(selector => {
+    BANNED_SELECTOR_PATTERNS.forEach(pattern => {
+      user().assertString(selector,
+          `amp-next-page hideSelector value ${selector} is not a string`);
+      user().assert(!pattern.test(selector),
+          `amp-next-page hideSelector '${selector}' not allowed`);
+    });
+  });
+}
+
 function assertReco(reco, origin, sourceOrigin) {
   const url = parseUrl(reco.ampUrl);
-  user().assert(typeof reco.ampUrl == 'string', 'ampUrl must be a string');
+  user().assertString(reco.ampUrl, 'ampUrl must be a string');
   user().assert(url.origin === origin || url.origin === sourceOrigin,
       'pages must be from the same origin as the current document');
-  user().assert(typeof reco.image == 'string', 'image must be a string');
-  user().assert(typeof reco.title == 'string', 'title must be a string');
+  user().assertString(reco.image, 'image must be a string');
+  user().assertString(reco.title, 'title must be a string');
 
   if (sourceOrigin) {
     reco.ampUrl = reco.ampUrl.replace(url.origin, origin);

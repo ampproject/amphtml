@@ -47,7 +47,6 @@ import {
 } from '../doubleclick-a4a-config';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
-import {Preconnect} from '../../../../src/preconnect';
 import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
@@ -1184,44 +1183,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
   });
 
-  describe('#disable safeframe preload experiment', () => {
-
-    const sfPreloadExpName = 'a4a-safeframe-preloading-off';
-    let preloadSpy;
-
-    beforeEach(() => {
-      element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-        height: '250',
-        width: '320',
-      });
-      doc.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-      preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
-    });
-
-    it('should not preload SafeFrame', () => {
-      forceExperimentBranch(impl.win, sfPreloadExpName, '21061136');
-      impl.buildCallback();
-      expect(isInExperiment(element, '21061135')).to.be.false;
-      expect(isInExperiment(element, '21061136')).to.be.true;
-      expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://securepubads.g.doubleclick.net/']);
-      expect(preloadSpy).to.not.be.called;
-    });
-
-    it('should preload SafeFrame', () => {
-      forceExperimentBranch(impl.win, sfPreloadExpName, '21061135');
-      impl.buildCallback();
-      expect(isInExperiment(element, '21061135')).to.be.true;
-      expect(isInExperiment(element, '21061136')).to.be.false;
-      expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://securepubads.g.doubleclick.net/']);
-      expect(preloadSpy).to.be.calledOnce;
-      expect(preloadSpy.args[0]).to.match(/safeframe/);
-    });
-  });
-
   describe('Troubleshoot for AMP pages', () => {
     beforeEach(() => {
       element = doc.createElement('amp-ad');
@@ -1564,16 +1525,6 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           });
           doc.body.appendChild(element);
           impl = new AmpAdNetworkDoubleclickImpl(element);
-        });
-
-        it('should preload safeframe', () => {
-          const preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
-          // Note that this causes preconnection to tpc.googlesyndication.com
-          // due to preloading safeframe.
-          expect(impl.getPreconnectUrls()).to.deep.equal(
-              ['https://securepubads.g.doubleclick.net/']);
-          expect(preloadSpy).to.be.calledOnce;
-          expect(preloadSpy.args[0]).to.match(/safeframe/);
         });
       });
 
