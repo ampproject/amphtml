@@ -171,7 +171,7 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    if (!Services.viewerForDoc(this.win_.document.documentElement)
+    if (Services.viewerForDoc(this.win_.document.documentElement)
         .isEmbedded()) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
     }
