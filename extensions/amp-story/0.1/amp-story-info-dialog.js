@@ -183,7 +183,7 @@ export class InfoDialog {
 
     return messagingPromise
         .then(() => {
-          return this.viewer_.sendMessageAwaitResponse('moreInfoLinkUrl',
+          return this.viewer_./*OK*/sendMessageAwaitResponse('moreInfoLinkUrl',
               /* data */ undefined);
         })
         .then(moreInfoUrl => {
