@@ -21,7 +21,9 @@ import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {macroTask} from '../../../../testing/yield';
 import {toggleExperiment} from '../../../../src/experiments';
 
-describes.realWin('amp-next-page component', {
+// TODO(@peterjosling, #15150): These tests fail on Travis.
+// See https://github.com/ampproject/amphtml/pull/15150#pullrequestreview-119563529
+describes.realWin.skip('amp-next-page component', {
   amp: {
     extensions: ['amp-next-page'],
   },
