@@ -341,7 +341,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should not call onMeasureChanged callback when element dimensions '
         + 'have not changed', () => {
       const element = new ElementClass();
-      const errorStub = sandbox.stub(element, 'dispatchCustomEventForTesting');
+      const onMeasureChangeStub =
+          sandbox.stub(element.implementation_, 'onMeasureChanged');
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
         element.updateLayoutBox(
@@ -350,14 +351,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
         );
         expect(element.layoutWidth_).to.equal(111);
         expect(element.implementation_.layoutWidth_).to.equal(111);
-        expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+        expect(onMeasureChangeStub).to.have.not.been.called;
       });
     });
 
     it('should call onMeasureChanged callback when element dimensions '
         + 'have changed', () => {
       const element = new ElementClass();
-      const errorStub = sandbox.stub(element, 'dispatchCustomEventForTesting');
+      const onMeasureChangeStub =
+          sandbox.stub(element.implementation_, 'onMeasureChanged');
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
         element.updateLayoutBox(
@@ -366,7 +368,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         );
         expect(element.layoutWidth_).to.equal(111);
         expect(element.implementation_.layoutWidth_).to.equal(111);
-        expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+        expect(onMeasureChangeStub).to.have.been.called;
       });
     });
 
