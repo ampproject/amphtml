@@ -114,6 +114,23 @@ For example, the following is possible in AMP:
   </tr>
 </table>
 
+## amp-audio
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+  </tr>
+</table>
+
 ### Input elements
 <table>
   <tr>
