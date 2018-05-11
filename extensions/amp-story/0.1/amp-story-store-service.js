@@ -67,6 +67,7 @@ export const StateProperty = {
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   CURRENT_PAGE_ID: 'currentpageid',
+  CURRENT_PAGE_INDEX: 'currentpageindex',
 };
 
 
@@ -146,7 +147,10 @@ const actions = (state, action, data) => {
           {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
+          {}, state, {
+            [StateProperty.CURRENT_PAGE_ID]: data.id,
+            [StateProperty.CURRENT_PAGE_INDEX]: data.index,
+          }));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
@@ -247,6 +251,7 @@ export class AmpStoryStoreService {
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.CURRENT_PAGE_ID]: '',
+      [StateProperty.CURRENT_PAGE_INDEX]: 0,
     });
   }
 

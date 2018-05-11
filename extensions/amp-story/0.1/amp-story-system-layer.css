@@ -141,7 +141,7 @@
   display: none !important;
 }
 
-.i-amphtml-embedded .i-amphtml-story-info-control {
+.i-amphtml-embedded.first-page-active .i-amphtml-story-info-control {
   display: block !important;
 }
 

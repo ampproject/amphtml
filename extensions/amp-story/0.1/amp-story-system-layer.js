@@ -133,9 +133,6 @@ export class SystemLayer {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
-
-    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = ;
   }
 
   /**
@@ -174,7 +171,8 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    if (Services.viewerForDoc(this.systemLayerEl_).isEmbedded()) {
+    if (Services.viewerForDoc(this.win_.document.documentElement)
+        .isEmbedded()) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
     }
 
@@ -231,6 +229,10 @@ export class SystemLayer {
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
+      this.onPageIndexUpdate_(index);
     }, true /** callToInitialize */);
   }
 
@@ -305,6 +307,16 @@ export class SystemLayer {
       isMuted ?
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
         this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+    });
+  }
+
+  /**
+   * Reacts to the active page index changing.
+   * @param {number} index
+   */
+  onPageIndexUpdate_(index) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle('first-page-active', index === 0);
     });
   }
 
