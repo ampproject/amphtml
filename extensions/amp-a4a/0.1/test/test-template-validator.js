@@ -18,6 +18,7 @@ import * as sinon from 'sinon';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
+  getAmpAdTemplateHelper,
 } from '../template-validator';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {VerificationStatus} from '../signature-verifier';
@@ -32,69 +33,122 @@ const realWinConfig = {
 
 describes.realWin('TemplateValidator', realWinConfig, env => {
 
-  const headers = {[AMP_TEMPLATED_CREATIVE_HEADER_NAME]: 'amp-mustache'};
-  let sandbox;
-  let userErrorStub;
+  const templateUrl = 'https://adnetwork.com/amp-template.html';
+  const headers = {
+    get: name => {
+      if (name == AMP_TEMPLATED_CREATIVE_HEADER_NAME) {
+        return 'amp-mustache';
+      }
+    },
+  };
   let validator;
-  let validatorPromise;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     validator = new TemplateValidator();
-    validatorPromise = validator.validate(
-        {win: env.win}, utf8Encode(data.adTemplate), headers);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+  describe('AMP Result', () => {
 
-  it('should have AMP validator result', () => {
-    return validatorPromise.then(validatorOutput => {
-      expect(validatorOutput).to.be.ok;
-      expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-      expect(validatorOutput.adResponseType).to.equal(
-          AdResponseType.CRYPTO);
-      expect(validatorOutput.creativeData).to.be.ok;
+    let sandbox;
+    let validatorPromise;
 
-      const creativeMetadata =
-          validatorOutput.creativeData.creativeMetadata;
-      expect(creativeMetadata.minifiedCreative).to.equal(
-          data.minifiedCreative);
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
+        expect(url).to.equal(templateUrl);
+        return Promise.resolve(data.adTemplate);
+      });
+
+      validatorPromise = validator.validate({win: env.win},
+          utf8Encode(JSON.stringify({
+            templateUrl,
+            data: {url: 'https://buy.com/buy-1'},
+            analytics: {foo: 'bar'},
+          })), headers);
     });
-  });
 
-  it('should have non-AMP validator result', () => {
-    return validator.validate(
-        {win: env.win}, utf8Encode(data.reserialized), headers)
-        .then(validatorOutput => {
-          expect(validatorOutput).to.be.ok;
-          expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
-          expect(validatorOutput.adResponseType).to.equal(
-              AdResponseType.CRYPTO);
-          expect(validatorOutput.creativeData).to.be.ok;
+    afterEach(() => sandbox.restore());
 
-          const creativeMetadata =
-              validatorOutput.creativeData.creativeMetadata;
-          expect(creativeMetadata.minifiedCreative).to.equal(
-              data.minifiedCreative);
-          expect(userErrorStub).to.be.calledOnce;
+    it('should have AMP validator result', () => {
+      return validatorPromise.then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
+      });
+    });
+
+    it('should have TEMPLATE ad response type', () => {
+      return validatorPromise.then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.adResponseType).to.equal(
+            AdResponseType.TEMPLATE);
+      });
+    });
+
+    it('should have creativeData with minified creative in metadata', () => {
+      return validatorPromise.then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.creativeData).to.be.ok;
+        const creativeMetadata =
+            validatorOutput.creativeData.creativeMetadata;
+        expect(creativeMetadata.minifiedCreative)
+            .to.equal(data.minifiedTemplateCreative);
+      });
+    });
+
+    it('should have amp-analytics and mustache in customElementExtensions',
+        () => {
+          return validatorPromise.then(validatorOutput => {
+            expect(validatorOutput).to.be.ok;
+            expect(validatorOutput.creativeData).to.be.ok;
+            const creativeMetadata =
+                validatorOutput.creativeData.creativeMetadata;
+            expect(creativeMetadata.customElementExtensions)
+                .to.deep.equal(['amp-analytics', 'amp-mustache']);
+          });
         });
   });
 
-  it('should have non-AMP validator result due to bad metadata', () => {
-    return validator.validate(
-        {win: env.win}, utf8Encode(data.reserializedInvalidOffset), headers)
-        .then(validatorOutput => {
-          expect(validatorOutput).to.be.ok;
-          expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
-          expect(validatorOutput.adResponseType).to.equal(
-              AdResponseType.CRYPTO);
-          expect(validatorOutput.creativeData).to.be.ok;
-          expect(validatorOutput.creativeData.creativeMetadata).to.not.be.ok;
+  describe('Non-AMP Result', () => {
+    it('should have NON_AMP validator result due to lack of headers', () => {
+      return validator.validate({win: env.win},
+          utf8Encode(JSON.stringify({
+            templateUrl,
+            data: {url: 'https://buy.com/buy-1'},
+            analytics: {foo: 'bar'},
+          }))).then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
+      });
+    });
 
-          expect(userErrorStub).to.be.calledOnce;
+    it('should have NON_AMP validator result due to lack of mustache header',
+        () => {
+          return validator.validate({win: env.win},
+              utf8Encode(JSON.stringify({
+                templateUrl,
+                data: {url: 'https://buy.com/buy-1'},
+                analytics: {foo: 'bar'},
+              })),
+              {
+                get: name => null,
+              }).then(validatorOutput => {
+            expect(validatorOutput).to.be.ok;
+            expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
+          });
         });
+
+    it('should have TEMPLATE ad response type', () => {
+      return validator.validate({win: env.win},
+          utf8Encode(JSON.stringify({
+            templateUrl,
+            data: {url: 'https://buy.com/buy-1'},
+            analytics: {foo: 'bar'},
+          }))).then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.adResponseType)
+            .to.equal(AdResponseType.TEMPLATE);
+      });
+    });
   });
 });
 

@@ -25,43 +25,30 @@ import {utf8Decode} from '../../../src/utils/bytes';
 /** @const {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 
+/** {?AmpAdTemplateHelper} */
+let ampAdTemplateHelper;
+
+/**
+ * Returns the global template helper.
+ * @param {!Window} win
+ * @return {!AmpAdTemplateHelper}
+ * @visibleForTesting
+ */
+export function getAmpAdTemplateHelper(win) {
+  return ampAdTemplateHelper ||
+      (ampAdTemplateHelper = new AmpAdTemplateHelper(win));
+}
+
 /**
  * Validator for Template ads.
  */
 export class TemplateValidator extends Validator {
-
-  constructor() {
-    super();
-
-    /** @private {?AmpAdTemplateHelper} */
-    this.ampAdTemplateHelper_ = null;
-  }
-
-  /**
-   * @param {string} templateString
-   * @param {!./amp-ad-type-defs.AmpTemplateCreativeDef} parsedResponseBody
-   * @param {!Window} win
-   * @return {!./amp-ad-type-defs.CreativeMetaDataDef}
-   * @private
-   */
-  getAmpAdMetadata_(templateString, parsedResponseBody, win) {
-    const metadata = getAmpAdMetadata(templateString);
-    if (parsedResponseBody.analytics) {
-      pushIfNotExist(metadata['customElementExtensions'], 'amp-analytics');
-    }
-    pushIfNotExist(metadata['customElementExtensions'], 'amp-mustache');
-
-    const extensions = Services.extensionsFor(win);
-    metadata.customElementExtensions.forEach(
-        extensionId => extensions./*OK*/preloadExtension(extensionId));
-    // TODO(levitzky) Add preload logic for fonts / images.
-    return metadata;
-  }
-
   /** @override */
   validate(context, unvalidatedBytes, headers) {
+
     const creativeData = {};
     const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
+
     if (!headers ||
         headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
       creativeData['creative'] = body;
@@ -76,16 +63,28 @@ export class TemplateValidator extends Validator {
     const parsedResponseBody =
         /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
         tryParseJson(body) || {});
-    this.ampAdTemplateHelper_ = this.ampAdTemplateHelper_ ||
-        new AmpAdTemplateHelper(context.win);
-    return this.ampAdTemplateHelper_
+    return getAmpAdTemplateHelper()
         .fetch(parsedResponseBody.templateUrl)
         .then(template => {
-          const creativeMetadata = this.getAmpAdMetadata_(
-              template, parsedResponseBody, context.win);
+          const metadata = getAmpAdMetadata(template);
+          if (parsedResponseBody.analytics) {
+            pushIfNotExist(
+                metadata['customElementExtensions'], 'amp-analytics');
+          }
+          pushIfNotExist(metadata['customElementExtensions'], 'amp-mustache');
+
+          const extensions = Services.extensionsFor(context.win);
+          metadata.customElementExtensions.forEach(
+              extensionId => extensions./*OK*/preloadExtension(extensionId));
+          // TODO(levitzky) Add preload logic for fonts / images.
           creativeData.templateData = parsedResponseBody;
-          creativeData.creativeMetadata = creativeMetadata;
-          return {creativeData, type: ValidatorResult.AMP};
+          creativeData.creativeMetadata = metadata;
+          return Promise.resolve(
+              /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
+                creativeData,
+                adResponseType: 'template',
+                type: ValidatorResult.AMP,
+              }));
         });
   }
 }
