@@ -305,12 +305,7 @@ function warnForConsoleError() {
       const helpMessage =
           'The test "' + testName + '" contains an "allowConsoleError" block ' +
           'that didn\'t result in a call to console.error.';
-      // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
-      if (window.__karma__.config.failOnConsoleError) {
-        throw new Error(helpMessage);
-      } else {
-        originalConsoleError(helpMessage);
-      }
+      throw new Error(helpMessage);
     }
     warnForConsoleError();
   };
