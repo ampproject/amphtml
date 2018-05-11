@@ -245,14 +245,13 @@ export class NextPageService {
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => new Promise((resolve, reject) => {
-            this.positionObserver_.unobserve(articleLinks);
-
             if (documentRef.cancelled) {
               // User has reached the end of the document already, don't render.
               resolve();
               return;
             }
 
+            this.positionObserver_.unobserve(articleLinks);
             this.resources_.mutateElement(container, () => {
               try {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
