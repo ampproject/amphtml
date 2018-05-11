@@ -21,7 +21,6 @@ import {
   getAmpAdTemplateHelper,
 } from '../template-validator';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
-import {VerificationStatus} from '../signature-verifier';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
@@ -130,7 +129,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
                 analytics: {foo: 'bar'},
               })),
               {
-                get: name => null,
+                get: () => null,
               }).then(validatorOutput => {
             expect(validatorOutput).to.be.ok;
             expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
@@ -154,7 +153,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       return validator.validate({win: env.win},
           utf8Encode(JSON.stringify({templateUrl})),
           {
-            get: name => null,
+            get: () => null,
           }).then(validatorOutput => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.creativeData).to.be.ok;
