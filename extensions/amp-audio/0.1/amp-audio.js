@@ -119,17 +119,18 @@ export class AmpAudio extends AMP.BaseElement {
   pauseCallback() {
     if (this.audio_) {
       this.audio_.pause();
-      setPlayingStateForTesting_(false);
+      this.setPlayingStateForTesting_(false);
     }
   }
 
   pause() {
     if (!this.audio_) {
       return;
-    } 
+    }
     if (this.isStoryDescendant_()) {
-       user().warn(TAG, '<amp-story> elements do not support actions on <amp-audio> elements');
-       return;
+      user().warn(TAG, '<amp-story> elements do not support actions on ' +
+        '<amp-audio> elements');
+      return;
     }
     this.audio_.pause();
     this.setPlayingStateForTesting_(false);
@@ -138,10 +139,11 @@ export class AmpAudio extends AMP.BaseElement {
   play() {
     if (!this.audio_) {
       return;
-    } 
+    }
     if (this.isStoryDescendant_()) {
-       user().warn(TAG, '<amp-story> elements do not support actions on <amp-audio> elements');
-       return;
+      user().warn(TAG, '<amp-story> elements do not support actions on ' +
+        '<amp-audio> elements');
+      return;
     }
     this.audio_.play();
     this.setPlayingStateForTesting_(true);
@@ -171,11 +173,11 @@ export class AmpAudio extends AMP.BaseElement {
   audioPlaying_() {
     const playHandler = () => {
       this.audio_.play();
-      setPlayingStateForTesting_(true);
+      this.setPlayingStateForTesting_(true);
     };
     const pauseHandler = () => {
       this.audio_.pause();
-      setPlayingStateForTesting_(false);
+      this.setPlayingStateForTesting_(false);
     };
 
     // Update the media session
