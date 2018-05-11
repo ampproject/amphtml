@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {once} from '../utils/function';
+import {dev} from '../log';
+import {once} from './function';
 import {setStyles} from '../style';
 
 
@@ -54,7 +55,9 @@ function isAutoplaySupportedImpl(win, isLiteViewer) {
     opacity: '0',
   });
 
-  new Promise(() => detectionElement.play()).catch(() => {
+  // Promise wrapped this way to catch both sync throws and async rejections.
+  // More info: https://github.com/tc39/proposal-promise-try
+  new Promise(resolve => resolve(detectionElement.play())).catch(() => {
     // Suppress any errors, useless to report as they are expected.
   });
 
@@ -99,4 +102,13 @@ export class VideoUtils {
   static resetIsAutoplaySupported() {
     setIsAutoplaySupported();
   }
+}
+
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+// Not included in `VideoUtils` as we don't need to test a static selector.
+export function getInternalVideoElementFor(element) {
+  return dev().assertElement(element.querySelector('video, iframe'));
 }

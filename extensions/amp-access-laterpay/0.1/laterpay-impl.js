@@ -38,7 +38,7 @@ const CONFIG_URLS = {
 
 const DEFAULT_REGION = 'eu';
 
-const CONFIG_BASE_PATH = '/api/public/amp?' +
+const CONFIG_BASE_PATH = '/api/v1/public/amp?' +
                          'article_url=CANONICAL_URL' +
                          '&amp_reader_id=READER_ID' +
                          '&return_url=RETURN_URL';

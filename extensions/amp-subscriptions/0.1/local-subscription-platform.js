@@ -19,7 +19,6 @@ import {Entitlement} from './entitlement';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {SubscriptionAnalytics} from './analytics';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
@@ -36,8 +35,9 @@ export class LocalSubscriptionPlatform {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
-  constructor(ampdoc, platformConfig, serviceAdapter) {
+  constructor(ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
@@ -49,9 +49,6 @@ export class LocalSubscriptionPlatform {
 
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
-
-    /** @const @private {!PageConfig} */
-    this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
@@ -71,8 +68,8 @@ export class LocalSubscriptionPlatform {
     /** @private {!UrlBuilder} */
     this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
 
-    /** @private {!SubscriptionAnalytics} */
-    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+    /** @private {!./analytics.SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = subscriptionAnalytics;
 
     user().assert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
@@ -89,13 +86,7 @@ export class LocalSubscriptionPlatform {
 
     /** @private {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
-        serviceAdapter.getDialog());
-
-    /** @private {?Entitlement}*/
-    this.entitlement_ = null;
-
-    /** @private @const {boolean} */
-    this.isPingbackEnabled_ = true;
+        serviceAdapter.getDialog(), this.serviceAdapter_);
 
     /** @private @const {?string} */
     this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
@@ -148,11 +139,25 @@ export class LocalSubscriptionPlatform {
     this.rootNode_.addEventListener('click', e => {
       const element = closestBySelector(dev().assertElement(e.target),
           '[subscriptions-action]');
-      if (element) {
-        const action = element.getAttribute('subscriptions-action');
+      this.handleClick_(element);
+    });
+  }
+
+  /**
+   * Handle click on subscription-action
+   * @private
+   * @param {Node} element
+   */
+  handleClick_(element) {
+    if (element) {
+      const action = element.getAttribute('subscriptions-action');
+      if (element.hasAttribute('subscriptions-service')) {
+        const serviceId = element.getAttribute('subscriptions-service');
+        this.serviceAdapter_.delegateActionToService(action, serviceId);
+      } else {
         this.executeAction(action);
       }
-    });
+    }
   }
 
   /**
@@ -166,11 +171,7 @@ export class LocalSubscriptionPlatform {
     });
   }
 
-  /**
-   * Executes action for the local platform.
-   * @param {string} action
-   * @returns {!Promise<boolean>}
-   */
+  /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
@@ -189,9 +190,7 @@ export class LocalSubscriptionPlatform {
           this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
               .then(res => res.json())
               .then(resJson => {
-                const entitlement = Entitlement.parseFromJson(resJson);
-                this.entitlement_ = entitlement;
-                return entitlement;
+                return Entitlement.parseFromJson(resJson);
               }));
   }
 
@@ -217,7 +216,7 @@ export class LocalSubscriptionPlatform {
         headers: {
           'Content-Type': 'text/plain',
         },
-        body: selectedEntitlement.raw,
+        body: JSON.stringify(selectedEntitlement.jsonForPingback()),
       });
     });
   }
@@ -226,6 +225,14 @@ export class LocalSubscriptionPlatform {
   supportsCurrentViewer() {
     return false;
   }
+
+  /** @override */
+  getBaseScore() {
+    return this.serviceConfig_['baseScore'] || 0;
+  }
+
+  /** @override */
+  decorateUI(unusedNode, unusedAction, unusedOptions) {}
 }
 
 /**

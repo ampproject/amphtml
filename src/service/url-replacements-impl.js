@@ -195,7 +195,10 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the title of this AMP document.
     this.set('TITLE', () => {
-      return this.ampdoc.win.document.title;
+      // The environment may override the title and set originalTitle. Prefer
+      // that if available.
+      return this.ampdoc.win.document['originalTitle'] ||
+          this.ampdoc.win.document.title;
     });
 
     // Returns the URL for this AMP document.
@@ -510,9 +513,9 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the incremental engaged time since the last push under the
     // same name.
-    this.setAsync('INCREMENTAL_ENGAGED_TIME', name => {
+    this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
       return Services.activityForDoc(this.ampdoc).then(activity => {
-        return activity.getIncrementalEngagedTime(name);
+        return activity.getIncrementalEngagedTime(name, reset !== 'false');
       });
     });
 
@@ -1110,20 +1113,21 @@ export class UrlReplacements {
    * Collects substitutions in the `src` attribute of the given element
    * that are _not_ whitelisted via `data-amp-replace` opt-in attribute.
    * @param {!Element} element
-   * @return {!Promise<!Array<string>>}
+   * @return {!Array<string>}
    */
-  collectUnwhitelistedVars(element) {
+  collectUnwhitelistedVarsSync(element) {
     const url = element.getAttribute('src');
-    return this.collectVars(url).then(vars => {
-      const whitelist = this.getWhitelistForElement_(element);
-      const varNames = Object.keys(vars);
-      if (whitelist) {
-        return varNames.filter(v => !whitelist[v]);
-      } else {
-        // All vars are unwhitelisted if the element has no whitelist.
-        return varNames;
-      }
-    });
+    const vars = Object.create(null);
+    this.expandStringSync(url, /* opt_bindings */ undefined, vars);
+    const varNames = Object.keys(vars);
+
+    const whitelist = this.getWhitelistForElement_(element);
+    if (whitelist) {
+      return varNames.filter(v => !whitelist[v]);
+    } else {
+      // All vars are unwhitelisted if the element has no whitelist.
+      return varNames;
+    }
   }
 
   /**

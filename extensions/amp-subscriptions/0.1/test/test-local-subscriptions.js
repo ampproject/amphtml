@@ -19,8 +19,9 @@ import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
+import {SubscriptionAnalytics} from '../analytics';
 
-describes.fakeWin('local-subscriptions', {amp: true}, env => {
+describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
   let serviceAdapter;
@@ -43,6 +44,7 @@ describes.fakeWin('local-subscriptions', {amp: true}, env => {
     loggedIn,
   };
   const entitlement = Entitlement.parseFromJson(json);
+  entitlement.setCurrentProduct(products[0]);
   const authUrl = 'https://lipsum.com/login/authorize';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {
@@ -52,6 +54,7 @@ describes.fakeWin('local-subscriptions', {amp: true}, env => {
         'authorizationUrl': authUrl,
         'actions': actionMap,
         'pingbackUrl': pingbackUrl,
+        'baseScore': 99,
       },
     ],
   };
@@ -64,7 +67,8 @@ describes.fakeWin('local-subscriptions', {amp: true}, env => {
     sandbox.stub(serviceAdapter, 'getDialog')
         .callsFake(() => new Dialog(ampdoc));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
-        serviceConfig.services[0], serviceAdapter);
+        serviceConfig.services[0], serviceAdapter,
+        new SubscriptionAnalytics(ampdoc.getRootNode()));
   });
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {
@@ -75,6 +79,10 @@ describes.fakeWin('local-subscriptions', {amp: true}, env => {
     expect(domStub).calledOnce;
     expect(domStub.getCall(0).args[0])
         .to.be.equals('click');
+  });
+
+  it('should return baseScore', () => {
+    expect(localSubscriptionPlatform.getBaseScore()).to.be.equal(99);
   });
 
   it('should fetch the entitlements on getEntitlements', () => {
@@ -129,6 +137,36 @@ describes.fakeWin('local-subscriptions', {amp: true}, env => {
     });
   });
 
+  describe('handleClick_', () => {
+    let element;
+    beforeEach(() => {
+      element = document.createElement('div');
+      element.setAttribute('subscriptions-action', 'subscribe');
+    });
+
+    it('should call executeAction with subscriptions-action value', () => {
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      localSubscriptionPlatform.handleClick_(element);
+      expect(executeStub).to.be.calledWith(
+          element.getAttribute('subscriptions-action'));
+    });
+
+    it('should delegate action to service specified in '
+        + 'subscriptions-service', () => {
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      element.setAttribute('subscriptions-service', 'swg.google.com');
+      localSubscriptionPlatform.handleClick_(element);
+      expect(executeStub).to.not.be.called;
+      expect(delegateStub).to.be.called;
+    });
+  });
+
   describe('executeAction', () => {
     it('should call executeAction on actions_', () => {
       const actionString = 'action';
@@ -167,10 +205,10 @@ describes.fakeWin('local-subscriptions', {amp: true}, env => {
       return localSubscriptionPlatform.pingback(entitlement).then(() => {
         expect(urlBuildStub).to.be.calledOnce;
         expect(sendSignalStub).to.be.calledOnce;
-        expect(sendSignalStub.getCall(0).args[0]).to.be
-            .equal(localSubscriptionPlatform.pingbackUrl_);
-        expect(sendSignalStub.getCall(0).args[1].body).to.deep
-            .equal(entitlement.raw);
+        expect(sendSignalStub.getCall(0).args[0]).to.be.equal(
+            localSubscriptionPlatform.pingbackUrl_);
+        expect(sendSignalStub.getCall(0).args[1].body).to.equal(
+            JSON.stringify(entitlement.jsonForPingback()));
       });
     });
   });

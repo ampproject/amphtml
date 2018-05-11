@@ -21,4 +21,4 @@
 import '../../../../src/polyfills';
 import {AmpAccessIframeApi} from './iframe-api';
 
-self['AmpAccessIframeApi'] = AmpAccessIframeApi;
+export default AmpAccessIframeApi;

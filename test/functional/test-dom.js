@@ -792,8 +792,7 @@ describes.sandboxed('DOM', {}, env => {
       expect(res).to.equal(dialog);
     });
 
-    // TODO(dvoytenko, #14336): Fails due to console errors.
-    it.skip('should retry on first exception', () => {
+    it('should retry on first exception', () => {
       const dialog = {};
       windowMock.expects('open')
           .withExactArgs('https://example.com/', '_blank', 'width=1')
@@ -822,8 +821,7 @@ describes.sandboxed('DOM', {}, env => {
       expect(res).to.be.null;
     });
 
-    // TODO(dvoytenko, #14336): Fails due to console errors.
-    it.skip('should return the final exception', () => {
+    it('should return the final exception', () => {
       windowMock.expects('open')
           .withExactArgs('https://example.com/', '_blank', 'width=1')
           .throws(new Error('intentional1'))
@@ -832,10 +830,10 @@ describes.sandboxed('DOM', {}, env => {
           .withExactArgs('https://example.com/', '_top')
           .throws(new Error('intentional2'))
           .once();
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         dom.openWindowDialog(windowApi, 'https://example.com/',
             '_blank', 'width=1');
-      }).to.throw(/intentional2/);
+      }).to.throw(/intentional2/); });
     });
 
     it('should retry only non-top target', () => {
@@ -1025,8 +1023,10 @@ describes.realWin('DOM', {
 
     it('should not continue if element is not AMP element', () => {
       const element = doc.createElement('div');
-      expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
-          'element is not AmpElement');
+      allowConsoleError(() => {
+        expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
+            'element is not AmpElement');
+      });
     });
 
     it('should resolve if element has already upgrade', () => {

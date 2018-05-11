@@ -551,8 +551,18 @@ app.use('/impression-proxy/', (req, res) => {
 app.post('/get-consent-v1/', (req, res) => {
   assertCors(req, res, ['POST']);
   const body = {
-    'consentRequired': true,
+    'promptIfUnknown': true,
+    'sharedData': {
+      'tfua': true,
+      'coppa': true,
+    },
   };
+  res.json(body);
+});
+
+app.post('/get-consent-no-prompt/', (req, res) => {
+  assertCors(req, res, ['POST']);
+  const body = {};
   res.json(body);
 });
 

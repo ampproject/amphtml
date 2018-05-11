@@ -189,8 +189,7 @@ describes.realWin('amp-analytics', {
       actualResults[vendor] = {};
       describe('analytics vendor: ' + vendor, function() {
         for (const name in config.requests) {
-          // TODO(malteubl, #14336): Fails due to console errors.
-          it.skip('should produce request: ' + name +
+          it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', function* () {
             const urlReplacements =
                 Services.urlReplacementsForDoc(ampdoc);
@@ -266,13 +265,28 @@ describes.realWin('amp-analytics', {
     }
   });
 
-  // TODO(jonkeller, #14336): Fails due to console errors.
-  it.skip('does not unnecessarily preload iframe transport script', function() {
+  it('does not unnecessarily preload iframe transport script', function() {
     const el = doc.createElement('amp-analytics');
+    el.setAttribute('type', 'foo');
     doc.body.appendChild(el);
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
     const preloadSpy = sandbox.spy(analytics, 'preload');
+    sandbox.stub(analytics, 'predefinedConfig_').value(
+        {
+          'foo': {
+            'triggers': {
+              'sample_visibility_trigger': {
+                'on': 'visible',
+                'request': 'sample_visibility_request',
+              },
+            },
+            'requests': {
+              'sample_visibility_request': 'fake-request',
+            },
+          },
+        }
+    );
     analytics.buildCallback();
     analytics.preconnectCallback();
     return analytics.layoutCallback().then(() => {
@@ -323,8 +337,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  // TODO(avimehta, #14336): Fails due to console errors.
-  it.skip('does not send a hit when config is not in a script tag', function() {
+  it('does not send a hit when config is not in a script tag', function() {
     const config = JSON.stringify(trivialConfig);
     const el = doc.createElement('amp-analytics');
     el.textContent = config;
@@ -364,8 +377,7 @@ describes.realWin('amp-analytics', {
     expect(whenFirstVisibleStub).to.be.calledOnce;
   });
 
-  // TODO(avimehta, #14336): Fails due to console errors.
-  it.skip('does not send a hit when multiple child tags exist', function() {
+  it('does not send a hit when multiple child tags exist', function() {
     const analytics = getAnalyticsTag(trivialConfig);
     const script2 = document.createElement('script');
     script2.setAttribute('type', 'application/json');
@@ -375,8 +387,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  // TODO(avimehta, #14336): Fails due to console errors.
-  it.skip('does not send a hit when script tag does not have a type attribute',
+  it('does not send a hit when script tag does not have a type attribute',
       function() {
         const el = doc.createElement('amp-analytics');
         const script = doc.createElement('script');
@@ -394,8 +405,7 @@ describes.realWin('amp-analytics', {
         });
       });
 
-  // TODO(avimehta, #14336): Fails due to console errors.
-  it.skip('does not send a hit when request is not provided', function() {
+  it('does not send a hit when request is not provided', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible'}],
@@ -406,8 +416,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  // TODO(avimehta, #14336): Fails due to console errors.
-  it.skip('does not send a hit when request type is not defined', function() {
+  it('does not send a hit when request type is not defined', function() {
     const analytics = getAnalyticsTag({
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
@@ -450,9 +459,9 @@ describes.realWin('amp-analytics', {
     const analytics = getAnalyticsTag();
     // An incomplete click request.
     analytics.addTriggerNoInline_({'on': 'click'});
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       clock.tick(1);
-    }).to.throw(/Failed to process trigger/);
+    }).to.throw(/Failed to process trigger/); });
   });
 
   it('expands recursive requests', function() {
@@ -1159,8 +1168,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  // TODO(zhouyx, #14336): Fails due to console errors.
-  it.skip('ignore transport iframe from remote config', () => {
+  it('ignore transport iframe from remote config', () => {
     const analytics = getAnalyticsTag({
       'vars': {'title': 'local'},
       'requests': {'foo': 'https://example.com/${title}'},
@@ -1285,8 +1293,7 @@ describes.realWin('amp-analytics', {
       });
     });
 
-    // TODO(avimehta, #14336): Fails due to console errors.
-    it.skip('works when sampleSpec is incomplete', () => {
+    it('works when sampleSpec is incomplete', () => {
       const incompleteConfig = {
         'requests': {
           'pageview1': '/test1=${requestCount}',
@@ -1306,8 +1313,7 @@ describes.realWin('amp-analytics', {
       });
     });
 
-    // TODO(avimehta, #14336): Fails due to console errors.
-    it.skip('works for invalid threadhold (Infinity)', () => {
+    it('works for invalid threadhold (Infinity)', () => {
       const analytics = getAnalyticsTag(getConfig(Infinity));
 
       return waitForSendRequest(analytics).then(() => {
@@ -1315,8 +1321,7 @@ describes.realWin('amp-analytics', {
       });
     });
 
-    // TODO(avimehta, #14336): Fails due to console errors.
-    it.skip('works for invalid threadhold (NaN)', () => {
+    it('works for invalid threadhold (NaN)', () => {
       const analytics = getAnalyticsTag(getConfig(NaN));
 
       return waitForSendRequest(analytics).then(() => {
@@ -1324,8 +1329,7 @@ describes.realWin('amp-analytics', {
       });
     });
 
-    // TODO(avimehta, #14336): Fails due to console errors.
-    it.skip('works for invalid threadhold (-1)', () => {
+    it('works for invalid threadhold (-1)', () => {
       const analytics = getAnalyticsTag(getConfig(-1));
 
       return waitForSendRequest(analytics).then(() => {
@@ -1686,9 +1690,7 @@ describes.realWin('amp-analytics', {
       });
     });
 
-    // TODO(zhouyx, #14336): Fails due to console errors.
-    it.skip('should not add listener when eventType is not ' +
-        'whitelist', function() {
+    it('should not add listener when eventType is not whitelist', function() {
       // Right now we only whitelist VISIBLE & HIDDEN
       const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
       const addStub = sandbox.stub(tracker, 'add');
@@ -1961,7 +1963,7 @@ describes.realWin('amp-analytics', {
           'pageview': 'https://ping.example.com/endpoint',
         },
         'triggers': [{
-          'on': 'ini-load',
+          'on': 'visible',
           'request': 'pageview',
           'extraUrlParams': {
             'rt': '${resourceTiming}',
@@ -1971,8 +1973,10 @@ describes.realWin('amp-analytics', {
       };
     };
 
+    this.timeout(400);
+
     const runResourceTimingTest = function(entries, config, expectedPing) {
-      sandbox.stub(win.performance, 'getEntriesByType').returns([entries]);
+      sandbox.stub(win.performance, 'getEntriesByType').returns(entries);
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
@@ -1980,7 +1984,7 @@ describes.realWin('amp-analytics', {
     };
 
     it('should evaluate ${resourceTiming} to be empty by default', () => {
-      runResourceTimingTest(
+      return runResourceTimingTest(
           [], newConfig(), 'https://ping.example.com/endpoint?rt=');
     });
 
@@ -1990,11 +1994,19 @@ describes.realWin('amp-analytics', {
           false);
       const entry2 = newPerformanceResourceTiming(
           'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
-      runResourceTimingTest(
-          [entry1, entry2], newConfig(),
+      const config = newConfig();
+      const trigger = config['triggers'][0];
+      // Check precondition of responseAfter.
+      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.undefined;
+
+      return runResourceTimingTest(
+          [entry1, entry2], config,
           'https://ping.example.com/endpoint?rt=' +
               'foo_bar-script-100-500-7200~' +
               'foo_bar-script-700-100-0');
+
+      // 'responseAfter' should be set to a positive number.
+      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.above(0);
     });
 
     it('should url encode variables', () => {
@@ -2007,12 +2019,11 @@ describes.realWin('amp-analytics', {
       const spec = config['triggers'][0]['resourceTimingSpec'];
       spec['encoding']['entry'] = '${key}?${startTime},${duration}';
       spec['encoding']['delim'] = ':';
-      runResourceTimingTest(
+      return runResourceTimingTest(
           [entry1, entry2], config,
           'https://ping.example.com/endpoint?rt=' +
               'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
     });
-
 
     it('should ignore resourceTimingSpec outside of triggers', () => {
       const entry = newPerformanceResourceTiming(
@@ -2022,17 +2033,7 @@ describes.realWin('amp-analytics', {
       config['resourceTimingSpec'] =
           config['triggers'][0]['resourceTimingSpec'];
       delete config['triggers'][0]['resourceTimingSpec'];
-      runResourceTimingTest(
-          [entry], newConfig(), 'https://ping.example.com/endpoint?rt=');
-    });
-
-    it('should only report timings on ini-load', () => {
-      const entry = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-          false);
-      const config = newConfig();
-      config['triggers'][0]['on'] = 'visible';
-      runResourceTimingTest(
+      return runResourceTimingTest(
           [entry], config, 'https://ping.example.com/endpoint?rt=');
     });
   });

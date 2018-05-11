@@ -51,7 +51,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
               () => addToFixedLayerPromise);
     });
 
-    // TODO(zhouyx, #14336): Fails due to console errors.
+    // TODO (#14775): fix and unskip this test
     it.skip('should listen to scroll event', function * () {
       expect(impl.scrollUnlisten_).to.be.null;
       yield macroTask();
@@ -262,15 +262,11 @@ describes.realWin('amp-sticky-ad 1.0 version', {
     it('should not build when child is not ad', () => {
       ampStickyAd.appendChild(ampImg);
       const impl = ampStickyAd.implementation_;
-
-      const error = null;
-      try {
-        impl.buildCallback();
-      } catch (AssertionError) {
-        expect(AssertionError.messageArray).to.have.length(1);
-        return;
-      }
-      expect(error).not.to.be.null;
+      allowConsoleError(() => {
+        expect(() => impl.buildCallback()).to.throw(
+            /amp-sticky-ad must have a single amp-ad child/
+        );
+      });
     });
 
     it('should not build when has more than 1 children', () => {
@@ -278,14 +274,11 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       ampStickyAd.appendChild(ampAd2);
       const impl = ampStickyAd.implementation_;
 
-      const error = null;
-      try {
-        impl.buildCallback();
-      } catch (AssertionError) {
-        expect(AssertionError.messageArray).to.have.length(1);
-        return;
-      }
-      expect(error).not.to.be.null;
+      allowConsoleError(() => {
+        expect(() => impl.buildCallback()).to.throw(
+            /amp-sticky-ad must have a single amp-ad child/
+        );
+      });
     });
   });
 });

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /** @typedef {{left: number, total: number, resetTime: number, durationUnit: string, token: string}} */
@@ -87,6 +88,19 @@ export class Entitlement {
   }
 
   /**
+   * Returns json to be used for pingback.
+   *
+   * @return {!JsonObject}
+   */
+  jsonForPingback() {
+    return dict({
+      'raw': this.raw,
+      'source': this.source,
+      'grantState': this.enablesThis(),
+    });
+  }
+
+  /**
    * @param {?string} product
    * @return {boolean}
    */
@@ -101,7 +115,11 @@ export class Entitlement {
    * @return {boolean}
    */
   enablesThis() {
-    return this.product_ ? this.enables(this.product_) : false;
+    if (this.products.length === 0) {
+      return false;
+    }
+    dev().assert(this.product_, 'Current Product is not set');
+    return this.enables(this.product_);
   }
 
   /**

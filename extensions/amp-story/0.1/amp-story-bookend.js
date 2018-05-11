@@ -236,13 +236,13 @@ export class Bookend {
     this.bookendEl_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = Services.storyRequestService(this.win_);
+    this.requestService_ = Services.storyRequestServiceV01(this.win_);
 
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -308,6 +308,10 @@ export class Bookend {
       this.onBookendStateUpdate_(isActive);
     });
 
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
+      this.onCanShowSharingUisUpdate_(show);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
@@ -338,6 +342,19 @@ export class Bookend {
    */
   onBookendStateUpdate_(isActive) {
     this.toggle_(isActive);
+  }
+
+  /**
+   * Reacts to updates to whether sharing UIs may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowSharingUis
+   * @private
+   */
+  onCanShowSharingUisUpdate_(canShowSharingUis) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+    });
   }
 
   /**

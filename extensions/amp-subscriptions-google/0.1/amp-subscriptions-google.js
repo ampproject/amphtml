@@ -92,6 +92,9 @@ export class GoogleSubscriptionsPlatform {
       });
     });
 
+    /** @const @private {!JsonObject} */
+    this.serviceConfig_ = platformConfig;
+
     /** @private {boolean} */
     this.isGoogleViewer_ = false;
     this.resolveGoogleViewer_(Services.viewerForDoc(ampdoc));
@@ -218,6 +221,28 @@ export class GoogleSubscriptionsPlatform {
               parseUrl(origin).hostname);
         }
       });
+    }
+  }
+
+  /** @override */
+  getBaseScore() {
+    return this.serviceConfig_['baseScore'] || 0;
+  }
+
+  /** @override */
+  executeAction(action) {
+    if (action === 'subscribe') {
+      this.runtime_.showOffers({list: 'amp', isClosable: true});
+      return Promise.resolve(true);
+    }
+    return Promise.resolve(false);
+  }
+
+  /** @override */
+  decorateUI(element, action, options) {
+    if (action === 'subscribe') {
+      element.textContent = '';
+      this.runtime_.attachButton(element, options, () => {});
     }
   }
 }

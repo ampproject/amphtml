@@ -142,6 +142,7 @@ const TagRegion = {
   IN_HEAD: 1,
   PRE_BODY: 2,  // After closing head tag, but before open body tag.
   IN_BODY: 3,
+  IN_SVG: 4,
   // We don't track the region after the closing body tag.
 };
 
@@ -278,6 +279,10 @@ class TagNameStack {
           // a manufactured one, or the first one encountered.
           return;
         }
+        if (tag.upperName() === 'SVG') {
+          this.region_ = TagRegion.IN_SVG;
+          break;
+        }
         // Check implicit tag closing due to opening tags.
         if (this.stack_.length > 0) {
           const parentTagName = this.stack_[this.stack_.length - 1];
@@ -299,6 +304,12 @@ class TagNameStack {
           }
         }
         break;
+      case TagRegion.IN_SVG:
+        if (this.handler_.startTag) {
+          this.handler_.startTag(tag);
+        }
+        this.stack_.push(tag.upperName());
+        return;
       default:
         break;
     }
@@ -367,6 +378,9 @@ class TagNameStack {
     for (let idx = this.stack_.length - 1; idx >= 0; idx--) {
       if (this.stack_[idx] === tag.upperName()) {
         while (this.stack_.length > idx) {
+          if (this.stack_[this.stack_.length - 1] === 'SVG') {
+            this.region_ = TagRegion.IN_BODY;
+          }
           if (this.handler_.endTag) {
             this.handler_.endTag(
                 new amp.htmlparser.ParsedHtmlTag(this.stack_.pop()));

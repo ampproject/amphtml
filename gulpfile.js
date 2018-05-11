@@ -20,14 +20,13 @@ checkMinVersion();
 
 const $$ = require('gulp-load-plugins')();
 const applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
-const babel = require('babelify');
+const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 const closureCompile = require('./build-system/tasks/compile').closureCompile;
 const colors = require('ansi-colors');
 const createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
-const exec = require('./build-system/exec').exec;
 const exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs-extra');
 const gulp = $$.help(require('gulp'));
@@ -72,6 +71,7 @@ const unminified3pTarget = 'dist.3p/current/integration.js';
 declareExtension('amp-3q-player', '0.1');
 declareExtension('amp-access', '0.1', {hasCss: true});
 declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
+declareExtension('amp-access-laterpay', '0.2', {hasCss: true});
 declareExtension('amp-access-scroll', '0.1', {hasCss: true});
 declareExtension('amp-accordion', '0.1');
 declareExtension('amp-ad', '0.1', {hasCss: true});
@@ -83,6 +83,7 @@ declareExtension('amp-ad-network-triplelift-impl', 0.1);
 declareExtension('amp-ad-network-cloudflare-impl', 0.1);
 declareExtension('amp-ad-network-gmossp-impl', 0.1);
 declareExtension('amp-ad-exit', 0.1);
+declareExtension('amp-addthis', '0.1');
 declareExtension('amp-analytics', '0.1');
 declareExtension('amp-anim', '0.1');
 declareExtension('amp-animation', '0.1');
@@ -90,6 +91,7 @@ declareExtension('amp-apester-media', '0.1', {hasCss: true});
 declareExtension('amp-app-banner', '0.1', {hasCss: true});
 declareExtension('amp-audio', '0.1');
 declareExtension('amp-auto-ads', '0.1');
+declareExtension('amp-beopinion', '0.1');
 declareExtension('amp-bind', '0.1');
 declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
 declareExtension('amp-brid-player', '0.1');
@@ -102,7 +104,6 @@ declareExtension('amp-compare-slider', '0.1');
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
-declareExtension('amp-document-recommendations', '0.1', {hasCss: true});
 declareExtension('amp-dynamic-css-classes', '0.1');
 declareExtension('amp-experiment', '0.1');
 declareExtension('amp-facebook', '0.1');
@@ -133,6 +134,7 @@ declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
 declareExtension('amp-mustache', '0.1');
+declareExtension('amp-next-page', '0.1', {hasCss: true});
 declareExtension('amp-nexxtv-player', '0.1');
 declareExtension('amp-o2-player', '0.1');
 declareExtension('amp-ooyala-player', '0.1');
@@ -151,6 +153,20 @@ declareExtension('amp-story', '0.1', {
   hasCss: true,
   cssBinaries: [
     'amp-story-bookend',
+    'amp-story-consent',
+    'amp-story-hint',
+    'amp-story-unsupported-browser-layer',
+    'amp-story-viewport-warning-layer',
+    'amp-story-share',
+    'amp-story-share-menu',
+    'amp-story-system-layer',
+  ],
+});
+declareExtension('amp-story', '1.0', {
+  hasCss: true,
+  cssBinaries: [
+    'amp-story-bookend',
+    'amp-story-consent',
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
@@ -516,21 +532,35 @@ function compileCss(watch, opt_compileAll) {
     });
   }
 
+  function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
+    return toPromise(gulp.src(`css/${originalCssFilename}`)
+        .pipe($$.file(jsFilename, 'export const cssText = ' +
+          JSON.stringify(css)))
+        .pipe(gulp.dest('build'))
+        .on('end', function() {
+          mkdirSync('build');
+          mkdirSync('build/css');
+          fs.writeFileSync(`build/css/${cssFilename}`, css);
+        }));
+  }
+
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
-      .then(function(css) {
-        return toPromise(gulp.src('css/**.css')
-            .pipe($$.file('css.js', 'export const cssText = ' +
-              JSON.stringify(css)))
-            .pipe(gulp.dest('build'))
-            .on('end', function() {
-              mkdirSync('build');
-              mkdirSync('build/css');
-              fs.writeFileSync('build/css/v0.css', css);
-            }));
-      })
+      .then(css => writeCss(css, 'amp.css', 'css.js', 'v0.css'))
       .then(() => {
         endBuildStep('Recompiled CSS in', 'amp.css', startTime);
+      })
+      .then(() => jsifyCssAsync('css/video-docking.css'))
+      .then(css => writeCss(css,
+          'video-docking.css', 'video-docking.css.js', 'video-docking.css'))
+      .then(() => {
+        endBuildStep('Recompiled CSS in', 'video-docking.css', startTime);
+      })
+      .then(() => jsifyCssAsync('css/video-autoplay.css'))
+      .then(css => writeCss(css,
+          'video-autoplay.css', 'video-autoplay.css.js', 'video-autoplay.css'))
+      .then(() => {
+        endBuildStep('Recompiled CSS in', 'video-autoplay.css', startTime);
       })
       .then(() => {
         return buildExtensions({
@@ -548,6 +578,7 @@ function compileCss(watch, opt_compileAll) {
 function copyCss() {
   const startTime = Date.now();
   fs.copySync('build/css/v0.css', 'dist/v0.css');
+  fs.copySync('build/css/video-docking.css', 'dist/video-docking.css');
   return toPromise(gulp.src('build/css/amp-*.css')
       .pipe(gulp.dest('dist/v0')))
       .then(() => {
@@ -805,26 +836,6 @@ function performBuild(watch) {
 }
 
 /**
- * @param {boolean} compiled
- */
-function checkBinarySize(compiled) {
-  const file = compiled ? './dist/v0.js' : './dist/amp.js';
-  const size = compiled ? '76.49KB' : '333.27KB';
-  const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
-  log(green('Running ') + cyan(cmd) + green('...\n'));
-  const p = exec(cmd);
-  if (p.status != 0) {
-    log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
-        'exceeded its size cap. This is part of a new effort to reduce ' +
-        'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
-    // Terminate Travis builds on failure.
-    if (process.env.TRAVIS) {
-      process.exit(p.status);
-    }
-  }
-}
-
-/**
  * Enables watching for file changes in css, extensions.
  * @return {!Promise}
  */
@@ -839,9 +850,7 @@ function watch() {
  */
 function build() {
   const handlerProcess = createCtrlcHandler('build');
-  return performBuild()
-      .then(() => checkBinarySize(/* compiled */ false))
-      .then(() => exitCtrlcHandler(handlerProcess));
+  return performBuild().then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -893,9 +902,7 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
         }
-      })
-      .then(() => checkBinarySize(/* compiled */ true))
-      .then(() => exitCtrlcHandler(handlerProcess));
+      }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -1124,8 +1131,10 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
+  const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
-      .transform(babel, {
+      .transform(babelify, {
+        compact: false,
         presets: [
           ['env', {
             targets: {
@@ -1133,6 +1142,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             },
           }],
         ],
+      })
+      .once('transform', () => {
+        endBuildStep('Transformed', srcFilename, startTime);
       });
   if (options.watch) {
     bundler = watchify(bundler);
@@ -1161,8 +1173,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(
         bundler.bundle()
             .on('error', function(err) {
-              // Drop the node_modules call stack, which begins with '    at'.
-              const message = err.stack.replace(/    at[^]*/, '').trim();
+              let message = err;
+              if (err.stack) {
+                // Drop the node_modules call stack, which begins with '    at'.
+                message = err.stack.replace(/    at[^]*/, '').trim();
+              }
               console.error(red(message));
               if (failOnError) {
                 process.exit(1);

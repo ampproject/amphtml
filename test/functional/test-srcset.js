@@ -178,9 +178,9 @@ describe('Srcset', () => {
     });
 
     it('should not accept mixed sources', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         parseSrcset(' \n image1 100w\n , \n image2 1.5x\n , image3 ');
-      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
     });
 
     it('should parse misc examples', () => {
@@ -258,10 +258,11 @@ describe('Srcset', () => {
     });
 
     it('should require srcset or src to be available', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         srcsetFromElement(document.createElement('div'));
       }).to.throw(
           /Either non-empty "srcset" or "src" attribute must be specified/);
+      });
     });
   });
 
@@ -281,38 +282,38 @@ describe('Srcset', () => {
 
   describe('construct', () => {
     it('should enforce only one type of descriptor per source', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new Srcset([{url: 'image-1000', width: 100, dpr: 2}]);
-      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
     });
 
     it('should not allow 0-width descriptor', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new Srcset([{url: 'image-1000', width: 0}]);
-      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
     });
 
     it('should not allow 0-dpr descriptor', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new Srcset([{url: 'image-1000', dpr: 0}]);
-      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
     });
 
     it('should enforce only one type of descriptor total', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new Srcset([{url: 'image-1000', width: 100},
           {url: 'image-2x', dpr: 2}]);
-      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
     });
 
     it('should not allow duplicate sources', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new Srcset([{url: 'image', width: 100},
           {url: 'image', width: 100}]);
-      }).to.throw(/Duplicate width/);
-      expect(() => {
+      }).to.throw(/Duplicate width/); });
+      allowConsoleError(() => { expect(() => {
         new Srcset([{url: 'image', dpr: 2}, {url: 'image', dpr: 2}]);
-      }).to.throw(/Duplicate dpr/);
+      }).to.throw(/Duplicate dpr/); });
     });
   });
 

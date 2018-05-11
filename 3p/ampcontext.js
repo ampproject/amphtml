@@ -40,7 +40,7 @@ export class AbstractAmpContext {
     /** @private {?string} */
     this.cachedFrameName_ = this.win_.name || null;
 
-    /** @type {?string} */
+    /** @protected {?string} */
     this.embedType_ = null;
 
     // ----------------------------------------------------
@@ -59,6 +59,9 @@ export class AbstractAmpContext {
     /** @type {?string|undefined} */
     this.container = null;
 
+    /** @type {?Object} */
+    this.consentSharedData = null;
+
     /** @type {?Object<string, *>} */
     this.data = null;
 
@@ -67,6 +70,9 @@ export class AbstractAmpContext {
 
     /** @type {?boolean} */
     this.hidden = null;
+
+    /** @type {?number} */
+    this.initialConsentState = null;
 
     /** @type {?Object} */
     this.initialLayoutRect = null;
@@ -97,9 +103,6 @@ export class AbstractAmpContext {
 
     /** @type {?string} */
     this.tagName = null;
-
-    /** @type {number} */
-    this.getHtmlMessageId_ = 1;
 
     this.findAndSetMetadata_();
 
@@ -185,24 +188,23 @@ export class AbstractAmpContext {
    *  @param {string} selector CSS selector
    *  @param {!Array<string>} attributes whitelisted attributes to be kept
    *    in the returned HTML string
-   *  @param {function(string)} callback to be invoked with the HTML string
+   *  @param {function(*)} callback to be invoked with the HTML string
    */
   getHtml(selector, attributes, callback) {
-    const messageId = this.getHtmlMessageId_++;
-    const unlisten = this.client_.registerCallback(
-        MessageType.GET_HTML_RESULT,
-        result => {
-          if (result['messageId'] && (result['messageId'] == messageId)) {
-            unlisten();
-            callback(result['content']);
-          }
-        });
-
-    this.client_.sendMessage(MessageType.GET_HTML, dict({
+    this.client_.getData(MessageType.GET_HTML, dict({
       'selector': selector,
       'attributes': attributes,
-      'messageId': messageId,
-    }));
+    }), callback);
+  }
+
+  /**
+   * Requests consent state from the parent window.
+   *
+   * @param {function(*)} callback
+   */
+  getConsentState(callback) {
+    this.client_.getData(
+        MessageType.GET_CONSENT_STATE, null, callback);
   }
 
   /**
@@ -285,9 +287,11 @@ export class AbstractAmpContext {
     this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
+    this.consentSharedData = context.consentSharedData;
     this.container = context.container;
     this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
+    this.initialConsentState = context.initialConsentState;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
     this.location = parseUrl(context.location.href);
@@ -356,7 +360,7 @@ export class AbstractAmpContext {
 }
 
 export class AmpContext extends AbstractAmpContext {
-  /** @return {boolean} */
+  /** @override */
   isAbstractImplementation_() {
     return false;
   }

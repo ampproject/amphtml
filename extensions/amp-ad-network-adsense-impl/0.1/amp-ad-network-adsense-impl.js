@@ -23,6 +23,8 @@
 import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
   ValidAdContainerTypes,
@@ -38,6 +40,10 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {Services} from '../../../src/services';
+import {
+  addExperimentIdToElement,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
@@ -49,19 +55,14 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
-import {isExperimentOn} from '../../../src/experiments';
-import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 
@@ -225,7 +226,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl() {
+  getConsentPolicy() {
+    // Ensure that build is not blocked by need for consent (delay will occur
+    // prior to ad URL construction).
+    return null;
+  }
+
+  /** @override */
+  getAdUrl(consentState) {
+    if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+        this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
+      user().info(TAG, 'Ad request suppressed due to unknown consent');
+      return Promise.resolve('');
+    }
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
@@ -240,13 +253,24 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         isInManualExperiment(this.element);
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
-    // Need to ensure these are numbers since width can be set to 'auto'.
-    // Checking height just in case.
-    const useDefinedSizes = isExperimentOn(this.win, 'as-use-attr-for-format')
-        && !this.isResponsive_()
-        && !isNaN(width) && width > 0
-        && !isNaN(height) && height > 0;
-    this.size_ = useDefinedSizes
+
+    const adsenseFormatExpName = 'as-use-attr-for-format';
+    const experimentInfoMap =
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({});
+    experimentInfoMap[adsenseFormatExpName] = {
+      isTrafficEligible: () => !this.isResponsive_() &&
+        !isNaN(width) && width > 0 &&
+        !isNaN(height) && height > 0,
+      branches: ['21062003', '21062004'],
+    };
+
+    const adsenseFormatExpId =
+        randomlySelectUnsetExperiments(
+            this.win, experimentInfoMap)[adsenseFormatExpName];
+    addExperimentIdToElement(adsenseFormatExpId, this.element);
+
+    this.size_ = adsenseFormatExpId == '21062004'
       ? {width, height}
       : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
@@ -272,6 +296,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'w': this.size_.width,
       'h': this.size_.height,
       'iu': slotname,
+      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
       'adtest': adTestOn ? 'on' : null,
       adk,
       'output': 'html',
@@ -393,7 +419,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);
-      installAnchorClickInterceptor(
+      Navigation.installAnchorClickInterceptor(
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
@@ -487,6 +513,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getPreconnectUrls() {
+    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     return ['https://googleads.g.doubleclick.net'];
   }
 

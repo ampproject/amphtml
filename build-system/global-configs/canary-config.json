@@ -20,7 +20,7 @@
   "amp-auto-ads-adsense-holdout": 0.1,
   "slidescroll-disable-css-snap": 1,
   "version-locking": 1,
-  "as-use-attr-for-format": 1,
+  "as-use-attr-for-format": 0,
   "a4aFastFetchDoubleclickLaunched": 0,
   "a4aFastFetchAdSenseLaunched": 0,
   "a4a-measure-get-ad-urls": 1,
@@ -33,15 +33,6 @@
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
   "expUnconditionedCanonicalHoldback": 0.01,
-  "font-display-swap": 1,
-  "rollback-delayed-fetch-deprecation": 0,
-  "rollback-dfd-ix": 1,
-  "rollback-dfd-criteo": 1,
-  "rollback-dfd-rubicon": 1,
-  "rollback-dfd-navegg": 1,
-  "rollback-dfd-openx": 1,
-  "rollback-dfd-yieldbot": 1,
-  "rollback-dfd-imonomy": 1,
-  "rollback-dfd-pulsepoint": 1,
-  "dcdf-whitelist-deprecation": 0.01
+  "amp-consent": 1,
+  "amp-img-native-srcset": 1
 }

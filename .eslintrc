@@ -30,20 +30,26 @@
     "sandbox": true,
     "context": false,
     "global": false,
-    "describes": true
+    "describes": true,
+    "allowConsoleError": false
   },
   "rules": {
     "amphtml-internal/closure-type-primitives": 2,
     "amphtml-internal/dict-string-keys": 2,
     "amphtml-internal/enforce-private-props": 2,
+    "amphtml-internal/html-template": 2,
     "amphtml-internal/no-array-destructuring": 2,
     "amphtml-internal/no-es2015-number-props": 2,
     "amphtml-internal/no-export-side-effect": 2,
     "amphtml-internal/no-for-of-statement": 2,
     "amphtml-internal/no-global": 0,
     "amphtml-internal/no-spread": 2,
+    "amphtml-internal/no-style-property-setting": 2,
     "amphtml-internal/query-selector": 2,
+    "amphtml-internal/resolve-inside-promise-resolver": 1,
     "amphtml-internal/todo-format": 0,
+    "amphtml-internal/unused-private-field": 1,
+    "amphtml-internal/vsync": 0,
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
@@ -60,8 +66,9 @@
     "key-spacing": 2,
     "max-len": [2, 80, 4, {
       "ignoreComments": true,
-      "ignoreUrls": true,
-      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$"
+      "ignoreRegExpLiterals": true,
+      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$",
+      "ignoreUrls": true
     }],
     "no-alert": 2,
     "no-cond-assign": 2,

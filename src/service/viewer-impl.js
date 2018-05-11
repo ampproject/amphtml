@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
@@ -23,6 +24,7 @@ import {findIndex} from '../utils/array';
 import {
   getFragment,
   getSourceOrigin,
+  isProxyOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -30,6 +32,7 @@ import {
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -48,7 +51,7 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  * @private {!RegExp}
  */
 const TRIM_ORIGIN_PATTERN_ =
-  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp)\.)+/i;
+  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -180,9 +183,6 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
-    /** @private {?function()} */
-    this.whenFirstVisibleResolve_ = null;
-
     /** @private {?Promise} */
     this.nextVisiblePromise_ = null;
 
@@ -204,15 +204,17 @@ export class Viewer {
     /** @private {?Function} */
     this.trustedViewerResolver_ = null;
 
+    const deferred = new Deferred();
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
      * `this.onVisibilityChange_()`.
      * @private @const {!Promise}
      */
-    this.whenFirstVisiblePromise_ = new Promise(resolve => {
-      this.whenFirstVisibleResolve_ = resolve;
-    });
+    this.whenFirstVisiblePromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.whenFirstVisibleResolve_ = deferred.resolve;
 
     // Params can be passed either directly in multi-doc environment or via
     // iframe hash/name with hash taking precedence.
@@ -278,7 +280,14 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isCctEmbedded_ = !this.isIframed_ &&
-        parseQueryString(this.win.location.search)['amp_agsa'] === '1';
+        parseQueryString(this.win.location.search)['amp_gsa'] === '1';
+
+    const url = parseUrl(this.ampdoc.win.location.href);
+    /**
+     * Whether the AMP document was served by a proxy.
+     * @private @const {boolean}
+     */
+    this.isProxyOrigin_ = isProxyOrigin(url);
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -334,10 +343,9 @@ export class Viewer {
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
     } else {
       // Wait for comms channel to confirm the origin.
-      trustedViewerResolved = undefined;
-      trustedViewerPromise = new Promise(resolve => {
-        this.trustedViewerResolver_ = resolve;
-      });
+      const deferred = new Deferred();
+      trustedViewerPromise = deferred.promise;
+      this.trustedViewerResolver_ = deferred.resolve;
     }
 
     /** @const @private {!Promise<boolean>} */
@@ -529,6 +537,14 @@ export class Viewer {
   }
 
   /**
+   * Whether the document was served by a proxy.
+   * @return {boolean}
+   */
+  isProxyOrigin() {
+    return this.isProxyOrigin_;
+  }
+
+  /**
    * Update the URL fragment with data needed to support custom tabs. This will
    * not clear query string parameters, but will clear the fragment.
    */
@@ -701,9 +717,9 @@ export class Viewer {
       return this.nextVisiblePromise_;
     }
 
-    return this.nextVisiblePromise_ = new Promise(resolve => {
-      this.nextVisibleResolve_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.nextVisibleResolve_ = deferred.resolve;
+    return this.nextVisiblePromise_ = deferred.promise;
   }
 
   /**
@@ -1024,7 +1040,7 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-        Promise.resolve(this.messageDeliverer_(
+        tryResolve(() => this.messageDeliverer_(
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
             awaitResponse)));
@@ -1053,10 +1069,10 @@ export class Viewer {
       message.data = data;
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
-      let responseResolver;
-      const responsePromise = new Promise(r => {
-        responseResolver = r;
-      });
+      const deferred = new Deferred();
+      const responsePromise = deferred.promise;
+      const responseResolver = deferred.resolve;
+
       message = {
         eventType,
         data,
