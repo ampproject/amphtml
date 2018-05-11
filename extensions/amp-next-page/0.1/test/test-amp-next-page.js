@@ -97,19 +97,20 @@ env => {
     toggleExperiment(win, 'amp-next-page', false);
   });
 
-  // TODO (@peterjosling, #15234): This test is flaky on Headless Chrome on Travis because it does
-  // call fetchDocument.
-  it.skip('does not fetch the next document before 3 viewports away', function* () {
-    xhrMock.expects('fetchDocument').never();
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
-      // 4x viewports away
-      return Promise.resolve(
-          layoutRectLtwh(0, 0, sizes.width, sizes.height * 5));
-    });
+  // TODO (@peterjosling, #15234): This test is flaky on Headless Chrome on
+  // Travis because it does call fetchDocument.
+  it.skip('does not fetch the next document before 3 viewports away',
+      function* () {
+        xhrMock.expects('fetchDocument').never();
+        sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+          // 4x viewports away
+          return Promise.resolve(
+              layoutRectLtwh(0, 0, sizes.width, sizes.height * 5));
+        });
 
-    win.dispatchEvent(new Event('scroll'));
-    yield macroTask();
-  });
+        win.dispatchEvent(new Event('scroll'));
+        yield macroTask();
+      });
 
   it('fetches the next document within 3 viewports away', function* () {
     xhrMock.expects('fetchDocument').returns(Promise.resolve());
