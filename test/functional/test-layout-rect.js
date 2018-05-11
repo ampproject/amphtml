@@ -116,17 +116,17 @@ describe('LayoutRect', () => {
   });
 });
 
-describe('hasMeasurementChanges', () => {
+describe('hasMeasureChanges', () => {
   it('should detect changes', () => {
     const from = lr.layoutRectLtwh(10, 20, 1, 1);
     const to = lr.layoutRectLtwh(10, 20, 40, 50);
-    expect(lr.hasMeasurementChanges(from, to)).to.be.true;
+    expect(lr.hasMeasureChanges(from, to)).to.be.true;
   });
 
-  it('should detect changes', () => {
+  it('should detect no changes', () => {
     const from = lr.layoutRectLtwh(10, 20, 1, 1);
     const to = lr.layoutRectLtwh(10, 20, 1, 1);
-    expect(lr.hasMeasurementChanges(from, to)).to.be.false;
+    expect(lr.hasMeasureChanges(from, to)).to.be.false;
   });
 });
 
