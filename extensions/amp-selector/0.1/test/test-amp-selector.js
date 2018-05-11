@@ -942,7 +942,7 @@ describes.realWin('amp-selector', {
             multiple: true,
           },
         });
-        allowConsoleError(() => {
+        return allowConsoleError(() => {
           return expect(ampSelector.build()).to.eventually.be.rejectedWith(
               /not supported for multiple selection amp-selector​​​/);
         });

@@ -212,7 +212,7 @@ describes.realWin('amp-youtube', {
   });
 
   it('requires data-videoid or data-live-channelid', () => {
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return getYt({}).should.eventually.be.rejectedWith(
           /Exactly one of data-videoid or data-live-channelid should/);
     });
