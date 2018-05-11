@@ -755,6 +755,6 @@ amp-story .i-amphtml-loader {
  * loaded. This cause the element to jump. This is a fix for that, which 
  * doesn't push the preset's defaults into v0.js making it larger.
  */
-[amp-fx] {
+[amp-fx^="fly-in"] {
   visibility: hidden;
 }

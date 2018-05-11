@@ -141,6 +141,9 @@ export class FxElement {
     /** @private {boolean} */
     this.hasRepeat_ = element.hasAttribute('data-repeat');
 
+    /** @public {boolean} */
+    this.initialTrigger = false;
+
     this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
       this.adjustedViewportHeight = adjustedViewportHeight;
 
@@ -187,6 +190,12 @@ export class FxElement {
       return aboveTheFold ? offsetTop : viewportHeight;
     });
   }
+
+  /** @returns {!../../../../src/service/ampdoc-impl.AmpDoc} */
+  getAmpDoc() {
+    return this.ampdoc_;
+  }
+
 
   /**
    * @returns {number}

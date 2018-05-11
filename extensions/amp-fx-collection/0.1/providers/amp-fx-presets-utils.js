@@ -60,19 +60,16 @@ export function installStyles(ampdoc, element, fxType, flyInDistance) {
     case 'parallax':
       return {
         'will-change': 'transform',
-        'visibility': 'visible',
       };
     case 'fade-in':
       return {
         'will-change': 'opacity',
         'opacity': 0,
-        'visibility': 'visible',
       };
     case 'fade-in-scroll':
       return {
         'will-change': 'opacity',
         'opacity': 0,
-        'visibility': 'visible',
       };
     case 'fly-in-bottom':
       return {
@@ -89,13 +86,13 @@ export function installStyles(ampdoc, element, fxType, flyInDistance) {
     case 'fly-in-left':
       return {
         'will-change': 'transform',
-        'left': 'calc(' + style.left + ' - ' + flyInDistance + 'vw)',
-        'visibility': 'visible',
       };
     case 'fly-in-right':
       return {
         'will-change': 'transform',
-        'left': 'calc(' + style.left + ' + ' + flyInDistance + 'vw)',
+      };
+    default:
+      return {
         'visibility': 'visible',
       };
   }
@@ -110,11 +107,11 @@ export function defaultDurationValues(ampdoc, fxType) {
     case 'fly-in-left':
     case 'fly-in-right':
       const screenWidth = ampdoc.win.screen.width;
-      if (screenWidth <= 480) {
+      if (screenWidth <= 480) { // mobile devices
         return '400ms';
-      } else if (screenWidth > 480 && screenWidth < 1000) {
+      } else if (screenWidth > 480 && screenWidth < 1000) { // tablet devices
         return '500ms';
-      } else {
+      } else { // laptops and desktops
         return '600ms';
       }
     default:
@@ -127,15 +124,14 @@ export function defaultFlyInDistanceValues(ampdoc, fxType) {
     case 'fly-in-bottom':
     case 'fly-in-top':
       const screenWidth = ampdoc.win.screen.width;
-      if (screenWidth < 1000) {
+      if (screenWidth < 1000) { // mobile and tablets
         return 25;
-      } else {
+      } else { // laptops and desktops
         return 33;
       }
     case 'fly-in-left':
     case 'fly-in-right':
-    // TODO: Should be 100%
-      return 70;
+      return 100;
     default:
       return 1;
   }

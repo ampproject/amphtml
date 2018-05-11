@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {computedStyle} from '../../../../src/style';
 import {dev, user} from '../../../../src/log';
 import {isExperimentOn} from '../../../../src/experiments';
 import {setStyles} from '../../../../src/style';
@@ -121,6 +122,18 @@ export const Presets = {
         return;
       }
 
+      // only do this on the first element
+      if (!fxElement.initialTrigger) {
+        const style = computedStyle(fxElement.getAmpDoc().win,
+            fxElement.getElement());
+        setStyles(fxElement.getElement(), {
+          'left':
+            'calc(' + style.left + ' - ' + fxElement.getFlyInDistance() + 'vw)',
+          'visibility': 'visible',
+        });
+        fxElement.initialTrigger = true;
+      }
+
       // If above the threshold of trigger-position
       fxElement.setIsMutateScheduled(true);
       fxElement.resources_.mutateElement(fxElement.getElement(), function() {
@@ -152,6 +165,18 @@ export const Presets = {
 
       if (fxElement.isMutateScheduled()) {
         return;
+      }
+
+      // only do this on the first element
+      if (!fxElement.initialTrigger) {
+        const style = computedStyle(fxElement.getAmpDoc().win,
+            fxElement.getElement());
+        setStyles(fxElement.getElement(), {
+          'left':
+            'calc(' + style.left + ' + ' + fxElement.getFlyInDistance() + 'vw)',
+          'visibility': 'visible',
+        });
+        fxElement.initialTrigger = true;
       }
 
       // If above the threshold of trigger-position
