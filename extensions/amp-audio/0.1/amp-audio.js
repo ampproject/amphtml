@@ -46,8 +46,8 @@ export class AmpAudio extends AMP.BaseElement {
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
-    /** @private {boolean} */
-    this.isPlaying_ = false;
+    /** @public {boolean} */
+    this.isPlaying = false;
 
   }
 
@@ -93,23 +93,21 @@ export class AmpAudio extends AMP.BaseElement {
     this.audio_ = audio;
 
     // Gather metadata
-    const doc = this.getAmpDoc().win.document;
-    const artist = this.getElementAttribute_('artist');
+    const {document} = this.getAmpDoc().win;
+    const artist = this.getElementAttribute_('artist') || '';
     const title = this.getElementAttribute_('title')
                   || this.getElementAttribute_('aria-label')
-                  || doc.title;
-    const album = this.getElementAttribute_('album');
+                  || document.title || '';
+    const album = this.getElementAttribute_('album') || '';
     const artwork = this.getElementAttribute_('artwork')
-                   || parseSchemaImage(doc)
-                   || parseOgImage(doc)
-                   || parseFavicon(doc);
+                   || parseSchemaImage(document)
+                   || parseOgImage(document)
+                   || parseFavicon(document) || '';
     this.metadata_ = {
-      'title': title || '',
-      'artist': artist || '',
-      'album': album || '',
-      'artwork': [
-        {'src': artwork || ''},
-      ],
+      title,
+      artist,
+      album,
+      artwork: [{src: artwork}],
     };
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
@@ -118,6 +116,8 @@ export class AmpAudio extends AMP.BaseElement {
 
   /**
    * Returns the value of the attribute specified
+   * @param {string} attr
+   * @returns {string}
    */
   getElementAttribute_(attr) {
     return this.element.getAttribute(attr);
@@ -175,7 +175,7 @@ export class AmpAudio extends AMP.BaseElement {
    */
   setPlayingStateForTesting_(isPlaying) {
     if (getMode().test) {
-      this.isPlaying_ = isPlaying;
+      this.isPlaying = isPlaying;
     }
   }
 
