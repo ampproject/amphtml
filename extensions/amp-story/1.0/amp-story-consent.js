@@ -34,7 +34,6 @@ import {throttle} from '../../../src/utils/rate-limit';
 const TAG = 'amp-story-consent';
 
 // TODO(gmajoulet): switch to `htmlFor` static template helper.
-// TODO(gmajoulet): use a CSS variable for the `color` config parameter.
 /**
  * Story consent template.
  * @private @const {function(!Object, string, ?string):!./simple-template.ElementDef}
@@ -54,11 +53,7 @@ const getTemplate = (config, consentId, logoSrc) => ({
           children: [
             {
               tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-consent-header',
-                'style': config.color ?
-                  `background-color: ${config.color} !important;` : '',
-              }),
+              attrs: dict({'class': 'i-amphtml-story-consent-header'}),
               children: [
                 {
                   tag: 'div',
@@ -123,9 +118,6 @@ const getTemplate = (config, consentId, logoSrc) => ({
               attrs: dict({
                 'class': 'i-amphtml-story-consent-action ' +
                     'i-amphtml-story-consent-action-accept',
-                'style': config.color ?
-                  `background-color: ${config.color} !important; ` +
-                      `border-color: ${config.color} !important;` : '',
                 'on': `tap:${consentId}.accept`,
               }),
               children: [],
