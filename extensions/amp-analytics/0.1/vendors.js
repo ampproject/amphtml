@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from './iframe-transport-vendors';
+import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from './iframe-transport-vendors';
 
 /**
  * @const {!JsonObject}
