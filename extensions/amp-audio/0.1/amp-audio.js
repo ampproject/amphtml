@@ -47,7 +47,7 @@ export class AmpAudio extends AMP.BaseElement {
     this.metadata_ = EMPTY_METADATA;
 
     /** @private {boolean} */
-    this.isPlaying = false;
+    this.isPlaying_ = false;
 
   }
 
@@ -58,8 +58,8 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.registerAction('play', this.play.bind(this));
-    this.registerAction('pause', this.pause.bind(this));
+    this.registerAction('play', this.play_.bind(this));
+    this.registerAction('pause', this.pause_.bind(this));
   }
 
   /** @override */
@@ -72,8 +72,9 @@ export class AmpAudio extends AMP.BaseElement {
 
     // Force controls otherwise there is no player UI.
     audio.controls = true;
-    if (this.element.getAttribute('src')) {
-      assertHttpsUrl(this.element.getAttribute('src'), this.element);
+    const src = this.getElementAttribute_('src');
+    if (src) {
+      assertHttpsUrl(src, this.element);
     }
     this.propagateAttributes(
         ['src', 'preload', 'autoplay', 'muted', 'loop', 'aria-label',
@@ -93,12 +94,12 @@ export class AmpAudio extends AMP.BaseElement {
 
     // Gather metadata
     const doc = this.getAmpDoc().win.document;
-    const artist = this.element.getAttribute('artist');
-    const title = this.element.getAttribute('title')
-                  || this.element.getAttribute('aria-label')
+    const artist = this.getElementAttribute_('artist');
+    const title = this.getElementAttribute_('title')
+                  || this.getElementAttribute_('aria-label')
                   || doc.title;
-    const album = this.element.getAttribute('album');
-    const artwork = this.element.getAttribute('artwork')
+    const album = this.getElementAttribute_('album');
+    const artwork = this.getElementAttribute_('artwork')
                    || parseSchemaImage(doc)
                    || parseOgImage(doc)
                    || parseFavicon(doc);
@@ -115,6 +116,13 @@ export class AmpAudio extends AMP.BaseElement {
     return this.loadPromise(audio);
   }
 
+  /**
+   * Returns the value of the attribute specified
+   */
+  getElementAttribute_(attr) {
+    return this.element.getAttribute(attr);
+  }
+
   /** @override */
   pauseCallback() {
     if (this.audio_) {
@@ -123,26 +131,38 @@ export class AmpAudio extends AMP.BaseElement {
     }
   }
 
-  pause() {
+  /**
+   * Checks if the function is allowed to be called
+   * @returns {boolean}
+   */
+  isInvocationValid_() {
     if (!this.audio_) {
-      return;
+      return false;
     }
     if (this.isStoryDescendant_()) {
       user().warn(TAG, '<amp-story> elements do not support actions on ' +
         '<amp-audio> elements');
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Pause action for <amp-audio>.
+   */
+  pause_() {
+    if (!this.isInvocationValid_()) {
       return;
     }
     this.audio_.pause();
     this.setPlayingStateForTesting_(false);
   }
 
-  play() {
-    if (!this.audio_) {
-      return;
-    }
-    if (this.isStoryDescendant_()) {
-      user().warn(TAG, '<amp-story> elements do not support actions on ' +
-        '<amp-audio> elements');
+  /**
+   * Play action for <amp-audio>.
+   */
+  play_() {
+    if (!this.isInvocationValid_()) {
       return;
     }
     this.audio_.play();
@@ -150,19 +170,18 @@ export class AmpAudio extends AMP.BaseElement {
   }
 
   /**
-   * Returns whether the audio is playing or not.
-   * @returns {boolean}
+   * Sets whether the audio is playing or not.
    * @VisibleForTesting
    */
   setPlayingStateForTesting_(isPlaying) {
     if (getMode().test) {
-      this.isPlaying = isPlaying;
+      this.isPlaying_ = isPlaying;
     }
   }
 
   /**
    * Returns whether `<amp-audio>` has an `<amp-story>` for an ancestor.
-   * @returns {boolean}
+   * @returns {?Element}
    * @VisibleForTesting
    */
   isStoryDescendant_() {
