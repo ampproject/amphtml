@@ -68,7 +68,7 @@ describes.realWin('amp-o2-player', {
   });
 
   it('requires data-pid', () => {
-    allowConsoleError(() => { return getO2player({
+    return allowConsoleError(() => { return getO2player({
       'data-bcid': '50d595ec0364e95588c77bd2',
     }).should.eventually.be.rejectedWith(
         /data-pid attribute is required for/);
@@ -76,7 +76,7 @@ describes.realWin('amp-o2-player', {
   });
 
   it('requires data-bcid', () => {
-    allowConsoleError(() => { return getO2player({
+    return allowConsoleError(() => { return getO2player({
       'data-pid': '573acb47e4b0564ec2e10011',
     }).should.eventually.be.rejectedWith(
         /data-bcid attribute is required for/);
@@ -84,7 +84,7 @@ describes.realWin('amp-o2-player', {
   });
 
   it('requires data-pid && data-bcid', () => {
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return getO2player({}).should.eventually.be.rejectedWith(
           /data-pid attribute is required for/);
     });
