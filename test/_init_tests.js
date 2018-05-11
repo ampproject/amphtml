@@ -298,7 +298,7 @@ function warnForConsoleError() {
   });
   this.allowConsoleError = function(func) {
     dontWarnForConsoleError();
-    func();
+    const result = func();
     try {
       expect(consoleErrorStub).to.have.been.called;
     } catch (e) {
@@ -308,6 +308,7 @@ function warnForConsoleError() {
       throw new Error(helpMessage);
     }
     warnForConsoleError();
+    return result;
   };
 }
 
