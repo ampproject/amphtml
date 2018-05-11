@@ -23,7 +23,9 @@ import {
 } from '../../../src/mediasession-helper';
 import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
+import {closestByTag} from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 
 const TAG = 'amp-audio';
@@ -43,6 +45,10 @@ export class AmpAudio extends AMP.BaseElement {
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
+
+    /** @private {boolean} */
+    this.isPlaying_ = false;
+
   }
 
   /** @override */
@@ -50,6 +56,11 @@ export class AmpAudio extends AMP.BaseElement {
     return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
   }
 
+  /** @override */
+  buildCallback() {
+    this.registerAction('play', this.play.bind(this));
+    this.registerAction('pause', this.pause.bind(this));
+  }
 
   /** @override */
   layoutCallback() {
@@ -108,15 +119,53 @@ export class AmpAudio extends AMP.BaseElement {
   pauseCallback() {
     if (this.audio_) {
       this.audio_.pause();
+      if (getMode().test) {
+        this.isPlaying_ = false;
+      }
     }
+  }
+
+  pause() {
+    const storyEl = closestByTag(this.element, 'AMP-STORY');
+    if (this.audio_ && !storyEl) {
+      this.audio_.pause();
+      if (getMode().test) {
+        this.isPlaying_ = false;
+      }
+    }
+  }
+
+  play() {
+    const storyEl = closestByTag(this.element, 'AMP-STORY');
+    if (this.audio_ && !storyEl) {
+      this.audio_.play();
+      if (getMode().test) {
+        this.isPlaying_ = true;
+      }
+    }
+  }
+
+  /**
+   * Returns whether the audio is playing or not.
+   * @returns {boolean}
+   * @VisibleForTesting
+   */
+  playerStatus() {
+    return this.isPlaying_;
   }
 
   audioPlaying_() {
     const playHandler = () => {
       this.audio_.play();
+      if (getMode().test) {
+        this.isPlaying_ = true;
+      }
     };
     const pauseHandler = () => {
       this.audio_.pause();
+      if (getMode().test) {
+        this.isPlaying_ = false;
+      }
     };
 
     // Update the media session
