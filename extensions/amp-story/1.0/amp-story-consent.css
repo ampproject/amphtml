@@ -68,7 +68,7 @@
   position: relative !important;
   height: 80px !important;
   min-height: 80px !important;
-  background: #F0F0F0 !important;
+  background: var(--primary-color, #F0F0F0) !important;
   z-index: 2 !important;
 
   /* Making sure the background color fills the container in full bleed mode. */
@@ -164,7 +164,7 @@
 }
 
 .i-amphtml-story-consent-action-accept {
-  background: #000000 !important;
+  background: var(--primary-color, #000000) !important;
   color: #FFFFFF !important;
 }
 
