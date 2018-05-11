@@ -9,7 +9,7 @@ notifications:
   email:
     recipients:
       - amp-build-cop@grotations.appspotmail.com
-    on_success: never
+    on_success: change
     on_failure: change
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
