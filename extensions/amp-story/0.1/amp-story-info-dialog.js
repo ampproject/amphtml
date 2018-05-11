@@ -31,6 +31,11 @@ export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
 /** @const {string} Class to toggle the info dialog link. */
 export const MOREINFO_VISIBLE_CLASS = 'i-amphtml-story-info-moreinfo-visible';
 
+/**
+ * A dialog that provides a link to the canonical URL of the story, as well as
+ * a link to any more information that the viewer would like to provide about
+ * linking on that platform.
+ */
 export class InfoDialog {
   /**
    * @param {!Window} win
