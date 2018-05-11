@@ -45,7 +45,7 @@ The `<amp-consent>` element can be used to block the ad request until the user o
 
 If the user has responded negatively to the amp-consent component (user rejects the consent prompt), RTC call-outs will not be made and [non-personalized ads](https://support.google.com/dfp_premium/answer/9005435) will be requested.  
 
-If the user’s response to the amp-consent is unknown (user dismisses the consent prompt).  By default, no ad requests are sent at all.  If `data-npa-on-unknown-consent` is set to true, non-personalized ads will be requested.
+If the user’s response to the amp-consent is unknown (user dismisses the consent prompt), by default, no ad requests are sent.  If `data-npa-on-unknown-consent` is set to true, non-personalized ads will be requested.
 
 See [AdSense Help Center article](https://support.google.com/dfp_premium/answer/7678538) for more information.
 
