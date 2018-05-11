@@ -24,7 +24,7 @@ import {
 import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestByTag} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 
@@ -46,8 +46,8 @@ export class AmpAudio extends AMP.BaseElement {
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
-    /** @private {boolean} */
-    this.isPlaying_ = false;
+    /** @public {boolean} */
+    this.isPlaying = false;
 
   }
 
@@ -119,30 +119,32 @@ export class AmpAudio extends AMP.BaseElement {
   pauseCallback() {
     if (this.audio_) {
       this.audio_.pause();
-      if (getMode().test) {
-        this.isPlaying_ = false;
-      }
+      setPlayingStateForTesting_(false);
     }
   }
 
   pause() {
-    const storyEl = closestByTag(this.element, 'AMP-STORY');
-    if (this.audio_ && !storyEl) {
-      this.audio_.pause();
-      if (getMode().test) {
-        this.isPlaying_ = false;
-      }
+    if (!this.audio_) {
+      return;
+    } 
+    if (this.isStoryDescendant_()) {
+       user().warn(TAG, '<amp-story> elements do not support actions on <amp-audio> elements');
+       return;
     }
+    this.audio_.pause();
+    this.setPlayingStateForTesting_(false);
   }
 
   play() {
-    const storyEl = closestByTag(this.element, 'AMP-STORY');
-    if (this.audio_ && !storyEl) {
-      this.audio_.play();
-      if (getMode().test) {
-        this.isPlaying_ = true;
-      }
+    if (!this.audio_) {
+      return;
+    } 
+    if (this.isStoryDescendant_()) {
+       user().warn(TAG, '<amp-story> elements do not support actions on <amp-audio> elements');
+       return;
     }
+    this.audio_.play();
+    this.setPlayingStateForTesting_(true);
   }
 
   /**
@@ -150,22 +152,30 @@ export class AmpAudio extends AMP.BaseElement {
    * @returns {boolean}
    * @VisibleForTesting
    */
-  playerStatus() {
-    return this.isPlaying_;
+  setPlayingStateForTesting_(val) {
+    if (getMode().test) {
+      this.isPlaying = val;
+    }
   }
+
+  /**
+   * Returns whether `<amp-audio>` has an `<amp-story>` for an ancestor.
+   * @returns {boolean}
+   * @VisibleForTesting
+   */
+  isStoryDescendant_() {
+    return closestByTag(this.element, 'AMP-STORY') ? true : false;
+  }
+
 
   audioPlaying_() {
     const playHandler = () => {
       this.audio_.play();
-      if (getMode().test) {
-        this.isPlaying_ = true;
-      }
+      setPlayingStateForTesting_(true);
     };
     const pauseHandler = () => {
       this.audio_.pause();
-      if (getMode().test) {
-        this.isPlaying_ = false;
-      }
+      setPlayingStateForTesting_(false);
     };
 
     // Update the media session
