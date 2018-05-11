@@ -21,13 +21,8 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {Services} from './services';
 import {getCookie, setCookie} from './cookies';
 import {parseQueryString} from './url';
-import {user} from './log';
-
-/** @const {string} */
-const TAG = 'experiments';
 
 /** @const {string} */
 const COOKIE_NAME = 'AMP_EXP';
