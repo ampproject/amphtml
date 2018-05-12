@@ -685,9 +685,9 @@ describes.sandboxed('DOM', {}, env => {
       element.setAttribute('data-param-hello', '2');
       element.setAttribute('data-param-from-the-other-side', '3');
       const params = dom.getDataParamsFromAttributes(element);
+      expect(params.attr1).to.be.equal('1');
       expect(params.hello).to.be.equal('2');
       expect(params.fromTheOtherSide).to.be.equal('3');
-      expect(params.attr1).to.be.undefined;
     });
 
     it('should return key-value for custom data attributes', () => {
@@ -696,6 +696,15 @@ describes.sandboxed('DOM', {}, env => {
       const params = dom.getDataParamsFromAttributes(element, null,
           /^vars(.+)/);
       expect(params.eventName).to.be.equal('click');
+    });
+  });
+
+  describe('getDataParamsFromLinkUrl', () => {
+    it('should return key-value for link of https://example.com/index.html?query#hash', () => {
+      const element = document.createElement('a');
+      element.setAttribute('href', 'https://example.com/index.html?query#hash');
+      const params = dom.getDataParamsFromAttributes(element, null);
+      expect(params.href).to.be.equal('https://example.com/index.html?query#hash');
     });
   });
 

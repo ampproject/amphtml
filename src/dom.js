@@ -19,6 +19,7 @@ import {cssEscape} from '../third_party/css-escape/css-escape';
 import {dev} from './log';
 import {dict} from './utils/object';
 import {startsWith} from './string';
+import {parseUrl} from './url';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -556,8 +557,12 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
   opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const dataset = element.dataset;
+  const attributes = element.attributes;
   const params = dict();
   const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
+  for (const key in attributes) {
+    params[computeParamNameFunc(key)] = element.getAttribute(key);
+  }
   for (const key in dataset) {
     const matches = key.match(paramPattern);
     if (matches) {
@@ -565,6 +570,39 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
       params[computeParamNameFunc(param)] = dataset[key];
     }
   }
+  return params;
+}
+
+/**
+ * Returns link element url components as url parameters key-value pairs.
+ * e.g. <a href="https://example.com/index.html?query#hash"
+ * -> {
+ *   clickHostname: example.com,
+ *   clickProtocol: https,
+ *   clickPathname: /index.html,
+ *   clickQuery: query,
+ *   clickHash: hash,
+ *   clickUrl: https://example.com/index.html?query#hash
+ * }
+ * @param {!Element} element
+ * @param {function(string):string=} opt_computeParamNameFunc to compute the parameters
+ *    name, get passed the camel-case parameter name.
+ * @return {!JsonObject}
+ */
+export function getDataParamsFromLinkUrl(element, opt_computeParamNameFunc) {
+  if (element.tagName.toUpperCase() != 'A' || !element.href) {
+    return dict();
+  }
+  const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
+  const location = parseUrl(element.href);
+  const params = dict();
+  params[computeParamNameFunc('clickHostname')] = location.hostname;
+  params[computeParamNameFunc('clickProtocol')]
+            = location.protocol.replace(':', '');
+  params[computeParamNameFunc('clickPathname')] = location.pathname;
+  params[computeParamNameFunc('clickQuery')] = location.search.replace('?', '');
+  params[computeParamNameFunc('clickHash')] = location.hash.replace('#', '');
+  params[computeParamNameFunc('clickUrl')] = location.href;
   return params;
 }
 

@@ -23,7 +23,10 @@ import {
 } from '../../../src/video-interface';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {
+  getDataParamsFromAttributes,
+  getDataParamsFromLinkUrl,
+} from '../../../src/dom';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
@@ -392,11 +395,11 @@ export class ClickEventTracker extends EventTracker {
    * @private
    */
   handleClick_(listener, target, unusedEvent) {
-    const params = getDataParamsFromAttributes(
+    const attributesParams = getDataParamsFromAttributes(
         target,
         /* computeParamNameFunc */ undefined,
         VARIABLE_DATA_ATTRIBUTE_KEY);
-    listener(new AnalyticsEvent(target, 'click', params));
+    listener(new AnalyticsEvent(target, 'click', attributesParams));
   }
 }
 
