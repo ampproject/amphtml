@@ -301,7 +301,7 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   if (req.headers['amp-same-origin'] == 'true') {
       origin = sourceOrigin;
   // If allowed CORS origin & allowed source origin
-  } else if (allowedOrigins.indexOf(req.headers.origin) == -1 &&
+  } else if (allowedOrigins.indexOf(req.headers.origin) !== -1 &&
       sourceOrigin == allowedSourceOrigin) {
       origin = req.headers.origin;
   } else {
