@@ -273,7 +273,7 @@ export class NextPageService {
    * one.
    * @param {number} nextPage Index of the next unseen page to use as the first
    *     recommendation in the list.
-   * @return {Element} Container element for the recommendations.
+   * @return {!Element} Container element for the recommendations.
    */
   createArticleLinks_(nextPage) {
     const doc = this.win_.document;
@@ -355,12 +355,12 @@ export class NextPageService {
    * the position of a page separator in the viewport.
    * @param {number} i Index of the documentRef this recommendation unit is
    *     attached to.
-   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
+   * @param {?../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
    *     position Position of the current recommendation unit in the viewport.
    */
   positionUpdate_(i, position) {
     // We're only interested when the recommendations exit the viewport
-    if (position.positionRect !== null) {
+    if (!position || position.positionRect !== null) {
       return;
     }
 
@@ -386,7 +386,9 @@ export class NextPageService {
    */
   articleLinksPositionUpdate_(documentRef) {
     documentRef.cancelled = true;
-    this.positionObserver_.unobserve(documentRef.recUnit);
+    if (documentRef.recUnit) {
+      this.positionObserver_.unobserve(documentRef.recUnit);
+    }
   }
 
   /**
