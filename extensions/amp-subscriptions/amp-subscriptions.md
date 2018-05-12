@@ -144,10 +144,9 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
   },
   "fallbackEntitlement": {
     "source": "fallback",
-    "service": "local",
-    "products": ["norcal_tribune.com:basic",...],
-    "subscriptionToken": "subscription-token",
-    "loggedIn": true/false,
+    "granted": true,
+    "grantReason": "SUBSCRIBER/METERING",
+    "data": {...}
   }
 }
 </script>
@@ -223,22 +222,16 @@ The Entitlement response returned by the authorization endpoint must conform to 
 
 ```
 {
-  "products": [string, ...],
-  "subscriptionToken": string,
-  "loggedIn": boolean,
-  "metering": {
-    "left": number,
-    "total": number,
-    "token": string
-  }
+  "granted": true/false,
+  "grantReason": "SUBSCRIBER/METERING",
+  "data" : {...}
 }
 ```
 
 The properties in the Entitlement response are:
- - "products" - a set of products that a user is entitled to view. E.g. "norcal_tribune.com:basic".
- - "subscriptionToken" - the string representation of the subscription token, if the reader is a subscriber. The token itself should reference the subscription and not directly the reader. If the reader is not a subscriber, this property should be absent.
- - "loggedIn" - an optional true/false value that indicates whether the user is currently logged in. If not specified, the system assumes that the logged in state is not known.
- - "metering" - an optional structure that indicates whether the user is granted the access via metering. The optional "left", "total" and "token" fields can be used to provide the metering details.
+ - "granted" - boolean stating if the access to the document is granted or not.
+ - "grantReason" - the string of the reason for giving the access to the document, recognized reasons are either SUBSCRIBER meaning the user is fully subscribed or METERING meaning user is on metering.
+ - "data" - any free form data which can be used for render templating.
 
 Notice, while it's not explicitly visible, all vendor services also implement authorization endpoints of their own and conform to the same response format.
 
@@ -347,27 +340,7 @@ The `subscriptions-display` uses expressions for actions and dialogs.
 
 The value of the `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in the [AMP Access Appendix 1][../amp-acccess/amp-access.md#appendix-a-amp-access-expression-grammar].
 
-The expression is executed against the object in the following form:
-
-```
-{
-  "granted": boolean,
-  "loggedIn": boolean,
-  "subscribed": boolean,
-  "metered": boolean,
-  "entitlement": {
-    "products": [],
-    ...
-  }
-}
-```
-
-The properties in this object are:
- - "granted" - whether the access to this document has been granted.
- - "loggedIn" - whether the user is currently logged in.
- - "subscribed" - whether the user is a subscriber.
- - "metered" - whether the user's access is metered.
- - "entitlement" - the entitlement object returned by the authorization endpoint.
+The expression is executed against the json representation of the entitlement object.
 
 For instance, to show a "subscribe" action to non-subscribers:
 

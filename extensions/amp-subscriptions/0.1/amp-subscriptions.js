@@ -40,9 +40,6 @@ const TAG = 'amp-subscriptions';
 /** @const */
 const SERVICE_TIMEOUT = 3000;
 
-/** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !JsonObject, metered: boolean}} */
-export let RenderState;
-
 export class SubscriptionService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -202,11 +199,6 @@ export class SubscriptionService {
    * @private
    */
   resolveEntitlementsToStore_(serviceId, entitlement) {
-    const productId = /** @type {string} */ (dev().assert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-    ));
-    entitlement.setCurrentProduct(productId);
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
     this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
@@ -307,12 +299,8 @@ export class SubscriptionService {
   delegateAuthToViewer_() {
     const serviceIds = ['local'];
     const origin = getWinOrigin(this.ampdoc_.win);
-    const currentProductId = /** @type {string} */ (user().assert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-    ));
-
     this.initializePlatformStore_(serviceIds);
+
     this.platformConfig_['services'].forEach(service => {
       if ((service['serviceId'] || 'local') == 'local') {
         const viewerPlatform = new ViewerSubscriptionPlatform(
@@ -323,12 +311,12 @@ export class SubscriptionService {
             this.subscriptionAnalytics_
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);
-        viewerPlatform.getEntitlements()
-            .then(entitlement => {
-              entitlement.setCurrentProduct(currentProductId);
-              // Viewer authorization is redirected to use local platform instead.
-              this.platformStore_.resolveEntitlement('local', entitlement);
-            });
+        viewerPlatform.getEntitlements().then(entitlement => {
+          dev().assert(entitlement, 'Entitlement is null');
+          // Viewer authorization is redirected to use local platform instead.
+          this.platformStore_.resolveEntitlement('local',
+              /** @type {!./entitlement.Entitlement}*/ (entitlement));
+        });
       }
     });
   }
@@ -365,20 +353,11 @@ export class SubscriptionService {
     ]);
 
     return requireValuesPromise.then(resolvedValues => {
-      const grantState = resolvedValues[0];
       const selectedPlatform = resolvedValues[1];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
           selectedPlatform.getServiceId());
-      /** @type {!RenderState} */
-      const renderState = {
-        entitlement: selectedEntitlement.json(),
-        loggedIn: selectedEntitlement.loggedIn,
-        subscribed: !!selectedEntitlement.subscriptionToken,
-        granted: grantState,
-        metered: !!selectedEntitlement.metering,
-      };
 
-      selectedPlatform.activate(renderState);
+      selectedPlatform.activate(selectedEntitlement);
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId()
