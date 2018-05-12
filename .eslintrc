@@ -67,7 +67,7 @@
     "max-len": [2, 80, 4, {
       "ignoreTrailingComments": true,
       "ignoreRegExpLiterals": true,
-      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$|@typedef|@param|@return",
+      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
       "ignoreUrls": true
     }],
     "no-alert": 2,

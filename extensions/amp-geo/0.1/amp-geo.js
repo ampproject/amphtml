@@ -16,7 +16,8 @@
 
 
 /**
- * @fileoverview Sets location specific CSS, bind variables, and attributes on AMP pages
+ * @fileoverview Sets location specific CSS, bind variables, and attributes on
+ * AMP pages
  * Example:
  * <code>
  * <amp-geo>
@@ -147,7 +148,8 @@ export class AmpGeo extends AMP.BaseElement {
    * @param {Object} config
    */
   matchCountryGroups_(config) {
-    /* ISOCountryGroups are optional but if specified at least one must exist  */
+    /* ISOCountryGroups are optional but if specified at least one must exist
+    */
     /** @private @const {!Object<string, Array<string>>} */
     const ISOCountryGroups = config.ISOCountryGroups;
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size

@@ -139,10 +139,10 @@ function setupPageLoadMetricsReporter_(ampElement) {
       'requests': {
         'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
             `&c=${correlator}&met.a4a=` +
-	    'makeBodyVisible.${makeBodyVisible}~' +
-	    'firstVisibleTime.${firstVisibleTime}~' +
-	    'firstContentfulPaint.${firstContentfulPaint}~' +
-	    'firstViewportReady.${firstViewportReady}',
+      'makeBodyVisible.${makeBodyVisible}~' +
+      'firstVisibleTime.${firstVisibleTime}~' +
+      'firstContentfulPaint.${firstContentfulPaint}~' +
+      'firstViewportReady.${firstViewportReady}',
       },
       'transport': {
         'beacon': false,
