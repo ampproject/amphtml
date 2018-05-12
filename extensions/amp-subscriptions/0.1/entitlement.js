@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
-/** @typedef {{left: number, total: number, resetTime: number, durationUnit: string, token: string}} */
-export let MeteringData;
+/** @enum {string} */
+export const GrantReason = {
+  'SUBSCRIBER': 'SUBSCRIBER',
+  'METERING': 'METERING',
+};
 
 /**
  * The single entitlement object.
@@ -33,10 +35,7 @@ export class Entitlement {
       source: '',
       raw: '',
       service,
-      products: [],
-      subscriptionToken: null,
-      loggedIn: false,
-      metering: null,
+      granted: false,
     });
   }
 
@@ -45,29 +44,24 @@ export class Entitlement {
    * @param {string} [input.source]
    * @param {string} [input.raw]
    * @param {string} [input.service]
-   * @param {!Array<string>} [input.products]
-   * @param {?string} [input.subscriptionToken]
-   * @param {boolean} [input.loggedIn]
-   * @param {?MeteringData} [input.metering]
+   * @param {boolean} [input.granted]
+   * @param {?GrantReason} [input.grantReason]
+   * @param {?JsonObject} [input.dataObject]
    */
-  constructor({source, raw = '', service, products = [],
-    subscriptionToken = '', loggedIn = false, metering = null}) {
+  constructor({source, raw = '', service, granted = false,
+    grantReason = '', dataObject}) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
     this.source = source;
     /** {string} */
     this.service = service;
-    /** @const {!Array<string>} */
-    this.products = products;
-    /** @const {?string} */
-    this.subscriptionToken = subscriptionToken;
     /** @const {boolean} */
-    this.loggedIn = loggedIn;
-    /** @const {?MeteringData} */
-    this.metering = metering;
-    /** @private {?string} */
-    this.product_ = null;
+    this.granted = granted;
+    /** @const {?string} */
+    this.grantReason = grantReason;
+    /** @const {?JsonObject} */
+    this.data = dataObject;
   }
 
   /**
@@ -76,13 +70,11 @@ export class Entitlement {
    */
   json() {
     const entitlementJson = dict({
-      'raw': this.raw,
       'source': this.source,
       'service': this.service,
-      'products': this.products,
-      'loggedIn': this.loggedIn,
-      'subscriptionToken': this.subscriptionToken,
-      'metering': this.metering,
+      'granted': this.granted,
+      'grantReason': this.grantReason,
+      'data': this.data,
     });
     return (entitlementJson);
   }
@@ -93,41 +85,9 @@ export class Entitlement {
    * @return {!JsonObject}
    */
   jsonForPingback() {
-    return dict({
-      'raw': this.raw,
-      'source': this.source,
-      'grantState': this.enablesThis(),
-    });
-  }
-
-  /**
-   * @param {?string} product
-   * @return {boolean}
-   */
-  enables(product) {
-    if (!product) {
-      return false;
-    }
-    return this.products.includes(product);
-  }
-
-  /**
-   * @return {boolean}
-   */
-  enablesThis() {
-    if (this.products.length === 0) {
-      return false;
-    }
-    dev().assert(this.product_, 'Current Product is not set');
-    return this.enables(this.product_);
-  }
-
-  /**
-   * Sets the current product
-   * @param {string} product
-   */
-  setCurrentProduct(product) {
-    this.product_ = product;
+    return /** @type {!JsonObject} */ (Object.assign({},
+        {'raw': this.raw},
+        this.json()));
   }
 
   /**
@@ -141,21 +101,18 @@ export class Entitlement {
     }
     const raw = rawData || JSON.stringify(json);
     const source = json['source'] || '';
-    const products = json['products'] || [];
-    const subscriptionToken = json['subscriptionToken'];
-    const loggedIn = json['loggedIn'];
-    const meteringData = json['metering'];
-    let metering = null;
-    if (meteringData) {
-      metering = {
-        left: meteringData['left'],
-        total: meteringData['total'],
-        resetTime: meteringData['resetTime'],
-        durationUnit: meteringData['durationUnit'],
-        token: meteringData['token'],
-      };
-    }
+    const granted = json['granted'] || false;
+    const grantReason = json['grantReason'];
+    const dataObject = json['data'] || null;
     return new Entitlement({source, raw, service: '',
-      products, subscriptionToken, loggedIn, metering});
+      granted, grantReason, dataObject});
+  }
+
+  /**
+   * Returns if the user is a subscriber.
+   * @return {boolean}
+   */
+  isSubscriber() {
+    return this.granted && this.grantReason === GrantReason.SUBSCRIBER;
   }
 }
