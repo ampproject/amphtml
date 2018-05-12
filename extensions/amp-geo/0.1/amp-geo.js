@@ -242,7 +242,6 @@ export class AmpGeo extends AMP.BaseElement {
             state.id = GEO_ID;
             doc.body.appendChild(state);
           }
-          this.mutated_ = true;
           break;
         case mode.GEO_PRERENDER:
           break;
