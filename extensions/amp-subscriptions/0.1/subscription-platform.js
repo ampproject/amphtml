@@ -38,9 +38,9 @@ export class SubscriptionPlatform {
 
   /**
    * Activates the subscription platform and hands over the control for rendering.
-   * @param {!./amp-subscriptions.RenderState} unusedRenderState
+   * @param {!./entitlement.Entitlement} unusedEntitlement
    */
-  activate(unusedRenderState) {}
+  activate(unusedEntitlement) {}
 
   /**
    * Returns if pingback is enabled for this platform.

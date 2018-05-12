@@ -19,6 +19,7 @@ import {
   Entitlements,
   SubscribeResponse,
 } from '../../../../third_party/subscriptions-project/swg';
+import {Entitlement, GrantReason} from '../../../amp-subscriptions/0.1/entitlement';
 import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {
   PageConfig,
@@ -162,20 +163,23 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should ignore activate when granted', () => {
-    platform.activate({granted: true, subscribed: true});
+    platform.activate(new Entitlement({service: 'subscribe.google.com',
+      granted: true, grantReason: GrantReason.SUBSCRIBER}));
     expect(methods.showOffers).to.not.be.called;
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
   it('should show offers on activate when not granted', () => {
-    platform.activate({granted: false});
+    platform.activate(new Entitlement({service: 'subscribe.google.com',
+      granted: false}));
     expect(methods.showOffers).to.be.calledOnce
         .calledWithExactly({list: 'amp'});
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
   it('should show abbrv offer on activate when granted non-subscriber', () => {
-    platform.activate({granted: true, subscribed: false});
+    platform.activate(new Entitlement({service: 'subscribe.google.com',
+      granted: true, subscribed: true}));
     expect(methods.showAbbrvOffer).to.be.calledOnce
         .calledWithExactly({list: 'amp'});
     expect(methods.showOffers).to.not.be.called;

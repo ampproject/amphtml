@@ -15,7 +15,7 @@
  */
 
 
-import {Entitlement} from './entitlement';
+import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
@@ -116,26 +116,38 @@ export class ViewerSubscriptionPlatform {
       let entitlement = Entitlement.empty('local');
       if (Array.isArray(entitlements)) {
         for (let index = 0; index < entitlements.length; index++) {
-          const entitlementObject =
-              Entitlement.parseFromJson(entitlements[index], token);
-          if (entitlementObject.enables(currentProductId)) {
-            entitlement = entitlementObject;
+          if (entitlements[index]['products'].indexOf(currentProductId)
+              !== -1) {
+            const entitlementObject = entitlements[index];
+            entitlement = new Entitlement({
+              source: 'viewer',
+              raw: token,
+              granted: true,
+              grantReason: entitlementObject.subscriptionToken ?
+                GrantReason.SUBSCRIBER : '',
+              dataObject: entitlementObject,
+            });
             break;
           }
         }
-      } else if (decodedData['metering'] && !decodedData['entitlements']) { // No entitlements
-        dev().assert(this.currentProductId_, 'Current product is not set');
+      } else if (decodedData['metering'] && !decodedData['entitlements']) {
+        // Special case where viewer gives metering but no entitlement
         entitlement = new Entitlement({
           source: decodedData['iss'] || '',
           raw: token,
-          service: 'local',
-          products: [this.currentProductId_],
-          subscriptionToken: null,
-          loggedIn: false,
-          metering: decodedData['metering'],
+          granted: true,
+          grantReason: GrantReason.METERING,
+          dataObject: decodedData['metering'],
         });
       } else if (entitlements) { // Not null
-        entitlement = Entitlement.parseFromJson(entitlements, token);
+        entitlement = new Entitlement({
+          source: 'viewer',
+          raw: token,
+          granted: entitlements.granted,
+          grantReason: entitlements.subscriptionToken ?
+            GrantReason.SUBSCRIBER : '',
+          dataObject: entitlements,
+        });
       }
 
       entitlement.service = 'local';
