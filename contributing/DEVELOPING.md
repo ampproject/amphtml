@@ -227,7 +227,7 @@ You can also run the visual tests locally during development. You must first cre
 
 First, make sure you have [Ruby](https://www.ruby-lang.org/en/documentation/installation/) installed on your machine if you don't already have it, and download the gems required for local Percy builds:
 ```
-gem install percy-capybara poltergeist selenium-webdriver chromedriver-helper
+gem install percy-capybara poltergeist selenium-webdriver chromedriver-helper rspec-retry
 ```
 Next, build the AMP runtime and run the gulp task that invokes the visual diff script:
 ```
