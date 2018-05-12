@@ -78,8 +78,6 @@ export class AmpGeo extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {boolean} */
-    this.mutated_ = false;
     /** @private {number} */
     this.mode_ = mode.GEO_HOT_PATCH;
     /** @private {string} */
@@ -110,17 +108,6 @@ export class AmpGeo extends AMP.BaseElement {
     geoResolver(geo);
   }
 
-  /** @override */
-  layoutCallback() {
-    // Let the runtime know we just if we added/changed classes that
-    // may case a re-layout.
-    if (this.mutated_) {
-      return this.mutateElement(() => {
-        /** nothing to do here, we already mutated the body classes */
-      }, this.win.document.body);
-    }
-    return Promise.resolve();
-  }
 
   /**
    * findCountry_, sets this.country_ and this.mode_
@@ -218,6 +205,8 @@ export class AmpGeo extends AMP.BaseElement {
     return waitForBodyPromise(doc).then(() => {
       self.findCountry_(doc);
       self.matchCountryGroups_(config);
+      /* @type {Array<string>} */
+      const classesToAdd = [];
 
       switch (self.mode_) {
         case mode.GEO_OVERRIDE:
@@ -228,13 +217,18 @@ export class AmpGeo extends AMP.BaseElement {
           states.ISOCountry = self.country_;
 
           for (let group = 0; group < self.matchedGroups_.length; group++) {
-            doc.body.classList.add(GROUP_PREFIX + self.matchedGroups_[group]);
+            classesToAdd.push(GROUP_PREFIX + self.matchedGroups_[group]);
             states[self.matchedGroups_[group]] = true;
           }
-          // add  classes to <body>
-          doc.body.classList.add(COUNTRY_PREFIX + self.country_);
-          states.ISOCountryGroups = self.matchedGroups_;
+          classesToAdd.push(COUNTRY_PREFIX + self.country_);
 
+          // Let the runtime know we're mutating the doc.body
+          self.mutateElement(() => {
+            // add classes to <body>
+            doc.body.classList.add.apply(doc.body.classList, classesToAdd);
+          }, doc.body);
+
+          states.ISOCountryGroups = self.matchedGroups_;
 
           // Only include amp state if user requests it to avoid validator issue
           // with missing amp-bind js
