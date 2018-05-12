@@ -160,12 +160,10 @@ export class LocalSubscriptionPlatform {
     }
   }
 
-  /**
-   * Renders the platform specific UI
-   * @param {!./amp-subscriptions.RenderState} renderState
-   */
-  activate(renderState) {
-    this.urlBuilder_.setAuthResponse(renderState.entitlement);
+  /** @override */
+  activate(entitlement) {
+    const renderState = entitlement.json();
+    this.urlBuilder_.setAuthResponse(renderState);
     this.actions_.build().then(() => {
       this.renderer_.render(renderState);
     });

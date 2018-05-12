@@ -36,11 +36,11 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     renderer = new LocalSubscriptionPlatformRenderer(
         ampdoc, dialog, serviceAdapter);
     const serviceIds = ['service1', 'service2'];
-    const currentProduct = 'currentProductId';
-    const sampleEntitlement1 =
-      new Entitlement(serviceIds[0], ['currentProductId'], '');
-    entitlementsForService1 = new Entitlement(
-        serviceIds[0], '', [sampleEntitlement1], currentProduct);
+    entitlementsForService1 = new Entitlement({
+      service: serviceIds[0],
+      granted: false,
+      grantReason: null,
+    });
   });
 
   describe('render method', () => {

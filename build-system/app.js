@@ -883,8 +883,11 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
     source: 'local' + req.params.id,
-    products: ['scenic-2017.appspot.com:news',
-      'scenic-2017.appspot.com:product2'],
+    granted: true,
+    grantedReason: 'NOT_SUBSCRIBED',
+    data: {
+      login: true,
+    },
   });
 });
 

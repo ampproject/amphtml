@@ -15,7 +15,7 @@
  */
 
 import {Dialog} from '../dialog';
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
@@ -32,19 +32,13 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   };
   const service = 'sample-service';
   const source = 'sample-source';
-  const products = ['scenic-2017.appspot.com:news',
-    'scenic-2017.appspot.com:product2'];
-  const subscriptionToken = 'token';
-  const loggedIn = true;
   const json = {
     service,
     source,
-    products,
-    subscriptionToken,
-    loggedIn,
+    granted: true,
+    grantReason: GrantReason.SUBSCRIBER,
   };
   const entitlement = Entitlement.parseFromJson(json);
-  entitlement.setCurrentProduct(products[0]);
   const authUrl = 'https://lipsum.com/login/authorize';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {
@@ -188,7 +182,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     it('should call renderer\'s render method', () => {
       const renderStub =
         sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
-      localSubscriptionPlatform.activate({entitlement});
+      localSubscriptionPlatform.activate(entitlement);
       return localSubscriptionPlatform.actions_.build().then(() => {
         expect(renderStub).to.be.calledOnce;
       });

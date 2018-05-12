@@ -48,7 +48,7 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    *
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!JsonObject} renderState
    */
   render(renderState) {
     return Promise.all([
@@ -58,7 +58,7 @@ export class LocalSubscriptionPlatformRenderer {
   }
 
   /**
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!JsonObject} renderState
    */
   renderActions_(renderState) {
     this.renderActionsInNode_(renderState, this.rootNode_);
@@ -89,7 +89,7 @@ export class LocalSubscriptionPlatformRenderer {
         return this.templates_.renderTemplate(candidate, authResponse)
             .then(element => {
               const renderState =
-                  /** @type {!./amp-subscriptions.RenderState} */(authResponse);
+                /** @type {!JsonObject} */(authResponse);
               return this.renderActionsInNode_(
                   renderState,
                   element);
@@ -109,7 +109,7 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    * Renders actions inside a given node according to an authResponse
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!JsonObject} renderState
    * @param {!Node} rootNode
    * @return {!Promise<Node>}
    * @private

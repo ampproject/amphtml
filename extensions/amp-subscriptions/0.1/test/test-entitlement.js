@@ -14,35 +14,33 @@
  * limitations under the License.
  */
 
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 
 
 describes.realWin('EntitlementClass', {}, () => {
   const service = 'sample-service';
   const source = 'sample-source';
-  const products = ['scenic-2017.appspot.com:news',
-    'scenic-2017.appspot.com:product2'];
-  const subscriptionToken = 'token';
-  const loggedIn = true;
-  const metering = {
-    left: 1,
-    total: 10,
-    resetTime: 30,
-    durationUnit: 'days',
-    token: 'token',
+  const granted = true;
+  const grantReason = GrantReason.SUBSCRIBER;
+  const dataObject = {
+    metering: {
+      left: 1,
+      total: 10,
+      resetTime: 30,
+      durationUnit: 'days',
+      token: 'token',
+    },
   };
   it('should give json representation of the object', () => {
     const raw = 'raw';
-    const entitlement = new Entitlement({source, raw, service, products,
-      subscriptionToken, loggedIn, metering});
+    const entitlement = new Entitlement({source, raw, service, granted,
+      grantReason, dataObject});
     expect(entitlement.json()).to.deep.equal({
       service,
       source,
-      raw,
-      products,
-      subscriptionToken,
-      loggedIn,
-      metering,
+      granted,
+      grantReason,
+      data: dataObject,
     });
   });
 
@@ -50,57 +48,41 @@ describes.realWin('EntitlementClass', {}, () => {
     const json = {
       service,
       source,
-      products,
-      subscriptionToken,
-      loggedIn,
-      metering,
+      granted,
+      grantReason,
+      data: dataObject,
     };
     const entitlement = Entitlement.parseFromJson(json);
     expect(entitlement.source).to.be.equal(source);
-    expect(entitlement.products).to.be.equal(products);
-    expect(entitlement.subscriptionToken).to.be.equal(subscriptionToken);
+    expect(entitlement.granted).to.be.equal(granted);
+    expect(entitlement.grantReason).to.be.equal(grantReason);
     expect(entitlement.raw).to.be.equal(JSON.stringify(json));
-    expect(entitlement.loggedIn).to.be.equal(loggedIn);
-    expect(entitlement.metering).to.deep.equal(metering);
+    expect(entitlement.data).to.be.equal(dataObject);
   });
 
   it('should be able to parse raw from json', () => {
     const json = {
       service,
       source,
-      products,
-      subscriptionToken,
-      loggedIn,
-      metering,
+      granted,
+      grantReason,
+      data: dataObject,
     };
     const rawValue = 'rawValue';
     const entitlement = Entitlement.parseFromJson(json, rawValue);
     expect(entitlement.source).to.be.equal(source);
-    expect(entitlement.products).to.be.equal(products);
-    expect(entitlement.subscriptionToken).to.be.equal(subscriptionToken);
+    expect(entitlement.granted).to.be.equal(granted);
+    expect(entitlement.grantReason).to.be.equal(grantReason);
     expect(entitlement.raw).to.equal(rawValue);
-    expect(entitlement.loggedIn).to.be.equal(loggedIn);
-    expect(entitlement.metering).to.deep.equal(metering);
-  });
-
-  it('should tell if current product is enabled', () => {
-    const raw = 'raw';
-    const entitlement = new Entitlement({source, raw, service, products,
-      subscriptionToken, loggedIn});
-    entitlement.setCurrentProduct(products[0]);
-    expect(entitlement.enablesThis()).to.be.true;
-    entitlement.setCurrentProduct('lipsum');
-    expect(entitlement.enablesThis()).to.be.false;
+    expect(entitlement.data).to.be.equal(dataObject);
   });
 
   it('should return raw, granStatus and source for pingback', () => {
     const raw = 'raw';
-    const entitlement = new Entitlement({source, raw, service, products,
-      subscriptionToken, loggedIn});
-    entitlement.setCurrentProduct(products[0]);
+    const entitlement = new Entitlement({source, raw, service, granted,
+      grantReason, dataObject});
     const pingbackData = entitlement.jsonForPingback();
-    expect(pingbackData.raw).to.be.equal(raw);
-    expect(pingbackData.source).to.be.equal(entitlement.source);
-    expect(pingbackData.grantState).to.be.equal(entitlement.enablesThis());
+    expect(pingbackData).to.deep.equal(
+        Object.assign({raw}, entitlement.json()));
   });
 });
