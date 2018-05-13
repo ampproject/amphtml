@@ -20,10 +20,12 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
 const eslint = require('gulp-eslint');
+const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
+const path = require('path');
 const watch = require('gulp-watch');
 
 const isWatching = (argv.watch || argv.w) || false;
@@ -80,7 +82,8 @@ function logOnSameLine(message) {
 function runLinter(path, stream, options) {
   if (!process.env.TRAVIS) {
     log(colors.green('Starting linter...'));
-  } else {
+  }
+  if (process.env.TRAVIS_EVENT_TYPE == 'push') {
     // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
     log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
     console./* OK*/log('travis_fold:start:lint_results\n');
@@ -97,7 +100,7 @@ function runLinter(path, stream, options) {
       }))
       .pipe(eslint.results(function(results) {
         // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
-        if (process.env.TRAVIS) {
+        if (process.env.TRAVIS_EVENT_TYPE == 'push') {
           console./* OK*/log('travis_fold:end:lint_results');
         }
         if (results.errorCount == 0 && results.warningCount == 0) {
@@ -125,6 +128,19 @@ function runLinter(path, stream, options) {
 }
 
 /**
+ * Extracts the list of JS files in this PR from the commit log.
+ *
+ * @return {!Array<string>}
+ */
+function getLintFiles() {
+  const filesInPr =
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
+  return filesInPr.filter(function(file) {
+    return path.extname(file) == '.js';
+  });
+}
+
+/**
  * Run the eslinter on the src javascript and log the output
  * @return {!Stream} Readable stream
  */
@@ -133,7 +149,16 @@ function lint() {
     options.fix = true;
   }
   if (argv.files) {
-    config.lintGlobs[config.lintGlobs.indexOf('**/*.js')] = argv.files;
+    config.lintGlobs =
+        config.lintGlobs.filter(e => e !== '**/*.js').concat(argv.files);
+  }
+  if (process.env.TRAVIS_PULL_REQUEST || process.env.LOCAL_PR_CHECK) {
+    config.lintGlobs =
+        config.lintGlobs.filter(e => e !== '**/*.js').concat(getLintFiles());
+    // Override .eslintrc settings here.
+    options['rules'] = {
+      'valid-jsdoc': 2,
+    };
   }
   const stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);

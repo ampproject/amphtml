@@ -123,6 +123,12 @@
     "space-in-parens": 2,
     "space-infix-ops": 2,
     "space-unary-ops": [1, { "words": true, "nonwords": false }],
+    "valid-jsdoc": [1, {
+      "requireParamDescription": false,
+      "requireReturn": false,
+      "requireReturnType": false,
+      "requireReturnDescription": false
+    }],
     "wrap-iife": [2, "any"]
   }
 }
