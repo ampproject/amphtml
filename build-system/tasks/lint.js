@@ -157,7 +157,11 @@ function lint() {
         config.lintGlobs.filter(e => e !== '**/*.js').concat(getLintFiles());
     // Override .eslintrc settings here.
     options['rules'] = {
+      // TODO(rsimha, #15255): This should error by default in .eslintrc.
       'valid-jsdoc': 2,
+      // TODO(jridgewell, #14761): These should error by default in .eslintrc.
+      'amphtml-internal/resolve-inside-promise-resolver': 2,
+      'amphtml-internal/unused-private-field': 2,
     };
   }
   const stream = initializeStream(config.lintGlobs, {});
