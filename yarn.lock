@@ -10572,7 +10572,7 @@ tryit@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tryit/-/tryit-1.0.3.tgz#393be730a9446fd1ead6da59a014308f36c289cb"
 
-tsickle@^0.28.0:
+tsickle@0.28.0:
   version "0.28.0"
   resolved "https://registry.yarnpkg.com/tsickle/-/tsickle-0.28.0.tgz#6cd6fa004766c6ad9261b599c83866ee97cc7875"
   dependencies:
@@ -10631,7 +10631,7 @@ typedarray@^0.0.6, typedarray@~0.0.5:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
-typescript@^2.7.2:
+typescript@2.7.2:
   version "2.7.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.7.2.tgz#2d615a1ef4aee4f574425cdff7026edf81919836"
 
