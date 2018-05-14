@@ -221,27 +221,26 @@ export class AmpGeo extends AMP.BaseElement {
             states[self.matchedGroups_[group]] = true;
           }
           classesToAdd.push(COUNTRY_PREFIX + self.country_);
+          states.ISOCountryGroups = self.matchedGroups_;
 
           // Let the runtime know we're mutating the doc.body
           self.mutateElement(() => {
             // add classes to <body>
             doc.body.classList.add.apply(doc.body.classList, classesToAdd);
+            // Only include amp state if user requests it to
+            // avoid validator issue with missing amp-bind js
+            if (config.AmpBind) {
+              const state = doc.createElement('amp-state');
+              const confScript = doc.createElement('script');
+              confScript.setAttribute('type', 'application/json');
+              confScript.textContent =
+                  JSON.stringify(/** @type {!JsonObject} */(states)) ;
+              state.appendChild(confScript);
+              state.id = GEO_ID;
+              doc.body.appendChild(state);
+            }
           }, doc.body);
 
-          states.ISOCountryGroups = self.matchedGroups_;
-
-          // Only include amp state if user requests it to avoid validator issue
-          // with missing amp-bind js
-          if (config.AmpBind) {
-            const state = doc.createElement('amp-state');
-            const confScript = doc.createElement('script');
-            confScript.setAttribute('type', 'application/json');
-            confScript.textContent =
-                JSON.stringify(/** @type {!JsonObject} */(states)) ;
-            state.appendChild(confScript);
-            state.id = GEO_ID;
-            doc.body.appendChild(state);
-          }
           break;
         case mode.GEO_PRERENDER:
           break;
