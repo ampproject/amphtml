@@ -62,6 +62,7 @@ export const adConfig = {
   _ping_: {
     renderStartImplemented: true,
     clientIdScope: '_PING_',
+    consentHandlingOverride: true,
   },
 
   '24smi': {

@@ -158,7 +158,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   getConsentPolicy() {
-    return null;
+    const type = this.element.getAttribute('type');
+    const config = adConfig[type];
+    if (config && config['consentHandlingOverride']) {
+      return null;
+    }
+    return super.getConsentPolicy();
   }
 
   /** @override */
