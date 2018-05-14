@@ -78,13 +78,14 @@ export function installStylesForDoc(
 
 /**
  * Adds the given css text to the given document.
- * TODO(dvoytenko, #10705): Remove this method once FIE/ampdoc migration is done.
+ * TODO(dvoytenko, #10705): Remove this method once FIE/ampdoc migration is
+ * done.
  *
  * @param {!Document} doc The document that should get the new styles.
  * @param {string} cssText
- * @param {?function(!Element)|undefined} cb Called when the new styles are available.
- *     Not using a promise, because this is synchronous when possible.
- *     for better performance.
+ * @param {?function(!Element)|undefined} cb Called when the new styles are
+ *     available. Not using a promise, because this is synchronous when
+ *     possible. for better performance.
  * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
  *     as the first element in head and all style elements will be positioned
  *     after.

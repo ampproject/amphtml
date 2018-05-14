@@ -16,7 +16,8 @@
 
 /**
  * @fileoverview Embeds an AddThis widget.
- * The data-pub-id and data-widget-id can be found easily in the AddThis dashboard at addthis.com.
+ * The data-pub-id and data-widget-id can be found easily in the AddThis
+ * dashboard at addthis.com.
  * Example:
  * <code>
  * <amp-addthis
@@ -62,16 +63,18 @@ import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 
-// The following items will be shared by all AmpAddThis elements on a page, to prevent unnecessary
-// HTTP requests, get accurate analytics, etc., and hence are defined outside of the class.
+// The following items will be shared by all AmpAddThis elements on a page, to
+// prevent unnecessary HTTP requests, get accurate analytics, etc., and hence
+// are defined outside of the class.
 const configManager = new ConfigManager();
 const scrollMonitor = new ScrollMonitor();
 const dwellMonitor = new DwellMonitor();
 const clickMonitor = new ClickMonitor();
 const activeToolsMonitor = new ActiveToolsMonitor();
 
-// `shouldRegisterView` is a shared flag that should be true only for the first built element on the
-// page, to prevent registering more than one view per page.
+// `shouldRegisterView` is a shared flag that should be true only for the first
+// built element on the page, to prevent registering more than one view per
+// page.
 let shouldRegisterView = true;
 
 // Redirection to prevent eslint issues.
@@ -165,7 +168,8 @@ class AmpAddThis extends AMP.BaseElement {
             clickMonitor.startForDoc(ampDoc);
           });
 
-      // Only the component that registers the page view listens for x-frame events.
+      // Only the component that registers the page view listens for x-frame
+      // events.
       this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
     }
   }

@@ -30,9 +30,9 @@ export const CONSENT_ITEM_STATE = {
   REJECTED: 2,
   DISMISSED: 3,
   NOT_REQUIRED: 4,
-  // TODO(@zhouyx): Seperate UI state from consent state. Add consent requirement state
-  // ui_state = {pending, active, complete}
-  // consent_state = {unknown, granted, rejected}
+  // TODO(@zhouyx): Seperate UI state from consent state. Add consent
+  // requirement state ui_state = {pending, active, complete} consent_state =
+  // {unknown, granted, rejected}
 };
 
 export class ConsentStateManager {

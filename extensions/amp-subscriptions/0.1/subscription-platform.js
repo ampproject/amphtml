@@ -37,7 +37,8 @@ export class SubscriptionPlatform {
   getEntitlements() {}
 
   /**
-   * Activates the subscription platform and hands over the control for rendering.
+   * Activates the subscription platform and hands over the control for
+   * rendering.
    * @param {!./entitlement.Entitlement} unusedEntitlement
    */
   activate(unusedEntitlement) {}

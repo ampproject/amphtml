@@ -16,8 +16,8 @@
 
 /**
  * @fileoverview Displays BySide placeholder content.
- * The client settings and placeholder content label should be added as component
- * attributes as seen in the following example:
+ * The client settings and placeholder content label should be added as
+ * component attributes as seen in the following example:
  * <code>
  * <amp-byside-content
  * 	 data-webcare-id="<<<webcare_id>>>"

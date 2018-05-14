@@ -920,7 +920,8 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
     if (this.isDesktop_()) {
-      // Force repaint is only needed when transitioning from invisible to visible
+      // Force repaint is only needed when transitioning from invisible to
+      // visible
       return;
     }
 
@@ -1260,7 +1261,8 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      // TODO(newmuis): Remove the assignment and return, as they're unnecessary.
+      // TODO(newmuis): Remove the assignment and return, as they're
+      // unnecessary.
       map = this.getPageDistanceMapHelper_(distance + 1, map, adjacentPageId);
     });
 
@@ -1577,7 +1579,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} was page inserted
    */
   insertPage(pageBeforeId, pageToBeInsertedId) {
-    // TODO(ccordry): make sure this method moves to PageManager when implemented
+    // TODO(ccordry): make sure this method moves to PageManager when
+    // implemented
     const pageToBeInserted = this.getPageById(pageToBeInsertedId);
     const pageToBeInsertedEl = pageToBeInserted.element;
 

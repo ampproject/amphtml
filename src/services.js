@@ -61,8 +61,8 @@ export class Services {
   }
 
   /**
-   * Returns a promise for the Access service or a promise for null if the service
-   * is not available on the current page.
+   * Returns a promise for the Access service or a promise for null if the
+   * service is not available on the current page.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
    */
@@ -124,9 +124,10 @@ export class Services {
       Services.extensionsFor(ampdoc.win)./*OK*/installExtensionForDoc(
           ampdoc, 'amp-analytics');
     }
-    return (/** @type {!Promise<
-              !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-            >} */ (getElementServiceForDoc(
+    return (
+      /** @type {!Promise<
+        !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+      >} */ (getElementServiceForDoc(
           nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
   }
 
@@ -135,9 +136,10 @@ export class Services {
    * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
   static analyticsForDocOrNull(nodeOrDoc) {
-    return (/** @type {!Promise<
-              ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-            >} */ (getElementServiceIfAvailableForDoc(
+    return (
+      /** @type {!Promise<
+        ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+      >} */ (getElementServiceIfAvailableForDoc(
           nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
   }
 
@@ -302,13 +304,11 @@ export class Services {
    * Version of the story store service depends on which version of amp-story
    * the publisher is loading. They all have the same implementation.
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|
-   *                   ?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
    */
   static storyStoreServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|
-                        ?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
       (getElementServiceIfAvailable(win, 'story-store', 'amp-story')));
   }
 
@@ -401,8 +401,7 @@ export class Services {
    * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
    */
   static webAnimationServiceFor(nodeOrDoc) {
-    return (/** @type {
-        !Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
+    return (/** @type {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
       (getElementServiceForDoc(nodeOrDoc, 'web-animation', 'amp-animation')));
   }
 
@@ -477,8 +476,8 @@ export class Services {
   }
 
   /**
-   * Returns a promise for the experiment variants or a promise for null if it is
-   * not available on the current page.
+   * Returns a promise for the experiment variants or a promise for null if it
+   * is not available on the current page.
    * @param {!Window} win
    * @return {!Promise<?Object<string>>}
    */
