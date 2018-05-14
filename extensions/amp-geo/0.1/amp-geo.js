@@ -218,7 +218,6 @@ export class AmpGeo extends AMP.BaseElement {
           // Build the AMP State, add classes
           states.ISOCountry = self.country_;
 
-          /* @type {Array<string>} */
           const classesToAdd = self.matchedGroups_.map(group => {
             states[group] = true;
             return GROUP_PREFIX + group;
@@ -231,13 +230,13 @@ export class AmpGeo extends AMP.BaseElement {
           // Actual change happens in callback to runtime can
           // optimize dom mutations.
           self.mutateElement(() => {
+            const classList = doc.body.classList;
             // Always remove the pending class
             classesToRemove.push('amp-geo-pending');
-            doc.body.classList.remove.apply(
-                doc.body.classList, classesToRemove);
+            classList.remove.apply(classList, classesToRemove);
 
             // add the new classes to <body>
-            doc.body.classList.add.apply(doc.body.classList, classesToAdd);
+            classList.add.apply(classList, classesToAdd);
 
             // Only include amp state if user requests it to
             // avoid validator issue with missing amp-bind js
