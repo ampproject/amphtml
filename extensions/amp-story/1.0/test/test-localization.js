@@ -68,7 +68,7 @@ describes.fakeWin('localization', {}, env => {
 
     it('should have language fallbacks', () => {
       expect(getLanguageCodesFromString('de-hi-1')).to
-          .deep.equal(['de-hi-1', 'de-hi', 'de', 'en']);
+          .deep.equal(['de-hi-1', 'de-hi', 'de', 'default']);
     });
   });
 
