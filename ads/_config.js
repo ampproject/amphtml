@@ -161,6 +161,7 @@ export const adConfig = {
     remoteHTMLDisabled: true,
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
+    consentHandlingOverride: true,
   },
 
   adsnative: {
