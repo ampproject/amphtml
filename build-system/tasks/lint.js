@@ -158,20 +158,9 @@ function lint() {
       config.lintGlobs =
           config.lintGlobs.filter(e => e !== '**/*.js').concat(getLintFiles());
     }
-    // Override .eslintrc settings here.
-    options['rules'] = {
-      // TODO(rsimha, #15255): Make this error by default in .eslintrc.
-      'valid-jsdoc': [2, {
-        'prefer': {'return': 'return'},
-        'requireParamDescription': false,
-        'requireReturn': false,
-        'requireReturnType': true,
-        'requireReturnDescription': false,
-      }],
-      // TODO(jridgewell, #14761): Make these error by default in .eslintrc.
-      'amphtml-internal/resolve-inside-promise-resolver': 2,
-      'amphtml-internal/unused-private-field': 2,
-    };
+    // TODO(#14761, #15255): Remove these overrides and make the rules errors by
+    // default in .eslintrc after all code is fixed.
+    options['configFile'] = '.eslintrc-strict';
   }
   const stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);

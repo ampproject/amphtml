@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "amphtml-internal/resolve-inside-promise-resolver": 2,
+    "amphtml-internal/unused-private-field": 2,
+    "amphtml-internal/vsync": 2,
+    "valid-jsdoc": [2, {
+      "prefer": {"return": "return"},
+      "requireParamDescription": false,
+      "requireReturn": false,
+      "requireReturnType": true,
+      "requireReturnDescription": false
+    }]
+  }
+}
