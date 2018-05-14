@@ -207,8 +207,7 @@ export class AmpGeo extends AMP.BaseElement {
     return waitForBodyPromise(doc).then(() => {
       self.findCountry_(doc);
       self.matchCountryGroups_(config);
-      /* @type {Array<string>} */
-      const classesToAdd = [];
+
       let classesToRemove = [];
 
       switch (self.mode_) {
@@ -219,10 +218,12 @@ export class AmpGeo extends AMP.BaseElement {
           // Build the AMP State, add classes
           states.ISOCountry = self.country_;
 
-          for (let group = 0; group < self.matchedGroups_.length; group++) {
-            classesToAdd.push(GROUP_PREFIX + self.matchedGroups_[group]);
-            states[self.matchedGroups_[group]] = true;
-          }
+          /* @type {Array<string>} */
+          const classesToAdd = self.matchedGroups_.map(group => {
+            states[group] = true;
+            return GROUP_PREFIX + group;
+          });
+
           states.ISOCountryGroups = self.matchedGroups_;
           classesToAdd.push(COUNTRY_PREFIX + this.country_);
 
