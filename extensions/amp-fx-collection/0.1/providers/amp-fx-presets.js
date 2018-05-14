@@ -71,7 +71,7 @@ export const Presets = {
     isFxTypeSupported(win) {
       return isExperimentOn(win, 'amp-fx-fly-in');
     },
-    userAsserts(unusedElement) {
+    userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
         return;
@@ -113,7 +113,7 @@ export const Presets = {
     isFxTypeSupported(win) {
       return isExperimentOn(win, 'amp-fx-fly-in');
     },
-    userAsserts(unusedElement) {
+    userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
         return;
@@ -165,7 +165,7 @@ export const Presets = {
     isFxTypeSupported(win) {
       return isExperimentOn(win, 'amp-fx-fly-in');
     },
-    userAsserts(unusedElement) {
+    userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
         return;
@@ -217,7 +217,7 @@ export const Presets = {
     isFxTypeSupported(win) {
       return isExperimentOn(win, 'amp-fx-fly-in');
     },
-    userAsserts(unusedElement) {
+    userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
         return;
