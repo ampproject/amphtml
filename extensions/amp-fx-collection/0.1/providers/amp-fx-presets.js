@@ -68,7 +68,7 @@ export const Presets = {
   },
   'fade-in': {
     isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fade-in');
+      return true;
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
@@ -108,7 +108,7 @@ export const Presets = {
   },
   'fade-in-scroll': {
     isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fade-in-scroll');
+      return true;
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
