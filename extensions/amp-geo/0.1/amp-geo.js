@@ -106,7 +106,7 @@ export class AmpGeo extends AMP.BaseElement {
           parseJson(children[0].textContent) : {});
 
     /* resolve the service promise singleton we stashed earlier */
-    geoPromise.resolve(geo);
+    geoDeferred.resolve(geo);
   }
 
   /**
@@ -252,11 +252,11 @@ export class AmpGeo extends AMP.BaseElement {
  */
 
 /** singleton */
-let geoPromise = null;
+let geoDeferred = null;
 
 AMP.extension('amp-geo', '0.1', AMP => {
-  geoPromise = new Deferred();
+  geoDeferred = new Deferred();
 
   AMP.registerElement(TAG, AmpGeo);
-  AMP.registerServiceForDoc(SERVICE_TAG, () => geoPromise.promise);
+  AMP.registerServiceForDoc(SERVICE_TAG, () => geoDeferred.promise);
 });
