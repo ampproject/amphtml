@@ -172,12 +172,12 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  activate(renderState) {
+  activate(entitlement) {
     // Offers or abbreviated offers may need to be shown depending on
     // whether the access has been granted and whether user is a subscriber.
-    if (!renderState.granted) {
+    if (!entitlement.granted) {
       this.runtime_.showOffers({list: 'amp'});
-    } else if (!renderState.subscribed) {
+    } else if (!entitlement.isSubscriber()) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
   }

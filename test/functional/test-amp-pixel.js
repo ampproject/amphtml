@@ -127,7 +127,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should throw for referrerpolicy with value other than ' +
       'no-referrer', () => {
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return createPixel(
           'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
           'origin')

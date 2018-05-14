@@ -23,6 +23,7 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
+import {Deferred} from './utils/promise';
 import {dev} from './log';
 import {toWin} from './types';
 
@@ -465,10 +466,10 @@ function getServicePromiseInternal(holder, id) {
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
-  let resolve;
-  const promise = new Promise(r => {
-    resolve = r;
-  });
+  const deferred = new Deferred();
+  const promise = deferred.promise;
+  const resolve = deferred.resolve;
+
   const services = getServices(holder);
   services[id] = {
     obj: null,
