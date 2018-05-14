@@ -55,13 +55,16 @@ describes.repeated('', {
     let sandbox;
     const timer = Services.timerFor(window);
 
-    function getAmpForm(form, canonical = 'https://example.com/amps.html') {
+    function getAmpFormSync(form, canonical = 'https://example.com/amps.html') {
       new AmpFormService(env.ampdoc);
       Services.documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
       cidServiceForDocForTesting(env.ampdoc);
       env.ampdoc.getBody().appendChild(form);
-      const ampForm = new AmpForm(form, 'amp-form-test-id');
-      return Promise.resolve(ampForm);
+      return new AmpForm(form, 'amp-form-test-id');
+    }
+
+    function getAmpForm(form, canonical = 'https://example.com/amps.html') {
+      return Promise.resolve(getAmpFormSync(form, canonical));
     }
 
     function getForm(doc = document, button1 = true, button2 = false,
@@ -539,36 +542,37 @@ describes.repeated('', {
     });
 
     it('should allow rendering responses through inlined templates', () => {
-      return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
-        const form = ampForm.form_;
-        // Add a div[submit-error] with a template child.
-        const errorContainer = document.createElement('div');
-        errorContainer.setAttribute('submit-error', '');
-        form.appendChild(errorContainer);
-        const errorTemplate = document.createElement('template');
-        errorTemplate.setAttribute('type', 'amp-mustache');
-        errorTemplate.content.appendChild(
-            document.createTextNode('Error: {{message}}'));
-        errorContainer.appendChild(errorTemplate);
-        let renderedTemplate = document.createElement('div');
-        renderedTemplate.innerText = 'Error: hello there';
-        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
-          response: {
-            status: 400,
-            json() {
-              return Promise.resolve({message: 'hello there'});
-            },
+      const ampForm = getAmpFormSync(getForm(env.win.document, true));
+      const form = ampForm.form_;
+      // Add a div[submit-error] with a template child.
+      const errorContainer = document.createElement('div');
+      errorContainer.setAttribute('submit-error', '');
+      form.appendChild(errorContainer);
+      const errorTemplate = document.createElement('template');
+      errorTemplate.setAttribute('type', 'amp-mustache');
+      errorTemplate.content.appendChild(
+          document.createTextNode('Error: {{message}}'));
+      errorContainer.appendChild(errorTemplate);
+      let renderedTemplate = document.createElement('div');
+      renderedTemplate.innerText = 'Error: hello there';
+      sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
+        response: {
+          status: 400,
+          json() {
+            return Promise.resolve({message: 'hello there'});
           },
-        }));
-        sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
-            .returns(Promise.resolve(renderedTemplate));
-        const event = {
-          stopImmediatePropagation: sandbox.spy(),
-          target: form,
-          preventDefault: sandbox.spy(),
-        };
-        ampForm.handleSubmitEvent_(event);
-        const findTemplateStub = ampForm.templates_.findAndRenderTemplate;
+        },
+      }));
+      sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
+          .returns(Promise.resolve(renderedTemplate));
+      const event = {
+        stopImmediatePropagation: sandbox.spy(),
+        target: form,
+        preventDefault: sandbox.spy(),
+      };
+      ampForm.handleSubmitEvent_(event);
+      const findTemplateStub = ampForm.templates_.findAndRenderTemplate;
+      allowConsoleError(() => {
         return ampForm.xhrSubmitPromiseForTesting().then(() => {
           expect(findTemplateStub).to.be.called;
           // Template should have rendered an error
