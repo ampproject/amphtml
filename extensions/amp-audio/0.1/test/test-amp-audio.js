@@ -216,10 +216,10 @@ describes.realWin('amp-audio', {
     }).then(ampAudio => {
       const impl = ampAudio.implementation_;
       impl.executeAction({method: 'play', satisfiesTrust: () => true});
-      expect(impl.playerStatus()).to.be.true;
+      expect(impl.isPlaying).to.be.true;
 
       impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-      expect(impl.playerStatus()).to.be.false;
+      expect(impl.isPlaying).to.be.false;
     });
   });
 
@@ -231,10 +231,10 @@ describes.realWin('amp-audio', {
     }).then(ampAudio => {
       const impl = ampAudio.implementation_;
       impl.executeAction({method: 'play', satisfiesTrust: () => true});
-      expect(impl.playerStatus()).to.be.false;
+      expect(impl.isPlaying).to.be.false;
 
       impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-      expect(impl.playerStatus()).to.be.false;
+      expect(impl.isPlaying).to.be.false;
     });
   });
 
