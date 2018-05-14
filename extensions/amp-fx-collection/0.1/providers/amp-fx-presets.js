@@ -15,7 +15,6 @@
  */
 
 import {dev, user} from '../../../../src/log';
-import {isExperimentOn} from '../../../../src/experiments';
 import {setStyles} from '../../../../src/style';
 
 export const Presets = {
@@ -67,7 +66,7 @@ export const Presets = {
     },
   },
   'fade-in': {
-    isFxTypeSupported(win) {
+    isFxTypeSupported(unusedWin) {
       return true;
     },
     userAsserts(element) {
@@ -107,7 +106,7 @@ export const Presets = {
     },
   },
   'fade-in-scroll': {
-    isFxTypeSupported(win) {
+    isFxTypeSupported(unusedWin) {
       return true;
     },
     userAsserts(element) {
