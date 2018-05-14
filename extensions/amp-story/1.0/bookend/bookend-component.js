@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
+
 import {ArticleComponent, ArticleComponentDef} from './components/article';
+import {CtaLinkComponent, CtaLinkDef} from './components/cta-link';
 import {HeadingComponent, HeadingComponentDef} from './components/heading';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
-=======
-import {ArticleComponent, ArticleTitleComponent, BookendArticleComponentDef, BookendArticleTitleComponentDef} from './components/article';
-import {CtaLinkPairComponent} from './components/cta-link-pair';
->>>>>>> Initial prototype for cta buttons in bookend.
 import {htmlFor} from '../../../../src/static-template';
 
 /** @type {string} */
@@ -37,26 +34,19 @@ export const TAG = 'amp-story-bookend';
 export let BookendDataDef;
 
 /**
-<<<<<<< HEAD
  * @typedef {
  *   (!ArticleComponentDef|
  *   !HeadingComponentDef|
- *   !PortraitComponentDef)
+ *   !PortraitComponentDef|
+ *   !CtaLinkDef)
  * }
-=======
- * @typedef {(!BookendArticleComponentDef|!BookendArticleTitleComponentDef|!CtaLinkPairDef)}
->>>>>>> Initial prototype for cta buttons in bookend.
  */
 export let BookendComponentDef;
 
 const articleComponentBuilder = new ArticleComponent();
-<<<<<<< HEAD
 const headingComponentBuilder = new HeadingComponent();
 const portraitComponentBuilder = new PortraitComponent();
-=======
-const articleTitleComponentBuilder = new ArticleTitleComponent();
-const ctaLinkPairComponentBuilder = new CtaLinkPairComponent();
->>>>>>> Initial prototype for cta buttons in bookend.
+const ctaLinkComponentBuilder = new CtaLinkComponent();
 
 /**
  * @typedef {(!ArticleComponent|!HeadingComponent|!PortraitComponent)}
@@ -76,10 +66,8 @@ function componentBuilderInstanceFor(componentType) {
       return headingComponentBuilder;
     case 'portrait':
       return portraitComponentBuilder;
-    case 'article-set-title':
-      return articleTitleComponentBuilder;
-    case 'cta-link-pair':
-      return ctaLinkPairComponentBuilder;
+    case 'cta-link':
+      return ctaLinkComponentBuilder;
     default:
       return null;
   }
