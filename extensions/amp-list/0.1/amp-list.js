@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
+import {Deferred} from '../../../src/utils/promise';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {
@@ -241,12 +242,11 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(items) {
-    let resolver;
-    let rejecter;
-    const promise = new Promise((resolve, reject) => {
-      resolver = resolve;
-      rejecter = reject;
-    });
+    const deferred = new Deferred();
+    const promise = deferred.promise;
+    const resolver = deferred.resolve;
+    const rejecter = deferred.reject;
+
     // If there's nothing currently being rendered, schedule a render pass.
     if (!this.renderItems_) {
       this.renderPass_.schedule();

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {
   KeyframesDef,
   KeyframesOrFilterFnDef,
@@ -570,9 +571,9 @@ class AnimationSequence {
    */
   waitFor(id) {
     if (!(id in this.subscriptionPromises_)) {
-      this.subscriptionPromises_[id] = new Promise(resolve => {
-        this.subscriptionResolvers_[id] = resolve;
-      });
+      const deferred = new Deferred();
+      this.subscriptionPromises_[id] = deferred.promise;
+      this.subscriptionResolvers_[id] = deferred.resolve;
     }
     return this.subscriptionPromises_[id];
   }
