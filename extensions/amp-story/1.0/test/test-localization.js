@@ -70,6 +70,11 @@ describes.fakeWin('localization', {}, env => {
       expect(getLanguageCodesFromString('de-hi-1')).to
           .deep.equal(['de-hi-1', 'de-hi', 'de', 'default']);
     });
+
+    it('should default to English', () => {
+      expect(getLanguageCodesFromString()).to
+          .deep.equal(['en']);
+    });
   });
 
   describe('en-XA pseudolocale', () => {

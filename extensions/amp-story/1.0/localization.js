@@ -94,7 +94,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @return {!Array<string>} A list of language codes.
  */
 export function getLanguageCodesFromString(languageCode) {
-  if (!languageCode || languageCode === '') {
+  if (!languageCode) {
     return ['en'];
   }
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
