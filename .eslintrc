@@ -49,7 +49,7 @@
     "amphtml-internal/resolve-inside-promise-resolver": 1,
     "amphtml-internal/todo-format": 0,
     "amphtml-internal/unused-private-field": 1,
-    "amphtml-internal/vsync": 0,
+    "amphtml-internal/vsync": 1,
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
@@ -123,6 +123,13 @@
     "space-in-parens": 2,
     "space-infix-ops": 2,
     "space-unary-ops": [1, { "words": true, "nonwords": false }],
+    "valid-jsdoc": [1, {
+      "prefer": {"return": "return"},
+      "requireParamDescription": false,
+      "requireReturn": false,
+      "requireReturnType": true,
+      "requireReturnDescription": false
+    }],
     "wrap-iife": [2, "any"]
   }
 }
