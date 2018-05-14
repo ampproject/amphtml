@@ -179,12 +179,12 @@ export class AmpGeo extends AMP.BaseElement {
    * @returns {Array<string>}
    */
   clearPreRender_(doc) {
-    const klasses = doc.body.classList;
+    const {classList} = doc.body;
     const classesToRemove = [];
     const stripRe = new RegExp('^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX ,'i');
-    for (let i = klasses.length - 1; i > 0; i--) {
-      if (stripRe.test(klasses[i])) {
-        classesToRemove.push(klasses[i]);
+    for (let i = classList.length - 1; i > 0; i--) {
+      if (stripRe.test(classList[i])) {
+        classesToRemove.push(classList[i]);
       }
     }
     return classesToRemove;
@@ -230,7 +230,7 @@ export class AmpGeo extends AMP.BaseElement {
           // Actual change happens in callback to runtime can
           // optimize dom mutations.
           self.mutateElement(() => {
-            const classList = doc.body.classList;
+            const {classList} = doc.body;
             // Always remove the pending class
             classesToRemove.push('amp-geo-pending');
             classesToRemove.forEach(toRemove => classList.remove(toRemove));
