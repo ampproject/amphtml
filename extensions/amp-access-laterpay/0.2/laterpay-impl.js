@@ -243,8 +243,8 @@ export class LaterpayVendor {
             this.purchaseConfig_ = responseJson;
             this.purchaseOptions_ = this.parseConfigIntoOptions_(
                 responseJson.purchase_options);
-            // empty before rendering, in case authorization is being called again
-            // with the same state
+            // empty before rendering, in case authorization is being called
+            // again with the same state
             this.emptyContainer_()
                 .then(this.renderPurchaseOverlay_.bind(this));
             return {access: false};

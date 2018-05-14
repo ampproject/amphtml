@@ -1031,7 +1031,8 @@ describes.realWin('SlideScroll', {
           const showSlideSpy = sandbox.spy(impl, 'showSlide_');
           const satisfiesTrust = () => true;
 
-          // Test that showSlide_ due to goToSlide(index=1) is not called before layout.
+          // Test that showSlide_ due to goToSlide(index=1) is not called before
+          // layout.
           let args = {'index': '1'};
           impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
           expect(showSlideSpy).to.not.have.been.called;
@@ -1047,7 +1048,8 @@ describes.realWin('SlideScroll', {
           showSlideSpy.reset();
           impl.unlayoutCallback();
 
-          // Test that showSlide_ due to goToSlide(index=4) is not called before layout.
+          // Test that showSlide_ due to goToSlide(index=4) is not called before
+          // layout.
           args = {'index': '4'};
           impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
           expect(showSlideSpy).to.not.have.been.called;

@@ -519,7 +519,8 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.not.have.been.called;
 
-    // The click is within the left border but left border protection is not set.
+    // The click is within the left border but left border protection is not
+    // set.
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'borderProtection'},
@@ -576,7 +577,8 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.not.have.been.called;
 
-    // The click is within the left border but left border protection is not set.
+    // The click is within the left border but left border protection is not
+    // set.
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'borderProtectionRelativeTo'},

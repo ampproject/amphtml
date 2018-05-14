@@ -32,7 +32,8 @@ const allowedAttributes = ['action', 'alt', 'class', 'disabled', 'height',
  * Returns content of HTML node
  * @param {!Window} win
  * @param {string} selector - CSS selector of the node to take content from
- * @param {!Array<string>} attrs - tag attributes to be left in the stringified HTML
+ * @param {!Array<string>} attrs - tag attributes to be left in the stringified
+ * HTML
  * @return {string}
  */
 export function getHtml(win, selector, attrs) {

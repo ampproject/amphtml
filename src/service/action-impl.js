@@ -947,7 +947,7 @@ export function dereferenceExprsInArgs(args, event) {
     let value = args[key];
     if (typeof value == 'object' && value.expression) {
       const expr =
-          /** @type {ActionInfoArgExpressionDef} */ (value).expression;
+        /** @type {ActionInfoArgExpressionDef} */ (value).expression;
       const exprValue = getValueForExpr(data, expr);
       // If expr can't be found in data, use null instead of undefined.
       value = (exprValue === undefined) ? null : exprValue;

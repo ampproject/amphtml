@@ -74,7 +74,8 @@ describes.realWin('amp-story', {
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_').callsFake(NOOP);
+    // sandbox.stub(element.implementation_,
+    // 'triggerActiveEventForPage_').callsFake(NOOP);
   });
 
   afterEach(() => {

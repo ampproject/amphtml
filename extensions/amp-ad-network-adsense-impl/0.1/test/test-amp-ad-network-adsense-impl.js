@@ -276,8 +276,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
             }
           },
         };
-        // Next two lines are to ensure that internal parts not relevant for this
-        // test are properly set.
+        // Next two lines are to ensure that internal parts not relevant for
+        // this test are properly set.
         impl.size_ = {width: 200, height: 50};
         impl.iframe = impl.win.document.createElement('iframe');
         if (exp) {

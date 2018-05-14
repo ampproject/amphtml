@@ -119,7 +119,7 @@ export class BaseElement {
     /** @public @const {!Element} */
     this.element = element;
     /*
-    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
       \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
@@ -729,7 +729,8 @@ export class BaseElement {
   }
 
   /**
-   * Returns whether the loading indicator is reused again after the first render.
+   * Returns whether the loading indicator is reused again after the first
+   * render.
    * @return {boolean}
    * @public
    */

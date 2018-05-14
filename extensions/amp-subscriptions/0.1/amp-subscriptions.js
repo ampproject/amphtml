@@ -149,10 +149,12 @@ export class SubscriptionService {
   }
 
   /**
-   * This method registers an auto initialized subcription platform with this service.
+   * This method registers an auto initialized subcription platform with this
+   * service.
    *
    * @param {string} serviceId
-   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
+   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform}
+   * subscriptionPlatformFactory
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
@@ -251,8 +253,8 @@ export class SubscriptionService {
         this.startAuthorizationFlow_(false);
         return;
       } else if (this.platformConfig_['alwaysGrant']) {
-        // If service config has `alwaysGrant` key as true,
-        // publisher wants it to be open always until a sviewer decides otherwise.
+        // If service config has `alwaysGrant` key as true, publisher wants it
+        // to be open always until a sviewer decides otherwise.
         this.processGrantState_(true);
         return;
       }

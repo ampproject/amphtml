@@ -142,7 +142,8 @@ export class PlatformStore {
   }
 
   /**
-   * This registers a callback which is called whenever a service id is resolved with an entitlement.
+   * This registers a callback which is called whenever a service id is resolved
+   * with an entitlement.
    * @param {function(!EntitlementChangeEventDef):void} callback
    */
   onChange(callback) {
@@ -316,7 +317,8 @@ export class PlatformStore {
   selectPlatform() {
 
     return this.getAllPlatformsEntitlements_().then(() => {
-      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
+      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs
+      // waiting for all entitlement.
       return this.selectApplicablePlatform_();
     });
   }
@@ -332,14 +334,14 @@ export class PlatformStore {
   }
 
   /**
-   * Returns most qualified platform.
-   * Qualification of a platform is based on an integer weight.
-   * Every platform starts with weight 0 and evaluated against the following parameters,
+   * Returns most qualified platform. Qualification of a platform is based on an
+   * integer weight. Every platform starts with weight 0 and evaluated against
+   * the following parameters,
    * - user is subscribed with platform (Gives weight 10)
    * - supports the current viewer (Gives weight 9)
    *
-   * In the end candidate with max weight is selected.
-   * However if candidate's weight is equal to local platform, then local platform is selected.
+   * In the end candidate with max weight is selected. However if candidate's
+   * weight is equal to local platform, then local platform is selected.
    * @returns {!./subscription-platform.SubscriptionPlatform}
    * @private
    */

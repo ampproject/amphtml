@@ -158,8 +158,8 @@ export class DoubleclickA4aEligibility {
           (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else {
-        // For unconditioned canonical holdback, in the control branch
-        // we allow Fast Fetch on non-CDN pages, but in the experiment we do not.
+        // For unconditioned canonical holdback, in the control branch we allow
+        // Fast Fetch on non-CDN pages, but in the experiment we do not.
         if (getExperimentBranch(
             win, UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME) !=
             DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP) {
@@ -192,8 +192,9 @@ export class DoubleclickA4aEligibility {
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
 
-    // If we need to rollback the launch, or we are in the launch's holdback experiment,
-    // still use Delayed Fetch if USDRUD or custom remote.html in use
+    // If we need to rollback the launch, or we are in the launch's holdback
+    // experiment, still use Delayed Fetch if USDRUD or custom remote.html in
+    // use
     if (isExperimentOn(win, dfDepRollbackExperiment) ||
         experimentId ==
         DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_HOLDBACK_EXPERIMENT) {
@@ -213,7 +214,7 @@ export class DoubleclickA4aEligibility {
    */
   maybeSelectExperiment(win, element, selectionBranches, experimentName) {
     const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+      /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[experimentName] = {
       isTrafficEligible: () => true,
       branches: selectionBranches,

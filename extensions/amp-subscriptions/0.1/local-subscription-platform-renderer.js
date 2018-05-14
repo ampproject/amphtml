@@ -116,7 +116,8 @@ export class LocalSubscriptionPlatformRenderer {
    */
   renderActionsInNode_(renderState, rootNode) {
     return this.ampdoc_.whenReady().then(() => {
-      // Find the matching actions and sections and make them visible if evalutes to true.
+      // Find the matching actions and sections and make them visible if
+      // evalutes to true.
       const querySelectors =
           '[subscriptions-action], [subscriptions-section="actions"],'
               + ' [subscriptions-actions]';

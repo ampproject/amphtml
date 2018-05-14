@@ -574,7 +574,8 @@ describes.repeated('', {
           // Template should have rendered an error
           expect(findTemplateStub).to.have.been.calledWith(
               errorContainer, {message: 'hello there'});
-          // Check that form has a rendered div with class .submit-error-message.
+          // Check that form has a rendered div with class
+          // .submit-error-message.
           renderedTemplate = form.querySelector('[i-amphtml-rendered]');
           expect(renderedTemplate).to.not.be.null;
         });

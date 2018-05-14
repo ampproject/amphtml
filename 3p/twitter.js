@@ -66,7 +66,8 @@ export function twitter(global, data) {
 
     let twitterWidgetSandbox;
     twttr.events.bind('resize', event => {
-      // To be safe, make sure the resize event was triggered for the widget we created below.
+      // To be safe, make sure the resize event was triggered for the widget we
+      // created below.
       if (twitterWidgetSandbox === event.target) {
         resize(twitterWidgetSandbox);
       }

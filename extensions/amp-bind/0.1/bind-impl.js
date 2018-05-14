@@ -340,7 +340,8 @@ export class Bind {
   }
 
   /**
-   * Calls setState(s), where s is data.state with the non-overridable keys removed.
+   * Calls setState(s), where s is data.state with the non-overridable keys
+   * removed.
    * @param {*} data
    * @return {!Promise}
    * @private
@@ -384,7 +385,7 @@ export class Bind {
   addMacros_() {
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros =
-        /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
+      /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
           .split(',')

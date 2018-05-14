@@ -495,7 +495,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const typeConfig = expandConfigRequest(this.predefinedConfig_[type] || {});
     if (this.predefinedConfig_[type]) {
-      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
+      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport
+      // overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
         const TAG = this.getName_();
         this.user().error(TAG, 'Inline or remote config should not ' +
@@ -776,11 +777,13 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Checks result of 'enabled' spec evaluation. Returns false if spec is provided and value
-   * resolves to a falsey value (empty string, 0, false, null, NaN or undefined).
+   * Checks result of 'enabled' spec evaluation. Returns false if spec is
+   * provided and value resolves to a falsey value (empty string, 0, false,
+   * null, NaN or undefined).
    * @param {string} spec Expression that will be evaluated.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
-   * @return {!Promise<boolean>} False only if spec is provided and value is falsey.
+   * @return {!Promise<boolean>} False only if spec is provided and value is
+   * falsey.
    * @private
    */
   checkSpecEnabled_(spec, expansionOptions) {
@@ -797,7 +800,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Expands spec using provided expansion options and applies url replacement if necessary.
+   * Expands spec using provided expansion options and applies url replacement
+   * if necessary.
    * @param {string} spec Expression that needs to be expanded.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<string>} expanded spec.

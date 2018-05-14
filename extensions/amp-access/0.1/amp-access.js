@@ -667,7 +667,8 @@ export class AccessService {
   }
 
   /**
-   * Runs the login flow using one of the predefined urls in the amp-access config
+   * Runs the login flow using one of the predefined urls in the amp-access
+   * config
    *
    * @private
    * @param {string} type Type of login defined in the config

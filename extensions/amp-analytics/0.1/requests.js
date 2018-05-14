@@ -158,7 +158,8 @@ export class RequestHandler {
     const extraUrlParamsPromise = this.expandExtraUrlParams_(
         configParams, triggerParams, expansionOption)
         .then(expandExtraUrlParams => {
-          // Construct the extraUrlParamsString: Remove null param and encode component
+          // Construct the extraUrlParamsString: Remove null param and encode
+          // component
           const expandedExtraUrlParamsStr =
               this.getExtraUrlParamsString_(expandExtraUrlParams);
           return this.urlReplacementService_.expandUrlAsync(

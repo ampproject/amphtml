@@ -37,7 +37,8 @@ setReportError(() => {});
 try {
   const windowContextCreated = new Event('amp-windowContextCreated');
   window.context = new AmpContext(window);
-  // Allows for pre-existence, consider validating correct window.context lib instance?
+  // Allows for pre-existence, consider validating correct window.context lib
+  // instance?
   window.dispatchEvent(windowContextCreated);
 } catch (err) {
   // do nothing with error

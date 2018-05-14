@@ -42,7 +42,8 @@ const cssNanoDefaultOptions = {
   convertValues: false,
   discardUnused: false,
   cssDeclarationSorter: false,
-  // `mergeIdents` this is only unsafe if you rely on those animation names in JavaScript.
+  // `mergeIdents` this is only unsafe if you rely on those animation names in
+  // JavaScript.
   mergeIdents: true,
   reduceIdents: false,
   reduceInitial: false,

@@ -135,27 +135,28 @@ function setupPageLoadMetricsReporter_(ampElement) {
   const win = ampElement.win;
   const correlator = getCorrelator(win);
   win.ampAnalyticsPageLoadMetricsConfig =
-      win.ampAnalyticsPageLoadMetricsConfig || dict({
-      'requests': {
-        'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
-            `&c=${correlator}&met.a4a=` +
-	    'makeBodyVisible.${makeBodyVisible}~' +
-	    'firstVisibleTime.${firstVisibleTime}~' +
-	    'firstContentfulPaint.${firstContentfulPaint}~' +
-	    'firstViewportReady.${firstViewportReady}',
-      },
-      'transport': {
-        'beacon': false,
-        'xhrpost': false,
-      },
-      'triggers': {
-        'iniLoad': {
-          'on': 'visible',
-          'request': 'fvt',
-          'selector': 'body',
+      win.ampAnalyticsPageLoadMetricsConfig ||
+      dict({
+        'requests': {
+          'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
+              `&c=${correlator}&met.a4a=` +
+              'makeBodyVisible.${makeBodyVisible}~' +
+              'firstVisibleTime.${firstVisibleTime}~' +
+              'firstContentfulPaint.${firstContentfulPaint}~' +
+              'firstViewportReady.${firstViewportReady}',
         },
-      },
-    });
+        'transport': {
+          'beacon': false,
+          'xhrpost': false,
+        },
+        'triggers': {
+          'iniLoad': {
+            'on': 'visible',
+            'request': 'fvt',
+            'selector': 'body',
+          },
+        },
+      });
 
   // Load amp-analytics extensions
   win.ampAnalyticsPageLoadMetricsElement =

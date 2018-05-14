@@ -26,8 +26,9 @@ const fs = require('fs');
 const program = require('commander');
 
 /**
- * Changes global `require` calls to be referenced from a given global namespace.
- * e.g. if scopeName is `AMP`, calls will be transformed to `AMP.require`.
+ * Changes global `require` calls to be referenced from a given global
+ * namespace. e.g. if scopeName is `AMP`, calls will be transformed to
+ * `AMP.require`.
  * @param {string} src The contents of a JavaScript source file.
  * @param {string} scopeName The name to prepend to `require` calls.
  * @return {string} The transformed source code

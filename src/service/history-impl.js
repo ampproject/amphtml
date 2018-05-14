@@ -128,8 +128,9 @@ export class History {
   }
 
   /**
-   * Helper method to handle navigation to a local target, e.g. When a user clicks an
-   * anchor link to a local hash - <a href="#section1">Go to section 1</a>.
+   * Helper method to handle navigation to a local target, e.g. When a user
+   * clicks an anchor link to a local hash - <a href="#section1">Go to section
+   * 1</a>.
    *
    * @param {string} target
    * @return {!Promise}

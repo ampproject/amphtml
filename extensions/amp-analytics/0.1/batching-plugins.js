@@ -35,11 +35,11 @@ export const BatchingPluginFunctions = {
 
 
 /**
- * Please add your batch plugin function below in alphabetic order.
- * All batch plugin function should accept input of a string, an array of batchSegment
- * Then return a string.
- * Note: extraUrlParams passed in are not encoded. Please make sure to proper
- * encode segments and make sure the final output url is valid.
+ * Please add your batch plugin function below in alphabetic order. All batch
+ * plugin function should accept input of a string, an array of batchSegment
+ * Then return a string. Note: extraUrlParams passed in are not encoded. Please
+ * make sure to proper encode segments and make sure the final output url is
+ * valid.
  */
 
 // Below is a function prototype for easy copy

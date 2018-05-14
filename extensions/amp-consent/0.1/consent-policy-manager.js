@@ -60,7 +60,8 @@ export class ConsentPolicyManager {
    * Example policy config format:
    * {
    *   "waitFor": {
-   *     "consentABC": [], // Can't support array now. All items will be treated as an empty array
+   *     "consentABC": [], // Can't support array now.
+   *                       // All items will be treated as an empty array
    *     "consentDEF": [],
    *   }
    *   "timeout": {
@@ -325,8 +326,8 @@ export class ConsentPolicyInstance {
     // A single consent instance is unknown
     let isUnknown = false;
 
-    // Decide to traverse item list every time instead of keeping reject/pending counts
-    // Performance should be OK since we expect item list to be small.
+    // Decide to traverse item list every time instead of keeping reject/pending
+    // counts Performance should be OK since we expect item list to be small.
     const items = Object.keys(this.itemToConsentState_);
     for (let i = 0; i < items.length; i++) {
       const consentId = items[i];

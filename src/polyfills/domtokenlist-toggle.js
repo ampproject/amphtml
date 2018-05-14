@@ -16,9 +16,9 @@
 
 
 /**
- * Polyfill for `DOMTokenList.prototype.toggle(token, opt_force)` method.
- * This is specially important because IE does not support `opt_force` attribute.
- * See https://goo.gl/hgKNYY for details.
+ * Polyfill for `DOMTokenList.prototype.toggle(token, opt_force)` method. This
+ * is specially important because IE does not support `opt_force` attribute. See
+ * https://goo.gl/hgKNYY for details.
  * @param {string} token
  * @param {boolean=} opt_force
  * @this {DOMTokenList}
