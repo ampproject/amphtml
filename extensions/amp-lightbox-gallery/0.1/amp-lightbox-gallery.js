@@ -76,12 +76,6 @@ const MOTION_DURATION_RATIO = 0.8; // fraction of animation
 const EPSILON = 0.01; // precision for approx equals
 
 /**
- * TODO(aghassemi): Make lightbox-manager into a doc-level service.
- * @private  {!./service/lightbox-manager-impl.LightboxManager}
- * */
-let manager_;
-
-/**
  * The structure that represents the metadata of a lightbox element
  *
  * @typedef {{
@@ -102,6 +96,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = null;
 
     /** @private {boolean} */
     this.isActive_ = false;
@@ -184,13 +181,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.ampdoc_ = this.getAmpDoc();
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment ${TAG} disabled`);
-    this.manager_ = getServiceForDoc(this.getAmpDoc(), 'navigation');
+    this.manager_ = getServiceForDoc(this.ampdoc_, 'amp-lightbox-manager');
     this.vsync_ = this.getVsync();
-    this.history_ = Services.historyForDoc(this.getAmpDoc());
+    this.history_ = Services.historyForDoc(this.ampdoc_);
     this.action_ = Services.actionServiceForDoc(this.element);
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.ampdoc_);
     viewer.whenFirstVisible().then(() => {
       this.container_ = this.win.document.createElement('div');
       this.container_.classList.add('i-amphtml-lbg');
@@ -334,9 +332,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildCarousel_(lightboxGroupId) {
     return Promise.all([
       Services.extensionsFor(this.win).installExtensionForDoc(
-          this.getAmpDoc(), 'amp-carousel'),
+          this.ampdoc_, 'amp-carousel'),
       Services.extensionsFor(this.win).installExtensionForDoc(
-          this.getAmpDoc(), 'amp-image-viewer'),
+          this.ampdoc_, 'amp-image-viewer'),
     ]).then(() => {
       return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
     }).then(list => {
@@ -728,7 +726,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     let target = invocation.caller;
     if (invocation.args && invocation.args['id']) {
       const targetId = invocation.args['id'];
-      target = this.getAmpDoc().getElementById(targetId);
+      target = this.ampdoc_.getElementById(targetId);
       user().assert(target,
           'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
@@ -1492,18 +1490,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 }
 
 /**
- * @private visible for testing.
- */
-export function installLightboxManager(win) {
-  if (isExperimentOn(win, TAG)) {
-    // TODO (#12859): This only works for singleDoc mode. We will move
-    // installation of LightboxManager to core after the experiment, okay for now.
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
-    manager_ = new LightboxManager(ampdoc);
-  }
-}
-
-/**
  * Tries to find an existing amp-lightbox-gallery, if there is none, it adds a
  * default one.
  * @param {!Window} win
@@ -1524,7 +1510,7 @@ function installLightboxGallery(win) {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerServiceForDoc('amp-lightbox-manager', LightboxManager);
   AMP.registerElement(TAG, AmpLightboxGallery, CSS);
-  installLightboxManager(AMP.win);
   installLightboxGallery(AMP.win);
 });
