@@ -56,7 +56,7 @@
     "babelify": "8.0.0",
     "baconipsum": "0.1.2",
     "bluebird": "3.5.1",
-    "body-parser": "1.18.2",
+    "body-parser": "1.18.3",
     "browserify": "16.2.1",
     "browserify-istanbul": "3.0.1",
     "bundlesize": "0.17.0",
