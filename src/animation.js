@@ -39,8 +39,8 @@ export class Animation {
    * @param {!Node} contextNode The context node.
    * @param {!TransitionDef<?>} transition Transition to animate.
    * @param {./time.timeDef} duration Duration in milliseconds.
-   * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for animation.
-   *   Default is the linear animation.
+   * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for
+   *   animation. Default is the linear animation.
    * @return {!AnimationPlayer}
    */
   static animate(contextNode, transition, duration, opt_curve) {
@@ -85,9 +85,9 @@ export class Animation {
   }
 
   /**
-   * Adds a segment to the animation. Each segment starts at offset (delay)
-   * and runs for a portion of the overall animation (duration). Note that
-   * both delay and duration and normtimeDef types which accept values from 0 to 1.
+   * Adds a segment to the animation. Each segment starts at offset (delay) and
+   * runs for a portion of the overall animation (duration). Note that both
+   * delay and duration and normtimeDef types which accept values from 0 to 1.
    * Optionally, the time is pushed through a curve. If curve is not specified,
    * the default animation curve will be used. The specified transition is
    * animated over the specified duration from 0 to 1.

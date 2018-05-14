@@ -61,7 +61,8 @@ export const RTC_ERROR_ENUM = {
   UNKNOWN_VENDOR: '9',
   // Occurs when request took longer than timeout
   TIMEOUT: '10',
-  // Occurs when URL expansion time exceeded allowed timeout, request never sent.
+  // Occurs when URL expansion time exceeded allowed timeout, request never
+  // sent.
   MACRO_EXPAND_TIMEOUT: '11',
 };
 

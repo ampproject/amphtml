@@ -148,7 +148,8 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * amp-list reuses the loading indicator when the list is fetched again via bind mutation or refresh action
+   * amp-list reuses the loading indicator when the list is fetched again via
+   * bind mutation or refresh action
    * @override
    */
   isLoadingReused() {

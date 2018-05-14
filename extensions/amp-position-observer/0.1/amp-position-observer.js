@@ -269,8 +269,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   parseAttributes_() {
-    // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>"
-    // e.g, "0.5 1": use 50% visibility at top and 100% at the bottom of viewport.
+    // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>" e.g,
+    // "0.5 1": use 50% visibility at top and 100% at the bottom of viewport.
     const ratios = this.element.getAttribute('intersection-ratios');
     if (ratios) {
       const topBottom = ratios.trim().split(' ');
@@ -281,8 +281,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       }
     }
 
-    // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}> <bottom:{px,vh}>"
-    // e.g, "100px 10vh": exclude 100px from top and 10vh from bottom of viewport.
+    // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}>
+    // <bottom:{px,vh}>" e.g, "100px 10vh": exclude 100px from top and 10vh from
+    // bottom of viewport.
     const margins = this.element.getAttribute('viewport-margins');
     if (margins) {
       const topBottom = margins.trim().split(' ');
