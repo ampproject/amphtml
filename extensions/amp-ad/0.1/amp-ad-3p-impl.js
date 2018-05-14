@@ -157,11 +157,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /** @override */
-  getConsentPolicy() {
-    return null;
-  }
-
-  /** @override */
   buildCallback() {
     this.type_ = this.element.getAttribute('type');
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
@@ -316,14 +311,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
 
-    const consentPromise = this.getConsentState();
-    const consentPolicyId = super.getConsentPolicy();
+    const consentPolicyId = this.getConsentPolicy();
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.getAmpDoc(), consentPolicyId)
       : Promise.resolve(null);
 
     this.layoutPromise_ = Promise.all(
-        [getAdCid(this), consentPromise, sharedDataPromise]).then(consents => {
+        [getAdCid(this), sharedDataPromise]).then(consents => {
       const opt_context = {
         clientId: consents[0] || null,
         container: this.container_,
