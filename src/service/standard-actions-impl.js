@@ -176,7 +176,7 @@ export class StandardActions {
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();
     if (startsWith(node.tagName, 'AMP-')) {
-      permission = node.getImpl(impl => {
+      permission = node.getImpl().then(impl => {
         if (typeof impl.navigationError == 'function') {
           throw impl.navigationError();
         }

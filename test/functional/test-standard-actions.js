@@ -223,10 +223,12 @@ describes.sandboxed('StandardActions', {}, () => {
             url: 'http://bar.com',
           },
           node: {
+            tagName: 'DIV',
             ownerDocument: {
               defaultView: win,
             },
           },
+          satisfiesTrust: () => true,
         };
       });
 
@@ -238,32 +240,37 @@ describes.sandboxed('StandardActions', {}, () => {
 
         // Should succeed.
         invocation.satisfiesTrust = () => true;
-        standardActions.handleAmpTarget(invocation);
-        expect(navigator.navigateTo).to.be.calledOnce;
-        expect(navigator.navigateTo).to.be.calledWithExactly(
-            win, 'http://bar.com', 'AMP.navigateTo');
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo');
+        });
       });
 
-      it('should require sandbox="allow-top-navigation" for amp-iframe', () => {
+      it('should pass if node does not implement navigationError()', () => {
+        invocation.node.tagName = 'AMP-FOO';
+        invocation.node.getImpl = () => Promise.resolve({});
+
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo');
+        });
+      });
+
+      it('should fail if node implements navigationError()', () => {
         const userError = sandbox.stub(user(), 'error');
 
-        const attributes = {};
-        invocation.getAttribute = attr => attributes[attr] || '';
-        invocation.satisfiesTrust = () => true;
-        invocation.tagName = 'AMP-IFRAME';
+        invocation.node.tagName = 'AMP-FOO';
+        invocation.node.getImpl = () => Promise.resolve({
+          navigationError: () => new Error('Fake navigation error.'),
+        });
 
-        // Should fail.
-        standardActions.handleAmpTarget(invocation);
-        expect(navigator.navigateTo).to.not.be.called;
-        expect(userError).to.be.calledWithMatch('STANDARD-ACTIONS',
-            '"AMP.navigateTo" is only allowed on <amp-iframe>');
-
-        // Should succeed.
-        attributes['sandbox'] = 'allow-scripts allow-top-navigation';
-        standardActions.handleAmpTarget(invocation);
-        expect(navigator.navigateTo).to.be.calledOnce;
-        expect(navigator.navigateTo).to.be.calledWithExactly(
-            win, 'http://bar.com', 'AMP.navigateTo');
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.not.be.called;
+          expect(userError).to.be.calledWith('STANDARD-ACTIONS',
+              'Fake navigation error.');
+        });
       });
     });
 
