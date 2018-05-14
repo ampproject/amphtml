@@ -50,8 +50,9 @@ export const AccessType = {
 
 
 /**
- * AccessSource represents a single source of authentication information for a page.
- * These sources are constructed, unified and attached to the document by AccessService.
+ * AccessSource represents a single source of authentication information for a
+ * page. These sources are constructed, unified and attached to the document by
+ * AccessService.
  */
 export class AccessSource {
   /**
@@ -420,7 +421,8 @@ export class AccessSource {
   }
 
   /**
-   * Runs the login flow using one of the predefined urls in the amp-access config
+   * Runs the login flow using one of the predefined urls in the amp-access
+   * config
    *
    * @param {string} type Type of login defined in the config
    * @return {!Promise}

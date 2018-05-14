@@ -120,7 +120,8 @@ export class AmpAdXOriginIframeHandler {
     if (isExperimentOn(this.win_, 'inabox-position-api')) {
       this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {
-            // TODO(@zhouyx): Make sendPosition_ only send to message origin iframe
+            // TODO(@zhouyx): Make sendPosition_ only send to message origin
+            // iframe
             this.sendPosition_();
             this.registerPosition_();
           });

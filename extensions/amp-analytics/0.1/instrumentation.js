@@ -84,7 +84,7 @@ export class InstrumentationService {
     this.scrollHandlerRegistered_ = false;
 
     /** @private {!Observable<
-        !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
+      !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
   }
 
@@ -399,9 +399,9 @@ export class AnalyticsGroup {
 
 
 /**
- * It's important to resolve instrumentation asynchronously in elements that depends on
- * it in multi-doc scope. Otherwise an element life-cycle could resolve way before we
- * have the service available.
+ * It's important to resolve instrumentation asynchronously in elements that
+ * depends on it in multi-doc scope. Otherwise an element life-cycle could
+ * resolve way before we have the service available.
  *
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<InstrumentationService>}

@@ -332,8 +332,8 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
-    // TODO(@aghassemi, #10597) Make internal <video> element go fullscreen instead
-    // using postMessages
+    // TODO(@aghassemi, #10597) Make internal <video> element go fullscreen
+    // instead using postMessages
     if (!this.iframe_) {
       return;
     }

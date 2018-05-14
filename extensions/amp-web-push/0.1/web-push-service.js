@@ -547,8 +547,8 @@ export class WebPushService {
           } else {
           /*
             The site is running our initial AMP web push release and the helper
-            frame does not support retrieving the remote storage value. Assume the
-            permission is default to provide the best user experience.
+            frame does not support retrieving the remote storage value. Assume
+            the permission is default to provide the best user experience.
           */
             return Promise.resolve(NotificationPermission.DEFAULT);
           }
@@ -557,8 +557,8 @@ export class WebPushService {
           /*
             If the canonical notification permission is:
               - Blocked
-                - If the publisher has defined a blocked widget section, show it,
-                  otherwise show the unsubscribed widget.
+                - If the publisher has defined a blocked widget section, show
+                  it, otherwise show the unsubscribed widget.
               - Default or Granted
                 - Resume flow
           */

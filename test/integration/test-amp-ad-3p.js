@@ -74,8 +74,8 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
         htmlAccessAllowed: '',
       });
 
-      // make sure the context.data is the same instance as the data param passed
-      // into the vendor function. see #10628
+      // make sure the context.data is the same instance as the data param
+      // passed into the vendor function. see #10628
       expect(context.data).to.equal(
           iframe.contentWindow.networkIntegrationDataParamForTesting);
 

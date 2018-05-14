@@ -717,7 +717,8 @@ describe('amp-a4a', () => {
           headerVal => {
             it(`should not attach a NameFrame when header is ${headerVal}`,
                 () => {
-                  // Make sure there's no signature, so that we go down the 3p iframe path.
+                  // Make sure there's no signature, so that we go down the 3p
+                  // iframe path.
                   delete adResponse.headers['AMP-Fast-Fetch-Signature'];
                   delete adResponse.headers[AMP_SIGNATURE_HEADER];
                   // If rendering type is anything but nameframe, we SHOULD NOT
@@ -808,8 +809,8 @@ describe('amp-a4a', () => {
           headerVal => {
             it(`should not attach a SafeFrame when header is ${headerVal}`,
                 () => {
-                  // If rendering type is anything but safeframe, we SHOULD NOT attach a
-                  // SafeFrame.
+                  // If rendering type is anything but safeframe, we SHOULD NOT
+                  // attach a SafeFrame.
                   adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
                   a4a.onLayoutMeasure();
                   return a4a.layoutCallback().then(() => {

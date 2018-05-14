@@ -16,28 +16,18 @@
 
 
 /**
- * @fileoverview Embeds an instagram photo.
- * The data-shortcode attribute can be easily copied from a normal instagram
- * URL.
- * Example:
- * <code>
- * <amp-instagram
- *   data-shortcode="fBwFP"
- *   data-captioned
- *   data-default-framing
- *   alt="Fastest page in the west."
- *   width="320"
- *   height="392"
- *   layout="responsive">
- * </amp-instagram>
+ * @fileoverview Embeds an instagram photo. The data-shortcode attribute can be
+ * easily copied from a normal instagram URL. Example: <code> <amp-instagram
+ * data-shortcode="fBwFP" data-captioned data-default-framing alt="Fastest page
+ * in the west." width="320" height="392" layout="responsive"> </amp-instagram>
  * </code>
  *
- * For responsive embedding the width and height can be left unchanged from
- * the example above and should produce the correct aspect ratio. amp-instagram
- * will attempt to resize on load based on the height reported by the embedded
- * frame. If captions are specified (data-captioned) then a resize will be
- * requested every time due to the fact that it's not possible to know the height
- * of the caption in advance.
+ * For responsive embedding the width and height can be left unchanged from the
+ * example above and should produce the correct aspect ratio. amp-instagram will
+ * attempt to resize on load based on the height reported by the embedded frame.
+ * If captions are specified (data-captioned) then a resize will be requested
+ * every time due to the fact that it's not possible to know the height of the
+ * caption in advance.
  *
  * If captions are included it is stringly reccomended that an overflow element
  * is also included.  See description of overflow in amp-iframe.

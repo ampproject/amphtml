@@ -60,8 +60,9 @@ function getPostContainer(global, data) {
   if (data.href.match(/\/videos\/\d+\/?$/) && !data.embedAs) {
     embedAs = 'video';
     container.setAttribute('data-embed-as', 'video');
-    // Since 'data-embed-as="video"' disables post text, setting the 'data-show-text'
-    // to 'true' enables the ability to see the text (changed from the default 'false')
+    // Since 'data-embed-as="video"' disables post text, setting the
+    // 'data-show-text' to 'true' enables the ability to see the text (changed
+    // from the default 'false')
     container.setAttribute('data-show-text', 'true');
   }
   container.className = 'fb-' + embedAs;

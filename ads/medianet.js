@@ -26,7 +26,8 @@ const mandatoryParams = ['tagtype', 'cid'],
       'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
       'experimentId', 'multiSize', 'multiSizeValidation',
     ];
-//useSameDomainRenderingUntilDeprecated is included to ensure publisher amp-tags don't break before 29th March
+// useSameDomainRenderingUntilDeprecated is included to ensure publisher
+// amp-tags don't break before 29th March
 
 /**
  * @param {!Window} global

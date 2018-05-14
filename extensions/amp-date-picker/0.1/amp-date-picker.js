@@ -481,9 +481,9 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.registerAction('clear', () => this.handleClear_());
 
     return this.mutateElement(() => {
-      // NOTE(cvializ): There is no standard date format for just the first letter
-      // of the week-day. So we hack it in with this CSS class and don't apply the
-      // CSS class if there is a week-day-format specified.
+      // NOTE(cvializ): There is no standard date format for just the first
+      // letter of the week-day. So we hack it in with this CSS class and don't
+      // apply the CSS class if there is a week-day-format specified.
       this.element.classList.toggle(
           DEFAULT_WEEK_DAY_FORMAT_CSS,
           this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT);
@@ -1473,9 +1473,10 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       if (Picker) {
-        // TODO(cvializ): When rendered with React, the picker expands to fit the number of
-        // weeks for that month. When rendered with Preact, the picker expands 1 behind where it
-        // should for the number of weeks in the month. Fix this.
+        // TODO(cvializ): When rendered with React, the picker expands to fit
+        // the number of weeks for that month. When rendered with Preact, the
+        // picker expands 1 behind where it should for the number of weeks in
+        // the month. Fix this.
         this.reactRender_(
             this.react_.createElement(Picker, Object.assign({}, {
               date: props.date,

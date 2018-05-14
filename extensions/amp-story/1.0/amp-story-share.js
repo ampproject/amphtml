@@ -322,8 +322,8 @@ export class ShareWidget {
   }
 
   /**
-   * TODO(#14591): Remove when bookend API v0.1 is deprecated.
-   * If using the bookend API v1.0, converts the contents to match with the bookend API v0.1.
+   * TODO(#14591): Remove when bookend API v0.1 is deprecated. If using the
+   * bookend API v1.0, converts the contents to match with the bookend API v0.1.
    * @param {!Array<!Object|string>} providers
    * @return {!Object<string, (!JsonObject|boolean)>}
    */
@@ -351,7 +351,8 @@ export class ShareWidget {
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
-    // TODO(#14591): Check if using bookend API v1.0 and convert it to be v0.1 compatible if so.
+    // TODO(#14591): Check if using bookend API v1.0 and convert it to be v0.1
+    // compatible if so.
     if (providers && isArray(providers)) {
       providers = this.parseToClassicApi_(
           /** @type !Array<!Object|string> */ (providers));

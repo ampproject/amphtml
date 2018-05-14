@@ -187,7 +187,8 @@ const isSearchUrl = (url = '') => {
 };
 
 /**
- * Classifies the present page based on title, hostname, meta keywords and meta description.
+ * Classifies the present page based on title, hostname, meta keywords and meta
+ * description.
  * @param {*} pageInfo
  * @param {Array} metaElements
  * @returns {number} classification bitmask (currently only setting a porn bit)

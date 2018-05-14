@@ -132,7 +132,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
                   !== -1);
             expect(resolvedEntitlement.grantReason).to.be
                 .equal(GrantReason.SUBSCRIBER);
-            // raw should be the data which was resolved via sendMessageAwaitResponse.
+            // raw should be the data which was resolved via
+            // sendMessageAwaitResponse.
             expect(resolvedEntitlement.raw).to
                 .equal('faketoken');
           });
@@ -155,7 +156,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
             expect(resolvedEntitlement.granted).to.be.equal(true);
             expect(resolvedEntitlement.grantReason).to.be
                 .equal(GrantReason.METERING);
-            // raw should be the data which was resolved via sendMessageAwaitResponse.
+            // raw should be the data which was resolved via
+            // sendMessageAwaitResponse.
             expect(resolvedEntitlement.data).to.deep.equal({
               left: 3,
             });

@@ -144,9 +144,9 @@ export class Xhr {
           if (interceptorResponse) {
             return interceptorResponse;
           }
-          // After this point, both the native `fetch` and the `fetch` polyfill will
-          // expect a native `FormData` object in the `body` property, so the native
-          // `FormData` object needs to be unwrapped.
+          // After this point, both the native `fetch` and the `fetch` polyfill
+          // will expect a native `FormData` object in the `body` property, so
+          // the native `FormData` object needs to be unwrapped.
           if (isFormDataWrapper(init.body)) {
             init.body = init.body.getFormData();
           }

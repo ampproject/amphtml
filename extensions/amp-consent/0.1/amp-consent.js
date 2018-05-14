@@ -526,8 +526,8 @@ export class AmpConsent extends AMP.BaseElement {
               return;
             }
             // TODO(@zhouyx):
-            // 1. Race condition on consent state change between
-            // schedule to display and display. Add one more check before display
+            // 1. Race condition on consent state change between schedule to
+            //    display and display. Add one more check before display
             // 2. Should not schedule display with DISMISSED UNKNOWN state
             this.scheduleDisplay_(instanceId);
           }

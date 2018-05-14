@@ -278,8 +278,8 @@ export class Templates {
   }
 
   /**
-   * Returns the promise that will eventually yield the template class. This will
-   * wait until the actual template script has been downloaded and parsed.
+   * Returns the promise that will eventually yield the template class. This
+   * will wait until the actual template script has been downloaded and parsed.
    * @param {!Element} element
    * @param {string} type
    * @return {!Promise<!TemplateClassDef>}

@@ -28,14 +28,16 @@ const RequestStatus = {
 };
 
 /**
- * The ConfigManager manages requests for publishers' dashboard configurations from addthis.com,
- * ensuring that a configuration is requested for a given publisher id at most once, that
- * all relevant amp-addthis iframes are notified when configs are received, etc. The exposed API
- * is specified in the typedef, below; everything else is private. When an AMPElement registers
- * with the ConfigManager, this kicks off a request for the relevant dashboard configuration, if
- * necessary, and eventually delivers that configuration to the AMPElement's iframe. When an
- * AMPElement unregisters, the ConfigManager destroys its references to that AMPElement's iframe and
- * performs other cleanup when necessary (such as removing event listeners and destroying other
+ * The ConfigManager manages requests for publishers' dashboard configurations
+ * from addthis.com, ensuring that a configuration is requested for a given
+ * publisher id at most once, that all relevant amp-addthis iframes are notified
+ * when configs are received, etc. The exposed API is specified in the typedef,
+ * below; everything else is private. When an AMPElement registers with the
+ * ConfigManager, this kicks off a request for the relevant dashboard
+ * configuration, if necessary, and eventually delivers that configuration to
+ * the AMPElement's iframe. When an AMPElement unregisters, the ConfigManager
+ * destroys its references to that AMPElement's iframe and performs other
+ * cleanup when necessary (such as removing event listeners and destroying other
  * element references).
  */
 export class ConfigManager {
@@ -60,8 +62,8 @@ export class ConfigManager {
   }
 
   /**
-   * Store the configuration received for the provided pubId, mark the request for the config as
-   * completed, and broadcast the config to relevant iframes.
+   * Store the configuration received for the provided pubId, mark the request
+   * for the config as completed, and broadcast the config to relevant iframes.
    */
   receiveConfiguration({config, pubId, source}) {
     // Check that the configuration event is coming from an iframe that
@@ -109,16 +111,16 @@ export class ConfigManager {
     iframe.contentWindow./*OK*/postMessage(JSON.stringify(jsonToSend), ORIGIN);
 
     if (configRequestStatus === RequestStatus.NOT_REQUESTED) {
-      // If a config for this pubId has not been requested yet, then this iframe will be the one
-      // responsible for requesting it and sending it back here.
+      // If a config for this pubId has not been requested yet, then this iframe
+      // will be the one responsible for requesting it and sending it back here.
       this.configProviderIframes_.push(iframe);
       pubData.requestStatus = RequestStatus.REQUESTED;
     }
   }
 
   /**
-   * Register relevant data with the configuration manager and prepare request/response cycle
-   * between frames.
+   * Register relevant data with the configuration manager and prepare
+   * request/response cycle between frames.
    * @param {{
    * pubId: string,
    * activeToolsMonitor: Object<string,string>,

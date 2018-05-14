@@ -278,10 +278,10 @@ function declareExtension(name, version, options) {
 }
 
 /**
- * This function is used for declaring deprecated extensions. It simply places the current
- * version code in place of the latest versions.
- * This has the ability to break an extension verison, so please be sure that this is
- * the correct one to use.
+ * This function is used for declaring deprecated extensions. It simply places
+ * the current version code in place of the latest versions. This has the
+ * ability to break an extension verison, so please be sure that this is the
+ * correct one to use.
  * @param {string} name
  * @param {string} version E.g. 0.1
  * @param {string} latestVersion
