@@ -124,9 +124,10 @@
     "space-infix-ops": 2,
     "space-unary-ops": [1, { "words": true, "nonwords": false }],
     "valid-jsdoc": [1, {
+      "prefer": {"return": "return"},
       "requireParamDescription": false,
       "requireReturn": false,
-      "requireReturnType": false,
+      "requireReturnType": true,
       "requireReturnDescription": false
     }],
     "wrap-iife": [2, "any"]
