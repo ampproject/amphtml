@@ -19,6 +19,7 @@ import {
   MessageType,
 } from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {
   IntersectionObserver,
 } from '../../../src/intersection-observer';
@@ -183,14 +184,13 @@ export class AmpAdXOriginIframeHandler {
     }
 
     // Calculate render-start and no-content signals.
-    let renderStartResolve;
-    const renderStartPromise = new Promise(resolve => {
-      renderStartResolve = resolve;
-    });
-    let noContentResolve;
-    const noContentPromise = new Promise(resolve => {
-      noContentResolve = resolve;
-    });
+    const renderDeferred = new Deferred();
+    const renderStartPromise = renderDeferred.promise;
+    const renderStartResolve = renderDeferred.resolve;
+    const noContentDeferred = new Deferred();
+    const noContentPromise = noContentDeferred.promise;
+    const noContentResolve = noContentDeferred.resolve;
+
     if (this.baseInstance_.config &&
             this.baseInstance_.config.renderStartImplemented) {
       // When `render-start` is supported, these signals are mutually
