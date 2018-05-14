@@ -72,6 +72,13 @@ export const Presets = {
       return isExperimentOn(win, 'amp-fx-fly-in');
     },
     userAsserts(unusedElement) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
+        return;
+      }
+      user().assert(marginStart >= 0 && marginStart <= 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
@@ -107,6 +114,13 @@ export const Presets = {
       return isExperimentOn(win, 'amp-fx-fly-in');
     },
     userAsserts(unusedElement) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
+        return;
+      }
+      user().assert(marginStart >= 0 && marginStart <= 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
@@ -152,6 +166,13 @@ export const Presets = {
       return isExperimentOn(win, 'amp-fx-fly-in');
     },
     userAsserts(unusedElement) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
+        return;
+      }
+      user().assert(marginStart >= 0 && marginStart <= 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
@@ -197,6 +218,13 @@ export const Presets = {
       return isExperimentOn(win, 'amp-fx-fly-in');
     },
     userAsserts(unusedElement) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
+        return;
+      }
+      user().assert(marginStart >= 0 && marginStart <= 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
