@@ -29,6 +29,7 @@ import {
   iterateCursor,
 } from '../../../../src/dom';
 import {dev, user} from '../../../../src/log';
+import {installServiceInEmbedScope} from '../../../../src/service';
 import {isExperimentOn} from '../../../../src/experiments';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
@@ -71,13 +72,15 @@ export let LightboxThumbnailDataDef;
  *   the current element.
  *  -Discovering elements that can be auto-lightboxed and add the
  *   `lightbox` attribute and possibly an on-tap handler to them
+ * @implements {../../../../src/service.EmbeddableService}
  */
 export class LightboxManager {
 
   /**
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window=} opt_win
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_win) {
 
     // Extra safety check, we don't install this service if experiment is off
     dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-gallery'));
@@ -111,6 +114,13 @@ export class LightboxManager {
      */
     this.seen_ = [];
 
+  }
+
+
+  /** @override */
+  adoptEmbedWindow(embedWin) {
+    installServiceInEmbedScope(
+        embedWin, 'bind', new LightboxManager(this.ampdoc_, embedWin));
   }
 
   /**

@@ -41,6 +41,7 @@ import {
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
+import {getServiceForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
@@ -185,7 +186,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment ${TAG} disabled`);
-    this.manager_ = dev().assert(manager_);
+    this.manager_ = getServiceForDoc(this.getAmpDoc(), 'navigation');
     this.vsync_ = this.getVsync();
     this.history_ = Services.historyForDoc(this.getAmpDoc());
     this.action_ = Services.actionServiceForDoc(this.element);
