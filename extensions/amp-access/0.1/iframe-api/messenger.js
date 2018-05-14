@@ -153,8 +153,7 @@ export class Messenger {
   sendCommandRsvp(cmd, opt_payload) {
     const rsvpId = String(++this.requestId_);
     const deferred = new Deferred();
-    const promise = deferred.promise;
-    const resolver = deferred.resolve;
+    const {promise, resolve: resolver} = deferred;
 
     this.waiting_[rsvpId] = {
       promise,

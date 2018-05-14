@@ -184,12 +184,14 @@ export class AmpAdXOriginIframeHandler {
     }
 
     // Calculate render-start and no-content signals.
-    const renderDeferred = new Deferred();
-    const renderStartPromise = renderDeferred.promise;
-    const renderStartResolve = renderDeferred.resolve;
-    const noContentDeferred = new Deferred();
-    const noContentPromise = noContentDeferred.promise;
-    const noContentResolve = noContentDeferred.resolve;
+    const {
+      promise: renderStartPromise,
+      resolve: renderStartResolve,
+    } = new Deferred();
+    const {
+      promise: noContentPromise,
+      resolve: noContentResolve
+    } = new Deferred();
 
     if (this.baseInstance_.config &&
             this.baseInstance_.config.renderStartImplemented) {

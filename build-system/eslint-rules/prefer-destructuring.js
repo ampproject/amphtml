@@ -83,7 +83,7 @@ module.exports = {
           const ids = [];
 
           names.forEach(name => ids.push(name));
-          const replacement = `{${ids.join(', ')}} = ${base} `;
+          const replacement = `{${ids.join(', ')}} = ${base}`;
           fixes.push(fixer.replaceText(node, replacement));
 
           declarations.forEach(declaration => {
