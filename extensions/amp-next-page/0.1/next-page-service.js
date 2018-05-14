@@ -26,6 +26,7 @@ import {
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {parseUrl} from '../../../src/url';
+import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -179,6 +180,14 @@ export class NextPageService {
       for (let i = 0; i < elements.length; i++) {
         elements[i].classList.add('i-amphtml-next-page-hidden');
       }
+    }
+
+    // Drop any amp-analytics tags from the child doc. We want to reuse the
+    // parent config instead.
+    const analytics = doc.querySelectorAll('amp-analytics');
+    for (let i = 0; i < analytics.length; i++) {
+      const item = analytics[i];
+      removeElement(item);
     }
 
     const amp =
