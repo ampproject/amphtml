@@ -15,8 +15,6 @@
  */
 import {closest} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
-import { lang } from 'moment';
-
 
 /**
  * A unique identifier for each localized string.  Localized string IDs should:
@@ -96,11 +94,9 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @return {!Array<string>} A list of language codes.
  */
 export function getLanguageCodesFromString(languageCode) {
-  if(!languageCode || languageCode === ""){
-    console.log('Empty');
+  if (!languageCode || languageCode === '') {
     return ['en'];
   }
-  console.log("LC: " +languageCode)
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce((fallbackLanguageCodeList, chunk, index) => {
     const fallbackLanguageCode = matches.slice(0, index + 1)
