@@ -332,9 +332,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildCarousel_(lightboxGroupId) {
     return Promise.all([
       Services.extensionsFor(this.win).installExtensionForDoc(
-          this.ampdoc_, 'amp-carousel'),
+          this.getAmpDoc(), 'amp-carousel'),
       Services.extensionsFor(this.win).installExtensionForDoc(
-          this.ampdoc_, 'amp-image-viewer'),
+          this.getAmpDoc(), 'amp-image-viewer'),
     ]).then(() => {
       return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
     }).then(list => {
@@ -1492,11 +1492,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 /**
  * Tries to find an existing amp-lightbox-gallery, if there is none, it adds a
  * default one.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise}
  */
-function installLightboxGallery(win) {
-  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+function installLightboxGallery(ampdoc) {
   // TODO (#12859): make this work for more than singleDoc mode
   return ampdoc.whenBodyAvailable().then(body => {
     const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
@@ -1512,5 +1511,5 @@ function installLightboxGallery(win) {
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc('amp-lightbox-manager', LightboxManager);
   AMP.registerElement(TAG, AmpLightboxGallery, CSS);
-  installLightboxGallery(AMP.win);
+  installLightboxGallery(AMP.ampdoc);
 });

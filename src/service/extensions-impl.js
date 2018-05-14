@@ -453,9 +453,8 @@ export class Extensions {
                   /* completeCallback */ resolve,
                   /* isRuntime */ false,
                   extensionId);
-            } else {
-              resolve();
             }
+            resolve();
           }).then(() => {
             upgradeOrRegisterElement(
                 childWin,
