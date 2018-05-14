@@ -729,6 +729,36 @@ describes.realWin('amp-iframe', {
           expect(iframe.getAttribute('src')).to.contain(newSrc);
         });
 
+    describe('navigationError()', () => {
+      it('should return null if top navigation is allowed', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin allow-top-navigation',
+          width: 300,
+          height: 250,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        // Should be allowed if `allow-top-navigation` is set.
+        expect(impl.navigationError()).to.be.null;
+      });
+
+      it('should return error if top navigation is not allowed', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin',
+          width: 300,
+          height: 250,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        // Should be allowed if `allow-top-navigation` is set.
+        const error = impl.navigationError();
+        expect(error).to.not.be.null;
+        expect(error.message).to.match(/allow-top-navigation/);
+      });
+    });
+
     describe('two-way messaging', function() {
       let messagingSrc;
 

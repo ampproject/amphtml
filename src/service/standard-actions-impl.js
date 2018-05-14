@@ -178,7 +178,10 @@ export class StandardActions {
     if (startsWith(node.tagName, 'AMP-')) {
       permission = node.getImpl().then(impl => {
         if (typeof impl.navigationError == 'function') {
-          throw impl.navigationError();
+          const error = impl.navigationError();
+          if (error) {
+            throw error;
+          }
         }
       });
     }
