@@ -148,13 +148,16 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
-  if (argv.files) {
-    config.lintGlobs =
-        config.lintGlobs.filter(e => e !== '**/*.js').concat(argv.files);
-  }
-  if (process.env.TRAVIS_PULL_REQUEST || process.env.LOCAL_PR_CHECK) {
-    config.lintGlobs =
-        config.lintGlobs.filter(e => e !== '**/*.js').concat(getLintFiles());
+  if (argv.files ||
+      process.env.TRAVIS_PULL_REQUEST ||
+      process.env.LOCAL_PR_CHECK) {
+    if (argv.files) {
+      config.lintGlobs =
+          config.lintGlobs.filter(e => e !== '**/*.js').concat(argv.files);
+    } else {
+      config.lintGlobs =
+          config.lintGlobs.filter(e => e !== '**/*.js').concat(getLintFiles());
+    }
     // Override .eslintrc settings here.
     options['rules'] = {
       // TODO(rsimha, #15255): Make this error by default in .eslintrc.
