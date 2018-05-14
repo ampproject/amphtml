@@ -29,7 +29,7 @@ module.exports = function(context) {
   return {
     // Promise.resolve(CALL())
     CallExpression(node) {
-      if (/test-/.test(context.getFilename())) {
+      if (/\btest|build-system/.test(context.getFilename())) {
         return;
       }
 
@@ -57,7 +57,7 @@ module.exports = function(context) {
 
     // new Promise(...)
     NewExpression(node) {
-      if (/test-/.test(context.getFilename())) {
+      if (/\btest|build-system/.test(context.getFilename())) {
         return;
       }
 

@@ -20,6 +20,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
+import {Deferred} from '../../../src/utils/promise';
 import {FiniteStateMachine} from '../../../src/finite-state-machine';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
@@ -315,13 +316,13 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private */
     this.renderedTemplates_ = map();
 
-    /** @private {?function()} */
-    this.templatesReadyResolver_ = null;
+    const deferred = new Deferred();
 
     /** @private {!Promise} */
-    this.templatesReadyPromise_ = new Promise(resolve => {
-      this.templatesReadyResolver_ = resolve;
-    });
+    this.templatesReadyPromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.templatesReadyResolver_ = deferred.resolve;
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];

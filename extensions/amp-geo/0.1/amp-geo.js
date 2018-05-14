@@ -258,7 +258,6 @@ let geoDeferred = null;
 
 AMP.extension('amp-geo', '0.1', AMP => {
   geoDeferred = new Deferred();
-
   AMP.registerElement(TAG, AmpGeo);
   AMP.registerServiceForDoc(SERVICE_TAG, () => geoDeferred.promise);
 });
