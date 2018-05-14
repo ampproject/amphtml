@@ -81,7 +81,7 @@ export let LocalizedStringBundleDef;
  * Language code used if there is no language code specified by the document.
  * @const {string}
  */
-const DEFAULT_LANGUAGE_CODE = 'default';
+const DEFAULT_LANGUAGE_CODE = 'en';
 
 
 /**
