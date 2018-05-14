@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -93,13 +94,13 @@ export class AmpUserNotification extends AMP.BaseElement {
     /** @private {?string} */
     this.elementId_ = null;
 
-    /** @private {?function()} */
-    this.dialogResolve_ = null;
+    const deferred = new Deferred();
 
     /** @private {Promise} */
-    this.dialogPromise_ = new Promise(resolve => {
-      this.dialogResolve_ = resolve;
-    });
+    this.dialogPromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.dialogResolve_ = deferred.resolve;
 
     /** @private {?string} */
     this.dismissHref_ = null;
@@ -489,10 +490,9 @@ export class UserNotificationManager {
       return this.deferRegistry_[id];
     }
 
-    let resolve;
-    const promise = new Promise(r => {
-      resolve = r;
-    });
+    const deferred = new Deferred();
+    const promise = deferred.promise;
+    const resolve = deferred.resolve;
 
     return this.deferRegistry_[id] = {promise, resolve};
   }

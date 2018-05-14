@@ -20,6 +20,7 @@ import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {SignInProtocol} from './signin';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
@@ -122,17 +123,17 @@ export class AccessSource {
     this.signIn_ = new SignInProtocol(ampdoc, this.viewer_, this.pubOrigin_,
         configJson);
 
-    /** @private {?Function} */
-    this.firstAuthorizationResolver_ = null;
+    const deferred = new Deferred();
 
     /**
      * This pattern allows AccessService to attach behavior to authorization
      * before runAuthorization() is actually called.
      * @const @private {!Promise}
      */
-    this.firstAuthorizationPromise_ = new Promise(resolve => {
-      this.firstAuthorizationResolver_ = resolve;
-    });
+    this.firstAuthorizationPromise_ = deferred.promise;
+
+    /** @private {?Function} */
+    this.firstAuthorizationResolver_ = deferred.resolve;
 
     /** @private {!Object<string, string>} */
     this.loginUrlMap_ = {};
