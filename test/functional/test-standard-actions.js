@@ -258,19 +258,35 @@ describes.sandboxed('StandardActions', {}, () => {
         });
       });
 
-      it('should fail if node implements navigationError()', () => {
+      it('should check navigationError() for AMP elements', function*() {
         const userError = sandbox.stub(user(), 'error');
 
         invocation.node.tagName = 'AMP-FOO';
+
+        // Should succeed if navigationError() is not implemented.
+        invocation.node.getImpl = () => Promise.resolve({});
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledOnce;
+        expect(navigator.navigateTo).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+
+        // Should succeed if navigationError() returns null.
+        invocation.node.getImpl = () => Promise.resolve({
+          navigationError: () => null,
+        });
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledTwice;
+        expect(navigator.navigateTo.getCall(1)).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+
+        // Should fail if navigationError() returns an error.
         invocation.node.getImpl = () => Promise.resolve({
           navigationError: () => new Error('Fake navigation error.'),
         });
-
-        return standardActions.handleAmpTarget(invocation).then(() => {
-          expect(navigator.navigateTo).to.not.be.called;
-          expect(userError).to.be.calledWith('STANDARD-ACTIONS',
-              'Fake navigation error.');
-        });
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledTwice;
+        expect(userError).to.be.calledWith('STANDARD-ACTIONS',
+            'Fake navigation error.');
       });
     });
 
