@@ -48,6 +48,10 @@ const SUPPORTED_ELEMENTS_ = {
   'amp-anim': true,
 };
 
+/** @private @const */
+const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby',
+  'aria-labelledby'];
+
 /** @private @const {!../../../src/curve.CurveDef} */
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
@@ -94,13 +98,6 @@ export class ImageViewer {
 
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
-
-    /** @private {!Object} */
-    this.ariaAttributes_ = {
-      'alt': null,
-      'aria-label': null,
-      'aria-labelledby': null,
-    };
 
     /** @private {number} */
     this.sourceWidth_ = 0;
@@ -197,9 +194,8 @@ export class ImageViewer {
    */
   reset() {
     this.image_.setAttribute('src', '');
-    Object.keys(this.ariaAttributes_).forEach(key => {
+    ARIA_ATTRIBUTES.forEach(key => {
       this.image_.removeAttribute(key);
-      this.ariaAttributes_[key] = null;
     });
     this.image_.removeAttribute('aria-describedby');
     this.srcset_ = null;
@@ -228,32 +224,20 @@ export class ImageViewer {
   }
 
   /**
-   * @param {!Element} sourceElement
-   * @param {?Element} sourceImage
-   * @return {number}
+   * Sets the source width and height based the natural dimensions of the
+   * source image if loaded, and the offset dimensions of amp-img element
+   * if not.
+   * @param {!Element} ampImg
+   * @param {?Element} img
    * @private
    */
-  getSourceWidth_(sourceElement, sourceImage) {
-    if (sourceElement.hasAttribute('width')) {
-      return parseInt(sourceElement.getAttribute('width'), 10);
+  setSourceDimensions_(ampImg, img) {
+    if (img) {
+      this.sourceWidth_ = img.naturalWidth || ampImg./*OK*/offsetWidth;
+      this.sourceHeight_ = img.naturalHeight || ampImg./*OK*/offsetHeight;
     } else {
-      return sourceImage ? sourceImage.naturalWidth
-        : sourceElement./*OK*/offsetWidth;
-    }
-  }
-
-  /**
-   * @param {!Element} sourceElement
-   * @param {?Element} sourceImage
-   * @return {number}
-   * @private
-   */
-  getSourceHeight_(sourceElement, sourceImage) {
-    if (sourceElement.hasAttribute('height')) {
-      return parseInt(sourceElement.getAttribute('height'), 10);
-    } else {
-      return sourceImage ? sourceImage.naturalHeight
-        : sourceElement./*OK*/offsetHeight;
+      this.sourceWidth_ = ampImg./*OK*/offsetWidth;
+      this.sourceHeight_ = ampImg./*OK*/offsetHeight;
     }
   }
 
@@ -265,15 +249,11 @@ export class ImageViewer {
    * @param {?Element} sourceImage
    */
   init(sourceElement, sourceImage) {
-    this.sourceWidth_ = this.getSourceWidth_(sourceElement, sourceImage);
-    this.sourceHeight_ = this.getSourceHeight_(sourceElement, sourceImage);
+    this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    Object.keys(this.ariaAttributes_).forEach(key => {
-      this.ariaAttributes_[key] = sourceElement.getAttribute(key);
-      if (this.ariaAttributes_[key]) {
-        this.image_.setAttribute(key, this.ariaAttributes_[key]);
-      }
+    sourceElement.getImpl().then(elem => {
+      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
     });
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
