@@ -111,6 +111,7 @@ export class AmpGeo extends AMP.BaseElement {
 
   /**
    * findCountry_, sets this.country_ and this.mode_
+   * @param {Document} doc
    */
   findCountry_(doc) {
     // First see if we've been pre-rendered with a country, if so set it
@@ -173,6 +174,7 @@ export class AmpGeo extends AMP.BaseElement {
    * clearPreRender_()
    * Removes classes and amp-state block addred by server side
    * pre-render when debug override is in effect
+   * @param {Document} doc
    */
   clearPreRender_(doc) {
     const klasses = doc.body.classList;
