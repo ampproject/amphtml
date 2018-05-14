@@ -18,12 +18,12 @@ import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
-import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../../src/sanitizer';
+import {sanitizeHtml, sanitizeTagsForTripleMustache} from './amp-mustache-html-sanitizer';
+
 
 // Configure sanitizer for output of "triple-mustache";a set of allowed tags
 // to be unescaped.
 setUnescapedSanitizier(sanitizeTagsForTripleMustache);
-
 
 /**
  * Implements an AMP template for Mustache.js.

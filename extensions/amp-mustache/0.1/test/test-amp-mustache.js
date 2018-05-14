@@ -17,6 +17,7 @@
 import {
   AmpMustache,
 } from '../amp-mustache';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describe('amp-mustache template', () => {
 
@@ -53,6 +54,65 @@ describe('amp-mustache template', () => {
     });
   });
 
+  it('should output style attributes if inline styles enabled', () => {
+    toggleExperiment(self, 'inline-styles', true,
+        /* opt_transientExperiment */ true);
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <b style="color: red">abc</b>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <b style="color: red">abc</b>');
+  });
+
+  it('should ignore styles containing `!important`',() => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <div style="color:blue!important">Test</div>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal('value = <div>Test</div>');
+    });
+  });
+
+  it('should ignore styles containing `position:fixed`', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <div style="position:fixed">Test</div>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <div>Test</div>');
+    });
+  });
+
+  it('should ignore styles containing `position:sticky`', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <div style="position:sticky">Test</div>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <div>Test</div>');
+    });
+  });
+
   it('should sanitize templated tag names', () => {
     const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
@@ -65,6 +125,379 @@ describe('amp-mustache template', () => {
     expect(result./*OK*/innerHTML).to.not
         .equal('<a href="javascript:alert(0)">abc</a>');
     expect(result.firstElementChild).to.be.null;
+  });
+
+  it('should default target to _top with href', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <a href="http://www.google.com">google</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a href="http://www.google.com/" target="_top">google</a>');
+  });
+
+  it('should output a valid target', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <a target="_top">a</a><a target="_blank">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a target="_top">a</a><a target="_blank">b</a>');
+  });
+
+  it('should output a valid target in different case', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <a target="_TOP">a</a><a target="_BLANK">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a target="_top">a</a><a target="_blank">b</a>');
+  });
+
+  it('should sanitize tags, removing unsafe attributes', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <a href="javascript:alert(\'XSS\')">test</a>'
+        + '<img src="x" onerror="alert(\'XSS\')" />';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <a target="_top">test</a>');
+    });
+  });
+
+  it('should override an unallowed target', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <a target="_self">_self</a>'
+        + '<a target="_parent">_parent</a>'
+        + '<a target="_other">_other</a>'
+        + '<a target="_OTHER">_OTHER</a>'
+        + '<a target="other">other</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a target="_top">_self</a>'
+        + '<a target="_top">_parent</a>'
+        + '<a target="_top">_other</a>'
+        + '<a target="_top">_OTHER</a>'
+        + '<a target="_top">other</a>');
+  });
+
+  it('should NOT output security-sensitive binding attributes', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = a<a onclick="alert">b</a>'
+        + 'a<a STYLE="color: red;">b</a>'
+        + 'a<a STYLE="color: red;">b</a>'
+        + '<a href="javascript:alert">b</a>'
+        + 'a<a href="JAVASCRIPT:alert">b</a>'
+        + 'a<a href="vbscript:alert">b</a>'
+        + 'a<a href="VBSCRIPT:alert">b</a>'
+        + 'a<a href="data:alert">b</a>'
+        + 'a<a href="DATA:alert">b</a>'
+        + 'a<a href="<script">b</a>'
+        + 'a<a href="</script">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = a<a>b</a>'
+          + 'a<a>b</a>'
+          + 'a<a>b</a>'
+          + '<a target="_top">b</a>'
+          + 'a<a target="_top">b</a>'
+          + 'a<a target="_top">b</a>'
+          + 'a<a target="_top">b</a>'
+          + 'a<a target="_top">b</a>'
+          + 'a<a target="_top">b</a>'
+          + 'a<a target="_top">b</a>'
+          + 'a<a target="_top">b</a>');
+    });
+  });
+
+  it('should output [text] and [class] attributes', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <p [text]="foo" [class]="bar"></p>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <p [text]="foo" [class]="bar"></p>');
+  });
+
+  it('should apply html4/caja restrictions', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = a<dialog>b</dialog>c'
+        + 'a<dialog>b<img>d</dialog>c'
+        + '<div class="c" src="d">b</div>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = ac'
+        + 'ac'
+        + '<div class="c" src="">b</div>');
+  });
+
+  it('should allow amp-subscriptions attributes', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <div subscriptions-action="login">link</div>'
+        + '<div subscriptions-section="actions">link</div>'
+        + '<div subscriptions-actions="">link</div>'
+        + '<div subscriptions-display="">link</div>'
+        + '<div subscriptions-dialog="">link</div>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <div subscriptions-action="login">link</div>'
+        + '<div subscriptions-section="actions">link</div>'
+        + '<div subscriptions-actions="">link</div>'
+        + '<div subscriptions-display="">link</div>'
+        + '<div subscriptions-dialog="">link</div>');
+  });
+
+  it('should NOT rewrite values of binding attributes', () => {
+    // Should not change "foo.bar" but should add target="_top"
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <a [href]="foo.bar">link</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a [href]="foo.bar" target="_top">link</a>');
+  });
+
+  it('should allow source::src with vaild protocol', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <source src="https://www.foo.com/">';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <source src="https://www.foo.com/">');
+  });
+
+  it('should catch attribute value whitespace variations', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = a<a href=" j\na\tv\ra s&#160;cript:&#32;alert">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = a<a target="_top">b</a>');
+    });
+  });
+
+  it('should not allow source::src with invaild protocol', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <source src="http://www.foo.com">'
+        + '<source src="<script>bad()</script>">';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <source src="">'
+        + '<source src="">');
+  });
+
+  it('should NOT output blacklisted values for class attributes', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <p class="i-amphtml-">hello</p>'
+        + '<p class="i-amphtml-class">hello</p>'
+        + '<p class="foo-i-amphtml-bar">hello</p>'
+        + '<p [class]="i-amphtml-">hello</p>'
+        + '<p [class]="i-amphtml-class">hello</p>'
+        + '<p [class]="foo-i-amphtml-bar">hello</p>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <p>hello</p>'
+          + '<p>hello</p>'
+          + '<p>hello</p>'
+          + '<p>hello</p>'
+          + '<p>hello</p>'
+          + '<p>hello</p>');
+    });
+  });
+
+  it('should output "href" attribute', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = a<a href="http://acme.com/">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = a<a href="http://acme.com/" target="_top">b</a>');
+  });
+
+  it('should output "rel" attribute', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = a<a href="http://acme.com/" rel="amphtml">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = a<a href="http://acme.com/" rel="amphtml" '
+        + 'target="_top">b</a>');
+  });
+
+  it('should NOT output security-sensitive attributes', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = value = a<a onclick="alert">b</a>'
+        + 'a<a [onclick]="alert">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = value = a<a>b</a>'
+          + 'a<a>b</a>');
+    });
+  });
+
+  it('should output "on" attribute', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML = 'value = a<a on="tap">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal('value = a<a on="tap">b</a>');
+  });
+
+  it('should output "data-, aria-, and role" attributes', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = <a data-foo="bar" aria-label="bar" role="button">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a data-foo="bar" aria-label="bar" role="button">b</a>');
+  });
+
+  it('should NOT output security-sensitive markup', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = a<script>b</script>c'
+        + 'a<script>b<img>d</script>c'
+        + 'a<style>b</style>c'
+        + 'a<img>c'
+        + 'a<iframe></iframe>c'
+        + 'a<frame></frame>c'
+        + 'a<video></video>c'
+        + 'a<audio></audio>c'
+        + 'a<applet></applet>c'
+        + 'a<link>c'
+        + 'a<meta>c';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac');
+  });
+
+  it('should NOT output security-sensitive markup when nested', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'value = a<script><style>b</style></script>c'
+        + 'a<style><iframe>b</iframe></style>c'
+        + 'a<script><img></script>c';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = ac'
+        + 'ac'
+        + 'ac');
+  });
+
+  it('should NOT output security-sensitive markup when broken', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML = 'value = a<script>bc';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal('value = a');
   });
 
   describe('Sanitizing data- attributes', () => {
@@ -438,19 +871,6 @@ describe('amp-mustache template', () => {
           + '</tr></tfoot>'
           + '</table>'
       );
-    });
-
-    it('should sanitize tags, removing unsafe attributes', () => {
-      const templateElement = document.createElement('template');
-      templateElement.content.textContent = 'value = {{{value}}}';
-      const template = new AmpMustache(templateElement);
-      template.compileCallback();
-      const result = template.render({
-        value: '<a href="javascript:alert(\'XSS\')">test</a>'
-            + '<img src="x" onerror="alert(\'XSS\')" />',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a target="_top">test</a>');
     });
   });
 

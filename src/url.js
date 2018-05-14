@@ -20,6 +20,7 @@ import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
+import {parseSrcset} from './srcset';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 import {urls} from './config';
 import {user} from './log';
@@ -526,4 +527,97 @@ export function checkCorsUrl(url) {
  */
 export function tryDecodeUriComponent(component, opt_fallback) {
   return tryDecodeUriComponent_(component, opt_fallback);
+}
+
+/**
+ * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
+ * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
+ * @see resolveUrlAttr for rewriting rules.
+ * @param {string} tag
+ * @param {string} tagName
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @return {string}
+ * @private Visible for testing.
+ */
+export function rewriteAttributeValue(tag, tagName, attrName, attrValue) {
+  const attr = attrName.toLowerCase();
+  if (attr == 'src' || attr == 'href' || attr == 'srcset') {
+    return resolveUrlAttr(
+        tag, tagName.toLowerCase(), attr, attrValue, self.location);
+  }
+  return attrValue;
+}
+
+/**
+ * Non-HTTPs image URLs are rewritten via proxy.
+ * @param {string} attrValue
+ * @param {!Location} baseUrl
+ * @param {boolean} isProxyHost
+ * @return {string}
+ */
+export function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
+  const src = parseUrl(resolveRelativeUrl(attrValue, baseUrl));
+
+  // URLs such as `data:` or proxy URLs are returned as is. Unsafe protocols
+  // do not arrive here - already stripped by the sanitizer.
+  if (src.protocol == 'data:' || isProxyOrigin(src) || !isProxyHost) {
+    return src.href;
+  }
+
+  // Rewrite as a proxy URL.
+  return `${urls.cdn}/i/` +
+      (src.protocol == 'https:' ? 's/' : '') +
+      encodeURIComponent(src.host) +
+      src.pathname + (src.search || '') + (src.hash || '');
+}
+
+/**
+ * Rewrites the URL attribute values. URLs are rewritten as following:
+ * - If URL is absolute, it is not rewritten
+ * - If URL is relative, it's rewritten as absolute against the source origin
+ * - If resulting URL is a `http:` URL and it's for image, the URL is rewritten
+ *   again to be served with AMP Cache (cdn.ampproject.org).
+ *
+ * @param {string} tag
+ * @param {string} tagName
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {!Location} windowLocation
+ * @return {string}
+ * @private Visible for testing.
+ */
+export function resolveUrlAttr(
+  tag, tagName, attrName, attrValue, windowLocation) {
+  const TAG = tag;
+  checkCorsUrl(attrValue);
+  const isProxyHost = isProxyOrigin(windowLocation);
+  const baseUrl = parseUrl(getSourceUrl(windowLocation));
+
+  if (attrName == 'href' && !startsWith(attrValue, '#')) {
+    return resolveRelativeUrl(attrValue, baseUrl);
+  }
+
+  if (attrName == 'src') {
+    if (tagName == 'amp-img') {
+      return resolveImageUrlAttr(attrValue, baseUrl, isProxyHost);
+    }
+    return resolveRelativeUrl(attrValue, baseUrl);
+  }
+
+  if (attrName == 'srcset') {
+    let srcset;
+    try {
+      srcset = parseSrcset(attrValue);
+    } catch (e) {
+      // Do not fail the whole template just because one srcset is broken.
+      // An AMP element will pick it up and report properly.
+      user().error(TAG, 'Failed to parse srcset: ', e);
+      return attrValue;
+    }
+    return srcset.stringify(url => resolveImageUrlAttr(url, baseUrl,
+        isProxyHost));
+  }
+
+  return attrValue;
 }

@@ -30,10 +30,10 @@ import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+import {isProxyOrigin, rewriteAttributeValue} from '../../../src/url';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/sanitizer';
 
 const TAG = 'amp-bind';
 
@@ -384,7 +384,7 @@ export class Bind {
   addMacros_() {
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros =
-        /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
+    /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
           .split(',')
@@ -489,7 +489,6 @@ export class Bind {
    * @param {!Array<!Node>} nodes
    * @return {!Promise}
    * @private
-   * @visibleForTesting
    */
   removeBindingsForNodes_(nodes) {
     const before = (getMode().development) ? this.numberOfBindings() : 0;
@@ -871,7 +870,6 @@ export class Bind {
    * @param {!Element} element
    * @param {./bind-expression.BindExpressionResultDef} newValue
    * @return (?{name: string, value:./bind-expression.BindExpressionResultDef})
-   * @private
    */
   applyBinding_(boundProperty, element, newValue) {
     const property = boundProperty.property;
@@ -970,7 +968,8 @@ export class Bind {
     // `url#parseUrl` which uses <a>. Worker has URL API but not on IE11.
     let rewrittenValue;
     try {
-      rewrittenValue = rewriteAttributesForElement(element, property, value);
+      rewrittenValue =
+          this.rewriteAttributesForElement_(element, property, value);
     } catch (e) {
       const error = user().createError(`${TAG}: "${value}" is not a ` +
           `valid result for [${property}]`, e);
@@ -1100,6 +1099,46 @@ export class Bind {
     userError.stack = e.stack;
     reportError(userError, opt_element);
     return userError;
+  }
+
+  /**
+   * The same as rewriteAttributeValue() but actually updates the element and
+   * modifies other related attribute(s) for special cases, i.e. `target` for <a>.
+   * @param {!Element} element
+   * @param {string} attrName
+   * @param {string} attrValue
+   * @param {!Location=} opt_location
+   * @return {string}
+   */
+  rewriteAttributesForElement_(element, attrName, attrValue, opt_location) {
+    /** @private @const {string} */
+    const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
+    const tag = element.tagName.toLowerCase();
+    const attr = attrName.toLowerCase();
+    const rewrittenValue = rewriteAttributeValue(TAG, tag, attr, attrValue);
+    // When served from proxy (CDN), changing an <a> tag from a hash link to a
+    // non-hash link requires updating `target` attribute per cache modification
+    // rules. @see amp-cache-modifications.md#url-rewrites
+    const isProxy = isProxyOrigin(opt_location || self.location);
+    if (isProxy && tag === 'a' && attr === 'href') {
+      const oldValue = element.getAttribute(attr);
+      const newValueIsHash = rewrittenValue[0] === '#';
+      const oldValueIsHash = oldValue && oldValue[0] === '#';
+
+      if (newValueIsHash && !oldValueIsHash) {
+        // Save the original value of `target` so it can be restored (if needed).
+        if (!element[ORIGINAL_TARGET_VALUE]) {
+          element[ORIGINAL_TARGET_VALUE] = element.getAttribute('target');
+        }
+        element.removeAttribute('target');
+      } else if (oldValueIsHash && !newValueIsHash) {
+        // Restore the original value of `target` or default to `_top`.
+        element.setAttribute(
+            'target', element[ORIGINAL_TARGET_VALUE] || '_top');
+      }
+    }
+    element.setAttribute(attr, rewrittenValue);
+    return rewrittenValue;
   }
 
   /**

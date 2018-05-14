@@ -32,6 +32,8 @@ import {
   removeFragment,
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
+  resolveUrlAttr,
+  rewriteAttributeValue,
   serializeQueryString,
 } from '../../src/url';
 
@@ -797,5 +799,106 @@ describe('getCorsUrl', () => {
     expect(getCorsUrl(window, 'http://example.com/?name=hello'))
         .to.equal('http://example.com/?name=hello&' +
             '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876');
+  });
+});
+
+
+describe('rewriteAttributeValue', () => {
+
+  it('should be case-insensitive to tag and attribute name', () => {
+    expect(rewriteAttributeValue('a', 'href', '/doc2'))
+        .to.equal(rewriteAttributeValue('A', 'HREF', '/doc2'));
+    expect(rewriteAttributeValue('amp-img', 'src', '/jpeg1'))
+        .to.equal(rewriteAttributeValue('AMP-IMG', 'SRC', '/jpeg1'));
+    expect(rewriteAttributeValue('amp-img', 'srcset', '/jpeg2 2x, /jpeg1 1x'))
+        .to.equal(rewriteAttributeValue(
+            'AMP-IMG', 'SRCSET', '/jpeg2 2x, /jpeg1 1x'));
+  });
+});
+
+
+describe('resolveUrlAttr', () => {
+  const TAG = 'url-test';
+  const resolveUrlAttr_ = resolveUrlAttr.bind(null, TAG);
+  it('should throw if __amp_source_origin is set', () => {
+    allowConsoleError(() => { expect(() => resolveUrlAttr_('a', 'href',
+        '/doc2?__amp_source_origin=https://google.com',
+        'http://acme.org/doc1')).to.throw(/Source origin is not allowed in/); });
+  });
+
+
+  it('should resolve non-hash href', () => {
+    expect(resolveUrlAttr_('a', 'href',
+        '/doc2',
+        'http://acme.org/doc1'))
+        .to.equal('http://acme.org/doc2');
+    expect(resolveUrlAttr_('a', 'href',
+        '/doc2',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('http://acme.org/doc2');
+    expect(resolveUrlAttr_('a', 'href',
+        'http://non-acme.org/doc2',
+        'http://acme.org/doc1'))
+        .to.equal('http://non-acme.org/doc2');
+  });
+
+  it('should ignore hash URLs', () => {
+    expect(resolveUrlAttr_('a', 'href',
+        '#hash1',
+        'http://acme.org/doc1'))
+        .to.equal('#hash1');
+  });
+
+  it('should resolve src', () => {
+    expect(resolveUrlAttr_('amp-video', 'src',
+        '/video1',
+        'http://acme.org/doc1'))
+        .to.equal('http://acme.org/video1');
+    expect(resolveUrlAttr_('amp-video', 'src',
+        '/video1',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('http://acme.org/video1');
+    expect(resolveUrlAttr_('amp-video', 'src',
+        'http://non-acme.org/video1',
+        'http://acme.org/doc1'))
+        .to.equal('http://non-acme.org/video1');
+  });
+
+  it('should rewrite image http(s) src', () => {
+    expect(resolveUrlAttr_('amp-img', 'src',
+        '/image1?a=b#h1',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1');
+    expect(resolveUrlAttr_('amp-img', 'src',
+        'https://acme.org/image1?a=b#h1',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('https://cdn.ampproject.org/i/s/acme.org/image1?a=b#h1');
+  });
+
+  it('should rewrite image http(s) srcset', () => {
+    expect(resolveUrlAttr_('amp-img', 'srcset',
+        '/image2?a=b#h1 2x, /image1?a=b#h1 1x',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
+            'https://cdn.ampproject.org/i/acme.org/image2?a=b#h1 2x');
+    expect(resolveUrlAttr_('amp-img', 'srcset',
+        'https://acme.org/image2?a=b#h1 2x, /image1?a=b#h1 1x',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
+            'https://cdn.ampproject.org/i/s/acme.org/image2?a=b#h1 2x');
+  });
+
+  it('should NOT rewrite image http(s) src when not on proxy', () => {
+    expect(resolveUrlAttr_('amp-img', 'src',
+        '/image1',
+        'http://acme.org/doc1'))
+        .to.equal('http://acme.org/image1');
+  });
+
+  it('should NOT rewrite image data src', () => {
+    expect(resolveUrlAttr_('amp-img', 'src',
+        'data:12345',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('data:12345');
   });
 });
