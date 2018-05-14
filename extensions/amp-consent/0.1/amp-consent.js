@@ -131,6 +131,11 @@ export class AmpConsent extends AMP.BaseElement {
     // TODO: Decide what to do with incorrect configuration.
     this.assertAndParseConfig_();
 
+    const children = this.getRealChildren();
+    for (let i = 0; i < children.length; i++) {
+      this.setAsOwner(children[i]);
+    }
+
     const consentPolicyManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANAGER)
             .then(manager => {
@@ -224,8 +229,9 @@ export class AmpConsent extends AMP.BaseElement {
 
       // Display the current instance
       this.currentDisplayInstance_ = instanceId;
-      setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
-          {display: 'block'});
+      const uiElement = this.consentUI_[this.currentDisplayInstance_];
+      setImportantStyles(uiElement, {display: 'block'});
+      this.scheduleLayout(uiElement);
     });
 
     return new Promise(resolve => {
@@ -553,6 +559,7 @@ export class AmpConsent extends AMP.BaseElement {
         this.getViewport().addToFixedLayer(this.element);
         setImportantStyles(dev().assertElement(this.postPromptUI_),
             {display: 'block'});
+        this.scheduleLayout(this.postPromptUI_);
       });
     });
 
