@@ -75,7 +75,7 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart < 100,
+      user().assert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
@@ -117,11 +117,11 @@ export const Presets = {
       if (!marginStart && !marginEnd) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart < 100,
+      user().assert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
-      user().assert(marginEnd >= 0 && marginEnd < 100,
-          'data-margin-start must be a percentage value ' +
+      user().assert(marginEnd >= 0 && marginEnd <= 100,
+          'data-margin-end must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
 
       user().assert(marginEnd > marginStart,
