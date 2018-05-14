@@ -75,7 +75,8 @@ export class InfoDialog {
 
   /**
    * Builds and appends the component in the story.
-   * @return {!Promise}
+   * @return {!Promise} used for testing to ensure that the component is built
+   *     before assertions.
    */
   build() {
     if (this.isBuilt()) {
