@@ -233,10 +233,10 @@ export class AmpGeo extends AMP.BaseElement {
             const classList = doc.body.classList;
             // Always remove the pending class
             classesToRemove.push('amp-geo-pending');
-            classList.remove.apply(classList, classesToRemove);
+            classesToRemove.forEach(toRemove => classList.remove(toRemove));
 
             // add the new classes to <body>
-            classList.add.apply(classList, classesToAdd);
+            classesToAdd.forEach(toAdd => classList.add(toAdd));
 
             // Only include amp state if user requests it to
             // avoid validator issue with missing amp-bind js
