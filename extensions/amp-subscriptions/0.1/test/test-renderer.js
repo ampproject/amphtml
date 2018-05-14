@@ -195,4 +195,19 @@ describes.realWin('amp-subscriptions renderer', {
     renderer.setGrantState(false);
     displayed([contentNotGranted1, contentNotGranted2]);
   });
+
+  describe('addLoadingBar', () => {
+    it('should add a progress bar if no subscriptions-section=loading is found', () => {
+      const appendChildStub = sandbox.stub(renderer.getRootElement_(), 'appendChild');
+      renderer.addLoadingBar();
+      expect(appendChildStub).to.not.be.called;
+      loading1.remove();
+      loading2.remove();
+      renderer.addLoadingBar();
+      expect(appendChildStub).to.be.called;
+      const element = appendChildStub.getCall(0).args[0];
+      expect(element.tagName).to.be.equal('DIV');
+      expect(element.className).to.be.equal('subscriptions-progress');
+    });
+  });
 });

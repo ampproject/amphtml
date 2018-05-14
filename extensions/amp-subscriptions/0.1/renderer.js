@@ -16,6 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import { createElementWithAttributes } from '../../../src/dom';
 
 const CSS_PREFIX = 'i-amphtml-subs';
 
@@ -29,12 +30,17 @@ export class Renderer {
     /** @const @private */
     this.ampdoc_ = ampdoc;
 
+    this.document_ = ampdoc.win.document;
+
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     // Initial state is "unknown".
     this.setGrantState(null);
     this.getRootElement_().classList.add(`${CSS_PREFIX}-ready`);
+
+    // Check and add progress bar.
+    this.addLoadingBar();
   }
 
   /**
@@ -63,6 +69,17 @@ export class Renderer {
           `${CSS_PREFIX}-${type}-no`,
           state === false);
     });
+  }
+
+  addLoadingBar() {
+    if (!this.getRootElement_().querySelector('[subscriptions-section=loading]')) {
+      const element = createElementWithAttributes(this.document_, 'div' , {
+        class: 'subscriptions-progress',
+        'subscriptions-section': 'loading',
+      });
+
+      this.getRootElement_().appendChild(element);
+    }
   }
 
   /**
