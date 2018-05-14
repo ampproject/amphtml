@@ -252,8 +252,8 @@ export class ImageViewer {
     this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    sourceElement.getImpl().then(e => {
-      e.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
+    sourceElement.getImpl().then(elem => {
+      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
     });
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
