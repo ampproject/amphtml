@@ -47,14 +47,15 @@ tags: {  # amp-mustache
   attr_lists: "common-extension-attrs"
 }
 # HTML5, 4.11.3 The template element
-# The template element is also defined at
-# extensions/amp-date-picker/validator-amp-date-picker.protoascii
 tags: {
   tag_name: "TEMPLATE"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "TEMPLATE"
   # <templates> tags inside <amp-story-auto-ads> have additional requirements
-  # as specified in the <amp-story-auto-ads rule> file.
+  # as specified in the <amp-date-picker> rule file.
+  disallowed_ancestor: "AMP-DATE-PICKER"
+  # <templates> tags inside <amp-story-auto-ads> have additional requirements
+  # as specified in the <amp-story-auto-ads> rule file.
   disallowed_ancestor: "AMP-STORY-AUTO-ADS"
   disallowed_ancestor: "FORM > DIV [submit-success][template]"
   disallowed_ancestor: "FORM > DIV [submit-error][template]"
