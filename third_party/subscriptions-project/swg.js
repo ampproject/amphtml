@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.22.11 */
+ /** Version: 0.1.22.12 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -473,6 +473,61 @@ function injectStyleSheet(doc, styleText) {
 
 
 /**
+ * @param {!Object<string, string>} map
+ * @param {?string|?Element} langOrElement
+ * @return {?string}
+ */
+function msg(map, langOrElement) {
+  const lang =
+      !langOrElement ? '' :
+      typeof langOrElement == 'string' ? langOrElement :
+      langOrElement.lang ||
+      langOrElement.ownerDocument &&
+          langOrElement.ownerDocument.documentElement.lang;
+  let search = (lang && lang.toLowerCase() || 'en').replace(/_/g, '-');
+  while (search) {
+    if (search in map) {
+      return map[search];
+    }
+    const dash = search.lastIndexOf('-');
+    search = dash != -1 ? search.substring(0, dash) : '';
+  }
+  // "en" is always default.
+  return map['en'];
+}
+
+
+
+/** @type {!Object<string, string>} */
+const TITLE_LANG_MAP = {
+  'en': 'Subscribe with Google',
+  'ar': 'الاشتراك عبر Google',
+  'de': 'Abonnieren mit Google',
+  'es': 'Suscríbete con Google',
+  'es-latam': 'Suscribirse con Google',
+  'es-latn': 'Suscribirse con Google',
+  'fr': 'S\'abonner avec Google',
+  'hi': 'Google की सदस्यता लें',
+  'id': 'Berlangganan dengan Google',
+  'it': 'Abbonati con Google',
+  'jp': 'Google で購読',
+  'ko': 'Google 을(를) 통해 구독',
+  'ms': 'Langgan dengan Google',
+  'nl': 'Abonneren met Google',
+  'no': 'Abonner med Google',
+  'pl': 'Subskrybuj z Google',
+  'pt': 'Subscrever com o Google',
+  'pt-br': 'Faça sua assinatura com Google',
+  'ru': 'Подпишитесь через Google',
+  'se': 'Prenumerera med Google',
+  'th': 'สมัครรับข้อมูลด้วย Google',
+  'tr': 'Google ile abone olun',
+  'uk': 'Підписатися через Google',
+  'zh-tw': '透過 Google 訂閱',
+};
+
+
+/**
  * The button stylesheet can be found in the `/assets/swg-button.css`.
  * It's produced by the `assets:swg-button` gulp task and deployed to
  * `https://news.google.com/swg/js/v1/swg-button.css`.
@@ -538,8 +593,10 @@ class ButtonApi {
     }
     button.classList.add(`swg-button-${theme}`);
     button.setAttribute('role', 'button');
-    // TODO(dvoytenko): i18n.
-    button.setAttribute('title', 'Subscribe with Google');
+    if (options && options['lang']) {
+      button.setAttribute('lang', options['lang']);
+    }
+    button.setAttribute('title', msg(TITLE_LANG_MAP, button) || '');
     button.addEventListener('click', callback);
     return button;
   }
@@ -2168,7 +2225,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.11',
+    '_client': 'SwG 0.1.22.12',
   });
 }
 
@@ -2360,6 +2417,13 @@ class PayCompleteFlow {
           'loginHint': response.userData && response.userData.email,
         }),
         /* shouldFadeBody */ true);
+    this.activityIframeView_.onMessage(data => {
+      if (data['entitlements']) {
+        this.deps_.entitlementsManager().pushNextEntitlements(
+            /** @type {string} */ (data['entitlements']));
+        return;
+      }
+    });
     this.activityIframeView_.acceptResult().then(() => {
       // The flow is complete.
       this.dialogManager_.completeView(this.activityIframeView_);
@@ -2988,14 +3052,17 @@ class Dialog {
 
     /** @private {?Promise} */
     this.animating_ = null;
+
+    /** @private {boolean} */
+    this.hidden_ = false;
   }
 
   /**
    * Opens the dialog and builds the iframe container.
-   * @param {boolean=} animated
+   * @param {boolean=} hidden
    * @return {!Promise<!Dialog>}
    */
-  open(animated = true) {
+  open(hidden = false) {
     const iframe = this.iframe_;
     if (iframe.isConnected()) {
       throw new Error('already opened');
@@ -3005,15 +3072,14 @@ class Dialog {
     this.doc_.getBody().appendChild(iframe.getElement());  // Fires onload.
     this.graypane_.attach();
 
-    if (animated) {
-      this.animate_(() => {
-        setImportantStyles(iframe.getElement(), {
-          'transform': 'translateY(100%)',
-        });
-        return transition(iframe.getElement(), {
-          'transform': 'translateY(0)',
-        }, 300, 'ease-out');
+    if (hidden) {
+      setImportantStyles(iframe.getElement(), {
+        'visibility': 'hidden',
+        'opacity': 0,
       });
+      this.hidden_ = hidden;
+    } else {
+      this.show_();
     }
 
     return iframe.whenReady().then(() => {
@@ -3129,15 +3195,42 @@ class Dialog {
     this.getContainer().appendChild(view.getElement());
 
     // If the current view should fade the parent document.
-    if (view.shouldFadeBody()) {
+    if (view.shouldFadeBody() && !this.hidden_) {
       this.graypane_.show(/* animate */ true);
     }
+
     return view.init(this).then(() => {
       setImportantStyles(view.getElement(), {
         'opacity': 1,
       });
+      if (this.hidden_) {
+        if (view.shouldFadeBody()) {
+          this.graypane_.show(/* animated */ true);
+        }
+        this.show_();
+      }
       this.setLoading(false);
     });
+  }
+
+  /**
+   * Show the iframe
+   * @private
+   */
+  show_() {
+    this.animate_(() => {
+      setImportantStyles(this.getElement(), {
+        'transform': 'translateY(100%)',
+        'opactiy': 1,
+        'visibility': 'visible',
+      });
+      return transition(this.getElement(), {
+        'transform': 'translateY(0)',
+        'opacity': 1,
+        'visiblity': 'visible',
+      }, 300, 'ease-out');
+    });
+    this.hidden_ = false;
   }
 
   /**
@@ -3344,28 +3437,30 @@ class DialogManager {
   }
 
   /**
+   * @param {boolean=} hidden
    * @return {!Promise<!Dialog>}
    */
-  openDialog() {
+  openDialog(hidden = false) {
     if (!this.openPromise_) {
       this.dialog_ = new Dialog(this.doc_);
-      this.openPromise_ = this.dialog_.open();
+      this.openPromise_ = this.dialog_.open(hidden);
     }
     return this.openPromise_;
   }
 
   /**
    * @param {!./view.View} view
+   * @param {boolean=} hidden
    * @return {!Promise}
    */
-  openView(view) {
+  openView(view, hidden = false) {
     view.whenComplete().catch(reason => {
       if (isCancelError(reason)) {
         this.completeView(view);
       }
       throw (reason);
     });
-    return this.openDialog().then(dialog => {
+    return this.openDialog(hidden).then(dialog => {
       return dialog.openView(view);
     });
   }
@@ -3674,6 +3769,7 @@ class Toast {
 
 const SERVICE_ID = 'subscribe.google.com';
 const TOAST_STORAGE_KEY = 'toast';
+const ENTS_STORAGE_KEY = 'ents';
 
 
 /**
@@ -3725,6 +3821,9 @@ class EntitlementsManager {
     this.responsePromise_ = null;
     this.positiveRetries_ = Math.max(
         this.positiveRetries_, opt_expectPositive ? 3 : 0);
+    if (opt_expectPositive) {
+      this.storage_.remove(ENTS_STORAGE_KEY);
+    }
   }
 
   /**
@@ -3738,9 +3837,62 @@ class EntitlementsManager {
   }
 
   /**
-   * @return {!Promise<!Entitlements>}
+   * @param {string} raw
+   * @return {boolean}
    */
-  fetchEntitlements() {
+  pushNextEntitlements(raw) {
+    const entitlements = this.getValidJwtEntitlements_(
+        raw, /* requireNonExpired */ true);
+    if (entitlements && entitlements.enablesThis()) {
+      this.storage_.set(ENTS_STORAGE_KEY, raw);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  getEntitlementsFlow_() {
+    return this.fetchEntitlementsWithCaching_().then(entitlements => {
+      this.onEntitlementsFetched_(entitlements);
+      return entitlements;
+    });
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetchEntitlementsWithCaching_() {
+    return this.storage_.get(ENTS_STORAGE_KEY).then(raw => {
+      // Try cache first.
+      if (raw) {
+        const cached = this.getValidJwtEntitlements_(
+            raw, /* requireNonExpired */ true);
+        if (cached && cached.enablesThis()) {
+          // Already have a positive response.
+          this.positiveRetries_ = 0;
+          return cached;
+        }
+      }
+      // If cache didn't match, perform fetch.
+      return this.fetchEntitlements_().then(ents => {
+        // If entitlements match the product, store them in cache.
+        if (ents && ents.enablesThis() && ents.raw) {
+          this.storage_.set(ENTS_STORAGE_KEY, ents.raw);
+        }
+        return ents;
+      });
+    });
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetchEntitlements_() {
     // TODO(dvoytenko): Replace retries with consistent fetch.
     let positiveRetries = this.positiveRetries_;
     this.positiveRetries_ = 0;
@@ -3786,47 +3938,62 @@ class EntitlementsManager {
    * @return {!Entitlements}
    */
   parseEntitlements(json) {
-    const ackHandler = this.ack_.bind(this);
     const signedData = json['signedEntitlements'];
     if (signedData) {
-      const jwt = this.jwtHelper_.decode(signedData);
-      const entitlementsClaim = jwt['entitlements'];
-      if (entitlementsClaim) {
-        return new Entitlements(
-            SERVICE_ID,
-            signedData,
-            Entitlement.parseListFromJson(entitlementsClaim),
-            this.config_.getProductId(),
-            ackHandler);
+      const entitlements = this.getValidJwtEntitlements_(
+          signedData, /* requireNonExpired */ false);
+      if (entitlements) {
+        return entitlements;
       }
     } else {
       const plainEntitlements = json['entitlements'];
       if (plainEntitlements) {
-        return new Entitlements(
-            SERVICE_ID,
-            '',
-            Entitlement.parseListFromJson(plainEntitlements),
-            this.config_.getProductId(),
-            ackHandler);
+        return this.createEntitlements_('', plainEntitlements);
       }
     }
     // Empty response.
-    return new Entitlements(
-        SERVICE_ID,
-        '',
-        [],
-        this.config_.getProductId(),
-        ackHandler);
+    return this.createEntitlements_('', []);
   }
 
   /**
-   * @return {!Promise<!Entitlements>}
+   * @param {string} raw
+   * @param {boolean} requireNonExpired
+   * @return {?Entitlements}
+   * @private
    */
-  getEntitlementsFlow_() {
-    return this.fetchEntitlements().then(entitlements => {
-      this.onEntitlementsFetched_(entitlements);
-      return entitlements;
-    });
+  getValidJwtEntitlements_(raw, requireNonExpired) {
+    try {
+      const jwt = this.jwtHelper_.decode(raw);
+      if (requireNonExpired) {
+        const now = Date.now();
+        const exp = jwt['exp'];
+        if (parseFloat(exp) * 1000 < now) {
+          return null;
+        }
+      }
+      const entitlementsClaim = jwt['entitlements'];
+      return entitlementsClaim &&
+          this.createEntitlements_(raw, entitlementsClaim) || null;
+    } catch (e) {
+      // Ignore the error.
+      this.win_.setTimeout(() => {throw e;});
+    }
+    return null;
+  }
+
+  /**
+   * @param {string} raw
+   * @param {!Object|!Array<!Object>} json
+   * @return {!Entitlements}
+   * @private
+   */
+  createEntitlements_(raw, json) {
+    return new Entitlements(
+        SERVICE_ID,
+        raw,
+        Entitlement.parseListFromJson(json),
+        this.config_.getProductId(),
+        this.ack_.bind(this));
   }
 
   /**
@@ -4127,6 +4294,9 @@ class LinkCompleteFlow {
     this.entitlementsManager_.setToastShown(true);
     this.entitlementsManager_.unblockNextNotification();
     this.entitlementsManager_.reset(response && response['success'] || false);
+    if (response && response['entitlements']) {
+      this.entitlementsManager_.pushNextEntitlements(response['entitlements']);
+    }
     this.completeResolver_();
   }
 
@@ -4195,23 +4365,24 @@ class LinkSaveFlow {
       /* shouldFadeBody */ false
     );
     /** {!Promise<boolean>} */
-    return this.dialogManager_.openView(this.activityIframeView_).then(() => {
-      return this.activityIframeView_.port().then(port => {
-        return acceptPortResultData(
-            port,
-            feOrigin(),
-            /* requireOriginVerified */ true,
-            /* requireSecureChannel */ true);
-      }).then(result => {
-        return result['linked'];
-      }).catch(() => {
-        return false;
-      }).then(result => {
-        // The flow is complete.
-        this.dialogManager_.completeView(this.activityIframeView_);
-        return result;
-      });
-    });
+    return this.dialogManager_.openView(this.activityIframeView_,
+        /* hidden */ true).then(() => {
+          return this.activityIframeView_.port().then(port => {
+            return acceptPortResultData(
+                port,
+                feOrigin(),
+                /* requireOriginVerified */ true,
+                /* requireSecureChannel */ true);
+          }).then(result => {
+            return result['linked'];
+          }).catch(() => {
+            return false;
+          }).then(result => {
+            // The flow is complete.
+            this.dialogManager_.completeView(this.activityIframeView_);
+            return result;
+          });
+        });
   }
 }
 
@@ -4634,6 +4805,24 @@ class Storage {
       if (this.win_.sessionStorage) {
         try {
           this.win_.sessionStorage.setItem(storageKey(key), value);
+        } catch (e) {
+          // Ignore error.
+        }
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * @param {string} key
+   * @return {!Promise}
+   */
+  remove(key) {
+    delete this.values_[key];
+    return new Promise(resolve => {
+      if (this.win_.sessionStorage) {
+        try {
+          this.win_.sessionStorage.removeItem(storageKey(key));
         } catch (e) {
           // Ignore error.
         }
