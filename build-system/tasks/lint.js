@@ -20,13 +20,13 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
 const eslint = require('gulp-eslint');
-const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
+const {getStdout} = require('../exec');
 
 const isWatching = (argv.watch || argv.w) || false;
 const filesInARefactorPr = 15;
