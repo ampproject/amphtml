@@ -1796,7 +1796,7 @@ describes.repeated('', {
 
       it('should not execute form submit with file field present', () => {
         const form = getForm();
-        const input = document.createElement('input');
+        const input = createElement('input');
         input.type = 'file';
         form.appendChild(input);
 
@@ -1821,7 +1821,7 @@ describes.repeated('', {
         const form = ampForm.form_;
         form.id = 'registration';
 
-        const emailInput = document.createElement('input');
+        const emailInput = createElement('input');
         emailInput.setAttribute('name', 'email');
         emailInput.setAttribute('type', 'email');
         emailInput.setAttribute('value', 'j@hnmiller.com');

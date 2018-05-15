@@ -125,7 +125,7 @@ feature_tests/forms.html:114:4 The attribute 'type' in tag 'input' is set to the
 |    <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="password" name="password">
-|      <input type="file" name="file">
+|      <input type="file" name="file" accept="text/plain">
 |    </form>
 |    <!-- Invalid: password requires post and action-xhr -->
 |    <form method="get" action="https://example.com/subscribe" action-xhr="https://example.com/subscribe" target="_blank">
