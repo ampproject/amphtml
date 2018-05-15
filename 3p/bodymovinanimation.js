@@ -46,7 +46,8 @@ function parseMessage(event) {
     if (eventMessage['valueType'] === 'time') {
       animationHandler.goToAndStop(eventMessage['value']);
     } else {
-      animationHandler.goToAndStop(eventMessage['value'] * animationHandler.totalFrames, true);
+      const frameNumber = Math.round(eventMessage['value'] * animationHandler.totalFrames);
+      animationHandler.goToAndStop(frameNumber, true);
     }
   }
 }
