@@ -117,7 +117,7 @@ export class AmpFxCollection {
    * e.g. `amp-fx="parallax fade-in"
    *
    * @param {!Element} fxElement
-   * @returns {!Array<!FxType>}
+   * @return {!Array<!FxType>}
    */
   getFxTypes_(fxElement) {
     dev().assert(fxElement.hasAttribute('amp-fx'));

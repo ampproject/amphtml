@@ -80,7 +80,7 @@ export class PositionObserver {
 
   /**
    * @param element {!Element}
-   * @returns {!PositionEntryDef}
+   * @return {!PositionEntryDef}
    * @private
    */
   getPositionEntry_(element) {
@@ -112,7 +112,7 @@ export class PositionObserver {
 
 /**
  * @param win {!Window}
- * @returns {!Element}
+ * @return {!Element}
  */
 function getScrollingElement(win) {
   const doc = win.document;

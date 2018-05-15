@@ -112,7 +112,7 @@ export class BaseSlides extends BaseCarousel {
 
   /**
   * Checks if a carousel is eligible to loop, regardless of the loop attribute.
-  * @returns {boolean}
+  * @return {boolean}
   * @protected
   */
   isLoopingEligible() {

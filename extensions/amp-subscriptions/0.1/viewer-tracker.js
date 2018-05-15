@@ -44,7 +44,7 @@ export class ViewerTracker {
 
   /**
    * @param {time} timeToView
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   scheduleView(timeToView) {
     this.reportViewPromise_ = null;

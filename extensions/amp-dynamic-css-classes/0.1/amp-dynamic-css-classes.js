@@ -21,7 +21,7 @@ import {parseUrl} from '../../../src/url';
 /**
  * Strips everything but the domain from referrer string.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @returns {string}
+ * @return {string}
  */
 function referrerDomain(ampdoc) {
   const referrer = Services.viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
@@ -34,7 +34,7 @@ function referrerDomain(ampdoc) {
 /**
  * Grabs the User Agent string.
  * @param {!Window} win
- * @returns {string}
+ * @return {string}
  */
 function userAgent(win) {
   return win.navigator.userAgent;
@@ -64,7 +64,7 @@ export function referrers_(referrer) {
 /**
  * Normalizes certain referrers across devices.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @returns {!Array<string>}
+ * @return {!Array<string>}
  */
 function normalizedReferrers(ampdoc) {
   const referrer = referrerDomain(ampdoc);

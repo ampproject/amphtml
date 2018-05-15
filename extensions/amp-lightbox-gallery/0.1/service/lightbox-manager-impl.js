@@ -331,7 +331,7 @@ export class LightboxManager {
   /**
    * Gets the duration of a supported video element
    * @param {!Element} element
-   * @returns {!Promise<number>}
+   * @return {!Promise<number>}
    * @private
    */
   getVideoTimestamp_(element) {

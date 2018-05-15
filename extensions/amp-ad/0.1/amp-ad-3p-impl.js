@@ -372,7 +372,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @returns {!Promise<?CONSENT_POLICY_STATE>}
+   * @return {!Promise<?CONSENT_POLICY_STATE>}
    */
   getConsentState() {
     const consentPolicyId = super.getConsentPolicy();

@@ -66,7 +66,7 @@ export class CacheCidApi {
 
   /**
    * Returns true if the page is embedded in CCT and is served by a proxy.
-   * @returns {boolean}
+   * @return {boolean}
    */
   isSupported() {
     return this.viewer_.isCctEmbedded() && this.viewer_.isProxyOrigin();

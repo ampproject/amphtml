@@ -148,7 +148,7 @@ export class AbstractAmpContext {
    *  Listen to page visibility changes.
    *  @param {function({hidden: boolean})} callback Function to call every time
    *    we receive a page visibility message.
-   *  @returns {function()} that when called stops triggering the callback
+   *  @return {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
   onPageVisibilityChange(callback) {
@@ -161,7 +161,7 @@ export class AbstractAmpContext {
    *  Send message to runtime to start sending intersection messages.
    *  @param {function(Array<Object>)} callback Function to call every time we
    *    receive an intersection message.
-   *  @returns {function()} that when called stops triggering the callback
+   *  @return {function()} that when called stops triggering the callback
    *    every time we receive an intersection message.
    */
   observeIntersection(callback) {

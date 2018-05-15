@@ -26,7 +26,7 @@ export class SubscriptionPlatform {
 
   /**
    * Returns the service Id.
-   * @returns {string}
+   * @return {string}
    */
   getServiceId() {}
 
@@ -45,33 +45,33 @@ export class SubscriptionPlatform {
 
   /**
    * Returns if pingback is enabled for this platform.
-   * @returns {boolean}
+   * @return {boolean}
    */
   isPingbackEnabled() {}
 
   /**
    * Performs the pingback to the subscription platform.
    * @param {!./entitlement.Entitlement} unusedSelectedPlatform
-   * @returns {!Promise|undefined}
+   * @return {!Promise|undefined}
    */
   pingback(unusedSelectedPlatform) {}
 
   /**
    * Tells if this platform supports the current viewer.
-   * @returns {boolean}
+   * @return {boolean}
    */
   supportsCurrentViewer() {}
 
   /**
    * Executes action for the local platform.
    * @param {string} unusedAction
-   * @returns {!Promise<boolean>}
+   * @return {!Promise<boolean>}
    */
   executeAction(unusedAction) {}
 
   /**
    * Returns the base score configured for the platform.
-   * @returns {number}
+   * @return {number}
    */
   getBaseScore() {}
 

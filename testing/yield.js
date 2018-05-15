@@ -29,7 +29,7 @@ export function installYieldIt(realIt) {
 /**
  * A convenient method so you can flush the event queue by doing
  * `yield macroTask()` in your test.
- * @returns {Promise}
+ * @return {Promise}
  */
 export function macroTask() {
   return new Promise(setTimeout);

@@ -1416,7 +1416,7 @@ export class Resources {
    * @param {!./resource.Resource} resource
    * @param {!../layout-rect.LayoutRectDef=} opt_layoutBox
    * @param {!../layout-rect.LayoutRectDef=} opt_initialLayoutBox
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   elementNearBottom_(resource, opt_layoutBox, opt_initialLayoutBox) {

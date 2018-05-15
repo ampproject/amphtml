@@ -373,7 +373,7 @@ export function postMessageToWindows(iframe, targets, type, object, opt_is3P) {
  * Gets the sentinel string.
  * @param {!Element} iframe The iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @returns {string} Sentinel string.
+ * @return {string} Sentinel string.
  * @private
  */
 function getSentinel_(iframe, opt_is3P) {
@@ -383,7 +383,7 @@ function getSentinel_(iframe, opt_is3P) {
 /**
  * JSON parses event.data if it needs to be
  * @param {*} data
- * @returns {?JsonObject} object message
+ * @return {?JsonObject} object message
  * @private
  * @visibleForTesting
  */

@@ -266,7 +266,7 @@ export class AmpBysideContent extends AMP.BaseElement {
   }
 
   /**
-   * @returns {!Element} Returns the overflow element
+   * @return {!Element} Returns the overflow element
    * @private
    */
   getOverflowElement_() {

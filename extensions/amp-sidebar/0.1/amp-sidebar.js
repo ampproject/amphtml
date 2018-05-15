@@ -214,7 +214,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Returns true if the sidebar is opened.
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   isOpen_() {

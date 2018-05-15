@@ -22,7 +22,7 @@
  * @param {!Window} win
  * @param {function(...*)} callback
  * @param {number} minInterval the minimum time interval in millisecond
- * @returns {function(...*)}
+ * @return {function(...*)}
  */
 export function throttle(win, callback, minInterval) {
   let locker = 0;
@@ -61,7 +61,7 @@ export function throttle(win, callback, minInterval) {
  * @param {!Window} win
  * @param {function(...*)} callback
  * @param {number} minInterval the minimum time interval in millisecond
- * @returns {function(...*)}
+ * @return {function(...*)}
  */
 export function debounce(win, callback, minInterval) {
   let locker = 0;

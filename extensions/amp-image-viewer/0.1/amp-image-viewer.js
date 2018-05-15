@@ -268,7 +268,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   init_() {
     if (this.image_) {

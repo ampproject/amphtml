@@ -902,7 +902,7 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Creates a placeholder for the element.
-     * @returns {?Element}
+     * @return {?Element}
      * @final @this {!Element}
      */
     createPlaceholder() {
