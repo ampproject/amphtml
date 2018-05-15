@@ -1440,7 +1440,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'timer',
         'enabled': '${incrementalEngagedTime(parsely-js,false)}',
         'timerSpec': {
-          'interval': 5,
+          'interval': 10,
           'maxTimerLength': 7200,
         },
         'request': 'heartbeat',
