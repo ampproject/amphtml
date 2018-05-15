@@ -18,7 +18,7 @@ import * as dom from './dom';
 import {AmpEvents} from './amp-events';
 import {
   CONSENT_POLICY_STATE,
-  getConsentPolicyPromise,
+  getConsentPolicyState,
 } from './consent-state';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
@@ -40,6 +40,7 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
+import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
@@ -482,8 +483,9 @@ function createBaseCustomElementClass(win) {
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
-          getConsentPolicyPromise(this.getAmpDoc(), policyId).then(state => {
-            if (state == CONSENT_POLICY_STATE.INSUFFICIENT) {
+          getConsentPolicyState(this.getAmpDoc(), policyId).then(state => {
+            if (state == CONSENT_POLICY_STATE.INSUFFICIENT ||
+                state == CONSENT_POLICY_STATE.UNKNOWN) {
               // Need to change after support more policy state
               reject(blockedByConsentError());
             } else {
@@ -577,13 +579,7 @@ function createBaseCustomElementClass(win) {
           layoutBox.top >= 0) {
           // Few top elements will also be pre-initialized with a loading
           // element.
-          getVsync(this).mutate(() => {
-            // Repeat "loading enabled" check because it could have changed while
-            // waiting for vsync.
-            if (this.isLoadingEnabled_()) {
-              this.prepareLoading_();
-            }
-          });
+          this.mutateOrInvoke_(() => this.prepareLoading_());
         }
       }
     }
@@ -604,11 +600,12 @@ function createBaseCustomElementClass(win) {
     /**
      * If the element has a media attribute, evaluates the value as a media
      * query and based on the result adds or removes the class
-     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the element
-     * which in turn prevents any of the resource loading to happen for the
-     * element.
+     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the
+     * element which in turn prevents any of the resource loading to happen for
+     * the element.
      *
-     * This method is called by Resources and shouldn't be called by anyone else.
+     * This method is called by Resources and shouldn't be called by anyone
+     * else.
      *
      * @final
      * @package @this {!Element}
@@ -654,8 +651,8 @@ function createBaseCustomElementClass(win) {
     /**
      * Changes the size of the element.
      *
-     * This method is called by Resources and shouldn't be called by anyone else.
-     * This method must always be called in the mutation context.
+     * This method is called by Resources and shouldn't be called by anyone
+     * else. This method must always be called in the mutation context.
      *
      * @param {number|undefined} newHeight
      * @param {number|undefined} newWidth
@@ -671,11 +668,9 @@ function createBaseCustomElementClass(win) {
         // preserved.
         this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
-        if (this.resources_) {
-          this.resources_.mutateElement(this, () => {
-            dom.removeElement(sizer);
-          });
-        }
+        this.mutateOrInvoke_(() => {
+          dom.removeElement(sizer);
+        });
       }
       if (newHeight !== undefined) {
         setStyle(this, 'height', newHeight, 'px');
@@ -1171,9 +1166,10 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Requests the resource to resume its activity when the document returns from
-     * an inactive state. The scope is up to the actual component. Among other
-     * things the active playback of video or audio content may be resumed.
+     * Requests the resource to resume its activity when the document returns
+     * from an inactive state. The scope is up to the actual component. Among
+     * other things the active playback of video or audio content may be
+     * resumed.
      *
      * @package @final @this {!Element}
      */
@@ -1340,14 +1336,14 @@ function createBaseCustomElementClass(win) {
         this.implementation_.executeAction(invocation, deferred);
       } catch (e) {
         rethrowAsync('Action execution failed:', e,
-            invocation.target.tagName, invocation.method);
+            invocation.node.tagName, invocation.method);
       }
     }
 
     /**
-     * Returns the original nodes of the custom element without any service nodes
-     * that could have been added for markup. These nodes can include Text,
-     * Comment and other child nodes.
+     * Returns the original nodes of the custom element without any service
+     * nodes that could have been added for markup. These nodes can include
+     * Text, Comment and other child nodes.
      * @return {!Array<!Node>}
      * @package @final @this {!Element}
      */
@@ -1439,10 +1435,10 @@ function createBaseCustomElementClass(win) {
           resourceState == ResourceState.READY_FOR_LAYOUT)) {
         return;
       }
-      // This implementation is notably less efficient then placeholder toggling.
-      // The reasons for this are: (a) "not supported" is the state of the whole
-      // element, (b) some relayout is expected and (c) fallback condition would
-      // be rare.
+      // This implementation is notably less efficient then placeholder
+      // toggling. The reasons for this are: (a) "not supported" is the state of
+      // the whole element, (b) some relayout is expected and (c) fallback
+      // condition would be rare.
       this.classList.toggle('amp-notsupported', show);
       if (show == true) {
         const fallbackElement = this.getFallback();
@@ -1469,12 +1465,13 @@ function createBaseCustomElementClass(win) {
      * @private @this {!Element}
      */
     isLoadingEnabled_() {
-      // No loading indicator will be shown if either one of these
-      // conditions true:
+      // No loading indicator will be shown if either one of these conditions
+      // true:
       // 1. `noloading` attribute is specified;
       // 2. The element has not been whitelisted;
       // 3. The element is too small or has not yet been measured;
-      // 4. The element has already been laid out (include having loading error);
+      // 4. The element has already been laid out (include having loading
+      //    error);
       // 5. The element is a `placeholder` or a `fallback`;
       // 6. The element's layout is not a size-defining layout.
       // 7. The document is A4A.
@@ -1513,13 +1510,15 @@ function createBaseCustomElementClass(win) {
      * @private @this {!Element}
      */
     prepareLoading_() {
+      if (!this.isLoadingEnabled_()) {
+        return;
+      }
       if (!this.loadingContainer_) {
-        const doc = this.ownerDocument;
+        const doc = /** @type {!Document} */(dev().assert(this.ownerDocument));
 
-        const container = doc.createElement('div');
-        container.classList.add('i-amphtml-loading-container');
-        container.classList.add('i-amphtml-fill-content');
-        container.classList.add('amp-hidden');
+        const container = htmlFor(doc)`
+            <div class="i-amphtml-loading-container i-amphtml-fill-content
+              amp-hidden"></div>`;
 
         const element = createLoaderElement(doc, this.elementName());
         container.appendChild(element);
@@ -1557,7 +1556,7 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      getVsync(this).mutate(() => {
+      this.mutateOrInvoke_(() => {
         let state = this.loadingState_;
         // Repeat "loading enabled" check because it could have changed while
         // waiting for vsync.
@@ -1579,7 +1578,7 @@ function createBaseCustomElementClass(win) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
-          this.getResources().mutateElement(this, () => {
+          this.mutateOrInvoke_(() => {
             dom.removeElement(loadingContainer);
           });
         }
@@ -1638,9 +1637,9 @@ function createBaseCustomElementClass(win) {
 
         if (overflown) {
           this.overflowElement_.onclick = () => {
-            this.getResources(). /*OK*/ changeSize(
-                this, requestedHeight, requestedWidth);
-            getVsync(this).mutate(() => {
+            const resources = this.getResources();
+            resources./*OK*/changeSize(this, requestedHeight, requestedWidth);
+            resources.mutateElement(this, () => {
               this.overflowCallback(
                   /* overflown */ false, requestedHeight, requestedWidth);
             });
@@ -1648,6 +1647,20 @@ function createBaseCustomElementClass(win) {
         } else {
           this.overflowElement_.onclick = null;
         }
+      }
+    }
+
+    /**
+     * Mutates the element using resources if available.
+     *
+     * @param {function()} mutator
+     * @param {?Element=} opt_element
+     */
+    mutateOrInvoke_(mutator, opt_element) {
+      if (this.resources_) {
+        this.getResources().mutateElement(opt_element || this, mutator);
+      } else {
+        mutator();
       }
     }
   }
@@ -1666,16 +1679,6 @@ function assertNotTemplate(element) {
   dev().assert(!element.isInTemplate_, 'Must never be called in template');
 }
 
-
-/**
- * @param {!Element} element
- * @return {!./service/vsync-impl.Vsync}
- */
-function getVsync(element) {
-  // TODO(dvoytenko, #9177): consider removing this and always resolving via
-  // `createCustomElementClass(win)` object.
-  return Services.vsyncFor(toWin(element.ownerDocument.defaultView));
-}
 
 /**
  * Whether the implementation is a stub.
@@ -1710,8 +1713,7 @@ function isInternalOrServiceNode(node) {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {string} name The name of the custom element.
- * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For
- *     testing only.
+ * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For testing only.
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementProtoForTesting(

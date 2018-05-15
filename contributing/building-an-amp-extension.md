@@ -253,9 +253,13 @@ Element styles are loaded when the element script itself is included in
 an AMP doc. You tell AMP which CSS belongs to this element when
 registering the element (see below).
 
-Class names prefixed with `-amp-` are considered private and
-publishers are not allowed to use to customize (enforced by AMP
-validator).
+Class names prefixed with `i-amphtml` are considered private. Publishers
+are not allowed to use them for customization (enforced by AMP validator).
+
+Class names prefixed with  `amp-` are public css classes that can be customized
+by publishers. All such classes should be documented in the component-specific
+`.md` file. All CSS classes in component stylesheets should be prefixed with
+either `i-amphtml-` or `amp-`.
 
 ## Register element with AMP
 
@@ -747,7 +751,7 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ npx gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
 ## Type checking
@@ -760,7 +764,7 @@ your code. The following command should be run to ensure no type
 violations are introduced by your extension.
 
 ```shell
-$ npx gulp check-types
+$ gulp check-types
 ```
 
 ## Example PRs

@@ -17,7 +17,6 @@
 import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
 import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
@@ -84,9 +83,6 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
 
-    /** @private {number|string|null} */
-    this.openOrCloseTimeOut_ = null;
-
     /** @const {function()} */
     this.boundOnAnimationEnd_ =
         debounce(this.win, this.onAnimationEnd_.bind(this), ANIMATION_TIMEOUT);
@@ -96,11 +92,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {number} */
     this.initialScrollTop_ = 0;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
@@ -196,8 +187,6 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     }, true);
 
-    this.element.addEventListener('transitionend', this.boundOnAnimationEnd_);
-    this.element.addEventListener('animationend', this.boundOnAnimationEnd_);
   }
 
   /** @override */

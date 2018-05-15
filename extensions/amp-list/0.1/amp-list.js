@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
+import {Deferred} from '../../../src/utils/promise';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {
@@ -71,8 +72,11 @@ export class AmpList extends AMP.BaseElement {
      */
     this.layoutCompleted_ = false;
 
-    /** @const @private {string} */
-    this.initialSrc_ = element.getAttribute('src');
+    /**
+     * The `src` attribute's initial value.
+     * @private {?string}
+     */
+    this.initialSrc_ = null;
 
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
@@ -88,6 +92,10 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // Store this in buildCallback() because `this.element` sometimes
+    // is missing attributes in the constructor.
+    this.initialSrc_ = this.element.getAttribute('src');
+
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
@@ -141,7 +149,8 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * amp-list reuses the loading indicator when the list is fetched again via bind mutation or refresh action
+   * amp-list reuses the loading indicator when the list is fetched again via
+   * bind mutation or refresh action
    * @override
    */
   isLoadingReused() {
@@ -233,12 +242,11 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(items) {
-    let resolver;
-    let rejecter;
-    const promise = new Promise((resolve, reject) => {
-      resolver = resolve;
-      rejecter = reject;
-    });
+    const deferred = new Deferred();
+    const promise = deferred.promise;
+    const resolver = deferred.resolve;
+    const rejecter = deferred.reject;
+
     // If there's nothing currently being rendered, schedule a render pass.
     if (!this.renderItems_) {
       this.renderPass_.schedule();

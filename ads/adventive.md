@@ -16,7 +16,7 @@ limitations under the License.
 
 # Adventive
 
-## Examples
+## Example
 
 ### Single Ad
 
@@ -29,6 +29,9 @@ limitations under the License.
 
 ## Configuration
 
-Required parameters:
-- src: provided ad url
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+
+### Required parameters
+
+- `data-src`: provided ad url
 

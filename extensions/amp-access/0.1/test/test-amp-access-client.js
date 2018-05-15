@@ -93,33 +93,33 @@ describes.realWin('AccessClientAdapter', {
 
     it('should fail when authorization timeout is malformed', () => {
       validConfig['authorizationTimeout'] = 'someString';
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessClientAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"authorizationTimeout" must be a number/);
+      }).to.throw(/"authorizationTimeout" must be a number/); });
     });
 
     it('should fail if config authorization is missing or malformed', () => {
       delete validConfig['authorization'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessClientAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"authorization" URL must be specified/);
+      }).to.throw(/"authorization" URL must be specified/); });
 
       validConfig['authorization'] = 'http://acme.com/a';
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessClientAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"authorization".*https\:/);
+      }).to.throw(/"authorization".*https\:/); });
     });
 
     it('should fail if config pingback is missing or malformed', () => {
       delete validConfig['pingback'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessClientAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"pingback" URL must be specified/);
+      }).to.throw(/"pingback" URL must be specified/); });
 
       validConfig['pingback'] = 'http://acme.com/p';
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessClientAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"pingback".*https\:/);
+      }).to.throw(/"pingback".*https\:/); });
     });
 
     it('should allow missing pingback when noPingback=true', () => {

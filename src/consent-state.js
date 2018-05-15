@@ -21,8 +21,10 @@ import {Services} from './services';
  * @enum {number}
  */
 export const CONSENT_POLICY_STATE = {
-  SUFFICIENT: 0,
-  INSUFFICIENT: 1,
+  UNKNOWN: 0,
+  SUFFICIENT: 1,
+  INSUFFICIENT: 2,
+  UNKNOWN_NOT_REQUIRED: 3,
 };
 
 /**
@@ -32,13 +34,31 @@ export const CONSENT_POLICY_STATE = {
  * @param {string} policyId
  * @return {!Promise<?CONSENT_POLICY_STATE>}
  */
-export function getConsentPolicyPromise(ampdoc, policyId) {
+export function getConsentPolicyState(ampdoc, policyId) {
   return Services.consentPolicyServiceForDocOrNull(ampdoc)
       .then(consentPolicy => {
         if (!consentPolicy) {
           return null;
         }
         return consentPolicy.whenPolicyResolved(
+            /** @type {string} */ (policyId));
+      });
+}
+
+/**
+ * Returns a promise that resolves to a sharedData retrieved from consent
+ * remote endpoint.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} policyId
+ * @return {!Promise<?Object>}
+ */
+export function getConsentPolicySharedData(ampdoc, policyId) {
+  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+      .then(consentPolicy => {
+        if (!consentPolicy) {
+          return null;
+        }
+        return consentPolicy.getMergedSharedData(
             /** @type {string} */ (policyId));
       });
 }

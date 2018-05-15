@@ -20,17 +20,20 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   RTC_ERROR_ENUM,
   getCalloutParam_,
   inflateAndSendRtc_,
   maybeExecuteRealTimeConfig_,
+  sendErrorMessage,
   truncUrl_,
   validateRtcConfig_,
 } from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {dev} from '../../../../src/log';
 import {isFiniteNumber} from '../../../../src/types';
 
 describes.realWin('real-time-config-manager', {amp: true}, env => {
@@ -329,8 +332,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         vendors, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
-    // TODO(jeffkaufman, #13422): this test was silently failing
-    it.skip('should favor publisher URLs over vendor URLs', () => {
+
+    it('should favor publisher URLs over vendor URLs', () => {
       const urls = generateUrls(3,2);
       const vendors = {
         'fAkeVeNdOR': {SLOT_ID: 0, PAGE_ID: 1},
@@ -341,7 +344,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.2.com/',
         'https://www.3.com/?slot_id=1',
         'https://www.4.com/?slot_id=1&page_id=2',
-        'https://localhost:8000/examples/rtcE1.json?slot_id=1&page_id=2&foo_id=3',
       ];
       const rtcCalloutResponses = generateCalloutResponses(6);
       const customMacros = {
@@ -356,10 +358,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       }
       expectedRtcArray.push(
           rtcEntry(null, Object.keys(vendors)[0].toLowerCase(),
-              RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED));
+              RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED, true));
       const calloutCount = 5;
       return executeTest({
-        urls, vendors, customMacros, inflatedUrls, rtcCalloutResponses,
+        urls, vendors, customMacros, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
     it('should not send more than one RTC callout to the same url', () => {
@@ -447,6 +449,27 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         calloutCount, expectedCalloutUrls: urls, expectedRtcArray,
         failXhr: true});
     });
+    for (const consentState in CONSENT_POLICY_STATE) {
+      it(`should handle consentState ${consentState}`, () => {
+        setRtcConfig({urls: ['https://foo.com']});
+        const rtcResult = maybeExecuteRealTimeConfig_(
+            a4aElement, {}, CONSENT_POLICY_STATE[consentState]);
+        switch (CONSENT_POLICY_STATE[consentState]) {
+          case CONSENT_POLICY_STATE.SUFFICIENT:
+          case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+            expect(rtcResult).to.be.ok;
+            return rtcResult.then(() =>
+              expect(fetchJsonStub).to.be.calledOnce);
+          case CONSENT_POLICY_STATE.UNKNOWN:
+          case CONSENT_POLICY_STATE.INSUFFICIENT:
+            expect(rtcResult).to.not.be.ok;
+            expect(fetchJsonStub).to.not.be.called;
+            break;
+          default:
+            throw new Error(`unknown consent state ${consentState}`);
+        }
+      });
+    }
   });
 
   describe('#validateRtcConfig', () => {
@@ -515,7 +538,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
       it('should return null for rtcConfig missing required values', () => {
         setRtcConfig(rtcConfig);
-        validatedRtcConfig = validateRtcConfig_(element);
+        allowConsoleError(() => {
+          dev().error('RTCTESTS', 'Error');
+          validatedRtcConfig = validateRtcConfig_(element);
+        });
         expect(validatedRtcConfig).to.be.null;
       });
     });
@@ -549,6 +575,61 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         expect(errorResponse.error).to.equal(
             RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT);
       });
+    });
+
+    it('should not send RTC if no longer current', () => {
+      const url = 'https://www.example.biz/';
+      const seenUrls = {};
+      const promiseArray = [];
+      const rtcStartTime = Date.now();
+      const timeoutMillis = 1000;
+      const macros = {};
+      // Simulate an unlayoutCallback call
+      inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
+          rtcStartTime, macros, timeoutMillis);
+      a4aElement.promiseId_++;
+      return promiseArray[0].then(errorResponse => {
+        expect(errorResponse).to.be.undefined;
+      });
+
+    });
+  });
+
+  describe('sendErrorMessage', () => {
+    let imageStub, requestUrl, ampDoc;
+    let errorType, errorReportingUrl;
+    let imageMock;
+
+    beforeEach(() => {
+      // Make sure that we always send the message, as we are using
+      // the check Math.random() < reporting frequency.
+      sandbox.stub(Math, 'random').returns(0);
+      sandbox.stub(Xhr.prototype, 'fetch');
+      imageMock = {};
+      imageStub = sandbox.stub(env.win, 'Image').returns(imageMock);
+      ampDoc = a4aElement.getAmpDoc();
+
+      errorType = RTC_ERROR_ENUM.TIMEOUT;
+      errorReportingUrl = 'https://www.example.com?e=ERROR_TYPE&h=HREF';
+      const whitelist = {ERROR_TYPE: true, HREF: true};
+      const macros = {
+        ERROR_TYPE: errorType,
+        HREF: env.win.location.href,
+      };
+      requestUrl = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
+          errorReportingUrl, macros, whitelist);
+    });
+
+    it('should send error message pingback to correct url', () => {
+      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
+      expect(imageStub).to.be.calledOnce;
+      expect(imageMock.src).to.equal(requestUrl);
+    });
+
+    it('should not send error message if insecure url', () => {
+      errorReportingUrl = 'http://www.IAmInsecure.biz';
+      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
+      expect(imageStub).to.not.be.called;
     });
   });
 });

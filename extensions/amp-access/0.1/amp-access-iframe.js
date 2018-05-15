@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Messenger} from './iframe-api/messenger';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -143,9 +144,10 @@ export class AccessIframeAdapter {
    */
   connect() {
     if (!this.connectedPromise_) {
-      this.connectedPromise_ = new Promise(resolve => {
-        this.connectedResolver_ = resolve;
-      });
+      const deferred = new Deferred();
+      this.connectedPromise_ = deferred.promise;
+      this.connectedResolver_ = deferred.resolve;
+
       this.configPromise_ = this.resolveConfig_();
       // Connect.
       this.messenger_.connect(this.handleCommand_.bind(this));
@@ -195,8 +197,7 @@ export class AccessIframeAdapter {
   authorizeRemote_() {
     return this.connect().then(() => {
       return this.messenger_.sendCommandRsvp('authorize', {});
-    }).then(response => {
-      const data = response['data'];
+    }).then(data => {
       if (data) {
         // Store the value in a non-blocking microtask.
         Promise.resolve().then(() => this.store_(data));

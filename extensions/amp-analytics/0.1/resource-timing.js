@@ -53,6 +53,14 @@ let IndividualResourceSpecDef;
 let ResourceSpecForHostDef;
 
 /**
+ * The default maximum buffer size for resource timing entries. After the limit
+ * has been reached, the browser will stop recording resource timing entries.
+ * This number is chosen by the spec: https://w3c.github.io/resource-timing.
+ * @const {number}
+ */
+const RESOURCE_TIMING_BUFFER_SIZE = 150;
+
+/**
  * Yields the thread before running the function to avoid causing jank. (i.e. a
  * task that takes over 16ms.)
  * @param {function(): OUT} fn
@@ -88,6 +96,12 @@ function validateResourceTimingSpec(spec) {
         'resource timing variables only supports bases between 2 and 36');
     return false;
   }
+  if (spec['responseAfter'] != null &&
+      typeof spec['responseAfter'] != 'number') {
+    user().warn(
+        'ANALYTICS', 'resourceTimingSpec["responseAfter"] must be a number');
+    return false;
+  }
   return true;
 }
 
@@ -97,9 +111,6 @@ function validateResourceTimingSpec(spec) {
  * @return {!Array<!PerformanceResourceTiming>}
  */
 function getResourceTimingEntries(win) {
-  if (!win.performance || !win.performance.getEntriesByType) {
-    return [];
-  }
   return /** @type {!Array<!PerformanceResourceTiming>} */ (
     win.performance.getEntriesByType('resource'));
 }
@@ -244,15 +255,34 @@ function serialize(entries, resourceTimingSpec, win) {
 
 /**
  * Serializes resource timing entries according to the resource timing spec.
- * @param {!JsonObject} resourceTimingSpec
  * @param {!Window} win
+ * @param {!JsonObject} resourceTimingSpec
  * @return {!Promise<string>}
  */
-export function serializeResourceTiming(resourceTimingSpec, win) {
-  if (!validateResourceTimingSpec(resourceTimingSpec)) {
+export function serializeResourceTiming(win, resourceTimingSpec) {
+  // Check that the performance timing API exists before and that the spec is
+  // valid before proceeding. If not, we simply return an empty string.
+  if (resourceTimingSpec['done'] || !win.performance || !win.performance.now ||
+      !win.performance.getEntriesByType ||
+      !validateResourceTimingSpec(resourceTimingSpec)) {
+    resourceTimingSpec['done'] = true;
     return Promise.resolve('');
   }
-  const entries = getResourceTimingEntries(win);
+  let entries = getResourceTimingEntries(win);
+  if (entries.length >= RESOURCE_TIMING_BUFFER_SIZE) {
+    // We've exceeded the maximum buffer size so no additional metrics will be
+    // reported for this resourceTimingSpec.
+    resourceTimingSpec['done'] = true;
+  }
+
+  const responseAfter = resourceTimingSpec['responseAfter'] || 0;
+  // Update responseAfter for next time to avoid reporting the same resource
+  // multiple times.
+  resourceTimingSpec['responseAfter'] =
+      Math.max(responseAfter, win.performance.now());
+
+  // Filter resources that are too early.
+  entries = entries.filter(e => e.startTime + e.duration >= responseAfter);
   if (!entries.length) {
     return Promise.resolve('');
   }
