@@ -157,7 +157,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Layout} layout
+   * @param {!../../../src/layout.Layout} layout
    * @override
    */
   isLayoutSupported(layout) {
