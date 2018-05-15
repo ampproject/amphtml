@@ -184,7 +184,7 @@ declareExtension('amp-viewer-integration', '0.1', {
   // faster.
   loadPriority: 'high',
 });
-declareExtension('amp-video', '0.1');
+declareExtension('amp-viqeo', '0.1');
 declareExtension('amp-video-service', '0.1', {
   // `amp-video-service` provides analytics and autoplay for all videos. We need
   // those to be available asap. This service replaces a runtime-level provider,
@@ -192,7 +192,6 @@ declareExtension('amp-video-service', '0.1', {
   // binary.
   loadPriority: 'high',
 });
-declareExtension('amp-viqeo', '0.1');
 declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
