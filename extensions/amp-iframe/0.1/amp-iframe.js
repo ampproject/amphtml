@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {
   IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
