@@ -35,11 +35,24 @@
     "allowConsoleError": false
   },
   "settings": {
-      "jsdoc": {
-          "tagNamePreference": {
-              "returns": "return"
-          }
+    "jsdoc": {
+      "tagNamePreference": {
+        "returns": "return",
+        "constant": "const"
+      },
+      "additionalTagNames": {
+        "customTags": [
+          "deprecated",
+          "export",
+          "final",
+          "package",
+          "restricted",
+          "suppress",
+          "template",
+          "visibleForTesting"
+        ]
       }
+    }
   },
   "rules": {
     "amphtml-internal/closure-type-primitives": 2,
