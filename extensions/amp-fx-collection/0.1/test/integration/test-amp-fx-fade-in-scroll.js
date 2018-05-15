@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {toggleExperiment} from '../../../../../src/experiments';
-
 const config = describe.configure().ifNewChrome();
 config.run('amp-fx-collection', function() {
   this.timeout(100000);
@@ -54,7 +52,6 @@ config.run('amp-fx-collection', function() {
     let win;
     beforeEach(() => {
       win = env.win;
-      toggleExperiment(win, 'amp-fx-fade-in-scroll', true, false);
     });
 
     it('runs fade-in-scroll animation with default parameters', () => {
@@ -104,7 +101,6 @@ config.run('amp-fx-collection', function() {
     let win;
     beforeEach(() => {
       win = env.win;
-      toggleExperiment(win, 'amp-fx-fade-in-scroll', true, false);
     });
 
     it('runs fade-in-scroll animation with margins specified', () => {
@@ -143,7 +139,6 @@ config.run('amp-fx-collection', function() {
     let win;
     beforeEach(() => {
       win = env.win;
-      toggleExperiment(win, 'amp-fx-fade-in-scroll', true, false);
     });
 
     it('runs fade-in-scroll animation with repeat specified', () => {

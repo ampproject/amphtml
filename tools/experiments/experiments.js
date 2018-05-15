@@ -289,18 +289,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'amp-fx-fade-in',
-    name: 'Enables amp-fx="fade-in" - scroll triggered timed fade in animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
-  },
-  {
-    id: 'amp-fx-fade-in-scroll',
-    name: 'Enables amp-fx="fade-in-scroll" - a scroll dependent fade animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
-  },
-  {
     id: 'amp-img-native-srcset',
     name: 'Enables native browser implementation of srcset and sizes',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
