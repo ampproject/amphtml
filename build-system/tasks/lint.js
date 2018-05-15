@@ -33,6 +33,7 @@ const filesInARefactorPr = 15;
 const options = {
   fix: false,
 };
+let collapseLintResults = !!process.env.TRAVIS;
 
 /**
  * Checks if current Vinyl file has been fixed by eslint.
@@ -83,8 +84,8 @@ function runLinter(path, stream, options) {
   if (!process.env.TRAVIS) {
     log(colors.green('Starting linter...'));
   }
-  if (process.env.TRAVIS_EVENT_TYPE == 'push') {
-    // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
+  if (collapseLintResults) {
+    // TODO(#15255, #14761): Remove log folding after warnings are fixed.
     log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
     console./* OK*/log('travis_fold:start:lint_results\n');
   }
@@ -99,8 +100,8 @@ function runLinter(path, stream, options) {
         }
       }))
       .pipe(eslint.results(function(results) {
-        // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
-        if (process.env.TRAVIS_EVENT_TYPE == 'push') {
+        // TODO(#15255, #14761): Remove log folding after warnings are fixed.
+        if (collapseLintResults) {
           console./* OK*/log('travis_fold:end:lint_results');
         }
         if (results.errorCount == 0 && results.warningCount == 0) {
@@ -171,6 +172,7 @@ function enableStrictMode() {
   // TODO(#14761, #15255): Remove these overrides and make the rules errors by
   // default in .eslintrc after all code is fixed.
   options['configFile'] = '.eslintrc-strict';
+  collapseLintResults = false;
 }
 
 /**
