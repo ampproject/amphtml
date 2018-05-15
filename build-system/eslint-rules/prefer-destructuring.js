@@ -42,6 +42,14 @@ module.exports = {
       return renamable || property.name === name;
     }
 
+    function shouldBeIdempotent(node) {
+      while (node.type === 'MemberExpression') {
+        node = node.object;
+      }
+
+      return node.type === 'Identifier' || node.type === 'ThisExpression';
+    }
+
     function setStruct(map, key, node, declaration) {
       if (map.has(key)) {
         const struct = map.get(key);
@@ -153,8 +161,7 @@ module.exports = {
               continue;
             }
 
-            if (init.type !== 'Identifier' &&
-                init.type !== 'MemberExpression') {
+            if (!shouldBeIdempotent(init)) {
               continue;
             }
 
