@@ -148,6 +148,9 @@ function jsFilesInPr() {
  * @return {boolean}
  */
 function eslintrcChangesInPr() {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
+    return false;
+  }
   const filesInPr =
         getStdout('git diff --name-only master...HEAD').trim().split('\n');
   return filesInPr.filter(function(file) {
@@ -160,15 +163,16 @@ function eslintrcChangesInPr() {
  *
  * @param {!Array<string>} files
  */
-function setFiles(files) {
+function setFilesToLint(files) {
   config.lintGlobs =
       config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
+  log(colors.green('INFO: ') + 'Running lint on ' + colors.cyan(files));
 }
 
 /**
  * Enables linting in strict mode.
  */
-function enableStrictMode() {
+function enableStrictLinting() {
   // TODO(#14761, #15255): Remove these overrides and make the rules errors by
   // default in .eslintrc after all code is fixed.
   options['configFile'] = '.eslintrc-strict';
@@ -184,21 +188,21 @@ function lint() {
     options.fix = true;
   }
   if (argv.files) {
-    setFiles(argv.files);
-    enableStrictMode();
+    setFilesToLint(argv.files);
+    enableStrictLinting();
   } else if (!eslintrcChangesInPr() &&
-      (process.env.TRAVIS_EVENT_TYPE == 'pull_request' ||
+      (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
        process.env.LOCAL_PR_CHECK)) {
     const jsFiles = jsFilesInPr();
     if (jsFiles.length == 0) {
-      log(colors.green('INFO: ') + 'No JS files in this PR.');
+      log(colors.green('INFO: ') + 'No JS files in this PR');
       return Promise.resolve();
     } else if (jsFiles.length > filesInARefactorPr) {
       // This is probably a refactor, don't enable strict mode.
-      setFiles(jsFiles);
+      setFilesToLint(jsFiles);
     } else {
-      setFiles(jsFiles);
-      enableStrictMode();
+      setFilesToLint(jsFiles);
+      enableStrictLinting();
     }
   }
   const stream = initializeStream(config.lintGlobs, {});
