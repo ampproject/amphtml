@@ -20,6 +20,7 @@ import {
   ConsentPolicyManager,
   MULTI_CONSENT_EXPERIMENT,
 } from './consent-policy-manager';
+import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -131,6 +132,12 @@ export class AmpConsent extends AMP.BaseElement {
     // TODO: Decide what to do with incorrect configuration.
     this.assertAndParseConfig_();
 
+    const children = this.getRealChildren();
+    for (let i = 0; i < children.length; i++) {
+      // <amp-consent> will manualy schedule layout for its children.
+      this.setAsOwner(children[i]);
+    }
+
     const consentPolicyManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANAGER)
             .then(manager => {
@@ -224,13 +231,17 @@ export class AmpConsent extends AMP.BaseElement {
 
       // Display the current instance
       this.currentDisplayInstance_ = instanceId;
-      setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
-          {display: 'block'});
+      const uiElement = this.consentUI_[this.currentDisplayInstance_];
+      setImportantStyles(uiElement, {display: 'block'});
+      // scheduleLayout is required everytime because some AMP element may
+      // get un laid out after toggle display (#unlayoutOnPause)
+      // for example <amp-iframe>
+      this.scheduleLayout(uiElement);
     });
 
-    return new Promise(resolve => {
-      this.dialogResolver_[instanceId] = resolve;
-    });
+    const deferred = new Deferred();
+    this.dialogResolver_[instanceId] = deferred.resolve;
+    return deferred.promise;
   }
 
   /**
@@ -366,17 +377,6 @@ export class AmpConsent extends AMP.BaseElement {
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
       return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
     });
-  }
-
-  /**
-   * Init consent policy instances
-   */
-  initConsentPolicy_() {
-    const policyKeys = Object.keys(this.policyConfig_);
-    for (let i = 0; i < policyKeys.length; i++) {
-      this.consentPolicyManager_.registerConsentPolicyInstance(
-          policyKeys[i], this.policyConfig_[policyKeys[i]]);
-    }
   }
 
   /**
@@ -553,6 +553,8 @@ export class AmpConsent extends AMP.BaseElement {
         this.getViewport().addToFixedLayer(this.element);
         setImportantStyles(dev().assertElement(this.postPromptUI_),
             {display: 'block'});
+        // Will need to scheduleLayout for postPromptUI
+        // upon request for using AMP component.
       });
     });
 
