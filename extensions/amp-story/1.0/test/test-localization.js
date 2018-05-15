@@ -71,8 +71,8 @@ describes.fakeWin('localization', {}, env => {
           .deep.equal(['de-hi-1', 'de-hi', 'de', 'default']);
     });
 
-    it('should use to English', () => {expect(getLanguageCodesFromString()).to
-          .deep.equal(['en']);
+    it('should default to English', () => {
+      expect(getLanguageCodesFromString()).to.deep.equal(['en']);
     });
   });
 
