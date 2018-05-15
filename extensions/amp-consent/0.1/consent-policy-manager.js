@@ -28,6 +28,12 @@ export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
 
+const UNBLOCK_ON_ALL_POLICY = 'consent-unblock-on-all';
+const WHITELIST_POLICY = [
+  'default',
+  UNBLOCK_ON_ALL_POLICY,
+];
+
 
 export class ConsentPolicyManager {
   constructor(ampdoc) {
@@ -139,9 +145,9 @@ export class ConsentPolicyManager {
   whenPolicyResolved(policyId) {
     if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
       // If customized policy is not supported
-      if (policyId != 'default') {
-        user().error(TAG, 'can not find policy, do not set value to ' +
-            'data-block-on-consent');
+      if (WHITELIST_POLICY.indexOf(policyId) < 0) {
+        user().error(TAG, `can not find defined policy ${policyId}, ` +
+          `only default and ${UNBLOCK_ON_ALL_POLICY} is supported now`);
         return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
       }
     }
@@ -149,6 +155,26 @@ export class ConsentPolicyManager {
       return this.instances_[policyId].getReadyPromise().then(() => {
         return this.instances_[policyId].getCurrentPolicyStatus();
       });
+    });
+  }
+
+  /**
+   * Wait for policy to resolve and check if it should be unblocked
+   * @param {string} policyId
+   * @return {!Promise<boolean>}
+   */
+  whenPolicyUnblock(policyId) {
+    let predefined;
+    if (policyId == UNBLOCK_ON_ALL_POLICY) {
+      predefined = policyId;
+      policyId = 'default';
+    }
+    return this.whenPolicyResolved(policyId).then(state => {
+      if (predefined) {
+        return true;
+      }
+      return state == CONSENT_POLICY_STATE.SUFFICIENT ||
+          state == CONSENT_ITEM_STATE.NOT_REQUIRED;
     });
   }
 

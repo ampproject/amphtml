@@ -90,6 +90,24 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         return promise;
       });
     });
+
+    describe('whenPolicyUnblock', () => {
+      it('when policy is not consent-unblock-on-all', () => {
+        const promise = manager.whenPolicyUnblock('default');
+        manager.registerConsentPolicyInstance('default', {});
+        return promise.then(unblock => {
+          expect(unblock).to.be.false;
+        });
+      });
+
+      it('when policy is consent-unblock-on-all', () => {
+        const promise = manager.whenPolicyUnblock('consent-unblock-on-all');
+        manager.registerConsentPolicyInstance('default', {});
+        return promise.then(unblock => {
+          expect(unblock).to.be.true;
+        });
+      });
+    });
   });
 
   describe('Consent Policy Instance', () => {

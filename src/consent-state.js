@@ -49,6 +49,24 @@ export function getConsentPolicyState(ampdoc, policyId) {
 }
 
 /**
+ * Returns a promise that resolve when the consent policy is resolve,
+ * and if it should be unblocked.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} policyId
+ * @return {!Promise<boolean>}
+ */
+export function getConsentPolicyUnblockState(ampdoc, policyId) {
+  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+      .then(consentPolicy => {
+        if (!consentPolicy) {
+          return true;
+        }
+        return consentPolicy.whenPolicyUnblock(
+            /** @type {string} */ (policyId));
+      });
+}
+
+/**
  * Returns a promise that resolves to a sharedData retrieved from consent
  * remote endpoint.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc

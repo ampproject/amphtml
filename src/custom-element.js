@@ -16,10 +16,7 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
-import {
-  CONSENT_POLICY_STATE,
-  getConsentPolicyState,
-} from './consent-state';
+
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
@@ -36,6 +33,7 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
+import {getConsentPolicyUnblockState} from './consent-state';
 import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
@@ -486,15 +484,14 @@ function createBaseCustomElementClass(win) {
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
-          getConsentPolicyState(this.getAmpDoc(), policyId).then(state => {
-            if (state == CONSENT_POLICY_STATE.INSUFFICIENT ||
-                state == CONSENT_POLICY_STATE.UNKNOWN) {
-              // Need to change after support more policy state
-              reject(blockedByConsentError());
-            } else {
-              resolve(this.implementation_.buildCallback());
-            }
-          });
+          getConsentPolicyUnblockState(this.getAmpDoc(), policyId).then(
+              state => {
+                if (state == true) {
+                  resolve(this.implementation_.buildCallback());
+                } else {
+                  reject(blockedByConsentError());
+                }
+              });
         }
       }).then(() => {
         this.preconnect(/* onLayout */false);
