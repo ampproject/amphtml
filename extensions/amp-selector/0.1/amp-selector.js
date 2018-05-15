@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';

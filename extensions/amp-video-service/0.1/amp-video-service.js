@@ -21,7 +21,7 @@
  * it gets automatically inserted by the runtime when required.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';

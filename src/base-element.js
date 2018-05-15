@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust';
+import {ActionTrust} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {dev, user} from './log';

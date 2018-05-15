@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust';
+import {ActionTrust} from './action-constants';
 import {
   SOURCE_ORIGIN_PARAM,
   assertHttpsUrl,
