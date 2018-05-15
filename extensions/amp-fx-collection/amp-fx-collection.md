@@ -43,7 +43,7 @@ The `amp-fx-collection` extension provides a collection of preset visual effects
 such as parallax that can be easily enabled on any element via attributes.
 
 Currently, the `parallax` and `fade-in` effects are supported.
-More effects such as `slide-in` are planned to be supported soon.
+More effects such as `fly-in` are planned to be supported soon.
 
 To specify a visual effect for an element, add the `amp-fx` attribute with the value of the visual effect.
 
@@ -79,7 +79,7 @@ In this example, as the user scrolls the page, the h1 element scrolls faster rel
 </h1>
 ```
 
-### fade-in (experimental)
+### fade-in
 
 The `fade-in` effect allows an element to fade in once the element being targetted is visible in the viewport.
 
@@ -124,7 +124,7 @@ In the below example, the animation doesn't start until the element has crossed 
   </div>
 ```
 
-### fade-in-scroll (experimental)
+### fade-in-scroll
 
 The `fade-in-scroll` effect allows you to change the opacity of an element as it scrolls within the viewport. This creates a scroll dependent fade animation. By default once the element is fully visible we don't animate the opacity anymore. 
 
