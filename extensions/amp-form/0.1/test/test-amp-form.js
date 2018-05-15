@@ -1677,17 +1677,23 @@ describes.repeated('', {
           redirectToValue = 'http://google.com/';
           ampForm.handleSubmitAction_(/* invocation */ {});
 
+          // Make it a sync error for testing convenience
+          sandbox.stub(user(), 'assert').throws();
+
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
           }, () => {
             expect(navigateTo).to.not.be.called;
-          }).catch(() => {});
+          });
         });
 
         it('should fail to redirect to non-absolute urls', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = '/hello';
           ampForm.handleSubmitAction_(/* invocation */ {});
+
+          // Make it a sync error for testing convenience
+          sandbox.stub(user(), 'assert').throws();
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
@@ -1702,6 +1708,10 @@ describes.repeated('', {
           redirectToValue = 'http://google.com/';
           ampForm.handleSubmitAction_(/* invocation */ {});
 
+
+          // Make it a sync error for testing convenience
+          sandbox.stub(user(), 'assert').throws();
+
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
           }, () => {
@@ -1712,7 +1722,7 @@ describes.repeated('', {
         it('should redirect on error and header is set', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
           redirectToValue = 'https://example2.com/hello';
-          const logSpy = sandbox.spy(user(), 'error');
+          const logSpy = sandbox.stub(user(), 'error');
           ampForm.handleSubmitAction_(/* invocation */ {});
 
           expect(navigateTo).to.not.be.called;
