@@ -85,7 +85,7 @@ export function listen(element, eventType, listener, opt_evtListenerOpts) {
  * @param {string} sentinel
  * @param {JsonObject=} data
  * @param {?string=} rtvVersion
- * @returns {string}
+ * @return {string}
  */
 export function serializeMessage(type, sentinel, data = dict(),
   rtvVersion = null) {
@@ -102,7 +102,7 @@ export function serializeMessage(type, sentinel, data = dict(),
  * Returns null if it's not valid AMP message format.
  *
  * @param {*} message
- * @returns {?JsonObject|undefined}
+ * @return {?JsonObject|undefined}
  */
 export function deserializeMessage(message) {
   if (!isAmpMessage(message)) {
