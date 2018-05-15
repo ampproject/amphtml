@@ -16,6 +16,7 @@
 
 import {CONSENT_ITEM_STATE} from './consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Deferred} from '../../../src/utils/promise';
 import {dev, user} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn, map} from '../../../src/utils/object';
@@ -46,13 +47,14 @@ export class ConsentPolicyManager {
     this.ConsentStateManagerPromise_ =
         getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
 
-    /** @private {?function()} */
-    this.allConsentInitatedResolver_ = null;
+    const deferred = new Deferred();
 
     /** @private {!Promise} */
-    this.allConsentInitated_ = new Promise(resolve => {
-      this.allConsentInitatedResolver_ = resolve;
-    });
+    this.allConsentInitated_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.allConsentInitatedResolver_ = deferred.resolve;
+
   }
 
   /**
@@ -60,7 +62,8 @@ export class ConsentPolicyManager {
    * Example policy config format:
    * {
    *   "waitFor": {
-   *     "consentABC": [], // Can't support array now. All items will be treated as an empty array
+   *     "consentABC": [], // Can't support array now.
+   *                       // All items will be treated as an empty array
    *     "consentDEF": [],
    *   }
    *   "timeout": {
@@ -94,10 +97,9 @@ export class ConsentPolicyManager {
     this.ConsentStateManagerPromise_.then(manager => {
       for (let i = 0; i < waitFor.length; i++) {
         const consentId = waitFor[i];
-        let resolver;
-        const instanceInitValuePromise = new Promise(resolve => {
-          resolver = resolve;
-        });
+        const deferred = new Deferred();
+        const instanceInitValuePromise = deferred.promise;
+        let resolver = deferred.resolve;
 
         manager.whenConsentReady(consentId).then(() => {
           manager.onConsentStateChange(consentId, state => {
@@ -184,9 +186,9 @@ export class ConsentPolicyManager {
       return Promise.resolve();
     }
     if (!this.policyInstancePromises_[policyId]) {
-      this.policyInstancePromises_[policyId] = new Promise(resolve => {
-        this.policyInstancePromiseResolvers_[policyId] = resolve;
-      });
+      const deferred = new Deferred();
+      this.policyInstancePromises_[policyId] = deferred.promise;
+      this.policyInstancePromiseResolvers_[policyId] = deferred.resolve;
     }
     return /** @type {!Promise} */ (this.policyInstancePromises_[policyId]);
   }
@@ -203,13 +205,13 @@ export class ConsentPolicyInstance {
     /** @private {!Object<string, ?CONSENT_ITEM_STATE>} */
     this.itemToConsentState_ = map();
 
-    /** @private {?function()} */
-    this.readyPromiseResolver_ = null;
+    const deferred = new Deferred();
 
     /** @private {!Promise} */
-    this.readyPromise_ = new Promise(resolve => {
-      this.readyPromiseResolver_ = resolve;
-    });
+    this.readyPromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.readyPromiseResolver_ = deferred.resolve;
 
     /** @private {CONSENT_POLICY_STATE} */
     this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
@@ -325,8 +327,8 @@ export class ConsentPolicyInstance {
     // A single consent instance is unknown
     let isUnknown = false;
 
-    // Decide to traverse item list every time instead of keeping reject/pending counts
-    // Performance should be OK since we expect item list to be small.
+    // Decide to traverse item list every time instead of keeping reject/pending
+    // counts Performance should be OK since we expect item list to be small.
     const items = Object.keys(this.itemToConsentState_);
     for (let i = 0; i < items.length; i++) {
       const consentId = items[i];

@@ -106,6 +106,23 @@ describes.realWin('amp-geo', {
     });
   });
 
+  it('should remove amp-geo-pending class from body element', () => {
+    addConfigElement('script');
+    doc.body.classList.add('amp-geo-pending');
+
+    expectBodyHasClass([
+      'amp-geo-pending',
+    ], true);
+
+    geo.buildCallback();
+    return Services.geoForOrNull(win).then(geo => {
+      expect(geo.ISOCountry).to.equal('unknown');
+      expectBodyHasClass([
+        'amp-geo-pending',
+      ], false);
+    });
+  });
+
   it('should insert an amp-state if enabled', () => {
     addConfigElement('script', 'application/json',
         JSON.stringify(configWithState));

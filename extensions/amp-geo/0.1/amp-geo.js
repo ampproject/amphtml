@@ -16,7 +16,8 @@
 
 
 /**
- * @fileoverview Sets location specific CSS, bind variables, and attributes on AMP pages
+ * @fileoverview Sets location specific CSS, bind variables, and attributes on
+ * AMP pages
  * Example:
  * <code>
  * <amp-geo>
@@ -35,6 +36,7 @@
  * the amp-geo element's layout type is nodisplay.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
@@ -105,11 +107,12 @@ export class AmpGeo extends AMP.BaseElement {
           parseJson(children[0].textContent) : {});
 
     /* resolve the service promise singleton we stashed earlier */
-    geoResolver(geo);
+    geoDeferred.resolve(geo);
   }
 
   /**
    * findCountry_, sets this.country_ and this.mode_
+   * @param {Document} doc
    */
   findCountry_(doc) {
     // First see if we've been pre-rendered with a country, if so set it
@@ -145,7 +148,8 @@ export class AmpGeo extends AMP.BaseElement {
    * @param {Object} config
    */
   matchCountryGroups_(config) {
-    /* ISOCountryGroups are optional but if specified at least one must exist  */
+    /* ISOCountryGroups are optional but if specified at least one must exist
+    */
     /** @private @const {!Object<string, Array<string>>} */
     const ISOCountryGroups = config.ISOCountryGroups;
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
@@ -172,6 +176,7 @@ export class AmpGeo extends AMP.BaseElement {
    * clearPreRender_()
    * Removes classes and amp-state block addred by server side
    * pre-render when debug override is in effect
+   * @param {Document} doc
    */
   clearPreRender_(doc) {
     const klasses = doc.body.classList;
@@ -218,6 +223,7 @@ export class AmpGeo extends AMP.BaseElement {
             states[self.matchedGroups_[group]] = true;
           }
           doc.body.classList.add(COUNTRY_PREFIX + this.country_);
+          doc.body.classList.remove('amp-geo-pending');
           states.ISOCountryGroups = self.matchedGroups_;
 
           // Only include amp state if user requests it to avoid validator issue
@@ -247,15 +253,11 @@ export class AmpGeo extends AMP.BaseElement {
  * Create the service promise at load time to prevent race between extensions
  */
 
-/** singleton @type {?Promise<!Object<string, (string|Array<string>)>>} */
-let geoResolver = null;
+/** singleton */
+let geoDeferred = null;
 
 AMP.extension('amp-geo', '0.1', AMP => {
-  /** @type {Promise<!Object<string, (string|Array<string>)>>} */
-  const geoPromise = new Promise(resolve => {
-    geoResolver = resolve;
-  });
+  geoDeferred = new Deferred();
   AMP.registerElement(TAG, AmpGeo);
-  AMP.registerServiceForDoc(SERVICE_TAG, () => geoPromise);
+  AMP.registerServiceForDoc(SERVICE_TAG, () => geoDeferred.promise);
 });
-

@@ -539,7 +539,8 @@ export class Resources {
   }
 
   /**
-   * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * Builds the element if ready to be built, otherwise adds it to pending
+   * resources.
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
    * @param {boolean=} scheduleWhenBuilt
@@ -1012,9 +1013,9 @@ export class Resources {
     return this.vsync_.runPromise({
       measure: measurer || undefined,
       mutate: () => {
-        // TODO(jridgewell): Audit this system. Did this cause a layer invalidation (new
-        // layer, or removal of old layer)? Right now, we're only dirtying
-        // the measurements.
+        // TODO(jridgewell): Audit this system. Did this cause a layer
+        // invalidation (new layer, or removal of old layer)? Right now, we're
+        // only dirtying the measurements.
         mutator();
         this.dirtyElement(element);
       },

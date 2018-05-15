@@ -18,7 +18,8 @@ const MAX_HEX = 0xffffffff;
 const CUID_SESSION_TIME = Date.now();
 
 /**
- * Get the date from the CUID (first 8 hex digits are the time from epoch in seconds).
+ * Get the date from the CUID (first 8 hex digits are the time from epoch in
+ * seconds).
  * @param {string} cuid
  * @returns {Date}
  */

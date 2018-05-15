@@ -424,10 +424,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       };
 
       this.vsync_.mutatePromise(() => {
-        // The problem with setting innerText is that it not only removes
-        // child nodes from the element, but also permanently destroys all
-        // descendant text nodes. It is okay in this case because the description
-        // text area is a div that does not contain descendant elements.
+        // The problem with setting innerText is that it not only removes child
+        // nodes from the element, but also permanently destroys all descendant
+        // text nodes. It is okay in this case because the description text area
+        // is a div that does not contain descendant elements.
         this.descriptionTextArea_./*OK*/innerText = descText;
 
         // Avoid flickering out if transitioning from a slide with no text
@@ -1349,8 +1349,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       thumbnails.forEach(thumbnail => {
         thumbnail.timestampPromise.then(ts => {
           // Many video players (e.g. amp-youtube) that don't support this API
-          // will often return 1. So sometimes we will erroneously show a timestamp
-          // of 1 second instead of no timestamp.
+          // will often return 1. So sometimes we will erroneously show a
+          // timestamp of 1 second instead of no timestamp.
           if (!ts || isNaN(ts)) {
             return;
           }
@@ -1470,8 +1470,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       timestampDiv.appendChild(playButtonSpan);
       thumbnailObj.timestampPromise.then(ts => {
         // Many video players (e.g. amp-youtube) that don't support this API
-        // will often return 1. This will sometimes result in erroneous values of
-        // 1 second for video players that don't support getDuration.
+        // will often return 1. This will sometimes result in erroneous values
+        // of 1 second for video players that don't support getDuration.
         if (!ts || isNaN(ts)) {
           return;
         }
@@ -1496,7 +1496,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 export function installLightboxManager(win) {
   if (isExperimentOn(win, TAG)) {
     // TODO (#12859): This only works for singleDoc mode. We will move
-    // installation of LightboxManager to core after the experiment, okay for now.
+    // installation of LightboxManager to core after the experiment, okay for
+    // now.
     const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     manager_ = new LightboxManager(ampdoc);
   }
