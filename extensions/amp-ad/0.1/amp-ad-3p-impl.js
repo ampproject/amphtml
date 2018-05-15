@@ -156,14 +156,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       elementCheck : super.renderOutsideViewport();
   }
 
-  /** @override */
+  /**
+   * @param {!Layout} layout
+   * @override
+   */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -365,7 +368,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return this.layoutPromise_;
   }
 
-  /** @override  */
+  /**
+   * @param {boolean} inViewport
+   * @override
+   */
   viewportCallback(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
@@ -390,7 +396,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @returns {!Promise<?CONSENT_POLICY_STATE>}
+   * @return {!Promise<?CONSENT_POLICY_STATE>}
    */
   getConsentState() {
     const consentPolicyId = super.getConsentPolicy();
