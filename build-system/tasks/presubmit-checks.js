@@ -253,6 +253,7 @@ const forbiddenTerms = {
   'installVsyncService': {
     message: privateServiceFactory,
     whitelist: [
+      'extensions/amp-subscriptions/0.1/renderer.js',
       'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/viewport/viewport-impl.js',
