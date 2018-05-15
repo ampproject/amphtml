@@ -45,8 +45,8 @@ The `width` and `height` attributes determine the aspect ratio of the Viqeo embe
 
 ```html
 <amp-viqeo
-    data-profileId="184"
-    data-videoId="b51b70cdbb06248f4438"
+    data-profileid="184"
+    data-videoid="b51b70cdbb06248f4438"
     width="640"
     height="360"
     layout="responsive">
