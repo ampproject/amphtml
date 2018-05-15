@@ -32,6 +32,8 @@ import {user} from '../../../src/log';
  * @param {?string} optType Either “get” or “set”.
  * @return {string}
  */
+// See
+// https://developer.vimeo.com/player/js-api
 function getMethodName(prop, optType = null) {
   if (!optType) {
     return prop;
@@ -51,6 +53,7 @@ class AmpVimeo extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {function():string} */
     this.setVolume_ = once(() => getMethodName('volume', 'set'));
   }
 
