@@ -29,7 +29,7 @@ const path = require('path');
 const watch = require('gulp-watch');
 
 const isWatching = (argv.watch || argv.w) || false;
-
+const filesInARefactorPr = 15;
 const options = {
   fix: false,
 };
@@ -191,6 +191,9 @@ function lint() {
     if (jsFiles.length == 0) {
       log(colors.green('INFO: ') + 'No JS files in this PR.');
       return Promise.resolve();
+    } else if (jsFiles.length > filesInARefactorPr) {
+      // This is probably a refactor, don't enable strict mode.
+      setFiles(jsFiles);
     } else {
       setFiles(jsFiles);
       enableStrictMode();
