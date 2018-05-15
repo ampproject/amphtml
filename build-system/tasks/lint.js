@@ -29,10 +29,11 @@ const path = require('path');
 const watch = require('gulp-watch');
 
 const isWatching = (argv.watch || argv.w) || false;
-
+const filesInARefactorPr = 15;
 const options = {
   fix: false,
 };
+let collapseLintResults = !!process.env.TRAVIS;
 
 /**
  * Checks if current Vinyl file has been fixed by eslint.
@@ -83,8 +84,8 @@ function runLinter(path, stream, options) {
   if (!process.env.TRAVIS) {
     log(colors.green('Starting linter...'));
   }
-  if (process.env.TRAVIS_EVENT_TYPE == 'push') {
-    // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
+  if (collapseLintResults) {
+    // TODO(#15255, #14761): Remove log folding after warnings are fixed.
     log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
     console./* OK*/log('travis_fold:start:lint_results\n');
   }
@@ -99,8 +100,8 @@ function runLinter(path, stream, options) {
         }
       }))
       .pipe(eslint.results(function(results) {
-        // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
-        if (process.env.TRAVIS_EVENT_TYPE == 'push') {
+        // TODO(#15255, #14761): Remove log folding after warnings are fixed.
+        if (collapseLintResults) {
           console./* OK*/log('travis_fold:end:lint_results');
         }
         if (results.errorCount == 0 && results.warningCount == 0) {
@@ -132,12 +133,50 @@ function runLinter(path, stream, options) {
  *
  * @return {!Array<string>}
  */
-function filesInPr() {
+function jsFilesInPr() {
   const filesInPr =
         getStdout('git diff --name-only master...HEAD').trim().split('\n');
   return filesInPr.filter(function(file) {
     return path.extname(file) == '.js';
   });
+}
+
+/**
+ * Checks if there are .eslintrc changes in this PR, in which case we must lint
+ * all files.
+ *
+ * @return {boolean}
+ */
+function eslintrcChangesInPr() {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
+    return false;
+  }
+  const filesInPr =
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
+  return filesInPr.filter(function(file) {
+    return path.basename(file).includes('.eslintrc');
+  }).length > 0;
+}
+
+/**
+ * Sets the list of files to be linted.
+ *
+ * @param {!Array<string>} files
+ */
+function setFilesToLint(files) {
+  config.lintGlobs =
+      config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
+  log(colors.green('INFO: ') + 'Running lint on ' + colors.cyan(files));
+}
+
+/**
+ * Enables linting in strict mode.
+ */
+function enableStrictLinting() {
+  // TODO(#14761, #15255): Remove these overrides and make the rules errors by
+  // default in .eslintrc after all code is fixed.
+  options['configFile'] = '.eslintrc-strict';
+  collapseLintResults = false;
 }
 
 /**
@@ -148,25 +187,23 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
-  if (argv.files ||
-      process.env.TRAVIS_EVENT_TYPE == 'pull_request' ||
-      process.env.LOCAL_PR_CHECK) {
-    if (argv.files) {
-      config.lintGlobs =
-          config.lintGlobs.filter(e => e !== '**/*.js').concat(argv.files);
+  if (argv.files) {
+    setFilesToLint(argv.files);
+    enableStrictLinting();
+  } else if (!eslintrcChangesInPr() &&
+      (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
+       process.env.LOCAL_PR_CHECK)) {
+    const jsFiles = jsFilesInPr();
+    if (jsFiles.length == 0) {
+      log(colors.green('INFO: ') + 'No JS files in this PR');
+      return Promise.resolve();
+    } else if (jsFiles.length > filesInARefactorPr) {
+      // This is probably a refactor, don't enable strict mode.
+      setFilesToLint(jsFiles);
     } else {
-      const files = filesInPr();
-      if (files.length == 0) {
-        log(colors.green('INFO: ') + 'No JS files in this PR.');
-        return Promise.resolve();
-      } else {
-        config.lintGlobs =
-            config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
-      }
+      setFilesToLint(jsFiles);
+      enableStrictLinting();
     }
-    // TODO(#14761, #15255): Remove these overrides and make the rules errors by
-    // default in .eslintrc after all code is fixed.
-    options['configFile'] = '.eslintrc-strict';
   }
   const stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);
