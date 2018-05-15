@@ -21,6 +21,7 @@
  *   renderStartImplemented: (boolean|undefined),
  *   clientIdScope: (string|undefined),
  *   clientIdCookieName: (string|undefined),
+ *   consentHandlingOverride: (boolean|undefined),
  *   remoteHTMLDisabled: (boolean|undefined),
  *   fullWidthHeightRatio: (number|undefined),
  * }}
@@ -42,8 +43,12 @@ let AdNetworkConfigDef;
  *   // The scope used to provide CIDs to ads
  *   clientIdScope: string
  *
- *  // The cookie name to store the CID. In absence, `clientIdScope` is used.
+ *   // The cookie name to store the CID. In absence, `clientIdScope` is used.
  *   clientIdCookieName: string
+ *
+ *   // If the ad network is willing to override the consent handling, which
+ *   // by default is blocking ad load until the consent is accepted.
+ *   consentHandlingOverride: boolean
  *
  *   // Whether render-start API has been implemented
  *   // We highly recommend all networks to implement the API,
