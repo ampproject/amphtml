@@ -31,11 +31,11 @@ tags: {  # <amp-viqeo>
   tag_name: "AMP-VIQEO"
   requires_extension: "amp-viqeo"
   attrs: {
-    name: "data-profile"
+    name: "data-profileid"
     mandatory: true
   }
   attrs: {
-    name: "data-video"
+    name: "data-videoid"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
