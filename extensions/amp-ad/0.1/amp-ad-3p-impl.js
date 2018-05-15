@@ -21,7 +21,10 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent-state';
-import {LayoutPriority} from '../../../src/layout';
+import {
+  Layout, // eslint-disable-line no-unused-vars
+  LayoutPriority,
+} from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {
@@ -157,7 +160,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @param {!../../../src/layout.Layout} layout
+   * @param {!Layout} layout
    * @override
    */
   isLayoutSupported(layout) {
