@@ -15,7 +15,6 @@
  */
 
 import {dev, user} from '../../../../src/log';
-import {isExperimentOn} from '../../../../src/experiments';
 import {setStyles} from '../../../../src/style';
 
 export const Presets = {
@@ -67,8 +66,8 @@ export const Presets = {
     },
   },
   'fade-in': {
-    isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fade-in');
+    isFxTypeSupported(unusedWin) {
+      return true;
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
@@ -107,8 +106,8 @@ export const Presets = {
     },
   },
   'fade-in-scroll': {
-    isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fade-in-scroll');
+    isFxTypeSupported(unusedWin) {
+      return true;
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
