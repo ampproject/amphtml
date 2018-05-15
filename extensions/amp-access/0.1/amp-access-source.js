@@ -146,7 +146,7 @@ export class AccessSource {
   }
 
   /**
-   * @returns {?string}
+   * @return {?string}
    */
   getNamespace() {
     return this.namespace_;

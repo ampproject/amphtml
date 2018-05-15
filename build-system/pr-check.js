@@ -217,7 +217,7 @@ function isFlagConfig(filePath) {
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
- * @returns {!Set<string>}
+ * @return {!Set<string>}
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
@@ -513,7 +513,7 @@ function isGreenkeeperLockfilePushBuild() {
 /**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
- * @returns {number}
+ * @return {number}
  */
 function main() {
   const startTime = startTimer('pr-check.js');
