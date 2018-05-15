@@ -228,7 +228,7 @@ export class ConsentPolicyInstance {
     }
   }
 
-  /** @returns {Array<string>} */
+  /** @return {Array<string>} */
   getConsentInstanceIds() {
     return Object.keys(this.itemToConsentState_);
   }

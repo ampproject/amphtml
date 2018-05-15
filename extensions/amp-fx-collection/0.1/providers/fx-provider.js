@@ -182,7 +182,7 @@ export class FxElement {
    * Normally, preset factor is spread across a whole viewport height however
    * for elements above the fold, we should only apply the animation after
    * between the element and top of the page.
-   * @returns {!Promise<number>}
+   * @return {!Promise<number>}
    * @private
    */
   getAdjustedViewportHeight_() {
@@ -200,56 +200,56 @@ export class FxElement {
   }
 
   /**
-   * @returns {number}
+   * @return {number}
    */
   getFactor() {
     return this.factor_;
   }
 
   /**
-   * @returns {string}
+   * @return {string}
    */
   getDuration() {
     return this.duration_;
   }
 
   /**
-   * @returns {number}
+   * @return {number}
    */
   getMarginStart() {
     return this.marginStart_;
   }
 
   /**
-   * @returns {number}
+   * @return {number}
    */
   getMarginEnd() {
     return this.marginEnd_;
   }
 
   /**
-   * @returns {string}
+   * @return {string}
    */
   getEasing() {
     return this.easing_;
   }
 
   /**
-   * @returns {Element}
+   * @return {Element}
    */
   getElement() {
     return this.element_;
   }
 
   /**
-   * @returns {!../../../../src/service/resources-impl.Resources}
+   * @return {!../../../../src/service/resources-impl.Resources}
    */
   getResources() {
     return this.resources_;
   }
 
   /**
-   * @returns {number}
+   * @return {number}
    */
   getOffset() {
     return this.offset_;
@@ -263,7 +263,7 @@ export class FxElement {
   }
 
   /**
-   * @returns {boolean}
+   * @return {boolean}
    */
   isMutateScheduled() {
     return this.mutateScheduled_;
@@ -273,7 +273,7 @@ export class FxElement {
    * Boolean dictating whether or not the amp-fx preset has the `repeat`
    * attribute set. The `repeat` attribute allows the animation to be fully
    * dependent on scroll.
-   * @returns {boolean}
+   * @return {boolean}
    */
   hasRepeat() {
     return this.hasRepeat_;

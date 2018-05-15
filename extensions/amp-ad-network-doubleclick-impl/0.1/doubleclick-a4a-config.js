@@ -231,7 +231,7 @@ const singleton = new DoubleclickA4aEligibility();
  * @param {!Window} win
  * @param {!Element} element
  * @param {boolean} useRemoteHtml
- * @returns {boolean}
+ * @return {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {
   return singleton.isA4aEnabled(win, element, useRemoteHtml);

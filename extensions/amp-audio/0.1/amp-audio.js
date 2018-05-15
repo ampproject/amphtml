@@ -117,7 +117,7 @@ export class AmpAudio extends AMP.BaseElement {
   /**
    * Returns the value of the attribute specified
    * @param {string} attr
-   * @returns {string}
+   * @return {string}
    */
   getElementAttribute_(attr) {
     return this.element.getAttribute(attr);
@@ -133,7 +133,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /**
    * Checks if the function is allowed to be called
-   * @returns {boolean}
+   * @return {boolean}
    */
   isInvocationValid_() {
     if (!this.audio_) {
@@ -181,7 +181,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /**
    * Returns whether `<amp-audio>` has an `<amp-story>` for an ancestor.
-   * @returns {?Element}
+   * @return {?Element}
    * @VisibleForTesting
    */
   isStoryDescendant_() {

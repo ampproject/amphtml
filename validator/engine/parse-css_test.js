@@ -1238,7 +1238,7 @@ describe('parseMediaQueries', () => {
 
 /**
  * @param {string} selector
- * @returns {!Array<parse_css.Token>}
+ * @return {!Array<parse_css.Token>}
  */
 function parseSelectorForTest(selector) {
   const css = selector + '{}';

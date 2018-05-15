@@ -223,7 +223,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * passes.
    * @param {!Array<!./filters/filter.Filter>} filters
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @returns {boolean}
+   * @return {boolean}
    */
   filter_(filters, event) {
     return filters.every(filter => {
@@ -310,7 +310,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * This is a pass-through for the version in service.js, solely because
    * the one in service.js isn't stubbable for testing, since only object
    * methods are stubbable.
-   * @returns {?string}
+   * @return {?string}
    * @private
    * @VisibleForTesting
    */

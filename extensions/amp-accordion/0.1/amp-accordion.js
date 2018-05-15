@@ -295,7 +295,7 @@ class AmpAccordion extends AMP.BaseElement {
    * links or elements with tap targets, which should not have their default
    * behavior overidden.
    * @param {!Event} event
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   shouldHandleClick_(event) {

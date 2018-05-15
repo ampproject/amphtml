@@ -188,7 +188,7 @@ export class AmpFont extends AMP.BaseElement {
 
   /**
    * Computes and returns the time (in ms) to wait for font download.
-   * @returns {number} time (in ms) to wait for font download.
+   * @return {number} time (in ms) to wait for font download.
    * @private
    */
   getTimeout_() {

@@ -178,7 +178,7 @@ export class AmpGeo extends AMP.BaseElement {
    * Returns a list of classes to remove if pre-render has
    * been invalidated by way of being on an amp cache
    * @param {Document} doc
-   * @returns {Array<string>}
+   * @return {Array<string>}
    */
   clearPreRender_(doc) {
     const {classList} = doc.body;

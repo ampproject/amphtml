@@ -134,7 +134,7 @@ export class A4AVariableSource extends VariableSource {
    *     set, up to a max of 10. May be URI encoded.
    * @param {...string} var_args Additional params will be the names of
    *     attributes whose values will be returned. There should be at least 1.
-   * @returns {string} A stringified JSON array containing one member for each
+   * @return {string} A stringified JSON array containing one member for each
    *     matching element. Each member will contain the names and values of the
    *     specified attributes, if the corresponding element has that attribute.
    *     Note that if an element matches the cssSelected but has none of the

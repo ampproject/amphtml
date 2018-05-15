@@ -358,7 +358,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * Gets the resourceID of the parent amp-ad element.
    * Throws an exception if no such element.
-   * @returns {string}
+   * @return {string}
    * @VisibleForTesting
    */
   assertAmpAdResourceId() {

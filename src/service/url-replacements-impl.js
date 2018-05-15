@@ -1167,7 +1167,7 @@ export class UrlReplacements {
  * Extracts client ID from a _ga cookie.
  * https://developers.google.com/analytics/devguides/collection/analyticsjs/cookies-user-id
  * @param {string} gaCookie
- * @returns {string}
+ * @return {string}
  */
 export function extractClientIdFromGaCookie(gaCookie) {
   return gaCookie.replace(/^(GA1|1)\.[\d-]+\./, '');

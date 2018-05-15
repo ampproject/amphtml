@@ -935,7 +935,7 @@ export class Resource {
   /**
    * Returns the task ID for this resource.
    * @param localId
-   * @returns {string}
+   * @return {string}
    */
   getTaskId(localId) {
     return this.debugid + '#' + localId;

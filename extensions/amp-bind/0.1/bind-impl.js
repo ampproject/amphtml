@@ -232,7 +232,7 @@ export class Bind {
   /**
    * Executes an `AMP.setState()` or `AMP.pushState()` action.
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   invoke(invocation) {
     const {args, event, method, sequenceId, tagOrTarget} = invocation;

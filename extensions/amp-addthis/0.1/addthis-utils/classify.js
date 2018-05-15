@@ -59,7 +59,7 @@ const strictPornHash = rot13Array(['phz']);
  * @param {string} keywordString string of keywords (seperated by non alpha characters)
  * @param {boolean} nonStrictMatch true iff we can't use the list of strict keywords
  * @private
- * @returns {number}
+ * @return {number}
  */
 const classifyString = (keywordString = '', nonStrictMatch = false) => {
   let classification = 0;
@@ -80,7 +80,7 @@ const classifyString = (keywordString = '', nonStrictMatch = false) => {
  * Classify a meta RATING keyword.
  * @param {string} rating
  * @private
- * @returns {number}
+ * @return {number}
  */
 const classifyRating = (rating = '') => {
   let classification = 0;
@@ -101,7 +101,7 @@ const classifyRating = (rating = '') => {
  * Add keywords to the page based on the content.
  * @param {string} content
  * @private
- * @returns {Array<string>}
+ * @return {Array<string>}
  */
 const extractKeywordsFromContent = content => {
   const keywords = [];
@@ -129,7 +129,7 @@ const extractKeywordsFromContent = content => {
 /**
  * Guesses the search value from an url using a list of known search keys
  * @param {string} url
- * @returns {string|undefined}
+ * @return {string|undefined}
  */
 const getSearchString = url => {
   const terms = url.split('?').pop().toLowerCase().split('&');
@@ -149,7 +149,7 @@ const getSearchString = url => {
 /**
  * Return true if the url appears to be a search URL; false otherwise.
  * @param {string} url
- * @returns {boolean}
+ * @return {boolean}
  */
 const isSearchUrl = (url = '') => {
   const lowerUrl = url.toLowerCase();
@@ -191,7 +191,7 @@ const isSearchUrl = (url = '') => {
  * description.
  * @param {*} pageInfo
  * @param {Array} metaElements
- * @returns {number} classification bitmask (currently only setting a porn bit)
+ * @return {number} classification bitmask (currently only setting a porn bit)
  */
 export const classifyPage = (pageInfo, metaElements) => {
   let bitmask = classifyString(pageInfo.title) |
@@ -218,7 +218,7 @@ export const classifyPage = (pageInfo, metaElements) => {
  * @param {string} referrerString
  * @param {*} parsedReferrer
  * @param {*} parsedHref
- * @returns {number}
+ * @return {number}
  */
 export const classifyReferrer = (
   referrerString,
@@ -250,7 +250,7 @@ export const classifyReferrer = (
  * Return true if the url appears to be a product page; false otherwise.
  * @param {Document} doc
  * @param {Array} metaElements
- * @returns {boolean}
+ * @return {boolean}
  */
 export const isProductPage = (doc, metaElements) => {
   // if a single id or class enumerated below exists, return true
@@ -281,7 +281,7 @@ export const isProductPage = (doc, metaElements) => {
 /**
  * Gather the keywords gathered while classifying the page.
  * @param {Array} metaElements
- * @returns {string} csv containing keywords
+ * @return {string} csv containing keywords
  */
 export const getKeywordsString = metaElements => {
   const keywords = metaElements

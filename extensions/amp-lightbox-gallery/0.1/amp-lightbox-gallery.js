@@ -786,7 +786,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * associated with said element, updates the description, and initializes
    * the image viewer if the element is an amp-img.
    * @param {!Element} element
-   * @returns {!Promise}
+   * @return {!Promise}
    * @private
    */
   openLightboxForElement_(element) {
@@ -800,7 +800,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    * Returns true if the element is loaded and contains an img.
    * @param {!Element} element
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   elementTypeCanBeAnimated_(element) {
@@ -860,7 +860,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    *
    * @param {!Element} target
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   transitionTargetIsInViewport_(target) {
@@ -883,7 +883,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * lightbox.
    * @param {!Element} sourceElement
    * @private
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   transitionIn_(sourceElement) {
     const anim = new Animation(this.element);
@@ -978,7 +978,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * If no transition image is applicable, fade the lightbox in and out.
    * @param {number} startOpacity
    * @param {number} endOpacity
-   * @returns {!Promise}
+   * @return {!Promise}
    * @private
    */
   fade_(startOpacity, endOpacity) {
@@ -1296,7 +1296,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * Close gallery view
-   * @returns {!Promise}
+   * @return {!Promise}
    * @private
    */
   closeGallery_() {
@@ -1414,7 +1414,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    * Converts seconds to a timestamp formatted string.
    * @param {number} seconds
-   * @returns {string}
+   * @return {string}
    */
   secondsToTimestampString_(seconds) {
     const h = Math.floor(seconds / 3600);

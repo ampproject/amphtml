@@ -42,7 +42,7 @@ export class ViewerCidApi {
 
   /**
    * Resolves to true if Viewer is trusted and supports CID API.
-   * @returns {!Promise<boolean>}
+   * @return {!Promise<boolean>}
    */
   isSupported() {
     if (!this.viewer_.hasCapability('cid')) {

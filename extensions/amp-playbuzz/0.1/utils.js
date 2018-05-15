@@ -53,7 +53,7 @@ export function debounce(func, wait, immediate) {
  * Gets an element creator using a given document to create elements.
  * @export getElementCreator
  * @param {Document} document
- * @returns {!Function}
+ * @return {!Function}
  */
 export function getElementCreator(document) {
   return function createElement(name, className, children) {
@@ -103,7 +103,7 @@ function handlePlaybuzzItemEvent(event, eventName, handler) {
  * Parses Playbuzz Event Data
  *
  * @param {?JsonObject|string|undefined} data
- * @returns {?JsonObject|undefined} parsedObject
+ * @return {?JsonObject|undefined} parsedObject
  */
 function parsePlaybuzzEventData(data) {
   if (typeof data === 'object') {
@@ -127,7 +127,7 @@ function parsePlaybuzzEventData(data) {
 
 /**
  * @param {Object} options
- * @returns {string} playbuzzEmbedUrl
+ * @return {string} playbuzzEmbedUrl
  */
 export function composeEmbedUrl(options) {
   const embedUrl = options.itemUrl + '?' + serializeQueryString(dict({

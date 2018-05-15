@@ -140,7 +140,7 @@ export class WebPushService {
   /**
    * Occurs when the config element loads.
    * @param {!AmpWebPushConfig} configJson
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   start(configJson) {
     dev().fine(TAG, 'amp-web-push extension starting up.');
@@ -937,7 +937,7 @@ export class WebPushService {
    * Returns true if the Service Worker API, Push API, and Notification API are
    * supported and the page is HTTPS.
    *
-   * @returns {boolean}
+   * @return {boolean}
    */
   environmentSupportsWebPush() {
     return this.arePushRelatedApisSupported_() && this.isAmpPageHttps_();
@@ -953,7 +953,7 @@ export class WebPushService {
    * that AMP, a mobile-only feature, won't be supporting Safari until Safari
    * actually develops mobile push support.
    *
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   arePushRelatedApisSupported_() {

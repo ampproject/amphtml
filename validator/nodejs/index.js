@@ -36,7 +36,7 @@ var DEFAULT_USER_AGENT = 'amphtml-validator';
  * Determines if str begins with prefix.
  * @param {!string} str
  * @param {!string} prefix
- * @returns {!boolean}
+ * @return {!boolean}
  */
 function hasPrefix(str, prefix) {
   return str.indexOf(prefix) == 0;
@@ -46,7 +46,7 @@ function hasPrefix(str, prefix) {
  * Convenience function to detect whether an argument is a URL. If not,
  * it may be a local file.
  * @param {!string} url
- * @returns {!boolean}
+ * @return {!boolean}
  */
 function isHttpOrHttpsUrl(url) {
   return hasPrefix(url, 'http://') || hasPrefix(url, 'https://');
@@ -55,7 +55,7 @@ function isHttpOrHttpsUrl(url) {
 /**
  * Creates a promise which reads from a file.
  * @param {!string} name
- * @returns {!Promise<!string>}
+ * @return {!Promise<!string>}
  */
 function readFromFile(name) {
   return new Promise(function(resolve, reject) {
@@ -73,7 +73,7 @@ function readFromFile(name) {
  * Creates a promise which reads from a stream.
  * @param {!string} name
  * @param {!stream.Readable} readable
- * @returns {!Promise<!string>}
+ * @return {!Promise<!string>}
  */
 function readFromReadable(name, readable) {
   return new Promise(function(resolve, reject) {
@@ -95,7 +95,7 @@ function readFromReadable(name, readable) {
  * Creates a promise which reads from standard input. Even though it would
  * be easy to make a function that just returns the data, we return a promise
  * for consistency with readFromUrl and readFromFile.
- * @returns {!Promise<!string>}
+ * @return {!Promise<!string>}
  */
 function readFromStdin() {
   return readFromReadable('stdin', process.stdin).then(function(data) {
@@ -110,7 +110,7 @@ function readFromStdin() {
  * Any HTTP status other than 200 is interpreted as an error.
  * @param {!string} url
  * @param {!string} userAgent
- * @returns {!Promise<!string>}
+ * @return {!Promise<!string>}
  */
 function readFromUrl(url, userAgent) {
   return new Promise(function(resolve, reject) {
@@ -257,7 +257,7 @@ function Validator(scriptContents) {
  * 'AMP4ADS'; it defaults to 'AMP' if not specified.
  * @param {!string} inputString
  * @param {string=} htmlFormat
- * @returns {!ValidationResult}
+ * @return {!ValidationResult}
  * @export
  */
 Validator.prototype.validateString = function(inputString, htmlFormat) {
@@ -298,7 +298,7 @@ var instanceByValidatorJs = {};
  *
  * @param {string=} opt_validatorJs
  * @param {string=} opt_userAgent
- * @returns {!Promise<Validator>}
+ * @return {!Promise<Validator>}
  * @export
  */
 function getInstance(opt_validatorJs, opt_userAgent) {
@@ -337,7 +337,7 @@ exports.getInstance = getInstance;
  * from disk or the web, and caches them.
  *
  * @param {string} validatorJsContents
- * @returns {!Validator}
+ * @return {!Validator}
  * @export
  */
 function newInstance(validatorJsContents) {

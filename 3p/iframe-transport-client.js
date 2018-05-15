@@ -86,7 +86,7 @@ export class IframeTransportClient {
    * Retrieves/creates a context object to pass events pertaining to a
    * particular creative.
    * @param {string} creativeId The ID of the creative
-   * @returns {!IframeTransportContext}
+   * @return {!IframeTransportContext}
    * @private
    */
   contextFor_(creativeId) {
@@ -98,7 +98,7 @@ export class IframeTransportClient {
 
   /**
    * Gets the IframeMessagingClient.
-   * @returns {!IframeMessagingClient}
+   * @return {!IframeMessagingClient}
    * @VisibleForTesting
    */
   getIframeMessagingClient() {

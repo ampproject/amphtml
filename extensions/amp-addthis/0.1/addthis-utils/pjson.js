@@ -41,7 +41,7 @@ const SHARE = 300;
   *   service: string
   * }
   * }} pjson
-  * @returns {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
+  * @return {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
   */
 const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
   const {href, hostname, search, pathname, hash, protocol, port} = loc;

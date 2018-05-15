@@ -137,7 +137,7 @@ export class SubscriptionService {
 
   /**
    * @private
-   * @returns {!Promise<!JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   getPlatformConfig_() {
     return new Promise((resolve, reject) => {
@@ -239,7 +239,7 @@ export class SubscriptionService {
 
   /**
    * Starts the amp-subscription Service
-   * @returns {SubscriptionService}
+   * @return {SubscriptionService}
    */
   start() {
     this.initialize_().then(() => {
@@ -325,7 +325,7 @@ export class SubscriptionService {
 
   /**
    * Returns the singleton Dialog instance
-   * @returns {!Dialog}
+   * @return {!Dialog}
    */
   getDialog() {
     return this.dialog_;
@@ -389,7 +389,7 @@ export class SubscriptionService {
 
   /**
    * Returns Page config
-   * @returns {!PageConfig}
+   * @return {!PageConfig}
    */
   getPageConfig() {
     const pageConfig = dev().assert(this.pageConfig_,

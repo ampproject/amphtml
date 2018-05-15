@@ -174,7 +174,7 @@ export class Platform {
    * Returns the minor ios version in string.
    * The ios version can contain two numbers (10.2) or three numbers (10.2.1).
    * Direct string equality check is not suggested, use startWith instead.
-   * @returns {string}
+   * @return {string}
    */
   getIosVersionString() {
     if (!this.navigator_.userAgent) {

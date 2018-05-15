@@ -194,7 +194,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /**
    * @private getFullUrl_ Get a URL which includes a parameter indicating
    * all slots to be fetched from this web server URL
-   * @returns {string} The URL with the "ampslots" parameter appended
+   * @return {string} The URL with the "ampslots" parameter appended
    */
   getFullUrl_() {
     // If this ad doesn't have a slot defined, just return the base URL
