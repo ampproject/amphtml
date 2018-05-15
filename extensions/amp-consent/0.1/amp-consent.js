@@ -20,6 +20,7 @@ import {
   ConsentPolicyManager,
   MULTI_CONSENT_EXPERIMENT,
 } from './consent-policy-manager';
+import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -238,9 +239,9 @@ export class AmpConsent extends AMP.BaseElement {
       this.scheduleLayout(uiElement);
     });
 
-    return new Promise(resolve => {
-      this.dialogResolver_[instanceId] = resolve;
-    });
+    const deferred = new Deferred();
+    this.dialogResolver_[instanceId] = deferred.resolve;
+    return deferred.promise;
   }
 
   /**
@@ -376,17 +377,6 @@ export class AmpConsent extends AMP.BaseElement {
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
       return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
     });
-  }
-
-  /**
-   * Init consent policy instances
-   */
-  initConsentPolicy_() {
-    const policyKeys = Object.keys(this.policyConfig_);
-    for (let i = 0; i < policyKeys.length; i++) {
-      this.consentPolicyManager_.registerConsentPolicyInstance(
-          policyKeys[i], this.policyConfig_[policyKeys[i]]);
-    }
   }
 
   /**
