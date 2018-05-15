@@ -63,7 +63,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Element} */
+    /**
+     * @private {?Element}
+     * @visibleForTesting
+     */
     this.iframe_ = null;
 
     /** {?Object} */
@@ -75,10 +78,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?AmpAdXOriginIframeHandler} */
     this.xOriginIframeHandler_ = null;
 
-    /** @private {?Element} */
+    /**
+     * @private {?Element}
+     * @visibleForTesting
+     */
     this.placeholder_ = null;
 
-    /** @private {?Element} */
+    /**
+     * @private {?Element}
+     * @visibleForTesting
+     */
     this.fallback_ = null;
 
     /** @private {boolean} */
@@ -93,10 +102,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /**
      * Call to stop listening to viewport changes.
      * @private {?function()}
+     * @visibleForTesting
      */
     this.unlistenViewportChanges_ = null;
 
-    /** @private {IntersectionObserver} */
+    /**
+     * @private {IntersectionObserver}
+     * @visibleForTesting
+     */
     this.intersectionObserver_ = null;
 
     /** @private {?string|undefined} */
