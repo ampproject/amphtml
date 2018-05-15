@@ -96,7 +96,7 @@
     "gulp-if": "2.0.2",
     "gulp-intercept": "0.1.0",
     "gulp-load-plugins": "1.5.0",
-    "gulp-rename": "1.2.2",
+    "gulp-rename": "1.2.3",
     "gulp-replace": "0.6.1",
     "gulp-sourcemaps": "2.6.3",
     "gulp-uglify": "3.0.0",
