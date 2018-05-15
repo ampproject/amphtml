@@ -178,7 +178,7 @@ env => {
         .to.be.true;
   });
 
-  it('removes amp-analytics tags from child documents', function* () {
+  it.skip('removes amp-analytics tags from child documents', function* () {
     const exampleDoc = createExampleDocument(doc);
     exampleDoc.body.innerHTML +=
         '<amp-analytics id="analytics1"></amp-analytics>';
@@ -214,7 +214,7 @@ env => {
  * Creates an example document as a child of {@code doc} to be embedded as a
  * shadow document.
  * @param {!Document} doc Parent document to use to create new elements.
- * @returns {!Document} New {@code DocumentFragment} with example content.
+ * @return {!Document} New {@code DocumentFragment} with example content.
  */
 function createExampleDocument(doc) {
   const childDoc = doc.createDocumentFragment();
