@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
+import {htmlFor} from '../../../src/static-template';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
+
+/** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVimeo extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -39,12 +45,28 @@ class AmpVimeo extends AMP.BaseElement {
     this.preconnect.url('https://f.vimeocdn.com', onLayout);
   }
 
-  /** @override */
+  /**
+   * @override
+   * @inheritdoc
+   */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
+  /**
+   * @override
+   * @inheritdoc
+   */
+  buildCallback() {
+    const {element} = this;
+    installVideoManagerForDoc(element);
+    Services.videoManagerForDoc(element).register(this);
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
   layoutCallback() {
     const videoid = user().assert(
         this.element.getAttribute('data-videoid'),
@@ -52,27 +74,68 @@ class AmpVimeo extends AMP.BaseElement {
         this.element);
     // See
     // https://developer.vimeo.com/player/embedding
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = 'https://player.vimeo.com/video/' + encodeURIComponent(
-        videoid);
+    const {element} = this;
+    const iframe = htmlFor(element)`
+        <iframe frameborder=0 alllowfullscreen=true></iframe>`;
+    const encodedVideoId = encodeURIComponent(videoid);
+    iframe.src = `https://player.vimeo.com/video/${encodedVideoId}`;
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
+    element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 
-  /** @override */
+  /**
+   * @override
+   * @inheritdoc
+   */
   pauseCallback() {
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      // See
-      // https://developer.vimeo.com/player/js-api
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
-        'method': 'pause',
-        'value': '',
-      })), '*');
+    this.pause();
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  pause() {
+    this.sendCommand_('pause');
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  play() {
+    this.sendCommand_('play');
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  preimplementsMediaSessionAPI() {
+    // TODO(alanorozco)
+    return false;
+  }
+
+  /**
+   * @param {string} method
+   * @param {?Object|string=} optParams
+   * @private
+   */
+  sendCommand_(method, optParams = null) {
+    // See
+    // https://developer.vimeo.com/player/js-api
+    const iframe = this.iframe_;
+    const {contentWindow} = iframe;
+    if (!iframe || !contentWindow) {
+      return;
     }
+    const message = {method};
+    if (optParams) {
+      message.value = optParams;
+    }
+    contentWindow./*OK*/postMessage(JSON.stringify(message), '*');
   }
 }
 
