@@ -184,7 +184,7 @@ export class GoogleSubscriptionsPlatform {
 
   /**
    * Returns if pingback is enabled for this platform
-   * @returns {boolean}
+   * @return {boolean}
    */
   isPingbackEnabled() {
     return false;

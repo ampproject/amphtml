@@ -190,7 +190,7 @@ class AmpAddThis extends AMP.BaseElement {
   }
 
   /**
-   * @returns {Element}
+   * @return {Element}
    */
   createPlaceholderCallback() {
     const placeholder = createElementWithAttributes(
