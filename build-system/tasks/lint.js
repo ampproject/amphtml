@@ -166,7 +166,10 @@ function eslintrcChangesInPr() {
 function setFilesToLint(files) {
   config.lintGlobs =
       config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
-  log(colors.green('INFO: ') + 'Running lint on ' + colors.cyan(files));
+  if (!process.env.TRAVIS) {
+    log(colors.green('INFO: ') + 'Running lint on ' +
+        colors.cyan(files.join(',')));
+  }
 }
 
 /**
