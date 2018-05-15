@@ -139,8 +139,8 @@ export class ConsentPolicyManager {
     if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
       // If customized policy is not supported
       if (policyId != 'default') {
-        user().error(TAG, 'can not find policy, do not set value to ' +
-            'data-block-on-consent');
+        user().error(TAG, `cannot find policy ${policyId}, do not set value ` +
+            'to data-block-on-consent');
         return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
       }
     }

@@ -233,7 +233,7 @@ describes.realWin('amp-consent', {
       expect(ampConsent.consentRequired_['ABC']).to.equal(false);
     });
 
-    it('promptIfUnknow override geo', function* () {
+    it('promptIfUnknown override geo', function* () {
       ISOCountryGroups = ['unknown'];
       defaultConfig = {
         'consents': {
@@ -251,7 +251,7 @@ describes.realWin('amp-consent', {
       expect(ampConsent.consentRequired_['ABC']).to.equal(true);
     });
 
-    it('promptIfUnknow override geo with false value', function* () {
+    it('promptIfUnknown override geo with false value', function* () {
       ISOCountryGroups = ['unknown'];
       defaultConfig = {
         'consents': {
@@ -269,7 +269,7 @@ describes.realWin('amp-consent', {
       expect(ampConsent.consentRequired_['ABC']).to.equal(false);
     });
 
-    it('checkConsentHref w/o promptIfUnknow not override geo', function* () {
+    it('checkConsentHref w/o promptIfUnknown not override geo', function* () {
       ISOCountryGroups = ['testGroup'];
       defaultConfig = {
         'consents': {
