@@ -74,6 +74,13 @@ html.i-amphtml-story-standalone body {
   display: grid !important;
 }
 
+html.i-amphtml-story-standalone #i-amphtml-wrapper body {
+  /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
+      1px bigger than the viewport. */
+  border-top: none !important;
+  overflow: hidden !important;
+}
+
 amp-story[standalone] {
   align-self: center !important;
   box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5) !important;
