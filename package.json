@@ -145,7 +145,7 @@
     "prop-types": "15.6.1",
     "react": "16.3.2",
     "react-addons-shallow-compare": "15.6.2",
-    "react-dates": "15.5.3",
+    "react-dates": "16.7.0",
     "react-dom": "16.3.2",
     "react-externs": "0.13.6",
     "request": "2.84.0",
