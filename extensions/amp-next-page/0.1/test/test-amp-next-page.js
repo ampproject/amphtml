@@ -214,7 +214,7 @@ env => {
  * Creates an example document as a child of {@code doc} to be embedded as a
  * shadow document.
  * @param {!Document} doc Parent document to use to create new elements.
- * @returns {!Document} New {@code DocumentFragment} with example content.
+ * @return {!Document} New {@code DocumentFragment} with example content.
  */
 function createExampleDocument(doc) {
   const childDoc = doc.createDocumentFragment();
