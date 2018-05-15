@@ -133,6 +133,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     const children = this.getRealChildren();
     for (let i = 0; i < children.length; i++) {
+      // <amp-consent> will manualy schedule layout for its children.
       this.setAsOwner(children[i]);
     }
 
@@ -231,6 +232,9 @@ export class AmpConsent extends AMP.BaseElement {
       this.currentDisplayInstance_ = instanceId;
       const uiElement = this.consentUI_[this.currentDisplayInstance_];
       setImportantStyles(uiElement, {display: 'block'});
+      // scheduleLayout is required everytime because some AMP element may
+      // get un laid out after toggle display (#unlayoutOnPause)
+      // for example <amp-iframe>
       this.scheduleLayout(uiElement);
     });
 
@@ -559,7 +563,8 @@ export class AmpConsent extends AMP.BaseElement {
         this.getViewport().addToFixedLayer(this.element);
         setImportantStyles(dev().assertElement(this.postPromptUI_),
             {display: 'block'});
-        this.scheduleLayout(this.postPromptUI_);
+        // Will need to scheduleLayout for postPromptUI
+        // upon request for using AMP component.
       });
     });
 
