@@ -88,7 +88,7 @@ describes.realWin('amp-analytics', {
       return {fetchJson: (url, init) => {
         jsonRequestConfigs[url] = init;
         expect(init.requireAmpResponseSourceOrigin).to.be.false;
-        if (configWithCredentials || url === configRewriterUrl) {
+        if (configWithCredentials) {
           expect(init.credentials).to.equal('include');
         } else {
           expect(init.credentials).to.undefined;
