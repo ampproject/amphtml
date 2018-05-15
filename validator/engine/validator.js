@@ -3209,7 +3209,7 @@ function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
  * @param {string} attrName
  * @param {string} attrValue
  * @param {string} mandatoryParent may be set to "$NOPARENT"
- * @return {string} dispatch key
+ * @returns {string} dispatch key
  */
 function makeDispatchKey(
     dispatchKeyType, attrName, attrValue, mandatoryParent) {
@@ -5834,13 +5834,6 @@ amp.validator.categorizeError = function(error) {
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG) {
     return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
   }
-  // E.g.: "The attribute 'type' in tag 'script type=application/ld+json'
-  // is set to the invalid value 'text/javascript'."
-  if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE &&
-      goog.string./*OK*/ startsWith(error.params[1], 'script') &&
-      error.params[0] === 'type') {
-    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
-  }
   // E.g. "The attribute 'srcset' may not appear in tag 'amp-audio >
   // source'."
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_ATTR) {
@@ -5891,6 +5884,18 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The parent tag of tag 'source' is 'picture', but it can
   // only be 'amp-audio'."
   if (error.code === amp.validator.ValidationError.Code.WRONG_PARENT_TAG) {
+    // E.g. "The parent tag of tag 'style amp-custom' is '%2', but it can "
+    // only be '%3'."
+    if (error.params[0] === 'style amp-custom' ||
+        error.params[0] === 'head > style[amp-boilerplate] - old variant') {
+      return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+    }
+    // E.g. "The parent tag of tag 'amphtml engine v0.js script' is '%2', but
+    // it can only be '%3'."
+    if (error.params[0] === 'amphtml engine v0.js script' ||
+        goog.string./*OK*/ endsWith(error.params[0], ' extension .js script')) {
+      return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+    }
     if (goog.string./*OK*/ startsWith(error.params[0], 'amp-') ||
         goog.string./*OK*/ startsWith(error.params[1], 'amp-') ||
         goog.string./*OK*/ startsWith(error.params[2], 'amp-')) {
