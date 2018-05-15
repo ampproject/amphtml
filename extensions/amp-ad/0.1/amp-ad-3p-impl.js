@@ -21,7 +21,10 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent-state';
-import {LayoutPriority} from '../../../src/layout';
+import {
+  Layout, // eslint-disable-line no-unused-vars
+  LayoutPriority,
+} from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {
@@ -63,7 +66,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Element} */
+    /**
+     * @private {?Element}
+     * @visibleForTesting
+     */
     this.iframe_ = null;
 
     /** {?Object} */
@@ -75,10 +81,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?AmpAdXOriginIframeHandler} */
     this.xOriginIframeHandler_ = null;
 
-    /** @private {?Element} */
+    /**
+     * @private {?Element}
+     * @visibleForTesting
+     */
     this.placeholder_ = null;
 
-    /** @private {?Element} */
+    /**
+     * @private {?Element}
+     * @visibleForTesting
+     */
     this.fallback_ = null;
 
     /** @private {boolean} */
@@ -93,10 +105,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /**
      * Call to stop listening to viewport changes.
      * @private {?function()}
+     * @visibleForTesting
      */
     this.unlistenViewportChanges_ = null;
 
-    /** @private {IntersectionObserver} */
+    /**
+     * @private {IntersectionObserver}
+     * @visibleForTesting
+     */
     this.intersectionObserver_ = null;
 
     /** @private {?string|undefined} */
@@ -143,14 +159,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       elementCheck : super.renderOutsideViewport();
   }
 
-  /** @override */
+  /**
+   * @param {!Layout} layout
+   * @override
+   */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -158,7 +177,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   getConsentPolicy() {
-    return null;
+    const type = this.element.getAttribute('type');
+    const config = adConfig[type];
+    if (config && config['consentHandlingOverride']) {
+      return null;
+    }
+    return super.getConsentPolicy();
   }
 
   /** @override */
@@ -347,7 +371,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return this.layoutPromise_;
   }
 
-  /** @override  */
+  /**
+   * @param {boolean} inViewport
+   * @override
+   */
   viewportCallback(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
