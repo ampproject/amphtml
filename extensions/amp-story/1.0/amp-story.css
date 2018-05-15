@@ -63,6 +63,7 @@ html.i-amphtml-story-standalone body {
   margin: 0 !important;
   padding: 0 !important;
   width: 100% !important;
+  border: 0 !important;
   /** Remove the cursor: pointer; style set by the runtime, to avoid wrong
       touch feedback on mobile, like a flashing overlay on page transitions. */
   cursor: auto !important;
@@ -71,6 +72,13 @@ html.i-amphtml-story-standalone body {
 
 html.i-amphtml-story-standalone body {
   display: grid !important;
+}
+
+html.i-amphtml-story-standalone #i-amphtml-wrapper body {
+  /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
+      1px bigger than the viewport. */
+  border-top: none !important;
+  overflow: hidden !important;
 }
 
 amp-story[standalone] {
