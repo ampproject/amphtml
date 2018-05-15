@@ -41,7 +41,7 @@ module.exports = function(context) {
     },
     Program: function() {
       const comments =
-          /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
+        /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
       comments
           .map(node => parseClosureComments(context, node))
           .forEach(comment => checkClosureComments(context, comment));
@@ -116,7 +116,8 @@ const PRIMITIVE_WRAPPER_NAMES = [
 ];
 
 /**
- * Disallowed primitives wrappers, from go/es6-style#disallowed-features-wrapper-objects
+ * Disallowed primitives wrappers, from
+ * go/es6-style#disallowed-features-wrapper-objects
  * @param {string} name
  * @return {boolean}
  */

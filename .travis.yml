@@ -2,10 +2,15 @@ language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
 node_js:
-  - "6"
+  - "lts/*"
 python:
   - "2.7"
 notifications:
+  email:
+    recipients:
+      - amp-build-cop@grotations.appspotmail.com
+    on_success: change
+    on_failure: change
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
@@ -15,10 +20,12 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 before_script:
   - pip install --user protobuf
-  - gem install percy-capybara poltergeist selenium-webdriver chromedriver-helper
-  - ./node_modules/.bin/greenkeeper-lockfile-update
+  - gem install percy-capybara capybara selenium-webdriver chromedriver-helper
+  - chromedriver-update 2.35
+  - chromedriver -v
 script: node build-system/pr-check.js
-after_script: ./node_modules/.bin/greenkeeper-lockfile-upload
+after_script:
+  - build-system/sauce_connect/stop_sauce_connect.sh
 branches:
   only:
     - master
@@ -26,17 +33,8 @@ branches:
     - canary
     - /^amp-release-.*$/
     - /^greenkeeper/.*$/
-env:
-  global:
-    - SAUCE_USERNAME="amphtml"
-    - NPM_CONFIG_PROGRESS="false"
 addons:
   chrome: stable
-  sauce_connect:
-    username: "amphtml"
-  jwt:
-    # SAUCE_ACCESS_KEY for sauce_connect
-    - secure: "Wze0F0vGL0UcxryOx1n/vcuD5LIMGyR+69Nc6IWLoRvZBbbIpFwVFhDE6rE9ranIXiA2Hc684N4sV8ASfNDF8RRSB+jyLov159qwgji2rBxIfQ/4kuDV2vYoAJvYMz8m42kwx5FV2VV9awqMMt8mwU3wYIrKIaVCxB34uV86KIlDlbrHxt17Bm5EIiUmwi9r1AAnW/63vVRUN264D77oB4j9UQ759PfD6BDwEt54O87KurNIaLseNCr1IvzfL8veEsZ3uTbLC1GtgHfR4IGgkS2YyN2QIk06VZWeRDEOalS3RcY0nDkbCmBywxIGObnrpEMzOpjBiOb2fxLoLvvpjlla5W84zJGfWE6q4T9IvkyHuDJE+sft5B+arjMIeA6PIeUhKdV27+6qqDEf7fILZ/U/Ekn9ds4zSV8hekAZPUyyPncOeyWppCIJ8sOeCrsebkRjH1BoX/d+FE+nP0bN/XkBpIi/nManx5FyS/kqjQWGKmvsFQfEWlSUaZi7XtEQEjvBizRkzvpJanSDaoiTDS2Keulmwii3XRId51FuGtnfDZFeggLaMTKGfBX9DlPkccwYAZe6vPNfYk1pNgEj6AtnifEhYVEO+aAuWhEnJ86od+1wDOL/h+a2XY6h8/gFBywsD95p7sXPfdVDCKgwagiBo+Hw5MNjztVF7lszg1A="
   hosts:
     - ads.localhost
     - iframe.localhost
@@ -45,12 +43,24 @@ addons:
     - fonts.googleapis.com
   apt:
     packages:
-    - protobuf-compiler
-    - python-protobuf
+      - protobuf-compiler
+      - python-protobuf
 matrix:
   include:
-    - env: BUILD_SHARD="unit_tests"
-    - env: BUILD_SHARD="integration_tests"
+    # For non-greenkeeper branches, use the normal environment.
+    - if: NOT branch =~ ^greenkeeper/.*$
+      env: BUILD_SHARD="unit_tests"
+    - if: NOT branch =~ ^greenkeeper/.*$
+      env: BUILD_SHARD="integration_tests"
+    # For greenkeeper branches, add a secure GH token for the lockfile upload.
+    - if: branch =~ ^greenkeeper/.*$
+      env:
+        # BUILD_SHARD="unit_tests" GH_TOKEN=[secure]
+        secure: "vDfldX3uQ6Y5hG7RY4DGwm28TFTOhRjn2stwWxl6CCN0Dys6qLCm9z6aexZBnarOqoZRjX/MSaV57VSOMAZuvs4sJiR8jpEK3j8ZKYPsgw50HzkuzMT9365atDy2weCs0NniIXMk2X6pHr4VIXjdr07CWCrT31BJVCixAfPIIdTF3IAjrxSws/9SXHa2oWrFDrwJEmASQsDQ79uGKyvid+q5G9mYrpp9oT7nkDZTV2EwdHfIWWQ1xFq2ZFep9UjNmlVRYfGJLIg9LdfgnyY2qQKODGFiwHN3fY14A6PCm4kRHebwGqjL5TKrMSeexdpjDiAp80BAnlsN9eRk0lM+thoUfRlHi6LLAUGp7rR4+j1m/nyhhgQ1BLEHo6oUVZGpd733IqgRufIcxWQl3hImpysldfwR72oGFq0eZBrJa5yJbo1Qc89trS3Jpd5O9NLkvH4gaBrvrE6zJq8KfrAFvqvOINOyvJfQSVOOQkEbc/vUx1X2fEB/rFRnb+hNVR8gPvjlBCiYW2JqdtiUwqMjUHhmQwQkWXrAxGnf4XXCjXmpKl6XDeeVzMaaNNuZFn1F9bm8giA66UcRDvsi5tw7eR5HHEfyt1WBwByFopp6hwioy9symoCdsW+hUKLCBo1mo1cJ273I21z45jagPcgI99jlgAqnlHQ76/aUqtvRvro="
+    - if: branch =~ ^greenkeeper/.*$
+      env:
+        # BUILD_SHARD="integration_tests" GH_TOKEN=[secure]
+        secure: "juB/a5PPXjd3DtE0XzGTBG+QV14z3NNFiw+bUoGpc6/OzvN3e7ZhHOpzNV/MoIzHZXm4Rj4fwoehS4zRx034ecS1o9vfWM1Yw6yWXMKI5oDxB4xPWY1G+WAIXCWJnDzaETTLrjcGZ3ENr4XkPFAD7a7w45Uxqg37T8xUgT6OJwj0uTumeJdy9oj6VI9OycOD4C5xBcB3X7vkxsnc59sUmyPZYodQIVpzX/g6Ofvc0ofQaheHKfsZUZKWIEv7hvR1pxoLQOxMnue+mr43pOLe6CBgWIo2TBHz5t5pp3IMKewvAcavdnMjsC8phMk/rqXd42DmvR9SDIiTDio2FmPaQHRry2+asPAQarXDPFXnepQ2Od+e0AhmCLl01+wkQ5zEmDNWORPLqBDjJ1urq7DuTif77hKk/eeHyaBKGQGV1qQO1h/4Qh7rw8NsgzztqmfE6lCi1ZoWl56OJs1KZU3WltQmtYJ2xDN6h/UCK3YKC8rpVCRd0ed9Ftu7HZyRPiCUBwqQ24Fz1aZ1KzDS2Ig5NUaHS0U3JgDO9xojGeG2K7As0Ik0WeoLwf9h3PDWTAv8f4WhQbDCkZ/CTLi+RrkmsV+lrYF+TZ17l0X7fDIhLbULaK4Y1/kK7VWAT6chVQ8zFL8H1ahcGmSwzJ3n1qPbeHRyFpcvFMuIXJgjUoEQEz4="
 cache:
   yarn: true
   directories:

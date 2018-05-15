@@ -23,13 +23,13 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Services} from '../../../src/services';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
+import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {filterSplice} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
-import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
@@ -161,16 +161,15 @@ export class Bind {
      */
     this.initializePromise_ =
         this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
-          return this.initialize_(body);
+          const head = (opt_win) ? opt_win.document.head : ampdoc.getHeadNode();
+          return this.initialize_(body, head && elementByTag(head, 'title'));
         });
 
     /** @private {Promise} */
     this.setStatePromise_ = null;
 
-    // Expose for testing on dev.
-    if (getMode().development || getMode().localDev) {
-      AMP.printState = this.printState_.bind(this);
-    }
+    // Expose for debugging in the console.
+    AMP.printState = this.printState_.bind(this);
   }
 
   /** @override */
@@ -284,14 +283,19 @@ export class Bind {
   /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @param {!Node} rootNode
+   * @param {?Node} titleNode
    * @return {!Promise}
    * @private
    */
-  initialize_(rootNode) {
+  initialize_(rootNode, titleNode) {
     dev().fine(TAG, 'Scanning DOM for bindings and macros...');
+    const nodes = [rootNode];
+    if (titleNode) {
+      nodes.push(titleNode);
+    }
     let promise = Promise.all([
       this.addMacros_(),
-      this.addBindingsForNodes_([rootNode])]
+      this.addBindingsForNodes_(nodes)]
     ).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
@@ -336,7 +340,8 @@ export class Bind {
   }
 
   /**
-   * Calls setState(s), where s is data.state with the non-overridable keys removed.
+   * Calls setState(s), where s is data.state with the non-overridable keys
+   * removed.
    * @param {*} data
    * @return {!Promise}
    * @private
@@ -380,7 +385,7 @@ export class Bind {
   addMacros_() {
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros =
-        /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
+      /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
           .split(',')
@@ -424,6 +429,12 @@ export class Bind {
         : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
+        // Measuring impact of possibly reducing the binding limit (#11434).
+        const numberOfBindings = this.numberOfBindings();
+        if (numberOfBindings > 1000) {
+          dev().expectedError(TAG, `Over 1000 bindings (${numberOfBindings}).`);
+        }
+
         const {
           boundElements, bindings, expressionToElements, limitExceeded,
         } = results;
@@ -750,8 +761,10 @@ export class Bind {
     boundProperties.forEach(boundProperty => {
       const {expressionString, previousResult} = boundProperty;
       const newValue = results[expressionString];
+      // Support equality checks for arrays of objects containing arrays.
+      // Useful for rendering amp-list with amp-bind state via [src].
       if (newValue === undefined ||
-          recursiveEquals(newValue, previousResult, /* depth */ 3)) {
+          recursiveEquals(newValue, previousResult, /* depth */ 5)) {
         user().fine(TAG, 'Expression result unchanged or missing: ' +
             `"${expressionString}"`);
       } else {
@@ -868,6 +881,11 @@ export class Bind {
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
+        // If this is a <title> element in the <head>, update document title.
+        if (tag === 'TITLE'
+            && element.parentNode === this.localWin_.document.head) {
+          this.localWin_.document.title = String(newValue);
+        }
         // Setting `textContent` on TEXTAREA element only works if user
         // has not interacted with the element, therefore `value` also needs
         // to be set (but `value` is not an attribute on TEXTAREA)

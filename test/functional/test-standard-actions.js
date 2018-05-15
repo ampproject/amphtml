@@ -18,14 +18,15 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
 import {Services} from '../../src/services';
 import {StandardActions} from '../../src/service/standard-actions-impl';
-import {createElementWithAttributes} from '../../src/dom';
+import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
+import {macroTask} from '../../testing/yield';
+
 import {setParentWindow} from '../../src/service';
 
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
   let mutateElementStub;
-  let deferMutateStub;
   let scrollStub;
   let ampdoc;
 
@@ -66,8 +67,8 @@ describes.sandboxed('StandardActions', {}, () => {
   }
 
   function expectAmpElementToHaveBeenShown(element) {
-    expect(deferMutateStub).to.be.calledOnce;
-    expect(deferMutateStub.firstCall.args[0]).to.equal(element);
+    expect(mutateElementStub).to.be.calledOnce;
+    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
     expect(element.expand).to.be.calledOnce;
   }
 
@@ -80,7 +81,6 @@ describes.sandboxed('StandardActions', {}, () => {
     ampdoc = new AmpDocSingle(window);
     standardActions = new StandardActions(ampdoc);
     mutateElementStub = stubMutate('mutateElement');
-    deferMutateStub = stubMutate('deferMutate');
     scrollStub = sandbox.stub(
         standardActions.viewport_,
         'animateScrollIntoView');
@@ -90,14 +90,14 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"hide" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleHide(invocation);
       expectElementToHaveBeenHidden(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleHide(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
@@ -107,7 +107,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element (inline css)', () => {
       const element = createElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -115,7 +115,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -123,7 +123,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle AmpElement (inline css)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
@@ -134,7 +134,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show normal element when hidden (inline css)', () => {
       const element = createElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -142,14 +142,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show normal element when hidden (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
 
     it('should hide normal element when shown', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenHidden(element);
     });
@@ -157,14 +157,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show AmpElement when hidden (inline css)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
     it('should hide AmpElement when shown', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
@@ -173,14 +173,14 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"scrollTo" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleScrollTo(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleScrollTo(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
@@ -189,7 +189,7 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"focus" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       const focusStub = sandbox.stub(element, 'focus');
       standardActions.handleFocus(invocation);
       expect(focusStub).to.be.calledOnce;
@@ -197,7 +197,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       const focusStub = sandbox.stub(element, 'focus');
       standardActions.handleFocus(invocation);
       expect(focusStub).to.be.calledOnce;
@@ -215,7 +215,7 @@ describes.sandboxed('StandardActions', {}, () => {
         args: {
           url: 'http://bar.com',
         },
-        target: {
+        node: {
           ownerDocument: {
             defaultView: win,
           },
@@ -244,6 +244,17 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(goBackStub).to.be.calledOnce;
     });
 
+
+    it('should implement optoutOfCid', function*() {
+      const cid = cidServiceForDocForTesting(ampdoc);
+      const optoutStub = sandbox.stub(cid, 'optOut');
+      const invocation = {method: 'optoutOfCid', satisfiesTrust: () => true};
+      standardActions.handleAmpTarget(invocation);
+      yield macroTask();
+      expect(optoutStub).to.be.calledOnce;
+    });
+
+
     it('should implement setState()', () => {
       const setStateWithExpression = sandbox.stub();
       // Bind.setStateWithExpression() doesn't resolve with a value,
@@ -257,9 +268,9 @@ describes.sandboxed('StandardActions', {}, () => {
       const args = {
         [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
       };
-      const target = ampdoc;
+      const node = ampdoc;
       const satisfiesTrust = () => true;
-      const setState = {method: 'setState', args, target, satisfiesTrust};
+      const setState = {method: 'setState', args, node, satisfiesTrust};
 
       return standardActions.handleAmpTarget(setState, 0, []).then(result => {
         expect(result).to.equal('set-state-complete');
@@ -281,9 +292,9 @@ describes.sandboxed('StandardActions', {}, () => {
       const args = {
         [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
       };
-      const target = ampdoc;
+      const node = ampdoc;
       const satisfiesTrust = () => true;
-      const pushState = {method: 'pushState', args, target, satisfiesTrust};
+      const pushState = {method: 'pushState', args, node, satisfiesTrust};
 
       return standardActions.handleAmpTarget(pushState, 0, []).then(result => {
         expect(result).to.equal('push-state-complete');
@@ -303,13 +314,13 @@ describes.sandboxed('StandardActions', {}, () => {
       const firstSetState = {
         method: 'setState',
         args: {[OBJECT_STRING_ARGS_KEY]: '{foo: 123}'},
-        target: ampdoc,
+        node: ampdoc,
         satisfiesTrust: () => true,
       };
       const secondSetState = {
         method: 'setState',
         args: {[OBJECT_STRING_ARGS_KEY]: '{bar: 456}'},
-        target: ampdoc,
+        node: ampdoc,
         satisfiesTrust: () => true,
       };
       const actionInfos = [
@@ -317,7 +328,9 @@ describes.sandboxed('StandardActions', {}, () => {
         {target: 'AMP', method: 'setState'},
       ];
       standardActions.handleAmpTarget(firstSetState, 0, actionInfos);
-      standardActions.handleAmpTarget(secondSetState, 1, actionInfos);
+      allowConsoleError(() => {
+        standardActions.handleAmpTarget(secondSetState, 1, actionInfos);
+      });
 
       return Services.bindForDocOrNull(ampdoc).then(() => {
         // Only first setState call should be allowed.
@@ -335,7 +348,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const invocation = {
         method: 'print',
         satisfiesTrust: () => true,
-        target: {
+        node: {
           ownerDocument: {
             defaultView: windowApi,
           },
@@ -344,57 +357,6 @@ describes.sandboxed('StandardActions', {}, () => {
       standardActions.handleAmpTarget(invocation);
       expect(printStub).to.be.calledOnce;
     });
-  });
-
-  describes.realWin('whitelist of actions on the special AMP target', {
-    amp: {
-      ampdoc: 'single',
-    },
-  }, env => {
-    beforeEach(() => {
-      env.win.document.head.appendChild(
-          createElementWithAttributes(env.win.document, 'meta', {
-            name: 'amp-action-whitelist',
-            content: 'AMP.pushState,AMP.setState',
-          }));
-    });
-
-    it('should not implement print when not whitelisted', () => {
-      standardActions = new StandardActions(env.ampdoc);
-
-      const windowApi = {
-        print: () => {},
-      };
-      const printStub = sandbox.stub(windowApi, 'print');
-      const invocation = {
-        method: 'print',
-        satisfiesTrust: () => true,
-        target: {
-          ownerDocument: {
-            defaultView: windowApi,
-          },
-        },
-      };
-      expect(() => standardActions.handleAmpTarget(invocation)).to.throw();
-      expect(printStub).to.not.be.called;
-    });
-
-    it('should implement pushState when whitelisted', () => {
-      standardActions = new StandardActions(env.ampdoc);
-
-      const handleAmpBindActionStub =
-        sandbox.stub(standardActions, 'handleAmpBindAction_');
-      const invocation = {
-        method: 'pushState',
-        satisfiesTrust: () => true,
-        target: env.ampdoc,
-      };
-
-      expect(() =>
-        standardActions.handleAmpTarget(invocation, 0, [])).to.not.throw();
-      expect(handleAmpBindActionStub).to.be.calledOnce;
-    });
-
   });
 
   describes.fakeWin('adoptEmbedWindow', {}, env => {

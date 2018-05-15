@@ -15,10 +15,12 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
+import {AccessIframeAdapter} from './amp-access-iframe';
 import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {SignInProtocol} from './signin';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
@@ -41,6 +43,7 @@ const TAG = 'amp-access';
  */
 export const AccessType = {
   CLIENT: 'client',
+  IFRAME: 'iframe',
   SERVER: 'server',
   VENDOR: 'vendor',
   OTHER: 'other',
@@ -48,8 +51,9 @@ export const AccessType = {
 
 
 /**
- * AccessSource represents a single source of authentication information for a page.
- * These sources are constructed, unified and attached to the document by AccessService.
+ * AccessSource represents a single source of authentication information for a
+ * page. These sources are constructed, unified and attached to the document by
+ * AccessService.
  */
 export class AccessSource {
   /**
@@ -119,17 +123,17 @@ export class AccessSource {
     this.signIn_ = new SignInProtocol(ampdoc, this.viewer_, this.pubOrigin_,
         configJson);
 
-    /** @private {?Function} */
-    this.firstAuthorizationResolver_ = null;
+    const deferred = new Deferred();
 
     /**
      * This pattern allows AccessService to attach behavior to authorization
      * before runAuthorization() is actually called.
      * @const @private {!Promise}
      */
-    this.firstAuthorizationPromise_ = new Promise(resolve => {
-      this.firstAuthorizationResolver_ = resolve;
-    });
+    this.firstAuthorizationPromise_ = deferred.promise;
+
+    /** @private {?Function} */
+    this.firstAuthorizationResolver_ = deferred.resolve;
 
     /** @private {!Object<string, string>} */
     this.loginUrlMap_ = {};
@@ -180,6 +184,8 @@ export class AccessSource {
           return new AccessServerJwtAdapter(this.ampdoc, configJson, context);
         }
         return new AccessClientAdapter(this.ampdoc, configJson, context);
+      case AccessType.IFRAME:
+        return new AccessIframeAdapter(this.ampdoc, configJson, context);
       case AccessType.SERVER:
         if (isJwt) {
           return new AccessServerJwtAdapter(this.ampdoc, configJson, context);
@@ -230,6 +236,11 @@ export class AccessSource {
     if (type == AccessType.CLIENT && this.isServerEnabled_) {
       user().info(TAG, 'Forcing access type: SERVER');
       type = AccessType.SERVER;
+    }
+    if (type == AccessType.IFRAME &&
+        !isExperimentOn(this.ampdoc.win, 'amp-access-iframe')) {
+      user().error(TAG, 'Experiment "amp-access-iframe" is not enabled.');
+      type = AccessType.CLIENT;
     }
     return type;
   }
@@ -411,7 +422,8 @@ export class AccessSource {
   }
 
   /**
-   * Runs the login flow using one of the predefined urls in the amp-access config
+   * Runs the login flow using one of the predefined urls in the amp-access
+   * config
    *
    * @param {string} type Type of login defined in the config
    * @return {!Promise}
@@ -483,6 +495,7 @@ export class AccessSource {
         // Also do this for an empty response to avoid false negatives.
         // Pingback is repeated in this case since this could now be a new
         // "view" with a different access profile.
+        this.adapter_.postAction();
         return exchangePromise.then(() => {
           const authorizationPromise = this.runAuthorization(
               /* disableFallback */ true);
@@ -577,4 +590,9 @@ export class AccessTypeAdapterDef {
    * @return {!Promise}
    */
   pingback() {}
+
+  /**
+   * Called after an action (login/subscribe/etc) is complete.
+   */
+  postAction() {}
 }

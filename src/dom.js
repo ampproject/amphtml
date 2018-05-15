@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {dev} from './log';
 import {dict} from './utils/object';
@@ -198,6 +199,11 @@ export function createElementWithAttributes(doc, tagName, attributes) {
  * @see https://dom.spec.whatwg.org/#connected
  */
 export function isConnectedNode(node) {
+  const connected = node.isConnected;
+  if (connected !== undefined) {
+    return connected;
+  }
+
   // "An element is connected if its shadow-including root is a document."
   let n = node;
   do {
@@ -319,8 +325,14 @@ export function matches(el, selector) {
  * @return {?Element}
  */
 export function elementByTag(element, tagName) {
-  const elements = element.getElementsByTagName(tagName);
-  return elements[0] || null;
+  let elements;
+  // getElementsByTagName() is not supported on ShadowRoot.
+  if (typeof element.getElementsByTagName === 'function') {
+    elements = element.getElementsByTagName(tagName);
+  } else {
+    elements = element./*OK*/querySelectorAll(tagName);
+  }
+  return (elements && elements[0]) || null;
 }
 
 
@@ -535,8 +547,8 @@ export function scopedQuerySelectorAll(root, selector) {
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
- * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
- *    name, get passed the camel-case parameter name.
+ * @param {function(string):string=} opt_computeParamNameFunc to compute the
+ *    parameter name, get passed the camel-case parameter name.
  * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!JsonObject}
  */
@@ -805,9 +817,10 @@ export function whenUpgradedToCustomElement(element) {
   // If Element is still HTMLElement, wait for it to upgrade to customElement
   // Note: use pure string to avoid obfuscation between versions.
   if (!element[UPGRADE_TO_CUSTOMELEMENT_PROMISE]) {
-    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = new Promise(resolve => {
-      element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = resolve;
-    });
+    const deferred = new Deferred();
+    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = deferred.promise;
+    element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = deferred.resolve;
+
   }
 
   return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];

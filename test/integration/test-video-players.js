@@ -92,7 +92,8 @@ describe.skip('amp-ima-video', () => {
   }, 'amp-ima-video');
 });
 
-describe.configure().skipIos().run('amp-brid-player', () => {
+//TODO(cvializ, #14833): unskip after brid player is fixed
+describe.skip('amp-brid-player', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-brid-player');
     video.setAttribute('data-partner', '264');

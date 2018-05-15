@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {LayoutPriority} from '../../../src/layout';
+
 /**
  * Data representation of an <amp-bind-macro> that can cross the web worker
  * boundary (structured cloneable).
@@ -31,9 +33,9 @@ export let AmpBindMacroDef;
  */
 export class AmpBindMacro extends AMP.BaseElement {
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Loads after other content.
-    return 1;
+    return LayoutPriority.METADATA;
   }
 
   /** @override */

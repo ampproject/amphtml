@@ -119,6 +119,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adincube: {
+    renderStartImplemented: true,
+  },
+
   adition: {},
 
   adman: {},
@@ -127,7 +131,19 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  admixer: {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://inv-nets.admixer.net',
+      'https://cdn.admixer.net',
+    ],
+  },
+
   adocean: {},
+
+  adpicker: {
+    renderStartImplemented: true,
+  },
 
   adplugg: {
     prefetch: 'https://www.adplugg.com/serve/js/ad.js',
@@ -255,6 +271,16 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  beopinion: {
+    prefetch: 'https://widget.beopinion.com/sdk.js',
+    preconnect: [
+      'https://t.beopinion.com',
+      'https://s.beopinion.com',
+      'https://data.beopinion.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   bidtellect: {},
 
   brainy: {},
@@ -290,6 +316,10 @@ export const adConfig = {
       'https://cdn.caprofitx.com/tags/amp/profitx_amp.js',
     ],
     preconnect: 'https://ad.caprofitx.adtdp.com',
+  },
+
+  cedato: {
+    renderStartImplemented: true,
   },
 
   chargeads: {},
@@ -449,7 +479,6 @@ export const adConfig = {
     preconnect: 'https://spad.i-mobile.co.jp',
   },
   imonomy: {
-    prefetch: 'https://srv.imonomy.com/amp/amp.js',
     renderStartImplemented: true,
   },
   improvedigital: {},
@@ -492,6 +521,8 @@ export const adConfig = {
     prefetch: 'https://cdn.kixer.com/ad/load.js',
     renderStartImplemented: true,
   },
+
+  kuadio: {},
 
   ligatus: {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
@@ -584,6 +615,15 @@ export const adConfig = {
     ],
   },
 
+  monetizer101: {
+    renderStartImplemented: true,
+  },
+
+  mytarget: {
+    prefetch: 'https://ad.mail.ru/static/ads-async.js',
+    renderStartImplemented: true,
+  },
+
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
@@ -638,6 +678,12 @@ export const adConfig = {
     ],
   },
 
+  pixels: {
+    prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
+    clientIdCookieName: '__AF',
+    renderStartImplemented: true,
+  },
+
   plista: {},
 
   polymorphicads: {
@@ -656,6 +702,10 @@ export const adConfig = {
   postquare: {},
 
   pubexchange: {},
+
+  pubguru: {
+    renderStartImplemented: true,
+  },
 
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
@@ -680,6 +730,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  quoraad: {
+    prefetch: 'https://a.quora.com/amp_ad.js',
+    preconnect: 'https://ampad.quora.com',
+    renderStartImplemented: true,
+  },
+
   relap: {
     renderStartImplemented: true,
   },
@@ -700,6 +756,10 @@ export const adConfig = {
   },
 
   rubicon: {},
+
+  sekindo: {
+    renderStartImplemented: true,
+  },
 
   sharethrough: {
     renderStartImplemented: true,
@@ -792,6 +852,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  uas: {
+    prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
+  },
+
   valuecommerce: {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [
@@ -835,6 +899,15 @@ export const adConfig = {
   },
 
   widespace: {},
+
+  wpmedia: {
+    prefetch: 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js',
+    preconnect: [
+      'https://www.wp.pl',
+      'https://v.wpimg.pl',
+    ],
+    renderStartImplemented: true,
+  },
 
   xlift: {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',

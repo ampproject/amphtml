@@ -70,6 +70,7 @@ describe('Activity getTotalEngagedTime', () => {
         style: {
           // required to instantiate Viewport service
           paddingTop: 0,
+          setProperty: () => {},
         },
         classList: {
           add: () => {},
@@ -272,6 +273,7 @@ describe('Activity getIncrementalEngagedTime', () => {
         style: {
           // required to instantiate Viewport service
           paddingTop: 0,
+          setProperty: () => {},
         },
         classList: {
           add: () => {},
@@ -374,6 +376,39 @@ describe('Activity getIncrementalEngagedTime', () => {
       const second = activity.getIncrementalEngagedTime('tests');
       expect(second).to.equal(5);
       return expect(second).not.to.equal(activity.getTotalEngagedTime());
+    });
+  });
+
+  it('should not reset incremental engaged time if reset is false', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      // don't reset
+      const first = activity.getIncrementalEngagedTime('tests', false);
+      expect(first).to.equal(0);
+      mousedownObservable.fire();
+      clock.tick(10000);
+      // more engaged time, don't reset
+      const second = activity.getIncrementalEngagedTime('tests', false);
+      expect(second).to.equal(5);
+      mousedownObservable.fire();
+      clock.tick(10000);
+      // more engaged time, don't reset
+      const third = activity.getIncrementalEngagedTime('tests', false);
+      expect(third).to.equal(10);
+      // more engaged time, reset
+      const fourth = activity.getIncrementalEngagedTime('tests', true);
+      expect(fourth).to.equal(10);
+      mousedownObservable.fire();
+      clock.tick(10000);
+      // more engaged time, don't reset
+      const fifth = activity.getIncrementalEngagedTime('tests', false);
+      expect(fifth).to.equal(5);
+      // reset with default value
+      const sixth = activity.getIncrementalEngagedTime('tests');
+      expect(sixth).to.equal(5);
+      // should be reset
+      const seventh = activity.getIncrementalEngagedTime('tests', false);
+      return expect(seventh).to.equal(0);
     });
   });
 

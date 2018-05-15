@@ -16,7 +16,6 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {Layout} from '../../../src/layout';
 import {computedStyle, toggle} from '../../../src/style';
 import {dev,user} from '../../../src/log';
 import {
@@ -48,11 +47,9 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.collapsed_ = false;
-  }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    /** @private {?Promise} */
+    this.adReadyPromise_ = null;
   }
 
   /** @override */
@@ -66,13 +63,14 @@ class AmpStickyAd extends AMP.BaseElement {
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
 
-    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
-      return ad.whenBuilt();
-    }).then(() => {
-      this.mutateElement(() => {
-        toggle(this.element, true);
-      });
-    });
+    this.adReadyPromise_ =
+        whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
+          return ad.whenBuilt();
+        }).then(() => {
+          return this.mutateElement(() => {
+            toggle(this.element, true);
+          });
+        });
 
     const paddingBar = this.win.document.createElement(
         'amp-sticky-ad-top-padding');
@@ -155,16 +153,19 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   display_() {
     this.removeOnScrollListener_();
-    this.deferMutate(() => {
-      if (this.collapsed_) {
-        // It's possible that if an AMP ad collapse before its layoutCallback.
-        return;
-      }
-      this.visible_ = true;
-      this.addCloseButton_();
-      this.viewport_.addToFixedLayer(
-          this.element, /* forceTransfer */ true)
-          .then(() => this.scheduleLayoutForAd_());
+    this.adReadyPromise_.then(() => {
+      // Wait for ad build ready. For example user dismiss user notification.
+      this.mutateElement(() => {
+        if (this.collapsed_) {
+          // It's possible that if an AMP ad collapse before its layoutCallback.
+          return;
+        }
+        this.visible_ = true;
+        this.addCloseButton_();
+        this.viewport_.addToFixedLayer(
+            this.element, /* forceTransfer */ true)
+            .then(() => this.scheduleLayoutForAd_());
+      });
     });
   }
 

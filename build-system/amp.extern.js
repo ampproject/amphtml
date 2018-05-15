@@ -180,16 +180,10 @@ let PropTypes = {};
 let ReactDates = {};
 
 /** @constructor */
-ReactDates.SingleDatePicker;
+ReactDates.DayPickerSingleDateController;
 
 /** @struct */
-ReactDates.SingleDatePickerShape;
-
-/** @constructor */
-ReactDates.DateRangePicker;
-
-/** @struct */
-ReactDates.DateRangePickerShape;
+ReactDates.DayPickerRangeController;
 
 /** @type {function(*):boolean} */
 ReactDates.isInclusivelyAfterDay;
@@ -285,6 +279,14 @@ FB.init;
 var gist;
 gist.gistid;
 
+var bodymovin;
+bodymovin.loadAnimation;
+var animationHandler;
+animationHandler.play;
+animationHandler.pause;
+animationHandler.stop;
+animationHandler.goToAndStop;
+
 // Validator
 var amp;
 amp.validator;
@@ -293,7 +295,7 @@ amp.validator.validateUrlAndLog = function(string, doc, filter) {}
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
 Activity.prototype.getTotalEngagedTime = function() {};
-Activity.prototype.getIncrementalEngagedTime = function(name) {};
+Activity.prototype.getIncrementalEngagedTime = function(name, reset) {};
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics

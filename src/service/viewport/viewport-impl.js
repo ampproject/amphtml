@@ -160,7 +160,6 @@ export class Viewport {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
     if (this.useLayers_) {
-      this.layersSetupDone_ = true;
       installLayersServiceForDoc(this.ampdoc,
           this.binding_.getScrollingElement());
     }
@@ -173,9 +172,6 @@ export class Viewport {
         this.paddingTop_,
         this.binding_.requiresFixedLayerTransfer());
     this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
-
-    /** @private @const (function()) */
-    this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
@@ -458,6 +454,14 @@ export class Viewport {
       }
       return moveLayoutRect(l, r.left, r.top);
     });
+  }
+
+  /**
+   * Whether the binding supports fix-positioned elements.
+   * @return {boolean}
+   */
+  supportsPositionFixed() {
+    return this.binding_.supportsPositionFixed();
   }
 
   /**
@@ -1127,7 +1131,7 @@ function createViewport(ampdoc) {
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
   } else {
-    binding = new ViewportBindingNatural_(ampdoc, viewer);
+    binding = new ViewportBindingNatural_(ampdoc);
   }
   return new Viewport(ampdoc, binding, viewer);
 }

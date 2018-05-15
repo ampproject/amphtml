@@ -188,46 +188,11 @@ describes.realWin('amp-subscriptions renderer', {
 
   it('should show appropriate elements when granted', () => {
     renderer.setGrantState(true);
-    displayed([content1, content2, actions1, actions2]);
+    displayed([content1, content2]);
   });
 
   it('should show appropriate elements when denied', () => {
     renderer.setGrantState(false);
-    displayed([contentNotGranted1, contentNotGranted2, actions1, actions2]);
-  });
-
-  it('should show appropriate elements when logged-in', () => {
-    renderer.setGrantState(true);
-    renderer.setLoggedinState_(true);
-    displayed([
-      actionLogout,
-      content1, content2, actions1, actions2,
-    ]);
-  });
-
-  it('should show appropriate elements when logged-out', () => {
-    renderer.setGrantState(false);
-    renderer.setLoggedinState_(false);
-    displayed([
-      actionLogin,
-      contentNotGranted1, contentNotGranted2, actions1, actions2,
-    ]);
-  });
-
-  it('should show appropriate elements when subscriber', () => {
-    renderer.setGrantState(true);
-    renderer.setSubscriberState_(true);
-    displayed([
-      content1, content2, actions1, actions2,
-    ]);
-  });
-
-  it('should show appropriate elements when not subscriber', () => {
-    renderer.setGrantState(false);
-    renderer.setSubscriberState_(false);
-    displayed([
-      actionSubscribe,
-      contentNotGranted1, contentNotGranted2, actions1, actions2,
-    ]);
+    displayed([contentNotGranted1, contentNotGranted2]);
   });
 });

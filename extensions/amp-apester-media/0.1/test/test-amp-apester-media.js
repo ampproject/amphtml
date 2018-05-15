@@ -46,7 +46,7 @@ describes.realWin(
           code: 200,
           message: 'ok',
           payload: {
-            interactionId: '57a336dba187a2ca3005e826',
+            interactionId: '5aaa70c79aaf0c5443078d31',
             data: {
               size: {width: '600', height: '404'},
             },
@@ -63,7 +63,7 @@ describes.realWin(
           message: 'ok',
           payload: [
             {
-              interactionId: '57a336dba187a2ca3005e826',
+              interactionId: '5aaa70c79aaf0c5443078d31',
               data: {
                 size: {width: '600', height: '404'},
               },
@@ -118,23 +118,37 @@ describes.realWin(
 
       it('renders', () => {
         return getApester({
-          'data-apester-media-id': '57a336dba187a2ca3005e826',
+          'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
         }).then(ape => {
           const iframe = ape.querySelector('iframe');
           expect(iframe).to.not.be.null;
           expect(iframe.src).not.to.be.null;
+          const placeholder = ape.querySelector('div[placeholder]');
+          expect(placeholder).to.not.be.null;
+          expect(placeholder.getAttribute('aria-label'))
+              .to.equal('Loading video');
           const url = new URL(iframe.src);
           const qs = new URLSearchParams(url.searchParams);
           expect(url.hostname).to.equal('renderer.apester.com');
           expect(url.pathname)
-              .to.equal('/interaction/57a336dba187a2ca3005e826');
+              .to.equal('/interaction/5aaa70c79aaf0c5443078d31');
           expect(qs.get('sdk')).to.equal('amp');
           expect(qs.get('type')).to.equal('editorial');
           expect(changeSizeSpy).to.be.calledOnce;
           expect(changeSizeSpy.args[0][0]).to.equal('404');
         });
       });
-
+      it('propagates aria label to placeholder image', () => {
+        return getApester({
+          'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
+          'aria-label': 'scintilating video',
+        }).then(ape => {
+          const placeholder = ape.querySelector('div[placeholder]');
+          expect(placeholder).to.not.be.null;
+          expect(placeholder.getAttribute('aria-label'))
+              .to.equal('Loading - scintilating video');
+        });
+      });
       it('render playlist', () => {
         return getApester({
           'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
@@ -146,11 +160,12 @@ describes.realWin(
           const qs = new URLSearchParams(url.searchParams);
           expect(url.hostname).to.equal('renderer.apester.com');
           expect(url.pathname)
-              .to.equal('/interaction/57a336dba187a2ca3005e826');
+              .to.equal('/interaction/5aaa70c79aaf0c5443078d31');
           expect(qs.get('sdk')).to.equal('amp');
           expect(qs.get('type')).to.equal('playlist');
           expect(attemptChangeSizeSpy).to.be.calledOnce;
           expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
+
         });
       });
 
@@ -158,7 +173,7 @@ describes.realWin(
       it('renders responsively', () => {
         return getApester(
             {
-              'data-apester-media-id': '57a336dba187a2ca3005e826',
+              'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
               width: '500',
             },
             true
@@ -170,7 +185,7 @@ describes.realWin(
 
       it('removes iframe after unlayoutCallback', () => {
         return getApester({
-          'data-apester-media-id': '57a336dba187a2ca3005e826',
+          'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
         }).then(ape => {
           const iframe = ape.querySelector('iframe');
           expect(iframe).to.not.be.null;
@@ -178,7 +193,7 @@ describes.realWin(
           const url = new URL(iframe.src);
           expect(url.hostname).to.equal('renderer.apester.com');
           expect(url.pathname)
-              .to.equal('/interaction/57a336dba187a2ca3005e826');
+              .to.equal('/interaction/5aaa70c79aaf0c5443078d31');
           const tag = ape.implementation_;
           tag.unlayoutCallback();
           expect(ape.querySelector('iframe')).to.be.null;
@@ -187,9 +202,10 @@ describes.realWin(
       });
 
       it('requires media-id or channel-token', () => {
-        expect(getApester()).to.be.rejectedWith(
-            /The media-id attribute is required for/
-        );
+        allowConsoleError(() => {
+          expect(getApester()).to.be.rejectedWith(
+              /The media-id attribute is required for/);
+        });
       });
     }
 );

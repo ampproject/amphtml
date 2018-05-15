@@ -16,6 +16,7 @@
 
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {Resources} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
@@ -54,7 +55,7 @@ describe('Resources', () => {
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
-    element.getPriority = () => 0;
+    element.getLayoutPriority = () => LayoutPriority.CONTENT;
     element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
     return element;
@@ -307,7 +308,7 @@ describe('Resources', () => {
       isInViewport: () => true,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
-      getPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#P',
@@ -331,7 +332,7 @@ describe('Resources', () => {
       isInViewport: () => true,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
-      getPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#P',
@@ -372,7 +373,7 @@ describe('Resources', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       idleRenderOutsideViewport: () => false,
-      getPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#L',
@@ -393,7 +394,7 @@ describe('Resources', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
       idleRenderOutsideViewport: () => false,
-      getPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#L',
@@ -414,7 +415,7 @@ describe('Resources', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       idleRenderOutsideViewport: () => true,
-      getPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#L',
@@ -533,13 +534,13 @@ describe('Resources', () => {
   it('should update priority and schedule pass', () => {
     const element = document.createElement('div');
     element.isBuilt = () => true;
-    element.getPriority = () => 2;
+    element.getLayoutPriority = () => LayoutPriority.ADS;
     const resource = new Resource(1, element, resources);
     resources.pass_.cancel();
-    expect(resource.getPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
 
-    resources.updatePriority(element, 1);
-    expect(resource.getPriority()).to.equal(1);
+    resources.updateLayoutPriority(element, LayoutPriority.METADATA);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
     expect(resources.pass_.isPending()).to.be.true;
   });
 
@@ -549,27 +550,27 @@ describe('Resources', () => {
     // Target element.
     const element = document.createElement('div');
     element.isBuilt = () => true;
-    element.getPriority = () => 2;
+    element.getLayoutPriority = () => LayoutPriority.ADS;
     const resource = new Resource(1, element, resources);
     resources.schedule_(resource, 'L', 0, 0, () => {});
     const task = resources.queue_.tasks_[0];
-    expect(task.priority).to.equal(2);
+    expect(task.priority).to.equal(LayoutPriority.ADS);
 
     // Another element.
     const element2 = document.createElement('div');
     element2.isBuilt = () => true;
-    element2.getPriority = () => 2;
+    element2.getLayoutPriority = () => LayoutPriority.ADS;
     const resource2 = new Resource(2, element2, resources);
     resources.schedule_(resource2, 'L', 0, 0, () => {});
     const task2 = resources.queue_.tasks_[1];
-    expect(task2.priority).to.equal(2);
+    expect(task2.priority).to.equal(LayoutPriority.ADS);
 
-    resources.updatePriority(element, 1);
-    expect(resource.getPriority()).to.equal(1);
+    resources.updateLayoutPriority(element, LayoutPriority.METADATA);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
     expect(resources.pass_.isPending()).to.be.true;
-    expect(task.priority).to.equal(1);
+    expect(task.priority).to.equal(LayoutPriority.METADATA);
     // The other task is not updated.
-    expect(task2.priority).to.equal(2);
+    expect(task2.priority).to.equal(LayoutPriority.ADS);
   });
 });
 
@@ -1063,7 +1064,7 @@ describe('Resources discoverWork', () => {
       unlayoutCallback: () => true,
       unlayoutOnPause: () => true,
       togglePlaceholder: () => sandbox.spy(),
-      getPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       signals() {
         return signals;
       },
@@ -1736,7 +1737,7 @@ describe('Resources changeSize', () => {
       overflowCallback:
           (unused_overflown, unused_requestedHeight, unused_requestedWidth) => {
           },
-      getPriority: () => 0,
+      getLayoutPriority: () => LayoutPriority.CONTENT,
       signals: () => signals,
       fakeComputedStyle: {
         marginTop: '0px',
@@ -1918,7 +1919,6 @@ describe('Resources changeSize', () => {
 
       viewportRect = {top: 2, left: 0, right: 100, bottom: 200, height: 200};
       viewportMock.expects('getRect').returns(viewportRect).atLeast(1);
-      viewportMock.expects('getScrollHeight').returns(10000).atLeast(1);
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
         height: 50};
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
@@ -2068,6 +2068,8 @@ describe('Resources changeSize', () => {
 
     it('should NOT change size when top margin boundary within viewport ' +
         'and top margin changed', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
+
       const callback = sandbox.spy();
       resource1.layoutBox_ = {top: 100, left: 0, right: 100, bottom: 300,
         height: 200};
@@ -2113,6 +2115,7 @@ describe('Resources changeSize', () => {
 
     it('should NOT change size and call overflow callback if viewport not ' +
         'scrolled by user.', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       viewportRect.top = 1;
       resource1.layoutBox_ = {top: -50, left: 0, right: 100, bottom: 0,
         height: 51};
@@ -2255,6 +2258,7 @@ describe('Resources changeSize', () => {
     });
 
     it('in vp should NOT call overflowCallback if new height smaller', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resources.scheduleChangeSize_(resource1, 10, 11, undefined, false);
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
@@ -2284,6 +2288,7 @@ describe('Resources changeSize', () => {
 
     it('in viewport should NOT change size if in the last 15% but NOT ' +
         'in the last 1000px', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       viewportRect.top = 8600;
       viewportRect.bottom = 8800;
       resource1.layoutBox_ = {top: 8650, left: 0, right: 100, bottom: 8700,
@@ -2304,6 +2309,7 @@ describe('Resources changeSize', () => {
     });
 
     it('in viewport should NOT change size and calls overflowCallback', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resources.scheduleChangeSize_(resource1, 111, 222,
           {top: 1, right: 2, bottom: 3, left: 4}, false);
 
@@ -2324,6 +2330,7 @@ describe('Resources changeSize', () => {
 
     it('should NOT change size when resized margin in viewport and should ' +
         'call overflowCallback', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resource1.layoutBox_ = {top: -48, left: 0, right: 100, bottom: 2,
         height: 50};
       resource1.element.fakeComputedStyle = {
@@ -2386,6 +2393,7 @@ describe('Resources changeSize', () => {
     });
 
     it('should reset pending change size when rescheduling', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
       expect(resource1.getPendingChangeSize().height).to.equal(111);
@@ -2396,6 +2404,7 @@ describe('Resources changeSize', () => {
     });
 
     it('should force resize after focus', () => {
+      viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
       expect(resource1.getPendingChangeSize()).to.jsonEqual(
@@ -2425,14 +2434,14 @@ describe('Resources changeSize', () => {
     });
 
     it('should NOT change size when far the bottom of the document', () => {
-      viewportMock.expects('getScrollHeight').returns(10000).once();
+      viewportMock.expects('getContentHeight').returns(10000).once();
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
       expect(resource1.changeSize).to.not.been.called;
     });
 
     it('should change size when close to the bottom of the document', () => {
-      viewportMock.expects('getScrollHeight').returns(110).once();
+      viewportMock.expects('getContentHeight').returns(110).once();
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
       expect(resource1.changeSize).to.be.calledOnce;
@@ -2475,7 +2484,7 @@ describe('Resources mutateElement and collapse', () => {
       unlayoutOnPause: () => false,
       pauseCallback: () => {},
       unlayoutCallback: () => {},
-      getPriority: () => 0,
+      getLayoutPriority: () => LayoutPriority.CONTENT,
       signals: () => signals,
       getLayout: () => 'fixed',
     };
@@ -2650,9 +2659,9 @@ describe('Resources mutateElement and collapse', () => {
     let index = 0;
     sandbox.stub(resources.viewport_, 'getScrollHeight').callsFake(() => {
       // In change element size above viewport path, getScrollHeight will be
-      // called three times. And we care that the last measurement is correct,
+      // called twice. And we care that the last measurement is correct,
       // which requires it to be measured after element dispaly set to none.
-      if (index == 2) {
+      if (index == 1) {
         expect(resource1.completeCollapse).to.be.calledOnce;
         promiseResolve();
         return;

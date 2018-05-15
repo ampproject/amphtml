@@ -155,6 +155,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `${documentCharset}` |
 | [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `${documentReferrer}` |
 | [External Referrer](#external-referrer) | `EXTERNAL_REFERRER` | `${externalReferrer}` |
+| [HTML Attributes](#html-attr)           | `HTML_ATTR`      | `${htmlAttr}` |
 | [Source URL](#source-url)           | `SOURCE_URL`      | `${sourceUrl}` |
 | [Source Host](#source-host)         | `SOURCE_HOST`     | `${sourceHost}` |
 | [Source Hostname](#source-hostname) | `SOURCE_HOSTNAME` | `${sourceHostname}` |
@@ -193,6 +194,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Scroll Left](#scroll-left)         | `SCROLL_LEFT`     | `${scrollLeft}`     |
 | [Scroll Top](#scroll-top)           | `SCROLL_TOP`      | `${scrollTop}`      |
 | [Timezone](#timezone)               | `TIMEZONE`        | `${timezone}`       |
+| [Timezone Code](#timezone-code)     | `TIMEZONE_CODE`   | `${timezoneCode}`   |
 | [User Agent](#user-agent)           | `USER_AGENT`      | `${userAgent}`      |
 | [Viewport Height](#viewport-height) | `VIEWPORT_HEIGHT` | `${viewportHeight}` |
 | [Viewport Width](#viewport-width)   | `VIEWPORT_WIDTH`  | `${viewportWidth}`  |
@@ -203,6 +205,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 |----------------|--------------------|------------------------|
 | [Horizontal Scroll Boundary](#horizontal-scroll-boundary) | N/A | `${horizontalScrollBoundary}` |
 | [Total Engaged Time](#total-engaged-time) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
+| [Incremental Engaged Time](#incremental-engaged-time) | `INCREMENTAL_ENGAGED_TIME` | `${incrementalEngagedTime}` |
 | [Vertical Scroll Boundary](#vertical-scroll-boundary) | N/A | `${verticalScrollBoundary}` |
 
 ### Visibility
@@ -245,6 +248,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Background State](#background-state) | `BACKGROUND_STATE` | `${backgroundState}` |
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
+| [Geolocation](#geolocation) | `AMP_GEO` | `${ampGeo}` |
 | [Page View ID](#page-view-id) | `PAGE_VIEW_ID` | `${pageViewId}` |
 | [Query Parameter](#query-parameter) | `QUERY_PARAM` | `${queryParam}` |
 | [Random](#random) | `RANDOM` | `${random}` |
@@ -614,12 +618,54 @@ Provides the time when the element met visibility conditions for the first time 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${firstVisibleTime}`
 
+#### Geolocation
+
+Provides the approximate, country level, location of the user provided by the [`amp-geo`](../extensions/amp-geo/amp-geo.md#variable-substitution) extension.
+
+* **platform variable**: AMP_GEO
+  *  Example: <br>
+  ```html
+   <amp-pixel src="https://foo.com/pixel?domInteractiveTime=AMP_GEO"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${ampGeo}`
+  * Example value: `ca`
+
 #### Horizontal Scroll Boundary
 
 Provides the horizontal scroll boundary that triggered a scroll event. This variable is only available in a `trigger` of type `scroll`. The value of the boundary may be rounded based on the precision supported by the extension. For example, a boundary with value `1` and precision of `5` will result in value of var to be 0.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${horizontalScrollBoundary}`
+
+#### HTML Attributes
+
+Provides values of attributes of HTML elements inside of an amp-ad tag which match a given CSS selector.
+This only allows an amp-analytics tag to query attributes of HTML elements loaded by that amp-analytics tag's parent
+amp-ad tag. It will not allow a publisher to obtain information about the content of an ad, nor will it allow metrics
+of one ad to be seen by the provider of another ad on the page.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${htmlAttr}`
+
+Example:
+```
+"requests": {
+    "sample_visibility_request": "//somewhere/imgData=${htmlAttr(img,src,decoding)}"
+},
+```
+This will return the "src" and "decoding" attributes of img tags in the ad.
+
+Caveats:
+* If the CSS selector matches 20 or more elements, an empty array will be returned. This is because traversing a
+large list of elements is inefficient.
+* Attributes of at most 10 elements will be returned.
+* If an element matches the CSS selector but has none of the requested attributes, that element will not be
+represented in the returned array.
+* The returned values will be in the form of a URL encoded JSON array of objects wherein the object keys are the
+requested attribute names and the object values are the elements' values for those attributes.
+* The CSS selector may contain only letters (upper- and/or lower-case), numbers, hyphens, underscores, and periods.
+[Issue #14252](https://github.com/ampproject/amphtml/issues/14252) has been created to address potential future demand for more complex CSS selectors.
+
 
 #### Intersection Ratio
 
@@ -1020,12 +1066,32 @@ Provides the user's time-zone offset from UTC, in minutes.
 * **amp-analytics variable**: `${timezone}`
   * Example value: `480` for [Pacific Standard Time](https://en.wikipedia.org/wiki/Pacific_Time_Zone).
 
+#### Timezone Code
+
+Provides the user's IANA time-zone code (if available).
+
+* **platform variable**: `TIMEZONE_CODE`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?tz_code=TIMEZONE_CODE"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${timezoneCode}`
+  * Example value: `Europe/Rome`.
+
 #### Total Engaged Time
 
 Provides the total time (in seconds) the user has been engaged with the page since the page first became visible in the viewport. Total engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
 * **platform variable**: `TOTAL_ENGAGED_TIME`
 * **amp-analytics variable**: `${totalEngagedTime}`
+  * Example value: `36`
+
+#### Incremental Engaged Time
+
+Provides the time (in seconds) the user has been engaged with the page since the last time it was reset. It takes two arguments. The first is the name of the timer, the second is whether or not to reset it (it is optional and defaults to true). Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
+
+* **platform variable**: `INCREMENTAL_ENGAGED_TIME`
+* **amp-analytics variable**: `${incrementalEngagedTime(foo,false)}`
   * Example value: `36`
 
 #### Total Time

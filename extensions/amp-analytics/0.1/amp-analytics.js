@@ -27,12 +27,13 @@ import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
+import {LayoutPriority} from '../../../src/layout';
 import {
   RequestHandler,
   expandConfigRequest,
 } from './requests';
 import {Services} from '../../../src/services';
-import {appendEncodedParamStringToUrl, assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
@@ -56,7 +57,6 @@ const WHITELIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.HIDDEN,
 ];
 
-
 export class AmpAnalytics extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -77,12 +77,6 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {?string}
      */
     this.consentNotificationId_ = null;
-
-    /**
-     * @private {?string} Predefined type associated with the tag. If specified,
-     * the config from the predefined type is merged with the inline config
-     */
-    this.type_ = null;
 
     /** @private {boolean} */
     this.isSandbox_ = false;
@@ -122,12 +116,19 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
+
+    /**
+     * Maximum time (since epoch) to report resource timing metrics.
+     * We stop reporting after 1 minute.
+     * @private @const {number}
+     */
+    this.maxResourceTimingReportingTime_ = Date.now() + 60 * 1000;
   }
 
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? 0 : 1;
+    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
   }
 
   /** @override */
@@ -494,7 +495,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const typeConfig = expandConfigRequest(this.predefinedConfig_[type] || {});
     if (this.predefinedConfig_[type]) {
-      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
+      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport
+      // overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
         const TAG = this.getName_();
         this.user().error(TAG, 'Inline or remote config should not ' +
@@ -624,7 +626,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
-              this.getAmpDoc(), request, this.preconnect,
+              this.element, request, this.preconnect,
               this.sendRequest_.bind(this),
               this.isSandbox_);
         }
@@ -692,21 +694,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     const dynamicBindings = {};
     const resourceTimingSpec = trigger['resourceTimingSpec'];
     if (resourceTimingSpec) {
-      const on = trigger['on'];
-      if (on == 'ini-load') {
+      // Check if we're done reporting resource timing metrics before binding
+      // before binding the resource timing variable.
+      if (!resourceTimingSpec['done'] &&
+          Date.now() < this.maxResourceTimingReportingTime_) {
         const binding = 'RESOURCE_TIMING';
         const analyticsVar = 'resourceTiming';
-        // TODO(warrengm): Consider limiting resource timings to avoid
-        // duplicates by excluding timings that were previously reported.
         dynamicBindings[binding] =
-            serializeResourceTiming(resourceTimingSpec, this.win);
+            serializeResourceTiming(this.win, resourceTimingSpec);
         expansionOptions.vars[analyticsVar] = binding;
-      } else {
-        // TODO(warrengm): Instead of limiting resource timing to ini-load,
-        // analytics should have throttling or de-dupe timings that have already
-        // been reported.
-        user().warn(
-            TAG, 'resource timing is only allowed on ini-load triggers');
       }
     }
     return dynamicBindings;
@@ -781,11 +777,13 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Checks result of 'enabled' spec evaluation. Returns false if spec is provided and value
-   * resolves to a falsey value (empty string, 0, false, null, NaN or undefined).
+   * Checks result of 'enabled' spec evaluation. Returns false if spec is
+   * provided and value resolves to a falsey value (empty string, 0, false,
+   * null, NaN or undefined).
    * @param {string} spec Expression that will be evaluated.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
-   * @return {!Promise<boolean>} False only if spec is provided and value is falsey.
+   * @return {!Promise<boolean>} False only if spec is provided and value is
+   * falsey.
    * @private
    */
   checkSpecEnabled_(spec, expansionOptions) {
@@ -802,7 +800,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Expands spec using provided expansion options and applies url replacement if necessary.
+   * Expands spec using provided expansion options and applies url replacement
+   * if necessary.
    * @param {string} spec Expression that needs to be expanded.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<string>} expanded spec.
@@ -812,34 +811,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
             this.element).expandUrlAsync(key));
-  }
-
-  /**
-   * Adds parameters to URL. Similar to the function defined in url.js but with
-   * a different encoding method.
-   * @param {string} request
-   * @param {!Object<string, string>} params
-   * @return {string}
-   * @private
-   */
-  addParamsToUrl_(request, params) {
-    const s = [];
-    for (const k in params) {
-      const v = params[k];
-      if (v == null) {
-        continue;
-      } else {
-        const sv = this.variableService_.encodeVars(k, v);
-        s.push(`${encodeURIComponent(k)}=${sv}`);
-      }
-    }
-
-    const paramString = s.join('&');
-    if (request.indexOf('${extraUrlParams}') >= 0) {
-      return request.replace('${extraUrlParams}', paramString);
-    } else {
-      return appendEncodedParamStringToUrl(request, paramString);
-    }
   }
 
   /**

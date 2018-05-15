@@ -163,7 +163,6 @@ describe('BindValidator', () => {
       expect(val.isResultValid('INPUT', 'type', 'BUTTON')).to.be.false;
       expect(val.isResultValid('INPUT', 'type', 'file')).to.be.false;
       expect(val.isResultValid('INPUT', 'type', 'image')).to.be.false;
-      expect(val.isResultValid('INPUT', 'type', 'password')).to.be.false;
     });
   });
 
@@ -197,7 +196,7 @@ describe('BindValidator', () => {
       expect(val.isResultValid(
           'AMP-IMG',
           'srcset',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+          /* eslint no-script-url: 0 */ 'javascript:alert(1);')).to.be.false;
     });
 
     it('should support <amp-list>', () => {

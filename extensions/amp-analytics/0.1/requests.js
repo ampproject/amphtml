@@ -36,16 +36,16 @@ const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} ampAnalyticsElement
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {function(string, !JsonObject)} handler
    * @param {boolean} isSandbox
    */
-  constructor(ampdoc, request, preconnect, handler, isSandbox) {
+  constructor(ampAnalyticsElement, request, preconnect, handler, isSandbox) {
 
     /** @const {!Window} */
-    this.win = ampdoc.win;
+    this.win = ampAnalyticsElement.getAmpDoc().win;
 
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
@@ -75,7 +75,8 @@ export class RequestHandler {
     this.variableService_ = variableServiceFor(this.win);
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacementService_ = Services.urlReplacementsForDoc(ampdoc);
+    this.urlReplacementService_ =
+      Services.urlReplacementsForDoc(ampAnalyticsElement);
 
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
@@ -157,7 +158,8 @@ export class RequestHandler {
     const extraUrlParamsPromise = this.expandExtraUrlParams_(
         configParams, triggerParams, expansionOption)
         .then(expandExtraUrlParams => {
-          // Construct the extraUrlParamsString: Remove null param and encode component
+          // Construct the extraUrlParamsString: Remove null param and encode
+          // component
           const expandedExtraUrlParamsStr =
               this.getExtraUrlParamsString_(expandExtraUrlParams);
           return this.urlReplacementService_.expandUrlAsync(

@@ -27,7 +27,6 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
@@ -48,6 +47,10 @@ const SUPPORTED_ELEMENTS_ = {
   'amp-img': true,
   'amp-anim': true,
 };
+
+/** @private @const */
+const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby',
+  'aria-labelledby'];
 
 /** @private @const {!../../../src/curve.CurveDef} */
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
@@ -95,13 +98,6 @@ export class ImageViewer {
 
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
-
-    /** @private {!Object} */
-    this.ariaAttributes_ = {
-      'alt': null,
-      'aria-label': null,
-      'aria-labelledby': null,
-    };
 
     /** @private {number} */
     this.sourceWidth_ = 0;
@@ -198,9 +194,8 @@ export class ImageViewer {
    */
   reset() {
     this.image_.setAttribute('src', '');
-    Object.keys(this.ariaAttributes_).forEach(key => {
+    ARIA_ATTRIBUTES.forEach(key => {
       this.image_.removeAttribute(key);
-      this.ariaAttributes_[key] = null;
     });
     this.image_.removeAttribute('aria-describedby');
     this.srcset_ = null;
@@ -229,6 +224,24 @@ export class ImageViewer {
   }
 
   /**
+   * Sets the source width and height based the natural dimensions of the
+   * source image if loaded, and the offset dimensions of amp-img element
+   * if not.
+   * @param {!Element} ampImg
+   * @param {?Element} img
+   * @private
+   */
+  setSourceDimensions_(ampImg, img) {
+    if (img) {
+      this.sourceWidth_ = img.naturalWidth || ampImg./*OK*/offsetWidth;
+      this.sourceHeight_ = img.naturalHeight || ampImg./*OK*/offsetHeight;
+    } else {
+      this.sourceWidth_ = ampImg./*OK*/offsetWidth;
+      this.sourceHeight_ = ampImg./*OK*/offsetHeight;
+    }
+  }
+
+  /**
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
@@ -236,15 +249,11 @@ export class ImageViewer {
    * @param {?Element} sourceImage
    */
   init(sourceElement, sourceImage) {
-    this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
-    this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
+    this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    Object.keys(this.ariaAttributes_).forEach(key => {
-      this.ariaAttributes_[key] = sourceElement.getAttribute(key);
-      if (this.ariaAttributes_[key]) {
-        this.image_.setAttribute(key, this.ariaAttributes_[key]);
-      }
+    sourceElement.getImpl().then(elem => {
+      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
     });
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
@@ -322,7 +331,7 @@ export class ImageViewer {
     }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = this.imageBox_.width * this.maxSeenScale_;
-    const src = this.srcset_.select(width, this.lightbox_.getDpr()).url;
+    const src = this.srcset_.select(width, this.lightbox_.getDpr());
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -726,11 +735,6 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     /** @private {function(this:AmpImageLightbox, Event)} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /**

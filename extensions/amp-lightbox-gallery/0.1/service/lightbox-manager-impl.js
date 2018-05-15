@@ -17,32 +17,37 @@
 import {AmpEvents} from '../../../../src/amp-events';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
+  LIGHTBOX_THUMBNAIL_AD,
+  LIGHTBOX_THUMBNAIL_UNKNOWN,
+  LIGHTBOX_THUMBNAIL_VIDEO,
+} from './lightbox-placeholders';
+import {
   childElement,
   childElementByAttr,
   closestByTag,
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
-import {defaultPlaceholder} from './lightbox-placeholders';
 import {dev, user} from '../../../../src/log';
-import {hasOwn, map} from '../../../../src/utils/object';
 import {isExperimentOn} from '../../../../src/experiments';
+import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'AMP-AD': true,
   'AMP-IMG': true,
-  'AMP-ANIM': true,
   'AMP-VIDEO': true,
   'AMP-YOUTUBE': true,
-  'AMP-INSTAGRAM': true,
-  'AMP-FACEBOOK': true,
 };
 
 export const ELIGIBLE_TAP_TAGS = {
   'AMP-IMG': true,
-  'AMP-ANIM': true,
+};
+
+export const VIDEO_TAGS = {
+  'AMP-YOUTUBE': true,
+  'AMP-VIDEO': true,
 };
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
@@ -53,15 +58,10 @@ const SLIDE_SELECTOR = '.amp-carousel-slide';
 /** @typedef {{
  *  srcset: ?../../../../src/srcset.Srcset,
  *  placeholderSrc: string,
- *  element: !Element
+ *  element: !Element,
+ *  timestampPromise: !Promise<number>
  * }} */
 export let LightboxThumbnailDataDef;
-
-/** @typedef {{
- *  sourceCarousel: !Element,
- *  excludedIndexes: !Array<number>
- * }} */
-let LightboxedCarouselMetadataDef;
 
 /**
  * LightboxManager is a document-scoped service responsible for:
@@ -111,12 +111,6 @@ export class LightboxManager {
      */
     this.seen_ = [];
 
-    /**
-     * If the lightbox group is a carousel, this object contains a
-     * mapping of the lightbox group id to the carousel element.
-     * @private {!Object<string, !LightboxedCarouselMetadataDef>}
-     */
-    this.lightboxSourceCarousels_ = map();
   }
 
   /**
@@ -133,28 +127,6 @@ export class LightboxManager {
       this.scanPromise_ = this.scanLightboxables_();
     });
     return this.scanPromise_;
-  }
-
-  /**
-   * Returns a reference to the source carousel of the lightbox
-   * group if one exists.
-   * @param {string} lightboxGroupId
-   * @return {!LightboxedCarouselMetadataDef|null}
-   */
-  getCarouselMetadataForLightboxGroup(lightboxGroupId) {
-    if (hasOwn(this.lightboxSourceCarousels_, lightboxGroupId)) {
-      return this.lightboxSourceCarousels_[lightboxGroupId];
-    }
-    return null;
-  }
-
-  /**
-   * Returns true if the lightboxGroupId belongs to an amp carousel
-   * @param {string} lightboxGroupId
-   * @return {boolean}
-   */
-  hasCarousel(lightboxGroupId) {
-    return hasOwn(this.lightboxSourceCarousels_, lightboxGroupId);
   }
 
   /**
@@ -209,24 +181,17 @@ export class LightboxManager {
   processLightboxCarousel_(carousel) {
     const lightboxGroupId = carousel.getAttribute('lightbox') ||
     'carousel' + (carousel.getAttribute('id') || this.counter_++);
-    if (carousel.getAttribute('type') == 'slides') {
-      this.lightboxSourceCarousels_[lightboxGroupId] = map({
-        'sourceCarousel': carousel,
-        'excludedIndexes': [],
-      });
-      // TODO (#13011): scroll carousel needs to support goToSlide
-      // before we can use it for lightbox, so they currently don't count.
-    }
     this.getSlidesFromCarousel_(carousel).then(slides => {
-      slides.forEach((slide, index) => {
+      slides.forEach(slide => {
         const shouldExcludeSlide = slide.hasAttribute('lightbox-exclude')
             || (slide.hasAttribute('lightbox')
                 && slide.getAttribute('lightbox') !== lightboxGroupId);
-        if (shouldExcludeSlide) {
-          this.lightboxSourceCarousels_[lightboxGroupId]
-              .excludedIndexes.push(index);
-        } else {
+        if (!shouldExcludeSlide) {
+          if (this.seen_.includes(slide)) {
+            return;
+          }
           slide.setAttribute('lightbox', lightboxGroupId);
+          this.seen_.push(slide);
           this.processBaseLightboxElement_(slide, lightboxGroupId);
         }
       });
@@ -292,8 +257,7 @@ export class LightboxManager {
       this.lightboxGroups_[lightboxGroupId] = [];
     }
 
-    this.lightboxGroups_[lightboxGroupId]
-        .push(dev().assertElement(element));
+    this.lightboxGroups_[lightboxGroupId].push(dev().assertElement(element));
     if (this.meetsHeuristicsForTap_(element)) {
       const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
       element.setAttribute('on', `tap:${gallery.id}.activate`);
@@ -365,7 +329,18 @@ export class LightboxManager {
   }
 
   /**
-   * The function is not implemented yet. Fake for testing.
+   * Gets the duration of a supported video element
+   * @param {!Element} element
+   * @returns {!Promise<number>}
+   * @private
+   */
+  getVideoTimestamp_(element) {
+    return VIDEO_TAGS[element.tagName] ?
+      element.getImpl().then(videoPlayer => videoPlayer.getDuration())
+      : Promise.resolve();
+  }
+
+  /**
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view
    * @param {string} lightboxGroupId
@@ -377,18 +352,28 @@ export class LightboxManager {
           srcset: this.getThumbnailSrcset_(dev().assertElement(element)),
           placeholderSrc: this.getPlaceholderForElementType_(element),
           element,
+          timestampPromise: this.getVideoTimestamp_(element),
         }));
   }
 
   /**
    * Returns the default placeholder based on element type
-   * @param {!Element=} opt_element
+   * @param {!Element} element
    * @return {string}
    * @private
    */
-  getPlaceholderForElementType_(opt_element) {
+  getPlaceholderForElementType_(element) {
     // TODO(#12713): add placeholder icons for each component type
-    return defaultPlaceholder;
+    const type = element.tagName;
+    switch (type) {
+      case 'AMP-AD':
+        return LIGHTBOX_THUMBNAIL_AD;
+      case 'AMP-VIDEO':
+      case 'AMP-YOUTUBE':
+        return LIGHTBOX_THUMBNAIL_VIDEO;
+      default:
+        return LIGHTBOX_THUMBNAIL_UNKNOWN;
+    }
   }
 
   /**
@@ -401,11 +386,11 @@ export class LightboxManager {
     if (element.hasAttribute('lightbox-thumbnail-id')) {
       const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
       const thumbnailImage = element.ownerDocument.getElementById(thumbnailId);
-      user().assert(thumbnailImage.tagName == 'AMP-IMG');
-      return srcsetFromElement(thumbnailImage);
-    } else {
-      return this.getUserPlaceholderSrcset_(element);
+      if (thumbnailImage && thumbnailImage.tagName == 'AMP-IMG') {
+        return srcsetFromElement(thumbnailImage);
+      }
     }
+    return this.getUserPlaceholderSrcset_(element);
   }
 
   /**
@@ -416,8 +401,6 @@ export class LightboxManager {
    */
   getUserPlaceholderSrcset_(element) {
     if (element.tagName == 'AMP-IMG') {
-      return srcsetFromElement(element);
-    } else if (element.tagName == 'AMP-ANIM') {
       return srcsetFromElement(element);
     } else if (element.tagName == 'AMP-VIDEO') {
       return this.getThumbnailSrcsetForVideo_(element);

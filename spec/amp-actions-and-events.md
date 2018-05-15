@@ -114,6 +114,23 @@ For example, the following is possible in AMP:
   </tr>
 </table>
 
+## amp-audio
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+  </tr>
+</table>
+
 ### Input elements
 <table>
   <tr>
@@ -176,7 +193,7 @@ event.value</pre>
   </tr>
   <tr>
     <td><code>slideChange</code></td>
-    <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
+    <td>Fired when the carousel's current slide changes.</td>
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>
@@ -231,6 +248,11 @@ event.index</pre></td>
     <th width="25%">Event</th>
     <th width="35%">Description</th>
     <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>firstPlay</code>(low-trust)</td>
+    <td>Fired the first time the video is played by the user. On autoplay videos, this is fired as soon as the user interacts with the video. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
+    <td></td>
   </tr>
   <tr>
     <td><code>timeUpdate</code>(low-trust)</td>
@@ -314,6 +336,34 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-bodymovin-animation
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the animation.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the animation.</td>
+  </tr>
+  <tr>
+    <td><code>stop</code></td>
+    <td>Stops the animation.</td>
+  </tr>
+  <tr>
+    <td><code>seekTo(time=INTEGER)</code></td>
+    <td>Sets the currentTime of the animation to the specified value and pauses animation. </td>
+  </tr>
+  <tr>
+    <td><code>seekTo(percent=[0,1])</code></td>
+    <td>Uses the given percentage value to determine the currentTime of the animation to the specified value and pauses animation. </td>
+  </tr>
+</table>
+
 ### amp-carousel[type="slides"]
 <table>
   <tr>
@@ -351,6 +401,18 @@ event.response</pre></td>
   <tr>
     <td><code>close</code></td>
     <td>Closes the lightbox.</td>
+  </tr>
+</table>
+
+### amp-list
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refreshes data from the <code>src</code> and re-renders the list.</td>
   </tr>
 </table>
 
@@ -456,6 +518,10 @@ The actions below are supported in the following AMP video elements: `amp-video`
     <th>Description</th>
   </tr>
   <tr>
+    <td><code>clear</code></td>
+    <td>Clears any values in the form's inputs.</td>
+  </tr>
+  <tr>
     <td><code>submit</code></td>
     <td>Submits the form.</td>
   </tr>
@@ -486,6 +552,10 @@ actions that apply to the whole document.
   <tr>
     <td><code>print</code></td>
     <td>Opens the Print Dialog to print the current page.</td>
+  </tr>
+  <tr>
+    <td>optoutOfCid</td>
+    <td>Opts out of Client ID generation for all scopes.</td>
   </tr>
   <tr>
     <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>

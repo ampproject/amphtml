@@ -93,6 +93,8 @@ function getMode_(win) {
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: hashQuery['filter'],
+    // amp-geo override
+    geoOverride: hashQuery['amp-geo'],
     minified: IS_MINIFIED,
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.

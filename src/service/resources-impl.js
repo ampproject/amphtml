@@ -32,10 +32,11 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isArray} from '../types';
+import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -49,7 +50,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -187,9 +187,6 @@ export class Resources {
     * @private {!Array<!ChangeSizeRequestDef>}
     */
     this.requestsChangeSize_ = [];
-
-    /** @private {!Array<!Function>} */
-    this.deferredMutates_ = [];
 
     /** @private {?Array<!Resource>} */
     this.pendingBuildResources_ = [];
@@ -468,7 +465,7 @@ export class Resources {
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
-      return Promise.resolve(resource.getPageLayoutBox());
+      return tryResolve(() => resource.getPageLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();
@@ -542,7 +539,8 @@ export class Resources {
   }
 
   /**
-   * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * Builds the element if ready to be built, otherwise adds it to pending
+   * resources.
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
    * @param {boolean=} scheduleWhenBuilt
@@ -628,7 +626,9 @@ export class Resources {
       // Build failed: remove the resource. No other state changes are
       // needed.
       this.removeResource_(resource);
-      throw error;
+      if (!isBlockedByConsent(error)) {
+        throw error;
+      }
     });
   }
 
@@ -814,18 +814,18 @@ export class Resources {
    * Updates the priority of the resource. If there are tasks currently
    * scheduled, their priority is updated as well.
    * @param {!Element} element
-   * @param {number} newPriority
+   * @param {number} newLayoutPriority
    * @restricted
    */
-  updatePriority(element, newPriority) {
+  updateLayoutPriority(element, newLayoutPriority) {
     const resource = Resource.forElement(element);
 
-    resource.updatePriority(newPriority);
+    resource.updateLayoutPriority(newLayoutPriority);
 
     // Update affected tasks
     this.queue_.forEach(task => {
       if (task.resource == resource) {
-        task.priority = newPriority;
+        task.priority = newLayoutPriority;
       }
     });
 
@@ -894,18 +894,19 @@ export class Resources {
   }
 
   /**
-   * Requests mutate callback to executed at the earliest possibility.
-   * @param {!Element} element
-   * @param {!Function} callback
+   * Runs the specified measure, which is called in the "measure" vsync phase.
+   * This is simply a proxy to the privileged vsync service.
+   *
+   * @param {function()} measurer
+   * @return {!Promise}
    */
-  deferMutate(element, callback) {
-    this.scheduleDeferredMutate_(Resource.forElement(element), callback);
-    this.schedulePassVsync();
+  measureElement(measurer) {
+    return this.vsync_.measurePromise(measurer);
   }
 
   /**
-   * Runs the specified mutation on the element and ensures that measures
-   * and layouts performed for the affected elements.
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
    *
    * This method should be called whenever a significant mutations are done
    * on the DOM that could affect layout of elements inside this subtree or
@@ -918,6 +919,41 @@ export class Resources {
    * @return {!Promise}
    */
   mutateElement(element, mutator) {
+    return this.measureMutateElement(element, null, mutator);
+  }
+
+  /**
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElement(element, measurer, mutator) {
+    if (this.useLayers_) {
+      return this.measureMutateElementLayers_(element, measurer, mutator);
+    } else {
+      return this.measureMutateElementResources_(element, measurer, mutator);
+    }
+  }
+
+  /**
+   * Handles element mutation (and measurement) APIs in the Resources system.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElementResources_(element, measurer, mutator) {
     const calcRelayoutTop = () => {
       const box = this.viewport_.getLayoutRect(element);
       if (box.width != 0 && box.height != 0) {
@@ -926,15 +962,17 @@ export class Resources {
       return -1;
     };
     let relayoutTop = -1;
+    // TODO(jridgewell): support state
     return this.vsync_.runPromise({
       measure: () => {
+        if (measurer) {
+          measurer();
+        }
         relayoutTop = calcRelayoutTop();
       },
       mutate: () => {
         mutator();
 
-        // TODO(jridgewell): Mark parent layer as dirty, skip the rest of this.
-        // Mark itself and children for re-measurement.
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
           r.requestMeasure();
@@ -962,6 +1000,53 @@ export class Resources {
       },
     });
   }
+
+  /**
+   * Handles element mutation (and measurement) APIs in the Layers system.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElementLayers_(element, measurer, mutator) {
+    return this.vsync_.runPromise({
+      measure: measurer || undefined,
+      mutate: () => {
+        // TODO(jridgewell): Audit this system. Did this cause a layer
+        // invalidation (new layer, or removal of old layer)? Right now, we're
+        // only dirtying the measurements.
+        mutator();
+        this.dirtyElement(element);
+      },
+    });
+  }
+
+  /**
+   * Dirties the cached element measurements after a mutation occurs.
+   *
+   * TODO(jridgewell): This API needs to be audited. Common practice is
+   * to pass the amp-element in as the root even though we are only
+   * mutating children. If the amp-element is passed, we invalidate
+   * everything in the parent layer above it, where only invalidating the
+   * amp-element was necessary (only children were mutated, only
+   * amp-element's scroll box is affected).
+   *
+   * @param {!Element} element
+   */
+  dirtyElement(element) {
+    if (this.useLayers_) {
+      this.layers_.dirty(element);
+    } else {
+      const isAmpElement = element.classList.contains('i-amphtml-element');
+      if (isAmpElement) {
+        const r = Resource.forElement(element);
+        this.setRelayoutTop_(r.getLayoutBox().top);
+      }
+      this.schedulePass(FOUR_FRAME_DELAY_, !isAmpElement);
+    }
+  }
+
 
   /**
    * Return a promise that requests runtime to collapse this element.
@@ -1065,11 +1150,13 @@ export class Resources {
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
+      const documentInfo = Services.documentInfoForDoc(this.ampdoc);
       this.viewer_.sendMessage('documentLoaded', dict({
         'title': doc.title,
         'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
         'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
-        'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
+        'linkRels': documentInfo.linkRels,
+        'metaTags': documentInfo.metaTags,
       }), /* cancelUnsent */true);
 
       this.contentHeight_ = this.viewport_.getContentHeight();
@@ -1119,8 +1206,7 @@ export class Resources {
    * @private
    */
   hasMutateWork_() {
-    return (this.deferredMutates_.length > 0 ||
-        this.requestsChangeSize_.length > 0);
+    return (this.requestsChangeSize_.length > 0);
   }
 
   /**
@@ -1151,24 +1237,11 @@ export class Resources {
     // the overflow callbacks are called.
     const now = Date.now();
     const viewportRect = this.viewport_.getRect();
-    const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
-    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
-
-    if (this.deferredMutates_.length > 0) {
-      dev().fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
-      const deferredMutates = this.deferredMutates_;
-      this.deferredMutates_ = [];
-      for (let i = 0; i < deferredMutates.length; i++) {
-        deferredMutates[i]();
-      }
-      this.maybeChangeHeight_ = true;
-    }
 
     // TODO(jridgewell, #12780): Update resize rules to account for layers.
     if (this.requestsChangeSize_.length > 0) {
@@ -1186,7 +1259,6 @@ export class Resources {
         /** @const {!Resource} */
         const resource = request.resource;
         const box = resource.getLayoutBox();
-        const iniBox = resource.getInitialLayoutBox();
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
@@ -1259,8 +1331,7 @@ export class Resources {
             this.requestsChangeSize_.push(request);
           }
           continue;
-        } else if (iniBox.bottom >= docBottomOffset ||
-                      box.bottom >= docBottomOffset) {
+        } else if (this.elementNearBottom_(resource, box)) {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
@@ -1337,6 +1408,24 @@ export class Resources {
    */
   mutateWorkViaLayers_() {
     this.mutateWorkViaResources_();
+  }
+
+  /**
+   * Returns true if element is within 15% and 1000px of document bottom.
+   * Caller can provide current/initial layout boxes as an optimization.
+   * @param {!./resource.Resource} resource
+   * @param {!../layout-rect.LayoutRectDef=} opt_layoutBox
+   * @param {!../layout-rect.LayoutRectDef=} opt_initialLayoutBox
+   * @returns {boolean}
+   * @private
+   */
+  elementNearBottom_(resource, opt_layoutBox, opt_initialLayoutBox) {
+    const contentHeight = this.viewport_.getContentHeight();
+    const threshold = Math.max(contentHeight * 0.85, contentHeight - 1000);
+
+    const box = opt_layoutBox || resource.getLayoutBox();
+    const initialBox = opt_initialLayoutBox || resource.getInitialLayoutBox();
+    return box.bottom >= threshold || initialBox.bottom >= threshold;
   }
 
   /**
@@ -1876,16 +1965,6 @@ export class Resources {
   }
 
   /**
-   * Schedules deferred mutate.
-   * @param {!Resource} resource
-   * @param {!Function} callback
-   * @private
-   */
-  scheduleDeferredMutate_(resource, callback) {
-    this.deferredMutates_.push(callback);
-  }
-
-  /**
    * Returns whether the resource should be preloaded at this time.
    * The element must be measured by this time.
    * @param {!Resource} resource
@@ -1967,11 +2046,11 @@ export class Resources {
       if (resource.getState() == ResourceState.NOT_BUILT) {
         resource.whenBuilt().then(() => {
           this.measureAndScheduleIfAllowed_(resource, layout,
-              parentResource.getPriority());
+              parentResource.getLayoutPriority());
         });
       } else {
         this.measureAndScheduleIfAllowed_(resource, layout,
-            parentResource.getPriority());
+            parentResource.getLayoutPriority());
       }
     });
   }
@@ -2012,7 +2091,7 @@ export class Resources {
     const task = {
       id: taskId,
       resource,
-      priority: Math.max(resource.getPriority(), parentPriority) +
+      priority: Math.max(resource.getLayoutPriority(), parentPriority) +
           priorityOffset,
       forceOutsideViewport,
       callback,

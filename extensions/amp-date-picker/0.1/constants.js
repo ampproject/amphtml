@@ -16,7 +16,11 @@
 
 export const DEFAULT_LOCALE = 'en';
 
-export const DEFAULT_FORMAT = '';
+/**
+ * Standard ISO 8601 date format. https://xkcd.com/1179/
+ * Matches what input[type="date"] expects for setting the value property.
+ */
+export const DEFAULT_FORMAT = 'YYYY-MM-DD';
 
 export const FORMAT_STRINGS = [
   'M',

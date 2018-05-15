@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import '../../src/service/navigation';
 import * as Impression from '../../src/impression';
 import {Services} from '../../src/services';
 import {addParamToUrl} from '../../src/url';
+import {createElementWithAttributes} from '../../src/dom';
+import {
+  installUrlReplacementsServiceForDoc,
+} from '../../src/service/url-replacements-impl';
 import {macroTask} from '../../testing/yield';
-
+import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';
 
 describes.sandboxed('Navigation', {}, () => {
   let event;
@@ -28,6 +31,7 @@ describes.sandboxed('Navigation', {}, () => {
     event = {
       target: null,
       defaultPrevented: false,
+      type: 'click',
     };
     event.preventDefault = function() {
       event.defaultPrevented = true;
@@ -155,6 +159,14 @@ describes.sandboxed('Navigation', {}, () => {
         expect(anchor.href).to.equal(
             'https://www.google.com/link?out=QUERY_PARAM(hello)');
         expect(handleNavSpy).to.be.calledOnce;
+      });
+
+      it('should expand link if event type is right click', () => {
+        anchor.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+        anchor.setAttribute('data-amp-replace', 'QUERY_PARAM');
+        event.type = 'contextmenu';
+        handler.handle_(event);
+        expect(anchor.href).to.equal('https://www.google.com/link?out=world');
       });
     });
 
@@ -420,10 +432,10 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should use escaped css selectors with quotes', () => {
         anchor.href =
-            'https://www.google.com/some-path?hello=world#test"hello';
-        anchorWithName.setAttribute('name', 'test"hello');
+            'https://www.google.com/some-path?hello=world#test%22hello';
+        anchorWithName.setAttribute('name', 'test%22hello');
         handler.handle_(event);
-        expect(replaceStateForTargetStub).to.be.calledWith('#test"hello');
+        expect(replaceStateForTargetStub).to.be.calledWith('#test%22hello');
         return replaceStateForTargetPromise.then(() => {
           expect(scrollIntoViewStub).to.be.calledWith(anchorWithName);
         });
@@ -645,3 +657,41 @@ describes.sandboxed('Navigation', {}, () => {
     });
   });
 });
+
+describes.realWin('anchor-click-interceptor', {amp: true}, env => {
+
+  let doc;
+  let ampdoc;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+    doc = ampdoc.win.document;
+    installUrlReplacementsServiceForDoc(ampdoc);
+  });
+
+  it('should replace CLICK_X and CLICK_Y in href', () => {
+    const a = createElementWithAttributes(doc, 'a', {
+      href: 'http://example.com/?x=CLICK_X&y=CLICK_Y',
+    });
+    const div = createElementWithAttributes(doc, 'div', {});
+    a.appendChild(div);
+    doc.body.appendChild(a);
+
+    // first click
+    maybeExpandUrlParamsForTesting(ampdoc, {
+      target: div,
+      pageX: 12,
+      pageY: 34,
+    });
+    expect(a.href).to.equal('http://example.com/?x=12&y=34');
+
+    // second click
+    maybeExpandUrlParamsForTesting(ampdoc, {
+      target: div,
+      pageX: 23,
+      pageY: 45,
+    });
+    expect(a.href).to.equal('http://example.com/?x=23&y=45');
+  });
+});
+

@@ -66,6 +66,10 @@ attr_lists: {
     value_regex: "(none|metadata|auto|)"
   }
   attrs: {
+    name: "rotate-to-fullscreen"
+    value: ""
+  }
+  attrs: {
     name: "src"
     value_url: {
       allowed_protocol: "https"
@@ -101,6 +105,7 @@ tags: {  # <amp-video> not in amp-story.
   attrs: { name: "poster" }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
+  attr_lists: "lightboxable-elements"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
   amp_layout: {
     supported_layouts: FILL

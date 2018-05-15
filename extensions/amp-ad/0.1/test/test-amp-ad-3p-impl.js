@@ -17,8 +17,10 @@
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import * as adCid from '../../../../src/ad-cid';
+import * as consent from '../../../../src/consent-state';
 import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {LayoutPriority} from '../../../../src/layout';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
@@ -111,9 +113,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should propagete CID to ad iframe', () => {
-      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
-        return Promise.resolve('sentinel123');
-      });
+      sandbox.stub(adCid, 'getAdCid').resolves('sentinel123');
 
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
@@ -126,9 +126,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should proceed w/o CID', () => {
-      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
-        return Promise.resolve(undefined);
-      });
+      sandbox.stub(adCid, 'getAdCid').resolves(undefined);
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
@@ -139,10 +137,43 @@ describes.realWin('amp-ad-3p-impl', {
       });
     });
 
+    it('should propagate consent state to ad iframe', () => {
+      ad3p.element.setAttribute('data-block-on-consent', '');
+      sandbox.stub(consent, 'getConsentPolicyState')
+          .resolves(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+      sandbox.stub(consent, 'getConsentPolicySharedData')
+          .resolves({a: 1, b: 2});
+
+      return ad3p.layoutCallback().then(() => {
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        const data = JSON.parse(frame.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        expect(data._context.initialConsentState)
+            .to.equal(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+        expect(data._context.consentSharedData)
+            .to.deep.equal({a: 1, b: 2});
+      });
+    });
+
+    it('should propagate null consent state to ad iframe', () => {
+      return ad3p.layoutCallback().then(() => {
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        const data = JSON.parse(frame.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        expect(data._context.initialConsentState).to.be.null;
+      });
+    });
+
     it('should throw on position:fixed', () => {
       ad3p.element.style.position = 'fixed';
       ad3p.onLayoutMeasure();
-      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      allowConsoleError(() => {
+        expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      });
     });
 
     it('should throw on parent being position:fixed', () => {
@@ -153,7 +184,9 @@ describes.realWin('amp-ad-3p-impl', {
       adContainerElement.appendChild(ad3p.element);
 
       ad3p.onLayoutMeasure();
-      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      allowConsoleError(() => {
+        expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      });
     });
 
     it('should allow position:fixed with whitelisted ad container', () => {
@@ -525,7 +558,7 @@ describes.realWin('amp-ad-3p-impl', {
   });
 });
 
-describe('#getPriority', () => {
+describe('#getLayoutPriority', () => {
   describes.realWin('with shadow AmpDoc', {
     amp: {
       ampdoc: 'shadow',
@@ -533,7 +566,7 @@ describe('#getPriority', () => {
   }, env => {
     it('should return priority of 1', () => {
       const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-      expect(ad3p.getPriority()).to.equal(1);
+      expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
     });
   });
 
@@ -544,7 +577,7 @@ describe('#getPriority', () => {
   }, env => {
     it('should return priority of 2', () => {
       const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-      expect(ad3p.getPriority()).to.equal(2);
+      expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.ADS);
     });
   });
 });

@@ -48,9 +48,46 @@ This component is experimental and under active development. For any issues, ple
 
 [TOC]
 
+## Announcements
+
+### (4/2018) **New metadata requirements**
+
+We're adding four new required attributes and two optional attributes to the `<amp-story>` element:
+
+```html
+<!-- `title`, `publisher`, `publisher-logo-src` and `poster-portrait-src` will soon be required. -->
+<amp-story standalone title="My Story"
+    publisher="The AMP Team"
+    publisher-logo-src="https://example.com/logo/1x1.png"
+    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg">
+
+<!-- `poster-square-src` and `poster-landscape-src` are optional, but strongly recommended. -->
+<amp-story standalone title="My Story"
+    publisher="The AMP Team"
+    publisher-logo-src="https://example.com/logo/1x1.png"
+    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+    poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+    poster-landscape-src="https://example.com/my-story/poster/4x3.jpg">
+```
+
+These metadata attributes will be used for displaying a preview of this story across the AMP stories ecosystem. For example, these attributes can be used to render an engaging preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP stories surfaces to come.
+
+Note that these metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
+
+The new attributes:
+
+| ATTRIBUTE | DESCRIPTION |
+| -- | -- |
+| `title` [required] | The title of the story. |
+| `publisher` [required] | The name of the story's publisher. |
+| `publisher-logo-src` [required] | The publisher's logo in square format (1x1 aspect ratio). |
+| `poster-portrait-src` [required] | The story poster in portrait format (3x4 aspect ratio). |
+| `poster-square-src` | The story poster in square format (1x1 aspect ratio). |
+| `poster-landscape-src` | The story poster in landscape format (4x3 aspect ratio). |
+
 ## Overview
 
-The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP Story, you can provide users with bite-sized, visually rich information and content.
+The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -60,13 +97,13 @@ The `amp-story` extension provides a new format for displaying visual content th
   </amp-anim>
 </figure>
 
-## AMP Story format
+## AMP story format
 
-An [AMP Story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
+An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
-<amp-img alt="AMP Story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
+<amp-img alt="AMP story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
-    <img alt="AMP Story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
+    <img alt="AMP story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
   </noscript>
 </amp-img>
 
@@ -120,12 +157,12 @@ The content in the body creates a story with two pages.  Each page has a full bl
 
 ### Required markup for amp-story
 
-The AMP Story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
 
 
 | RULE | DESCRIPTION |
 | ---- | --- |
-| The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP Story. |
+| The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP story. |
 | Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-0.1.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
 
 ## Story: `amp-story`
@@ -143,7 +180,16 @@ The `amp-story` component represents an entire story.  The component itself  imp
 ### Example
 
 ```html
-<amp-story standalone bookend-config-src="./related.json" background-audio="my.mp3">
+<amp-story
+    standalone
+    title="My Story"
+    publisher="The AMP Team"
+    publisher-logo-src="https://example.com/logo/1x1.png"
+    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+    poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+    poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
+    bookend-config-src="./related.json"
+    background-audio="my.mp3">
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
@@ -156,13 +202,41 @@ The `amp-story` component represents an entire story.  The component itself  imp
 
 Identifies that the AMP document is a story.
 
+##### title [required]
+
+The title of the story.
+
+##### publisher [required]
+
+The name of the story's publisher.
+
+##### publisher-logo-src [required]
+
+A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 36x36 px logo.
+
+##### poster-portrait-src [required]
+
+A URL to the [story poster](#posters) in portrait format (3x4 aspect ratio).
+
 ##### bookend-config-src [optional]
 
 A URL endpoint that accepts GET requests and returns a JSON response with links to related and trending stories, to be shown on a screen at the end of the story.  If omitted, the amp-story component renders a default UI for the end screen.  See the [bookend endpoint](#bookend-json-endpoint) section below for the JSON response format.
 
 ##### background-audio [optional]
 
-A URI to an audio file that plays throughout the story.
+A URL to an audio file that plays throughout the story.
+
+##### poster-square-src [optional]
+
+A URL to the [story poster](#posters) in square format (1x1 aspect ratio).
+
+##### poster-landscape-src [optional]
+
+A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
+
+### Posters
+
+A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although you can use any image that is representative of the story.
 
 ### Children (of amp-story)
 
@@ -188,7 +262,7 @@ These are configured in the `related-articles` field of the response object.
 
 #### Social sharing
 
-The configuration for social sharing is defined in the `share-providers` field of the response object (optional).
+The configuration for social sharing is defined in the `share-providers` field of the response object [optional].
 
 This field should contain an object with key-value pairs. Each key represents a share provider's name (e.g. `facebook`). The value should be set to a non-empty configuration object for the provider or `true` (when no parameters are required).
 
@@ -297,9 +371,13 @@ For example:
 
 The `<amp-story-page>` component contains one or more [layers](#layers).  Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
 
-## Layers: `amp-story-grid-layer`
+## Layers
 
-Layers are stacked on top of one another to create the desired visual effect. The `<amp-story-grid-layer>` component lays its children out into a grid.  Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
+Layers are stacked on top of one another to create the desired visual effect.
+
+### `amp-story-grid-layer`
+
+The `<amp-story-grid-layer>` component lays its children out into a grid.  Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
 
 <div class="flex-images">
   <amp-img alt="Layer 1" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" width="200" height="355">
@@ -316,7 +394,7 @@ Layers are stacked on top of one another to create the desired visual effect. Th
   <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img></amp-im</amp-img>
 </div>
 
-### Attributes
+#### Attributes
 
 
 ##### template [required]
@@ -338,7 +416,7 @@ Example:
 </amp-story-grid-layer>
 ```
 
-### Templates
+#### Templates
 
 The following are available templates to specify for the layout of the grid layer.
 
@@ -348,7 +426,7 @@ To see the layout templates in use, check out the [layouts demo on AMP By Exampl
 
 
 
-#### fill
+##### fill
 
 The `fill` template shows its first child full bleed. All other children are not shown.
 
@@ -368,7 +446,7 @@ Example:
 </amp-story-grid-layer>
 ```
 
-#### vertical
+##### vertical
 
 The `vertical` template lays its elements out along the y-axis.  By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
 
@@ -389,7 +467,7 @@ Names Areas: (none)
 </amp-story-grid-layer>
 ```
 
-#### horizontal
+##### horizontal
 
 The `horizontal` template lays its elements out along the x-axis.  By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
 
@@ -409,7 +487,7 @@ Names Areas: (none)
 </amp-story-grid-layer>
 ```
 
-#### thirds
+##### thirds
 
 The `thirds` template divides the screen into three equally-sized rows, and allows you to slot content into each area.
 
@@ -433,7 +511,7 @@ Named Areas:
 </amp-story-grid-layer>
 ```
 
-### Children (of amp-story-grid-layer)
+#### Children
 
 An `amp-story-grid-layer` can contain any of the following elements:
 
@@ -481,6 +559,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;hgroup></code></li>
         <li><code>&lt;nav></code></li>
         <li><code>&lt;section></code></li>
+        <li><code>&lt;amp-cta-layer></code></li>
       </ul>
     </td>
   </tr>
@@ -576,6 +655,44 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
+### `amp-story-cta-layer`
+
+The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` elements inside an `<amp-story-page>`.
+
+#### Constraints
+
+* If specified, the `<amp-story-cta-layer>` element must be the last layer within an `<amp-story-page>`. As a result, effectively every `<amp-story-page>` can have exactly one or exactly zero of the `<amp-story-cta-layer>` element.
+* Positioning and sizing of this layer cannot be controlled. It is always 100% width of the page, 20% height of the page, and aligned to the bottom of the page.
+
+#### Example
+
+```html
+<amp-story-page id="vertical-template-thirds">
+  <amp-story-grid-layer template="thirds">
+    <div class="content" grid-area="upper-third">Paragraph 1</div>
+    <div class="content" grid-area="middle-third">Paragraph 2</div>
+    <div class="content" grid-area="lower-third">Paragraph 3</div>
+  </amp-story-grid-layer>
+  <amp-story-cta-layer>
+    <a href="http://www.google.com" class="button"> Call to action! </a>
+  </amp-story-cta-layer>
+</amp-story-page>
+```
+
+[Complete example found at the examples directory](https://github.com/ampproject/amphtml/blob/master/examples/amp-story/cta-layer-outlink.html)
+
+<div class="flex-images">
+  <amp-img alt="CTA Layer" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" width="404" height="678">
+  <noscript><img width="404" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" /></noscript>
+  </amp-img>
+</div>
+
+#### Children
+
+The `amp-story-cta-layer` allows mostly the same descendants as `amp-story-grid-layer`, and additionally allows `<a>` and `<button>` tags.
+
+For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) field in the validation rules.
+
 ## Animations
 
 Every element inside an `<amp-story-page>` can have an entrance animation.
@@ -601,6 +718,12 @@ The following animation effects are available as presets for AMP stories:
 | `twirl-in`        | 1000                  | 0 |
 | `whoosh-in-left`  | 500                   | 0 |
 | `whoosh-in-right` | 500                   | 0 |
+| `pan-left`        | 1000                  | 0 |
+| `pan-right`       | 1000                  | 0 |
+| `pan-down`        | 1000                  | 0 |
+| `pan-up`          | 1000                  | 0 |
+| `zoom-in`         | 1000                  | 0 |
+| `zoom-out`        | 1000                  | 0 |
 
 
 {% call callout('Tip', type='success') %}
@@ -610,7 +733,7 @@ See a [live demo of all the AMP story animations](https://ampbyexample.com/stori
 
 ### Animation attributes
 
-#####  animate-in (required)
+#####  animate-in [required]
 
 Use this attribute to specify the name of the entrance [animation preset](#animation-presets).
 
@@ -622,7 +745,7 @@ Fly from left!
 </h2>
 ```
 
-##### animate-in-duration (optional)
+##### animate-in-duration [optional]
 
 Use this attribute to specify the duration of the entrance animation, in seconds or milliseconds (e.g., 0.2s or 200ms). The default duration depends on the animation preset you specified.
 
@@ -634,7 +757,7 @@ Fly from left!
 </h2>
 ```
 
-##### animate-in-delay (optional)
+##### animate-in-delay [optional]
 
 Use this attribute to specify the delay before starting the animation. The value must be greater than or equal to 0, in seconds or milliseconds (for example, 0.2s or 200ms). The default delay depends on the animation preset you specified.
 
@@ -652,7 +775,7 @@ Fly from left!
 The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
 {% endcall %}
 
-##### animate-in-after (optional)
+##### animate-in-after [optional]
 
 Use this attribute to chain or sequence animations (for example, animation2 starts after animation1 is complete). Specify the ID of the animated element that this element's animation will follow. The element must be present on the same `<amp-story-page>`. The delay is applied after the previous element's animation has finished. For further details, see the [Sequencing animations](#sequencing-animations) section below.
 

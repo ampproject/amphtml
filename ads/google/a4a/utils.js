@@ -29,6 +29,7 @@ import {
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
 import {parseUrl} from '../../../src/url';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -194,17 +195,42 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {
+  // Look for amp-ad elements of correct type or those contained within
+  // standard container type.  Note that display none containers will not be
+  // included as they will never be measured.
+  // TODO(keithwrightbos): what about slots that become measured due to removal
+  // of display none (e.g. user resizes viewport and media selector makes
+  // visible).
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
-      r => r.element.tagName == 'AMP-AD' &&
-        r.element.getAttribute('type') == type)
-      .then(resources => {
-        const result = {};
-        resources.forEach(r => {
-          const groupId = groupFn(r.element);
-          (result[groupId] || (result[groupId] = [])).push(r.element.getImpl());
-        });
+      r => {
+        const isAmpAdType = r.element.tagName == 'AMP-AD' &&
+          r.element.getAttribute('type') == type;
+        if (isAmpAdType) {
+          return true;
+        }
+        const isAmpAdContainerElement =
+          Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
+          !!r.element.querySelector(`amp-ad[type=${type}]`);
+        return isAmpAdContainerElement;
+      })
+      // Need to wait on any contained element resolution followed by build
+      // of child ad.
+      .then(resources => Promise.all(resources.map(
+          resource => {
+            if (resource.element.tagName == 'AMP-AD') {
+              return resource.element;
+            }
+            // Must be container element so need to wait for child amp-ad to
+            // be upgraded.
+            return whenUpgradedToCustomElement(dev().assertElement(
+                resource.element.querySelector(`amp-ad[type=${type}]`)));
+          })))
+      // Group by networkId.
+      .then(elements => elements.reduce((result, element) => {
+        const groupId = groupFn(element);
+        (result[groupId] || (result[groupId] = [])).push(element.getImpl());
         return result;
-      });
+      }, {}));
 }
 
 /**
@@ -253,8 +279,9 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'vis': visibilityStateCodes[visibilityState] || '0',
           'scr_x': viewport.getScrollLeft(),
           'scr_y': viewport.getScrollTop(),
+          'bc': getBrowserCapabilitiesBitmap(win) || null,
           'debug_experiment_id':
-              (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
+              (/(?:#|,)deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
@@ -757,10 +784,8 @@ function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
         const token = obj['newToken'];
         const jar = obj['1p_jar'] || '';
         const pucrd = obj['pucrd'] || '';
-        const freshLifetimeSecs =
-            parseInt(obj['freshLifetimeSecs'] || '', 10) || 3600;
-        const validLifetimeSecs =
-            parseInt(obj['validLifetimeSecs'] || '', 10) || 86400;
+        const freshLifetimeSecs = parseInt(obj['freshLifetimeSecs'] || '', 10);
+        const validLifetimeSecs = parseInt(obj['validLifetimeSecs'] || '', 10);
         const altDomain = obj['altDomain'];
         const fetchTimeMs = Date.now() - startTime;
         if (IDENTITY_DOMAIN_REGEXP_.test(altDomain)) {
@@ -828,4 +853,40 @@ export function setNameframeExperimentConfigs(headers, nameframeConfig) {
       }
     });
   }
+}
+
+/**
+ * Enum for browser capabilities. NOTE: Since JS is 32-bit, do not add anymore
+ * than 32 capabilities to this enum.
+ * @enum {number}
+ */
+const Capability = {
+  SVG_SUPPORTED: 1 << 0,
+  SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED: 1 << 1,
+  SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED: 1 << 2,
+};
+
+/**
+ * Returns a bitmap representing what features are supported by this browser.
+ * @param {!Window} win
+ * @return {number}
+ */
+function getBrowserCapabilitiesBitmap(win) {
+  let browserCapabilities = 0;
+  const doc = win.document;
+  if (win.SVGElement && doc.createElementNS) {
+    browserCapabilities |= Capability.SVG_SUPPORTED;
+  }
+  const iframeEl = doc.createElement('iframe');
+  if (iframeEl.sandbox && iframeEl.sandbox.supports) {
+    if (iframeEl.sandbox.supports('allow-top-navigation-by-user-activation')) {
+      browserCapabilities |=
+        Capability.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
+    }
+    if (iframeEl.sandbox.supports('allow-popups-to-escape-sandbox')) {
+      browserCapabilities |=
+        Capability.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
+    }
+  }
+  return browserCapabilities;
 }

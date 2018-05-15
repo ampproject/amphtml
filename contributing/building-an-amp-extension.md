@@ -253,9 +253,13 @@ Element styles are loaded when the element script itself is included in
 an AMP doc. You tell AMP which CSS belongs to this element when
 registering the element (see below).
 
-Class names prefixed with `-amp-` are considered private and
-publishers are not allowed to use to customize (enforced by AMP
-validator).
+Class names prefixed with `i-amphtml` are considered private. Publishers
+are not allowed to use them for customization (enforced by AMP validator).
+
+Class names prefixed with  `amp-` are public css classes that can be customized
+by publishers. All such classes should be documented in the component-specific
+`.md` file. All CSS classes in component stylesheets should be prefixed with
+either `i-amphtml-` or `amp-`.
 
 ## Register element with AMP
 
@@ -442,7 +446,7 @@ image directly from instagram media endpoint.
 
 ```javascript
 class AmpInstagram extends AMP.BaseElement {
-  // ...  
+  // ...
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.getWin().document.createElement('div');
@@ -527,7 +531,7 @@ embedded when `unlayoutCallback` is called.
 unlayoutCallback() {
   if (this.iframe_) {
     removeElement(this.iframe_);
-    this.iframe_ = null;    
+    this.iframe_ = null;
     this.iframePromise_ = null;
     setStyles(this.placeholderWrapper_, {
       'display': '',
@@ -542,7 +546,7 @@ probably wants to return true in order to signal to AMP the need to call
 `layoutCallback` again once the document is active. Otherwise your
 element will never be re-laid out.
 
-### vsync, mutateElement, deferMutate and changeSize
+### vsync, mutateElement, and changeSize
 
 AMP provides multiple utilities to optimize many mutations and measuring
 for better performance. These include vsync service with a mutate and
@@ -628,7 +632,7 @@ in EXPERIMENTS variable.
 const EXPERIMENTS = [
   // ...
   {
-    id: 'amp-my-element',  
+    id: 'amp-my-element',
     name: 'AMP My Element',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-my-element/amp-my-element.md',
@@ -665,7 +669,7 @@ Class AmpMyElement extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {  
+  buildCallback() {
     if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
       user.warn('Experiment %s is not turned on.', EXPERIMENT);
       return;

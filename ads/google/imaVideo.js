@@ -165,6 +165,10 @@ let muteAdsManagerOnLoaded;
 // Flag tracking if we are in native fullscreen mode. Used for iPhone.
 let nativeFullscreen;
 
+// Flag tracking if the IMA library was allowed to load. Will be set to false
+// when e.g. a user is using an ad blocker.
+let imaLoadAllowed;
+
 // Used if the adsManager needs to be resized on load.
 let adsManagerWidthOnLoad, adsManagerHeightOnLoad;
 
@@ -183,12 +187,8 @@ let adsRequested;
 // Flag that tracks if the user tapped and dragged on the big play button.
 let userTappedAndDragged;
 
-/**
- * Loads the IMA SDK library.
- */
-function getIma(global, cb) {
-  loadScript(global, 'https://imasdk.googleapis.com/js/sdkloader/ima3.js', cb);
-}
+// User consent state.
+let consentState;
 
 /**
  * The business.
@@ -362,112 +362,127 @@ export function imaVideo(global, data) {
 
   window.addEventListener('message', onMessage.bind(null, global));
 
+  contentComplete = false;
+  adsActive = false;
+  playbackStarted = false;
+  nativeFullscreen = false;
+  imaLoadAllowed = true;
+
+  let mobileBrowser = false;
+  interactEvent = 'click';
+  mouseDownEvent = 'mousedown';
+  mouseMoveEvent = 'mousemove';
+  mouseUpEvent = 'mouseup';
+  if (navigator.userAgent.match(/iPhone/i) ||
+      navigator.userAgent.match(/iPad/i) ||
+      navigator.userAgent.match(/Android/i)) {
+    mobileBrowser = true;
+    interactEvent = 'touchend';
+    mouseDownEvent = 'touchstart';
+    mouseMoveEvent = 'touchmove';
+    mouseUpEvent = 'touchend';
+  }
+  if (mobileBrowser) {
+    // Create our own tap listener that ignores tap and drag.
+    bigPlayDiv.addEventListener(mouseMoveEvent, onBigPlayTouchMove);
+    bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
+    bigPlayDiv.addEventListener('tapwithoutdrag', onClick.bind(null, global));
+  } else {
+    bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
+  }
+  playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
+  progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
+  fullscreenDiv.addEventListener(interactEvent,
+      onFullscreenClick.bind(null, global));
+
+  const fullScreenEvents = [
+    'fullscreenchange',
+    'mozfullscreenchange',
+    'webkitfullscreenchange'];
+  fullScreenEvents.forEach(fsEvent => {
+    global.document.addEventListener(fsEvent,
+        onFullscreenChange.bind(null, global),
+        false);
+  });
+
+  consentState = global.context.initialConsentState;
+
   /**
    * Set-up code that can't run until the IMA lib loads.
    */
-  getIma(global, function() {
-    // This is the first place where we have access to any IMA objects.
-    contentComplete = false;
-    adsActive = false;
-    playbackStarted = false;
-    nativeFullscreen = false;
+  loadScript(
+      global, 'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
+      onImaLoadSuccess.bind(null, global, data), onImaLoadFail);
+}
 
-    let mobileBrowser = false;
-    interactEvent = 'click';
-    mouseDownEvent = 'mousedown';
-    mouseMoveEvent = 'mousemove';
-    mouseUpEvent = 'mouseup';
-    if (navigator.userAgent.match(/iPhone/i) ||
-        navigator.userAgent.match(/iPad/i) ||
-        navigator.userAgent.match(/Android/i)) {
-      mobileBrowser = true;
-      interactEvent = 'touchend';
-      mouseDownEvent = 'touchstart';
-      mouseMoveEvent = 'touchmove';
-      mouseUpEvent = 'touchend';
+function onImaLoadSuccess(global, data) {
+  // This is the first place where we have access to any IMA objects.
+
+  // Handle settings that need to be set before the AdDisplayContainer is
+  // created.
+  if (imaSettings) {
+    if (imaSettings['locale']) {
+      global.google.ima.settings.setLocale(imaSettings['locale']);
     }
-    if (mobileBrowser) {
-      // Create our own tap listener that ignores tap and drag.
-      bigPlayDiv.addEventListener(mouseMoveEvent, onBigPlayTouchMove);
-      bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
-      bigPlayDiv.addEventListener('tapwithoutdrag', onClick.bind(null, global));
-    } else {
-      bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
+    if (imaSettings['vpaidMode']) {
+      global.google.ima.settings.setVpaidMode(imaSettings['vpaidMode']);
     }
-    playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
-    progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
-    fullscreenDiv.addEventListener(interactEvent,
-        onFullscreenClick.bind(null, global));
+  }
 
-    const fullScreenEvents = [
-      'fullscreenchange',
-      'mozfullscreenchange',
-      'webkitfullscreenchange'];
-    fullScreenEvents.forEach(fsEvent => {
-      global.document.addEventListener(fsEvent,
-          onFullscreenChange.bind(null, global),
-          false);
-    });
+  adDisplayContainer =
+      new global.google.ima.AdDisplayContainer(adContainerDiv, videoPlayer);
 
-    // Handle settings that need to be set before the AdDisplayContainer is
-    // created.
-    if (imaSettings) {
-      if (imaSettings['locale']) {
-        global.google.ima.settings.setLocale(imaSettings['locale']);
-      }
-      if (imaSettings['vpaidMode']) {
-        global.google.ima.settings.setVpaidMode(imaSettings['vpaidMode']);
+  adsLoader = new global.google.ima.AdsLoader(adDisplayContainer);
+  adsLoader.getSettings().setPlayerType('amp-ima');
+  adsLoader.getSettings().setPlayerVersion('0.1');
+  // Propogate settings provided via child script tag.
+  // locale and vpaidMode are set above, as they must be set before we create
+  // an AdDisplayContainer.
+  // playerType and playerVersion are used by the developers to track usage,
+  // so we do not want to allow users to overwrite those values.
+  const skippedSettings =
+      ['locale', 'vpaidMode', 'playerType', 'playerVersion'];
+  for (const setting in imaSettings) {
+    if (!skippedSettings.includes(setting)) {
+      // Change e.g. 'ppid' to 'setPpid'.
+      const methodName = 'set' + camelCaseToTitleCase(setting);
+      if (typeof adsLoader.getSettings()[methodName] === 'function') {
+        adsLoader.getSettings()[methodName](imaSettings[setting]);
       }
     }
+  }
+  adsLoader.addEventListener(
+      global.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
+      onAdsManagerLoaded.bind(null, global),
+      false);
+  adsLoader.addEventListener(
+      global.google.ima.AdErrorEvent.Type.AD_ERROR,
+      onAdsLoaderError,
+      false);
 
+  videoPlayer.addEventListener('ended', onContentEnded);
 
-    adDisplayContainer =
-        new global.google.ima.AdDisplayContainer(adContainerDiv, videoPlayer);
+  adsRequest = new global.google.ima.AdsRequest();
+  adsRequest.adTagUrl = data.tag;
+  adsRequest.linearAdSlotWidth = videoWidth;
+  adsRequest.linearAdSlotHeight = videoHeight;
+  adsRequest.nonLinearAdSlotWidth = videoWidth;
+  adsRequest.nonLinearAdSlotHeight = videoHeight / 3;
 
-    adsLoader = new global.google.ima.AdsLoader(adDisplayContainer);
-    adsLoader.getSettings().setPlayerType('amp-ima');
-    adsLoader.getSettings().setPlayerVersion('0.1');
-    // Propogate settings provided via child script tag.
-    // locale and vpaidMode are set above, as they must be set before we create
-    // an AdDisplayContainer.
-    // playerType and playerVersion are used by the developers to track usage,
-    // so we do not want to allow users to overwrite those values.
-    const skippedSettings =
-        ['locale', 'vpaidMode', 'playerType', 'playerVersion'];
-    for (const setting in imaSettings) {
-      if (!skippedSettings.includes(setting)) {
-        // Change e.g. 'ppid' to 'setPpid'.
-        const methodName = 'set' + camelCaseToTitleCase(setting);
-        if (typeof adsLoader.getSettings()[methodName] === 'function') {
-          adsLoader.getSettings()[methodName](imaSettings[setting]);
-        }
-      }
-    }
-    adsLoader.addEventListener(
-        global.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
-        onAdsManagerLoaded.bind(null, global),
-        false);
-    adsLoader.addEventListener(
-        global.google.ima.AdErrorEvent.Type.AD_ERROR,
-        onAdsLoaderError,
-        false);
+  if (!data['delayAdRequest']) {
+    requestAds();
+  } else {
+    // Let amp-ima-video know that we are done set-up.
+    window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+  }
+}
 
-    videoPlayer.addEventListener('ended', onContentEnded);
-
-    adsRequest = new global.google.ima.AdsRequest();
-    adsRequest.adTagUrl = data.tag;
-    adsRequest.linearAdSlotWidth = videoWidth;
-    adsRequest.linearAdSlotHeight = videoHeight;
-    adsRequest.nonLinearAdSlotWidth = videoWidth;
-    adsRequest.nonLinearAdSlotHeight = videoHeight / 3;
-
-    if (!data['delayAdRequest']) {
-      requestAds();
-    } else {
-      // Let amp-ima-video know that we are done set-up.
-      window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
-    }
-  });
+function onImaLoadFail() {
+  // Something blocked ima3.js from loading - ignore all IMA stuff and just play
+  // content.
+  videoPlayer.addEventListener(interactEvent, showControls);
+  imaLoadAllowed = false;
+  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
 }
 
 function htmlToElement(html) {
@@ -496,7 +511,6 @@ function changeIcon(element, name, fill = '#FFFFFF') {
   }
 }
 
-
 /**
  * Triggered when the user clicks on the big play button div.
  *
@@ -508,11 +522,12 @@ export function onClick(global) {
   setInterval(playerDataTick, 1000);
   bigPlayDiv.removeEventListener(interactEvent, onClick);
   setStyle(bigPlayDiv, 'display', 'none');
-  adDisplayContainer.initialize();
+  if (adDisplayContainer) {
+    adDisplayContainer.initialize();
+  }
   videoPlayer.load();
   playAds(global);
 }
-
 
 /**
  * Triggered when the user ends a tap on the big play button.
@@ -527,7 +542,6 @@ function onBigPlayTouchEnd() {
   }
 }
 
-
 /**
  * Triggered when the user moves a tap on the big play button.
  */
@@ -539,16 +553,30 @@ function onBigPlayTouchMove() {
 export function requestAds() {
   adsRequested = true;
   adRequestFailed = false;
+  if (consentState == 0) { // UNKNOWN
+    // We're unaware of the user's consent state - do not request ads.
+    imaLoadAllowed = false;
+    return;
+  } else if (consentState == 2) { // INSUFFICIENT
+    // User has provided consent state but has not consented to personalized
+    // ads.
+    adsRequest.adTagUrl += '&npa=1';
+  }
   adsLoader.requestAds(adsRequest);
 }
 
 /**
- * Starts ad playback. If the ad request has not yte resolved, calls itself
+ * Starts ad playback. If the ad request has not yet resolved, calls itself
  * again after 250ms.
  *
  * @visibleForTesting
  */
 export function playAds(global) {
+  if (!imaLoadAllowed) {
+    playVideo();
+    return;
+  }
+
   if (!adsRequested) {
     requestAds();
     playAds(global);
@@ -581,7 +609,9 @@ export function playAds(global) {
  */
 export function onContentEnded() {
   contentComplete = true;
-  adsLoader.contentComplete();
+  if (adsLoader) {
+    adsLoader.contentComplete();
+  }
   window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
   window.parent./*OK*/postMessage({event: VideoEvents.ENDED}, '*');
 }
@@ -911,11 +941,13 @@ function onFullscreenClick(global) {
  */
 function onFullscreenChange(global) {
   if (fullscreen) {
-    // Resize the ad container
-    adsManager.resize(
-        videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-    adsManagerWidthOnLoad = null;
-    adsManagerHeightOnLoad = null;
+    if (adsManager) {
+      // Resize the ad container
+      adsManager.resize(
+          videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
+      adsManagerWidthOnLoad = null;
+      adsManagerHeightOnLoad = null;
+    }
     // Return the video to its original size and position
     setStyle(wrapperDiv, 'width', videoWidth + 'px');
     setStyle(wrapperDiv, 'height', videoHeight + 'px');
@@ -923,12 +955,14 @@ function onFullscreenChange(global) {
   } else {
     // The user just entered fullscreen
     if (!nativeFullscreen) {
-      // Resize the ad container
-      adsManager.resize(
-          fullscreenWidth, fullscreenHeight,
-          global.google.ima.ViewMode.FULLSCREEN);
-      adsManagerWidthOnLoad = null;
-      adsManagerHeightOnLoad = null;
+      if (adsManager) {
+        // Resize the ad container
+        adsManager.resize(
+            fullscreenWidth, fullscreenHeight,
+            global.google.ima.ViewMode.FULLSCREEN);
+        adsManagerWidthOnLoad = null;
+        adsManagerHeightOnLoad = null;
+      }
       // Make the video take up the entire screen
       setStyle(wrapperDiv, 'width', fullscreenWidth + 'px');
       setStyle(wrapperDiv, 'height', fullscreenHeight + 'px');
@@ -1029,7 +1063,7 @@ function onMessage(global, event) {
         break;
       case 'onFirstScroll':
       case 'onAdRequestDelayTimeout':
-        if (!adsRequested) {
+        if (!adsRequested && imaLoadAllowed) {
           requestAds();
         }
         break;
@@ -1044,9 +1078,9 @@ function onMessage(global, event) {
  */
 export function getPropertiesForTesting() {
   return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
-    adsManagerHeightOnLoad, contentComplete, controlsDiv, hideControlsTimeout,
-    interactEvent, playbackStarted, playerState,
-    PlayerStates, playPauseDiv, progressLine,
+    adsManagerHeightOnLoad, adsRequest, contentComplete, controlsDiv,
+    hideControlsTimeout, imaLoadAllowed, interactEvent, playbackStarted,
+    playerState, PlayerStates, playPauseDiv, progressLine,
     progressMarkerDiv, timeNode, uiTicker, videoPlayer};
 }
 
@@ -1094,6 +1128,15 @@ export function setAdRequestFailedForTesting(newValue) {
  */
 export function setAdsLoaderForTesting(newAdsLoader) {
   adsLoader = newAdsLoader;
+}
+
+/**
+ * Sets the ads request.
+ *
+ * @visibleForTesting
+ */
+export function setAdsRequestForTesting(newAdsRequest) {
+  adsRequest = newAdsRequest;
 }
 
 /**
@@ -1158,6 +1201,15 @@ export function setPlayerStateForTesting(newState) {
  */
 export function setHideControlsTimeoutForTesting(newTimeout) {
   hideControlsTimeout = newTimeout;
+}
+
+/**
+ * Sets the consent state.
+ *
+ * @visibleForTesting
+ */
+export function setConsentStateForTesting(newConsentState) {
+  consentState = newConsentState;
 }
 
 /**

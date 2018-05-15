@@ -37,7 +37,8 @@ const UNLISTEN_SENTINEL = 'unlisten';
 let WindowEventsDef;
 
 /**
- * Returns a mapping from a URL's origin to an array of windows and their listenFor listeners.
+ * Returns a mapping from a URL's origin to an array of windows and their
+ * listenFor listeners.
  * @param {!Window} parentWin the window that created the iframe
  * @param {boolean=} opt_create create the mapping if it does not exist
  * @return {?Object<string, !Array<!WindowEventsDef>>}
@@ -52,7 +53,8 @@ function getListenFors(parentWin, opt_create) {
 }
 
 /**
- * Returns an array of WindowEventsDef that have had any listenFor listeners registered for this sentinel.
+ * Returns an array of WindowEventsDef that have had any listenFor listeners
+ * registered for this sentinel.
  * @param {!Window} parentWin the window that created the iframe
  * @param {string} sentinel the sentinel of the message
  * @param {boolean=} opt_create create the array if it does not exist

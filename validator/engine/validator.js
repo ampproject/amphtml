@@ -730,6 +730,15 @@ class ParsedTagSpec {
   }
 
   /**
+   * A TagSpec may specify that another tag is excluded. This accessor returns
+   * the list of those tags.
+   * @return {!Array<number>}
+   */
+  excludes() {
+    return this.spec_.excludes;
+  }
+
+  /**
    * Whether or not the tag should be recorded via
    * Context.recordTagspecValidated_ if it was validated
    * successfullly. For performance, this is only done for tags that are
@@ -4874,6 +4883,24 @@ class ParsedValidatorRules {
               getTagSpecUrl(spec), validationResult);
         }
       }
+      for (const condition of spec.excludes()) {
+       if (context.satisfiesCondition(condition)) {
+          if (amp.validator.LIGHT) {
+            validationResult.status =
+                amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
+          context.addError(
+              amp.validator.ValidationError.Code.TAG_EXCLUDED_BY_TAG,
+              context.getLineCol(),
+              /* params */
+              [
+                getTagSpecName(spec.getSpec()),
+                context.getRules().getInternedString(condition)
+              ],
+              getTagSpecUrl(spec), validationResult);
+        }
+      }
       if (!amp.validator.LIGHT) {
         for (const tagspecId of spec.getAlsoRequiresTagWarning()) {
           if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
@@ -5816,22 +5843,30 @@ amp.validator.categorizeError = function(error) {
   }
   // E.g. "The attribute 'srcset' may not appear in tag 'amp-audio >
   // source'."
-  if ((error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE ||
-       error.code === amp.validator.ValidationError.Code.DISALLOWED_ATTR ||
-       error.code ===
-           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING)) {
-    if (goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
-      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
-    }
+  if (error.code === amp.validator.ValidationError.Code.DISALLOWED_ATTR) {
     if (goog.string./*OK*/ startsWith(error.params[1], 'on')) {
       return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
     }
-    if (error.params[1] === 'style' ||
+    // E.g. "The attribute 'async' may not appear in tag 'link
+    // rel=stylesheet for fonts'."
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+
+  // E.g. "The attribute '%1' in tag '%2' is set to the invalid value '%3'."
+  if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE) {
+    if (error.params[0] === 'href' &&
         error.params[1] === 'link rel=stylesheet for fonts') {
       return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
     }
-    // E.g. "The attribute 'async' may not appear in tag 'link
-    // rel=stylesheet for fonts'."
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+
+  // E.g. "The mandatory attribute '%1' is missing in tag '%2'."
+  if (error.code ===
+      amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING) {
+    if (goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // Like the previous example but the tag is params[0] here. This
@@ -5886,6 +5921,12 @@ amp.validator.categorizeError = function(error) {
           amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING &&
       (goog.string./*OK*/ startsWith(error.params[1], 'amp-') ||
        error.params[1] === 'template')) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "The tag 'amp-access extension .json script' is present, but
+  // is excluded by the presence of 'amp-subscriptions extension .json script'."
+  if (error.code ===
+          amp.validator.ValidationError.Code.TAG_EXCLUDED_BY_TAG) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "The attribute 'role' in tag 'amp-img' is missing or incorrect,

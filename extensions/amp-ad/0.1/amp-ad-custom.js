@@ -16,6 +16,7 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {CommonSignals} from '../../../src/common-signals';
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
@@ -56,11 +57,9 @@ export class AmpAdCustom extends AMP.BaseElement {
   }
 
   /** @override */
-  getPriority() {
-    // Loads ads after other content
-    const isPWA = !this.element.getAmpDoc().isSingleDoc();
-    // give the ad higher priority if it is inside a PWA
-    return isPWA ? 1 : 2;
+  getLayoutPriority() {
+    // Since this is AMPHTML we are trusting that it will load responsibly
+    return LayoutPriority.CONTENT;
   }
 
   /** @override **/
@@ -84,13 +83,15 @@ export class AmpAdCustom extends AMP.BaseElement {
   layoutCallback() {
     /** @const {string} fullUrl */
     const fullUrl = this.getFullUrl_();
-    // If this promise has no URL yet, create one for it.
-    if (!(fullUrl in ampCustomadXhrPromises)) {
-      // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[fullUrl] =
-          Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
+    // if we have cached the response, find it, otherwise fetch
+    const responsePromise = ampCustomadXhrPromises[fullUrl] ||
+        Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
+    if (this.slot_ !== null) {
+      // Cache this response if using `data-slot` feature so only one request
+      // is made per url
+      ampCustomadXhrPromises[fullUrl] = responsePromise;
     }
-    return ampCustomadXhrPromises[fullUrl].then(data => {
+    return responsePromise.then(data => {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
@@ -111,10 +112,10 @@ export class AmpAdCustom extends AMP.BaseElement {
         Services.templatesFor(this.win)
             .findAndRenderTemplate(this.element, templateData)
             .then(renderedElement => {
-              // Get here when the template has been rendered
-              // Clear out the child template and replace it by the rendered version
-              // Note that we can't clear templates that's not ad's child because
-              // they maybe used by other ad component.
+              // Get here when the template has been rendered Clear out the
+              // child template and replace it by the rendered version Note that
+              // we can't clear templates that's not ad's child because they
+              // maybe used by other ad component.
               removeChildren(this.element);
               this.element.appendChild(renderedElement);
               this.signals().signal(CommonSignals.INI_LOAD);

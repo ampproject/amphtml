@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
+import {Actions} from './actions';
+import {Entitlement} from './entitlement';
+import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
+import {closestBySelector} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
 
 /**
  * This implements the methods to interact with various subscription platforms.
@@ -29,18 +33,22 @@ export class LocalSubscriptionPlatform {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JsonObject} serviceConfig
-   * @param {!PageConfig} pageConfig
+   * @param {!JsonObject} platformConfig
+   * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
-  constructor(ampdoc, serviceConfig, pageConfig) {
+  constructor(ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
-    /** @const @private {!JsonObject} */
-    this.serviceConfig_ = serviceConfig;
+    /** @private @const */
+    this.rootNode_ = ampdoc.getRootNode();
 
-    /** @const @private {!PageConfig} */
-    this.pageConfig_ = pageConfig;
+    /** @const @private {!JsonObject} */
+    this.serviceConfig_ = platformConfig;
+
+    /** @private @const {!./service-adapter.ServiceAdapter} */
+    this.serviceAdapter_ = serviceAdapter;
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
@@ -53,27 +61,176 @@ export class LocalSubscriptionPlatform {
         ),
         'Authorization Url'
     );
+
+    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
+    this.cid_ = Services.cidForDoc(ampdoc);
+
+    /** @private {!UrlBuilder} */
+    this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
+
+    /** @private {!./analytics.SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = subscriptionAnalytics;
+
+    user().assert(this.serviceConfig_['actions'],
+        'Actions have not been defined in the service config');
+
+    /** @private {!Actions} */
+    this.actions_ = new Actions(
+        this.ampdoc_, this.urlBuilder_,
+        this.subscriptionAnalytics_,
+        this.validateActionMap(this.serviceConfig_['actions'])
+    );
+
+    /** @private {?Promise<string>} */
+    this.readerIdPromise_ = null;
+
+    /** @private {!LocalSubscriptionPlatformRenderer}*/
+    this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
+        serviceAdapter.getDialog(), this.serviceAdapter_);
+
+    /** @private @const {?string} */
+    this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
+
+    this.initializeListeners_();
+  }
+
+  /**
+   * @override
+   */
+  getServiceId() {
+    return 'local';
+  }
+
+  /**
+   * Validates the action map
+   * @param {!JsonObject<string, string>} actionMap
+   * @returns {!JsonObject<string, string>}
+   */
+  validateActionMap(actionMap) {
+    user().assert(actionMap['login'],
+        'Action "login" is not present in action map');
+    user().assert(actionMap['subscribe'],
+        'Action "subscribe" is not present in action map');
+    return actionMap;
+  }
+
+  /**
+   * @return {!Promise<string>}
+   * @private
+   */
+  getReaderId_() {
+    if (!this.readerIdPromise_) {
+      const consent = Promise.resolve();
+      this.readerIdPromise_ = this.cid_.then(cid => {
+        return cid.get(
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            consent
+        );
+      });
+    }
+    return this.readerIdPromise_;
+  }
+
+  /**
+   * Add event listener for the subscriptions action
+   * @private
+   */
+  initializeListeners_() {
+    this.rootNode_.addEventListener('click', e => {
+      const element = closestBySelector(dev().assertElement(e.target),
+          '[subscriptions-action]');
+      this.handleClick_(element);
+    });
+  }
+
+  /**
+   * Handle click on subscription-action
+   * @private
+   * @param {Node} element
+   */
+  handleClick_(element) {
+    if (element) {
+      const action = element.getAttribute('subscriptions-action');
+      if (element.hasAttribute('subscriptions-service')) {
+        const serviceId = element.getAttribute('subscriptions-service');
+        this.serviceAdapter_.delegateActionToService(action, serviceId);
+      } else {
+        this.executeAction(action);
+      }
+    }
+  }
+
+  /** @override */
+  activate(entitlement) {
+    const renderState = entitlement.json();
+    this.urlBuilder_.setAuthResponse(renderState);
+    this.actions_.build().then(() => {
+      this.renderer_.render(renderState);
+    });
+  }
+
+  /** @override */
+  executeAction(action) {
+    const actionExecution = this.actions_.execute(action);
+    return actionExecution.then(result => {
+      if (result) {
+        this.serviceAdapter_.reAuthorizePlatform(this);
+      }
+      return !!result;
+    });
   }
 
   /** @override */
   getEntitlements() {
-    const currentProductId = user().assertString(
-        this.pageConfig_.getProductId(), 'Current Product ID is null');
-
-    return this.xhr_
-        .fetchJson(this.authorizationUrl_, {
-          credentials: 'include',
-        })
-        .then(res => res.json())
-        .then(resJson => {
-          return new Entitlements(
-              this.serviceConfig_['serviceId'] || 'local',
-              JSON.stringify(resJson),
-              Entitlement.parseListFromJson(resJson),
-              currentProductId
-          );
-        });
+    return this.urlBuilder_.buildUrl(this.authorizationUrl_,
+        /* useAuthData */ false)
+        .then(fetchUrl =>
+          this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
+              .then(res => res.json())
+              .then(resJson => {
+                return Entitlement.parseFromJson(resJson);
+              }));
   }
+
+  /** @override */
+  isPingbackEnabled() {
+    return !!this.pingbackUrl_;
+  }
+
+  /** @override */
+  pingback(selectedEntitlement) {
+    if (!this.isPingbackEnabled) {
+      return;
+    }
+    const pingbackUrl = /** @type {string} */ (dev().assert(this.pingbackUrl_,
+        'pingbackUrl is null'));
+
+    const promise = this.urlBuilder_.buildUrl(pingbackUrl,
+        /* useAuthData */ true);
+    return promise.then(url => {
+      return this.xhr_.sendSignal(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: JSON.stringify(selectedEntitlement.jsonForPingback()),
+      });
+    });
+  }
+
+  /** @override */
+  supportsCurrentViewer() {
+    return false;
+  }
+
+  /** @override */
+  getBaseScore() {
+    return this.serviceConfig_['baseScore'] || 0;
+  }
+
+  /** @override */
+  decorateUI(unusedNode, unusedAction, unusedOptions) {}
 }
 
 /**
