@@ -108,7 +108,12 @@ let DockedDef;
 let ControlsDef;
 
 
-/** @private @const {function(number, number, number): string} */
+/**
+ * @param {number} x
+ * @param {number} y
+ * @param {number} scale
+ * @return {string}
+ */
 const transform = (x, y, scale) => `translate(${x}px, ${y}px) scale(${scale})`;
 
 
@@ -229,7 +234,10 @@ class Timeout {
  */
 export class VideoDocking {
 
-  /** @param {!../ampdoc-impl.AmpDoc} ampdoc */
+  /**
+   * @param {!../ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../video-service-interface.VideoServiceInterface} manager
+   */
   constructor(ampdoc, manager) {
 
     /** @private @const {!../ampdoc-impl.AmpDoc} */
@@ -247,7 +255,7 @@ export class VideoDocking {
     /** @private @const {function():!Timeout} */
     this.getDockingTimeout_ = this.lazyTimeout_(video =>
       this.onDockingTimeout_(
-        /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
+          /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
 
     /** @private @const {function():!Timeout} */
     this.getHideControlsTimeout_ = this.lazyTimeout_(() =>
@@ -256,7 +264,7 @@ export class VideoDocking {
     /** @private @const {function():!Timeout} */
     this.getUndockingTimeout_ = this.lazyTimeout_(video =>
       this.undock_(
-        /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
+          /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
 
     /** @private {!RelativeX} */
     // Overriden when user drags the video to a corner.
@@ -473,8 +481,8 @@ export class VideoDocking {
         swap(pauseButton, playButton);
       }
 
-      const isMuted = this.manager_.isMuted(video);
-      if (isMuted) {
+      if (this.manager_.isMuted(
+          /** @type {!../../video-interface.VideoInterface} */ (video))) {
         swap(muteButton, unmuteButton);
       } else {
         swap(unmuteButton, muteButton);
@@ -617,6 +625,8 @@ export class VideoDocking {
 
   /**
    * @param  {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {number=} ratio
+   * @param {number=} timeout
    * @return {boolean}
    */
   undockBecauseVisible_(video, ratio = 1, timeout = 40) {
@@ -742,15 +752,21 @@ export class VideoDocking {
   }
 
   /**
+   * @param {?../../video-interface.VideoOrBaseElementDef} optVideo
    * @return {boolean}
    * @private
    */
   isPlaying_(optVideo = null) {
-    const video = optVideo || this.getDockedVideo_();
+    const video = /** @type {!../../video-interface.VideoInterface} */ (
+      optVideo || this.getDockedVideo_());
     return this.manager_.getPlayingState(video) == PlayingStates.PLAYING_MANUAL;
   }
 
-  /** @private */
+  /**
+   * @param {number} dirX
+   * @param {number} dirY
+   * @private
+   */
   dismiss_(dirX = 0, dirY = 0) {
     const video = this.getDockedVideo_();
     const {posY} = this.currentlyDocked_;
@@ -838,6 +854,7 @@ export class VideoDocking {
   /**
    * Prevents jump when the transition was timed out before user finished
    * scrolling component out of view.
+   * @param {number} step
    * @return {boolean}
    */
   ignoreDueToTransitionEnd_(step) {
@@ -889,6 +906,7 @@ export class VideoDocking {
    * @param {number} y
    * @param {number} scale
    * @param {number} step in [0..1]
+   * @param {?number} optTransitionDurationMs
    * @private
    */
   placeAt_(video, x, y, scale, step, optTransitionDurationMs = null) {
@@ -1083,6 +1101,7 @@ export class VideoDocking {
   }
 
   /**
+   * @param {number} amount
    * @return {boolean}
    * @private
    */
@@ -1387,6 +1406,8 @@ export class VideoDocking {
 
   /**
    * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {number=} unusedDismissDirX
+   * @param {number=} unusedDismissDirY
    * @private
    */
   undock_(video, unusedDismissDirX = 0, unusedDismissDirY = 0) {
@@ -1420,7 +1441,10 @@ export class VideoDocking {
     });
   }
 
-  /** @private */
+  /**
+   * @param {boolean=} respectSticky
+   * @private
+   */
   hideControls_(respectSticky = false) {
     if (respectSticky && this.stickyControls_) {
       return;

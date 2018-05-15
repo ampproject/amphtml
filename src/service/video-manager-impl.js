@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
@@ -57,39 +56,11 @@ import {throttle} from '../utils/rate-limit';
 const TAG = 'video-manager';
 
 
-/** @typedef {../video-interface.VideoAnalyticsDetailsDef} */
-let VideoAnalyticsDef; // alias for line length
-
-
 /**
  * Internal event triggered when a video's visibility changes.
  * @private @const {string}
  */
 const VISIBILITY_CHANGED = 'amp:visibilitychanged';
-
-
-/** @interface */
-export class VideoService {
-
-  /** @param {!../video-interface.VideoInterface} unusedVideo */
-  register(unusedVideo) {}
-
-  /**
-   * Gets the current analytics details for the given video.
-   * Fails silently if the video is not registered.
-   * @param {!AmpElement} unusedVideo
-   * @return {!Promise<!VideoAnalyticsDef>|!Promise<void>}
-   */
-  getAnalyticsDetails(unusedVideo) {}
-
-  /**
-   * Delegates autoplay.
-   * @param {!AmpElement} unusedVideo
-   * @param {!../observable.Observable<boolean>=} opt_unusedObservable
-   *    If provided, video will be played or paused when this observable fires.
-   */
-  delegateAutoplay(unusedVideo, opt_unusedObservable) {}
-}
 
 
 /**
@@ -112,7 +83,7 @@ const SECONDS_PLAYED_MIN_DELAY = 1000;
  * It is responsible for providing a unified user experience and analytics for
  * all videos within a document.
  *
- * @implements {VideoService}
+ * @implements {./video-service-interface.VideoServiceInterface}
  */
 export class VideoManager {
 
@@ -179,6 +150,7 @@ export class VideoManager {
    * Triggers a LOW-TRUST timeupdate event consumable by AMP actions.
    * Frequency of this event is controlled by SECONDS_PLAYED_MIN_DELAY and is
    * every 1 second for now.
+   * @param {!VideoEntry} entry
    * @private
    */
   timeUpdateActionEvent_(entry) {
@@ -195,7 +167,10 @@ export class VideoManager {
     }
   }
 
-  /** @override */
+  /**
+   * @override
+   * @inheritdoc
+   */
   register(video) {
     dev().assert(video);
 
@@ -222,7 +197,10 @@ export class VideoManager {
     element.classList.add('i-amphtml-video-interface');
   }
 
-  /** @override */
+  /**
+   * @override
+   * @inheritdoc
+   */
   delegateAutoplay(videoElement, opt_unusedObservable) {
     videoElement.signals().whenSignal(VideoEvents.REGISTERED).then(() => {
       const entry = this.getEntryForElement_(videoElement);
@@ -328,7 +306,10 @@ export class VideoManager {
     return null;
   }
 
-  /** @override */
+  /**
+   * @override
+   * @inheritdoc
+   */
   getAnalyticsDetails(videoElement) {
     const entry = this.getEntryForElement_(videoElement);
     return entry ? entry.getAnalyticsDetails() : Promise.resolve();
@@ -515,7 +496,7 @@ class VideoEntry {
   }
 
   /**
-   * @retun {boolean}
+   * @return {boolean}
    * @private
    */
   requiresAutoFullscreen_() {
