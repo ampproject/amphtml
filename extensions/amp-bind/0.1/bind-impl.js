@@ -20,7 +20,7 @@ import {BindExpressionResultDef} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {BindingDef} from './bind-evaluator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {OBJECT_STRING_ARGS_KEY} from '../../../src/action-constants';
+import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
@@ -247,7 +247,7 @@ export class Bind {
     // Flush stored sequence IDs five seconds after the last invoked action.
     this.eventuallyClearActionSequenceIds_();
 
-    const expression = args[OBJECT_STRING_ARGS_KEY];
+    const expression = args[RAW_OBJECT_ARGS_KEY];
     if (expression) {
       const scope = dict();
       if (event && event.detail) {

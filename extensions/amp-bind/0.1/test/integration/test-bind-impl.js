@@ -24,7 +24,7 @@ import * as sinon from 'sinon';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
-import {OBJECT_STRING_ARGS_KEY} from '../../../../../src/action-constants';
+import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
 import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {toArray} from '../../../../../src/types';
@@ -486,7 +486,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       const invocation = {
         method: 'setState',
         args: {
-          [OBJECT_STRING_ARGS_KEY]: '{foo: bar}',
+          [RAW_OBJECT_ARGS_KEY]: '{foo: bar}',
         },
         event: {
           detail: {bar: 123},
@@ -516,7 +516,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       const invocation = {
         method: 'setState',
         args: {
-          [OBJECT_STRING_ARGS_KEY]: '{foo: bar}',
+          [RAW_OBJECT_ARGS_KEY]: '{foo: bar}',
         },
         event: {
           detail: {bar: 123},

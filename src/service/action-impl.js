@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../action-constants';
 import {KeyCodes} from '../utils/key-codes';
-import {OBJECT_STRING_ARGS_KEY} from '../action-constants';
+import {RAW_OBJECT_ARGS_KEY} from '../action-constants';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
@@ -858,7 +858,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
     // fragment and delegate to specific action handler.
     args = map();
     const value = toks.next().value;
-    args[OBJECT_STRING_ARGS_KEY] = value;
+    args[RAW_OBJECT_ARGS_KEY] = value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....

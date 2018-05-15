@@ -22,7 +22,7 @@ import {
   dereferenceExprsInArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
-import {ActionTrust, OBJECT_STRING_ARGS_KEY} from '../../src/action-constants';
+import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
@@ -305,7 +305,7 @@ describe('ActionService parseAction', () => {
 
   it('should parse with object literal args', () => {
     const a = parseAction('e:t.m({"foo": {"bar": "qux"}})');
-    expect(a.args[OBJECT_STRING_ARGS_KEY])
+    expect(a.args[RAW_OBJECT_ARGS_KEY])
         .to.equal('{"foo": {"bar": "qux"}}');
   });
 

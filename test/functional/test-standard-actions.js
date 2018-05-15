@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {OBJECT_STRING_ARGS_KEY} from '../../src/action-constants';
+import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {Services} from '../../src/services';
 import {StandardActions} from '../../src/service/standard-actions-impl';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
@@ -273,7 +273,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
       invocation.method = 'setState';
       invocation.args = {
-        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+        [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
       invocation.node = ampdoc;
 
@@ -296,7 +296,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
       invocation.method = 'pushState';
       invocation.args = {
-        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+        [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
       invocation.node = ampdoc;
 
