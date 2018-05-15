@@ -3265,7 +3265,7 @@ function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
  * @param {string} attrName
  * @param {string} attrValue
  * @param {string} mandatoryParent may be set to "$NOPARENT"
- * @returns {string} dispatch key
+ * @return {string} dispatch key
  */
 function makeDispatchKey(
     dispatchKeyType, attrName, attrValue, mandatoryParent) {
