@@ -17,7 +17,7 @@
 @import './amp-story-share.css';
 
 .i-amphtml-story-share-menu {
-  position: fixed !important;
+  position: absolute !important;
   top: 0 !important;
   left: 0 !important;
   height: 100% !important;
