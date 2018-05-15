@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,7 +15,8 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
+
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 
