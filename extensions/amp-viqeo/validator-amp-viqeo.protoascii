@@ -21,21 +21,21 @@ tags: {  # amp-viqeo
     name: "amp-viqeo"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
+
 tags: {  # <amp-viqeo>
   html_format: AMP
   tag_name: "AMP-VIQEO"
   requires_extension: "amp-viqeo"
   attrs: {
-    name: "data-profileId"
+    name: "data-profile"
     mandatory: true
   }
   attrs: {
-    name: "data-videoId"
+    name: "data-video"
     mandatory: true
   }
   attr_lists: "extended-amp-global"

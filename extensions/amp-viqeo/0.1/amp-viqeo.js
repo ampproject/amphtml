@@ -54,13 +54,13 @@ class AmpViqeo extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const videoId = user().assert(
-        this.element.getAttribute('data-videoId'),
-        'The data-videoId attribute is required for <amp-viqeo> %s',
+        this.element.getAttribute('data-videoid'),
+        'The data-videoid attribute is required for <amp-viqeo> %s',
         this.element);
 
     const profileId = user().assert(
-        this.element.getAttribute('data-profileId'),
-        'The data-profileId attribute is required for <amp-viqeo> %s',
+        this.element.getAttribute('data-profileid'),
+        'The data-profileid attribute is required for <amp-viqeo> %s',
         this.element);
 
     const kindIsProd = this.element.getAttribute('data-kind') !== 'stage';

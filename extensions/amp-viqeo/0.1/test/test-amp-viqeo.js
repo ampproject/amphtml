@@ -30,8 +30,8 @@ describes.realWin('amp-viqeo', {
 
   function getViqeo(viqeoProfileId, viqeoId, opt_params) {
     const viqeo = doc.createElement('amp-viqeo');
-    viqeo.setAttribute('data-profileId', viqeoProfileId);
-    viqeo.setAttribute('data-videoId', viqeoId);
+    viqeo.setAttribute('data-profileid', viqeoProfileId);
+    viqeo.setAttribute('data-videoid', viqeoId);
     viqeo.setAttribute('width', 640);
     viqeo.setAttribute('height', 360);
     if (opt_params && opt_params.responsive) {
@@ -43,14 +43,19 @@ describes.realWin('amp-viqeo', {
     }).then(() => viqeo);
   }
 
-  it('requires data-videoId', () => {
-    return getViqeo(184, '').should.eventually.be.rejectedWith(
-        /The data-videoId attribute is required for/);
+  it('has all mandatory attributes', () => {
+    return getViqeo(184, 'b51b70cdbb06248f4438').should.eventually.fulfilled;
   });
 
-  it('requires data-profileId', () => {
+  it('requires data-videoid', () => {
+    return getViqeo(184, '').should.eventually.be.rejectedWith(
+        /The data-videoid attribute is required for/);
+  });
+
+  it('requires data-profileid', () => {
     return getViqeo('', 'b51b70cdbb06248f4438')
         .should.eventually.be.rejectedWith(
-            /The data-profileId attribute is required for/);
+            /The data-profileid attribute is required for/);
   });
+
 });
