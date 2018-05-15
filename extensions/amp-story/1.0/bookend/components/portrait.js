@@ -33,9 +33,9 @@ export let PortraitComponentDef;
 
 /**
  * @struct @typedef {{
- *   portraitCategory: !Element,
- *   portraitImage: !Element,
- *   portraitMeta: !Element,
+ *   category: !Element,
+ *   image: !Element,
+ *   meta: !Element,
  * }}
  */
 let portraitElsDef;
@@ -45,22 +45,26 @@ let portraitElsDef;
  * @implements {BookendComponentInterface}
  */
 export class PortraitComponent {
-  /** @override */
-  assertValidity(articleJson) {
-    user().assert('category' in articleJson && 'image' in articleJson &&
-      'url' in articleJson, 'Portrait component must contain `category`, ' +
+  /**
+   * @param {!../bookend-component.BookendComponentDef} portraitJson
+   * @override
+   * */
+  assertValidity(portraitJson) {
+    user().assert('category' in portraitJson && 'image' in portraitJson &&
+      'url' in portraitJson, 'Portrait component must contain `category`, ' +
       '`image`, and `url` fields, skipping invalid.');
 
-    user().assert(isProtocolValid(articleJson['url']), 'Unsupported protocol ' +
-    `for article URL ${articleJson['url']}`);
+    user().assert(isProtocolValid(portraitJson['url']), 'Unsupported protocol' +
+    ` for article URL ${portraitJson['url']}`);
 
-    user().assert(isProtocolValid(articleJson['image']), 'Unsupported' +
-    `  protocol for article image URL ${articleJson['image']}`);
+    user().assert(isProtocolValid(portraitJson['image']), 'Unsupported' +
+    `  protocol for article image URL ${portraitJson['image']}`);
   }
 
   /**
-   * @override
+   * @param {!../bookend-component.BookendComponentDef} portraitJson
    * @return {!PortraitComponentDef}
+   * @override
    * */
   build(portraitJson) {
     return {
@@ -72,32 +76,37 @@ export class PortraitComponent {
     };
   }
 
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} portraitData
+   * @param {!Document} doc
+   * @return {!Element}
+   * @override
+   * */
   buildTemplate(portraitData, doc) {
     const html = htmlFor(doc);
     const template =
         html`
         <a class="i-amphtml-story-bookend-portrait"
-          target="_top" ref="portraitComponent">
+          target="_top">
           <h2 class="i-amphtml-story-bookend-portrait-category"
-            ref="portraitCategory"></h2>
+            ref="category"></h2>
           <amp-img class="i-amphtml-story-bookend-portrait-image"
-            layout="fixed" width="0" height="0" ref="portraitImage"></amp-img>
+            layout="fixed" width="0" height="0" ref="image"></amp-img>
           <div class="i-amphtml-story-bookend-portrait-meta"
-            ref="portraitMeta"></div>
+            ref="meta"></div>
         </a>`;
     addAttributesToElement(template, dict({'href': portraitData.url}));
 
     const portraitElements = htmlRefs(template);
     const {
-      portraitCategory,
-      portraitImage,
-      portraitMeta,
+      category,
+      image,
+      meta,
     } = /** @type {!portraitElsDef} */ (portraitElements);
 
-    portraitCategory.textContent = portraitData.category;
-    addAttributesToElement(portraitImage, dict({'src': portraitData.image}));
-    portraitMeta.textContent = portraitData.domainName;
+    category.textContent = portraitData.category;
+    addAttributesToElement(image, dict({'src': portraitData.image}));
+    meta.textContent = portraitData.domainName;
 
     return template;
   }

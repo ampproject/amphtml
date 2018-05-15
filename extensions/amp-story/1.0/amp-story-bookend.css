@@ -79,7 +79,6 @@
   margin: 48px 0 8px !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
   color: rgba(255, 255, 255, 0.54) !important;
-  font-family: 'Roboto', sans-serif;
   font-weight: 700 !important;
   letter-spacing: 0.83px !important;
   line-height: 1.48 !important;
@@ -88,7 +87,6 @@
 
 .i-amphtml-story-bookend-article-meta,
 .i-amphtml-story-bookend-portrait-meta {
-  font-family: 'Roboto', sans-serif;
   font-weight: 400 !important;
   font-size: 14px !important;
   text-overflow: ellipsis !important;
@@ -110,20 +108,20 @@
   color: inherit !important;
   overflow: hidden !important;
   flex: 1 0 320px !important;
-  min-width: calc(33%) !important;
+  min-width: 33% !important;
   margin: 24px 0 !important;
   padding: 0 32px !important;
 }
 
 .i-amphtml-story-bookend-portrait {
   box-sizing: border-box !important;
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   text-decoration: none !important;
   color: inherit !important;
   overflow: hidden !important;
   flex: 1 0 320px !important;
-  min-width: calc(33%) !important;
+  min-width: 33% !important;
   margin: 24px 0 !important;
   padding: 0 32px !important;
 }
@@ -131,19 +129,18 @@
 @media (min-width: 640px) {
   .i-amphtml-story-bookend-article,
   .i-amphtml-story-bookend-portrait {
-    max-width: calc(50%) !important;
+    max-width: 50% !important;
   }
 }
 
 @media (min-width: 960px) {
   .i-amphtml-story-bookend-article,
   .i-amphtml-story-bookend-portrait {
-    max-width: calc(33%) !important;
+    max-width: 33% !important;
   }
 }
 
 .i-amphtml-story-bookend-article-heading {
-  font-family: 'Roboto', sans-serif !important;
   font-weight: 400 !important;
   font-size: 16px !important;
   overflow: hidden !important;
@@ -155,7 +152,6 @@
 
 .i-amphtml-story-bookend-portrait-category {
   margin-top: 0px !important;
-  font-family: 'Roboto' !important;
   font-weight: 400 !important;
   font-size: 12px !important;
   text-transform: uppercase !important;
@@ -179,7 +175,7 @@
 
 @media (max-width: 376px) {
   .i-amphtml-story-bookend-portrait-image {
-    width: calc(100%) !important;
+    width: 100% !important;
   }
 }
 
@@ -256,6 +252,7 @@
 }
 
 .i-amphtml-story-bookend-component-set {
+  font-family: 'Roboto', sans-serif !important;
   margin-bottom: 32px !important;
   display: flex !important;
   flex-wrap: wrap !important;
@@ -333,13 +330,13 @@
 @media (min-width: 952px) {
   [desktop] .i-amphtml-story-bookend-article,
   [desktop] .i-amphtml-story-bookend-portrait {
-    max-width: calc(50%) !important;
+    max-width: 50% !important;
   }
 }
 
 @media (min-width: 1272px) {
   [desktop] .i-amphtml-story-bookend-article,
   [desktop] .i-amphtml-story-bookend-portrait {
-    max-width: calc(33%) !important;
+    max-width: 33% !important;
   }
 }

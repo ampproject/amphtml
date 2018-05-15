@@ -31,35 +31,32 @@ import {user} from '../../../../../src/log';
  */
 export let ArticleComponentDef;
 
-/** @type {string} */
-export const TAG = 'amp-story-bookend';
-
 /**
  * Builder class for the small article component.
  * @implements {BookendComponentInterface}
  */
 export class ArticleComponent {
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} articleJson
+   * @override
+   * */
   assertValidity(articleJson) {
-    if (!articleJson['title'] || !articleJson['url']) {
-      user().error(TAG, 'Articles must contain `title` and `url` ' +
-        'fields, skipping invalid.');
-    }
+    user().assert('title' in articleJson && 'url' in articleJson,
+        'Articles must contain `title` and `url` fields, skipping invalid.');
 
-    if (!isProtocolValid(articleJson['url'])) {
-      user().error(TAG, 'Unsupported protocol for article URL ' +
-        `${articleJson['url']}`);
-    }
+    user().assert(isProtocolValid(articleJson['url']), 'Unsupported protocol' +
+        ` for article URL ${articleJson['url']}`);
 
-    if (!isProtocolValid(articleJson['image'])) {
-      user().error(TAG, 'Unsupported protocol for article image URL' +
-      ` ${articleJson['image']}`);
+    if (articleJson['image']) {
+      user().assert(isProtocolValid(articleJson['image']), 'Unsupported ' +
+        `protocol for article image URL ${articleJson['image']}`);
     }
   }
 
   /**
-   * @override
+   * @param {!../bookend-component.BookendComponentDef} articleJson
    * @return {!ArticleComponentDef}
+   * @override
    * */
   build(articleJson) {
     const article = {
@@ -76,9 +73,13 @@ export class ArticleComponent {
     return /** @type {!ArticleComponentDef} */ (article);
   }
 
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} articleData
+   * @param {!Document} doc
+   * @return {!Element}
+   * @override
+   * */
   buildTemplate(articleData, doc) {
-
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const template =
