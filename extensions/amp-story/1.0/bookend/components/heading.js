@@ -35,14 +35,20 @@ export const TAG = 'amp-story-bookend';
  * @implements {BookendComponentInterface}
  */
 export class HeadingComponent {
-
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} headingJson
+   * @override
+   * */
   assertValidity(headingJson) {
     user().assert('text' in headingJson, 'Heading component must contain' +
       ' `text` field, skipping invalid.');
   }
 
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} headingJson
+   * @return {!HeadingComponentDef}
+   * @override
+   * */
   build(headingJson) {
     return {
       type: headingJson['type'],
@@ -50,7 +56,12 @@ export class HeadingComponent {
     };
   }
 
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} headingData
+   * @param {!Document} doc
+   * @return {!Element}
+   * @override
+   * */
   buildTemplate(headingData, doc) {
     const html = htmlFor(doc);
     const template = html`<h3 class="i-amphtml-story-bookend-heading"></h3>`;
