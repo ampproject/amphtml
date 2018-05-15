@@ -272,7 +272,7 @@ function validateAllowedFields(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
-    consentHandlingOverride: true,
+    blockOnConsent: true,
     ampSlotIndex: true,
     adHolderText: true,
     loadingStrategy: true,
