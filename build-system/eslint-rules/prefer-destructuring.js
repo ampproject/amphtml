@@ -149,7 +149,9 @@ module.exports = {
             const decl = declarations[j];
             const {id, init} = decl;
 
-            if (init && init.leadingComments) {
+            if (!init ||
+                init.leadingComments ||
+                init.type === 'NewExpression') {
               continue;
             }
 

@@ -190,7 +190,7 @@ export class AmpAdXOriginIframeHandler {
     } = new Deferred();
     const {
       promise: noContentPromise,
-      resolve: noContentResolve
+      resolve: noContentResolve,
     } = new Deferred();
 
     if (this.baseInstance_.config &&
