@@ -431,7 +431,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!Promise<undefined>}
    */
   processConfigs_() {
-    const remoteConfigUrl = this.getConfigRewriter_()['url'];
+    const configRewriterUrl = this.getConfigRewriter_()['url'];
 
     const config = dict({});
     const inlineConfig = this.getInlineConfigNoInline();
@@ -439,15 +439,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.mergeObjects_(inlineConfig, config);
     this.mergeObjects_(this.remoteConfig_, config);
 
-    if (!remoteConfigUrl || this.isSandbox_) {
+    if (!configRewriterUrl || this.isSandbox_) {
       this.config_ = this.mergeConfigs_(config);
       // use default configuration merge.
       return Promise.resolve();
     }
 
-    assertHttpsUrl(remoteConfigUrl, this.element);
+    assertHttpsUrl(configRewriterUrl, this.element);
     const TAG = this.getName_();
-    dev().fine(TAG, 'Rewriting config', remoteConfigUrl);
+    dev().fine(TAG, 'Rewriting config', configRewriterUrl);
 
     const fetchConfig = {
       method: 'POST',
@@ -459,7 +459,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const ampdoc = this.getAmpDoc();
     return Services.urlReplacementsForDoc(this.element)
-        .expandUrlAsync(remoteConfigUrl)
+        .expandUrlAsync(configRewriterUrl)
         .then(expandedUrl => {
           return Services.xhrFor(ampdoc.win).fetchJson(
               expandedUrl, fetchConfig);
@@ -467,10 +467,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         .then(res => res.json())
         .then(jsonValue => {
           this.config_ = this.mergeConfigs_(jsonValue);
-          dev().fine(TAG, 'Configuration re-written', remoteConfigUrl);
+          dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
         }, err => {
           this.user().error(TAG,
-              'Error rewriting configuration: ', remoteConfigUrl, err);
+              'Error rewriting configuration: ', configRewriterUrl, err);
         });
   }
   /**
