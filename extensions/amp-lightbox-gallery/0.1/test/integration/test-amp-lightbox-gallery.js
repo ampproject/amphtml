@@ -17,12 +17,7 @@
 import {poll} from '../../../../../testing/iframe';
 
 describe.configure().run('amp-lightbox-gallery', function() {
-  this.timeout(5000);
-  const extensions = [
-    'amp-lightbox-gallery',
-    'amp-image-viewer',
-    'amp-carousel',
-  ];
+  const extensions = ['amp-lightbox-gallery'];
   const body = `
   <figure>
   <amp-img id="img0"
@@ -45,6 +40,7 @@ describe.configure().run('amp-lightbox-gallery', function() {
     let win;
     beforeEach(() => {
       win = env.win;
+      win.AMP_MODE.localDev = true;
     });
 
     it('should open and close correctly', () => {
@@ -61,6 +57,7 @@ describe.configure().run('amp-lightbox-gallery', function() {
         openerImage.click();
         return openedPromise;
       }).then(() => {
+        expect(lightbox.style.display).to.not.equal('none');
         const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
         expect(carouselQuery.length).to.equal(1);
         const carousel = carouselQuery[0];
