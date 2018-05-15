@@ -61,6 +61,9 @@
    *     ".another-loading-complete-css-class"
    *   ],
    *
+   *   // Time (in seconds) to wait before Percy takes a screenshot
+   *   "snapshot_delay_sec": 2,
+   *
    *   // Experiments that must be enabled via cookies.
    *   "experiments": [
    *     "amp-feature-one",
@@ -97,10 +100,7 @@
     {
       "url": "examples/visual-tests/article-fade-in.amp.html",
       "name": "fade-in & fade-in-scroll",
-      "loading_complete_css": [
-        ".overflow-container",
-        ".overflow-window",
-      ],
+      "snapshot_delay_sec": 2,
       "experiments": [
         "amp-fx-fade-in",
         "amp-fx-fade-in-scroll"
