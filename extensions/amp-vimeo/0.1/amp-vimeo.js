@@ -14,13 +14,31 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
+
+
+/**
+ * Get the name of the method for a given getter or setter.
+ *
+ * @param {string} prop The name of the property.
+ * @param {?string} optType Either “get” or “set”.
+ * @return {string}
+ */
+function getMethodName(prop, optType = null) {
+  if (!optType) {
+    return prop;
+  }
+  return optType.toLowerCase() + prop.substr(0, 1).toUpperCase() +
+    prop.substr(1);
+}
 
 
 /** @implements {../../../src/video-interface.VideoInterface} */
@@ -29,8 +47,11 @@ class AmpVimeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
     /** @private {?Element} */
     this.iframe_ = null;
+
+    this.setVolume_ = once(() => getMethodName('volume', 'set'));
   }
 
   /**
@@ -58,9 +79,7 @@ class AmpVimeo extends AMP.BaseElement {
    * @inheritdoc
    */
   buildCallback() {
-    const {element} = this;
-    installVideoManagerForDoc(element);
-    Services.videoManagerForDoc(element).register(this);
+    installVideoManagerForDoc(this.getAmpDoc());
   }
 
   /**
@@ -68,21 +87,23 @@ class AmpVimeo extends AMP.BaseElement {
    * @inheritdoc
    */
   layoutCallback() {
-    const videoid = user().assert(
+    const vidId = user().assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
         this.element);
     // See
     // https://developer.vimeo.com/player/embedding
     const {element} = this;
-    const iframe = htmlFor(element)`
-        <iframe frameborder=0 alllowfullscreen=true></iframe>`;
-    const encodedVideoId = encodeURIComponent(videoid);
-    iframe.src = `https://player.vimeo.com/video/${encodedVideoId}`;
+    const iframe =
+        htmlFor(element)`<iframe frameborder=0 alllowfullscreen></iframe>`;
+    iframe.src = `https://player.vimeo.com/video/${encodeURIComponent(vidId)}`;
     this.applyFillContent(iframe);
     element.appendChild(iframe);
     this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+    return this.loadPromise(iframe).then(() => {
+      Services.videoManagerForDoc(element).register(this);
+      element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
   }
 
   /**
@@ -113,9 +134,125 @@ class AmpVimeo extends AMP.BaseElement {
    * @override
    * @inheritdoc
    */
+  mute() {
+    this.sendCommand_(this.setVolume_(), '0');
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  unmute() {
+    // TODO(alanorozco): Set based on volume before unmuting.
+    this.sendCommand_(this.setVolume_(), '1');
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  isInteractive() {
+    return true;
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  supportsPlatform() {
+    return true;
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
   preimplementsMediaSessionAPI() {
-    // TODO(alanorozco)
+    // TODO(alanorozco): dis tru?
     return false;
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  fullscreenEnter() {
+    // NOOP. Not implemented by Vimeo.
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  fullscreenExit() {
+    // NOOP. Not implemented by Vimeo.
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  isFullscreen() {
+    return false;
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  showControls() {
+    // Not implemented by Vimeo.
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  hideControls() {
+    // Not implemented by Vimeo.
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  getMetadata() {
+    // TODO(alanorozco)
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  getDuration() {
+    // TODO(alanorozco)
+    return 0;
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  getCurrentTime() {
+    // TODO(alanorozco)
+    return 0;
+  }
+
+  /**
+   * @override
+   * @inheritdoc
+   */
+  getPlayedRanges() {
+    // TODO(alanorozco)
+    return [];
   }
 
   /**
@@ -126,16 +263,17 @@ class AmpVimeo extends AMP.BaseElement {
   sendCommand_(method, optParams = null) {
     // See
     // https://developer.vimeo.com/player/js-api
-    const iframe = this.iframe_;
-    const {contentWindow} = iframe;
-    if (!iframe || !contentWindow) {
+    if (!this.iframe_) {
       return;
     }
-    const message = {method};
-    if (optParams) {
-      message.value = optParams;
+    const {contentWindow} = this.iframe_;
+    if (!contentWindow) {
+      return;
     }
-    contentWindow./*OK*/postMessage(JSON.stringify(message), '*');
+    contentWindow./*OK*/postMessage(JSON.stringify(dict({
+      'method': method,
+      'value': optParams || '',
+    })), '*');
   }
 }
 
