@@ -381,10 +381,8 @@ export class AmpAdXOriginIframeHandler {
         // iframe can be cleanup before vsync.
         return;
       }
-      const {
-        offsetHeight: iframeHeight,
-        offsetWidth: iframeWidth,
-      } = this.iframe;
+      const iframeHeight = this.iframe./*OK*/offsetHeight;
+      const iframeWidth = this.iframe./*OK*/offsetWidth;
       this.uiHandler_.updateSize(height, width, iframeHeight,
           iframeWidth).then(info => {
         this.sendEmbedSizeResponse_(info.success,

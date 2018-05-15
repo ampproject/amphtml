@@ -159,7 +159,8 @@ export class ViewportBindingNatural_ {
     // documentElement clientWidth/clientHeight.
     // documentElement./*OK*/clientHeight is buggy on iOS Safari
     // and thus cannot be used.
-    const {innerWidth: winWidth, innerHeight: winHeight} = this.win;
+    const winWidth = this.win./*OK*/innerWidth;
+    const winHeight = this.win./*OK*/innerHeight;
     if (winWidth && winHeight) {
       return {width: winWidth, height: winHeight};
     }

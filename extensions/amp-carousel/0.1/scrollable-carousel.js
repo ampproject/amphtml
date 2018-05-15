@@ -179,10 +179,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
    */
   getPosForSlideIndex_(index) {
     const containerWidth = this.element./*OK*/offsetWidth;
-    const {
-      offsetLeft: targetPosition,
-      offsetWidth: targetWidth,
-    } = this.cells_[index];
+    const targetPosition = this.cells_[index]./*OK*/offsetLeft;
+    const targetWidth = this.cells_[index]./*OK*/offsetWidth;
     return targetPosition - (containerWidth - targetWidth) / 2;
   }
 
@@ -327,7 +325,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   hasNext() {
     // TODO(jridgewell): this could be using cached values from Layers.
     const containerWidth = this.getLayoutWidth();
-    const {scrollWidth} = this.container_;
+    const scrollWidth = this.container_./*OK*/scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;
   }

@@ -367,7 +367,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     return this.render(this.state_).then(() => {
       if (this.mode_ == DatePickerMode.STATIC) {
         this.measureElement(() => {
-          const {scrollHeight} = this.container_;
+          const scrollHeight = this.container_./*OK*/scrollHeight;
           const height = this.element./*OK*/offsetHeight;
           if (scrollHeight > height) {
             // Add 1px to allow the bottom border to show

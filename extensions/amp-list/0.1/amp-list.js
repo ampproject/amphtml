@@ -315,7 +315,7 @@ export class AmpList extends AMP.BaseElement {
 
     // Change height if needed.
     this.getVsync().measure(() => {
-      const {scrollHeight} = this.container_;
+      const scrollHeight = this.container_./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
         this.attemptChangeHeight(scrollHeight).catch(() => {});

@@ -370,7 +370,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    */
   handleCustomElasticScroll_(currentScrollLeft) {
-    const {scrollWidth} = this.slidesContainer_;
+    const scrollWidth = this.slidesContainer_./*OK*/scrollWidth;
     if (this.elasticScrollState_ == -1 &&
         currentScrollLeft >= this.previousScrollLeft_) {
       // Elastic Scroll is reversing direction take control.

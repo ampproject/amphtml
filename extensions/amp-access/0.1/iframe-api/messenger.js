@@ -155,6 +155,7 @@ export class Messenger {
     const deferred = new Deferred();
     const {promise, resolve: resolver} = deferred;
 
+
     this.waiting_[rsvpId] = {
       promise,
       resolver,
@@ -194,7 +195,7 @@ export class Messenger {
     if (!data || data['sentinel'] != SENTINEL) {
       return;
     }
-    const {origin} = event;
+    const origin = /** @type {string} */ (event.origin);
     const cmd = data['cmd'];
     const payload = data['payload'] || null;
     if (this.targetOrigin_ == null && cmd == 'start') {
