@@ -28,7 +28,6 @@ import {
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
-  asBaseElement,
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoDocking} from './video/docking';
@@ -236,22 +235,20 @@ export class VideoManager {
    * so they can be called using AMP Actions.
    * For example: <button on="tap:myVideo.play">
    *
-   * @param {!../video-interface.VideoInterface} video
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
   registerCommonActions_(video) {
-    const videoImpl = asBaseElement(video);
-
     // Only require ActionTrust.LOW for video actions to defer to platform
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    videoImpl.registerAction('play', () => video.play(/* isAutoplay */ false),
+    video.registerAction('play', () => video.play(/* isAutoplay */ false),
         trust);
-    videoImpl.registerAction('pause', () => video.pause(), trust);
-    videoImpl.registerAction('mute', () => video.mute(), trust);
-    videoImpl.registerAction('unmute', () => video.unmute(), trust);
-    videoImpl.registerAction('fullscreen', () => video.fullscreenEnter(),
+    video.registerAction('pause', () => video.pause(), trust);
+    video.registerAction('mute', () => video.mute(), trust);
+    video.registerAction('unmute', () => video.unmute(), trust);
+    video.registerAction('fullscreen', () => video.fullscreenEnter(),
         trust);
   }
 
@@ -379,24 +376,12 @@ export class VideoManager {
 
 
 /**
- * This union type allows the compiler to treat VideoInterface objects as
- * `BaseElement`s, which they should be anyway.
- *
- * WARNING: Don't use this at the service level. Its `register` method should
- * only allow `VideoInterface` as a guarding measure.
- *
- * @typedef {!../video-interface.VideoInterface|!../base-element.BaseElement}
- */
-let VideoOrBaseElementDef;
-
-
-/**
  * VideoEntry represents an entry in the VideoManager's list.
  */
 class VideoEntry {
   /**
    * @param {!VideoManager} manager
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    */
   constructor(manager, video) {
     /** @private @const {!VideoManager} */
@@ -405,7 +390,7 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
-    /** @package @const {!VideoOrBaseElementDef} */
+    /** @package @const {!../video-interface.VideoOrBaseElementDef} */
     this.video = video;
 
     /** @private {boolean} */
@@ -1149,7 +1134,7 @@ export class AutoFullscreenManager {
 
   /**
    * Scrolls to a video if it's not in view.
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
    * @private
    */

@@ -84,15 +84,8 @@ export const Direction = {UP: 1, DOWN: -1};
 
 
 /**
- * @typedef
- * {!../../video-interface.VideoInterface|!../../base-element.BaseElement}
- */
-let VideoOrBaseElementDef;
-
-
-/**
  * @struct @typedef {{
- *  video: !VideoOrBaseElementDef,
+ *  video: !../../video-interface.VideoOrBaseElementDef,
  *  posX: !RelativeX,
  *  posY: !RelativeY,
  *  step: number,
@@ -253,7 +246,8 @@ export class VideoDocking {
 
     /** @private @const {function():!Timeout} */
     this.getDockingTimeout_ = this.lazyTimeout_(video =>
-      this.onDockingTimeout_(/** @type {!VideoOrBaseElementDef} */ (video)));
+      this.onDockingTimeout_(
+        /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
 
     /** @private @const {function():!Timeout} */
     this.getHideControlsTimeout_ = this.lazyTimeout_(() =>
@@ -261,7 +255,8 @@ export class VideoDocking {
 
     /** @private @const {function():!Timeout} */
     this.getUndockingTimeout_ = this.lazyTimeout_(video =>
-      this.undock_(/** @type {!VideoOrBaseElementDef} */ (video)));
+      this.undock_(
+        /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
 
     /** @private {!RelativeX} */
     // Overriden when user drags the video to a corner.
@@ -320,7 +315,7 @@ export class VideoDocking {
             </div>
           </div>`));
 
-    /** @private {?VideoOrBaseElementDef} */
+    /** @private {?../../video-interface.VideoOrBaseElementDef} */
     this.lastDismissed_ = null;
 
     /** @private {?RelativeY} */
@@ -353,7 +348,7 @@ export class VideoDocking {
     /** @private {boolean} */
     this.isDragging_ = false;
 
-    /** @private {!Array<!VideoOrBaseElementDef>} */
+    /** @private {!Array<!../../video-interface.VideoOrBaseElementDef>} */
     this.observed_ = [];
 
     /** @private @const {!function()} */
@@ -393,7 +388,7 @@ export class VideoDocking {
     this.observed_.forEach(video => this.onPositionChange_(video));
   }
 
-  /** @param {!VideoOrBaseElementDef} video */
+  /** @param {!../../video-interface.VideoOrBaseElementDef} video */
   register(video) {
     this.install_();
 
@@ -576,7 +571,7 @@ export class VideoDocking {
   }
 
   /**
-   * @return {!VideoOrBaseElementDef}
+   * @return {!../../video-interface.VideoOrBaseElementDef}
    * @private
    */
   getDockedVideo_() {
@@ -598,7 +593,7 @@ export class VideoDocking {
   /**
    * Reconciliates the state of a docked or potentially dockable video when
    * its position changes.
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @private
    */
   onPositionChange_(video) {
@@ -621,7 +616,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   undockBecauseVisible_(video, ratio = 1, timeout = 40) {
@@ -637,7 +632,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreDueToNotPlayingManually_(video) {
@@ -645,7 +640,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreBecauseAnotherDocked_(video) {
@@ -653,7 +648,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreDueToSize_(video) {
@@ -701,7 +696,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @return {?RelativeY}
    * @private
    */
@@ -789,7 +784,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @param {boolean=} finalize
@@ -819,7 +814,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    * @private
    */
@@ -889,7 +884,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {number} x
    * @param {number} y
    * @param {number} scale
@@ -975,7 +970,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   isCurrentlyDocked_(video) {
@@ -983,7 +978,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @param {number} step
@@ -1055,7 +1050,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @private
    */
   onDockingTimeout_(video) {
@@ -1331,7 +1326,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @return {{x: number, y: number, targetWidth: number, targetHeight: number}}
@@ -1357,7 +1352,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @param {number} step in [0..1]
@@ -1391,7 +1386,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @private
    */
   undock_(video, unusedDismissDirX = 0, unusedDismissDirY = 0) {
