@@ -15,8 +15,9 @@
  */
 
 import {Services} from '../../../src/services';
+import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
-import { createElementWithAttributes } from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 
 const CSS_PREFIX = 'i-amphtml-subs';
 
@@ -29,8 +30,6 @@ export class Renderer {
   constructor(ampdoc) {
     /** @const @private */
     this.ampdoc_ = ampdoc;
-
-    this.document_ = ampdoc.win.document;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
@@ -72,14 +71,19 @@ export class Renderer {
   }
 
   addLoadingBar() {
-    if (!this.getRootElement_().querySelector('[subscriptions-section=loading]')) {
-      const element = createElementWithAttributes(this.document_, 'div' , {
-        class: 'subscriptions-progress',
-        'subscriptions-section': 'loading',
-      });
-
-      this.getRootElement_().appendChild(element);
-    }
+    return this.ampdoc_.whenReady().then(() => {
+      if (!this.getRootElement_().querySelector(
+          '[subscriptions-section=loading]')) {
+        const element = createElementWithAttributes(this.ampdoc_.win.document,
+            'div' ,
+            dict({
+              'class': 'i-amphtml-subs-progress',
+              'subscriptions-section': 'loading',
+            })
+        );
+        this.ampdoc_.getBody().appendChild(element);
+      }
+    });
   }
 
   /**

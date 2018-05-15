@@ -197,17 +197,28 @@ describes.realWin('amp-subscriptions renderer', {
   });
 
   describe('addLoadingBar', () => {
-    it('should add a progress bar if no subscriptions-section=loading is found', () => {
-      const appendChildStub = sandbox.stub(renderer.getRootElement_(), 'appendChild');
-      renderer.addLoadingBar();
-      expect(appendChildStub).to.not.be.called;
+    let appendChildStub;
+
+    beforeEach(() => {
+      appendChildStub = sandbox.stub(renderer.ampdoc_.getBody(),
+          'appendChild');
+    });
+
+    it('shouldn\'t add a progress bar if loading section is found', () => {
+      return renderer.addLoadingBar().then(() => {
+        expect(appendChildStub).to.not.be.called;
+      });
+    });
+
+    it('should add a progress bar if no loading section is found', () => {
       loading1.remove();
       loading2.remove();
-      renderer.addLoadingBar();
-      expect(appendChildStub).to.be.called;
-      const element = appendChildStub.getCall(0).args[0];
-      expect(element.tagName).to.be.equal('DIV');
-      expect(element.className).to.be.equal('subscriptions-progress');
+      return renderer.addLoadingBar().then(() => {
+        expect(appendChildStub).to.be.called;
+        const element = appendChildStub.getCall(0).args[0];
+        expect(element.tagName).to.be.equal('DIV');
+        expect(element.className).to.be.equal('i-amphtml-subs-progress');
+      });
     });
   });
 });

@@ -107,7 +107,7 @@ html:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
   display: none;
 }
 
-.subscriptions-progress {
+.i-amphtml-subs-progress {
   height: 2px;
   background-color: #ccc;
   position: relative;
@@ -115,7 +115,7 @@ html:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
   overflow: hidden;
 }
 
-.subscriptions-progress:after {
+.i-amphtml-subs-progress:after {
   content: '';
   background-color: #2196F3;
   height: 2px;
@@ -123,10 +123,10 @@ html:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
   left: 0;
   top: 0;
   width: 20%;
-  animation: progress 1500ms ease-in-out infinite;
+  animation: i-amphtml-subs-loading-progress 1500ms ease-in-out infinite;
 }
 
-@keyframes progress {
+@keyframes i-amphtml-subs-loading-progress {
   from {
     transform: translateX(-100%);
   }
