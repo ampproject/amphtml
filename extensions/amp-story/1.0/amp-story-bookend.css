@@ -206,7 +206,7 @@
   content: " " !important;
   display: block !important;
   background-image: linear-gradient(0deg, rgba(1,1,1,0.00) 0%, #000000 100%) !important;
-  position: fixed !important;
+  position: absolute !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
