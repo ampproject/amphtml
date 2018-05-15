@@ -401,14 +401,11 @@ describes.realWin('amp-story', {
       createPages(story.element, 2, ['cover', 'page-1']);
       story.buildCallback();
 
-      const muteStub = sandbox.stub(story.mediaPool_, 'mute');
       const pauseStub = sandbox.stub(story.mediaPool_, 'pause');
 
       story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
       story.storeService_.dispatch(Action.TOGGLE_AD, true);
 
-      expect(muteStub).to.have.been.calledOnce;
-      expect(muteStub).to.have.been.calledWith(backgroundAudioEl);
       expect(pauseStub).to.have.been.calledOnce;
       expect(pauseStub).to.have.been.calledWith(backgroundAudioEl);
     });
