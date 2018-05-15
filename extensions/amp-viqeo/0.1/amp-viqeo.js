@@ -23,8 +23,6 @@ class AmpViqeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    this.playerWrapperElement_ = null;
   }
 
   /**
@@ -36,7 +34,11 @@ class AmpViqeo extends AMP.BaseElement {
     this.preconnect.url('https://stage.embed.viqeo.tv', opt_onLayout);
   }
 
-  /** @override */
+  /**
+   * @param {!Layout} layout
+   * @return {boolean}
+   * @override
+   */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
