@@ -441,7 +441,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const remoteConfigUrl = this.getConfigRewriter_()['url'];
 
     const config = dict({});
-    let inlineConfig = this.getInlineConfigNoInline();
+    const inlineConfig = this.getInlineConfigNoInline();
     this.validateTransport_(inlineConfig);
     this.mergeObjects_(inlineConfig, config);
     this.mergeObjects_(this.remoteConfig_, config);
@@ -460,7 +460,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       method: 'POST',
       body: config,
       credentials: 'include',
-      requireAmpResponseSourceOrigin: false
+      requireAmpResponseSourceOrigin: false,
     };
     const ampdoc = this.getAmpDoc();
     return Services.urlReplacementsForDoc(this.element)
