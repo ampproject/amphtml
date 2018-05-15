@@ -103,11 +103,6 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.remoteConfig_ = dict();
 
-    /**
-     * @private {!JsonObject}
-     */
-    this.rewrittenConfig_ = dict();
-
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
 
@@ -227,19 +222,17 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
             })
-            .then(this.rewriteConfig_.bind(this))
-            .then(this.onConfigRewriteSuccess_.bind(this));
+            .then(this.processConfigs_.bind(this))
+            .then(this.registerTriggers_.bind(this));
     return this.iniPromise_;
   }
 
   /**
-   * Handle successful fetching of (possibly) remote config.
+   * Registers triggers.
    * @return {!Promise|undefined}
    * @private
    */
-  onConfigRewriteSuccess_() {
-    this.config_ = this.mergeConfigs_();
-
+  registerTriggers_() {
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
       const TAG = this.getName_();
@@ -437,7 +430,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    * @return {!Promise<undefined>}
    */
-  rewriteConfig_() {
+  processConfigs_() {
     const remoteConfigUrl = this.getConfigRewriter_()['url'];
 
     const config = dict({});
@@ -447,7 +440,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.mergeObjects_(this.remoteConfig_, config);
 
     if (!remoteConfigUrl || this.isSandbox_) {
-      this.rewrittenConfig_ = config;
+      this.config_ = this.mergeConfigs_(config);
       // use default configuration merge.
       return Promise.resolve();
     }
@@ -471,7 +464,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         })
         .then(res => res.json())
         .then(jsonValue => {
-          this.rewrittenConfig_ = jsonValue;
+          this.config_ = this.mergeConfigs_(jsonValue);
           dev().fine(TAG, 'Configuration re-written', remoteConfigUrl);
         }, err => {
           this.user().error(TAG,
@@ -526,9 +519,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * - Default config: Built-in config shared by all amp-analytics tags.
    *
    * @private
+   * @param {!JsonObject} rewrittenConfig
    * @return {!JsonObject}
    */
-  mergeConfigs_() {
+  mergeConfigs_(rewrittenConfig) {
     // Initialize config with analytics related vars.
     const config = dict({
       'vars': {
@@ -539,7 +533,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.mergeObjects_(expandConfigRequest(defaultConfig), config);
     this.mergeObjects_(expandConfigRequest(this.getTypeConfig_()), config,
         /* predefined */ true);
-    this.mergeObjects_(expandConfigRequest(this.rewrittenConfig_), config);
+    this.mergeObjects_(expandConfigRequest(rewrittenConfig), config);
     return config;
   }
 
