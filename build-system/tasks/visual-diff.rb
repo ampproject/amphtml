@@ -387,7 +387,7 @@ def snapshot_webpages(page, webpages, config)
     log('verbose', 'Navigating to page ' + yellow(url) + '...')
     page.visit(url)
     if snapshot_delay_sec
-      sleep(snapshot_delay_sec)
+      sleep(snapshot_delay_sec.to_i)
     end
     verify_css_elements(
         page,

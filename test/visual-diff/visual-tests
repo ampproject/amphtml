@@ -61,8 +61,8 @@
    *     ".another-loading-complete-css-class"
    *   ],
    *
-   *   // Time (in seconds) to wait before Percy takes a screenshot
-   *   "snapshot_delay_sec": 2,
+   *   // Delay (in seconds) after page load, before a snapshot is taken.
+   *   "snapshot_delay_sec": N,
    *
    *   // Experiments that must be enabled via cookies.
    *   "experiments": [
