@@ -55,11 +55,11 @@ The `width` and `height` attributes determine the aspect ratio of the Viqeo embe
 
 ## Attributes
 
-##### data-profileId
+##### data-profileid
 
 The Viqeo profile ID.
 
-##### data-videoId
+##### data-videoid
 
 The identifier of the video.
 
