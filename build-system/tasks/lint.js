@@ -164,9 +164,13 @@ function lint() {
             config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
       }
     }
-    // TODO(#14761, #15255): Remove these overrides and make the rules errors by
-    // default in .eslintrc after all code is fixed.
-    options['configFile'] = '.eslintrc-strict';
+    log('TRAVIS_COMMIT_MESSAGE: ' + process.env.TRAVIS_COMMIT_MESSAGE);
+    if (!process.env.TRAVIS ||
+        !process.env.TRAVIS_COMMIT_MESSAGE.includes('[disable strict lint]')) {
+      // TODO(#14761, #15255): Remove these overrides and make the rules errors
+      // by default in .eslintrc after all code is fixed.
+      options['configFile'] = '.eslintrc-strict';
+    }
   }
   const stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);
