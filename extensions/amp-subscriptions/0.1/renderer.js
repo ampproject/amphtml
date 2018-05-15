@@ -31,8 +31,8 @@ export class Renderer {
     /** @const @private */
     this.ampdoc_ = ampdoc;
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(ampdoc.win);
+    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     // Initial state is "unknown".
     this.setGrantState(null);
@@ -57,7 +57,7 @@ export class Renderer {
    * @private
    */
   setState_(type, state) {
-    this.vsync_.mutate(() => {
+    this.resources_.mutateElement(this.getRootElement_() , () => {
       this.getRootElement_().classList.toggle(
           `${CSS_PREFIX}-${type}-unk`,
           state === null);
@@ -92,7 +92,7 @@ export class Renderer {
    * @private
    */
   toggleState_(type, state) {
-    this.vsync_.mutate(() => {
+    this.resources_.mutateElement(this.getRootElement_(), () => {
       this.getRootElement_().classList.toggle(`${CSS_PREFIX}-${type}`, state);
     });
   }

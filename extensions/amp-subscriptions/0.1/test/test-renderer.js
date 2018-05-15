@@ -85,8 +85,8 @@ describes.realWin('amp-subscriptions renderer', {
 
     installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
 
-    const vsync = Services.vsyncFor(win);
-    sandbox.stub(vsync, 'mutate').callsFake(mutator => {
+    const resources = Services.resourcesForDoc(ampdoc);
+    sandbox.stub(resources, 'mutateElement').callsFake((element, mutator) => {
       mutator();
     });
 
