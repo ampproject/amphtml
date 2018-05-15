@@ -20,7 +20,7 @@ checkMinVersion();
 
 const $$ = require('gulp-load-plugins')();
 const applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
-const babel = require('babelify');
+const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
@@ -71,6 +71,7 @@ const unminified3pTarget = 'dist.3p/current/integration.js';
 declareExtension('amp-3q-player', '0.1');
 declareExtension('amp-access', '0.1', {hasCss: true});
 declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
+declareExtension('amp-access-laterpay', '0.2', {hasCss: true});
 declareExtension('amp-access-scroll', '0.1', {hasCss: true});
 declareExtension('amp-accordion', '0.1');
 declareExtension('amp-ad', '0.1', {hasCss: true});
@@ -82,6 +83,7 @@ declareExtension('amp-ad-network-triplelift-impl', 0.1);
 declareExtension('amp-ad-network-cloudflare-impl', 0.1);
 declareExtension('amp-ad-network-gmossp-impl', 0.1);
 declareExtension('amp-ad-exit', 0.1);
+declareExtension('amp-addthis', '0.1');
 declareExtension('amp-analytics', '0.1');
 declareExtension('amp-anim', '0.1');
 declareExtension('amp-animation', '0.1');
@@ -89,6 +91,7 @@ declareExtension('amp-apester-media', '0.1', {hasCss: true});
 declareExtension('amp-app-banner', '0.1', {hasCss: true});
 declareExtension('amp-audio', '0.1');
 declareExtension('amp-auto-ads', '0.1');
+declareExtension('amp-beopinion', '0.1');
 declareExtension('amp-bind', '0.1');
 declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
 declareExtension('amp-brid-player', '0.1');
@@ -101,7 +104,6 @@ declareExtension('amp-compare-slider', '0.1');
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
-declareExtension('amp-document-recommendations', '0.1', {hasCss: true});
 declareExtension('amp-dynamic-css-classes', '0.1');
 declareExtension('amp-experiment', '0.1');
 declareExtension('amp-facebook', '0.1');
@@ -113,6 +115,7 @@ declareExtension('amp-font', '0.1');
 declareExtension('amp-form', '0.1', {hasCss: true});
 declareExtension('amp-fx-collection', '0.1');
 declareExtension('amp-fx-flying-carpet', '0.1', {hasCss: true});
+declareExtension('amp-geo', '0.1');
 declareExtension('amp-gfycat', '0.1');
 declareExtension('amp-gist', '0.1');
 declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
@@ -131,6 +134,7 @@ declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
 declareExtension('amp-mustache', '0.1');
+declareExtension('amp-next-page', '0.1', {hasCss: true});
 declareExtension('amp-nexxtv-player', '0.1');
 declareExtension('amp-o2-player', '0.1');
 declareExtension('amp-ooyala-player', '0.1');
@@ -148,14 +152,29 @@ declareExtension('amp-story', '0.1', {
   hasCss: true,
   cssBinaries: [
     'amp-story-bookend',
+    'amp-story-consent',
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
     'amp-story-share',
+    'amp-story-share-menu',
     'amp-story-system-layer',
   ],
 });
-declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
+declareExtension('amp-story', '1.0', {
+  hasCss: true,
+  cssBinaries: [
+    'amp-story-bookend',
+    'amp-story-consent',
+    'amp-story-hint',
+    'amp-story-unsupported-browser-layer',
+    'amp-story-viewport-warning-layer',
+    'amp-story-share',
+    'amp-story-share-menu',
+    'amp-story-system-layer',
+  ],
+});
+declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
@@ -196,7 +215,7 @@ declareExtension('amp-viqeo', '0.1');
 declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
-    'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
+    'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
 
 
 /**
@@ -260,25 +279,33 @@ function declareExtension(name, version, options) {
 }
 
 /**
- * This function is used for declaring deprecated extensions. It simply places the current
- * version code in place of the latest versions.
- * This has the ability to break an extension verison, so please be sure that this is
- * the correct one to use.
+ * This function is used for declaring deprecated extensions. It simply places
+ * the current version code in place of the latest versions. This has the
+ * ability to break an extension verison, so please be sure that this is the
+ * correct one to use.
  * @param {string} name
  * @param {string} version E.g. 0.1
- * @param {string} lastestVersion
- * @param {boolean} hasCss
+ * @param {string} latestVersion
+ * @param {!ExtensionOption} options extension options object.
  */
-function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
+function declareExtensionVersionAlias(name, version, latestVersion, options) {
   extensionAliasFilePath[name + '-' + version + '.js'] = {
     'name': name,
-    'file': name + '-' + lastestVersion + '.js',
+    'file': name + '-' + latestVersion + '.js',
   };
-  if (hasCss) {
+  if (options.hasCss) {
     extensionAliasFilePath[name + '-' + version + '.css'] = {
       'name': name,
-      'file': name + '-' + lastestVersion + '.css',
+      'file': name + '-' + latestVersion + '.css',
     };
+  }
+  if (options.cssBinaries) {
+    options.cssBinaries.forEach(cssBinaryName => {
+      extensionAliasFilePath[cssBinaryName + '-' + version + '.css'] = {
+        'name': cssBinaryName,
+        'file': cssBinaryName + '-' + latestVersion + '.css',
+      };
+    });
   }
 }
 
@@ -399,12 +426,12 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       // If there is a sync JS error during initial load,
       // at least try to unhide the body.
       wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
-          'setTimeout(function(){' +
-          'var s=document.body.style;' +
-          's.opacity=1;' +
-          's.visibility="visible";' +
-          's.animation="none";' +
-          's.WebkitAnimation="none;"},1000);throw e};',
+      'setTimeout(function(){' +
+      'var s=document.body.style;' +
+      's.opacity=1;' +
+      's.visibility="visible";' +
+      's.animation="none";' +
+      's.WebkitAnimation="none;"},1000);throw e};',
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -430,7 +457,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-          })
+          }),
       );
     }
 
@@ -457,7 +484,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-          })
+          }),
       );
     }
 
@@ -465,7 +492,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         thirdPartyBootstrap(
             '3p/frame.max.html', 'frame.html', shouldMinify),
         thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html',shouldMinify)
+            '3p/nameframe.max.html', 'nameframe.html', shouldMinify),
     );
 
     if (watch) {
@@ -505,21 +532,35 @@ function compileCss(watch, opt_compileAll) {
     });
   }
 
+  function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
+    return toPromise(gulp.src(`css/${originalCssFilename}`)
+        .pipe($$.file(jsFilename, 'export const cssText = ' +
+            JSON.stringify(css)))
+        .pipe(gulp.dest('build'))
+        .on('end', function() {
+          mkdirSync('build');
+          mkdirSync('build/css');
+          fs.writeFileSync(`build/css/${cssFilename}`, css);
+        }));
+  }
+
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
-      .then(function(css) {
-        return toPromise(gulp.src('css/**.css')
-            .pipe($$.file('css.js', 'export const cssText = ' +
-              JSON.stringify(css)))
-            .pipe(gulp.dest('build'))
-            .on('end', function() {
-              mkdirSync('build');
-              mkdirSync('build/css');
-              fs.writeFileSync('build/css/v0.css', css);
-            }));
-      })
+      .then(css => writeCss(css, 'amp.css', 'css.js', 'v0.css'))
       .then(() => {
         endBuildStep('Recompiled CSS in', 'amp.css', startTime);
+      })
+      .then(() => jsifyCssAsync('css/video-docking.css'))
+      .then(css => writeCss(css,
+          'video-docking.css', 'video-docking.css.js', 'video-docking.css'))
+      .then(() => {
+        endBuildStep('Recompiled CSS in', 'video-docking.css', startTime);
+      })
+      .then(() => jsifyCssAsync('css/video-autoplay.css'))
+      .then(css => writeCss(css,
+          'video-autoplay.css', 'video-autoplay.css.js', 'video-autoplay.css'))
+      .then(() => {
+        endBuildStep('Recompiled CSS in', 'video-autoplay.css', startTime);
       })
       .then(() => {
         return buildExtensions({
@@ -537,6 +578,7 @@ function compileCss(watch, opt_compileAll) {
 function copyCss() {
   const startTime = Date.now();
   fs.copySync('build/css/v0.css', 'dist/v0.css');
+  fs.copySync('build/css/video-docking.css', 'dist/video-docking.css');
   return toPromise(gulp.src('build/css/amp-*.css')
       .pipe(gulp.dest('dist/v0')))
       .then(() => {
@@ -609,7 +651,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
 
 /**
  * @param {string} path
- * @param {string} name
+ * @param {string} css
  * @param {string} version
  * @param {!Object} options
  */
@@ -621,6 +663,7 @@ function buildExtensionCss(path, name, version, options) {
     fs.writeFileSync(jsName, jsCss, 'utf-8');
     fs.writeFileSync(cssName, css, 'utf-8');
   }
+
   const promises = [];
   const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css')
       .then(writeCssBinaries.bind(null, `${name}-${version}.css`));
@@ -663,7 +706,7 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? ''
       : `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}` +
-      `v:"${internalRuntimeVersion}",f:(function(AMP){<%= contents %>\n})});`,
+        `v:"${internalRuntimeVersion}",f:(function(AMP){<%= contents %>\n})});`,
   }));
 }
 
@@ -832,17 +875,22 @@ function dist() {
           // and whether you need to init logging (initLogConstructor).
           buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildExaminer({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildWebWorker({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
           buildExperiments({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           buildLoginDone({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           buildWebPushPublisherFiles({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           copyCss(),
         ]);
       }).then(() => {
@@ -1089,22 +1137,20 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  const browsers = [];
-  if (process.env.TRAVIS) {
-    browsers.push('last 2 versions', 'safari >= 9');
-  } else {
-    browsers.push('Last 4 Chrome versions');
-  }
-
+  const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
-      .transform(babel, {
+      .transform(babelify, {
+        compact: false,
         presets: [
           ['env', {
             targets: {
-              browsers,
+              browsers: ['last 2 versions', 'safari >= 9'],
             },
           }],
         ],
+      })
+      .once('transform', () => {
+        endBuildStep('Transformed', srcFilename, startTime);
       });
   if (options.watch) {
     bundler = watchify(bundler);
@@ -1128,13 +1174,17 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(gulp.dest.bind(gulp), destDir);
 
   const destFilename = options.toName || srcFilename;
+
   function rebundle(failOnError) {
     const startTime = Date.now();
     return toPromise(
         bundler.bundle()
             .on('error', function(err) {
-              // Drop the node_modules call stack, which begins with '    at'.
-              const message = err.stack.replace(/    at[^]*/, '').trim();
+              let message = err;
+              if (err.stack) {
+                // Drop the node_modules call stack, which begins with '    at'.
+                message = err.stack.replace(/    at[^]*/, '').trim();
+              }
               console.error(red(message));
               if (failOnError) {
                 process.exit(1);
@@ -1264,7 +1314,6 @@ function buildWebPushPublisherFiles(options) {
 /**
  * Build amp-web-push publisher files HTML page.
  *
- * @param {string} version
  * @param {!Object} options
  */
 function buildWebPushPublisherFilesVersion(version, options) {
@@ -1285,15 +1334,6 @@ function buildWebPushPublisherFilesVersion(version, options) {
   return Promise.all(promises);
 }
 
-/**
- * buildWebPushPublisherFile
- *
- * @param {string} version
- * @param {string} fileName
- * @param {string} watch
- * @param {Object} options
- * @return {*}
- */
 function buildWebPushPublisherFile(version, fileName, watch, options) {
   const basePath = `extensions/amp-web-push/${version}/`;
   const tempBuildDir = `build/all/amp-web-push-${version}/`;
@@ -1326,7 +1366,7 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
           fileContents = fileContents.replace(
               '<!-- [GULP-MAGIC-REPLACE ' + fileName + '.js] -->',
               '<script>' + fs.readFileSync(distDir + '/' +
-              minifiedName, 'utf8') + '</script>'
+              minifiedName, 'utf8') + '</script>',
           );
 
           fs.writeFileSync('dist/v0/' + fileName + '.html',
@@ -1348,7 +1388,6 @@ function buildLoginDone(options) {
 /**
  * Build "Login Done" page for the specified version.
  *
- * @param {string} version
  * @param {!Object} options
  */
 function buildLoginDoneVersion(version, options) {
@@ -1583,7 +1622,7 @@ gulp.task('default', 'Runs "watch" and then "serve"',
 gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
-            'Great for profiling and debugging production code.',
+    'Great for profiling and debugging production code.',
     fortesting: '  Compiles production binaries for local testing',
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   },
