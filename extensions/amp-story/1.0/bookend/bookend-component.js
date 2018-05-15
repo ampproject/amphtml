@@ -41,7 +41,7 @@ export let BookendDataDef;
 export let BookendComponentDef;
 
 const articleComponentBuilder = new ArticleComponent();
-const articleTitleComponentBuilder = new HeadingComponent();
+const headingComponentBuilder = new HeadingComponent();
 const portraitComponentBuilder = new PortraitComponent();
 
 /**
@@ -59,7 +59,7 @@ function componentBuilderInstanceFor(componentType) {
     case 'small':
       return articleComponentBuilder;
     case 'heading':
-      return articleTitleComponentBuilder;
+      return headingComponentBuilder;
     case 'portrait':
       return portraitComponentBuilder;
     default:
