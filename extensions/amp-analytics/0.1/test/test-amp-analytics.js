@@ -2084,7 +2084,7 @@ describes.realWin('amp-analytics', {
       });
     });
 
-    it('should merge rewritten configuration and use defaults', () => {
+    it('should merge rewritten configuration and use vendor', () => {
       jsonMockResponses[configRewriterUrl] = JSON.stringify({
         'requests': {'foo': 'https://example.com/rewritten'},
         'triggers': [{'on': 'visible', 'request': ['foo', 'bar']}],
@@ -2103,13 +2103,10 @@ describes.realWin('amp-analytics', {
         'rewrite': {
           'configRewriter': {
             'url': configRewriterUrl,
-            'defaults': {
-              'requests': {'bar': 'https://example.com/defaults'},
-            },
           },
           'requests': {
-            'foo': 'https://example.com/vendor',
-            'quz': 'https://example.com/vendor',
+            'foo': 'https://example.com/vendorFoo',
+            'bar': 'https://example.com/vendor',
           },
         },
       };
@@ -2129,7 +2126,7 @@ describes.realWin('amp-analytics', {
         expect(sendRequestSpy.args[0][0]).to.equal(
             'https://example.com/rewritten');
         expect(sendRequestSpy.args[1][0]).to.equal(
-            'https://example.com/defaults');
+            'https://example.com/vendor');
       });
     });
 
@@ -2148,10 +2145,8 @@ describes.realWin('amp-analytics', {
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {
-            'defaults': {
-              'requests': {'bar': 'https://example.com/defaults'},
-            },
           },
+          'requests': {'bar': 'https://example.com/defaults'},
         },
       };
       return waitForSendRequest(analytics).then(() => {

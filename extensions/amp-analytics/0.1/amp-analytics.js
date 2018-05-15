@@ -104,9 +104,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.remoteConfig_ = dict();
 
     /**
-     * @private {?JsonObject}
+     * @private {!JsonObject}
      */
-    this.rewrittenConfig_ = null;
+    this.rewrittenConfig_ = dict();
 
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
@@ -440,7 +440,14 @@ export class AmpAnalytics extends AMP.BaseElement {
   rewriteConfig_() {
     const remoteConfigUrl = this.getConfigRewriter_()['url'];
 
+    const config = dict({});
+    let inlineConfig = this.getInlineConfigNoInline();
+    this.validateTransport_(inlineConfig);
+    this.mergeObjects_(inlineConfig, config);
+    this.mergeObjects_(this.remoteConfig_, config);
+
     if (!remoteConfigUrl || this.isSandbox_) {
+      this.rewrittenConfig_ = config;
       // use default configuration merge.
       return Promise.resolve();
     }
@@ -449,14 +456,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     const TAG = this.getName_();
     dev().fine(TAG, 'Rewriting config', remoteConfigUrl);
 
-    const config = dict({});
-    this.mergeObjects_(this.getInlineConfigNoInline(), config);
-    this.mergeObjects_(this.remoteConfig_, config);
-
     const fetchConfig = {
       method: 'POST',
       body: config,
       credentials: 'include',
+      requireAmpResponseSourceOrigin: false
     };
     const ampdoc = this.getAmpDoc();
     return Services.urlReplacementsForDoc(this.element)
@@ -533,21 +537,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     });
     const defaultConfig = this.predefinedConfig_['default'] || {};
     this.mergeObjects_(expandConfigRequest(defaultConfig), config);
-
-    if (this.rewrittenConfig_) {
-      const configRewriterDefaults = this.getConfigRewriter_()['defaults']
-          || {};
-      this.mergeObjects_(expandConfigRequest(configRewriterDefaults), config);
-      this.mergeObjects_(expandConfigRequest(this.rewrittenConfig_), config);
-    } else {
-      const inlineConfig = expandConfigRequest(this.getInlineConfigNoInline());
-      this.validateTransport_(inlineConfig);
-
-      this.mergeObjects_(expandConfigRequest(this.getTypeConfig_()), config,
-          /* predefined */ true);
-      this.mergeObjects_(inlineConfig, config);
-      this.mergeObjects_(expandConfigRequest(this.remoteConfig_), config);
-    }
+    this.mergeObjects_(expandConfigRequest(this.getTypeConfig_()), config,
+        /* predefined */ true);
+    this.mergeObjects_(expandConfigRequest(this.rewrittenConfig_), config);
     return config;
   }
 
