@@ -132,7 +132,7 @@ function runLinter(path, stream, options) {
  *
  * @return {!Array<string>}
  */
-function getLintFiles() {
+function filesInPr() {
   const filesInPr =
         getStdout('git diff --name-only master...HEAD').trim().split('\n');
   return filesInPr.filter(function(file) {
@@ -149,14 +149,20 @@ function lint() {
     options.fix = true;
   }
   if (argv.files ||
-      process.env.TRAVIS_PULL_REQUEST ||
+      process.env.TRAVIS_EVENT_TYPE == 'pull_request' ||
       process.env.LOCAL_PR_CHECK) {
     if (argv.files) {
       config.lintGlobs =
           config.lintGlobs.filter(e => e !== '**/*.js').concat(argv.files);
     } else {
-      config.lintGlobs =
-          config.lintGlobs.filter(e => e !== '**/*.js').concat(getLintFiles());
+      const files = filesInPr();
+      if (files.length == 0) {
+        log(colors.green('INFO: ') + 'No JS files in this PR.');
+        return Promise.resolve();
+      } else {
+        config.lintGlobs =
+            config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
+      }
     }
     // TODO(#14761, #15255): Remove these overrides and make the rules errors by
     // default in .eslintrc after all code is fixed.
