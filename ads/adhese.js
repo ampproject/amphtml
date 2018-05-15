@@ -48,8 +48,8 @@ export function adhese(global, data) {
 }
 
 /**
- * @param {!Object} e
  * @param {!Window} global
+ * @param {!Object} e
  */
 function getAdInfo(global, e) {
   if (e.detail.isReady && e.detail.width == e.target.width &&
