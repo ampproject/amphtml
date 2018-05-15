@@ -178,7 +178,7 @@ env => {
         .to.be.true;
   });
 
-  it('removes amp-analytics tags from child documents', function* () {
+  it.skip('removes amp-analytics tags from child documents', function* () {
     const exampleDoc = createExampleDocument(doc);
     exampleDoc.body.innerHTML +=
         '<amp-analytics id="analytics1"></amp-analytics>';
