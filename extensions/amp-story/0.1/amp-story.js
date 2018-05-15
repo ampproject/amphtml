@@ -32,7 +32,7 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryConsent} from './amp-story-consent';

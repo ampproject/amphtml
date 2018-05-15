@@ -16,7 +16,7 @@
 
 import * as sinon from 'sinon';
 
-import {ActionTrust} from '../../../../src/action-trust';
+import {ActionTrust} from '../../../../src/action-constants';
 import {
   AmpIframe,
   isAdLike,

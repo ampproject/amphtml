@@ -20,7 +20,9 @@ import {BindExpressionResultDef} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {BindingDef} from './bind-evaluator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
+import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
+import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
@@ -106,6 +108,20 @@ export class Bind {
      * @const @private {!Window}
      */
     this.localWin_ = opt_win || ampdoc.win;
+
+    /**
+     * Array of ActionInvocation.sequenceId values that have been invoked.
+     * Used to ensure that only one "AMP.setState" or "AMP.pushState" action
+     * may be triggered per event. Periodically cleared.
+     * @const @private {!Array<number>}
+     */
+    this.actionSequenceIds_ = [];
+
+    /** @const @private {!Function} */
+    this.eventuallyClearActionSequenceIds_ = debounce(this.win_,
+        () => {
+          this.actionSequenceIds_.length = 0;
+        }, 5000);
 
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
@@ -211,6 +227,47 @@ export class Bind {
     }
 
     return this.setStatePromise_ = promise;
+  }
+
+  /**
+   * Executes an `AMP.setState()` or `AMP.pushState()` action.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @returns {!Promise}
+   */
+  invoke(invocation) {
+    const {args, event, method, sequenceId, tagOrTarget} = invocation;
+
+    // Store the sequenceId values of action invocations and only allow one
+    // setState() or pushState() event per sequence.
+    if (this.actionSequenceIds_.includes(sequenceId)) {
+      user().error(TAG, 'One state action allowed per event.');
+      return Promise.resolve();
+    }
+    this.actionSequenceIds_.push(sequenceId);
+    // Flush stored sequence IDs five seconds after the last invoked action.
+    this.eventuallyClearActionSequenceIds_();
+
+    const expression = args[RAW_OBJECT_ARGS_KEY];
+    if (expression) {
+      const scope = dict();
+      if (event && event.detail) {
+        scope['event'] = event.detail;
+      }
+      switch (method) {
+        case 'setState':
+          return this.setStateWithExpression(expression, scope);
+        case 'pushState':
+          return this.pushStateWithExpression(expression, scope);
+        default:
+          return Promise.reject(dev().createError('Unrecognized method: ' +
+              `"${tagOrTarget}.${method}"`));
+      }
+    } else {
+      user().error('AMP-BIND', 'Please use the object-literal syntax, '
+          + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
+          + '"AMP.setState(foo=\'bar\')".');
+    }
+    return Promise.resolve();
   }
 
   /**
