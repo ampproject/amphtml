@@ -95,10 +95,6 @@ describes.realWin('amp-story-bookend', {
     bookend = new AmpStoryBookend(bookendElem);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should build the users json', () => {
     const userJson = {
       'bookend-version': 'v1.0',

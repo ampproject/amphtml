@@ -31,8 +31,14 @@ import {user} from '../../../../../src/log';
  */
 export let PortraitComponentDef;
 
-/** @type {string} */
-export const TAG = 'amp-story-bookend';
+/**
+ * @struct @typedef {{
+ *   portraitCategory: !Element,
+ *   portraitImage: !Element,
+ *   portraitMeta: !Element,
+ * }}
+ */
+let portraitElsDef;
 
 /**
  * Builder class for the portrait component.
@@ -87,7 +93,7 @@ export class PortraitComponent {
       portraitCategory,
       portraitImage,
       portraitMeta,
-    } = portraitElements;
+    } = /** @type {!portraitElsDef} */ (portraitElements);
 
     portraitCategory.textContent = portraitData.category;
     addAttributesToElement(portraitImage, dict({'src': portraitData.image}));
