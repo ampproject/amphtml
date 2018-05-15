@@ -60,6 +60,11 @@ export class AmpAutoAds extends AMP.BaseElement {
       if (!configObj) {
         return;
       }
+      const noConfigReason = configObj['noConfigReason'];
+      if (noConfigReason) {
+        this.user().warn(TAG, noConfigReason);
+        return;
+      }
 
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
       const attributes = /** @type {!JsonObject} */ (
