@@ -49,15 +49,13 @@ export default class GltfViewer {
     /** @private */
     this.controls_ = new THREE.OrbitControls(
         this.camera_,
-        this.renderer_.domElement
-    );
+        this.renderer_.domElement);
 
     /** @private */
     this.scene_ = new THREE.Scene();
 
-    this.step_ = this.step_.bind(this);
     /** @private */
-    this.animationLoop_ = new AnimationLoop(this.step_);
+    this.animationLoop_ = new AnimationLoop(() => this.step_());
 
     /** @private */
     this.ampPlay_ = true;
@@ -130,12 +128,18 @@ export default class GltfViewer {
 
   /** @private */
   setupRenderer_() {
+    const el = this.renderer_.domElement;
+    setStyle(el, 'position', 'absolute');
+    setStyle(el, 'top', 0);
+    setStyle(el, 'right', 0);
+    setStyle(el, 'bottom', 0);
+    setStyle(el, 'left', 0);
+    document.body.appendChild(this.renderer_.domElement);
+
     this.renderer_.setPixelRatio(
         Math.min(
             this.options_['maxPixelRatio'],
-            devicePixelRatio
-        )
-    );
+            devicePixelRatio));
   }
 
   /** @private */
@@ -162,8 +166,7 @@ export default class GltfViewer {
   /** @private */
   loadObject_() {
     const baseUrl = THREE.LoaderUtils.extractUrlBase(
-        this.options_['hostUrl']
-    );
+        this.options_['hostUrl']);
 
     const resolvedUrl = resolveURL(this.options_['src'], baseUrl);
 
@@ -176,9 +179,7 @@ export default class GltfViewer {
 
     loader.load(
         resolvedUrl,
-        /**
-         * @param {{scene: THREE.Scene}} gltfData
-         */
+        /** @param {{scene: THREE.Scene}} gltfData */
         gltfData => {
           this.setupCameraForObject_(gltfData.scene);
           gltfData.scene.children
@@ -187,20 +188,11 @@ export default class GltfViewer {
                 this.scene_.add(child);
               });
 
-          const el = this.renderer_.domElement;
-          setStyle(el, 'position', 'absolute');
-          setStyle(el, 'top', 0);
-          setStyle(el, 'right', 0);
-          setStyle(el, 'bottom', 0);
-          setStyle(el, 'left', 0);
-
-          document.body.appendChild(this.renderer_.domElement);
           this.animationLoop_.needsUpdate = true;
           this.handlers_.onload();
         },
         this.handlers_.onprogress,
-        this.handlers_.onerror
-    );
+        this.handlers_.onerror);
   }
 
   /** @private */

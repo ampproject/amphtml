@@ -93,11 +93,10 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const getOption = (name, fmt, dflt) => {
-      return this.element.hasAttribute(name)
+    const getOption = (name, fmt, dflt) =>
+      this.element.hasAttribute(name)
         ? fmt(this.element.getAttribute(name))
         : dflt;
-    };
 
     const bool = x => x !== 'false';
     const string = x => x;
@@ -149,8 +148,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         dev().assertElement(this.iframe_),
         evName,
         cb,
-        true
-    );
+        true);
 
     const disposers = [
       listenIframe('ready', this.willBeReadyResolver_),
@@ -180,8 +178,7 @@ export class Amp3dGltf extends AMP.BaseElement {
           'action',
           message,
           '*',
-          true
-      );
+          true);
     });
   }
 
@@ -204,8 +201,7 @@ export class Amp3dGltf extends AMP.BaseElement {
     const box = this.getLayoutBox();
     this.sendCommand_(
         'setSize',
-        dict({'width': box.width, 'height': box.height})
-    );
+        dict({'width': box.width, 'height': box.height}));
   }
 
   /** @override */

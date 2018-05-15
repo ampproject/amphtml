@@ -39,17 +39,14 @@ const loadThree = (global, cb) => {
   const loadScriptCb = url => cb => loadScript(global, url, cb);
   const loadThreeExample = examplePath =>
     loadScriptCb(
-        'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/' + examplePath
-    );
+        'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/' + examplePath);
 
   seq(
       loadScriptCb(
-          'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js'
-      ),
+          'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js'),
       parallel(
           loadThreeExample('loaders/GLTFLoader.js'),
-          loadThreeExample('controls/OrbitControls.js')
-      )
+          loadThreeExample('controls/OrbitControls.js'))
   )(cb);
 };
 
