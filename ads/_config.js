@@ -670,7 +670,7 @@ export const adConfig = {
 
   noddus: {
     prefetch: 'https://noddus.com/amp_loader.js',
-    renderStartImplemented: true
+    renderStartImplemented: true,
   },
 
   nokta: {
