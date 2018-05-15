@@ -1047,7 +1047,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    isAd ? this.muteBackgroundAudio_() : this.unmuteBackgroundAudio_();
+    isAd ? this.pauseBackgroundAudio_() : this.playBackgroundAudio_();
   }
 
   /**
@@ -1529,21 +1529,20 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   mute_() {
-    this.muteBackgroundAudio_();
+    this.pauseBackgroundAudio_();
     if (this.activePage_) {
       this.activePage_.muteAllMedia();
     }
   }
 
   /**
-   * Mutes and pauses the background audio.
+   * Pauses the background audio.
    * @private
    */
-  muteBackgroundAudio_() {
+  pauseBackgroundAudio_() {
     if (!this.backgroundAudioEl_) {
       return;
     }
-    this.mediaPool_.mute(this.backgroundAudioEl_);
     this.mediaPool_.pause(this.backgroundAudioEl_);
   }
 
@@ -1553,7 +1552,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   unmute_() {
     const unmuteAllMedia = () => {
-      this.unmuteBackgroundAudio_();
+      this.playBackgroundAudio_();
       if (this.activePage_) {
         this.activePage_.unmuteAllMedia();
       }
@@ -1567,7 +1566,7 @@ export class AmpStory extends AMP.BaseElement {
    * Unmutes and plays the background audio.
    * @private
    */
-  unmuteBackgroundAudio_() {
+  playBackgroundAudio_() {
     if (!this.backgroundAudioEl_) {
       return;
     }
