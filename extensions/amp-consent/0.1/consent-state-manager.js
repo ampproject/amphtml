@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -148,9 +149,9 @@ export class ConsentStateManager {
       return Promise.resolve();
     }
     if (!this.consentReadyPromises_[instanceId]) {
-      this.consentReadyPromises_[instanceId] = new Promise(resolve => {
-        this.consentReadyResolvers_[instanceId] = resolve;
-      });
+      const deferred = new Deferred();
+      this.consentReadyPromises_[instanceId] = deferred.promise;
+      this.consentReadyResolvers_[instanceId] = deferred.resolve;
     }
     return this.consentReadyPromises_[instanceId];
   }

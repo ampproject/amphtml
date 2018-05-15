@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -137,9 +138,9 @@ class AmpYoutube extends AMP.BaseElement {
     this.liveChannelid_ = this.getLiveChannelId_();
     this.assertDatasourceExists_();
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     // TODO(aghassemi, #3216): amp-youtube has a special case where 404s are not
     // easily caught hence the following hacky-solution.
@@ -256,9 +257,9 @@ class AmpYoutube extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
   }
 

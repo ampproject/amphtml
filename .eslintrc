@@ -4,6 +4,7 @@
     "chai-expect",
     "eslint-plugin-amphtml-internal",
     "eslint-plugin-google-camelcase",
+    "jsdoc",
     "sort-imports-es6-autofix",
     "sort-requires"
   ],
@@ -33,6 +34,26 @@
     "describes": true,
     "allowConsoleError": false
   },
+  "settings": {
+    "jsdoc": {
+      "tagNamePreference": {
+        "returns": "return",
+        "constant": "const"
+      },
+      "additionalTagNames": {
+        "customTags": [
+          "deprecated",
+          "export",
+          "final",
+          "package",
+          "restricted",
+          "suppress",
+          "template",
+          "visibleForTesting"
+        ]
+      }
+    }
+  },
   "rules": {
     "amphtml-internal/closure-type-primitives": 2,
     "amphtml-internal/dict-string-keys": 2,
@@ -49,7 +70,7 @@
     "amphtml-internal/resolve-inside-promise-resolver": 1,
     "amphtml-internal/todo-format": 0,
     "amphtml-internal/unused-private-field": 1,
-    "amphtml-internal/vsync": 0,
+    "amphtml-internal/vsync": 1,
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
@@ -63,6 +84,13 @@
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
     "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
+    "jsdoc/check-param-names": 1,
+    "jsdoc/check-tag-names": 1,
+    "jsdoc/check-types": 0,
+    "jsdoc/require-param": 1,
+    "jsdoc/require-param-name": 1,
+    "jsdoc/require-param-type": 1,
+    "jsdoc/require-returns-type": 1,
     "key-spacing": 2,
     "max-len": [2, 80, 4, {
       "ignoreTrailingComments": true,

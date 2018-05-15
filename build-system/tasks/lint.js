@@ -20,17 +20,20 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
 const eslint = require('gulp-eslint');
+const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
+const path = require('path');
 const watch = require('gulp-watch');
 
 const isWatching = (argv.watch || argv.w) || false;
-
+const filesInARefactorPr = 15;
 const options = {
   fix: false,
 };
+let collapseLintResults = !!process.env.TRAVIS;
 
 /**
  * Checks if current Vinyl file has been fixed by eslint.
@@ -80,8 +83,9 @@ function logOnSameLine(message) {
 function runLinter(path, stream, options) {
   if (!process.env.TRAVIS) {
     log(colors.green('Starting linter...'));
-  } else {
-    // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
+  }
+  if (collapseLintResults) {
+    // TODO(#15255, #14761): Remove log folding after warnings are fixed.
     log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
     console./* OK*/log('travis_fold:start:lint_results\n');
   }
@@ -96,8 +100,8 @@ function runLinter(path, stream, options) {
         }
       }))
       .pipe(eslint.results(function(results) {
-        // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
-        if (process.env.TRAVIS) {
+        // TODO(#15255, #14761): Remove log folding after warnings are fixed.
+        if (collapseLintResults) {
           console./* OK*/log('travis_fold:end:lint_results');
         }
         if (results.errorCount == 0 && results.warningCount == 0) {
@@ -125,6 +129,57 @@ function runLinter(path, stream, options) {
 }
 
 /**
+ * Extracts the list of JS files in this PR from the commit log.
+ *
+ * @return {!Array<string>}
+ */
+function jsFilesInPr() {
+  const filesInPr =
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
+  return filesInPr.filter(function(file) {
+    return path.extname(file) == '.js';
+  });
+}
+
+/**
+ * Checks if there are .eslintrc changes in this PR, in which case we must lint
+ * all files.
+ *
+ * @return {boolean}
+ */
+function eslintrcChangesInPr() {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
+    return false;
+  }
+  const filesInPr =
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
+  return filesInPr.filter(function(file) {
+    return path.basename(file).includes('.eslintrc');
+  }).length > 0;
+}
+
+/**
+ * Sets the list of files to be linted.
+ *
+ * @param {!Array<string>} files
+ */
+function setFilesToLint(files) {
+  config.lintGlobs =
+      config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
+  log(colors.green('INFO: ') + 'Running lint on ' + colors.cyan(files));
+}
+
+/**
+ * Enables linting in strict mode.
+ */
+function enableStrictLinting() {
+  // TODO(#14761, #15255): Remove these overrides and make the rules errors by
+  // default in .eslintrc after all code is fixed.
+  options['configFile'] = '.eslintrc-strict';
+  collapseLintResults = false;
+}
+
+/**
  * Run the eslinter on the src javascript and log the output
  * @return {!Stream} Readable stream
  */
@@ -133,7 +188,22 @@ function lint() {
     options.fix = true;
   }
   if (argv.files) {
-    config.lintGlobs[config.lintGlobs.indexOf('**/*.js')] = argv.files;
+    setFilesToLint(argv.files);
+    enableStrictLinting();
+  } else if (!eslintrcChangesInPr() &&
+      (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
+       process.env.LOCAL_PR_CHECK)) {
+    const jsFiles = jsFilesInPr();
+    if (jsFiles.length == 0) {
+      log(colors.green('INFO: ') + 'No JS files in this PR');
+      return Promise.resolve();
+    } else if (jsFiles.length > filesInARefactorPr) {
+      // This is probably a refactor, don't enable strict mode.
+      setFilesToLint(jsFiles);
+    } else {
+      setFilesToLint(jsFiles);
+      enableStrictLinting();
+    }
   }
   const stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);
