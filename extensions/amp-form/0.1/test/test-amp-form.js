@@ -918,7 +918,8 @@ describes.repeated('', {
     });
 
     it('should manage form state classes (submitting, error)', () => {
-      return getAmpForm(getForm(/*button1*/ true, /*button2*/ true)).then(ampForm => {
+      return getAmpForm(getForm(
+          /*button1*/ true, /*button2*/ true)).then(ampForm => {
         let fetchRejecter;
         sandbox.stub(ampForm, 'analyticsEvent_');
         sandbox.stub(ampForm.xhr_, 'fetch')
@@ -1618,7 +1619,7 @@ describes.repeated('', {
           location: 'https://example-top.com',
         },
       },
-    }, env => {
+    }, () => {
       let form;
       let ampForm;
       let redirectToValue;
