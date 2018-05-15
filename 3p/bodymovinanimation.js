@@ -43,8 +43,11 @@ function parseMessage(event) {
   } else if (action == 'stop') {
     animationHandler.stop();
   } else if (action == 'seekTo') {
-    animationHandler.goToAndStop(eventMessage['value'],
-        eventMessage['valueType'] !== 'time');
+    if (eventMessage['valueType'] === 'time') {
+      animationHandler.goToAndStop(eventMessage['value']);
+    } else {
+      animationHandler.goToAndStop(eventMessage['value'] * animationHandler.totalFrames, true);
+    }
   }
 }
 
