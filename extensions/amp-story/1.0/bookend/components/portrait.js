@@ -17,14 +17,14 @@
 import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {htmlFor} from '../../../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {isProtocolValid, parseUrl} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
 
 /**
  * @typedef {{
  *   type: string,
- *   title: string,
+ *   category: string,
  *   url: string,
  *   image: string
  * }}
@@ -35,26 +35,21 @@ export let PortraitComponentDef;
 export const TAG = 'amp-story-bookend';
 
 /**
- * Builder class for the article titles used to separate article sets.
+ * Builder class for the portrait component.
  * @implements {BookendComponentInterface}
  */
 export class PortraitComponent {
   /** @override */
   assertValidity(articleJson) {
-    if (!articleJson['title'] || !articleJson['image'] || !articleJson['url']) {
-      user().error(TAG, 'Portrait component must contain `title`, `image`, ' +
-      'and `url` fields, skipping invalid.');
-    }
+    user().assert('category' in articleJson && 'image' in articleJson &&
+      'url' in articleJson, 'Portrait component must contain `category`, ' +
+      '`image`, and `url` fields, skipping invalid.');
 
-    if (!isProtocolValid(articleJson['url'])) {
-      user().error(TAG, 'Unsupported protocol for article URL ' +
-        `${articleJson['url']}`);
-    }
+    user().assert(isProtocolValid(articleJson['url']), 'Unsupported protocol ' +
+    `for article URL ${articleJson['url']}`);
 
-    if (!isProtocolValid(articleJson['image'])) {
-      user().error(TAG, 'Unsupported protocol for article image URL' +
-      ` ${articleJson['image']}`);
-    }
+    user().assert(isProtocolValid(articleJson['image']), 'Unsupported' +
+    `  protocol for article image URL ${articleJson['image']}`);
   }
 
   /**
@@ -62,15 +57,13 @@ export class PortraitComponent {
    * @return {!PortraitComponentDef}
    * */
   build(portraitJson) {
-    const portrait = {
-      type: 'portrait',
-      title: portraitJson.title,
+    return {
+      type: portraitJson['type'],
+      category: portraitJson['category'],
       url: portraitJson['url'],
       domainName: parseUrl(portraitJson['url']).hostname,
       image: portraitJson['image'],
     };
-
-    return portrait;
   }
 
   /** @override */
@@ -79,27 +72,26 @@ export class PortraitComponent {
     const template =
         html`
         <a class="i-amphtml-story-bookend-portrait"
-          target="_top">
+          target="_top" ref="portraitComponent">
+          <h2 class="i-amphtml-story-bookend-portrait-category"
+            ref="portraitCategory"></h2>
+          <amp-img class="i-amphtml-story-bookend-portrait-image"
+            layout="fixed" width="0" height="0" ref="portraitImage"></amp-img>
+          <div class="i-amphtml-story-bookend-portrait-meta"
+            ref="portraitMeta"></div>
         </a>`;
     addAttributesToElement(template, dict({'href': portraitData.url}));
 
-    const heading =
-    html`<h2 class="i-amphtml-story-bookend-portrait-heading"></h2>`;
-    heading.textContent = portraitData.title;
-    template.appendChild(heading);
+    const portraitElements = htmlRefs(template);
+    const {
+      portraitCategory,
+      portraitImage,
+      portraitMeta,
+    } = portraitElements;
 
-    const ampImg =
-        html`
-        <amp-img class="i-amphtml-story-bookend-portrait-image"
-            layout="fixed" width="0" height="0">
-        </amp-img>`;
-    addAttributesToElement(ampImg, dict({'src': portraitData.image}));
-    template.appendChild(ampImg);
-
-    const articleMeta =
-      html`<div class="i-amphtml-story-bookend-portrait-meta"></div>`;
-    articleMeta.textContent = portraitData.domainName;
-    template.appendChild(articleMeta);
+    portraitCategory.textContent = portraitData.category;
+    addAttributesToElement(portraitImage, dict({'src': portraitData.image}));
+    portraitMeta.textContent = portraitData.domainName;
 
     return template;
   }

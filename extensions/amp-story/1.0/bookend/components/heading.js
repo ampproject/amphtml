@@ -46,11 +46,10 @@ export class HeadingComponent {
 
   /** @override */
   build(headingJson) {
-    const heading = {
+    return {
       type: headingJson['type'],
       text: headingJson['text'],
     };
-    return heading;
   }
 
   /** @override */

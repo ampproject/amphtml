@@ -116,13 +116,11 @@ export class BookendComponent {
    * @return {?Element}
    */
   static buildContainer(element, doc) {
-    const fragment = doc.createDocumentFragment();
     const html = htmlFor(doc);
     const containerTemplate =
       html`<div class="i-amphtml-story-bookend-component-set"></div>`;
 
-    fragment.appendChild(containerTemplate);
-    element.appendChild(fragment);
+    element.appendChild(containerTemplate);
     return element.lastElementChild;
   }
 }
