@@ -79,6 +79,8 @@ class AmpPoool extends AMP.BaseElement {
         updatePoool("config", "newsletter_name", this.element.getAttribute('data-newsletter-name'), script);
         updatePoool("config", "newsletter_id", this.element.getAttribute('data-newsletter-id'), script, true);
         updatePoool("config", "login_url", this.element.getAttribute('data-login-url'), script);
+        updatePoool("config", "login_button_enabled", this.element.getAttribute('data-login-button-enabled'), script, true);
+        updatePoool("config", "signature_enabled", this.element.getAttribute('data-signature-enabled'), script, true);
         updatePoool("config", "user_is_premium", this.element.getAttribute('data-user-is-premium'), script, true);
         updatePoool("config", "video_primary_mode", this.element.getAttribute('data-video-primary-mode'), script);
         updatePoool("config", "video_client", this.element.getAttribute('data-video-client'), script);
@@ -89,6 +91,8 @@ class AmpPoool extends AMP.BaseElement {
         updatePoool("config", "vast", this.element.getAttribute('data-vast'), script);
         updatePoool("config", "mobile_vast", this.element.getAttribute('data-mobile-vast'), script);
         updatePoool("config", "custom_segment", this.element.getAttribute('data-custom-segment'), script);
+        updatePoool("config", "cookies_enabled", this.element.getAttribute('data-cookies-enabled'), script, true);
+        updatePoool("config", "data_policy_url", this.element.getAttribute('data-data-policy-url'), script);
 
         // Add style values
         updatePoool("style", "main_color", this.element.getAttribute("data-main-color"), script);
@@ -113,6 +117,7 @@ class AmpPoool extends AMP.BaseElement {
             updatePoool("event", "onoutdatedbrowser", JSON.parse(events.innerHTML).on_outdatedbrowser, script, true);
             updatePoool("event", "onUserOutsideCohort", JSON.parse(events.innerHTML).on_useroutsidecohort, script, true);
             updatePoool("event", "onIdentityAvailable", JSON.parse(events.innerHTML).on_identityavailable, script, true);
+            updatePoool("event", "onDataPolicyClick", JSON.parse(events.innerHTML).on_datapolicyclick, script, true);
         }
 
         // End poool tag with action values
