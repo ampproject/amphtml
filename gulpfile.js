@@ -1602,7 +1602,6 @@ function mkdirSync(path) {
 }
 
 /**
- *
  * @param {*} readable
  * @return {Promise}
  */
