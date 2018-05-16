@@ -152,10 +152,6 @@ tags: {  # <amp-story-page>
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY"
   satisfies: "amp-story-page"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
   attrs: { name: "auto-advance-after" }
   attrs: {
     name: "background-audio"
@@ -163,6 +159,10 @@ tags: {  # <amp-story-page>
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
   }
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
@@ -178,7 +178,7 @@ tags: {  # <amp-story-grid-layer>
   mandatory_ancestor: "AMP-STORY-PAGE"
   attrs: {
     name: "template"
-    value_regex: "(fill|horizontal|vertical|thirds)"
+    value_regex: "(fill|horizontal|thirds|vertical)"
     mandatory: true
   }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
@@ -193,53 +193,28 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-STORY-GRID-LAYER default"
-  attrs: { name: "grid-area" }
   attrs: {
     name: "align-content"
-    value_regex: "(start|"
+    value_regex: "(center|"
         "end|"
-        "center|"
-        "stretch|"
         "space-around|"
         "space-between|"
-        "space-evenly)"
+        "space-evenly|"
+        "start|"
+        "stretch)"
   }
   attrs: {
     name: "align-items"
-    value_regex: "(start|"
+    value_regex: "(center|"
         "end|"
-        "center|"
+        "start|"
         "stretch)"
   }
   attrs: {
     name: "align-self"
-    value_regex: "(start|"
+    value_regex: "(center|"
         "end|"
-        "center|"
-        "stretch)"
-  }
-  attrs: {
-    name: "justify-content"
-    value_regex: "(start|"
-        "end|"
-        "center|"
-        "stretch|"
-        "space-around|"
-        "space-between|"
-        "space-evenly)"
-  }
-  attrs: {
-    name: "justify-items"
-    value_regex: "(start|"
-        "end|"
-        "center|"
-        "stretch)"
-  }
-  attrs: {
-    name: "justify-self"
-    value_regex: "(start|"
-        "end|"
-        "center|"
+        "start|"
         "stretch)"
   }
   attrs: {
@@ -263,9 +238,34 @@ tags: {
         "zoom-in|"
         "zoom-out)"
   }
+  attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
-  attrs: { name: "animate-in-after" }
+  attrs: { name: "grid-area" }
+  attrs: {
+    name: "justify-content"
+    value_regex: "(center|"
+        "end|"
+        "space-around|"
+        "space-between|"
+        "space-evenly|"
+        "start|"
+        "stretch)"
+  }
+  attrs: {
+    name: "justify-items"
+    value_regex: "(center|"
+        "end|"
+        "start|"
+        "stretch)"
+  }
+  attrs: {
+    name: "justify-self"
+    value_regex: "(center|"
+        "end|"
+        "start|"
+        "stretch)"
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
@@ -298,9 +298,9 @@ tags: {
         "zoom-in|"
         "zoom-out)"
   }
+  attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
-  attrs: { name: "animate-in-after" }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
