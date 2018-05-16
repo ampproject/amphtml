@@ -49,7 +49,12 @@ const portraitComponentBuilder = new PortraitComponent();
 const ctaLinkComponentBuilder = new CtaLinkComponent();
 
 /**
- * @typedef {(!ArticleComponent|!HeadingComponent|!PortraitComponent)}
+ * @typedef {
+ *   (!ArticleComponent|
+ *    !HeadingComponent|
+ *    !PortraitComponent|
+ *    !CtaLinkComponent)
+ * }
  */
 export let BookendComponentClass;
 

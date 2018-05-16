@@ -17,60 +17,75 @@
 import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {htmlFor} from '../../../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template';
+import {isArray} from '../../../../../src/types';
 import {isProtocolValid} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
 
 /**
  * @typedef {{
+ *   url: string,
+ *   text: string,
+ * }}
+ */
+let CtaLinkArrDef;
+
+/**
+ * @typedef {{
  *   type: string,
- *   text1: string,
- *   url1: string,
- *   text2: string,
- *   url2: string
+ *   links: !Array<CtaLinkArrDef>,
  * }}
  */
 export let CtaLinkDef;
 
-const TAG = 'amp-story-bookend';
+/**
+ * @struct @typedef {{
+ *   linkText: !Element,
+ * }}
+ */
+let ctaLinkElsDef;
 
 /**
- * Builder class for the call to action button pair.
+ * Builder class for the call to action link component.
  * @implements {BookendComponentInterface}
  */
 export class CtaLinkComponent {
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} ctaLinksJson
+   * @override
+   * */
   assertValidity(ctaLinksJson) {
-    if (!ctaLinksJson['links'] && !ctaLinksJson['links'].length > 0) {
-      user().error(TAG, 'CTA link component must contain at least one link.');
-    } else {
-      ctaLinksJson['links'].forEach(ctaLink => {
-        if (!ctaLink['text'] || !ctaLink['url']) {
-          user().error(TAG, 'All links in CTA link component must contain' +
-            'a `text` field and a `url`.');
-        }
+    user().assert(ctaLinksJson['links'] && isArray(ctaLinksJson['links']) &&
+      ctaLinksJson['links'].length > 0, 'CTA link component must be an array' +
+      ' and contain at least one link inside it.');
 
-        if (!isProtocolValid(ctaLink['url'])) {
-          user().error(TAG, 'Unsupported protocol for CTA link URL ' +
-            `${ctaLink['url']}`);
-        }
-      });
-    }
+    ctaLinksJson['links'].forEach(ctaLink => {
+      user().assert('text' in ctaLink && 'url' in ctaLink, 'All links in CTA ' +
+        'link component must contain `text` field and a `url`.');
+
+      user().assert(isProtocolValid(ctaLink['url']), 'Unsupported protocol' +
+        ` for CTA link URL ${ctaLink['url']}`);
+    });
   }
 
   /**
-   * @override
+   * @param {!../bookend-component.BookendComponentDef} ctaLinksJson
    * @return {!CtaLinkDef}
+   * @override
    * */
   build(ctaLinksJson) {
-    const ctaLinkDef = {
+    return {
       type: ctaLinksJson['type'],
       links: ctaLinksJson['links'],
     };
-    return ctaLinkDef;
   }
 
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} ctaLinksData
+   * @param {!Document} doc
+   * @return {!Element}
+   * @override
+   * */
   buildTemplate(ctaLinksData, doc) {
     const html = htmlFor(doc);
     const containerTemplate =
@@ -80,13 +95,17 @@ export class CtaLinkComponent {
 
     ctaLinksData['links'].forEach(currentLink => {
       const ctaLinkTemplate =
-        html`<a class="i-amphtml-story-bookend-cta-link" target="_top"></a>`;
+        html`
+        <a class="i-amphtml-story-bookend-cta-link" target="_top">
+          <div class="i-amphtml-story-bookend-cta-link-text" ref="linkText">
+          </div>
+        </a>`;
       addAttributesToElement(ctaLinkTemplate,
           dict({'href': currentLink['url']}));
-      const ctaLinkTextTemplate =
-        html`<div class="i-amphtml-story-bookend-cta-link-text"></div>`;
-      ctaLinkTextTemplate.textContent = currentLink['text'];
-      ctaLinkTemplate.appendChild(ctaLinkTextTemplate);
+
+      const ctaLinkElements = htmlRefs(ctaLinkTemplate);
+      const {linkText} = /** @type {!ctaLinkElsDef} */ (ctaLinkElements);
+      linkText.textContent = currentLink['text'];
 
       containerTemplate.appendChild(ctaLinkTemplate);
     });
