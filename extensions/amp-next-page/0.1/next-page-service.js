@@ -374,14 +374,19 @@ export class NextPageService {
       return;
     }
 
+    let documentRef;
+    let analyticsEvent = '';
+
     if (position.relativePos === 'top') {
-      const documentRef = this.documentRefs_[i + 1];
-      this.triggerAnalyticsEvent_('amp-next-page-scroll',
-          documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
-      this.setActiveDocument_(documentRef);
+      documentRef = this.documentRefs_[i + 1];
+      analyticsEvent = 'amp-next-page-scroll';
     } else if (position.relativePos === 'bottom') {
-      const documentRef = this.documentRefs_[i];
-      this.triggerAnalyticsEvent_('amp-next-page-scroll-back',
+      documentRef = this.documentRefs_[i];
+      analyticsEvent = 'amp-next-page-scroll-back';
+    }
+
+    if (documentRef && documentRef.amp) {
+      this.triggerAnalyticsEvent_(analyticsEvent,
           documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
       this.setActiveDocument_(documentRef);
     }
