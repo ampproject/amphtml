@@ -28,6 +28,7 @@ import {
   parseQueryString,
   parseUrl,
   removeFragment,
+  resolveRelativeUrl,
 } from '../url';
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
@@ -422,6 +423,12 @@ export class Viewer {
       }
     });
 
+    /**
+     * The replace URL is built using the "amp_r" parameter, if present.
+     * @const @private {?string}
+     */
+    this.replaceUrl_ = this.generateReplaceUrl_();
+
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
     if (this.params_['click']) {
@@ -781,6 +788,14 @@ export class Viewer {
   }
 
   /**
+   * Returns the replace URL, if present.
+   * @return {?string}
+   */
+  getReplaceUrl() {
+    return this.replaceUrl_;
+  }
+
+  /**
    * Possibly return the messaging origin if set. This would be the origin
    * of the parent viewer.
    * @return {?string}
@@ -1120,30 +1135,31 @@ export class Viewer {
   }
 
   /**
-   * Replace the document url with the viewer provided new replaceUrl.
-   * @param {?string} newUrl
+   * Attempts to generate a replace URL using the "amp_r" query parameter,
+   * returning null if invalid.
+   * @return {?string}
    */
-  replaceUrl(newUrl) {
-    if (!newUrl ||
-        !this.ampdoc.isSingleDoc() ||
-        !this.win.history.replaceState) {
-      return;
+  generateReplaceUrl_() {
+    if (!this.ampdoc.isSingleDoc()) {
+      return null;
     }
-
-    try {
-      // The origin and source origin must match.
-      const url = parseUrl(this.win.location.href);
-      const replaceUrl = parseUrl(
-          removeFragment(newUrl) + this.win.location.hash);
-      if (url.origin == replaceUrl.origin &&
-          getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
-        this.win.history.replaceState({}, '', replaceUrl.href);
-        this.win.location.originalHref = url.href;
-        dev().fine(TAG_, 'replace url:' + replaceUrl.href);
-      }
-    } catch (e) {
-      dev().error(TAG_, 'replaceUrl failed', e);
+    const param = parseQueryString(this.win.location.search)['amp_r'];
+    if (!param) {
+      return null;
     }
+    // Sanitize the parameter by parsing it, and require that the parameter be
+    // an absolute path.
+    const parsed = parseUrl(param);
+    if (param[0] != '/' || !parsed.pathname) {
+      dev().warn(TAG_, 'get invalid replaceUrl parameter');
+      return null;
+    }
+    const canonicalUrl = Services.documentInfoForDoc(this.ampdoc).canonicalUrl;
+    const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
+    const replaceUrl = resolveRelativeUrl(
+        parsed['pathname'] + parsed['search'], canonicalSourceOrigin);
+    dev().fine(TAG_, 'replace url:' + replaceUrl);
+    return replaceUrl;
   }
 }
 

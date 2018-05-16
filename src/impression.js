@@ -83,10 +83,7 @@ export function maybeTrackImpression(win) {
       return;
     }
 
-    const replaceUrlPromise = handleReplaceUrl(win);
-    const clickUrlPromise = handleClickUrl(win);
-
-    Promise.all([replaceUrlPromise, clickUrlPromise]).then(() => {
+    handleClickUrl(win).then(() => {
       resolveImpression();
     }, () => {});
   });
@@ -97,47 +94,6 @@ export function maybeTrackImpression(win) {
  */
 export function doNotTrackImpression() {
   trackImpressionPromise = Promise.resolve();
-}
-
-/**
- * Handle the getReplaceUrl and return a promise when url is replaced Only
- * handles replaceUrl when viewer indicates AMP to do so. Viewer should indicate
- * by setting the legacy replaceUrl init param and add `replaceUrl` to its
- * capability param. Future plan is to change the type of legacy init replaceUrl
- * param from url string to boolean value. Please NOTE replaceUrl and adLocation
- * will never arrive at same time, so there is no race condition on the order of
- * handling url replacement.
- * @param {!Window} win
- * @return {!Promise}
- */
-function handleReplaceUrl(win) {
-  const viewer = Services.viewerForDoc(win.document);
-
-  // ReplaceUrl substitution doesn't have to wait until the document is visible
-  if (!viewer.getParam('replaceUrl')) {
-    // The init replaceUrl param serve as a signal on whether replaceUrl is
-    // required for this doc.
-    return Promise.resolve();
-  }
-
-  if (!viewer.hasCapability('replaceUrl')) {
-    // If Viewer is not capability of providing async replaceUrl, use the legacy
-    // init replaceUrl param.
-    viewer.replaceUrl(viewer.getParam('replaceUrl') || null);
-    return Promise.resolve();
-  }
-
-  // request async replaceUrl is viewer support getReplaceUrl.
-  return viewer.sendMessageAwaitResponse('getReplaceUrl', /* data */ undefined)
-      .then(response => {
-        if (!response || typeof response != 'object') {
-          dev().warn('IMPRESSION', 'get invalid replaceUrl response');
-          return;
-        }
-        viewer.replaceUrl(response['replaceUrl'] || null);
-      }, err => {
-        dev().warn('IMPRESSION', 'Error request replaceUrl from viewer', err);
-      });
 }
 
 

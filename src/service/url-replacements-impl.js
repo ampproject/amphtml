@@ -236,7 +236,14 @@ export class GlobalVariableSource extends VariableSource {
     this.set('SOURCE_HOSTNAME', this.getDocInfoUrl_('sourceUrl', 'hostname'));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH', this.getDocInfoUrl_('sourceUrl', 'pathname'));
+    this.set('SOURCE_PATH', () => {
+      // If available, prefer the path from the replace URL.
+      const replaceUrl = Services.viewerForDoc(this.ampdoc).getReplaceUrl();
+      if (!replaceUrl) {
+        return this.getDocInfoUrl_('sourceUrl', 'pathname')();
+      }
+      return parseUrl(replaceUrl)['pathname'];
+    });
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
@@ -629,7 +636,10 @@ export class GlobalVariableSource extends VariableSource {
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
     user().assert(typeof param == 'string', 'param should be a string');
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const replaceUrl = Services.viewerForDoc(this.ampdoc).getReplaceUrl();
+    // If available, prefer the replace URL.
+    const url = parseUrl(replaceUrl
+      ? replaceUrl : this.ampdoc.win.location.href);
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
       ? params[param] : defaultValue;
