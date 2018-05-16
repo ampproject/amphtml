@@ -29,12 +29,12 @@ tags: {  # <amp-playbuzz>
   tag_name: "AMP-PLAYBUZZ"
   requires_extension: "amp-playbuzz"
   attrs: {
-    name: "src"
-    mandatory_oneof: "['src', 'data-item']"
+    name: "data-comments"
+    value_regex_casei: "(false|true)"
   }
   attrs: {
     name: "data-item"
-    mandatory_oneof: "['src', 'data-item']"
+    mandatory_oneof: "['data-item', 'src']"
   }
   attrs: {
     name: "data-item-info"
@@ -45,8 +45,8 @@ tags: {  # <amp-playbuzz>
     value_regex_casei: "(false|true)"
   }
   attrs: {
-    name: "data-comments"
-    value_regex_casei: "(false|true)"
+    name: "src"
+    mandatory_oneof: "['data-item', 'src']"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

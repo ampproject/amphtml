@@ -37,8 +37,8 @@ tags: {  # <amp-brightcove>
   # <amp-bind>
   attrs: { name: "[data-account]" }
   attrs: { name: "[data-embed]" }
-  attrs: { name: "[data-player]" }
   attrs: { name: "[data-player-id]" }
+  attrs: { name: "[data-player]" }
   attrs: { name: "[data-playlist-id]" }
   attrs: { name: "[data-video-id]" }
   attr_lists: "extended-amp-global"
