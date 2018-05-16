@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// TODO(rsimha, #15334): Enable this rule.
 /* eslint jsdoc/check-types: 0 */
 
 /**
@@ -24,8 +25,8 @@
  * so it will return the same cached value even when the arguments are
  * different.
  *
- * @param {function(...):(T)} fn
- * @return {function(...):(T)}
+ * @param {function(...):T} fn
+ * @return {function(...):T}
  * @template T
  */
 export function once(fn) {
