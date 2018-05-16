@@ -78,7 +78,7 @@ const SELF_CLOSING_TAGS = dict({
 });
 
 /** @const {!Array<string>} */
-const WHITELISTED_TAGS = [
+const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'a',
   'b',
   'br',
@@ -210,11 +210,30 @@ const PURIFY_CONFIG = {
   },
 };
 
+
+/**
+ * Sanitizes the provided HTML.
+ *
+ * This function expects the HTML to be already pre-sanitized and thus it does
+ * not validate all of the AMP rules - only the most dangerous security-related
+ * cases, such as <SCRIPT>, <STYLE>, <IFRAME>.
+ *
+ * @param {string} html
+ * @return {string}
+ */
+export function sanitizeHtml(html) {
+  if (isExperimentOn(self, 'svg-in-mustache')) {
+    return purifyHtml(html);
+  } else {
+    return sanitizeWithCaja(html);
+  }
+}
+
 /**
  * @param {string} dirty
  * @return {string}
  */
-export function sanitizeHtml(dirty) {
+function purifyHtml(dirty) {
   // TODO: Only do these once.
   PURIFY_CONFIG['ADD_ATTR'] = WHITELISTED_ATTRS.concat(['target']);
   if (!isExperimentOn(self, 'inline-styles')) {
@@ -225,7 +244,8 @@ export function sanitizeHtml(dirty) {
 
   DOMPurify.addHook('uponSanitizeElement', (node, data) => {
     const {tagName, allowedTags} = data;
-    // Allow all AMP elements (technically will also allow nonexistent tags).
+    // Allow all AMP elements (constrained by AMP Validator since tag
+    // calculation is not possible).
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
     }
@@ -256,15 +276,14 @@ export function sanitizeHtml(dirty) {
     }
 
     // Allow amp-bind attributes e.g. [foo].
-    const isBinding =
-        (attrName[0] == '[' && attrName[attrName.length - 1] == ']');
+    const isBinding = (attrName[0] == '['
+        && attrName[attrName.length - 1] == ']');
     if (isBinding) {
+      // TODO: Rewrite binding to browser-friendly attribute.
       allowedAttributes[attrName] = true;
     }
 
-    // TODO: Most logic in isValidAttr() is unnecessary since DOMPurify already
-    // sanitizes attributes.
-    if (isValidAttr(tagName, attrName, attrValue)) {
+    if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
       if (attrValue && !isBinding) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
       }
@@ -282,16 +301,10 @@ export function sanitizeHtml(dirty) {
 }
 
 /**
- * Sanitizes the provided HTML.
- *
- * This function expects the HTML to be already pre-sanitized and thus it does
- * not validate all of the AMP rules - only the most dangerous security-related
- * cases, such as <SCRIPT>, <STYLE>, <IFRAME>.
- *
  * @param {string} html
  * @return {string}
  */
-export function _sanitizeHtml(html) {
+function sanitizeWithCaja(html) {
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null);
   const output = [];
@@ -441,7 +454,13 @@ export function _sanitizeHtml(html) {
  * @return {string}
  */
 export function sanitizeTagsForTripleMustache(html) {
-  return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
+  if (isExperimentOn(self, 'svg-in-mustache')) {
+    return DOMPurify.sanitize(html, {
+      'ALLOWED_TAGS': TRIPLE_MUSTACHE_WHITELISTED_TAGS,
+    });
+  } else {
+    return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
+  }
 }
 
 /**
@@ -449,12 +468,26 @@ export function sanitizeTagsForTripleMustache(html) {
  * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
+ * @param {boolean} opt_purify Is true, skips some attribute sanitizations
+ *     that are already covered by DOMPurify.
  * @return {boolean}
  */
-export function isValidAttr(tagName, attrName, attrValue) {
-  // "on*" attributes are not allowed.
-  if (startsWith(attrName, 'on') && attrName != 'on') {
-    return false;
+export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
+  if (!opt_purify) {
+    // "on*" attributes are not allowed.
+    if (startsWith(attrName, 'on') && attrName != 'on') {
+      return false;
+    }
+
+    // No attributes with "javascript" or other blacklisted substrings in them.
+    if (attrValue) {
+      const normalized = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
+      for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
+        if (normalized.includes(BLACKLISTED_ATTR_VALUES[i])) {
+          return false;
+        }
+      }
+    }
   }
 
   // Inline styles are not allowed.
@@ -465,22 +498,10 @@ export function isValidAttr(tagName, attrName, attrValue) {
     return false;
   }
 
-  // See validator-main.protoascii
-  // https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
-  if (attrName == 'class' &&
-      attrValue &&
-      /(^|\W)i-amphtml-/i.test(attrValue)) {
+  // Don't allow CSS class names with internal AMP prefix.
+  // See https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
+  if (attrName == 'class' && attrValue && /(^|\W)i-amphtml-/i.test(attrValue)) {
     return false;
-  }
-
-  // No attributes with "javascript" or other blacklisted substrings in them.
-  if (attrValue) {
-    const attrValueNorm = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
-    for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
-      if (attrValueNorm.indexOf(BLACKLISTED_ATTR_VALUES[i]) != -1) {
-        return false;
-      }
-    }
   }
 
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
@@ -624,8 +645,7 @@ function tripleMustacheTagPolicy(tagName, attribs) {
       }
     }
   }
-  const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
-  if (!isWhitelistedTag) {
+  if (!TRIPLE_MUSTACHE_WHITELISTED_TAGS.includes(tagName)) {
     return null;
   }
   return {

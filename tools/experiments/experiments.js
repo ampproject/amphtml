@@ -311,6 +311,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/3434',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
+  {
+    id: 'svg-in-mustache',
+    name: 'Enables SVG support in amp-mustache templates',
+    spec: 'https://github.com/ampproject/amphtml/issues/15123',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15360',
+  },
 ];
 
 if (getMode().localDev) {
