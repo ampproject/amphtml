@@ -29,40 +29,38 @@ import {user} from '../../../../../src/log';
  *   image: (string|undefined)
  * }}
  */
-export let BookendArticleComponentDef;
-
-const TAG = 'amp-story-bookend';
+export let ArticleComponentDef;
 
 /**
  * Builder class for the small article component.
  * @implements {BookendComponentInterface}
  */
 export class ArticleComponent {
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} articleJson
+   * @override
+   * */
   assertValidity(articleJson) {
-    if (!articleJson['title'] || !articleJson['url']) {
-      user().error(TAG, 'Articles must contain `title` and `url` ' +
-        'fields, skipping invalid.');
-    }
+    user().assert('title' in articleJson && 'url' in articleJson,
+        'Articles must contain `title` and `url` fields, skipping invalid.');
 
-    if (!isProtocolValid(articleJson['url'])) {
-      user().error(TAG, 'Unsupported protocol for article URL ' +
-        `${articleJson['url']}`);
-    }
+    user().assert(isProtocolValid(articleJson['url']), 'Unsupported protocol' +
+        ` for article URL ${articleJson['url']}`);
 
-    if (!isProtocolValid(articleJson['image'])) {
-      user().error(TAG, 'Unsupported protocol for article image URL' +
-      ` ${articleJson['image']}`);
+    if (articleJson['image']) {
+      user().assert(isProtocolValid(articleJson['image']), 'Unsupported ' +
+        `protocol for article image URL ${articleJson['image']}`);
     }
   }
 
   /**
+   * @param {!../bookend-component.BookendComponentDef} articleJson
+   * @return {!ArticleComponentDef}
    * @override
-   * @return {!BookendArticleComponentDef}
    * */
   build(articleJson) {
     const article = {
-      type: 'small',
+      type: articleJson['type'],
       title: articleJson['title'],
       url: articleJson['url'],
       domainName: parseUrl(articleJson['url']).hostname,
@@ -72,20 +70,22 @@ export class ArticleComponent {
       article.image = articleJson['image'];
     }
 
-    return /** @type {!BookendArticleComponentDef} */ (article);
+    return /** @type {!ArticleComponentDef} */ (article);
   }
 
-  /** @override */
+  /**
+   * @param {!../bookend-component.BookendComponentDef} articleData
+   * @param {!Document} doc
+   * @return {!Element}
+   * @override
+   * */
   buildTemplate(articleData, doc) {
-
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const template =
         html`
         <a class="i-amphtml-story-bookend-article"
           target="_top">
-          <div class="i-amphtml-story-bookend-article-meta">
-          </div>
         </a>`;
     addAttributesToElement(template, dict({'href': articleData.url}));
 
@@ -110,48 +110,6 @@ export class ArticleComponent {
       html`<div class="i-amphtml-story-bookend-article-meta"></div>`;
     articleMeta.textContent = articleData.domainName;
     template.appendChild(articleMeta);
-
-    return template;
-  }
-}
-
-/**
- * @typedef {{
- *   type: string,
- *   heading: string
- * }}
- */
-export let BookendArticleTitleComponentDef;
-
-/**
- * Builder class for the article titles used to separate article sets.
- * @implements {BookendComponentInterface}
- */
-export class ArticleTitleComponent {
-
-  /** @override */
-  assertValidity(titleJson) {
-    if (!titleJson['title']) {
-      user().error(TAG, 'Titles must contain `title` field, skipping' +
-      ' invalid.');
-    }
-  }
-
-  /** @override */
-  build(titleJson) {
-    const title = {
-      type: 'article-set-title',
-      heading: titleJson.title,
-    };
-    return title;
-  }
-
-  /** @override */
-  buildTemplate(titleData, doc) {
-    const html = htmlFor(doc);
-    const template = html`<h3 class="i-amphtml-story-bookend-heading"></h3>`;
-
-    template.textContent = titleData.heading;
 
     return template;
   }
