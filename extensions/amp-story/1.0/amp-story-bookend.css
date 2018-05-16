@@ -285,10 +285,9 @@
   border-radius: 100px !important;
   overflow: hidden !important;
   text-decoration: none !important;
-  width: 45% !important;
-  max-width: 170px !important;
+  width: calc(50% - 6px) !important;
   cursor: pointer !important;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .i-amphtml-story-bookend-cta-link-text {
@@ -298,8 +297,9 @@
   text-align: center !important;
   font-size: 13px !important;
   font-weight: bold !important;
-  line-height: 20px !important;
-  padding: 8% 10% 8% 10% !important;
+  line-height: 40px !important;
+  padding: 0 24px !important;
+  height: 40px !important;
   text-overflow: ellipsis !important;
   overflow: hidden !important;
   white-space: nowrap !important;

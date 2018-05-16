@@ -39,13 +39,6 @@ let CtaLinkArrDef;
 export let CtaLinkDef;
 
 /**
- * @struct @typedef {{
- *   linkText: !Element,
- * }}
- */
-let ctaLinkElsDef;
-
-/**
  * Builder class for the call to action link component.
  * @implements {BookendComponentInterface}
  */
@@ -88,28 +81,29 @@ export class CtaLinkComponent {
    * */
   buildTemplate(ctaLinksData, doc) {
     const html = htmlFor(doc);
-    const containerTemplate =
+    const container =
         html`
         <div class="i-amphtml-story-bookend-cta-link-wrapper">
         </div>`;
 
-    ctaLinksData['links'].forEach(currentLink => {
-      const ctaLinkTemplate =
+    let linkSeed =
         html`
         <a class="i-amphtml-story-bookend-cta-link" target="_top">
           <div class="i-amphtml-story-bookend-cta-link-text" ref="linkText">
           </div>
         </a>`;
-      addAttributesToElement(ctaLinkTemplate,
-          dict({'href': currentLink['url']}));
+    ctaLinksData['links'].forEach(currentLink => {
+      const el = linkSeed.cloneNode(/* deep*/ true);
+      addAttributesToElement(el, dict({'href': currentLink['url']}));
 
-      const ctaLinkElements = htmlRefs(ctaLinkTemplate);
-      const {linkText} = /** @type {!ctaLinkElsDef} */ (ctaLinkElements);
-      linkText.textContent = currentLink['text'];
+      const refs = htmlRefs(el);
+      refs['linkText'].textContent = currentLink['text'];
 
-      containerTemplate.appendChild(ctaLinkTemplate);
+      container.appendChild(el);
     });
 
-    return containerTemplate;
+    linkSeed = null; // GC
+
+    return container;
   }
 }
