@@ -651,7 +651,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
 
 /**
  * @param {string} path
- * @param {string} css
+ * @param {string} name
  * @param {string} version
  * @param {!Object} options
  */
@@ -1314,6 +1314,7 @@ function buildWebPushPublisherFiles(options) {
 /**
  * Build amp-web-push publisher files HTML page.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildWebPushPublisherFilesVersion(version, options) {
@@ -1334,6 +1335,15 @@ function buildWebPushPublisherFilesVersion(version, options) {
   return Promise.all(promises);
 }
 
+/**
+ * buildWebPushPublisherFile
+ *
+ * @param {string} version
+ * @param {string} fileName
+ * @param {string} watch
+ * @param {Object} options
+ * @return {*}
+ */
 function buildWebPushPublisherFile(version, fileName, watch, options) {
   const basePath = `extensions/amp-web-push/${version}/`;
   const tempBuildDir = `build/all/amp-web-push-${version}/`;
@@ -1388,6 +1398,7 @@ function buildLoginDone(options) {
 /**
  * Build "Login Done" page for the specified version.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildLoginDoneVersion(version, options) {
