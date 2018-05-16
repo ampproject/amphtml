@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {addParamToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
@@ -69,10 +70,13 @@ function isJsonOrObj(anything) {
 
 
 /** @private {!Object<string, string>} */
+// If the item does not have a value, the event will not be forwarded
+// automatically, but it will be listened to.
 const VIMEO_EVENTS = {
   'play': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSED,
+  'pause': VideoEvents.PAUSE,
   'ended': VideoEvents.ENDED,
+  'volumechange': null,
 };
 
 
@@ -88,6 +92,9 @@ class AmpVimeo extends AMP.BaseElement {
 
     /** @private {function():string} */
     this.setVolumeMethod_ = once(() => getMethodName('volume', 'set'));
+
+    /** @private {boolean} */
+    this.muted_ = false;
 
     /**
      * @param {!Event} e
@@ -136,9 +143,17 @@ class AmpVimeo extends AMP.BaseElement {
     // See
     // https://developer.vimeo.com/player/embedding
     const iframe =
-        htmlFor(element)`<iframe frameborder=0 alllowfullscreen></iframe>`;
+        htmlFor(element)`<iframe frameborder=0 allowfullscreen></iframe>`;
 
-    iframe.src = `https://player.vimeo.com/video/${encodeURIComponent(vidId)}`;
+    let src = `https://player.vimeo.com/video/${encodeURIComponent(vidId)}`;
+
+    if (this.hasAutoplay_()) {
+      this.muted_ = true;
+      // Only muted videos are allowed to autoplay
+      src = addParamToUrl(src, 'muted', '1');
+    }
+
+    iframe.src = src;
 
     this.applyFillContent(iframe);
     element.appendChild(iframe);
@@ -167,6 +182,14 @@ class AmpVimeo extends AMP.BaseElement {
       this.unlistenFrame_();
       this.unlistenFrame_ = null;
     }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasAutoplay_() {
+    return this.element.hasAttribute(VideoAttributes.AUTOPLAY);
   }
 
   /** @private */
@@ -214,6 +237,24 @@ class AmpVimeo extends AMP.BaseElement {
     const eventToDispatch = VIMEO_EVENTS[data['event']];
     if (eventToDispatch) {
       element.dispatchCustomEvent(eventToDispatch);
+      return;
+    }
+
+    if (data['event'] == 'volumechange') {
+      const volume = data['data'] && data['data']['volume'];
+      if (!volume) {
+        return;
+      }
+      if (volume <= 0) {
+        this.muted_ = true;
+        element.dispatchCustomEvent(VideoEvents.MUTED);
+        return;
+      }
+      if (this.muted_) {
+        this.muted_ = false;
+        element.dispatchCustomEvent(VideoEvents.UNMUTED);
+        return;
+      }
     }
   }
 
@@ -234,6 +275,11 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   mute() {
+    if (this.muted_) {
+      // We need to check if already muted to prevent an initial mute() call
+      // that would disable autoplay on iOS.
+      return;
+    }
     this.sendCommand_(this.setVolumeMethod_(), '0');
   }
 
@@ -255,8 +301,7 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
-    // TODO(alanorozco): dis tru?
-    return false;
+    return true;
   }
 
   /** @override */
