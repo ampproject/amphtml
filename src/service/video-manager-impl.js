@@ -30,6 +30,9 @@ import {
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoDocking} from './video/docking';
+import {
+  VideoServiceInterface,
+} from './video-service-interface';
 import {VideoServiceSync} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
@@ -83,7 +86,7 @@ const SECONDS_PLAYED_MIN_DELAY = 1000;
  * It is responsible for providing a unified user experience and analytics for
  * all videos within a document.
  *
- * @implements {./video-service-interface.VideoServiceInterface}
+ * @implements {VideoServiceInterface}
  */
 export class VideoManager {
 
