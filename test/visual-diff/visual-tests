@@ -350,6 +350,11 @@
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-youtube/index.html",
       "name": "amp-youtube - Amp By Example"
+    },
+    {
+      "url": "examples/visual-tests/amp-lightbox-gallery.html",
+      "name": "amp-lightbox-gallery - article",
+      "experiments": ["amp-lightbox-gallery"]
     }
   ]
 }
