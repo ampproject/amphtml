@@ -381,13 +381,9 @@ def snapshot_webpages(page, webpages, config)
     forbidden_css = webpage['forbidden_css']
     loading_incomplete_css = webpage['loading_incomplete_css']
     loading_complete_css = webpage['loading_complete_css']
-    snapshot_delay_sec = webpage['snapshot_delay_sec']
     enable_experiments(page, webpage['experiments'])
     log('verbose', 'Navigating to page ' + yellow(url) + '...')
     page.visit(url)
-    if snapshot_delay_sec
-      sleep(snapshot_delay_sec.to_i)
-    end
     verify_css_elements(
         page,
         url,

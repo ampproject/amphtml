@@ -61,9 +61,6 @@
    *     ".another-loading-complete-css-class"
    *   ],
    *
-   *   // Delay (in seconds) after page load, before a snapshot is taken.
-   *   "snapshot_delay_sec": N,
-   *
    *   // Experiments that must be enabled via cookies.
    *   "experiments": [
    *     "amp-feature-one",
@@ -100,7 +97,10 @@
     {
       "url": "examples/visual-tests/article-fade-in.amp.html",
       "name": "fade-in & fade-in-scroll",
-      "snapshot_delay_sec": 2,
+      "loading_complete_css": [
+        ".overlay-container",
+        ".overflow-window"
+      ]
       "experiments": [
         "amp-fx-fade-in",
         "amp-fx-fade-in-scroll"
