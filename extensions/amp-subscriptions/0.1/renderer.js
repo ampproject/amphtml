@@ -57,7 +57,7 @@ export class Renderer {
    * @private
    */
   setState_(type, state) {
-    this.resources_.mutateElement(this.getRootElement_() , () => {
+    this.resources_.mutateElement(this.ampdoc_.getBody() , () => {
       this.getRootElement_().classList.toggle(
           `${CSS_PREFIX}-${type}-unk`,
           state === null);
@@ -72,7 +72,7 @@ export class Renderer {
 
   addLoadingBar() {
     return this.ampdoc_.whenReady().then(() => {
-      if (!this.getRootElement_().querySelector(
+      if (!this.ampdoc_.getBody().querySelector(
           '[subscriptions-section=loading]')) {
         const element = createElementWithAttributes(this.ampdoc_.win.document,
             'div' ,
@@ -92,7 +92,7 @@ export class Renderer {
    * @private
    */
   toggleState_(type, state) {
-    this.resources_.mutateElement(this.getRootElement_(), () => {
+    this.resources_.mutateElement(this.ampdoc_.getBody(), () => {
       this.getRootElement_().classList.toggle(`${CSS_PREFIX}-${type}`, state);
     });
   }
