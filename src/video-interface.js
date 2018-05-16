@@ -449,11 +449,12 @@ export let VideoAnalyticsDetailsDef;
 
 
 /**
- * Helper function to be used internally to cast types from VideoInterface to
- * the public AMP component interface.
- * @param {!VideoInterface} video
- * @return {!./base-element.BaseElement}
+ * Helper union type to be used internally, so that the compiler treats
+ * `VideoInterface` objects as `BaseElement`s, which they should be anyway.
+ *
+ * WARNING: Don't use this at the service level. Its `register` method should
+ * only allow `VideoInterface` as a guarding measure.
+ *
+ * @typedef {!VideoInterface|!./base-element.BaseElement}
  */
-export function asBaseElement(video) {
-  return /** @type {!./base-element.BaseElement} */ (video);
-}
+export let VideoOrBaseElementDef;

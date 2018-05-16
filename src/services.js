@@ -488,11 +488,12 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/video-manager-impl.VideoService}
+   * @return {!./service/video-service-interface.VideoServiceInterface}
    */
   static videoManagerForDoc(nodeOrDoc) {
-    return /** @type {!./service/video-manager-impl.VideoService} */ (
-      getServiceForDoc(nodeOrDoc, 'video-manager'));
+    return (
+      /** @type {!./service/video-service-interface.VideoServiceInterface} */ (
+        getServiceForDoc(nodeOrDoc, 'video-manager')));
   }
 
   /**
