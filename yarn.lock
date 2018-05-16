@@ -3298,8 +3298,8 @@ duplexer@^0.1.1, duplexer@~0.1.1:
   resolved "https://registry.yarnpkg.com/duplexer/-/duplexer-0.1.1.tgz#ace6ff808c1ce66b57d1ebf97977acb02334cfc1"
 
 duplexify@^3.5.0:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/duplexify/-/duplexify-3.5.1.tgz#4e1516be68838bc90a49994f0b39a6e5960befcd"
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/duplexify/-/duplexify-3.6.0.tgz#592903f5d80b38d037220541264d69a198fb3410"
   dependencies:
     end-of-stream "^1.0.0"
     inherits "^2.0.1"
@@ -4827,6 +4827,12 @@ gulp-closure-compiler@0.4.0:
     through "^2.3.4"
     uuid "^2.0.1"
 
+gulp-eslint-if-fixed@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/gulp-eslint-if-fixed/-/gulp-eslint-if-fixed-1.0.0.tgz#ebad1f2a92e2c6ed793b01daaf0081dcaaca0e26"
+  dependencies:
+    gulp-if "^2.0.0"
+
 gulp-eslint@4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/gulp-eslint/-/gulp-eslint-4.0.1.tgz#9df256a802e8e6b32ee75b54f315dd2d8efd9edc"
@@ -4870,7 +4876,7 @@ gulp-help@1.6.1:
     chalk "^1.0.0"
     object-assign "^3.0.0"
 
-gulp-if@2.0.2:
+gulp-if@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/gulp-if/-/gulp-if-2.0.2.tgz#a497b7e7573005041caa2bc8b7dda3c80444d629"
   dependencies:
