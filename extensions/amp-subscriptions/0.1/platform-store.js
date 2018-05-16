@@ -128,10 +128,11 @@ export class PlatformStore {
   }
 
   /**
-   * Returns all the platforms;
+   * Returns all available platforms.
+   *
    * @returns {!Array<!./subscription-platform.SubscriptionPlatform>}
    */
-  getAllRegisteredPlatforms() {
+  getAvailablePlatforms() {
     const platforms = [];
     for (const platformKey in this.subscriptionPlatforms_) {
       const subscriptionPlatform =
@@ -139,6 +140,21 @@ export class PlatformStore {
       platforms.push(subscriptionPlatform);
     }
     return platforms;
+  }
+
+  /**
+   * Returns a promise which resolves when all platforms are resolved.
+   *
+   * @returns {!Promise}
+   */
+  getAllPlatforms() {
+    return new Promise(resolve => {
+      this.onPlatformResolvedCallbacks_.add(e => {
+        if (this.subscriptionPlatforms_.length === this.serviceIds_.length) {
+          resolve();
+        }
+      });
+    });
   }
 
   /**
@@ -354,7 +370,7 @@ export class PlatformStore {
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
-    this.getAllRegisteredPlatforms().forEach(platform => {
+    this.getAvailablePlatforms().forEach(platform => {
       let weight = 0;
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());

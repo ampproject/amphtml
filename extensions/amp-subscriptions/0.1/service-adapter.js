@@ -79,6 +79,16 @@ export class ServiceAdapter {
   getDialog() {
     return this.subscriptionService_.getDialog();
   }
+
+  /**
+   *
+   *
+   * @returns
+   * @memberof ServiceAdapter
+   */
+  login() {
+    return this.subscriptionService_.scoreBasedLogin();
+  }
 }
 
 /** @package @VisibleForTesting */

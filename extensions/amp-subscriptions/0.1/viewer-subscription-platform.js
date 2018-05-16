@@ -66,6 +66,10 @@ export class ViewerSubscriptionPlatform {
     this.origin_ = origin;
   }
 
+  static login() {
+    return this.viewer_.sendMessageAwaitResponse('login');
+  }
+
   /** @override */
   getEntitlements() {
     dev().assert(this.currentProductId_, 'Current product is not set');

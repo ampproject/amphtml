@@ -457,6 +457,30 @@ export class SubscriptionService {
       platform.decorateUI(element, action, options);
     });
   }
+
+  scoreBasedLogin() {
+    return this.platformStore_.getAllPlatforms().then(() => {
+      const platformScores = [];
+      this.platformStore_.getAvailablePlatforms().forEach(platform => {
+        const score = 0;
+
+        if (platform.supportsCurrentViewer()) {
+          score += 1000;
+        }
+
+        platformScores.push({
+          platform,
+          score
+        });
+      });
+
+      platformScores.sort(function(platform1, platform2) {
+        return platform2.weight - platform1.weight;
+      });
+
+      return platformScores[0].platform;
+    })
+  }
 }
 
 
