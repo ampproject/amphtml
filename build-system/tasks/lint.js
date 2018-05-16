@@ -20,9 +20,9 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
 const eslint = require('gulp-eslint');
+const eslintIfFixed = require('gulp-eslint-if-fixed');
 const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
-const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
@@ -34,16 +34,6 @@ const options = {
   fix: false,
 };
 let collapseLintResults = !!process.env.TRAVIS;
-
-/**
- * Checks if current Vinyl file has been fixed by eslint.
- * @param {!Vinyl} file
- * @return {boolean}
- */
-function isFixed(file) {
-  // Has ESLint fixed the file contents?
-  return file.eslint != null && file.eslint.fixed;
-}
 
 /**
  * Initializes the linter stream based on globs
@@ -93,7 +83,7 @@ function runLinter(path, stream, options) {
       .pipe(eslint.formatEach('stylish', function(msg) {
         logOnSameLine(msg.trim() + '\n');
       }))
-      .pipe(gulpIf(isFixed, gulp.dest(path)))
+      .pipe(eslintIfFixed(path))
       .pipe(eslint.result(function(result) {
         if (!process.env.TRAVIS) {
           logOnSameLine(colors.green('Linted: ') + result.filePath);
@@ -208,8 +198,9 @@ function lint() {
       enableStrictLinting();
     }
   }
-  const stream = initializeStream(config.lintGlobs, {});
-  return runLinter('.', stream, options);
+  const basePath = '.';
+  const stream = initializeStream(config.lintGlobs, {base: basePath});
+  return runLinter(basePath, stream, options);
 }
 
 
