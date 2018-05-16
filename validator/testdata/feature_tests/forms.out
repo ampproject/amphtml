@@ -113,21 +113,19 @@ feature_tests/forms.html:102:2 The attribute 'target' in tag 'FORM [method=POST]
 |      <option value="1">English</option>
 |    </select>
 |    <textarea name="comment"></textarea>
-|    <!-- Invalid: input can not be type="button|file|image". -->
+|    <!-- Invalid: input can not be type="button|image". -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="button" name="button">
 >>     ^~~~~~~~~
 feature_tests/forms.html:113:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
-|      <input type="file" name="file">
->>     ^~~~~~~~~
-feature_tests/forms.html:114:4 The attribute 'type' in tag 'input' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
-feature_tests/forms.html:115:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:114:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
-|    <!-- Valid: input can be type="password" in a post xhr form. -->
+|    <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="password" name="password">
+|      <input type="file" name="file" accept="text/plain">
 |    </form>
 |    <!-- Invalid: password requires post and action-xhr -->
 |    <form method="get" action="https://example.com/subscribe" action-xhr="https://example.com/subscribe" target="_blank">
