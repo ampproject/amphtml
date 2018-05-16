@@ -69,7 +69,7 @@ describes.realWin('amp-jwplayer', {
   });
 
   it('fails if no media is specified', () => {
-    allowConsoleError(() => { return getjwplayer({
+    return allowConsoleError(() => { return getjwplayer({
       'data-player-id': 'sDZEo0ea',
     }).should.eventually.be.rejectedWith(
         /Either the data-media-id or the data-playlist-id attributes must be/);
@@ -77,7 +77,7 @@ describes.realWin('amp-jwplayer', {
   });
 
   it('fails if no player is specified', () => {
-    allowConsoleError(() => { return getjwplayer({
+    return allowConsoleError(() => { return getjwplayer({
       'data-media-id': 'Wferorsv',
     }).should.eventually.be.rejectedWith(
         /The data-player-id attribute is required for/);

@@ -42,7 +42,7 @@ export function debounce(func, wait, immediate) {
  * Gets an element creator using a given document to create elements.
  * @export getElementCreator
  * @param {Document} document
- * @returns {!Function}
+ * @return {!Function}
  */
 export function getElementCreator(document) {
   return function createElement(name, className, children) {

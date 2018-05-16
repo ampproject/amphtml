@@ -106,6 +106,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.isActive_ = false;
 
     /** @private {number} */
+    this.historyId_ = -1;
+
+    /** @private {number} */
     this.currentElemId_ = -1;
 
     /** @private {function(!Event)} */
@@ -118,6 +121,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     /** @private {?../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = null;
+
+    /** @private {?../../../src/service/history-impl.History}*/
+    this.history_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -181,6 +187,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         `Experiment ${TAG} disabled`);
     this.manager_ = dev().assert(manager_);
     this.vsync_ = this.getVsync();
+    this.history_ = Services.historyForDoc(this.getAmpDoc());
     this.action_ = Services.actionServiceForDoc(this.element);
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(() => {
@@ -417,10 +424,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       };
 
       this.vsync_.mutatePromise(() => {
-        // The problem with setting innerText is that it not only removes
-        // child nodes from the element, but also permanently destroys all
-        // descendant text nodes. It is okay in this case because the description
-        // text area is a div that does not contain descendant elements.
+        // The problem with setting innerText is that it not only removes child
+        // nodes from the element, but also permanently destroys all descendant
+        // text nodes. It is okay in this case because the description text area
+        // is a div that does not contain descendant elements.
         this.descriptionTextArea_./*OK*/innerText = descText;
 
         // Avoid flickering out if transitioning from a slide with no text
@@ -724,7 +731,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       user().assert(target,
           'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
-    this.open_(dev().assertElement(target));
+    this.open_(dev().assertElement(target)).then(() => {
+      return this.history_.push(this.close_.bind(this));
+    }).then(historyId => {
+      this.historyId_ = historyId;
+    });
   }
 
   /**
@@ -775,7 +786,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * associated with said element, updates the description, and initializes
    * the image viewer if the element is an amp-img.
    * @param {!Element} element
-   * @returns {!Promise}
+   * @return {!Promise}
    * @private
    */
   openLightboxForElement_(element) {
@@ -789,7 +800,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    * Returns true if the element is loaded and contains an img.
    * @param {!Element} element
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   elementTypeCanBeAnimated_(element) {
@@ -849,7 +860,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    *
    * @param {!Element} target
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   transitionTargetIsInViewport_(target) {
@@ -872,7 +883,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * lightbox.
    * @param {!Element} sourceElement
    * @private
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   transitionIn_(sourceElement) {
     const anim = new Animation(this.element);
@@ -967,7 +978,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * If no transition image is applicable, fade the lightbox in and out.
    * @param {number} startOpacity
    * @param {number} endOpacity
-   * @returns {!Promise}
+   * @return {!Promise}
    * @private
    */
   fade_(startOpacity, endOpacity) {
@@ -1221,6 +1232,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           this.schedulePause(dev().assertElement(this.container_));
           this.pauseLightboxChildren_();
           this.carousel_ = null;
+          if (this.historyId_ != -1) {
+            this.history_.pop(this.historyId_);
+          }
         });
   }
 
@@ -1282,7 +1296,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * Close gallery view
-   * @returns {!Promise}
+   * @return {!Promise}
    * @private
    */
   closeGallery_() {
@@ -1335,8 +1349,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       thumbnails.forEach(thumbnail => {
         thumbnail.timestampPromise.then(ts => {
           // Many video players (e.g. amp-youtube) that don't support this API
-          // will often return 1. So sometimes we will erroneously show a timestamp
-          // of 1 second instead of no timestamp.
+          // will often return 1. So sometimes we will erroneously show a
+          // timestamp of 1 second instead of no timestamp.
           if (!ts || isNaN(ts)) {
             return;
           }
@@ -1400,7 +1414,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    * Converts seconds to a timestamp formatted string.
    * @param {number} seconds
-   * @returns {string}
+   * @return {string}
    */
   secondsToTimestampString_(seconds) {
     const h = Math.floor(seconds / 3600);
@@ -1456,8 +1470,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       timestampDiv.appendChild(playButtonSpan);
       thumbnailObj.timestampPromise.then(ts => {
         // Many video players (e.g. amp-youtube) that don't support this API
-        // will often return 1. This will sometimes result in erroneous values of
-        // 1 second for video players that don't support getDuration.
+        // will often return 1. This will sometimes result in erroneous values
+        // of 1 second for video players that don't support getDuration.
         if (!ts || isNaN(ts)) {
           return;
         }
@@ -1482,7 +1496,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 export function installLightboxManager(win) {
   if (isExperimentOn(win, TAG)) {
     // TODO (#12859): This only works for singleDoc mode. We will move
-    // installation of LightboxManager to core after the experiment, okay for now.
+    // installation of LightboxManager to core after the experiment, okay for
+    // now.
     const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     manager_ = new LightboxManager(ampdoc);
   }

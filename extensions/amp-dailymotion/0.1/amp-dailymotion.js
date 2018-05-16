@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {
@@ -152,13 +153,13 @@ class AmpDailymotion extends AMP.BaseElement {
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const readyDeferred = new Deferred();
+    this.playerReadyPromise_ = readyDeferred.promise;
+    this.playerReadyResolver_ = readyDeferred.resolve;
 
-    this.startedBufferingPromise_ = new Promise(resolve => {
-      this.startedBufferingResolver_ = resolve;
-    });
+    const bufferingDeferred = new Deferred();
+    this.startedBufferingPromise_ = bufferingDeferred.promise;
+    this.startedBufferingResolver_ = bufferingDeferred.resolve;
   }
 
   /** @override */

@@ -155,8 +155,7 @@ let LayoutRectOrDimsDef;
 /**
  * Array of functions used to combine block level request parameters for SRA
  * request.
- * @private @const
- * {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>}
+ * @private @const {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>>}
  */
 const BLOCK_SRA_COMBINERS_ = [
   instances => {
@@ -446,8 +445,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
       // interaction with refresh.
       const experimentInfoMap =
-          /** @type {!Object<string,
-          !../../../src/experiments.ExperimentInfo>} */ ({});
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
         isTrafficEligible: () => true,
         branches: ['22302764','22302765'],
@@ -459,8 +458,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // requests.
         addExperimentIdToElement(expId, this.element);
         if (expId === CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT) {
-          // TODO(keithwrightbos) - do not clear if at least one slot on the page
-          // is an AMP creative that survived unlayoutCallback in order to
+          // TODO(keithwrightbos) - do not clear if at least one slot on the
+          // page is an AMP creative that survived unlayoutCallback in order to
           // ensure competitive exclusion/roadblocking.  Note this only applies
           // to non-backfill inventory.
           dev().info(TAG, 'resetting page correlator');
@@ -1134,9 +1133,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // Only contained invalid elements.
                 return;
               }
-              // Determine if more than one block for this element, if not do not
-              // set sra request promise which results in sending as
-              // non-SRA request (benefit is it allows direct cache method).
+              // Determine if more than one block for this element, if not do
+              // not set sra request promise which results in sending as non-SRA
+              // request (benefit is it allows direct cache method).
               if (typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
                 typeInstances[0].sraDeferred.resolve(null);
@@ -1232,8 +1231,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       // Publisher explicitly wants SRA so do not attempt to
                       // recover as SRA guarantees cannot be enforced.
                       typeInstances.forEach(instance => {
-                        // Reset ad url to ensure layoutCallback does not fallback to
-                        // frame get which would lose SRA guarantees.
+                        // Reset ad url to ensure layoutCallback does not
+                        // fallback to frame get which would lose SRA
+                        // guarantees.
                         instance.resetAdUrl();
                         instance.attemptCollapse();
                         instance.sraDeferred.reject(error);

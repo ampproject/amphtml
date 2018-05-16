@@ -37,8 +37,8 @@ export let MockResponseTiming;
 export let MockResponse;
 
 /**
- * A stub for `window.fetch`, facilitating hermetic testing of code that uses it.
- * The window is stubbed when this class's constructor is called.
+ * A stub for `window.fetch`, facilitating hermetic testing of code that uses
+ * it. The window is stubbed when this class's constructor is called.
  */
 export class FetchMock {
 

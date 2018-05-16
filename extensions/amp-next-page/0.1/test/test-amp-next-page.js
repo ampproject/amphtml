@@ -97,17 +97,20 @@ env => {
     toggleExperiment(win, 'amp-next-page', false);
   });
 
-  it('does not fetch the next document before 3 viewports away', function* () {
-    xhrMock.expects('fetchDocument').never();
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
-      // 4x viewports away
-      return Promise.resolve(
-          layoutRectLtwh(0, 0, sizes.width, sizes.height * 5));
-    });
+  // TODO (@peterjosling, #15234): This test is flaky on Headless Chrome on
+  // Travis because it does call fetchDocument.
+  it.skip('does not fetch the next document before 3 viewports away',
+      function* () {
+        xhrMock.expects('fetchDocument').never();
+        sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+          // 4x viewports away
+          return Promise.resolve(
+              layoutRectLtwh(0, 0, sizes.width, sizes.height * 5));
+        });
 
-    win.dispatchEvent(new Event('scroll'));
-    yield macroTask();
-  });
+        win.dispatchEvent(new Event('scroll'));
+        yield macroTask();
+      });
 
   it('fetches the next document within 3 viewports away', function* () {
     xhrMock.expects('fetchDocument').returns(Promise.resolve());
@@ -140,7 +143,8 @@ env => {
     yield macroTask();
   });
 
-  it('adds the hidden class to hideSelector elements', function* () {
+  // TODO (@peterjosling, #15234): This flakes on Chrome.
+  it.skip('adds the hidden class to hideSelector elements', function* () {
     const exampleDoc = createExampleDocument(doc);
     xhrMock.expects('fetchDocument')
         .returns(Promise.resolve(exampleDoc))
@@ -173,13 +177,44 @@ env => {
             'i-amphtml-next-page-hidden'))
         .to.be.true;
   });
+
+  it.skip('removes amp-analytics tags from child documents', function* () {
+    const exampleDoc = createExampleDocument(doc);
+    exampleDoc.body.innerHTML +=
+        '<amp-analytics id="analytics1"></amp-analytics>';
+    exampleDoc.body.innerHTML +=
+        '<amp-analytics id="analytics2"></amp-analytics>';
+    xhrMock.expects('fetchDocument')
+        .returns(Promise.resolve(exampleDoc))
+        .once();
+
+    const nextPageService = getService(win, 'next-page');
+    const attachShadowDocSpy =
+      sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
+
+    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+      // 1x viewport away
+      return Promise.resolve(
+          layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
+    });
+
+    win.dispatchEvent(new Event('scroll'));
+    yield macroTask();
+
+    const shadowDoc = attachShadowDocSpy.firstCall.returnValue.ampdoc;
+    yield shadowDoc.whenReady();
+
+    const shadowRoot = shadowDoc.getRootNode();
+    expect(shadowRoot.getElementById('analytics1')).to.be.null;
+    expect(shadowRoot.getElementById('analytics2')).to.be.null;
+  });
 });
 
 /**
  * Creates an example document as a child of {@code doc} to be embedded as a
  * shadow document.
  * @param {!Document} doc Parent document to use to create new elements.
- * @returns {!Document} New {@code DocumentFragment} with example content.
+ * @return {!Document} New {@code DocumentFragment} with example content.
  */
 function createExampleDocument(doc) {
   const childDoc = doc.createDocumentFragment();

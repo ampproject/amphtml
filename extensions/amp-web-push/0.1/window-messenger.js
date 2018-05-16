@@ -97,7 +97,7 @@ export class WindowMessenger {
    * @param {Array<string>} allowedOrigins A list of string origins to check
    *     against when receiving connection messages. A message from outside this
    *     list of origins won't be accepted.
-   * @returns {Promise} A Promise that resolves when another frame successfully
+   * @return {Promise} A Promise that resolves when another frame successfully
    *      establishes a messaging channel, or rejects on error.
    */
   listen(allowedOrigins) {
@@ -147,7 +147,7 @@ export class WindowMessenger {
    *
    * @param {string} origin
    * @param {Array<string>} allowedOrigins
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   isAllowedOrigin_(origin, allowedOrigins) {

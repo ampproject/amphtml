@@ -71,7 +71,7 @@ export class AmpDocService {
 
   /**
    * Whether if an `AmpDocShell` has been installed for the runtime.
-   * @returns {boolean}
+   * @return {boolean}
    */
   hasAmpDocShell() {
     return !!this.shellShadowDoc_;

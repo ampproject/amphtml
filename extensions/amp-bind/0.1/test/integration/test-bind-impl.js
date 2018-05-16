@@ -19,10 +19,12 @@
  *               because it requires building web-worker binary.
  */
 
+import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
+import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
 import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {toArray} from '../../../../../src/types';
@@ -245,15 +247,24 @@ describe.configure().ifNewChrome().run('Bind', function() {
     let bind;
     let container;
     let viewer;
+    let clock;
 
     beforeEach(() => {
-      // Make sure we have a chunk instance for testing.
-      chunkInstanceForTesting(env.ampdoc);
+      const {ampdoc, win} = env;
 
-      viewer = Services.viewerForDoc(env.ampdoc);
-      bind = new Bind(env.ampdoc);
+      // Make sure we have a chunk instance for testing.
+      chunkInstanceForTesting(ampdoc);
+
+      viewer = Services.viewerForDoc(ampdoc);
+      bind = new Bind(ampdoc);
       // Connected <div> element created by describes.js.
-      container = env.win.document.getElementById('parent');
+      container = win.document.getElementById('parent');
+
+      clock = lolex.install({target: win});
+    });
+
+    afterEach(() => {
+      clock.uninstall();
     });
 
     it('should scan for bindings when ampdoc is ready', () => {
@@ -465,6 +476,70 @@ describe.configure().ifNewChrome().run('Bind', function() {
       return onBindReadyAndSetState(env, bind, {}).then(() => {
         expect(toArray(element.classList)).to.deep.equal([]);
       });
+    });
+
+    it('should support handling actions with invoke()', () => {
+      const {sandbox} = env;
+      sandbox.stub(bind, 'setStateWithExpression');
+      sandbox.stub(bind, 'pushStateWithExpression');
+
+      const invocation = {
+        method: 'setState',
+        args: {
+          [RAW_OBJECT_ARGS_KEY]: '{foo: bar}',
+        },
+        event: {
+          detail: {bar: 123},
+        },
+        sequenceId: 0,
+      };
+
+      bind.invoke(invocation);
+      expect(bind.setStateWithExpression).to.be.calledOnce;
+      expect(bind.setStateWithExpression).to.be.calledWithExactly(
+          '{foo: bar}', sinon.match({event: {bar: 123}}));
+
+      invocation.method = 'pushState';
+      invocation.sequenceId++;
+      bind.invoke(invocation);
+      expect(bind.pushStateWithExpression).to.be.calledOnce;
+      expect(bind.pushStateWithExpression).to.be.calledWithExactly(
+          '{foo: bar}', sinon.match({event: {bar: 123}}));
+    });
+
+    it('should only allow one action per event in invoke()', () => {
+      const {sandbox} = env;
+      sandbox.stub(bind, 'setStateWithExpression');
+      const userError = sandbox.stub(user(), 'error');
+
+
+      const invocation = {
+        method: 'setState',
+        args: {
+          [RAW_OBJECT_ARGS_KEY]: '{foo: bar}',
+        },
+        event: {
+          detail: {bar: 123},
+        },
+        sequenceId: 0,
+      };
+
+      bind.invoke(invocation);
+      expect(bind.setStateWithExpression).to.be.calledOnce;
+      expect(bind.setStateWithExpression).to.be.calledWithExactly(
+          '{foo: bar}', sinon.match({event: {bar: 123}}));
+
+      // Second invocation with the same sequenceId should fail.
+      bind.invoke(invocation);
+      expect(bind.setStateWithExpression).to.be.calledOnce;
+      expect(userError).to.be.calledWith('amp-bind',
+          'One state action allowed per event.');
+
+      // Invocation with the same sequenceid will be allowed after 5 seconds,
+      // which is how long it takes for stored sequenceIds to be purged.
+      clock.tick(5000);
+      bind.invoke(invocation);
+      expect(bind.setStateWithExpression).to.be.calledTwice;
     });
 
     it('should support parsing exprs in setStateWithExpression()', () => {

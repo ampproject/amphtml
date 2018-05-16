@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-trust';
+import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
-import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
-import {dict} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
 import {tryFocus} from '../dom';
@@ -78,6 +76,7 @@ export class StandardActions {
    */
   installActions_(actionService) {
     actionService.addGlobalTarget('AMP', this.handleAmpTarget.bind(this));
+
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
@@ -90,135 +89,47 @@ export class StandardActions {
 
   /**
    * Handles global `AMP` actions.
-   *
-   * See `amp-actions-and-events.md` for documentation.
-   *
+   * See `amp-actions-and-events.md` for details.
    * @param {!./action-impl.ActionInvocation} invocation
-   * @param {number=} opt_actionIndex
-   * @param {!Array<!./action-impl.ActionInfoDef>=} opt_actionInfos
    * @return {?Promise}
+   * @throws If the invocation method is unrecognized.
    */
-  handleAmpTarget(invocation, opt_actionIndex, opt_actionInfos) {
-    const method = invocation.method;
+  handleAmpTarget(invocation) {
+    // All global `AMP` actions require high trust.
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
+    const {node, method, args} = invocation;
+    const win = (node.ownerDocument || node).defaultView;
     switch (method) {
       case 'pushState':
       case 'setState':
-        const actions = /** @type {!Array} */ (dev().assert(opt_actionInfos));
-        const index = dev().assertNumber(opt_actionIndex);
-        // Allow one amp-bind state action per event.
-        for (let i = 0; i < index; i++) {
-          const action = actions[i];
-          if (action.target == 'AMP' && action.method.indexOf('State') >= 0) {
-            user().error('AMP-BIND', 'One state action allowed per event.');
-            return null;
-          }
-        }
-        return this.handleAmpBindAction_(invocation, method == 'pushState');
+        return Services.bindForDocOrNull(node).then(bind => {
+          user().assert(bind, 'AMP-BIND is not installed.');
+          return bind.invoke(invocation);
+        });
 
       case 'navigateTo':
-        return this.handleAmpNavigateTo_(invocation);
+        Services.navigationForDoc(this.ampdoc).navigateTo(
+            win, args['url'], `AMP.${method}`);
+        return null;
 
       case 'goBack':
-        return this.handleAmpGoBack_(invocation);
+        Services.historyForDoc(this.ampdoc).goBack();
+        return null;
 
       case 'print':
-        return this.handleAmpPrint_(invocation);
+        win.print();
+        return null;
 
       case 'optoutOfCid':
-        return this.handleOptoutOfCid_(invocation);
+        return Services.cidForDoc(this.ampdoc)
+            .then(cid => cid.optOut())
+            .catch(reason => {
+              dev().error(TAG, 'Failed to opt out of CID', reason);
+            });
     }
     throw user().createError('Unknown AMP action ', method);
-  }
-
-  /**
-   * @param {!./action-impl.ActionInvocation} invocation
-   * @param {boolean} isPushState
-   * @private
-   */
-  handleAmpBindAction_(invocation, isPushState) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
-    return Services.bindForDocOrNull(invocation.node).then(bind => {
-      user().assert(bind, 'AMP-BIND is not installed.');
-
-      const objectString = invocation.args[OBJECT_STRING_ARGS_KEY];
-      if (objectString) {
-        const scope = dict();
-        const event = invocation.event;
-        if (event && event.detail) {
-          scope['event'] = event.detail;
-        }
-        if (isPushState) {
-          return bind.pushStateWithExpression(objectString, scope);
-        } else {
-          return bind.setStateWithExpression(objectString, scope);
-        }
-      } else {
-        user().error('AMP-BIND', 'Please use the object-literal syntax, '
-            + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
-            + '"AMP.setState(foo=\'bar\')".');
-      }
-    });
-  }
-
-  /**
-   * @param {!./action-impl.ActionInvocation} invocation
-   * @return {?Promise}
-   * @private
-   */
-  handleAmpNavigateTo_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
-    const node = invocation.node;
-    const win = (node.ownerDocument || node).defaultView;
-    const url = invocation.args['url'];
-    const requestedBy = `AMP.${invocation.method}`;
-    Services.navigationForDoc(this.ampdoc).navigateTo(win, url, requestedBy);
-    return null;
-  }
-
-  /**
-   * @param {!./action-impl.ActionInvocation} invocation
-   * @private
-   */
-  handleAmpGoBack_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
-    Services.historyForDoc(this.ampdoc).goBack();
-    return null;
-  }
-
-  /**
-   * @param {!./action-impl.ActionInvocation} invocation
-   * @return {?Promise}
-   * @private
-   */
-  handleAmpPrint_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
-    const node = invocation.node;
-    const win = (node.ownerDocument || node).defaultView;
-    win.print();
-    return null;
-  }
-
-  /**
-   * Opts the user out of cid issuance.
-   * @private
-   */
-  handleOptoutOfCid_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
-    return Services.cidForDoc(this.ampdoc)
-        .then(cid => cid.optOut())
-        .catch(reason => {
-          dev().error(TAG, 'Failed to opt out of Cid', reason);
-        });
   }
 
   /**
