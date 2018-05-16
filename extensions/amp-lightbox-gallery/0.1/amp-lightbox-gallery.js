@@ -353,6 +353,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * Handles slide change.
+   * @param {!Event} event
    * @private
    */
   slideChangeHandler_(event) {
@@ -1241,6 +1242,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    * Handles keyboard events for the lightbox.
    *  -Esc will close the lightbox.
+   * @param {!Event} event
    * @private
    */
   onKeyDown_(event) {
@@ -1491,6 +1493,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 }
 
 /**
+ * @param {!Window} win
  * @private visible for testing.
  */
 export function installLightboxManager(win) {
