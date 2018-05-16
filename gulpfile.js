@@ -211,6 +211,7 @@ declareExtension('amp-video-service', '0.1', {
   // binary.
   loadPriority: 'high',
 });
+declareExtension('amp-viqeo', '0.1');
 declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
@@ -425,12 +426,12 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       // If there is a sync JS error during initial load,
       // at least try to unhide the body.
       wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
-          'setTimeout(function(){' +
-          'var s=document.body.style;' +
-          's.opacity=1;' +
-          's.visibility="visible";' +
-          's.animation="none";' +
-          's.WebkitAnimation="none;"},1000);throw e};',
+      'setTimeout(function(){' +
+      'var s=document.body.style;' +
+      's.opacity=1;' +
+      's.visibility="visible";' +
+      's.animation="none";' +
+      's.WebkitAnimation="none;"},1000);throw e};',
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -456,7 +457,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-          })
+          }),
       );
     }
 
@@ -483,7 +484,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-          })
+          }),
       );
     }
 
@@ -491,7 +492,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         thirdPartyBootstrap(
             '3p/frame.max.html', 'frame.html', shouldMinify),
         thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html',shouldMinify)
+            '3p/nameframe.max.html', 'nameframe.html', shouldMinify),
     );
 
     if (watch) {
@@ -650,7 +651,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
 
 /**
  * @param {string} path
- * @param {string} css
+ * @param {string} name
  * @param {string} version
  * @param {!Object} options
  */
@@ -662,6 +663,7 @@ function buildExtensionCss(path, name, version, options) {
     fs.writeFileSync(jsName, jsCss, 'utf-8');
     fs.writeFileSync(cssName, css, 'utf-8');
   }
+
   const promises = [];
   const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css')
       .then(writeCssBinaries.bind(null, `${name}-${version}.css`));
@@ -704,7 +706,7 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? ''
       : `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}` +
-      `v:"${internalRuntimeVersion}",f:(function(AMP){<%= contents %>\n})});`,
+        `v:"${internalRuntimeVersion}",f:(function(AMP){<%= contents %>\n})});`,
   }));
 }
 
@@ -873,17 +875,22 @@ function dist() {
           // and whether you need to init logging (initLogConstructor).
           buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildExaminer({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildWebWorker({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
           buildExperiments({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           buildLoginDone({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           buildWebPushPublisherFiles({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+            minify: true, watch: false, preventRemoveAndMakeDir: true,
+          }),
           copyCss(),
         ]);
       }).then(() => {
@@ -1167,6 +1174,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(gulp.dest.bind(gulp), destDir);
 
   const destFilename = options.toName || srcFilename;
+
   function rebundle(failOnError) {
     const startTime = Date.now();
     return toPromise(
@@ -1306,6 +1314,7 @@ function buildWebPushPublisherFiles(options) {
 /**
  * Build amp-web-push publisher files HTML page.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildWebPushPublisherFilesVersion(version, options) {
@@ -1326,6 +1335,15 @@ function buildWebPushPublisherFilesVersion(version, options) {
   return Promise.all(promises);
 }
 
+/**
+ * buildWebPushPublisherFile
+ *
+ * @param {string} version
+ * @param {string} fileName
+ * @param {string} watch
+ * @param {Object} options
+ * @return {*}
+ */
 function buildWebPushPublisherFile(version, fileName, watch, options) {
   const basePath = `extensions/amp-web-push/${version}/`;
   const tempBuildDir = `build/all/amp-web-push-${version}/`;
@@ -1358,7 +1376,7 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
           fileContents = fileContents.replace(
               '<!-- [GULP-MAGIC-REPLACE ' + fileName + '.js] -->',
               '<script>' + fs.readFileSync(distDir + '/' +
-              minifiedName, 'utf8') + '</script>'
+              minifiedName, 'utf8') + '</script>',
           );
 
           fs.writeFileSync('dist/v0/' + fileName + '.html',
@@ -1380,6 +1398,7 @@ function buildLoginDone(options) {
 /**
  * Build "Login Done" page for the specified version.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildLoginDoneVersion(version, options) {
@@ -1582,7 +1601,12 @@ function mkdirSync(path) {
   }
 }
 
+/**
+ * @param {*} readable
+ * @return {Promise}
+ */
 function toPromise(readable) {
+  // eslint-disable-next-line amphtml-internal/resolve-inside-promise-resolver
   return new Promise(function(resolve, reject) {
     readable.on('error', reject).on('end', resolve);
   });
@@ -1614,7 +1638,7 @@ gulp.task('default', 'Runs "watch" and then "serve"',
 gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
-            'Great for profiling and debugging production code.',
+    'Great for profiling and debugging production code.',
     fortesting: '  Compiles production binaries for local testing',
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   },
