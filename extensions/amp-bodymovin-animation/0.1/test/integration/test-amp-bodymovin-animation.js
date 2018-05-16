@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpBodymovinAnimation} from '../../amp-bodymovin-animation';
 import {poll} from '../../../../../testing/iframe';
 
 describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
@@ -21,8 +22,9 @@ describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
   const bodymovinBody = `
     <amp-bodymovin-animation id="anim"
       layout="fixed" width="200" height="200"
-      src="https://nainar.github.io/loader.json">
-    </amp-bodymovin-animation>`;
+      src="testresource.json">
+    </amp-bodymovin-animation>
+    <div id="stop" on="tap:anim.stop">Stop</div>`;
   describes.integration('amp-bodymovin-animation iframe renders', {
     body: bodymovinBody,
     extensions,
@@ -32,6 +34,98 @@ describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
       const loadPromise = waitForAnimationLoad();
       return loadPromise.then(iframeExists => {
         expect(iframeExists).to.be.true;
+      });
+    });
+  });
+
+  const bodymovinNoAutoplayBody = `
+    <amp-bodymovin-animation id="anim"
+      layout="fixed" width="200" height="200"
+      src="testresource.json"
+      noautoplay>
+    </amp-bodymovin-animation>
+    <div id="play" on="tap:anim.play">Play</div>
+    <div id="pause" on="tap:anim.pause">Pause</div>`;
+
+  describes.integration('amp-bodymovin-animation actions work', {
+    body: bodymovinNoAutoplayBody,
+    extensions,
+  }, env => {
+
+    let playSpy;
+    let pauseSpy;
+
+    beforeEach(() => {
+      playSpy = sandbox.spy(AmpBodymovinAnimation.prototype, 'play_');
+      pauseSpy = sandbox.spy(AmpBodymovinAnimation.prototype, 'pause_');
+    });
+
+
+    it('play/pause actions work on `<amp-bodymovin-animation>` elements',
+        () => {
+          const loadPromise = waitForAnimationLoad();
+          return loadPromise.then(iframeExists => {
+            expect(iframeExists).to.be.true;
+            const playTrigger = env.win.document.querySelector('#play');
+            playTrigger.click();
+            expect(playSpy).to.not.have.been.called;
+            const pauseTrigger = env.win.document.querySelector('#pause');
+            pauseTrigger.click();
+            expect(pauseSpy).to.not.have.been.called;
+          });
+        });
+  });
+
+  describes.integration('amp-bodymovin-animation actions work', {
+    body: bodymovinBody,
+    extensions,
+  }, env => {
+
+    let stopSpy;
+
+    beforeEach(() => {
+      stopSpy = sandbox.spy(AmpBodymovinAnimation.prototype, 'stop_');
+    });
+
+
+    it('stop action works on `<amp-bodymovin-animation>` elements', () => {
+      const loadPromise = waitForAnimationLoad();
+      return loadPromise.then(iframeExists => {
+        expect(iframeExists).to.be.true;
+        const stopTrigger = env.win.document.querySelector('#stop');
+        stopTrigger.click();
+        expect(stopSpy).to.not.have.been.called;
+      });
+    });
+  });
+
+  const bodymovinSeekToBody = `
+    <amp-bodymovin-animation id="anim"
+      layout="fixed" width="200" height="200"
+      src="testresource.json"
+      noautoplay>
+    </amp-bodymovin-animation>
+    <div id="seekToHalf" on="tap:anim.seekTo(percent=0.5)">Seek to 1/2</div>`;
+
+  describes.integration('amp-bodymovin-animation actions work', {
+    body: bodymovinSeekToBody,
+    extensions,
+  }, env => {
+
+    let seekToSpy;
+
+    beforeEach(() => {
+      seekToSpy = sandbox.spy(AmpBodymovinAnimation.prototype, 'seekTo_');
+    });
+
+
+    it('seekTo action works on `<amp-bodymovin-animation>` elements', () => {
+      const loadPromise = waitForAnimationLoad();
+      return loadPromise.then(iframeExists => {
+        expect(iframeExists).to.be.true;
+        const seekToHalfTrigger = env.win.document.querySelector('#seekToHalf');
+        seekToHalfTrigger.click();
+        expect(seekToSpy).to.not.have.been.called;
       });
     });
   });
