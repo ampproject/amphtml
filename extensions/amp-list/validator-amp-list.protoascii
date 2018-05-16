@@ -122,6 +122,7 @@ tags: {  # <amp-list>
   requires_extension: "amp-list"
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
+  disallowed_ancestor: "TEMPLATE"
   attrs: {
     name: "src"
     mandatory: true

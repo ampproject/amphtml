@@ -197,38 +197,90 @@ describe('ValidatorCssLengthValidation', () => {
   // construct stylesheets of any length that we want.
   const validStyleBlob = 'h1 {a: b}\n';
   assertStrictEqual(10, validStyleBlob.length);
+  const validInlineStyleBlob = 'width:1px;';
+  assertStrictEqual(10, validInlineStyleBlob.length);
 
-  it('accepts max bytes with exactly 50000 bytes in author stylesheet', () => {
-    const maxBytes = Array(5001).join(validStyleBlob);
-    assertStrictEqual(50000, maxBytes.length);
+  it('accepts 50000 bytes in author stylesheet and 0 bytes in inline style',
+     () => {
+       const stylesheet = Array(5001).join(validStyleBlob);
+       assertStrictEqual(50000, stylesheet.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL';
+       test.run();
+     });
 
-    const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replaceme {}', maxBytes);
-    test.run();
-  });
+  it('will not accept 50001 bytes in author stylesheet and 0 bytes in inline style',
+     () => {
+       const stylesheet = Array(5001).join(validStyleBlob) + ' ';
+       assertStrictEqual(50001, stylesheet.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL';
+       test.run();
+     });
 
-  it('will not accept 50001 bytes in author stylesheet - one too many', () => {
-    const oneTooMany = Array(5001).join(validStyleBlob) + ' ';
-    assertStrictEqual(50001, oneTooMany.length);
-    const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replaceme {}', oneTooMany);
-    test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL';
-    test.run();
-  });
+  it('knows utf8 and rejects file with 50002 bytes but 49999 characters and 0 bytes in inline style',
+     () => {
+       const stylesheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
+       assertStrictEqual(49999, stylesheet.length);  // character length
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL';
+       test.run();
+     });
 
-  it('knows utf8 and rejects file w/ 50002 bytes but 49999 characters', () => {
-    const multiByteSheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
-    assertStrictEqual(49999, multiByteSheet.length);  // character length
-    const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replaceme {}', multiByteSheet);
-    test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL';
-    test.run();
-  });
+  it('accepts 0 bytes in author stylesheet and 50000 bytes in inline style',
+     () => {
+       const inlineStyle = Array(5001).join(validInlineStyleBlob);
+       assertStrictEqual(50000, inlineStyle.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
+               .replace('replace_inline_style', inlineStyle);
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL';
+       test.run();
+     });
+
+  it('will not accept 0 bytes in author stylesheet and 50001 bytes in inline style',
+     () => {
+       const inlineStyle = Array(5001).join(validInlineStyleBlob) + ' ';
+       assertStrictEqual(50001, inlineStyle.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
+               .replace('replace_inline_style', inlineStyle);
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL';
+       test.run();
+     });
+
+  it('will not accept 50000 bytes in author stylesheet and 14 bytes in inline style',
+     () => {
+       const stylesheet = Array(5001).join(validStyleBlob);
+       assertStrictEqual(50000, stylesheet.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', 'display:block;');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL';
+       test.run();
+     });
 });
 
 describe('CssLength', () => {

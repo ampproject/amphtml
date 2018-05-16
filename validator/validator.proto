@@ -370,6 +370,7 @@ message ExtensionSpec {
 // prescribes a particular set of validation rules.
 message HtmlFormat {
   enum Code {
+    UNKNOWN_CODE = 0;  // Never used
     AMP = 1;
     AMP4ADS = 2;
     AMP4EMAIL = 3;
@@ -505,9 +506,26 @@ message TagSpec {
   extensions 14, 26;
 }
 
+// Defines how much css is allowed on the document including inline styles.
+// If a CssLengthSpec is not defined for a particular html_format, then
+// no limit is enforced for inline styles but a limit may be enforced on
+// particular style tags. Those would be defined in that tag's CdataSpec.
+message CssLengthSpec {
+  // The html_format field tells the validator for which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this CssLengthSpec is defined for.
+  optional HtmlFormat.Code html_format = 1;
+
+  // If set, the cdata contents cannot be greater than this length, in bytes.
+  optional int32 max_bytes = 2 [default = -1];
+
+  // If provided, a URL which linking to a section / sentence in the
+  // AMP HTML spec.
+  optional string spec_url = 3;
+}
+
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 18
+// NEXT AVAILABLE TAG: 19
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -529,6 +547,8 @@ message ValidatorRules {
   repeated ErrorSpecificity error_specificity = 13;
 
   repeated DescendantTagList descendant_tag_list = 16;
+
+  repeated CssLengthSpec css_length_spec = 18;
 
   // Deprecated fields, do not reuse.
   extensions 2, 5, 11, 12, 14;
@@ -595,7 +615,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 102
+  // NEXT AVAILABLE TAG: 103
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -623,6 +643,7 @@ message ValidationError {
     DUPLICATE_UNIQUE_TAG_WARNING = 77;
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG = 50;
+    STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 102;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
