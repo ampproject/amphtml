@@ -74,7 +74,8 @@ describes.realWin('amp-story', {
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_').callsFake(NOOP);
+    // sandbox.stub(element.implementation_,
+    // 'triggerActiveEventForPage_').callsFake(NOOP);
   });
 
   afterEach(() => {
@@ -153,6 +154,32 @@ describes.realWin('amp-story', {
         .then(() => {
           expect(buildBookendStub).to.not.have.been.called;
           expect(loadBookendStub).to.not.have.been.called;
+        });
+  });
+
+  it('should prerender/load the share menu', () => {
+    createPages(story.element, 1, ['cover']);
+
+    sandbox.stub(story.bookend_, 'build');
+    const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(buildShareMenuStub).to.have.been.calledOnce;
+        });
+  });
+
+  it('should not prerender/load the share menu on desktop', () => {
+    createPages(story.element, 1, ['cover']);
+
+    story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
+
+    sandbox.stub(story.bookend_, 'build');
+    const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(buildShareMenuStub).to.not.have.been.called;
         });
   });
 
@@ -323,6 +350,24 @@ describes.realWin('amp-story', {
               {ampStoryPageId: firstPageId},
               '',
           );
+        });
+  });
+
+  it('should NOT update page id in browser history if ad', () => {
+    // Have to stub this because tests run in iframe and you can't write
+    // history from another domain (about:srcdoc)
+    const replaceStub = sandbox.stub(win.history, 'replaceState');
+    const firstPageId = 'i-amphtml-ad-page-1';
+    const pageCount = 2;
+    const pages = createPages(story.element, pageCount,
+        [firstPageId, 'page-1']);
+    const firstPage = pages[0];
+    firstPage.setAttribute('ad', '');
+
+    story.buildCallback();
+    return story.layoutCallback()
+        .then(() => {
+          return expect(replaceStub).to.not.have.been.called;
         });
   });
 });

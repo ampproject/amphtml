@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-trust';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
@@ -49,9 +50,6 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     /** @private {?boolean} */
     this.autoplay_ = null;
 
-    /** @private {?string} */
-    this.src_ = null;
-
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -83,10 +81,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
-    this.src_ = this.element.getAttribute('src');
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     // Register relevant actions
     this.registerAction('play', () => { this.play_(); }, ActionTrust.LOW);
@@ -135,9 +132,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true;
   }
 

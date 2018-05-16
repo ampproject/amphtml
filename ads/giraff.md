@@ -27,7 +27,8 @@ limitations under the License.
 
 ## Configuration
 
-For more information, please [see ad network documentation](https://www.giraff.io/help).
+For more information, see  [Giraff's documentation](https://www.giraff.io/help).
 
-Required parameters:
-- data-block-name
+### Required parameters
+
+- `data-block-name`

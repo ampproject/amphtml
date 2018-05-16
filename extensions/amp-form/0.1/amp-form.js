@@ -34,6 +34,7 @@ import {Services} from '../../../src/services';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+  escapeCssSelectorIdent,
   removeElement,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -158,12 +159,6 @@ export class AmpForm {
     /** @const @private {?string} */
     this.xhrVerify_ = this.getXhrUrl_('verify-xhr');
 
-    /**
-     * Indicates that the action will submit to canonical or not.
-     * @private {boolean|undefined}
-     */
-    this.isCanonicalAction_ = undefined;
-
     /** @const @private {boolean} */
     this.shouldValidate_ = !this.form_.hasAttribute('novalidate');
     // Need to disable browser validation in order to allow us to take full
@@ -225,6 +220,7 @@ export class AmpForm {
   }
 
   /**
+   * Handle actions that require at least high trust.
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @return {?Promise}
    * @private
@@ -234,13 +230,16 @@ export class AmpForm {
       this.whenDependenciesReady_().then(() => {
         this.handleSubmitAction_(invocation);
       });
+    } else if (invocation.method === 'clear') {
+      this.handleClearAction_();
     }
     return null;
   }
 
   /**
-   * Returns a promise that will be resolved when all dependencies used inside the form
-   * tag are loaded and built (e.g. amp-selector) or 2 seconds timeout - whichever is first.
+   * Returns a promise that will be resolved when all dependencies used inside
+   * the form tag are loaded and built (e.g. amp-selector) or 2 seconds timeout
+   * - whichever is first.
    * @return {!Promise}
    * @private
    */
@@ -336,12 +335,39 @@ export class AmpForm {
   }
 
   /**
-   * Note on stopImmediatePropagation usage here, it is important to emulate native
-   * browser submit event blocking. Otherwise any other submit listeners would get the
-   * event.
+   * Handles clearing the form through action service invocations.
+   * @private
+   */
+  handleClearAction_() {
+    this.form_.reset();
+    this.setState_(FormState_.INITIAL);
+    this.form_.classList.remove('user-valid');
+    this.form_.classList.remove('user-invalid');
+
+    const validityElements = this.form_.querySelectorAll(
+        '.user-valid, .user-invalid');
+    iterateCursor(validityElements, element => {
+      element.classList.remove('user-valid');
+      element.classList.remove('user-invalid');
+    });
+
+    const messageElements = this.form_.querySelectorAll(
+        '.visible[validation-for]');
+    iterateCursor(messageElements, element => {
+      element.classList.remove('visible');
+    });
+
+    removeValidityStateClasses(this.form_);
+  }
+
+  /**
+   * Note on stopImmediatePropagation usage here, it is important to emulate
+   * native browser submit event blocking. Otherwise any other submit listeners
+   * would get the event.
    *
-   * For example, action service shouldn't trigger 'submit' event if form is actually
-   * invalid. stopImmediatePropagation allows us to make sure we don't trigger it.
+   * For example, action service shouldn't trigger 'submit' event if form is
+   * actually invalid. stopImmediatePropagation allows us to make sure we don't
+   * trigger it.
    *
    * This prevents the default submission event in any of following cases:
    *   - The form is still finishing a previous submission.
@@ -481,6 +507,7 @@ export class AmpForm {
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
 
     if (isHeadOrGet) {
+      this.assertNoPasswordFields_();
       const values = this.getFormAsObject_();
       if (opt_extraFields) {
         deepMerge(values, opt_extraFields);
@@ -559,11 +586,22 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
+    this.assertNoPasswordFields_();
     // Non-xhr GET requests replacement should happen synchronously.
     for (let i = 0; i < varSubsFields.length; i++) {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
     }
     this.triggerFormSubmitInAnalytics_();
+  }
+
+  /**
+   * Fail if there are password fields present when the function is called.
+   * @private
+   */
+  assertNoPasswordFields_() {
+    const passwordFields = this.form_.querySelectorAll('input[type=password]');
+    user().assert(passwordFields.length == 0,
+        'input[type=password] may only appear in form[method=post]');
   }
 
   /**
@@ -807,21 +845,34 @@ function updateInvalidTypesClasses(element) {
   }
 }
 
+/**
+ * Removes all validity classes from elements in the given form.
+ * @param {!Element} form
+ */
+function removeValidityStateClasses(form) {
+  const dummyInput = document.createElement('input');
+  for (const validityState in dummyInput.validity) {
+    const elements = form.querySelectorAll(
+        `.${escapeCssSelectorIdent(validityState)}`);
+    iterateCursor(elements, element => element.classList.remove(validityState));
+  }
+}
 
 /**
- * Checks user validity which applies .user-valid and .user-invalid AFTER the user
- * interacts with the input by moving away from the input (blur) or by changing its
- * value (input).
+ * Checks user validity which applies .user-valid and .user-invalid AFTER the
+ * user interacts with the input by moving away from the input (blur) or by
+ * changing its value (input).
  *
  * See :user-invalid spec for more details:
  *   https://drafts.csswg.org/selectors-4/#user-pseudos
  *
- * The specs are still not fully specified. The current solution tries to follow a common
- * sense approach for when to apply these classes. As the specs gets clearer, we should
- * strive to match it as much as possible.
+ * The specs are still not fully specified. The current solution tries to follow
+ * a common sense approach for when to apply these classes. As the specs gets
+ * clearer, we should strive to match it as much as possible.
  *
  * @param {!Element} element
- * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
+ * @param {boolean=} propagate Whether to propagate the user validity to
+ * ancestors.
  * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
@@ -867,8 +918,8 @@ function checkUserValidity(element, propagate = false) {
 
 
 /**
- * Responds to user interaction with an input by checking user validity of the input
- * and possibly its input-related ancestors (e.g. feildset, form).
+ * Responds to user interaction with an input by checking user validity of the
+ * input and possibly its input-related ancestors (e.g. feildset, form).
  * @param {!Element} input
  * @private visible for testing.
  */

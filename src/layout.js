@@ -20,6 +20,7 @@
  */
 
 import {dev, user} from './log';
+import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles} from './style';
 import {startsWith} from './string';
@@ -98,6 +99,10 @@ export const LOADING_ELEMENTS_ = {
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
   'AMP-EMBED': true,
+  'AMP-FACEBOOK': true,
+  'AMP-FACEBOOK-COMMENTS': true,
+  'AMP-FACEBOOK-LIKE': true,
+  'AMP-FACEBOOK-PAGE': true,
   'AMP-IFRAME': true,
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
@@ -333,9 +338,9 @@ export function applyStaticLayout(element) {
     return layout;
   }
 
-  // If the layout was already done by server-side rendering (SSR), then the code
-  // below will not run. Any changes below will necessitate a change to SSR and must
-  // be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
+  // If the layout was already done by server-side rendering (SSR), then the
+  // code below will not run. Any changes below will necessitate a change to SSR
+  // and must be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
 
   // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
@@ -442,16 +447,18 @@ export function applyStaticLayout(element) {
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
   } else if (layout == Layout.INTRINSIC) {
-    // Intrinsic uses an svg inside the sizer element rather than the padding trick
-    // Note a naked svg won't work becasue other thing expect the i-amphtml-sizer element
-    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
-    const intrinsicSizer = element.ownerDocument.createElement('img');
-    sizer.classList.add('i-amphtml-sizer');
-    intrinsicSizer.classList.add('i-amphtml-intrinsic-sizer');
+    // Intrinsic uses an svg inside the sizer element rather than the padding
+    // trick Note a naked svg won't work becasue other thing expect the
+    // i-amphtml-sizer element
+    const sizer = htmlFor(element)`
+      <i-amphtml-sizer class="i-amphtml-sizer">
+        <img class="i-amphtml-intrinsic-sizer" />
+      </i-amphtml-sizer>`;
+    const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute('src',
-        `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>`);
-    sizer.appendChild(intrinsicSizer);
+        `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
     element.insertBefore(sizer, element.firstChild);
+    // TODO(jpettitt): sizer is leaked and can't be cleaned up.
     element.sizerElement = intrinsicSizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.

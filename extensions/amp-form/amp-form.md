@@ -104,11 +104,12 @@ See the [Custom Validation](#custom-validations) section for more details.
 **Allowed**:
 
 * Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
+* `<input type=password>` inside of `<form method=POST action-xhr>`.
 * [`amp-selector`](https://www.ampproject.org/docs/reference/components/amp-selector)
 
 **Not Allowed**:
 
-* `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>`
+* `<input type=button>`, `<input type=file>`, `<input type=image>`
 * Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
 
 (Relaxing some of these rules might be reconsidered in the future - [please let us know](https://www.ampproject.org/support/developer/) if you require these and provide use cases).
@@ -116,7 +117,13 @@ See the [Custom Validation](#custom-validations) section for more details.
 For details on valid inputs and fields, see [amp-form rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
 
 ## Actions
-`amp-form` exposes one action: `submit`. This allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). You can [read more about Actions and Events in AMP in the spec](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
+`amp-form` exposes two actions: `submit`, and `clear`.
+
+`submit` allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events).
+
+`clear` empties the values from each input in the form. This can allow users to quickly fill out forms a second time.
+
+You can [read more about Actions and Events in AMP in the spec](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
 
 ## Events
 `amp-form` exposes the following events:
@@ -279,7 +286,7 @@ See the [full example here](../../examples/forms.amp.html).
 
 ### Redirecting after a submission
 
-You can redirect users to a new page after a successful `amp-form` submission by setting the `AMP-Redirect-To` response header and specifying a redirect URL. The redirect URL must be a HTTPS URL, otherwise AMP will throw an error and redirection won't occur.  HTTP response headers are configured via your server. 
+You can redirect users to a new page after a successful `amp-form` submission by setting the `AMP-Redirect-To` response header and specifying a redirect URL. The redirect URL must be a HTTPS URL, otherwise AMP will throw an error and redirection won't occur.  HTTP response headers are configured via your server.
 
 Make sure to update your `Access-Control-Expose-Headers` response header to include `AMP-Redirect-To` to the list of allowed headers.  Learn more about these headers in [CORS Security in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 

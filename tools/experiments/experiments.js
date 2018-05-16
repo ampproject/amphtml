@@ -196,12 +196,6 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: '3p-use-ampcontext',
-    name: 'Use AmpContext for window.context messaging',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
-    spec: 'https://github.com/ampproject/amphtml/issues/6829',
-  },
-  {
     id: 'as-use-attr-for-format',
     name: 'Use slot width/height attribute for AdSense size format',
   },
@@ -257,8 +251,8 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
-    id: 'amp-document-recommendations',
-    name: 'Docment level recommendations and infinte scroll',
+    id: 'amp-next-page',
+    name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
@@ -277,6 +271,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
   },
   {
+    id: 'no-sync-xhr-in-ads',
+    name: 'Disables syncronous XHR requests in 3p iframes.',
+    spec: 'TODO',
+    cleanupIssue: 'TODO',
+  },
+  {
     id: 'video-service',
     name: 'Enables new implementation of unified Video Interface services.',
     spec: 'https://github.com/ampproject/amphtml/issues/13674',
@@ -286,7 +286,30 @@ const EXPERIMENTS = [
     id: 'iframe-messaging',
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14263',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
+  },
+  {
+    id: 'amp-fx-fade-in',
+    name: 'Enables amp-fx="fade-in" - scroll triggered timed fade in animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
+  },
+  {
+    id: 'amp-fx-fade-in-scroll',
+    name: 'Enables amp-fx="fade-in-scroll" - a scroll dependent fade animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
+  },
+  {
+    id: 'amp-img-native-srcset',
+    name: 'Enables native browser implementation of srcset and sizes',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
+  },
+  {
+    id: 'layers',
+    name: 'Enables the new Layers position/measurement system',
+    spec: 'https://github.com/ampproject/amphtml/issues/3434',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
 ];
 

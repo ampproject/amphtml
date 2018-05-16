@@ -16,7 +16,6 @@ limitations under the License.
 
 # Sekindo
 
-Please visit our web (http://www.sekindo.com) for more details
 ## Example
 
 ```html
@@ -28,6 +27,8 @@ Please visit our web (http://www.sekindo.com) for more details
 
 ## Configuration
 
-__Required:__
+For details on the configuration semantics, please visit [www.sekindo.com](http://www.sekindo.com).
 
-- `data-spaceId` - Adunit unique id
+### Required parameters
+
+- `data-spaceId` - Ad unit unique id

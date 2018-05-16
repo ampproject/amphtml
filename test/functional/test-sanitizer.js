@@ -18,8 +18,8 @@ import {
   resolveUrlAttr,
   rewriteAttributeValue,
   rewriteAttributesForElement,
-  sanitizeFormattingHtml,
   sanitizeHtml,
+  sanitizeTagsForTripleMustache,
 } from '../../src/sanitizer';
 import {toggleExperiment} from '../../src/experiments';
 
@@ -241,6 +241,18 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('<div subscriptions-dialog="">link</div>'))
         .to.equal('<div subscriptions-dialog="">link</div>');
   });
+
+  it('should allow source::src with vaild protocol', () => {
+    expect(sanitizeHtml('<source src="https://www.foo.com/">'))
+        .to.equal('<source src="https://www.foo.com/">');
+  });
+
+  it('should not allow source::src with invaild protocol', () => {
+    expect(sanitizeHtml('<source src="http://www.foo.com">'))
+        .to.equal('<source src="">');
+    expect(sanitizeHtml('<source src="<script>bad()</script>">'))
+        .to.equal('<source src="">');
+  });
 });
 
 
@@ -303,10 +315,9 @@ describe('rewriteAttributeValue', () => {
 describe('resolveUrlAttr', () => {
 
   it('should throw if __amp_source_origin is set', () => {
-    expect(() => resolveUrlAttr('a', 'href',
+    allowConsoleError(() => { expect(() => resolveUrlAttr('a', 'href',
         '/doc2?__amp_source_origin=https://google.com',
-        'http://acme.org/doc1'))
-        .to.throw(/Source origin is not allowed in/);
+        'http://acme.org/doc1')).to.throw(/Source origin is not allowed in/); });
   });
 
   it('should be called by sanitizer', () => {
@@ -392,33 +403,48 @@ describe('resolveUrlAttr', () => {
 });
 
 
-describe('sanitizeFormattingHtml', () => {
+describe('sanitizeTagsForTripleMustache', () => {
 
   it('should output basic text', () => {
-    expect(sanitizeFormattingHtml('abc')).to.be.equal('abc');
+    expect(sanitizeTagsForTripleMustache('abc')).to.be.equal('abc');
   });
 
   it('should output valid markup', () => {
-    expect(sanitizeFormattingHtml('<b>abc</b>')).to.be.equal('<b>abc</b>');
-    expect(sanitizeFormattingHtml('<b>ab<br>c</b>')).to.be.equal(
+    expect(sanitizeTagsForTripleMustache('<b>abc</b>'))
+        .to.be.equal('<b>abc</b>');
+    expect(sanitizeTagsForTripleMustache('<b>ab<br>c</b>')).to.be.equal(
         '<b>ab<br>c</b>');
-    expect(sanitizeFormattingHtml('<b>a<i>b</i>c</b>')).to.be.equal(
+    expect(sanitizeTagsForTripleMustache('<b>a<i>b</i>c</b>')).to.be.equal(
         '<b>a<i>b</i>c</b>');
+    const markupWithClassAttribute = '<p class="some-class">heading</p>';
+    expect(sanitizeTagsForTripleMustache(markupWithClassAttribute))
+        .to.be.equal(markupWithClassAttribute);
+    const markupWithClassesAttribute =
+        '<div class="some-class another"><span>heading</span></div>';
+    expect(sanitizeTagsForTripleMustache(markupWithClassesAttribute))
+        .to.be.equal(markupWithClassesAttribute);
+    const markupParagraph = '<p class="valid-class">paragraph</p>';
+    expect(sanitizeTagsForTripleMustache(markupParagraph))
+        .to.be.equal(markupParagraph);
   });
 
   it('should NOT output non-whitelisted markup', () => {
-    expect(sanitizeFormattingHtml('a<div>b</div>c')).to.be.equal('ac');
-    expect(sanitizeFormattingHtml('a<style>b</style>c')).to.be.equal('ac');
-    expect(sanitizeFormattingHtml('a<img>c')).to.be.equal('ac');
+    expect(sanitizeTagsForTripleMustache('a<style>b</style>c'))
+        .to.be.equal('ac');
+    expect(sanitizeTagsForTripleMustache('a<img>c'))
+        .to.be.equal('ac');
   });
 
-  it('should NOT output attributes', () => {
-    expect(sanitizeFormattingHtml('<b color=red style="color: red">abc</b>'))
-        .to.be.equal('<b>abc</b>');
+  it('should output style attributes if inline styles enabled', () => {
+    toggleExperiment(self, 'inline-styles', true,
+        /* opt_transientExperiment */ true);
+    expect(sanitizeTagsForTripleMustache(
+        '<b style="color: red">abc</b>'))
+        .to.be.equal('<b style="color: red">abc</b>');
   });
 
   it('should compensate for broken markup', () => {
-    expect(sanitizeFormattingHtml('<b>a<i>b')).to.be.equal(
+    expect(sanitizeTagsForTripleMustache('<b>a<i>b')).to.be.equal(
         '<b>a<i>b</i></b>');
   });
 

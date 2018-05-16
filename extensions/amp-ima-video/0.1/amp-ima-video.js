@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -28,6 +29,7 @@ import {
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getConsentPolicyState} from '../../../src/consent-state';
 import {
   getData,
   listen,
@@ -158,30 +160,41 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
+  getConsentPolicy() {
+    return null;
+  }
+
+  /** @override */
   layoutCallback() {
-    const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
-        this.element, 'ima-video');
-    iframe.setAttribute('allowfullscreen', 'true');
-    this.applyFillContent(iframe);
+    const consentPolicyId = super.getConsentPolicy();
+    const consentPromise = consentPolicyId
+      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      : Promise.resolve(null);
+    return consentPromise.then(initialConsentState => {
+      const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
+          this.element, 'ima-video', {initialConsentState});
+      iframe.setAttribute('allowfullscreen', 'true');
+      this.applyFillContent(iframe);
 
-    this.iframe_ = iframe;
+      this.iframe_ = iframe;
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
+      const deferred = new Deferred();
+      this.playerReadyPromise_ = deferred.promise;
+      this.playerReadyResolver_ = deferred.resolve;
+
+      this.unlistenMessage_ = listen(
+          this.win,
+          'message',
+          this.handlePlayerMessages_.bind(this)
+      );
+
+      this.element.appendChild(iframe);
+
+      installVideoManagerForDoc(this.element);
+      Services.videoManagerForDoc(this.win.document).register(this);
+
+      return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
-
-    this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handlePlayerMessages_.bind(this)
-    );
-
-    this.element.appendChild(iframe);
-
-    installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.win.document).register(this);
-
-    return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
 
   /** @override */
@@ -199,9 +212,9 @@ class AmpImaVideo extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true;
   }
 
@@ -320,8 +333,8 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
-    // TODO(@aghassemi, #10597) Make internal <video> element go fullscreen instead
-    // using postMessages
+    // TODO(@aghassemi, #10597) Make internal <video> element go fullscreen
+    // instead using postMessages
     if (!this.iframe_) {
       return;
     }
@@ -355,6 +368,11 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
     return false;
   }
 

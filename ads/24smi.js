@@ -43,6 +43,7 @@ function createContainer(global, blockId) {
 
 /**
  * @param {string} src
+ * @return {string}
  */
 function getBlockId(src) {
   const parts = src.split('/');

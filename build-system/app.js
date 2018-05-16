@@ -551,8 +551,18 @@ app.use('/impression-proxy/', (req, res) => {
 app.post('/get-consent-v1/', (req, res) => {
   assertCors(req, res, ['POST']);
   const body = {
-    'consentRequired': true,
+    'promptIfUnknown': true,
+    'sharedData': {
+      'tfua': true,
+      'coppa': true,
+    },
   };
+  res.json(body);
+});
+
+app.post('/get-consent-no-prompt/', (req, res) => {
+  assertCors(req, res, ['POST']);
+  const body = {};
   res.json(body);
 });
 
@@ -691,9 +701,10 @@ app.use(['/examples/*', '/extensions/*'], (req, res, next) => {
 });
 
 /**
- * Append ?sleep=5 to any included JS file in examples to emulate delay in loading that
- * file. This allows you to test issues with your extension being late to load
- * and testing user interaction with your element before your code loads.
+ * Append ?sleep=5 to any included JS file in examples to emulate delay in
+ * loading that file. This allows you to test issues with your extension being
+ * late to load and testing user interaction with your element before your code
+ * loads.
  *
  * Example delay loading amp-form script by 5 seconds:
  * <script async custom-element="amp-form"
@@ -873,8 +884,11 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
     source: 'local' + req.params.id,
-    products: ['scenic-2017.appspot.com:news',
-      'scenic-2017.appspot.com:product2'],
+    granted: true,
+    grantedReason: 'NOT_SUBSCRIBED',
+    data: {
+      login: true,
+    },
   });
 });
 
