@@ -321,7 +321,8 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeStandaloneStory_();
     }
 
-    this.element.querySelector('amp-story-page').setAttribute('active', '');
+    const pageEl = this.element.querySelector('amp-story-page');
+    pageEl && pageEl.setAttribute('active', '');
 
     this.initializeListeners_();
     this.initializeListenersForDev_();
@@ -431,6 +432,10 @@ export class AmpStory extends AMP.BaseElement {
       this.performTapNavigation_(direction);
     });
 
+    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+      this.onAdStateUpdate_(isAd);
+    });
+
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.onBookendStateUpdate_(isActive);
     });
@@ -480,7 +485,11 @@ export class AmpStory extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @param {number} deltaX
+   * @return {boolean}
+   * @private
+   */
   isSwipeLargeEnoughForHint_(deltaX) {
     return (Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
   }
@@ -887,8 +896,12 @@ export class AmpStory extends AMP.BaseElement {
         this.registerAndPreloadBackgroundAudio_();
       }
 
+      if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+        oldPage && oldPage.muteAllMedia();
+        this.activePage_.unmuteAllMedia();
+      }
+
       this.preloadPagesByDistance_();
-      this.reapplyMuting_();
       this.forceRepaintForSafari_();
       this.maybePreloadBookend_();
     });
@@ -1025,6 +1038,20 @@ export class AmpStory extends AMP.BaseElement {
         this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, state.isLandscape);
       },
     }, {});
+  }
+
+  /**
+   * Reacts to the ad state updates, and pauses the background-audio when an ad
+   * is displayed.
+   * @param {boolean} isAd
+   * @private
+   */
+  onAdStateUpdate_(isAd) {
+    if (this.storeService_.get(StateProperty.MUTED_STATE)) {
+      return;
+    }
+
+    isAd ? this.pauseBackgroundAudio_() : this.playBackgroundAudio_();
   }
 
   /**
@@ -1506,12 +1533,21 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   mute_() {
-    if (this.backgroundAudioEl_) {
-      this.mediaPool_.mute(this.backgroundAudioEl_);
+    this.pauseBackgroundAudio_();
+    if (this.activePage_) {
+      this.activePage_.muteAllMedia();
     }
-    this.pages_.forEach(page => {
-      page.muteAllMedia();
-    });
+  }
+
+  /**
+   * Pauses the background audio.
+   * @private
+   */
+  pauseBackgroundAudio_() {
+    if (!this.backgroundAudioEl_) {
+      return;
+    }
+    this.mediaPool_.pause(this.backgroundAudioEl_);
   }
 
   /**
@@ -1520,10 +1556,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   unmute_() {
     const unmuteAllMedia = () => {
-      if (this.backgroundAudioEl_) {
-        this.mediaPool_.unmute(this.backgroundAudioEl_);
-        this.mediaPool_.play(this.backgroundAudioEl_);
-      }
+      this.playBackgroundAudio_();
       if (this.activePage_) {
         this.activePage_.unmuteAllMedia();
       }
@@ -1534,15 +1567,15 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Reapplies the muting status for the currently-active media in the story.
+   * Unmutes and plays the background audio.
    * @private
    */
-  reapplyMuting_() {
-    const isMuted = this.storeService_.get(StateProperty.MUTED_STATE);
-    if (!isMuted) {
-      this.mute_();
-      this.unmute_();
+  playBackgroundAudio_() {
+    if (!this.backgroundAudioEl_) {
+      return;
     }
+    this.mediaPool_.unmute(this.backgroundAudioEl_);
+    this.mediaPool_.play(this.backgroundAudioEl_);
   }
 
   /**
