@@ -112,7 +112,7 @@ function getNavStart(win) {
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
- * @returns {boolean}  Whether Google Ads should attempt to render via the A4A
+ * @return {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
@@ -126,7 +126,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
 /**
  * Checks whether native crypto is supported for win.
  * @param {!Window} win  Host window for the ad.
- * @returns {boolean} Whether native crypto is supported.
+ * @return {boolean} Whether native crypto is supported.
  */
 export function supportsNativeCrypto(win) {
   return win.crypto && (win.crypto.subtle || win.crypto.webkitSubtle);
@@ -619,7 +619,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
  *     integer (base 10) experiment IDs.
  * @param {?string} currentIdString  If present, a string containing a
  *   comma-separated list of integer experiment IDs.
- * @returns {string}  New experiment list string, including newId iff it is
+ * @return {string}  New experiment list string, including newId iff it is
  *   a valid (integer) experiment ID.
  * @see parseExperimentIds, validateExperimentIds
  */

@@ -22,7 +22,7 @@ const hasOwnProperty = Object.prototype.hasOwnProperty;
  *
  * @param {!Object} target
  * @param {...Object} var_args
- * @returns {!Object}
+ * @return {!Object}
  */
 export function assign(target, var_args) {
   if (target == null) {

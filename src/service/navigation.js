@@ -418,15 +418,14 @@ export class Navigation {
   scrollToElement_(elem, hash) {
     // Scroll to the element if found.
     if (elem) {
-      // The first call to scrollIntoView overrides browsers' default
-      // scrolling behavior. The second call insides setTimeout allows us to
-      // scroll to that element properly.
-      // Without doing this, the viewport will not catch the updated scroll
-      // position on iOS Safari and hence calculate the wrong scrollTop for
-      // the scrollbar jumping the user back to the top for failing to calculate
-      // the new jumped offset.
-      // Without the first call there will be a visual jump due to browser scroll.
-      // See https://github.com/ampproject/amphtml/issues/5334 for more details.
+      // The first call to scrollIntoView overrides browsers' default scrolling
+      // behavior. The second call insides setTimeout allows us to scroll to
+      // that element properly. Without doing this, the viewport will not catch
+      // the updated scroll position on iOS Safari and hence calculate the wrong
+      // scrollTop for the scrollbar jumping the user back to the top for
+      // failing to calculate the new jumped offset. Without the first call
+      // there will be a visual jump due to browser scroll. See
+      // https://github.com/ampproject/amphtml/issues/5334 for more details.
       this.viewport_./*OK*/scrollIntoView(elem);
       Services.timerFor(this.ampdoc.win).delay(() =>
         this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);

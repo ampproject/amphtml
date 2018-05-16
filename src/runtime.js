@@ -130,8 +130,8 @@ export function installBuiltins(global) {
 
 
 /**
- * Applies the runtime to a given global scope for a single-doc mode.
- * Multi frame support is currently incomplete.
+ * Applies the runtime to a given global scope for a single-doc mode. Multi
+ * frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
  * @param {function(!Window, !./service/extensions-impl.Extensions):!Promise} callback
  * @return {!Promise}
@@ -430,7 +430,8 @@ export class MultidocManager {
    * @param {!Element} hostElement
    * @param {string} url
    * @param {!Object<string, string>|undefined} initParams
-   * @param {function(!Object, !ShadowRoot, !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
+   * @param {function(!Object, !ShadowRoot,
+   * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
    * @return {!Object}
    * @private
    */
