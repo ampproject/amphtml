@@ -409,7 +409,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * @retun {boolean}
+   * @return {boolean}
    */
   isBuilt() {
     return this.isBuilt_;
@@ -443,7 +443,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
     const fragment = BookendComponent
         .buildTemplates(components, this.win.document);
-    const container = this.getInnerContainer_();
+    const container = dev().assertElement(
+        BookendComponent.buildContainer(this.getInnerContainer_(),
+            this.win.document));
     this.resources_.mutateElement(container,
         () => container.appendChild(fragment));
   }
