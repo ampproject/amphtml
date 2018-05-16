@@ -17,7 +17,6 @@ FAIL
 |  <!--
 |    Test Description:
 |    Tests support for the amp-sidebar tag.
-|    TODO(honeybadgerdontcare): Include spec url once publicly available.
 |  -->
 |  <!doctype html>
 |  <html ⚡>
