@@ -436,6 +436,7 @@ function isExperimentOn_(id) {
 /**
  * Toggles the experiment.
  * @param {string} id
+ * @param {string} name
  * @param {boolean=} opt_on
  */
 function toggleExperiment_(id, name, opt_on) {

@@ -35,7 +35,8 @@ import {setStyles} from '../../../../src/style';
 export class FxProvider {
 
   /**
-   * @param  {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} fxType
    */
   constructor(ampdoc, fxType) {
 
@@ -79,6 +80,8 @@ export class FxElement {
    * @param {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} positionObserver
    * @param {!../../../../src/service/viewport/viewport-impl.Viewport} viewport
    * @param {!../../../../src/service/resources-impl.Resources} resources
+   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} fxType
    */
   constructor(element, positionObserver, viewport, resources, ampdoc, fxType) {
 
@@ -191,7 +194,7 @@ export class FxElement {
     });
   }
 
-  /** @returns {!../../../../src/service/ampdoc-impl.AmpDoc} */
+  /** @return {!../../../../src/service/ampdoc-impl.AmpDoc} */
   getAmpDoc() {
     return this.ampdoc_;
   }
@@ -226,14 +229,14 @@ export class FxElement {
   }
 
   /**
-   * @returns {number}
+   * @return {number}
    */
   getFlyInDistance() {
     return this.flyInDistance_;
   }
 
   /**
-   * @returns {string}
+   * @return {string}
    */
   getEasing() {
     return this.easing_;
