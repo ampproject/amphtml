@@ -118,8 +118,8 @@ describe('validateAmp4AdsCss', () => {
         errors);
   });
 
-  it('reports non-animation properties in animation selectors', () => {
-    // The non-animation property (in this case color) is not allowed in an
+  it('validates non-animation properties in animation selectors', () => {
+    // The non-animation property (in this case color) is allowed in an
     // animation selector.
     const css = '.amp-animate .box { ' +
         '    color: red; ' +
@@ -133,24 +133,12 @@ describe('validateAmp4AdsCss', () => {
         errors);
     assertJSONEquals([], errors);
     parse_css.validateAmp4AdsCss(sheet, errors);
-    assertJSONEquals(
-        [{
-          'line': 1,
-          'col': 24,
-          'tokenType': 'ERROR',
-          'params': [
-            'style', 'color', 'transition',
-            '[\'animation\', \'opacity\', \'transform\', \'transition\', ' +
-                '\'visibility\']'
-          ],
-          'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH'
-        }],
-        errors);
+    assertJSONEquals([], errors);
   });
 
-  it('reports non-animation properties in animation selectors (vendor prefixed)',
+  it('validates non-animation properties in animation selectors (vendor prefixed)',
      () => {
-       // The non-animation property (in this case color) is not allowed in an
+       // The non-animation property (in this case color) is allowed in an
        // animation selector.
        const css = '.amp-animate .box { ' +
            '    color: red; ' +
@@ -164,19 +152,7 @@ describe('validateAmp4AdsCss', () => {
            errors);
        assertJSONEquals([], errors);
        parse_css.validateAmp4AdsCss(sheet, errors);
-       assertJSONEquals(
-           [{
-             'line': 1,
-             'col': 24,
-             'tokenType': 'ERROR',
-             'params': [
-               'style', 'color', '-ms-transition',
-               '[\'animation\', \'opacity\', \'transform\', \'transition\', ' +
-                   '\'visibility\']'
-             ],
-             'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH'
-           }],
-           errors);
+       assertJSONEquals([], errors);
      });
 
   it('No longer an error when .amp-animate is missing', () => {

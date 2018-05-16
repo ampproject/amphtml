@@ -101,6 +101,7 @@ tags: {  # <amp-state>
   requires_extension: "amp-bind"
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
+  disallowed_ancestor: "TEMPLATE"
   attr_lists: "optional-src-amp4email"
   attrs: {
     name: "id"
