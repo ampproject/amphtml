@@ -651,7 +651,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
 
 /**
  * @param {string} path
- * @param {string} css
+ * @param {string} name
  * @param {string} version
  * @param {!Object} options
  */
@@ -1307,6 +1307,7 @@ function buildWebPushPublisherFiles(options) {
 /**
  * Build amp-web-push publisher files HTML page.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildWebPushPublisherFilesVersion(version, options) {
@@ -1381,6 +1382,7 @@ function buildLoginDone(options) {
 /**
  * Build "Login Done" page for the specified version.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildLoginDoneVersion(version, options) {
@@ -1584,6 +1586,7 @@ function mkdirSync(path) {
 }
 
 function toPromise(readable) {
+  // eslint-disable-next-line amphtml-internal/resolve-inside-promise-resolver
   return new Promise(function(resolve, reject) {
     readable.on('error', reject).on('end', resolve);
   });
