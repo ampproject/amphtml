@@ -108,10 +108,12 @@ function runLinter(path, stream, options) {
           if (!options.fix) {
             log(colors.yellow('NOTE 1:'),
                 'You may be able to automatically fix some of these warnings ' +
-                '/ errors by running', colors.cyan('gulp lint --fix') + '.');
+                '/ errors by running',
+                colors.cyan('gulp lint --local-changes --fix'),
+                'from your local branch.');
             log(colors.yellow('NOTE 2:'),
-                'Since this is a destructive operation (operates on the file',
-                'system), make sure you commit before running the command.');
+                'Since this is a destructive operation (that edits your files',
+                'in-place), make sure you commit before running the command.');
           }
         }
       }))
