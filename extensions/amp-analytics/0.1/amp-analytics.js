@@ -348,7 +348,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {string} url
    * @param {string=} opt_preloadAs
-   * @VisibleForTesting
+   * @visibleForTesting
    */
   preload(url, opt_preloadAs) {
     this.preconnect.preload(url, opt_preloadAs);
@@ -358,7 +358,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Gets the resourceID of the parent amp-ad element.
    * Throws an exception if no such element.
    * @return {string}
-   * @VisibleForTesting
+   * @visibleForTesting
    */
   assertAmpAdResourceId() {
     return user().assertString(
