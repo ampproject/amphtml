@@ -584,6 +584,22 @@ describe('CssLength', () => {
 });
 
 /**
+ * Helper for sorting attributes.
+ * @param {string} a
+ * @param {string} b
+ * @return {number}
+ */
+function compareAttrNames(a, b) {
+  // amp-bind attributes (e.g. "[name]") should be after other attributes.
+  if (a.startsWith('[') && !b.startsWith('[')) return 1;
+  if (!a.startsWith('[') && b.startsWith('[')) return -1;
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+
+/**
  * Helper for ValidatorRulesMakeSense.
  * @param {!amp.validator.AttrSpec} attrSpec
  * @param {!amp.validator.ValidatorRules} rules
@@ -757,6 +773,11 @@ describe('ValidatorRulesMakeSense', () => {
   const mandatoryParentRegex = new RegExp('(!DOCTYPE|\\$ROOT|[A-Z0-9-]+)');
   const disallowedAncestorRegex = new RegExp('[A-Z0-9-]+');
   for (const tagSpec of rules.tags) {
+    // Helper for message output, set a tagspec_name in this order:
+    // 1. tagSpec.specName, 2. tagSpec.tagName, 3. UNKNOWN_TAGSPEC.
+    const tagSpecName =
+        tagSpec.specName || tagSpec.tagName || 'UNKNOWN_TAGSPEC';
+
     // html_format is never UNKNOWN_CODE.
     it('html_format should never be set to UNKNOWN_CODE', () => {
       expect(
@@ -877,7 +898,7 @@ describe('ValidatorRulesMakeSense', () => {
     const attrNameIsUnique = {};
     for (const attrSpecId of tagSpec.attrs) {
       if (attrSpecId < 0) {
-        it('unique attr_name within tag_spec (simple attrs)', () => {
+        it('unique attr_name within tag_spec \'' + tagSpecName + '\'', () => {
           const attrName = rules.internedStrings[-1 - attrSpecId];
           expect(attrNameIsUnique.hasOwnProperty(attrName)).toBe(false);
           attrNameIsUnique[attrName] = 0;
@@ -943,12 +964,17 @@ describe('ValidatorRulesMakeSense', () => {
       }
 
       if (attrSpec.dispatchKey) {
-        it('tag_spec can not have more than one dispatch_key', () => {
+        it('tag_spec ' + tagSpecName + ' can not have more than one dispatch_key', () => {
           expect(seenDispatchKey).toBe(false);
           seenDispatchKey = true;
         });
       }
     }
+
+    it('\'' + tagSpecName + '\' has attrs not sorted alphabetically by name', () => {
+      var sortedAttrs = Object.keys(attrNameIsUnique).sort(compareAttrNames);
+      expect(Object.keys(attrNameIsUnique)).toEqual(sortedAttrs);
+    });
 
     // cdata
     if (tagSpec.cdata !== null) {

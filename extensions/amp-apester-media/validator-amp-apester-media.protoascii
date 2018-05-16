@@ -31,12 +31,12 @@ tags: {  # <amp-apester-media>
   tag_name: "AMP-APESTER-MEDIA"
   requires_extension: "amp-apester-media"
   attrs: {
-    name: "data-apester-media-id"
+    name: "data-apester-channel-token"
     mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"
     value_regex: "[0-9a-zA-Z]+"
   }
   attrs: {
-    name: "data-apester-channel-token"
+    name: "data-apester-media-id"
     mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"
     value_regex: "[0-9a-zA-Z]+"
   }

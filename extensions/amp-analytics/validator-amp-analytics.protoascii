@@ -58,7 +58,6 @@ tags: {  # <amp-analytics>
   html_format: EXPERIMENTAL
   tag_name: "AMP-ANALYTICS"
   requires_extension: "amp-analytics"
-  attrs: { name: "type" }
   attrs: {
     name: "config"
     value_url: {
@@ -68,6 +67,7 @@ tags: {  # <amp-analytics>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "type" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }
 

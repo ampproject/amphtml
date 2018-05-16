@@ -54,7 +54,6 @@ tags: {  # <amp-ad>
   attrs: { name: "alt" }
   attrs: { name: "json" }
   attrs: { name: "rtc-config" }
-  attrs: { name: "template" }
   attrs: {
     name: "src"
     value_url: {
@@ -63,6 +62,7 @@ tags: {  # <amp-ad>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "template" }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
@@ -177,7 +177,6 @@ tags: {  # <amp-embed>
   attrs: { name: "alt" }
   attrs: { name: "json" }
   attrs: { name: "rtc-config" }
-  attrs: { name: "template" }
   attrs: {
     name: "src"
     value_url: {
@@ -186,6 +185,7 @@ tags: {  # <amp-embed>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "template" }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"

@@ -615,7 +615,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 103
+  // NEXT AVAILABLE TAG: 104
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -644,6 +644,7 @@ message ValidationError {
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG = 50;
     STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 102;
+    INLINE_STYLE_TOO_LONG = 103;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;

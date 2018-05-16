@@ -31,8 +31,7 @@ tags: {  # <amp-install-serviceworker>
   tag_name: "AMP-INSTALL-SERVICEWORKER"
   requires_extension: "amp-install-serviceworker"
   attrs: {
-    name: "src"
-    mandatory: true
+    name: "data-iframe-src"
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
@@ -40,7 +39,8 @@ tags: {  # <amp-install-serviceworker>
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
-    name: "data-iframe-src"
+    name: "src"
+    mandatory: true
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.

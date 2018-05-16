@@ -123,6 +123,9 @@ tags: {  # <amp-list>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
+  attrs: { name: "items" }
+  attrs: { name: "max-items" }
+  attrs: { name: "single-item" }
   attrs: {
     name: "src"
     mandatory: true
@@ -133,9 +136,6 @@ tags: {  # <amp-list>
     blacklisted_value_regex: "(__amp_source_origin|"
         "{{|}})"    # Mustache is disallowed in src.
   }
-  attrs: { name: "items" }
-  attrs: { name: "max-items" }
-  attrs: { name: "single-item" }
   # TODO(gregable): Implement validation that requires the template attr value
   # to reference the id of an existing template element.
   attrs: { name: "template" }
