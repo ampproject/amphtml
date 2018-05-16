@@ -16,13 +16,19 @@
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {dict} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/types';
 import {once} from '../../../src/utils/function';
+import {removeElement} from '../../../src/dom';
+import {startsWith} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
+
 
 
 /**
@@ -43,6 +49,33 @@ function getMethodName(prop, optType = null) {
 }
 
 
+/**
+ * @param {string} url
+ * @return {boolean}
+ */
+export function isVimeoUrl(url) {
+  return (/^(https?:)?\/\/((player|www).)?vimeo.com(?=$|\/)/).test(url);
+}
+
+
+/**
+ * @param {?} anything
+ * @return {boolean}
+ */
+function isJsonOrObj(anything) {
+  return anything && (
+    isObject(anything) || startsWith(/** @type {string} */ (anything), '{'));
+}
+
+
+/** @private {!Object<string, string>} */
+const VIMEO_EVENTS = {
+  'play': VideoEvents.PLAYING,
+  'pause': VideoEvents.PAUSED,
+  'ended': VideoEvents.ENDED,
+};
+
+
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVimeo extends AMP.BaseElement {
 
@@ -54,7 +87,16 @@ class AmpVimeo extends AMP.BaseElement {
     this.iframe_ = null;
 
     /** @private {function():string} */
-    this.setVolume_ = once(() => getMethodName('volume', 'set'));
+    this.setVolumeMethod_ = once(() => getMethodName('volume', 'set'));
+
+    /**
+     * @param {!Event} e
+     * @private
+     */
+    this.boundOnMessage_ = e => this.onMessage_(e);
+
+    /** @private {!UnlistenDef|null} */
+    this.unlistenFrame_ = null;
   }
 
   /**
@@ -62,11 +104,12 @@ class AmpVimeo extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    this.preconnect.url('https://player.vimeo.com', onLayout);
+    const {preconnect} = this;
+    preconnect.url('https://player.vimeo.com', onLayout);
     // Host that Vimeo uses to serve poster frames needed by player.
-    this.preconnect.url('https://i.vimeocdn.com', onLayout);
+    preconnect.url('https://i.vimeocdn.com', onLayout);
     // Host that Vimeo uses to serve JS, CSS and other assets needed.
-    this.preconnect.url('https://f.vimeocdn.com', onLayout);
+    preconnect.url('https://f.vimeocdn.com', onLayout);
   }
 
   /**
@@ -77,182 +120,191 @@ class AmpVimeo extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   buildCallback() {
     installVideoManagerForDoc(this.getAmpDoc());
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   layoutCallback() {
+    const {element} = this;
     const vidId = user().assert(
-        this.element.getAttribute('data-videoid'),
+        element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
-        this.element);
+        element);
+
     // See
     // https://developer.vimeo.com/player/embedding
-    const {element} = this;
     const iframe =
         htmlFor(element)`<iframe frameborder=0 alllowfullscreen></iframe>`;
+
     iframe.src = `https://player.vimeo.com/video/${encodeURIComponent(vidId)}`;
+
     this.applyFillContent(iframe);
     element.appendChild(iframe);
+
     this.iframe_ = iframe;
-    return this.loadPromise(iframe).then(() => {
-      Services.videoManagerForDoc(element).register(this);
-      element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
+    this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
+
+    this.sendCommand_('ping');
+
+    return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    this.removeIframe_();
+    return true; // layout again.
+  }
+
+  /** @private */
+  removeIframe_() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    if (this.unlistenFrame_) {
+      this.unlistenFrame_();
+      this.unlistenFrame_ = null;
+    }
+  }
+
+  /** @private */
+  onReady_() {
+    const {element} = this;
+
+    Services.videoManagerForDoc(element).register(this);
+    element.dispatchCustomEvent(VideoEvents.LOAD);
+
+    [Object.keys(VIMEO_EVENTS)].forEach(event =>
+      this.sendCommand_('addEventListener', event));
   }
 
   /**
-   * @override
-   * @inheritdoc
+   * @param {!Event} event
+   * @private
    */
+  onMessage_(event) {
+    if (!isVimeoUrl(event.origin)) {
+      return;
+    }
+
+    if (event.source !== this.iframe_.contentWindow) {
+      return;
+    }
+
+    const eventData = getData(event);
+
+    if (!isJsonOrObj(eventData)) {
+      return;
+    }
+
+    const data = /** @type {?JsonObject} */ (
+      isObject(eventData) ? eventData : tryParseJson(eventData));
+
+    if (data['event'] == 'ready' || data['method'] == 'ping') {
+      this.onReady_();
+      return;
+    }
+
+    const {element} = this;
+
+    const eventToDispatch = VIMEO_EVENTS[data['event']];
+    if (eventToDispatch) {
+      element.dispatchCustomEvent(eventToDispatch);
+    }
+  }
+
+  /** @override */
   pauseCallback() {
     this.pause();
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   pause() {
     this.sendCommand_('pause');
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   play() {
     this.sendCommand_('play');
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   mute() {
-    this.sendCommand_(this.setVolume_(), '0');
+    this.sendCommand_(this.setVolumeMethod_(), '0');
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   unmute() {
     // TODO(alanorozco): Set based on volume before unmuting.
-    this.sendCommand_(this.setVolume_(), '1');
+    this.sendCommand_(this.setVolumeMethod_(), '1');
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   isInteractive() {
     return true;
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   supportsPlatform() {
     return true;
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   preimplementsMediaSessionAPI() {
     // TODO(alanorozco): dis tru?
     return false;
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   preimplementsAutoFullscreen() {
     return false;
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   fullscreenEnter() {
     // NOOP. Not implemented by Vimeo.
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   fullscreenExit() {
     // NOOP. Not implemented by Vimeo.
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   isFullscreen() {
     return false;
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   showControls() {
-    // Not implemented by Vimeo.
+    // NOOP. Not implemented by Vimeo.
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   hideControls() {
-    // Not implemented by Vimeo.
+    // NOOP. Not implemented by Vimeo.
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   getMetadata() {
     // TODO(alanorozco)
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   getDuration() {
     // TODO(alanorozco)
     return 0;
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   getCurrentTime() {
     // TODO(alanorozco)
     return 0;
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   getPlayedRanges() {
     // TODO(alanorozco)
     return [];
