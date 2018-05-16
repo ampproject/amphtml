@@ -86,10 +86,7 @@ export class LocalSubscriptionPlatform {
 
     /** @private {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
-        serviceAdapter.getDialog());
-
-    /** @private {?Entitlement}*/
-    this.entitlement_ = null;
+        serviceAdapter.getDialog(), this.serviceAdapter_);
 
     /** @private @const {?string} */
     this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
@@ -107,7 +104,7 @@ export class LocalSubscriptionPlatform {
   /**
    * Validates the action map
    * @param {!JsonObject<string, string>} actionMap
-   * @returns {!JsonObject<string, string>}
+   * @return {!JsonObject<string, string>}
    */
   validateActionMap(actionMap) {
     user().assert(actionMap['login'],
@@ -163,12 +160,10 @@ export class LocalSubscriptionPlatform {
     }
   }
 
-  /**
-   * Renders the platform specific UI
-   * @param {!./amp-subscriptions.RenderState} renderState
-   */
-  activate(renderState) {
-    this.urlBuilder_.setAuthResponse(renderState.entitlement);
+  /** @override */
+  activate(entitlement) {
+    const renderState = entitlement.json();
+    this.urlBuilder_.setAuthResponse(renderState);
     this.actions_.build().then(() => {
       this.renderer_.render(renderState);
     });
@@ -193,9 +188,7 @@ export class LocalSubscriptionPlatform {
           this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
               .then(res => res.json())
               .then(resJson => {
-                const entitlement = Entitlement.parseFromJson(resJson);
-                this.entitlement_ = entitlement;
-                return entitlement;
+                return Entitlement.parseFromJson(resJson);
               }));
   }
 
@@ -235,6 +228,9 @@ export class LocalSubscriptionPlatform {
   getBaseScore() {
     return this.serviceConfig_['baseScore'] || 0;
   }
+
+  /** @override */
+  decorateUI(unusedNode, unusedAction, unusedOptions) {}
 }
 
 /**

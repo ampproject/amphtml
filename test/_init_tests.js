@@ -289,22 +289,26 @@ function warnForConsoleError() {
             'test code that generated the error:\n' +
         '        \'allowConsoleError(() => { <code that generated the ' +
             'error> });';
-    // TODO(rsimha, #14432): Throw an error here after all tests are fixed.
-    originalConsoleError(errorMessage + '\'\n' + helpMessage);
+    // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
+    if (window.__karma__.config.failOnConsoleError) {
+      throw new Error(errorMessage + '\'\n' + helpMessage);
+    } else {
+      originalConsoleError(errorMessage + '\'\n' + helpMessage);
+    }
   });
   this.allowConsoleError = function(func) {
     dontWarnForConsoleError();
-    func();
+    const result = func();
     try {
       expect(consoleErrorStub).to.have.been.called;
     } catch (e) {
       const helpMessage =
           'The test "' + testName + '" contains an "allowConsoleError" block ' +
           'that didn\'t result in a call to console.error.';
-      // TODO(rsimha, #14432): Throw an error here after all tests are fixed.
-      originalConsoleError(helpMessage);
+      throw new Error(helpMessage);
     }
     warnForConsoleError();
+    return result;
   };
 }
 

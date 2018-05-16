@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
+import {tryResolve} from '../../../src/utils/promise';
 
 
 
@@ -146,17 +148,16 @@ export class MediaTask {
     /** @private @const {string} */
     this.name_ = name;
 
-    /** @private {?function()} */
-    this.resolve_ = null;
-
-    /** @private {?function(*)} */
-    this.reject_ = null;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise} */
-    this.completionPromise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    this.completionPromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.resolve_ = deferred.resolve;
+
+    /** @private {?function(*)} */
+    this.reject_ = deferred.reject;
   }
 
   /**
@@ -231,7 +232,7 @@ export class PlayTask extends MediaTask {
     // The play() invocation is wrapped in a Promise.resolve(...) due to the
     // fact that some browsers return a promise from media elements' play()
     // function, while others return a boolean.
-    return Promise.resolve(mediaEl.play());
+    return tryResolve(() => mediaEl.play());
   }
 }
 

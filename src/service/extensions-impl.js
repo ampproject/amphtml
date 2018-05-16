@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {
   adoptServiceForEmbed,
@@ -49,6 +50,13 @@ const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
+
+/**
+ * Default milliseconds to wait for all extensions to load before erroring.
+ * (8 seconds is the same as the CSS boilerplate timoeout)
+ * @const
+ */
+const LOAD_TIMEOUT = 8000;
 
 /**
  * The structure that contains the declaration of a custom element.
@@ -168,12 +176,17 @@ export class Extensions {
   /**
    * Waits for the previously included extension to complete
    * loading/registration.
+   * @param {!Window} win
    * @param {string} extensionId
-   * @return {!Promise<!ExtensionDef>}
+   * @param {number=} opt_timeout
+   * @return {!Promise<?ExtensionDef>}
    */
-  waitForExtension(extensionId) {
-    return this.waitFor_(this.getExtensionHolder_(
-        extensionId, /* auto */ false));
+  waitForExtension(win, extensionId, opt_timeout) {
+    return /** @type {!Promise<?ExtensionDef>} */ (
+      Services.timerFor(win).timeoutPromise(opt_timeout || LOAD_TIMEOUT,
+          this.waitFor_(
+              this.getExtensionHolder_(extensionId, /* auto */ false)),
+          `Render timeout waiting for extension ${extensionId} to be load.`));
   }
 
   /**
@@ -524,10 +537,10 @@ export class Extensions {
       } else if (holder.error) {
         holder.promise = Promise.reject(holder.error);
       } else {
-        holder.promise = new Promise((resolve, reject) => {
-          holder.resolve = resolve;
-          holder.reject = reject;
-        });
+        const deferred = new Deferred();
+        holder.promise = deferred.promise;
+        holder.resolve = deferred.resolve;
+        holder.reject = deferred.reject;
       }
     }
     return holder.promise;

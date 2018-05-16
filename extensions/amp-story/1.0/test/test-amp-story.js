@@ -73,7 +73,8 @@ describes.realWin('amp-story', {
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_').callsFake(NOOP);
+    // sandbox.stub(element.implementation_,
+    // 'triggerActiveEventForPage_').callsFake(NOOP);
   });
 
   afterEach(() => {
@@ -130,35 +131,26 @@ describes.realWin('amp-story', {
   it('should preload the bookend if navigating to the last page', () => {
     createPages(story.element, 1, ['cover']);
 
-    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
-    const loadBookendStub =
-        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
-
+    const buildBookendStub = sandbox.stub(story, 'buildAndPreloadBookend_');
     return story.layoutCallback()
         .then(() => {
           expect(buildBookendStub).to.have.been.calledOnce;
-          expect(loadBookendStub).to.have.been.calledOnce;
         });
   });
 
   it('should not preload the bookend if not on the last page', () => {
     createPages(story.element, 2, ['cover']);
 
-    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
-    const loadBookendStub =
-        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
-
+    const buildBookendStub = sandbox.stub(story, 'buildAndPreloadBookend_');
     return story.layoutCallback()
         .then(() => {
           expect(buildBookendStub).to.not.have.been.called;
-          expect(loadBookendStub).to.not.have.been.called;
         });
   });
 
   it('should prerender/load the share menu', () => {
-    createPages(story.element, 1, ['cover']);
+    createPages(story.element, 2);
 
-    sandbox.stub(story.bookend_, 'build');
     const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
 
     return story.layoutCallback()
@@ -168,11 +160,10 @@ describes.realWin('amp-story', {
   });
 
   it('should not prerender/load the share menu on desktop', () => {
-    createPages(story.element, 1, ['cover']);
+    createPages(story.element, 2);
 
     story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
 
-    sandbox.stub(story.bookend_, 'build');
     const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
 
     return story.layoutCallback()

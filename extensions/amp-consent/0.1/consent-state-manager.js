@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -30,9 +31,9 @@ export const CONSENT_ITEM_STATE = {
   REJECTED: 2,
   DISMISSED: 3,
   NOT_REQUIRED: 4,
-  // TODO(@zhouyx): Seperate UI state from consent state. Add consent requirement state
-  // ui_state = {pending, active, complete}
-  // consent_state = {unknown, granted, rejected}
+  // TODO(@zhouyx): Seperate UI state from consent state. Add consent
+  // requirement state ui_state = {pending, active, complete} consent_state =
+  // {unknown, granted, rejected}
 };
 
 export class ConsentStateManager {
@@ -112,6 +113,33 @@ export class ConsentStateManager {
     return unlistener;
   }
 
+
+  /**
+   * Sets a promise which resolves to a shareData object that is to be returned
+   * from the remote endpoint.
+   *
+   * @param {string} instanceId
+   * @param {Promise<?Object>} sharedDataPromise
+   */
+  setConsentInstanceSharedData(instanceId, sharedDataPromise) {
+    dev().assert(this.instances_[instanceId],
+        `${TAG}: cannot find this instance`);
+    this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
+  }
+
+  /**
+   * Returns a promise that resolves to a shareData object that is returned
+   * from the remote endpoint.
+   *
+   * @param {string} instanceId
+   * @return {?Promise<?Object>}
+   */
+  getConsentInstanceSharedData(instanceId) {
+    dev().assert(this.instances_[instanceId],
+        `${TAG}: cannot find this instance`);
+    return this.instances_[instanceId].sharedDataPromise;
+  }
+
   /**
    * Returns a promise that's resolved when consent instance is ready.
    * @param {string} instanceId
@@ -121,9 +149,9 @@ export class ConsentStateManager {
       return Promise.resolve();
     }
     if (!this.consentReadyPromises_[instanceId]) {
-      this.consentReadyPromises_[instanceId] = new Promise(resolve => {
-        this.consentReadyResolvers_[instanceId] = resolve;
-      });
+      const deferred = new Deferred();
+      this.consentReadyPromises_[instanceId] = deferred.promise;
+      this.consentReadyResolvers_[instanceId] = deferred.resolve;
     }
     return this.consentReadyPromises_[instanceId];
   }
@@ -134,6 +162,9 @@ export class ConsentStateManager {
  */
 export class ConsentInstance {
   constructor(ampdoc, id) {
+    /** @public {?Promise<Object>} */
+    this.sharedDataPromise = null;
+
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 

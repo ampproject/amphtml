@@ -45,7 +45,7 @@ export const URL_EXPERIMENT_MAPPING = {
  * @param {!Window} win
  * @param {!Element} element
  * @param {boolean} useRemoteHtml
- * @returns {boolean}
+ * @return {boolean}
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
   if (useRemoteHtml || !isGoogleAdsA4AValidEnvironment(win) ||

@@ -282,6 +282,7 @@ const forbiddenTerms = {
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
+      'src/service/video/docking.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -350,6 +351,7 @@ const forbiddenTerms = {
       'src/ad-cid.js',
       'src/services.js',
       'src/service/cid-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-subscriptions/0.1/local-subscription-platform.js',

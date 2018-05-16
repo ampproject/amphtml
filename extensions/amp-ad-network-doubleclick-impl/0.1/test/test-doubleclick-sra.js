@@ -142,6 +142,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         const element1 =
           createElementWithAttributes(doc, 'amp-ad', config1);
         const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
+        sandbox.stub(impl1, 'getPageLayoutBox').returns({top: 123, left: 456});
         element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
         sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320')
             .returns('13579');
@@ -168,6 +169,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         const element2 =
           createElementWithAttributes(doc, 'amp-ad', config2);
         const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
+        sandbox.stub(impl2, 'getPageLayoutBox').returns({top: 789, left: 101});
         sandbox.stub(impl2, 'generateAdKey_').withArgs('250x300')
             .returns('2468');
         element2.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
@@ -181,6 +183,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
           co: '1',
           adtest: 'on',
+          adxs: '456,101',
+          adys: '123,789',
           tfcd: 'some_tfcd',
           eid: MANUAL_EXPERIMENT_ID,
           output: 'ldjh',
@@ -307,8 +311,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
      *    xhrFail:(boolean|undefined),
      *    invalidInstances:number,
      *    nestHeaders:(boolean|undefined)}}>} items
+     * @param {boolean=} opt_implicitSra where SRA implicitly enabled (meaning
+     *    pub did not enable via meta).
      */
-    function executeTest(items) {
+    function executeTest(items, opt_implicitSra) {
+      if (!opt_implicitSra) {
+        createAndAppendAdElement(
+            {name: 'amp-ad-doubleclick-sra'}, 'meta', doc.head);
+      }
       // Store if XHR will fail by networkId.
       const networkXhrFailure = {};
       // Store if all elements for a given network are invalid.
@@ -339,7 +349,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           network.invalidInstances && !network.instances;
         networkXhrFailure[network.networkId] = !!network.xhrFail;
         networkNestHeaders[network.networkId] = network.nestHeaders;
-        expectedAttemptCollapseCalls += network.xhrFail ? network.instances : 0;
+        expectedAttemptCollapseCalls +=
+            network.xhrFail && !opt_implicitSra ? network.instances : 0;
       });
       const grouping = {};
       const groupingPromises = {};
@@ -360,6 +371,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         return impl.layoutCallback().then(() => {
           if (noRender) {
             expect(impl.iframe).to.not.be.ok;
+            return;
+          }
+          if (opt_implicitSra) {
+            expect(impl.iframe).to.be.ok;
+            expect(impl.iframe.src).to.match(
+                /securepubads\.g\.doubleclick\.net/);
             return;
           }
           expect(impl.postAdResponseExperimentFeatures['foo']).to.equal('bar');
@@ -396,7 +413,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           }
           layoutCallbacks.push(getLayoutCallback(
               impl, creative, isSra,
-              networkXhrFailure[networkId] ||
+              (!opt_implicitSra && networkXhrFailure[networkId]) ||
             impl.element.getAttribute('data-test-invalid') == 'true'));
         });
         if (isSra) {
@@ -442,6 +459,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     it('should handle xhr failure by not sending subsequent request',
         () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}]));
+
+    it('should handle xhr failure by via subsequent request if implicit',
+        () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}],
+            true));
 
     it('should handle mixture of xhr and non xhr failures', () => executeTest(
         [{networkId: 1234, instances: 2, xhrFail: true}, 4567, 4567]));

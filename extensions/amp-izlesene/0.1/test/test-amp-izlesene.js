@@ -62,7 +62,7 @@ describes.realWin('amp-izlesene', {
   });
 
   it('requires data-videoid', () => {
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return getIzlesene('').should.eventually.be.rejectedWith(
           /The data-videoid attribute is required for/);
     });

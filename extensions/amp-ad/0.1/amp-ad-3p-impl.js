@@ -16,7 +16,15 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
-import {LayoutPriority} from '../../../src/layout';
+import {
+  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent-state';
+import {
+  Layout, // eslint-disable-line no-unused-vars
+  LayoutPriority,
+} from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {
@@ -32,7 +40,6 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from './concurrent-load';
-import {getConsentPolicyState} from '../../../src/consent-state';
 import {getIframe} from '../../../src/3p-frame';
 import {
   googleLifecycleReporterFactory,
@@ -59,7 +66,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Element} */
+    /**
+     * @private {?Element}
+     * @visibleForTesting
+     */
     this.iframe_ = null;
 
     /** {?Object} */
@@ -71,10 +81,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?AmpAdXOriginIframeHandler} */
     this.xOriginIframeHandler_ = null;
 
-    /** @private {?Element} */
+    /**
+     * @private {?Element}
+     * @visibleForTesting
+     */
     this.placeholder_ = null;
 
-    /** @private {?Element} */
+    /**
+     * @private {?Element}
+     * @visibleForTesting
+     */
     this.fallback_ = null;
 
     /** @private {boolean} */
@@ -89,10 +105,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /**
      * Call to stop listening to viewport changes.
      * @private {?function()}
+     * @visibleForTesting
      */
     this.unlistenViewportChanges_ = null;
 
-    /** @private {IntersectionObserver} */
+    /**
+     * @private {IntersectionObserver}
+     * @visibleForTesting
+     */
     this.intersectionObserver_ = null;
 
     /** @private {?string|undefined} */
@@ -139,14 +159,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       elementCheck : super.renderOutsideViewport();
   }
 
-  /** @override */
+  /**
+   * @param {!Layout} layout
+   * @override
+   */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -154,7 +177,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   getConsentPolicy() {
-    return null;
+    const type = this.element.getAttribute('type');
+    const config = adConfig[type];
+    if (config && config['consentHandlingOverride']) {
+      return null;
+    }
+    return super.getConsentPolicy();
   }
 
   /** @override */
@@ -312,17 +340,19 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
 
+    const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
-    const consentPromise = consentPolicyId
-      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+    const sharedDataPromise = consentPolicyId
+      ? getConsentPolicySharedData(this.getAmpDoc(), consentPolicyId)
       : Promise.resolve(null);
 
     this.layoutPromise_ = Promise.all(
-        [getAdCid(this), consentPromise]).then(consents => {
+        [getAdCid(this), consentPromise, sharedDataPromise]).then(consents => {
       const opt_context = {
         clientId: consents[0] || null,
         container: this.container_,
         initialConsentState: consents[1],
+        consentSharedData: consents[2],
       };
 
       // In this path, the request and render start events are entangled,
@@ -341,7 +371,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return this.layoutPromise_;
   }
 
-  /** @override  */
+  /**
+   * @param {boolean} inViewport
+   * @override
+   */
   viewportCallback(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
@@ -363,6 +396,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     return this.uiHandler.createPlaceholder();
+  }
+
+  /**
+   * @return {!Promise<?CONSENT_POLICY_STATE>}
+   */
+  getConsentState() {
+    const consentPolicyId = super.getConsentPolicy();
+    return consentPolicyId
+      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      : Promise.resolve(null);
   }
 
   /**

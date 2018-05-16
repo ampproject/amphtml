@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {
@@ -159,12 +159,6 @@ export class AmpForm {
     /** @const @private {?string} */
     this.xhrVerify_ = this.getXhrUrl_('verify-xhr');
 
-    /**
-     * Indicates that the action will submit to canonical or not.
-     * @private {boolean|undefined}
-     */
-    this.isCanonicalAction_ = undefined;
-
     /** @const @private {boolean} */
     this.shouldValidate_ = !this.form_.hasAttribute('novalidate');
     // Need to disable browser validation in order to allow us to take full
@@ -243,8 +237,9 @@ export class AmpForm {
   }
 
   /**
-   * Returns a promise that will be resolved when all dependencies used inside the form
-   * tag are loaded and built (e.g. amp-selector) or 2 seconds timeout - whichever is first.
+   * Returns a promise that will be resolved when all dependencies used inside
+   * the form tag are loaded and built (e.g. amp-selector) or 2 seconds timeout
+   * - whichever is first.
    * @return {!Promise}
    * @private
    */
@@ -366,12 +361,13 @@ export class AmpForm {
   }
 
   /**
-   * Note on stopImmediatePropagation usage here, it is important to emulate native
-   * browser submit event blocking. Otherwise any other submit listeners would get the
-   * event.
+   * Note on stopImmediatePropagation usage here, it is important to emulate
+   * native browser submit event blocking. Otherwise any other submit listeners
+   * would get the event.
    *
-   * For example, action service shouldn't trigger 'submit' event if form is actually
-   * invalid. stopImmediatePropagation allows us to make sure we don't trigger it.
+   * For example, action service shouldn't trigger 'submit' event if form is
+   * actually invalid. stopImmediatePropagation allows us to make sure we don't
+   * trigger it.
    *
    * This prevents the default submission event in any of following cases:
    *   - The form is still finishing a previous submission.
@@ -863,19 +859,20 @@ function removeValidityStateClasses(form) {
 }
 
 /**
- * Checks user validity which applies .user-valid and .user-invalid AFTER the user
- * interacts with the input by moving away from the input (blur) or by changing its
- * value (input).
+ * Checks user validity which applies .user-valid and .user-invalid AFTER the
+ * user interacts with the input by moving away from the input (blur) or by
+ * changing its value (input).
  *
  * See :user-invalid spec for more details:
  *   https://drafts.csswg.org/selectors-4/#user-pseudos
  *
- * The specs are still not fully specified. The current solution tries to follow a common
- * sense approach for when to apply these classes. As the specs gets clearer, we should
- * strive to match it as much as possible.
+ * The specs are still not fully specified. The current solution tries to follow
+ * a common sense approach for when to apply these classes. As the specs gets
+ * clearer, we should strive to match it as much as possible.
  *
  * @param {!Element} element
- * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
+ * @param {boolean=} propagate Whether to propagate the user validity to
+ * ancestors.
  * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
@@ -921,8 +918,8 @@ function checkUserValidity(element, propagate = false) {
 
 
 /**
- * Responds to user interaction with an input by checking user validity of the input
- * and possibly its input-related ancestors (e.g. feildset, form).
+ * Responds to user interaction with an input by checking user validity of the
+ * input and possibly its input-related ancestors (e.g. feildset, form).
  * @param {!Element} input
  * @private visible for testing.
  */

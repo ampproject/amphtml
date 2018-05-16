@@ -114,6 +114,23 @@ For example, the following is possible in AMP:
   </tr>
 </table>
 
+## amp-audio
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+  </tr>
+</table>
+
 ### Input elements
 <table>
   <tr>
@@ -231,6 +248,11 @@ event.index</pre></td>
     <th width="25%">Event</th>
     <th width="35%">Description</th>
     <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>firstPlay</code>(low-trust)</td>
+    <td>Fired the first time the video is played by the user. On autoplay videos, this is fired as soon as the user interacts with the video. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
+    <td></td>
   </tr>
   <tr>
     <td><code>timeUpdate</code>(low-trust)</td>
@@ -530,6 +552,10 @@ actions that apply to the whole document.
   <tr>
     <td><code>print</code></td>
     <td>Opens the Print Dialog to print the current page.</td>
+  </tr>
+  <tr>
+    <td>optoutOfCid</td>
+    <td>Opts out of Client ID generation for all scopes.</td>
   </tr>
   <tr>
     <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>

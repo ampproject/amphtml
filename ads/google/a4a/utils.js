@@ -29,6 +29,7 @@ import {
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
 import {parseUrl} from '../../../src/url';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -111,7 +112,7 @@ function getNavStart(win) {
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
- * @returns {boolean}  Whether Google Ads should attempt to render via the A4A
+ * @return {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
@@ -125,7 +126,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
 /**
  * Checks whether native crypto is supported for win.
  * @param {!Window} win  Host window for the ad.
- * @returns {boolean} Whether native crypto is supported.
+ * @return {boolean} Whether native crypto is supported.
  */
 export function supportsNativeCrypto(win) {
   return win.crypto && (win.crypto.subtle || win.crypto.webkitSubtle);
@@ -194,17 +195,42 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {
+  // Look for amp-ad elements of correct type or those contained within
+  // standard container type.  Note that display none containers will not be
+  // included as they will never be measured.
+  // TODO(keithwrightbos): what about slots that become measured due to removal
+  // of display none (e.g. user resizes viewport and media selector makes
+  // visible).
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
-      r => r.element.tagName == 'AMP-AD' &&
-        r.element.getAttribute('type') == type)
-      .then(resources => {
-        const result = {};
-        resources.forEach(r => {
-          const groupId = groupFn(r.element);
-          (result[groupId] || (result[groupId] = [])).push(r.element.getImpl());
-        });
+      r => {
+        const isAmpAdType = r.element.tagName == 'AMP-AD' &&
+          r.element.getAttribute('type') == type;
+        if (isAmpAdType) {
+          return true;
+        }
+        const isAmpAdContainerElement =
+          Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
+          !!r.element.querySelector(`amp-ad[type=${type}]`);
+        return isAmpAdContainerElement;
+      })
+      // Need to wait on any contained element resolution followed by build
+      // of child ad.
+      .then(resources => Promise.all(resources.map(
+          resource => {
+            if (resource.element.tagName == 'AMP-AD') {
+              return resource.element;
+            }
+            // Must be container element so need to wait for child amp-ad to
+            // be upgraded.
+            return whenUpgradedToCustomElement(dev().assertElement(
+                resource.element.querySelector(`amp-ad[type=${type}]`)));
+          })))
+      // Group by networkId.
+      .then(elements => elements.reduce((result, element) => {
+        const groupId = groupFn(element);
+        (result[groupId] || (result[groupId] = [])).push(element.getImpl());
         return result;
-      });
+      }, {}));
 }
 
 /**
@@ -593,7 +619,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
  *     integer (base 10) experiment IDs.
  * @param {?string} currentIdString  If present, a string containing a
  *   comma-separated list of integer experiment IDs.
- * @returns {string}  New experiment list string, including newId iff it is
+ * @return {string}  New experiment list string, including newId iff it is
  *   a valid (integer) experiment ID.
  * @see parseExperimentIds, validateExperimentIds
  */

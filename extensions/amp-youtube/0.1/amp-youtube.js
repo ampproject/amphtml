@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -67,8 +68,6 @@ class AmpYoutube extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private {number} */
-    this.playerState_ = PlayerStates.UNSTARTED;
 
     /** @private {?string}  */
     this.videoid_ = null;
@@ -139,9 +138,9 @@ class AmpYoutube extends AMP.BaseElement {
     this.liveChannelid_ = this.getLiveChannelId_();
     this.assertDatasourceExists_();
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     // TODO(aghassemi, #3216): amp-youtube has a special case where 404s are not
     // easily caught hence the following hacky-solution.
@@ -257,21 +256,16 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    this.playerState_ = PlayerStates.PAUSED;
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
   }
 
   /** @override */
   pauseCallback() {
-    // Only send pauseVideo command if the player is playing. Otherwise
-    // The player breaks if the user haven't played the video yet specially
-    // on mobile.
-    if (this.iframe_ && this.iframe_.contentWindow &&
-        this.playerState_ == PlayerStates.PLAYING) {
+    if (this.iframe_ && this.iframe_.contentWindow) {
       this.pause();
     }
   }
@@ -357,14 +351,14 @@ class AmpYoutube extends AMP.BaseElement {
     }
     if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['playerState'] !== undefined) {
-      this.playerState_ = data['info']['playerState'];
-      if (this.playerState_ == PlayerStates.PAUSED) {
+      const playerState = data['info']['playerState'];
+      if (playerState == PlayerStates.PAUSED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-      } else if (this.playerState_ == PlayerStates.ENDED) {
+      } else if (playerState == PlayerStates.ENDED) {
         // YT does not fire pause and ended together.
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         this.element.dispatchCustomEvent(VideoEvents.ENDED);
-      } else if (this.playerState_ == PlayerStates.PLAYING) {
+      } else if (playerState == PlayerStates.PLAYING) {
         this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
     } else if (data['event'] == 'infoDelivery' &&
@@ -546,6 +540,11 @@ class AmpYoutube extends AMP.BaseElement {
     // Youtube already updates the Media Session so no need for the video
     // manager to update it too
     return true;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
   }
 
   /** @override */

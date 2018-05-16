@@ -195,7 +195,10 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the title of this AMP document.
     this.set('TITLE', () => {
-      return this.ampdoc.win.document.title;
+      // The environment may override the title and set originalTitle. Prefer
+      // that if available.
+      return this.ampdoc.win.document['originalTitle'] ||
+          this.ampdoc.win.document.title;
     });
 
     // Returns the URL for this AMP document.
@@ -371,7 +374,8 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set('TIMESTAMP', dateMethod('getTime'));
 
-    //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
+    // Returns the human readable timestamp in format of
+    // 2011-01-01T11:11:11.612Z.
     this.set('TIMESTAMP_ISO', dateMethod('toISOString'));
 
     // Returns the user's time-zone offset from UTC, in minutes.
@@ -749,14 +753,15 @@ export class UrlReplacements {
 
 
   /**
-   * Synchronously expands the provided source by replacing all known variables with
-   * their resolved values. Optional `opt_bindings` can be used to add new
+   * Synchronously expands the provided source by replacing all known variables
+   * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
+   * opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
-   *     that can be substituted.
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
+   *     names that can be substituted.
    * @return {string}
    */
   expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
@@ -778,14 +783,15 @@ export class UrlReplacements {
   }
 
   /**
-   * Synchronously expands the provided URL by replacing all known variables with
-   * their resolved values. Optional `opt_bindings` can be used to add new
+   * Synchronously expands the provided URL by replacing all known variables
+   * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
+   * opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
-   *     that can be substituted.
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
+   *     names that can be substituted.
    * @return {string}
    */
   expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
@@ -963,13 +969,13 @@ export class UrlReplacements {
       return element.href = href;
     }
 
-    // Note that defaultUrlParams is treated differently than additionalUrlParameters in two ways
-    // #1: If the outgoing url origin is not whitelisted:
-    // additionalUrlParameters are always appended by not expanded,
-    // defaultUrlParams will not be appended.
-    // #2: If the expansion function is not whitelisted:
-    // additionalUrlParamters will not be expanded,
-    // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
+    // Note that defaultUrlParams is treated differently than
+    // additionalUrlParameters in two ways #1: If the outgoing url origin is not
+    // whitelisted: additionalUrlParameters are always appended by not expanded,
+    // defaultUrlParams will not be appended. #2: If the expansion function is
+    // not whitelisted: additionalUrlParamters will not be expanded,
+    // defaultUrlParams will by default support QUERY_PARAM, and will still be
+    // expanded.
     if (defaultUrlParams) {
       if (!whitelist || !whitelist['QUERY_PARAM']) {
         // override whitelist and expand defaultUrlParams;
@@ -1008,7 +1014,8 @@ export class UrlReplacements {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
         REPLACEMENT_EXP_NAME);
     if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
-      // not supporting syncronous version (yet) or collect_vars with this new structure
+      // not supporting syncronous version (yet) or collect_vars with this new
+      // structure
       return this.expander_./*OK*/expand(url, opt_bindings, opt_whiteList);
     }
 
@@ -1110,20 +1117,21 @@ export class UrlReplacements {
    * Collects substitutions in the `src` attribute of the given element
    * that are _not_ whitelisted via `data-amp-replace` opt-in attribute.
    * @param {!Element} element
-   * @return {!Promise<!Array<string>>}
+   * @return {!Array<string>}
    */
-  collectUnwhitelistedVars(element) {
+  collectUnwhitelistedVarsSync(element) {
     const url = element.getAttribute('src');
-    return this.collectVars(url).then(vars => {
-      const whitelist = this.getWhitelistForElement_(element);
-      const varNames = Object.keys(vars);
-      if (whitelist) {
-        return varNames.filter(v => !whitelist[v]);
-      } else {
-        // All vars are unwhitelisted if the element has no whitelist.
-        return varNames;
-      }
-    });
+    const vars = Object.create(null);
+    this.expandStringSync(url, /* opt_bindings */ undefined, vars);
+    const varNames = Object.keys(vars);
+
+    const whitelist = this.getWhitelistForElement_(element);
+    if (whitelist) {
+      return varNames.filter(v => !whitelist[v]);
+    } else {
+      // All vars are unwhitelisted if the element has no whitelist.
+      return varNames;
+    }
   }
 
   /**
@@ -1159,7 +1167,7 @@ export class UrlReplacements {
  * Extracts client ID from a _ga cookie.
  * https://developers.google.com/analytics/devguides/collection/analyticsjs/cookies-user-id
  * @param {string} gaCookie
- * @returns {string}
+ * @return {string}
  */
 export function extractClientIdFromGaCookie(gaCookie) {
   return gaCookie.replace(/^(GA1|1)\.[\d-]+\./, '');

@@ -217,7 +217,7 @@ function isFlagConfig(filePath) {
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
- * @returns {!Set<string>}
+ * @return {!Set<string>}
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
@@ -294,8 +294,15 @@ const command = {
   buildRuntime: function() {
     timedExecOrDie('gulp build');
   },
-  buildRuntimeMinified: function() {
-    timedExecOrDie('gulp dist --fortesting');
+  buildRuntimeMinified: function(extensions) {
+    let cmd = 'gulp dist --fortesting';
+    if (!extensions) {
+      cmd = cmd + ' --noextensions';
+    }
+    timedExecOrDie(cmd);
+  },
+  runBundleSizeCheck: function() {
+    timedExecOrDie('gulp bundle-size');
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
@@ -401,7 +408,8 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
-    command.buildRuntimeMinified();
+    command.buildRuntimeMinified(/* extensions */ true);
+    command.runBundleSizeCheck();
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true);
   }
@@ -419,6 +427,8 @@ function runAllCommandsLocally() {
   if (!argv.nobuild) {
     command.cleanBuild();
     command.buildRuntime();
+    command.buildRuntimeMinified(/* extensions */ false);
+    command.runBundleSizeCheck();
   }
 
   // These tests need a build.
@@ -503,7 +513,7 @@ function isGreenkeeperLockfilePushBuild() {
 /**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
- * @returns {number}
+ * @return {number}
  */
 function main() {
   const startTime = startTimer('pr-check.js');
@@ -533,6 +543,7 @@ function main() {
 
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
+    process.env['LOCAL_PR_CHECK'] = true;
     console.log(fileLogPrefix, 'Running all pr-check commands locally.');
     runAllCommandsLocally();
     stopTimer('pr-check.js', startTime);
@@ -601,6 +612,8 @@ function main() {
         buildTargets.has('VISUAL_DIFF')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.buildRuntimeMinified(/* extensions */ false);
+      command.runBundleSizeCheck();
       command.runVisualDiffTests();
     } else {
       // Generates a blank Percy build to satisfy the required Github check.

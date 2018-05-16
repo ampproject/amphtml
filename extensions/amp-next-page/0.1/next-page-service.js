@@ -26,6 +26,7 @@ import {
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {parseUrl} from '../../../src/url';
+import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -64,6 +65,9 @@ export class NextPageService {
     /** @private {?./config.AmpNextPageConfig} */
     this.config_ = null;
 
+    /** @private {string} */
+    this.hideSelector_;
+
     /** @private {?Element} */
     this.separator_ = null;
 
@@ -85,10 +89,7 @@ export class NextPageService {
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
-    /**
-     * @private
-     * {?../../../../src/service/position-observer/position-observer-impl.PositionObserver}
-     */
+    /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private @const {!Array<!DocumentRef>} */
@@ -128,6 +129,10 @@ export class NextPageService {
     this.separator_ = separator || this.createDivider_();
     this.element_ = element;
 
+    if (this.config_.hideSelectors) {
+      this.hideSelector_ = this.config_.hideSelectors.join(',');
+    }
+
     this.viewer_ = Services.viewerForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
     this.resources_ = Services.resourcesForDoc(ampDoc);
@@ -148,6 +153,10 @@ export class NextPageService {
 
     this.viewport_.onScroll(() => this.scrollHandler_());
     this.viewport_.onResize(() => this.scrollHandler_());
+
+    // Check scroll position immediately to handle documents which are shorter
+    // than the viewport.
+    this.scrollHandler_();
   }
 
   /**
@@ -166,6 +175,21 @@ export class NextPageService {
    * @return {?Object} Return value of {@link MultidocManager#attachShadowDoc}
    */
   attachShadowDoc_(shadowRoot, doc) {
+    if (this.hideSelector_) {
+      const elements = doc.querySelectorAll(this.hideSelector_);
+      for (let i = 0; i < elements.length; i++) {
+        elements[i].classList.add('i-amphtml-next-page-hidden');
+      }
+    }
+
+    // Drop any amp-analytics tags from the child doc. We want to reuse the
+    // parent config instead.
+    const analytics = doc.querySelectorAll('amp-analytics');
+    for (let i = 0; i < analytics.length; i++) {
+      const item = analytics[i];
+      removeElement(item);
+    }
+
     const amp =
         this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
     installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
@@ -227,14 +251,13 @@ export class NextPageService {
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => new Promise((resolve, reject) => {
-            this.positionObserver_.unobserve(articleLinks);
-
             if (documentRef.cancelled) {
               // User has reached the end of the document already, don't render.
               resolve();
               return;
             }
 
+            this.positionObserver_.unobserve(articleLinks);
             this.resources_.mutateElement(container, () => {
               try {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
@@ -259,7 +282,7 @@ export class NextPageService {
    * one.
    * @param {number} nextPage Index of the next unseen page to use as the first
    *     recommendation in the list.
-   * @return {Element} Container element for the recommendations.
+   * @return {!Element} Container element for the recommendations.
    */
   createArticleLinks_(nextPage) {
     const doc = this.win_.document;
@@ -341,13 +364,12 @@ export class NextPageService {
    * the position of a page separator in the viewport.
    * @param {number} i Index of the documentRef this recommendation unit is
    *     attached to.
-   * @param
-   * {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
+   * @param {?../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
    *     position Position of the current recommendation unit in the viewport.
    */
   positionUpdate_(i, position) {
     // We're only interested when the recommendations exit the viewport
-    if (position.positionRect !== null) {
+    if (!position || position.positionRect !== null) {
       return;
     }
 
@@ -373,7 +395,9 @@ export class NextPageService {
    */
   articleLinksPositionUpdate_(documentRef) {
     documentRef.cancelled = true;
-    this.positionObserver_.unobserve(documentRef.recUnit);
+    if (documentRef.recUnit) {
+      this.positionObserver_.unobserve(documentRef.recUnit);
+    }
   }
 
   /**

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-trust';
+import {ActionTrust} from '../action-constants';
 import {KeyCodes} from '../utils/key-codes';
+import {RAW_OBJECT_ARGS_KEY} from '../action-constants';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
@@ -29,12 +30,6 @@ import {
 import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {reportError} from '../error';
-
-/**
- * ActionInfoDef args key that maps to the an unparsed object literal string.
- * @const {string}
- */
-export const OBJECT_STRING_ARGS_KEY = '__AMP_OBJECT_STRING__';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -147,30 +142,31 @@ export class ActionInvocation {
    *     <button id="btn">Submit</button>
    *   </div>
    *
-   * `target` is #myForm.
+   * `node` is #myForm.
    * `method` is "submit".
    * `args` is {'foo': 'bar'}.
    * `source` is #btn.
    * `caller` is #div.
    * `event` is a "click" Event object.
    * `trust` depends on whether this action was a result of a user gesture.
-   * `targetType` is "amp-form".
-   * `index` is 0.
+   * `tagOrTarget` is "amp-form".
+   * `sequenceId` is a pseudo-UUID.
    *
-   * @param {!Node} target Element whose action is being invoked.
+   * @param {!Node} node Element whose action is being invoked.
    * @param {string} method Name of the action being invoked.
    * @param {?JsonObject} args Named action arguments.
    * @param {?Element} source Element that generated the `event`.
    * @param {?Element} caller Element that contains the invoked handler.
    * @param {?ActionEventDef} event The event that triggered this action.
    * @param {ActionTrust} trust The trust level of this invocation's trigger.
-   * @param {?string} targetType The global target name or the element tagName.
-   * @param {number} index Position in a sequence of actions.
+   * @param {?string} tagOrTarget The global target name or the element tagName.
+   * @param {number} sequenceId An identifier for this action's sequence (all
+   *   actions triggered by one event e.g. "tap:form1.submit, form2.submit").
    */
-  constructor(target, method, args, source, caller, event, trust,
-    targetType = null, index = 0) {
+  constructor(node, method, args, source, caller, event, trust,
+    tagOrTarget = null, sequenceId = Math.random()) {
     /** @const {!Node} */
-    this.target = target;
+    this.node = node;
     /** @const {string} */
     this.method = method;
     /** @const {?JsonObject} */
@@ -184,16 +180,16 @@ export class ActionInvocation {
     /** @const {ActionTrust} */
     this.trust = trust;
     /** @const {string} */
-    this.targetType = targetType || target.tagName;
+    this.tagOrTarget = tagOrTarget || node.tagName;
     /** @const {number} */
-    this.index = index;
+    this.sequenceId = sequenceId;
   }
 
   /**
    * Returns true if the trigger event has a trust equal to or greater than
    * `minimumTrust`. Otherwise, logs a user error and returns false.
    * @param {ActionTrust} minimumTrust
-   * @returns {boolean}
+   * @return {boolean}
    */
   satisfiesTrust(minimumTrust) {
     // Sanity check.
@@ -281,8 +277,9 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
-          const isTapEventRole = hasOwn(TAPPABLE_ARIA_ROLES,
-              element.getAttribute('role').toLowerCase());
+          const role = element.getAttribute('role');
+          const isTapEventRole =
+              (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
           if (!event.defaultPrevented && isTapEventRole) {
             event.preventDefault();
             this.trigger(element, name, event, ActionTrust.HIGH);
@@ -428,7 +425,7 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} actionEventType
    * @param {!Element=} opt_stopAt
-   * @returns {boolean}
+   * @return {boolean}
    */
   hasAction(target, actionEventType, opt_stopAt) {
     return !!this.findAction_(target, actionEventType, opt_stopAt);
@@ -436,11 +433,23 @@ export class ActionService {
 
   /**
    * Overwrites the current action whitelist (if any). Takes an array of strings
-   * of the form "<targetType>.<method>", e.g. "amp-form.submit" or "AMP.print".
+   * of the form "<tagOrTarget>.<method>" e.g. "amp-form.submit" or "AMP.print".
    * @param {!Array<string>} whitelist
    */
   setWhitelist(whitelist) {
     this.whitelist_ = whitelist;
+  }
+
+  /**
+   * Adds an action to the whitelist. Takes one string of the form
+   * "<tagOrTarget>.<method>", e.g. "amp-form.submit" or "AMP.print".
+   * @param {string} action
+   */
+  addToWhitelist(action) {
+    if (!this.whitelist_) {
+      this.whitelist_ = [];
+    }
+    this.whitelist_.push(action);
   }
 
   /**
@@ -455,24 +464,29 @@ export class ActionService {
     if (!action) {
       return;
     }
+    // Use a pseudo-UUID to uniquely identify this sequence of actions.
+    // A sequence is all actions triggered by a single event.
+    const sequenceId = Math.random();
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
-    action.actionInfos.forEach((actionInfo, i) => {
-      const targetType = actionInfo.target;
+    action.actionInfos.forEach(actionInfo => {
+      const target = actionInfo.target;
       // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
       const invokeAction = () => {
-        // Use `this.root_` as the target for global targets e.g. "AMP".
-        // Otherwise, targetType should be an element id.
-        const target = (this.globalTargets_[targetType]) ?
-          this.root_ : this.root_.getElementById(targetType);
-        if (target) {
-          const invocation = new ActionInvocation(target, actionInfo.method,
-              args, source, action.node, event, trust, targetType, i);
-          return this.invoke_(invocation, action.actionInfos);
+        // For global targets e.g. "AMP, `node` is the document root. Otherwise,
+        // `target` is an element id and `node` is the corresponding element.
+        const node = (this.globalTargets_[target])
+          ? this.root_
+          : this.root_.getElementById(target);
+        if (node) {
+          const invocation = new ActionInvocation(node, actionInfo.method,
+              args, source, /* caller */ action.node, event, trust,
+              node.tagName || target, sequenceId);
+          return this.invoke_(invocation);
         } else {
-          this.error_(`Target "${targetType}" not found for action ` +
+          this.error_(`Target "${target}" not found for action ` +
               `[${actionInfo.str}].`);
         }
       };
@@ -501,20 +515,17 @@ export class ActionService {
 
   /**
    * @param {!ActionInvocation} invocation
-   * @param {!Array<ActionInfoDef>=} opt_actionInfos Array of infos for all
-   *   actions being invoked during a sequence (multiple actions triggered).
-   *   TODO(choumx): Remove this param by moving setState limit into this file.
    * @return {?Promise}
    * @private
    * @visibleForTesting
    */
-  invoke_(invocation, opt_actionInfos) {
+  invoke_(invocation) {
     const method = invocation.method;
-    const targetType = invocation.targetType;
+    const tagOrTarget = invocation.tagOrTarget;
 
     // Check that this action is whitelisted (if a whitelist is set).
     if (this.whitelist_) {
-      const id = `${targetType}.${method}`;
+      const id = `${tagOrTarget}.${method}`;
       if (!this.whitelist_.includes(id)) {
         this.error_(`"${id}" is not whitelisted (${this.whitelist_}).`);
         return null;
@@ -522,13 +533,13 @@ export class ActionService {
     }
 
     // Handle global targets e.g. "AMP".
-    const globalTarget = this.globalTargets_[targetType];
+    const globalTarget = this.globalTargets_[tagOrTarget];
     if (globalTarget) {
-      return globalTarget(invocation, invocation.index, opt_actionInfos);
+      return globalTarget(invocation);
     }
 
     // Subsequent handlers assume that invocation target is an Element.
-    const target = dev().assertElement(invocation.target);
+    const node = dev().assertElement(invocation.node);
 
     // Handle global actions e.g. "<any-element-id>.toggle".
     const globalMethod = this.globalMethodHandlers_[method];
@@ -537,12 +548,12 @@ export class ActionService {
     }
 
     // Handle element-specific actions.
-    const lowerTagName = target.tagName.toLowerCase();
+    const lowerTagName = node.tagName.toLowerCase();
     if (lowerTagName.substring(0, 4) == 'amp-') {
-      if (target.enqueAction) {
-        target.enqueAction(invocation);
+      if (node.enqueAction) {
+        node.enqueAction(invocation);
       } else {
-        this.error_(`Unrecognized AMP element "${lowerTagName}".`, target);
+        this.error_(`Unrecognized AMP element "${lowerTagName}".`, node);
       }
       return null;
     }
@@ -550,24 +561,24 @@ export class ActionService {
     // Special elements with AMP ID or known supported actions.
     const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
-    const targetId = target.getAttribute('id') || '';
+    const targetId = node.getAttribute('id') || '';
     if ((targetId && targetId.substring(0, 4) == 'amp-') ||
         (supportedActions && supportedActions.indexOf(method) > -1)) {
-      const holder = target[ACTION_HANDLER_];
+      const holder = node[ACTION_HANDLER_];
       if (holder) {
         const {handler, minTrust} = holder;
         if (invocation.satisfiesTrust(minTrust)) {
           handler(invocation);
         }
       } else {
-        target[ACTION_QUEUE_] = target[ACTION_QUEUE_] || [];
-        target[ACTION_QUEUE_].push(invocation);
+        node[ACTION_QUEUE_] = node[ACTION_QUEUE_] || [];
+        node[ACTION_QUEUE_].push(invocation);
       }
       return null;
     }
 
     // Unsupported method.
-    this.error_(`Target (${targetType}) doesn't support "${method}" action.`,
+    this.error_(`Target (${tagOrTarget}) doesn't support "${method}" action.`,
         invocation.caller);
 
     return null;
@@ -847,7 +858,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
     // fragment and delegate to specific action handler.
     args = map();
     const value = toks.next().value;
-    args[OBJECT_STRING_ARGS_KEY] = value;
+    args[RAW_OBJECT_ARGS_KEY] = value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....
@@ -931,7 +942,7 @@ export function dereferenceExprsInArgs(args, event) {
     let value = args[key];
     if (typeof value == 'object' && value.expression) {
       const expr =
-          /** @type {ActionInfoArgExpressionDef} */ (value).expression;
+        /** @type {ActionInfoArgExpressionDef} */ (value).expression;
       const exprValue = getValueForExpr(data, expr);
       // If expr can't be found in data, use null instead of undefined.
       value = (exprValue === undefined) ? null : exprValue;

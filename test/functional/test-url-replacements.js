@@ -116,6 +116,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
                     opt_options.withViewerIntegrationVariableService);
               });
         }
+        if (opt_options.withOriginalTitle) {
+          iframe.doc.originalTitle = 'Original Pixel Test';
+        }
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
       replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
@@ -279,6 +282,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace TITLE', () => {
     return expandUrlAsync('?title=TITLE').then(res => {
       expect(res).to.equal('?title=Pixel%20Test');
+    });
+  });
+
+  it('should prefer original title for TITLE', () => {
+    return expandUrlAsync('?title=TITLE',
+        /*opt_bindings*/undefined, {withOriginalTitle: true}).then(res => {
+      expect(res).to.equal('?title=Original%20Pixel%20Test');
     });
   });
 
@@ -1095,11 +1105,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     const element = document.createElement('amp-foo');
     element.setAttribute('src', '?SOURCE_HOST&QUERY_PARAM(p1)&COUNTER');
     element.setAttribute('data-amp-replace', 'QUERY_PARAM(p1)');
-    return Services.urlReplacementsForDoc(win.ampdoc)
-        .collectUnwhitelistedVars(element)
-        .then(res => {
-          expect(res).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
-        });
+    const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
+    const unwhitelisted = urlReplacements.collectUnwhitelistedVarsSync(element);
+    expect(unwhitelisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
   });
 
   it('should reject javascript protocol', () => {

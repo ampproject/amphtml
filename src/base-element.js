@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust';
+import {ActionTrust} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {dev, user} from './log';
@@ -119,7 +119,7 @@ export class BaseElement {
     /** @public @const {!Element} */
     this.element = element;
     /*
-    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
       \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
@@ -405,7 +405,7 @@ export class BaseElement {
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
-   * @returns {?Element}
+   * @return {?Element}
    */
   createPlaceholderCallback() {
     return null;
@@ -729,7 +729,8 @@ export class BaseElement {
   }
 
   /**
-   * Returns whether the loading indicator is reused again after the first render.
+   * Returns whether the loading indicator is reused again after the first
+   * render.
    * @return {boolean}
    * @public
    */

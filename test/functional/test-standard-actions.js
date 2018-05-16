@@ -15,10 +15,13 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
+import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {Services} from '../../src/services';
 import {StandardActions} from '../../src/service/standard-actions-impl';
+import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
+import {macroTask} from '../../testing/yield';
+
 import {setParentWindow} from '../../src/service';
 
 describes.sandboxed('StandardActions', {}, () => {
@@ -87,14 +90,14 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"hide" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleHide(invocation);
       expectElementToHaveBeenHidden(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleHide(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
@@ -104,7 +107,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element (inline css)', () => {
       const element = createElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -112,7 +115,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -120,7 +123,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle AmpElement (inline css)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
@@ -131,7 +134,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show normal element when hidden (inline css)', () => {
       const element = createElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -139,14 +142,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show normal element when hidden (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
 
     it('should hide normal element when shown', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenHidden(element);
     });
@@ -154,14 +157,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show AmpElement when hidden (inline css)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
     it('should hide AmpElement when shown', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
@@ -170,14 +173,14 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"scrollTo" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleScrollTo(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleScrollTo(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
@@ -186,7 +189,7 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"focus" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       const focusStub = sandbox.stub(element, 'focus');
       standardActions.handleFocus(invocation);
       expect(focusStub).to.be.calledOnce;
@@ -194,7 +197,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       const focusStub = sandbox.stub(element, 'focus');
       standardActions.handleFocus(invocation);
       expect(focusStub).to.be.calledOnce;
@@ -202,22 +205,28 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"AMP" global target', () => {
-    it('should implement navigateTo', () => {
-      const navigator = {navigateTo: sandbox.stub()};
-      sandbox.stub(Services, 'navigationForDoc').returns(navigator);
+    let win;
+    let invocation;
 
-      const win = {};
-      const invocation = {
-        method: 'navigateTo',
-        args: {
-          url: 'http://bar.com',
-        },
-        target: {
+    beforeEach(() => {
+      win = {};
+      invocation = {
+        args: {},
+        node: {
           ownerDocument: {
             defaultView: win,
           },
         },
+        satisfiesTrust: () => true,
       };
+    });
+
+    it('should implement navigateTo', () => {
+      const navigator = {navigateTo: sandbox.stub()};
+      sandbox.stub(Services, 'navigationForDoc').returns(navigator);
+
+      invocation.method = 'navigateTo';
+      invocation.args.url = 'http://bar.com';
 
       // Should check trust and fail.
       invocation.satisfiesTrust = () => false;
@@ -236,91 +245,65 @@ describes.sandboxed('StandardActions', {}, () => {
       installHistoryServiceForDoc(ampdoc);
       const history = Services.historyForDoc(ampdoc);
       const goBackStub = sandbox.stub(history, 'goBack');
-      const invocation = {method: 'goBack', satisfiesTrust: () => true};
+      invocation.method = 'goBack';
       standardActions.handleAmpTarget(invocation);
       expect(goBackStub).to.be.calledOnce;
     });
 
+
+    it('should implement optoutOfCid', function*() {
+      const cid = cidServiceForDocForTesting(ampdoc);
+      const optoutStub = sandbox.stub(cid, 'optOut');
+      invocation.method = 'optoutOfCid';
+      standardActions.handleAmpTarget(invocation);
+      yield macroTask();
+      expect(optoutStub).to.be.calledOnce;
+    });
+
+
     it('should implement setState()', () => {
-      const setStateWithExpression = sandbox.stub();
-      // Bind.setStateWithExpression() doesn't resolve with a value,
+      const invokeSpy = sandbox.stub();
+      // Bind.invoke() doesn't resolve with a value,
       // but add one here to check that the promise is chained.
-      setStateWithExpression.returns(Promise.resolve('set-state-complete'));
+      invokeSpy.returns(Promise.resolve('set-state-complete'));
 
       window.services.bind = {
-        obj: {setStateWithExpression},
+        obj: {invoke: invokeSpy},
       };
 
-      const args = {
-        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+      invocation.method = 'setState';
+      invocation.args = {
+        [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
-      const target = ampdoc;
-      const satisfiesTrust = () => true;
-      const setState = {method: 'setState', args, target, satisfiesTrust};
+      invocation.node = ampdoc;
 
-      return standardActions.handleAmpTarget(setState, 0, []).then(result => {
+      return standardActions.handleAmpTarget(invocation).then(result => {
         expect(result).to.equal('set-state-complete');
-        expect(setStateWithExpression).to.be.calledOnce;
-        expect(setStateWithExpression).to.be.calledWith('{foo: 123}');
+        expect(invokeSpy).to.be.calledOnce;
+        expect(invokeSpy).to.be.calledWith(invocation);
       });
     });
 
     it('should implement pushState()', () => {
-      const pushStateWithExpression = sandbox.stub();
-      // Bind.pushStateWithExpression() doesn't resolve with a value,
+      const invokeSpy = sandbox.stub();
+      // Bind.invoke() doesn't resolve with a value,
       // but add one here to check that the promise is chained.
-      pushStateWithExpression.returns(Promise.resolve('push-state-complete'));
+      invokeSpy.returns(Promise.resolve('push-state-complete'));
 
       window.services.bind = {
-        obj: {pushStateWithExpression},
+        obj: {invoke: invokeSpy},
       };
 
-      const args = {
-        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+      invocation.method = 'pushState';
+      invocation.args = {
+        [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
-      const target = ampdoc;
-      const satisfiesTrust = () => true;
-      const pushState = {method: 'pushState', args, target, satisfiesTrust};
+      invocation.node = ampdoc;
 
-      return standardActions.handleAmpTarget(pushState, 0, []).then(result => {
+      return standardActions.handleAmpTarget(invocation).then(result => {
         expect(result).to.equal('push-state-complete');
-        expect(pushStateWithExpression).to.be.calledOnce;
-        expect(pushStateWithExpression).to.be.calledWith('{foo: 123}');
-      });
-    });
-
-    it('should not allow chained setState', () => {
-      const spy = sandbox.spy();
-      window.services.bind = {
-        obj: {
-          setStateWithExpression: spy,
-        },
-      };
-
-      const firstSetState = {
-        method: 'setState',
-        args: {[OBJECT_STRING_ARGS_KEY]: '{foo: 123}'},
-        target: ampdoc,
-        satisfiesTrust: () => true,
-      };
-      const secondSetState = {
-        method: 'setState',
-        args: {[OBJECT_STRING_ARGS_KEY]: '{bar: 456}'},
-        target: ampdoc,
-        satisfiesTrust: () => true,
-      };
-      const actionInfos = [
-        {target: 'AMP', method: 'setState'},
-        {target: 'AMP', method: 'setState'},
-      ];
-      standardActions.handleAmpTarget(firstSetState, 0, actionInfos);
-      standardActions.handleAmpTarget(secondSetState, 1, actionInfos);
-
-      return Services.bindForDocOrNull(ampdoc).then(() => {
-        // Only first setState call should be allowed.
-        expect(spy).to.be.calledOnce;
-        expect(spy).to.be.calledWith('{foo: 123}');
-        expect(spy).to.not.be.calledWith('{bar: 456}');
+        expect(invokeSpy).to.be.calledOnce;
+        expect(invokeSpy).to.be.calledWith(invocation);
       });
     });
 
@@ -329,13 +312,11 @@ describes.sandboxed('StandardActions', {}, () => {
         print: () => {},
       };
       const printStub = sandbox.stub(windowApi, 'print');
-      const invocation = {
-        method: 'print',
-        satisfiesTrust: () => true,
-        target: {
-          ownerDocument: {
-            defaultView: windowApi,
-          },
+
+      invocation.method = 'print';
+      invocation.node = {
+        ownerDocument: {
+          defaultView: windowApi,
         },
       };
       standardActions.handleAmpTarget(invocation);

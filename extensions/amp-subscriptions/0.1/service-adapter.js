@@ -27,7 +27,7 @@ export class ServiceAdapter {
 
   /**
    * Returns the page config.
-   * @returns {!PageConfig}
+   * @return {!PageConfig}
    */
   getPageConfig() {
     return this.subscriptionService_.getPageConfig();
@@ -53,6 +53,18 @@ export class ServiceAdapter {
   }
 
   /**
+   * Delegate UI decoration to another service.
+   * @param {!Element} element
+   * @param {string} serviceId
+   * @param {string} action
+   * @param {?JsonObject} options
+   */
+  decorateServiceAction(element, serviceId, action, options) {
+    this.subscriptionService_.decorateServiceAction(element, serviceId,
+        action, options);
+  }
+
+  /**
    * Reauthorize platforms
    * @param {!./subscription-platform.SubscriptionPlatform} subscriptionPlatform
    */
@@ -62,7 +74,7 @@ export class ServiceAdapter {
 
   /**
    * Returns the singleton Dialog instance
-   * @returns {!./dialog.Dialog}
+   * @return {!./dialog.Dialog}
    */
   getDialog() {
     return this.subscriptionService_.getDialog();

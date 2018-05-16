@@ -43,13 +43,16 @@ export class PlatformStore {
     /** @private @const {!Object<string, !./entitlement.Entitlement>} */
     this.entitlements_ = {};
 
-    /** @private @const {Observable<!EntitlementChangeEventDef>} */
+    /** @private @const {!Observable<!EntitlementChangeEventDef>} */
     this.onEntitlementResolvedCallbacks_ = new Observable();
+
+    /** @private @const {!Observable<{serviceId: string}>} */
+    this.onPlatformResolvedCallbacks_ = new Observable();
 
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
-    /** @private @const {Observable} */
+    /** @private @const {!Observable} */
     this.onGrantStateResolvedCallbacks_ = new Observable();
 
     /** @private {?Entitlement} */
@@ -80,22 +83,42 @@ export class PlatformStore {
    */
   resolvePlatform(serviceId, platform) {
     this.subscriptionPlatforms_[serviceId] = platform;
+    this.onPlatformResolvedCallbacks_.fire({
+      serviceId,
+    });
+  }
+
+  /**
+   *Calls a callback for when a platform is resolved.
+   * @param {string} serviceId
+   */
+  onPlatformResolves(serviceId, callback) {
+    const platform = this.subscriptionPlatforms_[serviceId];
+    if (platform) {
+      callback(platform);
+    } else {
+      this.onPlatformResolvedCallbacks_.add(e => {
+        if (e.serviceId === serviceId) {
+          callback(this.getPlatform(serviceId));
+        }
+      });
+    }
   }
 
   /**
    * Returns the platform for the given id
-   * @param {string} servideId
-   * @returns {!./subscription-platform.SubscriptionPlatform}
+   * @param {string} serviceId
+   * @return {!./subscription-platform.SubscriptionPlatform}
    */
-  getPlatform(servideId) {
-    const platform = this.subscriptionPlatforms_[servideId];
-    dev().assert(platform, `Platform for id ${servideId} is not resolved`);
+  getPlatform(serviceId) {
+    const platform = this.subscriptionPlatforms_[serviceId];
+    dev().assert(platform, `Platform for id ${serviceId} is not resolved`);
     return platform;
   }
 
   /**
    * Returns the local platform;
-   * @returns {!./local-subscription-platform.LocalSubscriptionPlatform}
+   * @return {!./local-subscription-platform.LocalSubscriptionPlatform}
    */
   getLocalPlatform() {
     const localPlatform =
@@ -106,7 +129,7 @@ export class PlatformStore {
 
   /**
    * Returns all the platforms;
-   * @returns {!Array<!./subscription-platform.SubscriptionPlatform>}
+   * @return {!Array<!./subscription-platform.SubscriptionPlatform>}
    */
   getAllRegisteredPlatforms() {
     const platforms = [];
@@ -119,7 +142,8 @@ export class PlatformStore {
   }
 
   /**
-   * This registers a callback which is called whenever a service id is resolved with an entitlement.
+   * This registers a callback which is called whenever a service id is resolved
+   * with an entitlement.
    * @param {function(!EntitlementChangeEventDef):void} callback
    */
   onChange(callback) {
@@ -147,7 +171,7 @@ export class PlatformStore {
   /**
    * Returns entitlement for a platform
    * @param {string} serviceId
-   * @returns {!./entitlement.Entitlement} entitlement
+   * @return {!./entitlement.Entitlement} entitlement
    */
   getResolvedEntitlementFor(serviceId) {
     dev().assert(this.entitlements_[serviceId],
@@ -156,7 +180,7 @@ export class PlatformStore {
   }
 
   /**
-   * @returns {!Promise<boolean>}
+   * @return {!Promise<boolean>}
    */
   getGrantStatus() {
     if (this.grantStatusPromise_ !== null) {
@@ -168,7 +192,7 @@ export class PlatformStore {
       // Check if current entitlements unblocks the reader
       for (const key in this.entitlements_) {
         const entitlement = (this.entitlements_[key]);
-        if (entitlement.enablesThis()) {
+        if (entitlement.granted) {
           this.saveGrantEntitlement_(entitlement);
           return resolve(true);
         }
@@ -180,7 +204,7 @@ export class PlatformStore {
       } else {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(({entitlement}) => {
-          if (entitlement.enablesThis()) {
+          if (entitlement.granted) {
             this.saveGrantEntitlement_(entitlement);
             resolve(true);
           } else if (this.areAllPlatformsResolved_()) {
@@ -199,11 +223,12 @@ export class PlatformStore {
    * @private
    */
   saveGrantEntitlement_(entitlement) {
-    // The entitlement will be stored either if its the first one
-    // or last one was metered and new one has full subscription.
-    if ((!this.grantStatusEntitlement_) || (this.grantStatusEntitlement_
-      && (this.grantStatusEntitlement_.metering
-          && entitlement.subscriptionToken))) {
+    // The entitlement will be stored either if its the first one to grant
+    // or the new one has full subscription but the last one didn't.
+    if ((!this.grantStatusEntitlement_ && entitlement.granted)
+        || (this.grantStatusEntitlement_
+          && !this.grantStatusEntitlement_.isSubscriber()
+          && entitlement.isSubscriber())) {
       this.grantStatusEntitlement_ = entitlement;
       this.onGrantStateResolvedCallbacks_.fire();
     }
@@ -211,7 +236,7 @@ export class PlatformStore {
 
   /**
    * Returns the entitlement which unlocked the document
-   * @returns {!Promise<?Entitlement>}
+   * @return {!Promise<?Entitlement>}
    */
   getGrantEntitlement() {
     if (this.grantStatusEntitlementPromise_) {
@@ -220,12 +245,12 @@ export class PlatformStore {
 
     this.grantStatusEntitlementPromise_ = new Promise(resolve => {
       if ((this.grantStatusEntitlement_
-          && this.grantStatusEntitlement_.subscriptionToken)
-          || this.areAllPlatformsResolved_()) {
+          && this.grantStatusEntitlement_.isSubscriber())
+            || this.areAllPlatformsResolved_()) {
         resolve(this.grantStatusEntitlement_);
       } else {
         this.onGrantStateResolvedCallbacks_.add(() => {
-          if (this.grantStatusEntitlement_.subscriptionToken
+          if (this.grantStatusEntitlement_.granted
               || this.areAllPlatformsResolved_()) {
             resolve(this.grantStatusEntitlement_);
           }
@@ -246,7 +271,7 @@ export class PlatformStore {
   /**
    * Returns entitlements when all services are done fetching them.
    * @private
-   * @returns {!Promise<!Array<!./entitlement.Entitlement>>}
+   * @return {!Promise<!Array<!./entitlement.Entitlement>>}
    */
   getAllPlatformsEntitlements_() {
     if (this.allResolvedPromise_) {
@@ -273,7 +298,7 @@ export class PlatformStore {
   /**
    * Returns entitlements for resolved platforms.
    * @private
-   * @returns {!Array<!./entitlement.Entitlement>}
+   * @return {!Array<!./entitlement.Entitlement>}
    */
   getAvailablePlatformsEntitlements_() {
     const entitlements = [];
@@ -287,19 +312,20 @@ export class PlatformStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @returns {!Promise<!./subscription-platform.SubscriptionPlatform>}
+   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   selectPlatform() {
 
     return this.getAllPlatformsEntitlements_().then(() => {
-      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
+      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs
+      // waiting for all entitlement.
       return this.selectApplicablePlatform_();
     });
   }
 
   /**
    * Returns the number of entitlements resolved
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   areAllPlatformsResolved_() {
@@ -308,15 +334,15 @@ export class PlatformStore {
   }
 
   /**
-   * Returns most qualified platform.
-   * Qualification of a platform is based on an integer weight.
-   * Every platform starts with weight 0 and evaluated against the following parameters,
+   * Returns most qualified platform. Qualification of a platform is based on an
+   * integer weight. Every platform starts with weight 0 and evaluated against
+   * the following parameters,
    * - user is subscribed with platform (Gives weight 10)
    * - supports the current viewer (Gives weight 9)
    *
-   * In the end candidate with max weight is selected.
-   * However if candidate's weight is equal to local platform, then local platform is selected.
-   * @returns {!./subscription-platform.SubscriptionPlatform}
+   * In the end candidate with max weight is selected. However if candidate's
+   * weight is equal to local platform, then local platform is selected.
+   * @return {!./subscription-platform.SubscriptionPlatform}
    * @private
    */
   selectApplicablePlatform_() {
@@ -334,7 +360,7 @@ export class PlatformStore {
           this.getResolvedEntitlementFor(platform.getServiceId());
 
       // Subscriber wins immediatly.
-      if (!!entitlement.subscriptionToken) {
+      if (entitlement.isSubscriber()) {
         weight += 100000;
       }
 

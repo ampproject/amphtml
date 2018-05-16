@@ -379,8 +379,8 @@ export function isProtocolValid(url) {
 }
 
 /**
- * Removes parameters that start with amp js parameter pattern and returns the new
- * search string.
+ * Removes parameters that start with amp js parameter pattern and returns the
+ * new search string.
  * @param {string} urlSearch
  * @return {string}
  */
