@@ -62,6 +62,10 @@ describes.repeated('', {
       const ownerDoc = document.ownerDocument || document;
       createElement = ownerDoc.createElement.bind(ownerDoc);
       createTextNode = ownerDoc.createTextNode.bind(ownerDoc);
+
+      // Force sync mutateElement to make testing easier.
+      const resources = Services.resourcesForDoc(env.ampdoc);
+      sandbox.stub(resources, 'mutateElement').callsArg(1);
     });
 
     function getAmpForm(form, canonical = 'https://example.com/amps.html') {
@@ -258,16 +262,7 @@ describes.repeated('', {
         target: form,
         preventDefault: sandbox.spy(),
       };
-      ampForm.vsync_ = {
-        run: (task, state) => {
-          if (task.measure) {
-            task.measure(state);
-          }
-          if (task.mutate) {
-            task.mutate(state);
-          }
-        },
-      };
+
       sandbox.spy(form, 'checkValidity');
       sandbox.spy(emailInput, 'reportValidity');
       ampForm.handleSubmitEvent_(event);
@@ -319,16 +314,6 @@ describes.repeated('', {
         target: form,
         preventDefault: sandbox.spy(),
       };
-      ampForm.vsync_ = {
-        run: (task, state) => {
-          if (task.measure) {
-            task.measure(state);
-          }
-          if (task.mutate) {
-            task.mutate(state);
-          }
-        },
-      };
       sandbox.spy(form, 'checkValidity');
       sandbox.spy(emailInput, 'reportValidity');
 
@@ -353,22 +338,10 @@ describes.repeated('', {
         form.appendChild(emailInput);
         sandbox.spy(form, 'checkValidity');
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
-
         const event = {
           stopImmediatePropagation: sandbox.spy(),
           target: ampForm.form_,
           preventDefault: sandbox.spy(),
-        };
-
-        ampForm.vsync_ = {
-          run: (task, state) => {
-            if (task.measure) {
-              task.measure(state);
-            }
-            if (task.mutate) {
-              task.mutate(state);
-            }
-          },
         };
 
         const bubbleEl = env.ampdoc.getRootNode().querySelector(
@@ -429,23 +402,12 @@ describes.repeated('', {
         form.appendChild(emailInput);
         sandbox.spy(form, 'checkValidity');
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
-
         const event = {
           stopImmediatePropagation: sandbox.spy(),
           target: ampForm.form_,
           preventDefault: sandbox.spy(),
         };
 
-        ampForm.vsync_ = {
-          run: (task, state) => {
-            if (task.measure) {
-              task.measure(state);
-            }
-            if (task.mutate) {
-              task.mutate(state);
-            }
-          },
-        };
 
         ampForm.handleSubmitEvent_(event);
         return whenCalled(ampForm.xhr_.fetch).then(() => {

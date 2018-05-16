@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-form-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
@@ -128,9 +129,6 @@ export class AmpForm {
 
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
-
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
 
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
@@ -617,12 +615,7 @@ export class AmpForm {
       // reporting and blocking submission on non-valid forms.
       const isValid = checkUserValidityOnSubmission(this.form_);
       if (this.shouldValidate_) {
-        this.vsync_.run({
-          measure: undefined,
-          mutate: reportValidity,
-        }, {
-          validator: this.validator_,
-        });
+        this.validator_.report();
         return isValid;
       }
     }
@@ -798,15 +791,6 @@ export class AmpForm {
 
 
 /**
- * Reports validity of the form passed through state object.
- * @param {!Object} state
- */
-function reportValidity(state) {
-  state.validator.report();
-}
-
-
-/**
  * Checks user validity for all inputs, fieldsets and the form.
  * @param {!HTMLFormElement} form
  * @return {boolean} Whether the form is currently valid or not.
@@ -970,9 +954,9 @@ export class AmpFormService {
    * @private
    */
   installStyles_(ampdoc) {
-    return new Promise(resolve => {
-      installStylesForDoc(ampdoc, CSS, resolve, false, TAG);
-    });
+    const deferred = new Deferred();
+    installStylesForDoc(ampdoc, CSS, deferred.resolve, false, TAG);
+    return deferred.promise;
   }
 
   /**
@@ -992,7 +976,6 @@ export class AmpFormService {
   /**
    * Install submission handler on all forms in the document.
    * @param {?IArrayLike<T>} forms
-   * @previousValidityState
    * @template T
    * @private
    */

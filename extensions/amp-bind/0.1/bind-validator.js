@@ -78,7 +78,7 @@ export class BindValidator {
   /**
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
-   * @note `tag` and `property` are case-sensitive.
+   * NOTE: `tag` and `property` are case-sensitive.
    * @param {string} tag
    * @param {string} property
    * @return {boolean}
@@ -177,6 +177,8 @@ export class BindValidator {
    * Returns the property rules object for (tag, property), if it exists.
    * Returns null if binding is allowed without constraints.
    * Returns undefined if binding is not allowed.
+   * @param {string} tag
+   * @param {string} property
    * @return {(?PropertyRulesDef|undefined)}
    * @private
    */
