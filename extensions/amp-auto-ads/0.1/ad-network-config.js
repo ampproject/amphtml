@@ -21,7 +21,7 @@ import {
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {dict} from '../../../src/utils/object';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
 
 /**
@@ -92,7 +92,7 @@ class AdSenseNetworkConfig {
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
-    const canonicalHostname = parseUrl(docInfo.canonicalUrl).hostname;
+    const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
     return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', {
       'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
       'plah': canonicalHostname,
