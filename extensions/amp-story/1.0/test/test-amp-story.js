@@ -66,6 +66,7 @@ describes.realWin('amp-story', {
 
   beforeEach(() => {
     win = env.win;
+
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
@@ -78,7 +79,6 @@ describes.realWin('amp-story', {
   });
 
   afterEach(() => {
-    sandbox.restore();
     element.remove();
   });
 
@@ -326,7 +326,7 @@ describes.realWin('amp-story', {
 
   it('should update page id in browser history', () => {
     // Have to stub this because tests run in iframe and you can't write
-    // history from another domain (about:srcdoc)
+    // history from another domain (about:srcdoc).
     const replaceStub = sandbox.stub(win.history, 'replaceState');
     const firstPageId = 'page-zero';
     const pageCount = 2;
@@ -358,6 +358,123 @@ describes.realWin('amp-story', {
         .then(() => {
           return expect(replaceStub).to.not.have.been.called;
         });
+  });
+
+  describe('amp-story audio', () => {
+    it('should register and preload the background audio', () => {
+      sandbox.stub(win.history, 'replaceState');
+      const src = 'https://example.com/foo.mp3';
+      story.element.setAttribute('background-audio', src);
+      const registerStub = sandbox.stub(story.mediaPool_, 'register');
+      const preloadStub = sandbox.stub(story.mediaPool_, 'preload').resolves();
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.backgroundAudioEl_).to.exist;
+            expect(story.backgroundAudioEl_.src).to.equal(src);
+            expect(registerStub).to.have.been.calledOnce;
+            expect(preloadStub).to.have.been.calledOnce;
+          });
+    });
+
+    it('should bless the media on unmute', () => {
+      const blessAllStub =
+          sandbox.stub(story.mediaPool_, 'blessAll').resolves();
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+      story.buildCallback();
+
+      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+
+      expect(blessAllStub).to.have.been.calledOnce;
+    });
+
+    it('should pause the background audio on ad state if not muted', () => {
+      const backgroundAudioEl = win.document.createElement('audio');
+      backgroundAudioEl.setAttribute('id', 'foo');
+      story.backgroundAudioEl_ = backgroundAudioEl;
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+      story.buildCallback();
+
+      const pauseStub = sandbox.stub(story.mediaPool_, 'pause');
+
+      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+      story.storeService_.dispatch(Action.TOGGLE_AD, true);
+
+      expect(pauseStub).to.have.been.calledOnce;
+      expect(pauseStub).to.have.been.calledWith(backgroundAudioEl);
+    });
+
+    it('should play the background audio when hiding ad if not muted', () => {
+      const backgroundAudioEl = win.document.createElement('audio');
+      backgroundAudioEl.setAttribute('id', 'foo');
+      story.backgroundAudioEl_ = backgroundAudioEl;
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+      story.buildCallback();
+
+      // Displaying an ad and not muted.
+      story.storeService_.dispatch(Action.TOGGLE_AD, true);
+      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+
+      const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
+      const playStub = sandbox.stub(story.mediaPool_, 'play');
+
+      story.storeService_.dispatch(Action.TOGGLE_AD, false);
+
+      expect(unmuteStub).to.have.been.calledOnce;
+      expect(unmuteStub).to.have.been.calledWith(backgroundAudioEl);
+      expect(playStub).to.have.been.calledOnce;
+      expect(playStub).to.have.been.calledWith(backgroundAudioEl);
+    });
+
+    it('should not play the background audio when hiding ad if muted', () => {
+      const backgroundAudioEl = win.document.createElement('audio');
+      backgroundAudioEl.setAttribute('id', 'foo');
+      story.backgroundAudioEl_ = backgroundAudioEl;
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+      story.buildCallback();
+
+      story.storeService_.dispatch(Action.TOGGLE_AD, true);
+
+      const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
+      const playStub = sandbox.stub(story.mediaPool_, 'play');
+
+      story.storeService_.dispatch(Action.TOGGLE_AD, false);
+
+      expect(unmuteStub).not.to.have.been.called;
+      expect(playStub).not.to.have.been.called;
+    });
+
+    it('should mute the page and unmute the next page upon navigation', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+      story.buildCallback();
+
+      let coverMuteStub;
+      let firstPageUnmuteStub;
+
+      return story.layoutCallback()
+          .then(() => {
+            coverMuteStub =
+                sandbox.stub(story.getPageById('cover'), 'muteAllMedia');
+            firstPageUnmuteStub =
+                sandbox.stub(story.getPageById('page-1'), 'unmuteAllMedia');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(coverMuteStub).to.have.been.calledOnce;
+            expect(firstPageUnmuteStub).to.have.been.calledOnce;
+          });
+    });
   });
 
   describe('#getMaxMediaElementCounts', () => {
@@ -396,7 +513,6 @@ describes.realWin('amp-story', {
       };
       expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
     });
-
   });
 });
 
