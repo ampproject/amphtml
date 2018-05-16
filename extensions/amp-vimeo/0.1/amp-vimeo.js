@@ -173,11 +173,13 @@ class AmpVimeo extends AMP.BaseElement {
   onReady_() {
     const {element} = this;
 
-    Services.videoManagerForDoc(element).register(this);
-    element.dispatchCustomEvent(VideoEvents.LOAD);
+    Object.keys(VIMEO_EVENTS).forEach(event => {
+      this.sendCommand_('addEventListener', event);
+    });
 
-    [Object.keys(VIMEO_EVENTS)].forEach(event =>
-      this.sendCommand_('addEventListener', event));
+    Services.videoManagerForDoc(element).register(this);
+
+    element.dispatchCustomEvent(VideoEvents.LOAD);
   }
 
   /**
