@@ -157,7 +157,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the overflow element
-   * @returns {!Element} overflowElement
+   * @return {!Element} overflowElement
    *
    */
   getOverflowElement_() {
@@ -257,7 +257,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the composed embed source url
-   * @returns {string} url
+   * @return {string} url
    *
    */
   generateEmbedSourceUrl_() {

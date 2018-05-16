@@ -166,7 +166,10 @@ function eslintrcChangesInPr() {
 function setFilesToLint(files) {
   config.lintGlobs =
       config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
-  log(colors.green('INFO: ') + 'Running lint on ' + colors.cyan(files));
+  if (!process.env.TRAVIS) {
+    log(colors.green('INFO: ') + 'Running lint on ' +
+        colors.cyan(files.join(',')));
+  }
 }
 
 /**
@@ -188,7 +191,7 @@ function lint() {
     options.fix = true;
   }
   if (argv.files) {
-    setFilesToLint(argv.files);
+    setFilesToLint(argv.files.split(','));
     enableStrictLinting();
   } else if (!eslintrcChangesInPr() &&
       (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||

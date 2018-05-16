@@ -104,7 +104,7 @@ export class LocalSubscriptionPlatform {
   /**
    * Validates the action map
    * @param {!JsonObject<string, string>} actionMap
-   * @returns {!JsonObject<string, string>}
+   * @return {!JsonObject<string, string>}
    */
   validateActionMap(actionMap) {
     user().assert(actionMap['login'],
