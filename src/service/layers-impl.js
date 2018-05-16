@@ -447,9 +447,9 @@ export class LayoutElement {
     /**
      * Whether the layout is a descendant of the most recently scrolled layer.
      *
-     * Note: This attribute is `undefined`, unless the ancestry tree is currently
-     * being iterated with #iterateAncestry. This is the only time it can be
-     * determined without a ton of DOM checks.
+     * Note: This attribute is `undefined`, unless the ancestry tree is
+     * currently being iterated with #iterateAncestry. This is the only time it
+     * can be determined without a ton of DOM checks.
      *
      * @private {boolean|undefined}
      */
@@ -1049,7 +1049,8 @@ export class LayoutElement {
   }
 
   /**
-   * Remeasures the element, and all children, since this element was marked dirty.
+   * Remeasures the element, and all children, since this element was marked
+   * dirty.
    *
    * @param {!PositionDef=} opt_relativeTo A performance optimization used when
    *     recursively measuring the child nodes of the layer.

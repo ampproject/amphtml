@@ -102,7 +102,7 @@ function defaultMacro(value, defaultValue) {
  * @param {string} string input to be replaced
  * @param {string} matchPattern string representation of regex pattern
  * @param {string=} opt_newSubStr pattern to be substituted in
- * @returns {string}
+ * @return {string}
  */
 function replaceMacro(string, matchPattern, opt_newSubStr) {
   if (!matchPattern) {

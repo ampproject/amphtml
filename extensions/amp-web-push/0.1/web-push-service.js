@@ -140,7 +140,7 @@ export class WebPushService {
   /**
    * Occurs when the config element loads.
    * @param {!AmpWebPushConfig} configJson
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   start(configJson) {
     dev().fine(TAG, 'amp-web-push extension starting up.');
@@ -547,8 +547,8 @@ export class WebPushService {
           } else {
           /*
             The site is running our initial AMP web push release and the helper
-            frame does not support retrieving the remote storage value. Assume the
-            permission is default to provide the best user experience.
+            frame does not support retrieving the remote storage value. Assume
+            the permission is default to provide the best user experience.
           */
             return Promise.resolve(NotificationPermission.DEFAULT);
           }
@@ -557,8 +557,8 @@ export class WebPushService {
           /*
             If the canonical notification permission is:
               - Blocked
-                - If the publisher has defined a blocked widget section, show it,
-                  otherwise show the unsubscribed widget.
+                - If the publisher has defined a blocked widget section, show
+                  it, otherwise show the unsubscribed widget.
               - Default or Granted
                 - Resume flow
           */
@@ -937,7 +937,7 @@ export class WebPushService {
    * Returns true if the Service Worker API, Push API, and Notification API are
    * supported and the page is HTTPS.
    *
-   * @returns {boolean}
+   * @return {boolean}
    */
   environmentSupportsWebPush() {
     return this.arePushRelatedApisSupported_() && this.isAmpPageHttps_();
@@ -953,7 +953,7 @@ export class WebPushService {
    * that AMP, a mobile-only feature, won't be supporting Safari until Safari
    * actually develops mobile push support.
    *
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   arePushRelatedApisSupported_() {

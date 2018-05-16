@@ -40,7 +40,8 @@ export function appnexus(global, data) {
   }
 
   /**
-   * Construct the TTJ URL. Note params should be properly encoded first (use encodeURIComponent);
+   * Construct the TTJ URL. Note params should be properly encoded first (use
+   * encodeURIComponent);
    * @param  {!Array<string>} args query string params to add to the base URL.
    * @return {string}      Formated TTJ URL.
    */

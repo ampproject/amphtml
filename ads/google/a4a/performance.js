@@ -198,7 +198,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
   /**
    * @param {string} name  Metric name to send.
-   * @returns {string}  URL to send metrics to.
+   * @return {string}  URL to send metrics to.
    * @private
    */
   buildPingAddress_(name) {

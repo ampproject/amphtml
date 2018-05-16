@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {Builder} from './web-animations';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
