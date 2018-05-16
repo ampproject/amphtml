@@ -6,7 +6,9 @@
         "browsers": ["Last 2 versions"]
       },
       "modules": "commonjs",
-      "sourceType": "module"
+      "sourceType": "module",
+      // To use function* in amp-viewer-integration without importing 'babel-polyfill'.
+      "exclude": ["transform-regenerator"]
     }]
   ],
   "sourceType": "module",

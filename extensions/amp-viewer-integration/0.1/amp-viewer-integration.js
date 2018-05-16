@@ -22,6 +22,7 @@ import {
 } from './messaging/messaging';
 import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
+import {HighlightHandler} from './highlight-handler';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -29,9 +30,11 @@ import {
   registerServiceBuilder,
 } from '../../../src/service';
 import {getData} from '../../../src/event-helper';
-import {getSourceUrl} from '../../../src/url';
+import {getSourceUrl, parseUrl, parseQueryString} from '../../../src/url';
 import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
+import {findSentences, markTextRangeList} from './findtext';
+import {setStyles} from '../../../src/style';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -62,6 +65,11 @@ export class AmpViewerIntegration {
 
     /** @private {boolean} */
     this.isHandShakePoll_ = false;
+
+    /**
+     * @private {?HighlightHandler}
+     */
+    this.highlightHandler_ = null;
 
     /** @const @private {!AmpViewerIntegrationVariableService} */
     this.variableService_ = new AmpViewerIntegrationVariableService(
@@ -97,9 +105,11 @@ export class AmpViewerIntegration {
                 new Messaging(this.win, receivedPort, this.isWebView_));
           });
     }
+    this.highlightHandler_ = new HighlightHandler(ampdoc);
 
     const port = new WindowPortEmulator(
         this.win, origin, this.win.parent/* target */);
+    // This fails in my localhost demo for some reason.
     return this.openChannelAndStart_(
         viewer, ampdoc, origin, new Messaging(this.win, port, this.isWebView_));
   }
@@ -182,6 +192,7 @@ export class AmpViewerIntegration {
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);
     }
+    this.highlightHandler_.setupMessaging(messaging);
   }
 
   /**
