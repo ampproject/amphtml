@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -30,9 +31,9 @@ export const CONSENT_ITEM_STATE = {
   REJECTED: 2,
   DISMISSED: 3,
   NOT_REQUIRED: 4,
-  // TODO(@zhouyx): Seperate UI state from consent state. Add consent requirement state
-  // ui_state = {pending, active, complete}
-  // consent_state = {unknown, granted, rejected}
+  // TODO(@zhouyx): Seperate UI state from consent state. Add consent
+  // requirement state ui_state = {pending, active, complete} consent_state =
+  // {unknown, granted, rejected}
 };
 
 export class ConsentStateManager {
@@ -148,9 +149,9 @@ export class ConsentStateManager {
       return Promise.resolve();
     }
     if (!this.consentReadyPromises_[instanceId]) {
-      this.consentReadyPromises_[instanceId] = new Promise(resolve => {
-        this.consentReadyResolvers_[instanceId] = resolve;
-      });
+      const deferred = new Deferred();
+      this.consentReadyPromises_[instanceId] = deferred.promise;
+      this.consentReadyResolvers_[instanceId] = deferred.resolve;
     }
     return this.consentReadyPromises_[instanceId];
   }

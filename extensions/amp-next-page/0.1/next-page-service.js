@@ -26,6 +26,7 @@ import {
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {parseUrl} from '../../../src/url';
+import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -88,10 +89,7 @@ export class NextPageService {
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
-    /**
-     * @private
-     * {?../../../../src/service/position-observer/position-observer-impl.PositionObserver}
-     */
+    /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private @const {!Array<!DocumentRef>} */
@@ -182,6 +180,14 @@ export class NextPageService {
       for (let i = 0; i < elements.length; i++) {
         elements[i].classList.add('i-amphtml-next-page-hidden');
       }
+    }
+
+    // Drop any amp-analytics tags from the child doc. We want to reuse the
+    // parent config instead.
+    const analytics = doc.querySelectorAll('amp-analytics');
+    for (let i = 0; i < analytics.length; i++) {
+      const item = analytics[i];
+      removeElement(item);
     }
 
     const amp =
@@ -276,7 +282,7 @@ export class NextPageService {
    * one.
    * @param {number} nextPage Index of the next unseen page to use as the first
    *     recommendation in the list.
-   * @return {Element} Container element for the recommendations.
+   * @return {!Element} Container element for the recommendations.
    */
   createArticleLinks_(nextPage) {
     const doc = this.win_.document;
@@ -358,13 +364,12 @@ export class NextPageService {
    * the position of a page separator in the viewport.
    * @param {number} i Index of the documentRef this recommendation unit is
    *     attached to.
-   * @param
-   * {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
+   * @param {?../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
    *     position Position of the current recommendation unit in the viewport.
    */
   positionUpdate_(i, position) {
     // We're only interested when the recommendations exit the viewport
-    if (position.positionRect !== null) {
+    if (!position || position.positionRect !== null) {
       return;
     }
 
@@ -390,7 +395,9 @@ export class NextPageService {
    */
   articleLinksPositionUpdate_(documentRef) {
     documentRef.cancelled = true;
-    this.positionObserver_.unobserve(documentRef.recUnit);
+    if (documentRef.recUnit) {
+      this.positionObserver_.unobserve(documentRef.recUnit);
+    }
   }
 
   /**

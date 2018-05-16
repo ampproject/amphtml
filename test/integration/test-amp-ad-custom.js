@@ -28,7 +28,8 @@ describe.configure().retryOnSaucelabs().run('amp custom ad', () => {
         });
   });
 
-  it('should render template', () => {
+  /** TODO(#15329): unskip */
+  it.skip('should render template', () => {
     return fixture.awaitEvent(AmpEvents.LOAD_END, 6).then(function() {
       expect(fixture.doc.querySelectorAll('amp-img')).to
           .have.length(3);

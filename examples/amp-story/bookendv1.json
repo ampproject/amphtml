@@ -7,8 +7,54 @@
   ],
   "components": [
     {
-      "type": "article-set-title",
-      "title": "test"
+      "type": "heading",
+      "text": "test"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article2",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article3",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "heading",
+      "text": "test2"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "portrait",
+      "category": "This is an example portrait",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/312x416"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
     },
     {
       "type": "small",

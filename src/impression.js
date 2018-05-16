@@ -76,8 +76,8 @@ export function maybeTrackImpression(win) {
   ]).then(results => {
     const isTrustedViewer = results[0];
     const isTrustedReferrer = results[1];
-    // Currently this feature is launched for trusted viewer and trusted referrer,
-    // but still experiment guarded for all AMP docs.
+    // Currently this feature is launched for trusted viewer and trusted
+    // referrer, but still experiment guarded for all AMP docs.
     if (!isTrustedViewer && !isTrustedReferrer && !isExperimentOn(win, 'alp')) {
       resolveImpression();
       return;
@@ -100,13 +100,13 @@ export function doNotTrackImpression() {
 }
 
 /**
- * Handle the getReplaceUrl and return a promise when url is replaced
- * Only handles replaceUrl when viewer indicates AMP to do so. Viewer should indicate
- * by setting the legacy replaceUrl init param and add `replaceUrl` to its capability param.
- * Future plan is to change the type of legacy init replaceUrl param from url string
- * to boolean value.
- * Please NOTE replaceUrl and adLocation will never arrive at same time,
- * so there is no race condition on the order of handling url replacement.
+ * Handle the getReplaceUrl and return a promise when url is replaced Only
+ * handles replaceUrl when viewer indicates AMP to do so. Viewer should indicate
+ * by setting the legacy replaceUrl init param and add `replaceUrl` to its
+ * capability param. Future plan is to change the type of legacy init replaceUrl
+ * param from url string to boolean value. Please NOTE replaceUrl and adLocation
+ * will never arrive at same time, so there is no race condition on the order of
+ * handling url replacement.
  * @param {!Window} win
  * @return {!Promise}
  */
@@ -245,7 +245,8 @@ function applyResponse(win, response) {
 }
 
 /**
- * Return a promise that whether appending extra url params to outgoing link is required.
+ * Return a promise that whether appending extra url params to outgoing link is
+ * required.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise<boolean>}
  */

@@ -35,10 +35,7 @@ import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
-  'AMP-AD': true,
   'AMP-IMG': true,
-  'AMP-VIDEO': true,
-  'AMP-YOUTUBE': true,
 };
 
 export const ELIGIBLE_TAP_TAGS = {
@@ -308,30 +305,13 @@ export class LightboxManager {
         return descriptionElement./*OK*/innerText;
       }
     }
-    const alt = element.getAttribute('alt');
-    if (alt) {
-      return alt;
-    }
-    const ariaLabel = element.getAttribute('aria-label');
-    if (ariaLabel) {
-      return ariaLabel;
-    }
-    const ariaLabelledBy = element.getAttribute('aria-labelledby');
-    if (ariaLabelledBy) {
-      const descriptionElement = element.ownerDocument
-          .getElementById(ariaLabelledBy);
-      if (descriptionElement) {
-        return descriptionElement./*OK*/innerText;
-      }
-    }
-
     return null;
   }
 
   /**
    * Gets the duration of a supported video element
    * @param {!Element} element
-   * @returns {!Promise<number>}
+   * @return {!Promise<number>}
    * @private
    */
   getVideoTimestamp_(element) {

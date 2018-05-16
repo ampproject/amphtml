@@ -30,18 +30,17 @@ import {toWin} from './types';
 import {user} from './log';
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * Services.viewportForDoc(...)) for type safety and because the factory should not be
- * passed around.
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. Services.viewportForDoc(...)) for type safety and because the
+ * factory should not be passed around.
  * @param {!Window} win
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
- * @param {boolean=} opt_element Whether this service is provided by an
- *     element, not the extension.
+ * @param {boolean=} opt_element Whether this service is provided by an element,
+ *     not the extension.
  * @return {!Promise<*>}
  */
 export function getElementService(win, id, extension, opt_element) {
@@ -83,18 +82,17 @@ function isElementScheduled(win, elementName) {
 
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * Services.viewportForDoc(...)) for type safety and because the factory should not be
- * passed around.
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. Services.viewportForDoc(...)) for type safety and because the
+ * factory should not be passed around.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
- * @param {boolean=} opt_element Whether this service is provided by an
- *     element, not the extension.
+ * @param {boolean=} opt_element Whether this service is provided by an element,
+ *     not the extension.
  * @return {!Promise<*>}
  */
 export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
@@ -125,8 +123,8 @@ export function getElementServiceIfAvailableForDoc(
   return ampdoc.whenBodyAvailable()
       .then(() => waitForExtensionIfStubbed(ampdoc.win, extension))
       .then(() => {
-        // If this service is provided by an element, then we can't depend on the
-        // service (they may not use the element).
+        // If this service is provided by an element, then we can't depend on
+        // the service (they may not use the element).
         if (opt_element) {
           return getServicePromiseOrNullForDoc(nodeOrDoc, id);
         } else if (isElementScheduled(ampdoc.win, extension)) {
@@ -223,8 +221,8 @@ function getElementServicePromiseOrNull(win, id, extension, opt_element) {
   return dom.waitForBodyPromise(win.document)
       .then(() => waitForExtensionIfStubbed(win, extension))
       .then(() => {
-        // If this service is provided by an element, then we can't depend on the
-        // service (they may not use the element).
+        // If this service is provided by an element, then we can't depend on
+        // the service (they may not use the element).
         if (opt_element) {
           return getServicePromiseOrNull(win, id);
         } else if (isElementScheduled(win, extension)) {
