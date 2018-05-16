@@ -138,7 +138,9 @@
 }
 
 .i-amphtml-story-bookend-article-image > img {
-  object-fit: cover;
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .i-amphtml-story-bookend-replay-image {
