@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
@@ -91,6 +92,7 @@ export class PlatformStore {
   /**
    *Calls a callback for when a platform is resolved.
    * @param {string} serviceId
+   * @param {!Function} callback
    */
   onPlatformResolves(serviceId, callback) {
     const platform = this.subscriptionPlatforms_[serviceId];
@@ -130,7 +132,7 @@ export class PlatformStore {
   /**
    * Returns all available platforms.
    *
-   * @returns {!Array<!./subscription-platform.SubscriptionPlatform>}
+   * @return {!Array<!./subscription-platform.SubscriptionPlatform>}
    */
   getAvailablePlatforms() {
     const platforms = [];
@@ -145,16 +147,21 @@ export class PlatformStore {
   /**
    * Returns a promise which resolves when all platforms are resolved.
    *
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   getAllPlatforms() {
-    return new Promise(resolve => {
+    const allPlatformPromise = new Deferred();
+    if (Object.keys(this.subscriptionPlatforms_).length
+        === this.serviceIds_.length) {
+      allPlatformPromise.resolve();
+    } else {
       this.onPlatformResolvedCallbacks_.add(e => {
         if (this.subscriptionPlatforms_.length === this.serviceIds_.length) {
-          resolve();
+          allPlatformPromise.resolve();
         }
       });
-    });
+    }
+    return allPlatformPromise.promise;
   }
 
   /**
@@ -203,34 +210,33 @@ export class PlatformStore {
       return this.grantStatusPromise_;
     }
 
-    this.grantStatusPromise_ = new Promise(resolve => {
+    this.grantStatusPromise_ = new Deferred();
 
-      // Check if current entitlements unblocks the reader
-      for (const key in this.entitlements_) {
-        const entitlement = (this.entitlements_[key]);
+    // Check if current entitlements unblocks the reader
+    for (const key in this.entitlements_) {
+      const entitlement = (this.entitlements_[key]);
+      if (entitlement.granted) {
+        this.saveGrantEntitlement_(entitlement);
+        return this.grantStatusPromise_.resolve(true);
+      }
+    }
+
+    if (this.areAllPlatformsResolved_()) {
+      // Resolve with null if non of the entitlements unblocks the reader
+      return this.grantStatusPromise_.resolve(false);
+    } else {
+      // Listen if any upcoming entitlements unblock the reader
+      this.onChange(({entitlement}) => {
         if (entitlement.granted) {
           this.saveGrantEntitlement_(entitlement);
-          return resolve(true);
+          this.grantStatusPromise_.resolve(true);
+        } else if (this.areAllPlatformsResolved_()) {
+          this.grantStatusPromise_.resolve(false);
         }
-      }
+      });
+    }
 
-      if (this.areAllPlatformsResolved_()) {
-        // Resolve with null if non of the entitlements unblocks the reader
-        return resolve(false);
-      } else {
-        // Listen if any upcoming entitlements unblock the reader
-        this.onChange(({entitlement}) => {
-          if (entitlement.granted) {
-            this.saveGrantEntitlement_(entitlement);
-            resolve(true);
-          } else if (this.areAllPlatformsResolved_()) {
-            resolve(false);
-          }
-        });
-      }
-    });
-
-    return this.grantStatusPromise_;
+    return this.grantStatusPromise_.promise;
   }
 
   /**
@@ -258,23 +264,20 @@ export class PlatformStore {
     if (this.grantStatusEntitlementPromise_) {
       return (this.grantStatusEntitlementPromise_);
     }
-
-    this.grantStatusEntitlementPromise_ = new Promise(resolve => {
-      if ((this.grantStatusEntitlement_
-          && this.grantStatusEntitlement_.isSubscriber())
+    this.grantStatusEntitlementPromise_ = new Deferred();
+    if ((this.grantStatusEntitlement_
+        && this.grantStatusEntitlement_.isSubscriber())
+          || this.areAllPlatformsResolved_()) {
+      this.grantStatusEntitlement_.resolve(this.grantStatusEntitlement_);
+    } else {
+      this.onGrantStateResolvedCallbacks_.add(() => {
+        if (this.grantStatusEntitlement_.granted
             || this.areAllPlatformsResolved_()) {
-        resolve(this.grantStatusEntitlement_);
-      } else {
-        this.onGrantStateResolvedCallbacks_.add(() => {
-          if (this.grantStatusEntitlement_.granted
-              || this.areAllPlatformsResolved_()) {
-            resolve(this.grantStatusEntitlement_);
-          }
-        });
-      }
-    });
-
-    return this.grantStatusEntitlementPromise_;
+          this.grantStatusEntitlement_.resolve(this.grantStatusEntitlement_);
+        }
+      });
+    }
+    return this.grantStatusEntitlementPromise_.promise;
   }
 
   /**
@@ -293,22 +296,21 @@ export class PlatformStore {
     if (this.allResolvedPromise_) {
       return this.allResolvedPromise_;
     }
-
-    this.allResolvedPromise_ = new Promise(resolve => {
-      if (this.areAllPlatformsResolved_()) {
-        // Resolve with null if non of the entitlements unblocks the reader
-        return resolve(this.getAvailablePlatformsEntitlements_());
-      } else {
-        // Listen if any upcoming entitlements unblock the reader
-        this.onChange(() => {
-          if (this.areAllPlatformsResolved_()) {
-            resolve(this.getAvailablePlatformsEntitlements_());
-          }
-        });
-      }
-    });
-
-    return this.allResolvedPromise_;
+    this.allResolvedPromise_ = new Deferred();
+    if (this.areAllPlatformsResolved_()) {
+      // Resolve with null if non of the entitlements unblocks the reader
+      return this.allResolvedPromise_.resolve(
+          this.getAvailablePlatformsEntitlements_());
+    } else {
+      // Listen if any upcoming entitlements unblock the reader
+      this.onChange(() => {
+        if (this.areAllPlatformsResolved_()) {
+          this.allResolvedPromise_.resolve(
+              this.getAvailablePlatformsEntitlements_());
+        }
+      });
+    }
+    return this.allResolvedPromise_.promise;
   }
 
   /**

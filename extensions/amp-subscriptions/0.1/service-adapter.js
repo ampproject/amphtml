@@ -81,10 +81,9 @@ export class ServiceAdapter {
   }
 
   /**
+   * Returns login platform based on platform selection
    *
-   *
-   * @returns
-   * @memberof ServiceAdapter
+   * @return {!Promise}
    */
   login() {
     return this.subscriptionService_.scoreBasedLogin();

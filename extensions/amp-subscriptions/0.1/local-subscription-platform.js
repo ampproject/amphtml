@@ -156,11 +156,10 @@ export class LocalSubscriptionPlatform {
       } else if (!element.hasAttribute('subscriptions-service')
           || element.getAttribute('subscriptions-service') === 'auto'
           || element.getAttribute('subscriptions-service') === '') {
-        this.serviceAdapter_.login().then(result => {
-          if (result) {
-            this.serviceAdapter_.reAuthorizePlatform(this);
-          }
-        })
+        this.serviceAdapter_.login().then(platform => {
+          const serviceId = platform.getServiceId();
+          this.serviceAdapter_.delegateActionToService(action, serviceId);
+        });
       } else if (element.getAttribute('subscriptions-service')) {
         const serviceId = element.getAttribute('subscriptions-service');
         this.serviceAdapter_.delegateActionToService(action, serviceId);

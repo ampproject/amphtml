@@ -271,7 +271,7 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.platformStore_.getAllRegisteredPlatforms().forEach(
+      this.platformStore_.getAvailablePlatforms().forEach(
           subscriptionPlatform => {
             this.fetchEntitlements_(subscriptionPlatform);
           }
@@ -462,24 +462,21 @@ export class SubscriptionService {
     return this.platformStore_.getAllPlatforms().then(() => {
       const platformScores = [];
       this.platformStore_.getAvailablePlatforms().forEach(platform => {
-        const score = 0;
-
+        let score = 0;
         if (platform.supportsCurrentViewer()) {
           score += 1000;
         }
-
         platformScores.push({
           platform,
-          score
+          score,
         });
       });
 
       platformScores.sort(function(platform1, platform2) {
         return platform2.weight - platform1.weight;
       });
-
       return platformScores[0].platform;
-    })
+    });
   }
 }
 
