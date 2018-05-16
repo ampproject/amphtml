@@ -86,7 +86,7 @@
     "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
     "jsdoc/check-param-names": 1,
     "jsdoc/check-tag-names": 1,
-    "jsdoc/check-types": 0,
+    "jsdoc/check-types": 1,
     "jsdoc/require-param": 1,
     "jsdoc/require-param-name": 1,
     "jsdoc/require-param-type": 1,

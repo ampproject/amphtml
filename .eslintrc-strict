@@ -5,7 +5,7 @@
     "amphtml-internal/vsync": 1,
     "jsdoc/check-param-names": 2,
     "jsdoc/check-tag-names": 2,
-    "jsdoc/check-types": 0,
+    "jsdoc/check-types": 2,
     "jsdoc/require-param": 1,
     "jsdoc/require-param-name": 2,
     "jsdoc/require-param-type": 2,
