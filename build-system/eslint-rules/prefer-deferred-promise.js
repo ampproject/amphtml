@@ -114,7 +114,7 @@ module.exports = function(context) {
 
       const message = [
         'Instead of creating a pending Promise, please use ',
-        'Deferred in the src/utils/promise.js module instead.',
+        'Deferred in the src/utils/promise.js module.',
       ].join('\n\t');
       context.report(resolver, message);
     },
