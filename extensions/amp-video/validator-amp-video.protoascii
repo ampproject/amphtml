@@ -60,6 +60,10 @@ attr_lists: {
     name: "muted"
     value: ""
   }
+  attrs: {
+    name: "noaudio"
+    value: ""
+  }
   attrs: { name: "placeholder" }
   attrs: {
     name: "preload"

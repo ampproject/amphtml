@@ -112,6 +112,11 @@ Determines whether the media element is allowed to have a remote playback UI suc
 
 The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.
 
+##### noaudio
+
+Annotates the video as having no audio. This hides the equalizer icon that is displayed
+when the video has autoplay.
+
 ##### rotate-to-fullscreen
 
 If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#rotate-to-fullscreen).
