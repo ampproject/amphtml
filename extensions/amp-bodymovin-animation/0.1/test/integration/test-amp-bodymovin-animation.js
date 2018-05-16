@@ -22,7 +22,7 @@ describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
   const bodymovinBody = `
     <amp-bodymovin-animation id="anim"
       layout="fixed" width="200" height="200"
-      src="https://nainar.github.io/loader.json">
+      src="testresource.json">
     </amp-bodymovin-animation>
     <div id="stop" on="tap:anim.stop">Stop</div>`;
   describes.integration('amp-bodymovin-animation iframe renders', {
@@ -41,7 +41,7 @@ describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
   const bodymovinNoAutoplayBody = `
     <amp-bodymovin-animation id="anim"
       layout="fixed" width="200" height="200"
-      src="https://nainar.github.io/loader.json"
+      src="testresource.json"
       noautoplay>
     </amp-bodymovin-animation>
     <div id="play" on="tap:anim.play">Play</div>
@@ -96,7 +96,7 @@ describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
   const bodymovinSeekToBody = `
     <amp-bodymovin-animation id="anim"
       layout="fixed" width="200" height="200"
-      src="https://nainar.github.io/loader.json"
+      src="testresource.json"
       noautoplay>
     </amp-bodymovin-animation>
     <div id="seekToHalf" on="tap:anim.seekTo(percent=0.5)">Seek to 1/2</div>`;
