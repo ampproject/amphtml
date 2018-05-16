@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as DOMPurify from 'dompurify';
+import * as DOMPurify from 'dompurify/dist/purify.cjs';
 import {
   checkCorsUrl,
   getSourceUrl,
