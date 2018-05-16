@@ -216,7 +216,7 @@ The `amp-story` extension provides a [default prompt UI](https://user-images.git
     }
   }
   </script>
-  <amp-story-consent id="consent-ui"></amp-story-consent>
+  <amp-story-consent id="consent-ui" layout="nodisplay"></amp-story-consent>
 </amp-consent>
 ```
 
