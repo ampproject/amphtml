@@ -22,8 +22,7 @@ module.exports = function(context) {
     }
 
     const {right} = node;
-    return right.type === 'Identifier' &&
-        right.name === name;
+    return right.type === 'Identifier' && right.name === name;
   }
 
   return {
@@ -121,4 +120,3 @@ module.exports = function(context) {
     },
   };
 };
-
