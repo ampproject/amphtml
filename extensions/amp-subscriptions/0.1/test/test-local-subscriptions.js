@@ -136,6 +136,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     beforeEach(() => {
       element = document.createElement('div');
       element.setAttribute('subscriptions-action', 'subscribe');
+      element.setAttribute('subscriptions-service', 'local');
     });
 
     it('should call executeAction with subscriptions-action value', () => {

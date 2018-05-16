@@ -50,7 +50,7 @@ export class PlatformStore {
     /** @private @const {!Observable<{serviceId: string}>} */
     this.onPlatformResolvedCallbacks_ = new Observable();
 
-    /** @private {?Promise<boolean>} */
+    /** @private {?Deferred} */
     this.grantStatusPromise_ = null;
 
     /** @private @const {!Observable} */
@@ -155,7 +155,7 @@ export class PlatformStore {
         === this.serviceIds_.length) {
       allPlatformPromise.resolve();
     } else {
-      this.onPlatformResolvedCallbacks_.add(e => {
+      this.onPlatformResolvedCallbacks_.add(() => {
         if (this.subscriptionPlatforms_.length === this.serviceIds_.length) {
           allPlatformPromise.resolve();
         }
@@ -207,7 +207,7 @@ export class PlatformStore {
    */
   getGrantStatus() {
     if (this.grantStatusPromise_ !== null) {
-      return this.grantStatusPromise_;
+      return this.grantStatusPromise_.promise;
     }
 
     this.grantStatusPromise_ = new Deferred();
@@ -217,13 +217,13 @@ export class PlatformStore {
       const entitlement = (this.entitlements_[key]);
       if (entitlement.granted) {
         this.saveGrantEntitlement_(entitlement);
-        return this.grantStatusPromise_.resolve(true);
+        this.grantStatusPromise_.resolve(true);
       }
     }
 
     if (this.areAllPlatformsResolved_()) {
       // Resolve with null if non of the entitlements unblocks the reader
-      return this.grantStatusPromise_.resolve(false);
+      this.grantStatusPromise_.resolve(false);
     } else {
       // Listen if any upcoming entitlements unblock the reader
       this.onChange(({entitlement}) => {
@@ -262,18 +262,19 @@ export class PlatformStore {
    */
   getGrantEntitlement() {
     if (this.grantStatusEntitlementPromise_) {
-      return (this.grantStatusEntitlementPromise_);
+      return (this.grantStatusEntitlementPromise_.promise);
     }
     this.grantStatusEntitlementPromise_ = new Deferred();
     if ((this.grantStatusEntitlement_
         && this.grantStatusEntitlement_.isSubscriber())
           || this.areAllPlatformsResolved_()) {
-      this.grantStatusEntitlement_.resolve(this.grantStatusEntitlement_);
+      this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
     } else {
       this.onGrantStateResolvedCallbacks_.add(() => {
         if (this.grantStatusEntitlement_.granted
             || this.areAllPlatformsResolved_()) {
-          this.grantStatusEntitlement_.resolve(this.grantStatusEntitlement_);
+          this.grantStatusEntitlementPromise_.resolve(
+              this.grantStatusEntitlement_);
         }
       });
     }
@@ -294,12 +295,12 @@ export class PlatformStore {
    */
   getAllPlatformsEntitlements_() {
     if (this.allResolvedPromise_) {
-      return this.allResolvedPromise_;
+      return this.allResolvedPromise_.promise;
     }
     this.allResolvedPromise_ = new Deferred();
     if (this.areAllPlatformsResolved_()) {
       // Resolve with null if non of the entitlements unblocks the reader
-      return this.allResolvedPromise_.resolve(
+      this.allResolvedPromise_.resolve(
           this.getAvailablePlatformsEntitlements_());
     } else {
       // Listen if any upcoming entitlements unblock the reader
