@@ -31,6 +31,7 @@ const TAG = 'amp-story';
  *    canshowpreviouspagehelp: boolean,
  *    canshowsharinguis: boolean,
  *    canshowsystemlayerbuttons: boolean,
+ *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
  *    hasaudiostate: boolean,
@@ -241,9 +242,9 @@ export class AmpStoryStoreService {
     });
   }
 
+  // @TODO(gmajoulet): These should get their own file if they start growing.
   /**
    * Retrieves the embed mode config, that will override the default state.
-   * @todo(gmajoulet): These should get their own file if they start growing.
    * @return {!Object<StateProperty, *>} Partial state
    * @private
    */

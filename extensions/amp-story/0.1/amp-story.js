@@ -453,7 +453,11 @@ export class AmpStory extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @param {number} deltaX
+   * @return {boolean}
+   * @private
+   */
   isSwipeLargeEnoughForHint_(deltaX) {
     return (Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
   }
