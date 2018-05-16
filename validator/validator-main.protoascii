@@ -3671,6 +3671,21 @@ tags: {
 tags: {
   html_format: AMP
   tag_name: "INPUT"
+  spec_name: "INPUT [type=file]"
+  attrs: {
+    name: "type"
+    value_casei: "file"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attr_lists: "input-common-attr"
+  attr_lists: "input-name-attr"
+  mandatory_ancestor: "FORM [method=POST]"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+}
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
   spec_name: "INPUT [type=password]"
   attrs: {
     name: "type"
