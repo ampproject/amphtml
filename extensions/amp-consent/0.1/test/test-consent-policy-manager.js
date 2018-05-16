@@ -92,7 +92,11 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
     });
 
     describe('whenPolicyUnblock', () => {
-      it('when policy is not consent-unblock-on-all', () => {
+      beforeEach(() => {
+        toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, false);
+      });
+
+      it('when policy is not _none', () => {
         const promise = manager.whenPolicyUnblock('default');
         manager.registerConsentPolicyInstance('default', {});
         return promise.then(unblock => {
@@ -100,8 +104,8 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         });
       });
 
-      it('when policy is consent-unblock-on-all', () => {
-        const promise = manager.whenPolicyUnblock('consent-unblock-on-all');
+      it('when policy is _none', () => {
+        const promise = manager.whenPolicyUnblock('_none');
         manager.registerConsentPolicyInstance('default', {});
         return promise.then(unblock => {
           expect(unblock).to.be.true;
