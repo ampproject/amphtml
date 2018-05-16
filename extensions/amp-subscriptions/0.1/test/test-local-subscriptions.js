@@ -160,6 +160,30 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       expect(executeStub).to.not.be.called;
       expect(delegateStub).to.be.called;
     });
+
+    it('should delegate service selection to scoreBasedLogin if no service '
+        + 'name is specified', () => {
+      element.removeAttribute('subscriptions-service');
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'login'
+      ).callsFake(() => Promise.resolve(platform));
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.be.called;
+      return loginStub().then(() => {
+        expect(delegateStub).to.be.calledWith(
+            element.getAttribute('subscriptions-action'),
+            serviceId,
+        );
+      });
+    });
   });
 
   describe('executeAction', () => {

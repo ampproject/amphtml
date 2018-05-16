@@ -163,6 +163,7 @@ describes.realWin('Platform store', {}, () => {
       });
     });
   });
+
   describe('selectApplicablePlatform_', () => {
     let localPlatform;
     let anotherPlatform;
@@ -279,7 +280,6 @@ describes.realWin('Platform store', {}, () => {
     beforeEach(() => {
       errorSpy = sandbox.spy(user(), 'warn');
     });
-
     it('should report warning if all platforms fail and resolve '
         + 'local with fallbackEntitlement', () => {
       const platform = new SubscriptionPlatform();
@@ -428,6 +428,25 @@ describes.realWin('Platform store', {}, () => {
         done();
       });
       platformStore.resolvePlatform('local', localPlatform);
+    });
+  });
+
+  describe('getAllPlatforms', () => {
+    let platform1, platform2;
+
+    beforeEach(() => {
+      platform1 = new SubscriptionPlatform();
+      sandbox.stub(platform1, 'getServiceId').callsFake(() => 'service1');
+      platform2 = new SubscriptionPlatform();
+      sandbox.stub(platform2, 'getServiceId').callsFake(() => 'service2');
+    });
+
+    it('should resolve if already all platforms are resolved', () => {
+      platformStore.resolvePlatform('local', platform1);
+      platformStore.resolvePlatform('local', platform2);
+      return platformStore.getAllPlatforms().then(platforms => {
+
+      })
     });
   });
 
