@@ -113,8 +113,8 @@ module.exports = function(context) {
       }
 
       const message = [
-        'If you are creating a pending promise to extract a resolve function',
-        'please use Deferred in the src/utils/promise.js module instead.',
+        'Instead of creating a pending Promise, please use ',
+        'Deferred in the src/utils/promise.js module instead.',
       ].join('\n\t');
       context.report(resolver, message);
     },
