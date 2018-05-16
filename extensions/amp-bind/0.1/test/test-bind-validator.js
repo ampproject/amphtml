@@ -159,9 +159,10 @@ describe('BindValidator', () => {
     it('should NOT allow unsupported <input> "type" values', () => {
       expect(val.isResultValid('INPUT', 'type', 'checkbox')).to.be.true;
       expect(val.isResultValid('INPUT', 'type', 'email')).to.be.true;
+      expect(val.isResultValid('INPUT', 'type', 'file')).to.be.true;
+      expect(val.isResultValid('INPUT', 'type', 'password')).to.be.true;
 
       expect(val.isResultValid('INPUT', 'type', 'BUTTON')).to.be.false;
-      expect(val.isResultValid('INPUT', 'type', 'file')).to.be.false;
       expect(val.isResultValid('INPUT', 'type', 'image')).to.be.false;
     });
   });
