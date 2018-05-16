@@ -19,7 +19,6 @@
  * presets.
  */
 
-import {computedStyle} from '../../../../src/style';
 import {startsWith} from '../../../../src/string';
 import {user} from '../../../../src/log';
 
@@ -54,8 +53,7 @@ export function resolvePercentageToNumber(val) {
   }
 }
 
-export function installStyles(ampdoc, element, fxType, flyInDistance) {
-  const style = computedStyle(ampdoc.win, element);
+export function installStyles(element, fxType) {
   switch (fxType) {
     case 'parallax':
       return {
@@ -72,21 +70,8 @@ export function installStyles(ampdoc, element, fxType, flyInDistance) {
         'opacity': 0,
       };
     case 'fly-in-bottom':
-      return {
-        'will-change': 'transform',
-        'top': 'calc(' + style.top + ' + ' + flyInDistance + 'vh)',
-        'visibility': 'visible',
-      };
     case 'fly-in-top':
-      return {
-        'will-change': 'transform',
-        'top': 'calc(' + style.top + ' - ' + flyInDistance + 'vh)',
-        'visibility': 'visible',
-      };
     case 'fly-in-left':
-      return {
-        'will-change': 'transform',
-      };
     case 'fly-in-right':
       return {
         'will-change': 'transform',
@@ -126,9 +111,9 @@ export function defaultFlyInDistanceValues(ampdoc, fxType) {
       const screenWidth = ampdoc.win.screen.width;
       if (screenWidth < 1000) { // mobile and tablets
         return 25;
-      } else { // laptops and desktops
-        return 33;
       }
+      // laptops and desktops
+      return 33;
     case 'fly-in-left':
     case 'fly-in-right':
       return 100;

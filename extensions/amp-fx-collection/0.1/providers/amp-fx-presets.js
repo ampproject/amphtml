@@ -96,17 +96,32 @@ export const Presets = {
         return;
       }
 
+      // only do this on the first element
+      if (!fxElement.initialTrigger) {
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'top': `calc(${style.top} + ${fxElement.getFlyInDistance()}vh)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
+      }
+
       // If above the threshold of trigger-position
       fxElement.setIsMutateScheduled(true);
-      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
-        fxElement.setIsMutateScheduled(false);
-        // Translate the element offset pixels.
-        setStyles(fxElement.getElement(), {
-          'transition-duration': fxElement.getDuration(),
-          'transition-timing-function': fxElement.getEasing(),
-          'transform': `translateY(-${fxElement.getFlyInDistance()}vh)`,
-        });
-      });
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'transform': `translateY(-${fxElement.getFlyInDistance()}vh)`,
+            });
+          });
     },
   },
   'fly-in-left': {
@@ -138,27 +153,31 @@ export const Presets = {
 
       // only do this on the first element
       if (!fxElement.initialTrigger) {
-        const style = computedStyle(fxElement.getAmpDoc().win,
-            fxElement.getElement());
-        setStyles(fxElement.getElement(), {
-          'left':
-            'calc(' + style.left + ' - ' + fxElement.getFlyInDistance() + 'vw)',
-          'visibility': 'visible',
-        });
-        fxElement.initialTrigger = true;
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'left':
+                  `calc(${style.left} - ${fxElement.getFlyInDistance()}vw)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
       }
 
       // If above the threshold of trigger-position
       fxElement.setIsMutateScheduled(true);
-      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
-        fxElement.setIsMutateScheduled(false);
-        // Translate the element offset pixels.
-        setStyles(fxElement.getElement(), {
-          'transition-duration': fxElement.getDuration(),
-          'transition-timing-function': fxElement.getEasing(),
-          'transform': `translateX(${fxElement.getFlyInDistance()}vw)`,
-        });
-      });
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'transform': `translateX(${fxElement.getFlyInDistance()}vw)`,
+            });
+          });
     },
   },
   'fly-in-right': {
@@ -190,27 +209,31 @@ export const Presets = {
 
       // only do this on the first element
       if (!fxElement.initialTrigger) {
-        const style = computedStyle(fxElement.getAmpDoc().win,
-            fxElement.getElement());
-        setStyles(fxElement.getElement(), {
-          'left':
-            'calc(' + style.left + ' + ' + fxElement.getFlyInDistance() + 'vw)',
-          'visibility': 'visible',
-        });
-        fxElement.initialTrigger = true;
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'left':
+                  `calc(${style.left} + ${fxElement.getFlyInDistance()}vw)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
       }
 
       // If above the threshold of trigger-position
       fxElement.setIsMutateScheduled(true);
-      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
-        fxElement.setIsMutateScheduled(false);
-        // Translate the element offset pixels.
-        setStyles(fxElement.getElement(), {
-          'transition-duration': fxElement.getDuration(),
-          'transition-timing-function': fxElement.getEasing(),
-          'transform': `translateX(-${fxElement.getFlyInDistance()}vw)`,
-        });
-      });
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'transform': `translateX(-${fxElement.getFlyInDistance()}vw)`,
+            });
+          });
     },
   },
   'fly-in-top': {
@@ -242,17 +265,32 @@ export const Presets = {
         return;
       }
 
+      // only do this on the first element
+      if (!fxElement.initialTrigger) {
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'top': `calc(${style.top} - ${fxElement.getFlyInDistance()}vh)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
+      }
+
       // If above the threshold of trigger-position
       fxElement.setIsMutateScheduled(true);
-      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
-        fxElement.setIsMutateScheduled(false);
-        // Translate the element offset pixels.
-        setStyles(fxElement.getElement(), {
-          'transition-duration': fxElement.getDuration(),
-          'transition-timing-function': fxElement.getEasing(),
-          'transform': `translateY(${fxElement.getFlyInDistance()}vh)`,
-        });
-      });
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'transform': `translateY(${fxElement.getFlyInDistance()}vh)`,
+            });
+          });
     },
   },
   'fade-in': {
@@ -284,15 +322,16 @@ export const Presets = {
 
       // If above the threshold of trigger-position
       fxElement.setIsMutateScheduled(true);
-      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
-        fxElement.setIsMutateScheduled(false);
-        // Translate the element offset pixels.
-        setStyles(fxElement.getElement(), {
-          'transition-duration': fxElement.getDuration(),
-          'transition-timing-function': fxElement.getEasing(),
-          'opacity': 1,
-        });
-      });
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'opacity': 1,
+            });
+          });
     },
   },
   'fade-in-scroll': {

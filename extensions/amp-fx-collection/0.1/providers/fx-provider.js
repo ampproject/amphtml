@@ -63,11 +63,10 @@ export class FxProvider {
    * @param {!Element} element
    */
   installOn(element) {
-    const fxElement = new FxElement(
+    new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
         this.ampdoc_, this.fxType_);
-    setStyles(element, installStyles(this.ampdoc_, element, this.fxType_,
-        fxElement.getFlyInDistance()));
+    setStyles(element, installStyles(element, this.fxType_));
   }
 }
 
