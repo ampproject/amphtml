@@ -31,11 +31,9 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
   </figcaption>
 </figure>
   `;
-  const experiments = ['amp-lightbox-gallery'];
   describes.integration('amp-lightbox-gallery opens', {
     body,
     extensions,
-    experiments,
   }, env => {
 
     let win;
