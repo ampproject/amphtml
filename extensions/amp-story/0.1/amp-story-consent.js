@@ -28,6 +28,7 @@ import {computedStyle, setImportantStyles} from '../../../src/style';
 import {createShadowRootWithStyle} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
+import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
@@ -293,28 +294,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
             .querySelector('.i-amphtml-story-consent-action-accept'));
     const styles = computedStyle(this.win, buttonEl);
 
-    const regexPattern = /rgba?\((\d{1,3}), (\d{1,3}), (\d{1,3})/;
-    const matches = regexPattern.exec(styles['background-color']);
-
-    // Calculates the relative luminance L.
-    // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-    const eightBitToSRGBColorspace = x => {
-      x /= 255;
-      return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
-    };
-
-    const R = eightBitToSRGBColorspace(matches[1]);
-    const G = eightBitToSRGBColorspace(matches[2]);
-    const B = eightBitToSRGBColorspace(matches[3]);
-
-    const L = 0.2126 * R + 0.7152 * G + 0.0722 * B;
-
-    // Determines which one of the white and black text have a better contrast
-    // ratio against the used background color..
-    // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
-    // 1 is L for #FFF, and 0 is L for #000.
-    // (1 + 0.05) / (L + 0.05) > (L + 0.05) / (0 + 0.05) toggles for L = 0.179.
-    const color = L > 0.179 ? '#000' : '#FFF';
+    const rgb = getRGBFromCssColorValue(styles['background-color']);
+    const color = getTextColorForRGB(rgb);
 
     setImportantStyles(buttonEl, {color});
   }
