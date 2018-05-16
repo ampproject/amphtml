@@ -19,8 +19,12 @@
  * presets.
  */
 
+import {Services} from '../../../../src/services';
 import {startsWith} from '../../../../src/string';
 import {user} from '../../../../src/log';
+
+const MAX_MOBILE_WIDTH = 480;
+const MAX_TABLET_WIDTH = 1000;
 
 /**
  * Converts the data-fade-ineasing input into the corresponding `cubic-bezier()`
@@ -91,10 +95,10 @@ export function defaultDurationValues(ampdoc, fxType) {
     case 'fly-in-top':
     case 'fly-in-left':
     case 'fly-in-right':
-      const screenWidth = ampdoc.win.screen.width;
-      if (screenWidth <= 480) { // mobile devices
+      const {width} = Services.viewportForDoc(ampdoc).getSize();
+      if (width <= MAX_MOBILE_WIDTH) { // mobile devices
         return '400ms';
-      } else if (screenWidth > 480 && screenWidth < 1000) { // tablet devices
+      } else if (width > MAX_MOBILE_WIDTH && width < MAX_TABLET_WIDTH) { // tablet devices
         return '500ms';
       } else { // laptops and desktops
         return '600ms';
@@ -108,8 +112,8 @@ export function defaultFlyInDistanceValues(ampdoc, fxType) {
   switch (fxType) {
     case 'fly-in-bottom':
     case 'fly-in-top':
-      const screenWidth = ampdoc.win.screen.width;
-      if (screenWidth < 1000) { // mobile and tablets
+      const {width} = Services.viewportForDoc(ampdoc).getSize();
+      if (width < MAX_TABLET_WIDTH) { // mobile and tablets
         return 25;
       }
       // laptops and desktops
