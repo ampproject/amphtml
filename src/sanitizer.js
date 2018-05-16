@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as DOMPurify from 'dompurify';
 import {
   checkCorsUrl,
   getSourceUrl,
@@ -53,9 +54,6 @@ const BLACKLISTED_TAGS = dict({
   'object': true,
   'script': true,
   'style': true,
-  // TODO(dvoytenko, #1156): SVG is blacklisted temporarily. There's no
-  // intention to keep this block for any longer than we have to.
-  'svg': true,
   'video': true,
 });
 
@@ -129,10 +127,11 @@ const WHITELISTED_ATTRS = [
   /* Attributes for amp-subscriptions. */
   'subscriptions-action',
   'subscriptions-actions',
-  'subscriptions-section',
-  'subscriptions-display',
-  'subscriptions-service',
   'subscriptions-decorate',
+  'subscriptions-dialog',
+  'subscriptions-display',
+  'subscriptions-section',
+  'subscriptions-service',
 ];
 
 /** @const {!Object<string, !Array<string>>} */
@@ -202,6 +201,86 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 const INVALID_INLINE_STYLE_REGEX =
     /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
+/** @const {!Object} */
+const PURIFY_CONFIG = {
+  'USE_PROFILES': {
+    'html': true,
+    'svg': true,
+    'svgFilters': true,
+  },
+};
+
+/**
+ * @param {string} dirty
+ * @return {string}
+ */
+export function sanitizeHtml(dirty) {
+  // TODO: Only do these once.
+  PURIFY_CONFIG['ADD_ATTR'] = WHITELISTED_ATTRS.concat(['target']);
+  if (!isExperimentOn(self, 'inline-styles')) {
+    PURIFY_CONFIG['FORBID_ATTR'] = ['style'];
+  }
+  PURIFY_CONFIG['FORBID_TAGS'] = Object.keys(BLACKLISTED_TAGS);
+  DOMPurify.setConfig(PURIFY_CONFIG);
+
+  DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+    const {tagName, allowedTags} = data;
+    // Allow all AMP elements (technically will also allow nonexistent tags).
+    if (startsWith(tagName, 'amp-')) {
+      allowedTags[tagName] = true;
+    }
+
+    if (tagName == 'a') {
+      if (node.hasAttribute('href') && !node.hasAttribute('target')) {
+        node.setAttribute('target', '_top');
+      }
+    }
+  });
+  DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
+    const tagName = (node.tagName || '').toLowerCase();
+    const {allowedAttributes, attrName} = data;
+    let attrValue = data.attrValue;
+
+    // `<A>` has special target rules:
+    // - Default target is "_top";
+    // - Allowed targets are "_blank", "_top";
+    // - All other targets are rewritted to "_top".
+    if (tagName == 'a' && attrName == 'target') {
+      const lowercaseValue = attrValue.toLowerCase();
+      if (!WHITELISTED_TARGETS.includes(lowercaseValue)) {
+        attrValue = '_top';
+      } else {
+        // Always use lowercase values for `target` attr.
+        attrValue = lowercaseValue;
+      }
+    }
+
+    // Allow amp-bind attributes e.g. [foo].
+    const isBinding =
+        (attrName[0] == '[' && attrName[attrName.length - 1] == ']');
+    if (isBinding) {
+      allowedAttributes[attrName] = true;
+    }
+
+    // TODO: Most logic in isValidAttr() is unnecessary since DOMPurify already
+    // sanitizes attributes.
+    if (isValidAttr(tagName, attrName, attrValue)) {
+      if (attrValue && !isBinding) {
+        attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
+      }
+    } else {
+      user().error(TAG, `Removing "${attrName}" attribute with invalid `
+          + `value in <${tagName} ${attrName}="${attrValue}">.`);
+      data.keepAttr = false;
+    }
+
+    data.attrValue = attrValue;
+  });
+
+  const clean = DOMPurify.sanitize(dirty);
+  return clean;
+}
+
 /**
  * Sanitizes the provided HTML.
  *
@@ -212,7 +291,7 @@ const INVALID_INLINE_STYLE_REGEX =
  * @param {string} html
  * @return {string}
  */
-export function sanitizeHtml(html) {
+export function _sanitizeHtml(html) {
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null);
   const output = [];
@@ -223,6 +302,9 @@ export function sanitizeHtml(html) {
       output.push(content);
     }
   }
+
+  // Caja doesn't support SVG.
+  const cajaBlacklistedTags = Object.assign({'svg': true}, BLACKLISTED_TAGS);
 
   const parser = htmlSanitizer.makeSaxParser({
     'startTag': function(tagName, attribs) {
@@ -242,7 +324,7 @@ export function sanitizeHtml(html) {
           attribs[i] = attr.slice(1, -1);
         }
       }
-      if (BLACKLISTED_TAGS[tagName]) {
+      if (cajaBlacklistedTags[tagName]) {
         ignore++;
       } else if (!startsWith(tagName, 'amp-')) {
         // Ask Caja to validate the element as well.
