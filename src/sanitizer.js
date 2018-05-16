@@ -234,70 +234,78 @@ export function sanitizeHtml(html) {
  * @return {string}
  */
 function purifyHtml(dirty) {
-  // TODO: Only do these once.
-  PURIFY_CONFIG['ADD_ATTR'] = WHITELISTED_ATTRS.concat(['target']);
-  if (!isExperimentOn(self, 'inline-styles')) {
-    PURIFY_CONFIG['FORBID_ATTR'] = ['style'];
+  const config = Object.assign({
+    'ADD_ATTR': WHITELISTED_ATTRS.concat(['target']),
+    'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
+    'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
+  }, PURIFY_CONFIG);
+  DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
+  DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
+  return DOMPurify.sanitize(dirty, config);
+}
+
+/**
+ * @param {!Node} node
+ * @param {{tagName: string, allowedTags: !Object<string, boolean}} data
+ */
+function uponSanitizeElement(node, data) {
+  const {tagName, allowedTags} = data;
+  // Allow all AMP elements (constrained by AMP Validator since tag
+  // calculation is not possible).
+  if (startsWith(tagName, 'amp-')) {
+    allowedTags[tagName] = true;
   }
-  PURIFY_CONFIG['FORBID_TAGS'] = Object.keys(BLACKLISTED_TAGS);
-  DOMPurify.setConfig(PURIFY_CONFIG);
 
-  DOMPurify.addHook('uponSanitizeElement', (node, data) => {
-    const {tagName, allowedTags} = data;
-    // Allow all AMP elements (constrained by AMP Validator since tag
-    // calculation is not possible).
-    if (startsWith(tagName, 'amp-')) {
-      allowedTags[tagName] = true;
+  if (tagName == 'a') {
+    if (node.hasAttribute('href') && !node.hasAttribute('target')) {
+      node.setAttribute('target', '_top');
     }
+  }
+}
 
-    if (tagName == 'a') {
-      if (node.hasAttribute('href') && !node.hasAttribute('target')) {
-        node.setAttribute('target', '_top');
-      }
-    }
-  });
-  DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
-    const tagName = (node.tagName || '').toLowerCase();
-    const {allowedAttributes, attrName} = data;
-    let attrValue = data.attrValue;
+/**
+ * @param {!Node} node
+ * @param {{attrName: string, attrValue: string, allowedAttributes: !Array<string>}} data
+ */
+function uponSanitizeAttribute(node, data) {
+  const tagName = (node.tagName || '').toLowerCase();
+  const {attrName, allowedAttributes} = data;
+  let attrValue = data.attrValue;
 
-    // `<A>` has special target rules:
-    // - Default target is "_top";
-    // - Allowed targets are "_blank", "_top";
-    // - All other targets are rewritted to "_top".
-    if (tagName == 'a' && attrName == 'target') {
-      const lowercaseValue = attrValue.toLowerCase();
-      if (!WHITELISTED_TARGETS.includes(lowercaseValue)) {
-        attrValue = '_top';
-      } else {
-        // Always use lowercase values for `target` attr.
-        attrValue = lowercaseValue;
-      }
-    }
-
-    // Allow amp-bind attributes e.g. [foo].
-    const isBinding = (attrName[0] == '['
-        && attrName[attrName.length - 1] == ']');
-    if (isBinding) {
-      // TODO: Rewrite binding to browser-friendly attribute.
-      allowedAttributes[attrName] = true;
-    }
-
-    if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
-      if (attrValue && !isBinding) {
-        attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
-      }
+  // `<A>` has special target rules:
+  // - Default target is "_top";
+  // - Allowed targets are "_blank", "_top";
+  // - All other targets are rewritted to "_top".
+  if (tagName == 'a' && attrName == 'target') {
+    const lowercaseValue = attrValue.toLowerCase();
+    if (!WHITELISTED_TARGETS.includes(lowercaseValue)) {
+      attrValue = '_top';
     } else {
-      user().error(TAG, `Removing "${attrName}" attribute with invalid `
-          + `value in <${tagName} ${attrName}="${attrValue}">.`);
-      data.keepAttr = false;
+      // Always use lowercase values for `target` attr.
+      attrValue = lowercaseValue;
     }
+  }
 
-    data.attrValue = attrValue;
-  });
+  // Allow amp-bind attributes e.g. [foo].
+  const isBinding = (attrName[0] == '['
+      && attrName[attrName.length - 1] == ']');
+  if (isBinding) {
+    // TODO: Rewrite binding to browser-friendly attribute.
+    allowedAttributes[attrName] = true;
+  }
 
-  const clean = DOMPurify.sanitize(dirty);
-  return clean;
+  if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
+    if (attrValue && !isBinding) {
+      attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
+    }
+  } else {
+    user().error(TAG, `Removing "${attrName}" attribute with invalid `
+        + `value in <${tagName} ${attrName}="${attrValue}">.`);
+    data.keepAttr = false;
+  }
+
+  // Update attribute value.
+  data.attrValue = attrValue;
 }
 
 /**

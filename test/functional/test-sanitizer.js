@@ -23,9 +23,41 @@ import {
 } from '../../src/sanitizer';
 import {toggleExperiment} from '../../src/experiments';
 
-describe('Caja-based sanitizer', runSanitizerTests);
+describe('Caja-based sanitizer', () => {
+  runSanitizerTests();
 
-describe.only('DOMPurify-based sanitizer', () => {
+  describe('Caja-specific sanitization', () => {
+    // DOMPurify doesn't perform HTML4-specific sanitizations.
+    it('should apply html4/caja restrictions', () => {
+      expect(sanitizeHtml('a<dialog>b</dialog>c')).to.be.equal('ac');
+      expect(sanitizeHtml('a<dialog>b<img>d</dialog>c')).to.be.equal('ac');
+      expect(sanitizeHtml('<div class="c" src="d">b</div>')).to.be
+          .equal('<div class="c" src="">b</div>');
+    });
+
+    // DOMPurify doesn't do special whitespace handling in attribute values.
+    it('should catch attribute value whitespace variations', () => {
+      allowConsoleError(() => {
+        expect(sanitizeHtml('a<a href=" j\na\tv\ra s&#00;cript:alert">b</a>'))
+            .to.be.equal('a<a target="_top">b</a>');
+      });
+    });
+
+    // DOMPurify URL encodes attr chars e.g. `<` -> %3C`.
+    it('should ignore invalid characters in attributes', () => {
+      allowConsoleError(() => {
+        expect(sanitizeHtml('a<a href="<script">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>');
+        expect(sanitizeHtml('a<a href="</script">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>');
+        expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be.equal(
+            'a<a>b</a>');
+      });
+    });
+  });
+});
+
+describe('DOMPurify-based sanitizer', () => {
   beforeEach(() => {
     toggleExperiment(self, 'svg-in-mustache', true, true);
   });
@@ -205,29 +237,7 @@ function runSanitizerTests() {
             'a<a target="_top">b</a>');
         expect(sanitizeHtml('a<a href="DATA:alert">b</a>')).to.be.equal(
             'a<a target="_top">b</a>');
-        expect(sanitizeHtml('a<a href="<script">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(sanitizeHtml('a<a href="</script">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be.equal(
-            'a<a>b</a>');
       });
-    });
-
-    // TODO
-    it('should catch attribute value whitespace variations', () => {
-      allowConsoleError(() => {
-        expect(sanitizeHtml('a<a href=" j\na\tv\ra s&#00;cript:alert">b</a>'))
-            .to.be.equal('a<a target="_top">b</a>');
-      });
-    });
-
-    // TODO: What is this?
-    it('should apply html4/caja restrictions', () => {
-      expect(sanitizeHtml('a<dialog>b</dialog>c')).to.be.equal('ac');
-      expect(sanitizeHtml('a<dialog>b<img>d</dialog>c')).to.be.equal('ac');
-      expect(sanitizeHtml('<div class="c" src="d">b</div>')).to.be
-          .equal('<div class="c" src="">b</div>');
     });
 
     // TODO: Fails because DOMPurify removes the attribute and re-adds it, but
@@ -322,7 +332,8 @@ function runSanitizerTests() {
       const element = document.createElement('a');
       element.setAttribute('href', '#hash');
 
-      rewriteAttributesForElement(element, 'href', 'https://not.hash/', location);
+      rewriteAttributesForElement(element, 'href', 'https://not.hash/',
+          location);
 
       expect(element.getAttribute('href')).to.equal('https://not.hash/');
       expect(element.hasAttribute('target')).to.equal(false);
@@ -333,7 +344,7 @@ function runSanitizerTests() {
         location = 'https://cdn.ampproject.org';
       });
 
-      it('should set `target` when rewrite <a> from hash to non-hash', () => {
+      it('should set `target` if rewrite <a> from hash to non-hash', () => {
         const element = document.createElement('a');
         element.setAttribute('href', '#hash');
 
@@ -344,7 +355,7 @@ function runSanitizerTests() {
         expect(element.getAttribute('target')).to.equal('_top');
       });
 
-      it('should remove `target` when rewrite <a> from non-hash to hash', () => {
+      it('should remove `target` if rewrite <a> from non-hash to hash', () => {
         const element = document.createElement('a');
         element.setAttribute('href', 'https://not.hash/');
 
@@ -370,15 +381,18 @@ function runSanitizerTests() {
 
   describe('resolveUrlAttr', () => {
     it('should throw if __amp_source_origin is set', () => {
-      allowConsoleError(() => { expect(() => resolveUrlAttr('a', 'href',
-          '/doc2?__amp_source_origin=https://google.com',
-          'http://acme.org/doc1')).to.throw(/Source origin is not allowed in/); });
+      allowConsoleError(() => {
+        expect(() => resolveUrlAttr('a', 'href',
+            '/doc2?__amp_source_origin=https://google.com',
+            'http://acme.org/doc1')).to.throw(/Source origin is not allowed/);
+      });
     });
 
     it('should be called by sanitizer', () => {
       expect(sanitizeHtml('<a href="/path"></a>')).to.match(/http/);
       expect(sanitizeHtml('<amp-img src="/path"></amp-img>')).to.match(/http/);
-      expect(sanitizeHtml('<amp-img srcset="/path"></amp-img>')).to.match(/http/);
+      expect(sanitizeHtml('<amp-img srcset="/path"></amp-img>'))
+          .to.match(/http/);
     });
 
     it('should resolve non-hash href', () => {
