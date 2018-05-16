@@ -26,6 +26,7 @@ const bodyParser = require('body-parser');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
+const multer = require('multer');
 const path = require('path');
 const request = require('request');
 const pc = process;
@@ -197,6 +198,17 @@ app.use('/form/json/poll1', (req, res) => {
       }],
     }));
   });
+});
+
+const upload = multer();
+
+app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
+  assertCors(req, res, ['POST']);
+
+  const fileData = req.files['myFile'][0];
+  const contents = fileData.buffer.toString();
+
+  res.json({message: contents});
 });
 
 app.use('/form/search-html/get', (req, res) => {

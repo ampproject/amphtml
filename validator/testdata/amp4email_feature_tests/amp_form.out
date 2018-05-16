@@ -50,18 +50,18 @@ FAIL
 |      <input type="button" name="button">
 >>     ^~~~~~~~~
 amp4email_feature_tests/amp_form.html:49:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
-|      <input type="file" name="file">
->>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:50:4 The attribute 'type' in tag 'input' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:51:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:50:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: input can not be type="password" -->
 |    <form method="post" action-xhr="https://example.com/subscribe">
 |      <input type="password" name="password">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:55:4 The attribute 'type' in tag 'input' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:54:4 The attribute 'type' in tag 'input' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+|      <input type="file" name="file">
+>>     ^~~~~~~~~
+amp4email_feature_tests/amp_form.html:55:4 The attribute 'type' in tag 'input' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |  </body>
 |  </html>

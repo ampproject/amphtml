@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-form-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
@@ -128,9 +129,6 @@ export class AmpForm {
 
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
-
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
 
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
@@ -507,7 +505,7 @@ export class AmpForm {
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
 
     if (isHeadOrGet) {
-      this.assertNoPasswordFields_();
+      this.assertNoSensitiveFields_();
       const values = this.getFormAsObject_();
       if (opt_extraFields) {
         deepMerge(values, opt_extraFields);
@@ -586,7 +584,7 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
-    this.assertNoPasswordFields_();
+    this.assertNoSensitiveFields_();
     // Non-xhr GET requests replacement should happen synchronously.
     for (let i = 0; i < varSubsFields.length; i++) {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
@@ -595,13 +593,16 @@ export class AmpForm {
   }
 
   /**
-   * Fail if there are password fields present when the function is called.
+   * Fail if there are password or file fields present when the function
+   * is called.
    * @private
    */
-  assertNoPasswordFields_() {
-    const passwordFields = this.form_.querySelectorAll('input[type=password]');
-    user().assert(passwordFields.length == 0,
-        'input[type=password] may only appear in form[method=post]');
+  assertNoSensitiveFields_() {
+    const fields = this.form_.querySelectorAll(
+        'input[type=password],input[type=file]');
+    user().assert(fields.length == 0,
+        'input[type=password] or input[type=file] ' +
+        'may only appear in form[method=post]');
   }
 
   /**
@@ -614,12 +615,7 @@ export class AmpForm {
       // reporting and blocking submission on non-valid forms.
       const isValid = checkUserValidityOnSubmission(this.form_);
       if (this.shouldValidate_) {
-        this.vsync_.run({
-          measure: undefined,
-          mutate: reportValidity,
-        }, {
-          validator: this.validator_,
-        });
+        this.validator_.report();
         return isValid;
       }
     }
@@ -795,15 +791,6 @@ export class AmpForm {
 
 
 /**
- * Reports validity of the form passed through state object.
- * @param {!Object} state
- */
-function reportValidity(state) {
-  state.validator.report();
-}
-
-
-/**
  * Checks user validity for all inputs, fieldsets and the form.
  * @param {!HTMLFormElement} form
  * @return {boolean} Whether the form is currently valid or not.
@@ -967,9 +954,9 @@ export class AmpFormService {
    * @private
    */
   installStyles_(ampdoc) {
-    return new Promise(resolve => {
-      installStylesForDoc(ampdoc, CSS, resolve, false, TAG);
-    });
+    const deferred = new Deferred();
+    installStylesForDoc(ampdoc, CSS, deferred.resolve, false, TAG);
+    return deferred.promise;
   }
 
   /**
@@ -989,7 +976,6 @@ export class AmpFormService {
   /**
    * Install submission handler on all forms in the document.
    * @param {?IArrayLike<T>} forms
-   * @previousValidityState
    * @template T
    * @private
    */
