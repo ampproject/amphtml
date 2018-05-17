@@ -21,6 +21,7 @@ limitations under the License.
 ```html
 <amp-ad width="300" height="250"
     type="giraff"
+    data-widget-id="1"
     data-block-name="novotekaru">
 </amp-ad>
 ```
@@ -28,6 +29,10 @@ limitations under the License.
 ## Configuration
 
 For more information, see  [Giraff's documentation](https://www.giraff.io/help).
+
+### Optional parameters
+
+- `data-widget-id`
 
 ### Required parameters
 
