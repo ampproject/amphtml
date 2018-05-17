@@ -20,6 +20,7 @@
  */
 
 import {Services} from '../../../../src/services';
+import {mapRange} from '../../../../src/utils/math';
 import {startsWith} from '../../../../src/string';
 import {user} from '../../../../src/log';
 
@@ -96,13 +97,7 @@ export function defaultDurationValues(ampdoc, fxType) {
     case 'fly-in-left':
     case 'fly-in-right':
       const {width} = Services.viewportForDoc(ampdoc).getSize();
-      if (width <= MAX_MOBILE_WIDTH) { // mobile devices
-        return '400ms';
-      } else if (width > MAX_MOBILE_WIDTH && width < MAX_TABLET_WIDTH) { // tablet devices
-        return '500ms';
-      } else { // laptops and desktops
-        return '600ms';
-      }
+      return mapRange(Math.min(1000, width), MAX_MOBILE_WIDTH, MAX_TABLET_WIDTH, 400, 600) + 'ms';
     default:
       return '1ms';
   }
