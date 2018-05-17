@@ -69,7 +69,7 @@ export default class GltfViewer {
 
     this.setupRenderer_();
     this.setupControls_();
-    this.setupScene_();
+    this.setupLight_();
     this.loadObject_();
     this.reconcileAnimationLoop_();
 
@@ -112,11 +112,19 @@ export default class GltfViewer {
     });
   }
 
-  /** @private */
-  setupScene_() {
+  /**
+   * Sets lighting scheme.
+   *
+   * Two directional lights, from above and below.
+   * One ambient to avoid completely dark areas.
+   *
+   * @private */
+  setupLight_() {
     const amb = new THREE.AmbientLight();
+
     const dir1 = new THREE.DirectionalLight();
     dir1.position.set(1, 2, 3);
+
     const dir2 = new THREE.DirectionalLight();
     dir2.position.set(1, -2, -2);
 
@@ -143,6 +151,16 @@ export default class GltfViewer {
   }
 
   /**
+   * Camera is set to be not too far or near in terms of object's size.
+   *
+   * We are positioning camera on a ray coming from center (C)
+   * of bounding box to its corner with max coordinates (M),
+   * and outside bbox to the length of CM.
+   *
+   * It may look weird for objects stretched along one axis,
+   * also there are objects meant to be observed from inside,
+   * it will incorrectly work for them too.
+   *
    * @param {!THREE.Object3D} object
    * @private */
   setupCameraForObject_(object) {
