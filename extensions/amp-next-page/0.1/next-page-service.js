@@ -98,7 +98,7 @@ export class NextPageService {
     /** @private {?DocumentRef} */
     this.activeDocumentRef_ = null;
 
-    /** @private {function(!Element)} */
+    /** @private {function(!Element): !Promise} */
     this.appendPageHandler_ = () => {};
   }
 
@@ -161,8 +161,9 @@ export class NextPageService {
 
   /**
    * Sets the handler to be called with a
-   * @param {function(!Element)} handler Handler to be called when a new page
-   *     needs adding to the DOM, with a container element for that page.
+   * @param {function(!Element): !Promise} handler Handler to be called when
+   *     a new page needs adding to the DOM, with a container element for that
+   *     page.
    */
   setAppendPageHandler(handler) {
     this.appendPageHandler_ = handler;
@@ -232,21 +233,21 @@ export class NextPageService {
       separator.removeAttribute('separator');
       container.appendChild(separator);
 
-      const page = this.nextArticle_ - 1;
-      this.positionObserver_.observe(separator, PositionObserverFidelity.LOW,
-          position => this.positionUpdate_(page, position));
-
       const articleLinks = this.createArticleLinks_(this.nextArticle_);
       container.appendChild(articleLinks);
       documentRef.recUnit = articleLinks;
 
-      this.positionObserver_.observe(articleLinks, PositionObserverFidelity.LOW,
-          unused => this.articleLinksPositionUpdate_(documentRef));
-
       const shadowRoot = this.win_.document.createElement('div');
       container.appendChild(shadowRoot);
 
-      this.appendPageHandler_(container);
+      const page = this.nextArticle_ - 1;
+      this.appendPageHandler_(container).then(() => {
+        this.positionObserver_.observe(separator, PositionObserverFidelity.LOW,
+            position => this.positionUpdate_(page, position));
+        this.positionObserver_.observe(articleLinks,
+            PositionObserverFidelity.LOW,
+            unused => this.articleLinksPositionUpdate_(documentRef));
+      });
 
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
@@ -364,8 +365,8 @@ export class NextPageService {
    * the position of a page separator in the viewport.
    * @param {number} i Index of the documentRef this recommendation unit is
    *     attached to.
-   * @param {?../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
-   *     position Position of the current recommendation unit in the viewport.
+   * @param {?../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} position
+   *     Position of the current recommendation unit in the viewport.
    */
   positionUpdate_(i, position) {
     // We're only interested when the recommendations exit the viewport
