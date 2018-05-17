@@ -170,10 +170,7 @@ export class VideoManager {
     }
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   register(video) {
     dev().assert(video);
 
@@ -200,10 +197,7 @@ export class VideoManager {
     element.classList.add('i-amphtml-video-interface');
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   delegateAutoplay(videoElement, opt_unusedObservable) {
     videoElement.signals().whenSignal(VideoEvents.REGISTERED).then(() => {
       const entry = this.getEntryForElement_(videoElement);
@@ -309,10 +303,7 @@ export class VideoManager {
     return null;
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   getAnalyticsDetails(videoElement) {
     const entry = this.getEntryForElement_(videoElement);
     return entry ? entry.getAnalyticsDetails() : Promise.resolve();
