@@ -57,6 +57,7 @@ const BLACKLISTED_TAGS = dict({
   'video': true,
 });
 
+// TODO: Use this in purifyHtml()?
 /** @const {!Object<string, boolean>} */
 const SELF_CLOSING_TAGS = dict({
   'br': true,
@@ -134,6 +135,7 @@ const WHITELISTED_ATTRS = [
   'subscriptions-service',
 ];
 
+// TODO: Use this in purifyHtml()?
 /** @const {!Object<string, !Array<string>>} */
 const WHITELISTED_ATTRS_BY_TAGS = dict({
   'a': [
@@ -152,6 +154,7 @@ const WHITELISTED_ATTRS_BY_TAGS = dict({
   ],
 });
 
+// TODO: Use this in purifyHtml()?
 /** @const {!RegExp} */
 const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 

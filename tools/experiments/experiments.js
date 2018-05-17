@@ -24,6 +24,7 @@ import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
 //TODO(@cramforce): For type. Replace with forward declaration.
 import {reportError} from '../../src/error';
+import { Deferred } from '../../src/utils/promise';
 
 initLogConstructor();
 setReportError(reportError);
@@ -447,6 +448,7 @@ function isExperimentOn_(id) {
 /**
  * Toggles the experiment.
  * @param {string} id
+ * @param {string} name
  * @param {boolean=} opt_on
  */
 function toggleExperiment_(id, name, opt_on) {
@@ -512,18 +514,20 @@ function showConfirmation_(message, callback) {
  * experiment state can reflect the default activated experiments.
  */
 function getAmpConfig() {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', () => {
-      resolve(xhr.responseText);
-    });
-    xhr.addEventListener('error', () => {
-      reject(new Error(xhr.statusText));
-    });
-    // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
-    xhr.open('GET', '/v0.js?' + Math.random(), true);
-    xhr.send(null);
-  }).then(text => {
+  const {promise, resolve, reject} = new Deferred();
+
+  const xhr = new XMLHttpRequest();
+  xhr.addEventListener('load', () => {
+    resolve(xhr.responseText);
+  });
+  xhr.addEventListener('error', () => {
+    reject(new Error(xhr.statusText));
+  });
+  // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
+  xhr.open('GET', '/v0.js?' + Math.random(), true);
+  xhr.send(null);
+
+  return promise.then(text => {
     const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
     if (!match) {
       throw new Error('Can\'t find AMP_CONFIG in: ' + text);
