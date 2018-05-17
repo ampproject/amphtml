@@ -272,7 +272,7 @@ function purifyHtml(dirty) {
 
 /**
  * @param {!Node} node
- * @param {{tagName: string, allowedTags: !Object<string, boolean}} data
+ * @param {{tagName: string, allowedTags: !Object<string, boolean>}} data
  */
 function uponSanitizeElement(node, data) {
   const {tagName, allowedTags} = data;
@@ -296,7 +296,7 @@ function uponSanitizeElement(node, data) {
 function uponSanitizeAttribute(node, data) {
   const tagName = (node.tagName || '').toLowerCase();
   const {attrName} = data;
-  let attrValue = data.attrValue;
+  let {attrValue} = data;
 
   // `<A>` has special target rules:
   // - Default target is "_top";
@@ -518,7 +518,7 @@ export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
     if (attrValue) {
       const normalized = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
       for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
-        if (normalized.includes(BLACKLISTED_ATTR_VALUES[i])) {
+        if (normalized.indexOf(BLACKLISTED_ATTR_VALUES[i]) >= 0) {
           return false;
         }
       }

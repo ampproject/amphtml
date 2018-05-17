@@ -16,6 +16,7 @@
 
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
+import {Deferred} from '../../src/utils/promise';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
@@ -24,7 +25,6 @@ import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
 //TODO(@cramforce): For type. Replace with forward declaration.
 import {reportError} from '../../src/error';
-import { Deferred } from '../../src/utils/promise';
 
 initLogConstructor();
 setReportError(reportError);
