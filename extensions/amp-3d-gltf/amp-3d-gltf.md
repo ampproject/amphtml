@@ -19,15 +19,15 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>glTF 3d-model viewer</td>
+    <td>Displays GL Transmission Format (gITF) 3D models.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>WebGL capable browser required</td>
+    <td>Experimental</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-3d-gltf" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -35,7 +35,14 @@ limitations under the License.
   </tr>
 </table>
 
-## Example
+## Usage
+
+The `amp-3d-gltf` component displays 3D models that are in gITF format.
+
+**Note**: A WebGL capable browser is required to display these models.
+
+###  Example
+
 ```html
 <amp-3d-gltf
     layout="responsive"
@@ -46,8 +53,9 @@ limitations under the License.
     src="path/to/model.glb"></amp-3d-gltf>
 ```
 
-## Limitations
-Currently only works with glTF 2.0.
+### Limitations
+
+Currently, only works with glTF 2.0.
 
 Unsupported features:
 - embeded cameras
@@ -55,24 +63,28 @@ Unsupported features:
 
 ## Attributes
 
-##### src: URL
-Path to gltf file
+##### src [required]
+A required attribute that specifies the URL to the gltf file.
 
-##### alpha (optional, default="false"): boolean
-See through free space on canvas, by default free space is filled with black
+##### alpha [optional]
 
-##### antialiasing (optional, default="false")
-Turn on/off antialiasing
+A Boolean attribute that specifie whether to see through free space on canvas. By default, free space is filled with black.
+Default value is `false`.
 
-##### maxPixelRatio (optional, default=window.devicePixelRatio): number 
-Set upper limit for pixelRatio render option
+##### antialiasing [optional]
 
-##### autoRotate (optional, default="false"): boolean
-Automatically rotate camera around model's center
+A Boolean attribute that specifies whether to turn on antialiasing. Default value is `false`.
 
-##### enableZoom (optional, default="true"): boolean
-Turn on/off zoom
+##### maxPixelRatio [optional]
 
+A numeric value that specifies the upper limit for the pixelRatio render option. The default is `window.devicePixelRatio`.
+
+##### autoRotate [optional]
+A Boolean attribute that specifies whether to automatically rotate the camera around the model's center. Default value is `false`.
+
+##### enableZoom [optional]
+
+A Boolean attribute that specifies whether to turn on zoom.  Default value is `true`.
 
 ## Validation
 See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii) in the AMP validator specification.
