@@ -68,7 +68,7 @@ A required attribute that specifies the URL to the gltf file.
 
 ##### alpha [optional]
 
-A Boolean attribute that specifie whether to see through free space on canvas. By default, free space is filled with black.
+A Boolean attribute that specifies whether to see through free space on canvas. By default, free space is filled with black.
 Default value is `false`.
 
 ##### antialiasing [optional]
