@@ -4608,7 +4608,7 @@ attr_lists: {
   }
   attrs: {
     name: "subscriptions-section"
-    value_regex_casei: "(actions|content|content-not-granted)"
+    value_regex_casei: "(actions|content|content-not-granted|loading)"
     requires_extension: "amp-subscriptions"
   }
   attrs: {
