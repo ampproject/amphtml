@@ -107,6 +107,34 @@ html:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
   display: none;
 }
 
+.i-amphtml-subs-progress {
+  height: 2px;
+  background-color: #ccc;
+  position: relative;
+  margin: 8px;
+  overflow: hidden;
+}
+
+.i-amphtml-subs-progress:after {
+  content: '';
+  background-color: #2196F3;
+  height: 2px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20%;
+  animation: i-amphtml-subs-loading-progress 1500ms ease-in-out infinite;
+}
+
+@keyframes i-amphtml-subs-loading-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(500%);
+  }
+}
+
 /**
  * The maximum width allowed for the dialog is 480 px. Default width
  * is 100% (for container width < 480 px).
