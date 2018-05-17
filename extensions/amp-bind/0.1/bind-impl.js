@@ -715,6 +715,10 @@ export class Bind {
       property = attr.substr(1, attr.length - 2);
     } else if (startsWith(attr, 'data-amp-bind-')) {
       property = attr.substr(14);
+      // Ignore `data-amp-bind-foo` if `[foo]` already exists.
+      if (element.hasAttribute(`[${property}]`)) {
+        property = null;
+      }
     }
 
     if (property) {
