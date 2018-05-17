@@ -15,6 +15,65 @@
  */
 
 /**
+ * Returns a Deferred struct, which holds a pending promise and its associated
+ * resolve and reject functions.
+ *
+ * This is preferred instead of creating a Promise instance to extract the
+ * resolve/reject functions yourself:
+ *
+ * ```
+ * // Avoid doing
+ * let resolve;
+ * const promise = new Promise(res => {
+ *   resolve = res;
+ * });
+ *
+ * // Good
+ * const deferred = new Deferred();
+ * const { promise, resolve } = deferred;
+ * ```
+ *
+ * @template T
+ */
+export class Deferred {
+  constructor() {
+    let resolve, reject;
+
+    /**
+     * @const {!Promise<T>}
+     */
+    this.promise = new /*OK*/Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+
+    /**
+     * @const {function(T=)}
+     */
+    this.resolve = resolve;
+
+    /**
+     * @const {function(*=)}
+     */
+    this.reject = reject;
+  }
+}
+
+/**
+ * Creates a promise resolved to the return value of fn.
+ * If fn sync throws, it will cause the promise to reject.
+ *
+ * @param {function():T} fn
+ * @return !Promise<T>
+ * @template T
+ */
+export function tryResolve(fn) {
+  return new Promise(resolve => {
+    resolve(fn());
+  });
+}
+
+/**
  * Returns a promise which resolves if a threshold amount of the given promises
  * resolve, and rejects otherwise.
  * @param {!Array<!Promise>} promises The array of promises to test.
@@ -55,50 +114,6 @@ export function some(promises, count = 1) {
     for (let i = 0; i < promises.length; i++) {
       Promise.resolve(promises[i]).then(onFulfilled, onRejected);
     }
-  });
-}
-
-/**
- * Returns a Deferred struct, which holds a pending promise and its associated
- * resolve and reject functions.
- *
- * @template T
- */
-export class Deferred {
-  constructor() {
-    let resolve, reject;
-
-    /**
-     * @const {!Promise<T>}
-     */
-    this.promise = new /*OK*/Promise((res, rej) => {
-      resolve = res;
-      reject = rej;
-    });
-
-    /**
-     * @const {function(T=)}
-     */
-    this.resolve = resolve;
-
-    /**
-     * @const {function(*=)}
-     */
-    this.reject = reject;
-  }
-}
-
-/**
- * Creates a promise resolved to the return value of fn.
- * If fn sync throws, it will cause the promise to reject.
- *
- * @param {function():T} fn
- * @return !Promise<T>
- * @template T
- */
-export function tryResolve(fn) {
-  return new Promise(resolve => {
-    resolve(fn());
   });
 }
 
