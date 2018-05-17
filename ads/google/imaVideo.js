@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ImaPlayerData,
-} from './ima-player-data';
+import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
@@ -330,7 +328,7 @@ export function imaVideo(global, data) {
   // Ad container.
   adContainerDiv = global.document.createElement('div');
   adContainerDiv.id = 'ima-ad-container';
-  setStyle(adContainerDiv, {
+  setStyles(adContainerDiv, {
     'position': 'absolute',
     'top': '0px',
     'left': '0px',
@@ -415,7 +413,7 @@ export function imaVideo(global, data) {
   playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
   progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
   fullscreenDiv.addEventListener(interactEvent,
-      onFullscreenClick.bind(null, global));
+      toggleFullscreen.bind(null, global));
 
   const fullScreenEvents = [
     'fullscreenchange',
@@ -429,12 +427,11 @@ export function imaVideo(global, data) {
 
   consentState = global.context.initialConsentState;
 
-  /**
-   * Set-up code that can't run until the IMA lib loads.
-   */
+  // Set-up code that can't run until the IMA lib loads.
   loadScript(
-      global, 'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
-      onImaLoadSuccess.bind(null, global, data), onImaLoadFail);
+      /** @type {!Window} */ (global),
+      'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
+      () => onImaLoadSuccess(global, data), onImaLoadFail);
 }
 
 function onImaLoadSuccess(global, data) {
@@ -495,7 +492,7 @@ function onImaLoadSuccess(global, data) {
     requestAds();
   } else {
     // Let amp-ima-video know that we are done set-up.
-    window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+    postMessage({event: VideoEvents.LOAD});
   }
 }
 
@@ -504,7 +501,7 @@ function onImaLoadFail() {
   // content.
   videoPlayer.addEventListener(interactEvent, showControls);
   imaLoadAllowed = false;
-  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+  postMessage({event: VideoEvents.LOAD});
 }
 
 function htmlToElement(html) {
@@ -607,10 +604,10 @@ export function playAds(global) {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
+      postMessage({event: VideoEvents.PLAYING});
       adsManager.start();
     } catch (adError) {
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
+      postMessage({event: VideoEvents.PLAYING});
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -618,7 +615,7 @@ export function playAds(global) {
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
+    postMessage({event: VideoEvents.PLAYING});
     playVideo();
   }
 }
@@ -633,8 +630,8 @@ export function onContentEnded() {
   if (adsLoader) {
     adsLoader.contentComplete();
   }
-  window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
-  window.parent./*OK*/postMessage({event: VideoEvents.ENDED}, '*');
+  postMessage({event: VideoEvents.PAUSE});
+  postMessage({event: VideoEvents.ENDED});
 }
 
 /**
@@ -662,7 +659,7 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
-  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+  postMessage({event: VideoEvents.LOAD});
 }
 
 /**
@@ -675,7 +672,7 @@ export function onAdsLoaderError() {
   // Send this message to trigger auto-play for failed pre-roll requests -
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
-  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+  postMessage({event: VideoEvents.LOAD});
   if (playbackStarted) {
     videoPlayer.addEventListener(interactEvent, showControls);
     playVideo();
@@ -688,7 +685,7 @@ export function onAdsLoaderError() {
  * @visibleForTesting
  */
 export function onAdError() {
-  window.parent./*OK*/postMessage({event: VideoEvents.AD_END}, '*');
+  postMessage({event: VideoEvents.AD_END});
   if (adsManager) {
     adsManager.destroy();
   }
@@ -711,7 +708,7 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
-  window.parent./*OK*/postMessage({event: VideoEvents.AD_START}, '*');
+  postMessage({event: VideoEvents.AD_START});
   videoPlayer.removeEventListener(interactEvent, showControls);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
@@ -727,7 +724,7 @@ export function onContentPauseRequested(global) {
 export function onContentResumeRequested() {
   adsActive = false;
   videoPlayer.addEventListener(interactEvent, showControls);
-  window.parent./*OK*/postMessage({event: VideoEvents.AD_END}, '*');
+  postMessage({event: VideoEvents.AD_END});
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
@@ -753,10 +750,10 @@ function playerDataTick() {
   // playing.
   if (videoPlayer && !adsActive) {
     playerData.update(videoPlayer);
-    window.parent./*OK*/postMessage({
+    postMessage({
       event: ImaPlayerData.IMA_PLAYER_DATA,
       data: playerData,
-    }, '*');
+    });
   }
 }
 
@@ -880,7 +877,7 @@ function getPagePosition(el) {
  */
 export function onPlayPauseClick() {
   if (playerState == PlayerStates.PLAYING) {
-    pauseVideo(null);
+    pauseVideo();
   } else {
     playVideo();
   }
@@ -897,16 +894,16 @@ export function playVideo() {
   // Kick off the hide controls timer.
   showControls();
   changeIcon(playPauseDiv, 'pause');
-  window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
+  postMessage({event: VideoEvents.PLAYING});
   videoPlayer.play();
 }
 
 /**
  * Pauses the video player.
- * @param {!Event} event
+ * @param {?Event} event
  * @visibleForTesting
  */
-export function pauseVideo(event) {
+export function pauseVideo(event = null) {
   videoPlayer.pause();
   playerState = PlayerStates.PAUSED;
   // Show controls and keep them there because we're paused.
@@ -915,7 +912,7 @@ export function pauseVideo(event) {
     showControls();
   }
   changeIcon(playPauseDiv, 'play');
-  window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
+  postMessage({event: VideoEvents.PAUSE});
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
@@ -927,7 +924,7 @@ export function pauseVideo(event) {
  * Called when the user clicks on the fullscreen button. Makes the video player
  * @param {Object} global
  */
-function onFullscreenClick(global) {
+function toggleFullscreen(global) {
   if (fullscreen) {
     // The video is currently in fullscreen mode
     const cancelFullscreen = global.document.exitFullscreen ||
@@ -1026,7 +1023,7 @@ export function hideControls() {
 
 /**
  * Handles messages from the top window.
- * @param {Object} global
+ * @param {!Object} global
  * @param {!Event} event
  */
 function onMessage(global, event) {
@@ -1034,74 +1031,84 @@ function onMessage(global, event) {
   if (msg === undefined) {
     return; // We only process valid JSON.
   }
-  if (msg.event && msg.func) {
-    switch (msg.func) {
-      case 'playVideo':
+  if (!msg.event || !msg.func) {
+    return;
+  }
+  switch (msg.func) {
+    case 'playVideo':
+      if (adsActive) {
+        adsManager.resume();
+        postMessage({event: VideoEvents.PLAYING});
+      } else if (playbackStarted) {
+        playVideo();
+      } else {
+        // Auto-play support
+        onClick(global);
+      }
+      break;
+    case 'pauseVideo':
+      if (adsActive) {
+        adsManager.pause();
+        postMessage({event: VideoEvents.PAUSE});
+      } else if (playbackStarted) {
+        pauseVideo();
+      }
+      break;
+    case 'mute':
+      videoPlayer.volume = 0;
+      videoPlayer.muted = true;
+      if (adsManager) {
+        adsManager.setVolume(0);
+      } else {
+        muteAdsManagerOnLoaded = true;
+      }
+      postMessage({event: VideoEvents.MUTED});
+      break;
+    case 'unMute':
+      videoPlayer.volume = 1;
+      videoPlayer.muted = false;
+      if (adsManager) {
+        adsManager.setVolume(1);
+      } else {
+        muteAdsManagerOnLoaded = false;
+      }
+      postMessage({event: VideoEvents.UNMUTED});
+      break;
+    case 'resize':
+      if (msg.args && msg.args.width && msg.args.height) {
+        const dimsStyles = {
+          'width': px(msg.args.width),
+          'height': px(msg.args.height),
+        };
+        setStyles(wrapperDiv, dimsStyles);
+        setStyles(bigPlayDiv, dimsStyles);
         if (adsActive) {
-          adsManager.resume();
-          window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
-        } else if (playbackStarted) {
-          playVideo();
+          adsManager.resize(
+              msg.args.width, msg.args.height,
+              global.google.ima.ViewMode.NORMAL);
         } else {
-          // Auto-play support
-          onClick(global);
+          adsManagerWidthOnLoad = msg.args.width;
+          adsManagerHeightOnLoad = msg.args.height;
         }
-        break;
-      case 'pauseVideo':
-        if (adsActive) {
-          adsManager.pause();
-          window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
-        } else if (playbackStarted) {
-          pauseVideo(null);
-        }
-        break;
-      case 'mute':
-        videoPlayer.volume = 0;
-        videoPlayer.muted = true;
-        if (adsManager) {
-          adsManager.setVolume(0);
-        } else {
-          muteAdsManagerOnLoaded = true;
-        }
-        window.parent./*OK*/postMessage({event: VideoEvents.MUTED}, '*');
-        break;
-      case 'unMute':
-        videoPlayer.volume = 1;
-        videoPlayer.muted = false;
-        if (adsManager) {
-          adsManager.setVolume(1);
-        } else {
-          muteAdsManagerOnLoaded = false;
-        }
-        window.parent./*OK*/postMessage({event: VideoEvents.UNMUTED}, '*');
-        break;
-      case 'resize':
-        if (msg.args && msg.args.width && msg.args.height) {
-          const dimsStyles = {
-            'width': px(msg.args.width),
-            'height': px(msg.args.height),
-          };
-          setStyles(wrapperDiv, dimsStyles);
-          setStyles(bigPlayDiv, dimsStyles);
-          if (adsActive) {
-            adsManager.resize(
-                msg.args.width, msg.args.height,
-                global.google.ima.ViewMode.NORMAL);
-          } else {
-            adsManagerWidthOnLoad = msg.args.width;
-            adsManagerHeightOnLoad = msg.args.height;
-          }
-        }
-        break;
-      case 'onFirstScroll':
-      case 'onAdRequestDelayTimeout':
-        if (!adsRequested && imaLoadAllowed) {
-          requestAds();
-        }
-        break;
-    }
+      }
+      break;
+    case 'onFirstScroll':
+    case 'onAdRequestDelayTimeout':
+      if (!adsRequested && imaLoadAllowed) {
+        requestAds();
+      }
+      break;
   }
 }
+
+
+/**
+ * @param {!Object} data
+ */
+function postMessage(data) {
+  window.parent./*OK*/postMessage(data, '*');
+}
+
 
 /**
  * Returns the properties we need to access for testing.
