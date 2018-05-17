@@ -27,6 +27,7 @@ import {user} from '../../../../../src/log';
  *   category: string,
  *   title: string,
  *   url: string,
+ *   domainName: string,
  *   image: string
  * }}
  */
@@ -88,7 +89,7 @@ export class LandscapeComponent {
    * */
   buildTemplate(landscapeData, doc) {
     const html = htmlFor(doc);
-    const template =
+    const el =
         html`
         <a class="i-amphtml-story-bookend-landscape"
           target="_top">
@@ -101,21 +102,21 @@ export class LandscapeComponent {
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    addAttributesToElement(template, dict({'href': landscapeData.url}));
+    addAttributesToElement(el, dict({'href': landscapeData.url}));
 
-    const landscapeElements = htmlRefs(template);
+    const landscapeEls = htmlRefs(el);
     const {
       category,
       title,
       image,
       meta,
-    } = /** @type {!landscapeElsDef} */ (landscapeElements);
+    } = /** @type {!landscapeElsDef} */ (landscapeEls);
 
     category.textContent = landscapeData.category;
     title.textContent = landscapeData.title;
     addAttributesToElement(image, dict({'src': landscapeData.image}));
     meta.textContent = landscapeData.domainName;
 
-    return template;
+    return el;
   }
 }

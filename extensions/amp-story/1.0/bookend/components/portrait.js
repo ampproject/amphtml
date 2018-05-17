@@ -26,6 +26,7 @@ import {user} from '../../../../../src/log';
  *   type: string,
  *   category: string,
  *   url: string,
+ *   domainName: string,
  *   image: string
  * }}
  */

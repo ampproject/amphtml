@@ -109,8 +109,8 @@
   padding: 0 32px !important;
 }
 
-.i-amphtml-story-bookend-portrait,
-.i-amphtml-story-bookend-landscape {
+.i-amphtml-story-bookend-landscape,
+.i-amphtml-story-bookend-portrait {
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
@@ -175,28 +175,28 @@
 
 
 @media (max-width: 376px) {
-  .i-amphtml-story-bookend-portrait-image
-  .i-amphtml-story-bookend-landscape-image {
+  .i-amphtml-story-bookend-landscape-image,
+  .i-amphtml-story-bookend-portrait-image {
     width: 100% !important;
   }
 }
 
 .i-amphtml-story-bookend-article-image.amp-notsupported,
-.i-amphtml-story-bookend-portrait-image.amp-notsupported,
-.i-amphtml-story-bookend-landscape-image.amp-notsupported {
+.i-amphtml-story-bookend-landscape-image.amp-notsupported,
+.i-amphtml-story-bookend-portrait-image.amp-notsupported {
   display: none !important;
 }
 
 .i-amphtml-story-bookend-article-image > img,
-.i-amphtml-story-bookend-portrait-image > img,
-.i-amphtml-story-bookend-landscape-image > img  {
+.i-amphtml-story-bookend-landscape-image > img,
+.i-amphtml-story-bookend-portrait-image > img {
   object-fit: cover !important;
   width: 100% !important;
   height: 100% !important;
 }
 
-.i-amphtml-story-bookend-portrait-image,
-.i-amphtml-story-bookend-landscape-image {
+.i-amphtml-story-bookend-landscape-image,
+.i-amphtml-story-bookend-portrait-image {
   width: 100% !important;
   position: relative !important;
   border-radius: 8px !important;
@@ -211,8 +211,8 @@
   padding-bottom: 75% !important;
 }
 
-.i-amphtml-story-bookend-portrait-image > img,
-.i-amphtml-story-bookend-landscape-image > img {
+.i-amphtml-story-bookend-landscape-image > img,
+.i-amphtml-story-bookend-portrait-image > img {
   position: absolute !important;
 }
 
@@ -377,19 +377,18 @@
 
 @media (min-width: 952px) {
   [desktop] .i-amphtml-story-bookend-article,
-  [desktop] .i-amphtml-story-bookend-portrait,
   [desktop] .i-amphtml-story-bookend-cta-link-wrapper,
-  [desktop] .i-amphtml-story-bookend-landscape {
+  [desktop] .i-amphtml-story-bookend-landscape,
+  [desktop] .i-amphtml-story-bookend-portrait {
     max-width: 50% !important;
   }
 }
 
 @media (min-width: 1272px) {
   [desktop] .i-amphtml-story-bookend-article,
-  [desktop] .i-amphtml-story-bookend-portrait,
   [desktop] .i-amphtml-story-bookend-cta-link-wrapper,
-  [desktop] .i-amphtml-story-bookend-landscape {
+  [desktop] .i-amphtml-story-bookend-landscape,
+  [desktop] .i-amphtml-story-bookend-portrait {
     max-width: 33% !important;
   }
 }
-
