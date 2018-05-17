@@ -60,15 +60,22 @@ export function adunity(global, data) {
 
   if (data != null) {
     for (const key in data) {
-      if (hasOwnProperty.call(data, key)) {
-        if (startsWith(key, 'type') || startsWith(key, 'ampSlotIndex'))
+      //skip not valid attributes
+      if (!hasOwnProperty.call(data, key)) continue;
+
+      //skip if attribute is type or ampSlotIndex
+      if (startsWith(key, 'type')
+          ||
+          startsWith(key, 'ampSlotIndex'))
         {continue;}
-        if (startsWith(key, 'au')) {
-          if (key == 'auVideo')
-          {tag.setAttribute('class', 'au-video');}
-          else {
-            const auKey = key.substring(2).toLowerCase();
-            tag.setAttribute('data-au-' + auKey, data[key]);}
+      
+      if (startsWith(key, 'au')) {
+        if (key == 'auVideo'){
+          tag.setAttribute('class', 'au-video');
+        }
+        else {
+          const auKey = key.substring(2).toLowerCase();
+          tag.setAttribute('data-au-' + auKey, data[key]);
         }
       }
     }
@@ -94,7 +101,11 @@ export function adunity(global, data) {
  * @param {!Object} data
  */
 function renderTags(global, data) {
-  const localData = data || global.context.data;
+  let localData = data;
+
+  if(localData == null)
+    localData = global.context.data;
+
   global.context.renderStart({
     width: localData.width,
     height: localData.height,
