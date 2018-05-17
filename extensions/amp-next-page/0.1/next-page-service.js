@@ -126,7 +126,7 @@ export class NextPageService {
 
     this.config_ = config;
     this.win_ = win;
-    this.separator_ = separator || this.createDivider_();
+    this.separator_ = separator || this.createDefaultSeparator_();
     this.element_ = element;
 
     if (this.config_.hideSelectors) {
@@ -202,13 +202,13 @@ export class NextPageService {
   }
 
   /**
-   * Creates a divider between two recommendations or articles.
+   * Creates a default hairline separator element to go between two documents.
    * @return {!Element}
    */
-  createDivider_() {
-    const topDivision = this.win_.document.createElement('div');
-    topDivision.classList.add('amp-next-page-division');
-    return topDivision;
+  createDefaultSeparator_() {
+    const separator = this.win_.document.createElement('div');
+    separator.classList.add('amp-next-page-default-separator');
+    return separator;
   }
 
   /**
@@ -295,20 +295,26 @@ export class NextPageService {
     }
 
     const element = doc.createElement('div');
-    const divider = this.createDivider_();
-    element.appendChild(divider);
+    element.classList.add('amp-next-page-links');
 
     while (article < this.config_.pages.length &&
            article - nextPage < SEPARATOR_RECOS) {
       const next = this.config_.pages[article];
       article++;
 
-      const articleHolder = doc.createElement('button');
-      articleHolder.classList.add('i-amphtml-reco-holder-article');
-      articleHolder.addEventListener('click', () => {
+      const articleHolder = doc.createElement('a');
+      articleHolder.href = next.ampUrl;
+      articleHolder.classList.add(
+          'i-amphtml-reco-holder-article', 'amp-next-page-link');
+      articleHolder.addEventListener('click', e => {
         this.triggerAnalyticsEvent_(
             'amp-next-page-click', next.ampUrl, currentAmpUrl);
-        this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+        const a2a =
+            this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+        if (a2a) {
+          // A2A is enabled, don't navigate the browser.
+          e.preventDefault();
+        }
       });
 
       const imageElement = doc.createElement('div');
@@ -325,7 +331,6 @@ export class NextPageService {
       articleHolder.appendChild(titleElement);
 
       element.appendChild(articleHolder);
-      element.appendChild(this.createDivider_());
     }
 
     return element;
