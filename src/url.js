@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LRUCache} from './utils/lru-cache';
+import {LruCache} from './utils/lru-cache';
 import {dict} from './utils/object';
 import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
@@ -48,7 +48,7 @@ let a;
  * We cached all parsed URLs. As of now there are no use cases
  * of AMP docs that would ever parse an actual large number of URLs,
  * but we often parse the same one over and over again.
- * @type {LRUCache}
+ * @type {LruCache}
  */
 let cache;
 
@@ -109,7 +109,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
  */
 export function parseUrlWithA(a, url, opt_nocache) {
   if (!cache) {
-    cache = self.UrlCache || (self.UrlCache = new LRUCache(100));
+    cache = self.UrlCache || (self.UrlCache = new LruCache(100));
   }
 
   const fromCache = cache.get(url);
