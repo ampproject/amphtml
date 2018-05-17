@@ -33,7 +33,8 @@ export function giraff(global, data) {
   });
 
   const anchorEl = global.document.createElement('div');
-  anchorEl.id = 'grf_' + data['blockName'];
+  const widgetId = data['widgetId'] ? '_' + data['widgetId'] : '';
+  anchorEl.id = 'grf_' + data['blockName'] + widgetId;
   global.document.getElementById('c').appendChild(anchorEl);
 
 }
