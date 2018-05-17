@@ -61,16 +61,17 @@ export function adunity(global, data) {
   if (data != null) {
     for (const key in data) {
       //skip not valid attributes
-      if (!hasOwnProperty.call(data, key)) continue;
+      if (!hasOwnProperty.call(data, key)) {
+        continue;
+      }
 
       //skip if attribute is type or ampSlotIndex
-      if (startsWith(key, 'type')
-          ||
-          startsWith(key, 'ampSlotIndex'))
-        {continue;}
-      
+      if (startsWith(key, 'type') || startsWith(key, 'ampSlotIndex')) {
+        continue;
+      }
+
       if (startsWith(key, 'au')) {
-        if (key == 'auVideo'){
+        if (key == 'auVideo') {
           tag.setAttribute('class', 'au-video');
         }
         else {
@@ -80,14 +81,16 @@ export function adunity(global, data) {
       }
     }
   }
+
   //make sure is executed only once
   let libAd = false;
+
   //execute tag only if in view
-  const inViewUnlisten = global.context.observeIntersection(function(changes) {
+  const inViewCb = global.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
       if (!libAd && c.intersectionRect.height > data['height'] / 2) {
         libAd = true;
-        inViewUnlisten();
+        inViewCb();
         renderTags(global, data);
       }
     });
@@ -103,8 +106,9 @@ export function adunity(global, data) {
 function renderTags(global, data) {
   let localData = data;
 
-  if(localData == null)
+  if (localData == null) {
     localData = global.context.data;
+  }
 
   global.context.renderStart({
     width: localData.width,
