@@ -111,14 +111,14 @@ describes.realWin('ad-network-config', {
       });
     });
 
-    it('should get the ad constraints', () => {
+    it('should get the default ad constraints', () => {
       const viewportMock =
           sandbox.mock(Services.viewportForDoc(env.win.document));
       viewportMock.expects('getSize').returns(
           {width: 320, height: 500}).atLeast(1);
 
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-      expect(adNetwork.getAdConstraints()).to.deep.equal({
+      expect(adNetwork.getDefaultAdConstraints()).to.deep.equal({
         initialMinSpacing: 500,
         subsequentMinSpacing: [
           {adCount: 3, spacing: 1000},
