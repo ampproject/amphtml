@@ -270,12 +270,12 @@ An optional `policy` object can be added to the `<amp-consent>` element's JSON c
       "my-consent": {
         "checkConsentHref": "https://example.com/api/show-consent"
       }
-    }
+    },
     "policy": {
       "default": {
         "waitFor": {
           "my-consent": []
-        }
+        },
         "timeout": {
           "seconds": 5,
           "fallbackAction": "reject"
@@ -302,7 +302,7 @@ When used as a single value, `timeout` equals the timeout value in second.
   "default": {
     "waitFor": {
       "my-consent": []
-    }
+    },
     "timeout": 2
   }
 ```
@@ -315,7 +315,7 @@ When used as an object. `timeout` object supports two attributes
   "default": {
     "waitFor": {
       "my-consent": []
-    }
+    },
     "timeout": {
       "seconds": 2,
       "fallbackAction": "reject"
