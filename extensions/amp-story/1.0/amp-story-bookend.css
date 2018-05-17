@@ -44,6 +44,7 @@
 
 .i-amphtml-story-bookend-inner {
   margin: 88px 0 0 !important;
+  font-family: 'Roboto', sans-serif !important;
   position: relative !important;
   padding-top: 32px !important;
   overflow: hidden !important;
@@ -263,7 +264,6 @@
 }
 
 .i-amphtml-story-bookend-component-set {
-  font-family: 'Roboto', sans-serif !important;
   margin-bottom: 32px !important;
   display: flex !important;
   flex-wrap: wrap !important;
