@@ -101,10 +101,6 @@
         ".overlay-container",
         ".overflow-window"
       ]
-      "experiments": [
-        "amp-fx-fade-in",
-        "amp-fx-fade-in-scroll"
-      ]
     },
     {
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
