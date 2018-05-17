@@ -459,9 +459,9 @@ export class SubscriptionService {
   }
 
   scoreBasedLogin() {
-    return this.platformStore_.getAllPlatforms().then(() => {
+    return this.platformStore_.getAllPlatforms().then(platforms => {
       const platformScores = [];
-      this.platformStore_.getAvailablePlatforms().forEach(platform => {
+      platforms.forEach(platform => {
         let score = 0;
         if (platform.supportsCurrentViewer()) {
           score += 1000;

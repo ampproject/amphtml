@@ -442,11 +442,20 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should resolve if already all platforms are resolved', () => {
-      platformStore.resolvePlatform('local', platform1);
-      platformStore.resolvePlatform('local', platform2);
+      platformStore.resolvePlatform('service1', platform1);
+      platformStore.resolvePlatform('service2', platform2);
       return platformStore.getAllPlatforms().then(platforms => {
+        expect(platforms.length).to.be.equal(2);
+      });
+    });
 
-      })
+    it('should resolve when platforms are resolved', done => {
+      platformStore.resolvePlatform('service1', platform1);
+      platformStore.getAllPlatforms().then(platforms => {
+        expect(platforms.length).to.be.equal(2);
+        done();
+      });
+      platformStore.resolvePlatform('service2', platform2);
     });
   });
 

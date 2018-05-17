@@ -153,11 +153,13 @@ export class PlatformStore {
     const allPlatformPromise = new Deferred();
     if (Object.keys(this.subscriptionPlatforms_).length
         === this.serviceIds_.length) {
-      allPlatformPromise.resolve();
+      allPlatformPromise.resolve(Object.values(this.subscriptionPlatforms_));
     } else {
       this.onPlatformResolvedCallbacks_.add(() => {
-        if (this.subscriptionPlatforms_.length === this.serviceIds_.length) {
-          allPlatformPromise.resolve();
+        const platformLength = Object.keys(this.subscriptionPlatforms_).length;
+        if (platformLength === this.serviceIds_.length) {
+          allPlatformPromise.resolve(Object.values(
+              this.subscriptionPlatforms_));
         }
       });
     }
