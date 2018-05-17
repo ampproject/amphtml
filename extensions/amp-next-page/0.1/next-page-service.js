@@ -224,7 +224,6 @@ export class NextPageService {
         cancelled: false,
       };
       this.documentRefs_.push(documentRef);
-      this.nextArticle_++;
 
       const container = this.win_.document.createElement('div');
 
@@ -239,7 +238,7 @@ export class NextPageService {
       const shadowRoot = this.win_.document.createElement('div');
       container.appendChild(shadowRoot);
 
-      const page = this.nextArticle_ - 1;
+      const page = this.nextArticle_;
       this.appendPageHandler_(container).then(() => {
         this.positionObserver_.observe(separator, PositionObserverFidelity.LOW,
             position => this.positionUpdate_(page, position));
@@ -254,6 +253,7 @@ export class NextPageService {
         return;
       }
 
+      this.nextArticle_++;
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => new Promise((resolve, reject) => {
