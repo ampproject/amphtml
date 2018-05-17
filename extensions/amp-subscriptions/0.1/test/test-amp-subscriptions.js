@@ -553,4 +553,22 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(decorateUIStub).to.be.calledWith(element);
     });
   });
+
+  describe('scoreBasedLogin', () => {
+
+    it('should return the platform which ever supports viewer', () => {
+      const platform = new SubscriptionPlatform();
+      platform.getServiceId = () => 'swg-google';
+      platform.supportsCurrentViewer = () => true;
+      const localPlatform = new SubscriptionPlatform();
+      localPlatform.getServiceId = () => 'local';
+      subscriptionService.platformStore_ = new PlatformStore(
+          ['local', 'swg-google']);
+      sandbox.stub(subscriptionService.platformStore_, 'getAllPlatforms')
+          .callsFake(() => Promise.resolve([platform, localPlatform]));
+      return subscriptionService.scoreBasedLogin().then(platform => {
+        expect(platform.getServiceId()).to.be.equal(platform.getServiceId());
+      });
+    });
+  });
 });

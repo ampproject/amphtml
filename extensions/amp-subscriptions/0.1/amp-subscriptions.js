@@ -153,8 +153,7 @@ export class SubscriptionService {
    * service.
    *
    * @param {string} serviceId
-   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform}
-   * subscriptionPlatformFactory
+   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
@@ -458,6 +457,10 @@ export class SubscriptionService {
     });
   }
 
+  /**
+   * Evaluates platforms and select the one to be selected for login.
+   * @return {!Promise<!./subscriptions-platform.SubscriptionPlatform>}
+   */
   scoreBasedLogin() {
     return this.platformStore_.getAllPlatforms().then(platforms => {
       const platformScores = [];
