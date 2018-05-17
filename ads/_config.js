@@ -206,13 +206,13 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  adunity:{
+  adunity: {
     preconnect: [
-      'https://content.adunity.com'
+      'https://content.adunity.com',
     ],
     renderStartImplemented: true,
   },
-  
+
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
     preconnect: [
