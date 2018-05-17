@@ -557,7 +557,7 @@ export class Viewer {
       return;
     }
     const sourceOrigin = getSourceOrigin(this.win.location.href);
-    const canonicalUrl = Services.documentInfoForDoc(this.ampdoc).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc);
     const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
     if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
       const oldFragment = getFragment(this.win.location.href);
@@ -1070,8 +1070,7 @@ export class Viewer {
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
       const deferred = new Deferred();
-      const responsePromise = deferred.promise;
-      const responseResolver = deferred.resolve;
+      const {promise: responsePromise, resolve: responseResolver} = deferred;
 
       message = {
         eventType,

@@ -219,7 +219,7 @@ export class WebLoginDialog {
 
   /** @private */
   openInternal_() {
-    const screen = this.win.screen;
+    const {screen} = this.win;
     const w = Math.floor(Math.min(700, screen.width * 0.9));
     const h = Math.floor(Math.min(450, screen.height * 0.9));
     const x = Math.floor((screen.width - w) / 2);

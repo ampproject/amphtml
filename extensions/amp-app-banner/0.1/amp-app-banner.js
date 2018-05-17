@@ -426,11 +426,11 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @private */
   getAndroidIntentForUrl_(appId) {
-    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
     const parsedUrl = parseUrl(canonicalUrl);
     const cleanProtocol = parsedUrl.protocol.replace(':', '');
-    const host = parsedUrl.host;
-    const pathname = parsedUrl.pathname;
+    const {host, pathname} = parsedUrl;
+
     return `android-app://${appId}/${cleanProtocol}/${host}${pathname}`;
   }
 }

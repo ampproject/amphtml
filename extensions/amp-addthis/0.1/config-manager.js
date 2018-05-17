@@ -90,8 +90,10 @@ export class ConfigManager {
   /** @private */
   sendConfiguration_({iframe, widgetId, pubId, shareConfig, atConfig}) {
     const pubData = this.dataForPubId_[pubId];
-    const dashboardConfig = pubData.config;
-    const configRequestStatus = pubData.requestStatus;
+    const {
+      config: dashboardConfig,
+      requestStatus: configRequestStatus,
+    } = pubData;
     const jsonToSend = dict({
       'event': CONFIGURATION_EVENT,
       'shareConfig': shareConfig,

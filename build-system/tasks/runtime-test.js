@@ -15,29 +15,22 @@
  */
 'use strict';
 
-const app = require('../test-server').app;
-const applyConfig = require('./prepend-global/index.js').applyConfig;
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
-const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
-const exec = require('../exec').exec;
-const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
 const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
 const path = require('path');
-const removeConfig = require('./prepend-global/index.js').removeConfig;
 const webserver = require('gulp-webserver');
+const {applyConfig, removeConfig} = require('./prepend-global/index.js');
+const {app} = require('../test-server');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {exec} = require('../exec');
 
-
-const green = colors.green;
-const yellow = colors.yellow;
-const cyan = colors.cyan;
-const red = colors.red;
-const bold = colors.bold;
+const {green, yellow, cyan, red, bold} = colors;
 
 const preTestTasks =
     argv.nobuild ? [] : ((argv.unit || argv.a4a) ? ['css'] : ['build']);
