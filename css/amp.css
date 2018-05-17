@@ -312,6 +312,10 @@ i-amphtml-sizer {
   overflow: hidden !important;
 }
 
+.i-amphtml-scroll-disabled>body {
+  position: fixed !important;
+}
+
 .i-amphtml-scroll-disabled {
   overflow-x: hidden !important;
   overflow-y: hidden !important;
