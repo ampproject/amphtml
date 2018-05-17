@@ -51,7 +51,8 @@
           "template",
           "visibleForTesting"
         ]
-      }
+      },
+      "allowOverrideWithoutParam" : true
     }
   },
   "rules": {
