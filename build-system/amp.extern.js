@@ -286,6 +286,7 @@ animationHandler.play;
 animationHandler.pause;
 animationHandler.stop;
 animationHandler.goToAndStop;
+animationHandler.totalFrames;
 
 // Validator
 var amp;
