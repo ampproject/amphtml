@@ -427,7 +427,7 @@ export class Viewer {
      * The replace URL is built using the "amp_r" parameter, if present.
      * @const @private {?string}
      */
-    this.replaceUrl_ = this.generateReplaceUrl_();
+    this.replaceUrl_ = this.getReplaceUrlFromParameter_();
 
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
@@ -1135,11 +1135,40 @@ export class Viewer {
   }
 
   /**
+  * Sets the replace URL explicitly when obtained by querying the viewer. This
+  * is being deprecated and will only be used when the replace URL parameter
+  * isn't provided.
+  * @param {?string} newUrl
+  */
+  replaceUrl(newUrl) {
+    if (!newUrl ||
+        this.replaceUrl_ != null ||
+        !this.ampdoc.isSingleDoc()) {
+      return;
+    }
+
+    try {
+      // The origin and source origin must match. Note that this does not
+      // rewrite the window location.
+      const url = parseUrl(this.win.location.href);
+      const replaceUrl = parseUrl(
+          removeFragment(newUrl) + this.win.location.hash);
+      if (url.origin == replaceUrl.origin &&
+          getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+        this.replaceUrl_ = replaceUrl.href;
+        dev().fine(TAG_, 'replace url:' + this.replaceUrl_);
+      }
+    } catch (e) {
+      dev().error(TAG_, 'replaceUrl failed', e);
+    }
+  }
+
+  /**
    * Attempts to generate a replace URL using the "amp_r" query parameter,
    * returning null if invalid.
    * @return {?string}
    */
-  generateReplaceUrl_() {
+  getReplaceUrlFromParameter_() {
     if (!this.ampdoc.isSingleDoc()) {
       return null;
     }

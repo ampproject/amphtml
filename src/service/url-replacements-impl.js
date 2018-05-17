@@ -220,12 +220,10 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the Source URL for this AMP document.
     this.setBoth('SOURCE_URL', () => {
-      const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      return removeFragment(docInfo.sourceUrl);
+      return this.getSourceUrlData_();
     }, () => {
       return getTrackImpressionPromise().then(() => {
-        const docInfo = Services.documentInfoForDoc(this.ampdoc);
-        return removeFragment(docInfo.sourceUrl);
+        return this.getSourceUrlData_();
       });
     });
 
@@ -643,6 +641,21 @@ export class GlobalVariableSource extends VariableSource {
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
       ? params[param] : defaultValue;
+  }
+
+  /**
+   * Return the SOURCE_URL from the current document.
+   * @return {string}
+   * @private
+   */
+  getSourceUrlData_() {
+    let url = Services.viewerForDoc(this.ampdoc).getReplaceUrl();
+    // Prefer the replace URL, falling back to source URL if not found.
+    if (!url) {
+      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      url = docInfo.sourceUrl;
+    }
+    return removeFragment(url);
   }
 
   /**
