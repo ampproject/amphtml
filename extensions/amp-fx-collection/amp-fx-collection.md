@@ -162,10 +162,17 @@ The `fly-in` effects allow an element's position to be translated by a specified
 
 ##### data-duration (optional)
 
-This is the duration over which the animation takes places. The default value differs across device as follows:
-* Mobile - `400ms`,
-* Tablet - `500ms`,
-* Desktop - `600ms`.
+This is the duration over which the animation takes places. The default value differs across devices as follows:
+Between `480 px` (the minimum width of a mobile device) and `1000px` (the minimum width of a laptop screen width), we scale the default duration between `400ms` and `600ms`.
+
+Here are some examples to help you better understand this:
+1. screen width - `610px` the default duration for a `fly-in-bottom` would be `450ms`.
+2. screen width - `675px` the default duration for a `fly-in-bottom` would be `475ms`.
+3. screen width - `740px` the default duration for a `fly-in-bottom` would be `500ms`.
+4. screen width - `805px` the default duration for a `fly-in-bottom` would be `525ms`.
+5. screen width - `870px` the default duration for a `fly-in-bottom` would be `550ms`.
+
+If the user overrides this default value of `data-duration` to `Xms`, the same default will apply across all devices.
 
 ##### data-easing (optional)
 
@@ -174,7 +181,7 @@ This parameter lets you vary the animation's speed over the course of its durati
 * “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
 * “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00)
 * “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00) (default)
-or specify a `custom-bezier()` input
+or specify a `custom-bezier()` input.
 
 ##### data-fly-in-distance (optional)
 
