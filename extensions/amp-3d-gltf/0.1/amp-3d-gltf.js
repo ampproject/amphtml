@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Deferred} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -36,21 +37,11 @@ export class Amp3dGltf extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Function} */
-    this.willBeReadyResolver_ = null;
+    /** @private {!Deferred} */
+    this.willBeReady_ = new Deferred();
 
-    /** @private {?Function} */
-    this.willBeLoadedResolver_ = null;
-
-    /** @private {!Promise} */
-    this.willBeReady_ = new Promise(resolve => {
-      this.willBeReadyResolver_ = resolve;
-    });
-
-    /** @private {!Promise} */
-    this.willBeLoaded_ = new Promise(resolve => {
-      this.willBeLoadedResolver_ = resolve;
-    });
+    /** @private {!Deferred} */
+    this.willBeLoaded_ = new Deferred();
 
     /** @private {!JsonObject} */
     this.context_ = dict();
@@ -80,13 +71,8 @@ export class Amp3dGltf extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.willBeReady_ = new Promise(resolve => {
-      this.willBeReadyResolver_ = resolve;
-    });
-
-    this.willBeLoaded_ = new Promise(resolve => {
-      this.willBeLoadedResolver_ = resolve;
-    });
+    this.willBeReady_ = new Deferred();
+    this.willBeLoaded_ = new Deferred();
 
     return true;
   }
@@ -135,7 +121,7 @@ export class Amp3dGltf extends AMP.BaseElement {
 
     this.element.appendChild(iframe);
 
-    return this.willBeLoaded_;
+    return this.willBeLoaded_.promise;
   }
 
   /** @private */
@@ -151,8 +137,8 @@ export class Amp3dGltf extends AMP.BaseElement {
         true);
 
     const disposers = [
-      listenIframe('ready', this.willBeReadyResolver_),
-      listenIframe('loaded', this.willBeLoadedResolver_),
+      listenIframe('ready', this.willBeReady_.resolve),
+      listenIframe('loaded', this.willBeLoaded_.resolve),
       listenIframe('error', () => {
         this.toggleFallback(true);
       }),
@@ -167,7 +153,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @private
    * */
   sendCommand_(action, args) {
-    this.willBeReady_.then(() => {
+    this.willBeReady_.promise.then(() => {
       const message = dict({
         'action': action,
         'args': args,
@@ -182,7 +168,10 @@ export class Amp3dGltf extends AMP.BaseElement {
     });
   }
 
-  /** @override */
+  /**
+   * @param {boolean} inViewport
+   * @override
+   */
   viewportCallback(inViewport) {
     this.sendCommand_('toggleAmpViewport', inViewport);
   }
@@ -204,7 +193,11 @@ export class Amp3dGltf extends AMP.BaseElement {
         dict({'width': box.width, 'height': box.height}));
   }
 
-  /** @override */
+  /**
+   * @override
+   * @param {!Layout} layout
+   * @return {boolean}
+   */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }

@@ -142,7 +142,9 @@ export default class GltfViewer {
             devicePixelRatio));
   }
 
-  /** @private */
+  /**
+   * @param {!THREE.Object3D} object
+   * @private */
   setupCameraForObject_(object) {
     const center = new THREE.Vector3();
     const size = new THREE.Vector3();
@@ -201,13 +203,17 @@ export default class GltfViewer {
     this.renderer_.render(this.scene_, this.camera_);
   }
 
-  /** @private */
+  /**
+   * @param {boolean} value
+   * @private */
   toggleAmpPlay_(value) {
     this.ampPlay_ = value;
     this.reconcileAnimationLoop_();
   }
 
-  /** @private */
+  /**
+   * @param {boolean} inVp
+   * @private */
   toggleAmpViewport_(inVp) {
     this.ampInViewport_ = inVp;
     this.reconcileAnimationLoop_();
