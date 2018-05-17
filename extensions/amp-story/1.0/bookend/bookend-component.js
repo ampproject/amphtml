@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+
 import {ArticleComponent, ArticleComponentDef} from './components/article';
+import {CtaLinkComponent, CtaLinkDef} from './components/cta-link';
 import {HeadingComponent, HeadingComponentDef} from './components/heading';
+import {LandscapeComponent, LandscapeComponentDef} from './components/landscape';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
 import {htmlFor} from '../../../../src/static-template';
 
@@ -34,18 +37,28 @@ export let BookendDataDef;
 /**
  * @typedef {
  *   (!ArticleComponentDef|
- *   !HeadingComponentDef|
- *   !PortraitComponentDef)
+ *    !CtaLinkDef|
+ *    !HeadingComponentDef|
+ *    !LandscapeComponentDef|
+ *    !PortraitComponentDef)
  * }
  */
 export let BookendComponentDef;
 
 const articleComponentBuilder = new ArticleComponent();
+const ctaLinkComponentBuilder = new CtaLinkComponent();
 const headingComponentBuilder = new HeadingComponent();
+const landscapeComponentBuilder = new LandscapeComponent();
 const portraitComponentBuilder = new PortraitComponent();
 
 /**
- * @typedef {(!ArticleComponent|!HeadingComponent|!PortraitComponent)}
+ * @typedef {
+ *   (!ArticleComponent|
+ *    !CtaLinkComponent|
+ *    !HeadingComponent|
+ *    !LandscapeComponent|
+ *    !PortraitComponent)
+ * }
  */
 export let BookendComponentClass;
 
@@ -58,8 +71,12 @@ function componentBuilderInstanceFor(componentType) {
   switch (componentType) {
     case 'small':
       return articleComponentBuilder;
+    case 'cta-link':
+      return ctaLinkComponentBuilder;
     case 'heading':
       return headingComponentBuilder;
+    case 'landscape':
+      return landscapeComponentBuilder;
     case 'portrait':
       return portraitComponentBuilder;
     default:
@@ -100,7 +117,7 @@ export class BookendComponent {
   static buildTemplates(components, doc) {
     const fragment = doc.createDocumentFragment();
     components.forEach(component => {
-      const type = component.type;
+      const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
         fragment.appendChild(componentBuilderInstanceFor(type)
             .buildTemplate(component, doc));
@@ -119,7 +136,6 @@ export class BookendComponent {
     const html = htmlFor(doc);
     const containerTemplate =
       html`<div class="i-amphtml-story-bookend-component-set"></div>`;
-
     element.appendChild(containerTemplate);
     return element.lastElementChild;
   }

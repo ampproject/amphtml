@@ -244,7 +244,7 @@ export class AmpAdExit extends AMP.BaseElement {
         createFilter('carouselBtns',
             makeInactiveElementSpec('.amp-carousel-button'), this));
 
-    const children = this.element.children;
+    const {children} = this.element;
     user().assert(children.length == 1,
         'The tag should contain exactly one <script> child.');
     const child = children[0];
@@ -290,7 +290,7 @@ export class AmpAdExit extends AMP.BaseElement {
             continue;
           }
           const vendor = matches[1];
-          const origin = parseUrlDeprecated(assertVendor(vendor)).origin;
+          const {origin} = parseUrlDeprecated(assertVendor(vendor));
           this.expectedOriginToVendor_[origin] =
               this.expectedOriginToVendor_[origin] || vendor;
         }

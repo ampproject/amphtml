@@ -607,7 +607,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   // We prefer the unforgable ancestorOrigins, but referrer is better than
   // nothing.
   const ancestor = ancestors ? ancestors[0] : window.document.referrer;
-  let hostname = parseUrlDeprecated(ancestor).hostname;
+  let {hostname} = parseUrlDeprecated(ancestor);
   if (isProxyOrigin(ancestor)) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be

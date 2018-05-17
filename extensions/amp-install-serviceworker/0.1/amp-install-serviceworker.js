@@ -53,7 +53,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const win = this.win;
+    const {win} = this;
     if (!('serviceWorker' in win.navigator)) {
       this.maybeInstallUrlRewrite_();
       return;
@@ -65,7 +65,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
-        const origin = parseUrlDeprecated(iframeSrc).origin;
+        const {origin} = parseUrlDeprecated(iframeSrc);
         const docInfo = Services.documentInfoForDoc(this.element);
         const sourceUrl = parseUrlDeprecated(docInfo.sourceUrl);
         const canonicalUrl = parseUrlDeprecated(docInfo.canonicalUrl);
@@ -127,7 +127,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     const ampdoc = this.getAmpDoc();
-    const win = this.win;
+    const {win} = this;
     const winUrl = parseUrlDeprecated(win.location.href);
 
     // Read the url-rewrite config.
@@ -182,7 +182,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   preloadShell_(shellUrl) {
-    const win = this.win;
+    const {win} = this;
 
     // Preload the shell by via an iframe with `#preload` fragment.
     const iframe = win.document.createElement('iframe');
@@ -263,7 +263,7 @@ class UrlRewriter_ {
 
     // Only rewrite URLs to a different location to avoid breaking fragment
     // navigation.
-    const win = this.win;
+    const {win} = this;
     if (removeFragment(tgtLoc.href) == removeFragment(win.location.href)) {
       return;
     }

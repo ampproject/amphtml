@@ -87,8 +87,7 @@ function reportStats(data, code) {
     if (typeof window.context.location.href !== 'undefined') {
       pageLocation = encodeURIComponent(window.context.location.href);
     }
-    const subId = data.subId,
-        pid = data.pid,
+    const {subId, pid} = data,
         trackId = 'AMP',
         notFirst = true,
         cid = '',

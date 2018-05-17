@@ -245,8 +245,8 @@ export class SafeframeHostApi {
     // Don't allow for referrer policy same-origin,
     // as Safeframe will always be a different origin.
     // Don't allow for no-referrer.
-    const canonicalUrl = Services.documentInfoForDoc(
-        this.baseInstance_.getAmpDoc()).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(
+        this.baseInstance_.getAmpDoc());
     const metaReferrer = this.win_.document.querySelector(
         "meta[name='referrer']");
     if (!metaReferrer) {

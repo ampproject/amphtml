@@ -98,7 +98,7 @@ export class NextPageService {
     /** @private {?DocumentRef} */
     this.activeDocumentRef_ = null;
 
-    /** @private {function(!Element)} */
+    /** @private {function(!Element): !Promise} */
     this.appendPageHandler_ = () => {};
   }
 
@@ -122,11 +122,11 @@ export class NextPageService {
     }
 
     const ampDoc = getAmpdoc(element);
-    const win = ampDoc.win;
+    const {win} = ampDoc;
 
     this.config_ = config;
     this.win_ = win;
-    this.separator_ = separator || this.createDivider_();
+    this.separator_ = separator || this.createDefaultSeparator_();
     this.element_ = element;
 
     if (this.config_.hideSelectors) {
@@ -161,8 +161,9 @@ export class NextPageService {
 
   /**
    * Sets the handler to be called with a
-   * @param {function(!Element)} handler Handler to be called when a new page
-   *     needs adding to the DOM, with a container element for that page.
+   * @param {function(!Element): !Promise} handler Handler to be called when
+   *     a new page needs adding to the DOM, with a container element for that
+   *     page.
    */
   setAppendPageHandler(handler) {
     this.appendPageHandler_ = handler;
@@ -201,13 +202,13 @@ export class NextPageService {
   }
 
   /**
-   * Creates a divider between two recommendations or articles.
+   * Creates a default hairline separator element to go between two documents.
    * @return {!Element}
    */
-  createDivider_() {
-    const topDivision = this.win_.document.createElement('div');
-    topDivision.classList.add('amp-next-page-division');
-    return topDivision;
+  createDefaultSeparator_() {
+    const separator = this.win_.document.createElement('div');
+    separator.classList.add('amp-next-page-default-separator');
+    return separator;
   }
 
   /**
@@ -232,21 +233,21 @@ export class NextPageService {
       separator.removeAttribute('separator');
       container.appendChild(separator);
 
-      const page = this.nextArticle_ - 1;
-      this.positionObserver_.observe(separator, PositionObserverFidelity.LOW,
-          position => this.positionUpdate_(page, position));
-
       const articleLinks = this.createArticleLinks_(this.nextArticle_);
       container.appendChild(articleLinks);
       documentRef.recUnit = articleLinks;
 
-      this.positionObserver_.observe(articleLinks, PositionObserverFidelity.LOW,
-          unused => this.articleLinksPositionUpdate_(documentRef));
-
       const shadowRoot = this.win_.document.createElement('div');
       container.appendChild(shadowRoot);
 
-      this.appendPageHandler_(container);
+      const page = this.nextArticle_ - 1;
+      this.appendPageHandler_(container).then(() => {
+        this.positionObserver_.observe(separator, PositionObserverFidelity.LOW,
+            position => this.positionUpdate_(page, position));
+        this.positionObserver_.observe(articleLinks,
+            PositionObserverFidelity.LOW,
+            unused => this.articleLinksPositionUpdate_(documentRef));
+      });
 
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
@@ -294,20 +295,26 @@ export class NextPageService {
     }
 
     const element = doc.createElement('div');
-    const divider = this.createDivider_();
-    element.appendChild(divider);
+    element.classList.add('amp-next-page-links');
 
     while (article < this.config_.pages.length &&
            article - nextPage < SEPARATOR_RECOS) {
       const next = this.config_.pages[article];
       article++;
 
-      const articleHolder = doc.createElement('button');
-      articleHolder.classList.add('i-amphtml-reco-holder-article');
-      articleHolder.addEventListener('click', () => {
+      const articleHolder = doc.createElement('a');
+      articleHolder.href = next.ampUrl;
+      articleHolder.classList.add(
+          'i-amphtml-reco-holder-article', 'amp-next-page-link');
+      articleHolder.addEventListener('click', e => {
         this.triggerAnalyticsEvent_(
             'amp-next-page-click', next.ampUrl, currentAmpUrl);
-        this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+        const a2a =
+            this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+        if (a2a) {
+          // A2A is enabled, don't navigate the browser.
+          e.preventDefault();
+        }
       });
 
       const imageElement = doc.createElement('div');
@@ -324,7 +331,6 @@ export class NextPageService {
       articleHolder.appendChild(titleElement);
 
       element.appendChild(articleHolder);
-      element.appendChild(this.createDivider_());
     }
 
     return element;
@@ -364,8 +370,8 @@ export class NextPageService {
    * the position of a page separator in the viewport.
    * @param {number} i Index of the documentRef this recommendation unit is
    *     attached to.
-   * @param {?../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
-   *     position Position of the current recommendation unit in the viewport.
+   * @param {?../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} position
+   *     Position of the current recommendation unit in the viewport.
    */
   positionUpdate_(i, position) {
     // We're only interested when the recommendations exit the viewport
@@ -373,14 +379,19 @@ export class NextPageService {
       return;
     }
 
+    let documentRef;
+    let analyticsEvent = '';
+
     if (position.relativePos === 'top') {
-      const documentRef = this.documentRefs_[i + 1];
-      this.triggerAnalyticsEvent_('amp-next-page-scroll',
-          documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
-      this.setActiveDocument_(documentRef);
+      documentRef = this.documentRefs_[i + 1];
+      analyticsEvent = 'amp-next-page-scroll';
     } else if (position.relativePos === 'bottom') {
-      const documentRef = this.documentRefs_[i];
-      this.triggerAnalyticsEvent_('amp-next-page-scroll-back',
+      documentRef = this.documentRefs_[i];
+      analyticsEvent = 'amp-next-page-scroll-back';
+    }
+
+    if (documentRef && documentRef.amp) {
+      this.triggerAnalyticsEvent_(analyticsEvent,
           documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
       this.setActiveDocument_(documentRef);
     }
@@ -406,7 +417,7 @@ export class NextPageService {
    *     active.
    */
   setActiveDocument_(documentRef) {
-    const amp = documentRef.amp;
+    const {amp} = documentRef;
     this.win_.document.title = amp.title || '';
     if (this.win_.history.replaceState) {
       const url = parseUrlDeprecated(documentRef.ampUrl);
