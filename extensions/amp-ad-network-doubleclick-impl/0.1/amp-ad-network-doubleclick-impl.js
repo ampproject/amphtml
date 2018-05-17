@@ -126,7 +126,7 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
 
 /**
  * @const {string}
- * @visibileForTesting
+ * @visibleForTesting
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
@@ -483,9 +483,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   getPageParameters(consentState) {
+    let npa = null;
+    let consent = null;
+    switch (consentState) {
+      case undefined:
+      case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+        break;
+      case CONSENT_POLICY_STATE.INSUFFICIENT:
+        consent = false;
+      case CONSENT_POLICY_STATE.UNKNOWN:
+        npa = '1';
+        break;
+      case CONSENT_POLICY_STATE.SUFFICIENT:
+        consent = true;
+        break;
+      default:
+        dev().error(TAG, `unknown consent enum ${consentState}`);
+    }
     return {
-      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
+      npa,
+      consent,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
@@ -534,7 +551,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Populate's block-level state for ad URL construction.
    * @param {?CONSENT_POLICY_STATE} consentState
-   * @visibileForTesting
+   * @visibleForTesting
    */
   populateAdUrlState(consentState) {
     this.consentState = consentState;
@@ -1082,7 +1099,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Groups slots by type and networkId from data-slot parameter.  Exposed for
    * ease of testing.
    * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
@@ -1096,7 +1113,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - group by networkID allowing for separate SRA requests
    * - for each grouping, construct SRA request
    * - handle chunks for streaming response for each block
-   * @visibileForTesting
+   * @visibleForTesting
    */
   initiateSraRequests() {
     if (sraRequests) {
@@ -1356,7 +1373,7 @@ export function resetLocationQueryParametersForTesting() {
 /**
  * @param {!Element} element
  * @return {string} networkId from data-ad-slot attribute.
- * @visibileForTesting
+ * @visibleForTesting
  */
 export function getNetworkId(element) {
   const networkId = /^(?:\/)?(\d+)/.exec(
