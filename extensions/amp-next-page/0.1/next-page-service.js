@@ -215,8 +215,7 @@ export class NextPageService {
    * Append a new article if still possible.
    */
   appendNextArticle_() {
-    if (this.nextArticle_ < MAX_ARTICLES &&
-        this.nextArticle_ < this.config_.pages.length) {
+    if (this.nextArticle_ < this.config_.pages.length) {
       const next = this.config_.pages[this.nextArticle_];
       const documentRef = {
         ampUrl: next.ampUrl,
@@ -248,6 +247,12 @@ export class NextPageService {
             PositionObserverFidelity.LOW,
             unused => this.articleLinksPositionUpdate_(documentRef));
       });
+
+      // Don't fetch the next article if we've rendered the maximum on screen.
+      // We just want the article links.
+      if (this.nextArticle_ >= MAX_ARTICLES) {
+        return;
+      }
 
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
