@@ -634,7 +634,7 @@ export class Bind {
         return true;
       }
       const element = dev().assertElement(node);
-      const tagName = element.tagName;
+      const {tagName} = element;
 
       let boundProperties = this.scanElement_(element);
       // Stop scanning once |limit| bindings are reached.
@@ -715,8 +715,8 @@ export class Bind {
    * @private
    */
   scanAttribute_(attribute, element) {
-    const tagName = element.tagName;
-    const name = attribute.name;
+    const {tagName} = element;
+    const {name} = attribute;
     if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
       const property = name.substr(1, name.length - 2);
       if (this.validator_.canBind(tagName, property)) {
@@ -893,7 +893,7 @@ export class Bind {
         const mutation = this.applyBinding_(boundProperty, element, newValue);
         if (mutation) {
           mutations[mutation.name] = mutation.value;
-          const property = boundProperty.property;
+          const {property} = boundProperty;
           if (property == 'width') {
             width = isFiniteNumber(newValue) ? Number(newValue) : width;
           } else if (property == 'height') {
@@ -932,7 +932,7 @@ export class Bind {
    * @private
    */
   applyBinding_(boundProperty, element, newValue) {
-    const property = boundProperty.property;
+    const {property} = boundProperty;
     const tag = element.tagName;
 
     switch (property) {
@@ -1047,7 +1047,7 @@ export class Bind {
    */
   verifyBinding_(boundProperty, element, expectedValue) {
     const {property, expressionString} = boundProperty;
-    const tagName = element.tagName;
+    const {tagName} = element;
 
     // Don't show a warning for bind-only attributes,
     // like 'slide' on amp-carousel.

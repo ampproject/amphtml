@@ -188,7 +188,7 @@ describe('impression', () => {
       xhr.fetchJson.returns(new Promise(() => {
         // never resolves
       }));
-      const href = window.location.href;
+      const {href} = window.location;
       const clock = sandbox.useFakeTimers();
       maybeTrackImpression(window);
       clock.tick(8001);

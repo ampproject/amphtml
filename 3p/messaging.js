@@ -95,7 +95,7 @@ function startListening(win) {
       if (listeners[i].type != data['type']) {
         continue;
       }
-      const cb = listeners[i].cb;
+      const {cb} = listeners[i];
       try {
         cb(data);
       } catch (e) {

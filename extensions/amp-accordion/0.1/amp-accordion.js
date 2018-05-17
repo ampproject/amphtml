@@ -315,7 +315,7 @@ class AmpAccordion extends AMP.BaseElement {
     if (event.defaultPrevented) {
       return;
     }
-    const keyCode = event.keyCode;
+    const {keyCode} = event;
     switch (keyCode) {
       case KeyCodes.UP_ARROW: /* fallthrough */
       case KeyCodes.DOWN_ARROW:

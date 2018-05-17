@@ -1075,7 +1075,7 @@ describes.fakeWin('AccessService login', {
         .returns(Promise.resolve('reader1'))
         .once();
     return service.sources_[0].buildLoginUrls_().then(urls => {
-      const url = urls[0].url;
+      const {url} = urls[0];
       expect(url).to.equal('https://acme.com/l?rid=reader1');
       expect(service.sources_[0].loginUrlMap_['']).to.equal(url);
     });
@@ -1129,7 +1129,7 @@ describes.fakeWin('AccessService login', {
         .returns(Promise.resolve('reader1'))
         .once();
     return source.buildLoginUrls_().then(urls => {
-      const url = urls[0].url;
+      const {url} = urls[0];
       expect(url).to.equal('https://acme.com/l?rid=reader1&ret=RETURN_URL');
       expect(source.loginUrlMap_['']).to.equal(url);
     });
