@@ -189,7 +189,7 @@ export class ActionInvocation {
    * Returns true if the trigger event has a trust equal to or greater than
    * `minimumTrust`. Otherwise, logs a user error and returns false.
    * @param {ActionTrust} minimumTrust
-   * @returns {boolean}
+   * @return {boolean}
    */
   satisfiesTrust(minimumTrust) {
     // Sanity check.
@@ -425,7 +425,7 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} actionEventType
    * @param {!Element=} opt_stopAt
-   * @returns {boolean}
+   * @return {boolean}
    */
   hasAction(target, actionEventType, opt_stopAt) {
     return !!this.findAction_(target, actionEventType, opt_stopAt);

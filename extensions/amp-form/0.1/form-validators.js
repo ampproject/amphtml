@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service';
 import {toWin} from '../../../src/types';
 
 
@@ -72,7 +71,10 @@ export class FormValidator {
     this.form = form;
 
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = getAmpdoc(form);
+    this.ampdoc = Services.ampdoc(form);
+
+    /** @const @protected {!../../../src/service/resources-impl.Resources} */
+    this.resources = Services.resourcesForDoc(form);
 
     /** @protected @const {!Document|!ShadowRoot} */
     this.root = this.ampdoc.getRootNode();
@@ -241,10 +243,12 @@ export class AbstractCustomValidator extends FormValidator {
     if (!validation.textContent.trim()) {
       validation.textContent = input.validationMessage;
     }
-
-    input.setAttribute('aria-invalid', 'true');
-    validation.classList.add('visible');
     this.inputVisibleValidationDict_[input.id] = validation;
+
+    this.resources.mutateElement(input,
+        () => input.setAttribute('aria-invalid', 'true'));
+    this.resources.mutateElement(validation,
+        () => validation.classList.add('visible'));
   }
 
   /**
@@ -255,9 +259,12 @@ export class AbstractCustomValidator extends FormValidator {
     if (!visibleValidation) {
       return;
     }
-    input.removeAttribute('aria-invalid');
-    visibleValidation.classList.remove('visible');
     delete this.inputVisibleValidationDict_[input.id];
+
+    this.resources.mutateElement(input,
+        () => input.removeAttribute('aria-invalid'));
+    this.resources.mutateElement(visibleValidation,
+        () => visibleValidation.classList.remove('visible'));
   }
 
   /**
