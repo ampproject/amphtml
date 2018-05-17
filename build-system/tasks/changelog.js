@@ -34,7 +34,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
-const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+const {GITHUB_ACCESS_TOKEN} = process.env;
 const exec = BBPromise.promisify(childProcess.exec);
 const gitExec = BBPromise.promisify(git.exec);
 
@@ -234,7 +234,7 @@ function buildChangelog(gitMetadata) {
 
   // Append all titles
   changelog += gitMetadata.logs.filter(function(log) {
-    const pr = log.pr;
+    const {pr} = log;
     if (!pr) {
       return true;
     }
@@ -244,7 +244,7 @@ function buildChangelog(gitMetadata) {
     });
   })
       .map(function(log) {
-        const pr = log.pr;
+        const {pr} = log;
         if (!pr) {
           return '  - ' + log.title;
         }
@@ -273,7 +273,7 @@ function buildChangelog(gitMetadata) {
 function buildSections(gitMetadata) {
   const sections = {};
   gitMetadata.logs.forEach(function(log) {
-    const pr = log.pr;
+    const {pr} = log;
     if (!pr) {
       return;
     }
@@ -595,7 +595,7 @@ function update() {
     if (!release.body) {
       return;
     }
-    const id = release.id;
+    const {id} = release;
     releasesOptions.url += id;
     if (argv.suffix) {
       releasesOptions.body.body = release.body + argv.message;

@@ -74,7 +74,7 @@ export class ExpansionOptions {
  */
 function substrMacro(str, s, opt_l) {
   const start = Number(s);
-  let length = str.length;
+  let {length} = str;
   user().assert(isFiniteNumber(start),
       'Start index ' + start + 'in substr macro should be a number');
   if (opt_l) {

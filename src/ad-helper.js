@@ -39,7 +39,7 @@ const CONTAINERS = {
  * @return {boolean}
  */
 function isPositionFixed(el, win) {
-  const position = computedStyle(win, el).position;
+  const {position} = computedStyle(win, el);
   // We consider sticky positions as fixed, since they can be fixed.
   return position == 'fixed' || position == 'sticky';
 }

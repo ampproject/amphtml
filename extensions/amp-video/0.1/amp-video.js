@@ -564,8 +564,8 @@ class AmpVideo extends AMP.BaseElement {
   /** @override */
   getPlayedRanges() {
     // TODO(cvializ): remove this because it can be inferred by other events
-    const played = this.video_.played;
-    const length = played.length;
+    const {played} = this.video_;
+    const {length} = played;
     const ranges = [];
     for (let i = 0; i < length; i++) {
       ranges.push([played.start(i), played.end(i)]);

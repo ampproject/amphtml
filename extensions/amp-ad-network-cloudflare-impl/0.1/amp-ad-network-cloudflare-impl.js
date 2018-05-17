@@ -80,7 +80,7 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
 
     const network = NETWORKS[el.getAttribute('data-cf-network')];
     const a4a = el.getAttribute('data-cf-a4a') !== 'false';
-    const base = network.base;
+    const {base} = network;
 
     // Get URL for ad creative
     let url = el.getAttribute('src') || network.src;

@@ -177,7 +177,7 @@ export class AmpForm {
 
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
-      const name = inputs[i].name;
+      const {name} = inputs[i];
       user().assert(name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
           'Illegal input name, %s found: %s', name, inputs[i]);
     }
@@ -930,7 +930,7 @@ export class AmpFormService {
     // Dispatch a test-only event for integration tests.
     if (getMode().test) {
       this.whenInitialized_.then(() => {
-        const win = ampdoc.win;
+        const {win} = ampdoc;
         const event = createCustomEvent(
             win, FormEvents.SERVICE_INIT, null, {bubbles: true});
         win.dispatchEvent(event);

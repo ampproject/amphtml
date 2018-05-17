@@ -106,7 +106,7 @@ export class FixedLayer {
     const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
       const stylesheet = stylesheets[i];
-      const ownerNode = stylesheet.ownerNode;
+      const {ownerNode} = stylesheet;
       if (stylesheet.disabled ||
               !ownerNode ||
               ownerNode.tagName != 'STYLE' ||
@@ -194,7 +194,7 @@ export class FixedLayer {
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     if (!element./*OK*/offsetParent &&
         computedStyle(win, element).display === 'none') {
       dev().error(TAG, 'Tried to add display:none element to FixedLayer',
@@ -273,7 +273,7 @@ export class FixedLayer {
       measure: state => {
         const elements = this.elements_;
         const autoTops = [];
-        const win = this.ampdoc.win;
+        const {win} = this.ampdoc;
 
         // Notice that this code intentionally breaks vsync contract.
         // Unfortunately, there's no way to reliably test whether or not
@@ -582,8 +582,7 @@ export class FixedLayer {
    * @private
    */
   mutateElement_(fe, index, state) {
-    const element = fe.element;
-    const oldFixed = fe.fixedNow;
+    const {element, fixedNow: oldFixed} = fe;
 
     fe.fixedNow = state.fixed;
     fe.stickyNow = state.sticky;
@@ -629,7 +628,7 @@ export class FixedLayer {
    * @private
    */
   transferToTransferLayer_(fe, index, state) {
-    const element = fe.element;
+    const {element} = fe;
     if (element.parentElement == this.transferLayer_) {
       return;
     }

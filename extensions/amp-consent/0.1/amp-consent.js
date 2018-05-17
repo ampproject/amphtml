@@ -180,7 +180,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
     this.registerAction('prompt', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       let consentId = args && args['consent'];
       if (!this.isMultiSupported_) {
         consentId = Object.keys(this.consentConfig_)[0];
@@ -538,7 +538,7 @@ export class AmpConsent extends AMP.BaseElement {
    * Handles the display of postPromptUI
    */
   handlePostPromptUI_() {
-    const classList = this.element.classList;
+    const {classList} = this.element;
     this.notificationUiManager_.onQueueEmpty(() => {
       if (!this.postPromptUI_) {
         return;

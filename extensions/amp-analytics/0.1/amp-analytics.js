@@ -541,7 +541,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     let inlineConfig = {};
     const TAG = this.getName_();
     try {
-      const children = this.element.children;
+      const {children} = this.element;
       if (children.length == 1) {
         const child = children[0];
         if (isJsonScriptTag(child)) {

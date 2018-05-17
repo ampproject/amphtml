@@ -300,8 +300,7 @@ export class AccessServerJwtAdapter {
   authorizeOnServer_() {
     dev().fine(TAG, 'Proceed via server protocol');
     return this.fetchJwt_().then(resp => {
-      const encoded = resp.encoded;
-      const jwt = resp.jwt;
+      const {encoded, jwt} = resp;
       const accessData = jwt['amp_authdata'];
       const request = serializeQueryString(dict({
         'url': removeFragment(this.ampdoc.win.location.href),

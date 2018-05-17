@@ -139,9 +139,9 @@ describe('Batching Plugins', () => {
 
       it('run custom test', () => {
         for (let i = 0; i < input.length; i++) {
-          const baseUrl = input[i].baseUrl;
+          const {baseUrl} = input[i];
           expect(baseUrl).to.be.ok;
-          const batchSegments = input[i].batchSegments;
+          const {batchSegments} = input[i];
           expect(batchSegments).to.be.ok;
           expect(isArray(batchSegments)).to.be.true;
           const url = output[i];

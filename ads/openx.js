@@ -18,7 +18,7 @@ import {doubleclick} from '../ads/google/doubleclick';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 import {startsWith} from '../src/string';
 
-const hasOwnProperty = Object.prototype.hasOwnProperty;
+const {hasOwnProperty} = Object.prototype;
 
 /**
  * Sort of like Object.assign.

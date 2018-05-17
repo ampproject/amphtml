@@ -22,7 +22,7 @@ import {startsWith} from '../src/string.js';
 
 const NX_URL_HOST = 'https://call.adadapter.netzathleten-media.de';
 const NX_URL_PATHPREFIX = '/pb/';
-const NX_URL_FULL = NX_URL_HOST + NX_URL_PATHPREFIX ;
+const NX_URL_FULL = NX_URL_HOST + NX_URL_PATHPREFIX;
 const DEFAULT_NX_KEY = 'default';
 const DEFAULT_NX_UNIT = 'default';
 const DEFAULT_NX_WIDTH = 'fluid';

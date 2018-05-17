@@ -143,7 +143,7 @@ export function getIframe(
  * visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {
-  const dataset = element.dataset;
+  const {dataset} = element;
   for (const name in dataset) {
     // data-vars- is reserved for amp-analytics
     // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
@@ -197,7 +197,7 @@ export function preloadBootstrap(
 export function getBootstrapBaseUrl(
   parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
   // The value is cached in a global variable called `bootstrapBaseUrl`;
-  const bootstrapBaseUrl = parentWindow.bootstrapBaseUrl;
+  const {bootstrapBaseUrl} = parentWindow;
   if (bootstrapBaseUrl) {
     return bootstrapBaseUrl;
   }

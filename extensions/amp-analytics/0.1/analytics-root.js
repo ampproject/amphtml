@@ -278,7 +278,7 @@ export class AnalyticsRoot {
       const rootElement = this.getRootElement();
       const isSelectAny = (selector == '*');
       const isSelectRoot = (selector == ':root');
-      let target = event.target;
+      let {target} = event;
       while (target) {
 
         // Target must be contained by this root.

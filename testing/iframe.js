@@ -146,7 +146,7 @@ export function createFixtureIframe(
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
-      const setTimeout = win.setTimeout;
+      const {setTimeout} = win;
       win.setTimeout = function(fn, ms) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
@@ -471,7 +471,7 @@ export function expectBodyToBecomeVisible(win, opt_timeout) {
  * @param {!Window} win
  */
 export function doNotLoadExternalResourcesInTest(win) {
-  const createElement = win.document.createElement;
+  const {createElement} = win.document;
   win.document.createElement = function(tagName) {
     const element = createElement.apply(this, arguments);
     tagName = tagName.toLowerCase();

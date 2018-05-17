@@ -25,7 +25,7 @@ app.use('/compose-doc', function(req, res) {
   const frameHtml = process.env.SERVE_MODE == 'compiled'
     ? 'dist.3p/current-min/frame.html'
     : 'dist.3p/current/frame.max.html';
-  const extensions = req.query.extensions;
+  const {extensions} = req.query;
   let extensionScripts = '';
   if (!!extensions) {
     extensionScripts = extensions.split(',').map(function(extension) {
@@ -35,7 +35,7 @@ app.use('/compose-doc', function(req, res) {
     }).join('\n');
   }
 
-  const experiments = req.query.experiments;
+  const {experiments} = req.query;
   let metaTag = '';
   let experimentString = '';
   if (experiments) {

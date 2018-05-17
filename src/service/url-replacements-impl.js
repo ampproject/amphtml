@@ -412,7 +412,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('VIEWPORT_WIDTH', viewportMethod(viewport, 'getWidth'));
 
 
-    const screen = this.ampdoc.win.screen;
+    const {screen} = this.ampdoc.win;
     // Returns screen.width.
     this.set('SCREEN_WIDTH', screenProperty(screen, 'width'));
 

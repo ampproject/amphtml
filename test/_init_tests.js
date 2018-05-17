@@ -256,12 +256,12 @@ it.configure = function() {
 
 // Used to check if an unrestored sandbox exists
 const sandboxes = [];
-const create = sinon.sandbox.create;
+const {create} = sinon.sandbox;
 sinon.sandbox.create = function(config) {
   const sandbox = create.call(sinon.sandbox, config);
   sandboxes.push(sandbox);
 
-  const restore = sandbox.restore;
+  const {restore} = sandbox;
   sandbox.restore = function() {
     const i = sandboxes.indexOf(sandbox);
     if (i > -1) {

@@ -46,11 +46,11 @@ export function adplugg(global,data) {
 
   // Get a handle on the AdPlugg SDK.
   global.AdPlugg = (global.AdPlugg || []);
-  const AdPlugg = global.AdPlugg;
+  const {AdPlugg} = global;
 
   // Register event listeners (via async wrapper).
   AdPlugg.push(function() {
-    const AdPlugg = global.AdPlugg;
+    const {AdPlugg} = global;
     // Register the renderStart event listener.
     AdPlugg.on(
         adTag,

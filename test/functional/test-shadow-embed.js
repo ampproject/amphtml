@@ -179,7 +179,7 @@ describes.sandboxed('shadow-embed', {}, () => {
               shadowStyle.textContent = '.x {background: green}';
               shadowRoot.appendChild(shadowStyle);
 
-              const styleSheets = shadowRoot.styleSheets;
+              const {styleSheets} = shadowRoot;
               expect(styleSheets).to.exist;
               expect(styleSheets).to.have.length(1);
               expect(styleSheets[0].ownerNode).to.equal(shadowStyle);

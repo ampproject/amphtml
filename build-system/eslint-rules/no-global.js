@@ -24,7 +24,7 @@ GLOBALS.document = 'Reference it as `self.document` or similar instead.';
 module.exports = function(context) {
   return {
     Identifier: function(node) {
-      const name = node.name;
+      const {name} = node;
       if (!(name in GLOBALS)) {
         return;
       }

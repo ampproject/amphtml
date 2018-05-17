@@ -112,7 +112,7 @@ describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
       const canvas = iframe.contentWindow.document.querySelector('#c');
       expect(pubads.get('page_url')).to.equal(
           'https://www.example.com/doubleclick.html');
-      const slot = canvas.slot;
+      const {slot} = canvas;
       expect(slot).to.not.be.null;
       expect(slot.getCategoryExclusions()).to.jsonEqual(['health']);
       expect(slot.getTargeting('amptest')).to.jsonEqual(['true']);

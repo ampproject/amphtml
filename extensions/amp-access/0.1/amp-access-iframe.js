@@ -211,7 +211,7 @@ export class AccessIframeAdapter {
    * @private
    */
   restore_() {
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     const storage = win.sessionStorage || win.localStorage;
     if (!storage) {
       return null;
@@ -245,7 +245,7 @@ export class AccessIframeAdapter {
    * @private
    */
   store_(data) {
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     const storage = win.sessionStorage || win.localStorage;
     if (!storage) {
       return;

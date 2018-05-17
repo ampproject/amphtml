@@ -60,7 +60,7 @@ export class GoogleCidApi {
      */
     this.cidPromise_ = {};
 
-    const canonicalUrl = Services.documentInfoForDoc(ampdoc).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
 
     /** @private {?string} */
     this.canonicalOrigin_ = canonicalUrl ? parseUrl(canonicalUrl).origin : null;

@@ -312,7 +312,7 @@ describe('preconnect', () => {
         expect(preloads).to.have.length(2);
         expect(preloads[0].href).to.equal('https://a.prefetch.com/foo/bar');
         expect(preloads[1].href).to.equal('https://a.prefetch.com/other');
-        const as = preloads[0].as;
+        const {as} = preloads[0];
         expect(as == '' || as == 'fetch').to.be.ok;
         preloads[0].as = 'not-valid';
         if (preloads[0].as != 'not-valid') {

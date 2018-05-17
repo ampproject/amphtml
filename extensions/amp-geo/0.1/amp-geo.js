@@ -93,7 +93,7 @@ export class AmpGeo extends AMP.BaseElement {
   buildCallback() {
     // All geo config within the amp-geo component.
     // The validator only allows one amp-geo per page
-    const children = this.element.children;
+    const {children} = this.element;
 
     if (children.length) {
       user().assert(children.length === 1 &&
@@ -101,7 +101,7 @@ export class AmpGeo extends AMP.BaseElement {
       `${TAG} can only have one <script type="application/json"> child`);
     }
 
-    /** @private @const {!Promise<!Object<string, (string|Array<string>)>>} */
+    /** @type {!Promise<!Object<string, (string|Array<string>)>>} */
     const geo = this.addToBody_(
         children.length ?
           parseJson(children[0].textContent) : {});
@@ -121,7 +121,6 @@ export class AmpGeo extends AMP.BaseElement {
 
     if (preRenderMatch && !isProxyOrigin(doc.location)) {
       this.mode_ = mode.GEO_PRERENDER;
-      /** @private {string} */
       this.country_ = preRenderMatch[1];
     } else {
       this.mode_ = mode.GEO_HOT_PATCH;
@@ -141,7 +140,7 @@ export class AmpGeo extends AMP.BaseElement {
       (isCanary(this.win) || getMode(this.win).localDev) &&
       /^\w+$/.test(getMode(this.win).geoOverride)) {
       this.mode_ = mode.GEO_OVERRIDE;
-      this.country_ = getMode(this.win).geoOverride ;
+      this.country_ = getMode(this.win).geoOverride;
     }
   }
   /**
@@ -149,10 +148,9 @@ export class AmpGeo extends AMP.BaseElement {
    * @param {Object} config
    */
   matchCountryGroups_(config) {
-    /* ISOCountryGroups are optional but if specified at least one must exist
-    */
-    /** @private @const {!Object<string, Array<string>>} */
-    const ISOCountryGroups = config.ISOCountryGroups;
+    // ISOCountryGroups are optional but if specified at least one must exist
+    const ISOCountryGroups = /** @type {!Object<string, Array<string>>} */(
+      config.ISOCountryGroups);
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       user().assert(
@@ -200,7 +198,7 @@ export class AmpGeo extends AMP.BaseElement {
    */
   addToBody_(config) {
     const doc = this.win.document;
-    /** @private {Object} */
+    /** @type {Object} */
     const states = {};
     const self = this;
 

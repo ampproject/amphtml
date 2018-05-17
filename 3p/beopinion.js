@@ -33,7 +33,7 @@ function getBeOpinion(global) {
  * @description Make canonicalUrl available from iframe
  */
 function addCanonicalLinkTag(global) {
-  const canonicalUrl = global.context.canonicalUrl;
+  const {canonicalUrl} = global.context;
   if (canonicalUrl) {
     const link = global.document.createElement('link');
     link.setAttribute('rel', 'canonical');
@@ -82,7 +82,7 @@ function createContainer(global, data) {
 }
 
 function getBeOpinionAsyncInit(global, accountId) {
-  const context = global.context;
+  const {context} = global;
   return function() {
     global.BeOpinionSDK.init({
       account: accountId,

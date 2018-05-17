@@ -62,7 +62,7 @@ export const PROFILING_BRANCHES = {
  * @visibleForTesting
  */
 export function getLifecycleReporter(ampElement, slotId) {
-  const win = ampElement.win;
+  const {win} = ampElement;
   randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
   if (isReportingEnabled(ampElement) &&
       (!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
@@ -132,7 +132,7 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
 }
 
 function setupPageLoadMetricsReporter_(ampElement) {
-  const win = ampElement.win;
+  const {win} = ampElement;
   const correlator = getCorrelator(win);
   win.ampAnalyticsPageLoadMetricsConfig =
       win.ampAnalyticsPageLoadMetricsConfig ||

@@ -491,8 +491,7 @@ export class UserNotificationManager {
     }
 
     const deferred = new Deferred();
-    const promise = deferred.promise;
-    const resolve = deferred.resolve;
+    const {promise, resolve} = deferred;
 
     return this.deferRegistry_[id] = {promise, resolve};
   }

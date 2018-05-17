@@ -20,9 +20,7 @@ const babelify = require('babelify');
 const BBPromise = require('bluebird');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
 const depCheckConfig = require('../dep-check-config');
-const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
@@ -30,6 +28,7 @@ const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 
 
 const root = process.cwd();
@@ -223,7 +222,7 @@ function flattenGraph(entryPoints) {
   // Now make the graph have unique entries
   return flatten(entryPoints)
       .reduce((acc, cur) => {
-        const name = cur.name;
+        const {name} = cur;
         if (!acc[name]) {
           acc[name] = Object.keys(cur.deps)
               // Get rid of the absolute path for minimatch'ing

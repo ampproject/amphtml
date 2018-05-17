@@ -98,8 +98,7 @@ export class LoginDoneDialog {
    */
   buildStyles_() {
     const query = parseQueryString(this.win.location.search);
-    const doc = this.win.document;
-    const nav = this.win.navigator;
+    const {document: doc, navigator: nav} = this.win;
     const langSet = [query['hl'], nav.language, nav.userLanguage, 'en-US'];
     for (let i = 0; i < langSet.length; i++) {
       const lang = langSet[i];
@@ -150,7 +149,7 @@ export class LoginDoneDialog {
     const response = this.win.location.hash;
     let unlisten = () => {};
     return new Promise((resolve, reject) => {
-      const opener = this.win.opener;
+      const {opener} = this.win;
       if (!opener) {
         reject(new Error('Opener not available'));
         return;
