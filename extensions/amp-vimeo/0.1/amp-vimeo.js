@@ -163,8 +163,8 @@ class AmpVimeo extends AMP.BaseElement {
     let src = `https://player.vimeo.com/video/${encodeURIComponent(vidId)}`;
 
     if (isAutoplay) {
-      this.muted_ = true;
       // Only muted videos are allowed to autoplay
+      this.muted_ = true;
       src = addParamToUrl(src, 'muted', '1');
     }
 
