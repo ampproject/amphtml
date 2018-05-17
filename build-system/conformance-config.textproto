@@ -228,6 +228,26 @@ requirement: {
 }
 
 requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Cannot use document referrer'
+  value: 'Document.prototype.referrer'
+  whitelist: '3p/frame-metadata.js'
+  whitelist: '3p/integration.js'
+  whitelist: 'ads/bringhub.js'
+  whitelist: 'ads/medianet.js'
+  whitelist: 'ads/meg.js'
+  whitelist: 'ads/outbrain.js'
+  whitelist: 'ads/taboola.js'
+  whitelist: 'ads/csa.js'
+  whitelist: 'ads/engageya.js'
+  whitelist: 'ads/dable.js'
+  whitelist: 'ads/google/csa.js'
+  whitelist: 'ads/gumgum.js'
+
+}
+
+
+requirement: {
   type: RESTRICTED_METHOD_CALL
   error_message: 'postMessage must be called with a string or a JsonObject'
   value: 'Window.prototype.postMessage:function((string|?JsonObject), string, (Array|Transferable)=)'

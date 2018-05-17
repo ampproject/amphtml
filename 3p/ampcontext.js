@@ -297,7 +297,7 @@ export class AbstractAmpContext {
     this.location = parseUrl(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
-    this.referrer = context.referrer;
+    //this.referrer = context.referrer;
     this.sentinel = context.sentinel;
     this.sourceUrl = context.sourceUrl;
     this.startTime = context.startTime;
