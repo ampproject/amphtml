@@ -127,7 +127,8 @@
   .i-amphtml-story-bookend-article,
   .i-amphtml-story-bookend-cta-link-wrapper,
   .i-amphtml-story-bookend-landscape,
-  .i-amphtml-story-bookend-portrait {
+  .i-amphtml-story-bookend-portrait,
+  .i-amphtml-story-bookend-textbox {
     max-width: 50% !important;
   }
 }
@@ -136,12 +137,14 @@
   .i-amphtml-story-bookend-article,
   .i-amphtml-story-bookend-cta-link-wrapper,
   .i-amphtml-story-bookend-landscape,
-  .i-amphtml-story-bookend-portrait {
+  .i-amphtml-story-bookend-portrait,
+  .i-amphtml-story-bookend-textbox {
     max-width: 33% !important;
   }
 }
 
-.i-amphtml-story-bookend-article-heading {
+.i-amphtml-story-bookend-article-heading,
+.i-amphtml-story-bookend-text {
   font-weight: 400 !important;
   font-size: 16px !important;
   overflow: hidden !important;
@@ -149,6 +152,10 @@
   line-height: 1.45em !important;
   max-height: 4.35em !important;
   margin: 0 0 8px !important;
+}
+
+.i-amphtml-story-bookend-text {
+  font-size: 14px !important;
 }
 
 .i-amphtml-story-bookend-component-category {
@@ -277,7 +284,8 @@
   margin-right: 32px !important;
 }
 
-.i-amphtml-story-bookend-cta-link-wrapper {
+.i-amphtml-story-bookend-cta-link-wrapper,
+.i-amphtml-story-bookend-textbox {
   display: flex !important;
   flex-wrap: wrap !important;
   box-sizing: border-box !important;
@@ -287,6 +295,10 @@
   justify-content: space-between !important;
   margin: 24px 0 !important;
   padding: 0 32px !important;
+}
+
+.i-amphtml-story-bookend-textbox {
+  flex-direction: column;
 }
 
 .i-amphtml-story-bookend-cta-link {
@@ -379,7 +391,8 @@
   [desktop] .i-amphtml-story-bookend-article,
   [desktop] .i-amphtml-story-bookend-cta-link-wrapper,
   [desktop] .i-amphtml-story-bookend-landscape,
-  [desktop] .i-amphtml-story-bookend-portrait {
+  [desktop] .i-amphtml-story-bookend-portrait,
+  [desktop] .i-amphtml-story-bookend-textbox  {
     max-width: 50% !important;
   }
 }
@@ -388,7 +401,8 @@
   [desktop] .i-amphtml-story-bookend-article,
   [desktop] .i-amphtml-story-bookend-cta-link-wrapper,
   [desktop] .i-amphtml-story-bookend-landscape,
-  [desktop] .i-amphtml-story-bookend-portrait {
+  [desktop] .i-amphtml-story-bookend-portrait,
+  [desktop] .i-amphtml-story-bookend-textbox {
     max-width: 33% !important;
   }
 }
