@@ -17,7 +17,6 @@
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
 import {loadScript} from './3p';
-import {parseUrl} from '../src/url';
 import {setStyles} from '../src/style';
 
 /**
@@ -106,18 +105,15 @@ export function cleanupTweetId_(tweetid) {
   // Handle malformed ids such as
   // https://twitter.com/abc123/status/585110598171631616
   tweetid = tweetid.toLowerCase();
-  if (tweetid.indexOf('https://twitter.com/') >= 0) {
-    const url = parseUrl(tweetid);
-    // pathname = /abc123/status/585110598171631616
-    const paths = url.pathname.split('/');
-    if (paths[2] == 'status' && paths[3]) {
-      return paths[3];
-    }
+  let match = tweetid.match(/https:\/\/twitter.com\/[^\/]+\/status\/(\d+)/);
+  if (match) {
+    return match[1];
   }
+
   // 2)
   // Handle malformed ids such as
   // 585110598171631616?ref_src
-  const match = tweetid.match(/^(\d+)\?ref.*/);
+  match = tweetid.match(/^(\d+)\?ref.*/);
   if (match) {
     return match[1];
   }
