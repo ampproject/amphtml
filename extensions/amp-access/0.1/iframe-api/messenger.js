@@ -153,8 +153,8 @@ export class Messenger {
   sendCommandRsvp(cmd, opt_payload) {
     const rsvpId = String(++this.requestId_);
     const deferred = new Deferred();
-    const promise = deferred.promise;
-    const resolver = deferred.resolve;
+    const {promise, resolve: resolver} = deferred;
+
 
     this.waiting_[rsvpId] = {
       promise,
@@ -191,7 +191,7 @@ export class Messenger {
    */
   handleEvent_(e) {
     const event = /** @type {!MessageEvent} */ (e);
-    const data = event.data;
+    const {data} = event;
     if (!data || data['sentinel'] != SENTINEL) {
       return;
     }

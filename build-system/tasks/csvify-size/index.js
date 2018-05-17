@@ -138,7 +138,7 @@ function mergeTables(dateTimes, tables) {
   // Aggregate all fields with same file name into an array
   tables.forEach(table => {
     table.forEach(field => {
-      const name = field.name;
+      const {name} = field;
       if (!obj[name]) {
         obj[name] = [];
       }

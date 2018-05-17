@@ -34,7 +34,7 @@ export class ViewerCidApi {
     /** @private {?Object<string, string>} */
     this.apiKeyMap_ = null;
 
-    const canonicalUrl = Services.documentInfoForDoc(this.ampdoc_).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
 
     /** @private {?string} */
     this.canonicalOrigin_ = canonicalUrl ? parseUrl(canonicalUrl).origin : null;

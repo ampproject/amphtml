@@ -921,7 +921,7 @@ export class VideoEventTracker extends EventTracker {
     let intervalCounter = 0;
 
     return this.sessionObservable_.add(event => {
-      const type = event.type;
+      const {type} = event;
       const isVisibleType = (type === VideoAnalyticsEvents.SESSION_VISIBLE);
       const normalizedType =
           isVisibleType ? VideoAnalyticsEvents.SESSION : type;

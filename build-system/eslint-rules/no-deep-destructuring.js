@@ -13,15 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {validateSrcPrefix, writeScript} from '../3p/3p';
+'use strict';
 
 /**
- * @param {!Window} global
- * @param {!Object} data
+ * Disallows deep object destructuring, because it's complicated and confusing.
+ *
+ * Bad:
+ *   const { x: { y } } = obj.prop;
+ * Good:
+ *   const { y } = obj.prop.x;
  */
-export function ligatus(global, data) {
-  const {src} = data;
-  validateSrcPrefix('https://a-ssl.ligatus.com/', src);
-  writeScript(global, src);
-}
+module.exports = function(context) {
+  return {
+    ObjectPattern: function(node) {
+      if (node.parent.type !== 'Property') {
+        return;
+      }
+      context.report(node, 'No deep object destructuring allowed.');
+    },
+  };
+};

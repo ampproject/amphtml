@@ -200,7 +200,7 @@ export function urlWithVersion(url, version) {
  * @return {!Request}
  */
 function normalizedRequest(request, version) {
-  const url = request.url;
+  const {url} = request;
   const data = requestData(url);
   if (data && data.explicitRtv === version) {
     return request;
@@ -269,7 +269,7 @@ export function generateFallbackClientId(referrer) {
  * @visibleForTesting
  */
 export function fetchAndCache(cache, request) {
-  const url = request.url;
+  const {url} = request;
 
   // Batch fetches. Mainly for the /diversions endpoint.
   if (fetchPromises[url]) {
@@ -432,7 +432,7 @@ function purge(cache, version, pathname, diversions) {
 
     for (let i = 0; i < requests.length; i++) {
       const request = requests[i];
-      const url = request.url;
+      const {url} = request;
       const cachedData = requestData(url);
       if (!cachedData) {
         continue;
@@ -515,7 +515,7 @@ export function getCachedVersion(cache, requestVersion, requestPath) {
     // cached files. Given every file we've cached, determine what version
     // it is, and increment the number of files we have for that version.
     for (let i = 0; i < requests.length; i++) {
-      const url = requests[i].url;
+      const {url} = requests[i];
       const data = requestData(url);
       if (!data) {
         continue;
@@ -578,7 +578,7 @@ export function getCachedVersion(cache, requestVersion, requestPath) {
  * @visibleForTesting
  */
 export function handleFetch(request, maybeClientId) {
-  const url = request.url;
+  const {url} = request;
   // We only cache CDN JS files, and we need a clientId to do our magic.
   const data = requestData(url);
 

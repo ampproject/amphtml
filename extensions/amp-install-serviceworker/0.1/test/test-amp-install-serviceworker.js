@@ -215,7 +215,7 @@ describes.realWin('amp-install-serviceworker', {
       const iframeSrc = 'https://www.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
       let iframe;
-      const appendChild = install.appendChild;
+      const {appendChild} = install;
       install.appendChild = child => {
         iframe = child;
         iframe.complete = true; // Mark as loaded.

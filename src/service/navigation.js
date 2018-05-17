@@ -295,7 +295,7 @@ export class Navigation {
     /** @const {!Window} */
     const win = toWin(target.ownerDocument.defaultView);
     const url = target.href;
-    const protocol = location.protocol;
+    const {protocol} = location;
 
     // On Safari iOS, custom protocol links will fail to open apps when the
     // document is iframed - in order to go around this, we set the top.location

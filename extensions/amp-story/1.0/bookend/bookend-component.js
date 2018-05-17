@@ -111,7 +111,7 @@ export class BookendComponent {
   static buildTemplates(components, doc) {
     const fragment = doc.createDocumentFragment();
     components.forEach(component => {
-      const type = component.type;
+      const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
         fragment.appendChild(componentBuilderInstanceFor(type)
             .buildTemplate(component, doc));

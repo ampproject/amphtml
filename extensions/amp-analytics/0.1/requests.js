@@ -224,10 +224,12 @@ export class RequestHandler {
    * @private
    */
   fire_() {
-    const extraUrlParamsPromise = this.extraUrlParamsPromise_;
-    const baseUrlTemplatePromise = this.baseUrlTemplatePromise_;
-    const baseUrlPromise = this.baseUrlPromise_;
-    const batchSegmentsPromise = this.batchSegmentPromises_;
+    const {
+      extraUrlParamsPromise_: extraUrlParamsPromise,
+      baseUrlTemplatePromise_: baseUrlTemplatePromise,
+      baseUrlPromise_: baseUrlPromise,
+      batchSegmentPromises_: batchSegmentsPromise,
+    } = this;
     const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 

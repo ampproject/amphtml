@@ -168,7 +168,7 @@ export class Input {
     }
 
     // Ignore inputs.
-    const target = e.target;
+    const {target} = e;
     if (target && (target.tagName == 'INPUT' ||
           target.tagName == 'TEXTAREA' ||
           target.tagName == 'SELECT' ||

@@ -317,7 +317,7 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     // choice.
     if (!win.experimentBranches[experimentName] &&
         isExperimentOn(win, experimentName)) {
-      const branches = experiments[experimentName].branches;
+      const {branches} = experiments[experimentName];
       win.experimentBranches[experimentName] = selectRandomItem(branches);
       selectedExperiments[experimentName] =
           win.experimentBranches[experimentName];

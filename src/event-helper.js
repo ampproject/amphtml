@@ -145,7 +145,7 @@ export function loadPromise(eleOrWindow) {
   const loadingPromise = new Promise((resolve, reject) => {
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    const tagName = eleOrWindow.tagName;
+    const {tagName} = eleOrWindow;
     if (tagName === 'AUDIO' || tagName === 'VIDEO') {
       unlistenLoad = listenOnce(eleOrWindow, 'loadstart', resolve);
     } else {

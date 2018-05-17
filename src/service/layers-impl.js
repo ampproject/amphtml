@@ -1039,7 +1039,7 @@ export class LayoutElement {
     }
 
     let accumulator = undefined;
-    const length = ANCESTRY_CACHE.length;
+    const {length} = ANCESTRY_CACHE;
     for (let i = 0; i < length; i++) {
       const layer = ANCESTRY_CACHE.pop();
       accumulator = iterator(accumulator, layer, i, state);

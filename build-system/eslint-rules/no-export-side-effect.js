@@ -19,7 +19,7 @@ module.exports = function(context) {
   return {
     ExportNamedDeclaration: function(node) {
       if (node.declaration) {
-        const declaration = node.declaration;
+        const {declaration} = node;
         if (declaration.type === 'VariableDeclaration') {
           declaration.declarations
               .map(function(declarator) {

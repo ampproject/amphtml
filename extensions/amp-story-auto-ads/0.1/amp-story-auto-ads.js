@@ -242,7 +242,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     user().assert(adAttributes, `<${TAG}>: Error reading config.` +
       'Top level JSON should have an "ad-attributes" key');
 
-    const type = adAttributes.type;
+    const {type} = adAttributes;
     user().assert(type, `<${TAG}>: Error reading config.` +
       'Missing ["ad-attribues"]["type"] key');
   }

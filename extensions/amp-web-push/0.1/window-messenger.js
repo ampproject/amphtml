@@ -320,7 +320,7 @@ export class WindowMessenger {
     if (this.messages_[message['id']] && message['isReply']) {
       const existingMessage = this.messages_[message['id']];
       delete this.messages_[message['id']];
-      const promiseResolver = existingMessage.promiseResolver;
+      const {promiseResolver} = existingMessage;
       // Set new incoming message data on existing message
       existingMessage.message = message['data'];
       if (this.debug_) {

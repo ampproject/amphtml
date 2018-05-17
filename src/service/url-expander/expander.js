@@ -63,7 +63,7 @@ export class Expander {
   findMatches_(url, expression) {
     const matches = [];
     url.replace(expression, (match, name, startPosition) => {
-      const length = match.length;
+      const {length} = match;
       const stopPosition = length + startPosition - 1;
       const info = {
         start: startPosition,

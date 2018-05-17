@@ -372,7 +372,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @private
    */
   adKey_(format) {
-    const element = this.element;
+    const {element} = this;
     const slot = element.getAttribute('data-ad-slot') || '';
     const string = `${slot}:${format}:${domFingerprintPlain(element)}`;
     return stringHash32(string);

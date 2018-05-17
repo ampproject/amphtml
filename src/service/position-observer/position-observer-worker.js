@@ -79,7 +79,7 @@ export class PositionObserverWorker {
    * @private
    */
   trigger_(position) {
-    const prevPos = this.prevPosition_ ;
+    const prevPos = this.prevPosition_;
     if (prevPos
         && layoutRectEquals(prevPos.positionRect, position.positionRect)
         && layoutRectEquals(prevPos.viewportRect, position.viewportRect)) {

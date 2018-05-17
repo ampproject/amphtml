@@ -112,7 +112,7 @@ describe('integration test: a4a', () => {
       installDocService(fixture.win, /* isSingleDoc */ true);
       installCryptoService(fixture.win);
       upgradeOrRegisterElement(fixture.win, 'amp-a4a', MockA4AImpl);
-      const doc = fixture.doc;
+      const {doc} = fixture;
       a4aElement = doc.createElement('amp-a4a');
       a4aElement.setAttribute('width', 200);
       a4aElement.setAttribute('height', 50);

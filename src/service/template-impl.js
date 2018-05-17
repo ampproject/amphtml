@@ -291,8 +291,7 @@ export class Templates {
     }
 
     const deferred = new Deferred();
-    const promise = deferred.promise;
-    const resolve = deferred.resolve;
+    const {promise, resolve} = deferred;
 
     this.templateClassMap_[type] = promise;
     this.templateClassResolvers_[type] = resolve;

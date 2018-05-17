@@ -114,7 +114,7 @@ describe('amp-a4a', () => {
           headers: {'Content-Type': 'application/jwk-set+json'},
         });
     installDocService(fixture.win, /* isSingleDoc */ true);
-    const doc = fixture.doc;
+    const {doc} = fixture;
     // TODO(a4a-cam@): This is necessary in the short term, until A4A is
     // smarter about host document styling.  The issue is that it needs to
     // inherit the AMP runtime style element in order for shadow DOM-enclosed
@@ -568,7 +568,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         a4aElement = createA4aElement(doc);
         a4a = new MockA4AImpl(a4aElement);
         a4a.releaseType_ = '0';
@@ -860,7 +860,7 @@ describe('amp-a4a', () => {
       fetchMock.getOnce(
           TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
           {name: 'ad'});
-      const doc = fixture.doc;
+      const {doc} = fixture;
       a4aElement = createA4aElement(doc);
       a4a = new MockA4AImpl(a4aElement);
     }));
@@ -910,7 +910,7 @@ describe('amp-a4a', () => {
       fetchMock.getOnce(
           TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
           {name: 'ad'});
-      const doc = fixture.doc;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       a4aElement.setAttribute('width', 480);
       a4aElement.setAttribute('height', 75);
@@ -939,7 +939,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const s = doc.createElement('style');
         s.textContent = '.fixed {position:fixed;}';
@@ -970,7 +970,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const s = doc.createElement('style');
         s.textContent = '.fixed {position:fixed;}';
@@ -1000,7 +1000,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const s = doc.createElement('style');
         s.textContent = '.fixed {position:fixed;}';
@@ -1029,7 +1029,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.releaseType_ = '0';
@@ -1116,7 +1116,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         sandbox.stub(a4a, 'getAmpAdMetadata').callsFake(creative => {
@@ -1143,7 +1143,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const s = doc.createElement('style');
         s.textContent = '.fixed {position:fixed;}';
@@ -1160,7 +1160,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const rect = layoutRectLtwh(0, 0, 200, 0);
         const a4aElement = createA4aElement(doc, rect);
         const a4a = new MockA4AImpl(a4aElement);
@@ -1185,7 +1185,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -1254,7 +1254,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
             Promise.reject(networkFailure()), {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -1284,7 +1284,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
             Promise.reject(networkFailure()), {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -1317,7 +1317,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
             Promise.reject(networkFailure()), {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.promiseErrorHandler_ = () => {};
@@ -1342,7 +1342,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
             Promise.reject(networkFailure()), {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
@@ -1367,7 +1367,7 @@ describe('amp-a4a', () => {
               rejectXhr = reject;
             }),
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
@@ -1419,7 +1419,7 @@ describe('amp-a4a', () => {
               TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
               adResponse,
               {name: 'ad'});
-          const doc = fixture.doc;
+          const {doc} = fixture;
           const a4aElement = createA4aElement(doc);
           const a4a = new MockA4AImpl(a4aElement);
           a4a.buildCallback();
@@ -1473,7 +1473,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
             () => adResponse, {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
@@ -1500,7 +1500,7 @@ describe('amp-a4a', () => {
           fetchMock.getOnce(
               TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
               () => adResponse, {name: 'ad'});
-          const doc = fixture.doc;
+          const {doc} = fixture;
           const a4aElement = createA4aElement(doc);
           a4a = new MockA4AImpl(a4aElement);
           getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -1556,7 +1556,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
@@ -1577,7 +1577,7 @@ describe('amp-a4a', () => {
     it('validate', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         //a4a.config = {};
@@ -1790,7 +1790,7 @@ describe('amp-a4a', () => {
     beforeEach(() => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         a4aElement = createA4aElement(doc);
         a4a = new AmpA4A(a4aElement);
         sandbox.stub(a4a, 'getFallback').callsFake(() => {return true;});
@@ -1855,7 +1855,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
@@ -1872,7 +1872,7 @@ describe('amp-a4a', () => {
         fetchMock.getOnce(
             TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
             {name: 'ad'});
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
@@ -1897,7 +1897,7 @@ describe('amp-a4a', () => {
         viewerWhenVisibleMock.returns(new Promise(resolve => {
           whenFirstVisibleResolve = resolve;
         }));
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -2038,7 +2038,7 @@ describe('amp-a4a', () => {
       devExpectedErrorStub = sandbox.stub(dev(), 'expectedError');
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         a4aElement = createA4aElement(doc);
         a4a = new MockA4AImpl(a4aElement);
         a4a.adUrl_ = 'https://acme.org?query';
@@ -2303,7 +2303,7 @@ describe('amp-a4a', () => {
     it('shouldPreferentialRenderWithoutCrypto returns false by default', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new AmpA4A(a4aElement);
         expect(a4a.shouldPreferentialRenderWithoutCrypto()).to.be.false;

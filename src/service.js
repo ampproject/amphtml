@@ -466,8 +466,7 @@ function getServicePromiseInternal(holder, id) {
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
   const deferred = new Deferred();
-  const promise = deferred.promise;
-  const resolve = deferred.resolve;
+  const {promise, resolve} = deferred;
 
   const services = getServices(holder);
   services[id] = {
@@ -510,7 +509,7 @@ function getServicePromiseOrNullInternal(holder, id) {
  * @return {!Object<string,!ServiceHolderDef>}
  */
 function getServices(holder) {
-  let services = holder.services;
+  let {services} = holder;
   if (!services) {
     services = holder.services = {};
   }

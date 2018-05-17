@@ -50,7 +50,7 @@ export function setMediaSession(win,
   metadata,
   playHandler,
   pauseHandler) {
-  const navigator = win.navigator;
+  const {navigator} = win;
   if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two
     // videos)

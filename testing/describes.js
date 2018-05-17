@@ -424,7 +424,7 @@ class SandboxFixture {
   /** @override */
   setup(env) {
     // Sandbox.
-    let sandbox = global.sandbox;
+    let {sandbox} = global;
     if (!sandbox) {
       sandbox = global.sandbox = sinon.sandbox.create();
       this.sandboxOwner_ = true;
@@ -547,7 +547,7 @@ class RealWinFixture {
 
   /** @override */
   setup(env) {
-    const spec = this.spec;
+    const {spec} = this;
     return new Promise((resolve, reject) => {
       const iframe = document.createElement('iframe');
       env.iframe = iframe;
@@ -640,7 +640,7 @@ class AmpFixture {
   /** @override */
   setup(env) {
     const spec = this.spec.amp;
-    const win = env.win;
+    const {win} = env;
     let completePromise;
 
     // Configure mode.
@@ -777,7 +777,7 @@ class AmpFixture {
       const importDoc = win.document.implementation.createHTMLDocument('');
       const ret = win.AMP.attachShadowDoc(
           hostElement, importDoc, win.location.href);
-      const ampdoc = ret.ampdoc;
+      const {ampdoc} = ret;
       env.ampdoc = ampdoc;
       const promise = Promise.all([
         env.extensions.installExtensionsInDoc(ampdoc, extensionIds),
@@ -792,7 +792,7 @@ class AmpFixture {
 
   /** @override */
   teardown(env) {
-    const win = env.win;
+    const {win} = env;
     if (env.embed) {
       env.embed.destroy();
     }

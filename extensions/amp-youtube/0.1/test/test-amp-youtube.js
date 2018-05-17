@@ -132,7 +132,7 @@ describes.realWin('amp-youtube', {
         'data-videoid': datasource,
         'data-param-playsinline': '0',
       }).then(yt => {
-        const src = yt.querySelector('iframe').src;
+        const {src} = yt.querySelector('iframe');
         const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'url');
         yt.implementation_.preconnectCallback();
         preloadSpy.should.have.been.calledWithExactly(src);

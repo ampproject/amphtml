@@ -706,8 +706,7 @@ const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
  */
 export function isAdLike(element) {
   const box = element.getLayoutBox();
-  const height = box.height;
-  const width = box.width;
+  const {height, width} = box;
   for (let i = 0; i < adSizes.length; i++) {
     const refWidth = adSizes[i][0];
     const refHeight = adSizes[i][1];

@@ -31,7 +31,7 @@ function detectLongTasks(win) {
         continue;
       }
 
-      const duration = entries[i].duration;
+      const {duration} = entries[i];
       let culprit = attr.containerSrc;
       if (attr.containerName) {
         const match = attr.containerName.match(/"type":"([^\"]*)"/);

@@ -72,8 +72,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   }
 
   function setupElementFunctions(div) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const {innerWidth: width, innerHeight: height} = window;
     div.getIntersectionChangeEntry = function() {
       return {
         time: 1234567888,
@@ -160,8 +159,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     div.setAttribute('width', '50');
     div.setAttribute('height', '100');
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const {innerWidth: width, innerHeight: height} = window;
     setupElementFunctions(div);
 
     const viewer = Services.viewerForDoc(window.document);
@@ -176,7 +174,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
         () => 'MY-MOCK-FINGERPRINT');
 
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
-    const src = iframe.src;
+    const {src} = iframe;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
     const docInfo = Services.documentInfoForDoc(window.document);

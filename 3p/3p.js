@@ -185,7 +185,7 @@ export function validateSrcContains(string, src) {
  *     done. The first argument is the result.
  */
 export function computeInMasterFrame(global, taskId, work, cb) {
-  const master = global.context.master;
+  const {master} = global.context;
   let tasks = master.__ampMasterTasks;
   if (!tasks) {
     tasks = master.__ampMasterTasks = {};

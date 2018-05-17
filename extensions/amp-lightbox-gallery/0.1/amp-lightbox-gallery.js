@@ -1007,7 +1007,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   // TODO (cathyxz): make this generalizable to more than just images
   enter_() {
-    const sourceElement = this.getCurrentElement_().sourceElement;
+    const {sourceElement} = this.getCurrentElement_();
     if (!this.elementTypeCanBeAnimated_(sourceElement)) {
       return this.fade_(0, 1);
     }
@@ -1033,7 +1033,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   transitionOut_() {
     const currentElementMetadata = this.getCurrentElement_();
-    const sourceElement = currentElementMetadata.sourceElement;
+    const {sourceElement} = currentElementMetadata;
     let duration = MIN_TRANSITION_DURATION;
     const anim = new Animation(this.element);
     const transLayer = this.element.ownerDocument.createElement('div');

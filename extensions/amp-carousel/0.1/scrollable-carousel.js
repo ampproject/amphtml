@@ -81,7 +81,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
         'scroll', this.scrollHandler_.bind(this));
 
     this.registerAction('goToSlide', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       if (args) {
         const index = parseInt(args['index'], 10);
         this.goToSlide_(index);

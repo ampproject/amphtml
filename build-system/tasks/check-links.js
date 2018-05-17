@@ -19,11 +19,11 @@ const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
+const {getStdout} = require('../exec');
 
 
 /**

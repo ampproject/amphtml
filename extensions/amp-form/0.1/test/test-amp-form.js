@@ -1629,7 +1629,7 @@ describes.repeated('', {
           expect(navigateTo).to.not.be.called;
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             expect(navigateTo).to.be.calledOnce;
-            const args = navigateTo.firstCall.args;
+            const {args} = navigateTo.firstCall;
             expect(args[1]).to.equal('https://google.com/');
             expect(args[2]).to.equal('AMP-Redirect-To');
           });
@@ -1695,7 +1695,7 @@ describes.repeated('', {
             expect(error).to.match(/Form submission failed/);
 
             expect(navigateTo).to.be.calledOnce;
-            const args = navigateTo.firstCall.args;
+            const {args} = navigateTo.firstCall;
             expect(args[1]).to.equal('https://example2.com/hello');
             expect(args[2]).to.equal('AMP-Redirect-To');
           });

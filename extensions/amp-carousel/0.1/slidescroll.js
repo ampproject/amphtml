@@ -198,7 +198,7 @@ export class AmpSlideScroll extends BaseSlides {
         'touchend', this.touchEndHandler_.bind(this));
 
     this.registerAction('goToSlide', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
@@ -524,7 +524,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   showSlide_(newIndex) {
-    const noOfSlides_ = this.noOfSlides_;
+    const {noOfSlides_} = this;
     newIndex = dev().assertNumber(newIndex);
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
@@ -627,7 +627,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   hideRestOfTheSlides_(indexArr) {
-    const noOfSlides_ = this.noOfSlides_;
+    const {noOfSlides_} = this;
     for (let i = 0; i < noOfSlides_; i++) {
       if (!this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
         continue;

@@ -24,8 +24,7 @@ const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 
-const red = colors.red;
-const cyan = colors.cyan;
+const {red, cyan} = colors;
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
