@@ -48,7 +48,7 @@ let a;
  * We cached all parsed URLs. As of now there are no use cases
  * of AMP docs that would ever parse an actual large number of URLs,
  * but we often parse the same one over and over again.
- * @type {Object<string, !Location>}
+ * @type {LRUCache}
  */
 let cache;
 
@@ -91,38 +91,32 @@ export function getWinOrigin(win) {
 export function parseUrlDeprecated(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = new LRUCache(100));
   }
 
-  const fromCache = cache.get(url);
-
-  if (fromCache) {
-    return fromCache;
-  }
-
-  const info = parseUrlWithA(a, url);
-
-  // Freeze during testing to avoid accidental mutation.
-  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-
-  if (opt_nocache) {
-    return frozen;
-  }
-
-  cache.put(url, frozen);
-
-  return frozen;
+  return parseUrlWithA(a, url, opt_nocache);
 }
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
+ * Consider the returned object immutable. This is enforced during
+ * testing by freezing the object.
  * @param {!HTMLAnchorElement} a
  * @param {string} url
+ * @param {boolean=} opt_nocache
  * @return {!Location}
  * @restricted
  */
-export function parseUrlWithA(a, url) {
+export function parseUrlWithA(a, url, opt_nocache) {
+  if (!cache) {
+    cache = self.UrlCache || (self.UrlCache = new LRUCache(100));
+  }
+
+  const fromCache = cache.get(url);
+  if (fromCache) {
+    return fromCache;
+  }
+
   a.href = url;
 
   // IE11 doesn't provide full URL components when parsing relative URLs.
@@ -166,7 +160,15 @@ export function parseUrlWithA(a, url) {
   } else {
     info.origin = info.protocol + '//' + info.host;
   }
-  return info;
+
+  // Freeze during testing to avoid accidental mutation.
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
+
+  if (!opt_nocache) {
+    cache.put(url, frozen);
+  }
+
+  return frozen;
 }
 
 /**
