@@ -57,8 +57,11 @@ const BLACKLISTED_TAGS = dict({
   'video': true,
 });
 
-// TODO: Use this in purifyHtml()?
-/** @const {!Object<string, boolean>} */
+/**
+ * Whitelist of supported self-closing tags for Caja. Most of these are
+ * internally supported in DOMPurify with some exceptions (see below).
+ * @const {!Object<string, boolean>}
+ */
 const SELF_CLOSING_TAGS = dict({
   'br': true,
   'col': true,
@@ -69,6 +72,9 @@ const SELF_CLOSING_TAGS = dict({
   'track': true,
   'wbr': true,
   'area': true,
+  // Note: The following tags are supported in Caja but not in DOMPurify.
+  // Most of these tags are either <head> or obsolete and dropping support for
+  // these in DOMPurify seems harmless.
   'base': true,
   'command': true,
   'embed': true,
@@ -78,7 +84,12 @@ const SELF_CLOSING_TAGS = dict({
   'param': true,
 });
 
-/** @const {!Array<string>} */
+/**
+ * Whitelist of tags allowed in triple mustache e.g. {{{name}}}.
+ * Very restrictive by design since the triple mustache renders unescaped HTML
+ * which, unlike double mustache, won't be processed by the AMP Validator.
+ * @const {!Array<string>}
+ */
 const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'a',
   'b',
@@ -135,8 +146,11 @@ const WHITELISTED_ATTRS = [
   'subscriptions-service',
 ];
 
-// TODO: Use this in purifyHtml()?
-/** @const {!Object<string, !Array<string>>} */
+/**
+ * Tag-specific attribute whitelist for Caja. DOMPurify uses a tag-agnostic
+ * whitelist and custom attrs below are duped into PURIFY_CONFIG['ADD_ATTR'].
+ * @const {!Object<string, !Array<string>>}
+ */
 const WHITELISTED_ATTRS_BY_TAGS = dict({
   'a': [
     'rel',
@@ -154,8 +168,11 @@ const WHITELISTED_ATTRS_BY_TAGS = dict({
   ],
 });
 
-// TODO: Use this in purifyHtml()?
-/** @const {!RegExp} */
+/**
+ * Regex to allow data-*, aria-* and role attributes.
+ * Only needed in Caja. Internally supported by DOMPurify.
+ * @const {!RegExp}
+ */
 const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /** @const {!Array<string>} */
@@ -206,6 +223,12 @@ const INVALID_INLINE_STYLE_REGEX =
 
 /** @const {!Object} */
 const PURIFY_CONFIG = {
+  'ADD_ATTR': [
+    'action-xhr',
+    'custom-validation-reporting',
+    'target',
+    'template',
+  ],
   'USE_PROFILES': {
     'html': true,
     'svg': true,
@@ -237,11 +260,11 @@ export function sanitizeHtml(html) {
  * @return {string}
  */
 function purifyHtml(dirty) {
-  const config = Object.assign({
-    'ADD_ATTR': WHITELISTED_ATTRS.concat(['target']),
+  const config = Object.assign({}, PURIFY_CONFIG, {
+    'ADD_ATTR': WHITELISTED_ATTRS.concat(PURIFY_CONFIG['ADD_ATTR']),
     'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
-  }, PURIFY_CONFIG);
+  });
   DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   return DOMPurify.sanitize(dirty, config);

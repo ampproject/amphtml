@@ -324,6 +324,16 @@ function runSanitizerTests() {
       expect(sanitizeHtml('<source src="<script>bad()</script>">'))
           .to.equal('<source src="">');
     });
+
+    it('should allow div::template', () => {
+      expect(sanitizeHtml('<div template="my-template-id"></div>'))
+          .to.equal('<div template="my-template-id"></div>');
+    });
+
+    it('should allow form::action-xhr', () => {
+      expect(sanitizeHtml('<form action-xhr="https://foo.com/bar"></form>'))
+          .to.equal('<form action-xhr="https://foo.com/bar"></form>');
+    });
   });
 
   describe('rewriteAttributesForElement', () => {
