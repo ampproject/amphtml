@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Pass} from '../../src/pass';
-import {timerFor} from '../../src/services';
 import * as sinon from 'sinon';
+import {Pass} from '../../src/pass';
+import {Services} from '../../src/services';
 
 describe('Pass', () => {
 
@@ -27,7 +27,7 @@ describe('Pass', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    timerMock = sandbox.mock(timerFor(window));
+    timerMock = sandbox.mock(Services.timerFor(window));
     handlerCalled = 0;
     pass = new Pass(window, () => {
       handlerCalled++;

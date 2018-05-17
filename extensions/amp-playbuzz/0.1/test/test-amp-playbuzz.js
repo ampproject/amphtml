@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-playbuzz';
-import {adopt} from '../../../../src/runtime';
+import {toggleExperiment} from '../../../../src/experiments';
 
-adopt(window);
 
 function startsWith(string, searchString) {
   return string.substr(0, searchString.length) === searchString;
-};
+}
 
-describe('amp-playbuzz', () => {
+describes.realWin('amp-playbuzz', {
+  amp: {
+    extensions: ['amp-playbuzz'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    toggleExperiment(win, 'amp-playbuzz', true);
+  });
 
   function createOptionalParams(displayInfo, displayShareBar, displayComments) {
     return {
@@ -52,32 +57,38 @@ describe('amp-playbuzz', () => {
   }
 
   function getIns(itemSrc, params, opt_responsive, opt_beforeLayoutCallback) {
-    return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const ins = iframe.doc.createElement('amp-playbuzz');
-      if (itemSrc.itemUrl) {
-        ins.setAttribute('src', itemSrc.itemUrl);
+    const ins = doc.createElement('amp-playbuzz');
+    if (itemSrc.itemUrl) {
+      ins.setAttribute('src', itemSrc.itemUrl);
+    }
+    if (itemSrc.itemId) {
+      ins.setAttribute('data-item', itemSrc.itemId);
+    }
+    ins.setAttribute('width', '111');
+    ins.setAttribute('height', '222');
+    ins.setAttribute('alt', 'Testing');
+    if (opt_responsive) {
+      ins.setAttribute('layout', 'responsive');
+    }
+    if (params && typeof params.displayItemInfo === 'boolean') {
+      ins.setAttribute('data-item-info', params.displayItemInfo);
+    }
+    if (params && typeof params.displayShareBar === 'boolean') {
+      ins.setAttribute('data-share-buttons', params.displayShareBar);
+    }
+    if (params && typeof params.displayComments === 'boolean') {
+      ins.setAttribute('data-comments', params.displayComments);
+    }
+    if (params && params.arialabel) {
+      ins.setAttribute('aria-label', params.arialabel);
+    }
+    doc.body.appendChild(ins);
+    return ins.build().then(() => {
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(ins);
       }
-      if (itemSrc.itemId) {
-        ins.setAttribute('data-item', itemSrc.itemId);
-      }
-      ins.setAttribute('width', '111');
-      ins.setAttribute('height', '222');
-      ins.setAttribute('alt', 'Testing');
-      if (opt_responsive) {
-        ins.setAttribute('layout', 'responsive');
-      }
-      if (params && typeof params.displayItemInfo === 'boolean') {
-        ins.setAttribute('data-item-info', params.displayItemInfo);
-      }
-      if (params && typeof params.displayShareBar === 'boolean') {
-        ins.setAttribute('data-share-buttons', params.displayShareBar);
-      }
-      if (params && typeof params.displayComments === 'boolean') {
-        ins.setAttribute('data-comments', params.displayComments);
-      }
-      return iframe.addElement(ins);
-    });
+      return ins.layoutCallback();
+    }).then(() => ins);
   }
 
   function testIframe(iframe, itemSrcUrl) {
@@ -87,10 +98,6 @@ describe('amp-playbuzz', () => {
     // This is important to avoid sizing issues.
     expect(iframe.getAttribute('scrolling')).to.equal('no');
   }
-
-  beforeEach(() => {
-    toggleExperiment(window, 'amp-playbuzz', true);
-  });
 
   it('renders', () => {
     const src = createItemSrc().withUrl('https://www.playbuzz.com/bob/bobs-life');
@@ -123,8 +130,8 @@ describe('amp-playbuzz', () => {
 
   it('renders with item id when submitted both with item url & item id', () => {
     const src = createItemSrc()
-      .withUrl('https://www.playbuzz.com/bob/bobs-life')
-      .withItemId('some-item-id');
+        .withUrl('https://www.playbuzz.com/bob/bobs-life')
+        .withItemId('some-item-id');
 
     return getIns(src).then(ins => {
       const iframe = ins.querySelector('iframe');
@@ -152,8 +159,11 @@ describe('amp-playbuzz', () => {
       const iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;
       expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder.getAttribute('aria-label'))
+          .to.equal('Loading interactive element');
     }).then(ins => {
       const placeholder = ins.querySelector('[placeholder]');
+
       const iframe = ins.querySelector('iframe');
       ins.getVsync = () => {
         return {
@@ -167,10 +177,21 @@ describe('amp-playbuzz', () => {
       });
     });
   });
+  it('propagates aria label to placeholder', () => {
+    const src = createItemSrc().withUrl('https://www.playbuzz.com/bob/bobs-life');
+    return getIns(src, {'arialabel': 'captivating quiz'}, true, ins => {
+      // console.log(ins);
+      const placeholder = ins.querySelector('[placeholder]');
+      expect(placeholder.getAttribute('aria-label'))
+          .to.equal('Loading - captivating quiz');
 
+    });
+  });
   it('requires item attribute', () => {
     const src = createItemSrc().withUrl('');
-    expect(getIns(src)).to.be.rejectedWith(
-        /The item attribute is required for/);
+    allowConsoleError(() => {
+      expect(getIns(src)).to.be.rejectedWith(
+          /The item attribute is required for/);
+    });
   });
 });

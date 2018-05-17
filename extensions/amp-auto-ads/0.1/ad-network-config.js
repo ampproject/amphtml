@@ -18,11 +18,10 @@ import {
   AdSenseAmpAutoAdsHoldoutBranches,
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {dict} from '../../../src/utils/object';
-import {documentInfoForDoc} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
-import {viewportForDoc} from '../../../src/services';
 
 
 /**
@@ -55,7 +54,7 @@ class AdNetworkConfigDef {
    * Network specific constraints on the placement of ads on the page.
    * @return {!./ad-tracker.AdConstraints}
    */
-  getAdConstraints() {}
+  getDefaultAdConstraints() {}
 }
 
 /**
@@ -92,12 +91,13 @@ class AdSenseNetworkConfig {
 
   /** @override */
   getConfigUrl() {
-    const docInfo = documentInfoForDoc(this.autoAmpAdsElement_);
+    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrl(docInfo.canonicalUrl).hostname;
     return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', {
       'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
       'plah': canonicalHostname,
       'ama_t': 'amp',
+      'url': docInfo.canonicalUrl,
     }, 4096);
   }
 
@@ -110,9 +110,9 @@ class AdSenseNetworkConfig {
   }
 
   /** @override */
-  getAdConstraints() {
+  getDefaultAdConstraints() {
     const viewportHeight =
-        viewportForDoc(this.autoAmpAdsElement_).getSize().height;
+        Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [

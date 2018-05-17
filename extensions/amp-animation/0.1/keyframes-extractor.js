@@ -15,7 +15,7 @@
  */
 
 import {endsWith} from '../../../src/string';
-
+import {toWin} from '../../../src/types';
 
 /**
  * Finds and extracts keyframes definition for Web Animations from CSS styles.
@@ -24,11 +24,11 @@ import {endsWith} from '../../../src/string';
  * @return {?./web-animation-types.WebKeyframesDef}
  */
 export function extractKeyframes(rootNode, name) {
-  const styleSheets = rootNode.styleSheets;
+  const {styleSheets} = rootNode;
   if (!styleSheets) {
     return null;
   }
-  const win = (rootNode.ownerDocument || rootNode).defaultView;
+  const win = toWin((rootNode.ownerDocument || rootNode).defaultView);
   // Go from the last to first since the last rule wins in CSS.
   for (let i = styleSheets.length - 1; i >= 0; i--) {
     const keyframes = scanStyle(
@@ -82,9 +82,10 @@ function scanRules(win, rules, name) {
       if (rule.name == name && isEnabled(win, rule)) {
         return buildKeyframes(keyframesRule);
       }
-    } else if (rule.type == /* CSSMediaRule */ 4) {
-      // Go recursively inside. The media match will be checked only when
-      // the corresponding @keyframes have been found.
+    } else if (rule.type == /* CSSMediaRule */ 4 ||
+          rule.type == /* CSSSupportsRule */ 12) {
+      // Go recursively inside. The media/supports match will be checked only
+      // when the corresponding @keyframes have been found.
       const found = scanRules(win, rule.cssRules, name);
       if (found) {
         return found;
@@ -108,14 +109,18 @@ function isEnabled(win, rule) {
       return false;
     }
   }
+  if (rule.type == /* CSSSupportsRule */ 12) {
+    if (!win.CSS ||
+        !win.CSS.supports ||
+        !win.CSS.supports(
+            /** @type {!CSSSupportsRule} */ (rule).conditionText)) {
+      return false;
+    }
+  }
 
   // Check the parents.
   if (rule.parentRule) {
     return isEnabled(win, rule.parentRule);
-  } else if (rule.parentStyleSheet &&
-      rule.parentStyleSheet.media &&
-      rule.parentStyleSheet.media.mediaText) {
-    return win.matchMedia(rule.parentStyleSheet.media.mediaText).matches;
   }
   return true;
 }
@@ -129,13 +134,13 @@ function buildKeyframes(keyframesRule) {
   const array = [];
   for (let i = 0; i < keyframesRule.cssRules.length; i++) {
     const keyframeRule = /** @type {!CSSKeyframeRule} */ (
-        keyframesRule.cssRules[i]);
+      keyframesRule.cssRules[i]);
     const keyframe = {};
     keyframe['offset'] =
         keyframeRule.keyText == 'from' ? 0 :
-        keyframeRule.keyText == 'to' ? 1 :
-        parseFloat(keyframeRule.keyText) / 100;
-    const style = keyframeRule.style;
+          keyframeRule.keyText == 'to' ? 1 :
+            parseFloat(keyframeRule.keyText) / 100;
+    const {style} = keyframeRule;
     for (let j = 0; j < style.length; j++) {
       const styleName = style[j];
       let propName = styleName;

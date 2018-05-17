@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Signals} from '../utils/signals';
 import {dev} from '../log';
 import {
@@ -26,40 +27,6 @@ import {waitForBodyPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
-
-
-/**
- * Creates and installs the ampdoc for the shadow root.
- * @param {!AmpDocService} ampdocService
- * @param {string} url
- * @param {!ShadowRoot} shadowRoot
- * @return {!AmpDocShadow}
- * @restricted
- */
-export function installShadowDoc(ampdocService, url, shadowRoot) {
-  return ampdocService.installShadowDoc_(url, shadowRoot);
-}
-
-
-/**
- * Signals that the shadow doc is ready.
- * @param {!AmpDocShadow} ampdoc
- * @restricted
- */
-export function shadowDocReady(ampdoc) {
-  ampdoc.setReady_();
-}
-
-
-/**
- * Signals that the shadow doc has a body.
- * @param {!AmpDocShadow} ampdoc
- * @param {!Element} body
- * @restricted
- */
-export function shadowDocHasBody(ampdoc, body) {
-  ampdoc.setBody_(body);
-}
 
 
 /**
@@ -86,6 +53,11 @@ export class AmpDocService {
     if (isSingleDoc) {
       this.singleDoc_ = new AmpDocSingle(win);
     }
+
+    /** Guarded by 'ampdoc-shell' experiment
+     * @private {?AmpDocShell}
+     */
+    this.shellShadowDoc_ = null;
   }
 
   /**
@@ -95,6 +67,14 @@ export class AmpDocService {
    */
   isSingleDoc() {
     return !!this.singleDoc_;
+  }
+
+  /**
+   * Whether if an `AmpDocShell` has been installed for the runtime.
+   * @return {boolean}
+   */
+  hasAmpDocShell() {
+    return !!this.shellShadowDoc_;
   }
 
   /**
@@ -121,6 +101,16 @@ export class AmpDocService {
     if (this.singleDoc_) {
       return this.singleDoc_;
     }
+
+    // Multiple documents and AmpDocShell requested
+    if (opt_node === this.win.document) {
+      if (this.shellShadowDoc_) {
+        return this.shellShadowDoc_;
+      } else {
+        throw dev().createError('Ampdoc for shell has not been installed');
+      }
+    }
+
     dev().assert(opt_node);
     // Otherwise discover and possibly create the ampdoc.
     let n = opt_node;
@@ -140,6 +130,10 @@ export class AmpDocService {
       // Shadow doc.
       const shadowRoot = getShadowRootNode(n);
       if (!shadowRoot) {
+        // If not inside a shadow root, it may belong to AmpDocShell
+        if (this.shellShadowDoc_) {
+          return this.shellShadowDoc_;
+        }
         break;
       }
 
@@ -158,14 +152,39 @@ export class AmpDocService {
    * @param {string} url
    * @param {!ShadowRoot} shadowRoot
    * @return {!AmpDocShadow}
-   * @private
+   * @restricted
    */
-  installShadowDoc_(url, shadowRoot) {
+  installShadowDoc(url, shadowRoot) {
     dev().assert(!shadowRoot[AMPDOC_PROP],
         'The shadow root already contains ampdoc');
     const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
+  }
+
+  /**
+   * Creates and installs an ampdoc for the shell in shadow-doc mode.
+   * `AmpDocShell` is a subclass of `AmpDocShadow` that is installed for
+   * `window.document` and allows to use AMP components as part of the shell,
+   * outside shadow roots
+   *
+   * Currently guarded by 'ampdoc-shell' experiment
+   *
+   * @return {!AmpDocShell}
+   * @restricted
+   */
+  installShellShadowDoc() {
+    dev().assert(this.singleDoc_ === null,
+        'AmpDocShell cannot be installed in single-doc mode');
+    this.shellShadowDoc_ = new AmpDocShell(this.win);
+    this.win.document[AMPDOC_PROP] = this.shellShadowDoc_;
+
+    whenDocumentReady(this.win.document).then(document => {
+      this.shellShadowDoc_.setBody(dev().assertElement(document.body));
+      this.shellShadowDoc_.setReady();
+    });
+
+    return this.shellShadowDoc_;
   }
 }
 
@@ -187,6 +206,9 @@ export class AmpDoc {
 
     /** @private @const */
     this.signals_ = new Signals();
+
+    /** @private @const {!Array<string>} */
+    this.declaredExtensions_ = [];
   }
 
   /**
@@ -213,6 +235,26 @@ export class AmpDoc {
   }
 
   /**
+   * Returns whether the specified extension has been declared on this ampdoc.
+   * @param {string} extensionId
+   * @return {boolean}
+   */
+  declaresExtension(extensionId) {
+    return this.declaredExtensions_.indexOf(extensionId) != -1;
+  }
+
+  /**
+   * Adds a declared extension to an ampdoc.
+   * @param {string} extensionId
+   * @restricted
+   */
+  declareExtension(extensionId) {
+    if (!this.declaresExtension(extensionId)) {
+      this.declaredExtensions_.push(extensionId);
+    }
+  }
+
+  /**
    * Returns the root node for this ampdoc. It will either be a `Document` for
    * the single-doc runtime mode, or a `ShadowRoot` for shadow-doc mode. This
    * node can be used, among other things, to add ampdoc-wide event listeners.
@@ -222,6 +264,13 @@ export class AmpDoc {
   getRootNode() {
     return /** @type {?} */ (dev().assert(null, 'not implemented'));
   }
+
+  /**
+   * Returns the head node. It's either an element or a shadow root.
+   * @return {!Element|!ShadowRoot}
+   * @abstract
+   */
+  getHeadNode() {}
 
   /**
    * Returns `true` if the ampdoc's body is available.
@@ -317,8 +366,8 @@ export class AmpDocSingle extends AmpDoc {
 
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body ?
-        Promise.resolve(this.win.document.body) :
-        waitForBodyPromise(this.win.document).then(() => this.getBody());
+      Promise.resolve(this.win.document.body) :
+      waitForBodyPromise(this.win.document).then(() => this.getBody());
 
     /** @private @const {!Promise} */
     this.readyPromise_ = whenDocumentReady(this.win.document);
@@ -337,6 +386,11 @@ export class AmpDocSingle extends AmpDoc {
   /** @override */
   getUrl() {
     return this.win.location.href;
+  }
+
+  /** @override */
+  getHeadNode() {
+    return dev().assertElement(this.win.document.head);
   }
 
   /** @override */
@@ -387,24 +441,24 @@ export class AmpDocShadow extends AmpDoc {
     /** @private {?Element} */
     this.body_ = null;
 
-    /** @private {function(!Element)|undefined} */
-    this.bodyResolver_ = undefined;
+    const bodyDeferred = new Deferred();
 
     /** @private {!Promise<!Element>} */
-    this.bodyPromise_ = new Promise(resolve => {
-      this.bodyResolver_ = resolve;
-    });
+    this.bodyPromise_ = bodyDeferred.promise;
+
+    /** @private {function(!Element)|undefined} */
+    this.bodyResolver_ = bodyDeferred.resolve;
 
     /** @private {boolean} */
     this.ready_ = false;
 
-    /** @private {function()|undefined} */
-    this.readyResolver_ = undefined;
+    const readyDeferred = new Deferred();
 
     /** @private {!Promise} */
-    this.readyPromise_ = new Promise(resolve => {
-      this.readyResolver_ = resolve;
-    });
+    this.readyPromise_ = readyDeferred.promise;
+
+    /** @private {function()|undefined} */
+    this.readyResolver_ = readyDeferred.resolve;
   }
 
   /** @override */
@@ -423,6 +477,11 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
+  getHeadNode() {
+    return this.shadowRoot_;
+  }
+
+  /** @override */
   isBodyAvailable() {
     return !!this.body_;
   }
@@ -433,10 +492,11 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /**
+   * Signals that the shadow doc has a body.
    * @param {!Element} body
-   * @private
+   * @restricted
    */
-  setBody_(body) {
+  setBody(body) {
     dev().assert(!this.body_, 'Duplicate body');
     this.body_ = body;
     this.bodyResolver_(body);
@@ -453,8 +513,11 @@ export class AmpDocShadow extends AmpDoc {
     return this.ready_;
   }
 
-  /** @private */
-  setReady_() {
+  /**
+   * Signals that the shadow doc is ready.
+   * @restricted
+   */
+  setReady() {
     dev().assert(!this.ready_, 'Duplicate ready state');
     this.ready_ = true;
     this.readyResolver_();
@@ -467,6 +530,21 @@ export class AmpDocShadow extends AmpDoc {
   }
 }
 
+
+/**
+ * AmpDocShadow for the shell
+ * @package @visibleForTesting
+ */
+export class AmpDocShell extends AmpDocShadow {
+  constructor(win) {
+    super(win, win.location.href, win.document);
+  }
+
+  /** @override */
+  getHeadNode() {
+    return dev().assertElement(this.win.document.head);
+  }
+}
 
 /**
  * Install the ampdoc service and immediately configure it for either a
@@ -482,4 +560,4 @@ export function installDocService(win, isSingleDoc) {
       function() {
         return new AmpDocService(win, isSingleDoc);
       });
-};
+}

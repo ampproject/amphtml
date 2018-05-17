@@ -14,48 +14,47 @@
  * limitations under the License.
  */
 
-import {getFixedContainer} from '../../src/full-overlay-frame-child-helper';
-import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {viewerForDoc} from '../services';
-import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
-import {registerServiceBuilderForDoc} from '../service';
-import {resourcesForDoc} from '../services';
-import {
-  nativeIntersectionObserverSupported,
-} from '../../src/intersection-observer-polyfill';
-import {layoutRectLtwh} from '../layout-rect';
-import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
+import {Observable} from '../observable';
+import {Services} from '../services';
+import {Viewport} from '../service/viewport/viewport-impl';
+import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {dev} from '../log';
-import {vsyncFor} from '../../src/services';
-import {px, setStyles} from '../../src/style';
-
+import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+} from '../layout-rect';
+import {px, resetStyles, setImportantStyles} from '../../src/style';
+import {registerServiceBuilderForDoc} from '../service';
+import {throttle} from '../../src/utils/rate-limit';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
 
+/** @const {number} */
+const MIN_EVENT_INTERVAL = 100;
 
 /** @visibleForTesting */
-export function prepareFixedContainer(win, fixedContainer) {
-  return vsyncFor(win).runPromise({
+export function prepareBodyForOverlay(win, bodyElement) {
+  return Services.vsyncFor(win).runPromise({
     measure: state => {
-      state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
+      state.width = win./*OK*/innerWidth;
+      state.height = win./*OK*/innerHeight;
     },
     mutate: state => {
-      setStyles(dev().assertElement(win.document.body), {
+      // We need to override runtime-level !important rules
+      setImportantStyles(bodyElement, {
         'background': 'transparent',
-      });
-
-      setStyles(fixedContainer, {
-        'position': 'absolute',
         'left': '50%',
         'top': '50%',
         'right': 'auto',
         'bottom': 'auto',
-        'width': px(state.boundingRect.width),
-        'height': px(state.boundingRect.height),
-        'margin-left': px(-(state.boundingRect.width / 2)),
-        'margin-top': px(-(state.boundingRect.height / 2)),
+        'position': 'absolute',
+        'height': px(state.height),
+        'width': px(state.width),
+        'margin-top': px(-state.height / 2),
+        'margin-left': px(-state.width / 2),
       });
     },
   }, {});
@@ -63,23 +62,21 @@ export function prepareFixedContainer(win, fixedContainer) {
 
 
 /** @visibleForTesting */
-export function resetFixedContainer(win, fixedContainer) {
-  return vsyncFor(win).mutatePromise(() => {
-    setStyles(dev().assertElement(win.document.body), {
-      'background': 'transparent',
-    });
-
-    setStyles(fixedContainer, {
-      'position': null,
-      'left': null,
-      'top': null,
-      'right': null,
-      'bottom': null,
-      'width': null,
-      'height': null,
-      'margin-left': null,
-      'margin-top': null,
-    });
+export function resetBodyForOverlay(win, bodyElement) {
+  return Services.vsyncFor(win).mutatePromise(() => {
+    // We're not resetting background here as it's supposed to remain
+    // transparent.
+    resetStyles(bodyElement, [
+      'position',
+      'left',
+      'top',
+      'right',
+      'bottom',
+      'width',
+      'height',
+      'margin-left',
+      'margin-top',
+    ]);
   });
 }
 
@@ -132,6 +129,14 @@ export class ViewportBindingInabox {
     /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeClient_ = iframeMessagingClientFor(win);
 
+    /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
+    this.requestPositionPromise_ = null;
+
+    /** @private {function()} */
+    this.fireScrollThrottle_ = throttle(this.win, () => {
+      this.scrollObservable_.fire();
+    }, MIN_EVENT_INTERVAL);
+
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
@@ -142,26 +147,21 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
-    if (nativeIntersectionObserverSupported(this.win)) {
-      // Using native IntersectionObserver, no position data needed
-      // from host doc.
-      return;
-    }
 
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          this.viewportRect_ = data.viewport;
+          this.viewportRect_ = data.viewportRect;
 
-          this.updateBoxRect_(data.target);
+          this.updateBoxRect_(data.targetRect);
 
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
           }
           if (isMoved(this.viewportRect_, oldViewportRect)) {
-            this.scrollObservable_.fire();
+            this.fireScrollThrottle_();
           }
         });
   }
@@ -204,14 +204,28 @@ export class ViewportBindingInabox {
     return this.viewportRect_.left;
   }
 
+  /** @override */
+  getScrollingElement() {
+    return this.getBodyElement();
+  }
+
+  /** @override */
+  supportsPositionFixed() {
+    return false;
+  }
+
   /**
-   * @param {!../layout-rect.LayoutRectDef|undefined} boxRect
+   * @param {?../layout-rect.LayoutRectDef|undefined} positionRect
    * @private
    */
-  updateBoxRect_(boxRect) {
-    if (!boxRect) {
+  updateBoxRect_(positionRect) {
+    if (!positionRect) {
       return;
     }
+
+    const boxRect = moveLayoutRect(positionRect, this.viewportRect_.left,
+        this.viewportRect_.top);
+
     if (isChanged(boxRect, this.boxRect_)) {
       dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
 
@@ -229,7 +243,7 @@ export class ViewportBindingInabox {
    * @visibleForTesting
    */
   getChildResources() {
-    return resourcesForDoc(this.win.document).get();
+    return Services.resourcesForDoc(this.win.document).get();
   }
 
   /** @private */
@@ -245,13 +259,30 @@ export class ViewportBindingInabox {
     return this.leaveOverlayMode_();
   }
 
+  /** @override */
+  getRootClientRectAsync() {
+    if (!this.requestPositionPromise_) {
+      this.requestPositionPromise_ = new Promise(resolve => {
+        this.iframeClient_.requestOnce(
+            MessageType.SEND_POSITIONS, MessageType.POSITION,
+            data => {
+              this.requestPositionPromise_ = null;
+              dev().assert(data.targetRect, 'Host should send targetRect');
+              resolve(data.targetRect);
+            }
+        );
+      });
+    }
+    return this.requestPositionPromise_;
+  }
+
+
   /**
    * @return {!Promise}
    * @private
    */
   tryToEnterOverlayMode_() {
-    // TODO(alanorozco): Update viewport measurement from host message.
-    return this.prepareFixedContainer_()
+    return this.prepareBodyForOverlay_()
         .then(() => this.requestFullOverlayFrame_());
   }
 
@@ -261,7 +292,7 @@ export class ViewportBindingInabox {
    */
   leaveOverlayMode_() {
     return this.requestCancelFullOverlayFrame_()
-        .then(() => this.resetFixedContainer_());
+        .then(() => this.resetBodyForOverlay_());
   }
 
   /**
@@ -269,15 +300,8 @@ export class ViewportBindingInabox {
    * @return {!Promise}
    * @private
    */
-  prepareFixedContainer_() {
-    const fixedContainer = this.getFixedContainer_();
-
-    if (!fixedContainer) {
-      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
-      return Promise.resolve();
-    }
-
-    return prepareFixedContainer(this.win, dev().assertElement(fixedContainer));
+  prepareBodyForOverlay_() {
+    return prepareBodyForOverlay(this.win, this.getBodyElement());
   }
 
   /**
@@ -285,15 +309,8 @@ export class ViewportBindingInabox {
    * @return {!Promise}
    * @private
    */
-  resetFixedContainer_() {
-    const fixedContainer = this.getFixedContainer_();
-
-    if (!fixedContainer) {
-      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
-      return Promise.resolve();
-    }
-
-    return resetFixedContainer(this.win, dev().assertElement(fixedContainer));
+  resetBodyForOverlay_() {
+    return resetBodyForOverlay(this.win, this.getBodyElement());
   }
 
   /**
@@ -334,9 +351,9 @@ export class ViewportBindingInabox {
     });
   }
 
-  getFixedContainer_() {
-    return getFixedContainer(
-        /** @type {!HTMLBodyElement} */ (dev().assert(this.win.document.body)));
+  /** @visibleForTesting */
+  getBodyElement() {
+    return dev().assertElement(this.win.document.body);
   }
 
   /** @override */ disconnect() {/* no-op */}
@@ -349,6 +366,7 @@ export class ViewportBindingInabox {
   /** @override */ setScrollTop() {/* no-op */}
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}
+  /** @override */ getContentHeight() {return 0;}
   /** @override */ getBorderTop() {return 0;}
   /** @override */ requiresFixedLayerTransfer() {return false;}
 }
@@ -358,7 +376,7 @@ export class ViewportBindingInabox {
  */
 export function installInaboxViewportService(ampdoc) {
   const binding = new ViewportBindingInabox(ampdoc.win);
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   registerServiceBuilderForDoc(ampdoc,
       'viewport',
       function() {
@@ -370,7 +388,7 @@ export function installInaboxViewportService(ampdoc) {
 /**
  * @param {!../layout-rect.LayoutRectDef} newRect
  * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
+ * @return {boolean}
  */
 function isChanged(newRect, oldRect) {
   return isMoved(newRect, oldRect) || isResized(newRect, oldRect);
@@ -379,7 +397,7 @@ function isChanged(newRect, oldRect) {
 /**
  * @param {!../layout-rect.LayoutRectDef} newRect
  * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
+ * @return {boolean}
  */
 function isMoved(newRect, oldRect) {
   return newRect.left != oldRect.left || newRect.top != oldRect.top;
@@ -388,7 +406,7 @@ function isMoved(newRect, oldRect) {
 /**
  * @param {!../layout-rect.LayoutRectDef} newRect
  * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
+ * @return {boolean}
  */
 function isResized(newRect, oldRect) {
   return newRect.width != oldRect.width || newRect.height != oldRect.height;

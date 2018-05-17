@@ -1,6 +1,6 @@
 {
   "name": "gulp-amphtml-validator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Gulp plugin for the official AMP HTML validator (www.ampproject.org)",
   "keywords": [
     "gulpplugin",
@@ -20,8 +20,7 @@
     "url": "https://github.com/ampproject/amphtml/tree/master/validator/gulpjs"
   },
   "dependencies": {
-    "amphtml-validator": "1.0.18",
-    "gulp-util": "^3.0.7",
+    "amphtml-validator": "1.0.21",
     "through2": "^2.0.1"
   },
   "devDependencies": {

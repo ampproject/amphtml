@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../../src/mode';
-import {getData, listen} from '../../../src/event-helper';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/services';
 import {urls} from '../../../src/config';
-import {dict} from '../../../src/utils/object';
 
 /** @const */
 const TAG = 'amp-access-login';
@@ -35,7 +35,7 @@ const RETURN_URL_REGEX = new RegExp('RETURN_URL');
  * @return {!WebLoginDialog|!ViewerLoginDialog}
  */
 export function createLoginDialog(ampdoc, urlOrPromise) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
   if (overrideDialog) {
     return new ViewerLoginDialog(viewer, urlOrPromise);
@@ -219,7 +219,7 @@ export class WebLoginDialog {
 
   /** @private */
   openInternal_() {
-    const screen = this.win.screen;
+    const {screen} = this.win;
     const w = Math.floor(Math.min(700, screen.width * 0.9));
     const h = Math.floor(Math.min(450, screen.height * 0.9));
     const x = Math.floor((screen.width - w) / 2);

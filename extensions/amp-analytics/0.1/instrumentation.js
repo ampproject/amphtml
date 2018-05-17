@@ -20,13 +20,13 @@ import {
 } from './analytics-root';
 import {
   AnalyticsEvent,
-  ClickEventTracker,
+  AnalyticsEventType,
   CustomEventTracker,
-  IniLoadTracker,
-  SignalTracker,
-  VisibilityTracker,
+  getTrackerKeyName,
+  getTrackerTypesForParentType,
 } from './events';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {
   getFriendlyIframeEmbedOptional,
@@ -37,74 +37,13 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isEnumValue} from '../../../src/types';
-import {timerFor} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {viewportForDoc} from '../../../src/services';
 
-const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
-const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const PROP = '__AMP_AN_ROOT';
 
 
-/**
- * Events that can result in analytics data to be sent.
- * @const
- * @enum {string}
- */
-export const AnalyticsEventType = {
-  VISIBLE: 'visible',
-  CLICK: 'click',
-  TIMER: 'timer',
-  SCROLL: 'scroll',
-  HIDDEN: 'hidden',
-};
-
-const ALLOWED_FOR_ALL = ['ampdoc', 'embed'];
-
-/**
- * Events that can result in analytics data to be sent.
- * @const {!Object<string, {
- *     name: string,
- *     allowedFor: !Array<string>,
- *     klass: function(new:./events.EventTracker)
- *   }>}
- */
-const EVENT_TRACKERS = {
-  'click': {
-    name: 'click',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: ClickEventTracker,
-  },
-  'custom': {
-    name: 'custom',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: CustomEventTracker,
-  },
-  'render-start': {
-    name: 'render-start',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: SignalTracker,
-  },
-  'ini-load': {
-    name: 'ini-load',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: IniLoadTracker,
-  },
-  'visible': {
-    name: 'visible',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VisibilityTracker,
-  },
-  'hidden': {
-    name: 'visible', // Reuse tracker with visibility
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VisibilityTracker,
-  },
-};
 
 /** @const {string} */
 const TAG = 'Analytics.Instrumentation';
@@ -138,20 +77,14 @@ export class InstrumentationService {
     /** @const */
     this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
 
-    /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.ampdoc.win);
-
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.ampdoc);
-
-    /** @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    /** @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
 
     /** @private {!Observable<
-        !../../../src/service/viewport-impl.ViewportChangedEventDef>} */
+      !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
   }
 
@@ -189,7 +122,7 @@ export class InstrumentationService {
     const event = new AnalyticsEvent(target, eventType, opt_vars);
     const root = this.findRoot_(target);
     const tracker = /** @type {!CustomEventTracker} */ (
-        root.getTracker('custom', CustomEventTracker));
+      root.getTracker('custom', CustomEventTracker));
     tracker.trigger(event);
   }
 
@@ -259,12 +192,8 @@ export class InstrumentationService {
         width: size.width,
         height: size.height,
         relayoutAll: false,
-        velocity: 0,  // Hack for typing.
+        velocity: 0, // Hack for typing.
       });
-    } else if (eventType === AnalyticsEventType.TIMER) {
-      if (this.isTimerSpecValid_(config['timerSpec'])) {
-        this.createTimerListener_(listener, config['timerSpec']);
-      }
     }
   }
 
@@ -281,7 +210,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!../../../src/service/viewport-impl.ViewportChangedEventDef} e
+   * @param {!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef} e
    * @private
    */
   onScroll_(e) {
@@ -378,55 +307,6 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {JsonObject} timerSpec
-   * @private
-   */
-  isTimerSpecValid_(timerSpec) {
-    if (!timerSpec || typeof timerSpec != 'object') {
-      user().error(TAG, 'Bad timer specification');
-      return false;
-    } else if (!('interval' in timerSpec)) {
-      user().error(TAG, 'Timer interval specification required');
-      return false;
-    } else if (typeof timerSpec['interval'] !== 'number' ||
-               timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
-      user().error(TAG, 'Bad timer interval specification');
-      return false;
-    } else if (('maxTimerLength' in timerSpec) &&
-              (typeof timerSpec['maxTimerLength'] !== 'number' ||
-                  timerSpec['maxTimerLength'] <= 0)) {
-      user().error(TAG, 'Bad maxTimerLength specification');
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  /**
-   * @param {!function(!AnalyticsEvent)} listener
-   * @param {JsonObject} timerSpec
-   * @private
-   */
-  createTimerListener_(listener, timerSpec) {
-    const hasImmediate = 'immediate' in timerSpec;
-    const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
-    const intervalId = this.ampdoc.win.setInterval(
-        listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
-        timerSpec['interval'] * 1000
-    );
-
-    if (callImmediate) {
-      listener(this.createEventDepr_(AnalyticsEventType.TIMER));
-    }
-
-    const maxTimerLength = timerSpec['maxTimerLength'] ||
-        DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
-    this.ampdoc.win.setTimeout(
-        this.ampdoc.win.clearInterval.bind(this.ampdoc.win, intervalId),
-        maxTimerLength * 1000);
-  }
-
-  /**
    * Checks to confirm that a given trigger type is allowed for the element.
    * Specifically, it confirms that if the element is in the embed, only a
    * subset of the trigger types are allowed.
@@ -488,40 +368,47 @@ export class AnalyticsGroup {
    */
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
-    let trackerProfile = EVENT_TRACKERS[eventType];
-    if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
-      trackerProfile = EVENT_TRACKERS['custom'];
-    }
-    if (trackerProfile) {
-      user().assert(
-          trackerProfile.allowedFor.indexOf(this.root_.getType()) != -1,
-          'Trigger type "%s" is not allowed in the %s',
-          eventType, this.root_.getType());
-      const tracker = this.root_.getTracker(
-          trackerProfile.name, trackerProfile.klass);
-      const unlisten = tracker.add(
-          this.analyticsElement_, eventType, config, handler);
-      this.listeners_.push(unlisten);
-    } else {
+    const trackerKey = getTrackerKeyName(eventType);
+    const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
+
+    if (this.isDeprecatedListenerEvent(trackerKey)) {
       // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
       // triggers have been migrated..
       this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
+      return;
     }
+
+    const tracker = this.root_.getTrackerForWhitelist(
+        trackerKey, trackerWhitelist);
+    user().assert(!!tracker,
+        'Trigger type "%s" is not allowed in the %s', eventType,
+        this.root_.getType());
+    const unlisten = tracker.add(this.analyticsElement_, eventType, config,
+        handler);
+    this.listeners_.push(unlisten);
+  }
+
+  /**
+   * @param {string} triggerType
+   * @return {boolean}
+   */
+  isDeprecatedListenerEvent(triggerType) {
+    return triggerType == 'scroll';
   }
 }
 
 
 /**
- * It's important to resolve instrumentation asynchronously in elements that depends on
- * it in multi-doc scope. Otherwise an element life-cycle could resolve way before we
- * have the service available.
+ * It's important to resolve instrumentation asynchronously in elements that
+ * depends on it in multi-doc scope. Otherwise an element life-cycle could
+ * resolve way before we have the service available.
  *
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<InstrumentationService>}
  */
 export function instrumentationServicePromiseForDoc(nodeOrDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
-      getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+    getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
 }
 
 /*

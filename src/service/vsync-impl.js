@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
+import {JankMeter} from './jank-meter';
 import {Pass} from '../pass';
-import {ampdocServiceFor} from '../ampdoc';
+import {Services} from '../services';
 import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
-import {documentStateFor} from './document-state';
-
-import {registerServiceBuilder, getService} from '../service';
+import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
-import {viewerForDoc, viewerPromiseForDoc} from '../services';
-import {JankMeter} from './jank-meter';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -61,10 +59,10 @@ export class Vsync {
     this.win = win;
 
     /** @private @const {!./ampdoc-impl.AmpDocService} */
-    this.ampdocService_ = ampdocServiceFor(this.win);
+    this.ampdocService_ = Services.ampdocServiceFor(this.win);
 
     /** @private @const {!./document-state.DocumentState} */
-    this.docState_ = documentStateFor(this.win);
+    this.docState_ = Services.documentStateFor(this.win);
 
     /** @private @const {function(function())}  */
     this.raf_ = this.getRaf_();
@@ -139,10 +137,11 @@ export class Vsync {
     if (this.ampdocService_.isSingleDoc()) {
       // In a single-doc mode, the visibility of the doc == global visibility.
       // Thus, it's more efficient to only listen to it once.
-      viewerPromiseForDoc(this.ampdocService_.getAmpDoc()).then(viewer => {
-        this.singleDocViewer_ = viewer;
-        viewer.onVisibilityChanged(boundOnVisibilityChanged);
-      });
+      Services.viewerPromiseForDoc(this.ampdocService_.getAmpDoc())
+          .then(viewer => {
+            this.singleDocViewer_ = viewer;
+            viewer.onVisibilityChanged(boundOnVisibilityChanged);
+          });
     } else {
       // In multi-doc mode, we track separately the global visibility and
       // per-doc visibility when necessary.
@@ -191,9 +190,9 @@ export class Vsync {
     if (this.nextFramePromise_) {
       return this.nextFramePromise_;
     }
-    return this.nextFramePromise_ = new Promise(resolve => {
-      this.nextFrameResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.nextFrameResolver_ = deferred.resolve;
+    return this.nextFramePromise_ = deferred.promise;
   }
 
   /**
@@ -213,7 +212,7 @@ export class Vsync {
    */
   mutate(mutator) {
     this.run({
-      measure: undefined,  // For uniform hidden class.
+      measure: undefined, // For uniform hidden class.
       mutate: mutator,
     });
   }
@@ -237,7 +236,7 @@ export class Vsync {
   measure(measurer) {
     this.run({
       measure: measurer,
-      mutate: undefined,  // For uniform hidden class.
+      mutate: undefined, // For uniform hidden class.
     });
   }
 
@@ -283,7 +282,7 @@ export class Vsync {
     // Multi-doc: animations depend on the state of the relevant doc.
     if (opt_contextNode) {
       const ampdoc = this.ampdocService_.getAmpDoc(opt_contextNode);
-      return viewerForDoc(ampdoc).isVisible();
+      return Services.viewerForDoc(ampdoc).isVisible();
     }
 
     return true;
@@ -300,8 +299,8 @@ export class Vsync {
   runAnim(contextNode, task, opt_state) {
     // Do not request animation frames when the document is not visible.
     if (!this.canAnimate_(contextNode)) {
-      dev().warn('VSYNC', 'Did not schedule a vsync request, because doc' +
-          'ument was invisible');
+      dev().warn('VSYNC', 'Did not schedule a vsync request, because' +
+          ' document was invisible');
       return false;
     }
     this.run(task, opt_state);
@@ -317,9 +316,9 @@ export class Vsync {
    */
   createAnimTask(contextNode, task) {
     return /** @type {function(!VsyncStateDef=):boolean} */ (
-        opt_state => {
-          return this.runAnim(contextNode, task, opt_state);
-        });
+      opt_state => {
+        return this.runAnim(contextNode, task, opt_state);
+      });
   }
 
   /**
@@ -393,9 +392,11 @@ export class Vsync {
     this.scheduled_ = false;
     this.jankMeter_.onRun();
 
-    const tasks = this.tasks_;
-    const states = this.states_;
-    const resolver = this.nextFrameResolver_;
+    const {
+      tasks_: tasks,
+      states_: states,
+      nextFrameResolver_: resolver,
+    } = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering

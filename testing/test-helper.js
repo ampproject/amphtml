@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {poll} from './iframe';
-import {xhrServiceForTesting} from '../src/service/xhr-impl';
+import {WindowInterface} from '../src/window-interface';
 import {
   getService,
   getServiceForDoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
+  resetServiceForTesting,
 } from '../src/service';
+import {poll} from './iframe';
+import {xhrServiceForTesting} from '../src/service/xhr-impl';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
@@ -43,6 +45,30 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   });
   const service = getServiceForDoc(ampdoc, serviceId);
   return sandbox.stub(service, method);
+}
+
+export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
+  resetServiceForTesting(ampdoc.win, serviceId);
+  const impl = {};
+  methods.forEach(method => {
+    impl[method] = () => {};
+  });
+  registerServiceBuilderForDoc(ampdoc, serviceId, () => impl);
+  const mock = {};
+  methods.forEach(method => {
+    mock[method] = sandbox.stub(impl, method);
+  });
+  return mock;
+}
+
+export function mockWindowInterface(sandbox) {
+  const methods = Object.getOwnPropertyNames(WindowInterface)
+      .filter(p => typeof WindowInterface[p] === 'function');
+  const mock = {};
+  methods.forEach(method => {
+    mock[method] = sandbox.stub(WindowInterface, method);
+  });
+  return mock;
 }
 
 /**
@@ -68,8 +94,8 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('position')).to.equal('fixed');
   expect(computedStyle.getPropertyValue('top')).to.equal('0px');
   expect(computedStyle.getPropertyValue('left')).to.equal('0px');
-  expect(computedStyle.getPropertyValue('width')).to.equal('2px');
-  expect(computedStyle.getPropertyValue('height')).to.equal('2px');
+  expect(computedStyle.getPropertyValue('width')).to.equal('4px');
+  expect(computedStyle.getPropertyValue('height')).to.equal('4px');
   expect(computedStyle.getPropertyValue('opacity')).to.equal('0');
   expect(computedStyle.getPropertyValue('overflow')).to.equal('hidden');
   expect(computedStyle.getPropertyValue('border')).to.contain('none');
@@ -84,14 +110,23 @@ export function assertScreenReaderElement(element) {
 // A server side temporary request storage which is useful for testing
 // browser sent HTTP requests.
 /////////////////
+
+/** @const {string} */
 const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
 
+/**
+ * Append user agent to request-bank deposit/withdraw IDs to avoid
+ * cross-browser race conditions when testing in Saucelabs.
+ * @const {string}
+ */
+const userAgent = encodeURIComponent(window.navigator.userAgent);
+
 export function depositRequestUrl(id) {
-  return REQUEST_URL + 'deposit/' + id;
+  return `${REQUEST_URL}deposit/${id}-${userAgent}`;
 }
 
 export function withdrawRequest(win, id) {
-  const url = REQUEST_URL + 'withdraw/' + id;
+  const url = `${REQUEST_URL}withdraw/${id}-${userAgent}`;
   return xhrServiceForTesting(win).fetchJson(url, {
     method: 'GET',
     ampCors: false,

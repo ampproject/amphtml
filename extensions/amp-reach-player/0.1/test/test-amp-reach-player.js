@@ -14,31 +14,33 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-reach-player';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-reach-player', () => {
+describes.realWin('amp-reach-player', {
+  amp: {
+    extensions: ['amp-reach-player'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getReach(attributes, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const reach = iframe.doc.createElement('amp-reach-player');
-      for (const key in attributes) {
-        reach.setAttribute(key, attributes[key]);
-      }
-      reach.setAttribute('width', '560');
-      reach.setAttribute('height', '315');
-      if (opt_responsive) {
-        reach.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(reach);
-    });
+    const reach = doc.createElement('amp-reach-player');
+    for (const key in attributes) {
+      reach.setAttribute(key, attributes[key]);
+    }
+    reach.setAttribute('width', '560');
+    reach.setAttribute('height', '315');
+    if (opt_responsive) {
+      reach.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(reach);
+    return reach.build().then(() => reach.layoutCallback()).then(() => reach);
   }
 
   it('renders', () => {
@@ -61,6 +63,4 @@ describe('amp-reach-player', () => {
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
-
 });
-

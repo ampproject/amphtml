@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import {LayoutDelayMeter} from '../../src/layout-delay-meter';
-import {
-  installPerformanceService,
-  performanceFor,
-} from '../../src/service/performance-impl';
 import * as lolex from 'lolex';
+import {LayoutDelayMeter} from '../../src/layout-delay-meter';
+import {Services} from '../../src/services';
+import {installPerformanceService} from '../../src/service/performance-impl';
 
 describes.realWin('layout-delay-meter', {
   amp: {
@@ -37,12 +35,17 @@ describes.realWin('layout-delay-meter', {
     sandbox = env.sandbox;
     win = env.win;
     installPerformanceService(win);
-    const perf = performanceFor(win);
-    sandbox.stub(perf, 'isPerformanceTrackingOn', () => true);
-    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    const perf = Services.performanceFor(win);
+    sandbox.stub(perf, 'isPerformanceTrackingOn').callsFake(() => true);
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     tickSpy = sandbox.spy(perf, 'tickDelta');
 
     meter = new LayoutDelayMeter(win, 2);
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   it('should tick when there is a delay', () => {

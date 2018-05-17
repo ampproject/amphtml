@@ -143,6 +143,13 @@ AmpViewerMessage.prototype.rsvp;
 /** @public {string|undefined}  */
 AmpViewerMessage.prototype.error;
 
+// AMP-Analytics Cross-domain iframes
+let IframeTransportEvent;
+
+/** @constructor @struct */
+function IframeTransportContext() {}
+IframeTransportContext.onAnalyticsEvent;
+IframeTransportContext.sendResponseToCreative;
 
 // amp-viz-vega related externs.
 /**
@@ -155,6 +162,48 @@ let VegaParser;
 let VegaObject;
 /* @type {VegaObject} */
 window.vg;
+
+// amp-date-picker externs
+/**
+ * @type {function(*)}
+ */
+let ReactRender = function() {};
+
+/**
+ * @struct
+ */
+let PropTypes = {};
+
+/**
+ * @struct
+ */
+let ReactDates = {};
+
+/** @constructor */
+ReactDates.DayPickerSingleDateController;
+
+/** @struct */
+ReactDates.DayPickerRangeController;
+
+/** @type {function(*):boolean} */
+ReactDates.isInclusivelyAfterDay;
+
+/** @type {function(*):boolean} */
+ReactDates.isInclusivelyBeforeDay;
+
+/** @type {function(*,*):boolean} */
+ReactDates.isSameDay;
+
+/**
+ * @struct
+ */
+let ReactDatesConstants = {};
+
+/** @const {string} */
+ReactDatesConstants.ANCHOR_LEFT;
+
+/** @const {string} */
+ReactDatesConstants.HORIZONTAL_ORIENTATION;
 
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
@@ -195,6 +244,8 @@ UserNotificationManager.prototype.get;
 var Cid = function() {};
 /** @constructor @struct */
 var Activity = function() {};
+/** @constructor */
+var AmpStoryVariableService = function() {};
 
 // data
 var data;
@@ -208,6 +259,12 @@ data.inViewport;
 data.numposts;
 data.orderBy;
 data.colorscheme;
+data.tabs;
+data.hideCover;
+data.hideCta;
+data.smallHeader;
+data.showFacepile;
+data.showText;
 
 // 3p code
 var twttr;
@@ -222,6 +279,15 @@ FB.init;
 var gist;
 gist.gistid;
 
+var bodymovin;
+bodymovin.loadAnimation;
+var animationHandler;
+animationHandler.play;
+animationHandler.pause;
+animationHandler.stop;
+animationHandler.goToAndStop;
+animationHandler.totalFrames;
+
 // Validator
 var amp;
 amp.validator;
@@ -230,6 +296,7 @@ amp.validator.validateUrlAndLog = function(string, doc, filter) {}
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
 Activity.prototype.getTotalEngagedTime = function() {};
+Activity.prototype.getIncrementalEngagedTime = function(name, reset) {};
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics
@@ -268,6 +335,10 @@ var GetCidDef;
  */
 Cid.prototype.get = function(
     externalCidScope, consent, opt_persistenceConsent) {}
+
+AmpStoryVariableService.prototype.onStateChange = function(event) {};
+AmpStoryVariableService.pageIndex;
+AmpStoryVariableService.pageId;
 
 var AMP = {};
 window.AMP;
@@ -339,3 +410,38 @@ SomeBaseElementLikeClass.prototype.inViewport_;
 SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
+
+AMP.maybeExecuteRealTimeConfig = false;
+
+/**
+ * Actual filled values for this exists in
+ * extensions/amp-a4a/0.1/real-time-config-manager.js
+ * @enum {string}
+ */
+const RTC_ERROR_ENUM = {};
+
+/** @typedef {{
+      response: (Object|undefined),
+      rtcTime: number,
+      callout: string,
+      error: (RTC_ERROR_ENUM|undefined)}} */
+var rtcResponseDef;
+
+/**
+ * This symbol is exposed by browserify bundles transformed by
+ * `scoped-require.js` to avoid polluting the global namespace with `require`.
+ * It allows AMP extensions to consume code injected into their binaries that
+ * cannot be run through Closure Compiler, e.g. React code with JSX.
+ * @type {!function(string):?}
+ */
+AMP.require;
+
+/**
+ * TransitionDef function that accepts normtime, typically between 0 and 1 and
+ * performs an arbitrary animation action. Notice that sometimes normtime can
+ * dip above 1 or below 0. This is an acceptable case for some curves. The
+ * second argument is a boolean value that equals "true" for the completed
+ * transition and "false" for ongoing.
+ * @typedef {function(number, boolean):?|function(number):?}
+ */
+var TransitionDef;

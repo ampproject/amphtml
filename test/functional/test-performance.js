@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../src/mode';
-import {
-  installPerformanceService,
-  performanceFor,
-} from '../../src/service/performance-impl';
-import {resourcesForDoc} from '../../src/services';
-import {viewerForDoc} from '../../src/services';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
+import {Services} from '../../src/services';
+import {getMode} from '../../src/mode';
+import {installPerformanceService} from '../../src/service/performance-impl';
 
 
 describes.realWin('performance', {amp: true}, env => {
@@ -36,9 +32,14 @@ describes.realWin('performance', {amp: true}, env => {
     win = env.win;
     sandbox = env.sandbox;
     ampdoc = env.ampdoc;
-    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     installPerformanceService(env.win);
-    perf = performanceFor(env.win);
+    perf = Services.performanceFor(env.win);
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   describe('when viewer is not ready', () => {
@@ -122,7 +123,7 @@ describes.realWin('performance', {amp: true}, env => {
 
       expect(perf.events_.length).to.equal(0);
 
-      for (let i = 0; i < 50 ; i++) {
+      for (let i = 0; i < 50; i++) {
         perf.tick(`start${i}`);
       }
 
@@ -151,7 +152,7 @@ describes.realWin('performance', {amp: true}, env => {
     let viewerSendMessageStub;
 
     beforeEach(() => {
-      viewer = viewerForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
       viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     });
 
@@ -272,7 +273,8 @@ describes.realWin('performance', {amp: true}, env => {
       beforeEach(() => {
         tickDeltaStub = sandbox.stub(perf, 'tickDelta');
         firstVisibleTime = null;
-        sandbox.stub(viewer, 'getFirstVisibleTime', () => firstVisibleTime);
+        sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(
+            () => firstVisibleTime);
       });
 
       it('should always be zero before viewer is set', () => {
@@ -454,7 +456,7 @@ describes.realWin('performance', {amp: true}, env => {
       return res;
     }
 
-    const resources = resourcesForDoc(ampdoc);
+    const resources = Services.resourcesForDoc(ampdoc);
     const resourcesMock = sandbox.mock(resources);
     perf.resources_ = resources;
 
@@ -464,13 +466,13 @@ describes.realWin('performance', {amp: true}, env => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        perf.win,
-        sinon.match(arg =>
-                arg.left == 0 &&
+            perf.win,
+            sinon.match(arg =>
+              arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == perf.win.innerWidth &&
                 arg.height == perf.win.innerHeight),
-        /* inPrerender */ true)
+            /* inPrerender */ true)
         .returns(Promise.resolve([res1, res2]))
         .once();
 
@@ -494,8 +496,12 @@ describes.realWin('performance', {amp: true}, env => {
           .returns(visibility);
     }
 
+    function getPerformanceMarks() {
+      return win.performance.getEntriesByType('mark').map(entry => entry.name);
+    }
+
     beforeEach(() => {
-      viewer = viewerForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
       viewerSendMessageStub = sandbox.stub(viewer,
@@ -537,6 +543,9 @@ describes.realWin('performance', {amp: true}, env => {
           return perf.whenViewportLayoutComplete_().then(() => {
             expect(viewerSendMessageStub.withArgs(
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
+
+            expect(getPerformanceMarks()).to.deep.equal(
+                ['ol', 'ofv', 'pc']);
           });
         });
       });
@@ -588,6 +597,8 @@ describes.realWin('performance', {amp: true}, env => {
           return whenFirstVisiblePromise.then(() => {
             expect(tickSpy.withArgs('pc')).to.be.calledOnce;
             expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
+            expect(getPerformanceMarks()).to.deep.equal(
+                ['ol', 'pc', 'ofv']);
           });
         });
       });
@@ -608,6 +619,7 @@ describes.realWin('performance', {amp: true}, env => {
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(viewerSendMessageStub.withArgs(
               'prerenderComplete').firstCall.args[1].value).to.equal(300);
+          expect(getPerformanceMarks()).to.deep.equal(['ol', 'pc']);
         });
       });
 
@@ -619,6 +631,7 @@ describes.realWin('performance', {amp: true}, env => {
           expect(tickSpy.withArgs('ol')).to.be.calledOnce;
           expect(tickSpy.withArgs('pc')).to.be.calledOnce;
           expect(tickSpy.withArgs('pc').args[0][2]).to.be.undefined;
+          expect(getPerformanceMarks()).to.deep.equal(['ol', 'pc']);
         });
       });
     });
@@ -635,13 +648,13 @@ describes.realWin('performance with experiment', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     sandbox = env.sandbox;
-    const viewer = viewerForDoc(env.ampdoc);
+    const viewer = Services.viewerForDoc(env.ampdoc);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
     sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
     sandbox.stub(viewer, 'isEmbedded').returns(true);
     installPerformanceService(win);
-    perf = performanceFor(win);
+    perf = Services.performanceFor(win);
   });
 
   it('rtvVersion experiment', () => {

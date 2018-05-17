@@ -1,0 +1,310 @@
+<!--
+  ## Introduction
+
+The `amp-analytics` element can be used to measure activity on an AMP document. Currently, `amp-analytics` supports four different kind of events:
+
+* Pageview
+* Anchor Clicks
+* Timer
+* Scrolling
+* AMP Carousel changes
+
+This sample demonstrates which events can be measured and how they can be configured. For a completele overview of all available options and parameters, have a look at the [official documentation](https://www.ampproject.org/docs/reference/extended/amp-analytics.html).
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-analytics</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--  Import the amp-analytics component in the header. -->
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <!--
+    We need `amp-iframe` to embed an analytics dashboard.
+  -->
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-analytics/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .fixed-dashboard {
+        background-color: #e0e0e0;
+        position:fixed;
+        bottom: 0;
+        right: 0;
+        width:100%;
+        z-index: 100;
+    }
+    amp-carousel .slide {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: green;
+      color: white;
+    }
+    </style>
+</head>
+<body>
+
+  <!--
+  We are going to use a demo analytics endpoint to demonstrate what's possible with `amp-analytics`. The dashboard is embedded via `amp-iframe` and shows the data received by the analytics endpoint in real-time. It should be visible in the bottom right corner.
+  -->
+  <amp-iframe class="fixed-dashboard ampstart-card m1" width="180"
+              height="180" layout="fixed"
+              sandbox="allow-scripts allow-same-origin"
+              frameborder="0"
+              src="https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/embed?user=[[.]]&account=ampbyexample">
+        <amp-img src="/examples/visual-tests/amp-by-example/img/pixel-white.png"
+                 layout="fixed-height"
+                 height="350"
+                 width="auto"
+                 placeholder></amp-img>
+  </amp-iframe>
+  <!--
+    ## Pageview
+  -->
+  <!--
+    This is a simple `amp-analytics` configuration to fire a single request when the page becomes visible. Note how we declare a variable `eventId` in the request and define the concrete value in the `vars` block.
+
+    **Important: ** amp-analytics should be configured in the document body.
+  -->
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=[[.]]&account=ampbyexample&event=${eventId}"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "event",
+        "vars": {
+          "eventId": "pageview"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+
+  <!--
+    This is a more sophisticated view tracking. This sample fires an analytics request when a specific element becomes visible. The element is specified via `id` and must be an AMP element (amp-img, amp-iframe, amp-ad,...). 
+  -->
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=[[.]]&account=ampbyexample&event=${eventId}"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "event",
+        "visibilitySpec": {
+          "selector": "#cat-image-id",
+          "visiblePercentageMin": 20,
+          "totalTimeMin": 500,
+          "continuousTimeMin": 200
+        },
+        "vars": {
+          "eventId": "catview"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+
+  <!--
+    This image will trigger an analytics request, if at least 20% of it are visible for 500ms with a minimum time of 200ms continuous visibility.
+  -->
+  <amp-img id="cat-image-id" src="/examples/visual-tests/amp-by-example/img/cat-looking-up-300x200.jpg" width="300" height="200" attribution="visualhunt" alt="a cat" layout="responsive"></amp-img>
+
+  <!-- ## Anchor Clicks -->
+  <!--
+    User interactions can be tracked as well. This configuration will track clicks on any anchor links in the page.
+  -->
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=[[.]]&account=ampbyexample&event=${eventId}"
+    },
+    "triggers": {
+      "trackAnchorClicks": {
+        "on": "click",
+        "selector": "a",
+        "request": "event",
+        "vars": {
+          "eventId": "clickOnAnyAnchor"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+
+  <!-- Try it by clicking one of the links. -->
+  <ul>
+    <li><a>a link</a></li>
+    <li><a>another link</a></li>
+  </ul>
+
+  <!--
+  It is also possible to fire click events only for specific links. Select specific elements to tracking by specifying a `selector` id. This sample only tracks clicks on anchors with the id `anchor-id`.
+  -->
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=[[.]]&account=ampbyexample&event=${eventId}"
+    },
+    "triggers": {
+      "trackAnchorClicks": {
+        "on": "click",
+        "selector": "#anchor-id",
+        "request": "event",
+        "vars": {
+          "eventId": "clickOnSpecialAnchor"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+  <!--  Only one of these links will trigger the `clickOnSpecialAnchor` event. -->
+  <ul>
+    <li><a id="anchor-id">a special link</a>.</li>
+    <li><a id="another-anchor-id">a not so special link</a>.</li>
+  </ul>
+
+  <!-- ## Scroll Events -->
+  <!-- Use scroll events to fire a request under certain conditions when the page is scrolled. -->
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=[[.]]&account=ampbyexample&event=${eventId}"
+    },
+    "triggers": {
+      "scrollPings": {
+        "on": "scroll",
+        "scrollSpec": {
+          "verticalBoundaries": [10, 20, 30, 40, 50, 60, 70, 80, 90]
+        },
+        "request": "event",
+        "vars": {
+          "eventId": "scroll"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+  <!-- ## Timer -->
+  <!--
+  Timer events fire in the specified interval.
+  -->
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=[[.]]&account=ampbyexample&event=${eventId}"
+    },
+    "triggers": {
+      "pageTimer": {
+        "on": "timer",
+        "timerSpec": {
+          "interval": 10,
+          "maxTimerLength": 600
+        },
+        "request": "event",
+        "vars": {
+          "eventId": "timer"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+  <!-- ## AMP Carousel Tracking-->
+  <!--
+ It is possible to track [amp-carousel](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-carousel) events with amp-analytics (this works only for  `type="slides"`). Here is a sample carousel:
+  -->
+  <amp-carousel width="400" height="300" layout="responsive" type="slides">
+    <div class="slide" data-slide-id="slide1">Slide 1</div>
+    <div class="slide" data-slide-id="slide2">Slide 2</div>
+    <div class="slide">Slide 3</div>
+  </amp-carousel>
+
+  <!--
+You can use the `fromSlide` and `toSlide` [variables](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md) for tracking which slides are viewed. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
+  -->
+  <!--
+The `amp-carousel-change` event is issued when there is any change in the slide that is currently visible:
+  -->
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=[[.]]&account=ampbyexample&event=${eventId}"
+    },
+    "triggers": {
+      "ampCarouselChange": {
+        "on": "amp-carousel-change",
+        "request": "event",
+        "vars": {
+          "eventId": "carousel-change-${toSlide}"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+  <!--
+The `amp-carousel-next` event is issued when there is a traversal to the next slide: 
+  -->
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=[[.]]&account=ampbyexample&event=${eventId}"
+    },
+    "triggers": {
+      "ampCarouselNext": {
+        "on": "amp-carousel-next",
+        "request": "event",
+        "vars": {
+          "eventId": "carousel-next-${toSlide}"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+  <!--
+The `amp-carousel-prev` event is issued when there is a traversal to the previous slide: -->
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=[[.]]&account=ampbyexample&event=${eventId}"
+    },
+    "triggers": {
+      "ampCarouselPrev": {
+        "on": "amp-carousel-prev",
+        "request": "event",
+        "vars": {
+          "eventId": "carousel-prev-${fromSlide}"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+</body>
+</html>

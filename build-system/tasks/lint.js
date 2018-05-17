@@ -16,33 +16,162 @@
 'use strict';
 
 
-var argv = require('minimist')(process.argv.slice(2));
-var config = require('../config');
-var eslint = require('gulp-eslint');
-var gulp = require('gulp-help')(require('gulp'));
-var gulpIf = require('gulp-if');
-var lazypipe = require('lazypipe');
-var util = require('gulp-util');
-var watch = require('gulp-watch');
+const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
+const config = require('../config');
+const eslint = require('gulp-eslint');
+const eslintIfFixed = require('gulp-eslint-if-fixed');
+const gulp = require('gulp-help')(require('gulp'));
+const lazypipe = require('lazypipe');
+const log = require('fancy-log');
+const path = require('path');
+const watch = require('gulp-watch');
+const {getStdout} = require('../exec');
 
-var isWatching = (argv.watch || argv.w) || false;
-
-var options = {
+const isWatching = (argv.watch || argv.w) || false;
+const filesInARefactorPr = 15;
+const options = {
   fix: false,
-  rulePaths: ['build-system/eslint-rules/'],
-  plugins: ['eslint-plugin-google-camelcase'],
 };
-
-var watcher = lazypipe().pipe(watch, config.lintGlobs);
+let collapseLintResults = !!process.env.TRAVIS;
 
 /**
- * Checks if current Vinyl file has been fixed by eslint.
- * @param {!Vinyl} file
+ * Initializes the linter stream based on globs
+ * @param {!Object} globs
+ * @param {!Object} streamOptions
+ * @return {!ReadableStream}
+ */
+function initializeStream(globs, streamOptions) {
+  let stream = gulp.src(globs, streamOptions);
+  if (isWatching) {
+    const watcher = lazypipe().pipe(watch, globs);
+    stream = stream.pipe(watcher());
+  }
+  return stream;
+}
+
+/**
+ * Logs a message on the same line to indicate progress
+ * @param {string} message
+ */
+function logOnSameLine(message) {
+  if (!process.env.TRAVIS && process.stdout.isTTY) {
+    process.stdout.moveCursor(0, -1);
+    process.stdout.cursorTo(0);
+    process.stdout.clearLine();
+  }
+  log(message);
+}
+
+/**
+ * Runs the linter on the given stream using the given options.
+ * @param {string} path
+ * @param {!ReadableStream} stream
+ * @param {!Object} options
  * @return {boolean}
  */
-function isFixed(file) {
-  // Has ESLint fixed the file contents?
-  return file.eslint != null && file.eslint.fixed;
+function runLinter(path, stream, options) {
+  if (!process.env.TRAVIS) {
+    log(colors.green('Starting linter...'));
+  }
+  if (collapseLintResults) {
+    // TODO(#15255, #14761): Remove log folding after warnings are fixed.
+    log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
+    console./* OK*/log('travis_fold:start:lint_results\n');
+  }
+  return stream.pipe(eslint(options))
+      .pipe(eslint.formatEach('stylish', function(msg) {
+        logOnSameLine(msg.trim() + '\n');
+      }))
+      .pipe(eslintIfFixed(path))
+      .pipe(eslint.result(function(result) {
+        if (!process.env.TRAVIS) {
+          logOnSameLine(colors.green('Linted: ') + result.filePath);
+        }
+      }))
+      .pipe(eslint.results(function(results) {
+        // TODO(#15255, #14761): Remove log folding after warnings are fixed.
+        if (collapseLintResults) {
+          console./* OK*/log('travis_fold:end:lint_results');
+        }
+        if (results.errorCount == 0 && results.warningCount == 0) {
+          if (!process.env.TRAVIS) {
+            logOnSameLine(colors.green('SUCCESS: ') +
+                'No linter warnings or errors.');
+          }
+        } else {
+          const prefix = results.errorCount == 0 ?
+            colors.yellow('WARNING: ') : colors.red('ERROR: ');
+          logOnSameLine(prefix + 'Found ' +
+              results.errorCount + ' error(s) and ' +
+              results.warningCount + ' warning(s).');
+          if (!options.fix) {
+            log(colors.yellow('NOTE 1:'),
+                'You may be able to automatically fix some of these warnings ' +
+                '/ errors by running',
+                colors.cyan('gulp lint --local-changes --fix'),
+                'from your local branch.');
+            log(colors.yellow('NOTE 2:'),
+                'Since this is a destructive operation (that edits your files',
+                'in-place), make sure you commit before running the command.');
+          }
+        }
+      }))
+      .pipe(eslint.failAfterError());
+}
+
+/**
+ * Extracts the list of JS files in this PR from the commit log.
+ *
+ * @return {!Array<string>}
+ */
+function jsFilesInPr() {
+  const filesInPr =
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
+  return filesInPr.filter(function(file) {
+    return path.extname(file) == '.js';
+  });
+}
+
+/**
+ * Checks if there are .eslintrc changes in this PR, in which case we must lint
+ * all files.
+ *
+ * @return {boolean}
+ */
+function eslintrcChangesInPr() {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
+    return false;
+  }
+  const filesInPr =
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
+  return filesInPr.filter(function(file) {
+    return path.basename(file).includes('.eslintrc');
+  }).length > 0;
+}
+
+/**
+ * Sets the list of files to be linted.
+ *
+ * @param {!Array<string>} files
+ */
+function setFilesToLint(files) {
+  config.lintGlobs =
+      config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
+  if (!process.env.TRAVIS) {
+    log(colors.green('INFO: ') + 'Running lint on ' +
+        colors.cyan(files.join(',')));
+  }
+}
+
+/**
+ * Enables linting in strict mode.
+ */
+function enableStrictLinting() {
+  // TODO(#14761, #15255): Remove these overrides and make the rules errors by
+  // default in .eslintrc after all code is fixed.
+  options['configFile'] = '.eslintrc-strict';
+  collapseLintResults = false;
 }
 
 /**
@@ -50,38 +179,44 @@ function isFixed(file) {
  * @return {!Stream} Readable stream
  */
 function lint() {
-  var errorsFound = false;
-  var stream = gulp.src(config.lintGlobs);
-
-  if (isWatching) {
-    stream = stream.pipe(watcher());
-  }
-
   if (argv.fix) {
     options.fix = true;
   }
-
-  return stream.pipe(eslint(options))
-    .pipe(eslint.formatEach('stylish', function(msg) {
-      errorsFound = true;
-      util.log(util.colors.red(msg));
-    }))
-    .pipe(gulpIf(isFixed, gulp.dest('.')))
-    .pipe(eslint.failAfterError())
-    .on('end', function() {
-      if (errorsFound && !options.fix) {
-        util.log(util.colors.blue('Run `gulp lint --fix` to automatically ' +
-            'fix some of these lint warnings/errors. This is a destructive ' +
-            'operation (operates on the file system) so please make sure ' +
-            'you commit before running.'));
-      }
-    });
+  if (argv.files) {
+    setFilesToLint(argv.files.split(','));
+    enableStrictLinting();
+  } else if (!eslintrcChangesInPr() &&
+      (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
+       process.env.LOCAL_PR_CHECK ||
+       argv['local-changes'])) {
+    const jsFiles = jsFilesInPr();
+    if (jsFiles.length == 0) {
+      log(colors.green('INFO: ') + 'No JS files in this PR');
+      return Promise.resolve();
+    } else if (jsFiles.length > filesInARefactorPr) {
+      // This is probably a refactor, don't enable strict mode.
+      setFilesToLint(jsFiles);
+    } else {
+      setFilesToLint(jsFiles);
+      enableStrictLinting();
+    }
+  }
+  const basePath = '.';
+  const stream = initializeStream(config.lintGlobs, {base: basePath});
+  return runLinter(basePath, stream, options);
 }
 
-gulp.task('lint', 'Validates against Google Closure Linter', lint,
-{
-  options: {
-    'watch': '  Watches for changes in files, validates against the linter',
-    'fix': '  Fixes simple lint errors (spacing etc).'
-  }
-});
+
+gulp.task(
+    'lint',
+    'Validates against Google Closure Linter',
+    ['update-packages'],
+    lint,
+    {
+      options: {
+        'watch': '  Watches for changes in files, validates against the linter',
+        'fix': '  Fixes simple lint errors (spacing etc)',
+        'local-changes':
+            '  Lints just the changes commited to the local branch',
+      },
+    });

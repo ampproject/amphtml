@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {openWindowDialog} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {xhrFor} from '../../../src/services';
-
+import {Services} from '../../../src/services';
 import {Util} from './util';
+import {dev, user} from '../../../src/log';
+import {openWindowDialog} from '../../../src/dom';
+
+import {toWin} from '../../../src/types';
 
 // Popup options
 const POP = 'status=no,resizable=yes,scrollbars=yes,' +
@@ -48,7 +49,7 @@ export class PinItButton {
     user().assert(rootElement.getAttribute('data-description'),
         'The data-description attribute is required for Pin It buttons');
     this.element = rootElement;
-    this.xhr = xhrFor(rootElement.ownerDocument.defaultView);
+    this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
     this.color = rootElement.getAttribute('data-color');
     this.count = rootElement.getAttribute('data-count');
     this.lang = rootElement.getAttribute('data-lang');
@@ -180,4 +181,4 @@ export class PinItButton {
     }
     return promise.then(this.renderTemplate.bind(this));
   }
-};
+}

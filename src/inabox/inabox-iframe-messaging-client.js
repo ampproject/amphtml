@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder, getService} from '../service';
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {getService, registerServiceBuilder} from '../service';
+import {tryParseJson} from '../json';
 
 /**
  * @param {!Window} win
@@ -23,7 +24,7 @@ import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
  */
 export function iframeMessagingClientFor(win) {
   return /** @type {!../../3p/iframe-messaging-client.IframeMessagingClient} */(
-      getService(win, 'iframeMessagingClient'));
+    getService(win, 'iframeMessagingClient'));
 }
 
 /**
@@ -42,7 +43,13 @@ export function installIframeMessagingClient(win) {
  */
 function createIframeMessagingClient(win) {
   const iframeClient = new IframeMessagingClient(win);
-  iframeClient.setSentinel(getRandom(win));
+  //  Try read sentinel from window first.
+  const dataObject = tryParseJson(win.name);
+  let sentinel = null;
+  if (dataObject && dataObject['_context']) {
+    sentinel = dataObject['_context']['sentinel'];
+  }
+  iframeClient.setSentinel(sentinel || getRandom(win));
 
   // Bet the top window is the scrollable window and loads host script.
   // TODO(lannka,#9120):
@@ -55,7 +62,7 @@ function createIframeMessagingClient(win) {
 
 /**
  * @param {!Window} win
- * @returns {string}
+ * @return {string}
  */
 function getRandom(win) {
   return String(win.Math.random()).substr(2);

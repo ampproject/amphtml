@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
+import '../../src/service/timer-impl';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
-import {reportError} from '../../src/error';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import '../../src/service/timer-impl';
+import {reportError} from '../../src/error';
 
 initLogConstructor();
 setReportError(reportError);
 
-const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
+const COOKIE_MAX_AGE_DAYS = 180; // 6 month
 
 /**
  * @typedef {{
@@ -58,15 +57,16 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
-    id: 'ad-type-custom',
-    name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
-  },
-  {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
+  },
+  {
+    id: 'amp-access-iframe',
+    name: 'AMP Access iframe prototype',
+    spec: 'https://github.com/ampproject/amphtml/issues/13287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
   },
   {
     id: 'amp-access-server',
@@ -135,7 +135,7 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
   {
-    id: 'amp-lightbox-viewer',
+    id: 'amp-lightbox-gallery',
     name: 'Enables a new lightbox experience via the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
@@ -145,27 +145,10 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-lightbox-viewer-auto',
-    name: 'Allows the new lightbox experience to automatically include some ' +
-        'elements without the need to manually add the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
-    id: 'amp-fresh',
-    name: 'Guaranteed minimum freshness on sections of a page',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
-  },
-  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
-    id: 'alp-for-a4a',
-    name: 'Enable redirect to landing page directly for A4A',
-    spec: 'https://github.com/ampproject/amphtml/issues/5212',
   },
   {
     id: 'ios-embed-wrapper',
@@ -180,16 +163,16 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
+    id: 'font-display-swap',
+    name: 'Use font-display: swap as the default for fonts.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
+  },
+  {
     id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP.',
+    name: 'High-performing keyframe animations in AMP (launched).',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
-    id: 'variable-filters',
-    name: 'Format to apply filters to analytics variables',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
     id: 'pump-early-frame',
@@ -204,13 +187,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
-    id: 'amp-bind',
-    name: 'AMP extension for dynamic content',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-bind/amp-bind.md',
-  },
-  {
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
@@ -220,52 +196,8 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'sticky-ad-early-load',
-    name: 'Load sticky-ad early after user first scroll' +
-        'Only apply to 1.0 version',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
-  },
-  {
-    id: 'amp-fx-parallax',
-    name: 'Amp extension for a parallax effect',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
-    spec: 'https://github.com/ampproject/amphtml/issues/1443',
-  },
-  {
-    id: 'slidescroll-disable-css-snap',
-    name: 'Slidescroll disable css snap',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
-    spec: 'https://github.com/ampproject/amphtml/issues/7670',
-  },
-  {
-    id: '3p-use-ampcontext',
-    name: 'Use AmpContext for window.context messaging',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
-    spec: 'https://github.com/ampproject/amphtml/issues/6829',
-  },
-  {
     id: 'as-use-attr-for-format',
     name: 'Use slot width/height attribute for AdSense size format',
-  },
-  {
-    id: 'dc-use-attr-for-format',
-    name: 'Use slot width/height attribute for DoubleClick size format',
-  },
-  {
-    id: 'ad-loader-v1',
-    name: 'New ad loader version 1',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
-  },
-  {
-    id: 'ad-loader-v2',
-    name: 'New ad loader version 2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
-  },
-  {
-    id: 'amp-form-verifiers',
-    name: 'Asynchronous form verifiers',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9174',
-    spec: 'https://github.com/ampproject/amphtml/issues/8736',
   },
   {
     id: 'input-debounced',
@@ -274,28 +206,98 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/9277',
   },
   {
-    id: 'amp-ima-video',
-    name: 'IMA-integrated Video Player',
+    id: 'user-error-reporting',
+    name: 'Report error to publishers',
+    spec: 'https://github.com/ampproject/amphtml/issues/6415',
   },
   {
-    id: 'amp-ad-exit',
-    name: 'Enable amp-ad-exit component',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9502',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/amp-ad-exit.md',
+    id: 'disable-rtc',
+    name: 'Disable AMP RTC',
+    spec: 'https://github.com/ampproject/amphtml/issues/8551',
   },
   {
-    id: 'amp-sidebar 1.0',
-    name: 'Amp sidebar 1.0 extension',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-sidebar/1.0/amp-sidebar-1.0.md',
+    id: 'inabox-position-api',
+    name: 'Position API for foreign iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/10995',
   },
   {
-    id: 'amp-ad-refresh',
-    name: 'Enable AMP ad refresh',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-ad-network-doubleclick-impl/' +
-        'amp-ad-network-doubleclick-impl-internal.md',
+    id: 'amp-story',
+    name: 'Visual storytelling in AMP',
+    spec: 'https://github.com/ampproject/amphtml/issues/11329',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
+  },
+  {
+    id: 'amp-story-scaling',
+    name: 'Scale pages dynamically in amp-story by default',
+    spec: 'https://github.com/ampproject/amphtml/issues/12902',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
+  },
+  {
+    id: 'amp-date-picker',
+    name: 'Enables the amp-date-picker extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/6469',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
+  },
+  {
+    id: 'inline-styles',
+    name: 'Enables the usage of inline styles for non fixed elements',
+    spec: 'https://github.com/ampproject/amphtml/issues/11881',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
+  },
+  {
+    id: 'url-replacement-v2',
+    name: 'new parsing engine for url variables',
+    spec: 'https://github.com/ampproject/amphtml/issues/12119',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
+  {
+    id: 'amp-next-page',
+    name: 'Document level next page recommendations and infinite scroll',
+    spec: 'https://github.com/ampproject/amphtml/issues/12945',
+  },
+  {
+    id: 'inabox-rov',
+    name: 'Extensions layout independent of viewport location if inabox.',
+  },
+  {
+    id: 'amp-live-list-sorting',
+    name: 'Allows "newest last" insertion algorithm to be used',
+    spec: 'https://github.com/ampproject/amphtml/issues/5396',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13552',
+  },
+  {
+    id: 'amp-consent',
+    name: 'Enables the amp-consent extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
+  {
+    id: 'no-sync-xhr-in-ads',
+    name: 'Disables syncronous XHR requests in 3p iframes.',
+    spec: 'TODO',
+    cleanupIssue: 'TODO',
+  },
+  {
+    id: 'video-service',
+    name: 'Enables new implementation of unified Video Interface services.',
+    spec: 'https://github.com/ampproject/amphtml/issues/13674',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
+  },
+  {
+    id: 'iframe-messaging',
+    name: 'Enables "postMessage" action on amp-iframe.',
+    spec: 'https://github.com/ampproject/amphtml/issues/9074',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
+  },
+  {
+    id: 'amp-img-native-srcset',
+    name: 'Enables native browser implementation of srcset and sizes',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
+  },
+  {
+    id: 'layers',
+    name: 'Enables the new Layers position/measurement system',
+    spec: 'https://github.com/ampproject/amphtml/issues/3434',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
 ];
 
@@ -434,8 +436,8 @@ function toggleExperiment_(id, name, opt_on) {
   const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against click jacking.
   const confirmMessage = on ?
-      'Do you really want to activate the AMP experiment' :
-      'Do you really want to deactivate the AMP experiment';
+    'Do you really want to activate the AMP experiment' :
+    'Do you really want to deactivate the AMP experiment';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {

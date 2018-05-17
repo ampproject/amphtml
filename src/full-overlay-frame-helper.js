@@ -26,7 +26,7 @@ import {px, resetStyles, setStyles, translate} from './style';
  * @param {number} transitionTimeMs
  */
 export function centerFrameUnderVsyncMutate(
-    iframe, iframeRect, viewportSize, transitionTimeMs) {
+  iframe, iframeRect, viewportSize, transitionTimeMs) {
   const translateX = px(
       (viewportSize.width / 2 - iframeRect.width / 2) - iframeRect.left);
 
@@ -66,6 +66,8 @@ export function expandFrameUnderVsyncMutate(iframe) {
     'height': '100vh',
     'transition': null,
     'transform': null,
+    'margin': 0,
+    'border': 0,
   });
 }
 
@@ -86,7 +88,7 @@ export function collapseFrameUnderVsyncMutate(iframe) {
     'bottom',
     'width',
     'height',
-    'min-width',
-    'min-height',
+    'margin',
+    'border',
   ]);
 }

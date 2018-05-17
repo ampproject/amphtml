@@ -14,30 +14,36 @@
  * limitations under the License.
  */
 
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
-import {removeElement} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {setStyles} from '../../../src/style';
-import {addParamsToUrl} from '../../../src/url';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
-import {dict} from '../../../src/utils/object';
-import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * @enum {number}
  * @private
  */
 
- // Correct PlayerStates taken from
- // https://developers.google.com/youtube/iframe_api_reference#Playback_status
+// Correct PlayerStates taken from
+// https://developers.google.com/youtube/iframe_api_reference#Playback_status
 const PlayerStates = {
   UNSTARTED: -1,
   ENDED: 0,
@@ -62,17 +68,21 @@ class AmpYoutube extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private {number} */
-    this.playerState_ = PlayerStates.UNSTARTED;
 
     /** @private {?string}  */
     this.videoid_ = null;
+
+    /** @private {?string} */
+    this.liveChannelid_ = null;
 
     /** @private {?boolean}  */
     this.muted_ = false;
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private {?Object} Info object about video returned by YouTube API*/
+    this.info_ = null;
 
     /** @private {?string} */
     this.videoIframeSrc_ = null;
@@ -117,7 +127,7 @@ class AmpYoutube extends AMP.BaseElement {
     return 0.75;
   }
 
-   /** @override */
+  /** @override */
   viewportCallback(visible) {
     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
@@ -125,21 +135,44 @@ class AmpYoutube extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.videoid_ = this.getVideoId_();
+    this.liveChannelid_ = this.getLiveChannelId_();
+    this.assertDatasourceExists_();
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     // TODO(aghassemi, #3216): amp-youtube has a special case where 404s are not
     // easily caught hence the following hacky-solution.
     // Please don't follow this behavior in other extensions, instead
     // see BaseElement.createPlaceholderCallback.
-    if (!this.getPlaceholder()) {
+    if (!this.getPlaceholder() && this.videoid_) {
       this.buildImagePlaceholder_();
     }
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getEmbedUrl_() {
+    this.assertDatasourceExists_();
+    let urlSuffix = '';
+    if (this.getCredentials_() === 'omit') {
+      urlSuffix = '-nocookie';
+    }
+    const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
+    let descriptor = '';
+    if (this.videoid_) {
+      descriptor = `${encodeURIComponent(this.videoid_ || '')}?`;
+    } else {
+      descriptor = 'live_stream?channel='
+        + `${encodeURIComponent(this.liveChannelid_ || '')}&`;
+    }
+    return `${baseUrl}${descriptor}enablejsapi=1`;
   }
 
   /** @return {string} */
@@ -147,14 +180,15 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
-    dev().assert(this.videoid_);
-    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+
+    let src = this.getEmbedUrl_();
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
       // Autoplay is managed by video manager, do not pass it to YouTube.
       delete params['autoplay'];
-      user().error('AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
+      this.user().error(
+          'AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
           'data-param-autoplay');
     }
 
@@ -222,21 +256,16 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    this.playerState_ = PlayerStates.PAUSED;
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
-    return true;  // Call layoutCallback again.
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
+    return true; // Call layoutCallback again.
   }
 
   /** @override */
   pauseCallback() {
-    // Only send pauseVideo command if the player is playing. Otherwise
-    // The player breaks if the user haven't played the video yet specially
-    // on mobile.
-    if (this.iframe_ && this.iframe_.contentWindow &&
-        this.playerState_ == PlayerStates.PLAYING) {
+    if (this.iframe_ && this.iframe_.contentWindow) {
       this.pause();
     }
   }
@@ -250,16 +279,38 @@ class AmpYoutube extends AMP.BaseElement {
       }
     }
   }
+  /**
+   * @return {?string}
+   * @private
+   */
+  getLiveChannelId_() {
+    return this.element.getAttribute('data-live-channelid');
+  }
+
+  /**
+   * @return {?string}
+   * @private
+   */
+  getVideoId_() {
+    return this.element.getAttribute('data-videoid');
+  }
 
   /**
    * @return {string}
    * @private
    */
-  getVideoId_() {
-    return user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-youtube> %s',
-        this.element);
+  getCredentials_() {
+    return this.element.getAttribute('credentials') || 'include';
+  }
+
+  assertDatasourceExists_() {
+    const datasourceExists = !(this.videoid_ && this.liveChannelid_)
+      && (this.videoid_ || this.liveChannelid_);
+    user().assert(
+        datasourceExists, 'Exactly one of data-videoid or '
+      + 'data-live-channelid should be present for <amp-youtube> %s',
+        this.element
+    );
   }
 
   /**
@@ -289,23 +340,26 @@ class AmpYoutube extends AMP.BaseElement {
     }
     if (!getData(event) || !(isObject(getData(event))
         || startsWith(/** @type {string} */ (getData(event)), '{'))) {
-      return;  // Doesn't look like JSON.
+      return; // Doesn't look like JSON.
     }
     /** @const {?JsonObject} */
     const data = /** @type {?JsonObject} */ (isObject(getData(event))
-        ? getData(event)
-        : tryParseJson(getData(event)));
+      ? getData(event)
+      : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
     if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['playerState'] !== undefined) {
-      this.playerState_ = data['info']['playerState'];
-      if (this.playerState_ == PlayerStates.PAUSED ||
-          this.playerState_ == PlayerStates.ENDED) {
+      const playerState = data['info']['playerState'];
+      if (playerState == PlayerStates.PAUSED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-      } else if (this.playerState_ == PlayerStates.PLAYING) {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      } else if (playerState == PlayerStates.ENDED) {
+        // YT does not fire pause and ended together.
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
+      } else if (playerState == PlayerStates.PLAYING) {
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
     } else if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['muted'] !== undefined) {
@@ -314,6 +368,11 @@ class AmpYoutube extends AMP.BaseElement {
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
+    } else if (data['event'] == 'initialDelivery' && data['info']) {
+      this.info_ = data['info'];
+    } else if (data['event'] == 'infoDelivery' && data['info'] &&
+        data['info']['currentTime'] !== undefined) {
+      this.info_.currentTime = data['info']['currentTime'];
     }
   }
 
@@ -322,6 +381,9 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   listenToFrame_() {
+    if (!this.iframe_) {
+      return;
+    }
     this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
       'event': 'listening',
     })), '*');
@@ -330,8 +392,7 @@ class AmpYoutube extends AMP.BaseElement {
   /** @private */
   buildImagePlaceholder_() {
     const imgPlaceholder = this.element.ownerDocument.createElement('img');
-    dev().assert(this.videoid_);
-    const videoid = this.videoid_ || '';
+    const videoid = dev().assertString(this.videoid_);
 
     setStyles(imgPlaceholder, {
       // Cover matches YouTube Player styling.
@@ -340,7 +401,7 @@ class AmpYoutube extends AMP.BaseElement {
       // the object-fit: cover.
       'visibility': 'hidden',
     });
-
+    this.propagateAttributes(['aria-label'], imgPlaceholder);
     // TODO(mkhatib): Maybe add srcset to allow the browser to
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
@@ -348,7 +409,13 @@ class AmpYoutube extends AMP.BaseElement {
         encodeURIComponent(videoid) + '/sddefault.jpg#404_is_fine';
     imgPlaceholder.setAttribute('placeholder', '');
     imgPlaceholder.setAttribute('referrerpolicy', 'origin');
-
+    if (imgPlaceholder.hasAttribute('aria-label')) {
+      imgPlaceholder.setAttribute('alt',
+          'Loading video - ' + imgPlaceholder.getAttribute('aria-label')
+      );
+    } else {
+      imgPlaceholder.setAttribute('alt', 'Loading video');
+    }
     this.applyFillContent(imgPlaceholder);
     this.element.appendChild(imgPlaceholder);
 
@@ -368,8 +435,10 @@ class AmpYoutube extends AMP.BaseElement {
           encodeURIComponent(videoid) + '/hqdefault.jpg';
       return this.loadPromise(imgPlaceholder);
     }).then(() => {
-      setStyles(imgPlaceholder, {
-        'visibility': '',
+      this.getVsync().mutate(() => {
+        setStyles(imgPlaceholder, {
+          'visibility': '',
+        });
       });
     });
   }
@@ -432,6 +501,77 @@ class AmpYoutube extends AMP.BaseElement {
   hideControls() {
     // Not supported.
   }
-};
 
-AMP.registerElement('amp-youtube', AmpYoutube);
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    // Youtube already updates the Media Session so no need for the video
+    // manager to update it too
+    return true;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    if (this.info_) {
+      return this.info_.currentTime;
+    }
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    if (this.info_) {
+      return this.info_.duration;
+    }
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
+}
+
+
+AMP.extension('amp-youtube', '0.1', AMP => {
+  AMP.registerElement('amp-youtube', AmpYoutube);
+});

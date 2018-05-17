@@ -15,29 +15,40 @@
  */
 
 // This must load before all other tests.
-import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
-import {ampdocServiceFor} from '../src/ampdoc';
-import {removeElement} from '../src/dom';
-import {setReportError} from '../src/log';
+import 'babel-polyfill';
+import * as describes from '../testing/describes';
+import {Services} from '../src/services';
+import {activateChunkingForTesting} from '../src/chunk';
 import {
   adopt,
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platformFor, resourcesForDoc} from '../src/services';
-import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
-import {
-  resetAccumulatedErrorMessagesForTesting,
-  reportError,
-} from '../src/error';
-import {resetExperimentTogglesForTesting} from '../src/experiments';
-import * as describes from '../testing/describes';
 import {installYieldIt} from '../testing/yield';
+import {removeElement} from '../src/dom';
+import {
+  reportError,
+  resetAccumulatedErrorMessagesForTesting,
+} from '../src/error';
+import {
+  resetEvtListenerOptsSupportForTesting,
+} from '../src/event-helper-listen';
+import {resetExperimentTogglesForTesting} from '../src/experiments';
+import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
+// Used to print warnings for unexpected console errors.
+let consoleErrorSandbox;
+let consoleErrorStub;
+let consoleInfoLogWarnSandbox;
+let testName;
+
+// Used to clean up global state between tests.
+let initialGlobalState;
+let initialWindowState;
 
 // All exposed describes.
 global.describes = describes;
@@ -100,11 +111,26 @@ class TestConfig {
      */
     this.configTasks = [];
 
-    this.platform = platformFor(window);
+    this.platform = Services.platformFor(window);
+
+    /**
+     * Predicate functions that determine whether to run tests on a platform.
+     */
+    this.runOnChrome = this.platform.isChrome.bind(this.platform);
+    this.runOnEdge = this.platform.isEdge.bind(this.platform);
+    this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
+    this.runOnSafari = this.platform.isSafari.bind(this.platform);
+    this.runOnIos = this.platform.isIos.bind(this.platform);
+    this.runOnIe = this.platform.isIe.bind(this.platform);
+
+    /**
+     * By default, IE is skipped. Individual tests may opt in.
+     */
+    this.skip(this.runOnIe);
   }
 
   skipChrome() {
-    return this.skip(this.platform.isChrome.bind(this.platform));
+    return this.skip(this.runOnChrome);
   }
 
   skipOldChrome() {
@@ -114,19 +140,24 @@ class TestConfig {
   }
 
   skipEdge() {
-    return this.skip(this.platform.isEdge.bind(this.platform));
+    return this.skip(this.runOnEdge);
   }
 
   skipFirefox() {
-    return this.skip(this.platform.isFirefox.bind(this.platform));
+    return this.skip(this.runOnFirefox);
   }
 
   skipSafari() {
-    return this.skip(this.platform.isSafari.bind(this.platform));
+    return this.skip(this.runOnSafari);
   }
 
   skipIos() {
-    return this.skip(this.platform.isIos.bind(this.platform));
+    return this.skip(this.runOnIos);
+  }
+
+  enableIe() {
+    this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
+    return this;
   }
 
   /**
@@ -137,24 +168,33 @@ class TestConfig {
     return this;
   }
 
+  ifNewChrome() {
+    return this.ifChrome().skipOldChrome();
+  }
+
   ifChrome() {
-    return this.if(this.platform.isChrome.bind(this.platform));
+    return this.if(this.runOnChrome);
   }
 
   ifEdge() {
-    return this.if(this.platform.isEdge.bind(this.platform));
+    return this.if(this.runOnEdge);
   }
 
   ifFirefox() {
-    return this.if(this.platform.isFirefox.bind(this.platform));
+    return this.if(this.runOnFirefox);
   }
 
   ifSafari() {
-    return this.if(this.platform.isSafari.bind(this.platform));
+    return this.if(this.runOnSafari);
   }
 
   ifIos() {
-    return this.if(this.platform.isIos.bind(this.platform));
+    return this.if(this.runOnIos);
+  }
+
+  ifIe() {
+    // It's necessary to first enable IE because we skip it by default.
+    return this.enableIe().if(this.runOnIe);
   }
 
   /**
@@ -163,10 +203,6 @@ class TestConfig {
   if(fn) {
     this.ifMatchers.push(fn);
     return this;
-  }
-
-  skipSauceLabs() {
-    return this.skip(() => window.ampTestRuntimeConfig.saucelabs);
   }
 
   retryOnSaucelabs() {
@@ -220,12 +256,12 @@ it.configure = function() {
 
 // Used to check if an unrestored sandbox exists
 const sandboxes = [];
-const create = sinon.sandbox.create;
+const {create} = sinon.sandbox;
 sinon.sandbox.create = function(config) {
   const sandbox = create.call(sinon.sandbox, config);
   sandboxes.push(sandbox);
 
-  const restore = sandbox.restore;
+  const {restore} = sandbox;
   sandbox.restore = function() {
     const i = sandboxes.indexOf(sandbox);
     if (i > -1) {
@@ -236,9 +272,85 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
+// Used during normal test execution, to detect unexpected console errors.
+function warnForConsoleError() {
+  if (consoleErrorSandbox) {
+    consoleErrorSandbox.restore();
+  }
+  consoleErrorSandbox = sinon.sandbox.create();
+  const originalConsoleError = console/*OK*/.error;
+  consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
+    const errorMessage = messages.join(' ').split('\n', 1)[0]; // First line.
+    const helpMessage = '    The test "' + testName + '"' +
+        ' resulted in a call to console.error.\n' +
+        '    ⤷ If this is not expected, fix the code that generated ' +
+            'the error.\n' +
+        '    ⤷ If this is expected, use the following pattern to wrap the ' +
+            'test code that generated the error:\n' +
+        '        \'allowConsoleError(() => { <code that generated the ' +
+            'error> });';
+    // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
+    if (window.__karma__.config.failOnConsoleError) {
+      throw new Error(errorMessage + '\'\n' + helpMessage);
+    } else {
+      originalConsoleError(errorMessage + '\'\n' + helpMessage);
+    }
+  });
+  this.allowConsoleError = function(func) {
+    dontWarnForConsoleError();
+    const result = func();
+    try {
+      expect(consoleErrorStub).to.have.been.called;
+    } catch (e) {
+      const helpMessage =
+          'The test "' + testName + '" contains an "allowConsoleError" block ' +
+          'that didn\'t result in a call to console.error.';
+      throw new Error(helpMessage);
+    }
+    warnForConsoleError();
+    return result;
+  };
+}
+
+// Used during sections of tests where an error is expected.
+function dontWarnForConsoleError() {
+  if (consoleErrorSandbox) {
+    consoleErrorSandbox.restore();
+  }
+  consoleErrorSandbox = sinon.sandbox.create();
+  consoleErrorStub =
+      consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
+}
+
+// Used to restore error level logging after each test.
+function restoreConsoleError() {
+  consoleErrorSandbox.restore();
+}
+
+// Used to silence info, log, and warn level logging during each test.
+function stubConsoleInfoLogWarn() {
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
+  consoleInfoLogWarnSandbox = sinon.sandbox.create();
+  consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
+  consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
+  consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
+}
+
+// Used to restore info, log, and warn level logging after each test.
+function restoreConsoleInfoLogWarn() {
+  consoleInfoLogWarnSandbox.restore();
+}
+
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
+  testName = this.currentTest.fullTitle();
+  stubConsoleInfoLogWarn();
+  warnForConsoleError();
+  initialGlobalState = Object.keys(global);
+  initialWindowState = Object.keys(window);
 });
 
 function beforeTest() {
@@ -250,18 +362,22 @@ function beforeTest() {
   };
   window.AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = ampdocServiceFor(window).getAmpDoc();
+  const ampdoc = Services.ampdocServiceFor(window).getAmpDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
-  resourcesForDoc(ampdoc).ampInitComplete();
+  Services.resourcesForDoc(ampdoc).ampInitComplete();
 }
 
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(function() {
+  const globalState = Object.keys(global);
+  const windowState = Object.keys(window);
+  restoreConsoleError();
+  restoreConsoleInfoLogWarn();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
-  if (!platformFor(window).isSafari()) {
+  if (!Services.platformFor(window).isSafari()) {
     cleanupTagNames.push('iframe');
   }
   const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
@@ -280,6 +396,21 @@ afterEach(function() {
   window.context = undefined;
   window.AMP_MODE = undefined;
 
+  if (windowState.length != initialWindowState.length) {
+    for (let i = initialWindowState.length; i < windowState.length; ++i) {
+      if (window[windowState[i]]) {
+        delete window[windowState[i]];
+      }
+    }
+  }
+
+  if (initialGlobalState.length != globalState.length) {
+    for (let i = initialGlobalState.length; i < globalState.length; ++i) {
+      if (global[globalState[i]]) {
+        delete global[globalState[i]];
+      }
+    }
+  }
   const forgotGlobal = !!global.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a
@@ -300,6 +431,7 @@ afterEach(function() {
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
+  resetEvtListenerOptsSupportForTesting();
   setReportError(reportError);
 });
 
@@ -388,5 +520,3 @@ chai.Assertion.addMethod('jsonEqual', function(compare) {
       b
   );
 });
-
-sinon = null;

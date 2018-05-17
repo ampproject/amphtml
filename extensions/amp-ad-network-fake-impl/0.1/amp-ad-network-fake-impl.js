@@ -15,13 +15,10 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {resolveRelativeUrl} from '../../../src/url';
-import {utf8Decode} from '../../../src/utils/bytes';
-import {parseJson} from '../../../src/json';
+import {startsWith} from '../../../src/string';
+import {user} from '../../../src/log';
 
+const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
 
@@ -30,8 +27,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
-    user().assert(TextEncoder, '<amp-ad type="fake"> requires browser'
-        + ' support for TextEncoder() function.');
   }
 
   /** @override */
@@ -43,55 +38,52 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    // Note: true is the default, so this method is not strictly needed here.
-    // But a network implementation might choose to implement a real check
-    // in this method.
+    // To send out ad request, ad type='fake' requires the id set to an invalid
+    // value start with `i-amphtml-demo-`. So that fake ad can only be used in
+    // invalid AMP pages.
+    const id = this.element.getAttribute('id');
+    if (!id || !startsWith(id, 'i-amphtml-demo-')) {
+      user().warn(TAG, 'Only works with id starts with i-amphtml-demo-');
+      return false;
+    }
     return true;
   }
 
   /** @override */
   getAdUrl() {
-    return resolveRelativeUrl(
-        this.element.getAttribute('src'),
-        '/extensions/amp-ad-network-fake-impl/0.1/data/');
+    return this.element.getAttribute('src');
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, unusedResponseHeaders) {
-    return utf8Decode(responseText).then(deserialized => {
-      if (getMode().localDev) {
-        if (this.element.getAttribute('fakesig') == 'true') {
-          // In the fake signature mode the content is the plain AMP HTML
-          // and the signature is "FAKESIG". This mode is only allowed in
-          // `localDev` and primarily used for A4A Envelope for testing.
-          // See DEVELOPING.md for more info.
-          const creative = this.transformCreativeLocalDev_(deserialized);
-          const encoder = new TextEncoder('utf-8');
-          return {
-            creative: encoder.encode(creative).buffer,
-            signature: 'FAKESIG',
-          };
-        }
+  sendXhrRequest(adUrl) {
+    return super.sendXhrRequest(adUrl).then(response => {
+      if (!response) {
+        return null;
       }
-      // Normal mode: the content is a JSON structure with two fieleds:
-      // `creative` and `signature`.
-      const decoded = parseJson(deserialized);
-      dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
-      dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);
-      const encoder = new TextEncoder('utf-8');
-      return {
-        creative: encoder.encode(decoded['creative']).buffer,
-        signature: base64DecodeToBytes(decoded['signature']),
-      };
+      const {status, headers} =
+          /** @type {{status: number, headers: !Headers}} */ (response);
+
+      // In the convert creative mode the content is the plain AMP HTML.
+      // This mode is primarily used for A4A Envelop for testing.
+      // See DEVELOPING.md for more info.
+      if (this.element.getAttribute('a4a-conversion') == 'true') {
+        return response.text().then(
+            responseText => new Response(
+                this.transformCreative_(responseText),
+                {status, headers}));
+      }
+
+      // Normal mode: Expect the creative is written in AMP4ADS doc.
+      return response;
     });
   }
 
   /**
-   * Converts a general AMP doc to a AMP4ADS doc. Only used in localDev.
+   * Converts a general AMP doc to a AMP4ADS doc.
    * @param {string} source
    * @return {string}
    */
-  transformCreativeLocalDev_(source) {
+  transformCreative_(source) {
     const doc = new DOMParser().parseFromString(source, 'text/html');
     const root = doc.documentElement;
 
@@ -148,5 +140,8 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement(
-    'amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+
+AMP.extension('amp-ad-network-fake-impl', '0.1', AMP => {
+  AMP.registerElement(
+      'amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+});

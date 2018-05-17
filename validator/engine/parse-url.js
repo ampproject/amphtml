@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,6 +55,7 @@ function hostCharIsEnd(code) {
   return (code === /* '#' */ 0x23 ||
           code === /* '/' */ 0x2F ||
           code === /* '?' */ 0x3F ||
+          code === /* '\' */ 0x5C ||
           isNaN(code));
 }
 

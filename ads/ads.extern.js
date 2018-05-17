@@ -34,6 +34,13 @@ function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {};
 
 // Under 3p folder
 
+// beopinion.js
+data.account;
+data.content;
+data.name;
+//data['my-content'];
+window.BeOpinionSDK;
+
 // facebook.js
 data.embedAs;
 data.href;
@@ -48,6 +55,13 @@ data.src;
 
 //twitter.js
 data.tweetid
+
+//mathml.js
+data.formula
+var mathjax
+mathjax.Hub
+mathjax.Hub.Queue
+window.MathJax
 
 // Under ads/google folder
 
@@ -122,6 +136,9 @@ google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
 google.ima.AdsManager;
 google.ima.AdsManager.setVolume;
+google.ima.settings;
+google.ima.settings.setLocale;
+google.ima.settings.setVpaidMode;
 
 // 3P ads
 // Please sort by alphabetic order of the ad server name to avoid conflict
@@ -159,6 +176,9 @@ data.targetid;
 data.ws;
 data.host;
 data.s;
+
+// adpicker.js
+data.ph;
 
 // adreactor.js
 data.zid;
@@ -211,6 +231,21 @@ data.debug;
 data.adUnits;
 data.target;
 
+// adventive.js
+const adventive = {};
+adventive.Ad;
+adventive.addArgs = () => {};
+adventive.addInstance = () => {};
+adventive.ads;
+adventive.args;
+adventive.instances;
+adventive.isLibLoaded;
+adventive.modes;
+adventive.Plugin;
+adventive.plugins;
+adventive.utility;
+window.adventive = adventive;
+
 // colombia.js
 data.clmb_slot;
 data.clmb_position;
@@ -229,6 +264,9 @@ Criteo.Log.Debug;
 Criteo.CallRTA;
 Criteo.ComputeDFPTargetingForAMP;
 Criteo.PubTag = {};
+Criteo.PubTag.Adapters = {};
+Criteo.PubTag.Adapters.AMP = {};
+Criteo.PubTag.Adapters.AMP.Standalone;
 Criteo.PubTag.RTA = {};
 Criteo.PubTag.RTA.DefaultCrtgContentName;
 Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
@@ -281,6 +319,10 @@ data.queue;
 // imedia.js
 data.positions
 
+// imonomy.js
+data.pid;
+data.subId;
+
 // improvedigital.js
 data.placement;
 data.optin;
@@ -292,6 +334,14 @@ window._inmobi;
 _inmobi.getNewAd;
 data.siteid;
 data.slotid;
+
+// innity.js
+var innity_adZone;
+var innityAMPZone;
+var innityAMPTag;
+data.pub;
+data.zone;
+data.channel;
 
 // ix.js
 data.ixId;
@@ -384,6 +434,17 @@ data.dfpSlot;
 data.nc;
 data.auid;
 
+// pixels.js
+var pixelsAd;
+var pixelsAMPAd;
+var pixelsAMPTag;
+pixelsAMPTag.renderAmp;
+data.origin;
+data.sid;
+data.tag;
+data.clickTracker;
+data.viewability;
+
 // plista.js
 data.widgetname;
 data.publickey;
@@ -391,6 +452,12 @@ data.urlprefix;
 data.item;
 data.geo;
 data.categories;
+
+// pubguru.js
+data.height;
+data.publisher;
+data.slot;
+data.width;
 
 // pubmatic.js
 data.kadpageurl;
@@ -404,24 +471,16 @@ data.section;
 window.PulsePointHeaderTag;
 
 // rubicon.js
-var rubicontag;
-rubicontag.setFPV;
-rubicontag.setFPI;
-rubicontag.getSlot;
-rubicontag.getAdServerTargeting;
-rubicontag.addKW;
-rubicontag.setUrl;
-rubicontag.setIntegration;
 data.method;
-data.overrideWidth;
 data.width;
-data.overrideHeight;
 data.height;
 data.account;
 data.kw;
 data.visitor;
 data.inventory;
 data.size;
+data.site;
+data.zone;
 data.callback;
 
 // sharethrough.js
@@ -464,6 +523,23 @@ data.tag;
 data.tag;
 data.tag.tta;
 data.tag.ttp;
+
+// uas.js
+var Phoenix;
+window.Phoenix;
+Phoenix.EQ;
+Phoenix.EQ.push;
+Phoenix.enableSingleRequestCallMode;
+Phoenix.setInfo;
+Phoenix.defineAdSlot;
+Phoenix.display;
+data.accId;
+data.adUnit;
+data.targetings;
+data.extraParams;
+data.slot.setVisibility;
+data.slot.setTargeting;
+data.slot.setExtraParameters;
 
 // webediads.js
 var wads;
@@ -532,3 +608,6 @@ data.renderer;
 // zergnet.js
 window.zergnetWidgetId;
 data.zergid;
+
+// _ping_.js
+window.networkIntegrationDataParamForTesting;

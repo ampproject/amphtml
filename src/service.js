@@ -20,9 +20,12 @@
  * Invariant: Service getters never return null for registered services.
  */
 
-// Requires polyfills in immediate side effect.
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
+import {Deferred} from './utils/promise';
 import {dev} from './log';
+import {toWin} from './types';
 
 
 /**
@@ -104,12 +107,12 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
  * @return {Object} The service.
  */
 export function getExistingServiceForDocInEmbedScope(
-    nodeOrDoc, id, opt_fallbackToTopWin) {
+  nodeOrDoc, id, opt_fallbackToTopWin) {
   // First, try to resolve via local (embed) window.
   if (nodeOrDoc.nodeType) {
     // If a node is passed, try to resolve via this node.
-    const win = /** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    const win = toWin(/** @type {!Document} */ (
+      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
     if (local) {
       return local;
@@ -163,9 +166,9 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilder(win,
-                                       id,
-                                       constructor,
-                                       opt_instantiate) {
+  id,
+  constructor,
+  opt_instantiate) {
   win = getTopWindow(win);
   registerServiceInternal(win, win, id, constructor);
   if (opt_instantiate) {
@@ -183,9 +186,9 @@ export function registerServiceBuilder(win,
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilderForDoc(nodeOrDoc,
-                                             id,
-                                             constructor,
-                                             opt_instantiate) {
+  id,
+  constructor,
+  opt_instantiate) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   registerServiceInternal(holder, ampdoc, id, constructor);
@@ -196,10 +199,10 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
 
 
 /**
- * Returns a service for the given id and window (a per-window singleton).
- * Users should typically wrap this as a special purpose function (e.g.
- * `vsyncFor(win)`) for type safety and because the factory should not be
- * passed around.
+ * Returns a service for the given id and window (a per-window singleton). Users
+ * should typically wrap this as a special purpose function (e.g.
+ * `Services.vsyncFor(win)`) for type safety and because the factory should not
+ * be passed around.
  * @param {!Window} win
  * @param {string} id of the service.
  * @template T
@@ -212,12 +215,11 @@ export function getService(win, id) {
 
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * `vsyncFor(win)`) for type safety and because the factory should not be
- * passed around.
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. `Services.vsyncFor(win)`) for type safety and because the
+ * factory should not be passed around.
  * @param {!Window} win
  * @param {string} id of the service.
  * @return {!Promise<!Object>}
@@ -352,8 +354,8 @@ export function getParentWindowFrameElement(node, topWin) {
  */
 export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    const win = /** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    const win = toWin(/** @type {!Document} */ (
+      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
@@ -378,7 +380,7 @@ function getAmpdocServiceHolder(nodeOrDoc) {
  */
 function getAmpdocService(win) {
   return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
-      getService(win, 'ampdoc'));
+    getService(win, 'ampdoc'));
 }
 
 
@@ -463,10 +465,9 @@ function getServicePromiseInternal(holder, id) {
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
-  let resolve;
-  const promise = new Promise(r => {
-    resolve = r;
-  });
+  const deferred = new Deferred();
+  const {promise, resolve} = deferred;
+
   const services = getServices(holder);
   services[id] = {
     obj: null,
@@ -508,7 +509,7 @@ function getServicePromiseOrNullInternal(holder, id) {
  * @return {!Object<string,!ServiceHolderDef>}
  */
 function getServices(holder) {
-  let services = holder.services;
+  let {services} = holder;
   if (!services) {
     services = holder.services = {};
   }

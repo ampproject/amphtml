@@ -15,21 +15,24 @@
  */
 
 import {
+  ADSENSE_A4A_EXPERIMENT_NAME,
+} from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
+import {
+  DOUBLECLICK_A4A_EXPERIMENT_NAME,
+} from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
+import {
   EXPERIMENT_ATTRIBUTE,
   QQID_HEADER,
+  getCorrelator,
   isReportingEnabled,
 } from './utils';
-import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
+import {dict} from '../../../src/utils/object';
 import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {
-    ADSENSE_A4A_EXPERIMENT_NAME,
-} from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
-import {
-  DOUBLECLICK_A4A_EXPERIMENT_NAME,
-} from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config'; // eslint-disable-line max-len
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 
 /**
  * An experiment config for controlling profiling.  Profiling has no branches:
@@ -44,7 +47,7 @@ import {
  * @const {!Object<string,!../../../src/experiments.ExperimentInfo>}
  */
 export const PROFILING_BRANCHES = {
-  a4aProfilingRate: {
+  'a4aProfilingRate': {
     isTrafficEligible: () => true,
     branches: ['unused', 'unused'],
   },
@@ -59,13 +62,14 @@ export const PROFILING_BRANCHES = {
  * @visibleForTesting
  */
 export function getLifecycleReporter(ampElement, slotId) {
-  const win = ampElement.win;
+  const {win} = ampElement;
   randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
   if (isReportingEnabled(ampElement) &&
       (!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
        !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
+    setupPageLoadMetricsReporter_(ampElement);
     return new GoogleAdLifecycleReporter(
-      win, ampElement.element, Number(slotId));
+        win, ampElement.element, Number(slotId));
   } else {
     return new BaseLifecycleReporter();
   }
@@ -106,7 +110,6 @@ export function googleLifecycleReporterFactory(baseInstance) {
   return reporter;
 }
 
-
 /**
  * Sets reportable variables from ad response headers.
  *
@@ -126,4 +129,38 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   pingParameters[qqidKey] = headers.get(QQID_HEADER);
   pingParameters[renderingMethodKey] = headers.get(renderingMethodHeader);
   reporter.setPingParameters(pingParameters);
+}
+
+function setupPageLoadMetricsReporter_(ampElement) {
+  const {win} = ampElement;
+  const correlator = getCorrelator(win);
+  win.ampAnalyticsPageLoadMetricsConfig =
+      win.ampAnalyticsPageLoadMetricsConfig ||
+      dict({
+        'requests': {
+          'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
+              `&c=${correlator}&met.a4a=` +
+              'makeBodyVisible.${makeBodyVisible}~' +
+              'firstVisibleTime.${firstVisibleTime}~' +
+              'firstContentfulPaint.${firstContentfulPaint}~' +
+              'firstViewportReady.${firstViewportReady}',
+        },
+        'transport': {
+          'beacon': false,
+          'xhrpost': false,
+        },
+        'triggers': {
+          'iniLoad': {
+            'on': 'visible',
+            'request': 'fvt',
+            'selector': 'body',
+          },
+        },
+      });
+
+  // Load amp-analytics extensions
+  win.ampAnalyticsPageLoadMetricsElement =
+      win.ampAnalyticsPageLoadMetricsElement ||
+      insertAnalyticsElement(ampElement.element,
+          win.ampAnalyticsPageLoadMetricsConfig, true);
 }

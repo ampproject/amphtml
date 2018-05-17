@@ -15,8 +15,8 @@
  */
 
 import {Observable} from './observable';
+import {Services} from './services';
 import {dev} from './log';
-import {timerFor} from './services';
 import {listenOnce, listenOncePromise} from './event-helper';
 import {registerServiceBuilder} from './service';
 
@@ -86,15 +86,9 @@ export class Input {
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
       this.boundOnMouseMove_ =
-          /** @private {function(!Event)} */ (this.onMouseMove_.bind(this));
+        /** @private {function(!Event)} */ (this.onMouseMove_.bind(this));
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
-  }
-
-  /** @private */
-  cleanup_() {
-    this.win.document.removeEventListener('keydown', this.boundOnKeyDown_);
-    this.win.document.removeEventListener('mousedown', this.boundOnMouseDown_);
   }
 
   /**
@@ -174,7 +168,7 @@ export class Input {
     }
 
     // Ignore inputs.
-    const target = e.target;
+    const {target} = e;
     if (target && (target.tagName == 'INPUT' ||
           target.tagName == 'TEXTAREA' ||
           target.tagName == 'SELECT' ||
@@ -221,7 +215,8 @@ export class Input {
         /* capture */ undefined, unlistener => {
           unlisten = unlistener;
         });
-    return timerFor(this.win).timeoutPromise(CLICK_TIMEOUT_, listenPromise)
+    return Services.timerFor(this.win)
+        .timeoutPromise(CLICK_TIMEOUT_, listenPromise)
         .then(this.boundMouseCanceled_, () => {
           if (unlisten) {
             unlisten();

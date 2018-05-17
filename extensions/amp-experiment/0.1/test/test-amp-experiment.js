@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
-import {AmpExperiment} from '../amp-experiment';
 import * as variant from '../variant';
-import {variantForOrNull} from '../../../../src/services';
-import * as sinon from 'sinon';
+import {AmpExperiment} from '../amp-experiment';
+import {Services} from '../../../../src/services';
 
-describe('amp-experiment', () => {
+
+describes.realWin('amp-experiment', {
+  amp: {
+    extensions: ['amp-experiment'],
+  },
+}, env => {
 
   const config = {
     'experiment-1': {
@@ -42,28 +45,21 @@ describe('amp-experiment', () => {
     },
   };
 
-  let sandbox;
-  let win;
+  let win, doc;
   let ampdoc;
   let experiment;
 
   beforeEach(() => {
-    return createIframePromise().then(iframe => {
-      sandbox = sinon.sandbox.create();
-      win = iframe.win;
-      ampdoc = iframe.ampdoc;
-      const el = win.document.createElement('amp-experiment');
-      el.ampdoc_ = ampdoc;
-      experiment = new AmpExperiment(el);
-    });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    const el = doc.createElement('amp-experiment');
+    el.ampdoc_ = ampdoc;
+    experiment = new AmpExperiment(el);
   });
 
   function addConfigElement(opt_elementName, opt_type, opt_textContent) {
-    const child = win.document.createElement(opt_elementName || 'script');
+    const child = doc.createElement(opt_elementName || 'script');
     child.setAttribute('type', opt_type || 'application/json');
     child.textContent = opt_textContent || JSON.stringify(config);
     experiment.element.appendChild(child);
@@ -72,7 +68,7 @@ describe('amp-experiment', () => {
   function expectBodyHasAttributes(attributes) {
     for (const attributeName in attributes) {
       if (attributes.hasOwnProperty(attributeName)) {
-        expect(win.document.body.getAttribute(attributeName))
+        expect(doc.body.getAttribute(attributeName))
             .to.equal(attributes[attributeName]);
       }
     }
@@ -86,31 +82,31 @@ describe('amp-experiment', () => {
   });
 
   it('should throw if it has no child element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       experiment.buildCallback();
-    }).to.throw(/should contain exactly one/);
+    }).to.throw(/should contain exactly one/); });
   });
 
   it('should throw if it has multiple child elements', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('script');
       addConfigElement('script');
       experiment.buildCallback();
-    }).to.throw(/should contain exactly one/);
+    }).to.throw(/should contain exactly one/); });
   });
 
   it('should throw if the child element is not a <script> element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('a');
       experiment.buildCallback();
-    }).to.throw(/script/);
+    }).to.throw(/script/); });
   });
 
   it('should throw if the child script element is not json typed', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('script', 'wrongtype');
       experiment.buildCallback();
-    }).to.throw(/application\/json/);
+    }).to.throw(/application\/json/); });
   });
 
   it('should throw if the child script element has non-JSON content', () => {
@@ -131,7 +127,7 @@ describe('amp-experiment', () => {
         .returns(Promise.resolve(null));
 
     experiment.buildCallback();
-    return variantForOrNull(win).then(variants => {
+    return Services.variantForOrNull(win).then(variants => {
       expect(variants).to.jsonEqual({
         'experiment-1': 'variant-a',
         'experiment-2': 'variant-d',
@@ -141,7 +137,7 @@ describe('amp-experiment', () => {
         'amp-x-experiment-1': 'variant-a',
         'amp-x-experiment-2': 'variant-d',
       });
-      expect(win.document.body.getAttribute('amp-x-experiment-3'))
+      expect(doc.body.getAttribute('amp-x-experiment-3'))
           .to.equal(null);
     });
   });

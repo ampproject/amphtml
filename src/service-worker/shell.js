@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getMode} from '../mode';
 import {calculateExtensionScriptUrl} from '../service/extension-location';
+import {getMode} from '../mode';
 import {installWorkerErrorReporting} from '../worker-error-reporting';
 
 installWorkerErrorReporting('sw');
@@ -26,5 +26,5 @@ installWorkerErrorReporting('sw');
  * thus, if a new SW must be installed) will be very fast.
  */
 const url = calculateExtensionScriptUrl(self.location, 'cache-service-worker',
-    getMode().localDev);
+    /*opt_extensionVersion*/ undefined, getMode().localDev);
 importScripts(url);

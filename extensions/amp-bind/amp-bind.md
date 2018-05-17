@@ -16,6 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+[TOC]
+
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
@@ -40,21 +42,21 @@ limitations under the License.
     </td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Codelabs</strong></td>
-    <td><a href="https://codelabs.developers.google.com/codelabs/advanced-interactivity-in-amp/">Advanced Interactivity in AMP</a> highlights a sophisticated e-commerce use case.</td>
+    <td class="col-fourty"><strong>Tutorials</strong></td>
+    <td><a href="https://www.ampproject.org/docs/tutorials/interactivity">Create interactive AMP pages</a></td>
   </tr>
 </table>
-
-[TOC]
 
 ## Overview
 
 The `amp-bind` component allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
 
-{% call callout('Learn more', type='read') %}
-Check out the AMP Conf 2017 talk "[Turing complete...AMP Pages?!](https://www.youtube.com/watch?v=xzCFU8b5fCU)" for a video introduction to the feature.
-{% endcall %}
-
+<figure class="alignment-wrapper  margin-">
+<amp-youtube
+    data-videoid="xzCFU8b5fCU"
+    layout="responsive"
+    width="480" height="270"></amp-youtube>
+<figcaption>Watch this video for an introduction to amp-bind.</figcaption></figure>
 
 ### A simple example
 
@@ -158,7 +160,7 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 
 #### Updating state with `AMP.setState()`
 
-The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state.
+The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state.
 
 ```html
 <!-- Like JavaScript, you can reference existing
@@ -176,8 +178,19 @@ When triggered by certain events, `AMP.setState()` also can access event-related
 <input type="range" on="change:AMP.setState({myRangeValue: event.value})">
 ```
 
+#### Modifying history with `AMP.pushState()`
 
- See [Actions and Events in AMP](../../spec/amp-actions-and-events.md) for more details.
+The [`AMP.pushState()`](../../spec/amp-actions-and-events.md#amp) action is similar to `AMP.setState()` except it also pushes a new entry
+onto the browser history stack. Popping this history entry (e.g. by navigating back) restores
+the previous value of variables set by `AMP.pushState()`.
+
+For example:
+```html
+<button on="tap:AMP.pushState({foo: '123'})">Set 'foo' to 123</button>
+```
+
+- Tapping the button will set variable `foo` to 123 and push a new history entry.
+- Navigating back will restore `foo` to its previous value, "bar" (equivalent to calling `AMP.setState({foo: 'bar'})`.
 
 ### Expressions
 
@@ -187,10 +200,10 @@ Expressions are similar to JavaScript with some important differences.
 
 - Expressions may only access the containing document's [state](#state).
 - Expressions **do not** have access to globals like `window` or `document`.
-- Only [white-listed functions](#white-listed-functions) are allowed.
-- Custom functions, classes and some control flow statements (e.g. `for`) are disallowed.
+- Only [white-listed functions](#white-listed-functions) and operators may be used.
+- Custom functions, classes and loops are generally disallowed. Arrow functions are allowed as parameters, e.g. `Array.prototype.map`.
 - Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
-- A single expression is currently capped at 50 operands for performance reasons. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
+- A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
 
 The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
 
@@ -214,38 +227,137 @@ null || 'default' // 'default'
     <th>Example</th>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code></a></td>
-    <td class="col-thirty"><code>concat</code><br><code>includes</code><br><code>indexOf</code><br><code>join</code><br><code>lastIndexOf</code><br><code>slice</code></td>
-    <td><pre>// Returns true.
-[1, 2, 3].includes(1)</pre></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code><sup>2</sup></a></td>
+    <td class="col-thirty">
+      <code>concat</code><br>
+      <code>filter</code><br>
+      <code>includes</code><br>
+      <code>indexOf</code><br>
+      <code>join</code><br>
+      <code>lastIndexOf</code><br>
+      <code>map</code><br>
+      <code>reduce</code><br>
+      <code>slice</code><br>
+      <code>some</code><br>
+    </td>
+    <td>
+      <pre>// Returns true.
+[1, 2, 3].includes(1)</pre>
+      <pre>// Returns [2, 3].
+[1, 2, 3].filter(x => x >= 2)</pre>
+      <pre>// Returns [1, 3, 5].
+[1, 2, 3].map((x, i) => x + i)</pre>
+      <pre>// Returns 6.
+[1, 2, 3].reduce((x, y) => x + y)</pre>
+    </td>
+  </tr>
+  <tr>
+   <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#Methods"><code>Number</code></a></td>
+    <td>
+      <code>toExponential</code><br>
+      <code>toFixed</code><br>
+      <code>toPrecision</code><br>
+      <code>toString</code>
+    <td>
+      <pre>// Returns 3.
+(3.14).toFixed()</pre>
+      <pre>// Returns '3.14'.
+(3.14).toString()</pre>
+    </td>
   </tr>
   <tr>
    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods"><code>String</code></a></td>
-    <td><code>charAt</code><br><code>charCodeAt</code><br><code>concat</code><br><code>indexOf</code><br><code>lastIndexOf</code><br><code>slice</code><br><code>split</code><br><code>substr</code><br><code>substring</code><br><code>toLowerCase</code><br><code>toUpperCase</code></td>
-    <td><pre>// Returns 'abcdef'.
-'abc'.concat('def')</pre></td>
+    <td>
+      <code>charAt</code><br>
+      <code>charCodeAt</code><br>
+      <code>concat</code><br>
+      <code>indexOf</code><br>
+      <code>lastIndexOf</code><br>
+      <code>slice</code><br>
+      <code>split</code><br>
+      <code>substr</code><br>
+      <code>substring</code><br>
+      <code>toLowerCase</code><br>
+      <code>toUpperCase</code></td>
+    <td>
+      <pre>// Returns 'abcdef'.
+'abc'.concat('def')</pre>
+    </td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"><code>Math</code></a><sup>2</sup></td>
-    <td><code>abs</code><br><code>ceil</code><br><code>floor</code><br><code>max</code><br><code>min</code><br><code>random</code><br><code>round</code><br><code>sign</code></td>
-    <td><pre>// Returns 1.
-abs(-1)</td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"><code>Math</code></a><sup>3</sup></td>
+    <td>
+      <code>abs</code><br>
+      <code>ceil</code><br>
+      <code>floor</code><br>
+      <code>max</code><br>
+      <code>min</code><br>
+      <code>random</code><br>
+      <code>round</code><br>
+      <code>sign</code></td>
+    <td>
+      <pre>// Returns 1.
+abs(-1)</pre>
+    </td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects"><code>Global</code></a><sup>2</sup></td>
-    <td><code>encodeURI</code><br><code>encodeURIComponent</code></td>
-    <td><pre>// Returns 'hello%20world'
-encodeURIComponent('hello world')</pre></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object"><code>Object</code></a><sup>3</sup></td>
+    <td>
+      <code>keys</code><br>
+      <code>values</code>
+    <td>
+      <pre>// Returns ['a', 'b'].
+keys({a: 1, b: 2})</pre>
+      <pre>// Returns [1, 2].
+values({a: 1, b: 2}</pre>
+    </td>
   </tr>
   <tr>
-    <td><a href="#custom-built-in-functions">Custom built-ins</a><sup>2</sup></td>
-    <td><code>copyAndSplice</code></td>
-    <td><pre>// Returns [1, 47 ,3].
-copyAndSplice([1, 2, 3], 1, 1, 47)</pre></td>
+    <td>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects"><code>Global</code></a><sup>3</sup>
+    </td>
+    <td>
+      <code>encodeURI</code><br>
+      <code>encodeURIComponent</code>
+    </td>
+    <td>
+      <pre>// Returns 'Hello%20world'.
+encodeURIComponent('Hello world')</pre>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="#custom-built-in-functions">Custom built-ins</a><sup>3</sup>
+    </td>
+    <td>
+      <code>splice</code><br>
+      <code>sort</code>
+    </td>
+    <td>
+      <pre>// Returns a new array [1, 47 ,3]. Does not splice in-place.
+splice([1, 2, 3], 1, 1, 47)</pre>
+      <pre>// Returns a new array: [1, 2, 3]. Does not sort in-place.
+sort([2, 1, 3])</pre>
+    </td>
   </tr>
 </table>
 
-<sup>2</sup>Functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
+<sup>2</sup>Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`.<br>
+<sup>3</sup>Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
+
+#### Defining macros with `amp-bind-macro`
+
+`amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
+
+```html
+<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius" />
+
+<div>
+  The circle has an area of <span [text]="circleArea(myCircle.radius)">0</span>.
+</div>
+```
+
+A macro can also call other macros <i>defined before itself</i>. A macro cannot call itself recursively.
 
 ### Bindings
 
@@ -270,6 +382,11 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">CSS classes</a></td>
     <td><code>[class]</code></td>
     <td>Expression result must be a space-delimited string.</td>
+  </tr>
+  <tr>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">The <code>hidden</code> attribute</a></td>
+    <td><code>[hidden]</code></td>
+    <td>Should be a boolean expression.</td>
   </tr>
   <tr>
     <td>Size of <a href="https://www.ampproject.org/docs/reference/components">AMP elements</a></td>
@@ -318,17 +435,15 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-img&gt;</code></td>
     <td><code>[alt]</code><br><code>[attribution]</code><br><code>[src]</code><br><code>[srcset]</code></td>
-    <td>When binding to <code>[src]</code>, make sure you also bind to <code>[srcset]</code> in order to make the binding work on cache.</td>
-    <td>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
+    <td>When binding to <code>[src]</code>, make sure you also bind to <code>[srcset]</code> in order to make the binding work on cache.<br>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
   </tr>
   <tr>
-    <td rowspan=2><code>&lt;amp-list&gt;</code></td>
+    <td><code>&lt;amp-list&gt;</code></td>
     <td><code>[src]</code></td>
-    <td>Fetches JSON from the new URL and re-renders, replacing old content.</td>
-  </tr>
-  <tr>
-    <td><code>[state]</code></td>
-    <td>Renders using local JSON state at the provided expression.</td>
+    <td>
+      If expression is a string, fetches and renders JSON from the string URL.
+      If expression is an object or array, renders the expression data.
+    </td>
   </tr>
   <tr>
     <td><code>&lt;amp-selector&gt;</code></td>
@@ -470,7 +585,7 @@ There are several types of runtime errors that may be encountered when working w
 
 ### Debugging State
 
-In development mode, use `AMP.printState()` to print the current state to the console.
+Use `AMP.printState()` to print the current state to the console.
 
 ## Appendix
 
@@ -491,6 +606,10 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 </amp-state>
 ```
 
+#### XHR batching
+
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.  For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
+
 #### Attributes
 
 **src**
@@ -500,7 +619,7 @@ The URL of the remote endpoint that will return the JSON that will update this `
 The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 {% call callout('Important', type='caution') %}
-The endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
 
@@ -511,37 +630,7 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 * Supported values: `omit`, `include`
 * Default: `omit`
 
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
-
-
-### Non-standard built-in functions
-
-`amp-bind` supports the following non-standard functions:
-
-<table>
-  <tr>
-    <th>Name</th>
-    <th>Details</th>
-  </tr>
-  <tr>
-    <td><code>copyAndSplice</code></td>
-    <td>Similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice">Array#splice()</a> except a copy of the spliced array is returned.
-    <br><br>Arguments:
-    <ul>
-      <li><code>array</code>: An array.</li>
-      <li><code>start</code>: Index at which to start changing the array.</li>
-      <li><code>deleteCount</code>: The number of items to delete, starting at index <code>start</code>.</li>
-      <li><code>items...</code>: Items to add to the array, beginning at index <code>start</code></li>
-    </ul>
-    <br><br>Examples:
-    <pre>// Deleting an element. Returns [1, 3]
-copyAndSplice([1, 2, 3], 1, 1)
-
-// Replacing an item. Returns ['Pizza', 'Cake', 'Ice Cream']
-copyAndSplice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')</pre>
-   </td>
-  </tr>
-</table>
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
 ### Deep-merge with `AMP.setState()`
 

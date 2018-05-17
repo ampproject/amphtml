@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh, LayoutRectDef} from '../../src/layout-rect';
+import {
+  LayoutRectDef,
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+} from '../../src/layout-rect';
 import {Observable} from '../../src/observable';
 import {throttle} from '../../src/utils/rate-limit';
 
 /**
  * @typedef {{
- *   viewport: !LayoutRectDef,
- *   target: !LayoutRectDef
+ *   viewportRect: !LayoutRectDef,
+ *   targetRect: !LayoutRectDef,
  * }}
  */
 let PositionEntryDef;
@@ -41,10 +45,6 @@ export class PositionObserver {
     this.positionObservable_ = null;
     /** @private {!Element} */
     this.scrollingElement_ = getScrollingElement(this.win_);
-    /** @private {?number} */
-    this.scrollLeft_ = null;
-    /** @private {?number} */
-    this.scrollTop_ = null;
     /** @private {?LayoutRectDef} */
     this.viewportRect_ = null;
   }
@@ -54,6 +54,7 @@ export class PositionObserver {
    * TODO: maybe take DOM mutation into consideration
    * @param element {!Element}
    * @param callback {function(!PositionEntryDef)}
+   * @return {!UnlistenDef}
    */
   observe(element, callback) {
     if (!this.positionObservable_) {
@@ -68,45 +69,50 @@ export class PositionObserver {
     }
     // Send the 1st ping immediately
     callback(this.getPositionEntry_(element));
-    this.positionObservable_.add(() => {
+    return this.positionObservable_.add(() => {
       callback(this.getPositionEntry_(element));
     });
   }
 
   update_() {
-    this.scrollLeft_ = this.scrollingElement_./*OK*/scrollLeft
-        || this.win_./*OK*/pageXOffset;
-    this.scrollTop_ = this.scrollingElement_./*OK*/scrollTop
-        || this.win_./*OK*/pageYOffset;
-    this.viewportRect_ = layoutRectLtwh(
-        Math.round(this.scrollLeft_),
-        Math.round(this.scrollTop_),
-        this.win_./*OK*/innerWidth,
-        this.win_./*OK*/innerHeight);
+    this.viewportRect_ = this.getViewportRect();
   }
 
   /**
    * @param element {!Element}
-   * @returns {!PositionEntryDef}
+   * @return {!PositionEntryDef}
    * @private
    */
   getPositionEntry_(element) {
-    const b = element./*OK*/getBoundingClientRect();
     return {
-      viewport: /** @type {!LayoutRectDef} */(this.viewportRect_),
-      // relative position to host doc
-      target: layoutRectLtwh(
-          Math.round(b.left + this.scrollLeft_),
-          Math.round(b.top + this.scrollTop_),
-          Math.round(b.width),
-          Math.round(b.height)),
+      viewportRect: /** @type {!LayoutRectDef} */(this.viewportRect_),
+      // relative position to viewport
+      targetRect:
+          layoutRectFromDomRect(element./*OK*/getBoundingClientRect()),
     };
+  }
+
+  /**
+   * A  method to get viewport rect
+   */
+  getViewportRect() {
+    const {scrollingElement_: scrollingElement, win_: win} = this;
+
+    const scrollLeft = scrollingElement./*OK*/scrollLeft ||
+        win./*OK*/pageXOffset;
+    const scrollTop = scrollingElement./*OK*/scrollTop ||
+        win./*OK*/pageYOffset;
+    return layoutRectLtwh(
+        Math.round(scrollLeft),
+        Math.round(scrollTop),
+        win./*OK*/innerWidth,
+        win./*OK*/innerHeight);
   }
 }
 
 /**
  * @param win {!Window}
- * @returns {!Element}
+ * @return {!Element}
  */
 function getScrollingElement(win) {
   const doc = win.document;

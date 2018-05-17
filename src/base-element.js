@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust';
-import {Layout} from './layout';
-import {getData} from './event-helper';
-import {loadPromise} from './event-helper';
+import {ActionTrust} from './action-constants';
+import {Layout, LayoutPriority} from './layout';
+import {Services} from './services';
+import {dev, user} from './log';
+import {getData, listen, loadPromise} from './event-helper';
+import {getMode} from './mode';
+import {isArray, toWin} from './types';
+import {isExperimentOn} from './experiments';
 import {preconnectForElement} from './preconnect';
-import {isArray} from './types';
-import {viewportForDoc} from './services';
-import {vsyncFor} from './services';
-import {user} from './log';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -119,7 +119,7 @@ export class BaseElement {
     /** @public @const {!Element} */
     this.element = element;
     /*
-    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
       \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
@@ -141,7 +141,7 @@ export class BaseElement {
     this.inViewport_ = false;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView;
+    this.win = toWin(element.ownerDocument.defaultView);
 
     /**
      * Maps action name to struct containing the action handler and minimum
@@ -157,6 +157,16 @@ export class BaseElement {
 
     /** @public {?Object} For use by sub classes */
     this.config = null;
+
+    /**
+     * The time at which this element was scheduled for layout relative to the
+     * epoch. This value will be set to 0 until the this element has been
+     * scheduled.
+     * Note that this value may change over time if the element is enqueued,
+     * then dequeued and re-enqueued by the scheduler.
+     * @public {number}
+     */
+    this.layoutScheduleTime = 0;
   }
 
   /**
@@ -168,13 +178,17 @@ export class BaseElement {
   }
 
   /**
-  * This is the priority of loading elements (layoutCallback).
+  * This is the priority of loading elements (layoutCallback). Used only to
+  * determine layout timing and preloading priority. Does not affect build time,
+  * etc.
+  *
   * The lower the number, the higher the priority.
-  * The default priority for base elements is 0.
+  *
+  * The default priority for base elements is LayoutPriority.CONTENT.
   * @return {number}
   */
-  getPriority() {
-    return 0;
+  getLayoutPriority() {
+    return LayoutPriority.CONTENT;
   }
 
   /**
@@ -185,11 +199,12 @@ export class BaseElement {
    * available. It's a restricted API and special review is required to
    * allow individual extensions to request priority upgrade.
    *
-   * @param {number} newPriority
+   * @param {number} newLayoutPriority
    * @restricted
    */
-  updatePriority(newPriority) {
-    this.element.getResources().updatePriority(this.element, newPriority);
+  updateLayoutPriority(newLayoutPriority) {
+    this.element.getResources().updateLayoutPriority(
+        this.element, newLayoutPriority);
   }
 
   /** @return {!Layout} */
@@ -235,7 +250,7 @@ export class BaseElement {
 
   /** @public @return {!./service/vsync-impl.Vsync} */
   getVsync() {
-    return vsyncFor(this.win);
+    return Services.vsyncFor(this.win);
   }
 
   /**
@@ -247,6 +262,22 @@ export class BaseElement {
    */
   getLayoutWidth() {
     return this.layoutWidth_;
+  }
+
+  /**
+   * Returns the consent policy id that this element should wait for before
+   * buildCallback.
+   * A `null` value indicates to not be blocked by consent.
+   * Subclasses may override.
+   * @return {?string}
+   */
+  getConsentPolicy() {
+    let policyId = null;
+    if (this.element.hasAttribute('data-block-on-consent')) {
+      policyId =
+          this.element.getAttribute('data-block-on-consent') || 'default';
+    }
+    return policyId;
   }
 
   /**
@@ -321,6 +352,11 @@ export class BaseElement {
    * class set on it.
    *
    * This callback is executed early after the element has been attached to DOM.
+   *
+   * This callback can either immediately return or return a promise if the
+   * build steps are asynchronous.
+   *
+   * @return {!Promise|undefined}
    */
   buildCallback() {
     // Subclasses may override.
@@ -369,7 +405,7 @@ export class BaseElement {
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
-   * @returns {?Element}
+   * @return {?Element}
    */
   createPlaceholderCallback() {
     return null;
@@ -385,7 +421,20 @@ export class BaseElement {
    * @return {boolean|number}
    */
   renderOutsideViewport() {
-    return 3;
+    // Inabox allow layout independent of viewport location.
+    return getMode(this.win).runtime == 'inabox' &&
+        isExperimentOn(this.win, 'inabox-rov') ? true : 3;
+  }
+
+  /**
+   * Allows for rendering outside of the constraint set by renderOutsideViewport
+   * so long task scheduler is idle.  Integer values less than those returned
+   * by renderOutsideViewport have no effect.  Subclasses can override (default
+   * is disabled).
+   * @return {boolean|number}
+   */
+  idleRenderOutsideViewport() {
+    return false;
   }
 
   /**
@@ -503,7 +552,7 @@ export class BaseElement {
    * @return {ActionTrust}
    */
   activationTrust() {
-    return ActionTrust.MEDIUM;
+    return ActionTrust.HIGH;
   }
 
   /**
@@ -529,15 +578,14 @@ export class BaseElement {
    * Registers the action handler for the method with the specified name.
    *
    * The handler is only invoked by events with trust equal to or greater than
-   * `minTrust` (or ActionTrust.MEDIUM if not provided). Otherwise, a
-   * user error is logged.
+   * `minTrust`. Otherwise, a user error is logged.
    *
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler, minTrust = ActionTrust.MEDIUM) {
+  registerAction(method, handler, minTrust = ActionTrust.HIGH) {
     this.initActionMap_();
     this.actionMap_[method] = {handler, minTrust};
   }
@@ -555,7 +603,7 @@ export class BaseElement {
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
       if (invocation.satisfiesTrust(this.activationTrust())) {
-        this.activate(invocation);
+        return this.activate(invocation);
       }
     } else {
       this.initActionMap_();
@@ -564,7 +612,7 @@ export class BaseElement {
           this);
       const {handler, minTrust} = holder;
       if (invocation.satisfiesTrust(minTrust)) {
-        handler(invocation);
+        return handler(invocation);
       }
     }
   }
@@ -613,14 +661,15 @@ export class BaseElement {
    * @param  {string|!Array<string>} events
    * @param  {!Element} element
    * @public @final
+   * @return {!UnlistenDef}
    */
   forwardEvents(events, element) {
-    events = isArray(events) ? events : [events];
-    for (let i = 0; i < events.length; i++) {
-      element.addEventListener(events[i], event => {
-        this.element.dispatchCustomEvent(events[i], getData(event) || {});
-      });
-    }
+    const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
+      listen(element, eventType, event => {
+        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+      }));
+
+    return () => unlisteners.forEach(unlisten => unlisten());
   }
 
   /**
@@ -667,6 +716,26 @@ export class BaseElement {
    */
   toggleFallback(state) {
     this.element.toggleFallback(state);
+  }
+
+  /**
+   * Hides or shows the loading indicator. This function must only
+   * be called inside a mutate context.
+   * @param {boolean} state
+   * @public @final
+   */
+  toggleLoading(state) {
+    this.element.toggleLoading(state, {force: true});
+  }
+
+  /**
+   * Returns whether the loading indicator is reused again after the first
+   * render.
+   * @return {boolean}
+   * @public
+   */
+  isLoadingReused() {
+    return false;
   }
 
   /**
@@ -728,10 +797,10 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportForDoc(this.getAmpDoc());
+    return Services.viewportForDoc(this.getAmpDoc());
   }
 
   /**
@@ -851,7 +920,7 @@ export class BaseElement {
         this.element, newHeight, /* newWidth */ undefined);
   }
 
- /**
+  /**
   * Return a promise that requests the runtime to update
   * the size of this element to the specified value.
   * The runtime will schedule this request and attempt to process it
@@ -871,32 +940,53 @@ export class BaseElement {
         this.element, newHeight, newWidth);
   }
 
- /**
-  * Runs the specified mutation on the element and ensures that measures
-  * and layouts performed for the affected elements.
-  *
-  * This method should be called whenever a significant mutations are done
-  * on the DOM that could affect layout of elements inside this subtree or
-  * its siblings. The top-most affected element should be specified as the
-  * first argument to this method and all the mutation work should be done
-  * in the mutator callback which is called in the "mutation" vsync phase.
-  *
-  * @param {function()} mutator
-  * @param {Element=} opt_element
-  * @return {!Promise}
-  */
-  mutateElement(mutator, opt_element) {
-    return this.element.getResources().mutateElement(
-        opt_element || this.element, mutator);
+  /**
+   * Runs the specified measure, which is called in the "measure" vsync phase.
+   * This is simply a proxy to the privileged vsync service.
+   *
+   * @param {function()} measurer
+   * @return {!Promise}
+   */
+  measureElement(measurer) {
+    return this.element.getResources().measureElement(measurer);
   }
 
   /**
-   * Schedules callback to be complete within the next batch. This call is
-   * intended for heavy DOM mutations that typically cause re-layouts.
-   * @param {!Function} callback
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {function()} mutator
+   * @param {Element=} opt_element
+   * @return {!Promise}
    */
-  deferMutate(callback) {
-    this.element.getResources().deferMutate(this.element, callback);
+  mutateElement(mutator, opt_element) {
+    return this.measureMutateElement(null, mutator, opt_element);
+  }
+
+  /**
+   * Runs the specified measure, then runs the mutation on the element and
+   * ensures that remeasures and layouts performed for the affected elements.
+   *
+   * This method should be called whenever a measure and significant mutations
+   * are done on the DOM that could affect layout of elements inside this
+   * subtree or its siblings. The top-most affected element should be specified
+   * as the first argument to this method and all the mutation work should be
+   * done in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @param {Element=} opt_element
+   * @return {!Promise}
+   */
+  measureMutateElement(measurer, mutator, opt_element) {
+    return this.element.getResources().measureMutateElement(
+        opt_element || this.element, measurer, mutator);
   }
 
   /**
@@ -947,4 +1037,23 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
+
+  user() {
+    return user(this.element);
+  }
+
+  /**
+   * Declares a child element (or ourselves) as a Layer
+   * @param {!Element=} opt_element
+   */
+  declareLayer(opt_element) {
+    dev().assert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
+        ' to declare layer.');
+    if (opt_element) {
+      dev().assert(this.element.contains(opt_element));
+    }
+    return this.element.getLayers().declareLayer(opt_element || this.element);
+  }
 }
+
+

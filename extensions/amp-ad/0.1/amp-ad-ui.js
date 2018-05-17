@@ -15,7 +15,6 @@
  */
 
 import {getAdContainer} from '../../../src/ad-helper';
-import {isExperimentOn} from '../../../src/experiments';
 
 export class AmpAdUIHandler {
 
@@ -33,7 +32,10 @@ export class AmpAdUIHandler {
     this.doc_ = baseInstance.win.document;
 
     if (!baseInstance.getFallback()) {
-      this.addDefaultUiComponent_('fallback');
+      const fallback = this.addDefaultUiComponent_('fallback');
+      if (fallback) {
+        this.baseInstance_.element.appendChild(fallback);
+      }
     }
   }
 
@@ -56,8 +58,8 @@ export class AmpAdUIHandler {
       return;
     }
     // The order here is collapse > user provided fallback > default fallback
-    this.baseInstance_.attemptCollapse().then(() => {}, () => {
-      this.baseInstance_.deferMutate(() => {
+    this.baseInstance_.attemptCollapse().catch(() => {
+      this.baseInstance_.mutateElement(() => {
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
       });
@@ -69,7 +71,7 @@ export class AmpAdUIHandler {
    * Note: No need to togglePlaceholder here, unlayout show it by default.
    */
   applyUnlayoutUI() {
-    this.baseInstance_.deferMutate(() => {
+    this.baseInstance_.mutateElement(() => {
       this.baseInstance_.toggleFallback(false);
     });
   }
@@ -89,15 +91,11 @@ export class AmpAdUIHandler {
 
     const content = this.doc_.createElement('div');
     content.classList.add('i-amphtml-ad-default-holder');
-    if (isExperimentOn(this.baseInstance_.win, 'ad-loader-v1')) {
-      content.setAttribute('experiment1', '');
-    }
-    if (isExperimentOn(this.baseInstance_.win, 'ad-loader-v2')) {
-      content.setAttribute('experiment2', '');
-    }
+
+    // TODO(aghassemi, #4146) i18n
+    content.setAttribute('data-ad-holder-text', 'Ad');
     uiComponent.appendChild(content);
 
-    this.baseInstance_.element.appendChild(uiComponent);
     return uiComponent;
   }
 
@@ -123,7 +121,7 @@ export class AmpAdUIHandler {
           width - iframeWidth, width);
     }
 
-    /** @type {!Object<!boolean, number|undefined, number|undefined>} */
+    /** @type {!Object<boolean, number|undefined, number|undefined>} */
     const resizeInfo = {
       success: true,
       newWidth,
@@ -141,11 +139,11 @@ export class AmpAdUIHandler {
     }
     return this.baseInstance_.attemptChangeSize(
         newHeight, newWidth).then(() => {
-          return resizeInfo;
-        }, () => {
-          resizeInfo.success = false;
-          return resizeInfo;
-        });
+      return resizeInfo;
+    }, () => {
+      resizeInfo.success = false;
+      return resizeInfo;
+    });
   }
 }
 

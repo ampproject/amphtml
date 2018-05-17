@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import {assertHttpsUrl, parseUrl} from './url';
 import {dev, user} from './log';
-import {getContextMetadata} from '../src/iframe-attributes';
-import {tryParseJson} from './json';
-import {getMode} from './mode';
-import {dashToCamelCase} from './string';
 import {dict} from './utils/object';
-import {parseUrl, assertHttpsUrl} from './url';
-import {urls} from './config';
+import {getContextMetadata} from '../src/iframe-attributes';
+import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
+import {startsWith} from './string';
+import {tryParseJson} from './json';
+import {urls} from './config';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -70,7 +71,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @return {!Element} The iframe.
  */
 export function getIframe(
-    parentWindow, parentElement, opt_type, opt_context, opt_disallowCustom) {
+  parentWindow, parentElement, opt_type, opt_context, opt_disallowCustom) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   dev().assert(
@@ -111,6 +112,9 @@ export function getIframe(
   if (attributes['height']) {
     iframe.height = attributes['height'];
   }
+  if (attributes['title']) {
+    iframe.title = attributes['title'];
+  }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
   /** @this {!Element} */
@@ -118,6 +122,12 @@ export function getIframe(
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
+  if (isExperimentOn(parentWindow, 'no-sync-xhr-in-ads')) {
+    // Block synchronous XHR in ad. These are very rare, but super bad for UX
+    // as they block the UI thread for the arbitrary amount of time until the
+    // request completes.
+    iframe.setAttribute('allow', 'sync-xhr \'none\';');
+  }
   iframe.setAttribute('data-amp-3p-sentinel',
       attributes['_context']['sentinel']);
   return iframe;
@@ -133,12 +143,13 @@ export function getIframe(
  * visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {
-  for (let i = 0; i < element.attributes.length; i++) {
-    const attr = element.attributes[i];
-    if (attr.name.indexOf('data-') != 0) {
-      continue;
+  const {dataset} = element;
+  for (const name in dataset) {
+    // data-vars- is reserved for amp-analytics
+    // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+    if (!startsWith(name, 'vars')) {
+      attributes[name] = dataset[name];
     }
-    attributes[dashToCamelCase(attr.name.substr(5))] = attr.value;
   }
   const json = element.getAttribute('json');
   if (json) {
@@ -162,15 +173,15 @@ export function addDataAndJsonAttributes_(element, attributes) {
  * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  */
 export function preloadBootstrap(
-    win, preconnect, opt_type, opt_disallowCustom) {
+  win, preconnect, opt_type, opt_disallowCustom) {
   const url = getBootstrapBaseUrl(win, undefined, opt_type, opt_disallowCustom);
   preconnect.preload(url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
   const scriptUrl = getMode().localDev
-      ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
-      : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
+    ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
+    : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
   preconnect.preload(scriptUrl, 'script');
 }
 
@@ -184,9 +195,9 @@ export function preloadBootstrap(
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(
-    parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
+  parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
   // The value is cached in a global variable called `bootstrapBaseUrl`;
-  const bootstrapBaseUrl = parentWindow.bootstrapBaseUrl;
+  const {bootstrapBaseUrl} = parentWindow;
   if (bootstrapBaseUrl) {
     return bootstrapBaseUrl;
   }
@@ -201,6 +212,7 @@ export function setDefaultBootstrapBaseUrlForTesting(url) {
 
 export function resetBootstrapBaseUrlForTesting(win) {
   win.bootstrapBaseUrl = undefined;
+  win.defaultBootstrapSubDomain = undefined;
 }
 
 /**
@@ -212,26 +224,26 @@ export function resetBootstrapBaseUrlForTesting(win) {
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
-    if (overrideBootstrapBaseUrl) {
-      return overrideBootstrapBaseUrl;
-    }
-    return getAdsLocalhost(parentWindow)
-        + '/dist.3p/'
-        + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
+    return overrideBootstrapBaseUrl || getAdsLocalhost(parentWindow)
+          + '/dist.3p/'
+          + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
             : `current/${srcFileBasename}.max`)
-        + '.html';
+          + '.html';
   }
-  return 'https://' + getSubDomain(parentWindow) +
+  // Ensure same sub-domain is used despite potentially different file.
+  parentWindow.defaultBootstrapSubDomain =
+      parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
+  return 'https://' + parentWindow.defaultBootstrapSubDomain +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
       `${srcFileBasename}.html`;
 }
 
 function getAdsLocalhost(win) {
-  if (urls.localDev) {
-    return `//${urls.thirdPartyFrameHost}`;
+  let adsUrl = urls.thirdParty; // local dev with a non-localhost server
+  if (adsUrl.indexOf('ampproject.net') > -1) {
+    adsUrl = 'http://ads.localhost'; // local dev with a localhost server
   }
-  return 'http://ads.localhost:'
-      + (win.location.port || win.parent.location.port);
+  return adsUrl + ':' + (win.location.port || win.parent.location.port);
 }
 
 /**
@@ -274,7 +286,7 @@ export function getRandom(win) {
  * @return {?string}
  */
 function getCustomBootstrapBaseUrl(
-    parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
+  parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
   const meta = parentWindow.document
       .querySelector('meta[name="amp-3p-iframe-src"]');
   if (!meta) {
@@ -294,10 +306,10 @@ function getCustomBootstrapBaseUrl(
   const parsed = parseUrl(url);
   user().assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
       parsed.origin != parseUrl(parentWindow.location.href).origin,
-      '3p iframe url must not be on the same origin as the current doc' +
-      'ument %s (%s) in element %s. See https://github.com/ampproject/amphtml' +
+  '3p iframe url must not be on the same origin as the current document ' +
+      '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
-      parsed.origin, meta);
+  parsed.origin, meta);
   return url + '?$internalRuntimeVersion$';
 }
 

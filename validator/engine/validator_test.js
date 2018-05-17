@@ -15,11 +15,16 @@
  * limitations under the license.
  */
 goog.provide('amp.validator.ValidatorTest');
+
 goog.require('amp.validator.CssLength');
-goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.HtmlFormat');
+goog.require('amp.validator.ValidationError');
+goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
+goog.require('amp.validator.renderErrorMessage');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.validateString');
+goog.require('goog.uri.utils');
 
 /**
  * Returns the absolute path for a given test file, that is, a file
@@ -74,6 +79,18 @@ function isValidRegex(regex) {
 }
 
 /**
+ * Returns true if the regex has a group but is missing the corresponding
+ * Unicode group. For now this tests only for word character group (\\w) which
+ * must be followed by the Unicode equivalent group (\\p{L}\\p{N}_).
+ * @param {null|string} regex
+ * @return {boolean}
+ */
+function isMissingUnicodeGroup(regex) {
+  var wordGroupRegex = new RegExp("\\\\w(?!\\\\p{L}\\\\p{N}_)");
+  return wordGroupRegex.test(regex);
+}
+
+/**
  * Returns all html files underneath the testdata roots. This looks
  * both for feature_tests/*.html and for tests in extension directories.
  * E.g.: extensions/amp-accordion/0.1/test/*.html,
@@ -120,6 +137,8 @@ function findHtmlFilesRelativeToTestdata() {
  * An AMP Validator test case. This constructor will load the AMP HTML file
  * and also find the adjacent .out file.
  * @constructor
+ * @param {string} ampHtmlFile
+ * @param {string=} opt_ampUrl
  */
 const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   /** @type {string} */
@@ -134,6 +153,16 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       this.ampHtmlFile.indexOf('/validator-amp4ads-') != -1) {
     this.htmlFormat = 'AMP4ADS';
   }
+  if (this.ampHtmlFile.indexOf('amp4email_feature_tests/') != -1 ||
+      this.ampHtmlFile.indexOf('/validator-amp4email-') != -1) {
+    this.htmlFormat = 'AMP4EMAIL';
+  }
+  /**
+   * If set to false, output will be generated without inlining the input
+   * document.
+   * @type {boolean}
+   */
+  this.inlineOutput = true;
   /**
    * This field can be null, indicating that the expectedOutput did not
    * come from a file.
@@ -143,11 +172,66 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       path.dirname(ampHtmlFile), path.basename(ampHtmlFile, '.html') + '.out');
   /** @type {string} */
   this.ampHtmlFileContents =
-      fs.readFileSync(absolutePathFor(this.ampHtmlFile), 'utf8');
+      fs.readFileSync(absolutePathFor(this.ampHtmlFile), 'utf8').trim();
   /** @type {string} */
   this.expectedOutput =
       fs.readFileSync(absolutePathFor(this.expectedOutputFile), 'utf8').trim();
 };
+
+/**
+ * Renders one line of error output.
+ * @param {string} filenameOrUrl
+ * @param {!amp.validator.ValidationError} error
+ * @return {string}
+ */
+function renderErrorWithPosition(filenameOrUrl, error) {
+  const line = error.line || 1;
+  const col = error.col || 0;
+
+  let errorLine = goog.uri.utils.removeFragment(filenameOrUrl) + ':' + line +
+      ':' + col + ' ';
+  errorLine += amp.validator.renderErrorMessage(error);
+  if (error.specUrl) {
+    errorLine += ' (see ' + error.specUrl + ')';
+  }
+  if (error.category !== null) {
+    errorLine += ' [' + error.category + ']';
+  }
+  return errorLine;
+}
+
+/**
+ * Like amp.validator.renderValidationResult, except inlines any error messages
+ * into the input document.
+ * @param {!Object} validationResult
+ * @param {string} filename to use in rendering error messages.
+ * @param {string} filecontents
+ * @return {string}
+ */
+function renderInlineResult(validationResult, filename, filecontents) {
+  let rendered = '';
+  rendered += validationResult.status;
+
+  const lines = filecontents.split('\n');
+  let linesEmitted = 0;
+  for (const error of validationResult.errors) {
+    // Emit all input lines up to and including the line containing the error,
+    // prefixed with '|  '.
+    while (linesEmitted < error.line && linesEmitted < lines.length) {
+      rendered += '\n|  ' + lines[linesEmitted++];
+    }
+    // Emit a carat showing the column of the following error.
+    rendered += '\n>>';
+    for (let i = 0; i < error.col + 1; ++i)
+      rendered += ' ';
+    rendered += '^~~~~~~~~\n';
+    rendered += renderErrorWithPosition(filename, error);
+  }
+  while (linesEmitted < lines.length) {
+    rendered += '\n|  '+ lines[linesEmitted++];
+  }
+  return rendered;
+}
 
 /**
  * Runs the test, by executing the AMP Validator, then comparing its output
@@ -157,9 +241,17 @@ ValidatorTestCase.prototype.run = function() {
   const results =
       amp.validator.validateString(this.ampHtmlFileContents, this.htmlFormat);
   amp.validator.annotateWithErrorCategories(results);
-  const observed =
+  const observed = this.inlineOutput ?
+      renderInlineResult(results, this.ampUrl, this.ampHtmlFileContents) :
       amp.validator.renderValidationResult(results, this.ampUrl).join('\n');
+
   if (observed === this.expectedOutput) {
+    return;
+  }
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1' &&
+      this.expectedOutputFile !== null) {
+    console/*OK*/.log('Updating ' +  this.expectedOutputFile + ' ...');
+    fs.writeFileSync(absolutePathFor(this.expectedOutputFile), observed);
     return;
   }
   let message = '';
@@ -170,22 +262,14 @@ ValidatorTestCase.prototype.run = function() {
   assert.fail('', '', message, '');
 };
 
-describe('ValidatorTestdata', () => {
-  it('reports data-amp-report-test values', () => {
-    const result = amp.validator.validateString(
-        '<!doctype lemur data-amp-report-test="foo">');
-    assertStrictEqual(
-        result.status, amp.validator.ValidationResult.Status.FAIL);
-    assertStrictEqual('foo', result.errors[0].dataAmpReportTestValue);
-  });
-});
-
 /**
  * A strict comparison between two values.
  * Note: Unfortunately assert.strictEqual has some drawbacks, including that
  * it truncates the provided arguments (and it's not configurable) and
  * with the Closure compiler, it requires a message argument to which
  * we'd always have to pass undefined. Too messy, so we roll our own.
+ * @param {*} expected
+ * @param {*} saw
  */
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
@@ -205,13 +289,16 @@ describe('ValidatorOutput', () => {
     const test = new ValidatorTestCase(
         'feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
-    test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL\n' +
-        'http://google.com/foo.html:28:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
-        'http://google.com/foo.html:29:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]';
-    test.run();
+    const results =
+        amp.validator.validateString(test.ampHtmlFileContents, test.htmlFormat);
+    amp.validator.annotateWithErrorCategories(results);
+    const observed =
+        amp.validator.renderValidationResult(results, test.ampUrl).join('\n');
+    const expectedSubstr = 'http://google.com/foo.html:28:3';
+    if (observed.indexOf(expectedSubstr) === -1)
+      assert.fail(
+          '', '', 'expectedSubstr:\n' + expectedSubstr +
+          '\nsaw:\n' + observed, '');
   });
 });
 
@@ -225,54 +312,152 @@ describe('ValidatorCssLengthValidation', () => {
   // construct stylesheets of any length that we want.
   const validStyleBlob = 'h1 {a: b}\n';
   assertStrictEqual(10, validStyleBlob.length);
+  const validInlineStyleBlob = 'width:1px;';
+  assertStrictEqual(10, validInlineStyleBlob.length);
 
-  it('accepts max bytes with exactly 50000 bytes in author stylesheet', () => {
-    const maxBytes = Array(5001).join(validStyleBlob);
-    assertStrictEqual(50000, maxBytes.length);
-
+  it('accepts 50000 bytes in author stylesheet and 0 bytes in inline style', () => {
+    const stylesheet = Array(5001).join(validStyleBlob);
+    assertStrictEqual(50000, stylesheet.length);
     const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
     test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replaceme {}', maxBytes);
-    test.run();
-  });
-
-  it('will not accept 50001 bytes in author stylesheet - one too many', () => {
-    const oneTooMany = Array(5001).join(validStyleBlob) + ' ';
-    assertStrictEqual(50001, oneTooMany.length);
-    const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replaceme {}', oneTooMany);
-    test.expectedOutputFile = null;
+        test.ampHtmlFileContents.replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+    // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
     test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
-        'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec' +
-        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'feature_tests/css_length.html:5034:0 The inline \'style\' attribute ' +
+        'is not allowed in AMP documents. Use \'style amp-custom\' tag ' +
+        'instead. (see https://www.ampproject.org/docs/guides/author-develop/' +
+        'responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
-  it('knows utf8 and rejects file w/ 50002 bytes but 49999 characters', () => {
-    const multiByteSheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
-    assertStrictEqual(49999, multiByteSheet.length);  // character length
-    const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replaceme {}', multiByteSheet);
-    test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
-        'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec' +
-        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
-    test.run();
-  });
+  it('will not accept 50001 bytes in author stylesheet and 0 bytes in inline style',
+     () => {
+       const stylesheet = Array(5001).join(validStyleBlob) + ' ';
+       assertStrictEqual(50001, stylesheet.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'specified in tag \'style amp-custom\' is too long - we saw ' +
+           '50001 bytes whereas the limit is 50000 bytes. ' +
+           '(see https://www.ampproject.org/docs/reference/spec' +
+           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]\n' +
+           'feature_tests/css_length.html:5034:0 The inline \'style\' ' +
+           'attribute is not allowed in AMP documents. Use \'style ' +
+           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
+           'docs/guides/author-develop/responsive/style_pages) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
+
+  it('knows utf8 and rejects file with 50002 bytes but 49999 characters and 0 bytes in inline style',
+     () => {
+       const stylesheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
+       assertStrictEqual(49999, stylesheet.length);  // character length
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'specified in tag \'style amp-custom\' is too long - we saw ' +
+           '50002 bytes whereas the limit is 50000 bytes. ' +
+           '(see https://www.ampproject.org/docs/reference/spec' +
+           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]\n' +
+           'feature_tests/css_length.html:5033:0 The inline \'style\' ' +
+           'attribute is not allowed in AMP documents. Use \'style ' +
+           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
+           'docs/guides/author-develop/responsive/style_pages) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
+
+  it('accepts 0 bytes in author stylesheet and 50000 bytes in inline style',
+     () => {
+       const inlineStyle = Array(5001).join(validInlineStyleBlob);
+       assertStrictEqual(50000, inlineStyle.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
+               .replace('replace_inline_style', inlineStyle);
+       // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:34:0 The inline \'style\' ' +
+           'attribute is not allowed in AMP documents. Use \'style ' +
+           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
+           'docs/guides/author-develop/responsive/style_pages) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
+
+  it('will not accept 0 bytes in author stylesheet and 50001 bytes in inline style',
+     () => {
+       const inlineStyle = Array(5001).join(validInlineStyleBlob) + ' ';
+       assertStrictEqual(50001, inlineStyle.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
+               .replace('replace_inline_style', inlineStyle);
+       test.expectedOutputFile = null;
+       // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:34:0 The inline \'style\' ' +
+           'attribute is not allowed in AMP documents. Use \'style ' +
+           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
+           'docs/guides/author-develop/responsive/style_pages) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]\n' +
+           'feature_tests/css_length.html:36:6 The author stylesheet ' +
+           'specified in tag \'style amp-custom\' and the combined inline ' +
+           'styles is too large - we saw 50001 bytes whereas the limit is ' +
+           '50000 bytes. (see https://www.ampproject.org/docs/guides/' +
+           'author-develop/responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
+
+  it('will not accept 50000 bytes in author stylesheet and 14 bytes in inline style',
+     () => {
+       const stylesheet = Array(5001).join(validStyleBlob);
+       assertStrictEqual(50000, stylesheet.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', 'display:block;');
+       // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:5034:0 The inline \'style\' ' +
+           'attribute is not allowed in AMP documents. Use \'style ' +
+           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
+           'docs/guides/author-develop/responsive/style_pages) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]\n' +
+           'feature_tests/css_length.html:5036:6 The author stylesheet ' +
+           'specified in tag \'style amp-custom\' and the combined inline ' +
+           'styles is too large - we saw 50014 bytes whereas the limit is ' +
+           '50000 bytes. (see https://www.ampproject.org/docs/guides/' +
+           'author-develop/responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
 });
 
 describe('CssLength', () => {
   it('parses a basic example', () => {
-    const parsed =
-        new amp.validator.CssLength('10.1em', /* allowAuto */ false);
+    const parsed = new amp.validator.CssLength(
+        '10.1em', /* allowAuto */ false, /* allowFluid */ false);
     expect(parsed.isSet).toBe(true);
     expect(parsed.isValid).toBe(true);
     expect(parsed.numeral).toEqual(10.1);
@@ -283,8 +468,8 @@ describe('CssLength', () => {
   it('supports several units', () => {
     for (const allowedUnit of ['px', 'em', 'rem', 'vh', 'vmin', 'vmax']) {
       const example = '10' + allowedUnit;
-      const parsed =
-          new amp.validator.CssLength(example, /* allowAuto */ false);
+      const parsed = new amp.validator.CssLength(
+          example, /* allowAuto */ false, /* allowFluid */ false);
       expect(parsed.isSet).toBe(true);
       expect(parsed.isValid).toBe(true);
       expect(parsed.numeral).toEqual(10);
@@ -294,8 +479,8 @@ describe('CssLength', () => {
   });
 
   it('understands empty unit as "px"', () => {
-    const parsed =
-        new amp.validator.CssLength('10', /* allowAuto */ false);
+    const parsed = new amp.validator.CssLength(
+        '10', /* allowAuto */ false, /* allowFluid */ false);
     expect(parsed.isSet).toBe(true);
     expect(parsed.isValid).toBe(true);
     expect(parsed.numeral).toEqual(10);
@@ -304,8 +489,8 @@ describe('CssLength', () => {
   });
 
   it('understands undefined input as valid (means attr is not set)', () => {
-    const parsed =
-        new amp.validator.CssLength(undefined, /* allowAuto */ false);
+    const parsed = new amp.validator.CssLength(
+        undefined, /* allowAuto */ false, /* allowFluid */ false);
     expect(parsed.isSet).toBe(false);
     expect(parsed.isValid).toBe(true);
     expect(parsed.unit).toEqual('px');
@@ -313,58 +498,106 @@ describe('CssLength', () => {
   });
 
   it('understands empty string as invalid (means attr value is empty)', () => {
-    const parsed =
-        new amp.validator.CssLength('', /* allowAuto */ false);
+    const parsed = new amp.validator.CssLength(
+        '', /* allowAuto */ false, /* allowFluid */ false);
     expect(parsed.isValid).toBe(false);
   });
 
   it('considers other garbage as invalid', () => {
-    expect(new amp.validator.CssLength('100%', /* allowAuto */ false)
-               .isValid)
-        .toBe(false);
     expect(new amp.validator
-               .CssLength('not a number', /* allowAuto */ false)
-               .isValid)
-        .toBe(false);
-    expect(new amp.validator.CssLength('1.1.1', /* allowAuto */ false)
-               .isValid)
-        .toBe(false);
-    expect(new amp.validator.CssLength('5 inches', /* allowAuto */ false)
+               .CssLength('100%', /* allowAuto */ false, /* allowFluid */ false)
                .isValid)
         .toBe(false);
     expect(
-        new amp.validator.CssLength('fahrenheit', /* allowAuto */ false)
+        new amp.validator
+            .CssLength(
+                'not a number', /* allowAuto */ false, /* allowFluid */ false)
             .isValid)
         .toBe(false);
     expect(
-        new amp.validator.CssLength('px', /* allowAuto */ false).isValid)
+        new amp.validator
+            .CssLength('1.1.1', /* allowAuto */ false, /* allowFluid */ false)
+            .isValid)
+        .toBe(false);
+    expect(new amp.validator
+               .CssLength(
+                   '5 inches', /* allowAuto */ false, /* allowFluid */ false)
+               .isValid)
+        .toBe(false);
+    expect(new amp.validator
+               .CssLength(
+                   'fahrenheit', /* allowAuto */ false, /* allowFluid */ false)
+               .isValid)
+        .toBe(false);
+    expect(new amp.validator
+               .CssLength('px', /* allowAuto */ false, /* allowFluid */ false)
+               .isValid)
         .toBe(false);
     expect(new amp.validator
                .CssLength(  // screen size in ancient Rome.
-                   'ix unciae', /* allowAuto */ false)
+                   'ix unciae', /* allowAuto */ false, /* allowFluid */ false)
                .isValid)
         .toBe(false);
   });
 
-  it('recongizes auto if allowed', () => {
-    {// allow_auto = false with input != auto
-     const parsed =
-         new amp.validator.CssLength('1', /* allowAuto */ false);
-     expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(false);} {
-        // allow_auto = true with input == auto
-        const parsed =
-            new amp.validator.CssLength('1', /* allowAuto */ true);
-        expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(false);} {
-        // allow_auto = false with input = auto
-        const parsed =
-            new amp.validator.CssLength('auto', /* allowAuto */ false);
-        expect(parsed.isValid).toBe(false);} {
-        // allow_auto = true with input = auto
-        const parsed =
-            new amp.validator.CssLength('auto', /* allowAuto */ true);
-        expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(true);}
+  it('recognizes auto if allowed', () => {
+    {  // allow_auto = false with input != auto
+      const parsed = new amp.validator.CssLength(
+          '1', /* allowAuto */ false, /* allowFluid */ false);
+      expect(parsed.isValid).toBe(true);
+      expect(parsed.isAuto).toBe(false);
+    } {// allow_auto = true with input != auto
+       const parsed = new amp.validator.CssLength(
+           '1', /* allowAuto */ true, /* allowFluid */ false);
+       expect(parsed.isValid).toBe(true);
+       expect(parsed.isAuto)
+           .toBe(false);} {  // allow_auto = false with input = auto
+      const parsed = new amp.validator.CssLength(
+          'auto', /* allowAuto */ false, /* allowFluid */ false);
+      expect(parsed.isValid).toBe(false);
+    } {// allow_auto = true with input = auto
+       const parsed = new amp.validator.CssLength(
+           'auto', /* allowAuto */ true, /* allowFluid */ false);
+       expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(true);}
+  });
+
+  it('recognizes fluid if allowed', () => {
+    {  // allow_fluid = false with input != fluid
+      const parsed = new amp.validator.CssLength(
+          '1', /* allowAuto */ false, /* allowFluid */ false);
+      expect(parsed.isValid).toBe(true);
+      expect(parsed.isFluid).toBe(false);
+    } {// allow_fluid = true with input != fluid
+       const parsed = new amp.validator.CssLength(
+           '1', /* allowAuto */ false, /* allowFluid */ true);
+       expect(parsed.isValid).toBe(true);
+       expect(parsed.isFluid)
+           .toBe(false);} {  // allow_fluid = false with input = fluid
+      const parsed = new amp.validator.CssLength(
+          'fluid', /* allowAuto */ false, /* allowFluid */ false);
+      expect(parsed.isValid).toBe(false);
+    } {// allow_fluid = true with input = fluid
+       const parsed = new amp.validator.CssLength(
+           'fluid', /* allowAuto */ false, /* allowFluid */ true);
+       expect(parsed.isValid).toBe(true); expect(parsed.isFluid).toBe(true);}
   });
 });
+
+/**
+ * Helper for sorting attributes.
+ * @param {string} a
+ * @param {string} b
+ * @return {number}
+ */
+function compareAttrNames(a, b) {
+  // amp-bind attributes (e.g. "[name]") should be after other attributes.
+  if (a.startsWith('[') && !b.startsWith('[')) return 1;
+  if (!a.startsWith('[') && b.startsWith('[')) return -1;
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
 
 /**
  * Helper for ValidatorRulesMakeSense.
@@ -411,17 +644,29 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
       const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
       expect(isValidRegex(regex)).toBe(true);
     });
+    it('value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
   }
   if (attrSpec.valueRegexCasei !== null) {
     it('value_regex_casei valid', () => {
       const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
       expect(isValidRegex(regex)).toBe(true);
     });
+    it('value_regex_casei must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
   }
   if (attrSpec.blacklistedValueRegex !== null) {
     it('blacklisted_value_regex valid', () => {
       const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
       expect(isValidRegex(regex)).toBe(true);
+    });
+    it('blacklisted_value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
     });
   }
   // value_url must have at least one allowed protocol.
@@ -455,16 +700,6 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
       expect(attrSpec.mandatory).toBeDefined();
       expect(attrSpec.mandatory).toBe(true);
     });
-    it('value or value_casei defined when dispatch_key is true', () => {
-      expect((attrSpec.value !== null) || (attrSpec.valueCasei !== null))
-          .toBe(true);
-    });
-    if (attrSpec.valueCasei !== null) {
-      it('value_casei must be lower case when dispatch_key is true', () => {
-        expect(attrSpec.valueCasei === attrSpec.valueCasei.toLowerCase())
-            .toBe(true);
-      });
-    }
   }
   // Value property names must be unique.
   if (attrSpec.valueProperties !== null) {
@@ -504,6 +739,23 @@ describe('ValidatorRulesMakeSense', () => {
     expect(rules.templateSpecUrl === null).toBe(false);
   });
 
+  // Verify at most one css_length_spec defined per html_format and that the
+  // html_format is never UNKNOWN_CODE.
+  const cssLengthSpecs = {};
+  for (const cssLengthSpec of rules.cssLengthSpec) {
+    it('html_format should never be set to UNKNOWN_CODE', () => {
+      expect(
+          cssLengthSpec.htmlFormat ===
+          amp.validator.HtmlFormat.Code.UNKNOWN_CODE)
+          .toBe(false);
+    });
+    it('css_length_spec defined only at most once per html_format', () => {
+      expect(cssLengthSpecs.hasOwnProperty(cssLengthSpec.htmlFormat))
+          .toBe(false);
+      cssLengthSpecs[cssLengthSpec.htmlFormat] = 0;
+    });
+  }
+
   // For verifying that all ReferencePoint::tag_spec_names will resolve to a
   // TagSpec that's marked REFERENCE_POINT.
   const allReferencePoints = {};
@@ -521,6 +773,18 @@ describe('ValidatorRulesMakeSense', () => {
   const mandatoryParentRegex = new RegExp('(!DOCTYPE|\\$ROOT|[A-Z0-9-]+)');
   const disallowedAncestorRegex = new RegExp('[A-Z0-9-]+');
   for (const tagSpec of rules.tags) {
+    // Helper for message output, set a tagspec_name in this order:
+    // 1. tagSpec.specName, 2. tagSpec.tagName, 3. UNKNOWN_TAGSPEC.
+    const tagSpecName =
+        tagSpec.specName || tagSpec.tagName || 'UNKNOWN_TAGSPEC';
+
+    // html_format is never UNKNOWN_CODE.
+    it('html_format should never be set to UNKNOWN_CODE', () => {
+      expect(
+          tagSpec.htmlFormat.indexOf(
+              amp.validator.HtmlFormat.Code.UNKNOWN_CODE) === -1)
+          .toBe(true);
+    });
     // name
     it('tag_name defined', () => {
       expect(tagSpec.tagName).toBeDefined();
@@ -528,48 +792,85 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // spec_name can't be empty and must be unique.
     it('unique spec_name or if none then unique tag_name', () => {
-      if (tagSpec.extensionSpec !== null) {
+      if (tagSpec.specName !== null) {
+        expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
+        specNameIsUnique[tagSpec.specName] = 0;
+      } else if (tagSpec.extensionSpec !== null) {
         const specName = tagSpec.extensionSpec.name + ' extension .js script';
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
-      } else if (tagSpec.specName !== null) {
-        expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
-        specNameIsUnique[tagSpec.specName] = 0;
       } else {
         expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
             .toBe(false);
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
-    if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
+    // Verify AMP4ADS extensions are whitelisted.
+    if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
         ((tagSpec.htmlFormat.length === 0) ||
          (tagSpec.htmlFormat.indexOf(
-              amp.validator.TagSpec.HtmlFormat.AMP4ADS) !== -1))) {
+              amp.validator.HtmlFormat.Code.AMP4ADS) !== -1))) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
-        'AMP-ACCORDION': 0,
-        'AMP-AD-EXIT': 0,
-        'AMP-ANALYTICS': 0,
-        'AMP-ANIM': 0,
-        'AMP-ANIMATION': 0,
-        'AMP-AUDIO': 0,
-        'AMP-CAROUSEL': 0,
-        'AMP-FIT-TEXT': 0,
-        'AMP-FONT': 0,
-        'AMP-FORM': 0,
-        'AMP-IMG': 0,
-        'AMP-PIXEL': 0,
-        'AMP-SOCIAL-SHARE': 0,
-        'AMP-VIDEO': 0,
-        'AMP-YOUTUBE': 0
+        'amp-accordion': 0,
+        'amp-ad-exit': 0,
+        'amp-analytics': 0,
+        'amp-anim': 0,
+        'amp-animation': 0,
+        'amp-audio': 0,
+        'amp-bind': 0,
+        'amp-carousel': 0,
+        'amp-fit-text': 0,
+        'amp-font': 0,
+        'amp-form': 0,
+        'amp-gwd-animation': 0,
+        'amp-img': 0,
+        'amp-layout': 0,
+        'amp-mustache': 0,
+        'amp-pixel': 0,
+        'amp-position-observer': 0,
+        'amp-social-share': 0,
+        'amp-video': 0,
+        'amp-youtube': 0
       };
-      it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
-          ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +
+      const extension = tagSpec.extensionSpec.name;
+      it(extension + ' has html_format either explicitly or implicitly' +
+          ' set for AMP4ADS but ' + extension + ' is not whitelisted' +
           ' for AMP4ADS', () => {
-        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(tagSpec.tagName))
+        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(extension))
             .toBe(true);
       });
+    }
+    // Verify AMP4EMAIL extensions are whitelisted.
+    if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
+        ((tagSpec.htmlFormat.length === 0) ||
+         (tagSpec.htmlFormat.indexOf(
+              amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1))) {
+      // AMP4EMAIL format is the source of this whitelist.
+      const whitelistedAmp4EmailExtensions = {
+        'AMP-ACCORDION': 0,
+        'AMP-ANIM': 0,
+        'AMP-CAROUSEL': 0,
+        'AMP-FIT-TEXT': 0,
+        'AMP-IMG': 0,
+        'AMP-IMAGE-LIGHTBOX': 0,
+        'AMP-LIGHTBOX': 0,
+        'AMP-LIST': 0,
+        'AMP-SELECTOR': 0,
+        'AMP-SIDEBAR': 0,
+        'AMP-STATE': 0,
+        'AMP-TIMEAGO': 0,
+      };
+      it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
+             ' set for AMP4EMAIL but ' + tagSpec.tagName +
+             ' is not whitelisted' +
+             ' for AMP4EMAIL',
+         () => {
+           expect(
+               whitelistedAmp4EmailExtensions.hasOwnProperty(tagSpec.tagName))
+               .toBe(true);
+         });
     }
     // mandatory_parent
     if (tagSpec.mandatoryParent !== null) {
@@ -597,7 +898,7 @@ describe('ValidatorRulesMakeSense', () => {
     const attrNameIsUnique = {};
     for (const attrSpecId of tagSpec.attrs) {
       if (attrSpecId < 0) {
-        it('unique attr_name within tag_spec (simple attrs)', () => {
+        it('unique attr_name within tag_spec \'' + tagSpecName + '\'', () => {
           const attrName = rules.internedStrings[-1 - attrSpecId];
           expect(attrNameIsUnique.hasOwnProperty(attrName)).toBe(false);
           attrNameIsUnique[attrName] = 0;
@@ -663,12 +964,17 @@ describe('ValidatorRulesMakeSense', () => {
       }
 
       if (attrSpec.dispatchKey) {
-        it('tag_spec can not have more than one dispatch_key', () => {
+        it('tag_spec ' + tagSpecName + ' can not have more than one dispatch_key', () => {
           expect(seenDispatchKey).toBe(false);
           seenDispatchKey = true;
         });
       }
     }
+
+    it('\'' + tagSpecName + '\' has attrs not sorted alphabetically by name', () => {
+      var sortedAttrs = Object.keys(attrNameIsUnique).sort(compareAttrNames);
+      expect(Object.keys(attrNameIsUnique)).toEqual(sortedAttrs);
+    });
 
     // cdata
     if (tagSpec.cdata !== null) {
@@ -684,15 +990,18 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
       // blacklisted_cdata_regex
-      it('blacklisted_cdata_regex valid and error_message defined', () => {
-        for (const blacklistedCdataRegex of
-                 tagSpec.cdata.blacklistedCdataRegex) {
+      for (const blacklistedCdataRegex of tagSpec.cdata.blacklistedCdataRegex) {
+        it('blacklisted_cdata_regex valid and error_message defined', () => {
           usefulCdataSpec = true;
           expect(blacklistedCdataRegex.regex).toBeDefined();
           expect(isValidRegex(blacklistedCdataRegex.regex)).toBe(true);
           expect(blacklistedCdataRegex.errorMessage).toBeDefined();
-        }
-      });
+        });
+        it('blacklisted_cdata_regex must have unicode named groups', () => {
+          const regex = rules.internedStrings[-1 - blacklistedCdataRegex.regex];
+          expect(isMissingUnicodeGroup(regex)).toBe(false);
+        });
+      }
 
       // css_spec
       if (tagSpec.cdata.cssSpec !== null) {
@@ -734,9 +1043,9 @@ describe('ValidatorRulesMakeSense', () => {
           expect(
               (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||
               tagSpec.cdata.cdataRegex !== null ||
-              tagSpec.cdata.mandatoryCdata !== null)
+              tagSpec.cdata.mandatoryCdata !== null ||
+              tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
-
         });
       }
       // cdata_regex and mandatory_cdata
@@ -746,6 +1055,10 @@ describe('ValidatorRulesMakeSense', () => {
       }
       it('a cdata spec must be defined', () => {
         expect(usefulCdataSpec).toBe(true);
+      });
+      it('cdata_regex must have unicode named groups', () => {
+        const regex = rules.internedStrings[-1 - tagSpec.cdata.cdataRegex];
+        expect(isMissingUnicodeGroup(regex)).toBe(false);
       });
 
       // reference_points
@@ -758,21 +1071,25 @@ describe('ValidatorRulesMakeSense', () => {
     }
   }
 
-  // satisfies and requires need to match up
+  // satisfies needs to match up with requires and excludes
   var allSatisfies = [];
-  var allRequires = [];
+  var allRequiresAndExcludes = [];
   for (const tagSpec of rules.tags) {
     for (const condition of tagSpec.requires) {
-      allRequires.push(condition);
+      allRequiresAndExcludes.push(condition);
     }
-    for (const condition of tagSpec.satisfies)
+    for (const condition of tagSpec.excludes) {
+      allRequiresAndExcludes.push(condition);
+    }
+    for (const condition of tagSpec.satisfies) {
       allSatisfies.push(condition);
+    }
   }
   sortAndUniquify(allSatisfies);
-  sortAndUniquify(allRequires);
+  sortAndUniquify(allRequiresAndExcludes);
   it('all conditions are both required and satisfied', ()=> {
-    expect(subtractDiff(allSatisfies, allRequires)).toEqual([]);
-    expect(subtractDiff(allRequires, allSatisfies)).toEqual([]);
+    expect(subtractDiff(allSatisfies, allRequiresAndExcludes)).toEqual([]);
+    expect(subtractDiff(allRequiresAndExcludes, allSatisfies)).toEqual([]);
   });
 
   // attr_specs within rules.

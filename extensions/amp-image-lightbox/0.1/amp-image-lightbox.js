@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import * as dom from '../../../src/dom';
+import * as st from '../../../src/style';
+import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
 import {
@@ -24,10 +27,10 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {historyForDoc} from '../../../src/services';
+import {dev, user} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -35,19 +38,19 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {timerFor, platformFor} from '../../../src/services';
-import {user, dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
-import * as dom from '../../../src/dom';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
 
+const TAG = 'amp-image-lightbox';
 
 /** @private @const {!Object<string, boolean>} */
 const SUPPORTED_ELEMENTS_ = {
   'amp-img': true,
   'amp-anim': true,
 };
+
+/** @private @const */
+const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby',
+  'aria-labelledby'];
 
 /** @private @const {!../../../src/curve.CurveDef} */
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
@@ -58,6 +61,8 @@ const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 /** @private @const {!../../../src/curve.CurveDef} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 
+/** @private @const {number} */
+const DEFAULT_MAX_SCALE = 2;
 
 /**
  * This class is responsible providing all operations necessary for viewing
@@ -69,7 +74,7 @@ export class ImageViewer {
   /**
    * @param {!AmpImageLightbox} lightbox
    * @param {!Window} win
-   * @param {!function(T, number=):Promise<T>} loadPromise
+   * @param {function(T, number=):Promise<T>} loadPromise
    * @template T
    */
   constructor(lightbox, win, loadPromise) {
@@ -94,13 +99,6 @@ export class ImageViewer {
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
 
-    /** @private {!Object} */
-    this.ariaAttributes_ = {
-      'alt': null,
-      'aria-label': null,
-      'aria-labelledby': null,
-    };
-
     /** @private {number} */
     this.sourceWidth_ = 0;
 
@@ -122,7 +120,7 @@ export class ImageViewer {
     /** @private {number} */
     this.minScale_ = 1;
     /** @private {number} */
-    this.maxScale_ = 2;
+    this.maxScale_ = DEFAULT_MAX_SCALE;
 
     /** @private {number} */
     this.startX_ = 0;
@@ -196,9 +194,8 @@ export class ImageViewer {
    */
   reset() {
     this.image_.setAttribute('src', '');
-    Object.keys(this.ariaAttributes_).forEach(key => {
+    ARIA_ATTRIBUTES.forEach(key => {
       this.image_.removeAttribute(key);
-      this.ariaAttributes_[key] = null;
     });
     this.image_.removeAttribute('aria-describedby');
     this.srcset_ = null;
@@ -227,6 +224,24 @@ export class ImageViewer {
   }
 
   /**
+   * Sets the source width and height based the natural dimensions of the
+   * source image if loaded, and the offset dimensions of amp-img element
+   * if not.
+   * @param {!Element} ampImg
+   * @param {?Element} img
+   * @private
+   */
+  setSourceDimensions_(ampImg, img) {
+    if (img) {
+      this.sourceWidth_ = img.naturalWidth || ampImg./*OK*/offsetWidth;
+      this.sourceHeight_ = img.naturalHeight || ampImg./*OK*/offsetHeight;
+    } else {
+      this.sourceWidth_ = ampImg./*OK*/offsetWidth;
+      this.sourceHeight_ = ampImg./*OK*/offsetHeight;
+    }
+  }
+
+  /**
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
@@ -234,15 +249,11 @@ export class ImageViewer {
    * @param {?Element} sourceImage
    */
   init(sourceElement, sourceImage) {
-    this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
-    this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
+    this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    Object.keys(this.ariaAttributes_).forEach(key => {
-      this.ariaAttributes_[key] = sourceElement.getAttribute(key);
-      if (this.ariaAttributes_[key]) {
-        this.image_.setAttribute(key, this.ariaAttributes_[key]);
-      }
+    sourceElement.getImpl().then(elem => {
+      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
     });
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
@@ -259,16 +270,21 @@ export class ImageViewer {
   measure() {
     this.viewerBox_ = layoutRectFromDomRect(this.viewer_
         ./*OK*/getBoundingClientRect());
-
-    const sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
-        this.viewerBox_.height / this.sourceHeight_);
-    let width = Math.min(this.sourceWidth_ * sf, this.viewerBox_.width);
-    let height = Math.min(this.sourceHeight_ * sf, this.viewerBox_.height);
+    const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+    let height = Math.min(
+        this.viewerBox_.width / sourceAspectRatio,
+        this.viewerBox_.height
+    );
+    let width = Math.min(
+        this.viewerBox_.height * sourceAspectRatio,
+        this.viewerBox_.width
+    );
 
     // TODO(dvoytenko): This is to reduce very small expansions that often
     // look like a stutter. To be evaluated if this is still the right
     // idea.
-    if (width - this.sourceWidth_ <= 16) {
+    if (Math.abs(width - this.sourceWidth_) <= 16
+        && Math.abs(height - this.sourceHeight_) <= 16) {
       width = this.sourceWidth_;
       height = this.sourceHeight_;
     }
@@ -285,6 +301,14 @@ export class ImageViewer {
       width: st.px(this.imageBox_.width),
       height: st.px(this.imageBox_.height),
     });
+
+    // If aspect ratio is off by too much, adjust max scale
+    const viewerBoxRatio = this.viewerBox_.width / this.viewerBox_.height;
+    const maxScale = Math.max(
+        viewerBoxRatio / sourceAspectRatio,
+        sourceAspectRatio / viewerBoxRatio
+    );
+    this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
 
     // Reset zoom and pan.
     this.startScale_ = this.scale_ = 1;
@@ -307,14 +331,14 @@ export class ImageViewer {
     }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = this.imageBox_.width * this.maxSeenScale_;
-    const src = this.srcset_.select(width, this.lightbox_.getDpr()).url;
+    const src = this.srcset_.select(width, this.lightbox_.getDpr());
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
     // Notice that we will wait until the next event cycle to set the "src".
     // This ensures that the already available image will show immediately
     // and then naturally upgrade to a higher quality image.
-    return timerFor(this.win).promise(1).then(() => {
+    return Services.timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
       return this.loadPromise_(this.image_);
     });
@@ -524,7 +548,7 @@ export class ImageViewer {
     const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     const zoomSign = Math.abs(deltaY) > Math.abs(deltaX) ?
-        Math.sign(deltaY) : Math.sign(-deltaX);
+      Math.sign(deltaY) : Math.sign(-deltaX);
     if (zoomSign == 0) {
       return;
     }
@@ -557,7 +581,7 @@ export class ImageViewer {
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
     return /** @type {!Promise|undefined} */ (
-        this.set_(newScale, newPosX, newPosY, animate));
+      this.set_(newScale, newPosX, newPosY, animate));
   }
 
   /**
@@ -614,8 +638,8 @@ export class ImageViewer {
     if (animate) {
       const maxDur = 250;
       dur = Math.min(maxDur, Math.max(
-          maxDur * dist * 0.01,      // Moving component.
-          maxDur * Math.abs(ds)));   // Zooming component.
+          maxDur * dist * 0.01, // Moving component.
+          maxDur * Math.abs(ds))); // Zooming component.
     }
 
     let promise;
@@ -713,11 +737,6 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
   }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
-  }
-
   /**
   * Lazily builds the image-lightbox DOM on the first open.
   * @private
@@ -764,7 +783,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.element.addEventListener('click', e => {
       if (!this.entering_ &&
             !this.imageViewer_.getImage().contains(/** @type {?Node} */ (
-                e.target))) {
+              e.target))) {
         this.close();
       }
     });
@@ -785,7 +804,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
     this.buildLightbox_();
 
-    const source = invocation.source;
+    const source = invocation.caller;
     user().assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
         'Unsupported element: %s', source.tagName);
 
@@ -807,8 +826,9 @@ class AmpImageLightbox extends AMP.BaseElement {
         // element size depends on window size directly and the measurement
         // happens in window.resize event. Adding a timeout for correct
         // measurement. See https://github.com/ampproject/amphtml/issues/8479
-        if (startsWith(platformFor(this.win).getIosVersionString(), '10.3')) {
-          timerFor(this.win).delay(() => {
+        if (startsWith(
+            Services.platformFor(this.win).getIosVersionString(), '10.3')) {
+          Services.timerFor(this.win).delay(() => {
             this.imageViewer_.measure();
           }, 500);
         } else {
@@ -856,6 +876,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
+    if (this.sourceElement_) {
+      dom.tryFocus(this.sourceElement_);
+    }
   }
 
   /**
@@ -886,11 +909,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     let caption = null;
 
     // 1. Check <figure> and <figcaption>.
-    if (!caption) {
-      const figure = dom.closestByTag(sourceElement, 'figure');
-      if (figure) {
-        caption = dom.elementByTag(figure, 'figcaption');
-      }
+    const figure = dom.closestByTag(sourceElement, 'figure');
+    if (figure) {
+      caption = dom.elementByTag(figure, 'figcaption');
     }
 
     // 2. Check "aria-describedby".
@@ -1094,8 +1115,11 @@ class AmpImageLightbox extends AMP.BaseElement {
 
   /** @private @return {!../../../src/service/history-impl.History} */
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
   }
 }
 
-AMP.registerElement('amp-image-lightbox', AmpImageLightbox, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpImageLightbox, CSS);
+});

@@ -21,7 +21,7 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-ad width=300 height=250
+<amp-ad width="300" height="265"
     type="pubmine"
     data-siteid="37790885">
 </amp-ad>
@@ -30,29 +30,27 @@ limitations under the License.
 ### With all attributes
 
 ```html
-<amp-ad width=300 height=250
+<amp-ad width="300" height="265"
     type="pubmine"
-    data-adsafe="1"
     data-section="1"
-    data-wordads="1"
+    data-pt="1"
+    data-ht="1"
     data-siteid="37790885">
 </amp-ad>
 ```
 
 ## Configuration
 
-For further Pubmine configuration information, please [contact us](https://wordpress.com/help/contact).
+For further configuration information, please [contact Pubmine](https://wordpress.com/help/contact).
 
-### Pubmine Required parameters
+Please note that the height parameter should be 15 greater than your ad size to ensure there is enough room for the "Report this ad" link.
 
-| Parameter     | Description |
-|:------------- |:-------------|
-| **`data-siteid`**    | Pubmine publisher site number |
+### Required parameters
 
-### Pubmine Optional parameters
+* `data-siteid`: Pubmine publisher site number.
 
-| Parameter     | Description |
-|:------------- |:-------------|
-| **`data-adsafe`**     | Flag for adsafe content |
-| **`data-section`**    | Pubmine slot identifier |
-| **`data-wordads`**    | Flag for WordAds or other |
+### Optional parameters
+
+* `data-section`: Pubmine slot identifier
+* `data-pt`: Enum value for page type
+* `data-ht`: Enum value for hosting type

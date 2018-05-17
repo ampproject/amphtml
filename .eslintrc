@@ -1,18 +1,20 @@
 {
   "parser": "babel-eslint",
-  "rulePaths": ["build-system/eslint-rules/"],
-  "plugins": ["eslint-plugin-google-camelcase"],
-  "ecmaFeatures": {
-    "modules": true,
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "forOf": false,
-    "destructuring": true,
-    "spread": true
-  },
+  "plugins": [
+    "chai-expect",
+    "eslint-plugin-amphtml-internal",
+    "eslint-plugin-google-camelcase",
+    "jsdoc",
+    "sort-imports-es6-autofix",
+    "sort-requires"
+  ],
   "env": {
     "es6": true,
     "browser": true
+  },
+ "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
   },
   "globals": {
     "it": false,
@@ -29,40 +31,85 @@
     "sandbox": true,
     "context": false,
     "global": false,
-    "describes": true
+    "describes": true,
+    "allowConsoleError": false
+  },
+  "settings": {
+    "jsdoc": {
+      "tagNamePreference": {
+        "returns": "return",
+        "constant": "const"
+      },
+      "additionalTagNames": {
+        "customTags": [
+          "deprecated",
+          "export",
+          "final",
+          "package",
+          "restricted",
+          "suppress",
+          "template",
+          "visibleForTesting"
+        ]
+      },
+      "allowOverrideWithoutParam" : true
+    }
   },
   "rules": {
+    "amphtml-internal/closure-type-primitives": 2,
+    "amphtml-internal/dict-string-keys": 2,
+    "amphtml-internal/enforce-private-props": 2,
+    "amphtml-internal/html-template": 2,
+    "amphtml-internal/no-array-destructuring": 2,
+    "amphtml-internal/no-deep-destructuring": 2,
+    "amphtml-internal/no-es2015-number-props": 2,
+    "amphtml-internal/no-export-side-effect": 2,
+    "amphtml-internal/no-for-of-statement": 2,
+    "amphtml-internal/no-global": 0,
+    "amphtml-internal/no-spread": 2,
+    "amphtml-internal/no-style-property-setting": 2,
+    "amphtml-internal/prefer-deferred-promise": 1,
+    "amphtml-internal/prefer-destructuring": 2,
+    "amphtml-internal/query-selector": 2,
+    "amphtml-internal/todo-format": 0,
+    "amphtml-internal/unused-private-field": 1,
+    "amphtml-internal/vsync": 1,
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
+    "chai-expect/missing-assertion": 2,
+    "chai-expect/no-inner-compare": 2,
+    "chai-expect/terminating-properties": 2,
     "comma-dangle": [2, "always-multiline"],
     "computed-property-spacing": [2, "never"],
     "curly": 2,
-    "dict-string-keys": 2,
     "dot-location": [2, "property"],
-    "enforce-private-props": 2,
-    "todo-format": 0,
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
     "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
+    "jsdoc/check-param-names": 1,
+    "jsdoc/check-tag-names": 1,
+    "jsdoc/check-types": 1,
+    "jsdoc/require-param": 1,
+    "jsdoc/require-param-name": 1,
+    "jsdoc/require-param-type": 1,
+    "jsdoc/require-returns-type": 1,
     "key-spacing": 2,
     "max-len": [2, 80, 4, {
-      "ignoreComments": true,
-      "ignoreUrls": true,
-      "ignorePattern": ""
+      "ignoreTrailingComments": true,
+      "ignoreRegExpLiterals": true,
+      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
+      "ignoreUrls": true
     }],
     "no-alert": 2,
-    "no-array-destructuring": 2,
     "no-cond-assign": 2,
     "no-debugger": 2,
     "no-div-regex": 2,
     "no-dupe-keys": 2,
-    "no-es2015-number-props": 2,
     "no-eval": 2,
-    "no-export-side-effect": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
-    "no-for-of-statement": 2,
+    "no-extra-semi": 2,
     "no-implicit-coercion": [2, { "boolean": false }],
     "no-implied-eval": 2,
     "no-iterator": 2,
@@ -74,7 +121,6 @@
     "no-self-compare": 2,
     "no-sequences": 2,
     "no-spaced-func": 2,
-    "no-spread": 2,
     "no-throw-literal": 2,
     "no-trailing-spaces": 2,
     "no-unused-expressions": 0,
@@ -96,7 +142,13 @@
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
     "semi": 2,
-    "keyword-spacing": ["error", { "before": true, "after": true }],
+    "keyword-spacing": [2, { "before": true, "after": true }],
+    "sort-imports-es6-autofix/sort-imports-es6": [2, {
+      "ignoreCase": false,
+      "ignoreMemberSort": false,
+      "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+    }],
+    "sort-requires/sort-requires": 2,
     "space-before-blocks": 2,
     "space-before-function-paren": [2, "never"],
     "space-in-parens": 2,

@@ -26,12 +26,17 @@ describe('BindValidator', () => {
   describe('canBind()', () => {
     it('should allow binding to "class" for any element', () => {
       expect(val.canBind('DIV', 'class')).to.be.true;
-      expect(val.canBind('ANY-TAG-REAL-OR-FAKE', 'class')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'class')).to.be.true;
     });
 
     it('should allow binding to "text" for any elements', () => {
       expect(val.canBind('P', 'text')).to.be.true;
-      expect(val.canBind('ANY-TAG-REAL-OR-FAKE', 'text')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'text')).to.be.true;
+    });
+
+    it('should allow binding to ARIA attributes for any element', () => {
+      expect(val.canBind('P', 'aria-foo')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'aria-foo')).to.be.true;
     });
 
     it('should NOT allow binding to "style"', () => {
@@ -154,11 +159,11 @@ describe('BindValidator', () => {
     it('should NOT allow unsupported <input> "type" values', () => {
       expect(val.isResultValid('INPUT', 'type', 'checkbox')).to.be.true;
       expect(val.isResultValid('INPUT', 'type', 'email')).to.be.true;
+      expect(val.isResultValid('INPUT', 'type', 'file')).to.be.true;
+      expect(val.isResultValid('INPUT', 'type', 'password')).to.be.true;
 
       expect(val.isResultValid('INPUT', 'type', 'BUTTON')).to.be.false;
-      expect(val.isResultValid('INPUT', 'type', 'file')).to.be.false;
       expect(val.isResultValid('INPUT', 'type', 'image')).to.be.false;
-      expect(val.isResultValid('INPUT', 'type', 'password')).to.be.false;
     });
   });
 
@@ -192,7 +197,7 @@ describe('BindValidator', () => {
       expect(val.isResultValid(
           'AMP-IMG',
           'srcset',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+          /* eslint no-script-url: 0 */ 'javascript:alert(1);')).to.be.false;
     });
 
     it('should support <amp-list>', () => {
@@ -201,6 +206,7 @@ describe('BindValidator', () => {
     });
 
     it('should support <amp-selector>', () => {
+      expect(val.canBind('AMP-SELECTOR', 'disabled')).to.be.true;
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
     });
 

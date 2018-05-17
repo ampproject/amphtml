@@ -15,15 +15,24 @@
  */
 'use strict';
 
-var gulp = require('gulp-help')(require('gulp'));
-var execSync = require('child_process').execSync;
+const gulp = require('gulp-help')(require('gulp'));
+const {execOrDie} = require('../exec');
 
 
 /**
  * Simple wrapper around the python based validator build.
  */
 function validator() {
-  execSync('cd validator && python build.py')
+  execOrDie('cd validator && python build.py');
+}
+
+/**
+ * Simple wrapper around the python based validator webui build.
+ */
+function validatorWebui() {
+  execOrDie('cd validator/webui && python build.py');
 }
 
 gulp.task('validator', 'Builds and tests the AMP validator.', validator);
+gulp.task('validator-webui', 'Builds and tests the AMP validator web UI.',
+    validatorWebui);

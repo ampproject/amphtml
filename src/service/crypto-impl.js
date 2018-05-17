@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder, getService} from '../service';
-import {dev} from '../log';
-import {extensionsFor} from '../services';
-import {stringToBytes, utf8EncodeSync} from '../utils/bytes';
+import {Services} from '../services';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {dev} from '../log';
+import {getService, registerServiceBuilder} from '../service';
+import {stringToBytes, utf8Encode} from '../utils/bytes';
 
 /** @const {string} */
 const TAG = 'Crypto';
@@ -30,11 +30,28 @@ export class Crypto {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private @const {?webCrypto.SubtleCrypto} */
-    this.subtle_ = getSubtle(win);
+    let subtle = null;
+    let isLegacyWebkit = false;
+    if (win.crypto) {
+      if (win.crypto.subtle) {
+        subtle = win.crypto.subtle;
+      } else if (win.crypto.webkitSubtle) {
+        subtle = win.crypto.webkitSubtle;
+        isLegacyWebkit = true;
+      }
+    }
+
+    /** @const {{name: string}} */
+    this.pkcsAlgo = {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: {name: 'SHA-256'},
+    };
+
+    /** @const {?webCrypto.SubtleCrypto} */
+    this.subtle = subtle;
 
     /** @private @const {boolean} */
-    this.isWebkit_ = this.subtle_ && win.crypto && 'webkitSubtle' in win.crypto;
+    this.isLegacyWebkit_ = isLegacyWebkit;
 
     /** @private {?Promise<{sha384: function((string|Uint8Array))}>} */
     this.polyfillPromise_ = null;
@@ -52,25 +69,25 @@ export class Crypto {
       input = stringToBytes(input);
     }
 
-    if (!this.subtle_ || this.polyfillPromise_) {
+    if (!this.subtle || this.polyfillPromise_) {
       // means native Crypto API is not available or failed before.
       return (this.polyfillPromise_ || this.loadPolyfill_())
           .then(polyfill => polyfill.sha384(input));
     }
 
     try {
-      return this.subtle_.digest({name: 'SHA-384'}, input)
+      return this.subtle.digest({name: 'SHA-384'}, input)
           /** @param {?} buffer */
           .then(buffer => new Uint8Array(buffer),
-          e => {
+              e => {
                 // Chrome doesn't allow the usage of Crypto API under
                 // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
-            if (e.message && e.message.indexOf('secure origin') < 0) {
+                if (e.message && e.message.indexOf('secure origin') < 0) {
                   // Log unexpected fallback.
-              dev().error(TAG, FALLBACK_MSG, e);
-            }
-            return this.loadPolyfill_().then(() => this.sha384(input));
-          });
+                  dev().error(TAG, FALLBACK_MSG, e);
+                }
+                return this.loadPolyfill_().then(() => this.sha384(input));
+              });
     } catch (e) {
       dev().error(TAG, FALLBACK_MSG, e);
       return this.loadPolyfill_().then(() => this.sha384(input));
@@ -117,8 +134,8 @@ export class Crypto {
     if (this.polyfillPromise_) {
       return this.polyfillPromise_;
     }
-    return this.polyfillPromise_ = extensionsFor(this.win_)
-        .loadExtension('amp-crypto-polyfill')
+    return this.polyfillPromise_ = Services.extensionsFor(this.win_)
+        .preloadExtension('amp-crypto-polyfill')
         .then(() => getService(this.win_, 'crypto-polyfill'));
   }
 
@@ -132,7 +149,7 @@ export class Crypto {
    * @return {boolean} whether Web Cryptography is available
    */
   isPkcsAvailable() {
-    return Boolean(this.subtle_) && this.win_['isSecureContext'] !== false;
+    return Boolean(this.subtle) && this.win_['isSecureContext'] !== false;
   }
 
   /**
@@ -146,16 +163,13 @@ export class Crypto {
    */
   importPkcsKey(jwk) {
     dev().assert(this.isPkcsAvailable());
+    // Safari 10 and earlier want this as an ArrayBufferView.
+    const keyData = this.isLegacyWebkit_
+      ? utf8Encode(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
+      : /** @type {!webCrypto.JsonWebKey} */ (jwk);
     return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
-        this.subtle_.importKey(
-            'jwk',
-            this.isWebkit_ ?
-                // WebKit wants this as an ArrayBufferView.
-                utf8EncodeSync(JSON.stringify(
-                    /** @type {!JsonObject} */ (jwk))) :
-                /** @type {!webCrypto.JsonWebKey} */ (jwk),
-            {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, true,
-            ['verify']));
+      this.subtle.importKey('jwk', keyData, this.pkcsAlgo, true, ['verify'])
+    );
   }
 
   /**
@@ -170,31 +184,10 @@ export class Crypto {
    */
   verifyPkcs(key, signature, data) {
     dev().assert(this.isPkcsAvailable());
-    return /** @type {!Promise<boolean>} */ (this.subtle_.verify(
-        {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, key, signature,
-        data));
+    return /** @type {!Promise<boolean>} */ (
+      this.subtle.verify(this.pkcsAlgo, key, signature, data)
+    );
   }
-
-  /**
-   * Returns the SHA-1 hash of the input array in a number array. As a
-   * precondition, `isPkcsAvailable()` must be `true` (there's no polyfill
-   * because only Fast Fetch uses this).
-   *
-   * @param {!Uint8Array} input
-   * @return {!Promise<!ArrayBuffer>}
-   */
-  sha1(input) {
-    dev().assert(this.isPkcsAvailable());
-    return /** @type {!Promise<!ArrayBuffer>} */ (
-        this.subtle_.digest({name: 'SHA-1'}, input));
-  }
-}
-
-function getSubtle(win) {
-  if (!win.crypto) {
-    return null;
-  }
-  return win.crypto.subtle || win.crypto.webkitSubtle || null;
 }
 
 /**

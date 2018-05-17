@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {validateData} from '../3p/3p';
 import {startsWith} from '../src/string';
+import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -47,7 +47,8 @@ export function spotx(global, data) {
     }
   };
 
-  // TODO(KenneyE): Implement AdLoaded callback in script to accurately trigger renderStart()
+  // TODO(KenneyE): Implement AdLoaded callback in script to accurately trigger
+  // renderStart()
   script.onload = global.context.renderStart;
 
   script.src = `//js.spotx.tv/easi/v1/${data['spotx_channel_id']}.js`;

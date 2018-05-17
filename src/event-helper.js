@@ -24,12 +24,12 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
  * Returns a CustomEvent with a given type and detail; supports fallback for IE.
  * @param {!Window} win
  * @param {string} type
- * @param {Object} detail
+ * @param {Object|string|undefined} detail
  * @param {EventInit=} opt_eventInit
  * @return {!Event}
  */
 export function createCustomEvent(win, type, detail, opt_eventInit) {
-  const eventInit = /** @type {CustomEventInit} */ ({detail});
+  const eventInit = /** @type {!CustomEventInit} */ ({detail});
   Object.assign(eventInit, opt_eventInit);
   // win.CustomEvent is a function on Edge, Chrome, FF, Safari but
   // is an object on IE 11.
@@ -49,12 +49,12 @@ export function createCustomEvent(win, type, detail, opt_eventInit) {
  * @param {!EventTarget} element
  * @param {string} eventType
  * @param {function(!Event)} listener
- * @param {boolean=} opt_capture
+ * @param {Object=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */
-export function listen(element, eventType, listener, opt_capture) {
+export function listen(element, eventType, listener, opt_evtListenerOpts) {
   return internalListenImplementation(
-      element, eventType, listener, opt_capture);
+      element, eventType, listener, opt_evtListenerOpts);
 }
 
 /**
@@ -72,10 +72,10 @@ export function getData(event) {
  * @param {!EventTarget} element
  * @param {string} eventType
  * @param {function(!Event)} listener
- * @param {boolean=} opt_capture
+ * @param {Object=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */
-export function listenOnce(element, eventType, listener, opt_capture) {
+export function listenOnce(element, eventType, listener, opt_evtListenerOpts) {
   let localListener = listener;
   const unlisten = internalListenImplementation(element, eventType, event => {
     try {
@@ -85,7 +85,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
       localListener = null;
       unlisten();
     }
-  }, opt_capture);
+  }, opt_evtListenerOpts);
   return unlisten;
 }
 
@@ -95,16 +95,17 @@ export function listenOnce(element, eventType, listener, opt_capture) {
  * fired on the element.
  * @param {!EventTarget} element
  * @param {string} eventType
- * @param {boolean=} opt_capture
+ * @param {Object=} opt_evtListenerOpts
  * @param {function(!UnlistenDef)=} opt_cancel An optional function that, when
  *     provided, will be called with the unlistener. This gives the caller
  *     access to the unlistener, so it may be called manually when necessary.
  * @return {!Promise<!Event>}
  */
-export function listenOncePromise(element, eventType, opt_capture, opt_cancel) {
+export function listenOncePromise(element, eventType, opt_evtListenerOpts,
+  opt_cancel) {
   let unlisten;
   const eventPromise = new Promise(resolve => {
-    unlisten = listenOnce(element, eventType, resolve, opt_capture);
+    unlisten = listenOnce(element, eventType, resolve, opt_evtListenerOpts);
   });
   eventPromise.then(unlisten, unlisten);
   if (opt_cancel) {
@@ -144,7 +145,7 @@ export function loadPromise(eleOrWindow) {
   const loadingPromise = new Promise((resolve, reject) => {
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    const tagName = eleOrWindow.tagName;
+    const {tagName} = eleOrWindow;
     if (tagName === 'AUDIO' || tagName === 'VIDEO') {
       unlistenLoad = listenOnce(eleOrWindow, 'loadstart', resolve);
     } else {

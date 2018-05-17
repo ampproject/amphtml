@@ -39,6 +39,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
@@ -56,11 +58,11 @@ Example:
 
 ## Attributes
 
-**data-embed-id**
+##### data-embed-id
 
 The Reach player embed id found in the "players" section or in the generated embed itself.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

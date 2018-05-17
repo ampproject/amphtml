@@ -24,17 +24,16 @@ limitations under the License.
     layout="fixed-height"
     data-token="D3UMgQWBqleq1tPW"
     data-url="http://bigpicture.ru"
-    data-anchorid="i0xMMY1MoliiZWVl"
->
+    data-anchorid="i0xMMY1MoliiZWVl">
 </amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation. Currently supported all anchor based widgets.
+For semantics of configuration, please see Relap's documentation. Currently supports all anchor-based widgets.
 
 Supported parameters:
 
-- data-token
-- data-url
-- data-anchorid
+- `data-token`
+- `data-url`
+- `data-anchorid`

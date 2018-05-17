@@ -52,16 +52,14 @@ limitations under the License.
 
 ## Behavior
 Given a sufficient number of valid placements (supplied in the configuration),
-`amp-auto-ads` tries to insert additional ads within the following
-constraints:
+`amp-auto-ads` tries to insert additional ads while adhering to a set of
+constraints specified by the ad network. These constraints will limit:
 <ul>
-  <li>No more than 3 ads on the page (including any existing ads)</li>
-  <li>No injected ad within 500px (measured vertically) of another ad</li>
-  <li>
-    An injected ad does not cause any unacceptable re-flow (as determined by
-    attemptChangeSize).
-  </li>
+  <li>The total number of ads that can be inserted</li>
+  <li>The minimum distance that there should be between any adjacent ads</li>
 </ul>
+In addition to this, ads will only be inserted in locations on the page that do
+not cause an unacceptable re-flow (as determined by attemptChangeSize).
 
 The `<amp-auto-ads>` tag should be placed as the first child of the `<body>`.
 
@@ -79,9 +77,17 @@ should be specified on the tag.
 
 ## Attributes
 
-**type**
+##### type (required)
 
 An identifier for the ad network.
+
+##### data-foo-bar
+
+Most ad networks require further configuration, which can be passed to the network by using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the [ad network](#supported-ad-networks) on which attributes can be used.
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Configuration Spec
 
@@ -140,6 +146,14 @@ The fields to specify in the configuration object:
         <li>layout</li>
         <li>data-* (i.e. any data attribute)</li>
       </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><code>adConstraints</code></td>
+    <td>AdConstraintsObj</td>
+    <td>
+      An <em>optional</em> field that specifies the contraints that should be used when placing ads on the page. If not specified then
+      <code>amp-auto-ads</code> will attempt to use the default constraints specified in [ad-network-config.js](0.1/ad-network-config.js).
     </td>
   </tr>
 </table>
@@ -299,6 +313,101 @@ The ENUM values for the `type` field in the `placements` configuration object:
     <td>BANNER</td>
     <td>1</td>
     <td>Placement describes a banner ad position.</td>
+  </tr>
+</table>
+
+#### AdConstraintsObj
+
+The fields to specify in the `adConstraints` configuration object: 
+
+<table>
+  <tr>
+    <th class="col-twenty">Field Name</th>
+    <th class="col-twenty">Type</th>
+    <th class="col-fourty" >Description</th>
+  </tr>
+  <tr>
+    <td><code>initialMinSpacing</code></td>
+    <td>string</td>
+    <td>
+      A <strong>required</strong> field that indicates the minimum distance that an ad should be from any ads already on the page (either manually placed or previously placed by amp-auto-ads) at the time of insertion.
+      Values are expressed as a number with a units prefix. E.g. "10px" means 10 pixels, or "0.5vp" means half a viewport height. Negative values are invalid. The supported units are:
+      <ul>
+        <li>px - pixels</li>
+        <li>vp - multiple of viewport height</li>
+      </ul>
+      This value applies only when the number of ads already on the page is less than any <code>adCount</code> matcher specified in the subsequentMinSpacing field.
+    </td>
+  </tr>
+  <tr>
+    <td><code>subsequentMinSpacing</code></td>
+    <td>Array&lt;!SubsequentMinSpacingObj&gt;</td>
+    <td>
+      An <em>optional</em> field that specifies the ad spacings that should apply based on how many ads are already on the page at the time of insertion.
+    </td>
+  </tr>
+  <tr>
+    <td><code>maxAdCount</code></td>
+    <td>number</td>
+    <td>
+      A <strong>required</strong> field that specifies the maximum number of ads that <code>amp-auto-ads</code> can cause there to be on a page. Both manually placed ads, as well as those placed by <code>amp-auto-ads</code> count towards this total.
+      E.g. if this field were set to 5 and there were 3 manually placed ads on the page, then <code>amp-auto-ads</code> would place a maximum of 2 additional ads.
+    </td>
+  </tr>
+</table>
+
+#### SubsequentMinSpacingObj
+
+The fields to specify in the `subsequentMinSpacing` configuration object. `subsequentMinSpacing` entries
+can be used to change the spacing required between any additional ads based on the number of ads already on
+the page. As an example, consider the following scenario:
+<ul>
+  <li>2 existing ads on the page</li>
+  <li>subsequentMinSpacing field is:
+    <code>
+      [
+        {adCount: 3, spacing: "500px"},
+        {adCount: 5, spacing: "1000px"},
+      ]
+    </code>
+  </li>
+</ul>
+Initially there are 2 existing ads on the page, so no mapping matches.
+The minimum spacing therefore defaults to initialMinSpacing in the `AdConstraints` object.
+`amp-auto-ads` will recursively try to place ads until it runs out of placements that
+could be used without breaking the `adContraints`.
+After `amp-auto-ads` has placed its first ad, there are now 3 ads on the page, since
+there is a mapping for 3 (or more) ads in `subsequentMinSpacing`, the min spacing now becomes 500px.
+This applies up until the point where there are 5 ads on the page, since
+there is a rule for 5 ads. Inserting the 6+th ad would then require
+it to be clear of other ads by at least 1000px.
+
+<table>
+  <tr>
+    <th class="col-twenty">Field Name</th>
+    <th class="col-twenty">Type</th>
+    <th class="col-fourty" >Description</th>
+  </tr>
+  <tr>
+    <td><code>adCount</code></td>
+    <td>number</td>
+    <td>
+      A <strong>required</strong> field.
+      The minimum number of ads already on the page that cause this rule to apply (assuming no other rule is a better match). See description above
+      for a more detailed explanation.
+    </td>
+  </tr>
+  <tr>
+    <td><code>spacing</code></td>
+    <td>string</td>
+    <td>
+      A <strong>required</strong> field that specifies the minimum ad spacing that applies when this rule is matched based on the <code>adCount</code>.
+      Values are expressed as a number with a units prefix. E.g. "10px" means 10 pixels, or "0.5vp" means half a viewport height. Negative values are invalid. The supported units are:
+      <ul>
+        <li>px - pixels</li>
+        <li>vp - multiple of viewport height</li>
+      </ul>
+    </td>
   </tr>
 </table>
 

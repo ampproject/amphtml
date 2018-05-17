@@ -20,11 +20,12 @@
  *   Copyright 2009, The Closure Library Authors, licensed under the
  *   Apache License.
  */
+
+goog.provide('amp.htmlparser.HtmlParserTest');
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandler');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 
-goog.provide('amp.htmlparser.HtmlParserTest');
 
 /**
  * @private
@@ -54,16 +55,40 @@ class LoggingHandler extends amp.htmlparser.HtmlSaxHandler {
   markManufacturedBody() { this.log.push('markManufacturedBody()'); }
 
   /** @override */
-  startTag(tagName, attrs) {
-    this.log.push('startTag(' + tagName + ',[' + attrs + '])');
+  startTag(tag) {
+    tag.dedupeAttrs();
+    this.log.push(
+        'startTag(' + tag.upperName() + ',' + this.attrsToString(tag.attrs()) +
+        ')');
   }
 
   /** @override */
-  endTag(tagName) { this.log.push('endTag(' + tagName + ')'); }
+  endTag(tag) {
+    this.log.push('endTag(' + tag.upperName() + ')');
+  }
 
   /** @override */
   effectiveBodyTag(attrs) {
-    this.log.push('effectiveBodyTag([' + attrs + '])');
+    this.log.push('effectiveBodyTag(' + this.attrsToString(attrs) + ')');
+  }
+
+  /**
+   * Converts a list of attributes to a comma separated string.
+   * @param {!Array<!Object>} attrs
+   * @return {string}
+   */
+  attrsToString(attrs) {
+    let str = '[';
+    let first = true;
+    for (let attr of attrs) {
+      if (first)
+        first = false;
+      else
+        str += ',';
+      str += attr.name + ',' + attr.value;
+    }
+    str += ']';
+    return str;
   }
 }
 
@@ -113,13 +138,24 @@ describe('HtmlParser', () => {
     ]);
   });
 
+  it('parses tag with duplicate attrs', () => {
+    const handler = new LoggingHandler();
+    const parser = new amp.htmlparser.HtmlParser();
+    parser.parse(handler, '<a class=foo class=bar>');
+    expect(handler.log).toEqual([
+      'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
+      'startTag(A,[class,foo])', 'endTag(A)', 'endTag(BODY)',
+      'effectiveBodyTag([])', 'endDoc()'
+    ]);
+  });
+
   it('parses tag with boolean attr', () => {
     const handler = new LoggingHandler();
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, '<input type=checkbox checked>');
     expect(handler.log).toEqual([
       'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
-      'startTag(INPUT,[type,checkbox,checked,])', 'endTag(INPUT)',
+      'startTag(INPUT,[checked,,type,checkbox])', 'endTag(INPUT)',
       'endTag(BODY)', 'effectiveBodyTag([])', 'endDoc()'
     ]);
   });
@@ -216,7 +252,7 @@ describe('HtmlParser', () => {
     parser.parse(handler, '<a href="foo.html""></a>');
     expect(handler.log).toEqual([
       'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
-      'startTag(A,[href,foo.html,",])', 'endTag(A)', 'endTag(BODY)',
+      'startTag(A,[",,href,foo.html])', 'endTag(A)', 'endTag(BODY)',
       'effectiveBodyTag([])', 'endDoc()'
     ]);
   });
@@ -330,17 +366,38 @@ class LoggingHandlerWithLocation extends
   }
 
   /** @override */
-  startTag(tagName, attrs) {
+  startTag(tag) {
+    tag.dedupeAttrs();
     this.log.push(
         ':' + this.locator.getLine() + ':' + this.locator.getCol() +
-        ': startTag(' + tagName + ',[' + attrs + '])');
+        ': startTag(' + tag.upperName() + ',' +
+        this.attrsToString(tag.attrs()) + ')');
   }
 
   /** @override */
-  endTag(tagName) {
+  endTag(tag) {
     this.log.push(
         ':' + this.locator.getLine() + ':' + this.locator.getCol() +
-        ': endTag(' + tagName + ')');
+        ': endTag(' + tag.upperName() + ')');
+  }
+
+  /**
+   * Converts a list of attributes to a comma separated string.
+   * @param {!Array<!Object>} attrs
+   * @return {string}
+   */
+  attrsToString(attrs) {
+    let str = '[';
+    let first = true;
+    for (let attr of attrs) {
+      if (first)
+        first = false;
+      else
+        str += ',';
+      str += attr.name + ',' + attr.value;
+    }
+    str += ']';
+    return str;
   }
 }
 
@@ -356,10 +413,10 @@ describe('HtmlParser with location', () => {
             '  </body>\n' +
             '</html>');
     expect(handler.log).toEqual([
-      ':1:0: startDoc()', ':1:0: startTag(HTML,[])', ':1:5: pcdata("\n  ")',
-      ':2:2: startTag(BODY,[])', ':2:7: pcdata("\n    ")',
-      ':3:4: startTag(DIV,[style,foo])', ':3:18: pcdata("Oh hi!")',
-      ':3:25: endTag(DIV)', ':3:30: pcdata("\n  ")', ':4:8: pcdata("\n")',
+      ':1:0: startDoc()', ':1:0: startTag(HTML,[])', ':1:6: pcdata("\n  ")',
+      ':2:2: startTag(BODY,[])', ':2:8: pcdata("\n    ")',
+      ':3:4: startTag(DIV,[style,foo])', ':3:19: pcdata("Oh hi!")',
+      ':3:25: endTag(DIV)', ':3:31: pcdata("\n  ")', ':4:9: pcdata("\n")',
       ':5:0: endTag(BODY)', ':5:0: endTag(HTML)', ':5:6: endDoc()'
     ]);
   });
@@ -389,22 +446,22 @@ describe('HtmlParser with location', () => {
     expect(handler.log).toEqual([
       ':1:0: startDoc()',
       ':1:0: startTag(HTML,[])',
-      ':1:5: pcdata("\n  ")',
+      ':1:6: pcdata("\n  ")',
       ':2:2: startTag(BODY,[])',
-      ':2:7: pcdata("\n    ")',
+      ':2:8: pcdata("\n    ")',
       ':3:4: startTag(P,[])',
-      ':3:6: pcdata("\n      ")',
+      ':3:7: pcdata("\n      ")',
       ':4:6: startTag(A-CUSTOM,[])',
-      ':4:15: pcdata("\n        ")',
+      ':4:16: pcdata("\n        ")',
       ':5:8: startTag(DIV,[style,foo])',
-      ':5:22: pcdata("Oh hi!")',
+      ':5:23: pcdata("Oh hi!")',
       ':5:29: endTag(DIV)',
-      ':5:34: pcdata("\n      ")',
+      ':5:35: pcdata("\n      ")',
       ':6:6: endTag(A-CUSTOM)',
-      ':6:16: pcdata("\n    ")',
+      ':6:17: pcdata("\n    ")',
       ':7:4: endTag(P)',
-      ':7:7: pcdata("\n  ")',
-      ':8:8: pcdata("\n")',
+      ':7:8: pcdata("\n  ")',
+      ':8:9: pcdata("\n")',
       ':9:0: endTag(BODY)',
       ':9:0: endTag(HTML)',
       ':9:6: endDoc()'
@@ -435,8 +492,8 @@ describe('HtmlParser with location', () => {
             '</body>\n' +
             '</html>');
     expect(handler.log).toEqual([
-      ':1:0: startDoc()', ':1:0: startTag(HTML,[])', ':1:5: pcdata("\n")',
-      ':2:0: startTag(BODY,[])', ':2:5: pcdata("\n")',
+      ':1:0: startDoc()', ':1:0: startTag(HTML,[])', ':1:6: pcdata("\n")',
+      ':2:0: startTag(BODY,[])', ':2:6: pcdata("\n")',
       ':3:0: startTag(SCRIPT,[type,application/json])', ':3:0: cdata("\n' +
           '{\n' +
           '"vars": {\n' +
@@ -449,9 +506,9 @@ describe('HtmlParser with location', () => {
           '}\n' +
           '}\n' +
           '")',
-      ':14:0: endTag(SCRIPT)', ':14:8: pcdata("\n")',
+      ':14:0: endTag(SCRIPT)', ':14:9: pcdata("\n")',
       ':15:0: startTag(AMP-ANALYTICS,[])', ':15:15: endTag(AMP-ANALYTICS)',
-      ':15:30: pcdata("\n")', ':16:6: pcdata("\n")', ':17:0: endTag(BODY)',
+      ':15:31: pcdata("\n")', ':16:7: pcdata("\n")', ':17:0: endTag(BODY)',
       ':17:0: endTag(HTML)', ':17:6: endDoc()'
     ]);
   });
@@ -476,31 +533,49 @@ describe('HtmlParser with location', () => {
     expect(handler.log).toEqual([
       ':1:0: startDoc()',
       ':1:0: startTag(!DOCTYPE,[html,])',
-      ':1:14: pcdata("\n")',
+      ':1:15: pcdata("\n")',
       ':2:0: startTag(HTML,[amp,,lang,tr])',
-      ':2:19: pcdata("\n")',
+      ':2:20: pcdata("\n")',
       ':3:0: startTag(HEAD,[])',
-      ':3:5: pcdata("\n")',
+      ':3:6: pcdata("\n")',
       ':4:0: startTag(META,[charset,utf-8])',
       ':4:0: endTag(META)',
-      ':4:21: pcdata("\n")',
+      ':4:22: pcdata("\n")',
       ':5:0: startTag(TITLE,[])',
       ':5:0: rcdata("")',
       ':5:7: endTag(TITLE)',
-      ':5:14: pcdata("\n")',
+      ':5:15: pcdata("\n")',
       ':6:0: startTag(SCRIPT,[async,,src,https://cdn.ampproject.org/v0.js])',
       ':6:0: cdata("")',
       ':6:53: endTag(SCRIPT)',
-      ':6:61: pcdata("\n")',
+      ':6:62: pcdata("\n")',
       ':7:0: endTag(HEAD)',
-      ':7:6: pcdata("\n")',
+      ':7:7: pcdata("\n")',
       ':8:0: startTag(BODY,[])',
-      ':8:5: pcdata("İ")',
-      ':8:13: pcdata("\n")',
+      ':8:6: pcdata("İ")',
+      ':8:14: pcdata("\n")',
       ':9:0: endTag(BODY)',
       ':9:0: endTag(HTML)',
       ':9:6: endTag(!DOCTYPE)',
       ':9:6: endDoc()'
+    ]);
+  });
+
+  it('Supports SVG with self-closed tags', () => {
+    const handler = new LoggingHandlerWithLocation();
+    const parser = new amp.htmlparser.HtmlParser();
+    parser.parse(handler, '<html><body><svg><foo/></svg></body></html>');
+    expect(handler.log).toEqual([
+      ':1:0: startDoc()',
+      ':1:0: startTag(HTML,[])',
+      ':1:6: startTag(BODY,[])',
+      ':1:12: startTag(SVG,[])',
+      ':1:17: startTag(FOO,[])',
+      ':1:23: endTag(FOO)',
+      ':1:23: endTag(SVG)',
+      ':1:36: endTag(BODY)',
+      ':1:36: endTag(HTML)',
+      ':1:42: endDoc()',
     ]);
   });
 });

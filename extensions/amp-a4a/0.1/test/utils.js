@@ -15,13 +15,7 @@
  */
 
 import {AmpA4A} from '../amp-a4a';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-
-/** @type {string} @private */
-export const SIGNATURE_HEADER = 'X-TestSignatureHeader';
-
-/** @type {string} @private */
-export const SIZE_HEADER = 'X-CreativeSize';
+import {dict} from '../../../../src/utils/object';
 
 /** @type {string} @private */
 export const TEST_URL = 'http://iframe.localhost:' + location.port +
@@ -32,20 +26,8 @@ export class MockA4AImpl extends AmpA4A {
     return Promise.resolve(TEST_URL);
   }
 
-  updatePriority() {
+  updateLayoutPriority() {
     // Do nothing.
-  }
-
-  extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
-    const sizeArr = responseHeaders.has(SIZE_HEADER) ?
-        responseHeaders.get(SIZE_HEADER).split('x') : null;
-    const size = sizeArr ? {width: sizeArr[0], height: sizeArr[1]} : null;
-    return Promise.resolve({
-      creative: responseArrayBuffer,
-      signature: responseHeaders.has(SIGNATURE_HEADER) ?
-          base64UrlDecodeToBytes(responseHeaders.get(SIGNATURE_HEADER)) : null,
-      size,
-    });
   }
 
   getFallback() {
@@ -56,12 +38,17 @@ export class MockA4AImpl extends AmpA4A {
     // Do nothing.
   }
 
-  deferMutate(callback) {
+  mutateElement(callback) {
     callback();
   }
 
   /** @override */
   getPreconnectUrls() {
     return ['https://googleads.g.doubleclick.net'];
+  }
+
+  /** @override */
+  getA4aAnalyticsConfig() {
+    return dict();
   }
 }

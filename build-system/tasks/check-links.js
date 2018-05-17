@@ -15,17 +15,32 @@
  */
 'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var path = require('path');
-var BBPromise = require('bluebird');
-var chalk = require('chalk');
-var fs = require('fs-extra');
-var getStdout = require('../exec.js').getStdout;
-var gulp = require('gulp-help')(require('gulp'));
-var markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
-var path = require('path');
-var util = require('gulp-util');
+const argv = require('minimist')(process.argv.slice(2));
+const BBPromise = require('bluebird');
+const colors = require('ansi-colors');
+const fs = require('fs-extra');
+const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
+const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
+const path = require('path');
+const {getStdout} = require('../exec');
 
+
+/**
+ * Parses the list of files in argv, or extracts it from the commit log.
+ *
+ * @return {!Array<string>}
+ */
+function getMarkdownFiles() {
+  if (!!argv.files) {
+    return argv.files.split(',');
+  }
+  const filesInPr =
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
+  return filesInPr.filter(function(file) {
+    return path.extname(file) == '.md' && !file.startsWith('examples/');
+  });
+}
 
 /**
  * Parses the list of files in argv and checks for dead links.
@@ -33,67 +48,64 @@ var util = require('gulp-util');
  * @return {Promise} Used to wait until all async link checkers finish.
  */
 function checkLinks() {
-  var files = argv.files;
-  if (!files) {
-    util.log(util.colors.red(
-        'Error: A list of markdown files must be specified via --files'));
-    process.exit(1);
-  }
-
-  var markdownFiles = files.split(',');
-  var linkCheckers = markdownFiles.map(function(markdownFile) {
+  const markdownFiles = getMarkdownFiles();
+  const linkCheckers = markdownFiles.map(function(markdownFile) {
     return runLinkChecker(markdownFile);
   });
   return BBPromise.all(linkCheckers)
-  .then(function(allResults) {
-    var deadLinksFound = false;
-    var filesWithDeadLinks = [];
-    allResults.map(function(results, index) {
-      // Skip files that were deleted by the PR.
-      if (!fs.existsSync(markdownFiles[index])) {
-        return;
-      }
-      var deadLinksFoundInFile = false;
-      results.forEach(function (result) {
-        // Skip links to files that were introduced by the PR.
-        if (isLinkToFileIntroducedByPR(result.link)) {
-          return;
-        }
-        if(result.status === 'dead') {
-          deadLinksFound = true;
-          deadLinksFoundInFile = true;
-          util.log('[%s] %s', chalk.red('✖'), result.link);
+      .then(function(allResults) {
+        let deadLinksFound = false;
+        const filesWithDeadLinks = [];
+        allResults.map(function(results, index) {
+          // Skip files that were deleted by the PR.
+          if (!fs.existsSync(markdownFiles[index])) {
+            return;
+          }
+          let deadLinksFoundInFile = false;
+          results.forEach(function(result) {
+            // Skip links to files that were introduced by the PR.
+            if (isLinkToFileIntroducedByPR(result.link)) {
+              return;
+            }
+            if (result.status === 'dead') {
+              deadLinksFound = true;
+              deadLinksFoundInFile = true;
+              log('[%s] %s', colors.red('✖'), result.link);
+            } else if (!process.env.TRAVIS) {
+              log('[%s] %s', colors.green('✔'), result.link);
+            }
+          });
+          if (deadLinksFoundInFile) {
+            filesWithDeadLinks.push(markdownFiles[index]);
+            log(
+                colors.red('ERROR'),
+                'Possible dead link(s) found in',
+                colors.magenta(markdownFiles[index]));
+          } else {
+            log(
+                colors.green('SUCCESS'),
+                'All links in',
+                colors.magenta(markdownFiles[index]), 'are alive.');
+          }
+        });
+        if (deadLinksFound) {
+          log(
+              colors.red('ERROR'),
+              'Please update dead link(s) in',
+              colors.magenta(filesWithDeadLinks.join(',')),
+              'or whitelist them in build-system/tasks/check-links.js');
+          log(
+              colors.yellow('NOTE'),
+              'If the link(s) above are not meant to resolve to a real webpage',
+              'surrounding them with backticks will exempt them from the link',
+              'checker.');
+          process.exit(1);
+        } else {
+          log(
+              colors.green('SUCCESS'),
+              'All links in all markdown files in this branch are alive.');
         }
       });
-      if(deadLinksFoundInFile) {
-        filesWithDeadLinks.push(markdownFiles[index]);
-        util.log(
-            util.colors.red('ERROR'),
-            'Possible dead link(s) found in',
-            util.colors.magenta(markdownFiles[index]),
-            '(please update, or whitelist in',
-            'build-system/tasks/check-links.js).');
-      } else {
-        util.log(
-            util.colors.green('SUCCESS'),
-            'All links in',
-            util.colors.magenta(markdownFiles[index]), 'are alive.');
-      }
-    });
-    if (deadLinksFound) {
-        util.log(
-            util.colors.red('ERROR'),
-            'Possible dead link(s) found in this PR.',
-            'Please update',
-            util.colors.magenta(filesWithDeadLinks.join(',')),
-            'or whitelist in build-system/tasks/check-links.js');
-            process.exit(1);
-    } else {
-        util.log(
-            util.colors.green('SUCCESS'),
-            'All links in all markdown files in this PR are alive.');
-    }
-  });
 }
 
 /**
@@ -103,9 +115,9 @@ function checkLinks() {
  * @return {boolean} True if the link points to a file introduced by the PR.
  */
 function isLinkToFileIntroducedByPR(link) {
-  var filesAdded =
-      getStdout(`git diff --name-only --diff-filter=ARC master...HEAD`)
-      .trim().split('\n');
+  const filesAdded =
+      getStdout('git diff --name-only --diff-filter=ARC master...HEAD')
+          .trim().split('\n');
   return filesAdded.some(function(file) {
     return (file.length > 0 && link.includes(path.parse(file).base));
   });
@@ -118,7 +130,7 @@ function isLinkToFileIntroducedByPR(link) {
  * @return {string} Markdown after filtering out whitelisted links.
  */
 function filterWhitelistedLinks(markdown) {
-  var filteredMarkdown = markdown;
+  let filteredMarkdown = markdown;
 
   // localhost links optionally preceded by ( or [ (not served on Travis)
   filteredMarkdown =
@@ -127,12 +139,20 @@ function filterWhitelistedLinks(markdown) {
   // Links in script tags (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
 
-  // Direct links to the https://cdn.ampproject.org domain (not a valid page)
-  filteredMarkdown =
-      filteredMarkdown.replace(/https:\/\/cdn.ampproject.org(?!\/)/g, '');
-
   // Links inside a <code> block (illustrative, and not always valid)
-  filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/g, '');
+  filteredMarkdown = filteredMarkdown.replace(/<code>([^]*?)<\/code>/g, '');
+
+  // Links inside a <pre> block (illustrative, and not always valid)
+  filteredMarkdown = filteredMarkdown.replace(/<pre>([^]*?)<\/pre>/g, '');
+
+  // The heroku nightly build page is not always acccessible by the checker.
+  filteredMarkdown = filteredMarkdown.replace(
+      /\(http:\/\/amphtml-nightly.herokuapp.com\/\)/g, '');
+
+  // After all whitelisting is done, clean up any remaining empty blocks bounded
+  // by backticks. Otherwise, `` will be treated as the start of a code block
+  // and confuse the link extractor.
+  filteredMarkdown = filteredMarkdown.replace(/\ \`\`\ /g, '');
 
   return filteredMarkdown;
 }
@@ -149,10 +169,10 @@ function runLinkChecker(markdownFile) {
   if (!fs.existsSync(markdownFile)) {
     return Promise.resolve();
   }
-  var markdown = fs.readFileSync(markdownFile).toString();
-  var filteredMarkdown = filterWhitelistedLinks(markdown);
-  var opts = {
-    baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
+  const markdown = fs.readFileSync(markdownFile).toString();
+  const filteredMarkdown = filterWhitelistedLinks(markdown);
+  const opts = {
+    baseUrl: 'file://' + path.dirname(path.resolve((markdownFile))),
   };
   return markdownLinkCheck(filteredMarkdown, opts);
 }
@@ -160,8 +180,11 @@ function runLinkChecker(markdownFile) {
 gulp.task(
     'check-links',
     'Detects dead links in markdown files',
-    checkLinks, {
-    options: {
-      'files': '  CSV list of files in which to check links'
+    ['update-packages'],
+    checkLinks,
+    {
+      options: {
+        'files': '  CSV list of files in which to check links',
+      },
     }
-});
+);

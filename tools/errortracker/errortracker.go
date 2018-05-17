@@ -76,7 +76,6 @@ func init() {
 // Get an auth context for logging RPC.
 func cloudAuthContext(r *http.Request) (context.Context, error) {
 	c := appengine.NewContext(r)
-
 	hc := &http.Client{
 		Transport: &oauth2.Transport{
 			Source: google.AppEngineTokenSource(c, logging.Scope),
@@ -95,12 +94,28 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		log.Errorf(c, "Cannot connect to Google Cloud Logging: %v", err)
 		return
 	}
-
 	// Note: Error Reporting currently ignores non-GCE and non-AWS logs.
 	logc.ServiceName = "compute.googleapis.com"
 	logc.CommonLabels = map[string]string{
 		"compute.googleapis.com/resource_type": "logger",
 		"compute.googleapis.com/resource_id":   "errors"}
+
+	// We're temporarily forwarding 100% of traffic to the JS error tracker.
+	if rand.Float64() < 1 {
+		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
+		client := urlfetch.Client(c)
+		req, err := http.NewRequest("GET", urlString, nil)
+		if err == nil {
+			req.Header.Set("User-Agent", r.UserAgent())
+			req.Header.Set("Referer", r.Referer())
+			_, err := client.Do(req)
+			if err != nil {
+				log.Errorf(c, "Error forwarding report: %v", err)
+			}
+		} else {
+			log.Errorf(c, "Error making forwarding request: %v", err)
+		}
+	}
 
 	// Fill query params into JSON struct.
 	line, _ := strconv.Atoi(r.URL.Query().Get("l"))

@@ -92,8 +92,22 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 
 
 /**
+ * Sets the CSS styles of the specified element with !important. The styles
+ * are specified as a map from CSS property names to their values.
+ * @param {!Element} element
+ * @param {!Object<string, *>} styles
+ */
+export function setImportantStyles(element, styles) {
+  for (const k in styles) {
+    element.style.setProperty(
+        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+  }
+}
+
+
+/**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
- * @param {Element} element
+ * @param {?Element} element
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units
@@ -103,7 +117,8 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   const propertyName = getVendorJsPropertyName(element.style, property,
       opt_bypassCache);
   if (propertyName) {
-    element.style[propertyName] = opt_units ? value + opt_units : value;
+    element.style[propertyName] =
+      /** @type {string} */ (opt_units ? value + opt_units : value);
   }
 }
 
@@ -157,9 +172,17 @@ export function toggle(element, opt_display) {
  * @return {string}
  */
 export function px(value) {
-  return value + 'px';
+  return `${value}px`;
 }
 
+/**
+ * Returns a degree value.
+ * @param {number} value
+ * @return {string}
+ */
+export function deg(value) {
+  return `${value}deg`;
+}
 
 /**
  * Returns a "translateX" for CSS "transform" property.
@@ -201,6 +224,18 @@ export function translate(x, opt_y) {
  */
 export function scale(value) {
   return `scale(${value})`;
+}
+
+/**
+ * Returns a "rotate" for CSS "transform" property.
+ * @param {number|string} value
+ * @return {string}
+ */
+export function rotate(value) {
+  if (typeof value == 'number') {
+    value = deg(value);
+  }
+  return `rotate(${value})`;
 }
 
 /**

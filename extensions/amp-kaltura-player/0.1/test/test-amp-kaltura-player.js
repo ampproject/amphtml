@@ -13,31 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
+
 import '../amp-kaltura-player';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-kaltura-player', () => {
+describes.realWin('amp-kaltura-player', {
+  amp: {
+    extensions: ['amp-kaltura-player'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getKaltura(attributes, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const kalturaPlayer = iframe.doc.createElement('amp-kaltura-player');
-      for (const key in attributes) {
-        kalturaPlayer.setAttribute(key, attributes[key]);
-      }
-      kalturaPlayer.setAttribute('width', '111');
-      kalturaPlayer.setAttribute('height', '222');
-      if (opt_responsive) {
-        kalturaPlayer.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(kalturaPlayer);
-    });
+    const kalturaPlayer = doc.createElement('amp-kaltura-player');
+    for (const key in attributes) {
+      kalturaPlayer.setAttribute(key, attributes[key]);
+    }
+    kalturaPlayer.setAttribute('width', '111');
+    kalturaPlayer.setAttribute('height', '222');
+    if (opt_responsive) {
+      kalturaPlayer.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(kalturaPlayer);
+    return kalturaPlayer.build().then(() => {
+      return kalturaPlayer.layoutCallback();
+    }).then(() => kalturaPlayer);
   }
 
   it('renders', () => {
@@ -67,10 +72,11 @@ describe('amp-kaltura-player', () => {
   });
 
   it('requires data-account', () => {
-    return getKaltura({}).then(kp => {
+    return allowConsoleError(() => { return getKaltura({}).then(kp => {
       kp.build();
     }).should.eventually.be.rejectedWith(
         /The data-partner attribute is required for/);
+    });
   });
 
   it('should pass data-param-* attributes to the iframe src', () => {
@@ -100,6 +106,21 @@ describe('amp-kaltura-player', () => {
         expect(img.getAttribute('layout')).to.equal('fill');
         expect(img.hasAttribute('placeholder')).to.be.true;
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+        expect(img.getAttribute('alt')).to.equal('Loading video');
+      });
+    });
+    it('should propagate aria label to placeholder image', () => {
+      return getKaltura({
+        'data-partner': '1281471',
+        'data-entryid': '1_3ts1ms9c',
+        'data-uiconf': '33502051',
+        'aria-label': 'great video',
+      }).then(kp => {
+        const img = kp.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('aria-label')).to.equal('great video');
+        expect(img.getAttribute('alt')).to.equal('Loading video - great video');
       });
     });
   });

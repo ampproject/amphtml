@@ -15,15 +15,15 @@
  */
 
 
-import {rethrowAsync} from './../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {parseJson} from './../../../src/json';
 import {getData} from './../../../src/event-helper';
+import {parseJson} from './../../../src/json';
 import {
   parseUrl,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
+import {rethrowAsync} from './../../../src/log';
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not
@@ -41,11 +41,11 @@ export function debounce(func, wait, immediate) {
     clearTimeout(timeout);
     timeout = setTimeout(function() {
       timeout = null;
-      if (!immediate) { func.apply(context, args); };
+      if (!immediate) { func.apply(context, args); }
     }, wait);
     if (immediate && !timeout) { func.apply(context, args); }
   };
-};
+}
 
 
 /**
@@ -53,7 +53,7 @@ export function debounce(func, wait, immediate) {
  * Gets an element creator using a given document to create elements.
  * @export getElementCreator
  * @param {Document} document
- * @returns {!Function}
+ * @return {!Function}
  */
 export function getElementCreator(document) {
   return function createElement(name, className, children) {
@@ -67,7 +67,7 @@ export function getElementCreator(document) {
 function appendChildren(element, children) {
   children = (!children) ? [] : Array.isArray(children) ? children : [children];
   children.forEach(child => element.appendChild(child));
-};
+}
 
 
 /**
@@ -103,7 +103,7 @@ function handlePlaybuzzItemEvent(event, eventName, handler) {
  * Parses Playbuzz Event Data
  *
  * @param {?JsonObject|string|undefined} data
- * @returns {?JsonObject|undefined} parsedObject
+ * @return {?JsonObject|undefined} parsedObject
  */
 function parsePlaybuzzEventData(data) {
   if (typeof data === 'object') {
@@ -127,7 +127,7 @@ function parsePlaybuzzEventData(data) {
 
 /**
  * @param {Object} options
- * @returns {string} playbuzzEmbedUrl
+ * @return {string} playbuzzEmbedUrl
  */
 export function composeEmbedUrl(options) {
   const embedUrl = options.itemUrl + '?' + serializeQueryString(dict({

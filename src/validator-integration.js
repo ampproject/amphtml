@@ -15,9 +15,9 @@
  */
 
 import {getMode} from './mode';
-import {urls} from './config';
-import {startsWith} from './string';
 import {loadPromise} from './event-helper';
+import {startsWith} from './string';
+import {urls} from './config';
 
 /**
  * Triggers validation for the current document if there is a script in the
@@ -27,7 +27,7 @@ import {loadPromise} from './event-helper';
  */
 export function maybeValidate(win) {
   const filename = win.location.href;
-  if (startsWith(filename, 'about:')) {  // Should only happen in tests.
+  if (startsWith(filename, 'about:')) { // Should only happen in tests.
     return;
   }
 

@@ -491,6 +491,30 @@
     </fieldset>
 </form>
 
+<h4>Show As You Go Messages (with all messages on submit)</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="interact-and-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name7" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name7"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name7">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email7" required>
+            <span visible-when-invalid="valueMissing" validation-for="email7"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email7"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
 <h4 id="header1">on=change and form.submit examples</h4>
 <button on="tap:header1.submit">Wrong Action - should throw an error</button>
 <form method="post"
@@ -548,7 +572,7 @@
 </form>
 
 
-<h4 id="header1">Using button[type=submit]</h4>
+<h4 id="header2">Using button[type=submit]</h4>
 <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank">
@@ -556,11 +580,11 @@
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" id="name1" required>
+            <input type="text" name="name" id="name8" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" id="email1" required>
+            <input type="email" name="email" id="email8" required>
         </label>
         <input type="submit" value="Subscribe - Input">
         <input type="submit" value="Subscribe 2 - Input">
@@ -597,7 +621,7 @@
 
 
 
-<h4 id="header1">Redirect After POST (works only if running on localhost)</h4>
+<h4 id="header3">Redirect After POST (works only if running on localhost)</h4>
 <form method="post"
       action-xhr="http://iframe.localhost:8000/form/redirect-to/post"
       target="_top">
@@ -619,11 +643,11 @@
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" id="name3" required>
+            <input type="text" name="name" id="name9" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" id="email3" required>
+            <input type="email" name="email" id="email9" required>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
@@ -732,3 +756,37 @@
 
 </body>
 </html>
+
+<h4>Using a submit-success template referenced by id</h4>
+
+<template type="amp-mustache" id="submit_success_template">
+    <h1>You searched for: {{term}}</h1>
+</template>
+
+<form method="get"
+      action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      target="_blank">
+    <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success template="submit_success_template"></div>
+</form>
+
+<h4>File upload</h4>
+<form method="post" action-xhr="/form/json/upload" enctype="multipart/form-data" target="_blank">
+    <label>
+        <p>Upload a file:</p>
+        <input type="file" name="myFile" accept="text/plain">
+    </label>
+    <div><input type="submit"></div>
+    <div submit-success><template type="amp-mustache">Way to go 🎉 {{message}}</template></div>
+    <div submit-error>Way to fail</div>
+</form>

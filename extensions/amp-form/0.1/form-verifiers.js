@@ -15,11 +15,8 @@
  */
 
 import {LastAddedResolver} from '../../../src/utils/promise';
-import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor} from '../../../src/dom';
 import {user} from '../../../src/log';
-
-export const FORM_VERIFY_EXPERIMENT = 'amp-form-verifiers';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';
 
@@ -40,10 +37,7 @@ let VerificationErrorDef;
  * @param {function():Promise<!../../../src/service/xhr-impl.FetchResponse>} xhr
  */
 export function getFormVerifier(form, xhr) {
-  const win = form.ownerDocument.defaultView;
   if (form.hasAttribute('verify-xhr')) {
-    user().assert(isExperimentOn(win, FORM_VERIFY_EXPERIMENT),
-        `Enable "${FORM_VERIFY_EXPERIMENT}" experiment to use form verifiers`);
     return new AsyncVerifier(form, xhr);
   } else {
     return new DefaultVerifier(form);
@@ -98,7 +92,7 @@ export class FormVerifier {
    * @private
    */
   isDirty_() {
-    const elements = this.form_.elements;
+    const {elements} = this.form_;
     for (let i = 0; i < elements.length; i++) {
       const field = elements[i];
       if (field.disabled) {
@@ -107,7 +101,7 @@ export class FormVerifier {
       switch (field.type) {
         case 'select-multiple':
         case 'select-one':
-          const options = field.options;
+          const {options} = field;
           for (let j = 0; j < options.length; j++) {
             if (options[j].selected !== options[j].defaultSelected) {
               return true;
@@ -135,7 +129,7 @@ export class FormVerifier {
    * @private
    */
   clearVerificationErrors_() {
-    const elements = this.form_.elements;
+    const {elements} = this.form_;
     if (elements) {
       iterateCursor(elements, e => {
         e.setCustomValidity('');

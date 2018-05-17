@@ -34,10 +34,11 @@ let PropertyRulesDef;
  * @private {Object<string, ?PropertyRulesDef>}
  */
 const GLOBAL_PROPERTY_RULES = {
-  'text': null,
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
+  'hidden': null,
+  'text': null,
 };
 
 /**
@@ -77,9 +78,9 @@ export class BindValidator {
   /**
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
-   * @note `tag` and `property` are case-sensitive.
-   * @param {!string} tag
-   * @param {!string} property
+   * NOTE: `tag` and `property` are case-sensitive.
+   * @param {string} tag
+   * @param {string} property
    * @return {boolean}
    */
   canBind(tag, property) {
@@ -89,8 +90,8 @@ export class BindValidator {
   /**
    * Returns true if `value` is a valid result for a (tag, property) binding.
    * Otherwise, returns false.
-   * @param {!string} tag
-   * @param {!string} property
+   * @param {string} tag
+   * @param {string} property
    * @param {?string} value
    * @return {boolean}
    */
@@ -123,8 +124,7 @@ export class BindValidator {
           user().error(TAG, 'Failed to parse srcset: ', e);
           return false;
         }
-        const sources = srcset.getSources();
-        urls = sources.map(source => source.url);
+        urls = srcset.getUrls();
       } else {
         urls = [value];
       }
@@ -137,7 +137,7 @@ export class BindValidator {
     }
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blacklistedValueRegex = rules.blacklistedValueRegex;
+    const {blacklistedValueRegex} = rules;
     if (value && blacklistedValueRegex) {
       const re = new RegExp(blacklistedValueRegex, 'i');
       if (re.test(value)) {
@@ -157,12 +157,12 @@ export class BindValidator {
    */
   isUrlValid_(url, rules) {
     // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const allowedProtocols = rules.allowedProtocols;
+    const {allowedProtocols} = rules;
     if (allowedProtocols && url) {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(url);
       if (match !== null) {
-        const protocol = match[1].toLowerCase().trimLeft();
+        const protocol = match[1].toLowerCase().trim();
         // hasOwnProperty() needed since nested objects are not prototype-less.
         if (!allowedProtocols.hasOwnProperty(protocol)) {
           return false;
@@ -177,10 +177,16 @@ export class BindValidator {
    * Returns the property rules object for (tag, property), if it exists.
    * Returns null if binding is allowed without constraints.
    * Returns undefined if binding is not allowed.
+   * @param {string} tag
+   * @param {string} property
    * @return {(?PropertyRulesDef|undefined)}
    * @private
    */
   rulesForTagAndProperty_(tag, property) {
+    // Allow binding to all ARIA attributes.
+    if (startsWith(property, 'aria-')) {
+      return null;
+    }
     const globalRules = ownProperty(GLOBAL_PROPERTY_RULES, property);
     if (globalRules !== undefined) {
       return /** @type {PropertyRulesDef} */ (globalRules);
@@ -241,6 +247,7 @@ function createElementRules_() {
       'state': null,
     },
     'AMP-SELECTOR': {
+      'disabled': null,
       'selected': null,
     },
     'AMP-STATE': {
@@ -317,7 +324,7 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
-        blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
+        blacklistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
       },
       'value': null,
       'width': null,

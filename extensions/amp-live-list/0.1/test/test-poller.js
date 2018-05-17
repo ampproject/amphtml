@@ -17,7 +17,7 @@
 
 import * as sinon from 'sinon';
 import {Poller} from '../poller';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 
 
 describe('Poller', () => {
@@ -25,7 +25,7 @@ describe('Poller', () => {
   let clock;
   let poller;
   let workStub;
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -34,7 +34,7 @@ describe('Poller', () => {
       work() {},
     };
     workStub = sandbox.stub(obj, 'work');
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
     const wait = 5000;
     poller = new Poller(window, wait, workStub);
   });
@@ -245,14 +245,14 @@ describe('Poller', () => {
     expect(delaySpy.lastCall.args[1]).to.equal(4000);
     clock.tick(4000);
 
-    expect(poller.lastTimeoutId_).to.be.number;
-    let lastTimeoutId_ = poller.lastTimeoutId_;
+    expect(poller.lastTimeoutId_).to.be.a('number');
+    let {lastTimeoutId_} = poller;
 
     // Reject 1
     return poller.lastWorkPromise_.then(() => {
       expect(delaySpy.lastCall.args[1]).to.equal(700);
       expect(poller.lastTimeoutId_).to.not.equal(lastTimeoutId_);
-      expect(poller.lastTimeoutId_).to.be.number;
+      expect(poller.lastTimeoutId_).to.be.a('number');
       lastTimeoutId_ = poller.lastTimeoutId_;
       clock.tick(700);
       // Reject 2
@@ -260,14 +260,14 @@ describe('Poller', () => {
         expect(delaySpy.lastCall.args[1]).to.equal(1400);
         // Should have cancelled next queued exponential tick
         expect(poller.lastTimeoutId_).to.not.equal(lastTimeoutId_);
-        expect(poller.lastTimeoutId_).to.be.number;
+        expect(poller.lastTimeoutId_).to.be.a('number');
         lastTimeoutId_ = poller.lastTimeoutId_;
         clock.tick(1400);
         return poller.lastWorkPromise_.then(() => {
           expect(delaySpy.lastCall.args[1]).to.equal(4000);
           expect(clearSpy.getCall(2)).to.be.null;
           expect(poller.lastTimeoutId_).to.not.equal(lastTimeoutId_);
-          expect(poller.lastTimeoutId_).to.be.number;
+          expect(poller.lastTimeoutId_).to.be.a('number');
           lastTimeoutId_ = poller.lastTimeoutId_;
           expect(clearSpy).to.have.not.been.called;
           poller.stop();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from './experiments';
+import {htmlFor} from './static-template';
 
 /** @private @const */
 const LINE_LOADER_ELEMENTS = {
@@ -25,29 +25,18 @@ const LINE_LOADER_ELEMENTS = {
  * Creates a default "loading indicator" element. This element accepts
  * `amp-active` class in which case it may choose to run an animation.
  * @param {!Document} doc
- * @param {!string} elementName
+ * @param {string} elementName
  * @return {!Element}
  */
 export function createLoaderElement(doc, elementName) {
-  const loader = doc.createElement('div');
   if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
-    loader.classList.add('i-amphtml-loader-line');
-    const line = doc.createElement('div');
-    line.classList.add('i-amphtml-loader-moving-line');
-    // Experiment with new loader design
-    const win = doc.defaultView;
-    if (isExperimentOn(win, 'ad-loader-v1')
-        || isExperimentOn(win, 'ad-loader-v2')) {
-      line.setAttribute('experiment', '');
-    };
-    loader.appendChild(line);
-  } else {
-    loader.classList.add('i-amphtml-loader');
-    for (let i = 0; i < 3; i++) {
-      const dot = doc.createElement('div');
-      dot.classList.add('i-amphtml-loader-dot');
-      loader.appendChild(dot);
-    }
+    return htmlFor(doc)`<div class="i-amphtml-loader-line">
+          <div class="i-amphtml-loader-moving-line"></div>
+        </div>`;
   }
-  return loader;
+  return htmlFor(doc)`<div class="i-amphtml-loader">
+        <div class="i-amphtml-loader-dot"></div>
+        <div class="i-amphtml-loader-dot"></div>
+        <div class="i-amphtml-loader-dot"></div>
+      </div>`;
 }

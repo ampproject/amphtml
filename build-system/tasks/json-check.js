@@ -15,22 +15,23 @@
  */
 'use strict';
 
-var gulp = require('gulp-help')(require('gulp'));
-var jsonGlobs = require('../config').jsonGlobs;
-var util = require('gulp-util');
-var through2 = require('through2');
+const colors = require('ansi-colors');
+const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
+const through2 = require('through2');
+const {jsonGlobs} = require('../config');
 
 /**
  * Fail if JSON files are valid.
  */
 function checkValidJson() {
-  var hasError = false;
+  let hasError = false;
   return gulp.src(jsonGlobs)
-      .pipe(through2.obj(function(file, enc, cb) {
+      .pipe(through2.obj(function(file) {
         try {
           JSON.parse(file.contents.toString());
         } catch (e) {
-          util.log(util.colors.red('Invalid JSON in '
+          log(colors.red('Invalid JSON in '
               + file.relative + ': ' + e.message));
           hasError = true;
         }
@@ -40,6 +41,7 @@ function checkValidJson() {
           process.exit(1);
         }
       });
-  }
+}
 
-gulp.task('json-syntax', 'Check that JSON files are valid JSON.', checkValidJson);
+gulp.task(
+    'json-syntax', 'Check that JSON files are valid JSON.', checkValidJson);

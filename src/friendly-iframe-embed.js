@@ -16,25 +16,30 @@
 
 import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
+import {Services} from './services';
 import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {extensionsFor} from './services';
-import {getFixedContainer} from './full-overlay-frame-child-helper';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {px, resetStyles, setStyle, setStyles} from './style';
-import {resourcesForDoc} from './services';
-import {vsyncFor} from './services';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from './style';
+import {toWin} from './types';
 
 
 /** @const {string} */
 const EMBED_PROP = '__AMP_EMBED__';
 
 /** @const {!Array<string>} */
-const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
+const EXCLUDE_INI_LOAD =
+    ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL', 'AMP-AD-EXIT'];
 
 
 /**
@@ -89,7 +94,6 @@ function isSrcdocSupported() {
  * whether the embed is currently in the viewport.
  * @param {!FriendlyIframeEmbed} embed
  * @param {boolean} visible
- * @restricted
  * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
  */
 export function setFriendlyIframeEmbedVisible(embed, visible) {
@@ -119,11 +123,11 @@ export function getFriendlyIframeEmbedOptional(iframe) {
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(iframe, container, spec,
-    opt_preinstallCallback) {
+  opt_preinstallCallback) {
   /** @const {!Window} */
-  const win = getTopWindow(iframe.ownerDocument.defaultView);
+  const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = extensionsFor(win);
+  const extensions = Services.extensionsFor(win);
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
@@ -131,7 +135,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   // Pre-load extensions.
   if (spec.extensionIds) {
     spec.extensionIds.forEach(
-        extensionId => extensions.loadExtension(extensionId));
+        extensionId => extensions.preloadExtension(extensionId));
   }
 
   const html = mergeHtml(spec);
@@ -141,16 +145,24 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     // Chrome does not reflect the iframe readystate.
     iframe.readyState = 'complete';
   };
+  const registerViolationListener = () => {
+    iframe.contentWindow.addEventListener('securitypolicyviolation',
+        violationEvent => {
+          dev().warn('FIE', 'security policy violation', violationEvent);
+        });
+  };
   let loadedPromise;
   if (isSrcdocSupported()) {
     iframe.srcdoc = html;
     loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
+    registerViolationListener();
   } else {
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
     childDoc.open();
+    registerViolationListener();
     childDoc.write(html);
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
@@ -263,6 +275,10 @@ function mergeHtml(spec) {
     });
   }
 
+  // Load CSP
+  result.push('<meta http-equiv=Content-Security-Policy ' +
+      'content="script-src \'none\';object-src \'none\';child-src \'none\'">');
+
   // Postambule.
   if (ip > 0) {
     result.push(originalHtml.substring(ip));
@@ -338,7 +354,7 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    Services.resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
   }
 
@@ -390,7 +406,10 @@ export class FriendlyIframeEmbed {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
   }
 
-  /** @private */
+  /**
+   * @private
+   * @restricted
+   */
   startRender_() {
     if (this.host) {
       this.host.renderStarted();
@@ -399,6 +418,7 @@ export class FriendlyIframeEmbed {
     }
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
+      this.win.document.documentElement.classList.add('i-amphtml-fie');
       setStyles(dev().assertElement(this.win.document.body), {
         opacity: 1,
         visibility: 'visible',
@@ -447,6 +467,7 @@ export class FriendlyIframeEmbed {
   /**
    * @param {boolean} visible
    * @private
+   * @restricted
    */
   setVisible_(visible) {
     if (this.visible_ != visible) {
@@ -461,16 +482,8 @@ export class FriendlyIframeEmbed {
    */
   getBodyElement() {
     return /** @type {!HTMLBodyElement} */ (
-        (this.iframe.contentDocument || this.iframe.contentWindow.document)
-            .body);
-  }
-
-  /**
-   * @return {!./service/vsync-impl.Vsync}
-   * @visibleForTesting
-   */
-  getVsync() {
-    return vsyncFor(this.win);
+      (this.iframe.contentDocument || this.iframe.contentWindow.document)
+          .body);
   }
 
   /**
@@ -478,64 +491,47 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   getResources() {
-    return resourcesForDoc(this.iframe);
+    return Services.resourcesForDoc(this.iframe);
   }
 
   /**
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
-   * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
+   * @param {{measure: (function()|undefined), mutate: function()}} task
    * @param {!Object=} opt_state
    * @return {!Promise}
    * @private
    */
   runVsyncOnIframe_(task, opt_state) {
-    if (task.mutate && !task.measure) {
-      return this.getResources().mutateElement(this.iframe, () => {
-        task.mutate(opt_state);
-      });
-    }
-    return new Promise(resolve => {
-      this.getVsync().measure(() => {
-        task.measure(opt_state);
-
-        if (!task.mutate) {
-          return resolve();
-        }
-
-        this.runVsyncOnIframe_({mutate: task.mutate}, opt_state)
-            .then(resolve);
-      });
-    });
+    return this.getResources().measureMutateElement(this.iframe,
+        task.measure || null, task.mutate);
   }
 
   /**
    * @return {!Promise}
    */
   enterFullOverlayMode() {
-    const iframeBody = this.getBodyElement();
-    const fixedContainer = this.getFixedContainer();
-
+    const bodyStyle = {
+      'background': 'transparent',
+      'position': 'absolute',
+      'top': '',
+      'left': '',
+      'width': '',
+      'height': '',
+      'bottom': 'auto',
+      'right': 'auto',
+    };
     return this.runVsyncOnIframe_({
-      measure: state => {
+      measure: () => {
         const iframeRect = this.iframe./*OK*/getBoundingClientRect();
-
-        const winWidth = this.win./*OK*/innerWidth;
-        const winHeight = this.win./*OK*/innerHeight;
-
-        state.fixedContainerStyle = {
-          'position': 'absolute',
+        Object.assign(bodyStyle, {
           'top': px(iframeRect.top),
-          'right': px(winWidth - iframeRect.right),
           'left': px(iframeRect.left),
-          'bottom': px(winHeight - iframeRect.bottom),
           'width': px(iframeRect.width),
           'height': px(iframeRect.height),
-        };
+        });
       },
-      mutate: state => {
-        setStyle(iframeBody, 'background', 'transparent');
-
+      mutate: () => {
         setStyles(this.iframe, {
           'position': 'fixed',
           'left': 0,
@@ -546,22 +542,18 @@ export class FriendlyIframeEmbed {
           'height': '100vh',
         });
 
-        setStyles(fixedContainer, state.fixedContainerStyle);
+        // We need to override runtime-level !important rules
+        setImportantStyles(this.getBodyElement(), bodyStyle);
       },
-    }, {});
+    });
   }
 
   /**
    * @return {!Promise}
    */
   leaveFullOverlayMode() {
-    const iframeBody = this.getBodyElement();
-    const fixedContainer = this.getFixedContainer();
-
     return this.runVsyncOnIframe_({
       mutate: () => {
-        resetStyles(iframeBody, ['background']);
-
         resetStyles(this.iframe, [
           'position',
           'left',
@@ -572,25 +564,19 @@ export class FriendlyIframeEmbed {
           'height',
         ]);
 
-        resetStyles(fixedContainer, [
+        // we're not resetting background here as we need to set it to
+        // transparent permanently (see TODO)
+        resetStyles(this.getBodyElement(), [
           'position',
           'top',
-          'right',
           'left',
-          'bottom',
           'width',
           'height',
+          'bottom',
+          'right',
         ]);
       },
     });
-  }
-
-  /**
-   * @return {!Element}
-   * @visibleForTesting
-   */
-  getFixedContainer() {
-    return getFixedContainer(this.getBodyElement());
   }
 }
 
@@ -604,7 +590,7 @@ export class FriendlyIframeEmbed {
  * @return {!Promise}
  */
 export function whenContentIniLoad(context, hostWin, rect) {
-  return resourcesForDoc(context)
+  return Services.resourcesForDoc(context)
       .getResourcesInRect(hostWin, rect)
       .then(resources => {
         const promises = [];

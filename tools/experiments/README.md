@@ -6,11 +6,11 @@ Developers and users can opt-in into these features before they are fully releas
 
 ## Enable an experiment for yourself
 
-Experimental components can be served from [https://cdn.ampproject.org](https://cdn.ampproject.org) or any other domain.
+Experimental components can be served from `https://cdn.ampproject.org` or any other domain.
 
 ### Served from cdn.ampproject.org
 
-For content served from [https://cdn.ampproject.org](https://cdn.ampproject.org), go to the [AMP experiments page](https://cdn.ampproject.org/experiments.html) and enable (or disable) any experimental component by toggling them on (or off). Opting in will set a cookie on your browser that will enable the experiment on all AMP pages served through the Google AMP Cache.
+For content served from `https://cdn.ampproject.org`, go to the [AMP experiments page](https://cdn.ampproject.org/experiments.html) and enable (or disable) any experimental component by toggling them on (or off). Opting in will set a cookie on your browser that will enable the experiment on all AMP pages served through the Google AMP Cache.
 
 ### Served from other domains
 

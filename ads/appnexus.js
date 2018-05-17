@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, writeScript, validateData} from '../3p/3p';
+import {loadScript, validateData, writeScript} from '../3p/3p';
+import {setStyles} from '../src/style';
 
 const APPNEXUS_AST_URL = 'https://acdn.adnxs.com/ast/ast.js';
 
@@ -39,7 +40,8 @@ export function appnexus(global, data) {
   }
 
   /**
-   * Construct the TTJ URL. Note params should be properly encoded first (use encodeURIComponent);
+   * Construct the TTJ URL. Note params should be properly encoded first (use
+   * encodeURIComponent);
    * @param  {!Array<string>} args query string params to add to the base URL.
    * @return {string}      Formated TTJ URL.
    */
@@ -82,7 +84,6 @@ function appnexusAst(global, data) {
     loadScript(global, APPNEXUS_AST_URL, () => {
       apntag.anq.push(() => {
         apntag.loadTags();
-        apntag.initialRequestMade = true;
       });
     });
   }
@@ -92,6 +93,13 @@ function appnexusAst(global, data) {
   const divContainer = global.document.getElementById('c');
   if (divContainer) {
     divContainer.appendChild(div);
+    setStyles(divContainer, {
+      top: '50%',
+      left: '50%',
+      bottom: '',
+      right: '',
+      transform: 'translate(-50%, -50%)',
+    });
   }
 
   if (!apntag) {
@@ -102,13 +110,10 @@ function appnexusAst(global, data) {
   }
 
   apntag.anq.push(() => {
-    if (!apntag.initialRequestMade) {
-      apntag.onEvent('adAvailable', data.target, () => {
-        apntag.showTag(data.target, global.window);
-      });
-    } else {
+    apntag.onEvent('adAvailable', data.target, adObj => {
+      global.context.renderStart({width: adObj.width, height: adObj.height});
       apntag.showTag(data.target, global.window);
-    }
+    });
 
     apntag.onEvent('adNoBid', data.target, () => {
       context.noContentAvailable();

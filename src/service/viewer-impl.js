@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
-import {findIndex} from '../utils/array';
-import {dict, map} from '../utils/object';
-import {documentStateFor} from './document-state';
-import {registerServiceBuilderForDoc} from '../service';
+import {Services} from '../services';
+import {VisibilityState} from '../visibility-state';
 import {dev, duplicateErrorIfNecessary} from '../log';
-import {isIframed} from '../dom';
+import {dict, map} from '../utils/object';
+import {findIndex} from '../utils/array';
 import {
+  getFragment,
   getSourceOrigin,
+  isProxyOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
-  isProxyOrigin,
 } from '../url';
-import {timerFor} from '../services';
+import {isIframed} from '../dom';
+import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
-import {VisibilityState} from '../visibility-state';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -42,6 +44,14 @@ const SENTINEL_ = '__AMP__';
  * @private {number}
  */
 const VIEWER_ORIGIN_TIMEOUT_ = 1000;
+
+/**
+ * Prefixes to remove when trimming a hostname for comparison.
+ * @const
+ * @private {!RegExp}
+ */
+const TRIM_ORIGIN_PATTERN_ =
+  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -72,6 +82,29 @@ const TRUSTED_VIEWER_HOSTS = [
 ];
 
 /**
+ * These domains are trusted with more sensitive viewer operations such as
+ * sending impression requests. If you believe your domain should be here,
+ * file the issue on GitHub to discuss. The process will be similar
+ * (but somewhat more stringent) to the one described in the [3p/README.md](
+ * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ *
+ * @export {!Array<!RegExp>}
+ */
+const TRUSTED_REFERRER_HOSTS = [
+  /**
+   * Twitter's link wrapper domains:
+   * - t.co
+   */
+  /^t.co$/,
+];
+
+/**
+ * @typedef {function(*):(!Promise<*>|undefined)}
+ */
+export let RequestResponder;
+
+
+/**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
  * actual Viewer are connected via "AMP.viewer" using three methods:
@@ -95,7 +128,7 @@ export class Viewer {
     this.isIframed_ = isIframed(this.win);
 
     /** @const {!./document-state.DocumentState} */
-    this.docState_ = documentStateFor(this.win);
+    this.docState_ = Services.documentStateFor(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = true;
@@ -114,6 +147,9 @@ export class Viewer {
 
     /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
+
+    /** @private {!Object<string, !RequestResponder>} */
+    this.messageResponders_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
@@ -147,8 +183,11 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
+    /** @private {?Promise} */
+    this.nextVisiblePromise_ = null;
+
     /** @private {?function()} */
-    this.whenFirstVisibleResolve_ = null;
+    this.nextVisibleResolve_ = null;
 
     /** @private {?time} */
     this.firstVisibleTime_ = null;
@@ -165,15 +204,17 @@ export class Viewer {
     /** @private {?Function} */
     this.trustedViewerResolver_ = null;
 
+    const deferred = new Deferred();
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
      * `this.onVisibilityChange_()`.
      * @private @const {!Promise}
      */
-    this.whenFirstVisiblePromise_ = new Promise(resolve => {
-      this.whenFirstVisibleResolve_ = resolve;
-    });
+    this.whenFirstVisiblePromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.whenFirstVisibleResolve_ = deferred.resolve;
 
     // Params can be passed either directly in multi-doc environment or via
     // iframe hash/name with hash taking precedence.
@@ -211,13 +252,14 @@ export class Viewer {
     this.isWebviewEmbedded_ = !this.isIframed_ &&
         this.params_['webview'] == '1';
 
+
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe, or
      * a web view, or a shadow doc in PWA.
      * @private @const {boolean}
      */
     this.isEmbedded_ = !!(
-        this.isIframed_ && !this.win.AMP_TEST_IFRAME
+      this.isIframed_ && !this.win.AMP_TEST_IFRAME
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
         // There appears to be a bug under investigation where the
@@ -233,6 +275,20 @@ export class Viewer {
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
+    /**
+     * Whether the AMP document is embedded in a Chrome Custom Tab.
+     * @private @const {boolean}
+     */
+    this.isCctEmbedded_ = !this.isIframed_ &&
+        parseQueryString(this.win.location.search)['amp_gsa'] === '1';
+
+    const url = parseUrl(this.ampdoc.win.location.href);
+    /**
+     * Whether the AMP document was served by a proxy.
+     * @private @const {boolean}
+     */
+    this.isProxyOrigin_ = isProxyOrigin(url);
+
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
 
@@ -247,14 +303,14 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingReadyPromise_ = this.isEmbedded_ ?
-        timerFor(this.win).timeoutPromise(
-            20000,
-            new Promise(resolve => {
-              this.messagingReadyResolver_ = resolve;
-            })).catch(reason => {
-              throw getChannelError(/** @type {!Error|string|undefined} */ (
-                  reason));
-            }) : null;
+      Services.timerFor(this.win).timeoutPromise(
+          20000,
+          new Promise(resolve => {
+            this.messagingReadyResolver_ = resolve;
+          })).catch(reason => {
+        throw getChannelError(/** @type {!Error|string|undefined} */ (
+          reason));
+      }) : null;
 
     /**
      * A promise for non-essential messages. These messages should not fail
@@ -264,12 +320,12 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingMaybePromise_ = this.isEmbedded_ ?
-        this.messagingReadyPromise_
-            .catch(reason => {
-              // Don't fail promise, but still report.
-              reportError(getChannelError(
-                  /** @type {!Error|string|undefined} */ (reason)));
-            }) : null;
+      this.messagingReadyPromise_
+          .catch(reason => {
+            // Don't fail promise, but still report.
+            reportError(getChannelError(
+                /** @type {!Error|string|undefined} */ (reason)));
+          }) : null;
 
     // Trusted viewer and referrer.
     let trustedViewerResolved;
@@ -287,10 +343,9 @@ export class Viewer {
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
     } else {
       // Wait for comms channel to confirm the origin.
-      trustedViewerResolved = undefined;
-      trustedViewerPromise = new Promise(resolve => {
-        this.trustedViewerResolver_ = resolve;
-      });
+      const deferred = new Deferred();
+      trustedViewerPromise = deferred.promise;
+      this.trustedViewerResolver_ = deferred.resolve;
     }
 
     /** @const @private {!Promise<boolean>} */
@@ -306,7 +361,8 @@ export class Viewer {
         resolve(this.win.location.ancestorOrigins[0]);
       } else {
         // Race to resolve with a timer.
-        timerFor(this.win).delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
+        Services.timerFor(this.win).delay(
+            () => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
         this.viewerOriginResolver_ = resolve;
       }
     });
@@ -315,8 +371,8 @@ export class Viewer {
     this.unconfirmedReferrerUrl_ =
         this.isEmbedded() && 'referrer' in this.params_ &&
             trustedViewerResolved !== false ?
-        this.params_['referrer'] :
-        this.win.document.referrer;
+          this.params_['referrer'] :
+          this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
@@ -366,27 +422,6 @@ export class Viewer {
       }
     });
 
-    // Replace URL if requested.
-    const replaceUrlParam = this.params_['replaceUrl'];
-    if (ampdoc.isSingleDoc() &&
-        replaceUrlParam &&
-        this.win.history.replaceState) {
-      try {
-        // The origin and source origin must match.
-        const url = parseUrl(this.win.location.href);
-        const replaceUrl = parseUrl(
-            removeFragment(replaceUrlParam) + this.win.location.hash);
-        if (url.origin == replaceUrl.origin &&
-            getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
-          this.win.history.replaceState({}, '', replaceUrl.href);
-          this.win.location.originalHref = url.href;
-          dev().fine(TAG_, 'replace url:' + replaceUrl.href);
-        }
-      } catch (e) {
-        dev().error(TAG_, 'replaceUrl failed', e);
-      }
-    }
-
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
     if (this.params_['click']) {
@@ -406,6 +441,10 @@ export class Viewer {
     // instance is constructed, the document is already `visible`.
     this.recheckVisibilityState_();
     this.onVisibilityChange_();
+
+    // This fragment may get cleared by impression tracking. If so, it will be
+    // restored afterward.
+    this.maybeUpdateFragmentForCct();
   }
 
   /**
@@ -421,6 +460,7 @@ export class Viewer {
       this.lastVisibleTime_ = now;
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
+      this.whenNextVisibleResolve_();
     }
     this.visibilityObservable_.fire();
   }
@@ -453,23 +493,23 @@ export class Viewer {
 
   /**
    * Requests A2A navigation to the given destination. If the viewer does
-   * not support this operation, will navigate the top level window
-   * to the destination.
+   * not support this operation, does nothing.
    * The URL is assumed to be in AMP Cache format already.
    * @param {string} url An AMP article URL.
    * @param {string} requestedBy Informational string about the entity that
    *     requested the navigation.
+   * @return {boolean} Returns true if navigation message was sent to viewer.
+   *     Otherwise, returns false.
    */
-  navigateTo(url, requestedBy) {
-    dev().assert(isProxyOrigin(url), 'Invalid A2A URL %s %s', url, requestedBy);
+  navigateToAmpUrl(url, requestedBy) {
     if (this.hasCapability('a2a')) {
-      this.sendMessage('a2a', dict({
+      this.sendMessage('a2aNavigate', dict({
         'url': url,
         'requestedBy': requestedBy,
       }));
-    } else {
-      this.win.top.location.href = url;
+      return true;
     }
+    return false;
   }
 
   /**
@@ -478,6 +518,72 @@ export class Viewer {
    */
   isEmbedded() {
     return this.isEmbedded_;
+  }
+
+  /**
+   * Whether the document is embedded in a webview.
+   * @return {boolean}
+   */
+  isWebviewEmbedded() {
+    return this.isWebviewEmbedded_;
+  }
+
+  /**
+   * Whether the document is embedded in a Chrome Custom Tab.
+   * @return {boolean}
+   */
+  isCctEmbedded() {
+    return this.isCctEmbedded_;
+  }
+
+  /**
+   * Whether the document was served by a proxy.
+   * @return {boolean}
+   */
+  isProxyOrigin() {
+    return this.isProxyOrigin_;
+  }
+
+  /**
+   * Update the URL fragment with data needed to support custom tabs. This will
+   * not clear query string parameters, but will clear the fragment.
+   */
+  maybeUpdateFragmentForCct() {
+    if (!this.isCctEmbedded_) {
+      return;
+    }
+    // CCT only works with versions of Chrome that support the history API.
+    if (!this.win.history.replaceState) {
+      return;
+    }
+    const sourceOrigin = getSourceOrigin(this.win.location.href);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc);
+    const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
+    if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
+      const oldFragment = getFragment(this.win.location.href);
+      const newFragment = 'ampshare=' + encodeURIComponent(canonicalUrl);
+      // Attempt to merge the fragments, if an old fragment was present.
+      this.win.history.replaceState({}, '',
+          oldFragment ? `${oldFragment}&${newFragment}` : `#${newFragment}`);
+    }
+  }
+
+  /**
+   * Compares URLs to determine if they match once common subdomains are
+   * removed. Everything else must match.
+   * @param {string} first Origin to compare.
+   * @param {string} second Origin to compare.
+   * @return {boolean} Whether the origins match without subdomains.
+   * @private
+   */
+  hasRoughlySameOrigin_(first, second) {
+    const trimOrigin = origin => {
+      if (origin.split('.').length > 2) {
+        return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
+      }
+      return origin;
+    };
+    return trimOrigin(first) == trimOrigin(second);
   }
 
   /**
@@ -590,11 +696,42 @@ export class Viewer {
 
   /**
    * Returns a Promise that only ever resolved when the current
-   * AMP document becomes visible.
+   * AMP document first becomes visible.
    * @return {!Promise}
    */
   whenFirstVisible() {
     return this.whenFirstVisiblePromise_;
+  }
+
+  /**
+   * Returns a Promise that resolve when current doc becomes visible.
+   * The promise resolves immediately if doc is already visible.
+   * @return {!Promise}
+   */
+  whenNextVisible() {
+    if (this.isVisible()) {
+      return Promise.resolve();
+    }
+
+    if (this.nextVisiblePromise_) {
+      return this.nextVisiblePromise_;
+    }
+
+    const deferred = new Deferred();
+    this.nextVisibleResolve_ = deferred.resolve;
+    return this.nextVisiblePromise_ = deferred.promise;
+  }
+
+  /**
+   * Helper method to be called on visiblity change
+   * @private
+   */
+  whenNextVisibleResolve_() {
+    if (this.nextVisibleResolve_) {
+      this.nextVisibleResolve_();
+      this.nextVisibleResolve_ = null;
+      this.nextVisiblePromise_ = null;
+    }
   }
 
   /**
@@ -653,6 +790,19 @@ export class Viewer {
   }
 
   /**
+   * @param {string} referrer
+   * @return {boolean}
+   * @private
+   */
+  isTrustedReferrer_(referrer) {
+    const url = parseUrl(referrer);
+    if (url.protocol != 'https:') {
+      return false;
+    }
+    return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
+  }
+
+  /**
    * Returns an unconfirmed "referrer" URL that can be optionally customized by
    * the viewer. Consider using `getReferrerUrl()` instead, which returns the
    * promise that will yield the confirmed "referrer" URL.
@@ -679,6 +829,16 @@ export class Viewer {
    */
   isTrustedViewer() {
     return this.isTrustedViewer_;
+  }
+
+  /**
+   * Whether the referrer has been whitelisted for CORS impression
+   * @return {!Promise<boolean>}
+   */
+  isTrustedReferrer() {
+    return this.referrerUrl_.then(referrer => {
+      return this.isTrustedReferrer_(referrer);
+    });
   }
 
   /**
@@ -739,6 +899,21 @@ export class Viewer {
   }
 
   /**
+   * Adds a eventType listener for viewer events.
+   * @param {string} eventType
+   * @param {!RequestResponder} responder
+   * @return {!UnlistenDef}
+   */
+  onMessageRespond(eventType, responder) {
+    this.messageResponders_[eventType] = responder;
+    return () => {
+      if (this.messageResponders_[eventType] === responder) {
+        delete this.messageResponders_[eventType];
+      }
+    };
+  }
+
+  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {!JsonObject} data
@@ -763,6 +938,11 @@ export class Viewer {
     const observable = this.messageObservables_[eventType];
     if (observable) {
       observable.fire(data);
+    }
+    const responder = this.messageResponders_[eventType];
+    if (responder) {
+      return responder(data);
+    } else if (observable) {
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -860,10 +1040,10 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-          Promise.resolve(this.messageDeliverer_(
-              eventType,
-              /** @type {?JsonObject|string|undefined} */ (data),
-              awaitResponse)));
+        tryResolve(() => this.messageDeliverer_(
+            eventType,
+            /** @type {?JsonObject|string|undefined} */ (data),
+            awaitResponse)));
     }
 
     if (!this.messagingReadyPromise_) {
@@ -889,10 +1069,9 @@ export class Viewer {
       message.data = data;
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
-      let responseResolver;
-      const responsePromise = new Promise(r => {
-        responseResolver = r;
-      });
+      const deferred = new Deferred();
+      const {promise: responsePromise, resolve: responseResolver} = deferred;
+
       message = {
         eventType,
         data,
@@ -937,6 +1116,33 @@ export class Viewer {
    */
   whenMessagingReady() {
     return this.messagingMaybePromise_;
+  }
+
+  /**
+   * Replace the document url with the viewer provided new replaceUrl.
+   * @param {?string} newUrl
+   */
+  replaceUrl(newUrl) {
+    if (!newUrl ||
+        !this.ampdoc.isSingleDoc() ||
+        !this.win.history.replaceState) {
+      return;
+    }
+
+    try {
+      // The origin and source origin must match.
+      const url = parseUrl(this.win.location.href);
+      const replaceUrl = parseUrl(
+          removeFragment(newUrl) + this.win.location.hash);
+      if (url.origin == replaceUrl.origin &&
+          getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+        this.win.history.replaceState({}, '', replaceUrl.href);
+        this.win.location.originalHref = url.href;
+        dev().fine(TAG_, 'replace url:' + replaceUrl.href);
+      }
+    } catch (e) {
+      dev().error(TAG_, 'replaceUrl failed', e);
+    }
   }
 }
 

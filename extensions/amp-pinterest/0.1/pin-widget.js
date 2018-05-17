@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {openWindowDialog} from '../../../src/dom';
-import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/services';
-
+import {Services} from '../../../src/services';
 import {Util} from './util';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
+import {openWindowDialog} from '../../../src/dom';
+import {toWin} from '../../../src/types';
+
+import {user} from '../../../src/log';
 
 // Popup options
 const POP = 'status=no,resizable=yes,scrollbars=yes,' +
@@ -37,8 +38,9 @@ export class PinWidget {
     user().assert(rootElement.getAttribute('data-url'),
         'The data-url attribute is required for Pin widgets');
     this.element = rootElement;
-    this.xhr = xhrFor(rootElement.ownerDocument.defaultView);
+    this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
     this.pinId = '';
+    this.alt = '';
     this.pinUrl = '';
     this.width = '';
     this.layout = '';
@@ -55,6 +57,7 @@ export class PinWidget {
     const href = el.getAttribute('data-pin-href');
     const log = el.getAttribute('data-pin-log');
     if (href) {
+      assertAbsoluteHttpOrHttpsUrl(href);
       if (shouldPop) {
         openWindowDialog(window, href, '_pinit', POP);
       } else {
@@ -109,12 +112,18 @@ export class PinWidget {
       'data-pin-log': 'embed_pin',
     }});
 
+    // If no alternate text is set, set it to the title gotten from the pin data
+    if (!this.alt && pin['attribution']) {
+      this.alt = pin['attribution']['title'];
+    }
+
     const img = Util.make(this.element.ownerDocument, {'img': {
       'src': imgUrl,
       'className': '-amp-pinterest-embed-pin-image',
       'data-pin-no-hover': true,
       'data-pin-href': 'https://www.pinterest.com/pin/' + pin['id'] + '/',
       'data-pin-log': 'embed_pin_img',
+      'alt': this.alt,
     }});
     container.appendChild(img);
 
@@ -236,6 +245,7 @@ export class PinWidget {
     this.pinUrl = this.element.getAttribute('data-url');
     this.width = this.element.getAttribute('data-width');
     this.layout = this.element.getAttribute('layout');
+    this.alt = this.element.getAttribute('alt');
 
     this.pinId = '';
     try {
@@ -250,4 +260,4 @@ export class PinWidget {
         .then(this.renderPin.bind(this));
   }
 
-};
+}

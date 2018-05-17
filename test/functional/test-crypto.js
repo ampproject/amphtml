@@ -16,18 +16,23 @@
 
 import {Crypto} from '../../src/service/crypto-impl';
 import {Platform} from '../../src/service/platform-impl';
+import {Services} from '../../src/services';
 import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {extensionsFor} from '../../src/services';
+
 
 describes.realWin('crypto-impl', {}, env => {
-
   let win;
   let crypto;
+
+  beforeEach(() => {
+    win = env.win;
+  });
 
   function uint8Array(array) {
     const uint8Array = new Uint8Array(array.length);
@@ -74,14 +79,16 @@ describes.realWin('crypto-impl', {}, env => {
       it('should hash [1,2,3] in sha384', () => {
         return expect(crypto.sha384Base64(uint8Array([1, 2, 3])))
             .to.eventually.equal(
-            'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
+                'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
                 'e57T8sjh2sTcMlhn053f8dJim3o5PUf2');
       });
 
       it('should throw when input contains chars out of range [0,255]', () => {
-        expect(() => crypto.sha384('abc今')).to.throw();
-        expect(() => crypto.sha384Base64('abc今')).to.throw();
-        expect(() => crypto.uniform('abc今')).to.throw();
+        allowConsoleError(() => {
+          expect(() => crypto.sha384('abc今')).to.throw();
+          expect(() => crypto.sha384Base64('abc今')).to.throw();
+          expect(() => crypto.uniform('abc今')).to.throw();
+        });
       });
 
       it('should hash "abc" to uniform number', () => {
@@ -93,9 +100,13 @@ describes.realWin('crypto-impl', {}, env => {
   }
 
   function createCrypto(win) {
+    if (win && !win.document) {
+      win.document = env.win.document;
+    }
+    installDocService(win, /* isSingleDoc */ true);
     installExtensionsService(win);
-    const extensions = extensionsFor(win);
-    sandbox.stub(extensions, 'loadExtension', extensionId => {
+    const extensions = Services.extensionsFor(win);
+    sandbox.stub(extensions, 'preloadExtension').callsFake(extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(win);
       return Promise.resolve();
@@ -108,10 +119,6 @@ describes.realWin('crypto-impl', {}, env => {
     const platform = new Platform(window);
     return platform.isChrome() && platform.getMajorVersion() >= 37;
   }
-
-  beforeEach(() => {
-    win = env.win;
-  });
 
   testSuite('with native crypto API');
   testSuite('with crypto lib', {});

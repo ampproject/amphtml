@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeago} from '../../../third_party/timeagojs/timeago';
+import {user} from '../../../src/log';
 
 export class AmpTimeAgo extends AMP.BaseElement {
 
@@ -42,14 +42,28 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.datetime_ = this.element.getAttribute('datetime');
     this.locale_ = this.element.getAttribute('locale') ||
       this.win.document.documentElement.lang;
-    this.title_ = this.element.textContent;
+    this.title_ = this.element.textContent.trim();
 
     this.element.title = this.title_;
     this.element.textContent = '';
 
     const timeElement = document.createElement('time');
     timeElement.setAttribute('datetime', this.datetime_);
-    timeElement.textContent = timeago(this.datetime_, this.locale_);
+
+    if (this.element.hasAttribute('cutoff')) {
+      const cutoff = parseInt(this.element.getAttribute('cutoff'), 10);
+      const elDate = new Date(this.datetime_);
+      const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
+
+      if (secondsAgo > cutoff) {
+        timeElement.textContent = this.title_;
+      } else {
+        timeElement.textContent = timeago(this.datetime_, this.locale_);
+      }
+    } else {
+      timeElement.textContent = timeago(this.datetime_, this.locale_);
+    }
+
     this.element.appendChild(timeElement);
   }
 
@@ -59,4 +73,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-timeago', AmpTimeAgo);
+
+AMP.extension('amp-timeago', '0.1', AMP => {
+  AMP.registerElement('amp-timeago', AmpTimeAgo);
+});

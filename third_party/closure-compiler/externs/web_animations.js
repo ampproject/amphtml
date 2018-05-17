@@ -31,6 +31,12 @@ class Animation {
      * @type {number}
      */
     this.currentTime;
+
+    /**
+     * Current state of the animation.
+     * @type {string}
+     */
+    this.playState;
   }
 
   /**
@@ -62,6 +68,20 @@ class Animation {
    * beginning.
    */
   reverse() {}
+}
+
+
+/**
+ * @extends {CSSRule}
+ * @see https://drafts.csswg.org/css-conditional-3/#the-csssupportsrule-interface
+ */
+class CSSSupportsRule {
+  constructor() {
+    /** @type {string} */
+    this.conditionText;
+    /** @type {!CSSRuleList} */
+    this.cssRules;
+  }
 }
 
 

@@ -17,6 +17,7 @@
 import {dev} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {startsWith} from '../../../src/string';
+import {toWin} from '../../../src/types';
 
 
 /**
@@ -49,7 +50,7 @@ export function setBlacklistedPropertiesForTesting(properties) {
  * @return {!Object}
  */
 export function installFormProxy(form) {
-  const constr = getFormProxyConstr(form.ownerDocument.defaultView);
+  const constr = getFormProxyConstr(toWin(form.ownerDocument.defaultView));
   const proxy = new constr(form);
   if (!('action' in proxy)) {
     setupLegacyProxy(form, proxy);
@@ -175,8 +176,7 @@ function setupLegacyProxy(form, proxy) {
           // The overriding input, if present, has to be removed and re-added
           // (renaming does NOT work). Completely insane, I know.
           const element = dev().assertElement(current);
-          const nextSibling = element.nextSibling;
-          const parent = element.parentNode;
+          const {nextSibling, parentNode: parent} = element;
           parent.removeChild(element);
           try {
             actual = form[name];

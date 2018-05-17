@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
+import {Observable} from '../../src/observable';
 
 describe('Observable', () => {
 

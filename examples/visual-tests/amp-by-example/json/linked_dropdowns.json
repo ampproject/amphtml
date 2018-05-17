@@ -1,0 +1,86 @@
+{
+  "items": [{
+    "countries": [
+      {
+        "name": "Australia",
+        "cities": [
+          "Brisbane",
+          "Melbourne",
+          "Sydney"
+        ]
+      },
+      {
+        "name": "Germany",
+        "cities": [
+          "Berlin",
+          "Hamburg",
+          "Munich",
+          "Frankfurt"
+        ]
+
+      },
+      {
+        "name": "India",
+        "cities": [
+          "Agra",
+          "Bangalore",
+          "Hyderabad"
+        ]
+      },
+      {
+        "name": "Malaysia",
+        "cities": [
+          "George Town",
+          "Johor Bahru",
+          "Kuala Lumpur"
+        ]
+
+      },
+      {
+        "name": "New Zealand",
+        "cities": [
+          "Auckland",
+          "Christchurch",
+          "Dunedin"
+        ]
+
+      },
+      {
+        "name": "Saudi Arabia",
+        "cities": [
+          "Jeddah",
+          "Mecca",
+          "Riyadh"
+        ]
+
+      },
+      {
+        "name": "South Africa",
+        "cities": [
+          "Cape Town",
+          "Durban",
+          "Johannesburg"
+        ]
+
+      },
+      {
+        "name": "United Kingdom",
+        "cities": [
+          "Birmingham",
+          "Leeds",
+          "London"
+        ]
+
+      },
+      {
+        "name": "United States",
+        "cities": [
+          "Chicago",
+          "Houston",
+          "New York"
+        ]
+
+      }
+    ]
+  }]
+}

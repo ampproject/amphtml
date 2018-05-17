@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/services';
-import {vsyncFor} from '../../../src/services';
 
 
 /**
  * Strips everything but the domain from referrer string.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @returns {string}
+ * @return {string}
  */
 function referrerDomain(ampdoc) {
-  const referrer = viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
+  const referrer = Services.viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
   if (referrer) {
     return parseUrl(referrer).hostname;
   }
@@ -35,7 +34,7 @@ function referrerDomain(ampdoc) {
 /**
  * Grabs the User Agent string.
  * @param {!Window} win
- * @returns {string}
+ * @return {string}
  */
 function userAgent(win) {
   return win.navigator.userAgent;
@@ -65,7 +64,7 @@ export function referrers_(referrer) {
 /**
  * Normalizes certain referrers across devices.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @returns {!Array<string>}
+ * @return {!Array<string>}
  */
 function normalizedReferrers(ampdoc) {
   const referrer = referrerDomain(ampdoc);
@@ -105,7 +104,7 @@ function addDynamicCssClasses(ampdoc, classes) {
  * @param {!Array<string>} classes
  */
 function addCssClassesToBody(body, classes) {
-  const classList = body.classList;
+  const {classList} = body;
   for (let i = 0; i < classes.length; i++) {
     classList.add(classes[i]);
   }
@@ -123,7 +122,7 @@ function addReferrerClasses(ampdoc) {
     return `amp-referrer-${referrer.replace(/\./g, '-')}`;
   });
 
-  vsyncFor(ampdoc.win).mutate(() => {
+  Services.vsyncFor(ampdoc.win).mutate(() => {
     addDynamicCssClasses(ampdoc, classes);
   });
 }
@@ -134,9 +133,9 @@ function addReferrerClasses(ampdoc) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
 function addViewerClass(ampdoc) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   if (viewer.isEmbedded()) {
-    vsyncFor(ampdoc.win).mutate(() => {
+    Services.vsyncFor(ampdoc.win).mutate(() => {
       addDynamicCssClasses(ampdoc, ['amp-viewer']);
     });
   }
@@ -152,19 +151,12 @@ function addRuntimeClasses(ampdoc) {
 }
 
 
-/**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @visibleForTesting
- */
-export function installDynamicClassesForTesting(ampdoc) {
-  addRuntimeClasses(ampdoc);
-}
-
-
 // Register doc-service factory.
-AMP.registerServiceForDoc(
-    'amp-dynamic-css-classes',
-    function(ampdoc) {
-      addRuntimeClasses(ampdoc);
-      return {};
-    });
+AMP.extension('amp-dynamic-css-classes', '0.1', AMP => {
+  AMP.registerServiceForDoc(
+      'amp-dynamic-css-classes',
+      function(ampdoc) {
+        addRuntimeClasses(ampdoc);
+        return {};
+      });
+});

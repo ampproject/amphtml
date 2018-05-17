@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Examples
 
 Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Follow button.
@@ -75,22 +77,21 @@ Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Fol
 </amp-pinterest>
 ```
 
-
 ## Pin It Button
 
-**data-do** (required)
+##### data-do (required)
 
 Must be set to `buttonPin`.
 
-**data-url** (required)
+##### data-url (required)
 
 Contains the fully-qualified URL intended to be pinned or re-made into a widget.
 
-**data-media** (required)
+##### data-media (required)
 
 Contains the fully-qualified URL of the image intended to be pinned. If the pin will eventually contain multimedia (such as YouTube), it should point to a high-resolution thumbnail.
 
-**data-description** (required)
+##### data-description (required)
 
 Contains the default description that appears in the pin create form; please choose carefully, since many Pinners will close the form without pinning if it doesn't make sense.
 
@@ -105,7 +106,7 @@ height=20 width=40
 Small rectangular button with pin count to the right, using `data-count="beside"`:
 
 ```html
-height=28 width=85
+height=20 width=85
 ```
 
 Small rectangular button with pin count on top, using `data-count="above"`:
@@ -114,7 +115,7 @@ Small rectangular button with pin count on top, using `data-count="above"`:
 height=50 width=40
 ```
 
-Large rectangular button using `data-height="tall"`:
+Large rectangular button using `data-tall="true"`:
 
 ```html
 height=28 width=56
@@ -126,7 +127,7 @@ Large rectangular button with pin count to the right, using `data-tall="true"` a
 height=28 width=107
 ```
 
-Large rectangular button with pin count on top, using `data-height="tall"` and `data-count="above"`:
+Large rectangular button with pin count on top, using `data-tall="true"` and `data-count="above"`:
 
 ```html
 height=66 width=56
@@ -138,7 +139,7 @@ Small circular button using `data-round="true"`:
 height=16 width=16
 ```
 
-Large circular button using `data-round="true"` and `data-height="tall"`:
+Large circular button using `data-round="true"` and `data-tall="true"`:
 
 ```html
 height=32 width=32
@@ -146,31 +147,35 @@ height=32 width=32
 
 ## Follow Button
 
-**data-do** (required)
+##### data-do (required)
 
 Must be set to `buttonFollow`.
 
-**data-href** (required)
+##### data-href (required)
 
 Contains the fully qualified Pinterest user profile url to follow.
 
-**data-label** (required)
+##### data-label (required)
 
 Contains the text to display on the follow button.
 
 ## Embedded Pin Widget
 
-**data-do** (required)
+##### data-do (required)
 
 Must be set to `embedPin`.
 
-**data-url** (required)
+##### data-url (required)
 
 Must contain the fully-qualified URL of the Pinterest resource to be shown as a widget.
 
 ```html
 data-url="https://www.pinterest.com/pin/99360735500167749/"
 ```
+
+##### alt
+
+This property like the the `alt` attribute on an `<img>` tag specifies the alternate text. If not provided it will be infered from the pin data provided by the Pinterest API.
 
 ## Validation
 

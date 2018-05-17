@@ -15,47 +15,48 @@
  */
 
 import '../amp-carousel';
-import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
 
-describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
-  let sandbox;
-  let win;
+
+describes.realWin('test-scrollable-carousel', {
+  amp: {
+    extensions: ['amp-carousel'],
+  },
+}, env => {
+  let win, doc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     win = env.win;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    doc = win.document;
+    env.iframe.width = '300';
+    env.iframe.height = '200';
   });
 
   function getAmpScrollableCarousel() {
-    return createIframePromise().then(iframe => {
-      iframe.width = '300';
-      iframe.height = '200';
-      const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
-          'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
+    const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
+        'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
 
-      const carouselElement = iframe.doc.createElement('amp-carousel');
-      carouselElement.setAttribute('width', '300');
-      carouselElement.setAttribute('height', '100');
+    const carouselElement = doc.createElement('amp-carousel');
+    carouselElement.setAttribute('width', '300');
+    carouselElement.setAttribute('height', '100');
 
-      const slideCount = 7;
-      for (let i = 0; i < slideCount; i++) {
-        const img = document.createElement('amp-img');
-        img.setAttribute('src', imgUrl);
-        img.setAttribute('width', '120');
-        img.setAttribute('height', '100');
-        img.style.width = '120px';
-        img.style.height = '100px';
-        img.id = 'img-' + i;
-        carouselElement.appendChild(img);
-      }
+    const slideCount = 7;
+    for (let i = 0; i < slideCount; i++) {
+      const img = document.createElement('amp-img');
+      img.setAttribute('src', imgUrl);
+      img.setAttribute('width', '120');
+      img.setAttribute('height', '100');
+      img.style.width = '120px';
+      img.style.height = '100px';
+      img.id = 'img-' + i;
+      carouselElement.appendChild(img);
+    }
 
-      return iframe.addElement(carouselElement);
-    });
+    doc.body.appendChild(carouselElement);
+    return carouselElement.build().then(() => {
+      carouselElement.updateLayoutBox(
+          {top: 0, left: 0, width: 300, height: 100});
+      return carouselElement.layoutCallback();
+    }).then(() => carouselElement);
   }
 
   it('should initialize correctly: create container, build initial slides ' +

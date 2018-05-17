@@ -73,7 +73,7 @@ function manageWin_(win) {
  */
 function instrumentDocWrite(parent, win) {
   const doc = win.document;
-  const close = doc.close;
+  const {close} = doc;
   doc.close = function() {
     parent.ampManageWin = function(win) {
       manageWin(win);
@@ -178,7 +178,7 @@ function installObserver(win) {
  */
 function instrumentEntryPoints(win) {
   // Change setTimeout to respect a minimum timeout.
-  const setTimeout = win.setTimeout;
+  const {setTimeout} = win;
   win.setTimeout = function(fn, time) {
     time = minTime(time);
     arguments[1] = time;
@@ -193,7 +193,7 @@ function instrumentEntryPoints(win) {
       next();
       if (typeof fn == 'string') {
         // Handle rare and dangerous string arg case.
-        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn);
+        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn); // lgtm [js/useless-expression]
       } else {
         return fn.apply(this, arguments);
       }
@@ -205,7 +205,7 @@ function instrumentEntryPoints(win) {
     next();
     return id;
   };
-  const clearInterval = win.clearInterval;
+  const {clearInterval} = win;
   win.clearInterval = function(id) {
     clearInterval(id);
     win.clearTimeout(intervals[id]);
@@ -261,4 +261,4 @@ export function installEmbedStateListener() {
   listenParent(window, 'embed-state', function(data) {
     inViewport = data.inViewport;
   });
-};
+}

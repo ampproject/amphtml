@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
 import '../amp-social-share';
-import {platformFor} from '../../../../src/services';
-
-adopt(window);
+import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Services} from '../../../../src/services';
 
 const STRINGS = {
   'text': 'Hello world',
@@ -32,102 +27,92 @@ const STRINGS = {
     'Hello world',
 };
 
-describe('amp-social-share', () => {
 
-  let sandbox;
+describes.realWin('amp-social-share', {
+  amp: {
+    extensions: ['amp-social-share'],
+    canonicalUrl: 'https://canonicalexample.com/',
+  },
+}, env => {
+  let win, doc;
   let platform;
   let isIos = false;
   let isSafari = false;
 
-  function getShare(type, opt_endpoint, opt_params) {
-    return getCustomShare(iframe => {
-      sandbox./*OK*/stub(iframe.win, 'open').returns(true);
-      const share = iframe.doc.createElement('amp-social-share');
-      share.addEventListener = sandbox.spy();
-      if (opt_endpoint) {
-        share.setAttribute('data-share-endpoint', opt_endpoint);
-      }
-
-      for (const key in opt_params) {
-        share.setAttribute('data-param-' + key, opt_params[key]);
-      }
-
-      share.setAttribute('type', type);
-      share.setAttribute('width', 60);
-      share.setAttribute('height', 44);
-      return share;
-    });
-  }
-
-  function getCustomShare(modifier) {
-    return createIframePromise().then(iframe => {
-      platform = platformFor(iframe.win);
-      sandbox.stub(platform, 'isIos', () => isIos);
-      sandbox.stub(platform, 'isSafari', () => isSafari);
-      const canonical = iframe.doc.createElement('link');
-
-      iframe.doc.title = 'doc title';
-      canonical.setAttribute('rel', 'canonical');
-      canonical.setAttribute('href', 'https://canonicalexample.com/');
-      iframe.addElement(canonical);
-
-      return iframe.addElement(modifier(iframe));
-    });
-  }
-
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
+    doc.title = 'doc title';
     isIos = false;
     isSafari = false;
+    platform = Services.platformFor(win);
+    sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+    sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
+    sandbox./*OK*/stub(win, 'open').returns(true);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+  function getShare(type, opt_endpoint, opt_params) {
+    const share = doc.createElement('amp-social-share');
+    share.addEventListener = sandbox.spy();
+    if (opt_endpoint) {
+      share.setAttribute('data-share-endpoint', opt_endpoint);
+    }
+
+    for (const key in opt_params) {
+      share.setAttribute('data-param-' + key, opt_params[key]);
+    }
+
+    share.setAttribute('type', type);
+    share.setAttribute('width', 60);
+    share.setAttribute('height', 44);
+    doc.body.appendChild(share);
+    return loaded(share);
+  }
+
+  function loaded(element) {
+    return element.build()
+        .then(() => element.layoutCallback())
+        .then(() => element);
+  }
 
   it('errors if share endpoint is missing', () => {
-    return createIframePromise().then(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
-      share.setAttribute('type', 'unknown-provider');
-      iframe.doc.body.appendChild(share);
-      return expect(share.whenBuilt())
-          .to.be.eventually.rejectedWith(
-          /data-share-endpoint attribute is required/
-          );
+    const share = doc.createElement('amp-social-share');
+    share.setAttribute('type', 'unknown-provider');
+    doc.body.appendChild(share);
+    return allowConsoleError(() => {
+      return expect(loaded(share)).to.eventually.be.rejectedWith(
+          /data-share-endpoint attribute is required/);
     });
   });
 
   it('errors if type is missing', () => {
-    return createIframePromise().then(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
-      iframe.doc.body.appendChild(share);
-      return expect(share.whenBuilt())
-          .to.be.eventually.rejectedWith(/type attribute is required/);
+    const share = doc.createElement('amp-social-share');
+    doc.body.appendChild(share);
+    return allowConsoleError(() => {
+      return expect(loaded(share)).to.eventually.be.rejectedWith(
+          /type attribute is required/);
     });
   });
 
   it('errors if type has space characters', () => {
-    return createIframePromise().then(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
-      share.setAttribute('type', 'hello world');
-      iframe.doc.body.appendChild(share);
-      return expect(share.whenBuilt())
-          .to.be.eventually.rejectedWith(
-          /Space characters are not allowed in type attribute value/
-          );
+    const share = doc.createElement('amp-social-share');
+    share.setAttribute('type', 'hello world');
+    doc.body.appendChild(share);
+    return allowConsoleError(() => {
+      return expect(loaded(share)).to.eventually.be.rejectedWith(
+          /Space characters are not allowed in type attribute value/);
     });
   });
 
   it('renders unconfigured providers if share endpoint provided', () => {
-    return getCustomShare(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
+    const share = doc.createElement('amp-social-share');
 
-      share.setAttribute('type', 'unknown-provider');
-      share.setAttribute('data-share-endpoint',
-          'https://exampleprovider.com/share/');
-      share.setAttribute('data-param-text', 'check out: CANONICAL_URL');
-      return share;
-    }).then(el => {
+    share.setAttribute('type', 'unknown-provider');
+    share.setAttribute('data-share-endpoint',
+        'https://exampleprovider.com/share/');
+    share.setAttribute('data-param-text', 'check out: CANONICAL_URL');
+    doc.body.appendChild(share);
+    return loaded(share).then(el => {
       expect(el.implementation_.params_.text).to.be.equal(
           'check out: CANONICAL_URL');
       expect(el.implementation_.href_).to.not.contain(
@@ -159,15 +144,14 @@ describe('amp-social-share', () => {
   });
 
   it('adds a default value for url', () => {
-    return getCustomShare(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
+    const share = doc.createElement('amp-social-share');
 
-      share.setAttribute('type', 'twitter');
-      share.setAttribute('width', 60);
-      share.setAttribute('height', 44);
+    share.setAttribute('type', 'twitter');
+    share.setAttribute('width', 60);
+    share.setAttribute('height', 44);
 
-      return share;
-    }).then(el => {
+    doc.body.appendChild(share);
+    return loaded(share).then(el => {
       expect(el.implementation_.params_.url).to.be.equal('CANONICAL_URL');
       expect(el.implementation_.href_).to.not.contain(
           encodeURIComponent('CANONICAL_URL'));
@@ -190,7 +174,25 @@ describe('amp-social-share', () => {
     });
   });
 
-  it('opens mailto: window in _top on iOS Safari', () => {
+  it('opens mailto: window in _top on iOS Safari with recipient', () => {
+    const params = {
+      'recipient': 'sample@xyz.com',
+    };
+    isIos = true;
+    isSafari = true;
+    return getShare('email', undefined, params).then(el => {
+      el.implementation_.handleClick_();
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
+          'mailto:sample%40xyz.com?subject=doc%20title&' +
+            'body=https%3A%2F%2Fcanonicalexample.com%2F' +
+            '&recipient=sample%40xyz.com',
+          '_top', 'resizable,scrollbars,width=640,height=480'
+      );
+    });
+  });
+
+  it('opens mailto: window in _top on iOS Safari without recipient', () => {
     isIos = true;
     isSafari = true;
     return getShare('email').then(el => {
@@ -198,7 +200,7 @@ describe('amp-social-share', () => {
       expect(el.implementation_.win.open).to.be.calledOnce;
       expect(el.implementation_.win.open).to.be.calledWith(
           'mailto:?subject=doc%20title&' +
-            'body=https%3A%2F%2Fcanonicalexample.com%2F',
+            'body=https%3A%2F%2Fcanonicalexample.com%2F&recipient=',
           '_top', 'resizable,scrollbars,width=640,height=480'
       );
     });
@@ -244,5 +246,4 @@ describe('amp-social-share', () => {
       expect(el.getAttribute('tabindex')).to.equal('0');
     });
   });
-
 });

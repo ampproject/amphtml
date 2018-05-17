@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAttributesFromConfigObj} from './attributes';
-import {resourcesForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {
   closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getAttributesFromConfigObj} from './attributes';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -48,10 +48,10 @@ export const PlacementState = {
  * @enum {number}
  */
 const Position = {
-  BEFORE: 1,  // Placement should be the sibling before the anchor element.
-  FIRST_CHILD: 2,  // Placement should be the first child of the anchor element.
-  LAST_CHILD: 3,  // Placement should be the last child of the anchor element.
-  AFTER: 4,  // Placement should be the sibling after the anchor element.
+  BEFORE: 1, // Placement should be the sibling before the anchor element.
+  FIRST_CHILD: 2, // Placement should be the first child of the anchor element.
+  LAST_CHILD: 3, // Placement should be the last child of the anchor element.
+  AFTER: 4, // Placement should be the sibling after the anchor element.
 };
 
 /**
@@ -65,7 +65,7 @@ const BLACKLISTED_ANCESTOR_TAGS = [
 ];
 
 /**
- * @const {!Object<!Position, !function(!Element, !Element)>}
+ * @const {!Object<!Position, function(!Element, !Element)>}
  */
 const INJECTORS = {};
 INJECTORS[Position.BEFORE] = (anchorElement, elementToInject) => {
@@ -84,18 +84,18 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 
 export class Placement {
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
-   * @param {!function(!Element, !Element)} injector
+   * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
-  constructor(win, resources, anchorElement, position, injector, attributes,
-      opt_margins) {
-    /** @const @private {!Window} */
-    this.win_ = win;
+  constructor(ampdoc, resources, anchorElement, position, injector, attributes,
+    opt_margins) {
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resources;
@@ -206,16 +206,17 @@ export class Placement {
       'class': 'i-amphtml-layout-awaiting-size',
     }), baseAttributes, this.attributes_));
     return createElementWithAttributes(
-        this.win_.document, 'amp-ad', attributes);
+        this.ampdoc.win.document, 'amp-ad', attributes);
   }
 }
 
+
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} configObj
  * @return {!Array<!Placement>}
  */
-export function getPlacementsFromConfigObj(win, configObj) {
+export function getPlacementsFromConfigObj(ampdoc, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
     user().warn(TAG, 'No placements in config');
@@ -223,19 +224,20 @@ export function getPlacementsFromConfigObj(win, configObj) {
   }
   const placements = [];
   placementObjs.forEach(placementObj => {
-    getPlacementsFromObject(win, placementObj, placements);
+    getPlacementsFromObject(ampdoc, placementObj, placements);
   });
   return placements;
 }
 
+
 /**
  * Validates that the placementObj represents a valid placement and if so
  * constructs and returns an instance of the Placement class for it.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} placementObj
  * @param {!Array<!Placement>} placements
  */
-function getPlacementsFromObject(win, placementObj, placements) {
+function getPlacementsFromObject(ampdoc, placementObj, placements) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
     user().warn(TAG, 'No injector for position');
@@ -246,8 +248,7 @@ function getPlacementsFromObject(win, placementObj, placements) {
     user().warn(TAG, 'No anchor in placement');
     return;
   }
-  const anchorElements =
-      getAnchorElements(win.document.documentElement, anchor);
+  const anchorElements = getAnchorElements(ampdoc.getBody(), anchor);
   if (!anchorElements.length) {
     user().warn(TAG, 'No anchor element found');
     return;
@@ -268,10 +269,17 @@ function getPlacementsFromObject(win, placementObj, placements) {
       return;
     }
     const attributes = getAttributesFromConfigObj(placementObj);
-    placements.push(new Placement(win, resourcesForDoc(anchorElement),
-        anchorElement, placementObj['pos'], injector, attributes, margins));
+    placements.push(new Placement(
+        ampdoc,
+        Services.resourcesForDoc(anchorElement),
+        anchorElement,
+        placementObj['pos'],
+        injector,
+        attributes,
+        margins));
   });
 }
+
 
 /**
  * Looks up the element(s) addresses by the anchorObj.
@@ -314,6 +322,7 @@ function getAnchorElements(rootElement, anchorObj) {
   return elements;
 }
 
+
 /**
  * @param {!Element} anchorElement
  * @param {!Position} position
@@ -322,7 +331,7 @@ function getAnchorElements(rootElement, anchorObj) {
 function isPositionValid(anchorElement, position) {
   const elementToCheckOrNull =
       position == Position.BEFORE || position == Position.AFTER ?
-          anchorElement.parentElement : anchorElement;
+        anchorElement.parentElement : anchorElement;
   if (!elementToCheckOrNull) {
     user().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return false;

@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {getCorrelator} from './utils';
+import {CommonSignals} from '../../../src/common-signals';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {serializeQueryString} from '../../../src/url';
+import {getCorrelator} from './utils';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {CommonSignals} from '../../../src/common-signals';
-import {analyticsForDoc} from '../../../src/analytics';
+import {serializeQueryString} from '../../../src/url';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -133,12 +131,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   constructor(win, element, slotId) {
     super();
 
-    /** @private {!Window} @const */
-    this.win_ = win;
-
-    /** @private {!Element} @const */
-    this.element_ = element;
-
     /** @private {string} @const */
     this.namespace_ =
       element.getAttribute('data-a4a-upgrade-type') ? 'a4a' : 'amp';
@@ -148,9 +140,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
     /** @private {number} @const */
     this.correlator_ = getCorrelator(win, /* opt_cid */ undefined, element);
-
-    /** @private {string} @const */
-    this.slotName_ = this.namespace_ + '.' + this.slotId_;
 
     // Contortions to convince the type checker that we're type-safe.
     let initTime;
@@ -163,9 +152,10 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     /** @private {time} @const */
     this.initTime_ = initTime;
 
-    /** @const {!function():number} */
-    this.getDeltaTime = (win.performance && win.performance.now.bind(
-        win.performance)) || (() => {return Date.now() - this.initTime_;});
+    /** @const {function():number} */
+    this.getDeltaTime = (win.performance && win.performance.now) ?
+      win.performance.now.bind(win.performance) :
+      () => Date.now() - this.initTime_;
 
     /** (Not constant b/c this can be overridden for testing.) @private */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
@@ -174,10 +164,10 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
      * @private {!../../../src/service/url-replacements-impl.UrlReplacements}
      * @const
      */
-    this.urlReplacer_ = urlReplacementsForDoc(element);
+    this.urlReplacer_ = Services.urlReplacementsForDoc(element);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(element);
+    this.viewer_ = Services.viewerForDoc(element);
   }
 
   /**
@@ -208,12 +198,15 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
   /**
    * @param {string} name  Metric name to send.
-   * @returns {string}  URL to send metrics to.
+   * @return {string}  URL to send metrics to.
    * @private
    */
   buildPingAddress_(name) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
-    const delta = Math.round(this.getDeltaTime());
+    // Allow for forcing delta via extra variable override.
+    const delta = !isNaN(Number(this.extraVariables_['forced_delta'])) ?
+      this.extraVariables_['forced_delta'] : Math.round(this.getDeltaTime());
+    delete this.extraVariables_['forced_delta'];
     // Note: extraParams can end up empty if (a) this.extraVariables_ is empty
     // or (b) if all values are themselves empty or null.
     let extraParams = serializeQueryString(this.extraVariables_);
@@ -275,7 +268,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @override
    */
   addPingsForVisibility(element) {
-    analyticsForDoc(element, true).then(analytics => {
+    Services.analyticsForDoc(element, true).then(analytics => {
       const signals = element.signals();
       const readyPromise = Promise.race([
         signals.whenSignal(CommonSignals.INI_LOAD),
@@ -291,7 +284,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
           });
       // 50% vis w ini load
       vis.listenElement(element,
-                        {visiblePercentageMin: 50},
+          {visiblePercentageMin: 50},
           readyPromise, null,
           () => {
             this.sendPing('visHalfIniLoad');

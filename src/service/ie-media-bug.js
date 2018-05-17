@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from '../services';
 import {dev} from '../log';
-import {platformFor} from '../services';
 
 
 const TAG = 'ie-media-bug';
@@ -31,7 +31,7 @@ const TAG = 'ie-media-bug';
  * @package
  */
 export function checkAndFix(win, opt_platform) {
-  const platform = opt_platform || platformFor(win);
+  const platform = opt_platform || Services.platformFor(win);
   if (!platform.isIe() || matchMediaIeQuite(win)) {
     return null;
   }

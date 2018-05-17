@@ -16,9 +16,12 @@
 
 import {
   resolveUrlAttr,
-  sanitizeFormattingHtml,
+  rewriteAttributeValue,
+  rewriteAttributesForElement,
   sanitizeHtml,
+  sanitizeTagsForTripleMustache,
 } from '../../src/sanitizer';
+import {toggleExperiment} from '../../src/experiments';
 
 
 describe('sanitizeHtml', () => {
@@ -37,7 +40,7 @@ describe('sanitizeHtml', () => {
         '<h1>a<i>b</i>c' +
         '<amp-img src="http://example.com/1.png"></amp-img></h1>'))
         .to.be.equal(
-        '<h1>a<i>b</i>c' +
+            '<h1>a<i>b</i>c' +
             '<amp-img src="http://example.com/1.png"></amp-img></h1>');
   });
 
@@ -47,12 +50,10 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<style>b</style>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<img>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<iframe></iframe>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<template></template>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<frame></frame>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<video></video>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<audio></audio>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<applet></applet>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<form></form>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<link>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<meta>c')).to.be.equal('ac');
   });
@@ -76,16 +77,27 @@ describe('sanitizeHtml', () => {
         'a<a on="tap">b</a>');
   });
 
+  it('should output "data-, aria-, and role" attributes', () => {
+    expect(
+        sanitizeHtml('<a data-foo="bar" aria-label="bar" role="button">b</a>'))
+        .to.be.equal('<a data-foo="bar" aria-label="bar" role="button">b</a>');
+  });
+
   it('should output "href" attribute', () => {
     expect(sanitizeHtml('a<a href="http://acme.com/">b</a>')).to.be.equal(
         'a<a href="http://acme.com/" target="_top">b</a>');
+  });
+
+  it('should output "rel" attribute', () => {
+    expect(sanitizeHtml('a<a href="http://acme.com/" rel="amphtml">b</a>')).to.be.equal(
+        'a<a href="http://acme.com/" rel="amphtml" target="_top">b</a>');
   });
 
   it('should default target to _top with href', () => {
     expect(sanitizeHtml(
         '<a href="">a</a>'
         + '<a href="" target="">c</a>'
-        )).to.equal(
+    )).to.equal(
         '<a href="" target="_top">a</a>'
         + '<a href="" target="_top">c</a>');
   });
@@ -94,7 +106,7 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml(
         '<a>b</a>'
         + '<a target="">d</a>'
-        )).to.equal(
+    )).to.equal(
         '<a>b</a>'
         + '<a target="_top">d</a>');
   });
@@ -116,7 +128,7 @@ describe('sanitizeHtml', () => {
         + '<a target="_other">_other</a>'
         + '<a target="_OTHER">_OTHER</a>'
         + '<a target="other">other</a>'
-        )).to.equal(
+    )).to.equal(
         '<a target="_top">_self</a>'
         + '<a target="_top">_parent</a>'
         + '<a target="_top">_other</a>'
@@ -186,7 +198,7 @@ describe('sanitizeHtml', () => {
         .equal('<p>hello</p>');
   });
 
-  it('should NOT output security-sensitive amp-bind attributes', () => {
+  it('should NOT output security-sensitive binding attributes', () => {
     expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be.equal(
         'a<a>b</a>');
     expect(sanitizeHtml('a<a [style]="color: red;">b</a>')).to.be.equal(
@@ -210,16 +222,102 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<a [href]="</script">b</a>')).to.be.equal(
         'a<a target="_top">b</a>');
   });
+
+  it('should NOT rewrite values of binding attributes', () => {
+    // Should not change "foo.bar" but should add target="_top".
+    expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
+        .to.equal('<a [href]="foo.bar" target="_top">link</a>');
+  });
+
+  it('should allow amp-subscriptions attributes', () => {
+    expect(sanitizeHtml('<div subscriptions-action="login">link</div>'))
+        .to.equal('<div subscriptions-action="login">link</div>');
+    expect(sanitizeHtml('<div subscriptions-section="actions">link</div>'))
+        .to.equal('<div subscriptions-section="actions">link</div>');
+    expect(sanitizeHtml('<div subscriptions-actions="">link</div>'))
+        .to.equal('<div subscriptions-actions="">link</div>');
+    expect(sanitizeHtml('<div subscriptions-display="">link</div>'))
+        .to.equal('<div subscriptions-display="">link</div>');
+    expect(sanitizeHtml('<div subscriptions-dialog="">link</div>'))
+        .to.equal('<div subscriptions-dialog="">link</div>');
+  });
+
+  it('should allow source::src with vaild protocol', () => {
+    expect(sanitizeHtml('<source src="https://www.foo.com/">'))
+        .to.equal('<source src="https://www.foo.com/">');
+  });
+
+  it('should not allow source::src with invaild protocol', () => {
+    expect(sanitizeHtml('<source src="http://www.foo.com">'))
+        .to.equal('<source src="">');
+    expect(sanitizeHtml('<source src="<script>bad()</script>">'))
+        .to.equal('<source src="">');
+  });
+});
+
+
+describe('rewriteAttributesForElement', () => {
+  let location = 'https://pub.com/';
+
+  it('should not modify `target` on publisher origin', () => {
+    const element = document.createElement('a');
+    element.setAttribute('href', '#hash');
+
+    rewriteAttributesForElement(element, 'href', 'https://not.hash/', location);
+
+    expect(element.getAttribute('href')).to.equal('https://not.hash/');
+    expect(element.hasAttribute('target')).to.equal(false);
+  });
+
+  describe('on CDN origin', () => {
+    beforeEach(() => {
+      location = 'https://cdn.ampproject.org';
+    });
+
+    it('should set `target` when rewrite <a> from hash to non-hash', () => {
+      const element = document.createElement('a');
+      element.setAttribute('href', '#hash');
+
+      rewriteAttributesForElement(
+          element, 'href', 'https://not.hash/', location);
+
+      expect(element.getAttribute('href')).to.equal('https://not.hash/');
+      expect(element.getAttribute('target')).to.equal('_top');
+    });
+
+    it('should remove `target` when rewrite <a> from non-hash to hash', () => {
+      const element = document.createElement('a');
+      element.setAttribute('href', 'https://not.hash/');
+
+      rewriteAttributesForElement(element, 'href', '#hash', location);
+
+      expect(element.getAttribute('href')).to.equal('#hash');
+      expect(element.hasAttribute('target')).to.equal(false);
+    });
+  });
+});
+
+
+describe('rewriteAttributeValue', () => {
+
+  it('should be case-insensitive to tag and attribute name', () => {
+    expect(rewriteAttributeValue('a', 'href', '/doc2'))
+        .to.equal(rewriteAttributeValue('A', 'HREF', '/doc2'));
+    expect(rewriteAttributeValue('amp-img', 'src', '/jpeg1'))
+        .to.equal(rewriteAttributeValue('AMP-IMG', 'SRC', '/jpeg1'));
+    expect(rewriteAttributeValue('amp-img', 'srcset', '/jpeg2 2x, /jpeg1 1x'))
+        .to.equal(rewriteAttributeValue(
+            'AMP-IMG', 'SRCSET', '/jpeg2 2x, /jpeg1 1x'));
+  });
 });
 
 
 describe('resolveUrlAttr', () => {
 
   it('should throw if __amp_source_origin is set', () => {
-    expect(() => resolveUrlAttr('a', 'href',
+    allowConsoleError(() => { expect(() => resolveUrlAttr('a', 'href',
         '/doc2?__amp_source_origin=https://google.com',
-        'http://acme.org/doc1'))
-        .to.throw(/Source origin is not allowed in/);
+        'http://acme.org/doc1')).to.throw(/Source origin is not allowed in/); });
   });
 
   it('should be called by sanitizer', () => {
@@ -280,13 +378,13 @@ describe('resolveUrlAttr', () => {
     expect(resolveUrlAttr('amp-img', 'srcset',
         '/image2?a=b#h1 2x, /image1?a=b#h1 1x',
         'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/acme.org/image2?a=b#h1 2x, ' +
-            'https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x');
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
+            'https://cdn.ampproject.org/i/acme.org/image2?a=b#h1 2x');
     expect(resolveUrlAttr('amp-img', 'srcset',
         'https://acme.org/image2?a=b#h1 2x, /image1?a=b#h1 1x',
         'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/s/acme.org/image2?a=b#h1 2x, ' +
-            'https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x');
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
+            'https://cdn.ampproject.org/i/s/acme.org/image2?a=b#h1 2x');
   });
 
   it('should NOT rewrite image http(s) src when not on proxy', () => {
@@ -305,33 +403,80 @@ describe('resolveUrlAttr', () => {
 });
 
 
-describe('sanitizeFormattingHtml', () => {
+describe('sanitizeTagsForTripleMustache', () => {
 
   it('should output basic text', () => {
-    expect(sanitizeFormattingHtml('abc')).to.be.equal('abc');
+    expect(sanitizeTagsForTripleMustache('abc')).to.be.equal('abc');
   });
 
   it('should output valid markup', () => {
-    expect(sanitizeFormattingHtml('<b>abc</b>')).to.be.equal('<b>abc</b>');
-    expect(sanitizeFormattingHtml('<b>ab<br>c</b>')).to.be.equal(
+    expect(sanitizeTagsForTripleMustache('<b>abc</b>'))
+        .to.be.equal('<b>abc</b>');
+    expect(sanitizeTagsForTripleMustache('<b>ab<br>c</b>')).to.be.equal(
         '<b>ab<br>c</b>');
-    expect(sanitizeFormattingHtml('<b>a<i>b</i>c</b>')).to.be.equal(
+    expect(sanitizeTagsForTripleMustache('<b>a<i>b</i>c</b>')).to.be.equal(
         '<b>a<i>b</i>c</b>');
+    const markupWithClassAttribute = '<p class="some-class">heading</p>';
+    expect(sanitizeTagsForTripleMustache(markupWithClassAttribute))
+        .to.be.equal(markupWithClassAttribute);
+    const markupWithClassesAttribute =
+        '<div class="some-class another"><span>heading</span></div>';
+    expect(sanitizeTagsForTripleMustache(markupWithClassesAttribute))
+        .to.be.equal(markupWithClassesAttribute);
+    const markupParagraph = '<p class="valid-class">paragraph</p>';
+    expect(sanitizeTagsForTripleMustache(markupParagraph))
+        .to.be.equal(markupParagraph);
   });
 
   it('should NOT output non-whitelisted markup', () => {
-    expect(sanitizeFormattingHtml('a<div>b</div>c')).to.be.equal('ac');
-    expect(sanitizeFormattingHtml('a<style>b</style>c')).to.be.equal('ac');
-    expect(sanitizeFormattingHtml('a<img>c')).to.be.equal('ac');
+    expect(sanitizeTagsForTripleMustache('a<style>b</style>c'))
+        .to.be.equal('ac');
+    expect(sanitizeTagsForTripleMustache('a<img>c'))
+        .to.be.equal('ac');
   });
 
-  it('should NOT output attributes', () => {
-    expect(sanitizeFormattingHtml('<b color=red style="color: red">abc</b>'))
-        .to.be.equal('<b>abc</b>');
+  it('should output style attributes if inline styles enabled', () => {
+    toggleExperiment(self, 'inline-styles', true,
+        /* opt_transientExperiment */ true);
+    expect(sanitizeTagsForTripleMustache(
+        '<b style="color: red">abc</b>'))
+        .to.be.equal('<b style="color: red">abc</b>');
   });
 
-  it('should compentsate for broken markup', () => {
-    expect(sanitizeFormattingHtml('<b>a<i>b')).to.be.equal(
+  it('should compensate for broken markup', () => {
+    expect(sanitizeTagsForTripleMustache('<b>a<i>b')).to.be.equal(
         '<b>a<i>b</i></b>');
+  });
+
+  describe('should sanitize `style` attribute', () => {
+    before(() => {
+      toggleExperiment(self, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+    });
+
+    after(() => {
+      toggleExperiment(self, 'inline-styles', false,
+          /* opt_transientExperiment */ true);
+    });
+
+    it('should allow valid styles',() => {
+      expect(sanitizeHtml('<div style="color:blue">Test</div>'))
+          .to.equal('<div style="color:blue">Test</div>');
+    });
+
+    it('should ignore styles containing `!important`',() => {
+      expect(sanitizeHtml('<div style="color:blue!important">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
+
+    it('should ignore styles containing `position:fixed`', () => {
+      expect(sanitizeHtml('<div style="position:fixed">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
+
+    it('should ignore styles containing `position:sticky`', () => {
+      expect(sanitizeHtml('<div style="position:sticky">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
   });
 });

@@ -21,7 +21,7 @@ tags: {  # amp-reach-player
     name: "amp-reach-player"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -29,7 +29,6 @@ tags: {  # amp-reach-player
 tags: {  # <amp-reach-player>
   html_format: AMP
   tag_name: "AMP-REACH-PLAYER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-reach-player"
   attrs: {
     name: "data-embed-id"

@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
+import {
+  CONSTANTS,
+  MessageType,
+} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {
   IntersectionObserver,
 } from '../../../src/intersection-observer';
+import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
   listenFor,
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {viewerForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {timerFor} from '../../../src/services';
-import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
-import {removeElement} from '../../../src/dom';
-import {getServiceForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
-import {
-  installPositionObserverServiceForDoc,
-  PositionObserverFidelity,
-  SEND_POSITIONS_HIGH_FIDELITY,
-  POSITION_HIGH_FIDELITY,
-} from '../../../src/service/position-observer-impl';
-
-
+import {removeElement} from '../../../src/dom';
+import {reportErrorToAnalytics} from '../../../src/error';
+import {setStyle} from '../../../src/style';
+import {throttle} from '../../../src/utils/rate-limit';
 
 const VISIBILITY_TIMEOUT = 10000;
+
+const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
 
 
 export class AmpAdXOriginIframeHandler {
@@ -52,6 +51,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
    */
   constructor(baseInstance) {
+    /** @private {!Window} */
+    this.win_ = baseInstance.win;
 
     /** @private */
     this.baseInstance_ = baseInstance;
@@ -72,17 +73,27 @@ export class AmpAdXOriginIframeHandler {
     this.embedStateApi_ = null;
 
     /** @private {?SubscriptionApi} */
-    this.positionObserverHighFidelityApi_ = null;
+    this.inaboxPositionApi_ = null;
 
-    /** @private {?../../../src/service/position-observer-impl.AmpDocPositionObserver} */
-    this.positionObserver_ = null;
+    /** @private {boolean} */
+    this.isInaboxPositionApiInit_ = false;
+
+    /** @private {?SubscriptionApi} */
+    this.inaboxRequestPositionApi_ = null;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.baseInstance_.getAmpDoc());
+    this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
+
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
+
+    /** @private {boolean} */
+    this.sendPositionPending_ = false;
   }
+
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
@@ -96,7 +107,7 @@ export class AmpAdXOriginIframeHandler {
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe);
-    const timer = timerFor(this.baseInstance_.win);
+    const timer = Services.timerFor(this.baseInstance_.win);
 
     // Init IntersectionObserver service.
     this.intersectionObserver_ = new IntersectionObserver(
@@ -106,30 +117,15 @@ export class AmpAdXOriginIframeHandler {
         this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
 
-    // High-fidelity positions for scrollbound animations.
-    // Protected by 'amp-animation' experiment for now.
-    if (isExperimentOn(this.baseInstance_.win, 'amp-animation')) {
-      let posObInstalled = false;
-      this.positionObserverHighFidelityApi_ = new SubscriptionApi(
-        this.iframe, SEND_POSITIONS_HIGH_FIDELITY, true, () => {
-          const ampdoc = this.baseInstance_.getAmpDoc();
-          // TODO (#9232) May crash PWA
-          if (!posObInstalled) {
-            installPositionObserverServiceForDoc(ampdoc);
-            posObInstalled = true;
-          }
-          this.positionObserver_ = getServiceForDoc(ampdoc,
-              'position-observer');
-          this.positionObserver_.observe(
-              dev().assertElement(this.iframe),
-              PositionObserverFidelity.HIGH, pos => {
-                // Valid cast because it is an external object.
-                const posCast = /** @type {!JsonObject} */ (pos);
-                this.positionObserverHighFidelityApi_.send(
-                    POSITION_HIGH_FIDELITY,
-                    posCast);
-              });
-        });
+    // To provide position to inabox.
+    if (isExperimentOn(this.win_, 'inabox-position-api')) {
+      this.inaboxPositionApi_ = new SubscriptionApi(
+          this.iframe, MessageType.SEND_POSITIONS, true, () => {
+            // TODO(@zhouyx): Make sendPosition_ only send to message origin
+            // iframe
+            this.sendPosition_();
+            this.registerPosition_();
+          });
     }
 
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
@@ -139,29 +135,21 @@ export class AmpAdXOriginIframeHandler {
           this.element_.creativeId = info.data['id'];
         });
 
-    this.unlisteners_.push(listenFor(this.iframe, 'get-html',
-        (info, source, origin) => {
-          if (!this.iframe) {
-            return;
-          }
+    this.handleOneTimeRequest_(MessageType.GET_HTML, payload => {
+      const selector = payload['selector'];
+      const attributes = payload['attributes'];
+      let content = '';
+      if (this.element_.hasAttribute('data-html-access-allowed')) {
+        content = getHtml(this.baseInstance_.win, selector, attributes);
+      }
+      return Promise.resolve(content);
+    });
 
-          const selector = info['selector'];
-          const attributes = info['attributes'];
-          const messageId = info['messageId'];
-          let content = '';
-
-          if (this.element_.hasAttribute('data-html-access-allowed')) {
-            content = getHtml(this.baseInstance_.win, selector, attributes);
-          }
-
-          postMessageToWindows(
-              this.iframe, [{win: source, origin}],
-              'get-html-result', dict({
-                'content': content,
-                'messageId': messageId,
-              }), true
-          );
-        }, true, false));
+    this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () => {
+      return this.baseInstance_.getConsentState().then(consentState => {
+        return {consentState};
+      });
+    });
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
@@ -172,6 +160,11 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
+
+    this.unlisteners_.push(listenFor(this.iframe,
+        MessageType.USER_ERROR_IN_IFRAME, data => {
+          this.userErrorForAnalytics_(data['message']);
+        }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {
@@ -191,29 +184,30 @@ export class AmpAdXOriginIframeHandler {
     }
 
     // Calculate render-start and no-content signals.
-    let renderStartResolve;
-    const renderStartPromise = new Promise(resolve => {
-      renderStartResolve = resolve;
-    });
-    let noContentResolve;
-    const noContentPromise = new Promise(resolve => {
-      noContentResolve = resolve;
-    });
+    const {
+      promise: renderStartPromise,
+      resolve: renderStartResolve,
+    } = new Deferred();
+    const {
+      promise: noContentPromise,
+      resolve: noContentResolve,
+    } = new Deferred();
+
     if (this.baseInstance_.config &&
             this.baseInstance_.config.renderStartImplemented) {
       // When `render-start` is supported, these signals are mutually
       // exclusive. Whichever arrives first wins.
       listenForOncePromise(this.iframe,
           ['render-start', 'no-content'], true).then(info => {
-            const data = info.data;
-            if (data['type'] == 'render-start') {
-              this.renderStart_(info);
-              renderStartResolve();
-            } else {
-              this.noContent_();
-              noContentResolve();
-            }
-          });
+        const {data} = info;
+        if (data['type'] == 'render-start') {
+          this.renderStart_(info);
+          renderStartResolve();
+        } else {
+          this.noContent_();
+          noContentResolve();
+        }
+      });
     } else {
       // If `render-start` is not supported, listen to `bootstrap-loaded`.
       // This will avoid keeping the Ad empty until it's fully loaded, which
@@ -271,6 +265,34 @@ export class AmpAdXOriginIframeHandler {
 
     // The actual ad load is eariliest of iframe.onload event and no-content.
     return Promise.race([iframeLoadPromise, noContentPromise]);
+  }
+
+  /**
+   * @param {string} requestType
+   * @param {function(*)} getter
+   * @private
+   */
+  handleOneTimeRequest_(requestType, getter) {
+    this.unlisteners_.push(listenFor(this.iframe, requestType,
+        (info, source, origin) => {
+          if (!this.iframe) {
+            return;
+          }
+
+          const messageId = info[CONSTANTS.messageIdFieldName];
+          const payload = info[CONSTANTS.payloadFieldName];
+
+          getter(payload).then(content => {
+            const result = dict();
+            result[CONSTANTS.messageIdFieldName] = messageId;
+            result[CONSTANTS.contentFieldName] = content;
+            postMessageToWindows(
+                dev().assertElement(this.iframe), [{win: source, origin}],
+                requestType + CONSTANTS.responseTypeSuffix,
+                result, true
+            );
+          });
+        }, true /* opt_is3P */, false /* opt_includingNestedWindows */));
   }
 
   /**
@@ -333,14 +355,9 @@ export class AmpAdXOriginIframeHandler {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
     }
-    if (this.positionObserver_) {
-      if (this.iframe) {
-        this.positionObserver_.unobserve(this.iframe);
-      }
-    }
-    if (this.positionObserverHighFidelityApi_) {
-      this.positionObserverHighFidelityApi_.destroy();
-      this.positionObserverHighFidelityApi_ = null;
+    if (this.inaboxPositionApi_) {
+      this.inaboxPositionApi_.destroy();
+      this.inaboxPositionApi_ = null;
     }
     if (this.intersectionObserver_) {
       this.intersectionObserver_.destroy();
@@ -368,9 +385,9 @@ export class AmpAdXOriginIframeHandler {
       const iframeWidth = this.iframe./*OK*/offsetWidth;
       this.uiHandler_.updateSize(height, width, iframeHeight,
           iframeWidth).then(info => {
-            this.sendEmbedSizeResponse_(info.success,
-                info.newWidth, info.newHeight, source, origin);
-          }, () => {});
+        this.sendEmbedSizeResponse_(info.success,
+            info.newWidth, info.newHeight, source, origin);
+      }, () => {});
     });
   }
 
@@ -384,7 +401,7 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   sendEmbedSizeResponse_(success, requestedWidth, requestedHeight, source,
-      origin) {
+    origin) {
     // The iframe may have been removed by the time we resize.
     if (!this.iframe) {
       return;
@@ -415,6 +432,58 @@ export class AmpAdXOriginIframeHandler {
   }
 
   /**
+   * Retrieve iframe position entry in next animation frame.
+   * @private
+   */
+  getIframePositionPromise_() {
+    return this.viewport_.getClientRectAsync(
+        dev().assertElement(this.iframe)).then(position => {
+      dev().assert(position,
+          'element clientRect should intersects with root clientRect');
+      const viewport = this.viewport_.getRect();
+      return dict({
+        'targetRect': position,
+        'viewportRect': viewport,
+      });
+    });
+  }
+
+  /** @private */
+  sendPosition_() {
+    if (this.sendPositionPending_) {
+      // Only send once in single animation frame.
+      return;
+    }
+
+    this.sendPositionPending_ = true;
+    this.getIframePositionPromise_().then(position => {
+      this.sendPositionPending_ = false;
+      this.inaboxPositionApi_.send(MessageType.POSITION, position);
+    });
+  }
+
+  /** @private */
+  registerPosition_() {
+    if (this.isInaboxPositionApiInit_) {
+      // only register to viewport scroll/resize once
+      return;
+    }
+
+    this.isInaboxPositionApiInit_ = true;
+    // Send window scroll/resize event to viewport.
+    this.unlisteners_.push(this.viewport_.onScroll(throttle(this.win_, () => {
+      this.getIframePositionPromise_().then(position => {
+        this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      });
+    }, MIN_INABOX_POSITION_EVENT_INTERVAL)));
+    this.unlisteners_.push(this.viewport_.onResize(() => {
+      this.getIframePositionPromise_().then(position => {
+        this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      });
+    }));
+  }
+
+  /**
    * See BaseElement method.
    * @param {boolean} inViewport
    */
@@ -434,6 +503,18 @@ export class AmpAdXOriginIframeHandler {
     // have changed. Send an intersection record if needed.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
+    }
+  }
+
+  /**
+   * @param {string} message
+   * @private
+   */
+  userErrorForAnalytics_(message) {
+    if (typeof message == 'string') {
+      const e = new Error(message);
+      e.name = '3pError';
+      reportErrorToAnalytics(e, this.baseInstance_.win);
     }
   }
 }

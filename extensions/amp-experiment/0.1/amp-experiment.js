@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import {Layout} from '../../../src/layout';
+import {allocateVariant} from './variant';
 import {dev, user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-import {Layout} from '../../../src/layout';
-import {waitForBodyPromise} from '../../../src/dom';
-import {allocateVariant} from './variant';
 import {registerServiceBuilder} from '../../../src/service';
+import {waitForBodyPromise} from '../../../src/dom';
 
-/** @const */
+const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
+
 
 export class AmpExperiment extends AMP.BaseElement {
 
@@ -56,7 +57,7 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @return {!JsonObject} [description] */
   getConfig_() {
-    const children = this.element.children;
+    const {children} = this.element;
     user().assert(
         children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
@@ -65,7 +66,7 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.');
 
     return /** @type {!JsonObject} */ (
-        dev().assert(parseJson(children[0].textContent)));
+      dev().assert(parseJson(children[0].textContent)));
   }
 
   /**
@@ -90,4 +91,7 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-experiment', AmpExperiment);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpExperiment);
+});

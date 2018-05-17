@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
-  parseUrl,
   checkCorsUrl,
+  parseUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
-import {timerFor} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 
@@ -44,8 +44,11 @@ export function sendRequest(win, request, transportOptions) {
       Transport.sendRequestUsingXhr(win, request)) {
     return;
   }
-  if (transportOptions['image']) {
-    Transport.sendRequestUsingImage(win, request);
+  const image = transportOptions['image'];
+  if (image) {
+    const suppressWarnings = (typeof image == 'object' &&
+        image['suppressWarnings']);
+    Transport.sendRequestUsingImage(request, suppressWarnings);
     return;
   }
   user().warn(TAG_, 'Failed to send request', request, transportOptions);
@@ -57,10 +60,10 @@ export function sendRequest(win, request, transportOptions) {
 export class Transport {
 
   /**
-   * @param {!Window} unusedWin
    * @param {string} request
+   * @param {boolean} suppressWarnings
    */
-  static sendRequestUsingImage(unusedWin, request) {
+  static sendRequestUsingImage(request, suppressWarnings) {
     const image = new Image();
     image.src = request;
     image.width = 1;
@@ -68,8 +71,10 @@ export class Transport {
     loadPromise(image).then(() => {
       dev().fine(TAG_, 'Sent image request', request);
     }).catch(() => {
-      user().warn(TAG_, 'Response unparseable or failed to send image ' +
-          'request', request);
+      if (!suppressWarnings) {
+        user().warn(TAG_, 'Response unparseable or failed to send image ' +
+            'request', request);
+      }
     });
   }
 
@@ -125,6 +130,8 @@ export class Transport {
  * it is loaded.
  * This is not available as a standard transport, but rather used for
  * specific, whitelisted requests.
+ * Note that this is unrelated to the cross-domain iframe use case above in
+ * sendRequestUsingCrossDomainIframe()
  * @param {!Window} win
  * @param {string} request The request URL.
  */
@@ -134,15 +141,15 @@ export function sendRequestUsingIframe(win, request) {
   const iframe = win.document.createElement('iframe');
   setStyle(iframe, 'display', 'none');
   iframe.onload = iframe.onerror = () => {
-    timerFor(win).delay(() => {
+    Services.timerFor(win).delay(() => {
       removeElement(iframe);
     }, 5000);
   };
   user().assert(
       parseUrl(request).origin != parseUrl(win.location.href).origin,
-      'Origin of iframe request must not be equal to the doc' +
-      'ument origin. See https://github.com/ampproject/' +
-      'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+      'Origin of iframe request must not be equal to the document origin.' +
+      ' See https://github.com/ampproject/' +
+      ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
   iframe.setAttribute('amp-analytics', '');
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
   iframe.src = request;

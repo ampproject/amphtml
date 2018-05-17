@@ -15,19 +15,9 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {dev} from '../../../src/log';
-import {startsWith} from '../../../src/string';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {NETWORKS} from './vendors';
-
-/**
- * Header that will contain Cloudflare generated signature
- *
- * @type {string}
- * @private
- */
-const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {startsWith} from '../../../src/string';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad
@@ -90,7 +80,7 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
 
     const network = NETWORKS[el.getAttribute('data-cf-network')];
     const a4a = el.getAttribute('data-cf-a4a') !== 'false';
-    const base = network.base;
+    const {base} = network;
 
     // Get URL for ad creative
     let url = el.getAttribute('src') || network.src;
@@ -123,30 +113,10 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
 
     return url;
   }
-
-  /**
-   * Extract creative and signature from a Cloudflare signed response.
-   *
-   * Note: Invalid A4A content will NOT have a signature, which will automatically
-   *   cause the A4A processing to render it within a cross domain frame.
-   *
-   * @override
-   */
-  extractCreativeAndSignature(responseText, responseHeaders) {
-    let signature = null;
-    try {
-      if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-        signature =
-          base64UrlDecodeToBytes(dev().assertString(
-              responseHeaders.get(AMP_SIGNATURE_HEADER)));
-      }
-    } finally {
-      return Promise.resolve(/** @type {!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */
-        ({creative: responseText, signature})
-      );
-    }
-  }
 }
 
-AMP.registerElement('amp-ad-network-cloudflare-impl',
-    AmpAdNetworkCloudflareImpl);
+
+AMP.extension('amp-ad-network-cloudflare-impl', '0.1', AMP => {
+  AMP.registerElement('amp-ad-network-cloudflare-impl',
+      AmpAdNetworkCloudflareImpl);
+});

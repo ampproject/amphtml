@@ -16,8 +16,8 @@
 
 import {Observable} from '../observable';
 import {getVendorJsPropertyName} from '../style';
+import {registerServiceBuilder} from '../service';
 import {waitForChild} from '../dom';
-import {registerServiceBuilder, getService} from '../service';
 
 /**
  */
@@ -68,14 +68,6 @@ export class DocumentState {
 
     /** @private {?Observable} */
     this.bodyAvailableObservable_ = null;
-  }
-
-  /** @private */
-  cleanup_() {
-    if (this.visibilityChangeEvent_) {
-      this.document_.removeEventListener(this.visibilityChangeEvent_,
-          this.boundOnVisibilityChanged_);
-    }
   }
 
   /**
@@ -150,13 +142,4 @@ export class DocumentState {
  */
 export function installDocumentStateService(window) {
   registerServiceBuilder(window, 'documentState', DocumentState);
-}
-
-/**
- * @param {!Window} window
- * @return {!DocumentState}
- */
-export function documentStateFor(window) {
-  installDocumentStateService(window);
-  return getService(window, 'documentState');
 }

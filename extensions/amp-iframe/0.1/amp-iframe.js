@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
+import {ActionTrust} from '../../../src/action-constants';
 import {
   IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {LayoutPriority} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
+import {closestBySelector, removeElement} from '../../../src/dom';
+import {createCustomEvent, getData} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
 import {endsWith} from '../../../src/string';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {isSecureUrl, parseUrl, removeFragment} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
-import {timerFor} from '../../../src/services';
-import {user, dev} from '../../../src/log';
-import {utf8EncodeSync} from '../../../src/utils/bytes.js';
-import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
+import {urls} from '../../../src/config';
+import {utf8Encode} from '../../../src/utils/bytes.js';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -39,6 +44,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'allowfullscreen',
   'allowpaymentrequest',
   'allowtransparency',
+  'allow',
   'frameborder',
   'referrerpolicy',
   'scrolling',
@@ -58,6 +64,7 @@ export class AmpIframe extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
     /** @private {?Element} */
     this.placeholder_ = null;
 
@@ -104,8 +111,21 @@ export class AmpIframe extends AMP.BaseElement {
      **/
     this.iframeSrc = null;
 
-    /** @private {?Element} */
+    /**
+     * The element which will contain the iframe. This may be the amp-iframe
+     * itself if the iframe is non-scrolling, or a wrapper element if it is.
+     * @private {?Element}
+     */
     this.container_ = null;
+
+    /** @private {boolean|undefined} */
+    this.isInContainer_ = undefined;
+
+    /**
+     * The origin of URL at `src` attr, if available. Otherwise, null.
+     * @private {?string}
+     */
+    this.targetOrigin_ = null;
   }
 
   /** @override */
@@ -132,7 +152,7 @@ export class AmpIframe extends AMP.BaseElement {
         this.element);
     user().assert(!(endsWith(url.hostname, `.${urls.thirdPartyFrameHost}`) ||
         endsWith(url.hostname, '.ampproject.org')),
-        'amp-iframe does not allow embedding of frames from ' +
+    'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
     return src;
   }
@@ -198,7 +218,7 @@ export class AmpIframe extends AMP.BaseElement {
         this.element);
 
     return 'data:text/html;charset=utf-8;base64,' +
-        base64EncodeFromBytes(utf8EncodeSync(srcdoc));
+        base64EncodeFromBytes(utf8Encode(srcdoc));
   }
 
   /** @override */
@@ -211,13 +231,6 @@ export class AmpIframe extends AMP.BaseElement {
             this.element.getAttribute('srcdoc'), this.sandbox_);
     this.iframeSrc = this.assertSource(
         iframeSrc, window.location.href, this.sandbox_);
-
-    /**
-     * The element which will contain the iframe. This may be the amp-iframe
-     * itself if the iframe is non-scrolling, or a wrapper element if it is.
-     * @type {!Element}
-     */
-    this.container_ = makeIOsScrollable(this.element);
   }
 
   /**
@@ -234,6 +247,7 @@ export class AmpIframe extends AMP.BaseElement {
   buildCallback() {
     this.placeholder_ = this.getPlaceholder();
     this.isClickToPlay_ = !!this.placeholder_;
+
     this.isResizable_ = this.element.hasAttribute('resizable');
     if (this.isResizable_) {
       this.element.setAttribute('scrolling', 'no');
@@ -242,6 +256,10 @@ export class AmpIframe extends AMP.BaseElement {
     if (!this.element.hasAttribute('frameborder')) {
       this.element.setAttribute('frameborder', '0');
     }
+
+    this.container_ = makeIOsScrollable(this.element);
+
+    this.registerIframeMessaging_();
   }
 
   /**
@@ -293,7 +311,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
-        dev().assert(this.iframeLayoutBox_));
+      dev().assert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -350,14 +368,13 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.onload = () => {
       // Chrome does not reflect the iframe readystate.
       iframe.readyState = 'complete';
-
       this.activateIframe_();
 
       if (this.isTrackingFrame_) {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
-        timerFor(this.win).promise(trackingIframeTimeout).then(() => {
+        Services.timerFor(this.win).promise(trackingIframeTimeout).then(() => {
           removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
@@ -380,8 +397,8 @@ export class AmpIframe extends AMP.BaseElement {
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
       if (this.container_ != this.element) {
-        timerFor(this.win).delay(() => {
-          this.deferMutate(() => {
+        Services.timerFor(this.win).delay(() => {
+          this.mutateElement(() => {
             this.container_.classList.add('amp-active');
           });
         }, 1000);
@@ -425,14 +442,14 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /** @override  */
-  getPriority() {
+  getLayoutPriority() {
     if (this.isAdLike_) {
-      return 2; // See AmpAd3PImpl.
+      return LayoutPriority.ADS; // See AmpAd3PImpl.
     }
     if (this.isTrackingFrame_) {
-      return 1;
+      return LayoutPriority.METADATA;
     }
-    return super.getPriority();
+    return super.getLayoutPriority();
   }
 
   /** @override */
@@ -478,14 +495,14 @@ export class AmpIframe extends AMP.BaseElement {
    */
   updateSize_(height, width) {
     if (!this.isResizable_) {
-      user().error(TAG_,
+      this.user().error(TAG_,
           'Ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
     }
 
     if (height < 100) {
-      user().error(TAG_,
+      this.user().error(TAG_,
           'Ignoring embed-size request because the resize height is less ' +
           'than 100px. If you are using amp-iframe to display ads, consider ' +
           'using amp-ad instead.',
@@ -521,7 +538,7 @@ export class AmpIframe extends AMP.BaseElement {
         }
       }, () => {});
     } else {
-      user().error(TAG_,
+      this.user().error(TAG_,
           'Ignoring embed-size request because '
           + 'no width or height value is provided',
           this.element);
@@ -531,6 +548,7 @@ export class AmpIframe extends AMP.BaseElement {
   /**
    * Whether this is iframe may have tracking as its primary use case.
    * @return {boolean}
+   * @private
    */
   looksLikeTrackingIframe_() {
     const box = this.element.getLayoutBox();
@@ -538,9 +556,115 @@ export class AmpIframe extends AMP.BaseElement {
     if (box.width > 10 && box.height > 10) {
       return false;
     }
+    // Iframe is not tracking iframe if open with user interaction
+    if (this.isInContainer_ === undefined) {
+      this.isInContainer_ =
+          !!closestBySelector(this.element, '.i-amphtml-overlay');
+    }
+    return !this.isInContainer_;
+  }
+
+  /**
+   * Registers 'postMessage' action and 'message' event.
+   * @private
+   */
+  registerIframeMessaging_() {
+    if (!isExperimentOn(this.win, 'iframe-messaging')) {
+      return;
+    }
+
+    const src = this.element.getAttribute('src');
+    if (src) {
+      this.targetOrigin_ = parseUrl(src).origin;
+    }
+
+    // Register action (even if targetOrigin_ is not available so we can
+    // provide a helpful error message).
+    this.registerAction('postMessage', invocation => {
+      if (this.targetOrigin_) {
+        this.iframe_.contentWindow./*OK*/postMessage(
+            invocation.args, this.targetOrigin_);
+      } else {
+        user().error(TAG_, '"postMessage" action is only allowed with "src"' +
+            'attribute with an origin.');
+      }
+    }, ActionTrust.HIGH);
+
+    // However, don't listen for 'message' event if targetOrigin_ is null.
+    if (!this.targetOrigin_) {
+      return;
+    }
+
+    const maxUnexpectedMessages = 10;
+    let unexpectedMessages = 0;
+
+    const listener = e => {
+      if (e.source !== this.iframe_.contentWindow) {
+        // Ignore messages from other iframes.
+        return;
+      }
+      if (e.origin !== this.targetOrigin_) {
+        user().error(TAG_, '"message" received from unexpected origin: ' +
+            e.origin + '. Only allowed from: ' + this.targetOrigin_);
+        return;
+      }
+      if (!this.isUserGesture_()) {
+        unexpectedMessages++;
+        user().error(TAG_, '"message" event may only be triggered ' +
+            'from a user gesture.');
+        // Disable the 'message' event if the iframe is behaving badly.
+        if (unexpectedMessages >= maxUnexpectedMessages) {
+          user().error(TAG_, 'Too many non-gesture-triggered "message" ' +
+              'events; detaching event listener.');
+          this.win.removeEventListener('message', listener);
+        }
+        return;
+      }
+      const data = getData(e);
+      let sanitizedData;
+      try {
+        sanitizedData = parseJson(JSON.stringify(data));
+      } catch (e) {
+        user().error(TAG_, 'Data from "message" event must be JSON.');
+        return;
+      }
+      const event =
+          createCustomEvent(this.win, 'amp-iframe:message', sanitizedData);
+      const actionService = Services.actionServiceForDoc(this.getAmpDoc());
+      actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
+    };
+    // TODO(choumx): Consider using global listener in iframe-helper.
+    this.win.addEventListener('message', listener);
+  }
+
+  /**
+   * Returns true if a user gesture was recently performed.
+   * @return {boolean}
+   * @private
+   * @visibleForTesting
+   */
+  isUserGesture_() {
+    // Best effort polyfill until native support is available: check that
+    // iframe has focus and audio playback isn't immediately paused.
+    if (this.getAmpDoc().getRootNode().activeElement !== this.iframe_) {
+      return false;
+    }
+    const audio = this.win.document.createElement('audio');
+    audio.play();
+    if (audio.paused) {
+      return false;
+    }
     return true;
   }
-};
+
+  /**
+   * @param {string} value
+   * @visibleForTesting
+   */
+  setTargetOriginForTesting(value) {
+    this.targetOrigin_ = value;
+  }
+}
 
 /**
  * We always set a sandbox. Default is that none of the things that need
@@ -553,7 +677,6 @@ function setSandbox(element, iframe, sandbox) {
   const allows = sandbox || '';
   iframe.setAttribute('sandbox', allows);
 }
-
 
 /**
  * If scrolling is allowed for the iframe, wraps the element into a container
@@ -583,8 +706,7 @@ const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
  */
 export function isAdLike(element) {
   const box = element.getLayoutBox();
-  const height = box.height;
-  const width = box.width;
+  const {height, width} = box;
   for (let i = 0; i < adSizes.length; i++) {
     const refWidth = adSizes[i][0];
     const refHeight = adSizes[i][1];
@@ -609,4 +731,6 @@ export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
 }
 
-AMP.registerElement('amp-iframe', AmpIframe);
+AMP.extension(TAG_, '0.1', AMP => {
+  AMP.registerElement(TAG_, AmpIframe);
+});

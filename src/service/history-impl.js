@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-  getService,
-} from '../service';
-import {getMode} from '../mode';
+import {Deferred} from '../utils/promise';
+import {Services} from '../services';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
-import {timerFor} from '../services';
-import {viewerForDoc} from '../services';
+import {getMode} from '../mode';
+import {
+  getService,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../service';
 
-/** @private @const */
+/** @private @const {string} */
 const TAG_ = 'History';
 
-/** @private @const */
+/** @private @const {string} */
 const HISTORY_PROP_ = 'AMP.History';
 
 /** @typedef {number} */
@@ -46,7 +46,7 @@ export class History {
     this.ampdoc_ = ampdoc;
 
     /** @private @const {!../service/timer-impl.Timer} */
-    this.timer_ = timerFor(ampdoc.win);
+    this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const {!HistoryBindingInterface} */
     this.binding_ = binding;
@@ -128,8 +128,9 @@ export class History {
   }
 
   /**
-   * Helper method to handle navigation to a local target, e.g. When a user clicks an
-   * anchor link to a local hash - <a href="#section1">Go to section 1</a>.
+   * Helper method to handle navigation to a local target, e.g. When a user
+   * clicks an anchor link to a local hash - <a href="#section1">Go to section
+   * 1</a>.
    *
    * @param {string} target
    * @return {!Promise}
@@ -206,12 +207,8 @@ export class History {
    * @private
    */
   enque_(callback, name) {
-    let resolve;
-    let reject;
-    const promise = new Promise((aResolve, aReject) => {
-      resolve = aResolve;
-      reject = aReject;
-    });
+    const deferred = new Deferred();
+    const {promise, resolve, reject} = deferred;
 
     // TODO(dvoytenko, #8785): cleanup after tracing.
     const trace = new Error('history trace for ' + name + ': ');
@@ -329,9 +326,9 @@ export class HistoryBindingNatural_ {
     this.win = win;
 
     /** @private @const {!../service/timer-impl.Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = Services.timerFor(win);
 
-    const history = this.win.history;
+    const {history} = this.win;
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
@@ -417,19 +414,7 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-
-    /**
-     * Used to ignore `popstate` handler for cases where we know we caused the
-     * popstate event through the use of location.replace.
-     * @private {?string}
-     **/
-    this.lastNavigatedHash_ = null;
-
     this.popstateHandler_ = e => {
-      if (this.lastNavigatedHash_ == this.win.location.hash) {
-        return;
-      }
-      this.lastNavigatedHash_ = this.win.location.hash;
       dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
       this.onHistoryEvent_();
@@ -477,9 +462,6 @@ export class HistoryBindingNatural_ {
     // On pop, stack is not allowed to go prior to the starting point.
     stackIndex = Math.max(stackIndex, this.startIndex_);
     return this.whenReady_(() => {
-      // Popping history forget the last navigated hash since we can't really
-      // know what hash the browser is going to go to.
-      this.lastNavigatedHash_ = null;
       return this.back_(this.stackIndex_ - stackIndex + 1);
     });
   }
@@ -644,15 +626,19 @@ export class HistoryBindingNatural_ {
   replaceStateForTarget(target) {
     dev().assert(target[0] == '#', 'target should start with a #');
     this.whenReady_(() => {
-      // location.replace will fire a popstate event, this is not a history
-      // event. This tells the popstate handler to not handle it by setting
-      // the lastNavigatedHash_ to the future hash we know we're going toward.
+      // location.replace will fire a popstate event which is not a history
+      // event, so temporarily remove the event listener and re-add it after.
       // As explained above in the function comment, typically we'd just do
       // replaceState here but in order to trigger :target re-eval we have to
       // use location.replace.
-      this.lastNavigatedHash_ = target;
-      // TODO(mkhatib, #6095): Chrome iOS will add extra states for location.replace.
-      this.win.location.replace(target);
+      this.win.removeEventListener('popstate', this.popstateHandler_);
+      try {
+        // TODO(mkhatib, #6095): Chrome iOS will add extra states for
+        // location.replace.
+        this.win.location.replace(target);
+      } finally {
+        this.win.addEventListener('popstate', this.popstateHandler_);
+      }
       this.historyReplaceState_();
       return Promise.resolve();
     });
@@ -694,7 +680,7 @@ export class HistoryBindingNatural_ {
 
   /** @override */
   getFragment() {
-    let hash = this.win.location.hash;
+    let {hash} = this.win.location;
     /* Strip leading '#' */
     hash = hash.substr(1);
     return Promise.resolve(hash);
@@ -765,8 +751,8 @@ export class HistoryBindingVirtual_ {
     this.updateStackIndex_(this.stackIndex_ + 1);
     return this.viewer_.sendMessageAwaitResponse(
         'pushHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
-          return this.stackIndex_;
-        });
+      return this.stackIndex_;
+    });
   }
 
   /** @override */
@@ -776,9 +762,9 @@ export class HistoryBindingVirtual_ {
     }
     return this.viewer_.sendMessageAwaitResponse(
         'popHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
-          this.updateStackIndex_(stackIndex - 1);
-          return this.stackIndex_;
-        });
+      this.updateStackIndex_(stackIndex - 1);
+      return this.stackIndex_;
+    });
   }
 
   /**
@@ -842,7 +828,7 @@ export class HistoryBindingVirtual_ {
  * @private
  */
 function createHistory(ampdoc) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   let binding;
   if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test ||
           ampdoc.win.AMP_TEST_IFRAME) {

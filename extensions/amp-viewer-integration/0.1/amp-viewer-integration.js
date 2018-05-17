@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
+import {AmpViewerIntegrationVariableService} from './variable-service';
 import {
   Messaging,
   WindowPortEmulator,
   parseMessage,
 } from './messaging/messaging';
+import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
-import {getAmpDoc} from '../../../src/ampdoc';
-import {isIframed} from '../../../src/dom';
-import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {
+  getAmpdoc,
+  registerServiceBuilder,
+} from '../../../src/service';
 import {getData} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/services';
+import {isIframed} from '../../../src/dom';
+import {listen, listenOnce} from '../../../src/event-helper';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -58,6 +62,12 @@ export class AmpViewerIntegration {
 
     /** @private {boolean} */
     this.isHandShakePoll_ = false;
+
+    /** @const @private {!AmpViewerIntegrationVariableService} */
+    this.variableService_ = new AmpViewerIntegrationVariableService(
+        getAmpdoc(this.win.document));
+    registerServiceBuilder(this.win, 'viewer-integration-variable',
+        () => this.variableService_.get());
   }
 
   /**
@@ -68,7 +78,7 @@ export class AmpViewerIntegration {
    */
   init() {
     dev().fine(TAG, 'handshake init()');
-    const viewer = viewerForDoc(this.win.document);
+    const viewer = Services.viewerForDoc(this.win.document);
     this.isWebView_ = viewer.getParam('webview') == '1';
     this.isHandShakePoll_ = viewer.hasCapability('handshakepoll');
     const origin = viewer.getParam('origin') || '';
@@ -77,7 +87,7 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
-    const ampdoc = getAmpDoc(this.win.document);
+    const ampdoc = getAmpdoc(this.win.document);
 
     if (this.isWebView_ || this.isHandShakePoll_) {
       const source = isIframed(this.win) ? this.win.parent : null;
@@ -89,7 +99,7 @@ export class AmpViewerIntegration {
     }
 
     const port = new WindowPortEmulator(
-      this.win, origin, this.win.parent/* target */);
+        this.win, origin, this.win.parent/* target */);
     return this.openChannelAndStart_(
         viewer, ampdoc, origin, new Messaging(this.win, port, this.isWebView_));
   }
@@ -111,13 +121,13 @@ export class AmpViewerIntegration {
         }
         // Viewer says: "I'm ready for you"
         if (
-            e.origin === origin &&
+          e.origin === origin &&
             e.source === source &&
             data.app == APP &&
             data.name == 'handshake-poll') {
           if (this.isWebView_ && (!e.ports || !e.ports.length)) {
             throw new Error(
-              'Did not receive communication port from the Viewer!');
+                'Did not receive communication port from the Viewer!');
           }
           const port = e.ports && e.ports.length > 0 ? e.ports[0] :
             new WindowPortEmulator(this.win, origin, this.win.parent);
@@ -144,7 +154,7 @@ export class AmpViewerIntegration {
       'url': ampdocUrl,
       'sourceUrl': srcUrl,
     }),
-        true /* awaitResponse */)
+    true /* awaitResponse */)
         .then(() => {
           dev().fine(TAG, 'Channel has been opened!');
           this.setup_(messaging, viewer, origin);

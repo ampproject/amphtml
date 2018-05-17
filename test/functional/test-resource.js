@@ -14,65 +14,34 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Resources} from '../../src/service/resources-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import {viewerForDoc} from '../../src/services';
 import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {LayoutPriority} from '../../src/layout';
+import {Resource, ResourceState} from '../../src/service/resource';
+import {Resources} from '../../src/service/resources-impl';
+import {Services} from '../../src/services';
+import {layoutRectLtwh} from '../../src/layout-rect';
 
 
-describe('Resource', () => {
-  let sandbox;
+describes.realWin('Resource', {amp: true}, env => {
+  let win, doc;
   let element;
   let elementMock;
-  let attributes;
   let resources;
   let resource;
   let viewportMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
 
-    attributes = {};
-    element = {
-      ownerDocument: {defaultView: window},
-      tagName: 'AMP-AD',
-      style: {},
-      hasAttribute: name => (name in attributes),
-      isBuilt: () => false,
-      isUpgraded: () => false,
-      prerenderAllowed: () => false,
-      renderOutsideViewport: () => true,
-      build: () => false,
-      getBoundingClientRect: () => null,
-      updateLayoutBox: () => {},
-      isRelayoutNeeded: () => false,
-      layoutCallback: () => {},
-      changeSize: () => {},
-      unlayoutOnPause: () => false,
-      unlayoutCallback: () => true,
-      pauseCallback: () => false,
-      resumeCallback: () => false,
-      viewportCallback: () => {},
-      disconnectedCallback: () => {},
-      togglePlaceholder: () => sandbox.spy(),
-      getPriority: () => 2,
-      dispatchCustomEvent: () => {},
-      fakeComputedStyle: {
-        marginTop: '1px',
-        marginRight: '2px',
-        marginBottom: '3px',
-        marginLeft: '4px',
-      },
-      nodeType: 1,
-      removeAttribute: () => {},
-      setAttribute: () => {},
-    };
+    element = env.createAmpElement('amp-ad');
+    sandbox.stub(element, 'getLayoutPriority').callsFake(
+        () => LayoutPriority.ADS);
     elementMock = sandbox.mock(element);
 
-    const viewer = viewerForDoc(document);
-    sandbox.stub(viewer, 'isRuntimeOn', () => false);
+    const viewer = Services.viewerForDoc(document);
+    sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
@@ -81,7 +50,7 @@ describe('Resource', () => {
       document,
       getComputedStyle: el => {
         return el.fakeComputedStyle ?
-            el.fakeComputedStyle : window.getComputedStyle(el);
+          el.fakeComputedStyle : window.getComputedStyle(el);
       },
     };
   });
@@ -89,13 +58,12 @@ describe('Resource', () => {
   afterEach(() => {
     viewportMock.verify();
     elementMock.verify();
-    sandbox.restore();
   });
 
   it('should initialize correctly', () => {
     expect(resource.getId()).to.equal(1);
     expect(resource.debugid).to.equal('amp-ad#1');
-    expect(resource.getPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
@@ -113,62 +81,74 @@ describe('Resource', () => {
     elementMock.expects('build').never();
     elementMock.expects('updateLayoutBox').never();
 
-    resource.build();
+    expect(resource.build()).to.be.null;
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
   });
 
 
   it('should build after upgraded', () => {
+    const buildPromise = Promise.resolve();
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
+    elementMock.expects('build').returns(buildPromise).once();
     elementMock.expects('updateLayoutBox').never();
-    resource.build();
-    expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    return resource.build().then(() => {
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    });
   });
 
   it('should not build if permission is not granted', () => {
     let permission = false;
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    sandbox.stub(resources, 'grantBuildPermission', () => permission);
+    sandbox.stub(resources, 'grantBuildPermission').callsFake(() => permission);
     elementMock.expects('updateLayoutBox').never();
-    resource.build();
+    expect(resource.build()).to.be.null;
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
 
     permission = true;
-    resource.build();
-    expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    });
   });
 
   it('should blacklist on build failure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').throws('Failed').once();
+    elementMock.expects('build')
+        .returns(Promise.reject(new Error('intentional'))).once();
     elementMock.expects('updateLayoutBox').never();
-    resource.build();
-    expect(resource.blacklisted_).to.equal(true);
-    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+    const buildPromise = resource.build();
+    expect(resource.isBuilding()).to.be.true;
+    return buildPromise.then(() => {
+      throw new Error('must have failed');
+    }, () => {
+      expect(resource.isBuilding()).to.be.false;
+      expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+    });
   });
 
   it('should mark as ready for layout if already measured', () => {
     const box = layoutRectLtwh(0, 0, 100, 200);
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
+    elementMock.expects('build').returns(Promise.resolve()).once();
     elementMock.expects('updateLayoutBox')
         .withExactArgs(box)
         .once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
     resource.layoutBox_ = box;
-    resource.build(false);
-    expect(stub).to.be.calledOnce;
-    expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+    return resource.build().then(() => {
+      expect(stub).to.be.calledOnce;
+      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+    });
   });
 
   it('should mark as not laid out if not yet measured', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
+    elementMock.expects('build').returns(Promise.resolve()).once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(false);
-    resource.build(false);
-    expect(stub.calledOnce).to.be.true;
-    expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    return resource.build().then(() => {
+      expect(stub.calledOnce).to.be.true;
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    });
   });
 
   it('should allow to measure when not upgraded', () => {
@@ -179,6 +159,9 @@ describe('Resource', () => {
       },
       isDeclaredFixed() {
         return false;
+      },
+      supportsPositionFixed() {
+        return true;
       },
     };
     resource.resources_.getViewport = () => viewport;
@@ -202,49 +185,49 @@ describe('Resource', () => {
 
   it('should measure and update state', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
-    resource.build();
-
-    elementMock.expects('getBoundingClientRect')
-        .returns({left: 11, top: 12, width: 111, height: 222})
-        .once();
-    elementMock.expects('updateLayoutBox')
-        .withExactArgs(sinon.match(data => {
-          return data.width == 111 && data.height == 222;
-        }))
-        .once();
-    resource.measure();
-    expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
-    expect(resource.getLayoutBox().left).to.equal(11);
-    expect(resource.getLayoutBox().top).to.equal(12);
-    expect(resource.getLayoutBox().width).to.equal(111);
-    expect(resource.getLayoutBox().height).to.equal(222);
-    expect(resource.isFixed()).to.be.false;
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 11, top: 12, width: 111, height: 222})
+          .once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(sinon.match(data => {
+            return data.width == 111 && data.height == 222;
+          }))
+          .once();
+      resource.measure();
+      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.getLayoutBox().left).to.equal(11);
+      expect(resource.getLayoutBox().top).to.equal(12);
+      expect(resource.getLayoutBox().width).to.equal(111);
+      expect(resource.getLayoutBox().height).to.equal(222);
+      expect(resource.isFixed()).to.be.false;
+    });
   });
 
   it('should update initial box only on first measure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
-    resource.build();
-
-    element.getBoundingClientRect = () =>
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      element.getBoundingClientRect = () =>
         ({left: 11, top: 12, width: 111, height: 222});
-    resource.measure();
-    expect(resource.getLayoutBox().top).to.equal(12);
-    expect(resource.getInitialLayoutBox().top).to.equal(12);
+      resource.measure();
+      expect(resource.getLayoutBox().top).to.equal(12);
+      expect(resource.getInitialLayoutBox().top).to.equal(12);
 
-    element.getBoundingClientRect = () =>
+      element.getBoundingClientRect = () =>
         ({left: 11, top: 22, width: 111, height: 222});
-    resource.measure();
-    expect(resource.getLayoutBox().top).to.equal(22);
-    expect(resource.getInitialLayoutBox().top).to.equal(12);
+      resource.measure();
+      expect(resource.getLayoutBox().top).to.equal(22);
+      expect(resource.getInitialLayoutBox().top).to.equal(12);
+    });
   });
 
-  it('should noop request measure when not built', () => {
+  it('should request measure even when not built', () => {
     expect(resource.isMeasureRequested()).to.be.false;
     elementMock.expects('getBoundingClientRect').never();
     resource.requestMeasure();
-    expect(resource.isMeasureRequested()).to.be.false;
+    expect(resource.isMeasureRequested()).to.be.true;
   });
 
   it('should request measure when built', () => {
@@ -320,9 +303,11 @@ describe('Resource', () => {
     elementMock.expects('getBoundingClientRect').returns(
         layoutRectLtwh(0, 0, 10, 10)).once();
     viewportMock.expects('getScrollTop').returns(11).atLeast(0);
-    element.offsetParent = {
-      isAlwaysFixed: () => true,
-    };
+    Object.defineProperty(element, 'offsetParent', {
+      value: {
+        isAlwaysFixed: () => true,
+      },
+    });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
     // layoutBox != pageLayoutBox
@@ -335,10 +320,10 @@ describe('Resource', () => {
     elementMock.expects('getBoundingClientRect').returns(
         layoutRectLtwh(0, 0, 10, 10)).once();
     viewportMock.expects('getScrollTop').returns(11).atLeast(0);
-    const fixedParent = document.createElement('div');
+    const fixedParent = doc.createElement('div');
     fixedParent.style.position = 'fixed';
-    document.body.appendChild(fixedParent);
-    element.offsetParent = fixedParent;
+    doc.body.appendChild(fixedParent);
+    fixedParent.appendChild(element);
     viewportMock.expects('isDeclaredFixed')
         .withExactArgs(element)
         .returns(false)
@@ -358,15 +343,16 @@ describe('Resource', () => {
     let rect;
 
     beforeEach(() => {
-      attributes['placeholder'] = '';
-      element.parentElement = document.createElement('amp-iframe');
+      element.setAttribute('placeholder', '');
+      Object.defineProperty(element, 'parentElement', {
+        value: doc.createElement('amp-iframe'),
+      });
       element.parentElement.__AMP__RESOURCE = {};
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
-      elementMock.expects('build').once();
-      resource = new Resource(1, element, resources);
-      resource.build();
-
+      elementMock.expects('build').returns(Promise.resolve()).once();
       rect = {left: 11, top: 12, width: 111, height: 222};
+      resource = new Resource(1, element, resources);
+      return resource.build();
     });
 
     it('should measure placeholder with stubbed parent', () => {
@@ -420,7 +406,7 @@ describe('Resource', () => {
     const owner = {
       collapsedCallback: sandbox.spy(),
     };
-    sandbox.stub(resource, 'getOwner', () => {
+    sandbox.stub(resource, 'getOwner').callsFake(() => {
       return owner;
     });
     resource.completeCollapse();
@@ -473,18 +459,18 @@ describe('Resource', () => {
     elementMock.expects('layoutCallback').never();
 
     resource.state_ = ResourceState.NOT_BUILT;
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       resource.startLayout();
-    }).to.throw(/Not ready to start layout/);
+    }).to.throw(/Not ready to start layout/); });
   });
 
   it('should ignore startLayout if not visible', () => {
     elementMock.expects('layoutCallback').never();
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       resource.startLayout();
-    }).to.throw(/Not displayed/);
+    }).to.throw(/Not displayed/); });
   });
 
   it('should force startLayout for first layout', () => {
@@ -531,7 +517,25 @@ describe('Resource', () => {
     return promise.then(() => {
       expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
       expect(resource.layoutPromise_).to.equal(null);
-      return loaded;  // Just making sure this doesn't time out.
+      return loaded; // Just making sure this doesn't time out.
+    });
+  });
+
+  it('should complete startLayout with height == 0', () => {
+    elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
+    elementMock.expects('getLayout').returns('fluid').once();
+
+    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 0};
+    const loaded = resource.loadedOnce();
+    const promise = resource.startLayout();
+    expect(resource.layoutPromise_).to.not.equal(null);
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+
+    return promise.then(() => {
+      expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+      expect(resource.layoutPromise_).to.equal(null);
+      return loaded;
     });
   });
 
@@ -564,12 +568,33 @@ describe('Resource', () => {
     });
   });
 
+  it('should record layout schedule time', () => {
+    resource.layoutScheduled(300);
+    expect(resource.element.layoutScheduleTime).to.equal(300);
+
+    // The time should be updated if scheduled multiple times.
+    resource.layoutScheduled(400);
+    expect(resource.element.layoutScheduleTime).to.equal(400);
+
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+  });
+
+  it('should not record layout schedule time in startLayout', () => {
+    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    resource.startLayout();
+
+    expect(resource.element.layoutScheduleTime).to.be.undefined;
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+  });
+
   it('should change size and update state', () => {
+    expect(resource.isMeasureRequested()).to.be.false;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     elementMock.expects('changeSize').withExactArgs(111, 222,
         {top: 1, right: 2, bottom: 3, left: 4}).once();
     resource.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
-    expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    expect(resource.isMeasureRequested()).to.be.true;
   });
 
   it('should change size but not state', () => {
@@ -581,43 +606,33 @@ describe('Resource', () => {
   });
 
   it('should update priority', () => {
-    expect(resource.getPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
 
-    resource.updatePriority(2);
-    expect(resource.getPriority()).to.equal(2);
+    resource.updateLayoutPriority(LayoutPriority.ADS);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
 
-    resource.updatePriority(3);
-    expect(resource.getPriority()).to.equal(3);
+    resource.updateLayoutPriority(LayoutPriority.BACKGROUND);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.BACKGROUND);
 
-    resource.updatePriority(1);
-    expect(resource.getPriority()).to.equal(1);
+    resource.updateLayoutPriority(LayoutPriority.METADATA);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
 
-    resource.updatePriority(0);
-    expect(resource.getPriority()).to.equal(0);
+    resource.updateLayoutPriority(LayoutPriority.CONTENT);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
   });
 
 
   describe('setInViewport', () => {
     it('should call viewportCallback when not built', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('viewportCallback').withExactArgs(true).once();
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
     });
 
     it('should call viewportCallback when built', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('viewportCallback').withExactArgs(true).once();
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
-    });
-
-    it('should call viewportCallback only once', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('viewportCallback').withExactArgs(true).once();
-      resource.setInViewport(true);
-      resource.setInViewport(true);
-      resource.setInViewport(true);
     });
   });
 
@@ -732,16 +747,14 @@ describe('Resource', () => {
       expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
     });
 
-    it('should NOT call viewportCallback when resource not in viewport', () => {
+    it('should call viewportCallback when resource not in viewport', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      resource.isInViewport_ = false;
-      elementMock.expects('viewportCallback').never();
+      elementMock.expects('viewportCallback').withExactArgs(false).once();
       resource.unlayout();
     });
 
     it('should call viewportCallback when resource in viewport', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      resource.isInViewport_ = true;
       elementMock.expects('viewportCallback').withExactArgs(false).once();
       resource.unlayout();
     });
@@ -756,16 +769,9 @@ describe('Resource', () => {
   });
 
   describe('pauseCallback', () => {
-    it('should NOT call pauseCallback on unbuilt element', () => {
+    it('should call pauseCallback on unbuilt element', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('pauseCallback').never();
-      resource.pause();
-    });
-
-    it('should NOT call pauseCallback on paused element', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      resource.paused_ = true;
-      elementMock.expects('pauseCallback').never();
+      elementMock.expects('pauseCallback').once();
       resource.pause();
     });
 
@@ -805,22 +811,16 @@ describe('Resource', () => {
     });
 
     describe('when remove from DOM', () => {
-      it('should not call pauseCallback on remove for unbuilt ele', () => {
+      it('should call pauseCallback on remove for unbuilt ele', () => {
         resource.state_ = ResourceState.NOT_BUILT;
+        elementMock.expects('pauseCallback').once();
         resource.pauseOnRemove();
-        elementMock.expects('pauseCallback').never();
-        elementMock.expects('viewportCallback').never();
       });
 
       it('should call pauseCallback on remove for built ele', () => {
         resource.state_ = ResourceState.LAYOUT_COMPLETE;
-        resource.isInViewport_ = true;
-        resource.paused_ = false;
         elementMock.expects('pauseCallback').once();
-        elementMock.expects('viewportCallback').once();
         resource.pauseOnRemove();
-        expect(resource.isInViewport_).to.equal(false);
-        expect(resource.paused_).to.equal(true);
       });
 
       it('should call disconnectedCallback on remove for built ele', () => {
@@ -834,24 +834,74 @@ describe('Resource', () => {
   });
 
   describe('resumeCallback', () => {
-    it('should NOT call resumeCallback on unbuilt element', () => {
+    it('should call resumeCallback on unbuilt element', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('resumeCallback').never();
-      resource.resume();
-    });
-
-    it('should NOT call resumeCallback on un-paused element', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('resumeCallback').never();
-      resource.resume();
-    });
-
-    it('should call resumeCallback on built element', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      resource.paused_ = true;
       elementMock.expects('resumeCallback').once();
       resource.resume();
     });
+
+    it('should call resumeCallback on un-paused element', () => {
+      resource.state_ = ResourceState.LAYOUT_COMPLETE;
+      elementMock.expects('resumeCallback').once();
+      resource.resume();
+    });
+  });
+});
+
+describe('Resource idleRenderOutsideViewport', () => {
+  let sandbox;
+  let element;
+  let resources;
+  let resource;
+  let idleRenderOutsideViewport;
+  let withinViewportMultiplier;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox.create();
+    idleRenderOutsideViewport = sandbox.stub();
+    element = {
+      idleRenderOutsideViewport,
+      ownerDocument: {defaultView: window},
+      tagName: 'AMP-AD',
+      hasAttribute: () => false,
+      isBuilt: () => false,
+      isUpgraded: () => false,
+      prerenderAllowed: () => false,
+      renderOutsideViewport: () => true,
+      build: () => false,
+      getBoundingClientRect: () => null,
+      updateLayoutBox: () => {},
+      isRelayoutNeeded: () => false,
+      layoutCallback: () => {},
+      changeSize: () => {},
+      unlayoutOnPause: () => false,
+      unlayoutCallback: () => true,
+      pauseCallback: () => false,
+      resumeCallback: () => false,
+      viewportCallback: () => {},
+      getLayoutPriority: () => LayoutPriority.CONTENT,
+    };
+    resources = new Resources(new AmpDocSingle(window));
+    resource = new Resource(1, element, resources);
+    withinViewportMultiplier =
+        sandbox.stub(resource, 'withinViewportMultiplier');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should return true if withinViewportMultiplier', () => {
+    idleRenderOutsideViewport.returns(5);
+    withinViewportMultiplier.withArgs(5).returns(true);
+    expect(resource.idleRenderOutsideViewport()).to.equal(true);
+  });
+
+  it('should return false for false element idleRenderOutsideViewport', () => {
+    idleRenderOutsideViewport.returns(false);
+    withinViewportMultiplier.withArgs(false).returns(false);
+    expect(resource.idleRenderOutsideViewport()).to.equal(false);
   });
 });
 
@@ -886,7 +936,7 @@ describe('Resource renderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
-      getPriority: () => 0,
+      getLayoutPriority: () => LayoutPriority.CONTENT,
     };
 
     resources = new Resources(new AmpDocSingle(window));
@@ -924,7 +974,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when bottom falls outside', () => {
@@ -960,7 +1010,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -996,7 +1046,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1037,7 +1087,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering', () => {
@@ -1078,7 +1128,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1114,7 +1164,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1155,7 +1205,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering', () => {
@@ -1198,7 +1248,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when bottom falls outside', () => {
@@ -1234,7 +1284,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1270,7 +1320,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1311,7 +1361,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering', () => {
@@ -1352,7 +1402,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1388,7 +1438,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1429,7 +1479,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering', () => {
@@ -1473,7 +1523,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when bottom falls outside', () => {
@@ -1509,7 +1559,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1545,7 +1595,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1586,7 +1636,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1627,7 +1677,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1663,7 +1713,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1704,7 +1754,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1750,7 +1800,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1796,7 +1846,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1842,7 +1892,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1888,7 +1938,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {

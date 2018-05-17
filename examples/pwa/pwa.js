@@ -41,6 +41,8 @@ class Shell {
     /** @private {string} */
     this.currentPage_ = win.location.pathname;
 
+    this.sidebarCloseButton_ = document.querySelector('#sidebarClose');
+
     win.addEventListener('popstate', this.handlePopState_.bind(this));
     win.document.documentElement.addEventListener('click',
         this.handleNavigate_.bind(this));
@@ -85,15 +87,16 @@ class Shell {
   }
 
   /**
+   * @param {!Event} e
    */
   handleNavigate_(e) {
     if (e.defaultPrevented) {
       return false;
     }
-    if (event.button) {
+    if (e.button) {
       return false;
     }
-    let a = event.target;
+    let a = e.target;
     while (a) {
       if (a.tagName == 'A' && a.href) {
         break;
@@ -110,7 +113,7 @@ class Shell {
         const newPage = url.pathname + location.search;
         log('Internal link to: ', newPage);
         if (newPage != this.currentPage_) {
-          this.navigateTo(newPage);
+          this.closeSidebar().then(() => this.navigateTo(newPage));
         }
       }
     }
@@ -163,7 +166,7 @@ class Shell {
     }
     return fetchDocument(url).then(doc => {
       log('Fetch complete: ', doc);
-      this.ampViewer_.show(doc, url);
+      return this.ampViewer_.show(doc, url);
     });
   }
 
@@ -178,6 +181,19 @@ class Shell {
     this.a_.href = url;
     return this.a_.href;
   }
+
+  closeSidebar() {
+    if (this.sidebarCloseButton_) {
+      return new Promise(resolve => {
+        this.sidebarCloseButton_.click();
+        // TODO implement a better method to detect when
+        // closing sidebar has finished
+        setTimeout(() => resolve(), 100);
+      });
+    } else {
+      return Promise.resolve();
+    }
+  }
 }
 
 
@@ -190,12 +206,33 @@ class AmpViewer {
     this.container = container;
 
     win.AMP_SHADOW = true;
-    this.ampReadyPromise_ = new Promise(resolve => {
+    const ampReadyPromise = new Promise(resolve => {
       (window.AMP = window.AMP || []).push(resolve);
     });
-    this.ampReadyPromise_.then(AMP => {
+    ampReadyPromise.then(AMP => {
       log('AMP LOADED:', AMP);
     });
+
+    const isShadowDomSupported = (
+      Element.prototype.attachShadow ||
+      Element.prototype.createShadowRoot
+    );
+    const shadowDomReadyPromise = new Promise((resolve, reject) => {
+      if (isShadowDomSupported) {
+        resolve();
+      } else if (this.win.document.querySelector('script[src*=webcomponents]')) {
+        this.win.addEventListener('WebComponentsReady', resolve);
+      } else {
+        // AMP polyfills small part of SD spec. It's functional, but some things
+        // (e.g. slots) are not available.
+        resolve();
+      }
+    });
+
+    this.readyPromise_ = Promise.all([
+      ampReadyPromise,
+      shadowDomReadyPromise,
+    ]).then(results => results[0]);
 
     /** @private @const {string} */
     this.baseUrl_ = null;
@@ -240,7 +277,7 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    this.ampReadyPromise_.then(AMP => {
+    return this.readyPromise_.then(AMP => {
       this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
       this.win.document.title = this.amp_.title || '';
       this.amp_.onMessage(this.onMessage_.bind(this));
@@ -270,7 +307,7 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    return this.ampReadyPromise_.then(AMP => {
+    return this.readyPromise_.then(AMP => {
       this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
       this.win.document.title = this.amp_.title || '';
       this.amp_.onMessage(this.onMessage_.bind(this));
@@ -326,7 +363,7 @@ class AmpViewer {
  * @return {boolean}
  */
 function isShellUrl(url) {
-  return (url == '/pwa' || url == '/pwa/');
+  return (url == '/pwa' || url == '/pwa/' || url == '/pwa/ampdoc-shell');
 }
 
 
@@ -379,7 +416,8 @@ function streamDocument(url, writer) {
     return fetch(url).then(response => {
       // This should be a lot simpler with transforming streams and pipes,
       // but, TMK, these are not supported anywhere yet.
-      const reader = response.body.getReader();
+      const /** !ReadableStreamDefaultReader */ reader = response.body
+          .getReader();
       const decoder = new TextDecoder();
       function readChunk(chunk) {
         const text = decoder.decode(

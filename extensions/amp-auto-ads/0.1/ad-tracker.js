@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import {resourcesForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
+import {endsWith} from '../../../src/string';
+import {user} from '../../../src/log';
+
+/** @const */
+const TAG = 'amp-auto-ads';
+
 
 /**
  * Structure for defining contraints about the placement of ads.
@@ -43,6 +49,7 @@ import {resourcesForDoc} from '../../../src/services';
  * }}
  */
 export let AdConstraints;
+
 
 export class AdTracker {
 
@@ -129,7 +136,7 @@ export class AdTracker {
    * @private
    */
   getDistanceFromAd_(yPosition, ad) {
-    return resourcesForDoc(ad).getElementLayoutBox(ad).then(box => {
+    return Services.resourcesForDoc(ad).getElementLayoutBox(ad).then(box => {
       if (yPosition >= box.top && yPosition <= box.bottom) {
         return 0;
       } else {
@@ -157,11 +164,11 @@ export class AdTracker {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Array<!Element>}
  */
-export function getExistingAds(win) {
-  return [].slice.call(win.document.getElementsByTagName('AMP-AD'))
+export function getExistingAds(ampdoc) {
+  return [].slice.call(ampdoc.getRootNode().getElementsByTagName('AMP-AD'))
       .filter(ad => {
         // Filters out AMP-STICKY-AD.
         if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {
@@ -169,4 +176,81 @@ export function getExistingAds(win) {
         }
         return true;
       });
+}
+
+/**
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Object<string, *>} configObj
+ * @return {?AdConstraints}
+ */
+export function getAdConstraintsFromConfigObj(ampdoc, configObj) {
+  const obj = configObj['adConstraints'];
+  if (!obj) {
+    return null;
+  }
+
+  const viewportHeight = Services.viewportForDoc(ampdoc).getHeight();
+
+  const initialMinSpacing =
+      getValueFromString(obj['initialMinSpacing'], viewportHeight);
+  if (initialMinSpacing == null) {
+    user().warn(TAG, 'Invalid initial min spacing');
+    return null;
+  }
+
+  const subsequentMinSpacing = (obj['subsequentMinSpacing'] || []).map(item => {
+    const adCount = item['adCount'];
+    if (adCount == null) {
+      user().warn(TAG, 'No subsequentMinSpacing adCount specified');
+      return null;
+    }
+    const spacing = getValueFromString(item['spacing'], viewportHeight);
+    if (spacing == null) {
+      user().warn(TAG, 'Invalid subsequent min spacing');
+      return null;
+    }
+    return {
+      adCount,
+      spacing,
+    };
+  });
+
+  if (subsequentMinSpacing.indexOf(null) != -1) {
+    return null;
+  }
+
+  if (obj['maxAdCount'] == null) {
+    user().warn(TAG, 'No maxAdCount specified');
+    return null;
+  }
+
+  return {
+    initialMinSpacing,
+    subsequentMinSpacing,
+    maxAdCount: obj['maxAdCount'],
+  };
+}
+
+/**
+ * Parses a string in the form "12px" (number of pixels) or "0.3vp"
+ * (number of viewports) into a number representing a number of pixels.
+ * @param {?string|undefined} strValue
+ * @param {number} viewportHeight
+ * @return {?number}
+ */
+function getValueFromString(strValue, viewportHeight) {
+  if (!strValue) {
+    return null;
+  }
+  const numValue = parseFloat(strValue);
+  if (isNaN(numValue) || numValue < 0) {
+    return null;
+  }
+  if (endsWith(strValue, 'px')) {
+    return numValue;
+  }
+  if (endsWith(strValue, 'vp')) {
+    return numValue * viewportHeight;
+  }
+  return null;
 }

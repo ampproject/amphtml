@@ -14,60 +14,56 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-instagram';
-import {adopt} from '../../../../src/runtime';
-import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-instagram', () => {
-
-  let sandbox;
+describes.realWin('amp-instagram', {
+  amp: {
+    extensions: ['amp-instagram'],
+  },
+}, env => {
+  let win, doc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
   });
 
   function getIns(shortcode, opt_responsive,
-      opt_beforeLayoutCallback, opt_captioned) {
-    return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const ins = iframe.doc.createElement('amp-instagram');
-      ins.setAttribute('data-shortcode', shortcode);
-      ins.setAttribute('width', '111');
-      ins.setAttribute('height', '222');
-      ins.setAttribute('alt', 'Testing');
-      if (opt_responsive) {
-        ins.setAttribute('layout', 'responsive');
-      }
-      if (opt_captioned) {
-        ins.setAttribute('data-captioned', '');
-      }
-      ins.implementation_.getVsync = () => {
-        return {
-          mutate(cb) { cb(); },
-          measure(cb) { cb(); },
-          runPromise(task, state = {}) {
-            if (task.measure) {
-              task.measure(state);
-            }
-            if (task.mutate) {
-              task.mutate(state);
-            }
-            return Promise.resolve();
-          },
-        };
+    opt_beforeLayoutCallback, opt_captioned) {
+    const ins = doc.createElement('amp-instagram');
+    ins.setAttribute('data-shortcode', shortcode);
+    ins.setAttribute('width', '111');
+    ins.setAttribute('height', '222');
+    ins.setAttribute('alt', 'Testing');
+    if (opt_responsive) {
+      ins.setAttribute('layout', 'responsive');
+    }
+    if (opt_captioned) {
+      ins.setAttribute('data-captioned', '');
+    }
+    ins.implementation_.getVsync = () => {
+      return {
+        mutate(cb) { cb(); },
+        measure(cb) { cb(); },
+        runPromise(task, state = {}) {
+          if (task.measure) {
+            task.measure(state);
+          }
+          if (task.mutate) {
+            task.mutate(state);
+          }
+          return Promise.resolve();
+        },
       };
-      return iframe.addElement(ins);
-    });
+    };
+    doc.body.appendChild(ins);
+    return ins.build().then(() => {
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(ins);
+      }
+      return ins.layoutCallback();
+    }).then(() => ins);
   }
 
   function testImage(image) {
@@ -157,15 +153,17 @@ describe('amp-instagram', () => {
   });
 
   it('requires data-shortcode', () => {
-    expect(getIns('')).to.be.rejectedWith(
-        /The data-shortcode attribute is required for/);
+    allowConsoleError(() => {
+      expect(getIns('')).to.be.rejectedWith(
+          /The data-shortcode attribute is required for/);
+    });
   });
 
   it('resizes in response to messages from Instagram iframe', () => {
     return getIns('fBwFP', true).then(ins => {
       const impl = ins.implementation_;
       const iframe = ins.querySelector('iframe');
-      const attemptChangeHeight = sandbox.spy(impl, 'attemptChangeHeight');
+      const changeHeight = sandbox.spy(impl, 'changeHeight');
       const newHeight = 977;
 
       expect(iframe).to.not.be.null;
@@ -174,9 +172,9 @@ describe('amp-instagram', () => {
         height: newHeight,
       });
 
-      expect(attemptChangeHeight).to.be.calledOnce;
+      expect(changeHeight).to.be.calledOnce;
       // Height minus padding
-      expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight - 64);
+      expect(changeHeight.firstCall.args[0]).to.equal(newHeight);
     });
   });
 

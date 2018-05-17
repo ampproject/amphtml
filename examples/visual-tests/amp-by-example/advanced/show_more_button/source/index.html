@@ -1,0 +1,87 @@
+<!-- ## Introduction -->
+<!--
+This is a sample showing how to implement the "show more" design pattern. "Show more" is common design pattern used on e-commerce category pages to lazy load more content triggered by an user interaction.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <!-- ## Setup -->
+  <!-- Additionally used AMP components must be imported in the header. We use `amp-list` for showing a list of products -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <!-- We use `amp-bind` for dynamically changing the src of `amp-list` -->
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <!-- We use `amp-form` for making the call to get extra products after an user interaction -->
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <!-- We use `amp-mustache` for rendering the `amp-list` content -->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+
+  <link rel="canonical" href="https://ampbyexample.com/advanced/show_more_button/">
+  <title>Load more button</title>
+
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+</head>
+<body>
+  <!-- ## How to implement a show more button -->
+  <!-- You can implement a show more button by using `amp-list` and `amp-bind`, where
+  `amp-list` `src` data are bind to the value of an `amp-state` element. Here we are using two `amp-state`: `productsState`
+  which uses the same json `src` as the `amp-list` so that will initially contain the same list of items ... -->
+  <amp-state id="productsState" src="/examples/visual-tests/amp-by-example/json/related_products.json">
+  </amp-state>
+
+  <!-- ... while the `amp-state` with id `product` is just used to implement the show-more logic where we are allowing the user to click 3 times. -->
+  <amp-state id="product">
+    <script type="application/json">
+    {
+      "moreItemsPageIndex": 0,
+      "hasMorePages": true
+    }
+    </script>
+  </amp-state>
+
+
+  <!-- We bind the `src` attribute of the `amp-list` to the `amp-state` object containing the products
+      from that component as a `src`. We also dynamically change the height of the amp-list based on 
+      the number of items (each item has a height of `24px`). -->
+  <amp-list src="/examples/visual-tests/amp-by-example/json/related_products.json" 
+            [src]="productsState.items" 
+            width="320"
+            height="144"
+            [height]="productsState.items.length * 24"
+            class="m1">
+    <template type="amp-mustache">
+      <strong>Product</strong>: {{name}}
+      <strong>Price</strong>: ${{price}}
+    </template>
+  </amp-list>
+
+  <!-- The show more button is implemented via a form which triggers a page update on the `submit-success` event.
+      We are then merging the form results into the items already loaded by the `amp-state` using the `concat` function. -->
+      <form method="GET"
+            action="/examples/visual-tests/amp-by-example/json/more_related_products_page"
+            action-xhr="/examples/visual-tests/amp-by-example/json/more_related_products_page"
+            target="_top"
+            on="submit-success: AMP.setState({
+              productsState: { 
+                items: productsState.items.concat(event.response.items)
+              },
+              product: {
+                moreItemsPageIndex: product.moreItemsPageIndex + 1,
+                hasMorePages: event.response.hasMorePages
+              }
+            });">
+        <input type="hidden" name="moreItemsPageIndex" value="0" [value]="product.moreItemsPageIndex">
+        <input type="submit" 
+               value="Show more"
+               class="ampstart-btn caps m1 show"
+               [class] = "(product.hasMorePages == false ? 'hide' : 'ampstart-btn caps m1 mb3 show')">
+    </form>
+
+</body>
+</html>

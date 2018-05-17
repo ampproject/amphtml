@@ -43,9 +43,10 @@ limitations under the License.
 
 The `amp-video` component loads the video resource specified by its `src` attribute lazily, at a time determined by the runtime. You can control an `amp-video` component much the same way as a standard HTML5 `<video>` tag.
 
-The `amp-video` component accepts up to three unique types of HTML nodes as children:
+The `amp-video` component accepts up to four unique types of HTML nodes as children:
 
 - `source` tags: Just like in the HTML `<video>` tag, you can add `<source>` tag children to specify different source media files to play.
+- `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag.
 -  a placeholder for before the video starts
 -  a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
 
@@ -59,10 +60,14 @@ The `amp-video` component accepts up to three unique types of HTML nodes as chil
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampvideo.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 
 </div>
+
+## Analytics
+
+`amp-video` supports analytics out of the box. See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md) for more information.
 
 ## Attributes
 
@@ -79,29 +84,80 @@ Alternatively, you can present a click-to-play overlay. For details, see the [Cl
 
 ##### autoplay
 
-If this attribute is present, and the browser supports autoplay:
-
-* the video is automatically muted before autoplay starts
-* when the video is scrolled out of view, the video is paused
-* when the video is scrolled into view, the video resumes playback
-* when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
 
 ##### controls
 
 This attribute is similar to the `controls` attribute in the HTML5 `video`. If this attribute is present, the browser offers controls to allow the user to control video playback.
 
+##### controlsList
+
+Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.
+
 ##### loop
 
 If present, the video will automatically loop back to the start upon reaching the end.
+
+##### crossorigin
+
+Required if a `track` resource is hosted on a different origin than the document.
+
+##### disableremoteplayback
+
+Determines whether the media element is allowed to have a remote playback UI such as Chromecast or AirPlay.
 
 ##### muted (deprecated)
 
 The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.
 
+##### noaudio
+
+Annotates the video as having no audio. This hides the equalizer icon that is displayed
+when the video has autoplay.
+
+##### rotate-to-fullscreen
+
+If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#rotate-to-fullscreen).
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Media Session API attributes
+
+The `amp-video` component implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session), which enables developers to specify more information about the video file. The additional information for the video displays in the notification center of the user's device (along with the play/pause controls).
+
+##### artwork
+
+Specifies a URL to a PNG/JPG/ICO image serving as the video's artwork. If `artwork` is not present, the Media Session API helper uses either the `image` field in the `schema.org` definition, the `og:image`, or the website's `favicon`.
+
+##### artist
+
+Indicates the author of the video file, specified as a string.
+
+##### album
+
+Indicates the album/collection the video was taken from, specified as a string.
+
+##### title
+
+Indicates the name/title of the video, specified as a string. If not provided, the Media Session API helper uses either the `aria-label` attribute or falls back to the page's title.
+
+Example:
+
+This example contains both the `poster` and `artwork` attributes. The `poster` serves as the placeholder image before the video plays, while `artwork` is the image that displays in the notification via the MediaSession API.
+
+```html
+<amp-video width="720" height="305" layout="responsive"
+  src="https://yourhost.com/videos/myvideo.mp4"
+  poster="https://yourhost.com/posters/poster.png"
+  artwork="https://yourhost.com/artworks/artwork.png"
+  title="Awesome video" artist="Awesome artist"
+  album="Amazing album">
+</amp-video>
+```
 
 ## Click-to-Play overlay
 

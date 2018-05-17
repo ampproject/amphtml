@@ -15,11 +15,11 @@
  */
 
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
+import {Services} from '../services';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
-import {getService, registerServiceBuilder} from '../service';
 import {getMode} from '../mode';
-import {xhrFor} from '../services';
+import {getService, registerServiceBuilder} from '../service';
 
 const TAG = 'web-worker';
 
@@ -75,7 +75,7 @@ class AmpWorker {
     this.win_ = win;
 
     /** @const @private {!../service/xhr-impl.Xhr} */
-    this.xhr_ = xhrFor(win);
+    this.xhr_ = Services.xhrFor(win);
 
     // Use `testLocation` for testing with iframes. @see testing/iframe.js.
     let loc = win.location;

@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
-import {
-    getLifecycleReporter,
-    setGoogleLifecycleVarsFromHeaders,
-    googleLifecycleReporterFactory,
-} from '../google-data-reporter';
-import {
-    GoogleAdLifecycleReporter,
-    BaseLifecycleReporter,
-} from '../performance';
-import {EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '../utils';
 import {
   ADSENSE_A4A_EXPERIMENT_NAME,
-} from '../../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config'; // eslint-disable-line
+} from '../../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+import {
+  BaseLifecycleReporter,
+  GoogleAdLifecycleReporter,
+} from '../performance';
 import {
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
-} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config'; // eslint-disable-line
+} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
+import {EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '../utils';
+import {createIframePromise} from '../../../../testing/iframe';
 import {forceExperimentBranch} from '../../../../src/experiments';
+import {
+  getLifecycleReporter,
+  googleLifecycleReporterFactory,
+  setGoogleLifecycleVarsFromHeaders,
+} from '../google-data-reporter';
 
 describe('#getLifecycleReporter', () => {
 
@@ -164,7 +164,7 @@ describes.sandboxed('#googleLifecycleReporterFactory', {}, () => {
         'slotId=22',
         `rls=${encodeURIComponent('$internalRuntimeVersion$')}`,
         'v_h=[0-9]+',
-        's_t=',  // SROLL_TOP not defined in test environment.
+        's_t=', // SROLL_TOP not defined in test environment.
         'stageName=renderFriendlyStart',
         'stageIdx=6',
         'met.a4a.22=renderFriendlyStart.[0-9]+',

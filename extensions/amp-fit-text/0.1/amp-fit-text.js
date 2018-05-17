@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
+import * as st from '../../../src/style';
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import * as st from '../../../src/style';
 
-
-/** @private @const {number} */
+const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
 
 
@@ -124,7 +123,7 @@ class AmpFitText extends AMP.BaseElement {
  * @private  Visible for testing only!
  */
 export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
-    minFontSize, maxFontSize) {
+  minFontSize, maxFontSize) {
   maxFontSize++;
   // Binomial search for the best font size.
   while (maxFontSize - minFontSize > 1) {
@@ -139,7 +138,7 @@ export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
     }
   }
   return minFontSize;
-};
+}
 
 
 /**
@@ -159,7 +158,9 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
     lineClamp: overflown ? numberOfLines : '',
     maxHeight: overflown ? st.px(lineHeight * numberOfLines) : '',
   });
-};
+}
 
 
-AMP.registerElement('amp-fit-text', AmpFitText, CSS);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpFitText, CSS);
+});

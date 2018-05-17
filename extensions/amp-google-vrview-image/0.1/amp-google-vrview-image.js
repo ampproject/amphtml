@@ -16,11 +16,12 @@
 
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const */
 const TAG = 'amp-google-vrview-image';
+
 
 class AmpGoogleVrviewImage extends AMP.BaseElement {
 
@@ -37,8 +38,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     /** @private {string} */
     this.src_ = '';
 
-    /** @private {?Element} */
-    this.iframe_ = null;
   }
 
   /** @override */
@@ -107,9 +106,11 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.setAttribute('src', this.src_);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 }
 
-AMP.registerElement('amp-google-vrview-image', AmpGoogleVrviewImage);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpGoogleVrviewImage);
+});

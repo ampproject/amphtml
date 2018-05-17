@@ -14,42 +14,34 @@
  * limitations under the License.
  */
 
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {timerFor} from '../../../../src/services';
-import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-image-lightbox';
+import * as dom from '../../../../src/dom';
+import * as lolex from 'lolex';
 import {
   ImageViewer,
 } from '../amp-image-lightbox';
-import {adopt} from '../../../../src/runtime';
+import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Services} from '../../../../src/services';
 import {parseSrcset} from '../../../../src/srcset';
-import * as sinon from 'sinon';
 
-adopt(window);
-
-
-describe('amp-image-lightbox component', () => {
-
-  function getImageLightbox() {
-    return createIframePromise().then(iframe => {
-      const el = iframe.doc.createElement('amp-image-lightbox');
-      el.setAttribute('layout', 'nodisplay');
-      iframe.doc.body.appendChild(el);
-      return timerFor(window).promise(16).then(() => {
-        return el;
-      });
-    });
-  }
-
-  let sandbox;
+describes.realWin('amp-image-lightbox component', {
+  amp: {
+    extensions: ['amp-image-lightbox'],
+  },
+}, env => {
+  let win, doc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+  function getImageLightbox() {
+    const el = doc.createElement('amp-image-lightbox');
+    el.setAttribute('layout', 'nodisplay');
+    doc.body.appendChild(el);
+    return el.build().then(() => el.layoutCallback()).then(() => el);
+  }
 
   it('should not render if not activated', () => {
     return getImageLightbox().then(lightbox => {
@@ -74,9 +66,9 @@ describe('amp-image-lightbox component', () => {
       };
       impl.enter_ = noop;
 
-      const ampImage = document.createElement('amp-img');
+      const ampImage = doc.createElement('amp-img');
       ampImage.setAttribute('src', 'data:');
-      impl.activate({source: ampImage});
+      impl.activate({caller: ampImage});
 
       const container = lightbox
           .querySelector('.i-amphtml-image-lightbox-container');
@@ -123,9 +115,9 @@ describe('amp-image-lightbox component', () => {
       const enter = sandbox.spy();
       impl.enter_ = enter;
 
-      const ampImage = document.createElement('amp-img');
+      const ampImage = doc.createElement('amp-img');
       ampImage.setAttribute('src', 'data:');
-      impl.activate({source: ampImage});
+      impl.activate({caller: ampImage});
 
       expect(viewportOnChanged).to.be.calledOnce;
       expect(impl.unlistenViewport_).to.not.equal(null);
@@ -156,8 +148,6 @@ describe('amp-image-lightbox component', () => {
       const exit = sandbox.spy();
       impl.exit_ = exit;
 
-      const ampImage = document.createElement('amp-img');
-      ampImage.setAttribute('src', 'data:');
       impl.close();
 
       expect(impl.active_).to.equal(false);
@@ -195,54 +185,96 @@ describe('amp-image-lightbox component', () => {
       const enter = sandbox.spy();
       impl.enter_ = enter;
 
-      const ampImage = document.createElement('amp-img');
+      const ampImage = doc.createElement('amp-img');
       ampImage.setAttribute('src', 'data:');
       ampImage.setAttribute('width', '100');
       ampImage.setAttribute('height', '100');
-      impl.activate({source: ampImage});
+      impl.activate({caller: ampImage});
       impl.closeOnEscape_({keyCode: KeyCodes.ESCAPE});
       expect(setupCloseSpy).to.be.calledOnce;
 
       // Regression test: ensure escape event listener is bound properly
       expect(nullAddEventListenerSpy).to.have.not.been.called;
-      impl.activate({source: ampImage});
+      impl.activate({caller: ampImage});
       expect(nullAddEventListenerSpy).to.have.not.been.called;
+    });
+  });
+
+  // Accessibility
+  it('should return focus to source element after close', () => {
+    return getImageLightbox().then(lightbox => {
+      const impl = lightbox.implementation_;
+      impl.enter_ = () => {};
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
+        };
+      };
+
+      const tryFocus = sandbox.spy(dom, 'tryFocus');
+
+      const sourceElement = doc.createElement('amp-img');
+      sourceElement.setAttribute('src', 'data:');
+
+      impl.activate({caller: sourceElement});
+      impl.close();
+
+      expect(tryFocus).to.be.calledOnce;
     });
   });
 });
 
 
-describe('amp-image-lightbox image viewer', () => {
-
-  let sandbox;
+describes.realWin('amp-image-lightbox image viewer', {
+  amp: {
+    extensions: ['amp-image-lightbox'],
+  },
+}, env => {
+  let win, doc;
   let clock;
   let lightbox;
   let lightboxMock;
   let imageViewer;
   let loadPromiseStub;
 
+  const sourceElement = {
+    offsetWidth: 101,
+    offsetHeight: 201,
+    getAttribute: name => {
+      if (name == 'src') {
+        return 'image1';
+      }
+      return undefined;
+    },
+    hasAttribute: () => undefined,
+    getImpl: () => Promise.resolve(sourceElement.implementation_),
+  };
+
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
+    win = env.win;
+    doc = win.document;
+    clock = lolex.install();
 
     lightbox = {
       getDpr: () => 1,
       element: {
-        ownerDocument: document,
+        ownerDocument: doc,
       },
     };
     lightboxMock = sandbox.mock(lightbox);
     loadPromiseStub = sandbox.stub().returns(Promise.resolve());
 
-    sandbox.stub(timerFor(window), 'promise').returns(Promise.resolve());
-    imageViewer = new ImageViewer(lightbox, window, loadPromiseStub);
-    document.body.appendChild(imageViewer.getElement());
+    sandbox.stub(Services.timerFor(win), 'promise')
+        .returns(Promise.resolve());
+    imageViewer = new ImageViewer(lightbox, win, loadPromiseStub);
+    doc.body.appendChild(imageViewer.getElement());
   });
 
   afterEach(() => {
-    document.body.removeChild(imageViewer.getElement());
+    clock.uninstall();
+    doc.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    sandbox.restore();
   });
 
 
@@ -256,62 +288,27 @@ describe('amp-image-lightbox image viewer', () => {
 
 
   it('should init to the source element without image', () => {
-    const sourceElement = {
-      offsetWidth: 101,
-      offsetHeight: 201,
-      getAttribute: name => {
-        if (name == 'src') {
-          return 'image1';
-        }
-        return undefined;
-      },
-    };
-
     imageViewer.init(sourceElement, null);
-
     expect(imageViewer.sourceWidth_).to.equal(101);
     expect(imageViewer.sourceHeight_).to.equal(201);
-    expect(imageViewer.srcset_.getLast().url).to.equal('image1');
     expect(imageViewer.getImage().src).to.equal('');
   });
 
   it('should init to the source element with unloaded image', () => {
-    const sourceElement = {
-      offsetWidth: 101,
-      offsetHeight: 201,
-      getAttribute: name => {
-        if (name == 'src') {
-          return 'image1';
-        }
-        return undefined;
-      },
-    };
     const sourceImage = {
       complete: false,
       src: 'image1-smaller',
     };
-
     imageViewer.init(sourceElement, sourceImage);
 
     expect(imageViewer.getImage().src).to.equal('');
   });
 
   it('should init to the source element with loaded image', () => {
-    const sourceElement = {
-      offsetWidth: 101,
-      offsetHeight: 201,
-      getAttribute: name => {
-        if (name == 'src') {
-          return 'image1';
-        }
-        return undefined;
-      },
-    };
     const sourceImage = {
       complete: true,
       src: 'image1-smaller',
     };
-
     imageViewer.init(sourceElement, sourceImage);
 
     expect(imageViewer.getImage().getAttribute('src')).to
@@ -404,28 +401,31 @@ describe('amp-image-lightbox image viewer', () => {
 });
 
 
-describe('amp-image-lightbox image viewer gestures', () => {
-
-  let sandbox;
+describes.realWin('amp-image-lightbox image viewer gestures', {
+  amp: {
+    extensions: ['amp-image-lightbox'],
+  },
+}, env => {
+  let win, doc;
   let lightbox;
   let lightboxMock;
   let imageViewer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-
+    win = env.win;
+    doc = win.document;
     lightbox = {
       getDpr: () => 1,
       close: () => {},
       toggleViewMode: () => {},
       element: {
-        ownerDocument: document,
+        ownerDocument: doc,
       },
     };
     lightboxMock = sandbox.mock(lightbox);
 
-    imageViewer = new ImageViewer(lightbox, window);
-    document.body.appendChild(imageViewer.getElement());
+    imageViewer = new ImageViewer(lightbox, win);
+    doc.body.appendChild(imageViewer.getElement());
 
     imageViewer.getElement().style.width = '100px';
     imageViewer.getElement().style.height = '200px';
@@ -436,9 +436,8 @@ describe('amp-image-lightbox image viewer gestures', () => {
   });
 
   afterEach(() => {
-    document.body.removeChild(imageViewer.getElement());
+    doc.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    sandbox.restore();
   });
 
   it('should have initial bounds', () => {

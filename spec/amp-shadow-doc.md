@@ -96,6 +96,44 @@ Both `AMP.attachShadowDoc` and `AMP.attachShadowDocAsStream` return a `ShadowDoc
 - `shadowDoc.close()` - closes the AMP document and frees the resources.
 
 
+## Shadow DOM API and polyfills
+
+AMP Shadow Docs rely heavily on the [Shadow DOM API](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM). This is a powerful and elegant API, part of the Web Components family. It allows for natural isolation between major parts of the page and, as such, is an ideal tool for PWAs and AMP Shadow Docs.
+
+Shadow DOM is currently only implemented in Chrome and newer Safari. AMP Shadow Docs API internally polyfills the necessary parts of Shadow DOM.
+
+However, not all advanced Shadow DOM features are polyfilled by AMP Shadow Docs. In particular, [shadow slots](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Slot) are not polyfilled. If you'd like to use slots and similar advanced features, please use one of the Shadow DOM polyfill, such as [WebComponents.js](https://github.com/webcomponents/webcomponentsjs). If you do, we recommend the following code structure (using Web Components polyfills as an example):
+
+HTML:
+```html
+<script async src="https://cdn.ampproject.org/shadow-v0.js"></script>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.3/webcomponents-sd-ce.js"></script>
+```
+
+JavaScript:
+```javascript
+const ampReadyPromise = new Promise(resolve => {
+  (window.AMP = window.AMP || []).push(resolve);
+});
+const sdReadyPromise = new Promise(resolve => {
+  if (Element.prototype.attachShadow) {
+    // Native available.
+    resolve();
+  } else {
+    // Otherwise, wait for polyfill to be installed.
+    window.addEventListener('WebComponentsReady', resolve);
+  }
+});
+Promise.all([ampReadyPromise, sdReadyPromise]).then(() => {
+  return AMP.attachShadowDocAsStream(...);
+});
+```
+
+The working example can be found in [pwa.js sample](https://github.com/ampproject/amphtml/blob/f8b1e925c65ad29da288aab743b3c37da290e74e/examples/pwa/pwa.js#L216).
+
+We tested with [WebComponents.js polyfill](https://github.com/webcomponents/webcomponentsjs), but this should work transparently with any other polyfill. Let us know if you run into difficulties with other polyfills.
+
+
 ## Examples and references
 
 See [pwa.js](../examples/pwa/pwa.js) for examples of uses of boths APIs.

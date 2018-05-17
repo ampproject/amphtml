@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-springboard-player';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-springboard-player', () => {
+describes.realWin('amp-springboard-player', {
+  amp: {
+    extensions: ['amp-springboard-player'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getSpringboardPlayer(attributes) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const sp = iframe.doc.createElement('amp-springboard-player');
-      for (const key in attributes) {
-        sp.setAttribute(key, attributes[key]);
-      }
-      sp.setAttribute('width', '480');
-      sp.setAttribute('height', '270');
-      sp.setAttribute('layout', 'responsive');
-      return iframe.addElement(sp);
-    });
+    const sp = doc.createElement('amp-springboard-player');
+    for (const key in attributes) {
+      sp.setAttribute(key, attributes[key]);
+    }
+    sp.setAttribute('width', '480');
+    sp.setAttribute('height', '270');
+    sp.setAttribute('layout', 'responsive');
+    doc.body.appendChild(sp);
+    return sp.build().then(() => sp.layoutCallback()).then(() => sp);
   }
 
   it('renders', () => {
@@ -144,6 +146,30 @@ describe('amp-springboard-player', () => {
         expect(img.getAttribute('layout')).to.equal('fill');
         expect(img.hasAttribute('placeholder')).to.be.true;
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+        expect(img.getAttribute('alt')).to.equal('Loading video');
+      });
+    });
+    it('should propagate aria-label for placeholder image', () => {
+      return getSpringboardPlayer({
+        'data-site-id': '261',
+        'data-mode': 'video',
+        'data-content-id': '1578473',
+        'data-player-id': 'test401',
+        'data-domain': 'test.com',
+        'data-items': '10',
+        'aria-label': 'sporty video',
+      }).then(kp => {
+        const img = kp.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('src')).to.equal(
+            'https://www.springboardplatform.com/storage/test.com' +
+            '/snapshots/1578473.jpg');
+        expect(img.getAttribute('layout')).to.equal('fill');
+        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+        expect(img.getAttribute('aria-label')).to.equal('sporty video');
+        expect(img.getAttribute('alt'))
+            .to.equal('Loading video - sporty video');
       });
     });
 

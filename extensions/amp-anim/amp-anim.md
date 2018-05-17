@@ -27,13 +27,15 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-anim/">Annotated code example for amp-anim</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -50,29 +52,29 @@ In the future, additional functionality, such as animation playback control, cou
 
 ## Attributes
 
-**src**
+##### src
 
 Similar to the `src` attribute on the `img` tag. The value must be a URL that
 points to a publicly-cacheable image file. Cache providers may rewrite these
 URLs when ingesting AMP files to point to a cached version of the image.
 
-**srcset**
+##### srcset
 
 Same as `srcset` attribute on the `img` tag.
 
-**alt**
+##### alt
 
 A string of alternate text, similar to the `alt` attribute on `img`.
 
-**attribution**
+#####  attribution
 
 A string that indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`.
 
-**height** and **width**
+##### height and width
 
 An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image. 
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

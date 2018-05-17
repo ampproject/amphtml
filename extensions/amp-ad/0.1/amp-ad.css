@@ -34,35 +34,20 @@ amp-embed iframe {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(200, 200, 200, 0.5);
-}
-
-.i-amphtml-ad-default-holder[experiment1] {
-  background-color: rgba(0, 0, 0, 0.01);
-}
-
-.i-amphtml-ad-default-holder[experiment2] {
   background-color: rgba(200, 200, 200, 0.05);
 }
 
 .i-amphtml-ad-default-holder:after {
   content: "Ad";
-  background-color: rgba(0, 0, 0, 0.5);
+  content: attr(data-ad-holder-text);
+  background-color: transparent;
   border-radius: 2px;
-  color: #fff;
-  font-size: 16px;
+  color: #696969;
+  font-size: 10px;
   line-height: 1;
   font-family: Arial, sans-serif;
-  padding: 2px 4px;
-}
-
-.i-amphtml-ad-default-holder[experiment1]:after,
-.i-amphtml-ad-default-holder[experiment2]:after {
-  font-size: 10px;
-  color: #696969;
-  background-color: transparent;
-  border: 1px, solid, #696969;
   padding: 3px 4px 1px;
+  border: 1px, solid, #696969;
 }
 
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
@@ -72,6 +57,12 @@ amp-ad[type="adsense"] > iframe {
   transform: translate(-50%, -50%);
 }
 
+[dir=rtl] amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+[dir=rtl] amp-ad[type="adsense"] > iframe {
+  left: 0 !important;
+  right: 50% !important;
+  transform: translate(50%, -50%);
+}
 
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
 amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
@@ -79,3 +70,12 @@ amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
   min-width: 0;
 }
 
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] > iframe {
+  height: 100% !important;
+  width: 100% !important;
+  position: relative;
+}
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] {
+  width: 100% !important;
+}

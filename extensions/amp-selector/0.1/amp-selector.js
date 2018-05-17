@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {actionServiceForDoc} from '../../../src/services';
-import {closestBySelector, tryFocus} from '../../../src/dom';
+import {Services} from '../../../src/services';
+import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {mod} from '../../../src/utils/math';
+const TAG = 'amp-selector';
 
 /**
  * Set of namespaces that can be set for lifecycle reporters.
@@ -77,7 +79,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.action_ = actionServiceForDoc(this.element);
+    this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
     this.isDisabled_ = this.element.hasAttribute('disabled');
 
@@ -104,11 +106,35 @@ export class AmpSelector extends AMP.BaseElement {
     }
     this.kbSelectMode_ = kbSelectMode;
 
+    this.registerAction('clear', this.clearAllSelections_.bind(this));
+
     this.init_();
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
       this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
     }
+
+    this.registerAction('selectUp', invocation => {
+      const {args} = invocation;
+      const delta = (args && args['delta'] !== undefined) ? -args['delta'] : -1;
+      this.select_(delta);
+    }, ActionTrust.LOW);
+
+    this.registerAction('selectDown', invocation => {
+      const {args} = invocation;
+      const delta = (args && args['delta'] !== undefined) ? args['delta'] : 1;
+      this.select_(delta);
+    }, ActionTrust.LOW);
+
+    this.registerAction('toggle', invocation => {
+      const {args} = invocation;
+      user().assert(args['index'] >= 0, '\'index\' must be greater than 0');
+      user().assert(args['index'] < this.options_.length, '\'index\' must be ' +
+        'less than the length of options in the <amp-selector>');
+      if (args && args['index'] !== undefined) {
+        this.toggle_(args['index'], args['value']);
+      }
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -292,9 +318,8 @@ export class AmpSelector extends AMP.BaseElement {
               targetOption: el.getAttribute('option'),
               selectedOptions: selectedValues,
             });
-        // TODO(choumx, #9699): HIGH.
         this.action_.trigger(this.element, name, selectEvent,
-            ActionTrust.MEDIUM);
+            ActionTrust.HIGH);
       }
     });
   }
@@ -317,11 +342,55 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
+   * Handles toggle action.
+   * @param {number} index
+   * @param {boolean=} opt_value
+   */
+  toggle_(index, opt_value) {
+    // Change the selection to the next element in the specified direction.
+    // The selection should loop around if the user attempts to go one
+    // past the beginning or end.
+    const indexCurrentStatus = this.options_[index].hasAttribute('selected');
+    const indexFinalStatus =
+      opt_value !== undefined ? opt_value : !indexCurrentStatus;
+    const selectedIndex = this.options_.indexOf(this.selectedOptions_[0]);
+
+    if (indexFinalStatus === indexCurrentStatus) {
+      return;
+    }
+
+    // There is a change of the `selected` attribute for the element
+    if (selectedIndex !== index) {
+      this.setSelection_(this.options_[index]);
+      this.clearSelection_(this.options_[selectedIndex]);
+    } else {
+      this.clearSelection_(this.options_[index]);
+    }
+  }
+
+
+  /**
+   * Handles selectUp events.
+   * @param {number} delta
+   */
+  select_(delta) {
+    // Change the selection to the next element in the specified direction.
+    // The selection should loop around if the user attempts to go one
+    // past the beginning or end.
+    const previousIndex = this.options_.indexOf(this.selectedOptions_[0]);
+    const index = previousIndex + delta;
+    const normalizedIndex = mod(index, this.options_.length);
+
+    this.setSelection_(this.options_[normalizedIndex]);
+    this.clearSelection_(this.options_[previousIndex]);
+  }
+
+  /**
    * Handles keyboard events.
    * @param {!Event} event
    */
   keyDownHandler_(event) {
-    const keyCode = event.keyCode;
+    const {keyCode} = event;
     switch (keyCode) {
       case KeyCodes.LEFT_ARROW: /* fallthrough */
       case KeyCodes.UP_ARROW: /* fallthrough */
@@ -344,12 +413,12 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   navigationKeyDownHandler_(event) {
-    const isLtr = this.win.document.body.getAttribute('dir') != 'rtl';
+    const doc = this.win.document;
     let dir = 0;
     switch (event.keyCode) {
       case KeyCodes.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
-        dir = isLtr ? -1 : 1;
+        dir = isRTL(doc) ? 1 : -1;
         break;
       case KeyCodes.UP_ARROW:
         // Up is considered 'previous' in both LTR and RTL.
@@ -357,7 +426,7 @@ export class AmpSelector extends AMP.BaseElement {
         break;
       case KeyCodes.RIGHT_ARROW:
         // Right is considered 'next' in LTR and 'previous' in RTL.
-        dir = isLtr ? 1 : -1;
+        dir = isRTL(doc) ? -1 : 1;
         break;
       case KeyCodes.DOWN_ARROW:
         // Down is considered 'next' in both LTR and RTL.
@@ -396,7 +465,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   selectionKeyDownHandler_(event) {
-    const keyCode = event.keyCode;
+    const {keyCode} = event;
     if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
       if (this.options_.includes(event.target)) {
         event.preventDefault();
@@ -430,6 +499,7 @@ export class AmpSelector extends AMP.BaseElement {
       const el = this.selectedOptions_.pop();
       this.clearSelection_(el);
     }
+    this.setInputs_();
   }
 
   /**
@@ -451,4 +521,7 @@ export class AmpSelector extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-selector', AmpSelector, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpSelector, CSS);
+});

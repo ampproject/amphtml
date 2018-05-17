@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {timerFor} from '../../../src/services';
-import {xhrFor} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */
@@ -27,19 +26,19 @@ const TAG = 'amp-access-client';
 const DEFAULT_AUTHORIZATION_TIMEOUT = 3000;
 
 
-/** @implements {./amp-access.AccessTypeAdapterDef} */
+/** @implements {./amp-access-source.AccessTypeAdapterDef} */
 export class AccessClientAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!./amp-access.AccessTypeAdapterContextDef} context
+   * @param {!./amp-access-source.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @const @private {string} */
@@ -62,10 +61,10 @@ export class AccessClientAdapter {
         configJson);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
-    this.xhr_ = xhrFor(ampdoc.win);
+    this.xhr_ = Services.xhrFor(ampdoc.win);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(ampdoc.win);
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /**
@@ -150,5 +149,10 @@ export class AccessClientAdapter {
         body: '',
       });
     });
+  }
+
+  /** @override */
+  postAction() {
+    // Nothing to do.
   }
 }

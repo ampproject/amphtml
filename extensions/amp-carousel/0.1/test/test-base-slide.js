@@ -31,11 +31,9 @@
  */
 
 import {BaseSlides} from '../base-slides';
-import * as sinon from 'sinon';
 
-describe('BaseSlides', () => {
-
-  let sandbox;
+describes.fakeWin('BaseSlides', {amp: true}, env => {
+  let win, doc;
   let buildSlidesSpy;
   let onViewportCallbackSpy;
   let hasPrevSpy;
@@ -52,7 +50,8 @@ describe('BaseSlides', () => {
 
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
     buildSlidesSpy = sandbox.spy();
     onViewportCallbackSpy = sandbox.spy();
     hasPrevSpy = sandbox.spy();
@@ -70,13 +69,9 @@ describe('BaseSlides', () => {
         sandbox.spy(BaseSlides.prototype, 'onViewportCallback');
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
 
   function setElement(options) {
-    const element = document.createElement('div');
+    const element = doc.createElement('div');
     if (options.loop) {
       element.setAttribute('loop', '');
     }
@@ -265,4 +260,64 @@ describe('BaseSlides', () => {
     carousel.clearAutoplay();
     expect(carousel.autoplayTimeoutId_).to.be.null;
   });
+
+  it('toggle autoPlay status using speficied value & autoplay=true', () => {
+    const carousel = new TestCarousel(setElement({
+      autoplay: true,
+      delay: 300,
+    }));
+    carousel.buildCallback();
+    carousel.autoplay_();
+
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    const args = {'toggleOn': false};
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.false;
+
+    args['toggleOn'] = true;
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
+  });
+
+  it('toggle autoPlay status using speficied value & autoplay=false', () => {
+    const carousel = new TestCarousel(setElement({
+      delay: 300,
+    }));
+    carousel.buildCallback();
+
+    expect(carousel.shouldAutoplay_).to.be.false;
+
+    const args = {'toggleOn': true};
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    args['toggleOn'] = false;
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.false;
+  });
+
+  it('toggle autoPlay status without speficied value & autoplay=true', () => {
+    const carousel = new TestCarousel(setElement({
+      autoplay: true,
+      delay: 300,
+    }));
+    carousel.buildCallback();
+    carousel.autoplay_();
+
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    carousel.executeAction(
+        {method: 'toggleAutoplay', satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.false;
+
+    carousel.executeAction(
+        {method: 'toggleAutoplay', satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
+  });
+
 });

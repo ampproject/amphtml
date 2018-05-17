@@ -18,11 +18,12 @@
 'use strict';
 
 const through = require('through2');
-const gutil = require('gulp-util');
 const amphtmlValidator = require('amphtml-validator');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const PLUGIN_NAME = 'gulp-amphtml-validator';
-const PluginError = gutil.PluginError;
+const PluginError = require('plugin-error');
 
 const STATUS_FAIL = 'FAIL';
 const STATUS_PASS = 'PASS';
@@ -60,7 +61,7 @@ module.exports.validate = function(validator) {
           // build, but map the exception to an validation error instead. This
           // makes it possible to configure via failAfterError whether this
           // should fail the build or not.
-          gutil.log(gutil.colors.red(err.message));
+          log(colors.red(err.message));
           file.ampValidationResult = {
             status: STATUS_UNKNOWN,
           };
@@ -81,7 +82,7 @@ module.exports.format = function(logger) {
 
   const results = [];
   if (!logger) {
-    logger = gutil;
+    logger = log;
   }
 
   function collectResults(file, encoding, callback) {
@@ -100,15 +101,15 @@ module.exports.format = function(logger) {
     const validationResult = file.ampValidationResult;
     let report = file.relative + ': ';
     if (validationResult.status === STATUS_PASS) {
-      report += gutil.colors.green(validationResult.status);
+      report += colors.green(validationResult.status);
     } else if (validationResult.status === STATUS_UNKNOWN) {
-      report += gutil.colors.red(validationResult.status);
+      report += colors.red(validationResult.status);
     } else {
-      report += gutil.colors.red(validationResult.status);
+      report += colors.red(validationResult.status);
       for (let ii = 0; ii < validationResult.errors.length; ii++) {
         const error = validationResult.errors[ii];
         let msg = file.relative + ':' + error.line + ':' + error.col + ' ' +
-          gutil.colors.red(error.message);
+          colors.red(error.message);
         if (error.specUrl) {
           msg += ' (see ' + error.specUrl + ')';
         }
@@ -122,20 +123,20 @@ module.exports.format = function(logger) {
 };
 
 /**
- * Fail when the stream ends if any AMP validation error(s) occurred.
+ * Fail when the stream ends if for any AMP validation results,
+ * isFailure(ampValidationResult) returns true.
  *
+ * @param {!function(amphtmlValidator.ValidationResult): boolean} isFailure
  * @return {!stream} gulp file stream
  */
-module.exports.failAfterError = function() {
-
+function failAfter(isFailure) {
   let failedFiles = 0;
 
   function collectFailedFiles(file, encoding, callback) {
     if (file.isNull() || !file.ampValidationResult) {
       return callback(null, file);
     }
-    const status = file.ampValidationResult.status;
-    if (status === STATUS_FAIL || status === STATUS_UNKNOWN) {
+    if (isFailure(file.ampValidationResult)) {
       failedFiles++;
     }
     return callback(null, file);
@@ -150,4 +151,30 @@ module.exports.failAfterError = function() {
   }
 
   return through.obj(collectFailedFiles, failOnError);
+}
+
+/**
+ * Fail when the stream ends if any AMP validation error(s) occurred.
+ *
+ * @return {!stream} gulp file stream
+ */
+module.exports.failAfterError = function() {
+  return failAfter(function(ampValidationResult) {
+    return ampValidationResult.status === STATUS_FAIL ||
+        ampValidationResult.status === STATUS_UNKNOWN;
+  });
+};
+
+/**
+ * Fail when the stream ends if any AMP validation warning(s) or
+ * error(s) occurred.
+ *
+ * @return {!stream} gulp file stream
+ */
+module.exports.failAfterWarningOrError = function() {
+  return failAfter(function(ampValidationResult) {
+    return ampValidationResult.errors.length > 0 ||
+        ampValidationResult.status === STATUS_FAIL ||
+        ampValidationResult.status === STATUS_UNKNOWN;
+  });
 };

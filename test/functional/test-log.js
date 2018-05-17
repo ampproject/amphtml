@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   Log,
   LogLevel,
   USER_ERROR_SENTINEL,
   dev,
+  duplicateErrorIfNecessary,
+  isUserErrorEmbed,
   isUserErrorMessage,
   rethrowAsync,
   setReportError,
   user,
-  duplicateErrorIfNecessary,
 } from '../../src/log';
-import * as sinon from 'sinon';
 
 describe('Logging', () => {
 
@@ -56,7 +57,7 @@ describe('Logging', () => {
       setTimeout: timeoutSpy,
       reportError: error => error,
     };
-    sandbox.stub(self, 'reportError', error => error);
+    sandbox.stub(self, 'reportError').callsFake(error => error);
   });
 
   afterEach(() => {
@@ -105,16 +106,16 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_FINE);
       expect(log.level_).to.equal(LogLevel.FINE);
 
-      log.fine('fine');
-      log.info('info');
-      log.warn('warn');
-      log.error('error');
+      log.fine('test-log', 'fine');
+      log.info('test-log', 'info');
+      log.warn('test-log', 'warn');
+      log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(4);
-      expect(logSpy.args[0][1]).to.equal('[fine]');
-      expect(logSpy.args[1][1]).to.equal('[info]');
-      expect(logSpy.args[2][1]).to.equal('[warn]');
-      expect(logSpy.args[3][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('fine');
+      expect(logSpy.args[1][0]).to.equal('info');
+      expect(logSpy.args[2][0]).to.equal('warn');
+      expect(logSpy.args[3][0]).to.equal('error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -122,15 +123,15 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_INFO);
       expect(log.level_).to.equal(LogLevel.INFO);
 
-      log.fine('fine');
-      log.info('info');
-      log.warn('warn');
-      log.error('error');
+      log.fine('test-log', 'fine');
+      log.info('test-log', 'info');
+      log.warn('test-log', 'warn');
+      log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(3);
-      expect(logSpy.args[0][1]).to.equal('[info]');
-      expect(logSpy.args[1][1]).to.equal('[warn]');
-      expect(logSpy.args[2][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('info');
+      expect(logSpy.args[1][0]).to.equal('warn');
+      expect(logSpy.args[2][0]).to.equal('error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -138,14 +139,14 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_WARN);
       expect(log.level_).to.equal(LogLevel.WARN);
 
-      log.fine('fine');
-      log.info('info');
-      log.warn('warn');
-      log.error('error');
+      log.fine('test-log', 'fine');
+      log.info('test-log', 'info');
+      log.warn('test-log', 'warn');
+      log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(2);
-      expect(logSpy.args[0][1]).to.equal('[warn]');
-      expect(logSpy.args[1][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('warn');
+      expect(logSpy.args[1][0]).to.equal('error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -153,13 +154,13 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_ERROR);
       expect(log.level_).to.equal(LogLevel.ERROR);
 
-      log.fine('fine');
-      log.info('info');
-      log.warn('warn');
-      log.error('error');
+      log.fine('test-log', 'fine');
+      log.info('test-log', 'info');
+      log.warn('test-log', 'warn');
+      log.error('test-log', 'error');
 
       expect(logSpy).to.be.calledOnce;
-      expect(logSpy.args[0][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -227,8 +228,8 @@ describe('Logging', () => {
 
   describe('UserLog', () => {
 
-    it('should be disabled by default', () => {
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.OFF);
+    it('should be WARN by default', () => {
+      expect(user().levelFunc_(mode)).to.equal(LogLevel.WARN);
     });
 
     it('should be enabled in development mode', () => {
@@ -457,16 +458,11 @@ describe('Logging', () => {
     });
 
     it('should fail with on non string', () => {
-      expect(() => log.assertString({}))
-          .to.throw('String expected: ');
-      expect(() => log.assertString(3))
-          .to.throw('String expected: ');
-      expect(() => log.assertString(null))
-          .to.throw('String expected: ');
-      expect(() => log.assertString(undefined))
-          .to.throw('String expected: ');
-      expect(() => log.assertString([]))
-          .to.throw('String expected: ');
+      expect(() => log.assertString({})).to.throw('String expected: ');
+      expect(() => log.assertString(3)).to.throw('String expected: ');
+      expect(() => log.assertString(null)).to.throw('String expected: ');
+      expect(() => log.assertString(undefined)).to.throw('String expected: ');
+      expect(() => log.assertString([])).to.throw('String expected: ');
     });
   });
 
@@ -490,16 +486,11 @@ describe('Logging', () => {
     });
 
     it('should fail with on non number', () => {
-      expect(() => log.assertNumber({}))
-          .to.throw('Number expected: ');
-      expect(() => log.assertNumber('a'))
-          .to.throw('Number expected: ');
-      expect(() => log.assertNumber(null))
-          .to.throw('Number expected: ');
-      expect(() => log.assertNumber(undefined))
-          .to.throw('Number expected: ');
-      expect(() => log.assertNumber([]))
-          .to.throw('Number expected: ');
+      expect(() => log.assertNumber({})).to.throw('Number expected: ');
+      expect(() => log.assertNumber('a')).to.throw('Number expected: ');
+      expect(() => log.assertNumber(null)).to.throw('Number expected: ');
+      expect(() => log.assertNumber(undefined)).to.throw('Number expected: ');
+      expect(() => log.assertNumber([])).to.throw('Number expected: ');
     });
   });
 
@@ -519,16 +510,16 @@ describe('Logging', () => {
 
     it('should fail with unknown enum value', () => {
       const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'value3'))
-          .to.throw('Unknown enum value: "value3"');
-      expect(() => log.assertEnumValue(enum1, 'value3', 'MyEnum'))
-          .to.throw('Unknown MyEnum value: "value3"');
+      expect(() => log.assertEnumValue(enum1, 'value3')).to.throw(
+          'Unknown enum value: "value3"');
+      expect(() => log.assertEnumValue(enum1, 'value3', 'MyEnum')).to.throw(
+          'Unknown MyEnum value: "value3"');
     });
 
     it('should fail with values of different case', () => {
       const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'VALUE1'))
-          .to.throw('Unknown enum value: "VALUE1"');
+      expect(() => log.assertEnumValue(enum1, 'VALUE1')).to.throw(
+          'Unknown enum value: "VALUE1"');
     });
   });
 
@@ -673,4 +664,48 @@ describe('Logging', () => {
       expect(duplicate.associatedElement).to.equal(error.associatedElement);
     });
   });
+
+  describe('embed error', () => {
+    let sandbox;
+    let iframe;
+    let element;
+    let element1;
+    let element2;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+      document.body.removeChild(iframe);
+    });
+
+    it('should return logger for user-error', () => {
+      const error = user().createError();
+      expect(isUserErrorEmbed(error.message)).to.be.false;
+      expect(isUserErrorMessage(error.message)).to.be.true;
+    });
+
+    it('should return logger for embed-error', () => {
+      element = document.createElement('embed');
+      iframe.contentWindow.document.body.appendChild(element);
+      const error = user(element).createError();
+      expect(isUserErrorEmbed(error.message)).to.be.true;
+    });
+
+    it('should not create extra identical loggers', () => {
+      element = document.createElement('embed');
+      element1 = document.createElement('embed_1');
+      element2 = document.createElement('embed_2');
+      iframe.contentWindow.document.body.appendChild(element1);
+      iframe.contentWindow.document.body.appendChild(element2);
+      expect(user()).to.equal(user(element));
+      expect(user(element1)).to.equal(user(element2));
+      expect(user()).to.not.equal(user(element1));
+    });
+  });
 });
+

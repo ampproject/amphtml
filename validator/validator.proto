@@ -67,7 +67,7 @@ message UrlSpec {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 19
+// NEXT AVAILABLE TAG: 20
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -120,13 +120,18 @@ message AttrSpec {
   }
   // If set true, the TagSpec containing this AttrSpec will be evaluated first
   // for any encountered tag which matches the tag name and this attribute spec.
-  // May only be set for an AttrSpec where mandatory=true and the value field
-  // is set.
+  // May only be set for an AttrSpec where mandatory=true and type matches those
+  // specified in the comments of DispatchKeyType above.
   optional DispatchKeyType dispatch_key = 13 [default = NONE_DISPATCH];
 
   // If set to true, the TagSpec containing this AttrSpec implicitly has this
   // attribute and the attribute is considered valid.
   optional bool implicit = 17 [default = false];
+
+  // If set, this attr is considered part of an amp extended component, and
+  // requires that the named extended component script tag is present on the
+  // page.
+  repeated string requires_extension = 19;
 }
 
 // Some tags share several attributes, so they're identified by unique key
@@ -134,6 +139,13 @@ message AttrSpec {
 message AttrList {
   optional string name = 1;
   repeated AttrSpec attrs = 2;
+}
+
+// A list of allowed tags for descendants of any level (children, grandchildren,
+// great-grandchildren, etc).
+message DescendantTagList {
+  optional string name = 1;
+  repeated string allowed_tags = 2;
 }
 
 // Regex which, if matches the cdata of a tag, causes the tag validation to
@@ -165,7 +177,7 @@ message AtRuleSpec {
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
 }
 
-// NEXT AVAILABLE TAG: 6
+// NEXT AVAILABLE TAG: 8
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
@@ -177,6 +189,12 @@ message CssSpec {
   // Enables checks specific to the draft A4A specification.
   // TODO(powdercloud): Make this more generic.
   optional bool validate_amp4ads = 5;
+
+  // Enables checks specific to the style[keyframes] specification.
+  // TODO(chenshay): Make this more generic.
+  optional bool validate_keyframes = 6;
+
+  repeated string allowed_declarations = 7;
 }
 
 // NEXT AVAILABLE TAG: 9
@@ -225,6 +243,8 @@ message AmpLayout {
     CONTAINER = 5;
     FILL = 6;
     FLEX_ITEM = 7;
+    FLUID = 8;
+    INTRINSIC = 9;
   }
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
@@ -255,6 +275,9 @@ message ChildTagSpec {
   // If at least one tag name is specified, then the child tags of
   // the parent tag must have one of the provided tag names.
   repeated string child_tag_name_oneof = 3;
+  // Unless set to -1 (the default), the parent tag must have a minimum of
+  // |mandatory_min_num_child_tags| immediate child tags.
+  optional int32 mandatory_min_num_child_tags = 4 [default = -1];
 }
 
 // TagSpecs and reference points.
@@ -325,15 +348,16 @@ message ExtensionSpec {
   //
   // The second requirement (extension requires usage) has a few exceptions:
   //   1) For older extensions, implemented before these tagspec rules, we
-  //      do not want to introduce a breaking change, so we emit a warning
-  //      rather than an error if there is an unused extension. New extensions
-  //      may not make this requirement a warning.
+  //      do not want to introduce a breaking change, so we grandfather these
+  //      extensions to not require usage. New extensions must use ERROR.
   //   2) Some extensions, such as `amp-dynamic-css-classes`, do not have any
   //      associated tag in the document indicating usage. These extensions do
   //      not trigger warnings or errors.
   enum ExtensionUsageRequirement {
     ERROR = 1;
-    DEPRECATED_WARNING = 2;
+    // Exception for grandfathered extensions. #1 above.
+    GRANDFATHERED = 2;
+    // Exception for extensions with no usage-indicating tag. #2 above.
     NONE = 3;
   }
   optional ExtensionUsageRequirement requires_usage = 7 [default = ERROR];
@@ -342,23 +366,29 @@ message ExtensionSpec {
   extensions 5;
 }
 
+// The HtmlFormat is the declared format in the top-level html tag, which
+// prescribes a particular set of validation rules.
+message HtmlFormat {
+  enum Code {
+    UNKNOWN_CODE = 0;  // Never used
+    AMP = 1;
+    AMP4ADS = 2;
+    AMP4EMAIL = 3;
+    EXPERIMENTAL = 4;  // Currently unused
+  }
+}
+
 // Tags that are not covered by at least one of these specs are disallowed.
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 29
+// NEXT AVAILABLE TAG: 33
 message TagSpec {
-  // The HtmlFormat field tells the validator which html formats
-  // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
+  // The html_format field tells the validator for which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
   // If the repeated field is empty, this indicates that the TagSpec is allowed
   // for all formats, rather than none.
-  enum HtmlFormat {
-    AMP = 1;
-    AMP4ADS = 2;
-  }
-  // Specifies which amp html document formats we allow this TagSpec to
-  // validate.
-  repeated HtmlFormat html_format = 21;
+  repeated HtmlFormat.Code html_format = 21;
 
   // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.
@@ -401,14 +431,20 @@ message TagSpec {
   //   specified mandatory parent tag.
   optional string mandatory_parent = 6;
   // If set, the tag must descend from (not necessarily direct parent of) the
-  // specified mandatory parent string.
+  // specified mandatory parent string which is either a tag name or a tag
+  // spec_name (e.g. tag.name = "!DOCTYPE" or tag.spec_name = "html doctype").
   optional string mandatory_ancestor = 15;
   // Use only for tags where mandatory_ancestor is set. If tag validation fails
   // due to the mandatory_ancestor, and this field is set, then the error
   // detail will suggest the tag specified here as an alternative to consider.
   optional string mandatory_ancestor_suggested_alternative = 16;
-  // This tag may not descend from any tag with any of these tag names.
+  // This tag may not descend from any tag with any of these tag names or tag
+  // spec_names (e.g. tag.name = "!DOCTYPE" or tag.spec_name = "html doctype").
   repeated string disallowed_ancestor = 13;
+
+  // If set, all of the tag's descendants must be tags from the named list.
+  // A tag not in the named list will generate an error.
+  optional string descendant_tag_list = 29;
 
   // If set, other tags - identified by their detail string - must be
   // present as well or a warning will be issued (will not invalidate doc).
@@ -419,6 +455,10 @@ message TagSpec {
   // Expresses a generic condition which must be satisfied if this tag is found.
   // Used in combination with the `satisfies` attributes on a different tag.
   repeated string requires = 24;
+  // The excludes field is a generic condition, which must not be satisfied if
+  // this tag is found. Otherwise a TAG_EXCLUDED_BY_TAG error will be generated.
+  // Used in combination with the `satisfies` attributes on a different tag.
+  repeated string excludes = 32;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
@@ -442,6 +482,12 @@ message TagSpec {
   // of this tag in the document.
   optional ChildTagSpec child_tags = 19;
 
+  // If set to true, this tag cannot have any siblings.
+  optional bool siblings_disallowed = 30 [default = false];
+
+  // If set to true, this tag must be the last child of its parent.
+  optional bool mandatory_last_child = 31 [default = false];
+
   // The reference_points defined by this TagSpec instance determine how
   // specific child tags are identified. Please see the comment for the
   // ReferencePoint message.
@@ -460,9 +506,26 @@ message TagSpec {
   extensions 14, 26;
 }
 
+// Defines how much css is allowed on the document including inline styles.
+// If a CssLengthSpec is not defined for a particular html_format, then
+// no limit is enforced for inline styles but a limit may be enforced on
+// particular style tags. Those would be defined in that tag's CdataSpec.
+message CssLengthSpec {
+  // The html_format field tells the validator for which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this CssLengthSpec is defined for.
+  optional HtmlFormat.Code html_format = 1;
+
+  // If set, the cdata contents cannot be greater than this length, in bytes.
+  optional int32 max_bytes = 2 [default = -1];
+
+  // If provided, a URL which linking to a section / sentence in the
+  // AMP HTML spec.
+  optional string spec_url = 3;
+}
+
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 16
+// NEXT AVAILABLE TAG: 19
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -477,8 +540,15 @@ message ValidatorRules {
   // Spec URL for information about styles and amp-custom stylesheet
   optional string styles_spec_url = 15;
 
+  // Spec URL for information about script tags.
+  optional string script_spec_url = 17;
+
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
+
+  repeated DescendantTagList descendant_tag_list = 16;
+
+  repeated CssLengthSpec css_length_spec = 18;
 
   // Deprecated fields, do not reuse.
   extensions 2, 5, 11, 12, 14;
@@ -528,6 +598,13 @@ message ErrorCategory {
   }
 }
 
+// We record validation errors in a structured form, so that they can be
+// worked with in code - e.g., to provide translated messages.
+// In the Javascript implementation (validator.js), you may find
+// the amp.validator.renderErrorMessage function which will make a
+// human-readable string from the structured form. It should be easy to port
+// this to other languages as needed; for instance Google has implementations
+// in C++, Java, and for templates used in some frontends.
 message ValidationError {
   enum Severity {
     UNKNOWN_SEVERITY = 0;
@@ -538,21 +615,24 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 85
+  // NEXT AVAILABLE TAG: 104
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
     WARNING_TAG_REQUIRED_BY_MISSING = 76;
+    TAG_EXCLUDED_BY_TAG = 101;
     WARNING_EXTENSION_UNUSED = 79;
     EXTENSION_UNUSED = 84;
     WARNING_EXTENSION_DEPRECATED_VERSION = 80;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
+    DISALLOWED_SCRIPT_TAG = 88;
     DISALLOWED_ATTR = 3;
     DISALLOWED_STYLE_ATTR = 81;
     INVALID_ATTR_VALUE = 4;
+    DUPLICATE_ATTRIBUTE = 94;
     ATTR_VALUE_REQUIRED_BY_LAYOUT = 27;
     IMPLIED_LAYOUT_INVALID = 22;
     SPECIFIED_LAYOUT_INVALID = 26;
@@ -562,12 +642,12 @@ message ValidationError {
     DUPLICATE_UNIQUE_TAG = 6;
     DUPLICATE_UNIQUE_TAG_WARNING = 77;
     WRONG_PARENT_TAG = 7;
-    STYLESHEET_TOO_LONG_OLD_VARIANT = 8;
     STYLESHEET_TOO_LONG = 50;
+    STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 102;
+    INLINE_STYLE_TOO_LONG = 103;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
-    DEV_MODE_ENABLED = 10;  // Deprecated, remove after 2016-04-01.
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
     MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE = 14;
@@ -584,21 +664,27 @@ message ValidationError {
     TEMPLATE_IN_ATTR_NAME = 20;
     INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT = 21;
     DISALLOWED_TAG_ANCESTOR = 23;
+    MANDATORY_LAST_CHILD_TAG = 89;
     MANDATORY_TAG_ANCESTOR = 31;
     MANDATORY_TAG_ANCESTOR_WITH_HINT = 32;
     ATTR_DISALLOWED_BY_IMPLIED_LAYOUT = 33;
     ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT = 34;
     INCORRECT_NUM_CHILD_TAGS = 56;
+    INCORRECT_MIN_NUM_CHILD_TAGS = 85;
     DISALLOWED_CHILD_TAG_NAME = 57;
     DISALLOWED_FIRST_CHILD_TAG_NAME = 58;
     DISALLOWED_MANUFACTURED_BODY = 64;
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT = 66;
     MANDATORY_REFERENCE_POINT_MISSING = 67;
     DUPLICATE_REFERENCE_POINT = 68;
+    TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS = 87;
     TAG_REFERENCE_POINT_CONFLICT = 69;
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR = 70;
     BASE_TAG_MUST_PRECEED_ALL_URLS = 78;
     MISSING_REQUIRED_EXTENSION = 83;
+    ATTR_MISSING_REQUIRED_EXTENSION = 97;
+    DOCUMENT_TOO_COMPLEX = 86;
+    INVALID_UTF8 = 96;
 
     CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;
@@ -619,6 +705,14 @@ message ValidationError {
     CSS_SYNTAX_DISALLOWED_DOMAIN = 63;
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
     CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
+    CSS_SYNTAX_INVALID_PROPERTY = 90;
+    CSS_SYNTAX_INVALID_PROPERTY_NOLIST = 95;
+    CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS = 91;
+    CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME = 92;
+    CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME = 93;
+    CSS_SYNTAX_MALFORMED_MEDIA_QUERY = 98;
+    CSS_SYNTAX_DISALLOWED_MEDIA_TYPE = 99;
+    CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE = 100;
 
     // The following codes are currently used only by A4A CSS validation.
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;

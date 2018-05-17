@@ -1,18 +1,33 @@
-Please pick a meaningful title for your pull request using sentence case.
+# Instructions:
 
-Do not overuse punctuation in the title like `(chore):`. If it is helpful feel free to start with a project name, though, like `ProjectX: Implement some feature`.
+- Pick a meaningful title for your pull request. (Use sentence case.)
+  - Prefix the title with an emoji to identify what is being done. (Copy-paste from the list below.)
+  - Do not overuse punctuation in the title (like `(chore):`).
+  - If it is helpful, use a simple prefix (like `ProjectX: Implement some feature`).
+- Enter a succinct description that says why the PR is necessary, and what it does.
+  - Mention the GitHub issue that is being addressed by the pull request.
+  - The keywords `Fixes`, `Closes`, or `Resolves` followed the issue number will automatically close the issue.
 
-# Title instructions above.
-
-Enter a succinct description of what is achieved by the PR. Ideally describe why the change is being made.
-
-Bullet points like
+# Example of a good description:
 
 - Implements aspect X
 - Leaves out feature Y because of A
 - Improves performance by B
 - Improves accessibility by C
 
-really help with making this more readable.
+# Emojis for categorizing pull requests:
 
-Fixes/Closes/Related-to #1 (enter issue number, except in rare cases where none exists).
+✨ New feature (`:sparkles:`)  
+🐛 Bug fix (`:bug:`)  
+🔥 P0 fix (`:fire:`)  
+✅ Tests (`:white_check_mark:`)  
+🚀 Performance improvements (`:rocket:`)  
+🖍 CSS / Styling (`:crayon:`)  
+♿ Accessibility (`:wheelchair:`)  
+🌐 Internationalization (`:globe_with_meridians:`)  
+📖 Documentation (`:book:`)  
+🏗 Infrastructure / Tooling / Builds / CI (`:building_construction:`)  
+⏪ Reverting a previous change (`:rewind:`)  
+♻️ Refactoring (like moving around code w/o any changes) (`:recycle:`)  
+🚮 Deleting code (`:put_litter_in_its_place:`)
+

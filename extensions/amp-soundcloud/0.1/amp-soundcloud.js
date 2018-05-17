@@ -43,7 +43,7 @@ class AmpSoundcloud extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -61,10 +61,13 @@ class AmpSoundcloud extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
     const color = this.element.getAttribute('data-color');
     const visual = this.element.getAttribute('data-visual');
-    const url = 'https://api.soundcloud.com/tracks/';
-    const trackid = user().assert(
-        (this.element.getAttribute('data-trackid')),
-        'The data-trackid attribute is required for <amp-soundcloud> %s',
+    const url = 'https://api.soundcloud.com/' + (
+      this.element.hasAttribute('data-trackid') ? 'tracks' : 'playlists'
+    ) + '/';
+    const mediaid = user().assert(
+        (this.element.getAttribute('data-trackid')
+         || this.element.getAttribute('data-playlistid')),
+        'data-trackid or data-playlistid is required for <amp-soundcloud> %s',
         this.element);
     const secret = this.element.getAttribute('data-secret-token');
 
@@ -74,7 +77,7 @@ class AmpSoundcloud extends AMP.BaseElement {
     iframe.setAttribute('scrolling', 'no');
 
     let src = 'https://w.soundcloud.com/player/?' +
-      'url=' + encodeURIComponent(url + trackid);
+      'url=' + encodeURIComponent(url + mediaid);
     if (secret) {
       // It's very important the entire thing is encoded, since it's part of
       // the `url` query param added above.
@@ -105,6 +108,9 @@ class AmpSoundcloud extends AMP.BaseElement {
           'https://w.soundcloud.com');
     }
   }
-};
+}
 
-AMP.registerElement('amp-soundcloud', AmpSoundcloud);
+
+AMP.extension('amp-soundcloud', '0.1', AMP => {
+  AMP.registerElement('amp-soundcloud', AmpSoundcloud);
+});

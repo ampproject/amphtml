@@ -17,12 +17,9 @@
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {allocateVariant} from '../variant';
 import {stubService, stubServiceForDoc} from '../../../../testing/test-helper';
-import * as sinon from 'sinon';
 
 
-describe('allocateVariant', () => {
-
-  let sandbox;
+describes.sandboxed('allocateVariant', {}, () => {
   let fakeWin;
   let ampdoc;
   let getCidStub;
@@ -45,16 +42,11 @@ describe('allocateVariant', () => {
     fakeWin.document.defaultView = fakeWin;
     ampdoc = new AmpDocSingle(fakeWin);
 
-    sandbox = sinon.sandbox.create();
     getCidStub = stubService(sandbox, fakeWin, 'cid', 'get');
     uniformStub = stubService(sandbox, fakeWin, 'crypto', 'uniform');
     getParamStub = stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getParam');
     getNotificationStub = stubService(
         sandbox, fakeWin, 'userNotificationManager', 'getNotification');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should throw for invalid config', () => {
@@ -66,79 +58,79 @@ describe('allocateVariant', () => {
       allocateVariant(ampdoc, 'name', undefined);
     }).to.throw();
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {});
-    }).to.throw(/Missing experiment variants config/);
+    }).to.throw(/Missing experiment variants config/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {variants: {}});
-    }).to.throw(/Missing experiment variants config/);
+    }).to.throw(/Missing experiment variants config/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'invalid_char_%_in_name': 1,
         },
       });
-    }).to.throw(/Invalid name/);
+    }).to.throw(/Invalid name/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'variant_1': 50,
           'variant_2': 51,
         },
       });
-    }).to.throw(/Total percentage is bigger than 100/);
+    }).to.throw(/Total percentage is bigger than 100/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'negative_percentage': -1,
         },
       });
-    }).to.throw(/Invalid percentage/);
+    }).to.throw(/Invalid percentage/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'too_big_percentage': 101,
         },
       });
-    }).to.throw(/Invalid percentage/);
+    }).to.throw(/Invalid percentage/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'non_number_percentage': '50',
         },
       });
-    }).to.throw(/Invalid percentage/);
+    }).to.throw(/Invalid percentage/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'invalid_name!', {
         variants: {
           'variant_1': 50,
         },
       });
-    }).to.throw(/Invalid name/);
+    }).to.throw(/Invalid name/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, '', {
         variants: {
           'variant_1': 50,
         },
       });
-    }).to.throw(/Invalid name/);
+    }).to.throw(/Invalid name/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         group: 'invalid_group_name!',
         variants: {
           'variant_1': 50,
         },
       });
-    }).to.throw(/Invalid name/);
+    }).to.throw(/Invalid name/); });
   });
 
   it('should work around float rounding error', () => {
@@ -284,7 +276,7 @@ describe('allocateVariant', () => {
         '-Variant_1': 50,
         '-Variant_2': 50,
       },
-    })).to.eventually.rejectedWith('Notification not found: notif-1');
+    })).to.eventually.be.rejectedWith('Notification not found: notif-1');
   });
 
   it('should have no variant allocated if consent is missing', () => {

@@ -18,35 +18,30 @@
  * The entry point for AMP inabox runtime (inabox-v0.js).
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
-import {ampdocServiceFor} from '../ampdoc';
-import {startupChunk} from '../chunk';
-import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
+import {Navigation} from '../service/navigation';
+import {Services} from '../services';
 import {
-  installPerformanceService,
-  performanceFor,
-} from '../service/performance-impl';
-import {installStyles, makeBodyVisible} from '../style-installer';
-import {installErrorReporting} from '../error';
-import {installDocService} from '../service/ampdoc-impl';
-import {installCacheServiceWorker} from '../service-worker/install';
-import {stubElements} from '../custom-element';
-import {
-    installAmpdocServices,
-    installBuiltins,
-    installRuntimeServices,
-    adopt,
+  adopt,
+  installAmpdocServices,
+  installBuiltins,
+  installRuntimeServices,
 } from '../runtime';
 import {cssText} from '../../build/css';
-import {maybeValidate} from '../validator-integration';
-import {maybeTrackImpression} from '../impression';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
-import {installInaboxViewportService} from './inabox-viewport';
-import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
+import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
-import {resourcesForDoc} from '../services';
+import {installCacheServiceWorker} from '../service-worker/install';
+import {installDocService} from '../service/ampdoc-impl';
+import {installErrorReporting} from '../error';
+import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
+import {installInaboxViewportService} from './inabox-viewport';
+import {installPerformanceService} from '../service/performance-impl';
+import {installStylesForDoc, makeBodyVisible} from '../style-installer';
+import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {maybeTrackImpression} from '../impression';
+import {maybeValidate} from '../validator-integration';
+import {startupChunk} from '../chunk';
+import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
 
@@ -59,12 +54,12 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisible on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  installDocService(self,  /* isSingleDoc */ true);
-  ampdocService = ampdocServiceFor(self);
+  installDocService(self, /* isSingleDoc */ true);
+  ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(self.document);
@@ -75,14 +70,14 @@ startupChunk(self.document, function initial() {
   const ampdoc = ampdocService.getAmpDoc(self.document);
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
-  const perf = performanceFor(self);
+  const perf = Services.performanceFor(self);
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
   const fullCss = cssText
       + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}'
       + 'html.i-amphtml-inabox>body{position:initial!important}';
-  installStyles(self.document, fullCss, () => {
+  installStylesForDoc(ampdoc, fullCss, () => {
     startupChunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
@@ -92,7 +87,6 @@ startupChunk(self.document, function initial() {
       // runtime tries to install the normal one.
       installViewerServiceForDoc(ampdoc);
       installInaboxViewportService(ampdoc);
-
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
@@ -106,18 +100,18 @@ startupChunk(self.document, function initial() {
       adopt(self);
     });
     startupChunk(self.document, function stub() {
-      stubElements(self);
+      // Pre-stub already known elements.
+      stubElementsForDoc(ampdoc);
     });
     startupChunk(self.document, function final() {
-      installAnchorClickInterceptor(ampdoc, self);
-
+      Navigation.installAnchorClickInterceptor(ampdoc, self);
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
       installCacheServiceWorker(self);
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
-      resourcesForDoc(ampdoc).ampInitComplete();
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();

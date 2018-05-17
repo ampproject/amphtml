@@ -76,19 +76,31 @@ Renders as:
 
 ## Attributes
 
-**data-href** (required)
+##### data-href (required)
 
 The URL of the Facebook post/video. For example, `https://www.facebook.com/zuck/posts/10102593740125791`.
 
-**data-embed-as** (optional)
+##### data-embed-as
 
 The value is either `post` or `video`.  The default is `post`.
 
-Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embeds the player of the video, and ignores the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
+Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos embeds the player of the video, and adds the accompanying post card with it. Setting `data-embed-as="post"` ignores the caption card. This is done to make sure we are zooming in on videos correctly.
 
 Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
 
-**common attributes**
+##### data-align-center
+
+The value is either `true` or `false`.  The default is `false`.
+
+Having this attribute set to true would align the post/video container to center.
+
+##### data-locale (optional)
+
+By default, the locale is set to user's system language; however, you can specify a locale as well. 
+
+For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
+
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

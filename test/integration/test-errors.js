@@ -16,14 +16,15 @@
 
 import {
   createFixtureIframe,
-  poll,
   expectBodyToBecomeVisible,
+  poll,
 } from '../../testing/iframe.js';
 
-describe.configure().retryOnSaucelabs().run('error page', function() {
-  const timeout = 5000;
+/** @const {number} */
+const TIMEOUT = window.ampTestRuntimeConfig.mochaTimeout;
 
-  this.timeout(timeout);
+describe.configure().retryOnSaucelabs().run('error page', function() {
+  this.timeout(TIMEOUT);
 
   let fixture;
   beforeEach(() => {
@@ -42,18 +43,18 @@ describe.configure().retryOnSaucelabs().run('error page', function() {
       }, () => {
         return new Error('Failed to find errors. HTML\n' +
             fixture.doc.documentElement./*TEST*/innerHTML);
-      }, timeout);
+      }, TIMEOUT);
     });
   });
 
   it.configure().skipFirefox().skipEdge()
       .run('should show the body in error test', () => {
-        return expectBodyToBecomeVisible(fixture.win, timeout);
+        return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
       });
 
   function shouldFail(id) {
     // Skip for issue #110
-    it.configure().skipSauceLabs().run('should fail to load #' + id, () => {
+    it.configure().ifNewChrome().run('should fail to load #' + id, () => {
       const e = fixture.doc.getElementById(id);
       expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror'));

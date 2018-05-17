@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {
-  GoogleAdLifecycleReporter,
-  BaseLifecycleReporter,
-} from '../performance';
-import {createIframePromise} from '../../../../testing/iframe';
-import {viewerForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
+import {
+  BaseLifecycleReporter,
+  GoogleAdLifecycleReporter,
+} from '../performance';
+import {Services} from '../../../../src/services';
+import {createIframePromise} from '../../../../testing/iframe';
 
 /**
  * Verify that `address` matches all of the patterns in `matchlist`.
  *
- * @param {!string} address
+ * @param {string} address
  * @param {!Array<!RegExp>} matchList
  */
 function expectMatchesAll(address, matchList) {
@@ -78,9 +78,8 @@ describe('GoogleAdLifecycleReporter', () => {
     sandbox = sinon.sandbox.create();
     emitPingSpy = sandbox.spy(GoogleAdLifecycleReporter.prototype, 'emitPing_');
     iframe = createIframePromise(false).then(iframeFixture => {
-      const win = iframeFixture.win;
-      const doc = iframeFixture.doc;
-      const viewer = viewerForDoc(doc);
+      const {win, doc} = iframeFixture;
+      const viewer = Services.viewerForDoc(doc);
       const elem = doc.createElement('div');
       doc.body.appendChild(elem);
       const reporter = new GoogleAdLifecycleReporter(win, elem, 42);
@@ -106,8 +105,10 @@ describe('GoogleAdLifecycleReporter', () => {
     it('should request a single ping', () => {
       return iframe.then(({viewer, reporter}) => {
         const iniTime = reporter.initTime_;
-        sandbox.stub(viewer, 'getFirstVisibleTime', () => iniTime + 11);
-        sandbox.stub(viewer, 'getLastVisibleTime', () => iniTime + 12);
+        sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(
+            () => iniTime + 11);
+        sandbox.stub(viewer, 'getLastVisibleTime').callsFake(
+            () => iniTime + 12);
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
@@ -135,7 +136,6 @@ describe('GoogleAdLifecycleReporter', () => {
           urlBuilt: '1',
           adRequestStart: '2',
           adRequestEnd: '3',
-          extractCreativeAndSignature: '4',
           adResponseValidateStart: '5',
           renderFriendlyStart: '6',
           renderCrossDomainStart: '7',
@@ -173,8 +173,9 @@ describe('GoogleAdLifecycleReporter', () => {
           adResponseValidateStart: '5',
           renderFriendlyStart: '6',
           renderCrossDomainStart: '7',
+          upgradeDelay: '30',
         };
-        const nStages = 4;
+        const nStages = 5;
         const allReporters = [];
         const nSlots = 20;
         for (let i = 0; i < nSlots; ++i) {
@@ -187,11 +188,16 @@ describe('GoogleAdLifecycleReporter', () => {
             's': 'AD_SLOT_NAMESPACE',
             'c': 'AD_PAGE_CORRELATOR',
             'it.AD_SLOT_ID': 'AD_SLOT_TIME_TO_EVENT',
+            'st': 'AD_SLOT_EVENT_ID',
           });
           allReporters.push(reporter);
         }
         allReporters.forEach(r => {
           for (const k in stages) {
+            if (k == 'upgradeDelay') {
+              // Verify force override.
+              r.setPingParameter('forced_delta', 123456);
+            }
             r.sendPing(k);
           }
         });
@@ -206,9 +212,11 @@ describe('GoogleAdLifecycleReporter', () => {
           commonCorrelator = commonCorrelator || corr;
           const slotId = /[?&]it.([0-9]+)=[0-9]+(&|$)/.exec(src)[1];
           expect(corr).to.equal(commonCorrelator);
+          expect(new RegExp(`&it.${slotId}=123456`).test(src)).to.equal(
+              /&st=30/.test(src));
           slotCounts[slotId] = slotCounts[slotId] || 0;
           ++slotCounts[slotId];
-        };
+        }
         // SlotId 0 corresponds to unusedReporter, so ignore it.
         for (let s = 1; s <= nSlots; ++s) {
           expect(slotCounts[s], 'slotCounts[' + s + ']').to.equal(nStages);

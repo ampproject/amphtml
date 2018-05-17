@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 goog.provide('json_testutil.defaultCmpFn');
 goog.provide('json_testutil.makeJsonKeyCmpFn');
 goog.provide('json_testutil.renderJSON');
+goog.require('goog.asserts');
 
 /**
  * Helper function for renderJSON below.

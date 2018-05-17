@@ -16,6 +16,7 @@
 
 /**
  * A single node in the AST of a `BindExpression`.
+ * @struct
  */
 export class AstNode {
   /**
@@ -72,6 +73,7 @@ export const AstNodeType = {
   NOT_EQUAL: 26,
   EQUAL: 27,
   TERNARY: 28,
+  ARROW_FUNCTION: 29,
 };
 
 /**

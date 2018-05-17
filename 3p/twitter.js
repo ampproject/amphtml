@@ -65,17 +65,21 @@ export function twitter(global, data) {
 
     let twitterWidgetSandbox;
     twttr.events.bind('resize', event => {
-      // To be safe, make sure the resize event was triggered for the widget we created below.
+      // To be safe, make sure the resize event was triggered for the widget we
+      // created below.
       if (twitterWidgetSandbox === event.target) {
         resize(twitterWidgetSandbox);
       }
     });
 
-    twttr.widgets.createTweet(data.tweetid, tweet, data)./*OK*/then(el => {
+    const tweetId = cleanupTweetId_(data.tweetid);
+    twttr.widgets.createTweet(tweetId, tweet, data)./*OK*/then(el => {
       if (el) {
         // Not a deleted tweet
         twitterWidgetSandbox = el;
         resize(twitterWidgetSandbox);
+      } else {
+        global.context.noContentAvailable();
       }
     });
   });
@@ -91,4 +95,28 @@ export function twitter(global, data) {
         container./*OK*/offsetWidth,
         height + /* margins */ 20);
   }
+}
+
+/**
+ * @visibleForTesting
+ */
+export function cleanupTweetId_(tweetid) {
+  // 1)
+  // Handle malformed ids such as
+  // https://twitter.com/abc123/status/585110598171631616
+  tweetid = tweetid.toLowerCase();
+  let match = tweetid.match(/https:\/\/twitter.com\/[^\/]+\/status\/(\d+)/);
+  if (match) {
+    return match[1];
+  }
+
+  // 2)
+  // Handle malformed ids such as
+  // 585110598171631616?ref_src
+  match = tweetid.match(/^(\d+)\?ref.*/);
+  if (match) {
+    return match[1];
+  }
+
+  return tweetid;
 }

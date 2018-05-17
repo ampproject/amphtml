@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 
 class AmpO2Player extends AMP.BaseElement {
 
@@ -123,4 +123,7 @@ class AmpO2Player extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-o2-player', AmpO2Player);
+
+AMP.extension('amp-o2-player', '0.1', AMP => {
+  AMP.registerElement('amp-o2-player', AmpO2Player);
+});

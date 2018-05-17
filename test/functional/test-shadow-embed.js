@@ -16,46 +16,27 @@
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {
-  ShadowDomWriter,
-  copyRuntimeStylesToShadowRoot,
-  createShadowEmbedRoot,
+  ShadowDomVersion,
+  setShadowCssSupportedForTesting,
+  setShadowDomSupportedVersionForTesting,
+} from '../../src/web-components';
+import {
+  ShadowDomWriterBulk,
+  ShadowDomWriterStreamer,
+  createShadowDomWriter,
   createShadowRoot,
   getShadowRootNode,
   importShadowBody,
-  installStylesForShadowRoot,
   isShadowRoot,
   scopeShadowCss,
+  setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
-import {ampdocServiceFor} from '../../src/ampdoc';
-import {
-  setShadowDomSupportedVersionForTesting,
-  ShadowDomVersion,
-} from '../../src/web-components';
-import {extensionsFor} from '../../src/services';
-import * as sinon from 'sinon';
-
+import {installStylesForDoc} from '../../src/style-installer';
+import {toArray} from '../../src/types';
 
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
-  });
-
-  it('should copy runtime styles from ampdoc', () => {
-    const parentRoot = document.createElement('div');
-    const style = document.createElement('style');
-    style.setAttribute('amp-runtime', '');
-    style.textContent = '.cssClass{}';
-    parentRoot.appendChild(style);
-    const hostElement = document.createElement('div');
-    const shadowRoot = createShadowRoot(hostElement);
-    const ampdoc = new AmpDocShadow(window, 'https://a.org/', parentRoot);
-
-    copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
-
-    const copy = shadowRoot.querySelector('style[amp-runtime]');
-    expect(copy).to.exist;
-    expect(copy.textContent).to.contain('.cssClass');
-    expect(copy).to.not.equal(style);
   });
 
   [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1]
@@ -66,6 +47,7 @@ describes.sandboxed('shadow-embed', {}, () => {
           beforeEach(function() {
             hostElement = document.createElement('div');
             setShadowDomSupportedVersionForTesting(scenario);
+            setShadowCssSupportedForTesting(undefined);
 
             if (scenario == ShadowDomVersion.V0 &&
                 !Element.prototype.createShadowRoot) {
@@ -78,10 +60,11 @@ describes.sandboxed('shadow-embed', {}, () => {
             }
           });
 
-          it('should transform CSS installStylesForShadowRoot', () => {
+          it('should transform CSS installStylesForDoc for shadow root', () => {
             const shadowRoot = createShadowRoot(hostElement);
-            const style = installStylesForShadowRoot(
-                shadowRoot, 'body {}', true);
+            const ampdoc = new AmpDocShadow(
+                window, 'https://a.org/', shadowRoot);
+            const style = installStylesForDoc(ampdoc, 'body {}', null, true);
             expect(shadowRoot.contains(style)).to.be.true;
             const css = style.textContent.replace(/\s/g, '');
             if (scenario == ShadowDomVersion.NONE) {
@@ -125,7 +108,54 @@ describes.sandboxed('shadow-embed', {}, () => {
                 expect(shadowRoot.tagName).to.equal('I-AMPHTML-SHADOW-ROOT');
                 expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
               });
+
+              it('should add host style for polyfill', () => {
+                const doc = hostElement.ownerDocument;
+                const win = doc.defaultView;
+                doc.body.appendChild(hostElement);
+                const slot = doc.createElement('div');
+                hostElement.appendChild(slot);
+                expect(win.getComputedStyle(slot).display).to.equal('block');
+                const shadowRoot = createShadowRoot(hostElement);
+                expect(hostElement).to.have.class(
+                    'i-amphtml-shadow-host-polyfill');
+                expect(win.getComputedStyle(slot).display).to.equal('none');
+                expect(win.getComputedStyle(shadowRoot).display)
+                    .to.not.equal('none');
+                doc.body.removeChild(hostElement);
+              });
             }
+
+            // Test scenarios where Shadow Css is not supported
+            it('Should add an id and class for CSS \
+              encapsulation to the shadow root', () => {
+                  setShadowCssSupportedForTesting(false);
+                  const shadowRoot = createShadowRoot(hostElement);
+                  expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
+                  // Browserify does not support arrow functions with params.
+                  // Using Old School for
+                  const shadowRootClassListArray =
+                toArray(shadowRoot.host.classList);
+                  let foundShadowCssClass = false;
+                  for (let i = 0; i < shadowRootClassListArray.length; i++) {
+                    if (shadowRootClassListArray[i].match(/i-amphtml-sd-\d+/)) {
+                      foundShadowCssClass = true;
+                      break;
+                    }
+                  }
+                  expect(foundShadowCssClass).to.be.ok;
+                });
+
+            it('Should transform CSS for the shadow root', () => {
+              setShadowCssSupportedForTesting(false);
+              const shadowRoot = createShadowRoot(hostElement);
+              const ampdoc = new AmpDocShadow(
+                  window, 'https://a.org/', shadowRoot);
+              const style = installStylesForDoc(ampdoc, 'body {}', null, true);
+              expect(shadowRoot.contains(style)).to.be.true;
+              const css = style.textContent.replace(/\s/g, '');
+              expect(css).to.match(/amp-body/);
+            });
           });
 
           describe('stylesheets', () => {
@@ -149,14 +179,15 @@ describes.sandboxed('shadow-embed', {}, () => {
               shadowStyle.textContent = '.x {background: green}';
               shadowRoot.appendChild(shadowStyle);
 
-              const styleSheets = shadowRoot.styleSheets;
+              const {styleSheets} = shadowRoot;
               expect(styleSheets).to.exist;
               expect(styleSheets).to.have.length(1);
               expect(styleSheets[0].ownerNode).to.equal(shadowStyle);
             });
           });
 
-          describe('importShadowBody', () => {
+          // TODO(aghassemi, #12499): Make this work with latest mocha / karma.
+          describe.skip('importShadowBody', () => {
             let shadowRoot, source, child1, child2;
 
             beforeEach(() => {
@@ -268,66 +299,6 @@ describes.sandboxed('shadow-embed', {}, () => {
     });
   });
 
-  describe('createShadowEmbedRoot', () => {
-    let extensionsMock;
-    let hostElement;
-
-    beforeEach(() => {
-      const extensions = extensionsFor(window);
-      extensionsMock = sandbox.mock(extensions);
-
-      hostElement = document.createElement('div');
-      if (!hostElement.createShadowRoot) {
-        hostElement.createShadowRoot = () => {
-          const shadowRoot = document.createElement('shadow');
-          hostElement.appendChild(shadowRoot);
-          hostElement.shadowRoot = shadowRoot;
-          shadowRoot.host = hostElement;
-        };
-      }
-
-      const root = document.createElement('div');
-      const style = document.createElement('style');
-      style.setAttribute('amp-runtime', '');
-      root.appendChild(style);
-      const ampdoc = new AmpDocShadow(window, 'https://a.org/', root);
-      const ampdocService = ampdocServiceFor(window);
-      sandbox.stub(ampdocService, 'getAmpDoc', () => ampdoc);
-    });
-
-    afterEach(() => {
-      extensionsMock.verify();
-    });
-
-    it('should create shadow root and context', () => {
-      const shadowRoot = createShadowEmbedRoot(hostElement, []);
-      expect(shadowRoot).to.exist;
-      expect(shadowRoot.AMP).to.exist;
-    });
-
-    it('should install runtime styles', () => {
-      const shadowRoot = createShadowEmbedRoot(hostElement, []);
-      expect(shadowRoot.querySelector('style[amp-runtime]')).to.exist;
-    });
-
-    it('should install extensions', () => {
-      extensionsMock.expects('loadExtension')
-          .withExactArgs('amp-ext1')
-          .returns(Promise.resolve({}))
-          .once();
-      let savedShadowRoot;
-      extensionsMock.expects('installFactoriesInShadowRoot')
-          .withExactArgs(sinon.match(arg => {
-            savedShadowRoot = arg;
-            return true;
-          }), ['amp-ext1'])
-          .returns(Promise.resolve())
-          .once();
-      const shadowRoot = createShadowEmbedRoot(hostElement, ['amp-ext1']);
-      expect(savedShadowRoot).to.equal(shadowRoot);
-    });
-  });
-
   describe('scopeShadowCss', () => {
     let shadowRoot;
 
@@ -341,26 +312,84 @@ describes.sandboxed('shadow-embed', {}, () => {
     }
 
     it('should replace root selectors', () => {
-      expect(scope('html {}')).to.equal('#h amp-html {}');
-      expect(scope('body {}')).to.equal('#h amp-body {}');
+      expect(scope('html {}')).to.equal('.h amp-html {}');
+      expect(scope('body {}')).to.equal('.h amp-body {}');
       expect(scope('html {} body {}')).to.equal(
-          '#h amp-html {}#h amp-body {}');
-      expect(scope('html, body {}')).to.equal('#h amp-html, #h amp-body {}');
-      expect(scope('body.x {}')).to.equal('#h amp-body.x {}');
-      expect(scope('body::after {}')).to.equal('#h amp-body::after {}');
-      expect(scope('body[x] {}')).to.equal('#h amp-body[x] {}');
+          '.h amp-html {}.h amp-body {}');
+      expect(scope('html, body {}')).to.equal('.h amp-html, .h amp-body {}');
+      expect(scope('body.x {}')).to.equal('.h amp-body.x {}');
+      expect(scope('body::after {}')).to.equal('.h amp-body::after {}');
+      expect(scope('body[x] {}')).to.equal('.h amp-body[x] {}');
     });
 
     it('should avoid false positives for root selectors', () => {
-      expect(scope('.body {}')).to.equal('#h .body {}');
-      expect(scope('x-body {}')).to.equal('#h x-body {}');
-      expect(scope('body-x {}')).to.equal('#h body-x {}');
-      expect(scope('body_x {}')).to.equal('#h body_x {}');
-      expect(scope('body1 {}')).to.equal('#h body1 {}');
+      expect(scope('.body {}')).to.equal('.h .body {}');
+      expect(scope('x-body {}')).to.equal('.h x-body {}');
+      expect(scope('body-x {}')).to.equal('.h body-x {}');
+      expect(scope('body_x {}')).to.equal('.h body_x {}');
+      expect(scope('body1 {}')).to.equal('.h body1 {}');
     });
   });
 
-  describes.fakeWin('ShadowDomWriter', {amp: true}, env => {
+  describe('createShadowDomWriter', () => {
+    let createHTMLDocumentSpy;
+    let win;
+    let isFirefox;
+
+    beforeEach(() => {
+      setShadowDomStreamingSupportedForTesting(undefined);
+      createHTMLDocumentSpy = sandbox.spy();
+      isFirefox = false;
+      const platform = {
+        isFirefox: () => isFirefox,
+      };
+      win = {
+        navigator: {
+          userAgent: '',
+        },
+        document: {
+          implementation: {
+            createHTMLDocument: type => {
+              createHTMLDocumentSpy(type);
+              return {
+                open: () => {},
+              };
+            },
+          },
+        },
+        services: {
+          'platform': {obj: platform},
+          'vsync': {obj: {}},
+        },
+      };
+    });
+
+    it('should resolve to streamer', () => {
+      expect(createShadowDomWriter(win))
+          .to.be.instanceOf(ShadowDomWriterStreamer);
+      expect(createHTMLDocumentSpy).to.be.calledOnce;
+      expect(createHTMLDocumentSpy).to.be.calledWith('');
+    });
+
+    it('should resolve to bulk without API', () => {
+      delete win.document.implementation.createHTMLDocument;
+      expect(createShadowDomWriter(win))
+          .to.be.instanceOf(ShadowDomWriterBulk);
+      delete win.document.implementation;
+      expect(createShadowDomWriter(win))
+          .to.be.instanceOf(ShadowDomWriterBulk);
+      expect(createHTMLDocumentSpy).to.not.be.called;
+    });
+
+    it('should resolve to bulk on firefox', () => {
+      isFirefox = true;
+      expect(createShadowDomWriter(win))
+          .to.be.instanceOf(ShadowDomWriterBulk);
+      expect(createHTMLDocumentSpy).to.not.be.called;
+    });
+  });
+
+  describes.fakeWin('ShadowDomWriterStreamer', {amp: true}, env => {
     let win;
     let writer;
     let onBodySpy, onBodyChunkSpy;
@@ -368,7 +397,7 @@ describes.sandboxed('shadow-embed', {}, () => {
 
     beforeEach(() => {
       win = env.win;
-      writer = new ShadowDomWriter(win);
+      writer = new ShadowDomWriterStreamer(win);
       onBodySpy = sandbox.spy();
       onBodyChunkSpy = sandbox.spy();
       onBodyPromise = new Promise(resolve => {
@@ -449,6 +478,134 @@ describes.sandboxed('shadow-embed', {}, () => {
           expect(win.document.body.querySelector('child2')).to.exist;
         });
       });
+    });
+
+    it('should not parse noscript as markup', () => {
+      writer.write('<body><child1></child1><noscript><child2></child2>' +
+          '</noscript>');
+      return waitForNextBodyChunk().then(() => {
+        expect(win.document.body.querySelector('child1')).to.exist;
+        expect(win.document.body.querySelector('child2')).not.to.exist;
+        writer.write('<noscript><child3></child3></noscript>');
+        writer.write('<child4></child4>');
+        writer.close();
+        env.flushVsync();
+
+        return onEndPromise.then(() => {
+          expect(win.document.body.querySelector('child3')).not.to.exist;
+          expect(win.document.body.querySelector('child4')).to.exist;
+        });
+      });
+    });
+
+    it('should not parse noscript as markup across writes', () => {
+      writer.write('<body><child1></child1><noscript><child2>');
+      return waitForNextBodyChunk().then(() => {
+        expect(win.document.body.querySelector('child1')).to.exist;
+        writer.write('</child2></noscript>');
+        writer.write('<child3></child3>');
+        writer.close();
+        env.flushVsync();
+
+        return onEndPromise.then(() => {
+          expect(win.document.body.querySelector('child1')).to.exist;
+          expect(win.document.body.querySelector('child2')).not.to.exist;
+          expect(win.document.body.querySelector('child3')).to.exist;
+        });
+      });
+    });
+  });
+
+  describes.fakeWin('ShadowDomWriterBulk', {amp: true}, env => {
+    let win;
+    let writer;
+    let onBodySpy, onBodyChunkSpy;
+    let onBodyPromise, onBodyChunkPromiseResolver, onEndPromise;
+
+    beforeEach(() => {
+      win = env.win;
+      writer = new ShadowDomWriterBulk(win);
+      onBodySpy = sandbox.spy();
+      onBodyChunkSpy = sandbox.spy();
+      onBodyPromise = new Promise(resolve => {
+        writer.onBody(parsedDoc => {
+          resolve(parsedDoc.body);
+          onBodySpy(parsedDoc);
+          return win.document.body;
+        });
+      });
+      writer.onBodyChunk(() => {
+        if (onBodyChunkPromiseResolver) {
+          onBodyChunkPromiseResolver();
+          onBodyChunkPromiseResolver = null;
+        }
+        onBodyChunkSpy();
+      });
+      onEndPromise = new Promise(resolve => {
+        writer.onEnd(resolve);
+      });
+    });
+
+    it('should complete when writer has been closed', () => {
+      writer.close();
+      return onEndPromise.then(() => {
+        expect(onBodySpy).to.be.calledOnce;
+        env.flushVsync();
+        expect(onBodyChunkSpy).to.not.be.called;
+      });
+    });
+
+    it('should wait for body until stream is closed', () => {
+      writer.write('<body class="b">');
+      env.flushVsync();
+      expect(onBodySpy).to.not.be.called;
+      expect(writer.eof_).to.be.false;
+
+      writer.write('abc');
+      env.flushVsync();
+      expect(onBodySpy).to.not.be.called;
+      expect(writer.eof_).to.be.false;
+
+      writer.close();
+      env.flushVsync();
+      expect(onBodySpy).to.be.calledOnce;
+      expect(win.document.body.textContent).to.equal('abc');
+      expect(writer.eof_).to.be.true;
+      return Promise.all([onBodyPromise, onEndPromise]);
+    });
+
+    it('should process for body chunks together', () => {
+      writer.write('<body class="b">');
+      env.flushVsync();
+      expect(onBodySpy).to.not.be.called;
+
+      writer.write('<child></child>');
+      env.flushVsync();
+      expect(onBodySpy).to.not.be.called;
+
+      writer.write('<child2></child2>');
+      env.flushVsync();
+      expect(onBodySpy).to.not.be.called;
+
+      writer.close();
+      env.flushVsync();
+      expect(onBodySpy).to.be.calledOnce;
+      expect(win.document.body.querySelector('child')).to.exist;
+      expect(win.document.body.querySelector('child2')).to.exist;
+      expect(writer.eof_).to.be.true;
+      return Promise.all([onBodyPromise, onEndPromise]);
+    });
+
+    it('should not parse noscript as markup', () => {
+      writer.write('<body>');
+      writer.write('<child1></child1><noscript><child2></child2></noscript>');
+      writer.write('<child3></child3>');
+      writer.close();
+      env.flushVsync();
+      expect(win.document.body.querySelector('child1')).to.exist;
+      expect(win.document.body.querySelector('child2')).not.to.exist;
+      expect(win.document.body.querySelector('child3')).to.exist;
+      return Promise.all([onBodyPromise, onEndPromise]);
     });
   });
 });

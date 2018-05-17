@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The AMP selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
@@ -40,7 +42,7 @@ The AMP selector is a control that presents a list of options and lets the user 
 - Selectable options can be set by adding the `option` attribute to the element and assigning a value to the attribute (e.g., `<li option='value'></li>`).
 - Disabled options can be set by adding the `disabled` attribute to the element (e.g.,  `<li option='d' disabled></li>`).
 - Preselected options can be set by adding the `selected` attribute to the element (e.g.,  `<li option='b' selected></li>`).
-- To allow for multiple selections, add the `multiple` attribute to the `amp-selector` element.  By default, the `amp-selector` allows for one selection at a time. 
+- To allow for multiple selections, add the `multiple` attribute to the `amp-selector` element.  By default, the `amp-selector` allows for one selection at a time.
 - To disable the entire `amp-selector`, add the `disabled` attribute to the `amp-selector` element.
 - When an `amp-selector` contains a `name` attribute and the `amp-selector` is inside a `form` tag, if a submit event occurs on the form, the `amp-selector`behaves like a radio-button/checkbox group and submits the selected values (the ones assigned to the option) against the name of the `amp-selector`.
 
@@ -79,23 +81,54 @@ Example:
 </amp-selector>
 ```
 
+## Clearing selections
+To clear all selections when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
+
+Example:
+
+```html
+<button on="tap:mySelector.clear">Clear Selection</button>
+<amp-selector id="mySelector" layout="container" multiple>
+  <div>Option One</div>
+  <div>Option Two</div>
+  <div>Option Three</div>
+</amp-selector>
+```
+
+{% call callout('Tip', type='success') %}
+See live demos at [AMP By Example](https://ampbyexample.com/components/amp-selector/).
+{% endcall %}
+
 ## Attributes
 
 ### Attributes on `<amp-selector>`
 
-**disabled, form, multiple, name**
+##### disabled, form, multiple, name
 
 The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
 
 ### Attributes on `<amp-selector>` options
 
-**option**
+##### option
 
 Indicates that the option is selectable.  If a value is specified, the contents of the value is submitted with the form.
 
-**disabled, selected**
+##### disabled, selected
 
 The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.
+
+## Events
+
+Events may trigger actions on other AMP components using the `on` attribute.
+e.g. `on="select: my-tab.show"`
+
+Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+
+##### select
+
+`amp-selector` triggers the `select` event when the user selects an option.
+Multi-selectors and single-selectors fire this when selecting or unselecting options.
+Tapping disabled options does not trigger the `select` event.
 
 ## Validation
 

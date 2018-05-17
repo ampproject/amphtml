@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {dev} from '../../../src/log';
+import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
-import {getAmpDoc} from '../../../src/ampdoc';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
+import {toWin} from '../../../src/types';
 
 
 /** @type {boolean|undefined} */
@@ -51,6 +52,7 @@ export function setCheckValiditySupportedForTesting(isSupported) {
 const CustomValidationTypes = {
   AsYouGo: 'as-you-go',
   ShowAllOnSubmit: 'show-all-on-submit',
+  InteractAndSubmit: 'interact-and-submit',
   ShowFirstOnSubmit: 'show-first-on-submit',
 };
 
@@ -69,10 +71,19 @@ export class FormValidator {
     this.form = form;
 
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = getAmpDoc(form);
+    this.ampdoc = Services.ampdoc(form);
 
-    /** @protected @const {!Document} */
-    this.doc = /** @type {!Document} */ (form.ownerDocument);
+    /** @const @protected {!../../../src/service/resources-impl.Resources} */
+    this.resources = Services.resourcesForDoc(form);
+
+    /** @protected @const {!Document|!ShadowRoot} */
+    this.root = this.ampdoc.getRootNode();
+
+    /**
+     * Tribool indicating last known validity of form.
+     * @private {boolean|null}
+     */
+    this.formValidity_ = null;
   }
 
   /**
@@ -89,6 +100,22 @@ export class FormValidator {
    * @param {!Event} unusedEvent
    */
   onInput(unusedEvent) {}
+
+  /**
+   * Fires a valid/invalid event from the form if its validity state
+   * has changed since the last invocation of this function.
+   * @visibleForTesting
+   */
+  fireValidityEventIfNecessary() {
+    const previousValidity = this.formValidity_;
+    this.formValidity_ = this.form.checkValidity();
+    if (previousValidity !== this.formValidity_) {
+      const win = toWin(this.form.ownerDocument.defaultView);
+      const type = this.formValidity_ ? 'valid' : 'invalid';
+      const event = createCustomEvent(win, type, null, {bubbles: true});
+      this.form.dispatchEvent(event);
+    }
+  }
 }
 
 
@@ -98,8 +125,8 @@ export class DefaultValidator extends FormValidator {
   /** @override */
   report() {
     this.form.reportValidity();
+    this.fireValidityEventIfNecessary();
   }
-
 }
 
 
@@ -123,6 +150,8 @@ export class PolyfillDefaultValidator extends FormValidator {
         break;
       }
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
@@ -179,14 +208,14 @@ export class AbstractCustomValidator extends FormValidator {
    */
   hideAllValidations() {
     for (const id in this.inputVisibleValidationDict_) {
-      const input = this.doc.getElementById(id);
+      const input = this.root.getElementById(id);
       this.hideValidationFor(dev().assertElement(input));
     }
   }
 
   /**
    * @param {!Element} input
-   * @param {!string} invalidType
+   * @param {string} invalidType
    * @return {?Element}
    */
   getValidationFor(input, invalidType) {
@@ -196,7 +225,7 @@ export class AbstractCustomValidator extends FormValidator {
     const selector = `[visible-when-invalid=${invalidType}]` +
         `[validation-for=${input.id}]`;
     if (this.inputValidationsDict_[selector] === undefined) {
-      this.inputValidationsDict_[selector] = this.doc.querySelector(selector);
+      this.inputValidationsDict_[selector] = this.root.querySelector(selector);
     }
     return this.inputValidationsDict_[selector];
   }
@@ -214,10 +243,12 @@ export class AbstractCustomValidator extends FormValidator {
     if (!validation.textContent.trim()) {
       validation.textContent = input.validationMessage;
     }
-
-    input.setAttribute('aria-invalid', 'true');
-    validation.classList.add('visible');
     this.inputVisibleValidationDict_[input.id] = validation;
+
+    this.resources.mutateElement(input,
+        () => input.setAttribute('aria-invalid', 'true'));
+    this.resources.mutateElement(validation,
+        () => validation.classList.add('visible'));
   }
 
   /**
@@ -228,9 +259,12 @@ export class AbstractCustomValidator extends FormValidator {
     if (!visibleValidation) {
       return;
     }
-    input.removeAttribute('aria-invalid');
-    visibleValidation.classList.remove('visible');
     delete this.inputVisibleValidationDict_[input.id];
+
+    this.resources.mutateElement(input,
+        () => input.removeAttribute('aria-invalid'));
+    this.resources.mutateElement(visibleValidation,
+        () => visibleValidation.classList.remove('visible'));
   }
 
   /**
@@ -258,7 +292,9 @@ export class AbstractCustomValidator extends FormValidator {
    */
   onInteraction(event) {
     const input = dev().assertElement(event.target);
-    const shouldValidate = this.shouldValidateOnInteraction(input);
+    const shouldValidate =
+        !!input.checkValidity && this.shouldValidateOnInteraction(input);
+
     this.hideValidationFor(input);
     if (shouldValidate && !input.checkValidity()) {
       this.reportInput(input);
@@ -291,13 +327,14 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
         break;
       }
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
   shouldValidateOnInteraction(input) {
     return !!this.getVisibleValidationFor(input);
   }
-
 }
 
 
@@ -319,6 +356,8 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     if (firstInvalidInput) {
       firstInvalidInput./*REVIEW*/focus();
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
@@ -333,6 +372,27 @@ export class AsYouGoValidator extends AbstractCustomValidator {
   /** @override */
   shouldValidateOnInteraction(unusedInput) {
     return true;
+  }
+
+  /** @override */
+  onInteraction(event) {
+    super.onInteraction(event);
+    this.fireValidityEventIfNecessary();
+  }
+}
+
+
+/** @private visible for testing */
+export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
+  /** @override */
+  shouldValidateOnInteraction(unusedInput) {
+    return true;
+  }
+
+  /** @override */
+  onInteraction(event) {
+    super.onInteraction(event);
+    this.fireValidityEventIfNecessary();
   }
 }
 
@@ -351,6 +411,8 @@ export function getFormValidator(form) {
       return new AsYouGoValidator(form);
     case CustomValidationTypes.ShowAllOnSubmit:
       return new ShowAllOnSubmitValidator(form);
+    case CustomValidationTypes.InteractAndSubmit:
+      return new InteractAndSubmitValidator(form);
     case CustomValidationTypes.ShowFirstOnSubmit:
       return new ShowFirstOnSubmitValidator(form);
   }

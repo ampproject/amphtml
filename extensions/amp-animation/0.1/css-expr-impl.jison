@@ -75,9 +75,11 @@ ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 {T}{R}{A}{N}{S}{L}{A}{T}{E}{Z}\(    return 'TRANSLATE_Z_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}3{D}\(   return 'TRANSLATE_3D_START'
 {R}{A}{N}{D}\(                      return 'RAND_START'
+{I}{N}{D}{E}{X}\(                   return 'INDEX_START'
 {W}{I}{D}{T}{H}\(                   return 'WIDTH_START'
 {H}{E}{I}{G}{H}{T}\(                return 'HEIGHT_START'
 {C}{L}{O}{S}{E}{S}{T}\(             return 'CLOSEST_START'
+{N}{U}{M}\(                         return 'NUM_START'
 {ident}\(                           return 'FUNCTION_START'
 {ident}                             return 'IDENT'
 \-\-{ident}                         return 'VAR_NAME';
@@ -249,7 +251,11 @@ function:
       {$$ = $1;}
   | dim_function
       {$$ = $1;}
+  | num_function
+      {$$ = $1;}
   | rand_function
+      {$$ = $1;}
+  | index_function
       {$$ = $1;}
   | any_function
       {$$ = $1;}
@@ -339,6 +345,17 @@ dim_function:
 
 
 /**
+ * AMP-specific `num()` function:
+ * - `num(10px)`
+ * - `num(20s)`
+ */
+num_function:
+    NUM_START literal_or_function ')'
+      {$$ = new ast.CssNumConvertNode($2);}
+  ;
+
+
+/**
  * AMP-specific `rand()` functions:
  * - `rand()` - a random value between 0 and 1
  * - `rand(min, max)` - a random value between min and max
@@ -348,6 +365,16 @@ rand_function:
       {$$ = new ast.CssRandNode();}
   | RAND_START literal_or_function ',' literal_or_function ')'
       {$$ = new ast.CssRandNode($2, $4);}
+  ;
+
+
+/**
+ * AMP-specific `index()` function that returns 0-based index of the current
+ * target in a list of all selected targets.
+ */
+index_function:
+    INDEX_START ')'
+      {$$ = new ast.CssIndexNode();}
   ;
 
 

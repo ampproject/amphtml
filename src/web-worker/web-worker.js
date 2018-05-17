@@ -21,7 +21,6 @@
  *   "lib" JS files and loaded at runtime via `importScripts()`.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
@@ -55,6 +54,9 @@ self.addEventListener('message', function(event) {
     case 'bind.removeBindingsWithExpressionStrings':
       const removeBindings = evaluator.removeBindingsWithExpressionStrings;
       returnValue = removeBindings.apply(evaluator, args);
+      break;
+    case 'bind.addMacros':
+      returnValue = evaluator.addMacros.apply(evaluator, args);
       break;
     case 'bind.evaluateBindings':
       returnValue = evaluator.evaluateBindings.apply(evaluator, args);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
   getSourceOrigin,
@@ -24,13 +25,10 @@ import {
 } from '../../../src/url';
 import {closestByTag, removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {documentInfoForDoc} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {timerFor} from '../../../src/services';
-import {toggle} from '../../../src/style';
-import {viewerForDoc} from '../../../src/services';
 import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -55,7 +53,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const win = this.win;
+    const {win} = this;
     if (!('serviceWorker' in win.navigator)) {
       this.maybeInstallUrlRewrite_();
       return;
@@ -67,8 +65,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
-        const origin = parseUrl(iframeSrc).origin;
-        const docInfo = documentInfoForDoc(this.element);
+        const {origin} = parseUrl(iframeSrc);
+        const docInfo = Services.documentInfoForDoc(this.element);
         const sourceUrl = parseUrl(docInfo.sourceUrl);
         const canonicalUrl = parseUrl(docInfo.canonicalUrl);
         user().assert(
@@ -78,48 +76,46 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
             'source (%s) or canonical URL (%s) of the AMP-document.',
             origin, sourceUrl.origin, canonicalUrl.origin);
         this.iframeSrc_ = iframeSrc;
-        this.scheduleIframeLoad_();
+        this.whenLoadedAndVisiblePromise_().then(() => {
+          return this.insertIframe_();
+        });
       }
-      return;
-    }
-
-    if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      this.loadPromise(this.win).then(() => {
+    } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
+      this.whenLoadedAndVisiblePromise_().then(() => {
         return install(this.win, src);
       });
     } else {
-      user().error(TAG,
+      this.user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
     }
   }
 
-  /** @private */
-  scheduleIframeLoad_() {
-    viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      // If the user is longer than 20 seconds on this page, load
-      // the external iframe to install the ServiceWorker. The wait is
-      // introduced to avoid installing SWs for content that the user
-      // only engaged with superficially.
-      timerFor(this.win).delay(() => {
-        this.deferMutate(this.insertIframe_.bind(this));
-      }, 10000);
-    });
+  /**
+   * A promise that resolves when both loadPromise and whenFirstVisible resolve.
+   * @return {!Promise}
+   * @private
+   */
+  whenLoadedAndVisiblePromise_() {
+    return Promise.all([
+      this.loadPromise(this.win),
+      Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible(),
+    ]);
   }
 
-  /** @private */
+  /**
+   * Insert an iframe from the origin domain to install the service worker.
+   * @return {!Promise}
+   * @private
+   */
   insertIframe_() {
-    // If we are no longer visible, we will not do a SW registration on this
-    // page view.
-    if (!viewerForDoc(this.getAmpDoc()).isVisible()) {
-      return;
-    }
-    // The iframe will stil be loaded.
-    setStyle(this.element, 'display', 'none');
-    const iframe = this.win.document.createElement('iframe');
-    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
-    iframe.src = this.iframeSrc_;
-    this.element.appendChild(iframe);
+    return this.mutateElement(() => {
+      setStyle(this.element, 'display', 'none');
+      const iframe = this.win.document.createElement('iframe');
+      iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
+      iframe.src = this.iframeSrc_;
+      this.element.appendChild(iframe);
+    });
   }
 
   /** @private */
@@ -130,7 +126,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     const ampdoc = this.getAmpDoc();
-    const win = this.win;
+    const {win} = this;
     const winUrl = parseUrl(win.location.href);
 
     // Read the url-rewrite config.
@@ -174,11 +170,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   waitToPreloadShell_(shellUrl) {
-    // Ensure that document is loaded and visible first.
-    const whenReady = this.loadPromise(this.win);
-    const whenVisible = viewerForDoc(this.getAmpDoc()).whenFirstVisible();
-    return Promise.all([whenReady, whenVisible]).then(() => {
-      this.deferMutate(() => this.preloadShell_(shellUrl));
+    return this.whenLoadedAndVisiblePromise_().then(() => {
+      this.mutateElement(() => this.preloadShell_(shellUrl));
     });
   }
 
@@ -187,7 +180,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   preloadShell_(shellUrl) {
-    const win = this.win;
+    const {win} = this;
 
     // Preload the shell by via an iframe with `#preload` fragment.
     const iframe = win.document.createElement('iframe');
@@ -268,7 +261,7 @@ class UrlRewriter_ {
 
     // Only rewrite URLs to a different location to avoid breaking fragment
     // navigation.
-    const win = this.win;
+    const {win} = this;
     if (removeFragment(tgtLoc.href) == removeFragment(win.location.href)) {
       return;
     }
@@ -300,5 +293,6 @@ function install(win, src) {
 }
 
 
-AMP.registerElement('amp-install-serviceworker',
-    AmpInstallServiceWorker);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpInstallServiceWorker);
+});

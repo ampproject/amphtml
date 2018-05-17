@@ -39,6 +39,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 `amp-app-banner` is a wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
 
@@ -134,17 +136,17 @@ Currently, the banner will be displayed always unless it was dismissed. Once dis
 
 ### Attributes on `amp-app-banner`
 
-**id** (Required)
+##### id (Required)
 
 A unique identifier for an amp-app-banner; used for persistence logic.
 
-**layout** (Required)
+##### layout (Required)
 
 The value must be `nodisplay`. 
 
 ### Attributes on `button` descendant element
 
-**open-button** (Required)
+##### open-button (Required)
 
 The click target for the banner to install the app, or open the deep-link if the app is already installed.
 

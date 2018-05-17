@@ -18,10 +18,6 @@ import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
 
-
-/** @const Time when this JS loaded.  */
-const start = Date.now();
-
 /**
  * Triple zero width space.
  *
@@ -35,10 +31,25 @@ export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 
 
 /**
+ * Four zero width space.
+ *
+ * @const {string}
+ */
+export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
+
+
+/**
  * @return {boolean} Whether this message was a user error.
  */
 export function isUserErrorMessage(message) {
   return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+/**
+ * @return {boolean} Whether this message was a a user error from an iframe embed.
+ */
+export function isUserErrorEmbed(message) {
+  return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
 }
 
 
@@ -64,12 +75,23 @@ export function setReportError(fn) {
 }
 
 /**
- * Logging class.
+ * Logging class. Use of sentinel string instead of a boolean to check user/dev
+ * errors because errors could be rethrown by some native code as a new error,
+ * and only a message would survive. Also, some browser don’t support a 5th
+ * error object argument in window.onerror. List of supporting browser can be
+ * found here:
+ * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
  * @final
  * @private Visible for testing only.
  */
 export class Log {
   /**
+   * opt_suffix will be appended to error message to identify the type of the
+   * error message. We can't rely on the error object to pass along the type
+   * because some browsers do not have this param in its window.onerror API.
+   * See:
+   * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
+   *
    * @param {!Window} win
    * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
    * @param {string=} opt_suffix
@@ -136,7 +158,9 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift(Date.now() - start, '[' + tag + ']');
+      if (getMode().localDev) {
+        messages.unshift('[' + tag + ']');
+      }
       fn.apply(this.win.console, messages);
     }
   }
@@ -203,13 +227,13 @@ export class Log {
 
   /**
    * Reports an error message.
-   * @param {string} unusedTag
+   * @param {string} tag
    * @param {...*} var_args
-   * @return {!Error|undefined}
    */
-  error(unusedTag, var_args) {
+  error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
+      error.name = tag || error.name;
       // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
@@ -357,8 +381,23 @@ export class Log {
   }
 
   /**
-   * Asserts and returns the enum value. If the enum doesn't contain such a value,
-   * the error is thrown.
+   * Throws an error if the first argument isn't a boolean.
+   *
+   * For more details see `assert`.
+   *
+   * @param {*} shouldBeBoolean
+   * @param {string=} opt_message The assertion message
+   * @return {boolean} The boolean value.
+   */
+  assertBoolean(shouldBeBoolean, opt_message) {
+    this.assert(!!shouldBeBoolean === shouldBeBoolean,
+        (opt_message || 'Boolean expected') + ': %s', shouldBeBoolean);
+    return /** @type {boolean} */ (shouldBeBoolean);
+  }
+
+  /**
+   * Asserts and returns the enum value. If the enum doesn't contain such a
+   * value, the error is thrown.
    *
    * @param {!Object<T>} enumObj
    * @param {string} s
@@ -394,7 +433,6 @@ export class Log {
   }
 }
 
-
 /**
  * @param {string|!Element} val
  * @return {string}
@@ -424,7 +462,7 @@ function pushIfNonEmpty(array, val) {
  * @return {!Error};
  */
 export function duplicateErrorIfNecessary(error) {
-  const message = error.message;
+  const {message} = error;
   const test = String(Math.random());
   error.message = test;
 
@@ -490,11 +528,12 @@ export function rethrowAsync(var_args) {
 /**
  * Cache for logs. We do not use a Service since the service module depends
  * on Log and closure literally can't even.
- * @type {{user: ?Log, dev: ?Log}}
+ * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
  */
 self.log = (self.log || {
   user: null,
   dev: null,
+  userForEmbed: null,
 });
 
 const logs = self.log;
@@ -511,14 +550,13 @@ let logConstructor = null;
 export function initLogConstructor() {
   logConstructor = Log;
   // Initialize instances for use. If a binary (an extension for example) that
-  // does not call `initLogConstructor` invokes `dev()` or `user()` earlier
-  // than the binary that does call `initLogConstructor` (amp.js), the extension
-  // will throw an error as that extension will never be able to initialize
-  // the log instances and we also don't want it to call `initLogConstructor`
-  // either (since that will cause the Log implementation to be bundled into that
-  // binary). So we must initialize the instances eagerly so that they are
-  // ready for use (stored globally) after the main binary calls
-  // `initLogConstructor`.
+  // does not call `initLogConstructor` invokes `dev()` or `user()` earlier than
+  // the binary that does call `initLogConstructor` (amp.js), the extension will
+  // throw an error as that extension will never be able to initialize the log
+  // instances and we also don't want it to call `initLogConstructor` either
+  // (since that will cause the Log implementation to be bundled into that
+  // binary). So we must initialize the instances eagerly so that they are ready
+  // for use (stored globally) after the main binary calls `initLogConstructor`.
   dev();
   user();
 }
@@ -526,7 +564,6 @@ export function initLogConstructor() {
 export function resetLogConstructorForTesting() {
   logConstructor = null;
 }
-
 
 /**
  * Publisher level log.
@@ -536,28 +573,45 @@ export function resetLogConstructorForTesting() {
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
  *
+ * @param {!Element=} opt_element
  * @return {!Log}
  */
-export function user() {
-  if (logs.user) {
-    return logs.user;
+export function user(opt_element) {
+  if (!logs.user) {
+    logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
+  if (!isFromEmbed(logs.user.win, opt_element)) {
+    return logs.user;
+  } else {
+    if (logs.userForEmbed) {
+      return logs.userForEmbed;
+    }
+    return logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL);
+  }
+}
+
+/**
+ * Getter for user logger
+ * @param {string=} suffix
+ * @return {!Log}
+ */
+function getUserLogger(suffix) {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return logs.user = new logConstructor(self, mode => {
+  return new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
     }
-    return LogLevel.OFF;
-  }, USER_ERROR_SENTINEL);
+    return LogLevel.WARN;
+  }, suffix);
 }
 
-
 /**
- * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped in
- * the PROD binary. However, `devLog().assert` result is preserved in either case.
+ * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped
+ * in the PROD binary. However, `devLog().assert` result is preserved in either
+ * case.
  *
  * Enabled in the following conditions:
  *  1. Not disabled using `#log=0`.
@@ -582,4 +636,16 @@ export function dev() {
     }
     return LogLevel.OFF;
   });
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element=} opt_element
+ * @return {boolean} isEmbed
+ */
+export function isFromEmbed(win, opt_element) {
+  if (!opt_element) {
+    return false;
+  }
+  return opt_element.ownerDocument.defaultView != win;
 }

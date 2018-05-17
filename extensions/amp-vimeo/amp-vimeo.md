@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
@@ -48,11 +50,11 @@ With responsive layout, the width and height from the example should yield corre
 
 ## Attributes
 
-**data-videoid** (required)
+##### data-videoid (required)
 
 The Vimeo video id found in every Vimeo video page URL For example, `27246366` is the video id for the following url: `https://vimeo.com/27246366`.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

@@ -20,7 +20,6 @@
 
 
 // This list should not get longer without a very good reason.
-import '../third_party/babel/custom-babel-helpers';
 import {install as installMathSign} from '../src/polyfills/math-sign';
 import {install as installObjectAssign} from '../src/polyfills/object-assign';
 

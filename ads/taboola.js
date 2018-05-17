@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ export function taboola(global, data) {
     framework: 'amp',
     container: 'c',
   },
-    params,
-    {flush: true}]
+  params,
+  {flush: true}]
   );
 
   // install observation on entering/leaving the view

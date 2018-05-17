@@ -22,7 +22,7 @@ This guide is intended for people who don't know much about Git/GitHub and the t
 
 If you're already familiar with Git/GitHub/etc. or you just want to know what commands to type in instead of what they're doing take a look at the much shorter [Quick Start Guide](getting-started-quick.md).
 
-If you do not yet have a specific code contribution project in mind as you go through this guide, consider grabbing one of the [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) we have created for new contributors.
+If you do not yet have a specific code contribution project in mind as you go through this guide, consider grabbing one of the [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) we have created for new contributors.
 
 - [How to get help](#how-to-get-help)
 - [Intro to Git and GitHub](#intro-to-git-and-github)
@@ -37,6 +37,7 @@ If you do not yet have a specific code contribution project in mind as you go th
 - [Edit files and commit them](#edit-files-and-commit-them)
 - [Testing your changes](#testing-your-changes)
   * [Running tests locally](#running-tests-locally)
+  * [Running all the Travis CI checks locally](#running-all-the-travis-ci-checks-locally)
   * [Adding tests for your change](#adding-tests-for-your-change)
 - [Push your changes to your GitHub fork](#push-your-changes-to-your-github-fork)
 - [Send a Pull Request (i.e. request a code review)](#send-a-pull-request-ie-request-a-code-review)
@@ -50,7 +51,7 @@ If you do not yet have a specific code contribution project in mind as you go th
 
 If you have a question or are unsure about something while following this end-to-end guide, you can get help from the AMP Project community in many ways:
 
-* If you are tackling a [Great First Issue](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
+* If you are tackling a [Good First Issue](https://github.com/ampproject/amphtml/labels/good%20first%20issue) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
 
 * The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in the AMP Project to find help.  You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.).  We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.
 
@@ -94,24 +95,24 @@ If you are new to Git it may seem surprising that there are three different repo
 
 * When you're done you'll push these changes to your fork on GitHub so that others can see your changes and review them before they become part of the amphtml repository.
 
-* When the changes have been approved by someone with permission to do so that person will handle merging your changes from your GitHub fork to the amphtml repository.
+* When the changes have been approved by someone with permission to do so, that person will handle merging your changes from your GitHub fork to the amphtml repository.
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase.  If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository.  Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease:  if you aren't currently a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) to the amphtml project you can't actually make changes to the amphtml repository directly--so go ahead and try out different Git commands without worrying you're going to break things for other people.
+One thing that might put your mind at ease:  if you aren't currently a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) to the amphtml project, you can't actually make changes to the amphtml repository directly. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 To create your fork on GitHub and your local copy of that fork:
 
-* Create a fork of the amphtml repository on GitHub by going to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and clicking the "Fork" button near the top.  Your GitHub fork will now be visible at `https://github.com/<your username>/amphtml`.
+* Create a fork of the amphtml repository on GitHub by going to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and clicking the "Fork" button near the top.  Your GitHub fork will now be visible at `https://github.com/<your username>/amphtml`. During local development, this will be referred to by `git` as `origin`.
 
 * Create your local copy (or *clone*) of your fork:
 
     * go to a local directory on your computer where you want to put a copy of the code, e.g. `~/src/ampproject`
 
-    * run the `git clone` command using the address for your remote repository (your GitHub fork)
+    * run the `git clone` command using the address for your remote repository (your GitHub fork):
 
-       ```shell
+       ```
        git clone git@github.com:<your username>/amphtml.git
        ```
 
@@ -147,35 +148,47 @@ git remote add upstream git@github.com:ampproject/amphtml.git
 
 Now run `git remote -v` again and notice that you have set up your upstream alias.
 
+Each branch of your local Git repository can track a branch of a remote repository.  Right now, your local `master` branch is tracking `origin/master`, which corresponds to the `master` branch of your GitHub fork.  You don't actually want this, though; the upstream `master` branch is constantly being updated, and your fork's `master` branch will rapidly become outdated.  Instead, it's best to make your local `master` branch track the upstream `master` branch.  You can do this like so:
+
+```
+git branch -u upstream/master master
+```
+
 # Building AMP and starting a local server
 
-Now that you have all of the files copied locally you can actually build the code and run a local server to try things out.
+Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the Yarn package manager, and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.
 
-amphtml uses Node.js, the yarn package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
+* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). An easy way to do so is with `nvm` (Mac and Linux: [here](https://github.com/creationix/nvm), Windows: [here](https://github.com/coreybutler/nvm-windows))
 
-* Install [NodeJS](https://nodejs.org/) (which includes npm).
+   ```
+   nvm install --lts
+   ```
 
-* Install [yarn](https://yarnpkg.com/en/docs/install)
+* Install the stable version of [Yarn](https://yarnpkg.com/) (Mac and Linux: [here](https://yarnpkg.com/en/docs/install#alternatives-stable), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
+
+   ```
+   curl -o- -L https://yarnpkg.com/install.sh | bash
+   ```
+  An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
+
+* If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
+
+   ```
+   yarn global remove gulp
+   ```
+
+* Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
+
+   ```
+   yarn global add gulp-cli
+   ```
+  An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local development. This will also use the version of `gulp` packaged with the amphtml repository.
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
    yarn
    ```
-   You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies that are generally safe to ignore.
-
-* For some local testing we refer to fake local URLs in order to simulate referencing third party URLs.  This requires extra setup so your browser will know that these URLs actually point to your local server.
-
-   You can do this by adding this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
-
-    ```127.0.0.1               ads.localhost iframe.localhost```
-
-* The AMP Project uses Gulp as our build system.   Gulp uses a configuration file ([gulpfile.js](https://github.com/ampproject/amphtml/blob/master/gulpfile.js)) to build amphtml (including the amphtml javascript) and to start up the Node.js server with the proper settings.  You don't really have to understand exactly what it is doing at this point--you just have to install it and use it.
-
-   You can install Gulp using yarn:
-
-   ```
-   yarn global add gulp
-   ```
+   You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies, which are generally safe to ignore.
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
@@ -216,10 +229,14 @@ By default you'll have a branch named _master_.  You can see this if you run the
 Although you could do work on the master branch, most people choose to leave the master branch unchanged and create other branches to actually do work in.  Creating a branch is easy; simply run:
 
 ```
-git branch --track <branch_name> origin/master
+git checkout -b <branch_name> master
 ```
 
-Whenever you want to do work in this branch, run the checkout command:
+This will move you to the new branch, which uses `master` as its start point, meaning that it will start out containing the same files as `master`.  You can then start working in the new branch.
+
+(You can use a different branch as a start point, like if you want to make one branch based on another.  Generally, though, you want `master` as your start point.  If you omit the start point, Git will use whichever branch you're currently on.)
+
+Whenever you want to move to a different branch, run the checkout command:
 
 ```
 git checkout <branch_name>
@@ -231,22 +248,20 @@ You can see a list of your branches and which one you're currently in by running
 git branch
 ```
 
-When you created the branch the `--track` flag and `origin/master` part are a convenience for telling Git the default place you want to sync with in the future.  Remember _origin_ is the alias that was set up for your GitHub fork remote repository. _origin/master_ is "the master branch of the origin repository."
-
 Note that currently the branch you just created only exists in your local repository.  If you check the list of branches that exist on your GitHub fork at `https://github.com/<your username>/amphtml/branches/yours`, you won't see this new branch listed.  Later on when we want to make the changes in your branch visible to others (e.g. so you can do a pull request) we'll push this branch to your GitHub fork.
 
 # Pull the latest changes from the amphtml repository
 
 Since your local repository is just a copy of the amphtml repository it can quickly become out of date if other people make changes to the amphtml repository.  Before you start making changes you'll want to make sure you have the latest version of the code; you'll also want to do this periodically during development, before sending your code for review, etc.
 
-In the workflow we will be using you'll go to the master branch on your local repository and pull the latest changes in from the remote amphtml repository's master branch.  (Remember that you set up the alias _upstream_ to refer to the remote amphtml repository.)
+In the workflow we will be using you'll go to the master branch on your local repository and pull the latest changes in from the remote amphtml repository's master branch.  (Remember that you set up the alias _upstream_ to refer to the remote amphtml repository, and you set your local `master` branch to track `upstream/master`.)
 
 ```
 # make sure you are in your local repo's master branch
 git checkout master
 
 # pull in the latest changes from the remote amphtml repository
-git pull upstream master
+git pull
 ```
 If there have been any changes you'll see the details of what changed, otherwise you'll see a message like `Already up-to-date`.
 
@@ -269,6 +284,10 @@ If there are changes that conflict with changes on your branch (e.g. someone mod
 The common workflow for making changes to files in Git is:
 
 * edit some files using your favorite editor
+
+* if your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which will automatically update `package.json` and `yarn.lock`
+
+* if you manually edited `package.json`, run `yarn install` to install the dependency and generate an updated `yarn.lock` file
 
 * tell Git that you care about these changes by _staging_ them using the `git add` command
 
@@ -324,7 +343,9 @@ Before sending your code changes for review, you will want to make sure that all
 
 Make sure you are in the branch that has your changes (`git checkout <branch name>`), pull in the latest changes from the remote amphtml repository and then simply run:
 
-`gulp test`
+```
+gulp test
+```
 
 You'll see some messages about stuff being compiled and then after a short time you will see a new Chrome window open up that says "Karma" at the top.  In the window where you ran `gulp test`, you'll see a bunch of tests scrolling by (`Executed NNNN of MMMM`) and hopefully a lot of `SUCCESS` messages.
 
@@ -334,7 +355,34 @@ If the tests have failed you will need to determine whether the failure is relat
 
 If the failing test looks completely unrelated to your change, it *might* be due to bad code/tests that have made it into the amphtml repository.  You can check the latest [amphtml test run on Travis](https://travis-ci.org/ampproject/amphtml/builds).  If it's green (meaning the tests pass) then it's more likely the failure is a problem with your change.  If it's red, you can click through to see if the failing tests are the same as the ones you see locally.
 
-Fixing the tests will depend heavily on the change you are making and what tests are failing.  If you need help to fix them you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).  
+Fixing the tests will depend heavily on the change you are making and what tests are failing.  If you need help to fix them you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
+
+## Running all the Travis CI checks locally
+
+Sometimes, it can be useful to pre-emptively eliminate errors in your pull request by running all the Travis CI checks on your local machine. You can do so by running:
+
+```
+gulp pr-check
+```
+
+To run all Travis CI checks, but skip the `gulp build` step, you can run:
+
+```
+gulp pr-check --nobuild
+```
+
+To run all Travis CI checks, and restrict the unit tests and integration tests to just a subset of files, you can run:
+
+```
+gulp pr-check --files=<test-files-path-glob>
+```
+
+Notes:
+
+* This will force a clean build and run all the PR checks one by one.
+* Just like on Travis, a failing check will prevent subsequent checks from being run.
+* The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#running-visual-diff-tests-locally).
+* The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#testing-on-sauce-labs).
 
 ## Adding tests for your change
 
@@ -362,15 +410,21 @@ Before pushing your changes, make sure you have the latest changes in the amphtm
 
 ```
 git checkout master
-git pull upstream master
+git pull
 git checkout <branch name>
 git rebase master
 ```
 
-Now push your changes to origin (the alias for your GitHub fork):
+Now push your changes to `origin` (the alias for your GitHub fork):
 
 ```
-git push origin <branch name>
+git push -u origin <branch name>
+```
+
+`-u origin <branch name>` tells Git to create a remote branch with the specified name in `origin` and to make your local branch track that remote branch from now on.  You only have to do this the first time you push each branch.  For subsequent pushes on the same branch, you can use a shorter command:
+
+```
+git push
 ```
 
 The changes you've made are now visible on GitHub!  Go to your fork on GitHub:
@@ -398,7 +452,7 @@ Note that you *can* edit files in your branch directly on GitHub using the web U
 In order for your changes to become part of the amphtml repository, you will need to get your code reviewed by one of the [core committers](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; once a core committer approves it he or she will handle the merge for you.
 
 Once your code is ready for a review, go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and click on the "Compare & pull request" button on the "recently pushed branches" banner.  If that banner isn't visible, go to your GitHub fork at
-`https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.  
+`https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.
 
 On the "Open a pull request" page, you will see dropdowns at the top indicating the proposed merge.  It will look something like:
 
@@ -412,11 +466,15 @@ The reviewer should be one of the [core committers](https://github.com/ampprojec
 
 When you're done click "Create pull request."  This will bring you to your Pull Request page where you can track progress, add comments, etc.
 
-On the Pull Request page you can see that a couple of checks are running:
+On the Pull Request page you can see that a few checks are running:
 
-* the tests are being run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests)
+* The tests are being run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests)
 
-* the system is verifying that you have signed a CLA (Contributor License Agreement).  If this is your first time submitting a Pull Request for the amphtml project you'll need to sign an agreement.  (Make sure the email address you use to sign the CLA is the same one that you configured Git with.)  See details in the [Contributing code](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code) documentation.
+* The system is verifying that you have signed a CLA (Contributor License Agreement).  If this is your first time submitting a Pull Request for the amphtml project you'll need to sign an agreement.  (Make sure the email address you use to sign the CLA is the same one that you configured Git with.)  See details in the [Contributing code](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code) documentation.
+
+* Your code is going through static analysis by [LGTM](https://lgtm.com/projects/g/ampproject/amphtml/).
+
+* Visual diff tests that are run on Travis are being analyzed by [Percy](http://percy.io/ampproject/amphtml). (To access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform), and your request should be approved soon.)
 
 If you don't hear back from your reviewer within 2 business days, feel free to ping the pull request by adding a comment.
 
@@ -448,7 +506,7 @@ git checkout master
 git branch -D <branch name>
 
 # delete the branch in your GitHub fork (if you didn't use the UI)
-git push origin --delete <branch name>
+git push -d origin <branch name>
 ```
 
 # See your changes in production
@@ -457,7 +515,7 @@ git push origin --delete <branch name>
 
 If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.  If your change was to the code that runs on AMP pages across the web you'll have to wait for the change to be included in a release.
 
-In general we cut a release of amphtml on Wednesdays during working hours (Pacific time) and push it to the AMP Dev Channel the next day.  After verifying there are no issues, we push that build to 1% of AMP pages the following Monday and complete the push to all AMP pages a few days later on Thursday.  That is:  on Thursday we will typically push last week's build to all AMP pages and this week's build to the Dev Channel.
+AMP is pushed to production after undergoing testing. Generally, it takes about 1-2 weeks for a change to be live for all users. For more specific details on the timing of production releases, reference our [release schedule](release-schedule.md).
 
 **Once the push of the build that includes your change is complete all users of AMP will be using the code you contributed!**
 
@@ -479,7 +537,7 @@ If you're looking for ideas on your next contribution feel free to reach out to 
 
 This end-to-end guide provided enough details to get a basic understanding of a typical workflow for contributing code to the AMP Project.  If you find yourself wanting to know more there are a lot of resources available.  Here are a few:
 
-* The ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/index.html) provides step-by-step instructions for a common type of code contribution to the AMP Project.  Even if your project involves modifying an existing AMP component this codelab will give you an overview of how AMP components work. 
+* The ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/index.html) provides step-by-step instructions for a common type of code contribution to the AMP Project.  Even if your project involves modifying an existing AMP component this codelab will give you an overview of how AMP components work.
 * GitHub has a lot of helpful introductory material, including:
    * a [Hello World tutorial](https://guides.github.com/activities/hello-world/) that's a bit less in depth than this guide, but it covers things like creating a new repository and merging in code after a pull request
    * the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))

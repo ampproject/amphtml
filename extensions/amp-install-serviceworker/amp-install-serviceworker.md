@@ -16,6 +16,8 @@ limitations under the License.
 
 # <a name="amp-install-serviceworker"></a> `amp-install-serviceworker`
 
+[TOC]
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -55,19 +57,19 @@ Example:
 
 ## Attributes
 
-**src** (required)
+##### src (required)
 
-The URL of the ServiceWorker to register.
+The URL of the ServiceWorker to register, which must use `https` protocol.
 
-**data-iframe-src** (optional)
+##### data-iframe-src (optional)
 
-The URL of an HTML document that installs a ServiceWorker.
+The URL of an HTML document that installs a ServiceWorker. The URL must use `https` protocol.
 
-**layout**
+##### layout
 
 Must have the value `nodisplay`.
 
-**data-no-service-worker-fallback-url-match**
+##### data-no-service-worker-fallback-url-match
 
 The is a regular expression that matches URLs to be rewritten to navigate via shell for no-service-worker fallback. See [Shell URL rewrite](#shell-url-rewrite) section for more details. The value must be a valid JavaScript RegExp string. For example:
  - `amp.html`
@@ -75,7 +77,7 @@ The is a regular expression that matches URLs to be rewritten to navigate via sh
  - `.*\.amp\.html`
  - `.*\/amp$`
 
-**data-no-service-worker-fallback-shell-url**
+##### data-no-service-worker-fallback-shell-url
 
 The URL to the shell to use to rewrite URL navigations for no-service-worker fallback. See [Shell URL rewrite](#shell-url-rewrite) section for more details. The value must be an URL on the same origin as the AMP document itself.
 

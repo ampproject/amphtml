@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript,validateData} from '../3p/3p';
+import {validateData,writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -28,7 +28,7 @@ export function mixpo(global, data) {
 
   const g = global,
       cdnSubdomain = (data.subdomain == 'www') ?
-          'cdn' : data.subdomain + '-cdn',
+        'cdn' : data.subdomain + '-cdn',
       url = data.loader || `https://${cdnSubdomain}.mixpo.com/js/loader.js`;
 
   g.mixpoAd = {

@@ -136,7 +136,7 @@ export class WebviewViewerForTesting {
   isChannelOpen_(e) {
     return e.type == 'message' && e.data.app == APP &&
       e.data.name == 'channelOpen';
-  };
+  }
 
   completeHandshake_(requestId) {
     this.log('Viewer ' + this.id + ' messaging established!');
@@ -156,7 +156,7 @@ export class WebviewViewerForTesting {
     });
 
     this.handshakeResponseResolve_();
-  };
+  }
 
   sendRequest_(eventType, payload) {
     const requestId = ++this.requestIdCounter_;
@@ -169,7 +169,7 @@ export class WebviewViewerForTesting {
       type: MessageType.REQUEST,
     };
     this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
-  };
+  }
 
   processRequest_(eventData) {
     const data = eventData;
@@ -186,14 +186,14 @@ export class WebviewViewerForTesting {
       case 'tick':
       case 'sendCsi':
       case 'scroll':
-      case 'a2a':
+      case 'a2aNavigate':
       case 'unloaded':
       case 'visibilitychange':
         return;
       default:
         return Promise.reject('request not supported: ' + data.name);
     }
-  };
+  }
 
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);

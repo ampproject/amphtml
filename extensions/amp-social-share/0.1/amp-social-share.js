@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {addParamsToUrl, parseUrl, parseQueryString} from '../../../src/url';
-import {setStyle} from '../../../src/style';
+import {Services} from '../../../src/services';
+import {addParamsToUrl, parseQueryString, parseUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {openWindowDialog} from '../../../src/dom';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {platformFor} from '../../../src/services';
+import {setStyle} from '../../../src/style';
 
 
 class AmpSocialShare extends AMP.BaseElement {
@@ -41,6 +40,9 @@ class AmpSocialShare extends AMP.BaseElement {
 
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
+
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = null;
 
     /** @private {?string} */
     this.href_ = null;
@@ -61,15 +63,19 @@ class AmpSocialShare extends AMP.BaseElement {
     user().assert(!/\s/.test(typeAttr),
         'Space characters are not allowed in type attribute value. %s',
         this.element);
+
+    this.platform_ = Services.platformFor(this.win);
+    this.viewer_ = Services.viewerForDoc(this.element);
+
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
-      if (!('share' in navigator)) {
+      if (!this.systemShareSupported_()) {
         setStyle(this.element, 'display', 'none');
         return;
       }
     } else {
       // Hide/ignore non-system component if system share wants to be unique
-      const systemOnly = ('share' in navigator) &&
+      const systemOnly = this.systemShareSupported_() &&
         !!this.win.document.querySelectorAll(
             'amp-social-share[type=system][data-mode=replace]').length;
       if (systemOnly) {
@@ -84,20 +90,27 @@ class AmpSocialShare extends AMP.BaseElement {
         'The data-share-endpoint attribute is required. %s', this.element);
     Object.assign(this.params_, typeConfig['defaultParams'],
         getDataParamsFromAttributes(this.element));
-    this.platform_ = platformFor(this.win);
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = urlReplacementsForDoc(this.getAmpDoc());
-    urlReplacements.expandAsync(hrefWithVars).then(href => {
+    const urlReplacements = Services.urlReplacementsForDoc(this.getAmpDoc());
+    const bindingVars = typeConfig['bindings'];
+    const bindings = {};
+    if (bindingVars) {
+      bindingVars.forEach(name => {
+        const bindingName = name.toUpperCase();
+        bindings[bindingName] = this.params_[name];
+      });
+    }
+
+    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(href => {
       this.href_ = href;
-      // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
-      const protocol = parseUrl(href).protocol;
+      // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
+      const {protocol} = parseUrl(href);
       const isMailTo = protocol === 'mailto:';
-      const isWhatsApp = protocol === 'whatsapp:';
       const isSms = protocol === 'sms:';
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
-      this.target_ = (isIosSafari && (isMailTo || isWhatsApp || isSms))
-          ? '_top' : '_blank';
+      this.target_ = (isIosSafari && (isMailTo || isSms))
+        ? '_top' : '_blank';
       if (isSms) {
         // http://stackoverflow.com/a/19126326
         // This code path seems to be stable for both iOS and Android.
@@ -120,7 +133,7 @@ class AmpSocialShare extends AMP.BaseElement {
    * @private
    */
   handleKeyPress_(event) {
-    const keyCode = event.keyCode;
+    const {keyCode} = event;
     if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
       event.preventDefault();
       this.handleActivation_();
@@ -151,6 +164,17 @@ class AmpSocialShare extends AMP.BaseElement {
     }
   }
 
-};
+  /** @private */
+  systemShareSupported_() {
+    // Chrome exports navigator.share in WebView but does not implement it.
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
+    const isChromeWebview = this.viewer_.isWebviewEmbedded() &&
+        this.platform_.isChrome();
 
-AMP.registerElement('amp-social-share', AmpSocialShare, CSS);
+    return ('share' in navigator) && !isChromeWebview;
+  }
+}
+
+AMP.extension('amp-social-share', '0.1', AMP => {
+  AMP.registerElement('amp-social-share', AmpSocialShare, CSS);
+});

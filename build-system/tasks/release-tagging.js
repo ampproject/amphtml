@@ -15,26 +15,22 @@
  */
 'use strict';
 
-var BBPromise = require('bluebird');
-var argv = require('minimist')(process.argv.slice(2));
-var assert = require('assert');
-var child_process = require('child_process');
-var config = require('../config');
-var extend = require('util')._extend;
-var fs = require('fs-extra');
-var git = require('gulp-git');
-var gulp = require('gulp-help')(require('gulp'));
-var request = BBPromise.promisify(require('request'));
-var util = require('gulp-util');
+const argv = require('minimist')(process.argv.slice(2));
+const BBPromise = require('bluebird');
+const colors = require('ansi-colors');
+const fs = require('fs-extra');
+const git = require('gulp-git');
+const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
+const request = BBPromise.promisify(require('request'));
 
-var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
-var exec = BBPromise.promisify(child_process.exec);
-var gitExec = BBPromise.promisify(git.exec);
+const {GITHUB_ACCESS_TOKEN} = process.env;
+const gitExec = BBPromise.promisify(git.exec);
 
-var isDryrun = argv.dryrun;
-var verbose = (argv.verbose || argv.v);
+const isDryrun = argv.dryrun;
+const verbose = (argv.verbose || argv.v);
 
-var LABELS = {
+const LABELS = {
   'canary': 'PR use: In Canary',
   'prod': 'PR use: In Production',
 };
@@ -46,19 +42,19 @@ var LABELS = {
  * @return {!Promise}
  */
 function releaseTagFor(type, dir) {
-  util.log('Tag release for: ', type);
-  var promise = Promise.resolve();
-  var ampDir = dir + '/amphtml';
+  log('Tag release for: ', type);
+  let promise = Promise.resolve();
+  const ampDir = dir + '/amphtml';
 
   // Fetch tag.
-  var tag;
+  let tag;
   promise = promise.then(function() {
     return githubRequest('/releases');
   }).then(res => {
-    var array = JSON.parse(res.body);
-    for (var i = 0; i < array.length; i++) {
-      var release = array[i];
-      var releaseType = release.prerelease ? 'canary' : 'prod';
+    const array = JSON.parse(res.body);
+    for (let i = 0; i < array.length; i++) {
+      const release = array[i];
+      const releaseType = release.prerelease ? 'canary' : 'prod';
       if (releaseType == type) {
         tag = release.tag_name;
         break;
@@ -68,7 +64,7 @@ function releaseTagFor(type, dir) {
 
   // Checkout tag.
   promise = promise.then(function() {
-    util.log('Git tag: ', tag);
+    log('Git tag: ', tag);
     return gitExec({
       cwd: ampDir,
       args: 'checkout ' + tag,
@@ -76,25 +72,25 @@ function releaseTagFor(type, dir) {
   });
 
   // Log.
-  var pullRequests = [];
+  const pullRequests = [];
   promise = promise.then(function() {
-    var date = new Date();
+    const date = new Date();
     date.setDate(date.getDate() - 15);
-    var dateIso = date.toISOString().split('T')[0];
+    const dateIso = date.toISOString().split('T')[0];
     return gitExec({
       cwd: ampDir,
       args: 'log --pretty=oneline --since=' + dateIso,
     });
   }).then(function(output) {
-    var lines = output.split('\n');
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      var paren = line.lastIndexOf('(');
+    const lines = output.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+      const paren = line.lastIndexOf('(');
       line = paren != -1 ? line.substring(paren) : '';
       if (!line) {
         continue;
       }
-      var match = line.match(/\(\#(\d+)\)/);
+      const match = line.match(/\(\#(\d+)\)/);
       if (match && match[1]) {
         pullRequests.push(match[1]);
       }
@@ -102,10 +98,10 @@ function releaseTagFor(type, dir) {
   });
 
   // Update.
-  var label = LABELS[type];
+  const label = LABELS[type];
   promise = promise.then(function() {
-    util.log('Update ' + pullRequests.length + ' pull requests');
-    var updates = [];
+    log('Update ' + pullRequests.length + ' pull requests');
+    const updates = [];
     pullRequests.forEach(function(pullRequest) {
       updates.push(applyLabel(pullRequest, label));
     });
@@ -113,7 +109,7 @@ function releaseTagFor(type, dir) {
   });
 
   return promise.then(function() {
-    util.log(util.colors.green('Tag release for ' + type + ' done.'));
+    log(colors.green('Tag release for ' + type + ' done.'));
   });
 }
 
@@ -124,7 +120,7 @@ function releaseTagFor(type, dir) {
  */
 function applyLabel(pullRequest, label) {
   if (verbose && isDryrun) {
-    util.log('Apply label ' + label + ' for #' + pullRequest);
+    log('Apply label ' + label + ' for #' + pullRequest);
   }
   if (isDryrun) {
     return Promise.resolve();
@@ -133,11 +129,11 @@ function applyLabel(pullRequest, label) {
       '/issues/' + pullRequest + '/labels',
       'POST',
       [label]).then(function() {
-        if (verbose) {
-          util.log(util.colors.green(
-              'Label applied ' + label + ' for #' + pullRequest));
-        }
-      });
+    if (verbose) {
+      log(colors.green(
+          'Label applied ' + label + ' for #' + pullRequest));
+    }
+  });
 }
 
 /**
@@ -145,8 +141,8 @@ function applyLabel(pullRequest, label) {
  * @return {!Promise}
  */
 function gitFetch(dir) {
-  var ampDir = dir + '/amphtml';
-  var clonePromise;
+  const ampDir = dir + '/amphtml';
+  let clonePromise;
   if (fs.existsSync(ampDir)) {
     clonePromise = Promise.resolve();
   } else {
@@ -155,7 +151,7 @@ function gitFetch(dir) {
       args: 'clone https://github.com/ampproject/amphtml.git',
     });
   }
-  return clonePromise.then(function(arg) {
+  return clonePromise.then(function() {
     return gitExec({
       cwd: ampDir,
       args: 'fetch --tags',
@@ -170,14 +166,14 @@ function gitFetch(dir) {
  * @return {!Promise<*>}
  */
 function githubRequest(path, opt_method, opt_data) {
-  var options = {
+  const options = {
     url: 'https://api.github.com/repos/ampproject/amphtml' + path,
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
-      'Accept': 'application/vnd.github.v3+json'
+      'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
-      access_token: GITHUB_ACCESS_TOKEN
+      'access_token': GITHUB_ACCESS_TOKEN,
     },
   };
   if (opt_method) {
@@ -194,16 +190,16 @@ function githubRequest(path, opt_method, opt_data) {
  * @return {!Promise}
  */
 function releaseTag() {
-  var promise = Promise.resolve();
+  let promise = Promise.resolve();
 
-  var dir = 'build/tagging';
-  util.log('Work dir: ', dir);
+  const dir = 'build/tagging';
+  log('Work dir: ', dir);
   fs.mkdirpSync(dir);
   promise = promise.then(function() {
     return gitFetch(dir);
   });
 
-  var type = argv.type || 'all';
+  const type = argv.type || 'all';
   if (type == 'all' || type == 'canary') {
     promise = promise.then(function() {
       return releaseTagFor('canary', dir);
@@ -222,5 +218,5 @@ gulp.task('release:tag', 'Tag the releases in pull requests', releaseTag, {
   options: {
     dryrun: '  Generate update log but dont push it out',
     type: '  Either of "canary", "prod" or "all". Default is "all".',
-  }
+  },
 });

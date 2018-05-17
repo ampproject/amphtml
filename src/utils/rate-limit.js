@@ -22,7 +22,7 @@
  * @param {!Window} win
  * @param {function(...*)} callback
  * @param {number} minInterval the minimum time interval in millisecond
- * @returns {function(...*)}
+ * @return {function(...*)}
  */
 export function throttle(win, callback, minInterval) {
   let locker = 0;
@@ -61,7 +61,7 @@ export function throttle(win, callback, minInterval) {
  * @param {!Window} win
  * @param {function(...*)} callback
  * @param {number} minInterval the minimum time interval in millisecond
- * @returns {function(...*)}
+ * @return {function(...*)}
  */
 export function debounce(win, callback, minInterval) {
   let locker = 0;
@@ -75,7 +75,7 @@ export function debounce(win, callback, minInterval) {
 
   function waiter() {
     locker = 0;
-    const remaining = minInterval - (Date.now() - timestamp);
+    const remaining = minInterval - (win.Date.now() - timestamp);
     if (remaining > 0) {
       locker = win.setTimeout(waiter, remaining);
     } else {
@@ -84,7 +84,7 @@ export function debounce(win, callback, minInterval) {
   }
 
   return function(...args) {
-    timestamp = Date.now();
+    timestamp = win.Date.now();
     nextCallArgs = args;
     if (!locker) {
       locker = win.setTimeout(waiter, minInterval);

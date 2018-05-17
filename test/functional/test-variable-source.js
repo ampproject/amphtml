@@ -19,11 +19,17 @@ import {
   getTimingDataAsync,
 } from '../../src/service/variable-source';
 
+import {createElementWithAttributes} from '../../src/dom';
 
-describe('VariableSource', () => {
+
+describes.fakeWin('VariableSource', {
+  amp: {
+    ampdoc: 'single',
+  },
+}, env => {
   let varSource;
   beforeEach(() => {
-    varSource = new VariableSource();
+    varSource = new VariableSource(env.ampdoc);
   });
 
   it('Works without any variables', () => {
@@ -84,6 +90,43 @@ describe('VariableSource', () => {
     });
   });
 
+  describes.realWin('Whitelist of variable substitutions', {
+    amp: {
+      ampdoc: 'single',
+    },
+  }, env => {
+    let variableSource;
+    beforeEach(() => {
+      env.win.document.head.appendChild(
+          createElementWithAttributes(env.win.document, 'meta', {
+            name: 'amp-allowed-url-macros',
+            content: 'ABC,ABCD,CANONICAL',
+          }));
+      variableSource = new VariableSource(env.ampdoc);
+    });
+
+    it('Works with whitelisted variables', () => {
+      variableSource.setAsync('ABCD', () => Promise.resolve('abcd'));
+      expect(variableSource.getExpr()).to.be.ok;
+      expect(variableSource.getExpr().toString()).to.contain('ABCD');
+
+      return variableSource.get('ABCD')['async']().then(value => {
+        expect(value).to.equal('abcd');
+      });
+    });
+
+    it('Should not work with unwhitelisted variables', () => {
+      variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
+      expect(variableSource.getExpr()).to.be.ok;
+      expect(variableSource.getExpr().toString()).not.to.contain('RANDOM');
+
+      return variableSource.get('RANDOM')['async']().then(value => {
+        expect(value).to.equal('0.1234');
+      });
+    });
+
+  });
+
   describes.fakeWin('getTimingData', {}, env => {
     let win;
 
@@ -95,14 +138,6 @@ describe('VariableSource', () => {
           loadEventStart: 0,
         },
       };
-    });
-
-    it('should resolve immediate when data is ready', () => {
-      win.performance.timing.loadEventStart = 12;
-      return getTimingDataAsync(win, 'navigationStart', 'loadEventStart')
-          .then(value => {
-            expect(value).to.equal(11);
-          });
     });
 
     it('should wait for load event', () => {

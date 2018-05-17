@@ -14,26 +14,37 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {ImaPlayerData} from '../../../ads/google/ima-player-data';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
 import {assertHttpsUrl} from '../../../src/url';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {
-  isObject,
-  toArray,
-} from '../../../src/types';
+  childElementsByTag,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+  isJsonScriptTag,
+  removeElement,
+} from '../../../src/dom';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getConsentPolicyState} from '../../../src/consent-state';
 import {
   getData,
   listen,
 } from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
-import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
+import {isEnumValue} from '../../../src/types';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  isObject,
+  toArray,
+  toWin,
+} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -50,6 +61,9 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
+
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -59,24 +73,44 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.preconnectSource_ = null;
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.preconnectTrack_ = null;
+
+    /**
+     * Maps events to their unlisteners.
+     * @private {!Object<string, function()>}
+     */
+    this.unlisteners_ = {};
+
+    /** @private {!ImaPlayerData} */
+    this.playerData_ = new ImaPlayerData();
   }
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        'Experiment ' + TAG + ' is disabled.');
+    this.viewport_ = this.getViewport();
+    if (this.element.getAttribute('data-delay-ad-request') === 'true') {
+      this.unlisteners_['onFirstScroll'] =
+          this.viewport_.onScroll(() => {
+            this.sendCommand_('onFirstScroll');
+          });
+      // Request ads after 3 seconds, if something else doesn't trigger an ad
+      // request before that.
+      Services.timerFor(this.win).delay(
+          () => { this.sendCommand_('onAdRequestDelayTimeout'); }, 3000);
+
+    }
 
     assertHttpsUrl(this.element.getAttribute('data-tag'),
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
 
-    const sourceElements = this.element.getElementsByTagName('source');
-    const trackElements = this.element.getElementsByTagName('track');
+    // Handle <source> and <track> children
+    const sourceElements = childElementsByTag(this.element, 'SOURCE');
+    const trackElements = childElementsByTag(this.element, 'TRACK');
     const childElements =
         toArray(sourceElements).concat(toArray(trackElements));
     if (childElements.length > 0) {
@@ -92,6 +126,13 @@ class AmpImaVideo extends AMP.BaseElement {
       });
       this.element.setAttribute(
           'data-child-elements', JSON.stringify(children));
+    }
+
+    // Handle IMASetting JSON
+    const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
+    if (scriptElement && isJsonScriptTag(scriptElement)) {
+      this.element.setAttribute(
+          'data-ima-settings', scriptElement./*OK*/innerHTML);
     }
   }
 
@@ -119,30 +160,41 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
+  getConsentPolicy() {
+    return null;
+  }
+
+  /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.element.ownerDocument.defaultView,
-        this.element, 'ima-video');
-    iframe.setAttribute('allowfullscreen', 'true');
-    this.applyFillContent(iframe);
+    const consentPolicyId = super.getConsentPolicy();
+    const consentPromise = consentPolicyId
+      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      : Promise.resolve(null);
+    return consentPromise.then(initialConsentState => {
+      const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
+          this.element, 'ima-video', {initialConsentState});
+      iframe.setAttribute('allowfullscreen', 'true');
+      this.applyFillContent(iframe);
 
-    this.iframe_ = iframe;
+      this.iframe_ = iframe;
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
+      const deferred = new Deferred();
+      this.playerReadyPromise_ = deferred.promise;
+      this.playerReadyResolver_ = deferred.resolve;
+
+      this.unlistenMessage_ = listen(
+          this.win,
+          'message',
+          this.handlePlayerMessages_.bind(this)
+      );
+
+      this.element.appendChild(iframe);
+
+      installVideoManagerForDoc(this.element);
+      Services.videoManagerForDoc(this.win.document).register(this);
+
+      return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
-
-    this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handlePlayerMessages_.bind(this)
-    );
-
-    this.element.appendChild(iframe);
-
-    installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.win.document).register(this);
-
-    return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
 
   /** @override */
@@ -160,9 +212,9 @@ class AmpImaVideo extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true;
   }
 
@@ -177,11 +229,13 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /**
-   * Sends a command to the player through postMessage.
+   * Sends a command to the player through postMessage. NOTE: All commands sent
+   * before imaVideo fires VideoEvents.LOAD will be queued until that event
+   * fires.
    * @param {string} command
    * @param {Object=} opt_args
    * @private
-   * */
+   */
   sendCommand_(command, opt_args) {
     if (this.iframe_ && this.iframe_.contentWindow)
     {
@@ -192,6 +246,10 @@ class AmpImaVideo extends AMP.BaseElement {
           'args': opt_args || '',
         })), '*');
       });
+    }
+    // If we have an unlistener for this command, call it.
+    if (this.unlisteners_[command]) {
+      this.unlisteners_[command]();
     }
   }
 
@@ -204,15 +262,13 @@ class AmpImaVideo extends AMP.BaseElement {
 
     if (isObject(eventData)) {
       const videoEvent = eventData['event'];
-      if (videoEvent == VideoEvents.LOAD ||
-          videoEvent == VideoEvents.PLAY ||
-          videoEvent == VideoEvents.PAUSE ||
-          videoEvent == VideoEvents.MUTED ||
-          videoEvent == VideoEvents.UNMUTED) {
+      if (isEnumValue(VideoEvents, videoEvent)) {
         if (videoEvent == VideoEvents.LOAD) {
           this.playerReadyResolver_(this.iframe_);
         }
         this.element.dispatchCustomEvent(videoEvent);
+      } else if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
+        this.playerData_ = /** @type {!ImaPlayerData} */(eventData['data']);
       }
     }
   }
@@ -272,6 +328,71 @@ class AmpImaVideo extends AMP.BaseElement {
   hideControls() {
     // Not supported.
   }
-};
 
-AMP.registerElement('amp-ima-video', AmpImaVideo);
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    // TODO(@aghassemi, #10597) Make internal <video> element go fullscreen
+    // instead using postMessages
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    // TODO(@aghassemi, #10597) Report fullscreen status of internal <video>
+    // element rather than iframe
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    return this.playerData_.currentTime;
+  }
+
+  /** @override */
+  getDuration() {
+    return this.playerData_.duration;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    return this.playerData_.playedRanges;
+  }
+}
+
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpImaVideo);
+});

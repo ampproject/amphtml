@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/services';
-import {vsyncFor} from '../../../../src/services';
 import {
-    AmpAppBanner,
-    AbstractAppBanner,
-    AmpIosAppBanner,
-    AmpAndroidAppBanner,
+  AbstractAppBanner,
+  AmpAndroidAppBanner,
+  AmpAppBanner,
+  AmpIosAppBanner,
 } from '../amp-app-banner';
-import {xhrFor} from '../../../../src/services';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {viewerForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 
-describes.realWin('amp-app-banner', {amp: true}, () => {
 
+describes.realWin('amp-app-banner', {
+  amp: {
+    extensions: ['amp-app-banner'],
+    canonicalUrl: 'https://example.com/amps.html',
+  },
+}, env => {
+  let win, doc, ampdoc;
   let vsync;
   let platform;
   let isAndroid = false;
@@ -66,82 +67,56 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
     }
   }
 
-  function getTestFrame() {
-    return createIframePromise(true).then(iframe => {
-      const ampdoc = new AmpDocSingle(iframe.win);
-      const viewer = viewerForDoc(ampdoc);
-      sandbox.stub(viewer, 'isEmbedded', () => isEmbedded);
-      sandbox.stub(viewer, 'hasCapability', () => hasNavigateToCapability);
-      platform = platformFor(iframe.win);
-      sandbox.stub(platform, 'isIos', () => isIos);
-      sandbox.stub(platform, 'isAndroid', () => isAndroid);
-      sandbox.stub(platform, 'isChrome', () => isChrome);
-      sandbox.stub(platform, 'isSafari', () => isSafari);
-      sandbox.stub(platform, 'isFirefox', () => isFirefox);
-      sandbox.stub(platform, 'isEdge', () => isEdge);
-
-      vsync = vsyncFor(iframe.win);
-      sandbox.stub(vsync, 'runPromise', (task, state) => {
-        runTask(task, state);
-        return Promise.resolve();
-      });
-      sandbox.stub(vsync, 'run', runTask);
-      return iframe;
-    });
-  }
-
   function getAppBanner(config = {}) {
-    return getTestFrame().then(iframe => {
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'https://example.com/amps.html');
-      iframe.doc.head.appendChild(link);
+    if (config.iosMeta) {
+      const meta = doc.createElement('meta');
+      meta.setAttribute('name', 'apple-itunes-app');
+      meta.setAttribute('content', config.iosMeta.content);
+      doc.head.appendChild(meta);
+    }
 
-      if (config.iosMeta) {
-        const meta = iframe.doc.createElement('meta');
-        meta.setAttribute('name', 'apple-itunes-app');
-        meta.setAttribute('content', config.iosMeta.content);
-        iframe.doc.head.appendChild(meta);
-      }
+    const manifestObj = config.originManifest || config.androidManifest;
+    if (manifestObj) {
+      const rel = config.originManifest ? 'origin-manifest' : 'manifest';
+      const manifest = doc.createElement('link');
+      manifest.setAttribute('rel', rel);
+      manifest.setAttribute('href', manifestObj.href);
+      doc.head.appendChild(manifest);
+      sandbox.mock(Services.xhrFor(win)).expects('fetchJson')
+          .returns(Promise.resolve({
+            json() {
+              return Promise.resolve(manifestObj.content);
+            },
+          }));
+    }
 
-      const manifestObj = config.originManifest || config.androidManifest;
-      if (manifestObj) {
-        const rel = config.originManifest ? 'origin-manifest' : 'manifest';
-        const manifest = iframe.doc.createElement('link');
-        manifest.setAttribute('rel', rel);
-        manifest.setAttribute('href', manifestObj.href);
-        iframe.doc.head.appendChild(manifest);
-        sandbox.mock(xhrFor(iframe.win)).expects('fetchJson')
-            .returns(Promise.resolve({
-              json() {
-                return Promise.resolve(manifestObj.content);
-              },
-            }));
-      }
+    const banner = doc.createElement('amp-app-banner');
+    banner.setAttribute('layout', 'nodisplay');
+    if (!config.noOpenButton) {
+      const openButton = doc.createElement('button');
+      openButton.setAttribute('open-button', '');
+      banner.appendChild(openButton);
+    }
 
-      const banner = iframe.doc.createElement('amp-app-banner');
-      banner.setAttribute('layout', 'nodisplay');
-      banner.getAmpDoc = () => iframe.ampdoc;
-      if (!config.noOpenButton) {
-        const openButton = iframe.doc.createElement('button');
-        openButton.setAttribute('open-button', '');
-        banner.appendChild(openButton);
-      }
-
-      return iframe.addElement(banner);
-    });
+    banner.id = 'banner0';
+    doc.body.appendChild(banner);
+    return banner.build()
+        .then(() => banner.layoutCallback())
+        .then(() => banner);
   }
 
   function testSetupAndShowBanner() {
     return getAppBanner({iosMeta, androidManifest}).then(banner => {
-      expect(banner.parentElement).to.not.be.null;
-      expect(banner.style.display).to.be.equal('');
-      const bannerTop = banner.querySelector(
-          'i-amphtml-app-banner-top-padding');
-      expect(bannerTop).to.exist;
-      const dismissBtn = banner.querySelector(
-          '.amp-app-banner-dismiss-button');
-      expect(dismissBtn).to.exist;
+      return banner.implementation_.isDismissed().then(() => {
+        expect(banner.parentElement).to.not.be.null;
+        expect(banner.style.display).to.be.equal('');
+        const bannerTop = banner.querySelector(
+            'i-amphtml-app-banner-top-padding');
+        expect(bannerTop).to.exist;
+        const dismissBtn = banner.querySelector(
+            '.amp-app-banner-dismiss-button');
+        expect(dismissBtn).to.exist;
+      });
     });
   }
 
@@ -153,15 +128,17 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
   }
 
   function testButtonMissing() {
-    return getAppBanner({
+    return allowConsoleError(() => { return getAppBanner({
       iosMeta,
       androidManifest,
       noOpenButton: true,
-    }).should.eventually.be.rejectedWith(/<button open-button> is required/);
+    }).should.eventually.be.rejectedWith(
+        /<button open-button> is required/);
+    });
   }
 
   function testRemoveBannerIfDismissed() {
-    sandbox.stub(AbstractAppBanner.prototype, 'isDismissed', () => {
+    sandbox.stub(AbstractAppBanner.prototype, 'isDismissed').callsFake(() => {
       return Promise.resolve(true);
     });
     return testRemoveBanner();
@@ -196,9 +173,9 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
       return getAppBanner({iosMeta}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-            el.querySelector('button[open-button]'),
-            'medium://p/cb7f223fad86',
-            'https://itunes.apple.com/us/app/id828256236');
+                el.querySelector('button[open-button]'),
+                'medium://p/cb7f223fad86',
+                'https://itunes.apple.com/us/app/id828256236');
       });
     });
 
@@ -210,18 +187,19 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
       }).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-            el.querySelector('button[open-button]'),
-            'https://itunes.apple.com/us/app/id828256236',
-            'https://itunes.apple.com/us/app/id828256236');
+                el.querySelector('button[open-button]'),
+                'https://itunes.apple.com/us/app/id828256236',
+                'https://itunes.apple.com/us/app/id828256236');
       });
     });
 
     it('should parse meta content and validate app-argument url', () => {
-      return getAppBanner({
+      return allowConsoleError(() => { return getAppBanner({
         iosMeta: {content:
             'app-id=828256236, app-argument=javascript:alert("foo");'},
       }).should.eventually.be.rejectedWith(
           /The url in app-argument has invalid protocol/);
+      });
     });
   }
 
@@ -276,10 +254,10 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
       return getAppBanner({androidManifest}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-            el.querySelector('button[open-button]'),
-            'android-app://com.medium.reader/https/example.com/amps.html',
-            'https://play.google.com/store/apps/details?id=com.medium.reader'
-        );
+                el.querySelector('button[open-button]'),
+                'android-app://com.medium.reader/https/example.com/amps.html',
+                'https://play.google.com/store/apps/details?id=com.medium.reader'
+            );
       });
     });
 
@@ -288,10 +266,10 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
       return getAppBanner({originManifest: androidManifest}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-            el.querySelector('button[open-button]'),
-            'android-app://com.medium.reader/https/example.com/amps.html',
-            'https://play.google.com/store/apps/details?id=com.medium.reader'
-        );
+                el.querySelector('button[open-button]'),
+                'android-app://com.medium.reader/https/example.com/amps.html',
+                'https://play.google.com/store/apps/details?id=com.medium.reader'
+            );
       });
     });
   }
@@ -305,6 +283,28 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
     isEdge = false;
     isEmbedded = false;
     hasNavigateToCapability = true;
+
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    const viewer = Services.viewerForDoc(ampdoc);
+    sandbox.stub(viewer, 'isEmbedded').callsFake(() => isEmbedded);
+    sandbox.stub(viewer, 'hasCapability').callsFake(
+        () => hasNavigateToCapability);
+    platform = Services.platformFor(win);
+    sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+    sandbox.stub(platform, 'isAndroid').callsFake(() => isAndroid);
+    sandbox.stub(platform, 'isChrome').callsFake(() => isChrome);
+    sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
+    sandbox.stub(platform, 'isFirefox').callsFake(() => isFirefox);
+    sandbox.stub(platform, 'isEdge').callsFake(() => isEdge);
+
+    vsync = Services.vsyncFor(win);
+    sandbox.stub(vsync, 'runPromise').callsFake((task, state) => {
+      runTask(task, state);
+      return Promise.resolve();
+    });
+    sandbox.stub(vsync, 'run').callsFake(runTask);
   });
 
   describe('Choosing platform', () => {
@@ -505,45 +505,36 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
 
   describe('Abstract App Banner', () => {
     it('should setup click listener', () => {
-      return createIframePromise(true).then(iframe => {
-        const doc = iframe.doc;
-        const element = doc.createElement('div');
-        doc.body.appendChild(element);
-        const openButton = doc.createElement('button');
-        element.appendChild(openButton);
-        openButton.setAttribute('open-button', '');
-        openButton.addEventListener = sandbox.spy();
-        const banner = new AbstractAppBanner(element);
-        banner.setupOpenButton_(openButton, 'open-button', 'install-link');
-        expect(openButton.addEventListener).to.have.been.calledWith('click');
-      });
+      const element = doc.createElement('div');
+      doc.body.appendChild(element);
+      const openButton = doc.createElement('button');
+      element.appendChild(openButton);
+      openButton.setAttribute('open-button', '');
+      openButton.addEventListener = sandbox.spy();
+      const banner = new AbstractAppBanner(element);
+      banner.setupOpenButton_(openButton, 'open-button', 'install-link');
+      expect(openButton.addEventListener).to.have.been.calledWith('click');
     });
 
     it('should create dismiss button and setup click listener', () => {
-      return createIframePromise(true).then(iframe => {
-        const win = iframe.win;
-        const doc = iframe.doc;
-        vsync = vsyncFor(win);
-        sandbox.stub(vsync, 'run', runTask);
-        const element = doc.createElement('div');
-        element.id = 'banner1';
-        element.getAmpDoc = () => iframe.ampdoc;
-        doc.body.appendChild(element);
-        const banner = new AbstractAppBanner(element);
-        banner.addDismissButton_();
+      const element = doc.createElement('div');
+      element.id = 'banner1';
+      element.getAmpDoc = () => ampdoc;
+      doc.body.appendChild(element);
+      const banner = new AbstractAppBanner(element);
+      banner.addDismissButton_();
 
-        const bannerTop = element.querySelector(
-            'i-amphtml-app-banner-top-padding');
-        expect(bannerTop).to.exist;
-        const dismissBtn = element.querySelector(
-            '.amp-app-banner-dismiss-button');
-        expect(dismissBtn).to.not.be.null;
-        expect(dismissBtn.parentElement).to.be.equal(element);
-        dismissBtn.dispatchEvent(new Event('click'));
+      const bannerTop = element.querySelector(
+          'i-amphtml-app-banner-top-padding');
+      expect(bannerTop).to.exist;
+      const dismissBtn = element.querySelector(
+          '.amp-app-banner-dismiss-button');
+      expect(dismissBtn).to.not.be.null;
+      expect(dismissBtn.parentElement).to.be.equal(element);
+      dismissBtn.dispatchEvent(new Event('click'));
+      return banner.isDismissed().then(value => {
         expect(element.parentElement).to.be.null;
-        return banner.isDismissed().then(value => {
-          expect(value).to.be.true;
-        });
+        expect(value).to.be.true;
       });
     });
   });

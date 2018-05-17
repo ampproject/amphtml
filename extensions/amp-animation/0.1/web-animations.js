@@ -16,16 +16,6 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
-import {ScrollboundPlayer} from './scrollbound-player';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestBySelector, matches} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {extractKeyframes} from './keyframes-extractor';
-import {getMode} from '../../../src/mode';
-import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
-import {isArray, isObject, toArray} from '../../../src/types';
-import {map} from '../../../src/utils/object';
-import {parseCss} from './css-expr';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -38,9 +28,20 @@ import {
   WebKeyframeAnimationDef,
   WebKeyframesDef,
   WebMultiAnimationDef,
+  WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
+import {closestBySelector, matches} from '../../../src/dom';
+import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
+import {dev, user} from '../../../src/log';
+import {extractKeyframes} from './keyframes-extractor';
+import {getMode} from '../../../src/mode';
+import {isArray, isObject, toArray} from '../../../src/types';
+import {map} from '../../../src/utils/object';
+import {parseCss} from './css-expr';
+import {setStyles} from '../../../src/style';
 
 
 /** @const {string} */
@@ -68,14 +69,6 @@ let animIdCounter = 0;
  */
 export let InternalWebAnimationRequestDef;
 
-/**
- * @private
- * @enum {string}
- */
-const Tickers = {
-  SCROLL: 'scroll',
-  TIME: 'time',
-};
 
 /**
  * @const {!Object<string, boolean>}
@@ -126,25 +119,17 @@ export class WebAnimationRunner {
   }
 
   /**
+   * Initializes the players but does not change the state.
    */
-  start() {
+  init() {
     dev().assert(!this.players_);
-    this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        for (const k in request.vars) {
-          request.target.style.setProperty(k, String(request.vars[k]));
-        }
+        setStyles(request.target, request.vars);
       }
-
-      // Create the player.
-      let player;
-      if (request.timing.ticker == Tickers.SCROLL) {
-        player = new ScrollboundPlayer(request);
-      } else {
-        player = request.target.animate(request.keyframes, request.timing);
-      }
+      const player = request.target.animate(request.keyframes, request.timing);
+      player.pause();
       return player;
     });
     this.runningCount_ = this.players_.length;
@@ -159,12 +144,25 @@ export class WebAnimationRunner {
   }
 
   /**
+   * Initializes the players if not already initialized,
+   * and starts playing the animations.
+   */
+  start() {
+    if (!this.players_) {
+      this.init();
+    }
+    this.resume();
+  }
+
+  /**
    */
   pause() {
     dev().assert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
-      player.pause();
+      if (player.playState == WebAnimationPlayState.RUNNING) {
+        player.pause();
+      }
     });
   }
 
@@ -172,12 +170,18 @@ export class WebAnimationRunner {
    */
   resume() {
     dev().assert(this.players_);
-    if (this.playState_ == WebAnimationPlayState.RUNNING) {
+    const oldRunnerPlayState = this.playState_;
+    if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.RUNNING);
+    this.runningCount_ = 0;
     this.players_.forEach(player => {
-      player.play();
+      if (oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
+          player.playState == WebAnimationPlayState.PAUSED) {
+        player.play();
+        this.runningCount_++;
+      }
     });
   }
 
@@ -198,12 +202,20 @@ export class WebAnimationRunner {
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
       player.pause();
-      if (player instanceof ScrollboundPlayer) {
-        player.tick(time);
-      } else {
-        player.currentTime = time;
-      }
+      player.currentTime = time;
     });
+  }
+
+  /**
+   * Seeks to a relative position within the animation timeline given a
+   * percentage (0 to 1 number).
+   * @param {number} percent between 0 and 1
+   */
+  seekToPercent(percent) {
+    dev().assert(percent >= 0 && percent <= 1);
+    const totalDuration = this.getTotalDuration_();
+    const time = totalDuration * percent;
+    this.seekTo(time);
   }
 
   /**
@@ -233,44 +245,6 @@ export class WebAnimationRunner {
   }
 
   /**
-   */
-  scrollTick(pos) {
-    this.players_.forEach(player => {
-      if (player instanceof ScrollboundPlayer) {
-        player.tick(pos);
-      }
-    });
-  }
-
-  /**
-   */
-  updateScrollDuration(newDuration) {
-    this.requests_.forEach(request => {
-      if (request.timing.ticker == Tickers.SCROLL) {
-        request.timing.duration = newDuration;
-      }
-    });
-
-    this.players_.forEach(player => {
-      if (player instanceof ScrollboundPlayer) {
-        player.onScrollDurationChanged();
-      }
-    });
-  }
-
-  /**
-   */
-  hasScrollboundAnimations() {
-    for (let i = 0; i < this.requests_.length; i++) {
-      if (this.requests_[i].timing.ticker == Tickers.SCROLL) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
    * @param {!WebAnimationPlayState} playState
    * @private
    */
@@ -279,6 +253,31 @@ export class WebAnimationRunner {
       this.playState_ = playState;
       this.playStateChangedObservable_.fire(this.playState_);
     }
+  }
+
+  /**
+   * @return {number} total duration in milliseconds.
+   * @throws {Error} If timeline is infinite.
+   */
+  getTotalDuration_() {
+    let maxTotalDuration = 0;
+    for (let i = 0; i < this.requests_.length; i++) {
+      const {timing} = this.requests_[i];
+
+      user().assert(isFinite(timing.iterations), 'Animation has infinite ' +
+      'timeline, we can not seek to a relative position within an infinite ' +
+      'timeline. Use "time" for seekTo or remove infinite iterations');
+
+      const iteration = timing.iterations - timing.iterationStart;
+      const totalDuration = (timing.duration * iteration) +
+          timing.delay + timing.endDelay;
+
+      if (totalDuration > maxTotalDuration) {
+        maxTotalDuration = totalDuration;
+      }
+    }
+
+    return maxTotalDuration;
   }
 }
 
@@ -292,21 +291,25 @@ class Scanner {
 
   /**
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @return {boolean}
    */
   scan(spec) {
     if (isArray(spec)) {
-      spec.forEach(spec => this.scan(spec));
-      return;
+      // Returns `true` if any of the components scan successfully.
+      return spec.reduce((acc, comp) => this.scan(comp) || acc, false);
     }
 
     // Check whether the animation is enabled.
     if (!this.isEnabled(/** @type {!WebAnimationDef} */ (spec))) {
-      return;
+      return false;
     }
 
-    // WebAnimationDef: (!WebMultiAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
+    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|
+    //                   !WebCompAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
+    } else if (spec.switch) {
+      this.onSwitchAnimation(/** @type {!WebSwitchAnimationDef} */ (spec));
     } else if (spec.animation) {
       this.onCompAnimation(/** @type {!WebCompAnimationDef} */ (spec));
     } else if (spec.keyframes) {
@@ -314,6 +317,7 @@ class Scanner {
     } else {
       this.onUnknownAnimation(spec);
     }
+    return true;
   }
 
   /**
@@ -330,6 +334,12 @@ class Scanner {
    * @abstract
    */
   onMultiAnimation(unusedSpec) {}
+
+  /**
+   * @param {!WebSwitchAnimationDef} unusedSpec
+   * @abstract
+   */
+  onSwitchAnimation(unusedSpec) {}
 
   /**
    * @param {!WebCompAnimationDef} unusedSpec
@@ -408,8 +418,8 @@ export class Builder {
    * @protected
    */
   resolveRequests(path, spec, args,
-      target = null, vars = null, timing = null) {
-    const scanner = this.createScanner_(path, target, vars, timing);
+    target = null, index = null, vars = null, timing = null) {
+    const scanner = this.createScanner_(path, target, index, vars, timing);
     return this.vsync_.measurePromise(
         () => scanner.resolveRequests(spec, args));
   }
@@ -428,12 +438,14 @@ export class Builder {
   /**
    * @param {!Array<string>} path
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @private
    */
-  createScanner_(path, target, vars, timing) {
-    return new MeasureScanner(this, this.css_, path, target, vars, timing);
+  createScanner_(path, target, index, vars, timing) {
+    return new MeasureScanner(this, this.css_, path,
+        target, index, vars, timing);
   }
 }
 
@@ -450,10 +462,11 @@ export class MeasureScanner extends Scanner {
    * @param {!CssContextImpl} css
    * @param {!Array<string>} path
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    */
-  constructor(builder, css, path, target, vars, timing) {
+  constructor(builder, css, path, target, index, vars, timing) {
     super();
 
     /** @const @private */
@@ -468,12 +481,14 @@ export class MeasureScanner extends Scanner {
     /** @private {?Element} */
     this.target_ = target;
 
+    /** @private {?number} */
+    this.index_ = index;
+
     /** @private {!Object<string, *>} */
     this.vars_ = vars || map();
 
     /** @private {!WebAnimationTimingDef} */
     this.timing_ = timing || {
-      ticker: Tickers.TIME,
       duration: 0,
       delay: 0,
       endDelay: 0,
@@ -520,8 +535,11 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   isEnabled(spec) {
-    if (spec.media) {
-      return this.css_.matchMedia(spec.media);
+    if (spec.media && !this.css_.matchMedia(spec.media)) {
+      return false;
+    }
+    if (spec.supports && !this.css_.supports(spec.supports)) {
+      return false;
     }
     return true;
   }
@@ -529,6 +547,20 @@ export class MeasureScanner extends Scanner {
   /** @override */
   onMultiAnimation(spec) {
     this.with_(spec, () => this.scan(spec.animations));
+  }
+
+  /** @override */
+  onSwitchAnimation(spec) {
+    // The first to match will be used; the rest will be ignored.
+    this.with_(spec, () => {
+      for (let i = 0; i < spec.switch.length; i++) {
+        const candidate = spec.switch[i];
+        if (this.scan(candidate)) {
+          // First matching candidate is applied and the rest are ignored.
+          break;
+        }
+      }
+    });
   }
 
   /** @override */
@@ -547,15 +579,18 @@ export class MeasureScanner extends Scanner {
       return impl.getAnimationSpec();
     });
     this.with_(spec, () => {
-      const target = this.target_;
-      const vars = this.vars_;
-      const timing = this.timing_;
+      const {
+        target_: target,
+        index_: index,
+        vars_: vars,
+        timing_: timing,
+      } = this;
       const promise = otherSpecPromise.then(otherSpec => {
         if (!otherSpec) {
           return;
         }
         return this.builder_.resolveRequests(
-            newPath, otherSpec, /* args */ null, target, vars, timing);
+            newPath, otherSpec, /* args */ null, target, index, vars, timing);
       }).then(requests => {
         requests.forEach(request => this.requests_.push(request));
       });
@@ -633,7 +668,7 @@ export class MeasureScanner extends Scanner {
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
       const startFrame = addStartFrame ? map() :
-          this.css_.resolveCssMap(array[0]);
+        this.css_.resolveCssMap(array[0]);
       keyframes.push(startFrame);
       const start = addStartFrame ? 0 : 1;
       for (let i = start; i < array.length; i++) {
@@ -684,22 +719,26 @@ export class MeasureScanner extends Scanner {
    */
   with_(spec, callback) {
     // Save context.
-    const prevTarget = this.target_;
-    const prevVars = this.vars_;
-    const prevTiming = this.timing_;
+    const {
+      target_: prevTarget,
+      index_: prevIndex,
+      vars_: prevVars,
+      timing_: prevTiming,
+    } = this;
 
     // Push new context and perform calculations.
     const targets =
         (spec.target || spec.selector) ?
-        this.resolveTargets_(spec) :
-        [null];
+          this.resolveTargets_(spec) :
+          [null];
     targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
-      this.css_.withTarget(this.target_, () => {
+      this.index_ = target ? index : prevIndex;
+      this.css_.withTarget(this.target_, this.index_, () => {
         const subtargetSpec =
             this.target_ ?
-            this.matchSubtargets_(this.target_, index, spec) :
-            spec;
+              this.matchSubtargets_(this.target_, this.index_ || 0, spec) :
+              spec;
         this.vars_ = this.mergeVars_(subtargetSpec, prevVars);
         this.css_.withVars(this.vars_, () => {
           this.timing_ = this.mergeTiming_(subtargetSpec, prevTiming);
@@ -710,6 +749,7 @@ export class MeasureScanner extends Scanner {
 
     // Restore context.
     this.target_ = prevTarget;
+    this.index_ = prevIndex;
     this.vars_ = prevVars;
     this.timing_ = prevTiming;
   }
@@ -735,8 +775,8 @@ export class MeasureScanner extends Scanner {
       }
       const target = user().assertElement(
           typeof spec.target == 'string' ?
-              this.css_.getElementById(spec.target) :
-              spec.target,
+            this.css_.getElementById(spec.target) :
+            spec.target,
           `Target not found: "${spec.target}"`);
       targets = [target];
     } else if (this.target_) {
@@ -850,21 +890,13 @@ export class MeasureScanner extends Scanner {
         newTiming.iterationStart, prevTiming.iterationStart);
 
     // Identifier CSS values.
-    const easing = newTiming.easing != null ?
-        this.css_.resolveCss(newTiming.easing) :
-        prevTiming.easing;
-    const direction = newTiming.direction != null ?
-        /** @type {!WebAnimationTimingDirection} */
-        (this.css_.resolveCss(newTiming.direction)) :
-        prevTiming.direction;
-    const fill = newTiming.fill != null ?
-        /** @type {!WebAnimationTimingFill} */
-        (this.css_.resolveCss(newTiming.fill)) :
-        prevTiming.fill;
+    const easing =
+        this.css_.resolveIdent(newTiming.easing, prevTiming.easing);
+    const direction = /** @type {!WebAnimationTimingDirection} */
+        (this.css_.resolveIdent(newTiming.direction, prevTiming.direction));
+    const fill = /** @type {!WebAnimationTimingFill} */
+        (this.css_.resolveIdent(newTiming.fill, prevTiming.fill));
 
-    // Other.
-    const ticker = newTiming.ticker != null ?
-        newTiming.ticker : prevTiming.ticker;
 
     // Validate.
     this.validateTime_(duration, newTiming.duration, 'duration');
@@ -874,7 +906,7 @@ export class MeasureScanner extends Scanner {
         '"iterations" is invalid: %s', newTiming.iterations);
     user().assert(iterationStart != null &&
         iterationStart >= 0 && isFinite(iterationStart),
-        '"iterationStart" is invalid: %s', newTiming.iterationStart);
+    '"iterationStart" is invalid: %s', newTiming.iterationStart);
     user().assertEnumValue(WebAnimationTimingDirection,
         /** @type {string} */ (direction), 'direction');
     user().assertEnumValue(WebAnimationTimingFill,
@@ -888,7 +920,6 @@ export class MeasureScanner extends Scanner {
       easing,
       direction,
       fill,
-      ticker,
     };
   }
 
@@ -943,6 +974,9 @@ class CssContextImpl {
     /** @private {?Element} */
     this.currentTarget_ = null;
 
+    /** @private {?number} */
+    this.currentIndex_ = null;
+
     /** @private {?Object<string, *>} */
     this.vars_ = null;
 
@@ -962,6 +996,17 @@ class CssContextImpl {
    */
   matchMedia(mediaQuery) {
     return this.win_.matchMedia(mediaQuery).matches;
+  }
+
+  /**
+   * @param {string} query
+   * @return {boolean}
+   */
+  supports(query) {
+    if (this.win_.CSS && this.win_.CSS.supports) {
+      return this.win_.CSS.supports(query);
+    }
+    return false;
   }
 
   /**
@@ -1002,27 +1047,30 @@ class CssContextImpl {
     if (!styles) {
       styles = computedStyle(this.win_, target);
       this.computedStyleCache_[targetId] =
-          /** @type {!CSSStyleDeclaration} */ (styles);
+        /** @type {!CSSStyleDeclaration} */ (styles);
     }
 
     // Resolve a var or a property.
     return startsWith(prop, '--') ?
-        styles.getPropertyValue(prop) :
-        styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
+      styles.getPropertyValue(prop) :
+      styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
   }
 
   /**
    * @param {?Element} target
+   * @param {?number} index
    * @param {function(?Element):T} callback
    * @return {T}
    * @template T
    * @protected
    */
-  withTarget(target, callback) {
-    const prev = this.currentTarget_;
+  withTarget(target, index, callback) {
+    const {currentTarget_: prev, currentIndex_: prevIndex} = this;
     this.currentTarget_ = target;
+    this.currentIndex_ = index;
     const result = callback(target);
     this.currentTarget_ = prev;
+    this.currentIndex_ = prevIndex;
     return result;
   }
 
@@ -1047,20 +1095,9 @@ class CssContextImpl {
    * @protected
    */
   resolveCss(input) {
-    if (input == null || input === '') {
-      return '';
-    }
-    const inputCss = String(input);
-    if (typeof input == 'number') {
-      return inputCss;
-    }
-    // Test first if CSS contains any variable components. Otherwise, there's
-    // no need to spend cycles to parse/evaluate.
-    if (!isVarCss(inputCss)) {
-      return inputCss;
-    }
-    const result = this.resolveAsNode_(inputCss);
-    return result != null ? result.css() : '';
+    // Will always return a valid string, since the default value is `''`.
+    return dev().assertString(this.resolveCss_(
+        input, /* def */ '', /* normalize */ true));
   }
 
   /**
@@ -1081,6 +1118,15 @@ class CssContextImpl {
 
   /**
    * @param {*} input
+   * @param {string|undefined} def
+   * @return {string|undefined}
+   */
+  resolveIdent(input, def) {
+    return this.resolveCss_(input, def, /* normalize */ false);
+  }
+
+  /**
+   * @param {*} input
    * @param {number|undefined} def
    * @return {number|undefined}
    */
@@ -1089,7 +1135,7 @@ class CssContextImpl {
       if (typeof input == 'number') {
         return input;
       }
-      const node = this.resolveAsNode_(input);
+      const node = this.resolveAsNode_(input, /* normalize */ false);
       if (node) {
         return CssTimeNode.millis(node);
       }
@@ -1107,7 +1153,7 @@ class CssContextImpl {
       if (typeof input == 'number') {
         return input;
       }
-      const node = this.resolveAsNode_(input);
+      const node = this.resolveAsNode_(input, /* normalize */ false);
       if (node) {
         return CssNumberNode.num(node);
       }
@@ -1117,10 +1163,35 @@ class CssContextImpl {
 
   /**
    * @param {*} input
+   * @param {string|undefined} def
+   * @param {boolean} normalize
+   * @return {string|undefined}
+   * @private
+   */
+  resolveCss_(input, def, normalize) {
+    if (input == null || input === '') {
+      return def;
+    }
+    const inputCss = String(input);
+    if (typeof input == 'number') {
+      return inputCss;
+    }
+    // Test first if CSS contains any variable components. Otherwise, there's
+    // no need to spend cycles to parse/evaluate.
+    if (!isVarCss(inputCss, normalize)) {
+      return inputCss;
+    }
+    const result = this.resolveAsNode_(inputCss, normalize);
+    return result != null ? result.css() : def;
+  }
+
+  /**
+   * @param {*} input
+   * @param {boolean} normalize
    * @return {?./css-expr-ast.CssNode}
    * @private
    */
-  resolveAsNode_(input) {
+  resolveAsNode_(input, normalize) {
     if (input == null || input === '') {
       return null;
     }
@@ -1138,7 +1209,7 @@ class CssContextImpl {
     if (!node) {
       return null;
     }
-    return node.resolve(this);
+    return node.resolve(this, normalize);
   }
 
   /**
@@ -1157,14 +1228,15 @@ class CssContextImpl {
         `Recursive variable: "${varName}"`);
     this.varPath_.push(varName);
     const rawValue = (this.vars_ && this.vars_[varName] != undefined) ?
-        this.vars_[varName] :
-        this.currentTarget_ ?
-            this.measure(this.currentTarget_, varName) :
-            null;
+      this.vars_[varName] :
+      this.currentTarget_ ?
+        this.measure(this.currentTarget_, varName) :
+        null;
     if (rawValue == null || rawValue === '') {
       user().warn(TAG, `Variable not found: "${varName}"`);
     }
-    const result = this.resolveAsNode_(rawValue);
+    // No need to normalize vars - they will be normalized later.
+    const result = this.resolveAsNode_(rawValue, /* normalize */ false);
     this.varPath_.pop();
     return result;
   }
@@ -1192,6 +1264,12 @@ class CssContextImpl {
       };
     }
     return this.viewportSize_;
+  }
+
+  /** @override */
+  getCurrentIndex() {
+    this.requireTarget_();
+    return dev().assertNumber(this.currentIndex_);
   }
 
   /** @override */
@@ -1252,7 +1330,8 @@ class CssContextImpl {
    * @private
    */
   getElementSize_(target) {
-    return {width: target./*OK*/offsetWidth, height: target./*OK*/offsetHeight};
+    const b = target./*OK*/getBoundingClientRect();
+    return {width: b.width, height: b.height};
   }
 
   /** @override */

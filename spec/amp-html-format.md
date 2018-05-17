@@ -22,6 +22,10 @@ AMP HTML is a subset of HTML for authoring content pages such as news articles i
 
 Being a subset of HTML, it puts some restrictions on the full set of tags and functionality available through HTML but it does not require the development of new rendering engines: existing user agents can render AMP HTML just like all other HTML.
 
+{% call callout('Watch', type='read') %}
+If you're primarily interested in what's allowed in AMP and what isn't, watch our [primer video on AMP's limitations](https://www.youtube.com/watch?v=Gv8A4CktajQ). 
+{% endcall %}
+
 Also, AMP HTML documents can be uploaded to a web server and served just like any other HTML document; no special configuration for the server is necessary. However, they are also designed to be optionally served through specialized AMP serving systems that proxy AMP documents. These documents serve them from their own origin and are allowed to apply transformations to the document that provide additional performance benefits. An incomplete list of optimizations such a serving system might do is:
 
 - Replace image references with images sized to the viewer’s viewport.
@@ -96,7 +100,7 @@ AMP HTML documents MUST
 - <a name="dctp"></a>start with the doctype `<!doctype html>`. [🔗](#dctp)
 - <a name="ampd"></a>contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well). [🔗](#ampd)
 - <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
-- <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
+- <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL">` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
 - <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommended to include `initial-scale=1`. [🔗](#vprt)
 - <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
@@ -172,11 +176,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">form</td>
-    <td>Allowed. Require including <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md">amp-form extension</a>.</td>
+    <td>Allowed. Require including <a href="https://www.ampproject.org/docs/reference/components/amp-form">amp-form</a> extension.</td>
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Mostly allowed with <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#inputs">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
+    <td>Mostly allowed with <a href="https://www.ampproject.org/docs/reference/components/amp-form#inputs-and-fields">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
   </tr>
   <tr>
     <td width="30%">button</td>
@@ -224,7 +228,7 @@ Internal AMP attributes prefixed with `i-amp-` are disallowed in AMP HTML.
 
 Internal AMP class names prefixed with `-amp-` and `i-amp-` are disallowed in AMP HTML.
 
-Consult AMP documentation for meaning of class names prefixed with `amp-`. The use of these classes is allowed and meant to allow customization of some features of AMP runtime and extensions.
+Consult [AMP documentation](amp-css-classes.md) for meaning of class names prefixed with `amp-`. The use of these classes is allowed and meant to allow customization of some features of AMP runtime and extensions.
 
 All other authored class names are allowed in AMP HTML markup.
 
@@ -256,6 +260,8 @@ The following @-rules are allowed in stylesheets:
 
 Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document.
 
+`@keyframes` rules are allowed in the `<style amp-custom>`. However, if they are too many of them, it's recommended to place them in the additional `<style amp-keyframes>` tag, which must be located at the end of the AMP document. For details, see the [Keyframes stylesheet](#keyframes-stylesheet) section of this document.
+
 #### Selectors
 
 The following restrictions apply to selectors in author style sheets:
@@ -269,15 +275,6 @@ To prevent usage of attribute selectors to circumvent class name limitations it 
 Usage of the `!important` qualifier is not allowed. This is a necessary requirement to enable AMP to enforce its element sizing invariants.
 
 #### Properties
-These CSS properties are permanently banned:
-
-- `behavior`
-- `-moz-binding`
-
-The following properties are currently blacklisted due to performance concerns:
-
-- `filter`
-
 AMP only allows transitions and animations of properties that can be GPU accelerated in common browsers. We currently whitelist: `opacity`, `transform` (also `-vendorPrefix-transform`).
 
 In the following examples `<property>` needs to be in the whitelist above.
@@ -289,6 +286,30 @@ In the following examples `<property>` needs to be in the whitelist above.
 
 #### Maximum size
 It is a validation error if the author stylesheet is larger than 50,000 bytes.
+
+### Keyframes stylesheet
+
+In addition to the `<style amp-custom>`, authors may also add the `<style amp-keyframes>` tag, which is allowed specifically for keyframes animations.
+
+The following restrictions apply to the `<style amp-keyframes>` tag:
+ 1. May only be placed as the last child of the document's `<body>` element.
+ 2. May only contain `@keyframes`, `@media`, `@supports` rules and their combination.
+ 3. May not be larger than 500,000 bytes.
+
+The reason the `<style amp-keyframes>` tag exists is because keyframes rules are often bulky even for moderately complicated animations, which leads to slow CSS parsing and first contentful paint. But such rules often exceed the size limit imposed on `<style amp-custom>`. Putting such keyframes declarations at the bottom of the document in the `<style amp-keyframes>` allows them to exceed size limitations. And since keyframes are not render-blocking, it also avoids blocking first contentful paint to parse them.
+
+Example:
+
+```html
+<style amp-keyframes>
+@keyframes anim1 {}
+
+@media (min-width: 600px) {
+  @keyframes anim1 {}
+}
+</style>
+</body>
+```
 
 ### Custom fonts
 
@@ -302,9 +323,10 @@ Example:
 
 Font providers can be whitelisted if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
 
-- Fonts.com: https://fast.fonts.net
-- Google Fonts: https://fonts.googleapis.com
-- Font Awesome: https://maxcdn.bootstrapcdn.com
+- Fonts.com: `https://fast.fonts.net`
+- Google Fonts: `https://fonts.googleapis.com`
+- Font Awesome: `https://maxcdn.bootstrapcdn.com`
+- [Typekit](https://helpx.adobe.com/typekit/using/google-amp.html): `https://use.typekit.net/kitId.css` (replace `kitId` accordingly)
 
 IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP Cache CSP rule.
 
@@ -393,7 +415,7 @@ The `<script>` tag must have an `async` attribute and must have a `custom-elemen
 
 Runtime implementations may use the name to render placeholders for these elements.
 
-The script URL must start with "https://cdn.ampproject.org" and must follow a very strict pattern of `/v\d+/[a-z-]+-(latest|\d+|\d+.\d+).js`.
+The script URL must start with `https://cdn.ampproject.org` and must follow a very strict pattern of `/v\d+/[a-z-]+-(latest|\d+|\d+\.\d+)\.js`.
 
 ##### URL
 
@@ -422,8 +444,8 @@ Extended components are loaded by including a `<script>` tag in the head of the 
 ```
 
 The `<script>` tag must have an `async` attribute and must have a `custom-template` attribute referencing the type of the
-template. The script URL must start with "https://cdn.ampproject.org" and must follow a very strict pattern of
-`/v\d+/[a-z-]+-(latest|\d+|\d+.\d+).js`.
+template. The script URL must start with `https://cdn.ampproject.org` and must follow a very strict pattern of
+`/v\d+/[a-z-]+-(latest|\d+|\d+\.\d+)\.js`.
 
 The templates are declared in the document as following:
 

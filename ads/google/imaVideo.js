@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {ImaPlayerData} from './ima-player-data';
+import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
-import {setStyle} from '../../src/style';
 import {tryParseJson} from '../../src/json';
 
 /**
@@ -29,17 +30,28 @@ const PlayerStates = {
   PAUSED: 2,
 };
 
-// Character used for play icon.
-const playChar = '\u25b6\ufe0e';
-
-// Character used for pause icons.
-const pauseChars = '\u258c\ufe0e\u258c\ufe0e';
-
-// Character used for seek dot on progress bar.
-const seekDot = '\u25cf\ufe0e';
-
-// Characters used for fullscreen icon.
-const fullscreenChars = '\u25ad\ufe0e';
+/*eslint-disable */
+const icons = {
+  'play':
+    `<path d="M8 5v14l11-7z"></path>
+     <path d="M0 0h24v24H0z" fill="none"></path>`,
+  'pause':
+    `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+     <path d="M0 0h24v24H0z" fill="none"></path>`,
+  'fullscreen':
+    `<path d="M0 0h24v24H0z" fill="none"/>
+     <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>`,
+  'mute':
+    `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>
+     <path d="M0 0h24v24H0z" fill="none"></path>`,
+  'volume_max':
+    `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+     <path d="M0 0h24v24H0z" fill="none"></path>`,
+  'seek':
+    `<circle cx="12" cy="12" r="12" />`,
+}
+const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
+/*eslint-enable */
 
 // Div wrapping our entire DOM.
 let wrapperDiv;
@@ -50,17 +62,11 @@ let bigPlayDiv;
 // Div contianing play button. Double-nested for alignment.
 let playButtonDiv;
 
-// Node containing play button characters.
-let bigPlayButtonNode;
-
 // Div containing player controls.
 let controlsDiv;
 
 // Div containing play or pause button.
 let playPauseDiv;
-
-// Node contianing play or pause characters.
-let playPauseNode;
 
 // Div containing player time.
 let timeDiv;
@@ -117,6 +123,9 @@ let adRequestFailed;
 // IMA SDK AdDisplayContainer object.
 let adDisplayContainer;
 
+// IMA SDK AdsRequest object.
+let adsRequest;
+
 // IMA SDK AdsLoader object.
 let adsLoader;
 
@@ -154,22 +163,34 @@ let muteAdsManagerOnLoaded;
 // Flag tracking if we are in native fullscreen mode. Used for iPhone.
 let nativeFullscreen;
 
+// Flag tracking if the IMA library was allowed to load. Will be set to false
+// when e.g. a user is using an ad blocker.
+let imaLoadAllowed;
+
 // Used if the adsManager needs to be resized on load.
 let adsManagerWidthOnLoad, adsManagerHeightOnLoad;
 
 // Initial video dimensions.
 let videoWidth, videoHeight;
 
-/**
- * Loads the IMA SDK library.
- */
-function getIma(global, cb) {
-  loadScript(global, 'https://imasdk.googleapis.com/js/sdkloader/ima3.js', cb);
-  //loadScript(global, 'https://storage.googleapis.com/gvabox/sbusolits/h5/debug/ima3.js', cb);
-}
+// IMASettings provided via <script> tag in parent element.
+let imaSettings;
+
+// Player data used for video analytics.
+const playerData = new ImaPlayerData();
+
+// Flag used to track if ads have been requested or not.
+let adsRequested;
+
+// Flag that tracks if the user tapped and dragged on the big play button.
+let userTappedAndDragged;
+
+// User consent state.
+let consentState;
 
 /**
- * The business.
+ * @param {!Object} global
+ * @param {!Object} data
  */
 export function imaVideo(global, data) {
 
@@ -179,146 +200,164 @@ export function imaVideo(global, data) {
   // Wraps *everything*.
   wrapperDiv = global.document.createElement('div');
   wrapperDiv.id = 'ima-wrapper';
-  setStyle(wrapperDiv, 'width', videoWidth + 'px');
-  setStyle(wrapperDiv, 'height', videoHeight + 'px');
+  setStyle(wrapperDiv, 'width', px(videoWidth));
+  setStyle(wrapperDiv, 'height', px(videoHeight));
   setStyle(wrapperDiv, 'background-color', 'black');
 
   // Wraps the big play button we show before video start.
   bigPlayDiv = global.document.createElement('div');
   bigPlayDiv.id = 'ima-big-play';
-  setStyle(bigPlayDiv, 'position', 'relative');
-  setStyle(bigPlayDiv, 'width', videoWidth + 'px');
-  setStyle(bigPlayDiv, 'height', videoHeight + 'px');
-  setStyle(bigPlayDiv, 'display', 'table-cell');
-  setStyle(bigPlayDiv, 'vertical-align', 'middle');
-  setStyle(bigPlayDiv, 'text-align', 'center');
-  setStyle(bigPlayDiv, 'cursor', 'pointer');
+  setStyles(bigPlayDiv, {
+    'position': 'relative',
+    'width': px(videoWidth),
+    'height': px(videoHeight),
+    'display': 'table-cell',
+    'vertical-align': 'middle',
+    'text-align': 'center',
+    'cursor': 'pointer',
+  });
   // Inner div so we can v and h align.
-  playButtonDiv = global.document.createElement('div');
+  playButtonDiv = createIcon(global, 'play');
   playButtonDiv.id = 'ima-play-button';
-  setStyle(playButtonDiv, 'font-size', '10em');
-  setStyle(playButtonDiv, 'color', 'white');
-  setStyle(playButtonDiv, 'display', 'inline-block');
-  setStyle(playButtonDiv, 'line-height', '0.5');
-  // Play button text node.
-  bigPlayButtonNode = global.document.createTextNode(playChar);
-  playButtonDiv.appendChild(bigPlayButtonNode);
+  setStyles(playButtonDiv, {
+    'display': 'inline-block',
+    'max-width': '120px',
+    'max-height': '120px',
+  });
   bigPlayDiv.appendChild(playButtonDiv);
 
   // Video controls.
   controlsDiv = global.document.createElement('div');
   controlsDiv.id = 'ima-controls';
-  setStyle(controlsDiv, 'position', 'absolute');
-  setStyle(controlsDiv, 'bottom', '0px');
-  setStyle(controlsDiv, 'width', '100%');
-  setStyle(controlsDiv, 'height', '30px');
-  setStyle(controlsDiv, 'background-color', '#EEEEEE');
-  setStyle(controlsDiv, 'color', '#333333');
-  setStyle(controlsDiv, 'display', 'none');
-  setStyle(controlsDiv, '-webkit-touch-callout', 'none');
-  setStyle(controlsDiv, '-webkit-user-select', 'none');
-  setStyle(controlsDiv, '-khtml-user-select', 'none');
-  setStyle(controlsDiv, '-moz-user-select', 'none');
-  setStyle(controlsDiv, '-ms-user-select', 'none');
-  setStyle(controlsDiv, 'user-select', 'none');
+  setStyles(controlsDiv, {
+    'position': 'absolute',
+    'bottom': '0px',
+    'width': '100%',
+    'height': '100px',
+    'box-sizing': 'border-box',
+    'padding': '10px',
+    'padding-top': '60px',
+    'background-image': `url(${controlsBg})`,
+    'background-position': 'bottom',
+    'color': 'white',
+    'display': 'none',
+    'justify-content': 'center',
+    'align-items': 'center',
+    'user-select': 'none',
+  });
   // Play button
-  playPauseDiv = global.document.createElement('div');
+  playPauseDiv = createIcon(global, 'play');
   playPauseDiv.id = 'ima-play-pause';
-  setStyle(playPauseDiv, 'width', '30px');
-  setStyle(playPauseDiv, 'height', '30px');
-  setStyle(playPauseDiv, 'margin-left', '10px');
-  setStyle(playPauseDiv, 'font-size', '1.25em');
-  setStyle(playPauseDiv, 'float', 'left');
-  setStyle(playPauseDiv, 'cursor', 'pointer');
-  playPauseNode = global.document.createTextNode(playChar);
-  playPauseDiv.appendChild(playPauseNode);
+  setStyles(playPauseDiv, {
+    'width': '30px',
+    'height': '30px',
+    'margin-right': '20px',
+    'font-size': '1.25em',
+    'cursor': 'pointer',
+  });
   controlsDiv.appendChild(playPauseDiv);
   // Current time and duration.
   timeDiv = global.document.createElement('div');
   timeDiv.id = 'ima-time';
-  setStyle(timeDiv, 'width', '120px');
-  setStyle(timeDiv, 'height', '30px');
-  setStyle(timeDiv, 'line-height', '30px');
-  setStyle(timeDiv, 'float', 'left');
-  setStyle(timeDiv, 'text-align', 'center');
-  timeNode = global.document.createTextNode('00:00 / 00:00');
+  setStyles(timeDiv, {
+    'margin-right': '20px',
+    'text-align': 'center',
+    'font-family': 'Helvetica, Arial, Sans-serif',
+    'font-size': '14px',
+    'text-shadow': '0px 0px 10px black',
+  });
+  timeNode = global.document.createTextNode('-:- / 0:00');
   timeDiv.appendChild(timeNode);
   controlsDiv.appendChild(timeDiv);
   // Progress bar.
   progressBarWrapperDiv = global.document.createElement('div');
   progressBarWrapperDiv.id = 'ima-progress-wrapper';
-  setStyle(progressBarWrapperDiv, 'height', '30px');
-  setStyle(progressBarWrapperDiv, 'position', 'absolute');
-  setStyle(progressBarWrapperDiv, 'left', '160px');
-  setStyle(progressBarWrapperDiv, 'right', '50px');
+  setStyles(progressBarWrapperDiv, {
+    'height': '30px',
+    'flex-grow': '1',
+    'position': 'relative',
+    'margin-right': '20px',
+  });
   progressLine = global.document.createElement('div');
   progressLine.id = 'progress-line';
-  setStyle(progressLine, 'background-color', '#00BBFF');
-  setStyle(progressLine, 'height', '2px');
-  setStyle(progressLine, 'margin-top', '14px');
-  setStyle(progressLine, 'width', '0%');
-  setStyle(progressLine, 'float', 'left');
+  setStyles(progressLine, {
+    'background-color': 'rgb(255, 255, 255)',
+    'height': '2px',
+    'margin-top': '14px',
+    'width': '0%',
+    'float': 'left',
+  });
   totalTimeLine = global.document.createElement('div');
   totalTimeLine.id = 'total-time-line';
-  setStyle(totalTimeLine, 'background-color', '#333333');
-  setStyle(totalTimeLine, 'height', '2px');
-  setStyle(totalTimeLine, 'width', '100%');
-  setStyle(totalTimeLine, 'margin-top', '14px');
+  setStyles(totalTimeLine, {
+    'background-color': 'rgba(255, 255, 255, 0.45)',
+    'height': '2px',
+    'width': '100%',
+    'margin-top': '14px',
+  });
   progressMarkerDiv = global.document.createElement('div');
   progressMarkerDiv.id = 'ima-progress-marker';
-  setStyle(progressMarkerDiv, 'color', '#00BBFF');
-  setStyle(progressMarkerDiv, 'height', '30px');
-  setStyle(progressMarkerDiv, 'position', 'absolute');
-  setStyle(progressMarkerDiv, 'font-size', '2em');
-  setStyle(progressMarkerDiv, 'margin-top', '-5px');
-  setStyle(progressMarkerDiv, 'left', '-1%');
-  setStyle(progressMarkerDiv, 'cursor', 'default');
-  progressMarkerDiv.appendChild(global.document.createTextNode(seekDot));
+  setStyles(progressMarkerDiv, {
+    'height': '14px',
+    'width': '14px',
+    'position': 'absolute',
+    'left': '0%',
+    'top': '50%',
+    'margin-top': '-7px',
+    'cursor': 'pointer',
+  });
+  progressMarkerDiv.appendChild(createIcon(global, 'seek'));
   progressBarWrapperDiv.appendChild(progressLine);
   progressBarWrapperDiv.appendChild(progressMarkerDiv);
   progressBarWrapperDiv.appendChild(totalTimeLine);
   controlsDiv.appendChild(progressBarWrapperDiv);
   // Fullscreen button
-  fullscreenDiv = global.document.createElement('div');
+  fullscreenDiv = createIcon(global, 'fullscreen');
   fullscreenDiv.id = 'ima-fullscreen';
-  setStyle(fullscreenDiv, 'position', 'absolute');
-  setStyle(fullscreenDiv, 'bottom', '0px');
-  setStyle(fullscreenDiv, 'right', '10px');
-  setStyle(fullscreenDiv, 'width', '30px');
-  setStyle(fullscreenDiv, 'height', '30px');
-  setStyle(fullscreenDiv, 'font-size', '1.25em');
-  setStyle(fullscreenDiv, 'cursor', 'pointer');
-  setStyle(fullscreenDiv, 'text-align', 'center');
-  setStyle(fullscreenDiv, 'font-weight', 'bold');
-  setStyle(fullscreenDiv, 'line-height', '1.4em');
-  fullscreenDiv.appendChild(global.document.createTextNode(fullscreenChars));
+  setStyles(fullscreenDiv, {
+    'width': '30px',
+    'height': '30px',
+    'font-size': '1.25em',
+    'cursor': 'pointer',
+    'text-align': 'center',
+    'font-weight': 'bold',
+    'line-height': '1.4em',
+  });
   controlsDiv.appendChild(fullscreenDiv);
 
   // Ad container.
   adContainerDiv = global.document.createElement('div');
   adContainerDiv.id = 'ima-ad-container';
-  setStyle(adContainerDiv, 'position', 'absolute');
-  setStyle(adContainerDiv, 'top', '0px');
-  setStyle(adContainerDiv, 'left', '0px');
-  setStyle(adContainerDiv, 'width', '100%');
-  setStyle(adContainerDiv, 'height', '100%');
+  setStyles(adContainerDiv, {
+    'position': 'absolute',
+    'top': '0px',
+    'left': '0px',
+    'width': '100%',
+    'height': '100%',
+  });
 
   // Wraps our content video.
   contentDiv = global.document.createElement('div');
   contentDiv.id = 'ima-content';
-  setStyle(contentDiv, 'position', 'absolute');
-  setStyle(contentDiv, 'top', '0px');
-  setStyle(contentDiv, 'left', '0px');
-  setStyle(contentDiv, 'width', '100%');
-  setStyle(contentDiv, 'height', '100%');
+  setStyles(contentDiv, {
+    'position': 'absolute',
+    'top': '0px',
+    'left': '0px',
+    'width': '100%',
+    'height': '100%',
+  });
   // The video player
   videoPlayer = global.document.createElement('video');
   videoPlayer.id = 'ima-content-player';
-  setStyle(videoPlayer, 'width', '100%');
-  setStyle(videoPlayer, 'height', '100%');
-  setStyle(videoPlayer, 'background-color', 'black');
+  setStyles(videoPlayer, {
+    'width': '100%',
+    'height': '100%',
+    'background-color': 'black',
+  });
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
+  videoPlayer.setAttribute(
+      'controlsList', 'nodownload nofullscreen noremoteplayback');
   if (data.src) {
     const sourceElement = document.createElement('source');
     sourceElement.setAttribute('src', data.src);
@@ -330,6 +369,9 @@ export function imaVideo(global, data) {
       videoPlayer.appendChild(htmlToElement(child));
     });
   }
+  if (data.imaSettings) {
+    imaSettings = tryParseJson(data.imaSettings);
+  }
 
   contentDiv.appendChild(videoPlayer);
   wrapperDiv.appendChild(contentDiv);
@@ -340,71 +382,126 @@ export function imaVideo(global, data) {
 
   window.addEventListener('message', onMessage.bind(null, global));
 
-  /**
-   * Set-up code that can't run until the IMA lib loads.
-   */
-  getIma(global, function() {
-    // This is the first place where we have access to any IMA objects.
-    contentComplete = false;
-    adsActive = false;
-    playbackStarted = false;
-    nativeFullscreen = false;
+  contentComplete = false;
+  adsActive = false;
+  playbackStarted = false;
+  nativeFullscreen = false;
+  imaLoadAllowed = true;
 
-    interactEvent = 'click';
-    mouseDownEvent = 'mousedown';
-    mouseMoveEvent = 'mousemove';
-    mouseUpEvent = 'mouseup';
-    if (navigator.userAgent.match(/iPhone/i) ||
-        navigator.userAgent.match(/iPad/i) ||
-        navigator.userAgent.match(/Android/i)) {
-      interactEvent = 'touchend';
-      mouseDownEvent = 'touchstart';
-      mouseMoveEvent = 'touchmove';
-      mouseUpEvent = 'touchend';
-    }
+  let mobileBrowser = false;
+  interactEvent = 'click';
+  mouseDownEvent = 'mousedown';
+  mouseMoveEvent = 'mousemove';
+  mouseUpEvent = 'mouseup';
+  if (navigator.userAgent.match(/iPhone/i) ||
+      navigator.userAgent.match(/iPad/i) ||
+      navigator.userAgent.match(/Android/i)) {
+    mobileBrowser = true;
+    interactEvent = 'touchend';
+    mouseDownEvent = 'touchstart';
+    mouseMoveEvent = 'touchmove';
+    mouseUpEvent = 'touchend';
+  }
+  if (mobileBrowser) {
+    // Create our own tap listener that ignores tap and drag.
+    bigPlayDiv.addEventListener(mouseMoveEvent, onBigPlayTouchMove);
+    bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
+    bigPlayDiv.addEventListener('tapwithoutdrag', onClick.bind(null, global));
+  } else {
     bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
-    playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
-    progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
-    fullscreenDiv.addEventListener(interactEvent,
-        onFullscreenClick.bind(null, global));
+  }
+  playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
+  progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
+  fullscreenDiv.addEventListener(interactEvent,
+      toggleFullscreen.bind(null, global));
 
-    const fullScreenEvents = [
-      'fullscreenchange',
-      'mozfullscreenchange',
-      'webkitfullscreenchange'];
-    fullScreenEvents.forEach(fsEvent => {
-      global.document.addEventListener(fsEvent,
-          onFullscreenChange.bind(null, global),
-          false);
-    });
-
-    adDisplayContainer =
-        new global.google.ima.AdDisplayContainer(adContainerDiv, videoPlayer);
-
-    adsLoader = new global.google.ima.AdsLoader(adDisplayContainer);
-    adsLoader.getSettings().setPlayerType('amp-ima');
-    adsLoader.getSettings().setPlayerVersion('0.1');
-    adsLoader.addEventListener(
-        global.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
-        onAdsManagerLoaded.bind(null, global),
+  const fullScreenEvents = [
+    'fullscreenchange',
+    'mozfullscreenchange',
+    'webkitfullscreenchange'];
+  fullScreenEvents.forEach(fsEvent => {
+    global.document.addEventListener(fsEvent,
+        onFullscreenChange.bind(null, global),
         false);
-    adsLoader.addEventListener(
-        global.google.ima.AdErrorEvent.Type.AD_ERROR,
-        onAdsLoaderError,
-        false);
-
-    videoPlayer.addEventListener('ended', onContentEnded);
-
-    const adsRequest = new global.google.ima.AdsRequest();
-    adsRequest.adTagUrl = data.tag;
-    adsRequest.linearAdSlotWidth = videoWidth;
-    adsRequest.linearAdSlotHeight = videoHeight;
-    adsRequest.nonLinearAdSlotWidth = videoWidth;
-    adsRequest.nonLinearAdSlotHeight = videoHeight / 3;
-
-    adRequestFailed = false;
-    adsLoader.requestAds(adsRequest);
   });
+
+  consentState = global.context.initialConsentState;
+
+  // Set-up code that can't run until the IMA lib loads.
+  loadScript(
+      /** @type {!Window} */ (global),
+      'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
+      () => onImaLoadSuccess(global, data), onImaLoadFail);
+}
+
+function onImaLoadSuccess(global, data) {
+  // This is the first place where we have access to any IMA objects.
+
+  // Handle settings that need to be set before the AdDisplayContainer is
+  // created.
+  if (imaSettings) {
+    if (imaSettings['locale']) {
+      global.google.ima.settings.setLocale(imaSettings['locale']);
+    }
+    if (imaSettings['vpaidMode']) {
+      global.google.ima.settings.setVpaidMode(imaSettings['vpaidMode']);
+    }
+  }
+
+  adDisplayContainer =
+      new global.google.ima.AdDisplayContainer(adContainerDiv, videoPlayer);
+
+  adsLoader = new global.google.ima.AdsLoader(adDisplayContainer);
+  adsLoader.getSettings().setPlayerType('amp-ima');
+  adsLoader.getSettings().setPlayerVersion('0.1');
+  // Propogate settings provided via child script tag.
+  // locale and vpaidMode are set above, as they must be set before we create
+  // an AdDisplayContainer.
+  // playerType and playerVersion are used by the developers to track usage,
+  // so we do not want to allow users to overwrite those values.
+  const skippedSettings =
+      ['locale', 'vpaidMode', 'playerType', 'playerVersion'];
+  for (const setting in imaSettings) {
+    if (!skippedSettings.includes(setting)) {
+      // Change e.g. 'ppid' to 'setPpid'.
+      const methodName = 'set' + camelCaseToTitleCase(setting);
+      if (typeof adsLoader.getSettings()[methodName] === 'function') {
+        adsLoader.getSettings()[methodName](imaSettings[setting]);
+      }
+    }
+  }
+  adsLoader.addEventListener(
+      global.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
+      onAdsManagerLoaded.bind(null, global),
+      false);
+  adsLoader.addEventListener(
+      global.google.ima.AdErrorEvent.Type.AD_ERROR,
+      onAdsLoaderError,
+      false);
+
+  videoPlayer.addEventListener('ended', onContentEnded);
+
+  adsRequest = new global.google.ima.AdsRequest();
+  adsRequest.adTagUrl = data.tag;
+  adsRequest.linearAdSlotWidth = videoWidth;
+  adsRequest.linearAdSlotHeight = videoHeight;
+  adsRequest.nonLinearAdSlotWidth = videoWidth;
+  adsRequest.nonLinearAdSlotHeight = videoHeight / 3;
+
+  if (!data['delayAdRequest']) {
+    requestAds();
+  } else {
+    // Let amp-ima-video know that we are done set-up.
+    postMessage({event: VideoEvents.LOAD});
+  }
+}
+
+function onImaLoadFail() {
+  // Something blocked ima3.js from loading - ignore all IMA stuff and just play
+  // content.
+  videoPlayer.addEventListener(interactEvent, showControls);
+  imaLoadAllowed = false;
+  postMessage({event: VideoEvents.LOAD});
 }
 
 function htmlToElement(html) {
@@ -413,37 +510,104 @@ function htmlToElement(html) {
   return template.content.firstChild;
 }
 
+function createIcon(global, name, fill = '#FFFFFF') {
+  const doc = global.document;
+  const icon = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  icon.setAttributeNS(null, 'fill', fill);
+  icon.setAttributeNS(null, 'height', '100%');
+  icon.setAttributeNS(null, 'width', '100%');
+  icon.setAttributeNS(null, 'viewBox', '0 0 24 24');
+  setStyle(icon, 'filter', 'drop-shadow(0px 0px 14px rgba(0,0,0,0.4))');
+  icon./*OK*/innerHTML = icons[name];
+  return icon;
+}
+
+function changeIcon(element, name, fill = '#FFFFFF') {
+  element./*OK*/innerHTML = icons[name];
+  if (fill != element.getAttributeNS(null, 'fill')) {
+    element.setAttributeNS(null, 'fill', fill);
+  }
+}
+
 /**
  * Triggered when the user clicks on the big play button div.
- *
+ * @param {!Object} global
  * @visibleForTesting
  */
 export function onClick(global) {
   playbackStarted = true;
   uiTicker = setInterval(uiTickerClick, 500);
+  setInterval(playerDataTick, 1000);
   bigPlayDiv.removeEventListener(interactEvent, onClick);
   setStyle(bigPlayDiv, 'display', 'none');
-  adDisplayContainer.initialize();
+  if (adDisplayContainer) {
+    adDisplayContainer.initialize();
+  }
   videoPlayer.load();
   playAds(global);
 }
 
 /**
- * Starts ad playback. If the ad request has not yte resolved, calls itself
+ * Triggered when the user ends a tap on the big play button.
+ */
+function onBigPlayTouchEnd() {
+  if (userTappedAndDragged) {
+    // Reset state and ignore this tap.
+    userTappedAndDragged = false;
+  } else {
+    const tapWithoutDragEvent = new Event('tapwithoutdrag');
+    bigPlayDiv.dispatchEvent(tapWithoutDragEvent);
+  }
+}
+
+/**
+ * Triggered when the user moves a tap on the big play button.
+ */
+function onBigPlayTouchMove() {
+  userTappedAndDragged = true;
+}
+
+
+export function requestAds() {
+  adsRequested = true;
+  adRequestFailed = false;
+  if (consentState == 0) { // UNKNOWN
+    // We're unaware of the user's consent state - do not request ads.
+    imaLoadAllowed = false;
+    return;
+  } else if (consentState == 2) { // INSUFFICIENT
+    // User has provided consent state but has not consented to personalized
+    // ads.
+    adsRequest.adTagUrl += '&npa=1';
+  }
+  adsLoader.requestAds(adsRequest);
+}
+
+/**
+ * Starts ad playback. If the ad request has not yet resolved, calls itself
  * again after 250ms.
- *
+ * @param {!Object} global
  * @visibleForTesting
  */
 export function playAds(global) {
-  if (adsManager) {
+  if (!imaLoadAllowed) {
+    playVideo();
+    return;
+  }
+
+  if (!adsRequested) {
+    requestAds();
+    playAds(global);
+    return;
+  } else if (adsManager) {
     // Ad request resolved.
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+      postMessage({event: VideoEvents.PLAYING});
       adsManager.start();
     } catch (adError) {
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+      postMessage({event: VideoEvents.PLAYING});
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -451,7 +615,7 @@ export function playAds(global) {
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+    postMessage({event: VideoEvents.PLAYING});
     playVideo();
   }
 }
@@ -463,12 +627,17 @@ export function playAds(global) {
  */
 export function onContentEnded() {
   contentComplete = true;
-  adsLoader.contentComplete();
+  if (adsLoader) {
+    adsLoader.contentComplete();
+  }
+  postMessage({event: VideoEvents.PAUSE});
+  postMessage({event: VideoEvents.ENDED});
 }
 
 /**
  * Called when the IMA SDK has an AdsManager ready for us.
- *
+ * @param {!Object} global
+ * @param {*} adsManagerLoadedEvent
  * @visibleForTesting
  */
 export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
@@ -490,7 +659,7 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
-  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+  postMessage({event: VideoEvents.LOAD});
 }
 
 /**
@@ -500,7 +669,14 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
  */
 export function onAdsLoaderError() {
   adRequestFailed = true;
-  playVideo();
+  // Send this message to trigger auto-play for failed pre-roll requests -
+  // failing to load an ad is just as good as loading one as far as starting
+  // playback is concerned because our content will be ready to play.
+  postMessage({event: VideoEvents.LOAD});
+  if (playbackStarted) {
+    videoPlayer.addEventListener(interactEvent, showControls);
+    playVideo();
+  }
 }
 
 /**
@@ -509,15 +685,17 @@ export function onAdsLoaderError() {
  * @visibleForTesting
  */
 export function onAdError() {
+  postMessage({event: VideoEvents.AD_END});
   if (adsManager) {
     adsManager.destroy();
   }
+  videoPlayer.addEventListener(interactEvent, showControls);
   playVideo();
 }
 
 /**
  * Called by the IMA SDK. Pauses the content and readies the player for ads.
- *
+ * @param {!Object} global
  * @visibleForTesting
  */
 export function onContentPauseRequested(global) {
@@ -530,6 +708,7 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
+  postMessage({event: VideoEvents.AD_START});
   videoPlayer.removeEventListener(interactEvent, showControls);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
@@ -545,6 +724,7 @@ export function onContentPauseRequested(global) {
 export function onContentResumeRequested() {
   adsActive = false;
   videoPlayer.addEventListener(interactEvent, showControls);
+  postMessage({event: VideoEvents.AD_END});
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
@@ -561,8 +741,26 @@ function uiTickerClick() {
 }
 
 /**
+ *  Called when our player data timer goes off. Sends a message to the parent
+ *  iframe to update the player data.
+ */
+function playerDataTick() {
+  // Skip while ads are active in case of custom playback. No harm done for
+  // non-custom playback because content won't be progressing while ads are
+  // playing.
+  if (videoPlayer && !adsActive) {
+    playerData.update(videoPlayer);
+    postMessage({
+      event: ImaPlayerData.IMA_PLAYER_DATA,
+      data: playerData,
+    });
+  }
+}
+
+/**
  * Updates the video player UI.
- *
+ * @param {number} currentTime
+ * @param {number} duration
  * @visibleForTesting
  */
 export function updateUi(currentTime, duration) {
@@ -577,12 +775,12 @@ export function updateUi(currentTime, duration) {
 /**
  * Formats an int in seconds into a string of the format X:XX:XX. Omits the
  * hour if the content is less than one hour.
- *
+ * @param {number} time
  * @visibleForTesting
  */
 export function formatTime(time) {
   if (isNaN(time)) {
-    return '00:00';
+    return '0:00';
   }
   let timeString = '';
   const hours = Math.floor(time / 3600);
@@ -590,7 +788,11 @@ export function formatTime(time) {
     timeString += hours + ':';
   }
   const minutes = Math.floor((time % 3600) / 60);
-  timeString += zeroPad(minutes) + ':';
+  if (hours > 0) {
+    timeString += zeroPad(minutes) + ':';
+  } else {
+    timeString += minutes + ':';
+  }
   const seconds = Math.floor(time - ((hours * 3600) + (minutes * 60)));
   timeString += zeroPad(seconds);
   return timeString;
@@ -598,7 +800,7 @@ export function formatTime(time) {
 
 /**
  * Zero-pads the provided int and returns a string of length 2.
- *
+ * @param {string|number} input
  * @visibleForTesting
  */
 export function zeroPad(input) {
@@ -608,6 +810,7 @@ export function zeroPad(input) {
 
 /**
  * Detects clicks on the progress bar.
+ * @param {!Event} event
  */
 function onProgressClick(event) {
   // Call this logic once to make sure we still seek if the user just clicks
@@ -633,6 +836,7 @@ function onProgressClickEnd() {
 
 /**
  * Detects when the user clicks and drags on the progress bar.
+ * @param {!Event} event
  */
 function onProgressMove(event) {
   const progressWrapperPosition = getPagePosition(progressBarWrapperDiv);
@@ -653,14 +857,16 @@ function onProgressMove(event) {
 
 /**
  * Returns the x,y coordinates of the given element relative to the window.
+ * @param {!Element} el
+ * @return {{x: number, y: number}}
  */
 function getPagePosition(el) {
   let lx, ly;
   for (lx = 0, ly = 0;
-      el != null;
-      lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
-          el = el./*OK*/offsetParent)
-    {};
+    el != null;
+    lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
+    el = el./*OK*/offsetParent)
+  {}
   return {x: lx,y: ly};
 }
 
@@ -671,7 +877,7 @@ function getPagePosition(el) {
  */
 export function onPlayPauseClick() {
   if (playerState == PlayerStates.PLAYING) {
-    pauseVideo(null);
+    pauseVideo();
   } else {
     playVideo();
   }
@@ -687,18 +893,17 @@ export function playVideo() {
   playerState = PlayerStates.PLAYING;
   // Kick off the hide controls timer.
   showControls();
-  setStyle(playPauseDiv, 'line-height', '1.4em');
-  playPauseNode.textContent = pauseChars;
-  window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+  changeIcon(playPauseDiv, 'pause');
+  postMessage({event: VideoEvents.PLAYING});
   videoPlayer.play();
 }
 
 /**
  * Pauses the video player.
- *
+ * @param {?Event} event
  * @visibleForTesting
  */
-export function pauseVideo(event) {
+export function pauseVideo(event = null) {
   videoPlayer.pause();
   playerState = PlayerStates.PAUSED;
   // Show controls and keep them there because we're paused.
@@ -706,81 +911,103 @@ export function pauseVideo(event) {
   if (!adsActive) {
     showControls();
   }
-  playPauseNode.textContent = playChar;
-  setStyle(playPauseDiv, 'line-height', '');;
-  window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
+  changeIcon(playPauseDiv, 'play');
+  postMessage({event: VideoEvents.PAUSE});
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
+    fullscreen = false;
   }
 }
 
+
 /**
- * Called when the user clicks on the fullscreen button. Makes the video player
- * fullscreen
+ * @param {Object} global
  */
-function onFullscreenClick(global) {
-  if (fullscreen) {
-    // The video is currently in fullscreen mode
-    const cancelFullscreen = global.document.exitFullscreen ||
-        global.document.exitFullScreen ||
-        global.document.webkitCancelFullScreen ||
-        global.document.mozCancelFullScreen;
-    if (cancelFullscreen) {
-      cancelFullscreen.call(document);
-    }
-  } else {
-    // Try to enter fullscreen mode in the browser
-    const requestFullscreen =
-        global.document.documentElement.requestFullscreen ||
-        global.document.documentElement.webkitRequestFullscreen ||
-        global.document.documentElement.mozRequestFullscreen ||
-        global.document.documentElement.requestFullScreen ||
-        global.document.documentElement.webkitRequestFullScreen ||
-        global.document.documentElement.mozRequestFullScreen;
-    if (requestFullscreen) {
-      fullscreenWidth = window.screen.width;
-      fullscreenHeight = window.screen.height;
-      requestFullscreen.call(global.document.documentElement);
-    } else {
-      // Figure out how to make iPhone fullscren work here - I've got nothing.
-      videoPlayer.webkitEnterFullscreen();
-      // Pause the video when we leave fullscreen. iPhone does this
-      // automatically, but we still use pauseVideo as an event handler to
-      // sync the UI.
-      videoPlayer.addEventListener('webkitendfullscreen', pauseVideo);
-      nativeFullscreen = true;
-      onFullscreenChange(global);
-    }
+function exitFullscreen(global) {
+  // The video is currently in fullscreen mode
+  const cancelFullscreen = global.document.exitFullscreen ||
+      global.document.exitFullScreen ||
+      global.document.webkitCancelFullScreen ||
+      global.document.mozCancelFullScreen;
+  if (cancelFullscreen) {
+    cancelFullscreen.call(document);
   }
 }
+
+
+/**
+ * @param {Object} global
+ */
+function enterFullscreen(global) {
+  // Try to enter fullscreen mode in the browser
+  const requestFullscreen =
+      global.document.documentElement.requestFullscreen ||
+      global.document.documentElement.webkitRequestFullscreen ||
+      global.document.documentElement.mozRequestFullscreen ||
+      global.document.documentElement.requestFullScreen ||
+      global.document.documentElement.webkitRequestFullScreen ||
+      global.document.documentElement.mozRequestFullScreen;
+  if (requestFullscreen) {
+    fullscreenWidth = window.screen.width;
+    fullscreenHeight = window.screen.height;
+    requestFullscreen.call(global.document.documentElement);
+  } else {
+    // Use native fullscreen (iPhone)
+    videoPlayer.webkitEnterFullscreen();
+    // Pause the video when we leave fullscreen. iPhone does this
+    // automatically, but we still use pauseVideo as an event handler to
+    // sync the UI.
+    videoPlayer.addEventListener('webkitendfullscreen', pauseVideo);
+    nativeFullscreen = true;
+    onFullscreenChange(global);
+  }
+}
+
+
+/**
+ * @param {Object} global
+ */
+function toggleFullscreen(global) {
+  if (fullscreen) {
+    exitFullscreen(global);
+    return;
+  }
+  enterFullscreen(global);
+}
+
 
 /**
  * Called when the fullscreen mode of the browser or content player changes.
+ * @param {Object} global
  */
 function onFullscreenChange(global) {
   if (fullscreen) {
-    // Resize the ad container
-    adsManager.resize(
-        videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-    adsManagerWidthOnLoad = null;
-    adsManagerHeightOnLoad = null;
+    if (adsManager) {
+      // Resize the ad container
+      adsManager.resize(
+          videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
+      adsManagerWidthOnLoad = null;
+      adsManagerHeightOnLoad = null;
+    }
     // Return the video to its original size and position
-    setStyle(wrapperDiv, 'width', videoWidth + 'px');
-    setStyle(wrapperDiv, 'height', videoHeight + 'px');
+    setStyle(wrapperDiv, 'width', px(videoWidth));
+    setStyle(wrapperDiv, 'height', px(videoHeight));
     fullscreen = false;
   } else {
     // The user just entered fullscreen
     if (!nativeFullscreen) {
-      // Resize the ad container
-      adsManager.resize(
-          fullscreenWidth, fullscreenHeight,
-          global.google.ima.ViewMode.FULLSCREEN);
-      adsManagerWidthOnLoad = null;
-      adsManagerHeightOnLoad = null;
+      if (adsManager) {
+        // Resize the ad container
+        adsManager.resize(
+            fullscreenWidth, fullscreenHeight,
+            global.google.ima.ViewMode.FULLSCREEN);
+        adsManagerWidthOnLoad = null;
+        adsManagerHeightOnLoad = null;
+      }
       // Make the video take up the entire screen
-      setStyle(wrapperDiv, 'width', fullscreenWidth + 'px');
-      setStyle(wrapperDiv, 'height', fullscreenHeight + 'px');
+      setStyle(wrapperDiv, 'width', px(fullscreenWidth));
+      setStyle(wrapperDiv, 'height', px(fullscreenHeight));
       hideControls();
     }
     fullscreen = true;
@@ -793,7 +1020,7 @@ function onFullscreenChange(global) {
  * @visibleForTesting
  */
 export function showControls() {
-  setStyle(controlsDiv, 'display', 'block');
+  setStyle(controlsDiv, 'display', 'flex');
   // Hide controls after 3 seconds
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
@@ -813,72 +1040,92 @@ export function hideControls() {
 
 /**
  * Handles messages from the top window.
+ * @param {!Object} global
+ * @param {!Event} event
  */
 function onMessage(global, event) {
   const msg = isObject(event.data) ? event.data : tryParseJson(event.data);
   if (msg === undefined) {
     return; // We only process valid JSON.
   }
-  if (msg.event && msg.func) {
-    switch (msg.func) {
-      case 'playVideo':
+  if (!msg.event || !msg.func) {
+    return;
+  }
+  switch (msg.func) {
+    case 'playVideo':
+      if (adsActive) {
+        adsManager.resume();
+        postMessage({event: VideoEvents.PLAYING});
+      } else if (playbackStarted) {
+        playVideo();
+      } else {
+        // Auto-play support
+        onClick(global);
+      }
+      break;
+    case 'pauseVideo':
+      if (adsActive) {
+        adsManager.pause();
+        postMessage({event: VideoEvents.PAUSE});
+      } else if (playbackStarted) {
+        pauseVideo();
+      }
+      break;
+    case 'mute':
+      videoPlayer.volume = 0;
+      videoPlayer.muted = true;
+      if (adsManager) {
+        adsManager.setVolume(0);
+      } else {
+        muteAdsManagerOnLoaded = true;
+      }
+      postMessage({event: VideoEvents.MUTED});
+      break;
+    case 'unMute':
+      videoPlayer.volume = 1;
+      videoPlayer.muted = false;
+      if (adsManager) {
+        adsManager.setVolume(1);
+      } else {
+        muteAdsManagerOnLoaded = false;
+      }
+      postMessage({event: VideoEvents.UNMUTED});
+      break;
+    case 'resize':
+      if (msg.args && msg.args.width && msg.args.height) {
+        const dimsStyles = {
+          'width': px(msg.args.width),
+          'height': px(msg.args.height),
+        };
+        setStyles(wrapperDiv, dimsStyles);
+        setStyles(bigPlayDiv, dimsStyles);
         if (adsActive) {
-          adsManager.resume();
-          window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
-        } else if (playbackStarted) {
-          playVideo();
+          adsManager.resize(
+              msg.args.width, msg.args.height,
+              global.google.ima.ViewMode.NORMAL);
         } else {
-          // Auto-play support
-          onClick(global);
+          adsManagerWidthOnLoad = msg.args.width;
+          adsManagerHeightOnLoad = msg.args.height;
         }
-        break;
-      case 'pauseVideo':
-        if (adsActive) {
-          adsManager.pause();
-          window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
-        } else if (playbackStarted) {
-          pauseVideo(null);
-        }
-        break;
-      case 'mute':
-        videoPlayer.volume = 0;
-        videoPlayer.muted = true;
-        if (adsManager) {
-          adsManager.setVolume(0);
-        } else {
-          muteAdsManagerOnLoaded = true;
-        }
-        window.parent./*OK*/postMessage({event: VideoEvents.MUTED}, '*');
-        break;
-      case 'unMute':
-        videoPlayer.volume = 1;
-        videoPlayer.muted = false;
-        if (adsManager) {
-          adsManager.setVolume(1);
-        } else {
-          muteAdsManagerOnLoaded = false;
-        }
-        window.parent./*OK*/postMessage({event: VideoEvents.UNMUTED}, '*');
-        break;
-      case 'resize':
-        if (msg.args && msg.args.width && msg.args.height) {
-          setStyle(wrapperDiv, 'width', msg.args.width + 'px');
-          setStyle(wrapperDiv, 'height', msg.args.height + 'px');
-          setStyle(bigPlayDiv, 'width', msg.args.width + 'px');
-          setStyle(bigPlayDiv, 'height', msg.args.height + 'px');
-          if (adsActive) {
-            adsManager.resize(
-                msg.args.width, msg.args.height,
-                global.google.ima.ViewMode.NORMAL);
-          } else {
-            adsManagerWidthOnLoad = msg.args.width;
-            adsManagerHeightOnLoad = msg.args.height;
-          }
-        }
-        break;
-    }
+      }
+      break;
+    case 'onFirstScroll':
+    case 'onAdRequestDelayTimeout':
+      if (!adsRequested && imaLoadAllowed) {
+        requestAds();
+      }
+      break;
   }
 }
+
+
+/**
+ * @param {!Object} data
+ */
+function postMessage(data) {
+  window.parent./*OK*/postMessage(data, '*');
+}
+
 
 /**
  * Returns the properties we need to access for testing.
@@ -887,15 +1134,15 @@ function onMessage(global, event) {
  */
 export function getPropertiesForTesting() {
   return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
-    adsManagerHeightOnLoad, contentComplete, controlsDiv, hideControlsTimeout,
-    interactEvent, pauseChars, playbackStarted, playChar, playerState,
-    PlayerStates, playPauseDiv, playPauseNode, progressLine,
+    adsManagerHeightOnLoad, adsRequest, contentComplete, controlsDiv,
+    hideControlsTimeout, imaLoadAllowed, interactEvent, playbackStarted,
+    playerState, PlayerStates, playPauseDiv, progressLine,
     progressMarkerDiv, timeNode, uiTicker, videoPlayer};
 }
 
 /**
  * Sets the big play button div.
- *
+ * @param {!Element} div
  * @visibleForTesting
  */
 export function setBigPlayDivForTesting(div) {
@@ -904,7 +1151,7 @@ export function setBigPlayDivForTesting(div) {
 
 /**
  * Sets the ad display container.
- *
+ * @param {!Element} adc
  * @visibleForTesting
  */
 export function setAdDisplayContainerForTesting(adc) {
@@ -913,7 +1160,8 @@ export function setAdDisplayContainerForTesting(adc) {
 
 /**
  * Sets the video width and height.
- *
+ * @param {number} width
+ * @param {number} height
  * @visibleForTesting
  */
 export function setVideoWidthAndHeightForTesting(width, height) {
@@ -923,7 +1171,7 @@ export function setVideoWidthAndHeightForTesting(width, height) {
 
 /**
  * Sets the ad request failed flag.
- *
+ * @param {boolean} newValue
  * @visibleForTesting
  */
 export function setAdRequestFailedForTesting(newValue) {
@@ -932,7 +1180,7 @@ export function setAdRequestFailedForTesting(newValue) {
 
 /**
  * Sets the ads loader.
- *
+ * @param {*} newAdsLoader
  * @visibleForTesting
  */
 export function setAdsLoaderForTesting(newAdsLoader) {
@@ -940,8 +1188,17 @@ export function setAdsLoaderForTesting(newAdsLoader) {
 }
 
 /**
+ * Sets the ads request.
+ * @param {*} newAdsRequest
+ * @visibleForTesting
+ */
+export function setAdsRequestForTesting(newAdsRequest) {
+  adsRequest = newAdsRequest;
+}
+
+/**
  * Sets the flag to mute the ads manager when it loads.
- *
+ * @param {boolean} shouldMute
  * @visibleForTesting
  */
 export function setMuteAdsManagerOnLoadedForTesting(shouldMute) {
@@ -950,7 +1207,7 @@ export function setMuteAdsManagerOnLoadedForTesting(shouldMute) {
 
 /**
  * Sets the ads manager.
- *
+ * @param {*} newAdsManager
  * @visibleForTesting
  */
 export function setAdsManagerForTesting(newAdsManager) {
@@ -959,7 +1216,8 @@ export function setAdsManagerForTesting(newAdsManager) {
 
 /**
  * Sets the ads manager dimensions on load.
- *
+ * @param {number} width
+ * @param {number} height
  * @visibleForTesting
  */
 export function setAdsManagerDimensionsOnLoadForTesting(width, height) {
@@ -969,7 +1227,7 @@ export function setAdsManagerDimensionsOnLoadForTesting(width, height) {
 
 /**
  * Sets the content complete flag.
- *
+ * @param {*} newContentComplete
  * @visibleForTesting
  */
 export function setContentCompleteForTesting(newContentComplete) {
@@ -978,7 +1236,7 @@ export function setContentCompleteForTesting(newContentComplete) {
 
 /**
  * Sets the video player.
- *
+ * @param {*} newPlayer
  * @visibleForTesting
  */
 export function setVideoPlayerForTesting(newPlayer) {
@@ -987,7 +1245,7 @@ export function setVideoPlayerForTesting(newPlayer) {
 
 /**
  * Sets the player state.
- *
+ * @param {*} newState
  * @visibleForTesting
  */
 export function setPlayerStateForTesting(newState) {
@@ -996,11 +1254,20 @@ export function setPlayerStateForTesting(newState) {
 
 /**
  * Sets the hideControlsTimeout
- *
+ * @param {number} newTimeout
  * @visibleForTesting
  */
 export function setHideControlsTimeoutForTesting(newTimeout) {
   hideControlsTimeout = newTimeout;
+}
+
+/**
+ * Sets the consent state.
+ * @param {*} newConsentState
+ * @visibleForTesting
+ */
+export function setConsentStateForTesting(newConsentState) {
+  consentState = newConsentState;
 }
 
 /**
@@ -1010,6 +1277,7 @@ export function setHideControlsTimeoutForTesting(newTimeout) {
  *
  * @constant {!Object<string, string>}
  */
+// TODO(aghassemi, #9216): Use video-interface.js
 const VideoEvents = {
   /**
    * load
@@ -1028,7 +1296,7 @@ const VideoEvents = {
    *
    * @event play
    */
-  PLAY: 'play',
+  PLAYING: 'playing',
 
   /**
    * pause
@@ -1038,6 +1306,17 @@ const VideoEvents = {
    * @event pause
    */
   PAUSE: 'pause',
+
+  /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * This event should be fired in addition to `pause` when video ends.
+   *
+   * @event ended
+   */
+  ENDED: 'ended',
 
   /**
    * muted
@@ -1053,7 +1332,7 @@ const VideoEvents = {
    *
    * Fired when the video is unmuted.
    *
-   * @event pause
+   * @event unmuted
    */
   UNMUTED: 'unmuted',
 
@@ -1076,4 +1355,27 @@ const VideoEvents = {
    * @event reload
    */
   RELOAD: 'reloaded',
+  /**
+   * pre/mid/post Ad start
+   *
+   * Fired when an Ad starts playing.
+   *
+   * This is used to remove any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_start
+   */
+  AD_START: 'ad_start',
+
+  /**
+   * pre/mid/post Ad ends
+   *
+   * Fired when an Ad ends playing.
+   *
+   * This is used to restore any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_end
+   */
+  AD_END: 'ad_end',
 };

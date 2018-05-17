@@ -14,60 +14,50 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-brid-player';
-import {listenOncePromise} from '../../../../src/event-helper';
-import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import * as sinon from 'sinon';
+import {listenOncePromise} from '../../../../src/event-helper';
 
-adopt(window);
 
-describe('amp-brid-player', () => {
-
-  let sandbox;
-  const timer = timerFor(window);
+describes.realWin('amp-brid-player', {
+  amp: {
+    extensions: ['amp-brid-player'],
+  },
+}, env => {
+  let win, doc;
+  let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    timer = Services.timerFor(win);
   });
 
   function getBridPlayer(attributes, opt_responsive) {
-    return createIframePromise(true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const bc = iframe.doc.createElement('amp-brid-player');
+    const bc = doc.createElement('amp-brid-player');
 
-      for (const key in attributes) {
-        bc.setAttribute(key, attributes[key]);
-      }
-      bc.setAttribute('width', '640');
-      bc.setAttribute('height', '360');
-      if (opt_responsive) {
-        bc.setAttribute('layout', 'responsive');
-      }
+    for (const key in attributes) {
+      bc.setAttribute(key, attributes[key]);
+    }
+    bc.setAttribute('width', '640');
+    bc.setAttribute('height', '360');
+    if (opt_responsive) {
+      bc.setAttribute('layout', 'responsive');
+    }
 
-      // see yt test implementation
-      timer.promise(50).then(() => {
-        const bridTimerIframe = bc.querySelector('iframe');
+    // see yt test implementation
+    timer.promise(50).then(() => {
+      const bridTimerIframe = bc.querySelector('iframe');
 
-        bc.implementation_.handleBridMessages_({
-          origin: 'https://services.brid.tv',
-          source: bridTimerIframe.contentWindow,
-          data: 'Brid|0|trigger|ready',
-        });
+      bc.implementation_.handleBridMessages_({
+        origin: 'https://services.brid.tv',
+        source: bridTimerIframe.contentWindow,
+        data: 'Brid|0|trigger|ready',
       });
-
-
-      return iframe.addElement(bc);
     });
+    doc.body.appendChild(bc);
+    return bc.build().then(() => bc.layoutCallback()).then(() => bc);
   }
 
   it('renders', () => {
@@ -97,19 +87,21 @@ describe('amp-brid-player', () => {
   });
 
   it('requires data-partner', () => {
-    return getBridPlayer({
+    return allowConsoleError(() => { return getBridPlayer({
       'data-player': '4144',
       'data-video': '13663',
     }).should.eventually.be.rejectedWith(
         /The data-partner attribute is required for/);
+    });
   });
 
   it('requires data-player', () => {
-    return getBridPlayer({
+    return allowConsoleError(() => { return getBridPlayer({
       'data-partner': '264',
       'data-video': '13663',
     }).should.eventually.be.rejectedWith(
         /The data-player attribute is required for/);
+    });
   });
 
   it('should forward events from brid-player to the amp element', () => {
@@ -122,7 +114,7 @@ describe('amp-brid-player', () => {
 
       return Promise.resolve()
           .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PLAY);
+            const p = listenOncePromise(bc, VideoEvents.PLAYING);
             sendFakeMessage(bc, iframe, 'trigger|play');
             return p;
           })
@@ -166,10 +158,22 @@ describe('amp-brid-player', () => {
             'https://cdn.brid.tv/live/partners/264/snapshot/13663.jpg');
         expect(img.getAttribute('layout')).to.equal('fill');
         expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('alt')).to.equal('Loading video');
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
       });
     });
-
+    it('should propagate aria label for placeholder image', () => {
+      return getBridPlayer({
+        'data-partner': '264',
+        'data-player': '979',
+        'data-video': '13663',
+        'aria-label': 'great video',
+      }).then(brid => {
+        const img = brid.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('alt')).to.equal('Loading video - great video');
+      });
+    });
     it('should create a fallback for default snapshot', () => {
       return getBridPlayer({
         'data-partner': '264',

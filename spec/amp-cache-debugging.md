@@ -48,14 +48,14 @@ If you still have a problem after following these steps, check the table below.
       <td>Ensure the AMP Cache can access your assets and that it is not blocked by an IP address, or a user agent, etc. (<a href="https://support.google.com/webmasters/answer/1061943?hl=en">List of user agents used by Google's crawler</a>).</td>
     </tr>
     <tr>
-      <td>Dynamic elements such as <code>&lt;amp-form&gt;</code>, <code>&lt;amp-listgt;</code>, do not behave as expected.</td>
+      <td>Dynamic elements such as <code>&lt;amp-form&gt;</code>, <code>&lt;amp-list&gt;</code>, do not behave as expected.</td>
       <td>Broken or missing CORS headers.</td>
       <td>These components make cross-origin requests from the AMP Cache to your origin. By default, browsers block these requests. To allow these requests, emit <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS">CORS headers</a> that whitelist <a href="https://www.ampproject.org/docs/guides/amp-cors-requests.html">all caches</a>.</td>
     </tr>
     <tr>
       <td>Content is being served that must be removed due to a legal takedown notice.</td>
       <td>The AMP Cache has not yet picked up the removal.</td>
-      <td>Follow the guidelines for each AMP Cache to refresh the content. For Google AMP Cache, see <a href="https://developers.google.com/amp/cache/update-ping">update ping</a>.</td>
+      <td>Follow the guidelines for each AMP Cache to refresh the content. For Google AMP Cache, see <a href="https://developers.google.com/amp/cache/update-cache">Update AMP Content</a>.</td>
     </tr>
 </tbody>
 </table>

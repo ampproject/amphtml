@@ -16,8 +16,8 @@
 
 import {
   createFixtureIframe,
-  pollForLayout,
   expectBodyToBecomeVisible,
+  pollForLayout,
 } from '../../testing/iframe.js';
 
 describe.configure().retryOnSaucelabs().run('released components: ',
@@ -31,7 +31,7 @@ describe.configure().retryOnSaucelabs().run(
     });
 
 function runTest(shouldKillPolyfillableApis) {
-  describe('Rendering of released components', function() {
+  describe.configure().run('Rendering of released components', function() {
     this.timeout(5000);
     let fixture;
     beforeEach(() => {

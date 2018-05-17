@@ -14,26 +14,36 @@
  * limitations under the License.
  */
 
-import {makeClickDelaySpec} from './filters/click-delay';
-import {assertConfig, TransportMode} from './config';
+import {FilterType} from './filters/filter';
+import {
+  MessageType,
+  deserializeMessage,
+  listen,
+} from '../../../src/3p-frame-messaging';
+import {Services} from '../../../src/services';
+import {TransportMode, assertConfig, assertVendor} from './config';
 import {createFilter} from './filters/factory';
-import {isExperimentOn} from '../../../src/experiments';
+import {dev, user} from '../../../src/log';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getData} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {user} from '../../../src/log';
+import {isObject} from '../../../src/types';
+import {makeClickDelaySpec} from './filters/click-delay';
+import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
-
+import {parseUrl} from '../../../src/url';
 const TAG = 'amp-ad-exit';
 
 /**
  * @typedef {{
  *   finalUrl: string,
  *   trackingUrls: !Array<string>,
- *   vars: !./config.Variables,
+ *   vars: !./config.VariablesDef,
  *   filters: !Array<!./filters/filter.Filter>
  * }}
  */
-let NavigationTarget;  // eslint-disable-line no-unused-vars
+let NavigationTargetDef;
 
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -41,7 +51,7 @@ export class AmpAdExit extends AMP.BaseElement {
     super(element);
 
     /**
-     * @private @const {!Object<string, !NavigationTarget>}
+     * @private @const {!Object<string, !NavigationTargetDef>}
      */
     this.targets_ = {};
 
@@ -57,25 +67,38 @@ export class AmpAdExit extends AMP.BaseElement {
       image: true,
     };
 
+    this.userFilters_ = {};
+
     this.registerAction('exit', this.exit.bind(this));
+
+    /** @private @const {!Object<string, !Object<string, string>>} */
+    this.vendorResponses_ = {};
+
+    /** @private {?function()} */
+    this.unlisten_ = null;
+
+    /** @private {?string} */
+    this.ampAdResourceId_ = null;
+
+    /** @private @const {!Object<string,string>} */
+    this.expectedOriginToVendor_ = {};
   }
 
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
   exit({args, event}) {
-    user().assert(
-        isExperimentOn(this.win, 'amp-ad-exit'),
-        'amp-ad-exit experiment is off.');
-
     const target = this.targets_[args['target']];
     user().assert(target, `Exit target not found: '${args['target']}'`);
+    user().assert(event, 'Unexpected null event');
+    event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
+      event);
 
-    event.preventDefault();
     if (!this.filter_(this.defaultFilters_, event) ||
         !this.filter_(target.filters, event)) {
       return;
     }
+    event.preventDefault();
     const substituteVariables =
         this.getUrlVariableRewriter_(args, event, target);
     if (target.trackingUrls) {
@@ -89,31 +112,88 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    * @param {!Object<string, string|number|boolean>} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @param {!NavigationTarget} target
+   * @param {!NavigationTargetDef} target
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
-    const vars = {
+    const substitutionFunctions = {
       'CLICK_X': () => event.clientX,
       'CLICK_Y': () => event.clientY,
     };
+    const replacements = Services.urlReplacementsForDoc(this.getAmpDoc());
     const whitelist = {
       'RANDOM': true,
       'CLICK_X': true,
       'CLICK_Y': true,
     };
     if (target.vars) {
-      for (const customVar in target.vars) {
-        if (customVar[0] == '_') {
-          vars[customVar] = () =>
-              args[customVar] || target.vars[customVar].defaultValue;
-          whitelist[customVar] = true;
+      for (const customVarName in target.vars) {
+        if (customVarName[0] != '_') {
+          continue;
         }
+        const customVar =
+            /** @type {!./config.VariableDef} */ (target.vars[customVarName]);
+        if (!customVar) {
+          continue;
+        }
+        /*
+         Example:
+         The amp-ad-exit target has a variable representing the priority of
+         something, which is defined as follows:
+         "vars": {
+           "_pty": {
+             "defaultValue": "unknown",
+             "iframeTransportSignal":
+                 "IFRAME_TRANSPORT_SIGNAL(vendorXYZ,priority)"
+           },
+           ...
+         }
+         The cross-domain iframe of vendorXYZ has sent the following
+         response for the creative:
+         { priority: medium, category: W }
+         This is just example data. The keys/values in that object can be
+         any strings.
+         The code below will create substitutionFunctions['_pty'], which in
+         this example will return "medium".
+        */
+        substitutionFunctions[customVarName] = () => {
+          if (customVar.iframeTransportSignal) {
+            const vendorResponse = replacements./*OK*/expandStringSync(
+                customVar.iframeTransportSignal, {
+                  'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
+                    if (!(vendor && responseKey)) {
+                      return '';
+                    }
+                    const vendorResponses = this.vendorResponses_[vendor];
+                    if (vendorResponses && responseKey in vendorResponses) {
+                      return vendorResponses[responseKey];
+                    }
+                  },
+                });
+            if (customVar.iframeTransportSignal ==
+                `IFRAME_TRANSPORT_SIGNAL${vendorResponse}`) {
+              // No substitution occurred, so format string in amp-ad-exit
+              // config was invalid
+              dev().error(TAG, 'Invalid IFRAME_TRANSPORT_SIGNAL format:' +
+                  vendorResponse +
+                  ' (perhaps there is a space after a comma?)');
+            } else if (vendorResponse != '') {
+              // Caveat: If the vendor's response *is* the empty string, then
+              // this will cause the arg/default value to be returned.
+              return vendorResponse;
+            }
+          }
+
+          // Either it's not a 3p analytics variable, or it is one
+          // but no matching response has been received yet.
+          return (customVarName in args) ?
+            args[customVarName] : customVar.defaultValue;
+        };
+        whitelist[customVarName] = true;
       }
     }
-    const replacements = urlReplacementsForDoc(this.getAmpDoc());
     return url => replacements.expandUrlSync(
-        url, vars, undefined /* opt_collectVars */, whitelist);
+        url, substitutionFunctions, undefined /* opt_collectVars */, whitelist);
   }
 
   /**
@@ -143,7 +223,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * passes.
    * @param {!Array<!./filters/filter.Filter>} filters
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @returns {boolean}
+   * @return {boolean}
    */
   filter_(filters, event) {
     return filters.every(filter => {
@@ -157,10 +237,14 @@ export class AmpAdExit extends AMP.BaseElement {
   buildCallback() {
     this.element.setAttribute('aria-hidden', 'true');
 
+    // Note that order is expected as part of applying default filter options.
     this.defaultFilters_.push(
-        createFilter('minDelay', makeClickDelaySpec(1000)));
+        createFilter('minDelay', makeClickDelaySpec(1000), this));
+    this.defaultFilters_.push(
+        createFilter('carouselBtns',
+            makeInactiveElementSpec('.amp-carousel-button'), this));
 
-    const children = this.element.children;
+    const {children} = this.element;
     user().assert(children.length == 1,
         'The tag should contain exactly one <script> child.');
     const child = children[0];
@@ -170,9 +254,20 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
-      const userFilters = {};
+      let defaultClickStartTimingEvent;
+      if (isObject(config.options) &&
+          typeof config.options.startTimingEvent === 'string') {
+        defaultClickStartTimingEvent = config.options.startTimingEvent;
+        this.defaultFilters_.splice(0, 1, createFilter('minDelay',
+            makeClickDelaySpec(1000, config.options.startTimingEvent), this));
+      }
       for (const name in config.filters) {
-        userFilters[name] = createFilter(name, config.filters[name]);
+        const spec = config.filters[name];
+        if (spec.type == FilterType.CLICK_DELAY) {
+          spec.startTimingEvent =
+              spec.startTimingEvent || defaultClickStartTimingEvent;
+        }
+        this.userFilters_[name] = createFilter(name, spec, this);
       }
       for (const name in config.targets) {
         const target = config.targets[name];
@@ -181,21 +276,141 @@ export class AmpAdExit extends AMP.BaseElement {
           trackingUrls: target.trackingUrls || [],
           vars: target.vars || {},
           filters:
-              (target.filters || []).map(f => userFilters[f]).filter(f => f),
+              (target.filters || []).map(
+                  f => this.userFilters_[f]).filter(f => f),
         };
+        // Build a map of {vendor, origin} for 3p custom variables in the config
+        for (const customVar in target.vars) {
+          if (!target.vars[customVar].iframeTransportSignal) {
+            continue;
+          }
+          const matches = target.vars[customVar].iframeTransportSignal.match(
+              /IFRAME_TRANSPORT_SIGNAL\(([^,]+)/);
+          if (!matches || matches.length < 2) {
+            continue;
+          }
+          const vendor = matches[1];
+          const {origin} = parseUrl(assertVendor(vendor));
+          this.expectedOriginToVendor_[origin] =
+              this.expectedOriginToVendor_[origin] || vendor;
+        }
       }
       this.transport_.beacon = config.transport[TransportMode.BEACON] !== false;
       this.transport_.image = config.transport[TransportMode.IMAGE] !== false;
     } catch (e) {
-      user().error(TAG, 'Invalid JSON config', e);
+      this.user().error(TAG, 'Invalid JSON config', e);
       throw e;
     }
+
+    this.init3pResponseListener_();
+  }
+
+  /**
+   * Gets the resource ID of the amp-ad element containing this amp-ad-exit tag.
+   * This is a pass-through for the version in service.js, solely because
+   * the one in service.js isn't stubbable for testing, since only object
+   * methods are stubbable.
+   * @return {?string}
+   * @private
+   * @VisibleForTesting
+   */
+  getAmpAdResourceId_() {
+    return getAmpAdResourceId(this.element, this.win.top);
+  }
+
+  /** @override */
+  resumeCallback() {
+    this.init3pResponseListener_();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.unlisten_) {
+      this.unlisten_();
+      this.unlisten_ = null;
+    }
+    return super.unlayoutCallback();
+  }
+
+  /**
+   * amp-analytics will create an iframe for vendors in
+   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * This is limited to MRC-accreddited vendors. The frame is removed in
+   * amp-analytics, and the listener is destroyed here, if the user
+   * navigates/swipes away from the page. Both are recreated if the user
+   * navigates back to the page.
+   * @private
+   */
+  init3pResponseListener_() {
+    if (getMode().runtime == 'inabox') {
+      // TODO(jonkeller): Remove this once #11436 is resolved.
+      return;
+    }
+    this.ampAdResourceId_ = this.ampAdResourceId_ || this.getAmpAdResourceId_();
+    if (!this.ampAdResourceId_) {
+      user().warn(TAG,
+          'No friendly parent amp-ad element was found for amp-ad-exit; ' +
+          'not in inabox case.');
+      return;
+    }
+    dev().assert(!this.unlisten_, 'Unlistener should not already exist.');
+    this.unlisten_ = listen(this.getAmpDoc().win, 'message',
+        event => {
+          // We shouldn't deserialize just any message...it would be too
+          // expensive to parse ones that aren't for amp-ad-exit.
+          if (!this.expectedOriginToVendor_[event.origin]) {
+            return;
+          }
+          const responseMsg = deserializeMessage(getData(event));
+          if (!responseMsg ||
+              responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE) {
+            return;
+          }
+          this.assertValidResponseMessage_(responseMsg, event.origin);
+          if (responseMsg['creativeId'] != this.ampAdResourceId_) {
+            return; // Valid message, but for different amp-ad-exit instance
+          }
+          this.vendorResponses_[responseMsg['vendor']] = responseMsg['message'];
+        });
+  }
+
+  /**
+   *
+   * @param {JsonObject} responseMessage The response object to
+   *     validate.
+   * @param {string} eventOrigin The origin of the message, which should
+   *     match the expected origin of messages from responseMessage['vendor']
+   * @private
+   */
+  assertValidResponseMessage_(responseMessage, eventOrigin) {
+    user().assert(responseMessage['message'],
+        'Received empty response from 3p analytics frame');
+    user().assert(
+        responseMessage['creativeId'],
+        'Received malformed message from 3p analytics frame: ' +
+        'creativeId missing');
+    user().assert(responseMessage['vendor'],
+        'Received malformed message from 3p analytics frame: ' +
+        'vendor missing');
+    const vendorURL = parseUrl(assertVendor(responseMessage['vendor']));
+    user().assert(vendorURL && vendorURL.origin == eventOrigin,
+        'Invalid origin for vendor ' +
+        `${responseMessage['vendor']}: ${eventOrigin}`);
   }
 
   /** @override */
   isLayoutSupported(unused) {
     return true;
   }
+
+  /** @override */
+  onLayoutMeasure() {
+    for (const name in this.userFilters_) {
+      this.userFilters_[name].onLayoutMeasure();
+    }
+  }
 }
 
-AMP.registerElement('amp-ad-exit', AmpAdExit);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdExit);
+});

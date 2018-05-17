@@ -36,12 +36,12 @@
  */
 
 import {CSS} from '../../../build/amp-pinterest-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
-
 import {FollowButton} from './follow-button';
 import {PinItButton} from './pinit-button';
+
 import {PinWidget} from './pin-widget';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {user} from '../../../src/log';
 
 /**
  * AMP Pinterest
@@ -87,7 +87,9 @@ class AmpPinterest extends AMP.BaseElement {
     }
     return Promise.reject(user().createError('Invalid selector: ' + selector));
   }
+}
 
-};
 
-AMP.registerElement('amp-pinterest', AmpPinterest, CSS);
+AMP.extension('amp-pinterest', '0.1', AMP => {
+  AMP.registerElement('amp-pinterest', AmpPinterest, CSS);
+});

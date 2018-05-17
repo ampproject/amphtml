@@ -15,15 +15,13 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
-import {isExperimentOn} from '../../../src/experiments';
-import {isProxyOrigin, removeFragment} from '../../../src/url';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
+import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import {timerFor} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {vsyncFor} from '../../../src/services';
-import {xhrFor} from '../../../src/services';
 
 /** @const {string} */
 const TAG = 'amp-access-server';
@@ -56,43 +54,43 @@ const TAG = 'amp-access-server';
  *            \/
  *    Apply authorization response
  *
- * @implements {./amp-access.AccessTypeAdapterDef}
+ * @implements {./amp-access-source.AccessTypeAdapterDef}
  */
 export class AccessServerAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!./amp-access.AccessTypeAdapterContextDef} context
+   * @param {!./amp-access-source.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @private @const */
     this.clientAdapter_ = new AccessClientAdapter(ampdoc, configJson, context);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(ampdoc);
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
-    this.xhr_ = xhrFor(ampdoc.win);
+    this.xhr_ = Services.xhrFor(ampdoc.win);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(ampdoc.win);
+    this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     const stateElement = ampdoc.getRootNode().querySelector(
         'meta[name="i-amphtml-access-state"]');
 
     /** @private @const {?string} */
     this.serverState_ = stateElement ?
-        stateElement.getAttribute('content') : null;
+      stateElement.getAttribute('content') : null;
 
     const isInExperiment = isExperimentOn(ampdoc.win, TAG);
 
@@ -100,7 +98,7 @@ export class AccessServerAdapter {
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
 
     const serviceUrlOverride = isInExperiment ?
-        this.viewer_.getParam('serverAccessService') : null;
+      this.viewer_.getParam('serverAccessService') : null;
 
     /** @private @const {string} */
     this.serviceUrl_ = serviceUrlOverride ||
@@ -186,6 +184,11 @@ export class AccessServerAdapter {
     return this.clientAdapter_.pingback();
   }
 
+  /** @override */
+  postAction() {
+    // Nothing to do.
+  }
+
   /**
    * @param {!Document} doc
    * @return {!Promise}
@@ -198,7 +201,7 @@ export class AccessServerAdapter {
         const section = sections[i];
         const sectionId = section.getAttribute('i-amphtml-access-id');
         const target = this.ampdoc.getRootNode().querySelector(
-            '[i-amphtml-access-id="' + sectionId + '"]');
+            `[i-amphtml-access-id="${escapeCssSelectorIdent(sectionId)}"]`);
         if (!target) {
           dev().warn(TAG, 'Section not found: ', sectionId);
           continue;

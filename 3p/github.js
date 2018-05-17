@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {writeScript} from './3p';
 import {user} from '../src/log';
+import {writeScript} from './3p';
 
 /**
  * Get the correct script for the gist.
@@ -43,7 +43,8 @@ export function github(global, data) {
       'The data-gistid attribute is required for <amp-gist> %s',
       data.element);
 
-  let gistUrl = 'https://gist.github.com/' + encodeURIComponent(data.gistid) + '.js';
+  let gistUrl =
+      'https://gist.github.com/' + encodeURIComponent(data.gistid) + '.js';
 
   if (data.file) {
     gistUrl += '?file=' + encodeURIComponent(data.file);

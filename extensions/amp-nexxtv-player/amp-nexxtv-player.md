@@ -31,34 +31,37 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
 
 ```html
 <amp-nexxtv-player
-    data-mediaid="PTPFEC4U184674"
-    data-client="583"
+    data-mediaid="71QQG852413DU7J"
+    data-client="761"
     data-streamtype="video"
     data-seek-to="2"
     data-mode="static"
     data-origin="https://embed.nexx.cloud/"
     data-disable-ads="1"
+    data-streaming-filter="nxp-bitrate-2500"
     layout="responsive"
     width="480" height="270"></amp-nexxtv-player>
 ```
 
 ## Attributes
 
-**data-mediaid** (required)
+##### data-mediaid (required)
 
 Represents the ID of the media you want to play.
 
-**data-client** (required)
+##### data-client (required)
 
 Your domain ID.
 
-**data-streamtype** (optional)
+##### data-streamtype (optional)
 
 Indicates the media streaming type, which can be one of the following:
 
@@ -70,24 +73,27 @@ Indicates the media streaming type, which can be one of the following:
 * `album`: An audio playlist.
 
 
-**data-seek-to** (optional)
+##### data-seek-to (optional)
 
 Indicates the starting point of your media (in seconds).  For example, video starting 1:30min.
 
-**data-mode** (optional)
+##### data-mode (optional)
 
 Indicates the data mode, which can be `static` (default) or `api`.
 
-**data-origin** (optional)
+##### data-origin (optional)
 
 Indicates the source from which the embedded domain media is played. By default this is set to `https://embed.nexx.cloud/`.
 
-**data-disable-ads** (optional)
+##### data-disable-ads (optional)
 
 Ads are enabled by default. Set value to 1 to disable.
 
+#### data-streaming-filter (optional)
 
-**common attributes**
+Set streaming filter e.g. "nxp-bitrate-0750" for max 750kbit max bitrate.
+
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

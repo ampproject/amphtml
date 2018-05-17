@@ -23,21 +23,19 @@
  */
 
 import {
+  EXPERIMENT_ATTRIBUTE,
   isGoogleAdsA4AValidEnvironment,
   mergeExperimentIds,
-  EXPERIMENT_ATTRIBUTE,
 } from './utils';
 import {
-  isExperimentOn,
+  ExperimentInfo, // eslint-disable-line no-unused-vars
   forceExperimentBranch,
   getExperimentBranch,
+  isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {
-  viewerForDoc,
-  performanceForOrNull,
-} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
@@ -46,7 +44,7 @@ import {parseQueryString} from '../../../src/url';
  *  }} */
 export let A4aExperimentBranches;
 
-/** @type {!string} @private */
+/** @type {string} @private */
 export const MANUAL_EXPERIMENT_ID = '117152632';
 
 
@@ -78,8 +76,8 @@ export const MANUAL_EXPERIMENT_ID = '117152632';
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
-    externalBranches, internalBranches, delayedExternalBranches,
-    opt_sfgInternalBranches) {
+  externalBranches, internalBranches, delayedExternalBranches,
+  opt_sfgInternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -93,7 +91,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       opt_sfgInternalBranches ? opt_sfgInternalBranches.experiment : null,
       MANUAL_EXPERIMENT_ID);
   if (!isSetFromUrl) {
-    const experimentInfoMap = {};
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
     const branches = [
       internalBranches.control,
       internalBranches.experiment,
@@ -115,7 +114,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     const selectedBranch = getExperimentBranch(win, experimentName);
     if (selectedBranch) {
       addExperimentIdToElement(selectedBranch, element);
-      const perf = performanceForOrNull(win);
+      const perf = Services.performanceForOrNull(win);
       if (perf) {
         perf.addEnabledExperiment(experimentName + '-' + selectedBranch);
       }
@@ -146,7 +145,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  * @return {?string} experiment extracted from page url.
  */
 export function extractUrlExperimentId(win, element) {
-  const expParam = viewerForDoc(element).getParam('exp') ||
+  const expParam = Services.viewerForDoc(element).getParam('exp') ||
     parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return null;
@@ -190,20 +189,20 @@ export function extractUrlExperimentId(win, element) {
  *
  * @param {!Window} win  Window.
  * @param {!Element} element Ad tag Element.
- * @param {!string} experimentName  Name of the overall experiment.
- * @param {!string} controlBranchId  Experiment ID string for control branch of
+ * @param {string} experimentName  Name of the overall experiment.
+ * @param {string} controlBranchId  Experiment ID string for control branch of
  *   the overall experiment.
- * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
+ * @param {string} treatmentBranchId  Experiment ID string for the 'treatment'
  *   branch of the overall experiment.
- * @param {!string} delayedTreatmentBrandId Experiment ID string for the
+ * @param {string} delayedTreatmentBrandId Experiment ID string for the
  *   'treatment' plus delayed request experiment.
- * @param {!string} manualId  ID of the manual experiment.
+ * @param {string} manualId  ID of the manual experiment.
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-     controlBranchId, treatmentBranchId, delayedControlId,
-     delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
+  controlBranchId, treatmentBranchId, delayedControlId,
+  delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
   const argMapping = {
     '-1': manualId,
     '0': null,
@@ -235,7 +234,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
  * that, use validateExperimentIds.
  *
  * @param {?string} idString  String to parse.
- * @returns {!Array<!string>}  List of experiment IDs (possibly empty).
+ * @return {!Array<string>}  List of experiment IDs (possibly empty).
  * @see validateExperimentIds
  */
 export function parseExperimentIds(idString) {
@@ -269,7 +268,7 @@ export function isInExperiment(element, id) {
  * #maybeSetExperimentFromUrl has added it).
  *
  * @param {!Element} element  Element to check for manual experiment membership.
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isInManualExperiment(element) {
   return isInExperiment(element, MANUAL_EXPERIMENT_ID);
@@ -283,7 +282,7 @@ export function isInManualExperiment(element) {
  *
  * @param {!Window} win  Host window for the ad.
  * @param {!Element} element  Element to check for pre-launch membership.
- * @returns {boolean}
+ * @return {boolean}
  */
 export function hasLaunched(win, element) {
   switch (element.getAttribute('type')) {
@@ -300,8 +299,8 @@ export function hasLaunched(win, element) {
  * Checks that all string experiment IDs in a list are syntactically valid
  * (integer base 10).
  *
- * @param {!Array<!string>} idList  List of experiment IDs.  Can be empty.
- * @returns {boolean} Whether all list elements are valid experiment IDs.
+ * @param {!Array<string>} idList  List of experiment IDs.  Can be empty.
+ * @return {boolean} Whether all list elements are valid experiment IDs.
  */
 export function validateExperimentIds(idList) {
   return idList.every(id => { return !isNaN(parseInt(id, 10)); });
@@ -309,11 +308,15 @@ export function validateExperimentIds(idList) {
 
 /**
  * Adds a single experimentID to an element iff it's a valid experiment ID.
+ * No-ops if the experimentId is undefined.
  *
- * @param {!string} experimentId  ID to add to the element.
+ * @param {string|undefined} experimentId  ID to add to the element.
  * @param element Element to add the experiment ID to.
  */
 export function addExperimentIdToElement(experimentId, element) {
+  if (!experimentId) {
+    return;
+  }
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE,

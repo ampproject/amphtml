@@ -14,58 +14,62 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-ooyala-player';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-ooyala-player', function() {
+describes.realWin('amp-ooyala-player', {
+  amp: {
+    extensions: ['amp-ooyala-player'],
+  },
+}, function(env) {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getOoyalaElement(embedCode, playerId, pCode, opt_version,
     opt_config, opt_placeholder) {
-    return createIframePromise(true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const player = iframe.doc.createElement('amp-ooyala-player');
-      if (embedCode) {
-        player.setAttribute('data-embedcode', embedCode);
-      }
-      if (playerId) {
-        player.setAttribute('data-playerid', playerId);
-      }
-      if (pCode) {
-        player.setAttribute('data-pcode', pCode);
-      }
+    const player = doc.createElement('amp-ooyala-player');
+    if (embedCode) {
+      player.setAttribute('data-embedcode', embedCode);
+    }
+    if (playerId) {
+      player.setAttribute('data-playerid', playerId);
+    }
+    if (pCode) {
+      player.setAttribute('data-pcode', pCode);
+    }
 
-      if (opt_version) {
-        player.setAttribute('data-playerversion', opt_version);
-      }
+    if (opt_version) {
+      player.setAttribute('data-playerversion', opt_version);
+    }
 
-      if (opt_config) {
-        player.setAttribute('data-config', opt_config);
-      }
+    if (opt_config) {
+      player.setAttribute('data-config', opt_config);
+    }
 
-      if (opt_placeholder) {
-        player.setAttribute('data-placeholder', opt_placeholder);
-      }
+    if (opt_placeholder) {
+      player.setAttribute('data-placeholder', opt_placeholder);
+    }
 
-      return iframe.addElement(player);
-    });
-  };
+    doc.body.appendChild(player);
+    return player.build()
+        .then(() => player.layoutCallback())
+        .then(() => player);
+  }
 
   it('renders a V3 player', () => {
     return getOoyalaElement('Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
         '6440813504804d76ba35c8c787a4b33c',
         '5zb2wxOlZcNCe_HVT3a6cawW298X').then(player => {
-          const playerIframe = player.querySelector('iframe');
-          expect(playerIframe).to.not.be.null;
-          expect(playerIframe.src).to.equal('https://player.ooyala.com/iframe.html' +
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+      expect(playerIframe.src).to.equal('https://player.ooyala.com/iframe.html' +
         '?platform=html5-priority&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
         '&pbid=6440813504804d76ba35c8c787a4b33c');
-        });
+    });
   });
 
   it('renders a V4 player', () => {
@@ -73,35 +77,33 @@ describe('amp-ooyala-player', function() {
         '6440813504804d76ba35c8c787a4b33c',
         '5zb2wxOlZcNCe_HVT3a6cawW298X',
         'V4').then(player => {
-          const playerIframe = player.querySelector('iframe');
-          expect(playerIframe).to.not.be.null;
-          expect(playerIframe.src).to.equal('https://player.ooyala.com/static/v4/sandbox/' +
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+      expect(playerIframe.src).to.equal('https://player.ooyala.com/static/v4/sandbox/' +
           'amp_iframe/skin-plugin/amp_iframe.html' +
           '?pcode=5zb2wxOlZcNCe_HVT3a6cawW298X' +
           '&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
           '&pbid=6440813504804d76ba35c8c787a4b33c');
-        });
+    });
   });
 
   it('fails without an embed code', () => {
-    return getOoyalaElement(null,
-        '6440813504804d76ba35c8c787a4b33c',
+    return getOoyalaElement(null, '6440813504804d76ba35c8c787a4b33c',
         '5zb2wxOlZcNCe_HVT3a6cawW298X').should.eventually.be.rejectedWith(
         /The data-embedcode attribute is required/);
   });
 
   it('fails without a player ID', () => {
-    return getOoyalaElement('Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-        null,
+    return getOoyalaElement('Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ', null,
         '5zb2wxOlZcNCe_HVT3a6cawW298X').should.eventually.be.rejectedWith(
         /The data-playerid attribute is required/);
   });
 
   it('fails without a p-code', () => {
     return getOoyalaElement('Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-        '6440813504804d76ba35c8c787a4b33c',
-        null).should.eventually.be.rejectedWith(
-        /The data-pcode attribute is required/);
+        '6440813504804d76ba35c8c787a4b33c', null)
+        .should.eventually.be.rejectedWith(
+            /The data-pcode attribute is required/);
   });
 
 });

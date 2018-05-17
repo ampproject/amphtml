@@ -21,7 +21,7 @@ tags: {  # amp-install-serviceworker
     name: "amp-install-serviceworker"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -29,11 +29,9 @@ tags: {  # amp-install-serviceworker
 tags: {  # <amp-install-serviceworker>
   html_format: AMP  # Ads cannot install serviceworkers
   tag_name: "AMP-INSTALL-SERVICEWORKER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-install-serviceworker"
   attrs: {
-    name: "src"
-    mandatory: true
+    name: "data-iframe-src"
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
@@ -41,7 +39,8 @@ tags: {  # <amp-install-serviceworker>
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
-    name: "data-iframe-src"
+    name: "src"
+    mandatory: true
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.

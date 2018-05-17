@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseJson} from '../../../../src/json';
 import {getData} from '../../../../src/event-helper';
+import {parseJson} from '../../../../src/json';
 
 const TAG = 'amp-viewer-messaging';
 export const APP = '__AMPHTML__';
@@ -52,7 +52,7 @@ export function parseMessage(message) {
 
   try {
     return /** @type {?Message} */ (
-        /** @type {?} */ (parseJson(/** @type {string} */ (message))));
+    /** @type {?} */ (parseJson(/** @type {string} */ (message))));
   } catch (e) {
     return null;
   }
@@ -75,7 +75,7 @@ export class WindowPortEmulator {
     this.win = win;
     /** @private {string} */
     this.origin_ = origin;
-    /** @const {!Window} */
+    /** @private @const {!Window} */
     this.target_ = target;
   }
 
@@ -115,7 +115,7 @@ export class Messaging {
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
-   * @param {boolean} opt_isWebview
+   * @param {boolean=} opt_isWebview
    */
   constructor(win, port, opt_isWebview) {
     /** @const {!Window} */
@@ -124,7 +124,7 @@ export class Messaging {
     this.port_ = port;
     /** @const @private */
     this.isWebview_ = !!opt_isWebview;
-    /** @private {!number} */
+    /** @private {number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
@@ -254,8 +254,8 @@ export class Messaging {
   sendMessage_(message) {
     this.port_./*OK*/postMessage(
         this.isWebview_
-            ? JSON.stringify(message)
-            : message);
+          ? JSON.stringify(message)
+          : message);
   }
 
   /**
@@ -272,7 +272,7 @@ export class Messaging {
     }
     if (!handler) {
       const error = new Error(
-        'Cannot handle request because handshake is not yet confirmed!');
+          'Cannot handle request because handshake is not yet confirmed!');
       error.args = message.name;
       throw error;
     }
@@ -316,7 +316,7 @@ export class Messaging {
 
   /**
    * @param {string} state
-   * @param {!Error|string} opt_data
+   * @param {!Error|string=} opt_data
    * @private
    */
   logError_(state, opt_data) {
@@ -324,7 +324,7 @@ export class Messaging {
     const dataStr = ' data: ' + this.errorToString_(opt_data);
     stateStr += dataStr;
     this.win['viewerState'] = stateStr;
-  };
+  }
 
   /**
    * @param {*} err !Error most of time, string sometimes, * rarely.

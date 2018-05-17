@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
 
 class AmpHulu extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -81,6 +81,9 @@ class AmpHulu extends AMP.BaseElement {
     dev().assert(this.eid_);
     return `https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(this.eid_ || '')}`;
   }
-};
+}
 
-AMP.registerElement('amp-hulu', AmpHulu);
+
+AMP.extension('amp-hulu', '0.1', AMP => {
+  AMP.registerElement('amp-hulu', AmpHulu);
+});

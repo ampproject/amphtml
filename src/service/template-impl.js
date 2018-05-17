@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {childElementByTag} from '../dom';
-import {getService, registerServiceBuilder} from '../service';
+import {Deferred} from '../utils/promise';
+import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
+import {getService, registerServiceBuilder} from '../service';
 
 
 /**
@@ -27,7 +28,7 @@ import {dev, user} from '../log';
 
 
 /**
- * @typedef {function(new:BaseTemplate, !Element)}
+ * @typedef {function(new:BaseTemplate, !Element, !Window)}
  */
 let TemplateClassDef;
 
@@ -43,13 +44,16 @@ const PROP_PROMISE_ = '__AMP_WAIT_';
  */
 export class BaseTemplate {
 
-  /** @param {!Element} element */
-  constructor(element) {
+  /**
+   * @param {!Element} element
+   * @param {!Window} win
+   */
+  constructor(element, win) {
     /** @public @const */
     this.element = element;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView;
+    this.win = element.ownerDocument.defaultView || win;
 
     this.compileCallback();
   }
@@ -64,7 +68,7 @@ export class BaseTemplate {
 
   /**
    * To be implemented by subclasses.
-   * @param {!JsonObject} unusedData
+   * @param {!JsonObject|string} unusedData
    * @return {!Element}
    */
   render(unusedData) {
@@ -169,10 +173,13 @@ export class Templates {
    * attribute, the value indicates the ID of the template element.
    * @param {!Element} parent
    * @param {!JsonObject} data
+   * @param {string=} opt_querySelector
    * @return {!Promise<!Element>}
    */
-  findAndRenderTemplate(parent, data) {
-    return this.renderTemplate(this.findTemplate_(parent), data);
+  findAndRenderTemplate(parent, data, opt_querySelector) {
+    return this.renderTemplate(
+        this.findTemplate_(parent, opt_querySelector),
+        data);
   }
 
   /**
@@ -183,30 +190,35 @@ export class Templates {
    * the array of the rendered elements.
    * @param {!Element} parent
    * @param {!Array<!JsonObject>} array
+   * @param {string=} opt_querySelector
    * @return {!Promise<!Array<!Element>>}
    */
-  findAndRenderTemplateArray(parent, array) {
-    return this.renderTemplateArray(this.findTemplate_(parent), array);
+  findAndRenderTemplateArray(parent, array, opt_querySelector) {
+    return this.renderTemplateArray(
+        this.findTemplate_(parent, opt_querySelector),
+        array);
   }
 
   /**
    * Detect if a template is present inside the parent.
    * @param {!Element} parent
+   * @param {string=} opt_querySelector
    * @return {boolean}
    */
-  hasTemplate(parent) {
-    return !!this.maybeFindTemplate_(parent);
+  hasTemplate(parent, opt_querySelector) {
+    return !!this.maybeFindTemplate_(parent, opt_querySelector);
   }
 
   /**
    * Find a specified template inside the parent. Fail if the template is
    * not present.
    * @param {!Element} parent
+   * @param {string=} opt_querySelector
    * @return {!Element}
    * @private
    */
-  findTemplate_(parent) {
-    const templateElement = this.maybeFindTemplate_(parent);
+  findTemplate_(parent, opt_querySelector) {
+    const templateElement = this.maybeFindTemplate_(parent, opt_querySelector);
     user().assert(templateElement, 'Template not found for %s', parent);
     user().assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
@@ -219,13 +231,16 @@ export class Templates {
    * child "template" element. When specified via "template" attribute,
    * the value indicates the ID of the template element.
    * @param {!Element} parent
+   * @param {string=} opt_querySelector
    * @return {?Element}
    * @private
    */
-  maybeFindTemplate_(parent) {
+  maybeFindTemplate_(parent, opt_querySelector) {
     const templateId = parent.getAttribute('template');
     if (templateId) {
-      return parent.ownerDocument.getElementById(templateId);
+      return rootNodeFor(parent).getElementById(templateId);
+    } else if (opt_querySelector) {
+      return scopedQuerySelector(parent, opt_querySelector);
     } else {
       return childElementByTag(parent, 'template');
     }
@@ -254,7 +269,7 @@ export class Templates {
     }
 
     promise = this.waitForTemplateClass_(element, type).then(templateClass => {
-      const impl = element[PROP_] = new templateClass(element);
+      const impl = element[PROP_] = new templateClass(element, this.win_);
       delete element[PROP_PROMISE_];
       return impl;
     });
@@ -263,8 +278,8 @@ export class Templates {
   }
 
   /**
-   * Returns the promise that will eventually yield the template class. This will
-   * wait until the actual template script has been downloaded and parsed.
+   * Returns the promise that will eventually yield the template class. This
+   * will wait until the actual template script has been downloaded and parsed.
    * @param {!Element} element
    * @param {string} type
    * @return {!Promise<!TemplateClassDef>}
@@ -275,37 +290,12 @@ export class Templates {
       return this.templateClassMap_[type];
     }
 
-    this.checkTemplateDeclared_(element, type);
-    let aResolve;
-    const promise = new Promise((resolve, unusedReject) => {
-      aResolve = resolve;
-    });
+    const deferred = new Deferred();
+    const {promise, resolve} = deferred;
+
     this.templateClassMap_[type] = promise;
-    this.templateClassResolvers_[type] = aResolve;
+    this.templateClassResolvers_[type] = resolve;
     return promise;
-  }
-
-
-  /**
-   * Checks that the template type has actually been declared by a
-   * `<script custom-template=$type>` tag in the head.
-   * @param {!Element} element
-   * @param {string} type
-   * @private
-   */
-  checkTemplateDeclared_(element, type) {
-    if (!this.declaredTemplates_) {
-      this.declaredTemplates_ = this.win_.Object.create(null);
-      const scriptTags = this.win_.document.querySelectorAll(
-          'script[custom-template]');
-      for (let i = 0; i < scriptTags.length; i++) {
-        this.declaredTemplates_[scriptTags[i].getAttribute(
-            'custom-template')] = true;
-      }
-    }
-    user().assert(this.declaredTemplates_[type],
-        'Template must be declared for %s as <script custom-template=%s>',
-        element, type);
   }
 
   /**

@@ -14,28 +14,31 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-vine';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-vine', () => {
+describes.realWin('amp-vine', {
+  amp: {
+    extensions: ['amp-vine'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
   function getVine(vineId, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const vine = iframe.doc.createElement('amp-vine');
-      vine.setAttribute('data-vineid', vineId);
-      vine.setAttribute('width', 400);
-      vine.setAttribute('height', 400);
-      if (opt_responsive) {
-        vine.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(vine);
-    });
+    const vine = doc.createElement('amp-vine');
+    vine.setAttribute('data-vineid', vineId);
+    vine.setAttribute('width', 400);
+    vine.setAttribute('height', 400);
+    if (opt_responsive) {
+      vine.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(vine);
+    return vine.build().then(() => vine.layoutCallback()).then(() => vine);
   }
 
   it('renders', () => {

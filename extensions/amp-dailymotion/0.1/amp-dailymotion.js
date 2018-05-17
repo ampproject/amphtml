@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {
+  addParamToUrl,
+  addParamsToUrl,
+  parseQueryString,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {VideoEvents} from '../../../src/video-interface';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {getData, listen} from '../../../src/event-helper';
-import {videoManagerForDoc} from '../../../src/services';
-import {parseQueryString} from '../../../src/url';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -52,6 +63,7 @@ const DailymotionEvents = {
   // Other events
   VOLUMECHANGE: 'volumechange',
   STARTED_BUFFERING: 'progress',
+  FULLSCREEN_CHANGE: 'fullscreenchange',
 };
 
 /**
@@ -92,9 +104,12 @@ class AmpDailymotion extends AMP.BaseElement {
     /** @private {?Function} */
     this.startedBufferingResolver_ = null;
 
+    /** @private {boolean} */
+    this.isFullscreen_ = false;
+
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -137,14 +152,14 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element);
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    Services.videoManagerForDoc(this.element).register(this);
+    const readyDeferred = new Deferred();
+    this.playerReadyPromise_ = readyDeferred.promise;
+    this.playerReadyResolver_ = readyDeferred.resolve;
 
-    this.startedBufferingPromise_ = new Promise(resolve => {
-      this.startedBufferingResolver_ = resolve;
-    });
+    const bufferingDeferred = new Deferred();
+    this.startedBufferingPromise_ = bufferingDeferred.promise;
+    this.startedBufferingResolver_ = bufferingDeferred.resolve;
   }
 
   /** @override */
@@ -153,8 +168,7 @@ class AmpDailymotion extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     dev().assert(this.videoid_);
-    iframe.src = 'https://www.dailymotion.com/embed/video/' +
-     encodeURIComponent(this.videoid_ || '') + '?' + this.getQuery_();
+    iframe.src = this.getIframeSrc_();
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -172,21 +186,13 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @private */
-  addQueryParam_(param, query) {
-    const val = this.element.getAttribute(`data-${param}`);
-    if (val) {
-      query.push(`${encodeURIComponent(param)}=${encodeURIComponent(val)}`);
-    }
-  }
-
-  /** @private */
   handleEvents_(event) {
     if (event.origin != 'https://www.dailymotion.com' ||
         event.source != this.iframe_.contentWindow) {
       return;
     }
     if (!getData(event) || !event.type || event.type != 'message') {
-      return;  // Event empty
+      return; // Event empty
     }
     const data = parseQueryString(/** @type {string} */ (getData(event)));
     if (data === undefined) {
@@ -199,18 +205,20 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         break;
       case DailymotionEvents.END:
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
+        // Don't break, also dispatch pause
       case DailymotionEvents.PAUSE:
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         this.playerState_ = DailymotionEvents.PAUSE;
         break;
       case DailymotionEvents.PLAY:
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
         this.playerState_ = DailymotionEvents.PLAY;
         break;
       case DailymotionEvents.VOLUMECHANGE:
         if (this.playerState_ == DailymotionEvents.UNSTARTED
             || this.muted_ != (
-                data['volume'] == 0 || (data['muted'] == 'true'))) {
+              data['volume'] == 0 || (data['muted'] == 'true'))) {
           this.muted_ = (data['volume'] == 0 || (data['muted'] == 'true'));
           if (this.muted_) {
             this.element.dispatchCustomEvent(VideoEvents.MUTED);
@@ -221,6 +229,9 @@ class AmpDailymotion extends AMP.BaseElement {
         break;
       case DailymotionEvents.STARTED_BUFFERING:
         this.startedBufferingResolver_(true);
+        break;
+      case DailymotionEvents.FULLSCREEN_CHANGE:
+        this.isFullscreen_ = data['fullscreen'] == 'true';
         break;
       default:
 
@@ -247,14 +258,12 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @private */
-  getQuery_() {
-    const query = [
-      'api=1',
-      'html=1',
-      'app=amp',
-    ];
+  getIframeSrc_() {
 
-    const settings = [
+    let iframeSrc = 'https://www.dailymotion.com/embed/video/' +
+       encodeURIComponent(this.videoid_ || '') + '?api=1&html=1&app=amp';
+
+    const explicitParamsAttributes = [
       'mute',
       'endscreen-enable',
       'sharing-enable',
@@ -264,11 +273,17 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    settings.forEach(setting => {
-      this.addQueryParam_(setting, query);
+    explicitParamsAttributes.forEach(explicitParam => {
+      const val = this.element.getAttribute(`data-${explicitParam}`);
+      if (val) {
+        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+      }
     });
 
-    return query.join('&');
+    const implicitParams = getDataParamsFromAttributes(this.element);
+    iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
+
+    return iframeSrc;
   }
 
   /** @override */
@@ -327,15 +342,94 @@ class AmpDailymotion extends AMP.BaseElement {
    * @override
    */
   showControls() {
-    // Not supported
+    this.sendCommand_('controls', [true]);
   }
 
   /**
    * @override
    */
   hideControls() {
-    // Not supported
+    this.sendCommand_('controls', [false]);
   }
-};
 
-AMP.registerElement('amp-dailymotion', AmpDailymotion);
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      this.sendCommand_('fullscreen', [true]);
+    } else {
+      if (!this.iframe_) {
+        return;
+      }
+      fullscreenEnter(dev().assertElement(this.iframe_));
+    }
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      this.sendCommand_('fullscreen', [false]);
+    } else {
+      if (!this.iframe_) {
+        return;
+      }
+      fullscreenExit(dev().assertElement(this.iframe_));
+    }
+  }
+
+  /** @override */
+  isFullscreen() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      return this.isFullscreen_;
+    } else {
+      if (!this.iframe_) {
+        return false;
+      }
+      return isFullscreenElement(dev().assertElement(this.iframe_));
+    }
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
+}
+
+
+AMP.extension('amp-dailymotion', '0.1', AMP => {
+  AMP.registerElement('amp-dailymotion', AmpDailymotion);
+});

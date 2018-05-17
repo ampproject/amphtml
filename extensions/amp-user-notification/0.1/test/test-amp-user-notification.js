@@ -18,7 +18,11 @@ import {
   AmpUserNotification,
   UserNotificationManager,
 } from '../amp-user-notification';
-import {getServiceForDoc} from '../../../../src/service';
+import {
+  getServiceForDoc,
+  getServicePromiseForDoc,
+} from '../../../../src/service';
+import {macroTask} from '../../../../testing/yield';
 
 
 describes.realWin('amp-user-notification', {
@@ -27,14 +31,12 @@ describes.realWin('amp-user-notification', {
     extensions: ['amp-user-notification'],
   },
 }, env => {
-  let sandbox;
   let ampdoc;
   let win;
   let dftAttrs;
   let storageMock;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     ampdoc = env.ampdoc;
     win = env.win;
     dftAttrs = {
@@ -45,6 +47,11 @@ describes.realWin('amp-user-notification', {
     };
     const storage = getServiceForDoc(ampdoc, 'storage');
     storageMock = sandbox.mock(storage);
+
+    return getServicePromiseForDoc(ampdoc, 'userNotificationManager')
+        .then(manager => {
+          sandbox.stub(manager, 'registerUserNotification');
+        });
   });
 
   function getUserNotification(attrs = {}) {
@@ -60,11 +67,6 @@ describes.realWin('amp-user-notification', {
     elem.appendChild(button);
 
     doc.body.appendChild(elem);
-    const impl = elem.implementation_;
-    impl.userNotificationManager_ = {
-      registerUserNotification: () => {},
-    };
-
     return elem;
   }
 
@@ -493,6 +495,20 @@ describes.realWin('amp-user-notification', {
     expect(el.getAttribute('role')).to.equal('status');
   });
 
+  describe('buildPostDismissRequest_', () => {
+    it('should return JSON request body', () => {
+      const el = getUserNotification(dftAttrs);
+      const impl = el.implementation_;
+      const elementId = 'elementId';
+      const ampUserId = '1';
+      const request = impl.buildPostDismissRequest_('application/json',
+          elementId, ampUserId);
+      expect(request.method).to.equal('POST');
+      expect(request.body.elementId).to.equal(elementId);
+      expect(request.body.ampUserId).to.equal(ampUserId);
+    });
+  });
+
   describe('buildGetHref_', () => {
 
     it('should do url replacement', () => {
@@ -503,7 +519,7 @@ describes.realWin('amp-user-notification', {
       return impl.buildGetHref_('12345').then(href => {
         const value = href.match(/\?ord=(.*)$/)[1];
         expect(href).to.not.contain('RANDOM');
-        expect(parseInt(value, 10)).to.be.a.number;
+        expect(parseInt(value, 10)).to.be.a('number');
       });
     });
 
@@ -523,7 +539,7 @@ describes.realWin('amp-user-notification', {
     let tag;
 
     beforeEach(() => {
-      service = new UserNotificationManager(window);
+      service = new UserNotificationManager(ampdoc);
       service.managerReadyPromise_ = Promise.resolve();
       service.nextInQueue_ = service.managerReadyPromise_;
       tag = {
@@ -553,34 +569,50 @@ describes.realWin('amp-user-notification', {
       return expect(service.get('n1')).to.eventually.equal(userNotification);
     });
 
-    it('should queue up multiple amp-user-notification elements', () => {
+    it('should queue up multiple amp-user-notification elements', function* () {
       const tag1 = Object.assign({}, tag);
       const tag2 = Object.assign({}, tag);
-      const show1 = sandbox.spy(tag, 'show');
-      const show2 = sandbox.spy(tag1, 'show');
-      const show3 = sandbox.spy(tag2, 'show');
-      const p1 = service.registerUserNotification('n1', tag);
-      const p2 = service.registerUserNotification('n2', tag1);
-      const p3 = service.registerUserNotification('n3', tag2);
+      let resolve1;
+      let resolve2;
 
-      return p1.then(() => {
-        expect(show1.calledOnce).to.be.true;
-        expect(show2.calledOnce).to.be.false;
-        expect(show3.calledOnce).to.be.false;
-        return p2.then(() => {
-          expect(show2.calledOnce).to.be.true;
-          expect(show3.calledOnce).to.be.false;
-          return p3.then(() => {
-            expect(show3.calledOnce).to.be.true;
-          });
-        });
+      const s1 = new Promise(resolve => {
+        resolve1 = resolve;
       });
+      const s2 = new Promise(resolve => {
+        resolve2 = resolve;
+      });
+
+      const show1 = sandbox.stub(tag, 'show').callsFake(() => {
+        return s1;
+      });
+      const show2 = sandbox.stub(tag1, 'show').callsFake(() => {
+        return s2;
+      });
+      const show3 = sandbox.spy(tag2, 'show');
+
+      service.registerUserNotification('n1', tag);
+      service.registerUserNotification('n2', tag1);
+      service.registerUserNotification('n3', tag2);
+      yield macroTask();
+
+      expect(show1).to.be.calledOnce;
+      expect(show2).to.not.be.called;
+      expect(show3).to.not.be.called;
+
+      resolve1();
+      yield macroTask();
+      expect(show2).to.be.calledOnce;
+      expect(show3).to.not.be.called;
+
+      resolve2();
+      yield macroTask();
+      expect(show3).to.be.calledOnce;
     });
 
     it('should be able to get before a registration of an element', () => {
       const get = service.get.bind(service, 'n4');
       expect(get).to.not.throw();
-      expect(get().then).to.be.function;
+      expect(get().then).to.be.a('function');
     });
   });
 

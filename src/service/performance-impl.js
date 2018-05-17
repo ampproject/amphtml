@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh} from '../layout-rect';
-import {registerServiceBuilder, getService} from '../service';
-import {resourcesForDoc} from '../services';
-import {viewerForDoc} from '../services';
-import {viewportForDoc} from '../services';
-import {whenDocumentComplete} from '../document-ready';
-import {getMode} from '../mode';
-import {isCanary} from '../experiments';
-import {throttle} from '../utils/rate-limit';
+import {Services} from '../services';
 import {dict, map} from '../utils/object';
+import {getMode} from '../mode';
+import {getService, registerServiceBuilder} from '../service';
+import {isCanary} from '../experiments';
+import {layoutRectLtwh} from '../layout-rect';
+import {throttle} from '../utils/rate-limit';
+import {whenDocumentComplete} from '../document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -99,6 +97,13 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
+    /** @private {number|null} */
+    this.makeBodyVisible_ = null;
+    /** @private {number|null} */
+    this.firstContentfulPaint_ = null;
+    /** @private {number|null} */
+    this.firstViewportReady_ = null;
+
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
     if (isCanary(this.win)) {
@@ -106,11 +111,7 @@ export class Performance {
     }
 
     // Tick window.onload event.
-    whenDocumentComplete(win.document).then(() => {
-      this.onload_();
-      this.flush();
-    });
-
+    whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPaintTimingObserver_();
   }
 
@@ -119,8 +120,8 @@ export class Performance {
    * @return {!Promise}
    */
   coreServicesAvailable() {
-    this.viewer_ = viewerForDoc(this.win.document);
-    this.resources_ = resourcesForDoc(this.win.document);
+    this.viewer_ = Services.viewerForDoc(this.win.document);
+    this.resources_ = Services.resourcesForDoc(this.win.document);
 
     this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
         this.viewer_.getParam('csi') === '1';
@@ -167,6 +168,7 @@ export class Performance {
   onload_() {
     this.tick('ol');
     this.tickLegacyFirstPaintTime_();
+    this.flush();
   }
 
   /**
@@ -177,16 +179,32 @@ export class Performance {
     if (!this.win.PerformancePaintTiming) {
       return;
     }
+    // Chrome doesn't implement the buffered flag for PerformanceObserver.
+    // That means we need to read existing entries and maintain state
+    // as to whether we have reported a value yet, since in the future it may
+    // be reported twice.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    let recordedFirstPaint = false;
+    let recordedFirstContentfulPaint = false;
+    const processEntry = entry => {
+      if (entry.name == 'first-paint' && !recordedFirstPaint) {
+        this.tickDelta('fp', entry.startTime + entry.duration);
+        recordedFirstPaint = true;
+      }
+      else if (entry.name == 'first-contentful-paint'
+          && !recordedFirstContentfulPaint) {
+        this.tickDelta('fcp', entry.startTime + entry.duration);
+        recordedFirstContentfulPaint = true;
+      }
+    };
     const observer = new this.win.PerformanceObserver(list => {
-      list.getEntries().forEach(entry => {
-        if (entry.name == 'first-paint') {
-          this.tickDelta('fp', entry.startTime + entry.duration);
-        }
-        else if (entry.name == 'first-contentful-paint') {
-          this.tickDelta('fcp', entry.startTime + entry.duration);
-        }
-      });
+      list.getEntries().forEach(processEntry);
+      this.flush();
     });
+    // Programmatically read once as currently PerformanceObserver does not
+    // report past entries as of Chrome 61.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    this.win.performance.getEntriesByType('paint').forEach(processEntry);
 
     observer.observe({entryTypes: ['paint']});
   }
@@ -235,9 +253,9 @@ export class Performance {
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-            ? (this.win.Date.now() - docVisibleTime)
-            //  Prerender was complete before visibility.
-            : 0;
+          ? (this.win.Date.now() - docVisibleTime)
+          //  Prerender was complete before visibility.
+          : 0;
         this.viewer_.whenFirstVisible().then(() => {
           // We only tick this if the page eventually becomes visible,
           // since otherwise we heavily skew the metric towards the
@@ -246,6 +264,8 @@ export class Performance {
           this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
         });
         this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
+        // Mark this instance in the browser timeline.
+        this.mark('pc');
       } else {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
@@ -266,7 +286,7 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    const size = viewportForDoc(this.win.document).getSize();
+    const size = Services.viewportForDoc(this.win.document).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.getResourcesInRect(
         this.win, rect, /* isInPrerender */ true)
@@ -296,8 +316,36 @@ export class Performance {
     } else {
       this.queueTick_(data);
     }
-    // Add browser performance timeline entries for simple ticks.
-    // These are for example exposed in WPT.
+    // Mark the event on the browser timeline, but only if there was
+    // no delta (in which case it would not make sense).
+    if (arguments.length == 1) {
+      this.mark(label);
+    }
+
+    // Store certain page visibility metrics to be exposed as analytics
+    // variables.
+    const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
+				 : value - this.initTime_);
+    switch (label) {
+      case 'fcp':
+        this.firstContentfulPaint_ = storedVal;
+        break;
+      case 'pc':
+        this.firstViewportReady_ = storedVal;
+        break;
+      case 'mbv':
+        this.makeBodyVisible_ = storedVal;
+        break;
+    }
+  }
+
+  /**
+   * Add browser performance timeline entries for simple ticks.
+   * These are for example exposed in WPT.
+   * See https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark
+   * @param {string} label
+   */
+  mark(label) {
     if (this.win.performance
         && this.win.performance.mark
         && arguments.length == 1) {
@@ -406,13 +454,25 @@ export class Performance {
   }
 
   /**
-   * Identifies if the viewer is able to track performance.
-   * If the document is not embedded, there is no messaging channel,
-   * so no performance tracking is needed since there is nobody to forward the events.
+   * Identifies if the viewer is able to track performance. If the document is
+   * not embedded, there is no messaging channel, so no performance tracking is
+   * needed since there is nobody to forward the events.
    * @return {boolean}
    */
   isPerformanceTrackingOn() {
     return this.isPerformanceTrackingOn_;
+  }
+
+  getFirstContentfulPaint() {
+    return this.firstContentfulPaint_;
+  }
+
+  getMakeBodyVisible() {
+    return this.makeBodyVisible_;
+  }
+
+  getFirstViewportReady() {
+    return this.firstViewportReady_;
   }
 }
 

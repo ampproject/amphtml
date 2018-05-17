@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseUrl, serializeQueryString} from '../../../../src/url';
 import {Messaging} from '../messaging/messaging';
+import {parseUrl, serializeQueryString} from '../../../../src/url';
 
 const APP = '__AMPHTML__';
 const MessageType = {
@@ -145,7 +145,7 @@ export class WebviewViewerForTesting {
     const data = JSON.parse(e.data);
     return e.type == 'message' && data.app == APP &&
       data.name == 'channelOpen';
-  };
+  }
 
 
   completeHandshake_(channel, requestId) {
@@ -175,7 +175,7 @@ export class WebviewViewerForTesting {
       start() {}
     }
     this.messaging_ = new Messaging(this.win,
-      new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
+        new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
 
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
       console/*OK*/.log(
@@ -189,7 +189,7 @@ export class WebviewViewerForTesting {
     }, true);
 
     this.handshakeResponseResolve_();
-  };
+  }
 
   sendRequest_(type, data, awaitResponse) {
     this.log('Viewer.prototype.sendRequest_');
@@ -197,7 +197,7 @@ export class WebviewViewerForTesting {
       return;
     }
     return this.messaging_.sendRequest(type, data, awaitResponse);
-  };
+  }
 
   handleMessage_(e) {
     if (this.messageHandlers_[this.id]) {
@@ -206,7 +206,7 @@ export class WebviewViewerForTesting {
 
     this.log('************** viewer got a message,', e.data);
     this.processRequest_(e.data);
-  };
+  }
 
   /**
    * This is used in test-amp-viewer-integration to test the handshake and make
@@ -232,14 +232,14 @@ export class WebviewViewerForTesting {
       case 'tick':
       case 'sendCsi':
       case 'scroll':
-      case 'a2a':
+      case 'a2aNavigate':
       case 'unloaded':
       case 'visibilitychange':
         return;
       default:
         return Promise.reject('request not supported: ' + data.name);
     }
-  };
+  }
 
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {addParamsToUrl} from '../../../src/url';
 import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
 class AmpBrightcove extends AMP.BaseElement {
@@ -103,8 +103,9 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @private */
   encodeId_(id) {
-    /* id is either a Brightcove-assigned id, or a customer-generated reference id.
-      reference ids are prefixed 'ref:' and the colon must be preserved unencoded */
+    /* id is either a Brightcove-assigned id, or a customer-generated reference
+      id. reference ids are prefixed 'ref:' and the colon must be preserved
+      unencoded */
     if (id.substring(0,4) === 'ref:') {
       return `ref:${encodeURIComponent(id.substring(4))}`;
     } else {
@@ -138,8 +139,8 @@ class AmpBrightcove extends AMP.BaseElement {
   /**
    * To prevent improperly setup videos (do not include the pauseCallback
    * listener script) from playing after being told to pause, we destroy the
-   * iframe. Once the listener script is updated to inform AMP that it is listening,
-   * we can prevent the unlayout.
+   * iframe. Once the listener script is updated to inform AMP that it is
+   * listening, we can prevent the unlayout.
    *
    * See https://github.com/ampproject/amphtml/issues/2224 for information.
    * @override
@@ -151,6 +152,9 @@ class AmpBrightcove extends AMP.BaseElement {
     }
     return true;
   }
-};
+}
 
-AMP.registerElement('amp-brightcove', AmpBrightcove);
+
+AMP.extension('amp-brightcove', '0.1', AMP => {
+  AMP.registerElement('amp-brightcove', AmpBrightcove);
+});

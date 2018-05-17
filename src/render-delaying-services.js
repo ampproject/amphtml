@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {dev} from './log';
 import {getServicePromise} from './service';
-import {timerFor} from './services';
 
 /**
  * A map of services that delay rendering. The key is the name of the service
@@ -39,6 +39,7 @@ import {timerFor} from './services';
 const SERVICES = {
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
+  'amp-story': 'amp-story[standalone]',
 };
 
 /**
@@ -48,15 +49,15 @@ const SERVICES = {
 const LOAD_TIMEOUT = 3000;
 
 /**
- * Detects any render delaying services that are required on the page,
- * and returns a promise with a timeout.
+ * Detects any render delaying services that are required on the page, and
+ * returns a promise with a timeout.
  * @param {!Window} win
- * @return {!Promise<!Array<*>>} resolves to an Array that has the same length as
- *     the detected render delaying services
+ * @return {!Promise<!Array<*>>} resolves to an Array that has the same length
+ *     as the detected render delaying services
  */
 export function waitForServices(win) {
   const promises = includedServices(win).map(service => {
-    return timerFor(win).timeoutPromise(
+    return Services.timerFor(win).timeoutPromise(
         LOAD_TIMEOUT,
         getServicePromise(win, service),
         `Render timeout waiting for service ${service} to be ready.`

@@ -18,8 +18,8 @@
  * @fileoverview Simplified error reporting for errors in web & service workers.
  */
 
-import {urls} from './config';
 import {exponentialBackoff} from './exponential-backoff';
+import {urls} from './config';
 
 /**
  * Installs error reporting on the `self` global. Error requests contain a

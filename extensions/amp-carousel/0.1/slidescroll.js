@@ -14,34 +14,30 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {actionServiceForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {isConnectedNode} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {dev} from '../../../src/log';
 import {getStyle, setStyle} from '../../../src/style';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
-import {platformFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {isExperimentOn} from '../../../src/experiments';
 import {startsWith} from '../../../src/string';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
 
 /** @const {number} */
-const NATIVE_SNAP_TIMEOUT = 35;
+const NATIVE_SNAP_TIMEOUT = 135;
 
 /** @const {number} */
 const IOS_CUSTOM_SNAP_TIMEOUT = 45;
 
 /** @const {number} */
-const NATIVE_TOUCH_TIMEOUT = 120;
+const NATIVE_TOUCH_TIMEOUT = 100;
 
 /** @const {number} */
 const IOS_TOUCH_TIMEOUT = 45;
@@ -60,7 +56,7 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {?../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.hasNativeSnapPoints_ = false;
 
     /** @private {!Array<!Element>} */
@@ -116,7 +112,7 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {!Array<?string>} */
     this.dataSlideIdArr_ = [];
 
-    const platform = platformFor(this.win);
+    const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
@@ -125,9 +121,8 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = isExperimentOn(this.win,
-        'slidescroll-disable-css-snap') &&
-        startsWith(platformFor(this.win).getIosVersionString(), '10.3');
+    this.shouldDisableCssSnap_ = startsWith(
+        Services.platformFor(this.win).getIosVersionString(), '10.3');
   }
 
   /** @override */
@@ -138,10 +133,10 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   buildSlides() {
     this.vsync_ = this.getVsync();
-    this.action_ = actionServiceForDoc(this.element);
+    this.action_ = Services.actionServiceForDoc(this.element);
 
     this.hasNativeSnapPoints_ = (
-        getStyle(this.element, 'scrollSnapType') != undefined);
+      getStyle(this.element, 'scrollSnapType') != undefined);
 
     if (this.shouldDisableCssSnap_) {
       this.hasNativeSnapPoints_ = false;
@@ -186,10 +181,6 @@ export class AmpSlideScroll extends BaseSlides {
       slideWrapper.classList.add('i-amphtml-slide-item');
       this.slidesContainer_.appendChild(slideWrapper);
 
-      // Slides must only be re-parented to DOM-connected nodes to avoid
-      // errors when used in a shadow document (#9291).
-      dev().assert(isConnectedNode(slideWrapper),
-          'Slides must only be re-parented to connected nodes.');
       slideWrapper.appendChild(slide);
 
       this.slideWrappers_.push(slideWrapper);
@@ -207,11 +198,11 @@ export class AmpSlideScroll extends BaseSlides {
         'touchend', this.touchEndHandler_.bind(this));
 
     this.registerAction('goToSlide', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    }, ActionTrust.MEDIUM); // TODO(choumx, #9699): LOW.
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -238,7 +229,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     this.hasTouchMoved_ = true;
     if (this.touchEndTimeout_) {
-      timerFor(this.win).cancel(this.touchEndTimeout_);
+      Services.timerFor(this.win).cancel(this.touchEndTimeout_);
     }
   }
 
@@ -249,12 +240,12 @@ export class AmpSlideScroll extends BaseSlides {
   touchEndHandler_() {
     if (this.hasTouchMoved_) {
       if (this.scrollTimeout_) {
-        timerFor(this.win).cancel(this.scrollTimeout_);
+        Services.timerFor(this.win).cancel(this.scrollTimeout_);
       }
       const timeout = this.shouldDisableCssSnap_ ? IOS_TOUCH_TIMEOUT
-          : NATIVE_TOUCH_TIMEOUT;
+        : NATIVE_TOUCH_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
-      this.touchEndTimeout_ = timerFor(this.win).delay(() => {
+      this.touchEndTimeout_ = Services.timerFor(this.win).delay(() => {
         const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
 
         if (this.snappingInProgress_) {
@@ -282,6 +273,12 @@ export class AmpSlideScroll extends BaseSlides {
   layoutCallback() {
     if (this.slideIndex_ === null) {
       this.showSlide_(this.initialSlideIndex_);
+    } else {
+      // When display is toggled on a partcular media or element resizes,
+      // it will need to be re-laid-out. This is only needed when the slide
+      // does not change (example when browser window size changes,
+      // or orientation changes)
+      this.scheduleLayout(this.slides_[dev().assertNumber(this.slideIndex_)]);
     }
     return Promise.resolve();
   }
@@ -341,20 +338,20 @@ export class AmpSlideScroll extends BaseSlides {
    */
   scrollHandler_(unusedEvent) {
     if (this.scrollTimeout_) {
-      timerFor(this.win).cancel(this.scrollTimeout_);
+      Services.timerFor(this.win).cancel(this.scrollTimeout_);
     }
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
+
     if (!this.isIos_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 
     if (!this.touchEndTimeout_) {
       const timeout = this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : (
-          this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
+        this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
       // Timer that detects scroll end and/or end of snap scroll.
-      this.scrollTimeout_ = timerFor(this.win).delay(() => {
-
+      this.scrollTimeout_ = Services.timerFor(this.win).delay(() => {
         if (this.snappingInProgress_) {
           return;
         }
@@ -462,10 +459,10 @@ export class AmpSlideScroll extends BaseSlides {
 
     if (this.shouldLoop) {
       newIndex = (newIndex < 0) ? this.noOfSlides_ - 1 :
-          (newIndex >= this.noOfSlides_) ? 0 : newIndex;
+        (newIndex >= this.noOfSlides_) ? 0 : newIndex;
     } else {
       newIndex = (newIndex < 0) ? 0 :
-          (newIndex >= this.noOfSlides_) ? this.noOfSlides_ - 1 : newIndex;
+        (newIndex >= this.noOfSlides_) ? this.noOfSlides_ - 1 : newIndex;
     }
     return newIndex;
   }
@@ -478,7 +475,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
-      //TODO (camelburrito): Identify more platforms that require
+      // TODO(amphtml): Identify more platforms that require
       // i-amphtml-no-scroll.
       if (this.isIos_) {
         // Make the container non scrollable to stop scroll events.
@@ -503,16 +500,19 @@ export class AmpSlideScroll extends BaseSlides {
    */
   showSlideWhenReady(value) {
     const index = parseInt(value, 10);
-    if (isFinite(index) && index >= 0 && index < this.noOfSlides_) {
-      // If we haven't been laid out yet, set `initialSlideIndex_` instead.
-      if (this.slideIndex_ === null) {
-        this.initialSlideIndex_ = index;
-      } else {
-        this.showSlide_(index);
-      }
-    } else {
-      user().error(TAG, 'Invalid [slide] value: %s', value);
+
+    if (!isFinite(index) || index < 0 || index >= this.noOfSlides_) {
+      this.user().error(TAG, 'Invalid [slide] value: %s', value);
+      return;
     }
+
+    // If we haven't been laid out, set `initialSlideIndex_` for layout time.
+    if (this.slideIndex_ === null) {
+      this.initialSlideIndex_ = index;
+      return;
+    }
+
+    this.showSlideAndTriggerAction_(index);
   }
 
   /**
@@ -524,7 +524,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   showSlide_(newIndex) {
-    const noOfSlides_ = this.noOfSlides_;
+    const {noOfSlides_} = this;
     newIndex = dev().assertNumber(newIndex);
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
@@ -532,9 +532,9 @@ export class AmpSlideScroll extends BaseSlides {
       return false;
     }
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
-        (this.shouldLoop) ? noOfSlides_ - 1 : null;
+      (this.shouldLoop) ? noOfSlides_ - 1 : null;
     const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
-        (this.shouldLoop) ? 0 : null;
+      (this.shouldLoop) ? 0 : null;
 
     const showIndexArr = [];
     if (prevIndex != null) {
@@ -596,7 +596,7 @@ export class AmpSlideScroll extends BaseSlides {
       const name = 'slideChange';
       const event =
           createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
-      this.action_.trigger(this.element, name, event, ActionTrust.MEDIUM);
+      this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});
     }
@@ -627,7 +627,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   hideRestOfTheSlides_(indexArr) {
-    const noOfSlides_ = this.noOfSlides_;
+    const {noOfSlides_} = this;
     for (let i = 0; i < noOfSlides_; i++) {
       if (!this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
         continue;
@@ -700,7 +700,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     const fromSlide =
         this.slideIndex_ === null ?
-            'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
+          'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
     const vars = {
       fromSlide,

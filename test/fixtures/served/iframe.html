@@ -2,6 +2,8 @@
 <body style="background-color: red">
 iframe
 <script>
+
+parent./*OK*/postMessage('loaded-iframe', '*');
 parent.parent./*OK*/postMessage('loaded-iframe', '*');
 
 function getAmpWindow(sentinel) {
