@@ -16,14 +16,13 @@
 'use strict';
 
 module.exports = function(context) {
-  function isResolveCall(node, name) {
-    if (node.type !== 'CallExpression') {
+  function isAssignment(node, name) {
+    if (node.type !== 'AssignmentExpression') {
       return false;
     }
 
-    const {callee} = node;
-    return callee.type === 'Identifier' &&
-        callee.name === name;
+    const {right} = node;
+    return right.type === 'Identifier' && right.name === name;
   }
 
   return {
@@ -86,28 +85,36 @@ module.exports = function(context) {
       }
 
       const {name} = resolve;
+      let assigned = false;
 
       if (resolver.type === 'ArrowFunctionExpression' &&
           resolver.expression === true) {
-        if (isResolveCall(resolver.body, name)) {
-          return;
-        }
+        const {body} = resolver;
+        assigned = isAssignment(body, name);
       } else {
         const {body} = resolver.body;
 
         for (let i = 0; i < body.length; i++) {
           const node = body[i];
-          if (node.type === 'ExpressionStatement' &&
-              isResolveCall(node.expression, name)) {
-            return;
+          if (node.type !== 'ExpressionStatement') {
+            continue;
+          }
+
+          const {expression} = node;
+          assigned = isAssignment(expression, name);
+          if (assigned) {
+            break;
           }
         }
       }
 
+      if (!assigned) {
+        return;
+      }
+
       const message = [
-        'Must call the resolve param.',
-        'If you are creating a pending promise to extract a resolve function',
-        'please use Deferred in the src/utils/promise.js module instead.',
+        'Instead of creating a pending Promise, please use ',
+        'Deferred in the src/utils/promise.js module.',
       ].join('\n\t');
       context.report(resolver, message);
     },
