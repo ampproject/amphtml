@@ -19,6 +19,7 @@ import {Services} from '../../../../src/services';
 import {getService} from '../../../../src/service';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {macroTask} from '../../../../testing/yield';
+import {setStyle} from '../../../../src/style';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-next-page component', {
@@ -65,12 +66,14 @@ env => {
               ]
             }
           </script>`;
+    // Ensure element is off screen when it renders.
+    setStyle(element, 'marginTop', '10000px');
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
     element.getResources = () => win.services.resources.obj;
 
-    nextPage = new AmpNextPage(element);
     doc.body.appendChild(element);
+    nextPage = new AmpNextPage(element);
 
     // sourceUrl is set to about:srcdoc, which has no host.
     sandbox.stub(Services.documentInfoForDoc(element), 'sourceUrl').value('/');
@@ -97,9 +100,7 @@ env => {
     toggleExperiment(win, 'amp-next-page', false);
   });
 
-  // TODO (@peterjosling, #15234): This test is flaky on Headless Chrome on
-  // Travis because it does call fetchDocument.
-  it.skip('does not fetch the next document before 3 viewports away',
+  it('does not fetch the next document before 3 viewports away',
       function* () {
         xhrMock.expects('fetchDocument').never();
         sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
@@ -143,8 +144,7 @@ env => {
     yield macroTask();
   });
 
-  // TODO (@peterjosling, #15234): This flakes on Chrome.
-  it.skip('adds the hidden class to hideSelector elements', function* () {
+  it('adds the hidden class to hideSelector elements', function* () {
     const exampleDoc = createExampleDocument(doc);
     xhrMock.expects('fetchDocument')
         .returns(Promise.resolve(exampleDoc))
@@ -178,7 +178,7 @@ env => {
         .to.be.true;
   });
 
-  it.skip('removes amp-analytics tags from child documents', function* () {
+  it('removes amp-analytics tags from child documents', function* () {
     const exampleDoc = createExampleDocument(doc);
     exampleDoc.body.innerHTML +=
         '<amp-analytics id="analytics1"></amp-analytics>';
