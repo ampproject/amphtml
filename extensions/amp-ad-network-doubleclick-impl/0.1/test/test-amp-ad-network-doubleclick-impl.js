@@ -88,6 +88,9 @@ const realWinConfigAmpAd = {
  * Creates an iframe promise, and instantiates element and impl, adding the
  * former to the document of the iframe.
  * @param {{width, height, type}} config
+ * @param {!Element} element
+ * @param {!AmpAdNetworkDoubleclickImpl} impl
+ * @param {!Object} env
  * @return The iframe promise.
  */
 function createImplTag(config, element, impl, env) {

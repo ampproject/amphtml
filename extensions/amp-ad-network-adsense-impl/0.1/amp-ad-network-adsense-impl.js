@@ -156,7 +156,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /**
    * @return {boolean}
    * @private
-   * @visibleForTesting
    */
   isResponsive_() {
     return this.autoFormat_ == 'rspv';
