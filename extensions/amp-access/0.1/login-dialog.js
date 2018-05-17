@@ -20,7 +20,7 @@ import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/dom';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';
 
 /** @const */
@@ -266,7 +266,7 @@ export class WebLoginDialog {
    * @private
    */
   setupDialog_(returnUrl) {
-    const returnOrigin = parseUrl(returnUrl).origin;
+    const returnOrigin = parseUrlDeprecated(returnUrl).origin;
 
     this.heartbeatInterval_ = this.win.setInterval(() => {
       if (this.dialog_.closed) {

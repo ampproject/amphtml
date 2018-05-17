@@ -59,7 +59,7 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 
@@ -147,7 +147,7 @@ class AmpAddThis extends AMP.BaseElement {
       shouldRegisterView = false;
 
       const viewer = Services.viewerForDoc(ampDoc);
-      const loc = parseUrl(this.canonicalUrl_);
+      const loc = parseUrlDeprecated(this.canonicalUrl_);
 
       viewer.whenFirstVisible()
           .then(() => viewer.getReferrerUrl())

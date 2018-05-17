@@ -38,7 +38,7 @@ import {
 import {
   getSourceOrigin,
   isProxyOrigin,
-  parseUrl,
+  parseUrlDeprecated,
 } from '../url';
 import {isIframed} from '../dom';
 import {parseJson, tryParseJson} from '../json';
@@ -212,7 +212,7 @@ export class Cid {
   getExternalCid_(getCidStruct, persistenceConsent) {
     const {scope} = getCidStruct;
     /** @const {!Location} */
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     if (!isProxyOrigin(url)) {
       const apiKey = this.isScopeOptedIn_(scope);
       if (apiKey) {

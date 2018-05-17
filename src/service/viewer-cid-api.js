@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {dict} from '../utils/object';
-import {parseUrl} from '../url';
+import {parseUrlDeprecated} from '../url';
 
 /**
  * Exposes CID API if provided by the Viewer.
@@ -37,7 +37,9 @@ export class ViewerCidApi {
     const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
 
     /** @private {?string} */
-    this.canonicalOrigin_ = canonicalUrl ? parseUrl(canonicalUrl).origin : null;
+    this.canonicalOrigin_ = canonicalUrl
+      ? parseUrlDeprecated(canonicalUrl).origin
+      : null;
   }
 
   /**

@@ -19,7 +19,7 @@ import {dev} from './log';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
-import {parseUrl} from './url';
+import {parseUrlDeprecated} from './url';
 import {tryParseJson} from './json';
 
 /**
@@ -82,7 +82,7 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
  */
 function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
-  const {origin} = parseUrl(iframe.src);
+  const {origin} = parseUrlDeprecated(iframe.src);
   const sentinel = getSentinel_(iframe, opt_is3P);
   const listenSentinel = getListenForSentinel(parentWin, sentinel, true);
 

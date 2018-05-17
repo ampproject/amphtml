@@ -28,7 +28,7 @@ import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
 import {isArray} from '../../../../src/types';
-import {isProtocolValid, parseUrl} from '../../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../../src/url';
 import {renderAsElement} from '../simple-template';
 import {throttle} from '../../../../src/utils/rate-limit';
 
@@ -498,7 +498,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
             this.win.document.head.querySelector('title'),
             'Please set <title> or structured data (JSON-LD).').textContent,
 
-      domainName: parseUrl(
+      domainName: parseUrlDeprecated(
           Services.documentInfoForDoc(this.getAmpDoc()).canonicalUrl).hostname,
     };
 

@@ -15,7 +15,7 @@
  */
 
 import {isArray} from '../../../src/types';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /**
@@ -80,7 +80,7 @@ function assertSelectors(selectors) {
 }
 
 function assertReco(reco, origin, sourceOrigin) {
-  const url = parseUrl(reco.ampUrl);
+  const url = parseUrlDeprecated(reco.ampUrl);
   user().assertString(reco.ampUrl, 'ampUrl must be a string');
   user().assert(url.origin === origin || url.origin === sourceOrigin,
       'pages must be from the same origin as the current document');

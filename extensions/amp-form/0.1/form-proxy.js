@@ -15,7 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {startsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
@@ -207,7 +207,7 @@ function setupLegacyProxy(form, proxy) {
             } else if (desc.type == LegacyPropDataType.URL) {
               // URLs, e.g. in `action` attribute are resolved against the
               // document's base.
-              value = parseUrl(/** @type {string} */ (value || '')).href;
+              value = parseUrlDeprecated(/** @type {string} */ (value || '')).href;
             }
             return value;
           },

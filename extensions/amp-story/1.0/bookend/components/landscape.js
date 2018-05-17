@@ -18,7 +18,7 @@ import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrl} from '../../../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
 
 /**
@@ -76,7 +76,7 @@ export class LandscapeComponent {
       title: landscapeJson['title'],
       category: landscapeJson['category'],
       url: landscapeJson['url'],
-      domainName: parseUrl(landscapeJson['url']).hostname,
+      domainName: parseUrlDeprecated(landscapeJson['url']).hostname,
       image: landscapeJson['image'],
     };
   }
