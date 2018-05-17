@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+
 import {ArticleComponent, ArticleComponentDef} from './components/article';
+import {CtaLinkComponent, CtaLinkDef} from './components/cta-link';
 import {HeadingComponent, HeadingComponentDef} from './components/heading';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
 import {htmlFor} from '../../../../src/static-template';
@@ -35,7 +37,8 @@ export let BookendDataDef;
  * @typedef {
  *   (!ArticleComponentDef|
  *   !HeadingComponentDef|
- *   !PortraitComponentDef)
+ *   !PortraitComponentDef|
+ *   !CtaLinkDef)
  * }
  */
 export let BookendComponentDef;
@@ -43,9 +46,15 @@ export let BookendComponentDef;
 const articleComponentBuilder = new ArticleComponent();
 const headingComponentBuilder = new HeadingComponent();
 const portraitComponentBuilder = new PortraitComponent();
+const ctaLinkComponentBuilder = new CtaLinkComponent();
 
 /**
- * @typedef {(!ArticleComponent|!HeadingComponent|!PortraitComponent)}
+ * @typedef {
+ *   (!ArticleComponent|
+ *    !HeadingComponent|
+ *    !PortraitComponent|
+ *    !CtaLinkComponent)
+ * }
  */
 export let BookendComponentClass;
 
@@ -62,6 +71,8 @@ function componentBuilderInstanceFor(componentType) {
       return headingComponentBuilder;
     case 'portrait':
       return portraitComponentBuilder;
+    case 'cta-link':
+      return ctaLinkComponentBuilder;
     default:
       return null;
   }
@@ -119,7 +130,6 @@ export class BookendComponent {
     const html = htmlFor(doc);
     const containerTemplate =
       html`<div class="i-amphtml-story-bookend-component-set"></div>`;
-
     element.appendChild(containerTemplate);
     return element.lastElementChild;
   }

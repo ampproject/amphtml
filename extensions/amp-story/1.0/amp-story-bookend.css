@@ -128,14 +128,16 @@
 
 @media (min-width: 640px) {
   .i-amphtml-story-bookend-article,
-  .i-amphtml-story-bookend-portrait {
+  .i-amphtml-story-bookend-portrait,
+  .i-amphtml-story-bookend-cta-link-wrapper {
     max-width: 50% !important;
   }
 }
 
 @media (min-width: 960px) {
   .i-amphtml-story-bookend-article,
-  .i-amphtml-story-bookend-portrait {
+  .i-amphtml-story-bookend-portrait,
+  .i-amphtml-story-bookend-cta-link-wrapper {
     max-width: 33% !important;
   }
 }
@@ -266,6 +268,43 @@
   margin-right: 32px !important;
 }
 
+.i-amphtml-story-bookend-cta-link-wrapper {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  box-sizing: border-box !important;
+  color: inherit !important;
+  overflow: hidden !important;
+  flex: 1 0 320px !important;
+  justify-content: space-between !important;
+  margin: 24px 0 !important;
+  padding: 0 32px !important;
+}
+
+.i-amphtml-story-bookend-cta-link {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 100px !important;
+  overflow: hidden !important;
+  text-decoration: none !important;
+  width: calc(50% - 6px) !important;
+  cursor: pointer !important;
+  margin-bottom: 12px;
+}
+
+.i-amphtml-story-bookend-cta-link-text {
+  color: #FFFFFF !important;
+  font-family: 'Roboto', sans-serif !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  font-size: 13px !important;
+  font-weight: bold !important;
+  line-height: 40px !important;
+  padding: 0 24px !important;
+  height: 40px !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
 .i-amphtml-story-bookend-fullbleed::before {
   content: " " !important;
   display: block !important;
@@ -329,14 +368,16 @@
 
 @media (min-width: 952px) {
   [desktop] .i-amphtml-story-bookend-article,
-  [desktop] .i-amphtml-story-bookend-portrait {
+  [desktop] .i-amphtml-story-bookend-portrait,
+  [desktop] .i-amphtml-story-bookend-cta-link-wrapper {
     max-width: 50% !important;
   }
 }
 
 @media (min-width: 1272px) {
   [desktop] .i-amphtml-story-bookend-article,
-  [desktop] .i-amphtml-story-bookend-portrait {
-    max-width: 33% !important;
+  [desktop] .i-amphtml-story-bookend-portrait,
+  [desktop] .i-amphtml-story-bookend-cta-link-wrapper {
+  max-width: 33% !important;
   }
 }

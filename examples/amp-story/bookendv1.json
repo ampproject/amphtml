@@ -61,6 +61,23 @@
       "title": "This is an example article",
       "url": "http://example.com/article.html",
       "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "cta-link",
+      "links": [
+        {
+          "text": "buttonA",
+          "url": "google.com"
+        },
+        {
+          "text": "buttonB",
+          "url": "google.com"
+        },
+        {
+          "text": "longtext longtext longtext longtext longtext longtext longt",
+          "url": "google.com"
+        }
+      ]
     }
   ]
 }
