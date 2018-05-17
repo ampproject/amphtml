@@ -15,7 +15,11 @@
  */
 
 
-import {AdTracker, getExistingAds} from '../ad-tracker';
+import {
+  AdTracker,
+  getAdConstraintsFromConfigObj,
+  getExistingAds,
+} from '../ad-tracker';
 import {Services} from '../../../../src/services';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
@@ -251,5 +255,220 @@ describes.realWin('getExistingAds', {amp: true}, env => {
     expect(ads[0]).to.equal(ad1);
     expect(ads[1]).to.equal(ad2);
     expect(ads[2]).to.equal(ad3);
+  });
+});
+
+
+describes.realWin('getAdConstraintsFromConfigObj', {amp: true}, env => {
+  let ampdoc;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+  });
+
+  it('should get from pixel values', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '170px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.deep.equal({
+      initialMinSpacing: 150,
+      subsequentMinSpacing: [
+        {
+          adCount: 2,
+          spacing: 160,
+        },
+        {
+          adCount: 4,
+          spacing: 170,
+        },
+      ],
+      maxAdCount: 8,
+    });
+  });
+
+  it('should get from viewport values', () => {
+    const viewportMock = sandbox.mock(Services.viewportForDoc(ampdoc));
+    viewportMock.expects('getHeight').returns(500).atLeast(1);
+
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '0.4vp',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '0.5vp',
+          },
+          {
+            adCount: 4,
+            spacing: '1.5vp',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.deep.equal({
+      initialMinSpacing: 200,
+      subsequentMinSpacing: [
+        {
+          adCount: 2,
+          spacing: 250,
+        },
+        {
+          adCount: 4,
+          spacing: 750,
+        },
+      ],
+      maxAdCount: 8,
+    });
+  });
+
+  it('should handle no subsequentMinSpacing', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.deep.equal({
+      initialMinSpacing: 150,
+      subsequentMinSpacing: [],
+      maxAdCount: 8,
+    });
+  });
+
+  it('should return null when initialMinSpacing unparsable', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150em',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '170px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when initialMinSpacing negative', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '-1px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '170px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when subsequentMinSpacing unparsable', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '170em',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when subsequentMinSpacing negative', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '-1px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when no adCount', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            spacing: '170px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when no maxAdCount', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+        ],
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
   });
 });
