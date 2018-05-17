@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-.amp-next-page-division {
-  border-bottom: 1px solid rgba(0,0,0,0.12);
+.amp-next-page-default-separator {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.amp-next-page-links {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.amp-next-page-link {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .amp-next-page-image {
@@ -23,7 +31,6 @@
 
 .amp-next-page-text {
   color: #3c4043;
-  font-family: sans-serif;
   font-size: 17px;
 }
 
@@ -48,28 +55,25 @@
 }
 
 .i-amphtml-reco-holder-article {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  height: 92px;
-  width: 100%;
+  display: block;
+  height: 72px;
+  padding: 10px 0;
+  text-decoration: none;
 }
 
 .i-amphtml-next-article-image {
   width: 72px;
   height: 72px;
   float: left;
-  margin-left: 10px;
+  margin: 0 10px;
   background-size: cover;
   background-position: center;
 }
 
 .i-amphtml-next-article-title {
   position: relative;
-  left: 10px;
   top: 5px;
   height: 60px;
-  text-overflow: ellipsis;
   overflow: hidden;
   margin-right: 30px;
-  text-align: left;
 }
