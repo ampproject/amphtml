@@ -1589,6 +1589,16 @@ class TagStack {
   }
 
   /**
+   * @return {boolean} true if this within <style amp-custom>. Else false.
+   */
+  isStyleAmpCustomChild() {
+    return (this.parentStackEntry_().tagName === 'STYLE') &&
+        (this.parentStackEntry_().tagSpec !== null) &&
+        (this.parentStackEntry_().tagSpec.getSpec().specName ===
+         'style amp-custom');
+  }
+
+  /**
    * Returns true if the current tag has ancestor with the given tag name or
    * specName.
    * @param {string} ancestor
@@ -2284,6 +2294,20 @@ class Context {
     this.tagspecsValidated_ = [];
 
     /**
+     * Size of <style amp-custom>.
+     * @type {number}
+     * @private
+     */
+    this.styleAmpCustomByteSize_ = 0;
+
+    /**
+     * Size of all inline styles (style attribute) combined.
+     * @type {number}
+     * @private
+     */
+    this.inlineStyleByteSize_ = 0;
+
+    /**
      * Set of conditions that we've satisfied.
      * @type {!Array<boolean>}
      * @private
@@ -2499,6 +2523,38 @@ class Context {
    */
   getTagspecsValidated() {
     return this.tagspecsValidated_;
+  }
+
+  /**
+   * Records how much of the document is used towards <style amp-custom>.
+   * @param {number} byteSize
+   */
+  addStyleAmpCustomByteSize(byteSize) {
+    this.styleAmpCustomByteSize_ += byteSize;
+  }
+
+  /**
+   * Records how much of the document is used twoards inline style.
+   * @param {number} byteSize
+   */
+  addInlineStyleByteSize(byteSize) {
+    this.inlineStyleByteSize_ += byteSize;
+  }
+
+  /**
+   * Returns the size of <style amp-custom>.
+   * @return {number}
+   */
+  getStyleAmpCustomByteSize() {
+    return this.styleAmpCustomByteSize_;
+  }
+
+  /**
+   * Returns the size of inline styles.
+   * @return {number}
+   */
+  getInlineStyleByteSize() {
+    return this.inlineStyleByteSize_;
   }
 
   /**
@@ -4570,6 +4626,17 @@ class ParsedValidatorRules {
         return tagSpec.htmlFormat.length === 0 ||
             tagSpec.htmlFormat.indexOf(castedHtmlFormat) !== -1;
       };
+
+      /**
+       * @type {function(amp.validator.CssLengthSpec) : boolean}
+       * @private
+       */
+      this.isCssLengthSpecCorrectHtmlFormat_ = function(cssLengthSpec) {
+        const castedHtmlFormat =
+            /** @type {amp.validator.HtmlFormat.Code<string>} */ (
+                /** @type {*} */ (htmlFormat));
+        return cssLengthSpec.htmlFormat == castedHtmlFormat;
+      };
     }
 
     /**
@@ -4977,6 +5044,40 @@ class ParsedValidatorRules {
   }
 
   /**
+   * Emits errors for css size limitations across entire document.
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} validationResult
+   */
+  maybeEmitCssLengthSpecErrors(context, validationResult) {
+    // Only emit an error if there have been inline styles used. Otherwise
+    // if there was to be an error it would have been caught by
+    // CdataMatcher::Match().
+    if (context.getInlineStyleByteSize() == 0) return;
+
+    const bytesUsed =
+        context.getInlineStyleByteSize() + context.getStyleAmpCustomByteSize();
+
+    for (const cssLengthSpec of context.getRules().getCssLengthSpec()) {
+      if (!amp.validator.LIGHT &&
+          !this.isCssLengthSpecCorrectHtmlFormat_(cssLengthSpec)) {
+        continue;
+      }
+      if (cssLengthSpec.maxBytes && bytesUsed > cssLengthSpec.maxBytes) {
+        if (amp.validator.LIGHT) {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        } else {
+          context.addError(
+              amp.validator.ValidationError.Code
+                  .STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
+              context.getLineCol(), /* params */
+              [bytesUsed.toString(), cssLengthSpec.maxBytes.toString()],
+              /* specUrl */ cssLengthSpec.specUrl, validationResult);
+        }
+      }
+    }
+  }
+
+  /**
    * Emits any validation errors which require a global view
    * (mandatory tags, tags required by other tags, mandatory alternatives).
    * @param {!Context} context
@@ -4987,6 +5088,7 @@ class ParsedValidatorRules {
     this.maybeEmitAlsoRequiresTagValidationErrors(context, validationResult);
     this.maybeEmitMandatoryAlternativesSatisfiedErrors(
         context, validationResult);
+    this.maybeEmitCssLengthSpecErrors(context, validationResult);
   }
 
   /**
@@ -5028,6 +5130,13 @@ class ParsedValidatorRules {
    */
   getDescendantTagLists() {
     return this.rules_.descendantTagList;
+  }
+
+  /**
+   * @return {!Array<amp.validator.CssLengthSpec>}
+   */
+  getCssLengthSpec() {
+    return this.rules_.cssLengthSpec;
   }
 
   /**
@@ -5260,6 +5369,12 @@ amp.validator.ValidationHandler =
       this.emitMissingExtensionErrors();
     }
 
+    const attrsByKey = encounteredTag.attrsByKey();
+    const styleAttr = attrsByKey['style'];
+    if (styleAttr !== undefined) {
+      this.context_.addInlineStyleByteSize(byteLength(styleAttr));
+    }
+
     /** @type {ValidateTagResult} */
     let resultForReferencePoint = {
       bestMatchTagSpec: null,
@@ -5320,6 +5435,10 @@ amp.validator.ValidationHandler =
    * @override
    */
   cdata(text) {
+    // Record <style amp-custom> byte size
+    if (this.context_.getTagStack().isStyleAmpCustomChild()) {
+      this.context_.addStyleAmpCustomByteSize(byteLength(text));
+    }
     const matcher = this.context_.getTagStack().cdataMatcher();
     if (matcher !== null)
       matcher.match(text, this.context_, this.validationResult_);
@@ -5673,6 +5792,9 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The text (CDATA) inside tag 'style amp-custom' matches
   // 'CSS !important', which is disallowed."
   if (error.code === amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG ||
+      error.code ===
+          amp.validator.ValidationError.Code
+              .STYLESHEET_AND_INLINE_STYLE_TOO_LONG ||
       (error.code ===
            amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST &&
        isAuthorStylesheet(error.params[0]))) {
@@ -5834,13 +5956,6 @@ amp.validator.categorizeError = function(error) {
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG) {
     return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
   }
-  // E.g.: "The attribute 'type' in tag 'script type=application/ld+json'
-  // is set to the invalid value 'text/javascript'."
-  if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE &&
-      goog.string./*OK*/ startsWith(error.params[1], 'script') &&
-      error.params[0] === 'type') {
-    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
-  }
   // E.g. "The attribute 'srcset' may not appear in tag 'amp-audio >
   // source'."
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_ATTR) {
@@ -5891,6 +6006,18 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The parent tag of tag 'source' is 'picture', but it can
   // only be 'amp-audio'."
   if (error.code === amp.validator.ValidationError.Code.WRONG_PARENT_TAG) {
+    // E.g. "The parent tag of tag 'style amp-custom' is '%2', but it can "
+    // only be '%3'."
+    if (error.params[0] === 'style amp-custom' ||
+        error.params[0] === 'head > style[amp-boilerplate] - old variant') {
+      return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+    }
+    // E.g. "The parent tag of tag 'amphtml engine v0.js script' is '%2', but
+    // it can only be '%3'."
+    if (error.params[0] === 'amphtml engine v0.js script' ||
+        goog.string./*OK*/ endsWith(error.params[0], ' extension .js script')) {
+      return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+    }
     if (goog.string./*OK*/ startsWith(error.params[0], 'amp-') ||
         goog.string./*OK*/ startsWith(error.params[1], 'amp-') ||
         goog.string./*OK*/ startsWith(error.params[2], 'amp-')) {

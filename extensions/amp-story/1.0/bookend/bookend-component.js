@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import {ArticleComponent, ArticleTitleComponent, BookendArticleComponentDef, BookendArticleTitleComponentDef} from './components/article';
+import {ArticleComponent, ArticleComponentDef} from './components/article';
+import {HeadingComponent, HeadingComponentDef} from './components/heading';
+import {PortraitComponent, PortraitComponentDef} from './components/portrait';
+import {htmlFor} from '../../../../src/static-template';
+
+/** @type {string} */
+export const TAG = 'amp-story-bookend';
 
 /**
  * @typedef {{
@@ -26,15 +32,20 @@ import {ArticleComponent, ArticleTitleComponent, BookendArticleComponentDef, Boo
 export let BookendDataDef;
 
 /**
- * @typedef {(!BookendArticleComponentDef|!BookendArticleTitleComponentDef)}
+ * @typedef {
+ *   (!ArticleComponentDef|
+ *   !HeadingComponentDef|
+ *   !PortraitComponentDef)
+ * }
  */
 export let BookendComponentDef;
 
 const articleComponentBuilder = new ArticleComponent();
-const articleTitleComponentBuilder = new ArticleTitleComponent();
+const headingComponentBuilder = new HeadingComponent();
+const portraitComponentBuilder = new PortraitComponent();
 
 /**
- * @typedef {(!ArticleComponent|!ArticleTitleComponent)}
+ * @typedef {(!ArticleComponent|!HeadingComponent|!PortraitComponent)}
  */
 export let BookendComponentClass;
 
@@ -47,8 +58,10 @@ function componentBuilderInstanceFor(componentType) {
   switch (componentType) {
     case 'small':
       return articleComponentBuilder;
-    case 'article-set-title':
-      return articleTitleComponentBuilder;
+    case 'heading':
+      return headingComponentBuilder;
+    case 'portrait':
+      return portraitComponentBuilder;
     default:
       return null;
   }
@@ -94,5 +107,20 @@ export class BookendComponent {
       }
     });
     return fragment;
+  }
+
+  /**
+   * Builds container for components.
+   * @param {!Element} element Bookend container
+   * @param {!Document} doc
+   * @return {?Element}
+   */
+  static buildContainer(element, doc) {
+    const html = htmlFor(doc);
+    const containerTemplate =
+      html`<div class="i-amphtml-story-bookend-component-set"></div>`;
+
+    element.appendChild(containerTemplate);
+    return element.lastElementChild;
   }
 }
