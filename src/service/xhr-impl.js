@@ -22,7 +22,7 @@ import {
   getCorsUrl,
   getSourceOrigin,
   getWinOrigin,
-  parseUrl,
+  parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
 import {getMode} from '../mode';
@@ -385,7 +385,7 @@ export class Xhr {
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
     const currentOrigin = getWinOrigin(this.win);
-    const targetOrigin = parseUrl(input).origin;
+    const targetOrigin = parseUrlDeprecated(input).origin;
     if (currentOrigin == targetOrigin) {
       init['headers'] = init['headers'] || {};
       init['headers']['AMP-Same-Origin'] = 'true';

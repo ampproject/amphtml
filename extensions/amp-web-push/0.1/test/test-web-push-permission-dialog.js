@@ -18,7 +18,7 @@ import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
 import {WebPushService} from '../web-push-service';
 import {WindowMessenger} from '../window-messenger';
-import {parseUrl} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url';
 
 const FAKE_IFRAME_URL =
   '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
@@ -82,7 +82,7 @@ describes.realWin('web-push-permission-dialog', {
   it('should detect opened from redirect', () => {
     return setupPermissionDialogFrame().then(() => {
       sandbox./*OK*/stub(iframeWindow, 'opener').callsFake(false);
-      iframeWindow.fakeLocation = parseUrl('https://test.com/?return=' +
+      iframeWindow.fakeLocation = parseUrlDeprecated('https://test.com/?return=' +
         encodeURIComponent('https://another-site.com'));
       sandbox./*OK*/stub(
           iframeWindow._ampWebPushPermissionDialog,
@@ -125,7 +125,7 @@ describes.realWin('web-push-permission-dialog', {
           'isCurrentDialogPopup').callsFake(
           () => false
       );
-      iframeWindow.fakeLocation = parseUrl('https://test.com/?return=' +
+      iframeWindow.fakeLocation = parseUrlDeprecated('https://test.com/?return=' +
         encodeURIComponent('https://another-site.com'));
       const permissionStub = sandbox./*OK*/stub(
           iframeWindow.Notification,
@@ -146,7 +146,7 @@ describes.realWin('web-push-permission-dialog', {
           'isCurrentDialogPopup').callsFake(
           () => false
       );
-      iframeWindow.fakeLocation = parseUrl('https://test.com/?return=' +
+      iframeWindow.fakeLocation = parseUrlDeprecated('https://test.com/?return=' +
         encodeURIComponent('https://another-site.com'));
       sandbox./*OK*/stub(
           iframeWindow._ampWebPushPermissionDialog,

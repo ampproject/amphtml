@@ -18,7 +18,7 @@ import {CONFIG_TAG, SERVICE_TAG, TAG} from './vars';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
 /** @enum {string} */
 export const WebPushConfigAttributes = {
@@ -104,7 +104,8 @@ export class WebPushConfig extends AMP.BaseElement {
       );
     }
 
-    if (parseUrl(config['service-worker-url']).protocol !== 'https:') {
+    if (parseUrlDeprecated(config['service-worker-url']).protocol
+      !== 'https:') {
       throw user().createError(
           `<${CONFIG_TAG}> must have a valid ` +
           'service-worker-url attribute. It should begin with the ' +
@@ -114,10 +115,10 @@ export class WebPushConfig extends AMP.BaseElement {
     }
 
     if (
-      parseUrl(config['service-worker-url']).origin !==
-        parseUrl(config['permission-dialog-url']).origin ||
-      parseUrl(config['permission-dialog-url']).origin !==
-        parseUrl(config['helper-iframe-url']).origin
+      parseUrlDeprecated(config['service-worker-url']).origin !==
+        parseUrlDeprecated(config['permission-dialog-url']).origin ||
+      parseUrlDeprecated(config['permission-dialog-url']).origin !==
+        parseUrlDeprecated(config['helper-iframe-url']).origin
     ) {
       throw user().createError(
           `<${CONFIG_TAG}> URL attributes ` +
@@ -243,7 +244,7 @@ export class WebPushConfig extends AMP.BaseElement {
   */
   isValidHelperOrPermissionDialogUrl_(url) {
     try {
-      const parsedUrl = parseUrl(url);
+      const parsedUrl = parseUrlDeprecated(url);
       /*
         The helper-iframe-url must be to a specific lightweight page on the
         user's site for handling AMP postMessage calls without loading push

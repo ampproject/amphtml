@@ -23,7 +23,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {toggle} from '../../../src/style';
 
 const AUTHORIZATION_TIMEOUT = 3000;
@@ -69,7 +69,7 @@ export class AccessIframeAdapter {
         '"defaultResponse" must be specified');
 
     /** @private @const {string} */
-    this.targetOrigin_ = parseUrl(this.iframeSrc_).origin;
+    this.targetOrigin_ = parseUrlDeprecated(this.iframeSrc_).origin;
 
     /** @private {?function()} */
     this.connectedResolver_ = null;

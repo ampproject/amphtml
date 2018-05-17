@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev, user} from '../../../src/log';
-import {isProtocolValid, parseUrl} from '../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 
 const TAG = 'amp-story';
@@ -57,7 +57,7 @@ function buildArticleFromJson_(articleJson) {
   const article = {
     title: dev().assert(articleJson['title']),
     url: dev().assert(articleJson['url']),
-    domainName: parseUrl(dev().assert(articleJson['url'])).hostname,
+    domainName: parseUrlDeprecated(dev().assert(articleJson['url'])).hostname,
   };
 
   if (articleJson['image']) {

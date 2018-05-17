@@ -20,7 +20,7 @@ import {
   getSourceOrigin,
   isProxyOrigin,
   isSecureUrl,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
 import {closestByTag, removeElement} from '../../../src/dom';
@@ -65,10 +65,10 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
-        const {origin} = parseUrl(iframeSrc);
+        const {origin} = parseUrlDeprecated(iframeSrc);
         const docInfo = Services.documentInfoForDoc(this.element);
-        const sourceUrl = parseUrl(docInfo.sourceUrl);
-        const canonicalUrl = parseUrl(docInfo.canonicalUrl);
+        const sourceUrl = parseUrlDeprecated(docInfo.sourceUrl);
+        const canonicalUrl = parseUrlDeprecated(docInfo.canonicalUrl);
         user().assert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
@@ -80,7 +80,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
           return this.insertIframe_();
         });
       }
-    } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
+    } else if (parseUrlDeprecated(win.location.href).origin ==
+      parseUrlDeprecated(src).origin) {
       this.whenLoadedAndVisiblePromise_().then(() => {
         return install(this.win, src);
       });
@@ -127,7 +128,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     const ampdoc = this.getAmpDoc();
     const {win} = this;
-    const winUrl = parseUrl(win.location.href);
+    const winUrl = parseUrlDeprecated(win.location.href);
 
     // Read the url-rewrite config.
     const urlMatch = this.element.getAttribute(
@@ -151,9 +152,10 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       throw user().createError(
           'Invalid "data-no-service-worker-fallback-url-match" expression', e);
     }
-    user().assert(getSourceOrigin(winUrl) == parseUrl(shellUrl).origin,
-        'Shell source origin "%s" must be the same as source origin "%s"',
-        shellUrl, winUrl.href);
+    user().assert(getSourceOrigin(winUrl) ==
+      parseUrlDeprecated(shellUrl).origin,
+    'Shell source origin "%s" must be the same as source origin "%s"',
+    shellUrl, winUrl.href);
 
     // Install URL rewriter.
     this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl);
@@ -227,7 +229,7 @@ class UrlRewriter_ {
     this.shellUrl_ = shellUrl;
 
     /** @const @private {!Location} */
-    this.shellLoc_ = parseUrl(shellUrl);
+    this.shellLoc_ = parseUrlDeprecated(shellUrl);
 
     listen(ampdoc.getRootNode(), 'click', this.handle_.bind(this));
   }
@@ -247,7 +249,7 @@ class UrlRewriter_ {
     }
 
     // Check the URL matches the mask and doesn't match shell itself.
-    const tgtLoc = parseUrl(target.href);
+    const tgtLoc = parseUrlDeprecated(target.href);
     if (tgtLoc.origin != this.shellLoc_.origin ||
             tgtLoc.pathname == this.shellLoc_.pathname ||
             !this.urlMatchExpr_.test(tgtLoc.href)) {

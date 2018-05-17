@@ -26,7 +26,7 @@ import {
   getSourceOrigin,
   isProxyOrigin,
   parseQueryString,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../url';
 import {isIframed} from '../dom';
@@ -282,7 +282,7 @@ export class Viewer {
     this.isCctEmbedded_ = !this.isIframed_ &&
         parseQueryString(this.win.location.search)['amp_gsa'] === '1';
 
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     /**
      * Whether the AMP document was served by a proxy.
      * @private @const {boolean}
@@ -795,7 +795,7 @@ export class Viewer {
    * @private
    */
   isTrustedReferrer_(referrer) {
-    const url = parseUrl(referrer);
+    const url = parseUrlDeprecated(referrer);
     if (url.protocol != 'https:') {
       return false;
     }
@@ -864,7 +864,7 @@ export class Viewer {
       return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
     }
     /** @const {!Location} */
-    const url = parseUrl(urlString);
+    const url = parseUrlDeprecated(urlString);
     if (url.protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
@@ -1131,8 +1131,8 @@ export class Viewer {
 
     try {
       // The origin and source origin must match.
-      const url = parseUrl(this.win.location.href);
-      const replaceUrl = parseUrl(
+      const url = parseUrlDeprecated(this.win.location.href);
+      const replaceUrl = parseUrlDeprecated(
           removeFragment(newUrl) + this.win.location.hash);
       if (url.origin == replaceUrl.origin &&
           getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {

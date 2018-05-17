@@ -219,7 +219,7 @@
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
-        origin: parseUrl(window.location.href).origin,
+        origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
         cap: 'foo,a2a,swipe,handshakepoll'
       };
@@ -229,7 +229,7 @@
       if (window.location.hash && window.location.hash.length > 1) {
         inputUrl += '&' + window.location.hash.substring(1);
       }
-      var parsedUrl = parseUrl(inputUrl);
+      var parsedUrl = parseUrlDeprecated(inputUrl);
       var url = parsedUrl.href;
       this.frameOrigin_ = parsedUrl.origin;
       log('AMP URL = ', url);
@@ -442,7 +442,7 @@
     }
 
 
-    function parseUrl(urlString) {
+    function parseUrlDeprecated(urlString) {
       var a = document.createElement('a');
       a.href = urlString;
       return {

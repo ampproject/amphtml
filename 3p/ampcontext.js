@@ -20,7 +20,7 @@ import {dev} from '../src/log';
 import {dict} from '../src/utils/object';
 import {isObject} from '../src/types';
 import {nextTick} from './3p';
-import {parseUrl} from '../src/url';
+import {parseUrlDeprecated} from '../src/url';
 import {tryParseJson} from '../src/json';
 
 export class AbstractAmpContext {
@@ -294,7 +294,7 @@ export class AbstractAmpContext {
     this.initialConsentState = context.initialConsentState;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
-    this.location = parseUrl(context.location.href);
+    this.location = parseUrlDeprecated(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
     this.referrer = context.referrer;

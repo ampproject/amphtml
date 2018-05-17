@@ -21,7 +21,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {
   isSecureUrl,
-  parseUrl,
+  parseUrlDeprecated,
 } from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 
@@ -119,7 +119,7 @@ export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
  * @visibleForTesting
  */
 export function getCalloutParam_(url) {
-  const parsedUrl = parseUrl(url);
+  const parsedUrl = parseUrlDeprecated(url);
   return (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
 }
 

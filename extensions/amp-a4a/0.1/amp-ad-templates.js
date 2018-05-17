@@ -21,7 +21,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';
 
 /** @private {!Object<string, string|boolean>} */
@@ -115,7 +115,7 @@ export class AmpAdTemplates {
    */
   getTemplateProxyUrl_(url) {
     const cdnUrlSuffix = urls.cdn.slice(8);
-    const loc = parseUrl(url);
+    const loc = parseUrlDeprecated(url);
     return loc.origin.indexOf(cdnUrlSuffix) > 0 ? url :
       'https://' + loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
       '.' + cdnUrlSuffix + '/ad/s/' + loc.hostname + loc.pathname;

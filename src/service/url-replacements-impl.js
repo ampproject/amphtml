@@ -30,7 +30,7 @@ import {
   addParamsToUrl,
   getSourceUrl,
   parseQueryString,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
@@ -186,7 +186,8 @@ export class GlobalVariableSource extends VariableSource {
             if (!referrer) {
               return null;
             }
-            const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
+            const referrerHostname = parseUrlDeprecated(getSourceUrl(referrer))
+                .hostname;
             const currentHostname =
                 WindowInterface.getHostname(this.ampdoc.win);
             return referrerHostname === currentHostname ? null : referrer;
@@ -208,13 +209,13 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the host of the URL for this AMP document.
     this.set('AMPDOC_HOST', () => {
-      const url = parseUrl(this.ampdoc.win.location.href);
+      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
       return url && url.host;
     });
 
     // Returns the hostname of the URL for this AMP document.
     this.set('AMPDOC_HOSTNAME', () => {
-      const url = parseUrl(this.ampdoc.win.location.href);
+      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
       return url && url.hostname;
     });
 
@@ -592,7 +593,7 @@ export class GlobalVariableSource extends VariableSource {
     return () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
       const value = docInfo[field];
-      return opt_urlProp ? parseUrl(value)[opt_urlProp] : value;
+      return opt_urlProp ? parseUrlDeprecated(value)[opt_urlProp] : value;
     };
   }
 
@@ -629,7 +630,7 @@ export class GlobalVariableSource extends VariableSource {
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
     user().assert(typeof param == 'string', 'param should be a string');
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
       ? params[param] : defaultValue;
@@ -902,8 +903,8 @@ export class UrlReplacements {
     */
   isAllowedOrigin_(url) {
     const docInfo = Services.documentInfoForDoc(this.ampdoc);
-    if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
-        url.origin == parseUrl(docInfo.sourceUrl).origin) {
+    if (url.origin == parseUrlDeprecated(docInfo.canonicalUrl).origin ||
+        url.origin == parseUrlDeprecated(docInfo.sourceUrl).origin) {
       return true;
     }
 
@@ -913,7 +914,7 @@ export class UrlReplacements {
     if (meta && meta.hasAttribute('content')) {
       const whitelist = meta.getAttribute('content').trim().split(/\s+/);
       for (let i = 0; i < whitelist.length; i++) {
-        if (url.origin == parseUrl(whitelist[i]).origin) {
+        if (url.origin == parseUrlDeprecated(whitelist[i]).origin) {
           return true;
         }
       }
@@ -949,7 +950,7 @@ export class UrlReplacements {
     // on subsequent replacements, so that each run gets a fresh value.
     let href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
-    const url = parseUrl(href);
+    const url = parseUrlDeprecated(href);
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
@@ -1143,8 +1144,10 @@ export class UrlReplacements {
    * @return {string}
    */
   ensureProtocolMatches_(url, replacement) {
-    const newProtocol = parseUrl(replacement, /* opt_nocache */ true).protocol;
-    const oldProtocol = parseUrl(url, /* opt_nocache */ true).protocol;
+    const newProtocol = parseUrlDeprecated(replacement, /* opt_nocache */ true)
+        .protocol;
+    const oldProtocol = parseUrlDeprecated(url, /* opt_nocache */ true)
+        .protocol;
     if (newProtocol != oldProtocol) {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;

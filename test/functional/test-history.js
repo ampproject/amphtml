@@ -25,7 +25,7 @@ import {
 import {Services} from '../../src/services';
 import {installTimerService} from '../../src/service/timer-impl';
 import {listenOncePromise} from '../../src/event-helper';
-import {parseUrl} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url';
 
 
 describes.fakeWin('History', {
@@ -198,7 +198,7 @@ describes.sandboxed('History install', {}, () => {
         body: {},
         querySelector: () => null,
       },
-      location: parseUrl('https://cdn.ampproject.org/c/s/www.example.com/path'),
+      location: parseUrlDeprecated('https://cdn.ampproject.org/c/s/www.example.com/path'),
       addEventListener: () => null,
     };
     ampdoc = new AmpDocSingle(win);
