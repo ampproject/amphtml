@@ -19,7 +19,7 @@ import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {isExperimentOn} from '../experiments';
-import {parseUrl} from '../url';
+import {parseUrlDeprecated} from '../url';
 import {urls} from '../config';
 
 /** @const */
@@ -37,7 +37,7 @@ export function installCacheServiceWorker(win) {
       return;
     }
     if (!getMode().localDev &&
-        win.location.hostname !== parseUrl(urls.cdn).hostname) {
+        win.location.hostname !== parseUrlDeprecated(urls.cdn).hostname) {
       return;
     }
     // The kill experiment is really just a configuration that allows us to
