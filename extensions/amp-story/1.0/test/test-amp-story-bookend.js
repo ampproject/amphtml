@@ -23,6 +23,7 @@ import {LandscapeComponent} from '../bookend/components/landscape';
 import {LocalizationService} from '../localization';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
+import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {
   amp: {
@@ -126,7 +127,7 @@ describes.realWin('amp-story-bookend', {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
-        {'provider': 'facebook', 'app-id': '254325784911610'},
+        {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
       ],
       'components': [
@@ -185,7 +186,7 @@ describes.realWin('amp-story-bookend', {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
-        {'provider': 'facebook', 'app-id': '254325784911610'},
+        {'provider': 'facebook', 'app_id': '254325784911610'},
         {'provider': 'whatsapp'},
       ],
       'components': [
@@ -239,13 +240,119 @@ describes.realWin('amp-story-bookend', {
     });
   });
 
+  it('should build the users share providers', () => {
+    const userJson = {
+      'bookend-version': 'v1.0',
+      'share-providers': [
+        'email',
+        {'provider': 'facebook', 'app_id': '254325784911610'},
+        {'provider': 'twitter', 'text': 'This is custom share text that I' +
+            ' would like for the Twitter platform'},
+        'whatsapp',
+      ],
+      'components': [
+        {
+          'type': 'heading',
+          'text': 'My Heading Title!',
+        },
+        {
+          'type': 'small',
+          'title': 'This is an example article',
+          'url': 'http://example.com/article.html',
+          'image': 'http://placehold.it/256x128',
+        },
+      ],
+    };
+
+    const expectedShareProviders = [
+      'email',
+      {'provider': 'facebook', 'app_id': '254325784911610'},
+      {'provider': 'twitter', 'text': 'This is custom share text that I ' +
+          'would like for the Twitter platform'},
+      'whatsapp',
+    ];
+
+    sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
+    sandbox.stub(bookend.requestService_, 'loadBookendConfig')
+        .resolves(userJson);
+
+    bookend.build();
+    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
+      config['share-providers'].forEach((currProvider, index) => {
+        return expect(currProvider).to.deep
+            .equal(expectedShareProviders[index]);
+      });
+    });
+  });
+
+  it('should ignore empty share providers', () => {
+    const userJson = {
+      'bookend-version': 'v1.0',
+      'share-providers': [],
+      'components': [
+        {
+          'type': 'heading',
+          'text': 'My Heading Title!',
+        },
+        {
+          'type': 'small',
+          'title': 'This is an example article',
+          'url': 'http://example.com/article.html',
+          'image': 'http://placehold.it/256x128',
+        },
+      ],
+    };
+
+    sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
+    sandbox.stub(bookend.requestService_, 'loadBookendConfig')
+        .resolves(userJson);
+
+    bookend.build();
+    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
+      return expect(config['share-providers']).to.deep.equal([]);
+    });
+  });
+
+  it('should warn when trying to use system sharing', () => {
+    const userJson = {
+      'bookend-version': 'v1.0',
+      'share-providers': ['system'],
+      'components': [
+        {
+          'type': 'heading',
+          'text': 'My Heading Title!',
+        },
+        {
+          'type': 'small',
+          'title': 'This is an example article',
+          'url': 'http://example.com/article.html',
+          'image': 'http://placehold.it/256x128',
+        },
+      ],
+    };
+
+    const userWarnStub = sandbox.stub(user(), 'warn');
+
+    sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
+    sandbox.stub(bookend.requestService_, 'loadBookendConfig')
+        .resolves(userJson);
+
+    bookend.build();
+    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+      expect(userWarnStub).to.be.calledOnce;
+      expect(userWarnStub.args[0][1]).to.be.equal('`system` is not a valid ' +
+      'share provider type. Native sharing is ' +
+      'enabled by default and cannot be turned off.');
+    });
+  });
+
   it('should reject invalid user json for article', () => {
     const articleComponent = new ArticleComponent();
     const userJson = {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
-        {'provider': 'facebook', 'app-id': '254325784911610'},
+        {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
       ],
       'components': [
@@ -274,7 +381,7 @@ describes.realWin('amp-story-bookend', {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
-        {'provider': 'facebook', 'app-id': '254325784911610'},
+        {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
       ],
       'components': [
@@ -308,7 +415,7 @@ describes.realWin('amp-story-bookend', {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
-        {'provider': 'facebook', 'app-id': '254325784911610'},
+        {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
       ],
       'components': [
