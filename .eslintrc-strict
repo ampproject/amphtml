@@ -1,6 +1,6 @@
 {
   "rules": {
-    "amphtml-internal/resolve-inside-promise-resolver": 2,
+    "amphtml-internal/prefer-deferred-promise": 2,
     "amphtml-internal/unused-private-field": 2,
     "amphtml-internal/vsync": 1,
     "jsdoc/check-param-names": 2,
