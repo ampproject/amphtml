@@ -18,6 +18,7 @@
 import {ArticleComponent, ArticleComponentDef} from './components/article';
 import {CtaLinkComponent, CtaLinkDef} from './components/cta-link';
 import {HeadingComponent, HeadingComponentDef} from './components/heading';
+import {LandscapeComponent, LandscapeComponentDef} from './components/landscape';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
 import {htmlFor} from '../../../../src/static-template';
 
@@ -36,24 +37,27 @@ export let BookendDataDef;
 /**
  * @typedef {
  *   (!ArticleComponentDef|
- *   !HeadingComponentDef|
- *   !PortraitComponentDef|
- *   !CtaLinkDef)
+ *    !CtaLinkDef|
+ *    !HeadingComponentDef|
+ *    !LandscapeComponentDef|
+ *    !PortraitComponentDef)
  * }
  */
 export let BookendComponentDef;
 
 const articleComponentBuilder = new ArticleComponent();
-const headingComponentBuilder = new HeadingComponent();
-const portraitComponentBuilder = new PortraitComponent();
 const ctaLinkComponentBuilder = new CtaLinkComponent();
+const headingComponentBuilder = new HeadingComponent();
+const landscapeComponentBuilder = new LandscapeComponent();
+const portraitComponentBuilder = new PortraitComponent();
 
 /**
  * @typedef {
  *   (!ArticleComponent|
+ *    !CtaLinkComponent|
  *    !HeadingComponent|
- *    !PortraitComponent|
- *    !CtaLinkComponent)
+ *    !LandscapeComponent|
+ *    !PortraitComponent)
  * }
  */
 export let BookendComponentClass;
@@ -67,12 +71,14 @@ function componentBuilderInstanceFor(componentType) {
   switch (componentType) {
     case 'small':
       return articleComponentBuilder;
-    case 'heading':
-      return headingComponentBuilder;
-    case 'portrait':
-      return portraitComponentBuilder;
     case 'cta-link':
       return ctaLinkComponentBuilder;
+    case 'heading':
+      return headingComponentBuilder;
+    case 'landscape':
+      return landscapeComponentBuilder;
+    case 'portrait':
+      return portraitComponentBuilder;
     default:
       return null;
   }
