@@ -32,6 +32,11 @@ const resolveURL = (url, path) => {
   return path + url;
 };
 
+const CAMERA_DISTANCE_FACTOR = 1;
+const CAMERA_FAR_FACTOR = 50;
+const CAMERA_NEAR_FACTOR = .1;
+
+
 export default class GltfViewer {
   constructor(options, handlers) {
     /** @private */
@@ -115,8 +120,12 @@ export default class GltfViewer {
   /**
    * Sets lighting scheme.
    *
+   * There are no formal reasoning behind lighting scheme.
+   * It just looks good.
+   *
    * Two directional lights, from above and below.
    * One ambient to avoid completely dark areas.
+   * All lights are white.
    *
    * @private */
   setupLight_() {
@@ -155,7 +164,7 @@ export default class GltfViewer {
    *
    * We are positioning camera on a ray coming from center (C)
    * of bounding box to its corner with max coordinates (M),
-   * and outside bbox to the length of CM.
+   * and outside bbox to the length of CM * CAMERA_DISTANCE_FACTOR.
    *
    * It may look weird for objects stretched along one axis,
    * also there are objects meant to be observed from inside,
@@ -172,9 +181,13 @@ export default class GltfViewer {
     bbox.getSize(size);
 
     const sizeLength = size.length();
-    this.camera_.far = sizeLength * 50;
-    this.camera_.near = sizeLength * .01;
-    this.camera_.position.lerpVectors(center, bbox.max, 2);
+    this.camera_.far = sizeLength * CAMERA_FAR_FACTOR;
+    this.camera_.near = sizeLength * CAMERA_NEAR_FACTOR;
+    this.camera_.position.lerpVectors(
+        center,
+        bbox.max,
+        1 + CAMERA_DISTANCE_FACTOR
+    );
     this.camera_.lookAt(center);
 
     this.camera_.updateProjectionMatrix();
