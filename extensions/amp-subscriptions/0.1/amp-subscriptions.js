@@ -459,7 +459,7 @@ export class SubscriptionService {
 
   /**
    * Evaluates platforms and select the one to be selected for login.
-   * @return {!Promise<!./subscriptions-platform.SubscriptionPlatform>}
+   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   scoreBasedLogin() {
     return this.platformStore_.getAllPlatforms().then(platforms => {

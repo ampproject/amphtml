@@ -59,10 +59,10 @@ export class PlatformStore {
     /** @private {?Entitlement} */
     this.grantStatusEntitlement_ = null;
 
-    /** @private {?Promise<?Entitlement>} */
+    /** @private {?Deferred<?Entitlement>} */
     this.grantStatusEntitlementPromise_ = null;
 
-    /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
+    /** @private {?Deferred<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
 
     /** @private {!Array<string>} */
@@ -153,13 +153,12 @@ export class PlatformStore {
     const allPlatformPromise = new Deferred();
     if (Object.keys(this.subscriptionPlatforms_).length
         === this.serviceIds_.length) {
-      allPlatformPromise.resolve(Object.values(this.subscriptionPlatforms_));
+      allPlatformPromise.resolve(this.getAvailablePlatforms());
     } else {
       this.onPlatformResolvedCallbacks_.add(() => {
         const platformLength = Object.keys(this.subscriptionPlatforms_).length;
         if (platformLength === this.serviceIds_.length) {
-          allPlatformPromise.resolve(Object.values(
-              this.subscriptionPlatforms_));
+          allPlatformPromise.resolve(this.getAvailablePlatforms());
         }
       });
     }
