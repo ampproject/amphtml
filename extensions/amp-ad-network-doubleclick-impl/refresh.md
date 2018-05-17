@@ -23,7 +23,7 @@ For a network implementation guide, please click <a href="../../extensions/amp-a
 
 Refresh may be enabled across all eligible slots for a set of opted-in network on a page by adding the following metadata tag:
 
-`<meta name="amp-ad-refresh" content="network1=refresh_interval1,network2=refresh_interval2,...">`
+`<meta name="amp-ad-enable-refresh" content="network1=refresh_interval1,network2=refresh_interval2,...">`
 
 Where `refresh_interval` is the time, in seconds, in between refresh cycles. This value must be a number greater than or equal to 30. Individual slots may be opted-out of refresh by adding `data-enable-refresh=false` to the slot.
 
