@@ -15,7 +15,7 @@
  */
 
 import '../amp-brightcove';
-import {parseUrl} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url';
 
 
 describes.realWin('amp-brightcove', {
@@ -94,7 +94,7 @@ describes.realWin('amp-brightcove', {
       'data-param-my-param': 'hello world',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
-      const params = parseUrl(iframe.src).search.split('&');
+      const params = parseUrlDeprecated(iframe.src).search.split('&');
       expect(params).to.contain('myParam=hello%20world');
     });
   });

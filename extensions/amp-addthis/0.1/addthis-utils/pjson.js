@@ -23,7 +23,7 @@ import {
 } from './classify';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
-import {parseUrl} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url';
 import {toArray} from '../../../../src/types';
 
 // "gen" value for shares
@@ -69,7 +69,7 @@ const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
     protocol,
     port,
   };
-  const parsedReferrer = referrer ? parseUrl(referrer) : {};
+  const parsedReferrer = referrer ? parseUrlDeprecated(referrer) : {};
   const {win} = ampDoc;
   const metaElements = toArray(getMetaElements(win.document));
 
@@ -81,7 +81,8 @@ const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
     gen: SHARE,
     mk: getKeywordsString(metaElements),
     pub: pubId,
-    rb: classifyReferrer(referrer, parsedReferrer, parseUrl(pageInfo.du)),
+    rb: classifyReferrer(referrer, parsedReferrer,
+        parseUrlDeprecated(pageInfo.du)),
     sid: getSessionId(),
     url: data.url,
   };

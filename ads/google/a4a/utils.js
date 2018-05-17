@@ -28,7 +28,7 @@ import {
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
@@ -366,16 +366,16 @@ function topWindowUrlOrDomain(win) {
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
+      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
     }
-    return parseUrl(topOrigin).hostname;
+    return parseUrlDeprecated(topOrigin).hostname;
   } else {
     try {
       return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
+      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
     } catch (e) {}
     return null;
   }
@@ -823,7 +823,8 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   }
   domain = domain || '.google.com';
   const canonical =
-    parseUrl(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl).hostname;
+    parseUrlDeprecated(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl)
+        .hostname;
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 

@@ -19,7 +19,7 @@ import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {once} from '../src/utils/function.js';
 import {parseJson} from '../src/json';
-import {parseUrl} from '../src/url';
+import {parseUrlDeprecated} from '../src/url';
 
 
 /**
@@ -117,7 +117,8 @@ export function getAttributeData() {
  * @return {!Location}
  */
 const getLocationImpl_ = once(() => {
-  return parseUrl(allMetadata()['attributes']['_context']['location']['href']);
+  const href = allMetadata()['attributes']['_context']['location']['href'];
+  return parseUrlDeprecated(href);
 });
 
 

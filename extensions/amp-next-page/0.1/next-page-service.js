@@ -25,7 +25,7 @@ import {
 } from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -420,7 +420,7 @@ export class NextPageService {
     const {amp} = documentRef;
     this.win_.document.title = amp.title || '';
     if (this.win_.history.replaceState) {
-      const url = parseUrl(documentRef.ampUrl);
+      const url = parseUrlDeprecated(documentRef.ampUrl);
       this.win_.history.replaceState({}, amp.title, url.pathname);
     }
 

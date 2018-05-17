@@ -19,7 +19,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle} from '../../../src/style';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
@@ -258,7 +258,7 @@ export class SafeframeHostApi {
       case 'no-referrer':
         return;
       case 'origin':
-        return parseUrl(canonicalUrl).origin;
+        return parseUrlDeprecated(canonicalUrl).origin;
     }
     return canonicalUrl;
   }

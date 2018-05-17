@@ -24,7 +24,7 @@ import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent, openWindowDialog} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {parseQueryString, parseUrl} from '../../../src/url';
+import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{
  *    isControllingFrame: boolean,
@@ -165,7 +165,7 @@ export class WebPushService {
           );
           return this.frameMessenger_.connect(
               this.iframe_.getDomElement().contentWindow,
-              parseUrl(this.config_['helper-iframe-url']).origin
+              parseUrlDeprecated(this.config_['helper-iframe-url']).origin
           );
         })
         .then(() => {
@@ -400,9 +400,9 @@ export class WebPushService {
    * @return {boolean}
    */
   isUrlSimilarForQueryParams(originalUrlString, urlToTestString) {
-    const originalUrl = parseUrl(originalUrlString);
+    const originalUrl = parseUrlDeprecated(originalUrlString);
     const originalUrlQueryParams = parseQueryString(originalUrl.search);
-    const urlToTest = parseUrl(urlToTestString);
+    const urlToTest = parseUrlDeprecated(urlToTestString);
     const urlToTestQueryParams = parseQueryString(urlToTest.search);
 
     // The URL to test may have more query params than the original URL, but it

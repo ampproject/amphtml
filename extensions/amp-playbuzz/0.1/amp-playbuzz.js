@@ -45,7 +45,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertAbsoluteHttpOrHttpsUrl,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
 import {dict} from '../../../src/utils/object';
@@ -262,10 +262,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
    */
   generateEmbedSourceUrl_() {
     const {canonicalUrl} = Services.documentInfoForDoc(this.element);
-    const parsedPageUrl = parseUrl(canonicalUrl);
+    const parsedPageUrl = parseUrlDeprecated(canonicalUrl);
     const params = {
       itemUrl: this.iframeSrcUrl_,
-      relativeUrl: parseUrl(this.iframeSrcUrl_).pathname,
+      relativeUrl: parseUrlDeprecated(this.iframeSrcUrl_).pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,

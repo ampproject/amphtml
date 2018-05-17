@@ -39,7 +39,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {macroTask} from '../../testing/yield';
-import {parseUrl} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url';
 import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
@@ -708,7 +708,7 @@ describe('cid', () => {
 describe('getProxySourceOrigin', () => {
   it('should fail on non-proxy origin', () => {
     allowConsoleError(() => { expect(() => {
-      getProxySourceOrigin(parseUrl('https://abc.org/v/foo.com/'));
+      getProxySourceOrigin(parseUrlDeprecated('https://abc.org/v/foo.com/'));
     }).to.throw(/Expected proxy origin/); });
   });
 });

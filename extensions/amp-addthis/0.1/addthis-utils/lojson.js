@@ -29,7 +29,7 @@ import {
 } from './fragment';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
-import {parseUrl} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url';
 import {toArray} from '../../../../src/types';
 
 const VIEW_EVENT_CHANNEL = 100;
@@ -83,7 +83,7 @@ const getLojsonData = ({
     protocol,
     port,
   };
-  const parsedReferrer = referrer ? parseUrl(referrer) : {};
+  const parsedReferrer = referrer ? parseUrlDeprecated(referrer) : {};
   const langParts = atConfig.ui_language.split('-');
   const langWithoutLocale = langParts[0];
   const locale = langParts.slice(1);
@@ -109,7 +109,7 @@ const getLojsonData = ({
     dp: host,
     dr: host === parsedReferrer.host ? undefined : parsedReferrer.host,
     fcu: service ? '' : getFragmentId(pageInfo.du),
-    fp: parseUrl(clearOurFragment(pageInfo.du)).pathname,
+    fp: parseUrlDeprecated(clearOurFragment(pageInfo.du)).pathname,
     fr: parsedReferrer.pathname || '',
     gen: VIEW_EVENT_CHANNEL,
     ln: langWithoutLocale,
@@ -120,7 +120,8 @@ const getLojsonData = ({
         0,
     pd: isProductPage(win.document, metaElements) ? 1 : 0,
     pub: pubId,
-    rb: classifyReferrer(referrer, parsedReferrer, parseUrl(pageInfo.du)),
+    rb: classifyReferrer(referrer, parsedReferrer,
+        parseUrlDeprecated(pageInfo.du)),
     sid: getSessionId(),
     skipb: 1,
     sr: service,

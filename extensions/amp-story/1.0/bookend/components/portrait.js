@@ -18,7 +18,7 @@ import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrl} from '../../../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
 
 /**
@@ -72,7 +72,7 @@ export class PortraitComponent {
       type: portraitJson['type'],
       category: portraitJson['category'],
       url: portraitJson['url'],
-      domainName: parseUrl(portraitJson['url']).hostname,
+      domainName: parseUrlDeprecated(portraitJson['url']).hostname,
       image: portraitJson['image'],
     };
   }

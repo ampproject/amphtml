@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseUrl} from '../src/url';
+import {parseUrlDeprecated} from '../src/url';
 import {setStyles} from '../src/style';
 import {validateData} from '../3p/3p';
 
@@ -39,7 +39,8 @@ export function cedato(global, data) {
   }
 
   const cb = Math.floor(Math.random() * 10000);
-  const domain = data.domain || parseUrl(global.context.sourceUrl).origin;
+  const domain = data.domain ||
+    parseUrlDeprecated(global.context.sourceUrl).origin;
 
   /* Create div for ad to target */
   const playerDiv = global.document.createElement('div');

@@ -17,7 +17,7 @@
 import {TAG} from './vars';
 import {dev} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{
  *    CONNECT_HANDSHAKE: string,
@@ -151,12 +151,12 @@ export class WindowMessenger {
    * @private
    */
   isAllowedOrigin_(origin, allowedOrigins) {
-    const normalizedOrigin = parseUrl(origin).origin;
+    const normalizedOrigin = parseUrlDeprecated(origin).origin;
     for (let i = 0; i < allowedOrigins.length; i++) {
       const allowedOrigin = allowedOrigins[i];
       // A user might have mistyped the allowed origin, so let's normalize our
       // comparisons first
-      if (parseUrl(allowedOrigin).origin === normalizedOrigin) {
+      if (parseUrlDeprecated(allowedOrigin).origin === normalizedOrigin) {
         return true;
       }
     }
@@ -259,7 +259,8 @@ export class WindowMessenger {
             topic: WindowMessenger.Topics.CONNECT_HANDSHAKE,
           }), expectedRemoteOrigin === '*' ?
             '*' :
-            parseUrl(expectedRemoteOrigin).origin, [this.channel_.port2]);
+            parseUrlDeprecated(expectedRemoteOrigin).origin,
+          [this.channel_.port2]);
       dev().fine(TAG, `Opening channel to ${expectedRemoteOrigin}...`);
     });
   }

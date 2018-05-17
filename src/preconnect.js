@@ -24,7 +24,7 @@ import {Services} from './services';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
 import {htmlFor} from './static-template';
-import {parseUrl} from './url';
+import {parseUrlDeprecated} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -100,7 +100,7 @@ class PreconnectService {
     /** @private @const {!./service/platform-impl.Platform}  */
     this.platform_ = Services.platformFor(win);
     // Mark current origin as preconnected.
-    this.origins_[parseUrl(win.location.href).origin] = true;
+    this.origins_[parseUrlDeprecated(win.location.href).origin] = true;
 
     /**
      * Detect support for the given resource hints.
@@ -150,7 +150,7 @@ class PreconnectService {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
-    const {origin} = parseUrl(url);
+    const {origin} = parseUrlDeprecated(url);
     const now = Date.now();
     const lastPreconnectTimeout = this.origins_[origin];
     if (lastPreconnectTimeout && now < lastPreconnectTimeout) {

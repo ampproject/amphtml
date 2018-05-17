@@ -28,7 +28,7 @@ import {endsWith} from '../../../src/string';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isSecureUrl, parseUrl, removeFragment} from '../../../src/url';
+import {isSecureUrl, parseUrlDeprecated, removeFragment} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
@@ -134,7 +134,7 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   assertSource(src, containerSrc, sandbox) {
-    const url = parseUrl(src);
+    const url = parseUrlDeprecated(src);
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
@@ -142,7 +142,7 @@ export class AmpIframe extends AMP.BaseElement {
         isSecureUrl(url) || url.protocol == 'data:',
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
-    const containerUrl = parseUrl(containerSrc);
+    const containerUrl = parseUrlDeprecated(containerSrc);
     user().assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)) ||
         (url.origin != containerUrl.origin && url.protocol != 'data:'),
@@ -183,7 +183,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!src) {
       return;
     }
-    const url = parseUrl(src);
+    const url = parseUrlDeprecated(src);
     // data-URLs are not modified.
     if (url.protocol == 'data:') {
       return src;
@@ -575,7 +575,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     const src = this.element.getAttribute('src');
     if (src) {
-      this.targetOrigin_ = parseUrl(src).origin;
+      this.targetOrigin_ = parseUrlDeprecated(src).origin;
     }
 
     // Register action (even if targetOrigin_ is not available so we can

@@ -33,7 +33,7 @@ import {
 } from '../service';
 import {
   isProtocolValid,
-  parseUrl,
+  parseUrlDeprecated,
   parseUrlWithA,
 } from '../url';
 import {toWin} from '../types';
@@ -245,7 +245,7 @@ export class Navigation {
   handleClick_(target, e) {
     this.expandVarsForAnchor_(target);
 
-    const location = this.parseUrl_(target.href);
+    const location = this.parseUrlDeprecated_(target.href);
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
@@ -356,7 +356,7 @@ export class Navigation {
    */
   handleNavClick_(e, target, tgtLoc) {
     /** @const {!Location} */
-    const curLoc = this.parseUrl_('');
+    const curLoc = this.parseUrlDeprecated_('');
     const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
     const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
 
@@ -440,7 +440,7 @@ export class Navigation {
    * @return {!Location}
    * @private
    */
-  parseUrl_(url) {
+  parseUrlDeprecated_(url) {
     if (this.isEmbed_) {
       let a = this.embedA_;
       if (!a) {
@@ -450,7 +450,7 @@ export class Navigation {
       }
       return parseUrlWithA(a, url);
     }
-    return parseUrl(url || this.ampdoc.win.location.href);
+    return parseUrlDeprecated(url || this.ampdoc.win.location.href);
   }
 }
 

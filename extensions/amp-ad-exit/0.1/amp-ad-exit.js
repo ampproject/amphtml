@@ -32,7 +32,7 @@ import {isObject} from '../../../src/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 const TAG = 'amp-ad-exit';
 
 /**
@@ -290,7 +290,7 @@ export class AmpAdExit extends AMP.BaseElement {
             continue;
           }
           const vendor = matches[1];
-          const {origin} = parseUrl(assertVendor(vendor));
+          const {origin} = parseUrlDeprecated(assertVendor(vendor));
           this.expectedOriginToVendor_[origin] =
               this.expectedOriginToVendor_[origin] || vendor;
         }
@@ -392,7 +392,8 @@ export class AmpAdExit extends AMP.BaseElement {
     user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
-    const vendorURL = parseUrl(assertVendor(responseMessage['vendor']));
+    const vendorURL = parseUrlDeprecated(assertVendor(
+        responseMessage['vendor']));
     user().assert(vendorURL && vendorURL.origin == eventOrigin,
         'Invalid origin for vendor ' +
         `${responseMessage['vendor']}: ${eventOrigin}`);
