@@ -267,6 +267,7 @@ describes.realWin('amp-story-bookend', {
           'skipping invalid.​​​');
     });
   });
+
   it('should reject invalid user json for the cta links component', () => {
     const ctaLinkComponent = new CtaLinkComponent();
     const userJson = {
