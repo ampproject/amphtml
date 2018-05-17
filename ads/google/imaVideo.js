@@ -920,45 +920,62 @@ export function pauseVideo(event = null) {
   }
 }
 
+
 /**
- * Called when the user clicks on the fullscreen button. Makes the video player
+ * @param {Object} global
+ */
+function exitFullscreen(global) {
+  // The video is currently in fullscreen mode
+  const cancelFullscreen = global.document.exitFullscreen ||
+      global.document.exitFullScreen ||
+      global.document.webkitCancelFullScreen ||
+      global.document.mozCancelFullScreen;
+  if (cancelFullscreen) {
+    cancelFullscreen.call(document);
+  }
+}
+
+
+/**
+ * @param {Object} global
+ */
+function enterFullscreen(global) {
+  // Try to enter fullscreen mode in the browser
+  const requestFullscreen =
+      global.document.documentElement.requestFullscreen ||
+      global.document.documentElement.webkitRequestFullscreen ||
+      global.document.documentElement.mozRequestFullscreen ||
+      global.document.documentElement.requestFullScreen ||
+      global.document.documentElement.webkitRequestFullScreen ||
+      global.document.documentElement.mozRequestFullScreen;
+  if (requestFullscreen) {
+    fullscreenWidth = window.screen.width;
+    fullscreenHeight = window.screen.height;
+    requestFullscreen.call(global.document.documentElement);
+  } else {
+    // Use native fullscreen (iPhone)
+    videoPlayer.webkitEnterFullscreen();
+    // Pause the video when we leave fullscreen. iPhone does this
+    // automatically, but we still use pauseVideo as an event handler to
+    // sync the UI.
+    videoPlayer.addEventListener('webkitendfullscreen', pauseVideo);
+    nativeFullscreen = true;
+    onFullscreenChange(global);
+  }
+}
+
+
+/**
  * @param {Object} global
  */
 function toggleFullscreen(global) {
   if (fullscreen) {
-    // The video is currently in fullscreen mode
-    const cancelFullscreen = global.document.exitFullscreen ||
-        global.document.exitFullScreen ||
-        global.document.webkitCancelFullScreen ||
-        global.document.mozCancelFullScreen;
-    if (cancelFullscreen) {
-      cancelFullscreen.call(document);
-    }
-  } else {
-    // Try to enter fullscreen mode in the browser
-    const requestFullscreen =
-        global.document.documentElement.requestFullscreen ||
-        global.document.documentElement.webkitRequestFullscreen ||
-        global.document.documentElement.mozRequestFullscreen ||
-        global.document.documentElement.requestFullScreen ||
-        global.document.documentElement.webkitRequestFullScreen ||
-        global.document.documentElement.mozRequestFullScreen;
-    if (requestFullscreen) {
-      fullscreenWidth = window.screen.width;
-      fullscreenHeight = window.screen.height;
-      requestFullscreen.call(global.document.documentElement);
-    } else {
-      // Use native fullscreen (iPhone)
-      videoPlayer.webkitEnterFullscreen();
-      // Pause the video when we leave fullscreen. iPhone does this
-      // automatically, but we still use pauseVideo as an event handler to
-      // sync the UI.
-      videoPlayer.addEventListener('webkitendfullscreen', pauseVideo);
-      nativeFullscreen = true;
-      onFullscreenChange(global);
-    }
+    exitFullscreen(global);
+    return;
   }
+  enterFullscreen(global);
 }
+
 
 /**
  * Called when the fullscreen mode of the browser or content player changes.
