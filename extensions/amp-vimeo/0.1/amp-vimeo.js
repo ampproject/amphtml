@@ -118,7 +118,7 @@ class AmpVimeo extends AMP.BaseElement {
   }
 
   /** @override */
-  preconnectCallback(onLayout) {
+  preconnectCallback(onLayout = false) {
     const {preconnect} = this;
     preconnect.url('https://player.vimeo.com', onLayout);
     // Host that Vimeo uses to serve poster frames needed by player.
