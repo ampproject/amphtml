@@ -326,6 +326,7 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
+    // The Vimeo player embedded in the frame hooks into the API directly.
     return true;
   }
 
