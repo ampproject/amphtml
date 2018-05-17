@@ -25,7 +25,7 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {getService} from '../../../src/service';
-import {getSourceOrigin, isProxyOrigin, parseUrl} from '../../../src/url';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -72,7 +72,7 @@ export class AmpNextPage extends AMP.BaseElement {
     });
 
     const docInfo = Services.documentInfoForDoc(this.element);
-    const url = parseUrl(docInfo.url);
+    const url = parseUrlDeprecated(docInfo.url);
     const sourceOrigin = getSourceOrigin(url);
     const config = assertConfig(configJson, url.origin, sourceOrigin);
 
