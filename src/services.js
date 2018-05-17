@@ -476,6 +476,16 @@ export class Services {
   }
 
   /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/action-impl.ActionService}
+   */
+  static urlForDoc(nodeOrDoc) {
+    return /** @type {!./service/url-impl.Url} */ (
+      getExistingServiceForDocInEmbedScope(
+          nodeOrDoc, 'url', /* opt_fallbackToTopWin */ true));
+  }
+
+  /**
    * Returns a promise for the experiment variants or a promise for null if it
    * is not available on the current page.
    * @param {!Window} win
