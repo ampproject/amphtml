@@ -30,6 +30,7 @@ export function _ping_(global, data) {
 
   validateData(data, []);
   user().assert(!data['error'], 'Fake user error!');
+  // make a change...
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
 
