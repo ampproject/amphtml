@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {getSourceUrl} from '../src/url';
 import {validateData, writeScript} from '../3p/3p';
 
 /**
@@ -39,13 +38,12 @@ export function rubicon(global, data) {
  * @param {!Object} data
  */
 function smartTag(global, data) {
-  const pageURL = getSourceUrl(context.location.href);
   /* eslint-disable */
   global.rp_account = data.account;
   global.rp_site = data.site;
   global.rp_zonesize = data.zone + '-' + data.size;
   global.rp_adtype = 'js';
-  global.rp_page = pageURL;
+  global.rp_page = context.sourceUrl;
   global.rp_kw = data.kw;
   global.rp_visitor = data.visitor;
   global.rp_inventory = data.inventory;
