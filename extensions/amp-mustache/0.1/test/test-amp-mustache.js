@@ -194,26 +194,24 @@ describe('amp-mustache template', () => {
       allowConsoleError(() => {
         const result = template.render({
           value: 'myid',
-          type: 'file',
-        });
-        expect(result./*OK*/innerHTML).to.equal(
-            'value = <input value="myid">');
-      });
-
-      allowConsoleError(() => {
-        const result = template.render({
-          value: 'myid',
           type: 'button',
         });
         expect(result./*OK*/innerHTML).to.equal(
             'value = <input value="myid">');
       });
 
-      const result = template.render({
+      const fileResult = template.render({
+        value: 'myid',
+        type: 'file',
+      });
+      expect(fileResult./*OK*/innerHTML).to.equal(
+          'value = <input value="myid" type="file">');
+
+      const passwordResult = template.render({
         value: 'myid',
         type: 'password',
       });
-      expect(result./*OK*/innerHTML).to.equal(
+      expect(passwordResult./*OK*/innerHTML).to.equal(
           'value = <input value="myid" type="password">');
     });
 
