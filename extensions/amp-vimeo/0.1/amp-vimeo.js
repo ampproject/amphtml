@@ -15,9 +15,11 @@
  */
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {VideoUtils} from '../../../src/utils/video';
 import {addParamToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
@@ -69,9 +71,15 @@ function isJsonOrObj(anything) {
 }
 
 
-/** @private {!Object<string, string>} */
-// If the item does not have a value, the event will not be forwarded
-// automatically, but it will be listened to.
+/**
+ * Maps events coming from the Vimeo frame to events to be dispatched from the
+ * component element.
+ *
+ * If the item does not have a value, the event will not be forwarded 1:1, but
+ * it will be listened to.
+ *
+ * @private {!Object<string, ?string>}
+ */
 const VIMEO_EVENTS = {
   'play': VideoEvents.PLAYING,
   'pause': VideoEvents.PAUSE,
@@ -92,6 +100,9 @@ class AmpVimeo extends AMP.BaseElement {
 
     /** @private {function():string} */
     this.setVolumeMethod_ = once(() => getMethodName('volume', 'set'));
+
+    /** @private {function()} */
+    this.onReadyOnce_ = once(() => this.onReady_());
 
     /** @private {boolean} */
     this.muted_ = false;
@@ -134,6 +145,16 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    return this.isAutoplay_().then(isAutoplay =>
+      this.buildIframe_(isAutoplay));
+  }
+
+  /**
+   * @param {boolean} isAutoplay
+   * @return {!Promise}
+   * @private
+   */
+  buildIframe_(isAutoplay) {
     const {element} = this;
     const vidId = user().assert(
         element.getAttribute('data-videoid'),
@@ -147,7 +168,7 @@ class AmpVimeo extends AMP.BaseElement {
 
     let src = `https://player.vimeo.com/video/${encodeURIComponent(vidId)}`;
 
-    if (this.hasAutoplay_()) {
+    if (isAutoplay) {
       this.muted_ = true;
       // Only muted videos are allowed to autoplay
       src = addParamToUrl(src, 'muted', '1');
@@ -185,11 +206,15 @@ class AmpVimeo extends AMP.BaseElement {
   }
 
   /**
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    * @private
    */
-  hasAutoplay_() {
-    return this.element.hasAttribute(VideoAttributes.AUTOPLAY);
+  isAutoplay_() {
+    if (!this.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+      return Promise.resolve(false);
+    }
+    const {win} = this;
+    return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
   }
 
   /** @private */
@@ -228,7 +253,7 @@ class AmpVimeo extends AMP.BaseElement {
       isObject(eventData) ? eventData : tryParseJson(eventData));
 
     if (data['event'] == 'ready' || data['method'] == 'ping') {
-      this.onReady_();
+      this.onReadyOnce_();
       return;
     }
 
