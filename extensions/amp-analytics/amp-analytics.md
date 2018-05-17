@@ -97,7 +97,7 @@ Here's a simple example that tracks page views.  Every time a page is visible, t
 <script type="application/json">
 {
   "requests": {
-    "pageview": "https://foo.com/pixel?RANDOM",
+    "pageview": "https://foo.com/pixel?RANDOM"
   },
   "triggers": {
     "trackPageview": {
