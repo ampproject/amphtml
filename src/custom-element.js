@@ -45,6 +45,7 @@ import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {toWin} from './types';
+import {tryResolve} from '../../../src/utils/promise';
 
 const TAG = 'CustomElement';
 
@@ -1041,9 +1042,11 @@ function createBaseCustomElementClass(win) {
       if (this.perfOn_) {
         this.getLayoutDelayMeter_().startLayout();
       }
-      const promise = this.implementation_.layoutCallback();
+
+      const promise = tryResolve(() => this.implementation_.layoutCallback());
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
+
       return promise.then(() => {
         if (isLoadEvent) {
           this.signals_.signal(CommonSignals.LOAD_END);
