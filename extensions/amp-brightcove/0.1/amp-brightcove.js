@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -93,15 +94,16 @@ class AmpBrightcove extends AMP.BaseElement {
   buildCallback() {
     this.iframe_ = null;
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     // Warn if the player does not have video interface support
-    this.readyTimeout_ = window.setTimeout(() => {
+    this.readyTimeout_ = Services.timerFor(window).delay(() => {
       dev().warn(TAG,
           `Did not receive ready callback from player ${this.playerId_}.` +
-        ' Ensure it has the videojs-amp-support plugin configured.');
+        ' Ensure it has the videojs-amp-support plugin.');
     }, 3000);
 
     this.playerReadyResolver_(this.iframe_);
@@ -109,14 +111,15 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
+    const el = this.element;
+    const iframe = el.ownerDocument.createElement('iframe');
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.getIframeSrc_();
 
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
+    el.appendChild(iframe);
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
@@ -145,6 +148,8 @@ class AmpBrightcove extends AMP.BaseElement {
   /** @private */
 
   handlePlayerMessages_(event) {
+    const el = this.element;
+
     if (event.origin != 'https://players.brightcove.net' ||
       event.source != this.iframe_.contentWindow) {
       return;
@@ -164,44 +169,50 @@ class AmpBrightcove extends AMP.BaseElement {
     if (data['event']) {
       if (data['event'] === 'ready') {
         // Clear warning timeout
-        window.clearTimeout(this.readyTimeout_);
+        Services.timerFor(window).cancel(this.readyTimeout_);
         dev().info(TAG, `Player ${this.playerId_} ready. ` +
           `Brightcove Player version: ${data['bcVersion']} ` +
           `AMP Support version: ${data['ampSupportVersion']}`);
         this.hasAmpSupport_ = true;
-        installVideoManagerForDoc(this.element);
-        Services.videoManagerForDoc(this.element).register(this);
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        installVideoManagerForDoc(el);
+        Services.videoManagerForDoc(el).register(this);
+        el.dispatchCustomEvent(VideoEvents.LOAD);
       }
 
       if (data['event'] === 'playing') {
         this.playing_ = true;
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+        el.dispatchCustomEvent(VideoEvents.PLAYING);
+        return;
       }
 
       if (data['event'] === 'pause') {
         this.playing_ = false;
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        el.dispatchCustomEvent(VideoEvents.PAUSE);
+        return;
       }
 
       if (data['event'] === 'ended') {
-        this.element.dispatchCustomEvent(VideoEvents.ENDED);
+        el.dispatchCustomEvent(VideoEvents.ENDED);
+        return;
       }
 
       if (data['event'] === 'ads-ad-started') {
-        this.element.dispatchCustomEvent(VideoEvents.AD_START);
+        el.dispatchCustomEvent(VideoEvents.AD_START);
+        return;
       }
 
       if (data['event'] === 'ads-ad-ended') {
-        this.element.dispatchCustomEvent(VideoEvents.AD_END);
+        el.dispatchCustomEvent(VideoEvents.AD_END);
+        return;
       }
 
       if (data['event'] === 'volumechange') {
         if (data['muted'] !== undefined) {
           this.muted_ = data['muted'];
           const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
-          this.element.dispatchCustomEvent(evt);
+          el.dispatchCustomEvent(evt);
         }
+        return;
       }
     }
   }
@@ -211,32 +222,33 @@ class AmpBrightcove extends AMP.BaseElement {
    * @private
    */
   getIframeSrc_() {
+    const el = this.element;
     const account = user().assert(
-        this.element.getAttribute('data-account'),
+        el.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
-        this.element);
-    const embed = (this.element.getAttribute('data-embed') || 'default');
+        el);
+    const embed = (el.getAttribute('data-embed') || 'default');
 
-    this.playerId_ = (this.element.getAttribute('data-player') ||
-      this.element.getAttribute('data-player-id') ||
+    this.playerId_ = (el.getAttribute('data-player') ||
+      el.getAttribute('data-player-id') ||
       'default');
 
     let src = `https://players.brightcove.net/${encodeURIComponent(account)}` +
       `/${encodeURIComponent(this.playerId_)}` +
       `_${encodeURIComponent(embed)}/index.html`;
 
-    if (this.element.getAttribute('data-playlist-id')) {
+    if (el.getAttribute('data-playlist-id')) {
       src += '?playlistId=';
-      src += this.encodeId_(this.element.getAttribute('data-playlist-id'));
-    } else if (this.element.getAttribute('data-video-id')) {
+      src += this.encodeId_(el.getAttribute('data-playlist-id'));
+    } else if (el.getAttribute('data-video-id')) {
       src += '?videoId=';
-      src += this.encodeId_(this.element.getAttribute('data-video-id'));
+      src += this.encodeId_(el.getAttribute('data-video-id'));
     }
 
-    this.element.setAttribute('data-param-playsinline', 'true');
+    el.setAttribute('data-param-playsinline', 'true');
 
     // Pass through data-param-* attributes as params for plugin use
-    src = addParamsToUrl(src, getDataParamsFromAttributes(this.element));
+    src = addParamsToUrl(src, getDataParamsFromAttributes(el));
     return src;
   }
 
