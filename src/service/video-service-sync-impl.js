@@ -83,19 +83,13 @@ export class VideoServiceSync {
           getElementServiceForDoc(nodeOrDoc, 'video-service', EXTENSION)));
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   register(video, unusedFromV1manageAutoplay = true) {
     this.asyncImpl_.then(impl =>
       impl.register(video));
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   delegateAutoplay(video, optObservable = null) {
     // TODO(alanorozco): Make observable required once implementation of
     // `VideoService` finalizes.
@@ -106,28 +100,19 @@ export class VideoServiceSync {
       impl.delegateAutoplay(video, observable));
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   getAnalyticsDetails(video) {
     return this.asyncImpl_.then(impl =>
       impl.getAnalyticsDetails(video));
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   isMuted(unusedVideo) {
     dev().warn(TAG, 'isMuted is not implemented');
     return false;
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   getPlayingState(unusedVideo) {
     dev().warn(TAG, 'getPlayingState is not implemented');
     return PlayingStates.PAUSED;
