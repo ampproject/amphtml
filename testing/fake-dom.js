@@ -277,8 +277,10 @@ class EventListeners {
    */
   static intercept(target) {
     target.eventListeners = new EventListeners();
-    const originalAdd = target.addEventListener;
-    const originalRemove = target.removeEventListener;
+    const {
+      addEventListener: originalAdd,
+      removeEventListener: originalRemove,
+    } = target;
     target.addEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
       if (originalAdd) {

@@ -21,7 +21,7 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function meg(global, data) {
   validateData(data, ['code']);
-  const code = data.code;
+  const {code} = data;
   const lang = global.encodeURIComponent(global.navigator.language);
   const ref = global.encodeURIComponent(global.context.referrer);
   const params = ['lang=' + lang, 'ref=' + ref].join('&');

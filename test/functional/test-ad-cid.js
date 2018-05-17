@@ -40,7 +40,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
       target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     element = env.win.document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
-    const ampdoc = env.ampdoc;
+    const {ampdoc} = env;
     cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,

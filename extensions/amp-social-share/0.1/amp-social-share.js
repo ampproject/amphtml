@@ -105,7 +105,7 @@ class AmpSocialShare extends AMP.BaseElement {
     urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(href => {
       this.href_ = href;
       // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
-      const protocol = parseUrl(href).protocol;
+      const {protocol} = parseUrl(href);
       const isMailTo = protocol === 'mailto:';
       const isSms = protocol === 'sms:';
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
@@ -133,7 +133,7 @@ class AmpSocialShare extends AMP.BaseElement {
    * @private
    */
   handleKeyPress_(event) {
-    const keyCode = event.keyCode;
+    const {keyCode} = event;
     if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
       event.preventDefault();
       this.handleActivation_();
