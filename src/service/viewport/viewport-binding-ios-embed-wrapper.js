@@ -44,7 +44,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.win = win;
 
     const doc = this.win.document;
-    const documentElement = doc.documentElement;
+    const {documentElement} = doc;
     const topClasses = documentElement.className;
     documentElement.className = 'i-amphtml-ios-embed';
 

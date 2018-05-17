@@ -465,7 +465,7 @@ describe.configure().skipSafari().run('XHR', function() {
         return xhr.fetchJson('http://localhost:31863/status/500').then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
-          const message = error.message;
+          const {message} = error;
           expect(message).to.contain('http://localhost:31863');
           expect(message).not.to.contain('status/500');
           expect(message).not.to.contain('CID');

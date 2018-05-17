@@ -627,7 +627,7 @@ app.get('/a4a_template/*', (req, res) => {
 // Example:
 // http://localhost:8000/iframe-echo-message?message=${payload}
 app.get('/iframe-echo-message', (req, res) => {
-  const message = req.query.message;
+  const {message} = req.query;
   res.send(
       `<!doctype html>
         <body style="background-color: yellow">

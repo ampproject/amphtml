@@ -122,7 +122,7 @@ export class NextPageService {
     }
 
     const ampDoc = getAmpdoc(element);
-    const win = ampDoc.win;
+    const {win} = ampDoc;
 
     this.config_ = config;
     this.win_ = win;
@@ -417,7 +417,7 @@ export class NextPageService {
    *     active.
    */
   setActiveDocument_(documentRef) {
-    const amp = documentRef.amp;
+    const {amp} = documentRef;
     this.win_.document.title = amp.title || '';
     if (this.win_.history.replaceState) {
       const url = parseUrl(documentRef.ampUrl);

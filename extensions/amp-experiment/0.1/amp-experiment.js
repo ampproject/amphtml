@@ -57,7 +57,7 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @return {!JsonObject} [description] */
   getConfig_() {
-    const children = this.element.children;
+    const {children} = this.element;
     user().assert(
         children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()

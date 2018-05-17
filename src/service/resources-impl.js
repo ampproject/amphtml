@@ -1257,13 +1257,12 @@ export class Resources {
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
         /** @const {!Resource} */
-        const resource = request.resource;
+        const {resource} = request;
         const box = resource.getLayoutBox();
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
-        let topUnchangedBoundary = box.top;
-        let bottomDisplacedBoundary = box.bottom;
+        let {top: topUnchangedBoundary, bottom: bottomDisplacedBoundary} = box;
         let newMargins = undefined;
         if (request.marginChange) {
           newMargins = request.marginChange.newMargins;
@@ -2180,11 +2179,13 @@ export class Resources {
    * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
-    const prerender = VisibilityState.PRERENDER;
-    const visible = VisibilityState.VISIBLE;
-    const hidden = VisibilityState.HIDDEN;
-    const paused = VisibilityState.PAUSED;
-    const inactive = VisibilityState.INACTIVE;
+    const {
+      PRERENDER: prerender,
+      VISIBLE: visible,
+      HIDDEN: hidden,
+      PAUSED: paused,
+      INACTIVE: inactive,
+    } = VisibilityState;
     const doPass = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();

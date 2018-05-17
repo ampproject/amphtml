@@ -183,8 +183,7 @@ class AmpBridPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
-    const partnerID = this.partnerID_;
-    const feedID = this.feedID_;
+    const {partnerID_: partnerID, feedID_: feedID} = this;
 
     this.propagateAttributes(['aria-label'], placeholder);
     if (this.element.hasAttribute('data-video') ||

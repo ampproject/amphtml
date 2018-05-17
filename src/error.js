@@ -559,7 +559,7 @@ export function detectJsEngineFromStack() {
   try {
     object.t();
   } catch (e) {
-    const stack = e.stack;
+    const {stack} = e;
 
     // Safari only mentions the method name.
     if (startsWith(stack, 't@')) {

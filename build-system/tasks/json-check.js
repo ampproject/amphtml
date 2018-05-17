@@ -17,9 +17,9 @@
 
 const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
-const jsonGlobs = require('../config').jsonGlobs;
 const log = require('fancy-log');
 const through2 = require('through2');
+const {jsonGlobs} = require('../config');
 
 /**
  * Fail if JSON files are valid.

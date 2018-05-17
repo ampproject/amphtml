@@ -20,13 +20,13 @@ const closureCompiler = require('gulp-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const highlight = require('cli-highlight').highlight;
-const internalRuntimeToken = require('../internal-version').TOKEN;
-const internalRuntimeVersion = require('../internal-version').VERSION;
+const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('../internal-version') ;
+
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
+const {highlight} = require('cli-highlight');
 
 const isProdBuild = !!argv.type;
 const queue = [];

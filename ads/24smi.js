@@ -24,7 +24,7 @@ const jsnPrefix = 'https://jsn.24smi.net/';
  */
 export function _24smi(global, data) {
   validateData(data, ['src']);
-  const src = data.src;
+  const {src} = data;
   validateSrcPrefix(jsnPrefix, src);
 
   createContainer(global, getBlockId(src));

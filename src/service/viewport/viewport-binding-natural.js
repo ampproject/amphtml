@@ -172,7 +172,7 @@ export class ViewportBindingNatural_ {
   getScrollTop() {
     const pageScrollTop = this.getScrollingElement()./*OK*/scrollTop ||
         this.win./*OK*/pageYOffset;
-    const host = this.ampdoc.getRootNode().host;
+    const {host} = this.ampdoc.getRootNode();
     return (host ? pageScrollTop - host./*OK*/offsetTop : pageScrollTop);
   }
 

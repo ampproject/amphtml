@@ -27,11 +27,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const colors = require('ansi-colors');
-const exec = require('./exec').exec;
-const execOrDie = require('./exec').execOrDie;
-const getStderr = require('./exec').getStderr;
-const getStdout = require('./exec').getStdout;
 const path = require('path');
+const {execOrDie, exec, getStderr, getStdout} = require('./exec');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -359,7 +356,7 @@ const command = {
     } else if (opt_mode === 'master') {
       cmd += ' --master';
     }
-    const status = timedExec(cmd).status;
+    const {status} = timedExec(cmd);
     if (status != 0) {
       console.error(fileLogPrefix, colors.red('ERROR:'),
           'Found errors while running', colors.cyan(cmd) +

@@ -402,7 +402,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
   describe('#getAdUrl', () => {
     beforeEach(() => {
-      const sandbox = env.sandbox;
+      const {sandbox} = env;
       element = doc.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'doubleclick');
@@ -962,7 +962,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 150/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -975,7 +975,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 150/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -995,7 +995,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 200/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -1011,7 +1011,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 200/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);

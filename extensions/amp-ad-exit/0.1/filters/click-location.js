@@ -80,7 +80,7 @@ export class ClickLocationFilter extends Filter {
     // viewport function is to get the coordinate based on current viewport.
     // However, the coordinate in click event is based on the iframe.
     this.adExitElement_.getVsync().measure(() => {
-      const win = this.adExitElement_.win;
+      const {win} = this.adExitElement_;
       if (this.relativeTo_) {
         const relativeElement = win.document.querySelector(
             this.relativeTo_);

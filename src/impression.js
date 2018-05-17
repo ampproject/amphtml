@@ -58,8 +58,7 @@ export function resetTrackImpressionPromiseForTesting() {
  */
 export function maybeTrackImpression(win) {
   const deferred = new Deferred();
-  const promise = deferred.promise;
-  const resolveImpression = deferred.resolve;
+  const {promise, resolve: resolveImpression} = deferred;
 
 
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
@@ -277,7 +276,7 @@ export function getExtraParamsUrl(win, target) {
 
   // Check if the param already exists
   const additionalUrlParams = target.getAttribute('data-amp-addparams');
-  let href = target.href;
+  let {href} = target;
   if (additionalUrlParams) {
     href = addParamsToUrl(href, parseQueryString(additionalUrlParams));
   }

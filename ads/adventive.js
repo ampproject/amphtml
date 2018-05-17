@@ -116,8 +116,8 @@ function callback(id, ns) { ns.addInstance(id); }
  *    provided, otherwise false
  */
 function getUrl(context, data, ns) {
-  const location = context.location,
-      mode = ns.mode,
+  const {location} = context,
+      {mode} = ns,
       isDev = hasOwn(data, 'isDev'),
       sld_ = sld[!mode.dev],
       thld_ = thld[isDev && !mode.live],

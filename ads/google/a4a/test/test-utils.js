@@ -48,7 +48,7 @@ import {installXhrService} from '../../../../src/service/xhr-impl';
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
   installExtensionsService(fixture.win);
-  const doc = fixture.doc;
+  const {doc} = fixture;
   // TODO(a4a-cam@): This is necessary in the short term, until A4A is
   // smarter about host document styling.  The issue is that it needs to
   // inherit the AMP runtime style element in order for shadow DOM-enclosed
@@ -247,7 +247,7 @@ describe('Google A4A utils', () => {
       this.timeout(5000);
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -268,7 +268,7 @@ describe('Google A4A utils', () => {
     it('should specify that this is canary', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -288,7 +288,7 @@ describe('Google A4A utils', () => {
     it('should specify that this is control', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -308,7 +308,7 @@ describe('Google A4A utils', () => {
     it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -327,7 +327,7 @@ describe('Google A4A utils', () => {
     it('should not have `art` parameter when binary type is production', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -348,7 +348,7 @@ describe('Google A4A utils', () => {
     it('should include scroll position', function() {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -376,7 +376,7 @@ describe('Google A4A utils', () => {
       this.timeout(5000);
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -397,7 +397,7 @@ describe('Google A4A utils', () => {
     it('should include debug_experiment_id if local mode w/ deid hash', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -419,7 +419,7 @@ describe('Google A4A utils', () => {
     it('should include GA cid/hid', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -441,7 +441,7 @@ describe('Google A4A utils', () => {
     it('should have correct bc value when everything supported', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -467,7 +467,7 @@ describe('Google A4A utils', () => {
     it('should have correct bc value when sandbox not supported', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -491,7 +491,7 @@ describe('Google A4A utils', () => {
     it('should not include bc when nothing supported', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',

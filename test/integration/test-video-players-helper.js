@@ -231,7 +231,7 @@ export function runVideoPlayerIntegrationTests(
       ).then(r => {
         // TODO(cvializ): Better way to detect which classes implement methods
         // needed for tracking?
-        const tagName = r.video.tagName;
+        const {tagName} = r.video;
         if (tagName !== 'AMP-VIDEO' &&
             tagName !== 'AMP-TEST-FAKE-VIDEOPLAYER') {
           this.skip();

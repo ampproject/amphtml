@@ -392,9 +392,11 @@ export class Vsync {
     this.scheduled_ = false;
     this.jankMeter_.onRun();
 
-    const tasks = this.tasks_;
-    const states = this.states_;
-    const resolver = this.nextFrameResolver_;
+    const {
+      tasks_: tasks,
+      states_: states,
+      nextFrameResolver_: resolver,
+    } = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering

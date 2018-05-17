@@ -505,12 +505,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should parse object keyframe', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: [0, 1],
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(isArray(keyframes.opacity)).to.be.true;
     expect(keyframes.opacity).to.deep.equal(['0', '1']);
@@ -518,24 +518,24 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should parse object keyframe w/partial offsets', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: '1',
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(isArray(keyframes.opacity)).to.be.true;
     expect(keyframes.opacity).to.deep.equal(['0', '1']);
   });
 
   it('should parse object keyframe with parsing', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: ['0', 'calc(1)'],
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(isArray(keyframes.opacity)).to.be.true;
     expect(keyframes.opacity).to.deep.equal(['0', '1']);
@@ -543,36 +543,36 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should parse object w/partial keyframe with parsing', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: ['calc(1)'],
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(isArray(keyframes.opacity)).to.be.true;
     expect(keyframes.opacity).to.deep.equal(['0', '1']);
   });
 
   it('should passthrough service props in a partial object keyframe', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         easing: 'ease-in',
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(keyframes.easing).to.equal('ease-in');
   });
 
   it('should parse array keyframe', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {opacity: '0'},
         {opacity: '1'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(isArray(keyframes)).to.be.true;
     expect(keyframes).to.deep.equal([
       {opacity: '0'},
@@ -582,12 +582,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should parse array keyframe w/partial offsets', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {opacity: '1'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(keyframes).to.deep.equal([
       {opacity: '0'},
       {opacity: '1'},
@@ -596,13 +596,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should parse array keyframe w/non-zero offset', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {offset: 0.1, opacity: '0.1'},
         {opacity: '1', easing: 'ease-in'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(keyframes).to.deep.equal([
       {opacity: '0'},
       {offset: 0.1, opacity: '0.1'},
@@ -612,13 +612,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should propagate partial properties into implicit 0-offset', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {easing: 'ease-in'},
         {opacity: '1'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(keyframes).to.deep.equal([
       {easing: 'ease-in', opacity: '0'},
       {opacity: '1'},
@@ -627,13 +627,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should propagate partial properties into explicit 0-offset', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {offset: 0, easing: 'ease-in'},
         {opacity: '1'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(keyframes).to.deep.equal([
       {offset: 0, easing: 'ease-in', opacity: '0'},
       {opacity: '1'},
@@ -641,13 +641,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should parse array keyframe with parsing', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {opacity: 'calc(0)'},
         {opacity: 'calc(1)'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(isArray(keyframes)).to.be.true;
     expect(keyframes).to.deep.equal([
       {opacity: '0'},
@@ -658,7 +658,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   it('should parse width/height functions', () => {
     target2.style.width = '11px';
     target2.style.height = '22px';
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         transform: [
@@ -666,7 +666,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           'translateY(height("#target2"))',
         ],
       },
-    })[0].keyframes;
+    })[0];
     expect(keyframes.transform).to.jsonEqual([
       'translatex(11px)',
       'translatey(22px)',
@@ -675,7 +675,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should parse rand function', () => {
     sandbox.stub(Math, 'random').callsFake(() => 0.25);
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: [
@@ -683,7 +683,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           'rand(0.5, 0.6)',
         ],
       },
-    })[0].keyframes;
+    })[0];
     expect(keyframes.opacity).to.jsonEqual(['0', '0.525']);
   });
 
@@ -713,7 +713,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     const name = 'keyframes1';
     const css = 'from{opacity: 0} to{opacity: 1}';
     return writeAndWaitForStyleKeyframes(name, css).then(() => {
-      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
+      const {keyframes} = scan({target: target1, keyframes: name})[0];
       expect(keyframes).to.jsonEqual([
         {offset: 0, opacity: '0'},
         {offset: 1, opacity: '1'},
@@ -725,7 +725,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     const name = 'keyframes2';
     const css = 'to{opacity: 0}';
     return writeAndWaitForStyleKeyframes(name, css).then(() => {
-      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
+      const {keyframes} = scan({target: target1, keyframes: name})[0];
       expect(keyframes).to.jsonEqual([
         {opacity: '1'},
         {offset: 1, opacity: '0'},

@@ -282,7 +282,7 @@ export class VariableSource {
       return this.variableWhitelist_;
     }
 
-    const head = this.ampdoc.getRootNode().head;
+    const {head} = this.ampdoc.getRootNode();
     if (!head) {
       return null;
     }

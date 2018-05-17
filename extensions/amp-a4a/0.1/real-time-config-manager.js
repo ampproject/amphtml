@@ -211,7 +211,7 @@ export function maybeExecuteRealTimeConfig_(
  */
 export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   rtcStartTime, macros, timeoutMillis, errorReportingUrl, opt_vendor) {
-  const win = a4aElement.win;
+  const {win} = a4aElement;
   const ampDoc = a4aElement.getAmpDoc();
   const callout = opt_vendor || getCalloutParam_(url);
   const checkStillCurrent = a4aElement.verifyStillCurrent.bind(a4aElement)();

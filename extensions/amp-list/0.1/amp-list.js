@@ -243,9 +243,7 @@ export class AmpList extends AMP.BaseElement {
    */
   scheduleRender_(items) {
     const deferred = new Deferred();
-    const promise = deferred.promise;
-    const resolver = deferred.resolve;
-    const rejecter = deferred.reject;
+    const {promise, resolve: resolver, reject: rejecter} = deferred;
 
     // If there's nothing currently being rendered, schedule a render pass.
     if (!this.renderItems_) {

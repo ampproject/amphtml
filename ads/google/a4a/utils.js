@@ -148,7 +148,7 @@ export function isReportingEnabled(ampElement) {
   // If any of those fail, we use the `BaseLifecycleReporter`, which is a
   // a no-op (sends no pings).
   const type = ampElement.element.getAttribute('type');
-  const win = ampElement.win;
+  const {win} = ampElement;
   const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
@@ -168,8 +168,7 @@ export function isReportingEnabled(ampElement) {
  * @return {!Object<string,null|number|string>} block level parameters
  */
 export function googleBlockParameters(a4a, opt_experimentIds) {
-  const adElement = a4a.element;
-  const win = a4a.win;
+  const {element: adElement, win} = a4a;
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
@@ -249,7 +248,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
-        const screen = win.screen;
+        const {screen} = win;
         const viewport = Services.viewportForDoc(nodeOrDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
@@ -357,9 +356,9 @@ function getHistoryLength(win) {
  * @return {?string}
  */
 function topWindowUrlOrDomain(win) {
-  const ancestorOrigins = win.location.ancestorOrigins;
+  const {ancestorOrigins} = win.location;
   if (ancestorOrigins) {
-    const origin = win.location.origin;
+    const {origin} = win.location;
     const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
     if (origin == topOrigin) {
       return win.top.location.hostname;

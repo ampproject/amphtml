@@ -1740,8 +1740,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should turn on already created', () => {
       stubInA4A(false);
       element.prepareLoading_();
-      const container = element.loadingContainer_;
-      const indicator = element.loadingElement_;
+      const {
+        loadingContainer_: container,
+        loadingElement_: indicator,
+      } = element;
       element.toggleLoading(true);
 
       expect(element.loadingContainer_).to.equal(container);

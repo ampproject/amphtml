@@ -618,7 +618,7 @@ function createBaseCustomElementClass(win) {
         this.mediaQuery_ = this.getAttribute('media') || null;
       }
       if (this.mediaQuery_) {
-        const defaultView = this.ownerDocument.defaultView;
+        const {defaultView} = this.ownerDocument;
         this.classList.toggle('i-amphtml-hidden-by-media-query',
             !defaultView.matchMedia(this.mediaQuery_).matches);
       }

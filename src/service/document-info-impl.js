@@ -122,7 +122,7 @@ function getLinkRels(doc) {
     const links = doc.head.querySelectorAll('link[rel]');
     for (let i = 0; i < links.length; i++) {
       const link = links[i];
-      const href = link.href;
+      const {href} = link;
       const rels = link.getAttribute('rel');
       if (!rels || !href) {
         continue;

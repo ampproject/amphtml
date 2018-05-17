@@ -15,8 +15,8 @@
  */
 'use strict';
 
-const getStdout = require('./exec').getStdout;
 const https = require('https');
+const {getStdout} = require('./exec');
 
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
 const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';

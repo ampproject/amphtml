@@ -36,8 +36,10 @@ describe('base64 <> utf-8 encode/decode', () => {
 
   scenarios.forEach(scenario => {
     describe(scenario, () => {
-      const oldTextEncoder = window.TextEncoder;
-      const oldTextDecoder = window.TextDecoder;
+      const {
+        TextEncoder: oldTextEncoder,
+        TextDecoder: oldTextDecoder,
+      } = window;
       beforeEach(() => {
         // Forces use of the TextEncoding polyfill
         if (scenario == 'PolyfillTextEncoding') {

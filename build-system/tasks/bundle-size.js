@@ -16,17 +16,14 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
+const {getStdout} = require('../exec');
 
 const runtimeFile = './dist/v0.js';
 const maxSize = '77.08KB';
 
-const green = colors.green;
-const red = colors.red;
-const cyan = colors.cyan;
-const yellow = colors.yellow;
+const {green, red, cyan, yellow} = colors;
 
 
 function checkBundleSize() {

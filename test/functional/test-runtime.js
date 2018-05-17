@@ -192,7 +192,7 @@ describes.fakeWin('runtime', {
     toggleExperiment(win, 'pump-early-frame', true);
     // Make document.body be null on first invocation to simulate
     // JS executing before the rest of the doc has been parsed.
-    const body = win.document.body;
+    const {body} = win.document;
     let accessedOnce = false;
     Object.defineProperty(win.document, 'body', {
       get: () => {
