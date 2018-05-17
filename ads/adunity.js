@@ -104,15 +104,11 @@ export function adunity(global, data) {
  * @param {!Object} data
  */
 function renderTags(global, data) {
-  let localData = data;
-
-  if (localData == null) {
-    localData = global.context.data;
-  }
+  if (data == null) {return;}
 
   global.context.renderStart({
-    width: localData.width,
-    height: localData.height,
+    width: data.width,
+    height: data.height,
   });
   loadScript(global, 'https://content.adunity.com/aulib.js');
 }
