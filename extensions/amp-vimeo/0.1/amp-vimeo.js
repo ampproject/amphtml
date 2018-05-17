@@ -117,10 +117,7 @@ class AmpVimeo extends AMP.BaseElement {
     this.unlistenFrame_ = null;
   }
 
-  /**
-   * @param {boolean=} onLayout
-   * @override
-   */
+  /** @override */
   preconnectCallback(onLayout) {
     const {preconnect} = this;
     preconnect.url('https://player.vimeo.com', onLayout);
@@ -130,10 +127,7 @@ class AmpVimeo extends AMP.BaseElement {
     preconnect.url('https://f.vimeocdn.com', onLayout);
   }
 
-  /**
-   * @override
-   * @inheritdoc
-   */
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
