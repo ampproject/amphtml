@@ -104,7 +104,7 @@ function addDynamicCssClasses(ampdoc, classes) {
  * @param {!Array<string>} classes
  */
 function addCssClassesToBody(body, classes) {
-  const classList = body.classList;
+  const {classList} = body;
   for (let i = 0; i < classes.length; i++) {
     classList.add(classes[i]);
   }

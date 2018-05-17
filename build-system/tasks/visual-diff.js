@@ -16,9 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const execOrDie = require('../exec').execOrDie;
-const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
+const {execOrDie, getStdout} = require('../exec');
 
 
 /**

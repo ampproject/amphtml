@@ -555,7 +555,7 @@ export function scopedQuerySelectorAll(root, selector) {
 export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
   opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
-  const dataset = element.dataset;
+  const {dataset} = element;
   const params = dict();
   const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
   for (const key in dataset) {
