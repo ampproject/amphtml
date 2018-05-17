@@ -353,8 +353,7 @@
     },
     {
       "url": "examples/visual-tests/amp-lightbox-gallery.html",
-      "name": "amp-lightbox-gallery - article",
-      "experiments": ["amp-lightbox-gallery"]
+      "name": "amp-lightbox-gallery - article"
     }
   ]
 }
