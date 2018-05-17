@@ -896,11 +896,10 @@ function stripComments(contents) {
  */
 function matchTerms(file, terms) {
   const contents = stripComments(file.contents.toString());
-  const relative = file.relative;
+  const {relative} = file;
   return Object.keys(terms).map(function(term) {
     let fix;
-    const whitelist = terms[term].whitelist;
-    const checkInTestFolder = terms[term].checkInTestFolder;
+    const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
     if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||

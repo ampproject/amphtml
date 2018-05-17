@@ -106,7 +106,7 @@ export class FetchMock {
    * @private
    */
   fetch_(input, init) {
-    const url = new Request(input, init).url;
+    const {url} = new Request(input, init);
     const route = this.routes_[url];
     if (!route) {
       throw new Error('no route defined for ' + url);

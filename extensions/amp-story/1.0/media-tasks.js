@@ -130,8 +130,7 @@ function copyAttributes(fromEl, toEl) {
 
   // Copy all of the unprotected attributes from the fromEl to the toEl.
   for (let i = 0; i < fromAttributes.length; i++) {
-    const attributeName = fromAttributes[i].name;
-    const attributeValue = fromAttributes[i].value;
+    const {name: attributeName, value: attributeValue} = fromAttributes[i] ;
     if (!isProtectedAttributeName(attributeName)) {
       toEl.setAttribute(attributeName, attributeValue);
     }
