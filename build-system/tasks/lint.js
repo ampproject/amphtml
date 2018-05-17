@@ -108,10 +108,12 @@ function runLinter(path, stream, options) {
           if (!options.fix) {
             log(colors.yellow('NOTE 1:'),
                 'You may be able to automatically fix some of these warnings ' +
-                '/ errors by running', colors.cyan('gulp lint --fix') + '.');
+                '/ errors by running',
+                colors.cyan('gulp lint --local-changes --fix'),
+                'from your local branch.');
             log(colors.yellow('NOTE 2:'),
-                'Since this is a destructive operation (operates on the file',
-                'system), make sure you commit before running the command.');
+                'Since this is a destructive operation (that edits your files',
+                'in-place), make sure you commit before running the command.');
           }
         }
       }))
@@ -185,7 +187,8 @@ function lint() {
     enableStrictLinting();
   } else if (!eslintrcChangesInPr() &&
       (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
-       process.env.LOCAL_PR_CHECK)) {
+       process.env.LOCAL_PR_CHECK ||
+       argv['local-changes'])) {
     const jsFiles = jsFilesInPr();
     if (jsFiles.length == 0) {
       log(colors.green('INFO: ') + 'No JS files in this PR');
@@ -212,6 +215,8 @@ gulp.task(
     {
       options: {
         'watch': '  Watches for changes in files, validates against the linter',
-        'fix': '  Fixes simple lint errors (spacing etc).',
+        'fix': '  Fixes simple lint errors (spacing etc)',
+        'local-changes':
+            '  Lints just the changes commited to the local branch',
       },
     });

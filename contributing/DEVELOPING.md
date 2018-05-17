@@ -47,7 +47,8 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp lint`                                                             | Validates against the ESLint linter.                              |
 | `gulp lint --watch`                                                     | Watches for changes in files, and validates against the ESLint linter. |
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
-| `gulp lint --files=<files-path-glob>`                                   | Lints just the files provided.                                         |
+| `gulp lint --files=<files-path-glob>`                                   | Lints just the files provided. Can be used with `--fix`.              |
+| `gulp lint --local-changes`                                             | Lints just the changes commited to the local branch. Can be used with `--fix`.   |
 | `gulp build`                                                            | Builds the AMP library.                                               |
 | `gulp build --extensions=<amp-foo,amp-bar>`                             | Builds the AMP library, with only the listed extensions.
 | `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
