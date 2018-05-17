@@ -107,7 +107,7 @@ export class ArticleComponent {
     template.appendChild(heading);
 
     const articleMeta =
-      html`<div class="i-amphtml-story-bookend-article-meta"></div>`;
+      html`<div class="i-amphtml-story-bookend-component-meta"></div>`;
     articleMeta.textContent = articleData.domainName;
     template.appendChild(articleMeta);
 

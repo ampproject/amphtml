@@ -26,6 +26,7 @@ import {user} from '../../../../../src/log';
  *   type: string,
  *   category: string,
  *   url: string,
+ *   domainName: string,
  *   image: string
  * }}
  */
@@ -88,11 +89,11 @@ export class PortraitComponent {
         html`
         <a class="i-amphtml-story-bookend-portrait"
           target="_top">
-          <h2 class="i-amphtml-story-bookend-portrait-category"
+          <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
           <amp-img class="i-amphtml-story-bookend-portrait-image"
             layout="fixed" width="0" height="0" ref="image"></amp-img>
-          <div class="i-amphtml-story-bookend-portrait-meta"
+          <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
     addAttributesToElement(template, dict({'href': portraitData.url}));

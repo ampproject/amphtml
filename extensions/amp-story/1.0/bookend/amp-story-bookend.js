@@ -111,7 +111,7 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
       },
       {
         tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
+        attrs: dict({'class': 'i-amphtml-story-bookend-component-meta'}),
         unlocalizedString: domainName,
       },
     ],
