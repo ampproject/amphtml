@@ -295,7 +295,7 @@ function uponSanitizeElement(node, data) {
  */
 function uponSanitizeAttribute(node, data) {
   const tagName = (node.tagName || '').toLowerCase();
-  const {attrName, allowedAttributes} = data;
+  const {attrName} = data;
   let attrValue = data.attrValue;
 
   // `<A>` has special target rules:
@@ -312,16 +312,17 @@ function uponSanitizeAttribute(node, data) {
     }
   }
 
-  // Allow amp-bind attributes e.g. [foo].
-  const isBinding = (attrName[0] == '['
-      && attrName[attrName.length - 1] == ']');
+  // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
+  // This is because DOMPurify eagerly removes attributes and re-adds them
+  // after sanitization, which fails because `[]` are not valid attr chars.
+  const isBinding = attrName[0] == '[' && attrName[attrName.length - 1] == ']';
   if (isBinding) {
-    // TODO: Rewrite binding to browser-friendly attribute.
-    allowedAttributes[attrName] = true;
+    const property = attrName.substring(1, attrName.length - 1);
+    node.setAttribute(`data-amp-bind-${property}`, attrValue);
   }
 
   if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
-    if (attrValue && !isBinding) {
+    if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
       attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
     }
   } else {
