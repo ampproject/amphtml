@@ -18,6 +18,7 @@ import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryRequestService} from '../amp-story-request-service';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {ArticleComponent} from '../bookend/components/article';
+import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LocalizationService} from '../localization';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -44,6 +45,23 @@ describes.realWin('amp-story-bookend', {
       'domainName': 'example.com',
       'url': 'http://example.com/article.html',
       'image': 'http://placehold.it/256x128',
+    },
+    {
+      'type': 'cta-link',
+      'links': [
+        {
+          'text': 'buttonA',
+          'url': 'google.com',
+        },
+        {
+          'text': 'buttonB',
+          'url': 'google.com',
+        },
+        {
+          'text': 'longtext longtext longtext longtext longtext',
+          'url': 'google.com',
+        },
+      ],
     },
   ];
 
@@ -113,6 +131,23 @@ describes.realWin('amp-story-bookend', {
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
         },
+        {
+          'type': 'cta-link',
+          'links': [
+            {
+              'text': 'buttonA',
+              'url': 'google.com',
+            },
+            {
+              'text': 'buttonB',
+              'url': 'google.com',
+            },
+            {
+              'text': 'longtext longtext longtext longtext longtext',
+              'url': 'google.com',
+            },
+          ],
+        },
       ],
     };
 
@@ -147,6 +182,23 @@ describes.realWin('amp-story-bookend', {
           'title': 'This is an example article',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
+        },
+        {
+          'type': 'cta-link',
+          'links': [
+            {
+              'text': 'buttonA',
+              'url': 'google.com',
+            },
+            {
+              'text': 'buttonB',
+              'url': 'google.com',
+            },
+            {
+              'text': 'longtext longtext longtext longtext longtext',
+              'url': 'google.com',
+            },
+          ],
         },
       ],
     };
@@ -190,6 +242,40 @@ describes.realWin('amp-story-bookend', {
       expect(() => articleComponent.assertValidity(userJson)).to.throw(
           'Articles must contain `title` and `url` fields, ' +
           'skipping invalid.​​​');
+    });
+  });
+
+  it('should reject invalid user json for the cta links component', () => {
+    const ctaLinkComponent = new CtaLinkComponent();
+    const userJson = {
+      'bookend-version': 'v1.0',
+      'share-providers': [
+        'email',
+        {'provider': 'facebook', 'app-id': '254325784911610'},
+        'whatsapp',
+      ],
+      'components': [
+        {
+          'type': 'heading',
+          'title': 'test',
+        },
+        {
+          'type': 'small',
+          'url': 'http://example.com/article.html',
+          'image': 'http://placehold.it/256x128',
+        },
+        {
+          'type': 'cta-link',
+          'links': [
+          ],
+        },
+      ],
+    };
+
+    allowConsoleError(() => {
+      expect(() => ctaLinkComponent.assertValidity(userJson)).to.throw(
+          'CTA link component must be an array' +
+          ' and contain at least one link inside it.');
     });
   });
 });
