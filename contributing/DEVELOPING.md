@@ -48,7 +48,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp lint --watch`                                                     | Watches for changes in files, and validates against the ESLint linter. |
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp lint --files=<files-path-glob>`                                   | Lints just the files provided. Can be used with `--fix`.              |
-| `gulp lint --local-changes`                                             | Lints just the changes commited to the local branch. Can be used with `--fix`.   |
+| `gulp lint --local-changes`                                             | Lints just the files changed in the local branch. Can be used with `--fix`.   |
 | `gulp build`                                                            | Builds the AMP library.                                               |
 | `gulp build --extensions=<amp-foo,amp-bar>`                             | Builds the AMP library, with only the listed extensions.
 | `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
@@ -65,6 +65,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp pr-check --files=<test-files-path-glob>`                          | Runs all the Travis CI checks locally, and restricts tests to the files provided.  |
 | `gulp test --unit`                                                      | Runs the unit tests in Chrome (doesn't require the AMP library to be built).                                                 |
 | `gulp test --unit --files=<test-files-path-glob>`                       | Runs the unit tests from the specified files in Chrome.                                                 |
+| `gulp test --local-changes`                                             | Runs the unit tests from just the files changed in the local branch in Chrome.   |
 | `gulp test --integration`                                               | Runs the integration tests in Chrome (requires the AMP library to be built).                                                 |
 | `gulp test --integration --files=<test-files-path-glob>`                | Runs the integration tests from the specified files in Chrome.                                                 |
 | `gulp test [--unit\|--integration] --verbose`                           | Runs tests in Chrome with logging enabled.                            |
