@@ -487,6 +487,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     let consent = null;
     switch (consentState) {
       case undefined:
+      case null:
       case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
         break;
       case CONSENT_POLICY_STATE.INSUFFICIENT:
