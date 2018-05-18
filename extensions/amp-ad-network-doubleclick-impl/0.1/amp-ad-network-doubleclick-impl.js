@@ -152,6 +152,7 @@ let windowLocationQueryParameters;
  */
 let LayoutRectOrDimsDef;
 
+/* eslint-disable jsdoc/require-param */
 /**
  * Array of functions used to combine block level request parameters for SRA
  * request.
@@ -259,7 +260,7 @@ const BLOCK_SRA_COMBINERS_ = [
     return hasAmpContainer ? {'acts': result.join('|')} : null;
   },
 ];
-
+/* eslint-enable jsdoc/require-param */
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
