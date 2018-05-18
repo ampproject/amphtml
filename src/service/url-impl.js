@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LruCache} from '../src/utils/lru-cache.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
@@ -39,6 +40,9 @@ export class Url {
 
     /** @private @const {!HTMLAnchorElement} */
     this.anchor_ = /** @type {!HTMLAnchorElement} */(doc.createElement('a'));
+
+    /** @private @const {!LruCache} */
+    this.cache_ = new LruCache(100);
   }
 
   /** @override */
@@ -55,7 +59,7 @@ export class Url {
    * @return {!Location}
    */
   parse(url, opt_nocache) {
-    return parseUrlWithA(this.anchor_, url, opt_nocache);
+    return parseUrlWithA(this.anchor_, url, opt_nocache ? null : this.cache_);
   }
 }
 

@@ -91,9 +91,10 @@ export function getWinOrigin(win) {
 export function parseUrlDeprecated(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
+    cache = self.UrlCache || (self.UrlCache = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, opt_nocache);
+  return parseUrlWithA(a, url, opt_nocache ? null : cache);
 }
 
 /**
@@ -103,18 +104,13 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * testing by freezing the object.
  * @param {!HTMLAnchorElement} a
  * @param {string} url
- * @param {boolean=} opt_nocache
+ * @param {LruCache=} opt_cache
  * @return {!Location}
  * @restricted
  */
-export function parseUrlWithA(a, url, opt_nocache) {
-  if (!cache) {
-    cache = self.UrlCache || (self.UrlCache = new LruCache(100));
-  }
-
-  const fromCache = cache.get(url);
-  if (fromCache) {
-    return fromCache;
+export function parseUrlWithA(a, url, opt_cache) {
+  if (opt_cache && opt_cache.has(url)) {
+    return opt_cache.get(url);
   }
 
   a.href = url;
@@ -164,8 +160,8 @@ export function parseUrlWithA(a, url, opt_nocache) {
   // Freeze during testing to avoid accidental mutation.
   const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
 
-  if (!opt_nocache) {
-    cache.put(url, frozen);
+  if (opt_cache) {
+    opt_cache.put(url, frozen);
   }
 
   return frozen;

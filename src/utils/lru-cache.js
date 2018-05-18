@@ -44,11 +44,21 @@ export class LruCache {
   }
 
   /**
-   * @param {number|string} id
+   * Returns whether key is cached.
+   *
+   * @param {number|string} key
+   * @return {boolean}
+   */
+  has(key) {
+    return !!this.cache_[key];
+  }
+
+  /**
+   * @param {number|string} key
    * @return {T} The cached payload.
    */
-  get(id) {
-    const cacheable = this.cache_[id];
+  get(key) {
+    const cacheable = this.cache_[key];
     if (cacheable) {
       cacheable.access = ++this.access_;
       return cacheable.payload;
@@ -57,11 +67,11 @@ export class LruCache {
   }
 
   /**
-   * @param {number|string} id
+   * @param {number|string} key
    * @param {T} payload The payload to cache.
    */
-  put(id, payload) {
-    this.cache_[id] = {payload, access: this.access_};
+  put(key, payload) {
+    this.cache_[key] = {payload, access: this.access_};
     this.size_++;
     this.evict_();
   }
