@@ -27,7 +27,7 @@ import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
-export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
+export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';
 
 /** {?AmpAdTemplateHelper} */
 let ampAdTemplateHelper;
