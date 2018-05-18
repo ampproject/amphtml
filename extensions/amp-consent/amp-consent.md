@@ -207,12 +207,12 @@ The `amp-story` extension provides a [default prompt UI](https://user-images.git
       "my-consent": {
         "checkConsentHref": "https://foo.com/api/show-consent",
         "promptUI": "consent-ui"
-      },
-      “story-consent”: {
-        “title”: "My title",
-        “message”: "My example message.",
-        “vendors”: ["Item 1", "Item 2", "Item 3", "Item 4"]
-     }
+      }
+    },
+    “story-consent”: {
+      “title”: "My title",
+      “message”: "My example message.",
+      “vendors”: ["Item 1", "Item 2", "Item 3", "Item 4"]
     }
   }
   </script>
