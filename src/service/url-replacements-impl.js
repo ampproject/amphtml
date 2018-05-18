@@ -237,8 +237,8 @@ export class GlobalVariableSource extends VariableSource {
     this.set('SOURCE_HOSTNAME', this.getDocInfoUrl_('sourceUrl', 'hostname'));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH', this.getDocInfoUrl_('replaceUrl', 'pathname', 'sourceUrl'));
-    });
+    this.set('SOURCE_PATH',
+        this.getDocInfoUrl_('replaceUrl', 'pathname', 'sourceUrl'));
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for

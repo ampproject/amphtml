@@ -1160,7 +1160,7 @@ export class Viewer {
       dev().error(TAG_, 'replaceUrl failed', e);
     }
   }
-
+}
 
 /**
  * Parses the viewer parameters as a string.

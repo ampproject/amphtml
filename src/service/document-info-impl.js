@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {Services} from '../services';
 import {
   getSourceOrigin,
   getSourceUrl,
   isProxyOrigin,
   parseQueryString,
   parseUrlDeprecated,
-  resolveRelativeUrl,
 } from '../url';
 import {isArray} from '../types';
 import {map} from '../utils/object';
@@ -93,7 +93,7 @@ export class DocInfo {
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
-    const replaceUrl = getReplaceUrlFromParameter(ampdoc, canonicalUrl);
+    const replaceUrl = getReplaceUrlFromParameter(ampdoc);
 
     return this.info_ = {
       /** @return {string} */
@@ -105,13 +105,16 @@ export class DocInfo {
       linkRels,
       metaTags,
       get replaceUrl() {
-        // Always prefer the replace URL from the "amp_r" parameter.
+        // Always prefer the replace URL from the "amp_r" parameter. Otherwise,
+        // fallback to the messaging flow via the viewer.
         if (replaceUrl) {
           return replaceUrl;
         }
-        // Fallback to viewer's replace URL, which may have been set via
-        // messaging.
-        return Services.viewerForDoc(this.ampdoc).getReplaceUrl();
+
+        // Warning: attempting to read the replace URL from the viewer's
+        // constructor will result in an infinite loop here.
+        return Services.viewerForDoc(ampdoc).getReplaceUrl();
+        }
       },
     };
   }
@@ -208,7 +211,7 @@ function getMetaTags(doc) {
 *  @param {string} canonicalUrl
  * @return {?string}
  */
-function getReplaceUrlFromParameter(ampdoc, canonicalUrl) {
+function getReplaceUrlFromParameter(ampdoc) {
   if (!ampdoc.isSingleDoc()) {
     return null;
   }
@@ -216,7 +219,8 @@ function getReplaceUrlFromParameter(ampdoc, canonicalUrl) {
   if (!isProxyOrigin(url)) {
     return null;
   }
-  const replaceUrl = parseUrlDeprecated(parseQueryString(url.search)['amp_r']);
+  const raw = parseQueryString(url.search)['amp_r'];
+  const replaceUrl = parseUrlDeprecated(raw);
   if (url.origin != replaceUrl.origin ||
       getSourceOrigin(url) != getSourceOrigin(replaceUrl)) {
     return null;
