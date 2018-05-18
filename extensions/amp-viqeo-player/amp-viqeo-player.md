@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-viqeo"></a> `amp-viqeo`
+# <a name="amp-viqeo-player"></a> `amp-viqeo-player`
 
 <table>
   <tr>
@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-viqeo" src="https://cdn.ampproject.org/v0/amp-viqeo-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-viqeo-player" src="https://cdn.ampproject.org/v0/amp-viqeo-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -44,13 +44,13 @@ limitations under the License.
 The `width` and `height` attributes determine the aspect ratio of the Viqeo embedded in responsive layouts.
 
 ```html
-<amp-viqeo
+<amp-viqeo-player
     data-profileid="184"
     data-videoid="b51b70cdbb06248f4438"
     width="640"
     height="360"
     layout="responsive">
-</amp-viqeo>
+</amp-viqeo-player>
 ```
 
 ## Attributes
