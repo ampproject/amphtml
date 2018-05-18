@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
@@ -32,16 +31,20 @@ export class Url {
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
   constructor(ampdoc, opt_rootNode) {
+    /** @private @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private @const {!Document|!ShadowRoot} */
     const root = opt_rootNode || ampdoc.getRootNode();
 
-    this.anchor_ = root.createElement('a');
+    /** @private @const {!HTMLAnchorElement} */
+    this.anchor_ = /** @type {!HTMLAnchorElement} */(root.createElement('a'));
   }
 
   /** @override */
   adoptEmbedWindow(embedWin) {
     installServiceInEmbedScope(embedWin, SERVICE,
-        new Url(this.ampdoc, embedWin.document));
+        new Url(this.ampdoc_, embedWin.document));
   }
 
   /**
@@ -62,5 +65,5 @@ export class Url {
  */
 export function installUrlForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, SERVICE, Url,
-    /* opt_instantiate */ true);
+      /* opt_instantiate */ true);
 }

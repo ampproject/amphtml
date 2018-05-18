@@ -477,7 +477,7 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/action-impl.ActionService}
+   * @return {!./service/url-impl.Url}
    */
   static urlForDoc(nodeOrDoc) {
     return /** @type {!./service/url-impl.Url} */ (
