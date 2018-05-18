@@ -21,10 +21,10 @@ import {Services} from './services';
  * @enum {number}
  */
 export const CONSENT_POLICY_STATE = {
-  UNKNOWN: 0,
-  SUFFICIENT: 1,
-  INSUFFICIENT: 2,
-  UNKNOWN_NOT_REQUIRED: 3,
+  UNKNOWN: 1,
+  SUFFICIENT: 2,
+  INSUFFICIENT: 3,
+  UNKNOWN_NOT_REQUIRED: 4,
 };
 
 /**
