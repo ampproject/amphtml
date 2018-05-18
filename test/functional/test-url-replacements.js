@@ -417,6 +417,21 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('Should replace AMP_STATE(expression)', () => {
+    const win = getFakeWindow();
+    sandbox.stub(Services, 'bindForDocOrNull').returns(Promise.resolve({
+      evaluateExpression(expression) {
+        expect(expression).to.equal('foo.bar');
+        return Promise.resolve('baz');
+      },
+    }));
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandUrlAsync('?state=AMP_STATE(foo.bar)')
+        .then(res => {
+          expect(res).to.equal('?state=baz');
+        });
+  });
+
   it('should replace VARIANT', () => {
     return expect(expandUrlAsync(
         '?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)',

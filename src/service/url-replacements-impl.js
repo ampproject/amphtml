@@ -39,6 +39,10 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {
+  isArray,
+  isObject,
+} from '../types';
 import {isExperimentOn} from '../experiments';
 import {isProtocolValid} from '../url';
 
@@ -579,6 +583,23 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('MAKE_BODY_VISIBLE', () => {
       return Services.performanceFor(this.ampdoc.win).getMakeBodyVisible();
     });
+
+    this.setAsync('AMP_STATE', expression => {
+      return Services.bindForDocOrNull(this.ampdoc).then(bind => {
+        if (!bind) {
+          return '';
+        }
+        return bind.evaluateExpression(expression, {})
+            .then(result => {
+              if (isObject(result) || isArray(result)) {
+                return JSON.stringify(result);
+              } else {
+                return String(result);
+              }
+            });
+      });
+    });
+
   }
 
   /**
