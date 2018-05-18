@@ -119,15 +119,15 @@ describes.fakeWin('amp-story-consent', {amp: true}, env => {
     });
   });
 
-  it('should whitelist the amp actions using the expected consent ID', () => {
+  it('should whitelist the <amp-consent> actions', () => {
     const addToWhitelistStub =
         sandbox.stub(storyConsent.actions_, 'addToWhitelist');
 
     storyConsent.buildCallback();
 
     expect(addToWhitelistStub).to.have.been.calledTwice;
-    expect(addToWhitelistStub).to.have.been.calledWith('ABC.accept');
-    expect(addToWhitelistStub).to.have.been.calledWith('ABC.reject');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.accept');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.reject');
   });
 
   it('should broadcast the amp actions', () => {
