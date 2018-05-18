@@ -647,20 +647,29 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
     it('should include npa=1 if unknown consent & explicit npa', () => {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-      return expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually
-          .match(/(\?|&)npa=1(&|$)/);
+      return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
+        expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        expect(url).not.to.match(/(\?|&)consent=(&|$)/);
+      });
     });
 
-    it('should include npa=1 if insufficient consent', () =>
-      expect(impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT)).to.eventually
-          .match(/(\?|&)npa=1(&|$)/));
+    it('should include npa=1, consent=false if insufficient consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then(url => {
+        expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        expect(url).to.match(/(\?|&)consent=false(&|$)/);
+      }));
 
-    [CONSENT_POLICY_STATE.SUFFICIENT,
-      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED].forEach(consentState => {
-      it(`should not include npa=1 if ${consentState}`, () =>
-        expect(impl.getAdUrl(consentState)).to.eventually.not
-            .match(/(\?|&)npa=1(&|$)/));
-    });
+    it('should include consent=true and not npa, if sufficient consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then(url => {
+        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        expect(url).to.match(/(\?|&)consent=true(&|$)/);
+      }));
+
+    it('should not include consent or npa, if not required consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
+        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        expect(url).to.not.match(/(\?|&)consent=(&|$)/);
+      }));
   });
 
   describe('#unlayoutCallback', () => {
