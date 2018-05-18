@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {loadScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -23,14 +23,11 @@ import {loadScript, validateData} from '../3p/3p';
 
 export function epeex(global, data) {
 
-  // ensure we have valid value
-  validateData(data, []);
-
   (global._epeex = global._epeex || {
     account: data['account'] || 'demoepeex',
     channel: data['channel'] || '1',
-    htmlURL: data['htmlurl'] || global.context.canonicalUrl,
-    ampURL: data['ampurl'] || global.context.sourceUrl,
+    htmlURL: data['htmlurl'] || encodeURIComponent(global.context.canonicalUrl),
+    ampURL: data['ampurl'] || encodeURIComponent(global.context.sourceUrl),
     testMode: data['testmode'] || 'false',
   });
 
