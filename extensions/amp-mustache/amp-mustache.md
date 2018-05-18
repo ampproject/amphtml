@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>None</td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-mustache/">annotated amp-mustache</a> example.</td>
   </tr>
 </table>
 
@@ -64,8 +64,8 @@ Then, the Mustache templates can be defined in the `template` tags like this:
 </template>
 ```
 
-How templates are discovered, when they are rendered, how data is provided - all decided by the
-target AMP element that uses this template to render its content.
+How templates are discovered, when they are rendered, how data is provided is  all decided by the
+target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
 
 ## Restrictions
 
