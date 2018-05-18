@@ -95,6 +95,27 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
   font-size: 0;
 }
 
+.DayPicker {
+  background: #fdfdfd;
+}
+
+.DayPicker__withBorder {
+  background-color: #fdfdfd;
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+amp-date-picker[mode="overlay"] .DayPicker__withBorder {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.07);
+  border: 0;
+}
+
+.CalendarMonth,
+.CalendarMonthGrid {
+  background-color: transparent;
+}
+
 .CalendarDay__highlighted_calendar,
 .CalendarDay__highlighted_calendar:hover {
   background-color: #fff;
@@ -103,6 +124,7 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
 
 .CalendarDay_container, /* remove after update to react-dates v16 */
 .CalendarDay__default {
+  background-color: transparent;
   border: 1px solid transparent;
 }
 
@@ -114,6 +136,7 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
 
 .CalendarDay__blocked_calendar {
   border: 1px solid #cacccd;
+  background-color: #cacccd;
 }
 
 .CalendarDay__blocked_calendar.CalendarDay__hovered_span {
@@ -126,6 +149,7 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
 .CalendarDay__blocked_out_of_range:hover {
   color: rgb(0, 0, 0, .1);
   border: 1px solid transparent;
+  background: transparent;
 }
 
 .CalendarDay__hovered_span,
@@ -227,6 +251,8 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
  */
 .DayPicker_transitionContainer {
   min-height: 354px;
+  max-width: 100%;
+  border-radius: 0;
 }
 
 [data-date-tooltip] {
