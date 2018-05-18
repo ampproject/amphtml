@@ -19,7 +19,7 @@ import {WindowInterface} from '../window-interface';
 import {dev} from '../log';
 import {dict} from '../utils/object';
 import {getCookie, setCookie} from '../cookies';
-import {isProxyOrigin, parseUrl} from '../url';
+import {isProxyOrigin, parseUrlDeprecated} from '../url';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 
@@ -63,7 +63,9 @@ export class GoogleCidApi {
     const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
 
     /** @private {?string} */
-    this.canonicalOrigin_ = canonicalUrl ? parseUrl(canonicalUrl).origin : null;
+    this.canonicalOrigin_ = canonicalUrl
+      ? parseUrlDeprecated(canonicalUrl).origin
+      : null;
   }
 
   /**

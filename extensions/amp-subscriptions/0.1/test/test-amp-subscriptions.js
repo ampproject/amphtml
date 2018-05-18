@@ -553,4 +553,15 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(decorateUIStub).to.be.calledWith(element);
     });
   });
+
+  describe('selectPlatformForLogin', () => {
+    it('should return the platform which ever supports viewer', () => {
+      subscriptionService.platformStore_ = new PlatformStore(
+          ['local', 'swg-google']);
+      const loginStub = sandbox.stub(
+          subscriptionService.platformStore_, 'selectPlatformForLogin');
+      subscriptionService.selectPlatformForLogin();
+      expect(loginStub).to.be.called;
+    });
+  });
 });
