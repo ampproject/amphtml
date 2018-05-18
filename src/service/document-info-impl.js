@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import {getSourceUrl, parseUrl} from '../url';
+import {
+  getSourceOrigin,
+  getSourceUrl,
+  isProxyOrigin,
+  parseQueryString,
+  parseUrl,
+  resolveRelativeUrl,
+} from '../url';
 import {isArray} from '../types';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
@@ -33,6 +40,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
  *     - metaTags: A map object of meta tag's name (key) and corresponding
  *       contents (value).
+ *     - replaceUrl: The document's replace URL, or null if none found.
  *
  * @typedef {{
  *   sourceUrl: string,
@@ -40,6 +48,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   pageViewId: string,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
+ *   replaceUrl: ?string
  * }}
  */
 export let DocumentInfoDef;
@@ -84,6 +93,7 @@ export class DocInfo {
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
+    const replaceUrl = getReplaceUrlFromParameter(ampdoc, canonicalUrl);
 
     return this.info_ = {
       /** @return {string} */
@@ -94,6 +104,15 @@ export class DocInfo {
       pageViewId,
       linkRels,
       metaTags,
+      get replaceUrl() {
+        // Always prefer the replace URL from the "amp_r" parameter.
+        if (replaceUrl) {
+          return replaceUrl;
+        }
+        // Fallback to viewer's replace URL, which may have been set via
+        // messaging.
+        return Services.viewerForDoc(this.ampdoc).getReplaceUrl();
+      },
     };
   }
 }
@@ -180,4 +199,27 @@ function getMetaTags(doc) {
     }
   }
   return metaTags;
+}
+
+/**
+ * Attempts to retrieve a replace URL using the "amp_r" query parameter,
+ * returning null if not found.
+*  @param {!./ampdoc-impl.AmpDoc} ampdoc
+*  @param {string} canonicalUrl
+ * @return {?string}
+ */
+function getReplaceUrlFromParameter(ampdoc, canonicalUrl) {
+  if (!ampdoc.isSingleDoc()) {
+    return null;
+  }
+  const url = parseUrl(ampdoc.win.location.href);
+  if (!isProxyOrigin(url)) {
+    return null;
+  }
+  const replaceUrl = parseUrl(parseQueryString(url.search)['amp_r']);
+  if (url.origin != replaceUrl.origin ||
+      getSourceOrigin(url) != getSourceOrigin(replaceUrl)) {
+    return null;
+  }
+  return raw;
 }

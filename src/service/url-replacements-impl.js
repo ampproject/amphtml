@@ -220,10 +220,12 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the Source URL for this AMP document.
     this.setBoth('SOURCE_URL', () => {
-      return this.getSourceUrlData_();
+      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      return removeFragment(docInfo.replaceUrl || docInfo.sourceUrl);
     }, () => {
       return getTrackImpressionPromise().then(() => {
-        return this.getSourceUrlData_();
+        const docInfo = Services.documentInfoForDoc(this.ampdoc);
+        return removeFragment(docInfo.replaceUrl || docInfo.sourceUrl);
       });
     });
 
@@ -234,13 +236,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('SOURCE_HOSTNAME', this.getDocInfoUrl_('sourceUrl', 'hostname'));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH', () => {
-      // If available, prefer the path from the replace URL.
-      const replaceUrl = Services.viewerForDoc(this.ampdoc).getReplaceUrl();
-      if (!replaceUrl) {
-        return this.getDocInfoUrl_('sourceUrl', 'pathname')();
-      }
-      return parseUrl(replaceUrl)['pathname'];
+    this.set('SOURCE_PATH', this.getDocInfoUrl_('replaceUrl', 'pathname', 'sourceUrl'));
     });
 
     // Returns a random string that will be the constant for the duration of
@@ -590,13 +586,17 @@ export class GlobalVariableSource extends VariableSource {
    * Resolves the value via one of document info's urls.
    * @param {string} field A field on the docInfo
    * @param {string=} opt_urlProp A subproperty of the field
+   * @param {string=} opt_fallbackField A fallback field.
    * @return {T}
    * @template T
    */
-  getDocInfoUrl_(field, opt_urlProp) {
+  getDocInfoUrl_(field, opt_urlProp, opt_fallbackField) {
     return () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      const value = docInfo[field];
+      let value = docInfo[field];
+      if (!value && opt_fallbackField) {
+        value = docInfo[opt_fallbackField];
+      }
       return opt_urlProp ? parseUrl(value)[opt_urlProp] : value;
     };
   }
@@ -634,28 +634,12 @@ export class GlobalVariableSource extends VariableSource {
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
     user().assert(typeof param == 'string', 'param should be a string');
-    const replaceUrl = Services.viewerForDoc(this.ampdoc).getReplaceUrl();
+    const {replaceUrl} = Services.documentInfoForDoc(this.ampdoc);
     // If available, prefer the replace URL.
-    const url = parseUrl(replaceUrl
-      ? replaceUrl : this.ampdoc.win.location.href);
+    const url = parseUrl(replaceUrl || this.ampdoc.win.location.href);
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
       ? params[param] : defaultValue;
-  }
-
-  /**
-   * Return the SOURCE_URL from the current document.
-   * @return {string}
-   * @private
-   */
-  getSourceUrlData_() {
-    let url = Services.viewerForDoc(this.ampdoc).getReplaceUrl();
-    // Prefer the replace URL, falling back to source URL if not found.
-    if (!url) {
-      const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      url = docInfo.sourceUrl;
-    }
-    return removeFragment(url);
   }
 
   /**
