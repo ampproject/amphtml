@@ -175,7 +175,7 @@ export function getTextColorForRGB({r, g, b}) {
  * @param {string} name
  * @param {string=} opt_value
  */
-export function setAtributeInMutate(elementImpl, name, opt_value) {
+export function setAttributeInMutate(elementImpl, name, opt_value) {
   const value = opt_value || '';
   elementImpl.mutateElement(() => {
     elementImpl.element.setAttribute(name, value);

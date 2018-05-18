@@ -91,7 +91,7 @@ import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
-import {removeAttributeInMutate, setAtributeInMutate} from './utils';
+import {removeAttributeInMutate, setAttributeInMutate} from './utils';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsDe from './_locales/de';
@@ -843,7 +843,7 @@ export class AmpStory extends AMP.BaseElement {
 
     if (targetPage.isAd()) {
       this.storeService_.dispatch(Action.TOGGLE_AD, true);
-      setAtributeInMutate(this, Attributes.AD_SHOWING);
+      setAttributeInMutate(this, Attributes.AD_SHOWING);
     } else {
       this.storeService_.dispatch(Action.TOGGLE_AD, false);
       removeAttributeInMutate(this, Attributes.AD_SHOWING);
@@ -868,7 +868,7 @@ export class AmpStory extends AMP.BaseElement {
     if (oldPage) {
       oldPage.setActive(false);
       // indication that this should be offscreen to left in desktop view
-      setAtributeInMutate(oldPage, Attributes.VISITED);
+      setAttributeInMutate(oldPage, Attributes.VISITED);
     }
 
     return targetPage.beforeVisible().then(() => {
@@ -912,14 +912,14 @@ export class AmpStory extends AMP.BaseElement {
     const prevPageId = targetPage.getPreviousPageId();
     if (prevPageId) {
       this.previousPage_ = this.getPageById(prevPageId);
-      setAtributeInMutate(this.previousPage_, Attributes.PREVIOUS);
+      setAttributeInMutate(this.previousPage_, Attributes.PREVIOUS);
     }
 
     const nextPageId = targetPage.getNextPageId(
         /* opt_isAutomaticAdvance */ false);
     if (nextPageId) {
       this.nextPage_ = this.getPageById(nextPageId);
-      setAtributeInMutate(this.nextPage_, Attributes.NEXT);
+      setAttributeInMutate(this.nextPage_, Attributes.NEXT);
     }
   }
 
@@ -1617,8 +1617,8 @@ export class AmpStory extends AMP.BaseElement {
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
 
-    // reset all pages so that they are offscren to right instead of left in
-    // desktop view
+    // Reset all pages so that they are offscreen to right instead of left in
+    // desktop view.
     this.pages_.forEach(page =>
       removeAttributeInMutate(page, Attributes.VISITED));
   }

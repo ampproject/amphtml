@@ -363,20 +363,6 @@ describes.realWin('amp-story', {
 
 
   describe('desktop attributes', () => {
-    it('should ad next page attribute', function() {
-      sandbox.stub(win.history, 'replaceState');
-      sandbox.stub(utils, 'setAtributeInMutate').callsFake(
-          (el, attr) => el.element.setAttribute(attr, ''));
-
-      const pages = createPages(story.element, 3, ['page-1', 'page-2']);
-      const page2 = pages[1];
-      story.buildCallback();
-      return story.layoutCallback()
-          .then(() => {
-            expect(page2.hasAttribute('i-amphtml-next-page')).to.be.true;
-          });
-    });
-
     it('should add next page attribute', () => {
       sandbox.stub(win.history, 'replaceState');
       sandbox.stub(utils, 'setAtributeInMutate').callsFake(
