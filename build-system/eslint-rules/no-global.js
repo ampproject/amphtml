@@ -47,7 +47,7 @@ module.exports = function(context) {
       if (GLOBALS[name]) {
         message += ' ' + GLOBALS[name];
       }
-      context.report(node, message);
+      context.report({node, message});
     },
   };
 };

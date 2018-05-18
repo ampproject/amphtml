@@ -17,8 +17,11 @@
 
 module.exports = function(context) {
   function htmlCannotBeCalled(node) {
-    context.report(node, 'The html helper MUST NOT be called directly. ' +
-        'Instead, use it as a template literal tag: ``` html`<div />` ```');
+    context.report({
+      node,
+      message: 'The html helper MUST NOT be called directly. ' +
+          'Instead, use it as a template literal tag: ``` html`<div />` ```',
+    });
   }
 
   function htmlForUsage(node) {
@@ -42,28 +45,39 @@ module.exports = function(context) {
       return;
     }
 
-    context.report(node, 'htmlFor result must be stored into a variable ' +
-      'named "html", or used as the tag of a tagged template literal.');
+    context.report({
+      node,
+      message: 'htmlFor result must be stored into a variable ' +
+          'named "html", or used as the tag of a tagged template literal.',
+    });
   }
 
   function htmlTagUsage(node) {
     const {quasi} = node;
     if (quasi.expressions.length !== 0) {
-      context.report(node, 'The html template tag CANNOT accept expression. ' +
-          'The template MUST be static only.');
+      context.report({
+        node,
+        message: 'The html template tag CANNOT accept expression. ' +
+            'The template MUST be static only.',
+      });
     }
 
     const template = quasi.quasis[0];
     const string = template.value.cooked;
     if (!string) {
-      context.report(template, 'Illegal escape sequence detected in template' +
-          ' literal.');
+      context.report({
+        node: template,
+        message: 'Illegal escape sequence detected in template literal.',
+      });
     }
 
     if (/<(html|body|head)/i.test(string)) {
-      context.report(template, 'It it not possible to generate HTML, BODY, or' +
-          ' HEAD root elements. Please do so manually with' +
-          ' document.createElement.');
+      context.report({
+        node: template,
+        message: 'It it not possible to generate HTML, BODY, or' +
+            ' HEAD root elements. Please do so manually with' +
+            ' document.createElement.',
+      });
     }
 
     const invalids = invalidVoidTag(string);
