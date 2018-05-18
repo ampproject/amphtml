@@ -134,7 +134,7 @@ export class AmpIframe extends AMP.BaseElement {
    * @returns {string}
    * @private
    */
-  assertSource_(src, containerSrc, sandbox) {
+  assertSource_(src, containerSrc, sandbox = '') {
     const url = parseUrl(src);
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
@@ -238,10 +238,10 @@ export class AmpIframe extends AMP.BaseElement {
   firstAttachedCallback() {
     this.sandbox_ = this.element.getAttribute('sandbox');
 
-    const iframeSrc =
-        this.transformSrc_(this.element.getAttribute('src')) ||
-        this.transformSrcDoc_(
-            this.element.getAttribute('srcdoc'), this.sandbox_);
+    const iframeSrc = /** @type {string} */ (
+      this.transformSrc_(this.element.getAttribute('src')) ||
+      this.transformSrcDoc_(this.element.getAttribute('srcdoc'), this.sandbox_)
+    );
     this.iframeSrc = this.assertSource_(
         iframeSrc, window.location.href, this.sandbox_);
   }
@@ -468,7 +468,9 @@ export class AmpIframe extends AMP.BaseElement {
       this.iframeSrc = this.transformSrc_(src);
       if (this.iframe_) {
         this.iframe_.src = this.assertSource_(
-            this.iframeSrc, window.location.href, this.sandbox_);
+            /** @type {string} */ (this.iframeSrc),
+            window.location.href,
+            this.sandbox_);
       }
     }
   }
