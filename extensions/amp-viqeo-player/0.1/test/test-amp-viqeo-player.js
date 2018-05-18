@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import '../amp-viqeo';
+import '../amp-viqeo-player';
 
-describes.realWin('amp-viqeo', {
+describes.realWin('amp-viqeo-player', {
   amp: {
-    extensions: ['amp-viqeo'],
+    extensions: ['amp-viqeo-player'],
   },
 }, env => {
   let win, doc;
@@ -29,7 +29,7 @@ describes.realWin('amp-viqeo', {
   });
 
   function getViqeo(viqeoProfileId, viqeoId, opt_params) {
-    const viqeo = doc.createElement('amp-viqeo');
+    const viqeo = doc.createElement('amp-viqeo-player');
     viqeo.setAttribute('data-profileid', viqeoProfileId);
     viqeo.setAttribute('data-videoid', viqeoId);
     viqeo.setAttribute('width', 640);
