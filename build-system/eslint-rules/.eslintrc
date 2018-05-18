@@ -6,6 +6,6 @@
     "jsdoc/require-param": 0,
     "jsdoc/require-param-name": 0,
     "jsdoc/require-param-type": 0,
-    "jsdoc/require-returns-type": 0,
+    "jsdoc/require-returns-type": 0
   }
 }
