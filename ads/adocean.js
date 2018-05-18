@@ -180,6 +180,7 @@ export function adocean(global, data) {
     'aoKeys',
     'aoVars',
     'aoClusters',
+    'npaOnUnknownConsent',
   ]);
 
   const mode = (data['aoMode'] != 'sync') ? 'buffered' : 'sync';
