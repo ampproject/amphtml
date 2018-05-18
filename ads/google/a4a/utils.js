@@ -92,6 +92,9 @@ export let NameframeExperimentConfig;
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
+/** @const {Object} */
+const CDN_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
+
 /**
  * Returns the value of navigation start using the performance API or 0 if not
  * supported by the browser.
@@ -254,7 +257,6 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
         const viewportSize = viewport.getSize();
         const visibilityState = Services.viewerForDoc(nodeOrDoc)
             .getVisibilityState();
-        const art = getBinaryTypeNumericalCode(getBinaryType(win));
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
@@ -274,7 +276,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'u_his': getHistoryLength(win),
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
-          'art': art == '0' ? null : art,
+          'art': getAmpRuntimeTypeParameter(win),
           'vis': visibilityStateCodes[visibilityState] || '0',
           'scr_x': viewport.getScrollLeft(),
           'scr_y': viewport.getScrollTop(),
@@ -889,4 +891,16 @@ function getBrowserCapabilitiesBitmap(win) {
     }
   }
   return browserCapabilities;
+}
+
+/**
+ * Returns an enum value representing the AMP binary type, or null if this is a
+ * canonical page.
+ *
+ * @return {?string}
+ * @visibleForTesting
+ */
+export function getAmpRuntimeTypeParameter(win) {
+  const art = getBinaryTypeNumericalCode(getBinaryType(win));
+  return CDN_REGEXP.test(win.location.href) && art != '0' ? art : null;
 }

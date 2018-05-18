@@ -21,6 +21,11 @@ const gulp = require('gulp-help')(require('gulp'));
 
 /**
  * Clean up the build artifacts
+<<<<<<< HEAD
+=======
+ *
+ * @param {Function} done callback
+>>>>>>> Carves out canonical pages from canary vs prod experiment.
  */
 function clean() {
   return del([

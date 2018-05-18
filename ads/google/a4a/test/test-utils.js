@@ -24,6 +24,7 @@ import {
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
   extractAmpAnalyticsConfig,
+  getAmpRuntimeTypeParameter,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
@@ -231,6 +232,38 @@ describe('Google A4A utils', () => {
     });
   });
 
+  describe('#getAmpRuntimeTypeParameter', () => {
+    it('should specify that this is canary', () => {
+      expect(getAmpRuntimeTypeParameter({
+        AMP_CONFIG: {type: 'canary'},
+        location: {href: 'https://www-pub-com.cdn.ampproject.org'},
+      })).to.equal('2');
+    });
+    it('should specify that this is control', () => {
+      expect(getAmpRuntimeTypeParameter({
+        AMP_CONFIG: {type: 'control'},
+        location: {href: 'https://www-pub-com.cdn.ampproject.org'},
+      })).to.equal('1');
+    });
+    it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
+      expect(getAmpRuntimeTypeParameter({
+        location: {href: 'https://www-pub-com.cdn.ampproject.org'},
+      })).to.be.null;
+    });
+    it('should not have `art` parameter when binary type is production', () => {
+      expect(getAmpRuntimeTypeParameter({
+        AMP_CONFIG: {type: 'production'},
+        location: {href: 'https://www-pub-com.cdn.ampproject.org'},
+      })).to.be.null;
+    });
+    it('should not have `art` parameter when canonical', () => {
+      expect(getAmpRuntimeTypeParameter({
+        AMP_CONFIG: {type: 'canary'},
+        location: {href: 'https://www.pub.com'},
+      })).to.be.null;
+    });
+  });
+
   describe('#googleAdUrl', () => {
     let sandbox;
 
@@ -260,86 +293,6 @@ describe('Google A4A utils', () => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
             expect(url1).to.match(/ady=11/);
             expect(url1).to.match(/adx=12/);
-          });
-        });
-      });
-    });
-
-    it('should specify that this is canary', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const {doc} = fixture;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = {type: 'canary'};
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/[&?]art=2/);
-          });
-        });
-      });
-    });
-    it('should specify that this is control', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const {doc} = fixture;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = {type: 'control'};
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/[&?]art=1/);
-          });
-        });
-      });
-    });
-    it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const {doc} = fixture;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.not.match(/[&?]art=/);
-          });
-        });
-      });
-    });
-    it('should not have `art` parameter when binary type is production', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const {doc} = fixture;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = {type: 'production'};
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.not.match(/[&?]art=/);
           });
         });
       });
