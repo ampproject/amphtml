@@ -21,7 +21,7 @@ import {
 import {closest, openWindowDialog} from '../../src/dom';
 import {dev} from '../../src/log';
 import {dict} from '../../src/utils/object';
-import {isLocalhostOrigin, isProxyOrigin, parseUrl} from '../../src/url';
+import {isLocalhostOrigin, isProxyOrigin, parseUrlDeprecated} from '../../src/url';
 import {startsWith} from '../../src/string';
 import {urls} from '../../src/config';
 
@@ -83,7 +83,7 @@ export function handleClick(e, opt_viewerNavigate) {
   const ancestors = win.location.ancestorOrigins;
   if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
     destination = destination.replace(
-        `${parseUrl(link.eventualUrl).host}/c/`,
+        `${parseUrlDeprecated(link.eventualUrl).host}/c/`,
         'http://localhost:8000/max/');
   }
   e.preventDefault();
@@ -133,7 +133,7 @@ function getEventualUrl(a) {
     return;
   }
   if (!isProxyOrigin(eventualUrl) ||
-      !startsWith(parseUrl(eventualUrl).pathname, '/c/')) {
+      !startsWith(parseUrlDeprecated(eventualUrl).pathname, '/c/')) {
     return;
   }
   return eventualUrl;
