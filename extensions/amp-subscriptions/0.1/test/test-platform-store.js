@@ -163,6 +163,7 @@ describes.realWin('Platform store', {}, () => {
       });
     });
   });
+
   describe('selectApplicablePlatform_', () => {
     let localPlatform;
     let anotherPlatform;
@@ -279,7 +280,6 @@ describes.realWin('Platform store', {}, () => {
     beforeEach(() => {
       errorSpy = sandbox.spy(user(), 'warn');
     });
-
     it('should report warning if all platforms fail and resolve '
         + 'local with fallbackEntitlement', () => {
       const platform = new SubscriptionPlatform();
@@ -431,5 +431,21 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('selectPlatformForLogin', () => {
+    it('should return the platform which ever supports viewer', () => {
+      const platform = new SubscriptionPlatform();
+      platform.getServiceId = () => 'service1';
+      platform.supportsCurrentViewer = () => true;
+      const localPlatform = new SubscriptionPlatform();
+      localPlatform.getServiceId = () => 'service2';
+      sandbox.stub(platformStore, 'getAvailablePlatforms')
+          .callsFake(() => [platform, localPlatform]);
+      sandbox.stub(platformStore, 'getLocalPlatform')
+          .callsFake(() => localPlatform);
+      const returnedPlatform = platformStore.selectPlatformForLogin();
+      expect(returnedPlatform.getServiceId()).to.be.equal(
+          platform.getServiceId());
+    });
+  });
 });
 

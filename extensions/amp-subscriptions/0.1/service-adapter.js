@@ -79,6 +79,15 @@ export class ServiceAdapter {
   getDialog() {
     return this.subscriptionService_.getDialog();
   }
+
+  /**
+   * Returns login platform based on platform selection
+   *
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   */
+  selectPlatformForLogin() {
+    return this.subscriptionService_.selectPlatformForLogin();
+  }
 }
 
 /** @package @VisibleForTesting */
