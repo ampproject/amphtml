@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
+import {Deferred, tryResolve} from '../utils/promise';
 import {Services} from '../services';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
@@ -84,9 +84,9 @@ export class History {
     this.binding_.setOnStateUpdated(this.onStateUpdated_.bind(this));
   }
 
-  /** @private */
-  cleanup_() {
-    this.binding_.cleanup_();
+  /** @visibleForTesting */
+  cleanup() {
+    this.binding_.cleanup();
   }
 
   /**
@@ -214,7 +214,10 @@ export class History {
     this.doPop_(historyState);
   }
 
-  /** @private */
+  /**
+   * @param {!HistoryStateDef} historyState
+   * @private
+   */
   doPop_(historyState) {
     if (this.stackIndex_ >= this.stackOnPop_.length - 1) {
       return;
@@ -299,8 +302,8 @@ export class History {
  */
 class HistoryBindingInterface {
 
-  /** @private */
-  cleanup_() {}
+  /** @protected */
+  cleanup() {}
 
   /**
    * Configures a callback to be called when the state has been updated.
@@ -345,7 +348,7 @@ class HistoryBindingInterface {
 
   /**
    * Replaces the state for local target navigation.
-   * @param unusedTarget
+   * @param {string} unusedTarget
    */
   replaceStateForTarget(unusedTarget) {}
 
@@ -480,7 +483,7 @@ export class HistoryBindingNatural_ {
   }
 
   /** @override */
-  cleanup_() {
+  cleanup() {
     if (this.origPushState_) {
       this.win.history.pushState = this.origPushState_;
     }
@@ -491,6 +494,7 @@ export class HistoryBindingNatural_ {
   }
 
   /**
+   * @param {number} stackIndex
    * @param {boolean=} opt_replace
    * @return {*}
    * @private
@@ -513,7 +517,7 @@ export class HistoryBindingNatural_ {
           this.getState_(),
           opt_stateUpdate || {});
       this.historyPushState_(updatedState);
-      return Promise.resolve(Object.assign({}, updatedState,
+      return tryResolve(() => Object.assign({}, updatedState,
           {stackIndex: this.stackIndex_}));
     });
   }
@@ -539,7 +543,7 @@ export class HistoryBindingNatural_ {
           opt_stateUpdate || {});
       this.historyReplaceState_(updatedState, '',
           '#' + (updatedState.fragment || ''));
-      return Promise.resolve(Object.assign({}, updatedState, {
+      return tryResolve(() => Object.assign({}, updatedState, {
         stackIndex: this.stackIndex_,
       }));
     });
@@ -547,7 +551,7 @@ export class HistoryBindingNatural_ {
 
   /** @override */
   get() {
-    return Promise.resolve(Object.assign({}, this.getState_(), {
+    return tryResolve(() => Object.assign({}, this.getState_(), {
       stackIndex: this.stackIndex_,
     }));
   }
@@ -650,13 +654,9 @@ export class HistoryBindingNatural_ {
    */
   wait_() {
     this.assertReady_();
-    let resolve;
-    let reject;
-    const promise = this.timer_.timeoutPromise(500,
-        new Promise((aResolve, aReject) => {
-          resolve = aResolve;
-          reject = aReject;
-        }));
+    const deferred = new Deferred();
+    const {resolve, reject} = deferred;
+    const promise = this.timer_.timeoutPromise(500, deferred.promise);
     this.waitingState_ = {promise, resolve, reject};
     return promise;
   }
@@ -822,7 +822,7 @@ export class HistoryBindingVirtual_ {
   }
 
   /** @override */
-  cleanup_() {
+  cleanup() {
     this.unlistenOnHistoryPopped_();
   }
 

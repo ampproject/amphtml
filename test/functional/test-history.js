@@ -45,7 +45,7 @@ describes.fakeWin('History', {
     clock = sandbox.useFakeTimers();
 
     const binding = {
-      cleanup_: () => {},
+      cleanup: () => {},
       setOnStateUpdated: callback => {
         onStateUpdated = callback;
       },
@@ -317,7 +317,7 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
   });
 
   afterEach(() => {
-    history.cleanup_();
+    history.cleanup();
   });
 
   it('should initialize correctly', () => {
@@ -337,7 +337,7 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
     expect(history2.startIndex_).to.equal(window.history.length - 2);
     expect(history.unsupportedState_['AMP.History']).to.equal(
         window.history.length - 2);
-    history2.cleanup_();
+    history2.cleanup();
     history.origReplaceState_({'AMP.History': window.history.length - 1},
         undefined);
     expect(onStateUpdated).to.have.not.been.called;
@@ -347,7 +347,7 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
     history.origReplaceState_({'a': 11}, undefined);
     const history2 = new HistoryBindingNatural_(window);
     expect(history.getState_()['a']).to.equal(11);
-    history2.cleanup_();
+    history2.cleanup();
     expect(onStateUpdated).to.have.not.been.called;
   });
 
@@ -555,7 +555,7 @@ describe('HistoryBindingVirtual', () => {
   });
 
   afterEach(() => {
-    history.cleanup_();
+    history.cleanup();
     sandbox.restore();
   });
 
@@ -703,7 +703,7 @@ describes.fakeWin('Local Hash Navigation', {
 
   afterEach(() => {
     if (history) {
-      history.cleanup_();
+      history.cleanup();
     }
   });
 
@@ -778,7 +778,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
   afterEach(() => {
     viewerMock.verify();
     if (history) {
-      history.cleanup_();
+      history.cleanup();
     }
   });
 
