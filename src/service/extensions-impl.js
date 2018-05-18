@@ -267,8 +267,7 @@ export class Extensions {
    * restricted method and it's allowed to be called only during the overall
    * extension registration.
    * @param {string} name
-   * @param {function(new:../base-element.BaseElement, !Element)}
-   *     implementationClass
+   * @param {function(new:../base-element.BaseElement, !Element)} implementationClass
    * @param {?string|undefined} css
    * @restricted
    */
