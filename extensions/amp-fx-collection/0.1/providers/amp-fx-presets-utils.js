@@ -97,7 +97,9 @@ export function defaultDurationValues(ampdoc, fxType) {
     case 'fly-in-left':
     case 'fly-in-right':
       const {width} = Services.viewportForDoc(ampdoc).getSize();
-      return mapRange(Math.min(1000, width), MAX_MOBILE_WIDTH, MAX_TABLET_WIDTH, 400, 600) + 'ms';
+      return mapRange(
+          Math.min(1000, width), MAX_MOBILE_WIDTH, MAX_TABLET_WIDTH, 400, 600)
+          + 'ms';
     default:
       return '1ms';
   }
