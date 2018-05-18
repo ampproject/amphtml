@@ -120,7 +120,7 @@ class AmpPoool extends AMP.BaseElement {
             this.updatePooolConfig_(
                 "config",
                 config,
-                this.element.getAttribute("data-"+config.replace("_", "-")),
+                this.element.getAttribute("data-"+config.replace(/_/g, "-")),
                 script,
                 PooolConfig[config].noString
             );
