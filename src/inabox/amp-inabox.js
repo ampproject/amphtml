@@ -30,7 +30,6 @@ import {
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
-import {installCacheServiceWorker} from '../service-worker/install';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
@@ -107,7 +106,6 @@ startupChunk(self.document, function initial() {
       Navigation.installAnchorClickInterceptor(ampdoc, self);
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
-      installCacheServiceWorker(self);
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');

@@ -55,8 +55,6 @@ requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'string.prototype.includes is not allowed'
   value: 'string.prototype.includes'
-  # SW code is modern-browser-only.
-  whitelist: 'src/service-worker/core.js'
 }
 
 requirement: {
