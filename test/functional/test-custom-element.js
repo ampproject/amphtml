@@ -572,8 +572,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
           .callsFake(() => {
             return Promise.resolve({
-              whenPolicyResolved: () => {
-                return Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
+              whenPolicyUnblock: () => {
+                return Promise.resolve(true);
               },
             });
           });
@@ -592,8 +592,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
           .callsFake(() => {
             return Promise.resolve({
-              whenPolicyResolved: () => {
-                return Promise.resolve(CONSENT_POLICY_STATE.INSUFFICIENT);
+              whenPolicyUnblock: () => {
+                return Promise.resolve(false);
               },
             });
           });
