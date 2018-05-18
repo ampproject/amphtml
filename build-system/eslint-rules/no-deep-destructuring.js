@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ module.exports = function(context) {
       if (node.parent.type !== 'Property') {
         return;
       }
-      context.report(node, 'No deep object destructuring allowed.');
+      context.report({node, message: 'No deep object destructuring allowed.'});
     },
   };
 };
