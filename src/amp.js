@@ -25,7 +25,6 @@ import {Services} from './services';
 import {adopt, installAmpdocServices, installBuiltins, installRuntimeServices} from './runtime';
 import {cssText} from '../build/css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
-import {installCacheServiceWorker} from './service-worker/install';
 import {installDocService} from './service/ampdoc-impl';
 import {installErrorReporting} from './error';
 import {installPerformanceService} from './service/performance-impl';
@@ -98,7 +97,6 @@ startupChunk(self.document, function initial() {
 
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
-      installCacheServiceWorker(self);
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
