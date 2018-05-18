@@ -573,6 +573,19 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should replace history state in setStateWithExpression()', () => {
+      const replaceHistorySpy =
+          env.sandbox.spy(bind.historyForTesting(), 'replace');
+      const promise = onBindReadyAndSetStateWithExpression(
+          env, bind, '{"onePlusOne": one + one}', {one: 1});
+      return promise.then(() => {
+        expect(replaceHistorySpy).calledOnce;
+        expect(replaceHistorySpy.firstCall.args[0].ampBindState)
+            .to.deep.equal({onePlusOne: 2});
+      });
+    });
+
+
     it('should support pushStateWithExpression()', () => {
       const pushHistorySpy =
           env.sandbox.spy(bind.historyForTesting(), 'push');
