@@ -393,7 +393,7 @@ export class VideoDocking {
 
   /** @private */
   updateOnResize_() {
-    this.observed_.forEach(video => this.onPositionChange_(video));
+    this.observed_.forEach(video => this.update_(video));
   }
 
   /** @param {!../../video-interface.VideoOrBaseElementDef} video */
@@ -403,7 +403,7 @@ export class VideoDocking {
     const {element} = video;
     const fidelity = PositionObserverFidelity.HIGH;
     this.getPositionObserver_().observe(element, fidelity,
-        () => this.onPositionChange_(video));
+        () => this.update_(video, /* onPositionChange */ true));
     this.observed_.push(video);
   }
 
@@ -600,11 +600,12 @@ export class VideoDocking {
 
   /**
    * Reconciliates the state of a docked or potentially dockable video when
-   * its position changes.
+   * something (viewport, position) changes.
    * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {boolean=} onPositionChange
    * @private
    */
-  onPositionChange_(video) {
+  update_(video, onPositionChange = false) {
     if (this.isDragging_) {
       return;
     }
@@ -620,7 +621,12 @@ export class VideoDocking {
     if (posY === null) {
       return;
     }
-    this.dock_(video, this.getRelativeX_(), posY);
+    const posX = this.getRelativeX_();
+    if (onPositionChange) {
+      this.dockOnPositionChange_(video, posX, posY);
+      return;
+    }
+    this.dock_(video, posX, posY);
   }
 
   /**
@@ -803,20 +809,33 @@ export class VideoDocking {
    * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
-   * @param {boolean=} finalize
    * @private
    */
-  dock_(video, posX, posY, finalize = false) {
+  dockOnPositionChange_(video, posX, posY) {
     if (this.ignoreDueToDismissal_(video)) {
       return;
     }
 
-    const {element} = video;
-    const step = finalize ? 1 : this.calculateStep_(element);
-
+    const step = this.calculateStep_(video.element);
     if (this.ignoreDueToTransitionEnd_(step)) {
       return;
     }
+
+    this.dock_(video, posX, posY, step);
+
+    this.getDockingTimeout_().trigger(DOCKING_TIMEOUT, video);
+  }
+
+  /**
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!RelativeX} posX
+   * @param {!RelativeY} posY
+   * @param {?number=} optStep
+   * @private
+   */
+  dock_(video, posX, posY, optStep = null) {
+    const step =
+      optStep !== null ? optStep : this.calculateStep_(video.element);
 
     const {x, y, scale} = this.getDims_(video, posX, posY, step);
 
@@ -825,8 +844,6 @@ export class VideoDocking {
     this.placeAt_(video, x, y, scale, step);
 
     this.setCurrentlyDocked_(video, posX, posY, step);
-
-    this.getDockingTimeout_().trigger(DOCKING_TIMEOUT, video);
   }
 
   /**
@@ -1087,7 +1104,7 @@ export class VideoDocking {
     const currentlyDocked = dev().assert(this.currentlyDocked_);
     const {posX, posY} = currentlyDocked;
 
-    this.dock_(video, posX, posY, /* finalize */ true);
+    this.dock_(video, posX, posY, /* step */ 1);
   }
 
   /**
@@ -1129,10 +1146,13 @@ export class VideoDocking {
     const {x, y} = pointerCoords(e);
 
     const offset = {x: 0, y: 0};
+    const {posX, posY} = this.currentlyDocked_;
 
     const onDragMove = throttleByAnimationFrame(this.ampdoc_.win,
         e => this.onDragMove_(
             /** @type {!TouchEvent|!MouseEvent} */ (e),
+            posX,
+            posY,
             /* initialX */ x,
             /* initialY */ y,
             offset));
@@ -1173,12 +1193,20 @@ export class VideoDocking {
 
   /**
    * @param {!MouseEvent|!TouchEvent} e
+   * @param {!RelativeX} startPosX
+   * @param {!RelativeY} startPosY
    * @param {number} startX
    * @param {number} startY
    * @param {{x: number, y: number}} offset
    * @private
    */
-  onDragMove_(e, startX, startY, offset) {
+  onDragMove_(e, startPosX, startPosY, startX, startY, offset) {
+    const {posX, posY} = this.currentlyDocked_;
+    if (posX !== startPosX || posY !== startPosY) {
+      // stale event
+      return;
+    }
+
     const {x, y} = pointerCoords(e);
     offset.x = x - startX;
     offset.y = y - startY;
@@ -1340,8 +1368,6 @@ export class VideoDocking {
         this.getDims_(video, closestCornerX, closestCornerY, step);
 
     this.placeAt_(video, x, y, scale, step, /* optTransitionDurationMs */ 200);
-
-    return false;
   }
 
   /**
@@ -1398,9 +1424,7 @@ export class VideoDocking {
   // Using `vw` and `vh` to disambiguate with `width` and `height` when
   // destructuring.
   getViewportSize_() {
-    const viewportSize = this.viewport_.getSize();
-    const {width: vw, height: vh} = viewportSize ;
-
+    const {width: vw, height: vh} = this.viewport_.getSize();
     return {vw, vh};
   }
 
