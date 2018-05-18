@@ -247,7 +247,7 @@ describes.sandboxed('StandardActions', {}, () => {
         });
       });
 
-      it('should pass if node does not implement navigationError()', () => {
+      it('should pass if node does not have throwIfCannotNavigate()', () => {
         invocation.node.tagName = 'AMP-FOO';
         invocation.node.getImpl = () => Promise.resolve({});
 
@@ -258,35 +258,35 @@ describes.sandboxed('StandardActions', {}, () => {
         });
       });
 
-      it('should check navigationError() for AMP elements', function*() {
+      it('should check throwIfCannotNavigate() for AMP elements', function*() {
         const userError = sandbox.stub(user(), 'error');
 
         invocation.node.tagName = 'AMP-FOO';
 
-        // Should succeed if navigationError() is not implemented.
+        // Should succeed if throwIfCannotNavigate() is not implemented.
         invocation.node.getImpl = () => Promise.resolve({});
         yield standardActions.handleAmpTarget(invocation);
         expect(navigator.navigateTo).to.be.calledOnce;
         expect(navigator.navigateTo).to.be.calledWithExactly(
             win, 'http://bar.com', 'AMP.navigateTo');
 
-        // Should succeed if navigationError() returns null.
+        // Should succeed if throwIfCannotNavigate() returns null.
         invocation.node.getImpl = () => Promise.resolve({
-          navigationError: () => null,
+          throwIfCannotNavigate: () => null,
         });
         yield standardActions.handleAmpTarget(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
         expect(navigator.navigateTo.getCall(1)).to.be.calledWithExactly(
             win, 'http://bar.com', 'AMP.navigateTo');
 
-        // Should fail if navigationError() returns an error.
+        // Should fail if throwIfCannotNavigate() throws an error.
         invocation.node.getImpl = () => Promise.resolve({
-          navigationError: () => new Error('Fake navigation error.'),
+          throwIfCannotNavigate: () => { throw new Error('Fake error.'); },
         });
         yield standardActions.handleAmpTarget(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
         expect(userError).to.be.calledWith('STANDARD-ACTIONS',
-            'Fake navigation error.');
+            'Fake error.');
       });
     });
 

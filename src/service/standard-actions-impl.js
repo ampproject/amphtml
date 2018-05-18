@@ -177,11 +177,8 @@ export class StandardActions {
     let permission = Promise.resolve();
     if (startsWith(node.tagName, 'AMP-')) {
       permission = node.getImpl().then(impl => {
-        if (typeof impl.navigationError == 'function') {
-          const error = impl.navigationError();
-          if (error) {
-            throw error;
-          }
+        if (typeof impl.throwIfCannotNavigate == 'function') {
+          impl.throwIfCannotNavigate();
         }
       });
     }

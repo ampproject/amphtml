@@ -729,8 +729,8 @@ describes.realWin('amp-iframe', {
           expect(iframe.getAttribute('src')).to.contain(newSrc);
         });
 
-    describe('navigationError()', () => {
-      it('should return null if top navigation is allowed', function*() {
+    describe('throwIfCannotNavigate()', () => {
+      it('should do nothing if top navigation is allowed', function*() {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           sandbox: 'allow-scripts allow-same-origin allow-top-navigation',
@@ -740,10 +740,10 @@ describes.realWin('amp-iframe', {
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
         const impl = ampIframe.implementation_;
         // Should be allowed if `allow-top-navigation` is set.
-        expect(impl.navigationError()).to.be.null;
+        expect(() => impl.throwIfCannotNavigate()).to.not.throw();
       });
 
-      it('should return error if top navigation is not allowed', function*() {
+      it('should throw error if top navigation is not allowed', function*() {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           sandbox: 'allow-scripts allow-same-origin',
@@ -753,9 +753,8 @@ describes.realWin('amp-iframe', {
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
         const impl = ampIframe.implementation_;
         // Should be allowed if `allow-top-navigation` is set.
-        const error = impl.navigationError();
-        expect(error).to.not.be.null;
-        expect(error.message).to.match(/allow-top-navigation/);
+        expect(() => impl.throwIfCannotNavigate())
+            .to.throw(/allow-top-navigation/);
       });
     });
 
