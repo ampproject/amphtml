@@ -61,7 +61,7 @@ describes.fakeWin('Video Docking', {amp: true}, env => {
     sandbox.stub(docking, 'getAreaWidth_').returns(319);
     stubLayoutBox(video, layoutRectLtwh(0, -200, 400, 300));
 
-    docking.update_(video, /* onPositionChange */ true);
+    docking.updateOnPositionChange_(video);
 
     expect(dock).to.not.have.been.called;
   });
@@ -75,7 +75,7 @@ describes.fakeWin('Video Docking', {amp: true}, env => {
 
     allowConsoleError(() => {
       // user().error() expected
-      docking.update_(video, /* onPositionChange */ true);
+      docking.updateOnPositionChange_(video);
     });
 
     expect(dock).to.not.have.been.called;
@@ -90,7 +90,7 @@ describes.fakeWin('Video Docking', {amp: true}, env => {
 
     docking.currentlyDocked_ = {video: createVideo()};
 
-    docking.update_(video, /* onPositionChange */ true);
+    docking.updateOnPositionChange_(video);
 
     expect(dock).to.not.have.been.called;
   });
@@ -105,7 +105,7 @@ describes.fakeWin('Video Docking', {amp: true}, env => {
     sandbox.stub(docking, 'getTopEdge_').returns(0);
     stubLayoutBox(video, layoutRectLtwh(0, -250, 400, 300), /* ratio */ 0.1667);
 
-    docking.update_(video, /* onPositionChange */ true);
+    docking.updateOnPositionChange_(video);
 
     expect(dock).to.have.been.calledOnce;
   });
@@ -120,7 +120,7 @@ describes.fakeWin('Video Docking', {amp: true}, env => {
     sandbox.stub(docking, 'getBottomEdge_').returns(400);
     stubLayoutBox(video, layoutRectLtwh(0, 650, 400, 300), /* ratio */ 0.1667);
 
-    docking.update_(video, /* onPositionChange */ true);
+    docking.updateOnPositionChange_(video);
 
     expect(dock).to.have.been.calledOnce;
   });
@@ -134,7 +134,7 @@ describes.fakeWin('Video Docking', {amp: true}, env => {
     stubLayoutBox(video, layoutRectLtwh(0, 1, 400, 300));
     sandbox.stub(docking, 'getAreaWidth_').returns(400);
 
-    docking.update_(video, /* onPositionChange */ true);
+    docking.updateOnPositionChange_(video);
 
     expect(dock).to.not.have.been.called;
   });

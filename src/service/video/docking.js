@@ -36,6 +36,7 @@ import {
   installPositionObserverServiceForDoc,
 } from '../position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../style-installer';
+import {isFiniteNumber} from '../../types';
 import {isRTL} from '../../dom';
 import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
@@ -366,7 +367,7 @@ export class VideoDocking {
           throttleByAnimationFrame(this.ampdoc_.win,
               () => this.updateScroll_()));
 
-      this.viewport_.onResize(() => this.updateOnResize_());
+      this.viewport_.onResize(() => this.updateAllOnResize_());
 
       this.installStyles_();
     });
@@ -392,8 +393,8 @@ export class VideoDocking {
   }
 
   /** @private */
-  updateOnResize_() {
-    this.observed_.forEach(video => this.update_(video));
+  updateAllOnResize_() {
+    this.observed_.forEach(video => this.updateOnResize_(video));
   }
 
   /** @param {!../../video-interface.VideoOrBaseElementDef} video */
@@ -403,7 +404,7 @@ export class VideoDocking {
     const {element} = video;
     const fidelity = PositionObserverFidelity.HIGH;
     this.getPositionObserver_().observe(element, fidelity,
-        () => this.update_(video, /* onPositionChange */ true));
+        () => this.updateOnPositionChange_(video));
     this.observed_.push(video);
   }
 
@@ -600,12 +601,12 @@ export class VideoDocking {
 
   /**
    * Reconciliates the state of a docked or potentially dockable video when
-   * something (viewport, position) changes.
+   * the viewport/position changes.
    * @param {!../../video-interface.VideoOrBaseElementDef} video
-   * @param {boolean=} onPositionChange
+   * @return {{posX: RelativeX, posY: RelativeY}|undefined}
    * @private
    */
-  update_(video, onPositionChange = false) {
+  update_(video) {
     if (this.isDragging_) {
       return;
     }
@@ -621,16 +622,35 @@ export class VideoDocking {
     if (posY === null) {
       return;
     }
-    const posX = this.getRelativeX_();
-    if (onPositionChange) {
-      this.dockOnPositionChange_(video, posX, posY);
-      return;
-    }
-    this.dock_(video, posX, posY);
+    return {posY, posX: this.getRelativeX_()};
   }
 
   /**
-   * @param  {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @private
+   */
+  updateOnResize_(video) {
+    const pos = this.update_(video);
+    if (!pos) {
+      return;
+    }
+    this.dock_(video, pos.posX, pos.posY);
+  }
+
+  /**
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @private
+   */
+  updateOnPositionChange_(video) {
+    const pos = this.update_(video);
+    if (!pos) {
+      return;
+    }
+    this.dockOnPositionChange_(video, pos.posX, pos.posY);
+  }
+
+  /**
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {number=} ratio
    * @param {number=} timeout
    * @return {boolean}
@@ -830,12 +850,14 @@ export class VideoDocking {
    * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
-   * @param {?number=} optStep
+   * @param {?number=} opt_step
    * @private
    */
-  dock_(video, posX, posY, optStep = null) {
+  dock_(video, posX, posY, opt_step = null) {
     const step =
-      optStep !== null ? optStep : this.calculateStep_(video.element);
+      isFiniteNumber(opt_step) ?
+        dev().assertNumber(opt_step) :
+        this.calculateStep_(video.element);
 
     const {x, y, scale} = this.getDims_(video, posX, posY, step);
 
@@ -1143,19 +1165,15 @@ export class VideoDocking {
       return;
     }
 
-    const {x, y} = pointerCoords(e);
+    const {x: initialX, y: initialY} = pointerCoords(e);
 
     const offset = {x: 0, y: 0};
-    const {posX, posY} = this.currentlyDocked_;
+    const {posX: currentPosX, posY: currentPosY} = this.currentlyDocked_;
 
     const onDragMove = throttleByAnimationFrame(this.ampdoc_.win,
         e => this.onDragMove_(
             /** @type {!TouchEvent|!MouseEvent} */ (e),
-            posX,
-            posY,
-            /* initialX */ x,
-            /* initialY */ y,
-            offset));
+            currentPosX, currentPosY, initialX, initialY, offset));
 
     const onDragEnd = () => this.onDragEnd_(unlisteners, offset);
 
