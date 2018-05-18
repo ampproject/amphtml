@@ -68,7 +68,7 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from './experiments';
-import {parseUrl} from './url';
+import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
@@ -449,7 +449,7 @@ export class MultidocManager {
     const amp = {};
     shadowRoot.AMP = amp;
     amp.url = url;
-    const {origin} = parseUrl(url);
+    const {origin} = parseUrlDeprecated(url);
 
     const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot);
     /** @const {!./service/ampdoc-impl.AmpDocShadow} */

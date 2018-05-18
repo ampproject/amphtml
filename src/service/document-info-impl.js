@@ -19,7 +19,7 @@ import {
   getSourceUrl,
   isProxyOrigin,
   parseQueryString,
-  parseUrl,
+  parseUrlDeprecated,
   resolveRelativeUrl,
 } from '../url';
 import {isArray} from '../types';
@@ -87,7 +87,7 @@ export class DocInfo {
     if (!canonicalUrl) {
       const canonicalTag = rootNode.querySelector('link[rel=canonical]');
       canonicalUrl = canonicalTag
-        ? parseUrl(canonicalTag.href).href
+        ? parseUrlDeprecated(canonicalTag.href).href
         : sourceUrl;
     }
     const pageViewId = getPageViewId(ampdoc.win);
@@ -212,11 +212,11 @@ function getReplaceUrlFromParameter(ampdoc, canonicalUrl) {
   if (!ampdoc.isSingleDoc()) {
     return null;
   }
-  const url = parseUrl(ampdoc.win.location.href);
+  const url = parseUrlDeprecated(ampdoc.win.location.href);
   if (!isProxyOrigin(url)) {
     return null;
   }
-  const replaceUrl = parseUrl(parseQueryString(url.search)['amp_r']);
+  const replaceUrl = parseUrlDeprecated(parseQueryString(url.search)['amp_r']);
   if (url.origin != replaceUrl.origin ||
       getSourceOrigin(url) != getSourceOrigin(replaceUrl)) {
     return null;
