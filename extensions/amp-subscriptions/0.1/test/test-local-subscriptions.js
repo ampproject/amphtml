@@ -169,20 +169,18 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
       const loginStub = sandbox.stub(
           localSubscriptionPlatform.serviceAdapter_,
-          'login'
-      ).callsFake(() => Promise.resolve(platform));
+          'selectPlatformForLogin'
+      ).callsFake(() => platform);
       const delegateStub = sandbox.stub(
           localSubscriptionPlatform.serviceAdapter_,
           'delegateActionToService'
       );
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.be.called;
-      return loginStub().then(() => {
-        expect(delegateStub).to.be.calledWith(
-            element.getAttribute('subscriptions-action'),
-            serviceId,
-        );
-      });
+      expect(delegateStub).to.be.calledWith(
+          element.getAttribute('subscriptions-action'),
+          serviceId,
+      );
     });
   });
 

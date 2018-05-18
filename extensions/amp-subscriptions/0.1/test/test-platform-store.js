@@ -431,33 +431,21 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
-  describe('getAllPlatforms', () => {
-    let platform1, platform2;
-
-    beforeEach(() => {
-      platform1 = new SubscriptionPlatform();
-      sandbox.stub(platform1, 'getServiceId').callsFake(() => 'service1');
-      platform2 = new SubscriptionPlatform();
-      sandbox.stub(platform2, 'getServiceId').callsFake(() => 'service2');
-    });
-
-    it('should resolve if already all platforms are resolved', () => {
-      platformStore.resolvePlatform('service1', platform1);
-      platformStore.resolvePlatform('service2', platform2);
-      return platformStore.getAllPlatforms().then(platforms => {
-        expect(platforms.length).to.be.equal(2);
-      });
-    });
-
-    it('should resolve when platforms are resolved', done => {
-      platformStore.resolvePlatform('service1', platform1);
-      platformStore.getAllPlatforms().then(platforms => {
-        expect(platforms.length).to.be.equal(2);
-        done();
-      });
-      platformStore.resolvePlatform('service2', platform2);
+  describe('selectPlatformForLogin', () => {
+    it('should return the platform which ever supports viewer', () => {
+      const platform = new SubscriptionPlatform();
+      platform.getServiceId = () => 'service1';
+      platform.supportsCurrentViewer = () => true;
+      const localPlatform = new SubscriptionPlatform();
+      localPlatform.getServiceId = () => 'service2';
+      sandbox.stub(platformStore, 'getAvailablePlatforms')
+          .callsFake(() => [platform, localPlatform]);
+      sandbox.stub(platformStore, 'getLocalPlatform')
+          .callsFake(() => localPlatform);
+      const returnedPlatform = platformStore.selectPlatformForLogin();
+      expect(returnedPlatform.getServiceId()).to.be.equal(
+          platform.getServiceId());
     });
   });
-
 });
 

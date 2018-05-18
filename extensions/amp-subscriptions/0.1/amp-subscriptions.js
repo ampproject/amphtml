@@ -459,27 +459,10 @@ export class SubscriptionService {
 
   /**
    * Evaluates platforms and select the one to be selected for login.
-   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
+   * @return {!./subscription-platform.SubscriptionPlatform}
    */
-  scoreBasedLogin() {
-    return this.platformStore_.getAllPlatforms().then(platforms => {
-      const platformScores = [];
-      platforms.forEach(platform => {
-        let score = 0;
-        if (platform.supportsCurrentViewer()) {
-          score += 1000;
-        }
-        platformScores.push({
-          platform,
-          score,
-        });
-      });
-
-      platformScores.sort(function(platform1, platform2) {
-        return platform2.weight - platform1.weight;
-      });
-      return platformScores[0].platform;
-    });
+  selectPlatformForLogin() {
+    this.platformStore_.selectPlatformForLogin();
   }
 }
 

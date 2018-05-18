@@ -145,27 +145,6 @@ export class PlatformStore {
   }
 
   /**
-   * Returns a promise which resolves when all platforms are resolved.
-   *
-   * @return {!Promise}
-   */
-  getAllPlatforms() {
-    const allPlatformPromise = new Deferred();
-    if (Object.keys(this.subscriptionPlatforms_).length
-        === this.serviceIds_.length) {
-      allPlatformPromise.resolve(this.getAvailablePlatforms());
-    } else {
-      this.onPlatformResolvedCallbacks_.add(() => {
-        const platformLength = Object.keys(this.subscriptionPlatforms_).length;
-        if (platformLength === this.serviceIds_.length) {
-          allPlatformPromise.resolve(this.getAvailablePlatforms());
-        }
-      });
-    }
-    return allPlatformPromise.promise;
-  }
-
-  /**
    * This registers a callback which is called whenever a service id is resolved
    * with an entitlement.
    * @param {function(!EntitlementChangeEventDef):void} callback
@@ -435,5 +414,33 @@ export class PlatformStore {
       this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
           this.fallbackEntitlement_);
     }
+  }
+
+  /**
+   * Evaluates platforms and select the one to be selected for login.
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   */
+  selectPlatformForLogin() {
+    const platformScores = [];
+    this.getAvailablePlatforms().forEach(platform => {
+      let score = 0;
+      if (platform.supportsCurrentViewer()) {
+        score += 1000;
+      }
+      platformScores.push({
+        platform,
+        score,
+      });
+    });
+
+    platformScores.sort(function(platform1, platform2) {
+      return platform2.weight - platform1.weight;
+    });
+
+    if (platformScores.length === 0 || platformScores[0].score === 0) {
+      return this.getLocalPlatform();
+    }
+
+    return platformScores[0].platform;
   }
 }

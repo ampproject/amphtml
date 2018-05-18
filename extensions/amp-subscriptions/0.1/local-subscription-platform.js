@@ -153,13 +153,10 @@ export class LocalSubscriptionPlatform {
       const action = element.getAttribute('subscriptions-action');
       if (element.getAttribute('subscriptions-service') === 'local') {
         this.executeAction(action);
-      } else if (!element.hasAttribute('subscriptions-service')
-          || element.getAttribute('subscriptions-service') === 'auto'
-          || element.getAttribute('subscriptions-service') === '') {
-        this.serviceAdapter_.login().then(platform => {
-          const serviceId = platform.getServiceId();
-          this.serviceAdapter_.delegateActionToService(action, serviceId);
-        });
+      } else if ((element.getAttribute('subscriptions-service') || 'auto')
+        == 'auto') {
+        const platform = this.serviceAdapter_.selectPlatformForLogin();
+        this.serviceAdapter_.delegateActionToService(action, platform.getServiceId());
       } else if (element.getAttribute('subscriptions-service')) {
         const serviceId = element.getAttribute('subscriptions-service');
         this.serviceAdapter_.delegateActionToService(action, serviceId);
