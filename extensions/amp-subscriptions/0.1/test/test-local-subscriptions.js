@@ -136,6 +136,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     beforeEach(() => {
       element = document.createElement('div');
       element.setAttribute('subscriptions-action', 'subscribe');
+      element.setAttribute('subscriptions-service', 'local');
     });
 
     it('should call executeAction with subscriptions-action value', () => {
@@ -158,6 +159,46 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       localSubscriptionPlatform.handleClick_(element);
       expect(executeStub).to.not.be.called;
       expect(delegateStub).to.be.called;
+    });
+
+    it('should delegate service selection to scoreBasedLogin if no service '
+        + 'name is specified', () => {
+      element.removeAttribute('subscriptions-service');
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'selectPlatformForLogin'
+      ).callsFake(() => platform);
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.be.called;
+      expect(delegateStub).to.be.calledWith(
+          element.getAttribute('subscriptions-action'),
+          serviceId,
+      );
+    });
+
+    it('should delegate service selection to scoreBasedLogin '
+      + 'service specified is auto', () => {
+      element.removeAttribute('subscriptions-service');
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'selectPlatformForLogin'
+      ).callsFake(() => platform);
+      sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.be.called;
     });
   });
 
