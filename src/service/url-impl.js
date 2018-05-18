@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../src/utils/lru-cache.js';
+import {LruCache} from '../utils/lru-cache';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
