@@ -909,8 +909,7 @@ export class AmpStory extends AMP.BaseElement {
       this.nextPage_ = null;
     }
 
-    const prevPageId = targetPage.getPreviousPageId(
-        /* opt_isAutomaticAdvance */ false);
+    const prevPageId = targetPage.getPreviousPageId();
     if (prevPageId) {
       this.previousPage_ = this.getPageById(prevPageId);
       setAtributeInMutate(this.previousPage_, Attributes.PREVIOUS);
