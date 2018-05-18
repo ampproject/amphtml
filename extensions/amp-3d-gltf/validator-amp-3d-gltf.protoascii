@@ -36,15 +36,6 @@ tags: {  # <amp-3d-gltf>
     supported_layouts: RESPONSIVE
   }
   attrs: {
-    name: "src"
-    mandatory: true
-    value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
-      allowed_protocol: "http"
-    }
-  }
-  attrs: {
     name: "alpha"
     value_regex: "[+-](\d*\.)?\d+"
   }
@@ -53,15 +44,24 @@ tags: {  # <amp-3d-gltf>
     value_regex: "(true|false)"
   }
   attrs: {
-    name: "maxPixelRatio"
-    value_regex: "[+-](\d*\.)?\d+"
+    name: "autoRotate"
+    value_regex: "(true|false)"
   }
   attrs: {
     name: "enableZoom"
     value_regex: "(true|false)"
   }
   attrs: {
-    name: "autoRotate"
-    value_regex: "(true|false)"
+    name: "maxPixelRatio"
+    value_regex: "[+-](\d*\.)?\d+"
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      allowed_protocol: "http"
+    }
   }
 }
