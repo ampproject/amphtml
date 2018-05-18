@@ -66,6 +66,9 @@ export class LruCache {
     this.evict_();
   }
 
+  /**
+   * Evicts the oldest cache entry, if we've exceeded capacity.
+   */
   evict_() {
     if (this.size_ <= this.capacity_) {
       return;
