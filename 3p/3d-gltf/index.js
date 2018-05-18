@@ -20,7 +20,7 @@ import {loadScript} from '../3p';
 import {parseJson} from '../../src/json';
 import {user} from '../../src/log';
 
-import GltfViewer from './Viewer';
+import GltfViewer from './viewer';
 
 const seq = (taskA, taskB) => cb => taskA(() => taskB(cb));
 const parallel = (taskA, taskB) => cb => {

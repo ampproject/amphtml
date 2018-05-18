@@ -17,7 +17,7 @@
 /* global THREE */
 
 import {setStyle} from '../../src/style';
-import AnimationLoop from './AnimationLoop';
+import AnimationLoop from './animation-loop';
 
 const resolveURL = (url, path) => {
   // Invalid URL
