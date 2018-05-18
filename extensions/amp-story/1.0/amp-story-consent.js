@@ -36,7 +36,11 @@ const TAG = 'amp-story-consent';
 // TODO(gmajoulet): switch to `htmlFor` static template helper.
 /**
  * Story consent template.
- * @private @const {function(!Object, string, ?string):!./simple-template.ElementDef}
+ * @param {!Object} config
+ * @param {string} consentId
+ * @param {?string} logoSrc
+ * @return {!./simple-template.ElementDef}
+ * @private @const
  */
 const getTemplate = (config, consentId, logoSrc) => ({
   tag: 'div',
