@@ -585,12 +585,12 @@ export class GlobalVariableSource extends VariableSource {
       return Services.performanceFor(this.ampdoc.win).getMakeBodyVisible();
     });
 
-    this.setAsync('AMP_STATE', expression => {
+    this.setAsync('AMP_STATE', key => {
       return Services.bindForDocOrNull(this.ampdoc).then(bind => {
         if (!bind) {
           return '';
         }
-        return bind.evaluateExpression(expression, {})
+        return bind.getStateValue(key)
             .then(result => {
               if (isObject(result) || isArray(result)) {
                 return JSON.stringify(result);
@@ -761,7 +761,10 @@ export class GlobalVariableSource extends VariableSource {
  * @package For export
  */
 export class UrlReplacements {
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!VariableSource} variableSource
+   */
   constructor(ampdoc, variableSource) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
@@ -779,8 +782,7 @@ export class UrlReplacements {
    * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
-   * opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
    *     names that can be substituted.
@@ -809,8 +811,7 @@ export class UrlReplacements {
    * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
-   * opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
    *     names that can be substituted.
@@ -895,7 +896,7 @@ export class UrlReplacements {
 
   /**
    * Returns a replacement whitelist from elements' data-amp-replace attribute.
-   * @param {!Element} element.
+   * @param {!Element} element
    * @param {!Object<string, boolean>=} opt_supportedReplacement Optional supported
    * replacement that filters whitelist to a subset.
    * @return {!Object<string, boolean>|undefined}
@@ -919,7 +920,7 @@ export class UrlReplacements {
 
   /**
     * Returns whether variable substitution is allowed for given url.
-    * @param {!Location} url.
+    * @param {!Location} url
     * @return {boolean}
     */
   isAllowedOrigin_(url) {

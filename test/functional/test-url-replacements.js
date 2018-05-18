@@ -417,11 +417,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('Should replace AMP_STATE(expression)', () => {
+  it('Should replace AMP_STATE(key)', () => {
     const win = getFakeWindow();
     sandbox.stub(Services, 'bindForDocOrNull').returns(Promise.resolve({
-      evaluateExpression(expression) {
-        expect(expression).to.equal('foo.bar');
+      getStateValue(key) {
+        expect(key).to.equal('foo.bar');
         return Promise.resolve('baz');
       },
     }));

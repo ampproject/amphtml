@@ -28,6 +28,7 @@ import {dev, user} from '../../../src/log';
 import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {filterSplice} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
+import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -278,7 +279,7 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    this.setStatePromise_ = this.evaluateExpression(expression, scope)
+    this.setStatePromise_ = this.evaluateExpression_(expression, scope)
         .then(result => this.setState(result));
     return this.setStatePromise_;
   }
@@ -292,7 +293,7 @@ export class Bind {
    * @return {!Promise}
    */
   pushStateWithExpression(expression, scope) {
-    return this.evaluateExpression(expression, scope).then(result => {
+    return this.evaluateExpression_(expression, scope).then(result => {
       // Store the current values of each referenced variable in `expression`
       // so that we can restore them on history-pop.
       const oldState = map();
@@ -335,6 +336,14 @@ export class Bind {
         });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
+  }
+
+  /**
+   * @param {string} key
+   * @return {*}
+   */
+  getStateValue(key) {
+    return getValueForExpr(this.state, key);
   }
 
   /**
@@ -547,7 +556,6 @@ export class Bind {
    * @param {!Array<!Node>} nodes
    * @return {!Promise}
    * @private
-   * @visibleForTesting
    */
   removeBindingsForNodes_(nodes) {
     const before = (getMode().development) ? this.numberOfBindings() : 0;
@@ -736,7 +744,7 @@ export class Bind {
    * @param {!JsonObject} scope
    * @return {!Promise<!JsonObject>}
    */
-  evaluateExpression(expression, scope) {
+  evaluateExpression_(expression, scope) {
     return this.initializePromise_.then(() => {
       // Allow expression to reference current state in addition to event state.
       Object.assign(scope, this.state_);
@@ -928,7 +936,7 @@ export class Bind {
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
    * @param {./bind-expression.BindExpressionResultDef} newValue
-   * @return (?{name: string, value:./bind-expression.BindExpressionResultDef})
+   * @return {?{name: string, value:./bind-expression.BindExpressionResultDef}}
    * @private
    */
   applyBinding_(boundProperty, element, newValue) {
