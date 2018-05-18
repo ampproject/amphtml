@@ -26,9 +26,6 @@ import {user} from '../../../../../src/log';
  */
 export let HeadingComponentDef;
 
-/** @type {string} */
-export const TAG = 'amp-story-bookend';
-
 /**
  * Builder class for the heading component that sits on top of a given set of
  * components in the bookend.
