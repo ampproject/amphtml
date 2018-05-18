@@ -95,6 +95,14 @@
       "name": "AMP Layout"
     },
     {
+      "url": "examples/visual-tests/article-fade-in.amp.html",
+      "name": "fade-in & fade-in-scroll",
+      "loading_complete_css": [
+        ".overlay-container",
+        ".overflow-window"
+      ]
+    },
+    {
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
       "name": "Fonts 404",
       "forbidden_css": [
