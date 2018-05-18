@@ -68,7 +68,7 @@ A required attribute that specifies the URL to the gltf file.
 
 ##### alpha [optional]
 
-A Boolean attribute that specifies whether to see through free space on canvas. By default, free space is filled with black.
+A Boolean attribute that specifies whether free space on canvas is transparent. By default, free space is filled with black.
 Default value is `false`.
 
 ##### antialiasing [optional]
@@ -84,7 +84,7 @@ A Boolean attribute that specifies whether to automatically rotate the camera ar
 
 ##### enableZoom [optional]
 
-A Boolean attribute that specifies whether to turn on zoom.  Default value is `true`.
+A Boolean attribute that specifies whether to turn on zoom. Default value is `true`.
 
 ## Validation
 See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii) in the AMP validator specification.
