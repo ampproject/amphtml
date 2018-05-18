@@ -91,7 +91,7 @@ const realWinConfigAmpAd = {
  * @param {!Element} element
  * @param {!AmpAdNetworkDoubleclickImpl} impl
  * @param {!Object} env
- * @return The iframe promise.
+ * @return {!Array} The iframe promise.
  */
 function createImplTag(config, element, impl, env) {
   config.type = 'doubleclick';
