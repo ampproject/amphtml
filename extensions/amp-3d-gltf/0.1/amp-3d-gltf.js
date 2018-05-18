@@ -20,6 +20,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
+import {assertHttpsUrl} from '../../../src/url';
 
 const isWebGLSupported = () => {
   const canvas = document.createElement('canvas');
@@ -88,8 +89,12 @@ export class Amp3dGltf extends AMP.BaseElement {
     const string = x => x;
     const number = x => parseFloat(x);
 
+    const src = assertHttpsUrl(
+        getOption('src', string, ''),
+        this.element);
+
     this.context_ = dict({
-      'src': getOption('src', string, ''),
+      'src': src,
       'renderer': {
         'alpha': getOption('alpha', bool, false),
         'antialias': getOption('antialiasing', bool, true),

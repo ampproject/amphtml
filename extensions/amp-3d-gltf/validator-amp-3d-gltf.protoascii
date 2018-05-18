@@ -61,7 +61,6 @@ tags: {  # <amp-3d-gltf>
     value_url: {
       allow_relative: true
       allowed_protocol: "https"
-      allowed_protocol: "http"
     }
   }
 }
