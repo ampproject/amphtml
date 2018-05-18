@@ -18,7 +18,7 @@ import {
   checkCorsUrl,
   getSourceUrl,
   isProxyOrigin,
-  parseUrl,
+  parseUrlDeprecated,
   resolveRelativeUrl,
 } from './url';
 import {dict, map} from './utils/object';
@@ -496,7 +496,7 @@ export function rewriteAttributeValue(tagName, attrName, attrValue) {
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   checkCorsUrl(attrValue);
   const isProxyHost = isProxyOrigin(windowLocation);
-  const baseUrl = parseUrl(getSourceUrl(windowLocation));
+  const baseUrl = parseUrlDeprecated(getSourceUrl(windowLocation));
 
   if (attrName == 'href' && !startsWith(attrValue, '#')) {
     return resolveRelativeUrl(attrValue, baseUrl);
@@ -560,7 +560,7 @@ function tripleMustacheTagPolicy(tagName, attribs) {
  * @return {string}
  */
 function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
-  const src = parseUrl(resolveRelativeUrl(attrValue, baseUrl));
+  const src = parseUrlDeprecated(resolveRelativeUrl(attrValue, baseUrl));
 
   // URLs such as `data:` or proxy URLs are returned as is. Unsafe protocols
   // do not arrive here - already stripped by the sanitizer.

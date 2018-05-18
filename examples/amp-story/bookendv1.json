@@ -2,7 +2,8 @@
   "bookend-version": "v1.0",
   "share-providers": [
     "email",
-    {"provider": "facebook", "app-id": "254325784911610"},
+    {"provider": "facebook", "app_id": "254325784911610"},
+    {"provider": "twitter", "text": "This is custom share text that I would like for the Twitter platform"},
     "whatsapp"
   ],
   "components": [
@@ -45,9 +46,10 @@
       "image": "http://placehold.it/312x416"
     },
     {
-      "type": "small",
-      "title": "This is an example article",
+      "type": "landscape",
+      "title": "TRAPPIST-1 Planets May Still Be Wet Enough for Life",
       "url": "http://example.com/article.html",
+      "category": "astronomy",
       "image": "http://placehold.it/256x128"
     },
     {
@@ -77,6 +79,19 @@
           "text": "longtext longtext longtext longtext longtext longtext longt",
           "url": "google.com"
         }
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "credits"
+    },
+    {
+      "type": "textbox",
+      "text": [
+        "Food by Enrique McPizza",
+        "Choreography by Gabriel Filly",
+        "Script by Alan Ecma S.",
+        "Direction by Jon Tarantino"
       ]
     }
   ]

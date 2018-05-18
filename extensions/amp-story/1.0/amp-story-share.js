@@ -22,7 +22,7 @@ import {
 } from '../../../src/clipboard';
 import {dev, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
-import {isArray, isObject} from '../../../src/types';
+import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
@@ -116,6 +116,7 @@ function buildProviderParams(opt_params) {
 
   if (opt_params) {
     Object.keys(opt_params).forEach(field => {
+      if (field === 'provider') { return; }
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }
@@ -322,67 +323,26 @@ export class ShareWidget {
   }
 
   /**
-   * TODO(#14591): Remove when bookend API v0.1 is deprecated. If using the
-   * bookend API v1.0, converts the contents to match with the bookend API v0.1.
-   * @param {!Array<!Object|string>} providers
-   * @return {!Object<string, (!JsonObject|boolean)>}
-   */
-  parseToClassicApi_(providers) {
-    const providersMap = {};
-
-    providers.forEach(currentProvider => {
-      if (!isObject(currentProvider)) {
-        providersMap[currentProvider] = true;
-        return;
-      }
-      if (currentProvider['provider'] == 'facebook') {
-        providersMap['facebook'] = ({'app_id': currentProvider['app-id']});
-        return;
-      }
-      providersMap[currentProvider['provider']] = true;
-    });
-
-    return providersMap;
-  }
-
-  /**
    * @param {(!Object<string, (!JsonObject|boolean)> | !Array<!Object|string>)} providers
    * @private
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
-    // TODO(#14591): Check if using bookend API v1.0 and convert it to be v0.1
-    // compatible if so.
-    if (providers && isArray(providers)) {
-      providers = this.parseToClassicApi_(
-          /** @type !Array<!Object|string> */ (providers));
-    }
+    providers.forEach(provider => {
+      if (isObject(provider)) {
+        this.add_(buildProvider(this.win.document,
+            provider['provider'], provider));
+        return;
+      }
 
-    Object.keys(providers).forEach(type => {
-      if (type == 'system') {
+      if (provider == 'system') {
         user().warn('AMP-STORY',
             '`system` is not a valid share provider type. Native sharing is ' +
             'enabled by default and cannot be turned off.',
-            type);
+            provider);
         return;
       }
-
-      if (isObject(providers[type])) {
-        this.add_(buildProvider(this.win.document, type,
-            /** @type {!JsonObject} */ (providers[type])));
-        return;
-      }
-
-      // Bookend config API requires real boolean, not just truthy
-      if (providers[type] === true) {
-        this.add_(buildProvider(this.win.document, type));
-        return;
-      }
-
-      user().warn('AMP-STORY',
-          'Invalid amp-story bookend share configuration for %s. ' +
-          'Value must be `true` or a params object.',
-          type);
+      this.add_(buildProvider(this.win.document, provider));
     });
   }
 

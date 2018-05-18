@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseUrl} from './url';
+import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, user} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
@@ -89,7 +89,7 @@ export function getIframe(
 
   const baseUrl = getBootstrapBaseUrl(
       parentWindow, undefined, opt_type, opt_disallowCustom);
-  const host = parseUrl(baseUrl).hostname;
+  const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
@@ -103,7 +103,7 @@ export function getIframe(
   }));
 
   iframe.src = baseUrl;
-  iframe.ampLocation = parseUrl(baseUrl);
+  iframe.ampLocation = parseUrlDeprecated(baseUrl);
   iframe.name = name;
   // Add the check before assigning to prevent IE throw Invalid argument error
   if (attributes['width']) {
@@ -303,9 +303,9 @@ function getCustomBootstrapBaseUrl(
   // This is not a security primitive, we just don't want this to happen in
   // practice. People could still redirect to the same origin, but they cannot
   // redirect to the proxy origin which is the important one.
-  const parsed = parseUrl(url);
+  const parsed = parseUrlDeprecated(url);
   user().assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
-      parsed.origin != parseUrl(parentWindow.location.href).origin,
+      parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
   '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
