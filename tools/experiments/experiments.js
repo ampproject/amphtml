@@ -16,6 +16,7 @@
 
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
+import {Deferred} from '../../src/utils/promise';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
@@ -490,18 +491,19 @@ function showConfirmation_(message, callback) {
  * experiment state can reflect the default activated experiments.
  */
 function getAmpConfig() {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', () => {
-      resolve(xhr.responseText);
-    });
-    xhr.addEventListener('error', () => {
-      reject(new Error(xhr.statusText));
-    });
-    // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
-    xhr.open('GET', '/v0.js?' + Math.random(), true);
-    xhr.send(null);
-  }).then(text => {
+  const deferred = new Deferred();
+  const {promise, resolve, reject} = deferred;
+  const xhr = new XMLHttpRequest();
+  xhr.addEventListener('load', () => {
+    resolve(xhr.responseText);
+  });
+  xhr.addEventListener('error', () => {
+    reject(new Error(xhr.statusText));
+  });
+  // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
+  xhr.open('GET', '/v0.js?' + Math.random(), true);
+  xhr.send(null);
+  return promise.then(text => {
     const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
     if (!match) {
       throw new Error('Can\'t find AMP_CONFIG in: ' + text);
