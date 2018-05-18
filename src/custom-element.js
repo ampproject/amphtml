@@ -45,6 +45,7 @@ import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {toWin} from './types';
+import {tryResolve} from '../src/utils/promise';
 
 const TAG = 'CustomElement';
 
@@ -111,6 +112,7 @@ export function createCustomElementClass(win, name) {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
+     * @param {HTMLElement} self
      */
     constructor(self) {
       return super(self);
@@ -139,6 +141,7 @@ function createBaseCustomElementClass(win) {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
+     * @param {HTMLElement} self
      */
     constructor(self) {
       self = super(self);
@@ -1041,9 +1044,11 @@ function createBaseCustomElementClass(win) {
       if (this.perfOn_) {
         this.getLayoutDelayMeter_().startLayout();
       }
-      const promise = this.implementation_.layoutCallback();
+
+      const promise = tryResolve(() => this.implementation_.layoutCallback());
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
+
       return promise.then(() => {
         if (isLoadEvent) {
           this.signals_.signal(CommonSignals.LOAD_END);
@@ -1274,8 +1279,8 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when one or more attributes are mutated.
-     * @note Must be called inside a mutate context.
-     * @note Boolean attributes have a value of `true` and `false` when
+     * Note Must be called inside a mutate context.
+     * Note Boolean attributes have a value of `true` and `false` when
      *       present and missing, respectively.
      * @param {
      *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
