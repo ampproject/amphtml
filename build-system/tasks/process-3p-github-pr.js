@@ -13,6 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * This script auto triage pull requests from 3P.
+ * It supports:
+ * 1. Triaging and 3P ad service integration PR.
+ */
+
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
