@@ -417,7 +417,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('Should replace AMP_STATE(key)', () => {
+  it('should replace AMP_STATE(key)', () => {
     const win = getFakeWindow();
     sandbox.stub(Services, 'bindForDocOrNull').returns(Promise.resolve({
       getStateValue(key) {

@@ -343,7 +343,7 @@ export class Bind {
    * @return {*}
    */
   getStateValue(key) {
-    return getValueForExpr(this.state, key);
+    return getValueForExpr(this.state_, key);
   }
 
   /**
