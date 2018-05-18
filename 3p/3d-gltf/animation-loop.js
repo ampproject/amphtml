@@ -56,8 +56,8 @@ export default class AnimationLoop {
     }
 
     if (this.needsUpdate) {
-      this.task_();
       this.needsUpdate = false;
+      this.task_();
     }
 
     this.currentRAF_ = requestAnimationFrame(this.loop_);
