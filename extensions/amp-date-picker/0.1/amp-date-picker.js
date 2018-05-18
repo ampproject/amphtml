@@ -1308,6 +1308,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   /**
    * Render the template that corresponds to the date with its data.
    * @param {!moment} date
+   * @return {!Promise<string>}
    * @private
    */
   renderDayTemplate_(date) {
