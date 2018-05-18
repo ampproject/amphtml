@@ -26,7 +26,7 @@ const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
-const {getStdout} = require('../exec');
+const {gitDiffNameOnlyMaster} = require('../git');
 
 const isWatching = (argv.watch || argv.w) || false;
 const filesInARefactorPr = 15;
@@ -125,10 +125,8 @@ function runLinter(path, stream, options) {
  *
  * @return {!Array<string>}
  */
-function jsFilesInPr() {
-  const filesInPr =
-        getStdout('git diff --name-only master...HEAD').trim().split('\n');
-  return filesInPr.filter(function(file) {
+function jsFilesChanged() {
+  return gitDiffNameOnlyMaster().filter(function(file) {
     return path.extname(file) == '.js';
   });
 }
@@ -139,13 +137,11 @@ function jsFilesInPr() {
  *
  * @return {boolean}
  */
-function eslintrcChangesInPr() {
+function eslintrcChanged() {
   if (process.env.TRAVIS_EVENT_TYPE === 'push') {
     return false;
   }
-  const filesInPr =
-        getStdout('git diff --name-only master...HEAD').trim().split('\n');
-  return filesInPr.filter(function(file) {
+  return gitDiffNameOnlyMaster().filter(function(file) {
     return path.basename(file).includes('.eslintrc');
   }).length > 0;
 }
@@ -159,8 +155,10 @@ function setFilesToLint(files) {
   config.lintGlobs =
       config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
   if (!process.env.TRAVIS) {
-    log(colors.green('INFO: ') + 'Running lint on ' +
-        colors.cyan(files.join(',')));
+    log(colors.green('INFO: ') + 'Running lint on the following files:');
+    files.forEach(file => {
+      log(colors.cyan(file));
+    });
   }
 }
 
@@ -185,11 +183,11 @@ function lint() {
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
     enableStrictLinting();
-  } else if (!eslintrcChangesInPr() &&
+  } else if (!eslintrcChanged() &&
       (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
        process.env.LOCAL_PR_CHECK ||
        argv['local-changes'])) {
-    const jsFiles = jsFilesInPr();
+    const jsFiles = jsFilesChanged();
     if (jsFiles.length == 0) {
       log(colors.green('INFO: ') + 'No JS files in this PR');
       return Promise.resolve();
