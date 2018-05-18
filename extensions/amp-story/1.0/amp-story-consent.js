@@ -36,7 +36,11 @@ const TAG = 'amp-story-consent';
 // TODO(gmajoulet): switch to `htmlFor` static template helper.
 /**
  * Story consent template.
- * @private @const {function(!Object, string, ?string):!./simple-template.ElementDef}
+ * @param {!Object} config
+ * @param {string} consentId
+ * @param {?string} logoSrc
+ * @return {!./simple-template.ElementDef}
+ * @private @const
  */
 const getTemplate = (config, consentId, logoSrc) => ({
   tag: 'div',
@@ -171,8 +175,11 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.win.document, getTemplate(storyConsentConfig, consentId, logoSrc));
     createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
+    // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
+    this.actions_.addToWhitelist('AMP-CONSENT.accept');
+    this.actions_.addToWhitelist('AMP-CONSENT.reject');
+
     this.initializeListeners_();
-    this.addActionsToWhitelist_();
   }
 
   /** @override */
@@ -229,22 +236,6 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     this.element.getResources()
         .measureMutateElement(this.storyConsentEl_, measurer, mutator);
-  }
-
-  /**
-   * Allows the consent related actions.
-   * @private
-   */
-  addActionsToWhitelist_() {
-    dev().assert(this.consentConfig_, `${TAG}: Consent config must be parsed ` +
-        'before adding the actions to the whitelist.');
-
-    const consentIds = Object.keys(this.consentConfig_.consents);
-
-    consentIds.forEach(consentId => {
-      this.actions_.addToWhitelist(`${consentId}.accept`);
-      this.actions_.addToWhitelist(`${consentId}.reject`);
-    });
   }
 
   /**
