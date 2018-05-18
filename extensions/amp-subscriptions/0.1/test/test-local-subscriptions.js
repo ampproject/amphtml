@@ -182,6 +182,24 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
           serviceId,
       );
     });
+
+    it('should delegate service selection to scoreBasedLogin '
+      + 'service specified is auto', () => {
+      element.removeAttribute('subscriptions-service');
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'selectPlatformForLogin'
+      ).callsFake(() => platform);
+      sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.be.called;
+    });
   });
 
   describe('executeAction', () => {
