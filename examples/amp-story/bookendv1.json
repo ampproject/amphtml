@@ -79,6 +79,19 @@
           "url": "google.com"
         }
       ]
+    },
+    {
+      "type": "heading",
+      "text": "credits"
+    },
+    {
+      "type": "textbox",
+      "text": [
+        "Food by Enrique McPizza",
+        "Choreography by Gabriel Filly",
+        "Script by Alan Ecma S.",
+        "Direction by Jon Tarantino"
+      ]
     }
   ]
 }

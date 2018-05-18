@@ -21,6 +21,7 @@ import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LandscapeComponent} from '../bookend/components/landscape';
 import {LocalizationService} from '../localization';
+import {TextBoxComponent} from '../bookend/components/text-box';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -71,6 +72,15 @@ describes.realWin('amp-story-bookend', {
       'url': 'http://example.com/article.html',
       'category': 'astronomy',
       'image': 'http://placehold.it/256x128',
+    },
+    {
+      'type': 'textbox',
+      'text': [
+        'Food by Enrique McPizza',
+        'Choreography by Gabriel Filly',
+        'Script by Alan Ecma S.',
+        'Direction by Jon Tarantino',
+      ],
     },
   ];
 
@@ -164,6 +174,15 @@ describes.realWin('amp-story-bookend', {
           'category': 'astronomy',
           'image': 'http://placehold.it/256x128',
         },
+        {
+          'type': 'textbox',
+          'text': [
+            'Food by Enrique McPizza',
+            'Choreography by Gabriel Filly',
+            'Script by Alan Ecma S.',
+            'Direction by Jon Tarantino',
+          ],
+        },
       ],
     };
 
@@ -222,6 +241,15 @@ describes.realWin('amp-story-bookend', {
           'url': 'http://example.com/article.html',
           'category': 'astronomy',
           'image': 'http://placehold.it/256x128',
+        },
+        {
+          'type': 'textbox',
+          'text': [
+            'Food by Enrique McPizza',
+            'Choreography by Gabriel Filly',
+            'Script by Alan Ecma S.',
+            'Direction by Jon Tarantino',
+          ],
         },
       ],
     };
@@ -289,8 +317,7 @@ describes.realWin('amp-story-bookend', {
         },
         {
           'type': 'cta-link',
-          'links': [
-          ],
+          'links': [],
         },
       ],
     };
@@ -334,6 +361,40 @@ describes.realWin('amp-story-bookend', {
       expect(() => landscapeComponent.assertValidity(userJson)).to.throw(
           'landscape component must contain `title`, `category`, `image`,' +
           ' and `url` fields, skipping invalid.');
+    });
+  });
+
+  it('should reject invalid user json for a textbox component', () => {
+    const textBoxComponent = new TextBoxComponent();
+    const userJson = {
+      'bookend-version': 'v1.0',
+      'share-providers': [
+        'email',
+        {'provider': 'facebook', 'app-id': '254325784911610'},
+        'whatsapp',
+      ],
+      'components': [
+        {
+          'type': 'heading',
+          'title': 'test',
+        },
+        {
+          'type': 'small',
+          'url': 'http://example.com/article.html',
+          'image': 'http://placehold.it/256x128',
+        },
+        {
+          'type': 'textbox',
+          'text': 'http://example.com/article.html',
+        },
+      ],
+    };
+
+    allowConsoleError(() => {
+      expect(() => textBoxComponent.assertValidity(userJson)).to.throw(
+          'Textbox component must contain' +
+          ' `text` array and at least one element inside it,' +
+          ' skipping invalid.');
     });
   });
 });
