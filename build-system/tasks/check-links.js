@@ -23,7 +23,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
-const {getStdout} = require('../exec');
+const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
 
 
 /**
@@ -35,9 +35,7 @@ function getMarkdownFiles() {
   if (!!argv.files) {
     return argv.files.split(',');
   }
-  const filesInPr =
-        getStdout('git diff --name-only master...HEAD').trim().split('\n');
-  return filesInPr.filter(function(file) {
+  return gitDiffNameOnlyMaster().filter(function(file) {
     return path.extname(file) == '.md' && !file.startsWith('examples/');
   });
 }
@@ -115,10 +113,7 @@ function checkLinks() {
  * @return {boolean} True if the link points to a file introduced by the PR.
  */
 function isLinkToFileIntroducedByPR(link) {
-  const filesAdded =
-      getStdout('git diff --name-only --diff-filter=ARC master...HEAD')
-          .trim().split('\n');
-  return filesAdded.some(function(file) {
+  return gitDiffAddedNameOnlyMaster().some(function(file) {
     return (file.length > 0 && link.includes(path.parse(file).base));
   });
 }

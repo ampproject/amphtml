@@ -56,7 +56,9 @@ const builtRuntimePaths = [
   },
 ];
 
-const commonTestPaths =
+const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
+
+const commonIntegrationTestPaths =
     initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
 
 const coveragePaths = [
@@ -72,7 +74,7 @@ const simpleTestPath = [
   'test/simple-test.js',
 ];
 
-const testPaths = commonTestPaths.concat([
+const testPaths = commonIntegrationTestPaths.concat([
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
@@ -88,30 +90,31 @@ const chaiAsPromised = [
   'test/chai-as-promised/chai-as-promised.js',
 ];
 
-const unitTestPaths = initTestsPath.concat(fixturesExamplesPaths, [
+const unitTestPaths = [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
-]);
+];
 
-const unitTestOnSaucePaths = initTestsPath.concat(fixturesExamplesPaths, [
+const unitTestOnSaucePaths = [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
-]);
+];
 
-const integrationTestPaths = commonTestPaths.concat([
+const integrationTestPaths = [
   'test/integration/**/*.js',
   'test/functional/test-error.js',
   'extensions/**/test/integration/**/*.js',
-]);
+];
 
 /** @const  */
 module.exports = {
-  commonTestPaths,
   simpleTestPath,
   testPaths,
   a4aTestPaths,
   chaiAsPromised,
+  commonUnitTestPaths,
+  commonIntegrationTestPaths,
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,

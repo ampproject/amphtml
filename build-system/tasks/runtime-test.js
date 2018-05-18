@@ -23,17 +23,19 @@ const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
 const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
+const minimatch = require('minimatch');
 const path = require('path');
 const webserver = require('gulp-webserver');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {app} = require('../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {exec} = require('../exec');
+const {gitDiffNameOnlyMaster} = require('../git');
 
 const {green, yellow, cyan, red, bold} = colors;
 
-const preTestTasks =
-    argv.nobuild ? [] : ((argv.unit || argv.a4a) ? ['css'] : ['build']);
+const preTestTasks = argv.nobuild ? [] : (
+  (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
 
 
@@ -157,16 +159,21 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
+    'local-changes':
+        'Running unit tests from files commited to the local branch.',
   };
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
     log(green('⤷ Use'), cyan('--nohelp'),
         green('to silence these messages.'));
-    if (!argv.unit && !argv.integration && !argv.files && !argv.a4a) {
+    if (!argv.unit && !argv.integration && !argv.files && !argv.a4a &&
+        !argv['local-changes']) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
           green('to run just the unit tests or integration tests.'));
+      log(green('⤷ Use'), cyan('--local-changes'),
+          green('to run unit tests from files commited to the local branch.'));
     }
     if (!argv.testnames && !argv.files) {
       log(green('⤷ Use'), cyan('--testnames'),
@@ -222,6 +229,19 @@ function writeConfig(targetFile) {
 }
 
 /**
+ * Extracts the list of unit test files changed on the local branch.
+ *
+ * @return {!Array<string>}
+ */
+function unitTestFilesChanged() {
+  return gitDiffNameOnlyMaster().filter(function(file) {
+    return config.unitTestPaths.some(pattern => {
+      return minimatch(file, pattern);
+    });
+  });
+}
+
+/**
  * Runs all the tests.
  */
 function runTests() {
@@ -246,7 +266,7 @@ function runTests() {
     c.client.captureConsole = true;
   }
 
-  if (argv.testnames) {
+  if (argv.testnames || argv['local-changes']) {
     c.reporters = ['mocha'];
   }
 
@@ -255,17 +275,28 @@ function runTests() {
   c.files = argv.saucelabs ? [] : config.chaiAsPromised;
 
   if (argv.files) {
-    c.files = c.files.concat(config.commonTestPaths, argv.files);
+    c.files = c.files.concat(config.commonIntegrationTestPaths, argv.files);
     if (!argv.saucelabs && !argv.saucelabs_lite) {
       c.reporters = ['mocha'];
     }
+  } else if (argv['local-changes']) {
+    const filesChanged = unitTestFilesChanged();
+    if (filesChanged.length == 0) {
+      log(green('No unit test files were changed. Exiting.'));
+      process.exit(0);
+    }
+    c.files = c.files.concat(config.commonUnitTestPaths, filesChanged);
+    c.client.failOnConsoleError = true;
   } else if (argv.integration) {
-    c.files = c.files.concat(config.integrationTestPaths);
+    c.files = c.files.concat(
+        config.commonIntegrationTestPaths, config.integrationTestPaths);
   } else if (argv.unit) {
     if (argv.saucelabs_lite) {
-      c.files = c.files.concat(config.unitTestOnSaucePaths);
+      c.files = c.files.concat(
+          config.commonUnitTestPaths, config.unitTestOnSaucePaths);
     } else {
-      c.files = c.files.concat(config.unitTestPaths);
+      c.files = c.files.concat(
+          config.commonUnitTestPaths, config.unitTestPaths);
     }
   } else if (argv.a4a) {
     c.files = c.files.concat(config.a4aTestPaths);
@@ -330,7 +361,7 @@ function runTests() {
   }
 
   // Run fake-server to test XHR responses.
-  const server = gulp.src(process.cwd()).pipe(webserver({
+  const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
     port: 31862,
     host: 'localhost',
     directoryListing: true,
@@ -442,5 +473,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
+    'local-changes': '  Run unit tests from files changed in the local branch',
   },
 });
