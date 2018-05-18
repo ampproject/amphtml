@@ -87,8 +87,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       return validatorPromise.then(validatorOutput => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.creativeData).to.be.ok;
-        const creativeMetadata =
-            validatorOutput.creativeData.creativeMetadata;
+        const {creativeMetadata} = validatorOutput.creativeData;
         expect(creativeMetadata.minifiedCreative)
             .to.equal(data.minifiedTemplateCreative);
       });
@@ -99,8 +98,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
           return validatorPromise.then(validatorOutput => {
             expect(validatorOutput).to.be.ok;
             expect(validatorOutput.creativeData).to.be.ok;
-            const creativeMetadata =
-                validatorOutput.creativeData.creativeMetadata;
+            const {creativeMetadata} = validatorOutput.creativeData;
             expect(creativeMetadata.customElementExtensions)
                 .to.deep.equal(['amp-analytics', 'amp-mustache']);
           });
@@ -157,7 +155,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
           }).then(validatorOutput => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.creativeData).to.be.ok;
-        const creativeData = validatorOutput.creativeData;
+        const {creativeData} = validatorOutput;
         expect(creativeData).to.be.ok;
         expect(creativeData.creative).to.deep.equal(
             '{"templateUrl":"https://adnetwork.com/amp-template.html"}');

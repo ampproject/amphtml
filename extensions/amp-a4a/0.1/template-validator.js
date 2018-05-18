@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+import {
+  AdResponseType,
+  Validator,
+  ValidatorResult,
+} from './amp-ad-type-defs';
 import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {Services} from '../../../src/services';
-import {Validator, ValidatorResult} from './amp-ad-type-defs';
 import {getAmpAdMetadata} from './amp-ad-utils';
 import {pushIfNotExist} from '../../../src/utils/array';
 import {tryParseJson} from '../../../src/json';
@@ -60,7 +64,7 @@ export class TemplateValidator extends Validator {
             creativeData: {
               creative: body,
             },
-            adResponseType: 'template',
+            adResponseType: AdResponseType.TEMPLATE,
             type: ValidatorResult.NON_AMP,
           }));
     }
@@ -89,7 +93,7 @@ export class TemplateValidator extends Validator {
                   templateData: parsedResponseBody,
                   creativeMetadata,
                 },
-                adResponseType: 'template',
+                adResponseType: AdResponseType.TEMPLATE,
                 type: ValidatorResult.AMP,
               }));
         });
