@@ -19,11 +19,10 @@ import {
   ActionInvocation,
   ActionService,
   DeferredEvent,
-  OBJECT_STRING_ARGS_KEY,
   dereferenceExprsInArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
-import {ActionTrust} from '../../src/action-trust';
+import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
@@ -306,7 +305,7 @@ describe('ActionService parseAction', () => {
 
   it('should parse with object literal args', () => {
     const a = parseAction('e:t.m({"foo": {"bar": "qux"}})');
-    expect(a.args[OBJECT_STRING_ARGS_KEY])
+    expect(a.args[RAW_OBJECT_ARGS_KEY])
         .to.equal('{"foo": {"bar": "qux"}}');
   });
 
@@ -1076,7 +1075,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     document = window.document;
     sandbox = env.sandbox;
     sandbox.stub(window.document, 'addEventListener');
-    const ampdoc = env.ampdoc;
+    const {ampdoc} = env;
     action = new ActionService(ampdoc, document);
     const originalTrigger = action.trigger;
     triggerPromise = new Promise((resolve, reject) => {
@@ -1234,7 +1233,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object => {
-          const detail = object.detail;
+          const {detail} = object;
           return detail.value == 'qux';
         }));
   });
@@ -1250,7 +1249,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object => {
-          const detail = object.detail;
+          const {detail} = object;
           return detail.value == 'foo';
         }));
   });
@@ -1271,7 +1270,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
           element,
           'input-debounced',
           sinon.match(event => {
-            const value = event.target.value;
+            const {value} = event.target;
             return value == 'foo bar baz';
           }));
     });
@@ -1293,7 +1292,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
           element,
           'input-throttled',
           sinon.match(event => {
-            const value = event.target.value;
+            const {value} = event.target;
             return value == 'foo bar baz';
           }));
     });

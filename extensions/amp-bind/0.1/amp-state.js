@@ -93,7 +93,7 @@ export class AmpState extends AMP.BaseElement {
     }
     // Parse child script tag and/or fetch JSON from endpoint at `src`
     // attribute, with the latter taking priority.
-    const children = this.element.children;
+    const {children} = this.element;
     if (children.length > 0) {
       this.parseChildAndUpdateState_();
     }
@@ -108,7 +108,7 @@ export class AmpState extends AMP.BaseElement {
    */
   parseChildAndUpdateState_() {
     const TAG = this.getName_();
-    const children = this.element.children;
+    const {children} = this.element;
     if (children.length != 1) {
       this.user().error(
           TAG, 'Should contain exactly one <script> child.');

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
 import {tryResolve} from '../../../src/utils/promise';
@@ -129,8 +130,7 @@ function copyAttributes(fromEl, toEl) {
 
   // Copy all of the unprotected attributes from the fromEl to the toEl.
   for (let i = 0; i < fromAttributes.length; i++) {
-    const attributeName = fromAttributes[i].name;
-    const attributeValue = fromAttributes[i].value;
+    const {name: attributeName, value: attributeValue} = fromAttributes[i] ;
     if (!isProtectedAttributeName(attributeName)) {
       toEl.setAttribute(attributeName, attributeValue);
     }
@@ -147,17 +147,16 @@ export class MediaTask {
     /** @private @const {string} */
     this.name_ = name;
 
-    /** @private {?function()} */
-    this.resolve_ = null;
-
-    /** @private {?function(*)} */
-    this.reject_ = null;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise} */
-    this.completionPromise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    this.completionPromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.resolve_ = deferred.resolve;
+
+    /** @private {?function(*)} */
+    this.reject_ = deferred.reject;
   }
 
   /**

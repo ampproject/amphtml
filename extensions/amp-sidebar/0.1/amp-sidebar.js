@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
@@ -23,7 +23,7 @@ import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
-import {parseUrl, removeFragment} from '../../../src/url';
+import {parseUrlDeprecated, removeFragment} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 /** @const */
@@ -170,7 +170,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
-        const tgtLoc = parseUrl(target.href);
+        const tgtLoc = parseUrlDeprecated(target.href);
         const currentHref = this.getAmpDoc().win.location.href;
         // Important: Only close sidebar (and hence pop sidebar history entry)
         // when navigating locally, Chrome might cancel navigation request
@@ -214,7 +214,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Returns true if the sidebar is opened.
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   isOpen_() {

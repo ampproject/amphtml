@@ -459,8 +459,8 @@ export class Resource {
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
     if (viewport.supportsPositionFixed() && this.isDisplayed()) {
-      const win = this.resources_.win;
-      const body = win.document.body;
+      const {win} = this.resources_;
+      const {body} = win.document;
       for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {
         if (n.isAlwaysFixed && n.isAlwaysFixed()) {
           isFixed = true;
@@ -935,7 +935,7 @@ export class Resource {
   /**
    * Returns the task ID for this resource.
    * @param localId
-   * @returns {string}
+   * @return {string}
    */
   getTaskId(localId) {
     return this.debugid + '#' + localId;

@@ -28,7 +28,7 @@ import {
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
@@ -112,7 +112,7 @@ function getNavStart(win) {
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
- * @returns {boolean}  Whether Google Ads should attempt to render via the A4A
+ * @return {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
@@ -126,7 +126,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
 /**
  * Checks whether native crypto is supported for win.
  * @param {!Window} win  Host window for the ad.
- * @returns {boolean} Whether native crypto is supported.
+ * @return {boolean} Whether native crypto is supported.
  */
 export function supportsNativeCrypto(win) {
   return win.crypto && (win.crypto.subtle || win.crypto.webkitSubtle);
@@ -148,7 +148,7 @@ export function isReportingEnabled(ampElement) {
   // If any of those fail, we use the `BaseLifecycleReporter`, which is a
   // a no-op (sends no pings).
   const type = ampElement.element.getAttribute('type');
-  const win = ampElement.win;
+  const {win} = ampElement;
   const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
@@ -168,8 +168,7 @@ export function isReportingEnabled(ampElement) {
  * @return {!Object<string,null|number|string>} block level parameters
  */
 export function googleBlockParameters(a4a, opt_experimentIds) {
-  const adElement = a4a.element;
-  const win = a4a.win;
+  const {element: adElement, win} = a4a;
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
@@ -249,7 +248,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
-        const screen = win.screen;
+        const {screen} = win;
         const viewport = Services.viewportForDoc(nodeOrDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
@@ -357,9 +356,9 @@ function getHistoryLength(win) {
  * @return {?string}
  */
 function topWindowUrlOrDomain(win) {
-  const ancestorOrigins = win.location.ancestorOrigins;
+  const {ancestorOrigins} = win.location;
   if (ancestorOrigins) {
-    const origin = win.location.origin;
+    const {origin} = win.location;
     const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
     if (origin == topOrigin) {
       return win.top.location.hostname;
@@ -367,16 +366,16 @@ function topWindowUrlOrDomain(win) {
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
+      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
     }
-    return parseUrl(topOrigin).hostname;
+    return parseUrlDeprecated(topOrigin).hostname;
   } else {
     try {
       return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
+      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
     } catch (e) {}
     return null;
   }
@@ -619,7 +618,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
  *     integer (base 10) experiment IDs.
  * @param {?string} currentIdString  If present, a string containing a
  *   comma-separated list of integer experiment IDs.
- * @returns {string}  New experiment list string, including newId iff it is
+ * @return {string}  New experiment list string, including newId iff it is
  *   a valid (integer) experiment ID.
  * @see parseExperimentIds, validateExperimentIds
  */
@@ -824,7 +823,8 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   }
   domain = domain || '.google.com';
   const canonical =
-    parseUrl(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl).hostname;
+    parseUrlDeprecated(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl)
+        .hostname;
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 

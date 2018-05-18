@@ -36,6 +36,7 @@ import {
   installPositionObserverServiceForDoc,
 } from '../position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../style-installer';
+import {isFiniteNumber} from '../../types';
 import {isRTL} from '../../dom';
 import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
@@ -84,15 +85,8 @@ export const Direction = {UP: 1, DOWN: -1};
 
 
 /**
- * @typedef
- * {!../../video-interface.VideoInterface|!../../base-element.BaseElement}
- */
-let VideoOrBaseElementDef;
-
-
-/**
  * @struct @typedef {{
- *  video: !VideoOrBaseElementDef,
+ *  video: !../../video-interface.VideoOrBaseElementDef,
  *  posX: !RelativeX,
  *  posY: !RelativeY,
  *  step: number,
@@ -115,7 +109,12 @@ let DockedDef;
 let ControlsDef;
 
 
-/** @private @const {function(number, number, number): string} */
+/**
+ * @param {number} x
+ * @param {number} y
+ * @param {number} scale
+ * @return {string}
+ */
 const transform = (x, y, scale) => `translate(${x}px, ${y}px) scale(${scale})`;
 
 
@@ -236,7 +235,10 @@ class Timeout {
  */
 export class VideoDocking {
 
-  /** @param {!../ampdoc-impl.AmpDoc} ampdoc */
+  /**
+   * @param {!../ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../video-service-interface.VideoServiceInterface} manager
+   */
   constructor(ampdoc, manager) {
 
     /** @private @const {!../ampdoc-impl.AmpDoc} */
@@ -253,7 +255,8 @@ export class VideoDocking {
 
     /** @private @const {function():!Timeout} */
     this.getDockingTimeout_ = this.lazyTimeout_(video =>
-      this.onDockingTimeout_(/** @type {!VideoOrBaseElementDef} */ (video)));
+      this.onDockingTimeout_(
+          /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
 
     /** @private @const {function():!Timeout} */
     this.getHideControlsTimeout_ = this.lazyTimeout_(() =>
@@ -261,7 +264,8 @@ export class VideoDocking {
 
     /** @private @const {function():!Timeout} */
     this.getUndockingTimeout_ = this.lazyTimeout_(video =>
-      this.undock_(/** @type {!VideoOrBaseElementDef} */ (video)));
+      this.undock_(
+          /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
 
     /** @private {!RelativeX} */
     // Overriden when user drags the video to a corner.
@@ -320,7 +324,7 @@ export class VideoDocking {
             </div>
           </div>`));
 
-    /** @private {?VideoOrBaseElementDef} */
+    /** @private {?../../video-interface.VideoOrBaseElementDef} */
     this.lastDismissed_ = null;
 
     /** @private {?RelativeY} */
@@ -353,7 +357,7 @@ export class VideoDocking {
     /** @private {boolean} */
     this.isDragging_ = false;
 
-    /** @private {!Array<!VideoOrBaseElementDef>} */
+    /** @private {!Array<!../../video-interface.VideoOrBaseElementDef>} */
     this.observed_ = [];
 
     /** @private @const {!function()} */
@@ -363,7 +367,7 @@ export class VideoDocking {
           throttleByAnimationFrame(this.ampdoc_.win,
               () => this.updateScroll_()));
 
-      this.viewport_.onResize(() => this.updateOnResize_());
+      this.viewport_.onResize(() => this.updateAllOnResize_());
 
       this.installStyles_();
     });
@@ -389,18 +393,18 @@ export class VideoDocking {
   }
 
   /** @private */
-  updateOnResize_() {
-    this.observed_.forEach(video => this.onPositionChange_(video));
+  updateAllOnResize_() {
+    this.observed_.forEach(video => this.updateOnResize_(video));
   }
 
-  /** @param {!VideoOrBaseElementDef} video */
+  /** @param {!../../video-interface.VideoOrBaseElementDef} video */
   register(video) {
     this.install_();
 
     const {element} = video;
     const fidelity = PositionObserverFidelity.HIGH;
     this.getPositionObserver_().observe(element, fidelity,
-        () => this.onPositionChange_(video));
+        () => this.updateOnPositionChange_(video));
     this.observed_.push(video);
   }
 
@@ -478,8 +482,8 @@ export class VideoDocking {
         swap(pauseButton, playButton);
       }
 
-      const isMuted = this.manager_.isMuted(video);
-      if (isMuted) {
+      if (this.manager_.isMuted(
+          /** @type {!../../video-interface.VideoInterface} */ (video))) {
         swap(muteButton, unmuteButton);
       } else {
         swap(unmuteButton, muteButton);
@@ -576,7 +580,7 @@ export class VideoDocking {
   }
 
   /**
-   * @return {!VideoOrBaseElementDef}
+   * @return {!../../video-interface.VideoOrBaseElementDef}
    * @private
    */
   getDockedVideo_() {
@@ -597,11 +601,12 @@ export class VideoDocking {
 
   /**
    * Reconciliates the state of a docked or potentially dockable video when
-   * its position changes.
-   * @param {!VideoOrBaseElementDef} video
+   * the viewport/position changes.
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @return {{posX: RelativeX, posY: RelativeY}|undefined}
    * @private
    */
-  onPositionChange_(video) {
+  update_(video) {
     if (this.isDragging_) {
       return;
     }
@@ -617,11 +622,37 @@ export class VideoDocking {
     if (posY === null) {
       return;
     }
-    this.dock_(video, this.getRelativeX_(), posY);
+    return {posY, posX: this.getRelativeX_()};
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @private
+   */
+  updateOnResize_(video) {
+    const pos = this.update_(video);
+    if (!pos) {
+      return;
+    }
+    this.dock_(video, pos.posX, pos.posY);
+  }
+
+  /**
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @private
+   */
+  updateOnPositionChange_(video) {
+    const pos = this.update_(video);
+    if (!pos) {
+      return;
+    }
+    this.dockOnPositionChange_(video, pos.posX, pos.posY);
+  }
+
+  /**
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {number=} ratio
+   * @param {number=} timeout
    * @return {boolean}
    */
   undockBecauseVisible_(video, ratio = 1, timeout = 40) {
@@ -637,7 +668,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreDueToNotPlayingManually_(video) {
@@ -645,7 +676,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreBecauseAnotherDocked_(video) {
@@ -653,7 +684,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreDueToSize_(video) {
@@ -701,7 +732,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @return {?RelativeY}
    * @private
    */
@@ -747,15 +778,21 @@ export class VideoDocking {
   }
 
   /**
+   * @param {?../../video-interface.VideoOrBaseElementDef} optVideo
    * @return {boolean}
    * @private
    */
   isPlaying_(optVideo = null) {
-    const video = optVideo || this.getDockedVideo_();
+    const video = /** @type {!../../video-interface.VideoInterface} */ (
+      optVideo || this.getDockedVideo_());
     return this.manager_.getPlayingState(video) == PlayingStates.PLAYING_MANUAL;
   }
 
-  /** @private */
+  /**
+   * @param {number} dirX
+   * @param {number} dirY
+   * @private
+   */
   dismiss_(dirX = 0, dirY = 0) {
     const video = this.getDockedVideo_();
     const {posY} = this.currentlyDocked_;
@@ -789,23 +826,38 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
-   * @param {boolean=} finalize
    * @private
    */
-  dock_(video, posX, posY, finalize = false) {
+  dockOnPositionChange_(video, posX, posY) {
     if (this.ignoreDueToDismissal_(video)) {
       return;
     }
 
-    const {element} = video;
-    const step = finalize ? 1 : this.calculateStep_(element);
-
+    const step = this.calculateStep_(video.element);
     if (this.ignoreDueToTransitionEnd_(step)) {
       return;
     }
+
+    this.dock_(video, posX, posY, step);
+
+    this.getDockingTimeout_().trigger(DOCKING_TIMEOUT, video);
+  }
+
+  /**
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!RelativeX} posX
+   * @param {!RelativeY} posY
+   * @param {?number=} opt_step
+   * @private
+   */
+  dock_(video, posX, posY, opt_step = null) {
+    const step =
+      isFiniteNumber(opt_step) ?
+        dev().assertNumber(opt_step) :
+        this.calculateStep_(video.element);
 
     const {x, y, scale} = this.getDims_(video, posX, posY, step);
 
@@ -814,12 +866,10 @@ export class VideoDocking {
     this.placeAt_(video, x, y, scale, step);
 
     this.setCurrentlyDocked_(video, posX, posY, step);
-
-    this.getDockingTimeout_().trigger(DOCKING_TIMEOUT, video);
   }
 
   /**
-   * @param  {!VideoOrBaseElementDef} video
+   * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    * @private
    */
@@ -843,6 +893,7 @@ export class VideoDocking {
   /**
    * Prevents jump when the transition was timed out before user finished
    * scrolling component out of view.
+   * @param {number} step
    * @return {boolean}
    */
   ignoreDueToTransitionEnd_(step) {
@@ -889,11 +940,12 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {number} x
    * @param {number} y
    * @param {number} scale
    * @param {number} step in [0..1]
+   * @param {?number} optTransitionDurationMs
    * @private
    */
   placeAt_(video, x, y, scale, step, optTransitionDurationMs = null) {
@@ -975,7 +1027,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   isCurrentlyDocked_(video) {
@@ -983,7 +1035,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @param {number} step
@@ -1055,7 +1107,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @private
    */
   onDockingTimeout_(video) {
@@ -1074,7 +1126,7 @@ export class VideoDocking {
     const currentlyDocked = dev().assert(this.currentlyDocked_);
     const {posX, posY} = currentlyDocked;
 
-    this.dock_(video, posX, posY, /* finalize */ true);
+    this.dock_(video, posX, posY, /* step */ 1);
   }
 
   /**
@@ -1088,6 +1140,7 @@ export class VideoDocking {
   }
 
   /**
+   * @param {number} amount
    * @return {boolean}
    * @private
    */
@@ -1112,16 +1165,15 @@ export class VideoDocking {
       return;
     }
 
-    const {x, y} = pointerCoords(e);
+    const {x: initialX, y: initialY} = pointerCoords(e);
 
     const offset = {x: 0, y: 0};
+    const {posX: currentPosX, posY: currentPosY} = this.currentlyDocked_;
 
     const onDragMove = throttleByAnimationFrame(this.ampdoc_.win,
         e => this.onDragMove_(
             /** @type {!TouchEvent|!MouseEvent} */ (e),
-            /* initialX */ x,
-            /* initialY */ y,
-            offset));
+            currentPosX, currentPosY, initialX, initialY, offset));
 
     const onDragEnd = () => this.onDragEnd_(unlisteners, offset);
 
@@ -1159,12 +1211,20 @@ export class VideoDocking {
 
   /**
    * @param {!MouseEvent|!TouchEvent} e
+   * @param {!RelativeX} startPosX
+   * @param {!RelativeY} startPosY
    * @param {number} startX
    * @param {number} startY
    * @param {{x: number, y: number}} offset
    * @private
    */
-  onDragMove_(e, startX, startY, offset) {
+  onDragMove_(e, startPosX, startPosY, startX, startY, offset) {
+    const {posX, posY} = this.currentlyDocked_;
+    if (posX !== startPosX || posY !== startPosY) {
+      // stale event
+      return;
+    }
+
     const {x, y} = pointerCoords(e);
     offset.x = x - startX;
     offset.y = y - startY;
@@ -1326,12 +1386,10 @@ export class VideoDocking {
         this.getDims_(video, closestCornerX, closestCornerY, step);
 
     this.placeAt_(video, x, y, scale, step, /* optTransitionDurationMs */ 200);
-
-    return false;
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @return {{x: number, y: number, targetWidth: number, targetHeight: number}}
@@ -1357,7 +1415,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @param {number} step in [0..1]
@@ -1384,14 +1442,14 @@ export class VideoDocking {
   // Using `vw` and `vh` to disambiguate with `width` and `height` when
   // destructuring.
   getViewportSize_() {
-    const viewportSize = this.viewport_.getSize();
-    const vw = viewportSize.width;
-    const vh = viewportSize.height;
+    const {width: vw, height: vh} = this.viewport_.getSize();
     return {vw, vh};
   }
 
   /**
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {number=} unusedDismissDirX
+   * @param {number=} unusedDismissDirY
    * @private
    */
   undock_(video, unusedDismissDirX = 0, unusedDismissDirY = 0) {
@@ -1425,7 +1483,10 @@ export class VideoDocking {
     });
   }
 
-  /** @private */
+  /**
+   * @param {boolean=} respectSticky
+   * @private
+   */
   hideControls_(respectSticky = false) {
     if (respectSticky && this.stickyControls_) {
       return;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
- * Trust level of an action.
+ * Disallows deep object destructuring, because it's complicated and confusing.
  *
- * Corresponds to degree of user intent, i.e. events triggered with strong
- * user intent have high trust.
- *
- * @enum {number}
+ * Bad:
+ *   const { x: { y } } = obj.prop;
+ * Good:
+ *   const { y } = obj.prop.x;
  */
-export const ActionTrust = {
-  LOW: 1,
-  HIGH: 100,
+module.exports = function(context) {
+  return {
+    ObjectPattern: function(node) {
+      if (node.parent.type !== 'Property') {
+        return;
+      }
+      context.report({node, message: 'No deep object destructuring allowed.'});
+    },
+  };
 };

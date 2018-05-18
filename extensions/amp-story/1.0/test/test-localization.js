@@ -56,7 +56,7 @@ describes.fakeWin('localization', {}, env => {
   describe('localization service', () => {
     it('should get string text', () => {
       const localizationService = new LocalizationService(env.win);
-      localizationService.registerLocalizedStringBundle('default', {
+      localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           string: 'test string content',
         },
@@ -67,8 +67,12 @@ describes.fakeWin('localization', {}, env => {
     });
 
     it('should have language fallbacks', () => {
-      expect(getLanguageCodesFromString('en-US-123')).to
-          .deep.equal(['en-us-123', 'en-us', 'en', 'default']);
+      expect(getLanguageCodesFromString('de-hi-1')).to
+          .deep.equal(['de-hi-1', 'de-hi', 'de', 'default']);
+    });
+
+    it('should default to English', () => {
+      expect(getLanguageCodesFromString()).to.deep.equal(['en']);
     });
   });
 

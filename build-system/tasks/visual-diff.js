@@ -16,10 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const execOrDie = require('../exec').execOrDie;
-const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
-
+const {execOrDie} = require('../exec');
+const {gitBranchName, gitCommitterEmail} = require('../git');
 
 /**
  * Disambiguates branch names by decorating them with the commit author name.
@@ -28,11 +27,9 @@ const gulp = require('gulp-help')(require('gulp'));
  */
 function setPercyBranch() {
   if (!argv.master || !process.env['TRAVIS']) {
-    const userName = getStdout(
-        'git log -1 --pretty=format:"%ae"').trim();
+    const userName = gitCommitterEmail();
     const branchName = process.env['TRAVIS'] ?
-      process.env['TRAVIS_PULL_REQUEST_BRANCH'] :
-      getStdout('git rev-parse --abbrev-ref HEAD').trim();
+      process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
 }

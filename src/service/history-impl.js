@@ -128,8 +128,9 @@ export class History {
   }
 
   /**
-   * Helper method to handle navigation to a local target, e.g. When a user clicks an
-   * anchor link to a local hash - <a href="#section1">Go to section 1</a>.
+   * Helper method to handle navigation to a local target, e.g. When a user
+   * clicks an anchor link to a local hash - <a href="#section1">Go to section
+   * 1</a>.
    *
    * @param {string} target
    * @return {!Promise}
@@ -207,9 +208,7 @@ export class History {
    */
   enque_(callback, name) {
     const deferred = new Deferred();
-    const promise = deferred.promise;
-    const resolve = deferred.resolve;
-    const reject = deferred.reject;
+    const {promise, resolve, reject} = deferred;
 
     // TODO(dvoytenko, #8785): cleanup after tracing.
     const trace = new Error('history trace for ' + name + ': ');
@@ -329,7 +328,7 @@ export class HistoryBindingNatural_ {
     /** @private @const {!../service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    const history = this.win.history;
+    const {history} = this.win;
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
@@ -681,7 +680,7 @@ export class HistoryBindingNatural_ {
 
   /** @override */
   getFragment() {
-    let hash = this.win.location.hash;
+    let {hash} = this.win.location;
     /* Strip leading '#' */
     hash = hash.substr(1);
     return Promise.resolve(hash);

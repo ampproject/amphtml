@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-0.1.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from './localization';

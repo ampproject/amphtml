@@ -15,7 +15,7 @@
  */
 
 .i-amphtml-story-no-rotation-overlay {
-  position: fixed !important;
+  position: absolute !important;
   z-index: 200000!important; /** unsupported-browser-overlay - 1 */
   font-family: 'Roboto', sans-serif;
   font-weight: 700 !important;

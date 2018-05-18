@@ -278,8 +278,8 @@ export class Templates {
   }
 
   /**
-   * Returns the promise that will eventually yield the template class. This will
-   * wait until the actual template script has been downloaded and parsed.
+   * Returns the promise that will eventually yield the template class. This
+   * will wait until the actual template script has been downloaded and parsed.
    * @param {!Element} element
    * @param {string} type
    * @return {!Promise<!TemplateClassDef>}
@@ -291,8 +291,7 @@ export class Templates {
     }
 
     const deferred = new Deferred();
-    const promise = deferred.promise;
-    const resolve = deferred.resolve;
+    const {promise, resolve} = deferred;
 
     this.templateClassMap_[type] = promise;
     this.templateClassResolvers_[type] = resolve;

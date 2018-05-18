@@ -58,8 +58,10 @@ describes.fakeWin('VideoEntry', {
 
   it('should add classname to element and trigger events on install', () => {
     const expectedClass = 'i-amphtml-video-interface';
-    const expectedSignal = VideoEvents.REGISTERED;
-    const expectedEvent = VideoEvents.REGISTERED;
+    const {
+      REGISTERED: expectedSignal,
+      REGISTERED: expectedEvent,
+    } = VideoEvents;
 
     const entry = new VideoEntry(env.ampdoc, /* service */ null, video);
 

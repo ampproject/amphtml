@@ -16,7 +16,7 @@
 
 import * as sinon from 'sinon';
 
-import {ActionTrust} from '../../../../src/action-trust';
+import {ActionTrust} from '../../../../src/action-constants';
 import {
   AmpIframe,
   isAdLike,
@@ -130,7 +130,7 @@ describes.realWin('amp-iframe', {
       if (opt_top != undefined) {
         ampIframe.style.top = opt_top.toString() + 'px';
       }
-      const top = ampIframe.style.top;
+      const {top} = ampIframe.style;
       ampIframe.style.position = 'absolute'; //opt_position
       if (opt_translateY) {
         ampIframe.style.transform = `translateY(${opt_translateY}px)`;//'translateY(' + opt_translateY + ')';

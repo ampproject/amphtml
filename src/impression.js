@@ -20,7 +20,7 @@ import {
   addParamsToUrl,
   isProxyOrigin,
   parseQueryString,
-  parseUrl,
+  parseUrlDeprecated,
 } from './url';
 import {dev, user} from './log';
 import {getMode} from './mode';
@@ -58,8 +58,7 @@ export function resetTrackImpressionPromiseForTesting() {
  */
 export function maybeTrackImpression(win) {
   const deferred = new Deferred();
-  const promise = deferred.promise;
-  const resolveImpression = deferred.resolve;
+  const {promise, resolve: resolveImpression} = deferred;
 
 
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
@@ -76,8 +75,8 @@ export function maybeTrackImpression(win) {
   ]).then(results => {
     const isTrustedViewer = results[0];
     const isTrustedReferrer = results[1];
-    // Currently this feature is launched for trusted viewer and trusted referrer,
-    // but still experiment guarded for all AMP docs.
+    // Currently this feature is launched for trusted viewer and trusted
+    // referrer, but still experiment guarded for all AMP docs.
     if (!isTrustedViewer && !isTrustedReferrer && !isExperimentOn(win, 'alp')) {
       resolveImpression();
       return;
@@ -100,13 +99,13 @@ export function doNotTrackImpression() {
 }
 
 /**
- * Handle the getReplaceUrl and return a promise when url is replaced
- * Only handles replaceUrl when viewer indicates AMP to do so. Viewer should indicate
- * by setting the legacy replaceUrl init param and add `replaceUrl` to its capability param.
- * Future plan is to change the type of legacy init replaceUrl param from url string
- * to boolean value.
- * Please NOTE replaceUrl and adLocation will never arrive at same time,
- * so there is no race condition on the order of handling url replacement.
+ * Handle the getReplaceUrl and return a promise when url is replaced Only
+ * handles replaceUrl when viewer indicates AMP to do so. Viewer should indicate
+ * by setting the legacy replaceUrl init param and add `replaceUrl` to its
+ * capability param. Future plan is to change the type of legacy init replaceUrl
+ * param from url string to boolean value. Please NOTE replaceUrl and adLocation
+ * will never arrive at same time, so there is no race condition on the order of
+ * handling url replacement.
  * @param {!Window} win
  * @return {!Promise}
  */
@@ -235,7 +234,7 @@ function applyResponse(win, response) {
 
     const viewer = Services.viewerForDoc(win.document);
     const currentHref = win.location.href;
-    const url = parseUrl(adLocation);
+    const url = parseUrlDeprecated(adLocation);
     const params = parseQueryString(url.search);
     const newHref = addParamsToUrl(currentHref, params);
     // TODO: Avoid overwriting the fragment parameter.
@@ -245,7 +244,8 @@ function applyResponse(win, response) {
 }
 
 /**
- * Return a promise that whether appending extra url params to outgoing link is required.
+ * Return a promise that whether appending extra url params to outgoing link is
+ * required.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise<boolean>}
  */
@@ -264,7 +264,7 @@ export function shouldAppendExtraParams(ampdoc) {
  */
 export function getExtraParamsUrl(win, target) {
   // Get an array with extra params that needs to append.
-  const url = parseUrl(win.location.href);
+  const url = parseUrlDeprecated(win.location.href);
   const params = parseQueryString(url.search);
   const appendParams = [];
   for (let i = 0; i < DEFAULT_APPEND_URL_PARAM.length; i++) {
@@ -276,11 +276,11 @@ export function getExtraParamsUrl(win, target) {
 
   // Check if the param already exists
   const additionalUrlParams = target.getAttribute('data-amp-addparams');
-  let href = target.href;
+  let {href} = target;
   if (additionalUrlParams) {
     href = addParamsToUrl(href, parseQueryString(additionalUrlParams));
   }
-  const loc = parseUrl(href);
+  const loc = parseUrlDeprecated(href);
   const existParams = parseQueryString(loc.search);
   for (let i = appendParams.length - 1; i >= 0; i--) {
     const param = appendParams[i];

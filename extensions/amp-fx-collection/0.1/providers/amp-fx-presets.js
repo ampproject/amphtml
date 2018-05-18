@@ -15,7 +15,6 @@
  */
 
 import {dev, user} from '../../../../src/log';
-import {isExperimentOn} from '../../../../src/experiments';
 import {setStyles} from '../../../../src/style';
 
 export const Presets = {
@@ -67,15 +66,15 @@ export const Presets = {
     },
   },
   'fade-in': {
-    isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fade-in');
+    isFxTypeSupported(unusedWin) {
+      return true;
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart < 100,
+      user().assert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
@@ -107,8 +106,8 @@ export const Presets = {
     },
   },
   'fade-in-scroll': {
-    isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fade-in-scroll');
+    isFxTypeSupported(unusedWin) {
+      return true;
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
@@ -117,11 +116,11 @@ export const Presets = {
       if (!marginStart && !marginEnd) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart < 100,
+      user().assert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
-      user().assert(marginEnd >= 0 && marginEnd < 100,
-          'data-margin-start must be a percentage value ' +
+      user().assert(marginEnd >= 0 && marginEnd <= 100,
+          'data-margin-end must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
 
       user().assert(marginEnd > marginStart,
@@ -142,7 +141,8 @@ export const Presets = {
         return;
       }
 
-      // Early exit if the animation doesn't need to repeat and it is fully opaque.
+      // Early exit if the animation doesn't need to repeat and it is fully
+      // opaque.
       if (!fxElement.hasRepeat() && fxElement.getOffset() >= 1) {
         return;
       }

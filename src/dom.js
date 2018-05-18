@@ -547,15 +547,15 @@ export function scopedQuerySelectorAll(root, selector) {
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
- * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
- *    name, get passed the camel-case parameter name.
+ * @param {function(string):string=} opt_computeParamNameFunc to compute the
+ *    parameter name, get passed the camel-case parameter name.
  * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!JsonObject}
  */
 export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
   opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
-  const dataset = element.dataset;
+  const {dataset} = element;
   const params = dict();
   const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
   for (const key in dataset) {

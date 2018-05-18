@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-trust';
+import {ActionTrust} from '../action-constants';
 import {KeyCodes} from '../utils/key-codes';
+import {RAW_OBJECT_ARGS_KEY} from '../action-constants';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
@@ -29,12 +30,6 @@ import {
 import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {reportError} from '../error';
-
-/**
- * ActionInfoDef args key that maps to the an unparsed object literal string.
- * @const {string}
- */
-export const OBJECT_STRING_ARGS_KEY = '__AMP_OBJECT_STRING__';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -155,7 +150,7 @@ export class ActionInvocation {
    * `event` is a "click" Event object.
    * `trust` depends on whether this action was a result of a user gesture.
    * `tagOrTarget` is "amp-form".
-   * `index` is 0.
+   * `sequenceId` is a pseudo-UUID.
    *
    * @param {!Node} node Element whose action is being invoked.
    * @param {string} method Name of the action being invoked.
@@ -165,10 +160,11 @@ export class ActionInvocation {
    * @param {?ActionEventDef} event The event that triggered this action.
    * @param {ActionTrust} trust The trust level of this invocation's trigger.
    * @param {?string} tagOrTarget The global target name or the element tagName.
-   * @param {number} index Position in a sequence of actions.
+   * @param {number} sequenceId An identifier for this action's sequence (all
+   *   actions triggered by one event e.g. "tap:form1.submit, form2.submit").
    */
   constructor(node, method, args, source, caller, event, trust,
-    tagOrTarget = null, index = 0) {
+    tagOrTarget = null, sequenceId = Math.random()) {
     /** @const {!Node} */
     this.node = node;
     /** @const {string} */
@@ -186,14 +182,14 @@ export class ActionInvocation {
     /** @const {string} */
     this.tagOrTarget = tagOrTarget || node.tagName;
     /** @const {number} */
-    this.index = index;
+    this.sequenceId = sequenceId;
   }
 
   /**
    * Returns true if the trigger event has a trust equal to or greater than
    * `minimumTrust`. Otherwise, logs a user error and returns false.
    * @param {ActionTrust} minimumTrust
-   * @returns {boolean}
+   * @return {boolean}
    */
   satisfiesTrust(minimumTrust) {
     // Sanity check.
@@ -279,7 +275,7 @@ export class ActionService {
       });
       this.root_.addEventListener('keydown', event => {
         const element = dev().assertElement(event.target);
-        const keyCode = event.keyCode;
+        const {keyCode} = event;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
@@ -429,7 +425,7 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} actionEventType
    * @param {!Element=} opt_stopAt
-   * @returns {boolean}
+   * @return {boolean}
    */
   hasAction(target, actionEventType, opt_stopAt) {
     return !!this.findAction_(target, actionEventType, opt_stopAt);
@@ -468,25 +464,27 @@ export class ActionService {
     if (!action) {
       return;
     }
+    // Use a pseudo-UUID to uniquely identify this sequence of actions.
+    // A sequence is all actions triggered by a single event.
+    const sequenceId = Math.random();
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
-    action.actionInfos.forEach((actionInfo, i) => {
+    action.actionInfos.forEach(actionInfo => {
+      const {target} = actionInfo;
       // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
       const invokeAction = () => {
-        // Document root is the target node for global targets e.g. "AMP".
-        const target = actionInfo.target;
-        // If it isn't a global target, it should be an element id.
-        // Find the corresponding element.
+        // For global targets e.g. "AMP, `node` is the document root. Otherwise,
+        // `target` is an element id and `node` is the corresponding element.
         const node = (this.globalTargets_[target])
           ? this.root_
           : this.root_.getElementById(target);
         if (node) {
-          const tagOrTarget = node.tagName || target;
           const invocation = new ActionInvocation(node, actionInfo.method,
-              args, source, action.node, event, trust, tagOrTarget, i);
-          return this.invoke_(invocation, action.actionInfos);
+              args, source, /* caller */ action.node, event, trust,
+              node.tagName || target, sequenceId);
+          return this.invoke_(invocation);
         } else {
           this.error_(`Target "${target}" not found for action ` +
               `[${actionInfo.str}].`);
@@ -517,16 +515,12 @@ export class ActionService {
 
   /**
    * @param {!ActionInvocation} invocation
-   * @param {!Array<ActionInfoDef>=} opt_actionInfos Array of infos for all
-   *   actions being invoked during a sequence (multiple actions triggered).
-   *   TODO(choumx): Remove this param by moving setState limit into this file.
    * @return {?Promise}
    * @private
    * @visibleForTesting
    */
-  invoke_(invocation, opt_actionInfos) {
-    const method = invocation.method;
-    const tagOrTarget = invocation.tagOrTarget;
+  invoke_(invocation) {
+    const {method, tagOrTarget} = invocation;
 
     // Check that this action is whitelisted (if a whitelist is set).
     if (this.whitelist_) {
@@ -540,7 +534,7 @@ export class ActionService {
     // Handle global targets e.g. "AMP".
     const globalTarget = this.globalTargets_[tagOrTarget];
     if (globalTarget) {
-      return globalTarget(invocation, invocation.index, opt_actionInfos);
+      return globalTarget(invocation);
     }
 
     // Subsequent handlers assume that invocation target is an Element.
@@ -665,7 +659,7 @@ export class ActionService {
    * @private
    */
   queryWhitelist_() {
-    const head = this.ampdoc.getRootNode().head;
+    const {head} = this.ampdoc.getRootNode();
     if (!head) {
       return null;
     }
@@ -684,7 +678,7 @@ export class ActionService {
    */
   addTargetPropertiesAsDetail_(event) {
     const detail = /** @type {!JsonObject} */ (map());
-    const target = event.target;
+    const {target} = event;
 
     if (target.value !== undefined) {
       detail['value'] = target.value;
@@ -862,15 +856,14 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
     // Don't parse object literals. Tokenize as a single expression
     // fragment and delegate to specific action handler.
     args = map();
-    const value = toks.next().value;
-    args[OBJECT_STRING_ARGS_KEY] = value;
+    const {value} = toks.next();
+    args[RAW_OBJECT_ARGS_KEY] = value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....
     do {
       tok = toks.next();
-      const type = tok.type;
-      const value = tok.value;
+      const {type, value} = tok;
       if (type == TokenType.SEPARATOR && (value == ',' || value == ')')) {
         // Expected: ignore.
       } else if (type == TokenType.LITERAL || type == TokenType.ID) {
@@ -947,7 +940,7 @@ export function dereferenceExprsInArgs(args, event) {
     let value = args[key];
     if (typeof value == 'object' && value.expression) {
       const expr =
-          /** @type {ActionInfoArgExpressionDef} */ (value).expression;
+        /** @type {ActionInfoArgExpressionDef} */ (value).expression;
       const exprValue = getValueForExpr(data, expr);
       // If expr can't be found in data, use null instead of undefined.
       value = (exprValue === undefined) ? null : exprValue;

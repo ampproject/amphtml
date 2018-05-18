@@ -19,6 +19,7 @@ import {
   MessageType,
 } from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {
   IntersectionObserver,
 } from '../../../src/intersection-observer';
@@ -120,7 +121,8 @@ export class AmpAdXOriginIframeHandler {
     if (isExperimentOn(this.win_, 'inabox-position-api')) {
       this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {
-            // TODO(@zhouyx): Make sendPosition_ only send to message origin iframe
+            // TODO(@zhouyx): Make sendPosition_ only send to message origin
+            // iframe
             this.sendPosition_();
             this.registerPosition_();
           });
@@ -182,21 +184,22 @@ export class AmpAdXOriginIframeHandler {
     }
 
     // Calculate render-start and no-content signals.
-    let renderStartResolve;
-    const renderStartPromise = new Promise(resolve => {
-      renderStartResolve = resolve;
-    });
-    let noContentResolve;
-    const noContentPromise = new Promise(resolve => {
-      noContentResolve = resolve;
-    });
+    const {
+      promise: renderStartPromise,
+      resolve: renderStartResolve,
+    } = new Deferred();
+    const {
+      promise: noContentPromise,
+      resolve: noContentResolve,
+    } = new Deferred();
+
     if (this.baseInstance_.config &&
             this.baseInstance_.config.renderStartImplemented) {
       // When `render-start` is supported, these signals are mutually
       // exclusive. Whichever arrives first wins.
       listenForOncePromise(this.iframe,
           ['render-start', 'no-content'], true).then(info => {
-        const data = info.data;
+        const {data} = info;
         if (data['type'] == 'render-start') {
           this.renderStart_(info);
           renderStartResolve();

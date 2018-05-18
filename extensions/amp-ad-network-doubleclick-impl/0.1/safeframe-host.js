@@ -19,7 +19,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle} from '../../../src/style';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
@@ -66,9 +66,9 @@ const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 
 /**
- * Event listener callback for message events. If message is a Safeframe message,
- * handles the message.
- * This listener is registered within SafeframeHostApi.
+ * Event listener callback for message events. If message is a Safeframe
+ * message, handles the message. This listener is registered within
+ * SafeframeHostApi.
  * @param {!Event} event
  */
 export function safeframeListener(event) {
@@ -102,20 +102,20 @@ export function safeframeListener(event) {
  * Safeframe container APIs to work:
  *   - $sf.ext.expand()
  *   - $sf.ext.collapse()
- *   - $sf.ext.geom()
- * Expand and collapse are both implemented utilizing AMP's built in element
- * resizing.
+ *   - $sf.ext.geom() Expand and collapse are both implemented utilizing AMP's
+ *     built in element resizing.
  *
- * For geom, the host needs to send geometry updates into the container
- *  whenever a position change happens, at a max frequency of 1 message/second.
- *  To implement this messaging, we are leveraging the existing IntersectionObserver
- *  class that works with AMP elements. However, the safeframe iframe that we
- *  need to monitor is not an AMP element, but rather contained within an amp-ad.
- *  So, we are doing intersection observing on the amp-ad, and calculating
- *  the correct position for the iframe whenever we get an update.
+ * For geom, the host needs to send geometry updates into the container whenever
+ *  a position change happens, at a max frequency of 1 message/second. To
+ *  implement this messaging, we are leveraging the existing
+ *  IntersectionObserver class that works with AMP elements. However, the
+ *  safeframe iframe that we need to monitor is not an AMP element, but rather
+ *  contained within an amp-ad. So, we are doing intersection observing on the
+ *  amp-ad, and calculating the correct position for the iframe whenever we get
+ *  an update.
  *
- * We pass an instance of this class into the IntersectionObserver class, which then
- *  calls the instance of send() below whenever an update occurs.
+ * We pass an instance of this class into the IntersectionObserver class, which
+ *  then calls the instance of send() below whenever an update occurs.
  */
 export class SafeframeHostApi {
 
@@ -245,8 +245,8 @@ export class SafeframeHostApi {
     // Don't allow for referrer policy same-origin,
     // as Safeframe will always be a different origin.
     // Don't allow for no-referrer.
-    const canonicalUrl = Services.documentInfoForDoc(
-        this.baseInstance_.getAmpDoc()).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(
+        this.baseInstance_.getAmpDoc());
     const metaReferrer = this.win_.document.querySelector(
         "meta[name='referrer']");
     if (!metaReferrer) {
@@ -258,7 +258,7 @@ export class SafeframeHostApi {
       case 'no-referrer':
         return;
       case 'origin':
-        return parseUrl(canonicalUrl).origin;
+        return parseUrlDeprecated(canonicalUrl).origin;
     }
     return canonicalUrl;
   }

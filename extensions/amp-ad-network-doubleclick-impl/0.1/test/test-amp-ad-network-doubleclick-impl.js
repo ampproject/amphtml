@@ -402,7 +402,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
   describe('#getAdUrl', () => {
     beforeEach(() => {
-      const sandbox = env.sandbox;
+      const {sandbox} = env;
       element = doc.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'doubleclick');
@@ -544,8 +544,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
-          // With exp dc-use-attr-for-format off, we can't test for specific
-          // numbers, but we know that the values should be numeric.
+        // With exp dc-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
         expect(url).to.match(/sz=[0-9]+x[0-9]+/));
     });
     it('has correct format when width == "auto"',
@@ -556,7 +556,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
+            // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
     it('has correct format with height/width override',
@@ -591,7 +591,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
+            // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
     it('should have the correct ifi numbers - no refresh', function() {
@@ -962,7 +962,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 150/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -975,7 +975,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 150/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -995,7 +995,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 200/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -1011,7 +1011,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 200/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -1321,10 +1321,10 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           expect(style.left).to.equal('50%');
           expect(style.width).to.equal(expectedSize.width);
           expect(style.height).to.equal(expectedSize.height);
-          // We don't know the exact values by which the frame will be translated,
-          // as this can vary depending on whether we use the height/width
-          // attributes, or the actual size of the frame. To make this less of a
-          // hassle, we'll just match against regexp.
+          // We don't know the exact values by which the frame will be
+          // translated, as this can vary depending on whether we use the
+          // height/width attributes, or the actual size of the frame. To make
+          // this less of a hassle, we'll just match against regexp.
           expect(style.transform).to.match(new RegExp(
               'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
         }
