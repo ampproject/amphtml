@@ -18,7 +18,7 @@
 module.exports = function(context) {
   return {
     SpreadElement: function(node) {
-      context.report(node, 'No spread element allowed.');
+      context.report({node, message: 'No spread element allowed.'});
     },
   };
 };
