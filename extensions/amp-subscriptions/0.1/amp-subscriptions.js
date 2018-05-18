@@ -462,7 +462,7 @@ export class SubscriptionService {
    * @return {!./subscription-platform.SubscriptionPlatform}
    */
   selectPlatformForLogin() {
-    this.platformStore_.selectPlatformForLogin();
+    return this.platformStore_.selectPlatformForLogin();
   }
 }
 

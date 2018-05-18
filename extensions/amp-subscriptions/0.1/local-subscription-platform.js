@@ -156,7 +156,8 @@ export class LocalSubscriptionPlatform {
       } else if ((element.getAttribute('subscriptions-service') || 'auto')
         == 'auto') {
         const platform = this.serviceAdapter_.selectPlatformForLogin();
-        this.serviceAdapter_.delegateActionToService(action, platform.getServiceId());
+        this.serviceAdapter_.delegateActionToService(
+            action, platform.getServiceId());
       } else if (element.getAttribute('subscriptions-service')) {
         const serviceId = element.getAttribute('subscriptions-service');
         this.serviceAdapter_.delegateActionToService(action, serviceId);
