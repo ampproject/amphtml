@@ -88,7 +88,10 @@ const realWinConfigAmpAd = {
  * Creates an iframe promise, and instantiates element and impl, adding the
  * former to the document of the iframe.
  * @param {{width, height, type}} config
- * @return The iframe promise.
+ * @param {!Element} element
+ * @param {!AmpAdNetworkDoubleclickImpl} impl
+ * @param {!Object} env
+ * @return {!Array} The iframe promise.
  */
 function createImplTag(config, element, impl, env) {
   config.type = 'doubleclick';
@@ -680,20 +683,29 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should include npa=1 if unknown consent & explicit npa', () => {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-      return expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually
-          .match(/(\?|&)npa=1(&|$)/);
+      return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
+        expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        expect(url).not.to.match(/(\?|&)consent=(&|$)/);
+      });
     });
 
-    it('should include npa=1 if insufficient consent', () =>
-      expect(impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT)).to.eventually
-          .match(/(\?|&)npa=1(&|$)/));
+    it('should include npa=1, consent=false if insufficient consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then(url => {
+        expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        expect(url).to.match(/(\?|&)consent=false(&|$)/);
+      }));
 
-    [CONSENT_POLICY_STATE.SUFFICIENT,
-      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED].forEach(consentState => {
-      it(`should not include npa=1 if ${consentState}`, () =>
-        expect(impl.getAdUrl(consentState)).to.eventually.not
-            .match(/(\?|&)npa=1(&|$)/));
-    });
+    it('should include consent=true and not npa, if sufficient consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then(url => {
+        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        expect(url).to.match(/(\?|&)consent=true(&|$)/);
+      }));
+
+    it('should not include consent or npa, if not required consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
+        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        expect(url).to.not.match(/(\?|&)consent=(&|$)/);
+      }));
   });
 
   describe('#getPageParameters', () => {
@@ -706,7 +718,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.getPageParameters(
-          CONSENT_POLICY_STATE.INSUFFICIENT).npa).to.equal(1);
+          CONSENT_POLICY_STATE.INSUFFICIENT).npa).to.equal('1');
     });
   });
 
