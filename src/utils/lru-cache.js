@@ -50,7 +50,7 @@ export class LruCache {
   get(id) {
     const cacheable = this.cache_[id];
     if (cacheable) {
-      cacheable.access = this.access_++;
+      cacheable.access = ++this.access_;
       return cacheable.payload;
     }
     return undefined;
@@ -77,7 +77,7 @@ export class LruCache {
 
     dev().warn(TAG, 'Trimming LRU cache');
     const cache = this.cache_;
-    let oldest = this.access_;
+    let oldest = this.access_ + 1;
     let oldestKey;
     for (const key in cache) {
       const {access} = cache[key];

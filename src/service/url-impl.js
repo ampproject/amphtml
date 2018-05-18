@@ -34,11 +34,11 @@ export class Url {
     /** @private @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private @const {!Document|!ShadowRoot} */
     const root = opt_rootNode || ampdoc.getRootNode();
+    const doc = root.ownerDocument || root;
 
     /** @private @const {!HTMLAnchorElement} */
-    this.anchor_ = /** @type {!HTMLAnchorElement} */(root.createElement('a'));
+    this.anchor_ = /** @type {!HTMLAnchorElement} */(doc.createElement('a'));
   }
 
   /** @override */
