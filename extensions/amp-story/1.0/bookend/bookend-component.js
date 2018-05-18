@@ -20,6 +20,7 @@ import {CtaLinkComponent, CtaLinkDef} from './components/cta-link';
 import {HeadingComponent, HeadingComponentDef} from './components/heading';
 import {LandscapeComponent, LandscapeComponentDef} from './components/landscape';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
+import {TextBoxComponent, TextBoxComponentDef} from './components/text-box';
 import {htmlFor} from '../../../../src/static-template';
 
 /** @type {string} */
@@ -40,7 +41,8 @@ export let BookendDataDef;
  *    !CtaLinkDef|
  *    !HeadingComponentDef|
  *    !LandscapeComponentDef|
- *    !PortraitComponentDef)
+ *    !PortraitComponentDef|
+ *    !TextBoxComponentDef)
  * }
  */
 export let BookendComponentDef;
@@ -50,6 +52,7 @@ const ctaLinkComponentBuilder = new CtaLinkComponent();
 const headingComponentBuilder = new HeadingComponent();
 const landscapeComponentBuilder = new LandscapeComponent();
 const portraitComponentBuilder = new PortraitComponent();
+const textBoxComponentBuilder = new TextBoxComponent();
 
 /**
  * @typedef {
@@ -57,7 +60,8 @@ const portraitComponentBuilder = new PortraitComponent();
  *    !CtaLinkComponent|
  *    !HeadingComponent|
  *    !LandscapeComponent|
- *    !PortraitComponent)
+ *    !PortraitComponent|
+ *    !TextBoxComponent)
  * }
  */
 export let BookendComponentClass;
@@ -79,6 +83,8 @@ function componentBuilderInstanceFor(componentType) {
       return landscapeComponentBuilder;
     case 'portrait':
       return portraitComponentBuilder;
+    case 'textbox':
+      return textBoxComponentBuilder;
     default:
       return null;
   }
