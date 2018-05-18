@@ -22,7 +22,9 @@ limitations under the License.
 <amp-ad width="300" height="250"
     type="adocean"
     data-ao-id="ado-bIVMPpCJPX0.5tjQbNyrWpnws_dbbTJ1fUnGjLeSqJ3.K7"
-    data-ao-emitter="myao.adocean.pl">
+    data-ao-emitter="myao.adocean.pl"
+    data-block-on-consent
+    data-npa-on-unknown-consent="true">
 </amp-ad>
 ```
 
