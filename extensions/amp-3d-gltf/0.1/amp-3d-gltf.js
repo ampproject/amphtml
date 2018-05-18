@@ -102,14 +102,14 @@ export class Amp3dGltf extends AMP.BaseElement {
       },
       'hostUrl': this.win.location.href,
     });
-
-    if (!isWebGLSupported()) {
-      this.toggleFallback(true);
-    }
   }
 
   /** @override */
   layoutCallback() {
+    if (!isWebGLSupported()) {
+      this.toggleFallback(true);
+      return Promise.resolve();
+    }
 
     const iframe = getIframe(
         this.win, this.element, '3d-gltf', this.context_
