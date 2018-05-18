@@ -50,8 +50,11 @@ module.exports = function(context) {
         return;
       }
 
-      context.report(node, 'Use the Promise constructor, ' +
-          'or tryResolve in the src/utils/promise.js module.');
+      context.report({
+        node,
+        message: 'Use the Promise constructor, or tryResolve in the ' +
+            'src/utils/promise.js module.',
+      });
     },
 
     // new Promise(...)
@@ -74,13 +77,13 @@ module.exports = function(context) {
 
       const resolver = node.arguments[0];
       if (!/Function/.test(resolver.type)) {
-        context.report(resolver, 'Must pass function');
+        context.report({node: resolver, message: 'Must pass function'});
         return;
       }
 
       const resolve = resolver.params[0];
       if (!resolve || resolve.type !== 'Identifier') {
-        context.report(resolver, 'Must have resolve param');
+        context.report({node: resolver, message: 'Must have resolve param'});
         return;
       }
 
@@ -116,7 +119,7 @@ module.exports = function(context) {
         'Instead of creating a pending Promise, please use ',
         'Deferred in the src/utils/promise.js module.',
       ].join('\n\t');
-      context.report(resolver, message);
+      context.report({node: resolver, message});
     },
   };
 };
