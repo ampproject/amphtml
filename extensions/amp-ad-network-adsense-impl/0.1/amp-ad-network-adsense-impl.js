@@ -156,7 +156,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /**
    * @return {boolean}
    * @private
-   * @visibleForTesting
    */
   isResponsive_() {
     return this.autoFormat_ == 'rspv';
@@ -290,14 +289,31 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const pfx = enclosingContainers.includes(
         ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
         enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
+    let npa = null;
+    let consent = null;
+    switch (consentState) {
+      case null:
+      case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+        break;
+      case CONSENT_POLICY_STATE.INSUFFICIENT:
+        consent = false;
+      case CONSENT_POLICY_STATE.UNKNOWN:
+        npa = '1';
+        break;
+      case CONSENT_POLICY_STATE.SUFFICIENT:
+        consent = true;
+        break;
+      default:
+        dev().error(TAG, `unknown consent enum ${consentState}`);
+    }
     const parameters = {
       'client': adClientId,
       format,
       'w': this.size_.width,
       'h': this.size_.height,
       'iu': slotname,
-      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
+      npa,
+      consent,
       'adtest': adTestOn ? 'on' : null,
       adk,
       'output': 'html',
