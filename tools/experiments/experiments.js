@@ -501,7 +501,6 @@ function getAmpConfig() {
     // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
     xhr.open('GET', '/v0.js?' + Math.random(), true);
     xhr.send(null);
-    resolve();
   }).then(text => {
     const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
     if (!match) {
