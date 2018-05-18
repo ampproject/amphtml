@@ -93,7 +93,7 @@ export class CtaLinkComponent {
           </div>
         </a>`;
     ctaLinksData['links'].forEach(currentLink => {
-      const el = linkSeed.cloneNode(/* deep*/ true);
+      const el = linkSeed.cloneNode(/* deep */ true);
       addAttributesToElement(el, dict({'href': currentLink['url']}));
 
       const refs = htmlRefs(el);
