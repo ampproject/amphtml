@@ -22,9 +22,11 @@ module.exports = function(context) {
         if (node.arguments[0]) {
           const arg1 = node.arguments[0];
           if (arg1.type !== 'ObjectExpression') {
-            context.report(node,
-                'calls to `dict` must have an Object Literal Expression as ' +
-                'the first argument');
+            context.report({
+              node,
+              message: 'calls to `dict` must have an Object Literal ' +
+                  'Expression as the first argument',
+            });
             return;
           }
           checkNode(arg1, context);
@@ -38,9 +40,11 @@ function checkNode(node, context) {
   if (node.type === 'ObjectExpression') {
     node.properties.forEach(function(prop) {
       if (!prop.key.raw) {
-        context.report(node, 'Found: ' + prop.key.name + '. The keys ' +
-            'of the Object Literal Expression passed into `dict` must ' +
-            'have string keys.');
+        context.report({
+          node,
+          message: 'Found: ' + prop.key.name + '. The keys of the Object ' +
+              'Literal Expression passed into `dict` must have string keys.',
+        });
       }
       checkNode(prop.value, context);
     });

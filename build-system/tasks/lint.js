@@ -132,17 +132,18 @@ function jsFilesChanged() {
 }
 
 /**
- * Checks if there are .eslintrc changes in this PR, in which case we must lint
- * all files.
+ * Checks if there are eslint rule changes, in which case we must lint all
+ * files.
  *
  * @return {boolean}
  */
-function eslintrcChanged() {
+function eslintRulesChanged() {
   if (process.env.TRAVIS_EVENT_TYPE === 'push') {
     return false;
   }
   return gitDiffNameOnlyMaster().filter(function(file) {
-    return path.basename(file).includes('.eslintrc');
+    return path.basename(file).includes('.eslintrc') ||
+        path.dirname(file) === 'build-system/eslint-rules';
   }).length > 0;
 }
 
@@ -182,8 +183,10 @@ function lint() {
   }
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
-    enableStrictLinting();
-  } else if (!eslintrcChanged() &&
+    if (!eslintRulesChanged()) {
+      enableStrictLinting();
+    }
+  } else if (!eslintRulesChanged() &&
       (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
        process.env.LOCAL_PR_CHECK ||
        argv['local-changes'])) {
