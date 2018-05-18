@@ -363,6 +363,10 @@
       "url": "examples/visual-tests/amp-lightbox-gallery.html",
       "name": "amp-lightbox-gallery - article",
       "experiments": ["amp-lightbox-gallery"]
+    },
+    {
+      "url": "examples/visual-tests/video/rotate-to-fullscreen.html",
+      "name": "Video rotate-to-fullscreen"
     }
   ]
 }
