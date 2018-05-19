@@ -150,7 +150,7 @@
     "react-dates": "16.7.0",
     "react-dom": "16.3.2",
     "react-externs": "0.13.6",
-    "request": "2.84.0",
+    "request": "2.86.0",
     "rimraf": "2.6.2",
     "rocambole": "0.7.0",
     "sinon": "4.4.6",
