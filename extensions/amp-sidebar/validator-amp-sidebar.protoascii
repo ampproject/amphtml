@@ -46,7 +46,7 @@ tags: {  # <amp-sidebar>
   requires_extension: "amp-sidebar"
   attrs: {
     name: "side"
-    value_regex: "(left|right)"
+    value_regex: "left|right"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

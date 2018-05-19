@@ -54,7 +54,7 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   }
   attrs: {
     name: "preload"
-    value_regex_casei: "(auto|metadata|none|)"
+    value_regex_casei: "auto|metadata|none|"
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
