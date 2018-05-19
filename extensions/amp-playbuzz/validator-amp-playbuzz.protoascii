@@ -30,7 +30,7 @@ tags: {  # <amp-playbuzz>
   requires_extension: "amp-playbuzz"
   attrs: {
     name: "data-comments"
-    value_regex_casei: "(false|true)"
+    value_regex_casei: "false|true"
   }
   attrs: {
     name: "data-item"
@@ -38,11 +38,11 @@ tags: {  # <amp-playbuzz>
   }
   attrs: {
     name: "data-item-info"
-    value_regex_casei: "(false|true)"
+    value_regex_casei: "false|true"
   }
   attrs: {
     name: "data-share-buttons"
-    value_regex_casei: "(false|true)"
+    value_regex_casei: "false|true"
   }
   attrs: {
     name: "src"

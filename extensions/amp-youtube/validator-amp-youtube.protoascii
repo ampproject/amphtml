@@ -37,7 +37,7 @@ tags: {  # <amp-youtube>
   attrs: { name: "autoplay" }
   attrs: {
     name: "credentials"
-    value_regex_casei: "(include|omit)"
+    value_regex_casei: "include|omit"
   }
   attrs: {
     name: "data-live-channelid"

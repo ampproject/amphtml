@@ -133,8 +133,8 @@ tags: {  # <amp-list>
       allowed_protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "(__amp_source_origin|"
-        "{{|}})"    # Mustache is disallowed in src.
+    blacklisted_value_regex: "__amp_source_origin|"
+        "{{|}}"    # Mustache is disallowed in src.
   }
   # TODO(gregable): Implement validation that requires the template attr value
   # to reference the id of an existing template element.
