@@ -31,16 +31,16 @@ tags: {  # <amp-reddit>
   requires_extension: "amp-reddit"
   attrs: {
     name: "data-embedlive"
-    value_regex_casei: "(false|true)"
+    value_regex_casei: "false|true"
   }
   attrs: {
     name: "data-embedparent"
-    value_regex_casei: "(false|true)"
+    value_regex_casei: "false|true"
   }
   attrs: {
     name: "data-embedtype"
     mandatory: true
-    value_regex_casei: "(comment|post)"
+    value_regex_casei: "comment|post"
   }
   attrs: {
     name: "data-src"
