@@ -46,7 +46,7 @@ FAIL
 |        <input type="submit" value="Subscribe">
 |      </fieldset>
 |    </form>
-|    <!-- Invalid: input can not be type="button|file|image". -->
+|    <!-- Invalid: input can not be type="button|image". -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="button" name="button">
 >>     ^~~~~~~~~
@@ -55,7 +55,7 @@ amp4ads_feature_tests/amp_form.html:50:4 The attribute 'type' in tag 'input' is 
 >>     ^~~~~~~~~
 amp4ads_feature_tests/amp_form.html:51:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
-|    <!-- Invalid: input can not be type="password" -->
+|    <!-- Invalid: input can not be type="file|password". -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="password" name="password">
 >>     ^~~~~~~~~
