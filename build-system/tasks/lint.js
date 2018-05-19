@@ -148,6 +148,21 @@ function eslintRulesChanged() {
 }
 
 /**
+ * Checks if there are validator changes, in which case we don't do strict
+ * linting.
+ *
+ * @return {boolean}
+ */
+function validatorChanged() {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
+    return false;
+  }
+  return gitDiffNameOnlyMaster().filter(function(file) {
+    return path.dirname(file).startsWith('validator');
+  }).length > 0;
+}
+
+/**
  * Sets the list of files to be linted.
  *
  * @param {!Array<string>} files
@@ -194,11 +209,10 @@ function lint() {
     if (jsFiles.length == 0) {
       log(colors.green('INFO: ') + 'No JS files in this PR');
       return Promise.resolve();
-    } else if (jsFiles.length > filesInARefactorPr) {
-      // This is probably a refactor, don't enable strict mode.
-      setFilesToLint(jsFiles);
-    } else {
-      setFilesToLint(jsFiles);
+    }
+    setFilesToLint(jsFiles);
+    // For large refactors or validator changes, don't enable strict linting.
+    if (jsFiles.length <= filesInARefactorPr && !validatorChanged()) {
       enableStrictLinting();
     }
   }
