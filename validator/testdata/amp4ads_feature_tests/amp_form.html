@@ -45,12 +45,12 @@
       <input type="submit" value="Subscribe">
     </fieldset>
   </form>
-  <!-- Invalid: input can not be type="button|file|image". -->
+  <!-- Invalid: input can not be type="button|image". -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <input type="button" name="button">
     <input type="image" name="image">
   </form>
-  <!-- Invalid: input can not be type="password" -->
+  <!-- Invalid: input can not be type="file|password". -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <input type="password" name="password">
     <input type="file" name="file">
