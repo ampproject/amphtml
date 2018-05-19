@@ -125,8 +125,7 @@ module.exports = {
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party}/**/*.*',
     '!examples/**/*.*',
-    // TODO: temporary, remove when validator is up to date
-    '!validator/**/*.*',
+    '!{validator/dist,validator/node_modules,validator/nodejs/node_modules}',
     '!eslint-rules/**/*.*',
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',

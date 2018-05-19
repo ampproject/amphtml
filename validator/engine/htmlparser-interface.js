@@ -48,18 +48,18 @@ amp.htmlparser.ParsedHtmlTag = class {
     // Convert attribute names to lower case, not values, which are
     // case-sensitive.
     for (let i = 0; i < attrs.length; i += 2) {
-      let attr = Object.create(null);
+      const attr = Object.create(null);
       attr.name = amp.htmlparser.toLowerCase(attrs[i]);
       attr.value = attrs[i + 1];
       // Our html parser repeats the key as the value if there is no value. We
       // replace the value with an empty string instead in this case.
-      if (attr.name === attr.value) attr.value = '';
+      if (attr.name === attr.value) {attr.value = '';}
       this.attrs_.push(attr);
     }
     // Sort the attribute array by (lower case) name.
     goog.array.sort(this.attrs_, function(a, b) {
-      if (a.name > b.name) return 1;
-      if (a.name < b.name) return -1;
+      if (a.name > b.name) {return 1;}
+      if (a.name < b.name) {return -1;}
       // No need to sub-sort by attr values, just names will do.
       return 0;
     });
@@ -103,7 +103,7 @@ amp.htmlparser.ParsedHtmlTag = class {
   attrsByKey() {
     if (this.attrsByKey_ === null) {
       this.attrsByKey_ = Object.create(null);
-      for (let attr of this.attrs()) {
+      for (const attr of this.attrs()) {
         this.attrsByKey_[attr.name] = attr.value;
       }
     }
@@ -121,7 +121,7 @@ amp.htmlparser.ParsedHtmlTag = class {
     let lastAttrName = '';
     /** @type {string} */
     let lastAttrValue = '';
-    for (let attr of this.attrs()) {
+    for (const attr of this.attrs()) {
       if (lastAttrName === attr.name && lastAttrValue !== attr.value) {
         return attr.name;
       }
@@ -138,10 +138,10 @@ amp.htmlparser.ParsedHtmlTag = class {
    */
   dedupeAttrs() {
     /** @type {!Array<!Object>} */
-    let newAttrs = [];
+    const newAttrs = [];
     /** @type {string} */
     let lastAttrName = '';
-    for (let attr of this.attrs_) {
+    for (const attr of this.attrs_) {
       if (lastAttrName !== attr.name) {
         newAttrs.push(attr);
       }
@@ -256,13 +256,13 @@ amp.htmlparser.DocLocator = class {
  */
 amp.htmlparser.HtmlSaxHandlerWithLocation =
     class extends amp.htmlparser.HtmlSaxHandler {
-  constructor() { super(); }
+      constructor() { super(); }
 
-  /**
+      /**
    * Called prior to parsing a document, that is, before `startTag`.
    * @param {amp.htmlparser.DocLocator} locator A locator instance which
    *   provides access to the line/column information while SAX events
    *   are being received by the handler.
    */
-  setDocLocator(locator) {}
-};
+      setDocLocator(locator) {}
+    };

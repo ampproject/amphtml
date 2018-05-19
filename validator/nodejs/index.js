@@ -18,24 +18,24 @@
 
 'use strict';
 
-var Promise = require('promise');
-var colors = require('colors');
-var fs = require('fs');
-var http = require('http');
-var https = require('https');
-var path = require('path');
-var program = require('commander');
-var querystring = require('querystring');
-var url = require('url');
-var util = require('util');
-var vm = require('vm');
+const colors = require('colors');
+const fs = require('fs');
+const http = require('http');
+const https = require('https');
+const path = require('path');
+const program = require('commander');
+const Promise = require('promise');
+const querystring = require('querystring');
+const url = require('url');
+const util = require('util');
+const vm = require('vm');
 
-var DEFAULT_USER_AGENT = 'amphtml-validator';
+const DEFAULT_USER_AGENT = 'amphtml-validator';
 
 /**
  * Determines if str begins with prefix.
- * @param {!string} str
- * @param {!string} prefix
+ * @param {string} str
+ * @param {string} prefix
  * @return {boolean}
  */
 function hasPrefix(str, prefix) {
@@ -45,7 +45,7 @@ function hasPrefix(str, prefix) {
 /**
  * Convenience function to detect whether an argument is a URL. If not,
  * it may be a local file.
- * @param {!string} url
+ * @param {string} url
  * @return {boolean}
  */
 function isHttpOrHttpsUrl(url) {
@@ -54,7 +54,7 @@ function isHttpOrHttpsUrl(url) {
 
 /**
  * Creates a promise which reads from a file.
- * @param {!string} name
+ * @param {string} name
  * @return {Promise<string>}
  */
 function readFromFile(name) {
@@ -71,13 +71,13 @@ function readFromFile(name) {
 
 /**
  * Creates a promise which reads from a stream.
- * @param {!string} name
+ * @param {string} name
  * @param {!stream.Readable} readable
  * @return {Promise<string>}
  */
 function readFromReadable(name, readable) {
   return new Promise(function(resolve, reject) {
-    var chunks = [];
+    const chunks = [];
     readable.setEncoding('utf8');
     readable.on('data', function(chunk) {
       chunks.push(chunk);
@@ -108,36 +108,36 @@ function readFromStdin() {
  * Creates a promise which reads from a URL or more precisely, fetches
  * the contents located at the URL by using the 'http' or 'https' module.
  * Any HTTP status other than 200 is interpreted as an error.
- * @param {!string} url
- * @param {!string} userAgent
+ * @param {string} url
+ * @param {string} userAgent
  * @return {Promise<string>}
  */
 function readFromUrl(url, userAgent) {
   return new Promise(function(resolve, reject) {
-           var clientModule = hasPrefix(url, 'http://') ? http : https;
-           var req = clientModule.request(url, function(response) {
-             if (response.statusCode !== 200) {
-               // https://nodejs.org/api/http.html says: "[...] However, if
-               // you add a 'response' event handler, then you must consume
-               // the data from the response object, either by calling
-               // response.read() whenever there is a 'readable' event, or by
-               // adding a 'data' handler, or by calling the .resume()
-               // method."
-               response.resume();
-               reject(new Error(
-                   'Unable to fetch ' + url + ' - HTTP Status ' +
+    const clientModule = hasPrefix(url, 'http://') ? http : https;
+    const req = clientModule.request(url, function(response) {
+      if (response.statusCode !== 200) {
+        // https://nodejs.org/api/http.html says: "[...] However, if
+        // you add a 'response' event handler, then you must consume
+        // the data from the response object, either by calling
+        // response.read() whenever there is a 'readable' event, or by
+        // adding a 'data' handler, or by calling the .resume()
+        // method."
+        response.resume();
+        reject(new Error(
+            'Unable to fetch ' + url + ' - HTTP Status ' +
                    response.statusCode));
-             } else {
-               resolve(response);
-             }
-           });
-           req.setHeader('User-Agent', userAgent);
-           req.on('error', function(error) {  // E.g., DNS resolution errors.
-             reject(
-                 new Error('Unable to fetch ' + url + ' - ' + error.message));
-           });
-           req.end();
-         })
+      } else {
+        resolve(response);
+      }
+    });
+    req.setHeader('User-Agent', userAgent);
+    req.on('error', function(error) { // E.g., DNS resolution errors.
+      reject(
+          new Error('Unable to fetch ' + url + ' - ' + error.message));
+    });
+    req.end();
+  })
       .then(readFromReadable.bind(null, url));
 }
 
@@ -152,7 +152,7 @@ function readFromUrl(url, userAgent) {
 function ValidationResult() {
   /**
    * Possible values are 'UNKNOWN', 'PASS', and 'FAIL'.
-   * @type {!string}
+   * @type {string}
    */
   this.status = 'UNKNOWN';
   /** @type {!Array<!ValidationError>} */
@@ -185,14 +185,14 @@ function ValidationError() {
    * If you find yourself trying to write a parser against this string
    * to scrape out some detail, consider looking at the code and params
    * fields below.
-   * @type {!string}
+   * @type {string}
    */
   this.message = '';
   /**
    * The spec URL is often added by the validator to provide additional
    * context for the error. In a user interface this would be shown
    * as a "Learn more" link.
-   * @type {!string}
+   * @type {string}
    */
   this.specUrl = null;
   /**
@@ -200,7 +200,7 @@ function ValidationError() {
    * easier to create error statistics across a site and give advice based
    * on the most common problems for a set of pages.
    * See the ErrorCategory.Code enum in validator.proto for possible values.
-   * @type {!string}
+   * @type {string}
    */
   this.category = 'UNKNOWN';
   /**
@@ -212,14 +212,14 @@ function ValidationError() {
    * 'TAG_REQUIRED_BY_MISSING'. For each of these codes there is a
    * format string in validator-main.protoascii (look for error_formats),
    * which is used to assemble the message from the strings in params.
-   * @type {!string}
+   * @type {string}
    */
   this.code = 'UNKNOWN_CODE';
   /**
    * This field is only useful when scripting against the validator,
    * it should not be displayed in a user interface as it adds nothing
    * for humans to read over the message field (see above).
-   * @type {!Array<!string>}
+   * @type {!Array<string>}
    */
   this.params = [];
 }
@@ -229,7 +229,7 @@ function ValidationError() {
  * validator.js script - in practice the script was either downloaded
  * from 'https://cdn.ampproject.org/v0/validator.js' or read from a
  * local file.
- * @param {!string} scriptContents
+ * @param {string} scriptContents
  * @throws {!Error}
  * @constructor
  */
@@ -255,19 +255,19 @@ function Validator(scriptContents) {
 /**
  * Validates the provided inputString; the htmlFormat can be 'AMP' or
  * 'AMP4ADS'; it defaults to 'AMP' if not specified.
- * @param {!string} inputString
+ * @param {string} inputString
  * @param {string=} htmlFormat
  * @return {!ValidationResult}
  * @export
  */
 Validator.prototype.validateString = function(inputString, htmlFormat) {
-  var internalResult =
+  const internalResult =
       this.sandbox.amp.validator.validateString(inputString, htmlFormat);
-  var result = new ValidationResult();
+  const result = new ValidationResult();
   result.status = internalResult.status;
-  for (var ii = 0; ii < internalResult.errors.length; ii++) {
-    var internalError = internalResult.errors[ii];
-    var error = new ValidationError();
+  for (let ii = 0; ii < internalResult.errors.length; ii++) {
+    const internalError = internalResult.errors[ii];
+    const error = new ValidationError();
     error.severity = internalError.severity;
     error.line = internalError.line;
     error.col = internalError.col;
@@ -287,7 +287,7 @@ Validator.prototype.validateString = function(inputString, htmlFormat) {
  * AMP Validators more than once.
  * @type {!Object<string, Validator>}
  */
-var instanceByValidatorJs = {};
+const instanceByValidatorJs = {};
 
 /**
  * Provided a URL or a filename from which to fetch the validator.js
@@ -302,17 +302,17 @@ var instanceByValidatorJs = {};
  * @export
  */
 function getInstance(opt_validatorJs, opt_userAgent) {
-  var validatorJs =
+  const validatorJs =
       opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
-  var userAgent = opt_userAgent || DEFAULT_USER_AGENT;
+  const userAgent = opt_userAgent || DEFAULT_USER_AGENT;
   if (instanceByValidatorJs.hasOwnProperty(validatorJs)) {
     return Promise.resolve(instanceByValidatorJs[validatorJs]);
   }
-  var validatorJsPromise = isHttpOrHttpsUrl(validatorJs) ?
-      readFromUrl(validatorJs, userAgent) :
-      readFromFile(validatorJs);
+  const validatorJsPromise = isHttpOrHttpsUrl(validatorJs) ?
+    readFromUrl(validatorJs, userAgent) :
+    readFromFile(validatorJs);
   return validatorJsPromise.then(function(scriptContents) {
-    var instance;
+    let instance;
     try {
       instance = new Validator(scriptContents);
     } catch (error) {
@@ -358,7 +358,7 @@ exports.newInstance = newInstance;
 /**
  * Logs a validation result to the console using process.stdout and
  * process.stderr as is appropriate.
- * @param {!string} filename
+ * @param {string} filename
  * @param {!ValidationResult} validationResult
  * @param {boolean} color
  */
@@ -367,9 +367,9 @@ function logValidationResult(filename, validationResult, color) {
     process.stdout.write(
         filename + ': ' + (color ? colors.green('PASS') : 'PASS') + '\n');
   }
-  for (var ii = 0; ii < validationResult.errors.length; ii++) {
-    var error = validationResult.errors[ii];
-    var msg = filename + ':' + error.line + ':' + error.col + ' ';
+  for (let ii = 0; ii < validationResult.errors.length; ii++) {
+    const error = validationResult.errors[ii];
+    let msg = filename + ':' + error.line + ':' + error.col + ' ';
     if (color) {
       msg += (error.severity === 'ERROR' ? colors.red : colors.magenta)(
           error.message);
@@ -440,9 +440,9 @@ function main() {
           process.exit(1);
         });
   }
-  var inputs = [];
-  for (var ii = 0; ii < program.args.length; ii++) {
-    var item = program.args[ii];
+  const inputs = [];
+  for (let ii = 0; ii < program.args.length; ii++) {
+    const item = program.args[ii];
     if (item === '-') {
       inputs.push(readFromStdin());
     } else if (isHttpOrHttpsUrl(item)) {
@@ -455,10 +455,10 @@ function main() {
       .then(function(validator) {
         Promise.all(inputs)
             .then(function(resolvedInputs) {
-              var jsonOut = {};
-              var hasError = false;
-              for (var ii = 0; ii < resolvedInputs.length; ii++) {
-                var validationResult = validator.validateString(
+              const jsonOut = {};
+              let hasError = false;
+              for (let ii = 0; ii < resolvedInputs.length; ii++) {
+                const validationResult = validator.validateString(
                     resolvedInputs[ii], program.html_format);
                 if (program.format === 'json') {
                   jsonOut[program.args[ii]] = validationResult;
@@ -489,7 +489,7 @@ function main() {
             .catch(function(error) {
               process.stderr.write(
                   (program.format == 'color' ? colors.red(error.message) :
-                                               error.message) +
+                    error.message) +
                       '\n',
                   function() {
                     process.exit(1);
@@ -499,7 +499,7 @@ function main() {
       .catch(function(error) {
         process.stderr.write(
             (program.format == 'color' ? colors.red(error.message) :
-                                         error.message) +
+              error.message) +
                 '\n',
             function() {
               process.exit(1);

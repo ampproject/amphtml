@@ -98,8 +98,9 @@ describe('Srcset parseSrcset', () => {
   });
 
   it('should not accept multiple sources with duplicate width', () => {
-    let result = parse_srcset.parseSrcset(
+    const result = parse_srcset.parseSrcset(
         'image1 10w, image2 100w, image3 1000w, image4 10w');
+
     expect(result.success).toBe(false);
   });
 
@@ -140,7 +141,7 @@ describe('Srcset parseSrcset', () => {
     ]);
     test(' \n image,1x , \n  image,2x 2x\n', [
       {url: 'image,1x', widthOrPixelDensity: '1x'},
-      {url: 'image,2x', widthOrPixelDensity: '2x'}
+      {url: 'image,2x', widthOrPixelDensity: '2x'},
     ]);
     test(' \n image,1 \n ', [
       {url: 'image,1', widthOrPixelDensity: '1x'},
@@ -225,36 +226,46 @@ describe('Srcset parseSrcset', () => {
 
   it('should reject urls with spaces', () => {
     let result = parse_srcset.parseSrcset('image 1x png 1x');
+
     expect(result.success).toBe(false);
     result = parse_srcset.parseSrcset('image 1x png 1x, image-2x.png 2x');
+
     expect(result.success).toBe(false);
   });
 
   it('should reject width or pixel density with negatives', () => {
     let result = parse_srcset.parseSrcset('image.png -1x');
+
     expect(result.success).toBe(false);
     result = parse_srcset.parseSrcset('image.png 1x, image2.png -2x');
+
     expect(result.success).toBe(false);
     result = parse_srcset.parseSrcset('image.png -480w');
+
     expect(result.success).toBe(false);
     result = parse_srcset.parseSrcset('image.png 1x, image2.png -100w');
+
     expect(result.success).toBe(false);
   });
 
   it('should reject empty srcsets', () => {
     let result = parse_srcset.parseSrcset('');
+
     expect(result.success).toBe(false);
     result = parse_srcset.parseSrcset(' \n\t\f\r');
+
     expect(result.success).toBe(false);
   });
 
   it('should reject invalid text after valid srcsets', () => {
-    let result = parse_srcset.parseSrcset('image1, image2, ,,,');
+    const result = parse_srcset.parseSrcset('image1, image2, ,,,');
+
     expect(result.success).toBe(false);
   });
 
   it('should reject no comma between sources', () => {
-    let result = parse_srcset.parseSrcset('image1 100w image2 50w');
+    const result = parse_srcset.parseSrcset('image1 100w image2 50w');
+
     expect(result.success).toBe(false);
   });
 });

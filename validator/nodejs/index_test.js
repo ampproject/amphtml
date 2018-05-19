@@ -19,14 +19,14 @@
 'use strict';
 
 global.assert = require('assert');
-var fs = require('fs');
+const fs = require('fs');
 global.path = require('path');
 
-var execFile = require('child_process').execFile;
-var JasmineRunner = require('jasmine');
-var jasmine = new JasmineRunner();
+const JasmineRunner = require('jasmine');
+const {execFile} = require('child_process');
+const jasmine = new JasmineRunner();
 
-var ampValidator = require('./index.js');
+const ampValidator = require('./index.js');
 
 it('deployed validator rejects the empty file', function(done) {
   // Note: This will fetch and use the validator from
@@ -34,7 +34,8 @@ it('deployed validator rejects the empty file', function(done) {
   // is supplied to validateString.
   ampValidator.getInstance()
       .then(function(instance) {
-        var validationResult = instance.validateString('');
+        const validationResult = instance.validateString('');
+
         expect(validationResult.status).toBe('FAIL');
         done();
       })
@@ -52,7 +53,8 @@ it('built validator rejects the empty file', function(done) {
   // Note: This will use the validator that was built with build.py.
   ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
-        var validationResult = instance.validateString('');
+        const validationResult = instance.validateString('');
+
         expect(validationResult.status).toBe('FAIL');
         done();
       })
@@ -64,11 +66,12 @@ it('built validator rejects the empty file', function(done) {
 
 it('accepts the minimum valid AMP file', function(done) {
   // Note: This will use the validator that was built with build.py.
-  var mini = fs.readFileSync(
+  const mini = fs.readFileSync(
       '../testdata/feature_tests/minimum_valid_amp.html', 'utf-8').trim();
   ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
-        var validationResult = instance.validateString(mini);
+        const validationResult = instance.validateString(mini);
+
         expect(validationResult.status).toBe('PASS');
         done();
       })
@@ -80,12 +83,13 @@ it('accepts the minimum valid AMP file', function(done) {
 
 it('accepts the minimum valid AMP4ADS file', function(done) {
   // Note: This will use the validator that was built with build.py.
-  var mini = fs.readFileSync(
+  const mini = fs.readFileSync(
       '../testdata/amp4ads_feature_tests/min_valid_amp4ads.html', 'utf-8')
       .trim();
   ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
-        var validationResult = instance.validateString(mini, 'AMP4ADS');
+        const validationResult = instance.validateString(mini, 'AMP4ADS');
+
         expect(validationResult.status).toBe('PASS');
         done();
       })
@@ -107,10 +111,10 @@ function isErrorLine(line) {
 
 it('rejects a specific file that is known to have errors', function(done) {
   // Note: This will use the validator that was built with build.py.
-  var severalErrorsHtml =
+  const severalErrorsHtml =
       fs.readFileSync('../testdata/feature_tests/several_errors.html', 'utf-8')
           .trim();
-  var severalErrorsOut =
+  const severalErrorsOut =
       fs.readFileSync('../testdata/feature_tests/several_errors.out', 'utf-8')
           .split('\n')
           .filter(isErrorLine)
@@ -118,13 +122,14 @@ it('rejects a specific file that is known to have errors', function(done) {
 
   ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
-        var validationResult = instance.validateString(severalErrorsHtml);
+        const validationResult = instance.validateString(severalErrorsHtml);
+
         expect(validationResult.status).toBe('FAIL');
         // Here, we assemble the output from the validationResult that was
         // computed by the validator and compare it with the golden file.
-        var out = 'FAIL\n';
-        for (var ii = 0; ii < validationResult.errors.length; ii++) {
-          var error = validationResult.errors[ii];
+        let out = 'FAIL\n';
+        for (let ii = 0; ii < validationResult.errors.length; ii++) {
+          const error = validationResult.errors[ii];
           out += 'feature_tests/several_errors.html';
           out += ':' + error.line + ':' + error.col + ' ' + error.message;
           if (error.specUrl) {
@@ -132,6 +137,7 @@ it('rejects a specific file that is known to have errors', function(done) {
           }
           out += ' [' + error.category + ']\n';
         }
+
         expect(out).toBe(severalErrorsOut);
         done();
       })
@@ -157,41 +163,43 @@ it('handles syntax errors in validator file', function(done) {
 });
 
 it('also works with newInstance', function() {
-  var mini = fs.readFileSync(
+  const mini = fs.readFileSync(
       '../testdata/feature_tests/minimum_valid_amp.html', 'utf-8').trim();
-  var validatorJsContents =
+  const validatorJsContents =
       fs.readFileSync('../dist/validator_minified.js', 'utf-8');
-  var resultForMini =
+  const resultForMini =
       ampValidator.newInstance(validatorJsContents).validateString(mini);
+
   expect(resultForMini.status).toBe('PASS');
 
-  var severalErrorsHtml =
+  const severalErrorsHtml =
       fs.readFileSync('../testdata/feature_tests/several_errors.html', 'utf-8')
           .trim();
-  var resultForSeveralErrors = ampValidator.newInstance(validatorJsContents)
-                                   .validateString(severalErrorsHtml);
+  const resultForSeveralErrors = ampValidator.newInstance(validatorJsContents)
+      .validateString(severalErrorsHtml);
+
   expect(resultForSeveralErrors.status).toBe('FAIL');
 });
 
 it('emits text if --format=text is specified on command line', function(done) {
-  var severalErrorsOut =
+  const severalErrorsOut =
       fs.readFileSync('../testdata/feature_tests/several_errors.out', 'utf-8')
           .split('\n')
           .filter(isErrorLine)
-          .splice(1)  // trim 1st line
+          .splice(1) // trim 1st line
           .join('\n')
-          .replace(/ \[[A-Z_]+\]/g, '');  // trim error categories
+          .replace(/ \[[A-Z_]+\]/g, ''); // trim error categories
   execFile(
       process.execPath,
       [
         '../nodejs/index.js', '--format=text',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
-        'feature_tests/minimum_valid_amp.html'
+        'feature_tests/minimum_valid_amp.html',
       ],
-      {'cwd': '../testdata'},  // Run inside the testdata dir to match paths.
-      function (error, stdout, stderr) {
-        expect(error).toBeDefined();  // At least one file had errors.
+      {'cwd': '../testdata'}, // Run inside the testdata dir to match paths.
+      function(error, stdout, stderr) {
+        expect(error).toBeDefined(); // At least one file had errors.
         expect(stderr).toBe(severalErrorsOut);
         expect(stdout).toBe('feature_tests/minimum_valid_amp.html: PASS\n');
         done();
@@ -205,22 +213,25 @@ it('emits json if --format=json is specified on command line', function(done) {
         '../nodejs/index.js', '--format=json',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
-        'feature_tests/minimum_valid_amp.html'
+        'feature_tests/minimum_valid_amp.html',
       ],
-      {'cwd': '../testdata'},  // Run inside the testdata dir to match paths.
-      function (error, stdout, stderr) {
-        expect(error).toBeDefined();  // At least one file had errors
-        expect(stderr).toBe('');      // entire json results will be on stdout
+      {'cwd': '../testdata'}, // Run inside the testdata dir to match paths.
+      function(error, stdout, stderr) {
+        expect(error).toBeDefined(); // At least one file had errors
+        expect(stderr).toBe(''); // entire json results will be on stdout
 
         // We inspect the parsed JSON but not very deep, to keep this test
         // relatively robust. We don't want it to churn if the validator
         // changes its outputs slightly.
-        var parsedJson = JSON.parse(stdout);
+        const parsedJson = JSON.parse(stdout);
+
         expect(parsedJson['feature_tests/minimum_valid_amp.html'])
             .toBeDefined();
+
         expect(parsedJson['feature_tests/several_errors.html']).toBeDefined();
         expect(parsedJson['feature_tests/minimum_valid_amp.html'].status)
             .toBe('PASS');
+
         expect(parsedJson['feature_tests/several_errors.html'].status)
             .toBe('FAIL');
         done();
@@ -228,26 +239,26 @@ it('emits json if --format=json is specified on command line', function(done) {
 }, 5000);
 
 it('supports AMP4ADS with --html_format command line option', function(done) {
-  var severalErrorsOut =
+  const severalErrorsOut =
       fs.readFileSync(
-            '../testdata/amp4ads_feature_tests/style-amp-custom.out',
-            'utf-8')
+          '../testdata/amp4ads_feature_tests/style-amp-custom.out',
+          'utf-8')
           .split('\n')
           .filter(isErrorLine)
-          .splice(1)  // trim 1st line
+          .splice(1) // trim 1st line
           .join('\n')
-          .replace(/ \[[A-Z_]+\]/g, '');  // trim error categories
+          .replace(/ \[[A-Z_]+\]/g, ''); // trim error categories
   execFile(
       process.execPath,
       [
         '../nodejs/index.js', '--format=text', '--html_format=AMP4ADS',
         '--validator_js=../dist/validator_minified.js',
         'amp4ads_feature_tests/style-amp-custom.html',
-        'amp4ads_feature_tests/min_valid_amp4ads.html'
+        'amp4ads_feature_tests/min_valid_amp4ads.html',
       ],
-      {'cwd': '../testdata'},  // Run inside the testdata dir to match paths.
+      {'cwd': '../testdata'}, // Run inside the testdata dir to match paths.
       function(error, stdout, stderr) {
-        expect(error).toBeDefined();  // At least one file had errors.
+        expect(error).toBeDefined(); // At least one file had errors.
         expect(stderr).toBe(severalErrorsOut);
         expect(stdout).toBe(
             'amp4ads_feature_tests/min_valid_amp4ads.html: PASS\n');
