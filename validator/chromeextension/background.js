@@ -173,8 +173,10 @@ function handleValidatorNotPresent(tabId) {
       globals.validatorNotPresentBgColor);
   chrome.tabs.get(tabId, function(tab) {
     if (!chrome.runtime.lastError) {
-      chrome.browserAction.setPopup(
-          {tabId, popup: globals.validatorNotPresentPopup});
+      chrome.browserAction.setPopup({
+        tabId,
+        popup: globals.validatorNotPresentPopup,
+      });
     }
   });
 }
@@ -196,18 +198,19 @@ function isForbiddenUrl(url) {
  * @param {Tab} tab The Tab which triggered the event.
  */
 function updateTab(tab) {
-  if (!isForbiddenUrl(tab.url))
-  {chrome.tabs.sendMessage(
-      tab.id, {'getAmpDetails': true}, function(response) {
-        if (response && response.fromAmpCache && response.ampHref) {
-          handleAmpCache(tab.id, response.ampHref);
-        } else if (response && response.isAmp) {
-          validateUrlFromTab(tab, response.userAgent);
-        } else if (response && !response.isAmp && response.ampHref) {
-          handleAmpLink(tab.id, response.ampHref);
+  if (!isForbiddenUrl(tab.url)) {
+    chrome.tabs.sendMessage(
+        tab.id, {'getAmpDetails': true}, function(response) {
+          if (response && response.fromAmpCache && response.ampHref) {
+            handleAmpCache(tab.id, response.ampHref);
+          } else if (response && response.isAmp) {
+            validateUrlFromTab(tab, response.userAgent);
+          } else if (response && !response.isAmp && response.ampHref) {
+            handleAmpLink(tab.id, response.ampHref);
+          }
         }
-      }
-  );}
+    );
+  }
 }
 
 /**
@@ -238,9 +241,13 @@ function updateTabStatus(tabId, iconPrefix, title, text, color) {
   // Verify tab still exists
   chrome.tabs.get(tabId, function(tab) {
     if (!chrome.runtime.lastError) {
-      chrome.browserAction.setIcon({path: {'19': iconPrefix + '-128.png',
-        '38': iconPrefix + '-38.png'},
-      tabId});
+      chrome.browserAction.setIcon({
+        path: {
+          '19': iconPrefix + '-128.png',
+          '38': iconPrefix + '-38.png',
+        },
+        tabId,
+      });
       if (title !== undefined)
       {chrome.browserAction.setTitle({title, tabId});}
       if (text !== undefined)

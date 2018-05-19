@@ -38,6 +38,7 @@
     }],
     "no-cond-assign": 1,
     "no-div-regex": 1,
+    "no-multi-spaces": 0,
     "no-throw-literal": 1,
     "no-undef": 1,
     "no-unused-vars": [1, {

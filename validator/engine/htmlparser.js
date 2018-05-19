@@ -431,11 +431,11 @@ amp.htmlparser.HtmlParser = class {
    */
   parse(handler, htmlText) {
     let htmlUpper = null;
-    let inTag = false; // True iff we're currently processing a tag.
-    const attribs = []; // Accumulates attribute names and values.
-    let tagName; // The name of the tag currently being processed.
-    let eflags; // The element flags for the current tag.
-    let openTag; // True if the current tag is an open tag.
+    let inTag = false;   // True iff we're currently processing a tag.
+    const attribs = [];  // Accumulates attribute names and values.
+    let tagName;         // The name of the tag currently being processed.
+    let eflags;          // The element flags for the current tag.
+    let openTag;         // True if the current tag is an open tag.
     const tagStack = new TagNameStack(handler);
 
     // Only provide location information if the handler implements the
@@ -473,9 +473,9 @@ amp.htmlparser.HtmlParser = class {
           let decodedValue = '';
           if (m[2]) {
             let encodedValue = m[3];
-            switch (encodedValue.charCodeAt(0)) { // Strip quotes.
-              case 34: // double quote "
-              case 39: // single quote '
+            switch (encodedValue.charCodeAt(0)) {  // Strip quotes.
+              case 34:                             // double quote "
+              case 39:                             // single quote '
                 encodedValue =
                     encodedValue.substring(1, encodedValue.length - 1);
                 break;
@@ -898,9 +898,9 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
         ('(?:' +
          // Allow attribute names to start with /, avoiding assigning the / in
          // close-tag syntax */>.
-         '([^\\t\\r\\n /=>][^\\t\\r\\n =>]*|' + // e.g. "href"
-         '[^\\t\\r\\n =>]+[^ >]|' + // e.g. "/asdfs/asd"
-         '\/+(?!>))' + // e.g. "/"
+         '([^\\t\\r\\n /=>][^\\t\\r\\n =>]*|' +  // e.g. "href"
+         '[^\\t\\r\\n =>]+[^ >]|' +              // e.g. "/asdfs/asd"
+         '\/+(?!>))' +                           // e.g. "/"
          // Optionally followed by:
          ('(' +
           '\\s*=\\s*' +
