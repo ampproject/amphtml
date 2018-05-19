@@ -49,7 +49,7 @@ module.exports = {
     transform: [
       ['babelify', {compact: false}],
     ],
-    bundleDelay: 900,
+    bundleDelay: 1200,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
