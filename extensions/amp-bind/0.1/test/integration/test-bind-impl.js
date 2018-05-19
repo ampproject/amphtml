@@ -275,6 +275,27 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should support data-amp-bind-* syntax', () => {
+      const element = createElement(env, container, 'data-amp-bind-text="1+1"');
+      expect(bind.numberOfBindings()).to.equal(0);
+      expect(element.textContent).to.equal('');
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(bind.numberOfBindings()).to.equal(1);
+        expect(element.textContent).to.equal('2');
+      });
+    });
+
+    it('should prefer [foo] over data-amp-bind-foo', () => {
+      const element = createElement(
+          env, container, '[text]="1+1" data-amp-bind-text="2+2"');
+      expect(bind.numberOfBindings()).to.equal(0);
+      expect(element.textContent).to.equal('');
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(bind.numberOfBindings()).to.equal(1);
+        expect(element.textContent).to.equal('2');
+      });
+    });
+
     it('should call createTreeWalker() with all params', () => {
       const spy = env.sandbox.spy(env.win.document, 'createTreeWalker');
       createElement(env, container, '[text]="1+1"');
