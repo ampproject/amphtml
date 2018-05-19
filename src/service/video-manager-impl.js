@@ -930,7 +930,8 @@ const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
  */
 function supportsFullscreenViaApi(video) {
   // TODO(alanorozco): Determine this via a flag in the component itself.
-  return video.tagName.toLowerCase() == 'amp-dailymotion';
+  return video.tagName.toLowerCase() == 'amp-dailymotion' ||
+      video.tagName.toLowerCase() == 'amp-ima-video';
 }
 
 
