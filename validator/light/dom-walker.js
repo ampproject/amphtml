@@ -79,7 +79,7 @@ amp.domwalker.NodeProcessingState_ = class {
    */
   nextChild() {
     if (this.numChildren_ > this.nextChildIdx_) {
-      var thisChild = this.node_.children[this.nextChildIdx_];
+      const thisChild = this.node_.children[this.nextChildIdx_];
       this.nextChildIdx_ += 1;
       return new amp.domwalker.NodeProcessingState_(thisChild);
     }
@@ -93,8 +93,8 @@ amp.domwalker.NodeProcessingState_ = class {
  * @return {Array<string>} attributes as alternating key/value pairs
  */
 function attrList(namedNodeMap) {
-  var ret = [];
-  for (var i = 0; i < namedNodeMap.length; ++i) {
+  const ret = [];
+  for (let i = 0; i < namedNodeMap.length; ++i) {
     // The attribute name is always lower cased when returned by the browser.
     ret.push(namedNodeMap[i].name);
     ret.push(namedNodeMap[i].value);
@@ -172,7 +172,7 @@ amp.domwalker.DomWalker = class {
         const tagName = nextChild.node().nodeName;
         calls.push([
           amp.domwalker.HandlerCalls.START_TAG, tagName,
-          attrList(nextChild.node().attributes)
+          attrList(nextChild.node().attributes),
         ]);
         if (CdataTagsToValidate.hasOwnProperty(tagName)) {
           calls.push(
@@ -186,7 +186,7 @@ amp.domwalker.DomWalker = class {
           calls.push([
             amp.domwalker.HandlerCalls.END_TAG,
             // The browser always returns upper case tag names.
-            curState.node().nodeName
+            curState.node().nodeName,
           ]);
         }
         tagStack.pop();

@@ -3608,6 +3608,10 @@ eslint-plugin-google-camelcase@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/eslint-plugin-google-camelcase/-/eslint-plugin-google-camelcase-0.0.2.tgz#0c27555e4782073442d034a3db1f214ee0b37401"
 
+eslint-plugin-jasmine@2.10.1:
+  version "2.10.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jasmine/-/eslint-plugin-jasmine-2.10.1.tgz#5733b709e751f4bc40e31e1c16989bd2cdfbec97"
+
 eslint-plugin-jsdoc@3.7.0:
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-3.7.0.tgz#b7ce206f99efdc4c0a31b492ae5aedfb06f03dc6"

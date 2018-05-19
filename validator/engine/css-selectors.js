@@ -47,7 +47,7 @@ goog.require('parse_css.extractAFunction');
  * class inherits from, has line, col, and tokenType fields.
  */
 parse_css.Selector = class extends parse_css.Token {
-  /** @param {!function(!parse_css.Selector)} lambda */
+  /** @param {function(!parse_css.Selector)} lambda */
   forEachChild(lambda) {}
 
   /** @param {!parse_css.SelectorVisitor} visitor */
@@ -170,7 +170,7 @@ if (!amp.validator.LIGHT) {
  */
 function isDelim(token, delimChar) {
   return token.tokenType === parse_css.TokenType.DELIM &&
-      /** @type {!parse_css.DelimToken} */ (token).value === delimChar;
+  /** @type {!parse_css.DelimToken} */ (token).value === delimChar;
 }
 
 /**
@@ -189,12 +189,12 @@ parse_css.parseATypeSelector = function(tokenStream) {
     namespacePrefix = '';
     tokenStream.consume();
   } else if (
-      isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
+    isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
     namespacePrefix = '*';
     tokenStream.consume();
     tokenStream.consume();
   } else if (
-      tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
+    tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
       isDelim(tokenStream.next(), '|')) {
     const ident = /** @type {!parse_css.IdentToken} */ (tokenStream.current());
     namespacePrefix = ident.value;
@@ -334,7 +334,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
       tokenStream.current().tokenType === parse_css.TokenType.OPEN_SQUARE,
       'Precondition violated: must be an OpenSquareToken');
   const start = tokenStream.current();
-  tokenStream.consume();  // Consumes '['.
+  tokenStream.consume(); // Consumes '['.
   if (tokenStream.current().tokenType === parse_css.TokenType.WHITESPACE) {
     tokenStream.consume();
   }
@@ -345,12 +345,12 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
     namespacePrefix = '';
     tokenStream.consume();
   } else if (
-      isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
+    isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
     namespacePrefix = '*';
     tokenStream.consume();
     tokenStream.consume();
   } else if (
-      tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
+    tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
       isDelim(tokenStream.next(), '|')) {
     const ident = /** @type {!parse_css.IdentToken} */ (tokenStream.current());
     namespacePrefix = ident.value;
@@ -405,7 +405,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   }
   /** @type {string} */
   let value = '';
-  if (matchOperator !== '') {  // If we saw an operator, parse the value.
+  if (matchOperator !== '') { // If we saw an operator, parse the value.
     const current = tokenStream.current().tokenType;
     if (current === parse_css.TokenType.IDENT) {
       const ident =
@@ -514,7 +514,7 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
     return firstColon.copyPosTo(
         new parse_css.PseudoSelector(isClass, name, []));
   } else if (
-      tokenStream.current().tokenType === parse_css.TokenType.FUNCTION_TOKEN) {
+    tokenStream.current().tokenType === parse_css.TokenType.FUNCTION_TOKEN) {
     const funcToken =
         /** @type {!parse_css.FunctionToken} */ (tokenStream.current());
     const func = parse_css.extractAFunction(tokenStream);
@@ -655,11 +655,11 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
     if (tokenStream.current().tokenType === parse_css.TokenType.HASH) {
       otherSelectors.push(parse_css.parseAnIdSelector(tokenStream));
     } else if (
-        isDelim(tokenStream.current(), '.') &&
+      isDelim(tokenStream.current(), '.') &&
         tokenStream.next().tokenType === parse_css.TokenType.IDENT) {
       otherSelectors.push(parse_css.parseAClassSelector(tokenStream));
     } else if (
-        tokenStream.current().tokenType === parse_css.TokenType.OPEN_SQUARE) {
+      tokenStream.current().tokenType === parse_css.TokenType.OPEN_SQUARE) {
       const maybeAttrSelector = parse_css.parseAnAttrSelector(tokenStream);
       if (maybeAttrSelector.tokenType === parse_css.TokenType.ERROR) {
         return /** @type {!parse_css.ErrorToken} */ (maybeAttrSelector);
@@ -701,7 +701,7 @@ parse_css.CombinatorType = {
   'DESCENDANT': 'DESCENDANT',
   'CHILD': 'CHILD',
   'ADJACENT_SIBLING': 'ADJACENT_SIBLING',
-  'GENERAL_SIBLING': 'GENERAL_SIBLING'
+  'GENERAL_SIBLING': 'GENERAL_SIBLING',
 };
 
 /**
@@ -846,7 +846,7 @@ parse_css.parseASelector = function(tokenStream) {
     }
     const right = parse_css.parseASimpleSelectorSequence(tokenStream);
     if (right.tokenType === parse_css.TokenType.ERROR) {
-      return right;  // TODO(johannes): more than one error / partial tree.
+      return right; // TODO(johannes): more than one error / partial tree.
     }
     left = combinatorToken.copyPosTo(new parse_css.Combinator(
         combinatorTypeForToken(combinatorToken), left,

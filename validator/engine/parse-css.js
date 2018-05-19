@@ -93,7 +93,7 @@ parse_css.TokenStream = class {
     // line / col!) so any request past the length of the array
     // fetches that.
     return (num < this.tokens.length) ? this.tokens[num] :
-                                        this.tokens[this.tokens.length - 1];
+      this.tokens[this.tokens.length - 1];
   }
 
   /**
@@ -135,13 +135,13 @@ parse_css.stripVendorPrefix = function(prefixedString) {
   // Checking for '-' is an optimization.
   if (prefixedString !== '' && prefixedString[0] === '-') {
     if (goog.string./*OK*/ startsWith(prefixedString, '-o-'))
-      return prefixedString.substr('-o-'.length);
+    {return prefixedString.substr('-o-'.length);}
     if (goog.string./*OK*/ startsWith(prefixedString, '-moz-'))
-      return prefixedString.substr('-moz-'.length);
+    {return prefixedString.substr('-moz-'.length);}
     if (goog.string./*OK*/ startsWith(prefixedString, '-ms-'))
-      return prefixedString.substr('-ms-'.length);
+    {return prefixedString.substr('-ms-'.length);}
     if (goog.string./*OK*/ startsWith(prefixedString, '-webkit-'))
-      return prefixedString.substr('-webkit-'.length);
+    {return prefixedString.substr('-webkit-'.length);}
   }
   return prefixedString;
 };
@@ -161,7 +161,7 @@ parse_css.stripVendorPrefix = function(prefixedString) {
  * @return {!parse_css.Stylesheet}
  */
 parse_css.parseAStylesheet = function(
-    tokenList, atRuleSpec, defaultSpec, errors) {
+  tokenList, atRuleSpec, defaultSpec, errors) {
   const canonicalizer = new Canonicalizer(atRuleSpec, defaultSpec);
   const stylesheet = new parse_css.Stylesheet();
 
@@ -304,7 +304,7 @@ if (!amp.validator.LIGHT) {
     for (let i = 0; i < this.prelude.length; ++i) {
       const prelude =
           /** @type {!parse_css.IdentToken} */ (this.prelude[i]);
-      if (prelude.value) ruleName += prelude.value;
+      if (prelude.value) {ruleName += prelude.value;}
     }
     return ruleName;
   };
@@ -389,7 +389,7 @@ parse_css.BlockType = {
   'PARSE_AS_DECLARATIONS': 'PARSE_AS_DECLARATIONS',
   // Ignore this simple block, do not parse. This is generally used
   // in conjunction with a later step emitting an error for this rule.
-  'PARSE_AS_IGNORE': 'PARSE_AS_IGNORE'
+  'PARSE_AS_IGNORE': 'PARSE_AS_IGNORE',
 };
 
 /**
@@ -451,7 +451,7 @@ class Canonicalizer {
       } else if (current === parse_css.TokenType.EOF_TOKEN) {
         return rules;
       } else if (
-          current === parse_css.TokenType.CDO ||
+        current === parse_css.TokenType.CDO ||
           current === parse_css.TokenType.CDC) {
         if (topLevel) {
           continue;
@@ -622,7 +622,7 @@ class Canonicalizer {
             ['style'])));
         tokenStream.reconsume();
         while (
-            !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
+          !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
               tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
           tokenStream.consume();
           const dummyTokenList = [];
@@ -668,7 +668,7 @@ class Canonicalizer {
           ['style'])));
       tokenStream.reconsume();
       while (
-          !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
+        !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
             tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
         tokenStream.consume();
       }
@@ -676,7 +676,7 @@ class Canonicalizer {
     }
 
     while (
-        !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
+      !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
           tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
       tokenStream.consume();
       consumeAComponentValue(tokenStream, decl.value);
@@ -688,14 +688,14 @@ class Canonicalizer {
       if (decl.value[i].tokenType === parse_css.TokenType.WHITESPACE) {
         continue;
       } else if (
-          decl.value[i].tokenType === parse_css.TokenType.IDENT &&
+        decl.value[i].tokenType === parse_css.TokenType.IDENT &&
           /** @type {parse_css.IdentToken} */
           (decl.value[i]).ASCIIMatch('important')) {
         foundImportant = true;
       } else if (
-          foundImportant &&
+        foundImportant &&
           decl.value[i].tokenType === parse_css.TokenType.DELIM &&
-          /** @type {parse_css.DelimToken} */ (decl.value[i]).value === '!') {
+      /** @type {parse_css.DelimToken} */ (decl.value[i]).value === '!') {
         decl.value.splice(i, decl.value.length);
         decl.important = true;
         break;
@@ -744,7 +744,7 @@ function consumeASimpleBlock(tokenStream, tokenList) {
 
   const startToken =
       /** @type {!parse_css.GroupingToken} */ (tokenStream.current());
-  const mirror = startToken.mirror;
+  const {mirror} = startToken;
 
   tokenList.push(startToken);
   while (true) {
@@ -754,10 +754,10 @@ function consumeASimpleBlock(tokenStream, tokenList) {
       tokenList.push(tokenStream.current());
       return;
     } else if (
-        (current === parse_css.TokenType.CLOSE_CURLY ||
+      (current === parse_css.TokenType.CLOSE_CURLY ||
          current === parse_css.TokenType.CLOSE_SQUARE ||
          current === parse_css.TokenType.CLOSE_PAREN) &&
-        /** @type {parse_css.GroupingToken} */ (tokenStream.current()).value ===
+    /** @type {parse_css.GroupingToken} */ (tokenStream.current()).value ===
             mirror) {
       tokenList.push(tokenStream.current());
       return;
@@ -784,8 +784,8 @@ parse_css.extractASimpleBlock = function(tokenStream) {
   // Exclude the start token. Convert end token to EOF.
   const end = consumedTokens.length - 1;
   consumedTokens[end] = amp.validator.LIGHT ?
-      parse_css.TRIVIAL_EOF_TOKEN :
-      consumedTokens[end].copyPosTo(new parse_css.EOFToken());
+    parse_css.TRIVIAL_EOF_TOKEN :
+    consumedTokens[end].copyPosTo(new parse_css.EOFToken());
   return consumedTokens.slice(1);
 };
 
@@ -832,8 +832,8 @@ parse_css.extractAFunction = function(tokenStream) {
   // Convert end token to EOF.
   const end = consumedTokens.length - 1;
   consumedTokens[end] = amp.validator.LIGHT ?
-      parse_css.TRIVIAL_EOF_TOKEN :
-      consumedTokens[end].copyPosTo(new parse_css.EOFToken());
+    parse_css.TRIVIAL_EOF_TOKEN :
+    consumedTokens[end].copyPosTo(new parse_css.EOFToken());
   return consumedTokens;
 };
 
@@ -908,7 +908,7 @@ function parseUrlFunction(tokens, tokenIdx, parsed) {
   goog.asserts.assert(
       tokens[tokens.length - 1].tokenType === parse_css.TokenType.EOF_TOKEN);
   token.copyPosTo(parsed);
-  ++tokenIdx;  // We've digested the function token above.
+  ++tokenIdx; // We've digested the function token above.
   // Safe: tokens ends w/ EOF_TOKEN.
   goog.asserts.assert(tokenIdx < tokens.length);
 
@@ -924,7 +924,7 @@ function parseUrlFunction(tokens, tokenIdx, parsed) {
     return -1;
   }
   parsed.utf8Url =
-      /** @type {parse_css.StringToken} */ (tokens[tokenIdx]).value;
+    /** @type {parse_css.StringToken} */ (tokens[tokenIdx]).value;
 
   ++tokenIdx;
   // Safe: tokens ends w/ EOF_TOKEN.
@@ -999,7 +999,7 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
         continue;
       }
       if (token.tokenType === parse_css.TokenType.FUNCTION_TOKEN &&
-          /** @type {!parse_css.FunctionToken} */ (token).value === 'url') {
+      /** @type {!parse_css.FunctionToken} */ (token).value === 'url') {
         const parsedUrl = new parse_css.ParsedCssUrl();
         ii = parseUrlFunction(declaration.value, ii, parsedUrl);
         if (ii === -1) {
@@ -1063,10 +1063,10 @@ class MediaQueryVisitor extends parse_css.RuleVisitor {
 
   /** @inheritDoc */
   visitAtRule(atRule) {
-    if (atRule.name.toLowerCase() !== 'media') return;
+    if (atRule.name.toLowerCase() !== 'media') {return;}
 
-    let tokenStream = new parse_css.TokenStream(atRule.prelude);
-    tokenStream.consume();  // Advance to first token.
+    const tokenStream = new parse_css.TokenStream(atRule.prelude);
+    tokenStream.consume(); // Advance to first token.
     if (!this.parseAMediaQueryList_(tokenStream)) {
       if (amp.validator.LIGHT) {
         this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
@@ -1088,7 +1088,7 @@ class MediaQueryVisitor extends parse_css.RuleVisitor {
     // our tokenizer already collapses whitespace so only one token can ever
     // be present.
     if (tokenStream.current().tokenType === parse_css.TokenType.WHITESPACE)
-      tokenStream.consume();
+    {tokenStream.consume();}
   }
 
   /**
@@ -1103,11 +1103,11 @@ class MediaQueryVisitor extends parse_css.RuleVisitor {
     // ;
     this.maybeConsumeAWhitespaceToken_(tokenStream);
     if (tokenStream.current().tokenType !== parse_css.TokenType.EOF_TOKEN) {
-      if (!this.parseAMediaQuery_(tokenStream)) return false;
+      if (!this.parseAMediaQuery_(tokenStream)) {return false;}
       while (tokenStream.current().tokenType === parse_css.TokenType.COMMA) {
-        tokenStream.consume();  // ','
+        tokenStream.consume(); // ','
         this.maybeConsumeAWhitespaceToken_(tokenStream);
-        if (!this.parseAMediaQuery_(tokenStream)) return false;
+        if (!this.parseAMediaQuery_(tokenStream)) {return false;}
       }
     }
     return tokenStream.current().tokenType === parse_css.TokenType.EOF_TOKEN;
@@ -1133,26 +1133,26 @@ class MediaQueryVisitor extends parse_css.RuleVisitor {
     // '(', so it's simpler to use as a check to distinguis the expression case
     // from the media type case.
     if (tokenStream.current().tokenType === parse_css.TokenType.OPEN_PAREN) {
-      if (!this.parseAMediaExpression_(tokenStream)) return false;
+      if (!this.parseAMediaExpression_(tokenStream)) {return false;}
     } else {
       if (tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
           (
-              /** @type {parse_css.IdentToken} */
-              (tokenStream.current()).ASCIIMatch('only') ||
+            /** @type {parse_css.IdentToken} */
+            (tokenStream.current()).ASCIIMatch('only') ||
               /** @type {parse_css.IdentToken} */
               (tokenStream.current()).ASCIIMatch('not'))) {
-        tokenStream.consume();  // 'ONLY' | 'NOT'
+        tokenStream.consume(); // 'ONLY' | 'NOT'
       }
       this.maybeConsumeAWhitespaceToken_(tokenStream);
-      if (!this.parseAMediaType_(tokenStream)) return false;
+      if (!this.parseAMediaType_(tokenStream)) {return false;}
       this.maybeConsumeAWhitespaceToken_(tokenStream);
     }
     while (tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
            /** @type {parse_css.IdentToken} */
            (tokenStream.current()).ASCIIMatch('and')) {
-      tokenStream.consume();  // 'AND'
+      tokenStream.consume(); // 'AND'
       this.maybeConsumeAWhitespaceToken_(tokenStream);
-      if (!this.parseAMediaExpression_(tokenStream)) return false;
+      if (!this.parseAMediaExpression_(tokenStream)) {return false;}
     }
     return true;
   }
@@ -1185,13 +1185,13 @@ class MediaQueryVisitor extends parse_css.RuleVisitor {
     //  : '(' S* media_feature S* [ ':' S* expr ]? ')' S*
     //  ;
     if (tokenStream.current().tokenType !== parse_css.TokenType.OPEN_PAREN)
-      return false;
-    tokenStream.consume();  // '('
+    {return false;}
+    tokenStream.consume(); // '('
     this.maybeConsumeAWhitespaceToken_(tokenStream);
-    if (!this.parseAMediaFeature_(tokenStream)) return false;
+    if (!this.parseAMediaFeature_(tokenStream)) {return false;}
     this.maybeConsumeAWhitespaceToken_(tokenStream);
     if (tokenStream.current().tokenType === parse_css.TokenType.COLON) {
-      tokenStream.consume();  // '('
+      tokenStream.consume(); // '('
       this.maybeConsumeAWhitespaceToken_(tokenStream);
       // The CSS3 grammar at this point just tells us to expect some
       // expr. Which tokens are accepted here are defined by the media
@@ -1205,13 +1205,13 @@ class MediaQueryVisitor extends parse_css.RuleVisitor {
       // or a number with a unit identifier. (The only exceptions are the
       // ‘aspect-ratio’ and ‘device-aspect-ratio’ media features.)
       while (
-          tokenStream.current().tokenType !== parse_css.TokenType.EOF_TOKEN &&
+        tokenStream.current().tokenType !== parse_css.TokenType.EOF_TOKEN &&
           tokenStream.current().tokenType !== parse_css.TokenType.CLOSE_PAREN)
-        tokenStream.consume();
+      {tokenStream.consume();}
     }
     if (tokenStream.current().tokenType !== parse_css.TokenType.CLOSE_PAREN)
-      return false;
-    tokenStream.consume();  // ')'
+    {return false;}
+    tokenStream.consume(); // ')'
     this.maybeConsumeAWhitespaceToken_(tokenStream);
     return true;
   }
@@ -1246,7 +1246,7 @@ class MediaQueryVisitor extends parse_css.RuleVisitor {
  * @param {!Array<!parse_css.ErrorToken>} errors
  */
 parse_css.parseMediaQueries = function(
-    stylesheet, mediaTypes, mediaFeatures, errors) {
+  stylesheet, mediaTypes, mediaFeatures, errors) {
   const visitor = new MediaQueryVisitor(mediaTypes, mediaFeatures, errors);
   stylesheet.accept(visitor);
 };

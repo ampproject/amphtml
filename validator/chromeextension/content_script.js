@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-var globals = {};
+const globals = {};
 globals.amphtmlRegex = new RegExp('(^\s*)amphtml(\s*$)');
 globals.ampCaches = [
   {
@@ -32,7 +32,7 @@ globals.ampCaches = [
     'isAmpCache': function() {
       return window.location.hostname.endsWith('cdn.ampproject.org');
     },
-  }
+  },
 ];
 
 /**
@@ -42,8 +42,8 @@ globals.ampCaches = [
  * @private
  */
 function getAmpCacheHref() {
-  for (var index in globals.ampCaches) {
-    var ampCache = globals.ampCaches[index];
+  for (const index in globals.ampCaches) {
+    const ampCache = globals.ampCaches[index];
     if (ampCache.isAmpCache()) {
       return ampCache.getAmpHref();
     }
@@ -59,17 +59,17 @@ function getAmpCacheHref() {
  * @private
  */
 function getAmpHtmlLinkHref() {
-  var ampHtmlLinkHref = '';
-  var headLinks = document.head.getElementsByTagName('link');
+  let ampHtmlLinkHref = '';
+  const headLinks = document.head.getElementsByTagName('link');
   if (headLinks.length > 0) {
-    for (var index in headLinks) {
-      var link = headLinks[index];
+    for (const index in headLinks) {
+      const link = headLinks[index];
       if (link instanceof HTMLLinkElement &&
           link.hasAttribute('rel') &&
           globals.amphtmlRegex.test(link.getAttribute('rel')) &&
           link.hasAttribute('href')) {
-            ampHtmlLinkHref = link.getAttribute('href');
-            break;
+        ampHtmlLinkHref = link.getAttribute('href');
+        break;
       }
     }
   }
@@ -83,8 +83,8 @@ function getAmpHtmlLinkHref() {
  * @private
  */
 function isAmpCache() {
-  for (var index in globals.ampCaches) {
-    var ampCache = globals.ampCaches[index];
+  for (const index in globals.ampCaches) {
+    const ampCache = globals.ampCaches[index];
     if (ampCache.isAmpCache()) {
       return true;
     }
@@ -120,9 +120,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.getAmpDetails) {
     const isAmp = isAmpDocument();
     const fromAmpCache = isAmpCache();
-    var ampHref = '';
-    if (!isAmp) ampHref = getAmpHtmlLinkHref();
-    if (fromAmpCache) ampHref = getAmpCacheHref();
+    let ampHref = '';
+    if (!isAmp) {ampHref = getAmpHtmlLinkHref();}
+    if (fromAmpCache) {ampHref = getAmpCacheHref();}
     sendResponse({
       'isAmp': isAmp, 'fromAmpCache': fromAmpCache, 'ampHref': ampHref,
       'userAgent': navigator.userAgent,

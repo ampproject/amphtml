@@ -14,27 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-var globals = {};
-globals.ampCacheBgcolor = "#ffffff";
-globals.ampCacheIconPrefix = "amp-link";
-globals.ampCacheTitle = chrome.i18n.getMessage("pageFromAmpCacheTitle");
-globals.invalidAmpBgcolor = "#8b0000";
-globals.invalidAmpIconPrefix = "invalid";
-globals.invalidAmpTitle = chrome.i18n.getMessage("pageFailsValidationTitle");
-globals.linkToAmpBgColor = "#ffffff";
-globals.linkToAmpIconPrefix = "amp-link";
-globals.linkToAmpTitle = chrome.i18n.getMessage("pageHasAmpAltTitle");
+const globals = {};
+globals.ampCacheBgcolor = '#ffffff';
+globals.ampCacheIconPrefix = 'amp-link';
+globals.ampCacheTitle = chrome.i18n.getMessage('pageFromAmpCacheTitle');
+globals.invalidAmpBgcolor = '#8b0000';
+globals.invalidAmpIconPrefix = 'invalid';
+globals.invalidAmpTitle = chrome.i18n.getMessage('pageFailsValidationTitle');
+globals.linkToAmpBgColor = '#ffffff';
+globals.linkToAmpIconPrefix = 'amp-link';
+globals.linkToAmpTitle = chrome.i18n.getMessage('pageHasAmpAltTitle');
 globals.tabToUrl = {};
 globals.userAgentHeader = 'X-AMP-Validator-UA';
-globals.validAmpBgcolor = "#ffd700";
-globals.validAmpIconPrefix = "valid";
-globals.validAmpTitle = chrome.i18n.getMessage("pagePassesValidationTitle");
-globals.validatorNotPresentBadge = chrome.i18n.getMessage("validatorNotPresentBadge");
-globals.validatorNotPresentBgColor = "#b71c1c";
-globals.validatorNotPresentIconPrefix = "validator-not-present";
-globals.validatorNotPresentPopup = "popup-validator-not-present.build.html";
-globals.validatorNotPresentTitle = chrome.i18n.getMessage("validatorNotPresentTitle");
-globals.validatorPopup = "popup-validator.build.html";
+globals.validAmpBgcolor = '#ffd700';
+globals.validAmpIconPrefix = 'valid';
+globals.validAmpTitle = chrome.i18n.getMessage('pagePassesValidationTitle');
+globals.validatorNotPresentBadge = chrome.i18n.getMessage('validatorNotPresentBadge');
+globals.validatorNotPresentBgColor = '#b71c1c';
+globals.validatorNotPresentIconPrefix = 'validator-not-present';
+globals.validatorNotPresentPopup = 'popup-validator-not-present.build.html';
+globals.validatorNotPresentTitle = chrome.i18n.getMessage('validatorNotPresentTitle');
+globals.validatorPopup = 'popup-validator.build.html';
 
 /**
  * Format a hex value (HTML colors such as #ffffff) as an RGBA.
@@ -44,9 +44,9 @@ globals.validatorPopup = "popup-validator.build.html";
  */
 function hex2rgba(hex) {
   // Remove the '#' char if necessary.
-  if (hex.charAt(0) === "#") { hex = hex.slice(1); }
+  if (hex.charAt(0) === '#') { hex = hex.slice(1); }
   hex = hex.toUpperCase();
-  var hexAlpha = "0123456789ABCDEF", value = new Array(4), k = 0, int1, int2, i;
+  let hexAlpha = '0123456789ABCDEF', value = new Array(4), k = 0, int1, int2, i;
   for (i = 0; i < 6; i += 2) {
     int1 = hexAlpha.indexOf(hex.charAt(i));
     int2 = hexAlpha.indexOf(hex.charAt(i + 1));
@@ -65,11 +65,11 @@ function hex2rgba(hex) {
  * @return {Object}
  */
 function getErrorSeverityCounts(errors) {
-  var numErrors = 0;
-  var numWarnings = 0;
-  for (var error in errors) {
-    if (errors[error].severity == 'ERROR') numErrors += 1;
-    if (errors[error].severity == 'WARNING') numWarnings += 1;
+  let numErrors = 0;
+  let numWarnings = 0;
+  for (const error in errors) {
+    if (errors[error].severity == 'ERROR') {numErrors += 1;}
+    if (errors[error].severity == 'WARNING') {numWarnings += 1;}
   }
   return {'ERROR': numErrors, 'WARNING': numWarnings};
 }
@@ -123,7 +123,7 @@ function handleAmpCache(tabId, ampHref) {
  * @param {!Object<!ValidationResult>} validationResult
  */
 function handleAmpFail(tabId, validationResult) {
-  var numErrors = getNumberOfErrors(validationResult.errors);
+  const numErrors = getNumberOfErrors(validationResult.errors);
   updateTabStatus(
       tabId, globals.invalidAmpIconPrefix, globals.invalidAmpTitle,
       numErrors.toString(), globals.invalidAmpBgcolor);
@@ -158,13 +158,13 @@ function handleAmpLink(tabId, ampHref) {
  * @param {!Object<!ValidationResult>} validationResult
  */
 function handleAmpPass(tabId, validationResult) {
-  var badgeTitle = '';
-  var numWarnings = getNumberOfWarnings(validationResult.errors);
-  if (numWarnings > 0) badgeTitle = numWarnings.toString();
+  let badgeTitle = '';
+  const numWarnings = getNumberOfWarnings(validationResult.errors);
+  if (numWarnings > 0) {badgeTitle = numWarnings.toString();}
   updateTabStatus(
       tabId, globals.validAmpIconPrefix, globals.validAmpTitle,
       badgeTitle, globals.validAmpBgcolor);
-  if (numWarnings > 0) updateTabPopup(tabId);
+  if (numWarnings > 0) {updateTabPopup(tabId);}
 }
 
 function handleValidatorNotPresent(tabId) {
@@ -173,8 +173,10 @@ function handleValidatorNotPresent(tabId) {
       globals.validatorNotPresentBgColor);
   chrome.tabs.get(tabId, function(tab) {
     if (!chrome.runtime.lastError) {
-      chrome.browserAction.setPopup(
-          {tabId: tabId, popup: globals.validatorNotPresentPopup});
+      chrome.browserAction.setPopup({
+        tabId,
+        popup: globals.validatorNotPresentPopup,
+      });
     }
   });
 }
@@ -196,7 +198,7 @@ function isForbiddenUrl(url) {
  * @param {Tab} tab The Tab which triggered the event.
  */
 function updateTab(tab) {
-  if (!isForbiddenUrl(tab.url))
+  if (!isForbiddenUrl(tab.url)) {
     chrome.tabs.sendMessage(
         tab.id, {'getAmpDetails': true}, function(response) {
           if (response && response.fromAmpCache && response.ampHref) {
@@ -208,6 +210,7 @@ function updateTab(tab) {
           }
         }
     );
+  }
 }
 
 /**
@@ -220,7 +223,7 @@ function updateTabPopup(tabId) {
   chrome.tabs.get(tabId, function(tab) {
     if (!chrome.runtime.lastError) {
       chrome.browserAction.setPopup(
-          {tabId: tabId, popup: globals.validatorPopup});
+          {tabId, popup: globals.validatorPopup});
     }
   });
 }
@@ -238,16 +241,20 @@ function updateTabStatus(tabId, iconPrefix, title, text, color) {
   // Verify tab still exists
   chrome.tabs.get(tabId, function(tab) {
     if (!chrome.runtime.lastError) {
-      chrome.browserAction.setIcon({path: {"19": iconPrefix + "-128.png",
-                                           "38": iconPrefix + "-38.png"},
-                                    tabId: tabId});
+      chrome.browserAction.setIcon({
+        path: {
+          '19': iconPrefix + '-128.png',
+          '38': iconPrefix + '-38.png',
+        },
+        tabId,
+      });
       if (title !== undefined)
-        chrome.browserAction.setTitle({title: title, tabId: tabId});
+      {chrome.browserAction.setTitle({title, tabId});}
       if (text !== undefined)
-        chrome.browserAction.setBadgeText({text: text, tabId: tabId});
+      {chrome.browserAction.setBadgeText({text, tabId});}
       if (color !== undefined)
-        chrome.browserAction.setBadgeBackgroundColor(
-            {color: hex2rgba(color), tabId: tabId});
+      {chrome.browserAction.setBadgeBackgroundColor(
+          {color: hex2rgba(color), tabId});}
     }
   });
 }
@@ -265,8 +272,8 @@ function validateUrlFromTab(tab, userAgent) {
     handleValidatorNotPresent(tab.id);
     return;
   }
-  var xhr = new XMLHttpRequest();
-  var url = tab.url.split('#')[0];
+  const xhr = new XMLHttpRequest();
+  const url = tab.url.split('#')[0];
   xhr.open('GET', url, true);
 
   // We can't set the User-Agent header directly, but we can set this header
@@ -276,9 +283,9 @@ function validateUrlFromTab(tab, userAgent) {
   // traffic, so this approach will interfere as little as possible with the
   // 99.9% of requests which aren't for AMP validation.
   chrome.webRequest.onBeforeSendHeaders.addListener(
-    updateSendHeadersUserAgent,
-    {urls: [url], types: ["xmlhttprequest"], tabId: -1},
-    ["requestHeaders", "blocking"]
+      updateSendHeadersUserAgent,
+      {urls: [url], types: ['xmlhttprequest'], tabId: -1},
+      ['requestHeaders', 'blocking']
   );
   // Add the temporary header to the request
   xhr.setRequestHeader(globals.userAgentHeader, userAgent);
@@ -313,7 +320,7 @@ function validateUrlFromTab(tab, userAgent) {
  */
 function updateSendHeadersUserAgent(details) {
   let newUserAgent,
-    headers = details.requestHeaders;
+      headers = details.requestHeaders;
   // Using var instead of let keeps the index in scope for later
   for (var i = 0; i < headers.length; i++) {
     if (headers[i].name === globals.userAgentHeader) {
@@ -371,4 +378,4 @@ chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
 /**
  * Reload every hour to retrieve the most recent AMP Validator.
  */
-window.setTimeout(() => { location.reload(); } , 60*60*1000);
+window.setTimeout(() => { location.reload(); } , 60 * 60 * 1000);
