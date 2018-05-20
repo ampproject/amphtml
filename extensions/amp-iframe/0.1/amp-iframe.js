@@ -131,7 +131,7 @@ export class AmpIframe extends AMP.BaseElement {
    * @param {string} src
    * @param {string} containerSrc
    * @param {string} sandbox
-   * @returns {string}
+   * @return {string}
    * @private
    */
   assertSource_(src, containerSrc, sandbox = '') {

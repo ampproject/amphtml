@@ -111,7 +111,6 @@ export class StandardActions {
         });
 
       case 'navigateTo':
-        const node = invocation.node;
         // Some components have additional constraints on allowing navigation.
         let permission = Promise.resolve();
         if (startsWith(node.tagName, 'AMP-')) {
@@ -122,14 +121,11 @@ export class StandardActions {
           });
         }
         return permission.then(() => {
-          const win = (node.ownerDocument || node).defaultView;
-          const url = invocation.args['url'];
-          const trigger = `AMP.${invocation.method}`;
-          Services.navigationForDoc(this.ampdoc).navigateTo(win, url, trigger);
+          Services.navigationForDoc(this.ampdoc).navigateTo(
+              win, args['url'], `AMP.${method}`);
         }, /* onrejected */ e => {
           user().error(TAG, e.message);
         });
-        return null;
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();

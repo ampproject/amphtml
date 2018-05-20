@@ -205,31 +205,34 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"AMP" global target', () => {
+    let win;
+    let invocation;
+
+    beforeEach(() => {
+      win = {};
+      invocation = {
+        node: {
+          ownerDocument: {
+            defaultView: win,
+          },
+        },
+        satisfiesTrust: () => true,
+      };
+    });
+
     describe('navigateTo', () => {
-      let win;
       let navigator;
-      let invocation;
 
       beforeEach(() => {
-        win = {};
-
         navigator = {navigateTo: sandbox.stub()};
         sandbox.stub(Services, 'navigationForDoc').returns(navigator);
 
         // Fake ActionInvocation.
-        invocation = {
-          method: 'navigateTo',
-          args: {
-            url: 'http://bar.com',
-          },
-          node: {
-            tagName: 'DIV',
-            ownerDocument: {
-              defaultView: win,
-            },
-          },
-          satisfiesTrust: () => true,
+        invocation.method = 'navigateTo';
+        invocation.args = {
+          url: 'http://bar.com',
         };
+        invocation.node.tagName = 'DIV';
       });
 
       it('should be implemented', () => {
