@@ -27,6 +27,9 @@ import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {setStyles} from '../../../src/style';
 
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
 class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -135,7 +138,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     const ampIframe = this.element.ownerDocument.createElement('iframe');
     ampIframe.src = 'about:blank';
     if (ampIframe.contentWindow) {
-      frameLoaded();
+      frameLoaded.call(this);
     } else {
       ampIframe.onload = frameLoaded.bind(this);
     }
@@ -193,13 +196,13 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       this.unlistenMessage_ = listen(
           ampIframeWindow,
           'message',
-          this.handleViqeoMessages_.bind(this),
+          this.handleViqeoMessages_.bind(this)
       );
 
-      if (!ampIframeWindow.VIQEO) {
-        ampIframeWindow.onViqeoLoad = this.viqeoPlayerInitLoaded_.bind(this);
+      if (!ampIframeWindow['VIQEO']) {
+        ampIframeWindow['onViqeoLoad'] = this.viqeoPlayerInitLoaded_.bind(this);
       } else {
-        this.viqeoPlayerInitLoaded_(ampIframeWindow.VIQEO);
+        this.viqeoPlayerInitLoaded_(ampIframeWindow['VIQEO']);
       }
 
       this.applyFillContent(ampIframe);
@@ -245,12 +248,12 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {Object} event
+   * @param {!Event|{data: !JsonObject}} event
+   * @return {?JsonObject|string|undefined}
    * @private
    * */
   handleViqeoMessages_(event) {
     const eventData = /** @type {?string|undefined} */ (getData(event));
-    console.log(`handleViqeoMessages_ eventData = ${eventData}`);
     if (event.source !== this.win ||
       typeof eventData !== 'string' ||
       eventData.indexOf('ViqeoPlayer') !== 0) {
@@ -399,26 +402,29 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     });
   }
 
+  /**
+   * @param {Object} VIQEO
+   * @param  {function(Object)} VIQEO.getPlayers - returns viqeo player
+   * @param {function(function(Object), Object)} VIQEO.subscribeTracking - subscriber
+   * @private
+   */
   viqeoPlayerInitLoaded_(VIQEO) {
     const ampIframeWindow = this.iframe_.contentWindow;
 
-    console.log('VIQEO Exists');
-
     subscribe('added', 'ready', () => {
-      const players = VIQEO.getPlayers({container: 'stdPlayer'});
+      const players = VIQEO['getPlayers']({container: 'stdPlayer'});
       this.viqeoPlayer_ = players && players[0];
     });
     subscribe('paused', 'pause');
     subscribe('played', 'play');
     subscribe('replayed', 'play');
 
-    function subscribe(playerEventName, targetEventName, extraHandler) {
-      VIQEO.subscribeTracking(
+    function subscribe(playerEventName, targetEventName, extraHandler = null) {
+      VIQEO['subscribeTracking'](
           () => {
-            ampIframeWindow.postMessage(
+            ampIframeWindow['postMessage'](
                 `ViqeoPlayer|trigger|${targetEventName}`, '*'
             );
-            console.log(`catched ${playerEventName}`);
             if (extraHandler) {
               extraHandler();
             }
