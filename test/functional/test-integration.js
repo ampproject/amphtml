@@ -34,6 +34,29 @@ describe('3p integration.js', () => {
   });
 
   it('should register integrations', () => {
+    expect(registrations).to.include.key('a9');
+    expect(registrations).to.include.key('adblade');
+    expect(registrations).to.include.key('adform');
+    expect(registrations).to.include.key('adsense');
+    expect(registrations).to.include.key('adtech');
+    expect(registrations).to.include.key('adreactor');
+    expect(registrations).to.include.key('criteo');
+    expect(registrations).to.include.key('doubleclick');
+    expect(registrations).to.include.key('flite');
+    expect(registrations).to.include.key('industrybrains');
+    expect(registrations).to.include.key('openx');
+    expect(registrations).to.include.key('twitter');
+    expect(registrations).to.include.key('yieldmo');
+    expect(registrations).to.include.key('sortable');
+    expect(registrations).to.include.key('triplelift');
+    expect(registrations).to.include.key('_ping_');
+    expect(registrations).to.include.key('imobile');
+    expect(registrations).to.include.key('gmossp');
+    expect(registrations).to.include.key('weborama-display');
+    expect(registrations).to.include.key('yieldbot');
+    expect(registrations).to.include.key('adstir');
+    expect(registrations).to.include.key('colombia');
+
     window.ampTestRuntimeConfig.adTypes.forEach(adType => {
       expect(registrations, `Missing registration for [${adType}]`)
           .to.contain.key(adType);

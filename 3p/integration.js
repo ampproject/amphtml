@@ -231,7 +231,6 @@ import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
-
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
