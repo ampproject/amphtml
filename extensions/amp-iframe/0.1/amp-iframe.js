@@ -181,7 +181,7 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   sandboxContainsToken_(sandbox, token) {
-    const re = new RegExp(`/\s${token}\s/`, 'i');
+    const re = new RegExp(`\\s${token}\\s`, 'i');
     return re.test(' ' + sandbox + ' ');
   }
 
