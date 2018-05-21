@@ -15,7 +15,9 @@
  */
 
 import {Services} from '../../../src/services';
+import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 const CSS_PREFIX = 'i-amphtml-subs';
 
@@ -29,12 +31,15 @@ export class Renderer {
     /** @const @private */
     this.ampdoc_ = ampdoc;
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(ampdoc.win);
+    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     // Initial state is "unknown".
     this.setGrantState(null);
     this.getRootElement_().classList.add(`${CSS_PREFIX}-ready`);
+
+    // Check and add progress bar.
+    this.addLoadingBar();
   }
 
   /**
@@ -52,7 +57,7 @@ export class Renderer {
    * @private
    */
   setState_(type, state) {
-    this.vsync_.mutate(() => {
+    this.resources_.mutateElement(this.ampdoc_.getBody() , () => {
       this.getRootElement_().classList.toggle(
           `${CSS_PREFIX}-${type}-unk`,
           state === null);
@@ -65,13 +70,29 @@ export class Renderer {
     });
   }
 
+  addLoadingBar() {
+    return this.ampdoc_.whenReady().then(() => {
+      if (!this.ampdoc_.getBody().querySelector(
+          '[subscriptions-section=loading]')) {
+        const element = createElementWithAttributes(this.ampdoc_.win.document,
+            'div' ,
+            dict({
+              'class': 'i-amphtml-subs-progress',
+              'subscriptions-section': 'loading',
+            })
+        );
+        this.ampdoc_.getBody().appendChild(element);
+      }
+    });
+  }
+
   /**
    * @param {string} type
    * @param {boolean} state
    * @private
    */
   toggleState_(type, state) {
-    this.vsync_.mutate(() => {
+    this.resources_.mutateElement(this.ampdoc_.getBody(), () => {
       this.getRootElement_().classList.toggle(`${CSS_PREFIX}-${type}`, state);
     });
   }

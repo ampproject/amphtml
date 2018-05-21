@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+
 import {ArticleComponent, ArticleComponentDef} from './components/article';
+import {CtaLinkComponent, CtaLinkDef} from './components/cta-link';
 import {HeadingComponent, HeadingComponentDef} from './components/heading';
+import {LandscapeComponent, LandscapeComponentDef} from './components/landscape';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
+import {TextBoxComponent, TextBoxComponentDef} from './components/text-box';
 import {htmlFor} from '../../../../src/static-template';
 
 /** @type {string} */
@@ -34,18 +38,31 @@ export let BookendDataDef;
 /**
  * @typedef {
  *   (!ArticleComponentDef|
- *   !HeadingComponentDef|
- *   !PortraitComponentDef)
+ *    !CtaLinkDef|
+ *    !HeadingComponentDef|
+ *    !LandscapeComponentDef|
+ *    !PortraitComponentDef|
+ *    !TextBoxComponentDef)
  * }
  */
 export let BookendComponentDef;
 
 const articleComponentBuilder = new ArticleComponent();
+const ctaLinkComponentBuilder = new CtaLinkComponent();
 const headingComponentBuilder = new HeadingComponent();
+const landscapeComponentBuilder = new LandscapeComponent();
 const portraitComponentBuilder = new PortraitComponent();
+const textBoxComponentBuilder = new TextBoxComponent();
 
 /**
- * @typedef {(!ArticleComponent|!HeadingComponent|!PortraitComponent)}
+ * @typedef {
+ *   (!ArticleComponent|
+ *    !CtaLinkComponent|
+ *    !HeadingComponent|
+ *    !LandscapeComponent|
+ *    !PortraitComponent|
+ *    !TextBoxComponent)
+ * }
  */
 export let BookendComponentClass;
 
@@ -58,10 +75,16 @@ function componentBuilderInstanceFor(componentType) {
   switch (componentType) {
     case 'small':
       return articleComponentBuilder;
+    case 'cta-link':
+      return ctaLinkComponentBuilder;
     case 'heading':
       return headingComponentBuilder;
+    case 'landscape':
+      return landscapeComponentBuilder;
     case 'portrait':
       return portraitComponentBuilder;
+    case 'textbox':
+      return textBoxComponentBuilder;
     default:
       return null;
   }
@@ -100,7 +123,7 @@ export class BookendComponent {
   static buildTemplates(components, doc) {
     const fragment = doc.createDocumentFragment();
     components.forEach(component => {
-      const type = component.type;
+      const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
         fragment.appendChild(componentBuilderInstanceFor(type)
             .buildTemplate(component, doc));
@@ -119,7 +142,6 @@ export class BookendComponent {
     const html = htmlFor(doc);
     const containerTemplate =
       html`<div class="i-amphtml-story-bookend-component-set"></div>`;
-
     element.appendChild(containerTemplate);
     return element.lastElementChild;
   }

@@ -462,7 +462,7 @@ function pushIfNonEmpty(array, val) {
  * @return {!Error};
  */
 export function duplicateErrorIfNecessary(error) {
-  const message = error.message;
+  const {message} = error;
   const test = String(Math.random());
   error.message = test;
 

@@ -23,7 +23,7 @@ const request = BBPromise.promisify(require('request'));
 const srcGlobs = require('../config').presubmitGlobs;
 const through2 = require('through2');
 
-const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+const {GITHUB_ACCESS_TOKEN} = process.env;
 
 /** @type {!Object<string, !Promise<number>>} */
 const issueCache = Object.create(null);

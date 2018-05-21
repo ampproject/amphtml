@@ -24,7 +24,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
-const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+const {GITHUB_ACCESS_TOKEN} = process.env;
 const gitExec = BBPromise.promisify(git.exec);
 
 const isDryrun = argv.dryrun;

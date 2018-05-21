@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
 
 /**
@@ -26,7 +26,7 @@ import {parseUrl} from '../../../src/url';
 function referrerDomain(ampdoc) {
   const referrer = Services.viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
   if (referrer) {
-    return parseUrl(referrer).hostname;
+    return parseUrlDeprecated(referrer).hostname;
   }
   return '';
 }
@@ -104,7 +104,7 @@ function addDynamicCssClasses(ampdoc, classes) {
  * @param {!Array<string>} classes
  */
 function addCssClassesToBody(body, classes) {
-  const classList = body.classList;
+  const {classList} = body;
   for (let i = 0; i < classes.length; i++) {
     classList.add(classes[i]);
   }

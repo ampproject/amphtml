@@ -18,7 +18,7 @@ import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrl} from '../../../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
 
 /**
@@ -63,7 +63,7 @@ export class ArticleComponent {
       type: articleJson['type'],
       title: articleJson['title'],
       url: articleJson['url'],
-      domainName: parseUrl(articleJson['url']).hostname,
+      domainName: parseUrlDeprecated(articleJson['url']).hostname,
     };
 
     if (articleJson['image']) {
@@ -107,7 +107,7 @@ export class ArticleComponent {
     template.appendChild(heading);
 
     const articleMeta =
-      html`<div class="i-amphtml-story-bookend-article-meta"></div>`;
+      html`<div class="i-amphtml-story-bookend-component-meta"></div>`;
     articleMeta.textContent = articleData.domainName;
     template.appendChild(articleMeta);
 

@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
@@ -28,10 +27,12 @@ import {
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
-  asBaseElement,
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoDocking} from './video/docking';
+import {
+  VideoServiceInterface,
+} from './video-service-interface';
 import {VideoServiceSync} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
@@ -58,39 +59,11 @@ import {throttle} from '../utils/rate-limit';
 const TAG = 'video-manager';
 
 
-/** @typedef {../video-interface.VideoAnalyticsDetailsDef} */
-let VideoAnalyticsDef; // alias for line length
-
-
 /**
  * Internal event triggered when a video's visibility changes.
  * @private @const {string}
  */
 const VISIBILITY_CHANGED = 'amp:visibilitychanged';
-
-
-/** @interface */
-export class VideoService {
-
-  /** @param {!../video-interface.VideoInterface} unusedVideo */
-  register(unusedVideo) {}
-
-  /**
-   * Gets the current analytics details for the given video.
-   * Fails silently if the video is not registered.
-   * @param {!AmpElement} unusedVideo
-   * @return {!Promise<!VideoAnalyticsDef>|!Promise<void>}
-   */
-  getAnalyticsDetails(unusedVideo) {}
-
-  /**
-   * Delegates autoplay.
-   * @param {!AmpElement} unusedVideo
-   * @param {!../observable.Observable<boolean>=} opt_unusedObservable
-   *    If provided, video will be played or paused when this observable fires.
-   */
-  delegateAutoplay(unusedVideo, opt_unusedObservable) {}
-}
 
 
 /**
@@ -113,7 +86,7 @@ const SECONDS_PLAYED_MIN_DELAY = 1000;
  * It is responsible for providing a unified user experience and analytics for
  * all videos within a document.
  *
- * @implements {VideoService}
+ * @implements {VideoServiceInterface}
  */
 export class VideoManager {
 
@@ -180,6 +153,7 @@ export class VideoManager {
    * Triggers a LOW-TRUST timeupdate event consumable by AMP actions.
    * Frequency of this event is controlled by SECONDS_PLAYED_MIN_DELAY and is
    * every 1 second for now.
+   * @param {!VideoEntry} entry
    * @private
    */
   timeUpdateActionEvent_(entry) {
@@ -236,22 +210,20 @@ export class VideoManager {
    * so they can be called using AMP Actions.
    * For example: <button on="tap:myVideo.play">
    *
-   * @param {!../video-interface.VideoInterface} video
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
   registerCommonActions_(video) {
-    const videoImpl = asBaseElement(video);
-
     // Only require ActionTrust.LOW for video actions to defer to platform
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    videoImpl.registerAction('play', () => video.play(/* isAutoplay */ false),
+    video.registerAction('play', () => video.play(/* isAutoplay */ false),
         trust);
-    videoImpl.registerAction('pause', () => video.pause(), trust);
-    videoImpl.registerAction('mute', () => video.mute(), trust);
-    videoImpl.registerAction('unmute', () => video.unmute(), trust);
-    videoImpl.registerAction('fullscreen', () => video.fullscreenEnter(),
+    video.registerAction('pause', () => video.pause(), trust);
+    video.registerAction('mute', () => video.mute(), trust);
+    video.registerAction('unmute', () => video.unmute(), trust);
+    video.registerAction('fullscreen', () => video.fullscreenEnter(),
         trust);
   }
 
@@ -266,7 +238,7 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    const element = entry.video.element;
+    const {element} = entry.video;
 
     listen(element, VideoEvents.VISIBILITY, details => {
       const data = getData(details);
@@ -379,24 +351,12 @@ export class VideoManager {
 
 
 /**
- * This union type allows the compiler to treat VideoInterface objects as
- * `BaseElement`s, which they should be anyway.
- *
- * WARNING: Don't use this at the service level. Its `register` method should
- * only allow `VideoInterface` as a guarding measure.
- *
- * @typedef {!../video-interface.VideoInterface|!../base-element.BaseElement}
- */
-let VideoOrBaseElementDef;
-
-
-/**
  * VideoEntry represents an entry in the VideoManager's list.
  */
 class VideoEntry {
   /**
    * @param {!VideoManager} manager
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    */
   constructor(manager, video) {
     /** @private @const {!VideoManager} */
@@ -405,7 +365,7 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
-    /** @package @const {!VideoOrBaseElementDef} */
+    /** @package @const {!../video-interface.VideoOrBaseElementDef} */
     this.video = video;
 
     /** @private {boolean} */
@@ -530,11 +490,11 @@ class VideoEntry {
   }
 
   /**
-   * @retun {boolean}
+   * @return {boolean}
    * @private
    */
   requiresAutoFullscreen_() {
-    const element = this.video.element;
+    const {element} = this.video;
     if (this.video.preimplementsAutoFullscreen() ||
         !element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN)) {
       return false;
@@ -933,7 +893,7 @@ class VideoEntry {
    * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
    */
   getAnalyticsDetails() {
-    const video = this.video;
+    const {video} = this;
     return this.supportsAutoplay_().then(supportsAutoplay => {
       const {width, height} = video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
@@ -1080,7 +1040,7 @@ export class AutoFullscreenManager {
   installOrientationObserver_() {
     // TODO(alanorozco) Update based on support
     const {win} = this.ampdoc_;
-    const screen = win.screen;
+    const {screen} = win;
     // Chrome considers 'orientationchange' to be an untrusted event, but
     // 'change' on screen.orientation is considered a user interaction.
     // We still need to listen to 'orientationchange' on Chrome in order to
@@ -1149,7 +1109,7 @@ export class AutoFullscreenManager {
 
   /**
    * Scrolls to a video if it's not in view.
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
    * @private
    */
@@ -1319,7 +1279,7 @@ function isLandscape(win) {
  * @private
  */
 function analyticsEvent(entry, eventType, opt_vars) {
-  const video = entry.video;
+  const {video} = entry;
   const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
     entry.getAnalyticsDetails();
 

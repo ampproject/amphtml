@@ -75,9 +75,9 @@ amp.validator.validateInBrowser = function(doc) {
  * @export
  */
 amp.validator.validateUrlAndLog = function(
-    url, opt_doc, opt_errorCategoryFilter) {
+  url, opt_doc, opt_errorCategoryFilter) {
   getUrl(url).then(
-      function(html) {  // Success
+      function(html) { // Success
         const validationResult = amp.validator.validateString(html);
         if (opt_doc) {
           const browserResult = amp.validator.validateInBrowser(opt_doc);
@@ -86,7 +86,7 @@ amp.validator.validateUrlAndLog = function(
         validationResult.outputToTerminal(
             url, undefined, opt_errorCategoryFilter);
       },
-      function(reason) {  // Failure
+      function(reason) { // Failure
         console.error(reason);
       });
 };

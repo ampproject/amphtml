@@ -97,7 +97,7 @@ function checkClosureComments(context, closureComment) {
       return;
     }
 
-    const name = astNode.name;
+    const {name} = astNode;
     if (astNode.type === 'NameExpression' && isPrimitiveWrapperName(name)) {
       reportPrimitiveWrapper(context, node, name);
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseUrl, serializeQueryString} from '../../../../src/url';
+import {parseUrlDeprecated, serializeQueryString} from '../../../../src/url';
 
 const APP = '__AMPHTML__';
 const MessageType = {
@@ -86,7 +86,7 @@ export class WebviewViewerForTesting {
       height: this.containerEl./*OK*/offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
-      origin: parseUrl(window.location.href).origin,
+      origin: parseUrlDeprecated(window.location.href).origin,
       csi: 1,
       cap: 'foo,a2a,handshakepoll',
     };
@@ -96,7 +96,7 @@ export class WebviewViewerForTesting {
     if (window.location.hash && window.location.hash.length > 1) {
       ampdocUrl += '&' + window.location.hash.substring(1);
     }
-    const parsedUrl = parseUrl(ampdocUrl);
+    const parsedUrl = parseUrlDeprecated(ampdocUrl);
     const url = parsedUrl.href;
     this.iframe.setAttribute('src', url);
     this.frameOrigin_ = parsedUrl.origin;

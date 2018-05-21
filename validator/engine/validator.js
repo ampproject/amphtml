@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.provide('amp.validator.CssLength');  // Only for testing.
+goog.provide('amp.validator.CssLength'); // Only for testing.
 goog.provide('amp.validator.Terminal');
 goog.provide('amp.validator.ValidationHandler');
 goog.provide('amp.validator.annotateWithErrorCategories');
@@ -69,14 +69,14 @@ goog.require('parse_url.URL');
  * @template T
  */
 function sortAndUniquify(arrayValue) {
-  if (arrayValue.length < 2) return;
+  if (arrayValue.length < 2) {return;}
 
   goog.array.sort(arrayValue);
-  var uniqIdx = 0;
-  for (var i = 1; i < arrayValue.length; ++i) {
-    if (arrayValue[i] === arrayValue[uniqIdx]) continue;
+  let uniqIdx = 0;
+  for (let i = 1; i < arrayValue.length; ++i) {
+    if (arrayValue[i] === arrayValue[uniqIdx]) {continue;}
     uniqIdx++;
-    if (uniqIdx !== i) arrayValue[uniqIdx] = arrayValue[i];
+    if (uniqIdx !== i) {arrayValue[uniqIdx] = arrayValue[i];}
   }
   arrayValue.splice(uniqIdx + 1);
 }
@@ -149,7 +149,7 @@ const DOCUMENT_START = new LineCol(1, 0);
  * @return {!amp.validator.ValidationError}
  */
 function populateError(
-    severity, validationErrorCode, lineCol, params, specUrl) {
+  severity, validationErrorCode, lineCol, params, specUrl) {
   const error = new amp.validator.ValidationError();
   error.severity = severity;
   error.code = validationErrorCode;
@@ -218,7 +218,7 @@ class ParsedUrlSpec {
         // 3) domain === 'someexample.com'  ->  isDisallowedDomain = false
         //
         // Case 1:
-        if (domain === disallowedDomain) return true;
+        if (domain === disallowedDomain) {return true;}
 
         // Case 2/3, determine if the character before the matching suffix
         // is a '.':
@@ -331,7 +331,7 @@ class ParsedAttrSpec {
    * @return {ParsedValueProperties}
    */
   getValuePropertiesOrNull() {
-    if (this.spec_.valueProperties === null) return null;
+    if (this.spec_.valueProperties === null) {return null;}
     if (this.valueProperties_ === null) {
       this.valueProperties_ =
           new ParsedValueProperties(this.spec_.valueProperties);
@@ -350,7 +350,7 @@ class ParsedAttrSpec {
  */
 function getTagSpecName(tagSpec) {
   return (tagSpec.specName !== null) ? tagSpec.specName :
-                                       tagSpec.tagName.toLowerCase();
+    tagSpec.tagName.toLowerCase();
 }
 
 /**
@@ -364,14 +364,14 @@ function getTagSpecUrl(tagSpec) {
   // Handle a ParsedTagSpec as well as a tag spec.
   // TODO(gregable): This is a bit hacky, we should improve on this approach
   // in the future.
-  if (tagSpec.getSpec !== undefined) return getTagSpecUrl(tagSpec.getSpec());
+  if (tagSpec.getSpec !== undefined) {return getTagSpecUrl(tagSpec.getSpec());}
 
-  if (tagSpec.specUrl !== null) return tagSpec.specUrl;
+  if (tagSpec.specUrl !== null) {return tagSpec.specUrl;}
 
   const extensionSpecUrlPrefix =
       'https://www.ampproject.org/docs/reference/components/';
   if (tagSpec.extensionSpec !== null && tagSpec.extensionSpec.name !== null)
-    return extensionSpecUrlPrefix + tagSpec.extensionSpec.name;
+  {return extensionSpecUrlPrefix + tagSpec.extensionSpec.name;}
   if (tagSpec.requiresExtension.length > 0) {
     // Return the first |requires_extension|, which should be the most
     // representitive.
@@ -482,7 +482,7 @@ class ParsedAttrSpecs {
 
   /**
    * @param {number} id
-   * @return {!string}
+   * @return {string}
    */
   getNameByAttrSpecId(id) {
     if (id < 0) {
@@ -596,14 +596,14 @@ class ParsedTagSpec {
    * fields in the tag spec.
    */
   expandExtensionSpec() {
-    const extensionSpec = this.spec_.extensionSpec;
+    const {extensionSpec} = this.spec_;
     if (this.spec_.specName === null)
-      this.spec_.specName = extensionSpec.name + ' extension .js script';
+    {this.spec_.specName = extensionSpec.name + ' extension .js script';}
     this.spec_.mandatoryParent = 'HEAD';
     if (this.spec_.extensionSpec.deprecatedAllowDuplicates)
-      this.spec_.uniqueWarning = true;
+    {this.spec_.uniqueWarning = true;}
     else
-      this.spec_.unique = true;
+    {this.spec_.unique = true;}
 
     if (amp.validator.VALIDATE_CSS) {
       this.spec_.cdata = new amp.validator.CdataSpec();
@@ -624,7 +624,7 @@ class ParsedTagSpec {
         continue;
       }
       this.attrsByName_[name] = attrId;
-      if (attrId < 0) {  // negative attr ids are simple attrs (only name set).
+      if (attrId < 0) { // negative attr ids are simple attrs (only name set).
         continue;
       }
       const attr = parsedAttrSpecs.getByAttrSpecId(attrId);
@@ -670,7 +670,7 @@ class ParsedTagSpec {
    * @return {?CdataMatcher}
    */
   cdataMatcher(lineCol) {
-    if (this.spec_.cdata !== null) return new CdataMatcher(this.spec_, lineCol);
+    if (this.spec_.cdata !== null) {return new CdataMatcher(this.spec_, lineCol);}
     return null;
   }
 
@@ -681,7 +681,7 @@ class ParsedTagSpec {
    */
   childTagMatcher(lineCol) {
     if (this.spec_.childTags !== null)
-      return new ChildTagMatcher(this.spec_, lineCol);
+    {return new ChildTagMatcher(this.spec_, lineCol);}
     return null;
   }
 
@@ -694,7 +694,7 @@ class ParsedTagSpec {
    */
   referencePointMatcher(rules, lineCol) {
     if (this.hasReferencePoints())
-      return new ReferencePointMatcher(rules, this.referencePoints_, lineCol);
+    {return new ReferencePointMatcher(rules, this.referencePoints_, lineCol);}
     return null;
   }
 
@@ -845,7 +845,7 @@ amp.validator.ValidationResult.prototype.mergeFrom = function(other) {
   goog.asserts.assert(other.status !== null);
   // Copy status only if fail. Failing is a terminal state.
   if (other.status === amp.validator.ValidationResult.Status.FAIL)
-    this.status = amp.validator.ValidationResult.Status.FAIL;
+  {this.status = amp.validator.ValidationResult.Status.FAIL;}
   if (!amp.validator.LIGHT) {
     Array.prototype.push.apply(this.errors, other.errors);
   }
@@ -860,7 +860,7 @@ amp.validator.ValidationResult.prototype.copyFrom = function(other) {
   goog.asserts.assert(other.status !== null);
   this.status = other.status;
   if (!amp.validator.LIGHT) {
-    let newErrors = [];
+    const newErrors = [];
     Array.prototype.push.apply(newErrors, other.errors);
     this.errors = newErrors;
   }
@@ -898,7 +898,7 @@ class ChildTagMatcher {
 
   /** @return {!LineCol} */
   getLineCol() {
-    if (amp.validator.LIGHT) return DOCUMENT_START;
+    if (amp.validator.LIGHT) {return DOCUMENT_START;}
     return this.lineCol_;
   }
 
@@ -908,7 +908,7 @@ class ChildTagMatcher {
    * @param {!amp.validator.ValidationResult} result
    */
   matchChildTagName(encounteredTag, context, result) {
-    const childTags = this.parentSpec_.childTags;
+    const {childTags} = this.parentSpec_;
     // Enforce child_tag_name_oneof: If at least one tag name is specified,
     // then the child tags of the parent tag must have one of the provided
     // tag names.
@@ -923,7 +923,7 @@ class ChildTagMatcher {
               /* params */
               [
                 encounteredTag.lowerName(), getTagSpecName(this.parentSpec_),
-                allowedNames.toLowerCase()
+                allowedNames.toLowerCase(),
               ],
               getTagSpecUrl(this.parentSpec_), result);
         } else {
@@ -948,7 +948,7 @@ class ChildTagMatcher {
               /* params */
               [
                 encounteredTag.lowerName(), getTagSpecName(this.parentSpec_),
-                allowedNames.toLowerCase()
+                allowedNames.toLowerCase(),
               ],
               getTagSpecUrl(this.parentSpec_), result);
         } else {
@@ -978,7 +978,7 @@ class ChildTagMatcher {
             /* params */
             [
               getTagSpecName(this.parentSpec_), expectedNumChildTags.toString(),
-              context.getTagStack().parentChildCount().toString()
+              context.getTagStack().parentChildCount().toString(),
             ],
             getTagSpecUrl(this.parentSpec_), result);
         return;
@@ -1000,7 +1000,7 @@ class ChildTagMatcher {
             [
               getTagSpecName(this.parentSpec_),
               expectedMinNumChildTags.toString(),
-              context.getTagStack().parentChildCount().toString()
+              context.getTagStack().parentChildCount().toString(),
             ],
             getTagSpecUrl(this.parentSpec_), result);
         return;
@@ -1062,7 +1062,7 @@ class ReferencePointMatcher {
    * @return {!LineCol}
    */
   getLineCol() {
-    if (amp.validator.LIGHT) return DOCUMENT_START;
+    if (amp.validator.LIGHT) {return DOCUMENT_START;}
     return this.lineCol_;
   }
 
@@ -1077,23 +1077,23 @@ class ReferencePointMatcher {
    */
   validateTag(tag, context) {
     // Look for a matching reference point, if we find one, record and exit.
-    let resultForBestAttempt = new amp.validator.ValidationResult();
+    const resultForBestAttempt = new amp.validator.ValidationResult();
     resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
     for (const p of this.parsedReferencePoints_.iterate()) {
       // p.tagSpecName here is actually a number, which was replaced in
       // validator_gen_js.py from the name string, so this works.
       const parsedTagSpec = context.getRules().getByTagSpecId(
-          /** @type {!number} */ (p.tagSpecName));
+          /** @type {number} */ (p.tagSpecName));
       const resultForAttempt = validateTagAgainstSpec(
           parsedTagSpec, /*bestMatchReferencePoint=*/null, context, tag);
       if (context.getRules().betterValidationResultThan(
-              resultForAttempt, resultForBestAttempt))
-        resultForBestAttempt.copyFrom(resultForAttempt);
+          resultForAttempt, resultForBestAttempt))
+      {resultForBestAttempt.copyFrom(resultForAttempt);}
       if (resultForBestAttempt.status ===
           amp.validator.ValidationResult.Status.PASS) {
         return {
           validationResult: resultForBestAttempt,
-          bestMatchTagSpec: parsedTagSpec
+          bestMatchTagSpec: parsedTagSpec,
         };
       }
     }
@@ -1115,7 +1115,7 @@ class ReferencePointMatcher {
           [
             tag.lowerName(), this.parsedReferencePoints_.parentTagSpecName(),
             this.parsedValidatorRules_.getReferencePointName(
-                this.parsedReferencePoints_.iterate()[0])
+                this.parsedReferencePoints_.iterate()[0]),
           ],
           this.parsedReferencePoints_.parentSpecUrl(), resultForBestAttempt);
       return {validationResult: resultForBestAttempt, bestMatchTagSpec: null};
@@ -1126,7 +1126,7 @@ class ReferencePointMatcher {
     for (const p of this.parsedReferencePoints_.iterate()) {
       acceptable.push(this.parsedValidatorRules_.getReferencePointName(p));
     }
-    let resultForMultipleAttempts = new amp.validator.ValidationResult();
+    const resultForMultipleAttempts = new amp.validator.ValidationResult();
     context.addError(
         amp.validator.ValidationError.Code
             .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT,
@@ -1134,12 +1134,12 @@ class ReferencePointMatcher {
         /*params*/
         [
           tag.lowerName(), this.parsedReferencePoints_.parentTagSpecName(),
-          acceptable.join(', ')
+          acceptable.join(', '),
         ],
         this.parsedReferencePoints_.parentSpecUrl(), resultForMultipleAttempts);
     return {
       validationResult: resultForMultipleAttempts,
-      bestMatchTagSpec: null
+      bestMatchTagSpec: null,
     };
   }
 
@@ -1162,8 +1162,8 @@ class ReferencePointMatcher {
     const referencePointByCount = [];
     for (const r of this.referencePointsMatched_) {
       referencePointByCount[r] = referencePointByCount.hasOwnProperty(r) ?
-          (referencePointByCount[r] + 1) :
-          1;
+        (referencePointByCount[r] + 1) :
+        1;
     }
     for (const p of this.parsedReferencePoints_.iterate()) {
       // p.tagSpecName here is actually a number, which was replaced in
@@ -1182,7 +1182,7 @@ class ReferencePointMatcher {
             /*params*/
             [
               this.parsedValidatorRules_.getReferencePointName(p),
-              this.parsedReferencePoints_.parentTagSpecName()
+              this.parsedReferencePoints_.parentTagSpecName(),
             ],
             this.parsedReferencePoints_.parentSpecUrl(), result);
       }
@@ -1198,7 +1198,7 @@ class ReferencePointMatcher {
             /*params*/
             [
               this.parsedValidatorRules_.getReferencePointName(p),
-              this.parsedReferencePoints_.parentTagSpecName()
+              this.parsedReferencePoints_.parentTagSpecName(),
             ],
             this.parsedReferencePoints_.parentSpecUrl(), result);
       }
@@ -1285,7 +1285,7 @@ class TagStack {
    */
   createNewTagStackEntry(tagName) {
     return {
-      tagName: tagName,
+      tagName,
       tagSpec: null,
       referencePoint: null,
       hasDescendantConstraintLists: false,
@@ -1298,7 +1298,7 @@ class TagStack {
       lastChildErrorLineCol: null,
       cdataMatcher: null,
       childTagMatcher: null,
-      referencePointMatcher: null
+      referencePointMatcher: null,
     };
   }
 
@@ -1309,7 +1309,7 @@ class TagStack {
    * @param {!ValidateTagResult} tagResult
    */
   enterTag(tagName, referencePointResult, tagResult) {
-    let stackEntry = this.createNewTagStackEntry(tagName);
+    const stackEntry = this.createNewTagStackEntry(tagName);
     stackEntry.referencePoint = referencePointResult.bestMatchTagSpec;
     stackEntry.tagSpec = tagResult.bestMatchTagSpec;
     this.stack_.push(stackEntry);
@@ -1346,7 +1346,7 @@ class TagStack {
    * @private
    */
   updateStackEntryFromTagResult_(result, parsedRules, lineCol) {
-    if (result.bestMatchTagSpec === null) return;
+    if (result.bestMatchTagSpec === null) {return;}
     const parsedTagSpec = result.bestMatchTagSpec;
 
     this.setReferencePointMatcher(
@@ -1372,7 +1372,7 @@ class TagStack {
    * @param {!LineCol} lineCol
    */
   updateFromTagResults(
-      encounteredTag, referencePointResult, tagResult, parsedRules, lineCol) {
+    encounteredTag, referencePointResult, tagResult, parsedRules, lineCol) {
     // Keep track of the number of direct children this tag has, even as we
     // pop in and out of them on the stack.
     this.parentStackEntry_().numChildren++;
@@ -1427,7 +1427,7 @@ class TagStack {
    * @param {?ChildTagMatcher} matcher
    */
   setChildTagMatcher(matcher) {
-    if (matcher !== null) this.back_().childTagMatcher = matcher;
+    if (matcher !== null) {this.back_().childTagMatcher = matcher;}
   }
 
   /**
@@ -1442,7 +1442,7 @@ class TagStack {
    * @param {?CdataMatcher} matcher
    */
   setCdataMatcher(matcher) {
-    if (matcher !== null) this.back_().cdataMatcher = matcher;
+    if (matcher !== null) {this.back_().cdataMatcher = matcher;}
   }
 
   /**
@@ -1459,7 +1459,7 @@ class TagStack {
    * @param {?ReferencePointMatcher} matcher
    */
   setReferencePointMatcher(matcher) {
-    if (matcher !== null) this.back_().referencePointMatcher = matcher;
+    if (matcher !== null) {this.back_().referencePointMatcher = matcher;}
   }
 
   /**
@@ -1479,7 +1479,7 @@ class TagStack {
   matchChildTagName(encounteredTag, context, result) {
     const matcher = this.parentStackEntry_().childTagMatcher;
     if (matcher !== null)
-      matcher.matchChildTagName(encounteredTag, context, result);
+    {matcher.matchChildTagName(encounteredTag, context, result);}
   }
 
   /**
@@ -1526,7 +1526,7 @@ class TagStack {
    */
   parentOnlyChildErrorLineCol() {
     return /** @type {!LineCol} */ (
-        this.parentStackEntry_().onlyChildErrorLineCol);
+      this.parentStackEntry_().onlyChildErrorLineCol);
   }
 
   /**
@@ -1563,7 +1563,7 @@ class TagStack {
    */
   parentLastChildErrorLineCol() {
     return /** @type {!LineCol} */ (
-        this.parentStackEntry_().lastChildErrorLineCol);
+      this.parentStackEntry_().lastChildErrorLineCol);
   }
 
   /**
@@ -1624,9 +1624,9 @@ class TagStack {
    * tagName.
    */
   setDescendantConstraintList(parsedTagSpec, parsedRules) {
-    if (parsedTagSpec.getSpec().descendantTagList === null) return;
+    if (parsedTagSpec.getSpec().descendantTagList === null) {return;}
 
-    let allowedDescendantsForThisTag = [];
+    const allowedDescendantsForThisTag = [];
     for (const descendantTagList of parsedRules.getDescendantTagLists()) {
       // Get the list matching this tag's descendant tag name.
       if (parsedTagSpec.getSpec().descendantTagList ===
@@ -1639,7 +1639,7 @@ class TagStack {
 
     this.allowedDescendantsList_.push(
         {tagName: getTagSpecName(parsedTagSpec.getSpec()),
-         allowedTags: allowedDescendantsForThisTag});
+          allowedTags: allowedDescendantsForThisTag});
     this.setHasDescendantConstraintLists(true);
   }
 
@@ -1699,9 +1699,9 @@ function isAtRuleValid(cssSpec, atRuleName) {
  * @return {boolean}
  */
 function IsDeclarationValid(cssSpec, declarationName) {
-  if (cssSpec.allowedDeclarations.length === 0) return true;
+  if (cssSpec.allowedDeclarations.length === 0) {return true;}
   return cssSpec.allowedDeclarations.indexOf(
-             parse_css.stripVendorPrefix(declarationName)) > -1;
+      parse_css.stripVendorPrefix(declarationName)) > -1;
 }
 
 /**
@@ -1710,7 +1710,7 @@ function IsDeclarationValid(cssSpec, declarationName) {
  * @return {string}
  */
 function AllowedDeclarationsString(cssSpec) {
-  if (cssSpec.allowedDeclarations.length > 5) return '';
+  if (cssSpec.allowedDeclarations.length > 5) {return '';}
   return '[\'' + cssSpec.allowedDeclarations.join('\', \'') + '\']';
 }
 
@@ -1771,7 +1771,7 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
               /* params */
               [
                 getTagSpecName(this.tagSpec), declaration.name,
-                AllowedDeclarationsString(this.cssSpec)
+                AllowedDeclarationsString(this.cssSpec),
               ],
               /* url */ '', this.result);
         }
@@ -1801,11 +1801,11 @@ function computeCssParsingConfig(cssSpec) {
       ampAtRuleParsingSpec[atRuleSpec.name] =
           parse_css.BlockType.PARSE_AS_IGNORE;
     } else if (
-        atRuleSpec.type === amp.validator.AtRuleSpec.BlockType.PARSE_AS_RULES) {
+      atRuleSpec.type === amp.validator.AtRuleSpec.BlockType.PARSE_AS_RULES) {
       ampAtRuleParsingSpec[atRuleSpec.name] =
           parse_css.BlockType.PARSE_AS_RULES;
     } else if (
-        atRuleSpec.type ===
+      atRuleSpec.type ===
         amp.validator.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS) {
       ampAtRuleParsingSpec[atRuleSpec.name] =
           parse_css.BlockType.PARSE_AS_DECLARATIONS;
@@ -1815,7 +1815,7 @@ function computeCssParsingConfig(cssSpec) {
   }
   const config = {
     atRuleSpec: ampAtRuleParsingSpec,
-    defaultSpec: parse_css.BlockType.PARSE_AS_IGNORE
+    defaultSpec: parse_css.BlockType.PARSE_AS_IGNORE,
   };
   if (cssSpec.atRuleSpec.length > 0) {
     config.defaultSpec = ampAtRuleParsingSpec['$DEFAULT'];
@@ -1878,7 +1878,7 @@ class CdataMatcher {
               /* params */
               [
                 getTagSpecName(this.tagSpec_), bytes.toString(),
-                cdataSpec.maxBytes.toString()
+                cdataSpec.maxBytes.toString(),
               ],
               cdataSpec.maxBytesSpecUrl, validationResult);
         }
@@ -1912,8 +1912,8 @@ class CdataMatcher {
       return;
     } else if (this.tagSpec_.cdata.cdataRegex !== null) {
       if (!context.getRules()
-               .getFullMatchRegex(this.tagSpec_.cdata.cdataRegex)
-               .test(cdata)) {
+          .getFullMatchRegex(this.tagSpec_.cdata.cdataRegex)
+          .test(cdata)) {
         if (amp.validator.LIGHT) {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         } else {
@@ -1954,11 +1954,11 @@ class CdataMatcher {
     // We use a combined regex as a fast test. If it matches, we re-match
     // against each individual regex so that we can generate better error
     // messages.
-    if (cdataSpec.combinedBlacklistedCdataRegex === null) return;
+    if (cdataSpec.combinedBlacklistedCdataRegex === null) {return;}
     if (!context.getRules()
-             .getPartialMatchCaseiRegex(cdataSpec.combinedBlacklistedCdataRegex)
-             .test(cdata))
-      return;
+        .getPartialMatchCaseiRegex(cdataSpec.combinedBlacklistedCdataRegex)
+        .test(cdata))
+    {return;}
     if (amp.validator.LIGHT) {
       validationResult.status = amp.validator.ValidationResult.Status.FAIL;
       return;
@@ -2029,7 +2029,7 @@ class CdataMatcher {
     } else {
       for (const errorToken of cssErrors) {
         // Override the first parameter with the name of this style tag.
-        let params = errorToken.params;
+        const {params} = errorToken;
         // Override the first parameter with the name of this style tag.
         params[0] = getTagSpecName(this.tagSpec_);
         context.addError(
@@ -2041,11 +2041,11 @@ class CdataMatcher {
     const parsedImageUrlSpec = new ParsedUrlSpec(cssSpec.imageUrlSpec);
     for (const url of parsedUrls) {
       const adapter = amp.validator.LIGHT ?
-          null :
-          new UrlErrorInStylesheetAdapter(url.line, url.col);
+        null :
+        new UrlErrorInStylesheetAdapter(url.line, url.col);
       validateUrlAndProtocol(
           ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
-                                               parsedImageUrlSpec),
+            parsedImageUrlSpec),
           adapter, context, url.utf8Url, this.tagSpec_, validationResult);
     }
     const visitor = new InvalidRuleVisitor(
@@ -2055,7 +2055,7 @@ class CdataMatcher {
 
   /** @return {!LineCol} */
   getLineCol() {
-    if (amp.validator.LIGHT) return DOCUMENT_START;
+    if (amp.validator.LIGHT) {return DOCUMENT_START;}
     return this.lineCol_;
   }
 }
@@ -2141,13 +2141,13 @@ class ExtensionsContext {
    */
   recordFutureErrorsIfMissing(parsedTagSpec, lineCol) {
     const tagSpec = parsedTagSpec.getSpec();
-    for (let requiredExtension of tagSpec.requiresExtension) {
+    for (const requiredExtension of tagSpec.requiresExtension) {
       if (!this.isExtensionLoaded(requiredExtension)) {
         // Record a possible failure once we have collected all extensions
         // in the document. If the given extension is missing, then report
         // a failure. This is used only in the LIGHT validator.
         if (!amp.validator.LIGHT) {
-          let error = new amp.validator.ValidationError();
+          const error = new amp.validator.ValidationError();
           error.severity = amp.validator.ValidationError.Severity.ERROR;
           error.code =
               amp.validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION;
@@ -2158,7 +2158,7 @@ class ExtensionsContext {
 
           this.extensionMissingErrors_.push(
               {missingExtension: requiredExtension, maybeError: error});
-        } else {  // amp.validator.LIGHT
+        } else { // amp.validator.LIGHT
           this.extensionMissingFailures_.push(requiredExtension);
         }
       }
@@ -2171,10 +2171,10 @@ class ExtensionsContext {
    * @return {!Array<!amp.validator.ValidationError>}
    */
   missingExtensionErrors() {
-    var out = [];
+    const out = [];
     for (const err of this.extensionMissingErrors_) {
       if (!this.isExtensionLoaded(err.missingExtension))
-        out.push(err.maybeError);
+      {out.push(err.maybeError);}
     }
 
     return out;
@@ -2187,7 +2187,7 @@ class ExtensionsContext {
    */
   hasMissingExtensionFailures() {
     for (const missingExtension of this.extensionMissingFailures_) {
-      if (!this.isExtensionLoaded(missingExtension)) return true;
+      if (!this.isExtensionLoaded(missingExtension)) {return true;}
     }
     return false;
   }
@@ -2199,9 +2199,9 @@ class ExtensionsContext {
    */
   unusedExtensionsRequired() {
     // Compute Difference: extensionsUnusedRequired_ - extensionsUsed_
-    var out = [];
+    const out = [];
     for (const extension of this.extensionsUnusedRequired_)
-      if (!(extension in this.extensionsUsed_)) out.push(extension);
+    {if (!(extension in this.extensionsUsed_)) {out.push(extension);}}
     out.sort();
     return out;
   }
@@ -2212,13 +2212,13 @@ class ExtensionsContext {
    * @param {!ValidateTagResult} result
    */
   updateFromTagResult(result) {
-    if (result.bestMatchTagSpec === null) return;
+    if (result.bestMatchTagSpec === null) {return;}
     const parsedTagSpec = result.bestMatchTagSpec;
     const tagSpec = parsedTagSpec.getSpec();
 
     // Keep track of which extensions are loaded.
     if (tagSpec.extensionSpec !== null) {
-      const extensionSpec = tagSpec.extensionSpec;
+      const {extensionSpec} = tagSpec;
       // This is an always present field if extension spec is set.
       const extensionName = /** @type{string} */ (extensionSpec.name);
 
@@ -2227,7 +2227,7 @@ class ExtensionsContext {
       this.extensionsLoaded_[extensionName] = true;
       switch (extensionSpec.requiresUsage) {
         case amp.validator.ExtensionSpec.ExtensionUsageRequirement
-            .GRANDFATHERED:  // Fallthrough intended:
+            .GRANDFATHERED: // Fallthrough intended:
         case amp.validator.ExtensionSpec.ExtensionUsageRequirement.NONE:
           // This extension does not have usage demonstrated by a tag, for
           // example: amp-dynamic-css-classes
@@ -2235,7 +2235,7 @@ class ExtensionsContext {
         case amp.validator.ExtensionSpec.ExtensionUsageRequirement.ERROR:
         // TODO(powdercloud): Make enum proto defaults work in generated
         // javascript.
-        default:  // Default is error
+        default: // Default is error
           // Record that a loaded extension indicates a new requirement:
           // namely that some tag must make use of this extension.
           this.extensionsUnusedRequired_.push(extensionName);
@@ -2245,8 +2245,8 @@ class ExtensionsContext {
 
     // Record presence of a tag, such as <amp-foo> which requires the usage
     // of an amp extension.
-    for (let requiredExtension of tagSpec.requiresExtension)
-      this.extensionsUsed_[requiredExtension] = true;
+    for (const requiredExtension of tagSpec.requiresExtension)
+    {this.extensionsUsed_[requiredExtension] = true;}
   }
 }
 
@@ -2414,7 +2414,7 @@ class Context {
    * @private
    */
   updateFromTagResult_(result) {
-    if (result.bestMatchTagSpec === null) return;
+    if (result.bestMatchTagSpec === null) {return;}
     const parsedTagSpec = result.bestMatchTagSpec;
 
     this.extensions_.updateFromTagResult(result);
@@ -2484,7 +2484,7 @@ class Context {
    */
   markUrlSeenFromMatchingTagSpec_(parsedTagSpec) {
     if (!this.hasSeenUrl() && parsedTagSpec.containsUrl())
-      this.firstUrlSeenTag_ = parsedTagSpec.getSpec();
+    {this.firstUrlSeenTag_ = parsedTagSpec.getSpec();}
   }
 
   /**
@@ -2512,7 +2512,7 @@ class Context {
    */
   recordValidatedFromTagSpec_(parsedTagSpec) {
     if (!this.tagspecsValidated_.hasOwnProperty(parsedTagSpec.id()))
-      this.tagspecsValidated_[parsedTagSpec.id()] = true;
+    {this.tagspecsValidated_[parsedTagSpec.id()] = true;}
   }
 
   /**
@@ -2781,7 +2781,7 @@ class UrlErrorInAttrAdapter {
  */
 function validateAttrValueUrl(parsedAttrSpec, context, attr, tagSpec, result) {
   /** @type {!Array<string>} */
-  let maybeUris = [];
+  const maybeUris = [];
   if (attr.name !== 'srcset') {
     maybeUris.push(attr.value);
   } else {
@@ -2860,9 +2860,9 @@ function validateAttrValueUrl(parsedAttrSpec, context, attr, tagSpec, result) {
  * @param {!amp.validator.ValidationResult} result
  */
 function validateUrlAndProtocol(
-    parsedUrlSpec, adapter, context, urlStr, tagSpec, result) {
+  parsedUrlSpec, adapter, context, urlStr, tagSpec, result) {
   const spec = parsedUrlSpec.getSpec();
-  const onlyWhitespaceRe = /^[\s\xa0]*$/;  // includes non-breaking space
+  const onlyWhitespaceRe = /^[\s\xa0]*$/; // includes non-breaking space
   if (urlStr.match(onlyWhitespaceRe) !== null &&
       (spec.allowEmpty === null || spec.allowEmpty === false)) {
     if (amp.validator.LIGHT) {
@@ -2933,7 +2933,7 @@ function validateUrlAndProtocol(
  * @param {!amp.validator.ValidationResult} result
  */
 function validateAttrValueProperties(
-    parsedValueProperties, context, attr, tagSpec, result) {
+  parsedValueProperties, context, attr, tagSpec, result) {
   // TODO(johannes): Replace this hack with a parser.
   const segments = attr.value.split(/[,;]/);
   /** @type {!Object<string, string>} */
@@ -3020,7 +3020,7 @@ function validateAttrValueProperties(
  * @param {!amp.validator.ValidationResult} result
  */
 function validateNonTemplateAttrValueAgainstSpec(
-    parsedAttrSpec, context, attr, tagSpec, result) {
+  parsedAttrSpec, context, attr, tagSpec, result) {
   // The value, value_regex, value_url, and value_properties fields are treated
   // like a oneof, but we're not using oneof because it's a feature that was
   // added after protobuf 2.5.0 (which our open-source version uses).
@@ -3054,9 +3054,9 @@ function validateNonTemplateAttrValueAgainstSpec(
         getTagSpecUrl(tagSpec), result);
   } else if (spec.valueRegex !== null || spec.valueRegexCasei !== null) {
     const valueRegex = (spec.valueRegex !== null) ?
-        context.getRules().getFullMatchRegex(spec.valueRegex) :
-        context.getRules().getFullMatchCaseiRegex(
-            /** @type {number} */ (spec.valueRegexCasei));
+      context.getRules().getFullMatchRegex(spec.valueRegex) :
+      context.getRules().getFullMatchCaseiRegex(
+          /** @type {number} */ (spec.valueRegexCasei));
     if (!valueRegex.test(attr.value)) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3226,7 +3226,7 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
   } else if (height.isSet && (!width.isSet || width.isAuto)) {
     return amp.validator.AmpLayout.Layout.FIXED_HEIGHT;
   } else if (
-      height.isSet && width.isSet &&
+    height.isSet && width.isSet &&
       (sizesAttr !== undefined || heightsAttr !== undefined)) {
     return amp.validator.AmpLayout.Layout.RESPONSIVE;
   } else {
@@ -3268,7 +3268,7 @@ function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
  * @return {string} dispatch key
  */
 function makeDispatchKey(
-    dispatchKeyType, attrName, attrValue, mandatoryParent) {
+  dispatchKeyType, attrName, attrValue, mandatoryParent) {
   switch (dispatchKeyType) {
     case amp.validator.AttrSpec.DispatchKeyType.NAME_DISPATCH:
       return attrName;
@@ -3280,7 +3280,7 @@ function makeDispatchKey(
     default:
       goog.asserts.assert(false);
   }
-  return '';  // To make closure happy.
+  return ''; // To make closure happy.
 }
 
 /**
@@ -3348,7 +3348,7 @@ function validateParentTag(parsedTagSpec, context, validationResult) {
         [
           getTagSpecName(spec),
           context.getTagStack().parentTagName().toLowerCase(),
-          spec.mandatoryParent.toLowerCase()
+          spec.mandatoryParent.toLowerCase(),
         ],
         getTagSpecUrl(spec), validationResult);
   }
@@ -3363,15 +3363,15 @@ function validateParentTag(parsedTagSpec, context, validationResult) {
  * @param {!amp.validator.ValidationResult} validationResult
  */
 function validateDescendantTags(
-    encounteredTag, parsedTagSpec, context, validationResult) {
+  encounteredTag, parsedTagSpec, context, validationResult) {
   const tagStack = context.getTagStack();
 
-  for (var ii = 0; ii < tagStack.allowedDescendantsList().length; ++ii) {
+  for (let ii = 0; ii < tagStack.allowedDescendantsList().length; ++ii) {
     const allowedDescendantsList = tagStack.allowedDescendantsList()[ii];
     // If the tag we're validating is not whitelisted for a specific ancestor,
     // then throw an error.
     if (!allowedDescendantsList.allowedTags.includes(
-            encounteredTag.upperName())) {
+        encounteredTag.upperName())) {
       if (amp.validator.LIGHT) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -3382,7 +3382,7 @@ function validateDescendantTags(
             /* params */
             [
               encounteredTag.lowerName(),
-              allowedDescendantsList.tagName.toLowerCase()
+              allowedDescendantsList.tagName.toLowerCase(),
             ],
             getTagSpecUrl(parsedTagSpec), validationResult);
         return;
@@ -3398,7 +3398,7 @@ function validateDescendantTags(
  * @param {!amp.validator.ValidationResult} validationResult
  */
 function validateNoSiblingsAllowedTags(
-    parsedTagSpec, context, validationResult) {
+  parsedTagSpec, context, validationResult) {
   const spec = parsedTagSpec.getSpec();
   const tagStack = context.getTagStack();
 
@@ -3428,7 +3428,7 @@ function validateNoSiblingsAllowedTags(
           /* params */
           [
             tagStack.parentOnlyChildTagName().toLowerCase(),
-            tagStack.parentTagName().toLowerCase()
+            tagStack.parentTagName().toLowerCase(),
           ],
           getTagSpecUrl(spec), validationResult);
     }
@@ -3454,7 +3454,7 @@ function validateLastChildTags(context, validationResult) {
           /* params */
           [
             tagStack.parentLastChildTagName().toLowerCase(),
-            tagStack.parentTagName().toLowerCase()
+            tagStack.parentTagName().toLowerCase(),
           ],
           tagStack.parentLastChildUrl(), validationResult);
     }
@@ -3471,7 +3471,7 @@ function validateLastChildTags(context, validationResult) {
 function validateRequiredExtensions(parsedTagSpec, context, validationResult) {
   const tagSpec = parsedTagSpec.getSpec();
   const extensionsCtx = context.getExtensions();
-  for (let requiredExtension of tagSpec.requiresExtension) {
+  for (const requiredExtension of tagSpec.requiresExtension) {
     if (!extensionsCtx.isExtensionLoaded(requiredExtension)) {
       if (amp.validator.LIGHT) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3496,10 +3496,10 @@ function validateRequiredExtensions(parsedTagSpec, context, validationResult) {
  * @param {!amp.validator.ValidationResult} validationResult
  */
 function validateAttrRequiredExtensions(
-    parsedAttrSpec, context, validationResult) {
+  parsedAttrSpec, context, validationResult) {
   const attrSpec = parsedAttrSpec.getSpec();
   const extensionsCtx = context.getExtensions();
-  for (let requiredExtension of attrSpec.requiresExtension) {
+  for (const requiredExtension of attrSpec.requiresExtension) {
     if (!extensionsCtx.isExtensionLoaded(requiredExtension)) {
       if (amp.validator.LIGHT) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3550,9 +3550,9 @@ function validateUniqueness(parsedTagSpec, context, validationResult) {
  * @param {!amp.validator.ValidationResult} validationResult
  */
 function checkForReferencePointCollision(
-    refPointSpec, tagSpec, context, validationResult) {
-  if (refPointSpec === null || !refPointSpec.hasReferencePoints()) return;
-  if (tagSpec === null || !tagSpec.hasReferencePoints()) return;
+  refPointSpec, tagSpec, context, validationResult) {
+  if (refPointSpec === null || !refPointSpec.hasReferencePoints()) {return;}
+  if (tagSpec === null || !tagSpec.hasReferencePoints()) {return;}
 
   if (amp.validator.LIGHT) {
     validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3563,7 +3563,7 @@ function checkForReferencePointCollision(
         /* params */
         [
           getTagSpecName(tagSpec.getSpec()),
-          refPointSpec.getReferencePoints().parentTagSpecName()
+          refPointSpec.getReferencePoints().parentTagSpecName(),
         ],
         refPointSpec.getReferencePoints().parentSpecUrl(), validationResult);
   }
@@ -3578,7 +3578,7 @@ function checkForReferencePointCollision(
 function validateAncestorTags(parsedTagSpec, context, validationResult) {
   const spec = parsedTagSpec.getSpec();
   if (spec.mandatoryAncestor !== null) {
-    const mandatoryAncestor = spec.mandatoryAncestor;
+    const {mandatoryAncestor} = spec;
     if (!context.getTagStack().hasAncestor(mandatoryAncestor)) {
       if (amp.validator.LIGHT) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3591,7 +3591,7 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
               /* params */
               [
                 getTagSpecName(spec), mandatoryAncestor.toLowerCase(),
-                spec.mandatoryAncestorSuggestedAlternative.toLowerCase()
+                spec.mandatoryAncestorSuggestedAlternative.toLowerCase(),
               ],
               getTagSpecUrl(spec), validationResult);
         } else {
@@ -3651,7 +3651,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
        attrValueHasTemplateSyntax(heightAttr) ||
        attrValueHasTemplateSyntax(sizesAttr) ||
        attrValueHasTemplateSyntax(heightsAttr)))
-    return;
+  {return;}
 
   // Parse the input layout attributes which we found for this tag.
   const inputLayout = parseLayout(layoutAttr);
@@ -3724,8 +3724,8 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
     } else {
       const code = layoutAttr === undefined ?
-          amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
-          amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
+        amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
+        amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
       context.addError(
           code, context.getLineCol(),
           /* params */[layout, getTagSpecName(spec)], getTagSpecUrl(spec),
@@ -3818,9 +3818,9 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
     } else {
       const code = layoutAttr === undefined ?
-          amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
-          amp.validator.ValidationError.Code
-              .ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
+        amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
+        amp.validator.ValidationError.Code
+            .ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
       context.addError(
           code, context.getLineCol(),
           /* params */['heights', getTagSpecName(spec), layout],
@@ -3849,7 +3849,7 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
   // However, to avoid parsing differences, we restrict the set of allowed
   // characters in the document.
   const dataAttrRe = /^data-[A-Za-z0-9-_:.]*$/;
-  if (attrName.match(dataAttrRe) !== null) return;
+  if (attrName.match(dataAttrRe) !== null) {return;}
 
   // At this point, it's an error either way, but we try to give a
   // more specific error in the case of Mustache template characters.
@@ -3885,7 +3885,7 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
  * @param {!amp.validator.ValidationResult} result
  */
 function validateAttrValueBelowTemplateTag(
-    parsedTagSpec, context, attr, result) {
+  parsedTagSpec, context, attr, result) {
   if (attrValueHasUnescapedTemplateSyntax(attr.value)) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3926,7 +3926,7 @@ function validateAttrValueBelowTemplateTag(
 function validateAttributeInExtension(tagSpec, context, attr, result) {
   goog.asserts.assert(tagSpec.extensionSpec !== null);
 
-  const extensionSpec = tagSpec.extensionSpec;
+  const {extensionSpec} = tagSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
   // matches, which is based on this custom-element/custom-template field
   // attribute value. The dispatch key matching is case-insensitive for
@@ -3939,7 +3939,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
     }
     return true;
   } else if (
-      extensionSpec.isCustomTemplate && attr.name === 'custom-template') {
+    extensionSpec.isCustomTemplate && attr.name === 'custom-template') {
     if (extensionSpec.name !== attr.value) {
       goog.asserts.assert(extensionSpec.name === attr.value.toLowerCase());
       return false;
@@ -3948,7 +3948,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
   } else if (attr.name === 'src') {
     const srcUrlRe =
         /^https:\/\/cdn\.ampproject\.org\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.js$/;
-    let reResult = srcUrlRe.exec(attr.value);
+    const reResult = srcUrlRe.exec(attr.value);
     // If the src URL matches this regex and the base name of the file matches
     // the extension, look to see if the version matches.
     if (reResult !== null && reResult[1] === extensionSpec.name) {
@@ -3966,7 +3966,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
         }
       }
       if (extensionSpec.allowedVersions.indexOf(encounteredVersion) !== -1)
-        return true;
+      {return true;}
     }
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3994,7 +3994,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
  * @param {!amp.validator.ValidationResult} result
  */
 function validateAttributes(
-    parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result) {
+  parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result) {
   const spec = parsedTagSpec.getSpec();
   if (spec.ampLayout !== null) {
     validateLayout(parsedTagSpec, context, encounteredTag, result);
@@ -4008,9 +4008,9 @@ function validateAttributes(
   let seenExtensionSrcAttr = false;
   const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
   /** @type {!Array<boolean>} */
-  let mandatoryAttrsSeen = [];  // This is a set of attr ids.
+  const mandatoryAttrsSeen = []; // This is a set of attr ids.
   /** @type {!Array<number>} */
-  const mandatoryOneofsSeen = [];  // This is small list of interned strings.
+  const mandatoryOneofsSeen = []; // This is small list of interned strings.
   /** @type {!Array<!amp.validator.AttrSpec>} */
   const triggersToCheck = [];
   /**
@@ -4025,17 +4025,17 @@ function validateAttributes(
   // Our html parser delivers attributes as an array of alternating keys and
   // values. We skip over this array 2 at a time to iterate over the keys.
   const attrsByName = parsedTagSpec.getAttrsByName();
-  for (let attr of encounteredTag.attrs()) {
+  for (const attr of encounteredTag.attrs()) {
     if (!(attr.name in attrsByName)) {
       // While validating a reference point, we skip attributes that
       // we don't have a spec for. They will be validated when the
       // TagSpec itself gets validated.
-      if (parsedTagSpec.isReferencePoint()) continue;
+      if (parsedTagSpec.isReferencePoint()) {continue;}
       // On the other hand, if we did just validate a reference point for
       // this tag, we check whether that reference point covers the attribute.
       if (bestMatchReferencePoint !== null &&
           bestMatchReferencePoint.hasAttrWithName(attr.name))
-        continue;
+      {continue;}
 
       // If |spec| is an extension, then we ad-hoc validate 'custom-element',
       // 'custom-templa'te, and 'src' attributes by calling this method.
@@ -4043,23 +4043,23 @@ function validateAttributes(
       // (seen_src_attr), since it's a mandatory attr.
       if (spec.extensionSpec !== null &&
           validateAttributeInExtension(spec, context, attr, result)) {
-        if (attr.name === 'src') seenExtensionSrcAttr = true;
+        if (attr.name === 'src') {seenExtensionSrcAttr = true;}
         continue;
       }
       validateAttrNotFoundInSpec(parsedTagSpec, context, attr.name, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
         if (amp.validator.LIGHT)
-          return;
+        {return;}
         else
-          continue;
+        {continue;}
       }
       if (hasTemplateAncestor) {
         validateAttrValueBelowTemplateTag(parsedTagSpec, context, attr, result);
         if (result.status === amp.validator.ValidationResult.Status.FAIL) {
           if (amp.validator.LIGHT)
-            return;
+          {return;}
           else
-            continue;
+          {continue;}
         }
       }
       continue;
@@ -4068,9 +4068,9 @@ function validateAttributes(
       validateAttrValueBelowTemplateTag(parsedTagSpec, context, attr, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
         if (amp.validator.LIGHT)
-          return;
+        {return;}
         else
-          continue;
+        {continue;}
       }
     }
     const attrId = attrsByName[attr.name];
@@ -4098,9 +4098,9 @@ function validateAttributes(
           parsedAttrSpec, context, attr, spec, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
         if (amp.validator.LIGHT)
-          return;
+        {return;}
         else
-          continue;
+        {continue;}
       }
     }
     if (attrSpec.blacklistedValueRegex !== null) {
@@ -4138,7 +4138,7 @@ function validateAttributes(
         continue;
       }
     }
-    const mandatoryOneof = attrSpec.mandatoryOneof;
+    const {mandatoryOneof} = attrSpec;
     if (mandatoryOneof !== null) {
       // The "at most 1" part of mandatory_oneof: mandatory_oneof
       // wants exactly one of the alternatives, so here
@@ -4154,7 +4154,7 @@ function validateAttributes(
               /* params */
               [
                 getTagSpecName(spec),
-                context.getRules().getInternedString(mandatoryOneof)
+                context.getRules().getInternedString(mandatoryOneof),
               ],
               getTagSpecUrl(spec), result);
           continue;
@@ -4166,8 +4166,8 @@ function validateAttributes(
     // If the trigger does not have an if_value_regex, then proceed to add the
     // spec. If it does have an if_value_regex, then test the regex to see
     // if it should add the spec.
-    if (attrSpec.trigger === null) continue;
-    const trigger = attrSpec.trigger;
+    if (attrSpec.trigger === null) {continue;}
+    const {trigger} = attrSpec;
     if (trigger.ifValueRegex === null ||
         context.getRules()
             .getFullMatchRegex(trigger.ifValueRegex)
@@ -4175,7 +4175,7 @@ function validateAttributes(
       triggersToCheck.push(attrSpec);
     }
   }
-  if (result.status === amp.validator.ValidationResult.Status.FAIL) return;
+  if (result.status === amp.validator.ValidationResult.Status.FAIL) {return;}
   // The "at least 1" part of mandatory_oneof: If none of the
   // alternatives were present, we report that an attribute is missing.
   for (const mandatoryOneof of parsedTagSpec.getMandatoryOneofs()) {
@@ -4190,7 +4190,7 @@ function validateAttributes(
             /* params */
             [
               getTagSpecName(spec),
-              context.getRules().getInternedString(mandatoryOneof)
+              context.getRules().getInternedString(mandatoryOneof),
             ],
             getTagSpecUrl(spec), result);
       }
@@ -4213,7 +4213,7 @@ function validateAttributes(
               [
                 context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
                     attrId),
-                getTagSpecName(spec), attrSpec.name
+                getTagSpecName(spec), attrSpec.name,
               ],
               getTagSpecUrl(spec), result);
         }
@@ -4233,7 +4233,7 @@ function validateAttributes(
             [
               context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
                   mandatory),
-              getTagSpecName(spec)
+              getTagSpecName(spec),
             ],
             getTagSpecUrl(spec), result);
       }
@@ -4320,7 +4320,7 @@ class TagSpecDispatch {
    * @return {number}
    */
   matchingDispatchKey(attrName, attrValue, mandatoryParent) {
-    if (!this.hasDispatchKeys()) return -1;
+    if (!this.hasDispatchKeys()) {return -1;}
 
     // Try first to find a key with the given parent.
     const dispatchKey = makeDispatchKey(
@@ -4351,7 +4351,7 @@ class TagSpecDispatch {
     // Special case for foo=foo. We consider this a match for a dispatch key of
     // foo="" or just <tag foo>.
     if (attrName === attrValue)
-      return this.matchingDispatchKey(attrName, '', mandatoryParent);
+    {return this.matchingDispatchKey(attrName, '', mandatoryParent);}
 
     return -1;
   }
@@ -4381,8 +4381,8 @@ class TagSpecDispatch {
  * @return {!amp.validator.ValidationResult}
  */
 function validateTagAgainstSpec(
-    parsedTagSpec, bestMatchReferencePoint, context, encounteredTag) {
-  let resultForAttempt = new amp.validator.ValidationResult();
+  parsedTagSpec, bestMatchReferencePoint, context, encounteredTag) {
+  const resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.PASS;
   validateParentTag(parsedTagSpec, context, resultForAttempt);
   validateAncestorTags(parsedTagSpec, context, resultForAttempt);
@@ -4450,19 +4450,19 @@ function validateTagAgainstSpec(
  * @return {ValidateTagResult}
  */
 function validateTag(encounteredTag, bestMatchReferencePoint, context) {
-  let tagSpecDispatch =
+  const tagSpecDispatch =
       context.getRules().dispatchForTagName(encounteredTag.upperName());
   // If there are no dispatch keys matching the tag name, ex: tag name is
   // "foo", set a disallowed tag error.
   if (tagSpecDispatch === undefined) {
-    let result = new amp.validator.ValidationResult();
+    const result = new amp.validator.ValidationResult();
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
     } else {
       let specUrl = '';
       // Special case the spec_url for font tags to be slightly more useful.
       if (encounteredTag.upperName() === 'FONT')
-        specUrl = context.getRules().getStylesSpecUrl();
+      {specUrl = context.getRules().getStylesSpecUrl();}
       context.addError(
           amp.validator.ValidationError.Code.DISALLOWED_TAG,
           context.getLineCol(),
@@ -4483,7 +4483,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // over encountered attributes in the case where we have no dispatches.
   let bestMatchTagSpec = null;
   if (tagSpecDispatch.hasDispatchKeys()) {
-    for (let attr of encounteredTag.attrs()) {
+    for (const attr of encounteredTag.attrs()) {
       const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
           attr.name,
           // Attribute values are case-sensitive by default, but we
@@ -4493,10 +4493,10 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
       if (maybeTagSpecId !== -1) {
         bestMatchTagSpec = context.getRules().getByTagSpecId(maybeTagSpecId);
         return {
-          bestMatchTagSpec: bestMatchTagSpec,
+          bestMatchTagSpec,
           validationResult: validateTagAgainstSpec(
               bestMatchTagSpec, bestMatchReferencePoint, context,
-              encounteredTag)
+              encounteredTag),
         };
       }
     }
@@ -4505,7 +4505,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
     // which gives an error that reads "tag foo is disallowed except in
     // specific forms".
     if (!tagSpecDispatch.hasTagSpecs()) {
-      let result = new amp.validator.ValidationResult();
+      const result = new amp.validator.ValidationResult();
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       } else if (encounteredTag.upperName() === 'SCRIPT') {
@@ -4529,28 +4529,28 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // return errors from a single tagspec, not all of them. We keep around
   // the 'best' attempt until we have found a matching TagSpec or have
   // tried them all.
-  let resultForBestAttempt = new amp.validator.ValidationResult();
+  const resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
     const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
     const resultForAttempt = validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
     if (context.getRules().betterValidationResultThan(
-            resultForAttempt, resultForBestAttempt)) {
+        resultForAttempt, resultForBestAttempt)) {
       resultForBestAttempt.copyFrom(resultForAttempt);
       bestMatchTagSpec = parsedTagSpec;
       if (resultForBestAttempt.status ===
           amp.validator.ValidationResult.Status.PASS) {
         return {
-          bestMatchTagSpec: bestMatchTagSpec,
-          validationResult: resultForBestAttempt
+          bestMatchTagSpec,
+          validationResult: resultForBestAttempt,
         };
       }
     }
   }
   return {
-    bestMatchTagSpec: bestMatchTagSpec,
-    validationResult: resultForBestAttempt
+    bestMatchTagSpec,
+    validationResult: resultForBestAttempt,
   };
 }
 
@@ -4616,13 +4616,13 @@ class ParsedValidatorRules {
 
     if (!amp.validator.LIGHT) {
       /**
-       * @type {!function(!amp.validator.TagSpec) : boolean}
+       * @type {function(!amp.validator.TagSpec) : boolean}
        * @private
        */
       this.isTagSpecCorrectHtmlFormat_ = function(tagSpec) {
         const castedHtmlFormat =
             /** @type {amp.validator.HtmlFormat.Code<string>} */ (
-                /** @type {*} */ (htmlFormat));
+          /** @type {*} */ (htmlFormat));
         return tagSpec.htmlFormat.length === 0 ||
             tagSpec.htmlFormat.indexOf(castedHtmlFormat) !== -1;
       };
@@ -4634,7 +4634,7 @@ class ParsedValidatorRules {
       this.isCssLengthSpecCorrectHtmlFormat_ = function(cssLengthSpec) {
         const castedHtmlFormat =
             /** @type {amp.validator.HtmlFormat.Code<string>} */ (
-                /** @type {*} */ (htmlFormat));
+          /** @type {*} */ (htmlFormat));
         return cssLengthSpec.htmlFormat == castedHtmlFormat;
       };
     }
@@ -4647,8 +4647,8 @@ class ParsedValidatorRules {
 
     /** @private @type {!Array<boolean>} */
     this.tagSpecIdsToTrack_ = [];
-    var numTags = this.rules_.tags.length;
-    for (var tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
+    const numTags = this.rules_.tags.length;
+    for (let tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
       const tag = this.rules_.tags[tagSpecId];
       if (!amp.validator.LIGHT) {
         if (!this.isTagSpecCorrectHtmlFormat_(tag)) {
@@ -4670,9 +4670,9 @@ class ParsedValidatorRules {
           // This tag is an extension. Compute and register a dispatch key
           // for it.
           var dispatchKey;
-          var attrName = tag.extensionSpec.isCustomTemplate ?
-              'custom-template' :
-              'custom-element';
+          const attrName = tag.extensionSpec.isCustomTemplate ?
+            'custom-template' :
+            'custom-element';
           dispatchKey = makeDispatchKey(
               amp.validator.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH,
               attrName, /** @type {string} */ (tag.extensionSpec.name), '');
@@ -4698,7 +4698,7 @@ class ParsedValidatorRules {
         // extension, we prefer to use the one that lists the extension first
         // (i === 0) as an example of that extension.
         if (!this.exampleUsageByExtension_.hasOwnProperty(extension) || i === 0)
-          this.exampleUsageByExtension_[extension] = getTagSpecName(tag);
+        {this.exampleUsageByExtension_[extension] = getTagSpecName(tag);}
       }
     }
     // The amp-ad tag doesn't require amp-ad javascript for historical
@@ -4790,7 +4790,7 @@ class ParsedValidatorRules {
 
   /**
    * @param {amp.validator.ValidationError.Code} errorCode
-   * @return {!string}
+   * @return {string}
    */
   getFormatByCode(errorCode) {
     return this.errorCodes_[errorCode].format;
@@ -4832,7 +4832,7 @@ class ParsedValidatorRules {
       max = Math.max(this.specificity(error.code), max);
     }
     return max;
-  };
+  }
 
   /**
    * Returns true iff statusA is a better status than statusB
@@ -4843,12 +4843,12 @@ class ParsedValidatorRules {
    */
   betterValidationStatusThan_(statusA, statusB) {
     // Equal, so not better than.
-    if (statusA === statusB) return false;
+    if (statusA === statusB) {return false;}
 
     // PASS > FAIL > UNKNOWN
-    if (statusA === amp.validator.ValidationResult.Status.PASS) return true;
-    if (statusB === amp.validator.ValidationResult.Status.PASS) return false;
-    if (statusA === amp.validator.ValidationResult.Status.FAIL) return true;
+    if (statusA === amp.validator.ValidationResult.Status.PASS) {return true;}
+    if (statusB === amp.validator.ValidationResult.Status.PASS) {return false;}
+    if (statusA === amp.validator.ValidationResult.Status.FAIL) {return true;}
     goog.asserts.assert(
         statusA === amp.validator.ValidationResult.Status.UNKNOWN);
     return false;
@@ -4862,22 +4862,22 @@ class ParsedValidatorRules {
    */
   betterValidationResultThan(resultA, resultB) {
     if (resultA.status !== resultB.status)
-      return this.betterValidationStatusThan_(resultA.status, resultB.status);
+    {return this.betterValidationStatusThan_(resultA.status, resultB.status);}
 
     // In the light mode, we only have status values.
     if (!amp.validator.LIGHT) {
       // Prefer the most specific error found in either set.
       if (this.maxSpecificity(resultA.errors) >
           this.maxSpecificity(resultB.errors))
-        return true;
+      {return true;}
       if (this.maxSpecificity(resultB.errors) >
           this.maxSpecificity(resultA.errors))
-        return false;
+      {return false;}
 
       // Prefer the attempt with the fewest errors if the most specific errors
       // are the same.
-      if (resultA.errors.length < resultB.errors.length) return true;
-      if (resultB.errors.length < resultA.errors.length) return false;
+      if (resultA.errors.length < resultB.errors.length) {return true;}
+      if (resultB.errors.length < resultA.errors.length) {return false;}
     }
 
     // Equal, so not better than.
@@ -4892,8 +4892,8 @@ class ParsedValidatorRules {
    */
   exampleTagForExtension(extensionName) {
     return this.exampleUsageByExtension_.hasOwnProperty(extensionName) ?
-        this.exampleUsageByExtension_[extensionName] :
-        '';
+      this.exampleUsageByExtension_[extensionName] :
+      '';
   }
 
   /**
@@ -4945,13 +4945,13 @@ class ParsedValidatorRules {
               /* params */
               [
                 context.getRules().getInternedString(condition),
-                getTagSpecName(spec.getSpec())
+                getTagSpecName(spec.getSpec()),
               ],
               getTagSpecUrl(spec), validationResult);
         }
       }
       for (const condition of spec.excludes()) {
-       if (context.satisfiesCondition(condition)) {
+        if (context.satisfiesCondition(condition)) {
           if (amp.validator.LIGHT) {
             validationResult.status =
                 amp.validator.ValidationResult.Status.FAIL;
@@ -4963,7 +4963,7 @@ class ParsedValidatorRules {
               /* params */
               [
                 getTagSpecName(spec.getSpec()),
-                context.getRules().getInternedString(condition)
+                context.getRules().getInternedString(condition),
               ],
               getTagSpecUrl(spec), validationResult);
         }
@@ -4979,7 +4979,7 @@ class ParsedValidatorRules {
                 /* params */
                 [
                   getTagSpecName(alsoRequiresTagspec.getSpec()),
-                  getTagSpecName(spec.getSpec())
+                  getTagSpecName(spec.getSpec()),
                 ],
                 getTagSpecUrl(spec), validationResult);
           }
@@ -4987,13 +4987,13 @@ class ParsedValidatorRules {
       }
     }
 
-    var extensionsCtx = context.getExtensions();
-    let unusedRequired = extensionsCtx.unusedExtensionsRequired();
+    const extensionsCtx = context.getExtensions();
+    const unusedRequired = extensionsCtx.unusedExtensionsRequired();
     for (const unusedExtensionName of unusedRequired) {
       if (amp.validator.LIGHT) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         return;
-      } else {  // !amp.validator.LIGHT
+      } else { // !amp.validator.LIGHT
         context.addError(
             amp.validator.ValidationError.Code.EXTENSION_UNUSED,
             context.getLineCol(),
@@ -5012,7 +5012,7 @@ class ParsedValidatorRules {
   maybeEmitMandatoryAlternativesSatisfiedErrors(context, validationResult) {
     const satisfied = context.getMandatoryAlternativesSatisfied();
     /** @type {!Array<string>} */
-    let missing = [];
+    const missing = [];
     const specUrlsByMissing = Object.create(null);
     for (const tagSpec of this.rules_.tags) {
       if (tagSpec.mandatoryAlternatives === null ||
@@ -5052,7 +5052,7 @@ class ParsedValidatorRules {
     // Only emit an error if there have been inline styles used. Otherwise
     // if there was to be an error it would have been caught by
     // CdataMatcher::Match().
-    if (context.getInlineStyleByteSize() == 0) return;
+    if (context.getInlineStyleByteSize() == 0) {return;}
 
     const bytesUsed =
         context.getInlineStyleByteSize() + context.getStyleAmpCustomByteSize();
@@ -5111,7 +5111,7 @@ class ParsedValidatorRules {
   }
 
   /**
-   * @param {!string} tagName
+   * @param {string} tagName
    * @return {TagSpecDispatch|undefined}
    */
   dispatchForTagName(tagName) {
@@ -5148,7 +5148,7 @@ class ParsedValidatorRules {
   getReferencePointName(referencePoint) {
     // tagSpecName here is actually a number, which was replaced in
     // validator_gen_js.py from the name string, so this works.
-    const tagSpecId = /** @type {!number} */ (referencePoint.tagSpecName);
+    const tagSpecId = /** @type {number} */ (referencePoint.tagSpecName);
     const refPointSpec = this.getByTagSpecId(tagSpecId);
     return getTagSpecName(refPointSpec.getSpec());
   }
@@ -5192,258 +5192,258 @@ function byteLength(utf8Str) {
  */
 amp.validator.ValidationHandler =
     class extends amp.htmlparser.HtmlSaxHandlerWithLocation {
-  /**
+      /**
    * Creates a new handler.
    * @param {string} htmlFormat
    */
-  constructor(htmlFormat) {
-    super();
+      constructor(htmlFormat) {
+        super();
 
-    this.validationResult_ = new amp.validator.ValidationResult();
-    this.validationResult_.status =
+        this.validationResult_ = new amp.validator.ValidationResult();
+        this.validationResult_.status =
         amp.validator.ValidationResult.Status.UNKNOWN;
-    /**
+        /**
      * Rules from parsed JSON configuration.
      * @type {!ParsedValidatorRules}
      * @private
      */
-    this.rules_ = getParsedValidatorRules(htmlFormat);
-    /**
+        this.rules_ = getParsedValidatorRules(htmlFormat);
+        /**
      * Validation Context.
      * @type {!Context}
      * @private
      */
-    this.context_ = new Context(this.rules_);
-  }
+        this.context_ = new Context(this.rules_);
+      }
 
-  /**
+      /**
    * @return {!amp.validator.ValidationResult} Validation Result at the current
    *     step.
    */
-  Result() {
-    return this.validationResult_;
-  }
+      Result() {
+        return this.validationResult_;
+      }
 
-  /**
+      /**
    * Callback before startDoc which gives us a document locator.
    * @param {amp.htmlparser.DocLocator} locator
    * @override
    */
-  setDocLocator(locator) {
-    if (locator === null) {
-      goog.asserts.fail('Null DocLocator set');
-    } else {
-      this.context_.setDocLocator(locator);
-    }
-  }
+      setDocLocator(locator) {
+        if (locator === null) {
+          goog.asserts.fail('Null DocLocator set');
+        } else {
+          this.context_.setDocLocator(locator);
+        }
+      }
 
-  /**
+      /**
    * Callback for the start of a new HTML document.
    * @override
    */
-  startDoc() {
-    this.validationResult_ = new amp.validator.ValidationResult();
-    this.validationResult_.status =
+      startDoc() {
+        this.validationResult_ = new amp.validator.ValidationResult();
+        this.validationResult_.status =
         amp.validator.ValidationResult.Status.UNKNOWN;
-  }
+      }
 
-  /**
+      /**
    * Callback for the attributes from all the body tags encountered
    * within the document.
    * @override
    */
-  effectiveBodyTag(attributes) {
-    var encounteredAttrs = this.context_.getEncounteredBodyAttrs();
-    // If we never recorded a body tag with attributes, it was manufactured.
-    // In which case we've already logged an error for that. Doing more here
-    // would be confusing.
-    if (encounteredAttrs === null) return;
-    // So now we compare the attributes from the tag that we encountered
-    // (HtmlParser sent us a startTag event for it earlier) with the attributes
-    // from the effective body tag that we're just receiving now, which contains
-    // all attributes on body tags within the doc. It's correct to think of this
-    // synthetic tag simply as a concatenation - there is in general no
-    // elimination of duplicate attributes or overriding behavior. Thus, if the
-    // second body tag has any attribute this will result in an error.
-    var differenceSeen = attributes.length !== encounteredAttrs.length;
-    if (!differenceSeen) {
-      for (var ii = 0; ii < attributes.length; ii++) {
-        if (attributes[ii] !== encounteredAttrs[ii]) {
-          differenceSeen = true;
-          break;
+      effectiveBodyTag(attributes) {
+        const encounteredAttrs = this.context_.getEncounteredBodyAttrs();
+        // If we never recorded a body tag with attributes, it was manufactured.
+        // In which case we've already logged an error for that. Doing more here
+        // would be confusing.
+        if (encounteredAttrs === null) {return;}
+        // So now we compare the attributes from the tag that we encountered
+        // (HtmlParser sent us a startTag event for it earlier) with the attributes
+        // from the effective body tag that we're just receiving now, which contains
+        // all attributes on body tags within the doc. It's correct to think of this
+        // synthetic tag simply as a concatenation - there is in general no
+        // elimination of duplicate attributes or overriding behavior. Thus, if the
+        // second body tag has any attribute this will result in an error.
+        let differenceSeen = attributes.length !== encounteredAttrs.length;
+        if (!differenceSeen) {
+          for (let ii = 0; ii < attributes.length; ii++) {
+            if (attributes[ii] !== encounteredAttrs[ii]) {
+              differenceSeen = true;
+              break;
+            }
+          }
         }
-      }
-    }
-    if (!differenceSeen) return;
-    if (amp.validator.LIGHT) {
-      this.validationResult_.status =
+        if (!differenceSeen) {return;}
+        if (amp.validator.LIGHT) {
+          this.validationResult_.status =
           amp.validator.ValidationResult.Status.FAIL;
-      return;
-    }
-    this.context_.addError(
-        amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-        this.context_.getEncounteredBodyLineCol(),
-        /* params */['BODY'], /* url */ '', this.validationResult_);
-  }
+          return;
+        }
+        this.context_.addError(
+            amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+            this.context_.getEncounteredBodyLineCol(),
+            /* params */['BODY'], /* url */ '', this.validationResult_);
+      }
 
-  /**
+      /**
    * Callback for the end of a new HTML document. Triggers validation of
    * mandatory
    * tag presence.
    */
-  endDoc() {
-    this.rules_.maybeEmitGlobalTagValidationErrors(
-        this.context_, this.validationResult_);
-    if (this.validationResult_.status ===
+      endDoc() {
+        this.rules_.maybeEmitGlobalTagValidationErrors(
+            this.context_, this.validationResult_);
+        if (this.validationResult_.status ===
         amp.validator.ValidationResult.Status.UNKNOWN) {
-      this.validationResult_.status =
+          this.validationResult_.status =
           amp.validator.ValidationResult.Status.PASS;
-    }
-    // As some errors can be inserted out of order, sort errors at the
-    // end based on their line/col numbers.
-    if (!amp.validator.LIGHT) {
-      goog.array.stableSort(this.validationResult_.errors, function(lhs, rhs) {
-        if (lhs.line != rhs.line) return lhs.line - rhs.line;
-        return lhs.col - rhs.col;
-      });
-    }
-  }
+        }
+        // As some errors can be inserted out of order, sort errors at the
+        // end based on their line/col numbers.
+        if (!amp.validator.LIGHT) {
+          goog.array.stableSort(this.validationResult_.errors, function(lhs, rhs) {
+            if (lhs.line != rhs.line) {return lhs.line - rhs.line;}
+            return lhs.col - rhs.col;
+          });
+        }
+      }
 
-  /**
+      /**
    * Callback for informing that the parser is manufacturing a <body> tag not
    * actually found on the page. This will be followed by a startTag() with the
    * actual body tag in question.
    * @override
    */
-  markManufacturedBody() {
-    if (amp.validator.LIGHT) {
-      this.validationResult_.status =
+      markManufacturedBody() {
+        if (amp.validator.LIGHT) {
+          this.validationResult_.status =
           amp.validator.ValidationResult.Status.FAIL;
-      return;
-    }
-    this.context_.addError(
-        amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
-        this.context_.getLineCol(),
-        /* params */[], /* url */ '', this.validationResult_);
-  }
+          return;
+        }
+        this.context_.addError(
+            amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
+            this.context_.getLineCol(),
+            /* params */[], /* url */ '', this.validationResult_);
+      }
 
-  /**
+      /**
    * While parsing the document HEAD, we may accumulate errors which depend
    * on seeing later extension <script> tags.
    */
-  emitMissingExtensionErrors() {
-    let extensionsCtx = this.context_.getExtensions();
-    if (amp.validator.LIGHT) {
-      if (extensionsCtx.hasMissingExtensionFailures()) {
-        this.validationResult_.status =
+      emitMissingExtensionErrors() {
+        const extensionsCtx = this.context_.getExtensions();
+        if (amp.validator.LIGHT) {
+          if (extensionsCtx.hasMissingExtensionFailures()) {
+            this.validationResult_.status =
             amp.validator.ValidationResult.Status.FAIL;
-        return;
+            return;
+          }
+        } else { // !amp.validator.LIGHT
+          for (const error of extensionsCtx.missingExtensionErrors())
+          {this.context_.addBuiltError(error, this.validationResult_);}
+        }
       }
-    } else {  // !amp.validator.LIGHT
-      for (const error of extensionsCtx.missingExtensionErrors())
-        this.context_.addBuiltError(error, this.validationResult_);
-    }
-  }
 
-  /**
+      /**
    * Callback for a start HTML tag.
    * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
    * @override
    */
-  startTag(encounteredTag) {
-    /** @type {?string} */
-    let maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();
-    if (maybeDuplicateAttrName !== null) {
-      if (!amp.validator.LIGHT) {
-        this.context_.addWarning(
-            amp.validator.ValidationError.Code.DUPLICATE_ATTRIBUTE,
-            this.context_.getLineCol(),
-            /* params */[encounteredTag.lowerName(), maybeDuplicateAttrName],
-            /* specUrl */ '', this.validationResult_);
-      }
-      encounteredTag.dedupeAttrs();
-    }
+      startTag(encounteredTag) {
+        /** @type {?string} */
+        const maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();
+        if (maybeDuplicateAttrName !== null) {
+          if (!amp.validator.LIGHT) {
+            this.context_.addWarning(
+                amp.validator.ValidationError.Code.DUPLICATE_ATTRIBUTE,
+                this.context_.getLineCol(),
+                /* params */[encounteredTag.lowerName(), maybeDuplicateAttrName],
+                /* specUrl */ '', this.validationResult_);
+          }
+          encounteredTag.dedupeAttrs();
+        }
 
-    if ('BODY' === encounteredTag.upperName()) {
-      this.context_.recordBodyTag(encounteredTag.attrs());
-      this.emitMissingExtensionErrors();
-    }
+        if ('BODY' === encounteredTag.upperName()) {
+          this.context_.recordBodyTag(encounteredTag.attrs());
+          this.emitMissingExtensionErrors();
+        }
 
-    const attrsByKey = encounteredTag.attrsByKey();
-    const styleAttr = attrsByKey['style'];
-    if (styleAttr !== undefined) {
-      this.context_.addInlineStyleByteSize(byteLength(styleAttr));
-    }
+        const attrsByKey = encounteredTag.attrsByKey();
+        const styleAttr = attrsByKey['style'];
+        if (styleAttr !== undefined) {
+          this.context_.addInlineStyleByteSize(byteLength(styleAttr));
+        }
 
-    /** @type {ValidateTagResult} */
-    let resultForReferencePoint = {
-      bestMatchTagSpec: null,
-      validationResult: new amp.validator.ValidationResult()
-    };
-    resultForReferencePoint.validationResult.status =
+        /** @type {ValidateTagResult} */
+        let resultForReferencePoint = {
+          bestMatchTagSpec: null,
+          validationResult: new amp.validator.ValidationResult(),
+        };
+        resultForReferencePoint.validationResult.status =
         amp.validator.ValidationResult.Status.UNKNOWN;
-    const referencePointMatcher =
+        const referencePointMatcher =
         this.context_.getTagStack().parentReferencePointMatcher();
-    if (referencePointMatcher !== null) {
-      resultForReferencePoint =
+        if (referencePointMatcher !== null) {
+          resultForReferencePoint =
           referencePointMatcher.validateTag(encounteredTag, this.context_);
-      this.validationResult_.mergeFrom(
-          resultForReferencePoint.validationResult);
-    }
+          this.validationResult_.mergeFrom(
+              resultForReferencePoint.validationResult);
+        }
 
-    const resultForTag = validateTag(
-        encounteredTag, resultForReferencePoint.bestMatchTagSpec,
-        this.context_);
-    checkForReferencePointCollision(
-        resultForReferencePoint.bestMatchTagSpec, resultForTag.bestMatchTagSpec,
-        this.context_, resultForTag.validationResult);
-    this.validationResult_.mergeFrom(resultForTag.validationResult);
+        const resultForTag = validateTag(
+            encounteredTag, resultForReferencePoint.bestMatchTagSpec,
+            this.context_);
+        checkForReferencePointCollision(
+            resultForReferencePoint.bestMatchTagSpec, resultForTag.bestMatchTagSpec,
+            this.context_, resultForTag.validationResult);
+        this.validationResult_.mergeFrom(resultForTag.validationResult);
 
-    this.context_.updateFromTagResults(
-        encounteredTag, resultForReferencePoint, resultForTag);
-  }
+        this.context_.updateFromTagResults(
+            encounteredTag, resultForReferencePoint, resultForTag);
+      }
 
-  /**
+      /**
    * Callback for an end HTML tag.
    * @param {!amp.htmlparser.ParsedHtmlTag} tag
    * @override
    */
-  endTag(tag) {
-    this.context_.getTagStack().exitTag(this.context_, this.validationResult_);
-  };
+      endTag(tag) {
+        this.context_.getTagStack().exitTag(this.context_, this.validationResult_);
+      }
 
-  /**
+      /**
    * Callback for pcdata. I'm not sure what this is supposed to include, but it
    * seems to be called for contents of <p> tags, looking at a few examples.
    * @param {string} text
    * @override
    */
-  pcdata(text) {}
+      pcdata(text) {}
 
-  /**
+      /**
    * Callback for rcdata text. rcdata text includes contents of title or
    * textarea
    * tags. The validator has no specific rules regarding these text blobs.
    * @param {string} text
    * @override
    */
-  rcdata(text) {}
+      rcdata(text) {}
 
-  /**
+      /**
    * Callback for cdata.
    * @param {string} text
    * @override
    */
-  cdata(text) {
-    // Record <style amp-custom> byte size
-    if (this.context_.getTagStack().isStyleAmpCustomChild()) {
-      this.context_.addStyleAmpCustomByteSize(byteLength(text));
-    }
-    const matcher = this.context_.getTagStack().cdataMatcher();
-    if (matcher !== null)
-      matcher.match(text, this.context_, this.validationResult_);
-  }
-};
+      cdata(text) {
+        // Record <style amp-custom> byte size
+        if (this.context_.getTagStack().isStyleAmpCustomChild()) {
+          this.context_.addStyleAmpCustomByteSize(byteLength(text));
+        }
+        const matcher = this.context_.getTagStack().cdataMatcher();
+        if (matcher !== null)
+        {matcher.match(text, this.context_, this.validationResult_);}
+      }
+    };
 
 /**
  * Convenience function which informs caller if given ValidationError is
@@ -5537,15 +5537,15 @@ if (!amp.validator.LIGHT) {
    * @param {string=} opt_errorCategoryFilter
    */
   amp.validator.ValidationResult.prototype.outputToTerminal = function(
-      url, opt_terminal, opt_errorCategoryFilter) {
+    url, opt_terminal, opt_errorCategoryFilter) {
 
     const terminal = opt_terminal || new amp.validator.Terminal();
     const errorCategoryFilter = opt_errorCategoryFilter || null;
 
-    const status = this.status;
+    const {status} = this;
     if (status === amp.validator.ValidationResult.Status.PASS) {
       terminal.info('AMP validation successful.');
-      if (this.errors.length === 0) return;
+      if (this.errors.length === 0) {return;}
     } else if (status !== amp.validator.ValidationResult.Status.FAIL) {
       terminal.error(
           'AMP validation had unknown results. This indicates a validator ' +
@@ -5564,7 +5564,7 @@ if (!amp.validator.LIGHT) {
     } else {
       errors = [];
       for (const error of this.errors) {
-        if (('' + amp.validator.categorizeError(error)) ===
+        if ((String(amp.validator.categorizeError(error))) ===
             errorCategoryFilter) {
           errors.push(error);
         }
@@ -5738,7 +5738,7 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The tag 'picture' is disallowed."
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_TAG) {
     if (error.params[0] === 'font')
-      return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+    {return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;}
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // E.g. The tag 'div' contains the attribute 'width' repeated multiple times.
@@ -5821,7 +5821,7 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The inline 'style' attribute is not allowed in AMP documents. Use
   // 'style amp-custom' tag instead."
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR)
-    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+  {return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;}
 
   // E.g. "CSS syntax error in tag 'style amp-custom' - unterminated string."
   if ((error.code ===
@@ -5891,7 +5891,7 @@ amp.validator.categorizeError = function(error) {
            amp.validator.ValidationError.Code
                .MANDATORY_CDATA_MISSING_OR_INCORRECT &&
        (goog.string./*OK*/ startsWith(
-            error.params[0], 'head > style[amp-boilerplate]') ||
+           error.params[0], 'head > style[amp-boilerplate]') ||
         goog.string./*OK*/ startsWith(
             error.params[0], 'noscript > style[amp-boilerplate]')))) {
     return amp.validator.ErrorCategory.Code

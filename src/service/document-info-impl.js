@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getSourceUrl, parseUrl} from '../url';
+import {getSourceUrl, parseUrlDeprecated} from '../url';
 import {isArray} from '../types';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
@@ -78,7 +78,7 @@ export class DocInfo {
     if (!canonicalUrl) {
       const canonicalTag = rootNode.querySelector('link[rel=canonical]');
       canonicalUrl = canonicalTag
-        ? parseUrl(canonicalTag.href).href
+        ? parseUrlDeprecated(canonicalTag.href).href
         : sourceUrl;
     }
     const pageViewId = getPageViewId(ampdoc.win);
@@ -122,7 +122,7 @@ function getLinkRels(doc) {
     const links = doc.head.querySelectorAll('link[rel]');
     for (let i = 0; i < links.length; i++) {
       const link = links[i];
-      const href = link.href;
+      const {href} = link;
       const rels = link.getAttribute('rel');
       if (!rels || !href) {
         continue;
