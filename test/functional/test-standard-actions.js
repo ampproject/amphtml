@@ -21,8 +21,8 @@ import {StandardActions} from '../../src/service/standard-actions-impl';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
-
 import {setParentWindow} from '../../src/service';
+import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
@@ -211,7 +211,6 @@ describes.sandboxed('StandardActions', {}, () => {
     beforeEach(() => {
       win = {};
       invocation = {
-        args: {},
         node: {
           ownerDocument: {
             defaultView: win,
@@ -221,24 +220,77 @@ describes.sandboxed('StandardActions', {}, () => {
       };
     });
 
-    it('should implement navigateTo', () => {
-      const navigator = {navigateTo: sandbox.stub()};
-      sandbox.stub(Services, 'navigationForDoc').returns(navigator);
+    describe('navigateTo', () => {
+      let navigator;
 
-      invocation.method = 'navigateTo';
-      invocation.args.url = 'http://bar.com';
+      beforeEach(() => {
+        navigator = {navigateTo: sandbox.stub()};
+        sandbox.stub(Services, 'navigationForDoc').returns(navigator);
 
-      // Should check trust and fail.
-      invocation.satisfiesTrust = () => false;
-      standardActions.handleAmpTarget(invocation);
-      expect(navigator.navigateTo).to.be.not.called;
+        // Fake ActionInvocation.
+        invocation.method = 'navigateTo';
+        invocation.args = {
+          url: 'http://bar.com',
+        };
+        invocation.node.tagName = 'DIV';
+      });
 
-      // Should succeed.
-      invocation.satisfiesTrust = () => true;
-      standardActions.handleAmpTarget(invocation);
-      expect(navigator.navigateTo).to.be.calledOnce;
-      expect(navigator.navigateTo).to.be.calledWithExactly(
-          win, 'http://bar.com', 'AMP.navigateTo');
+      it('should be implemented', () => {
+        // Should check trust and fail.
+        invocation.satisfiesTrust = () => false;
+        standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.not.called;
+
+        // Should succeed.
+        invocation.satisfiesTrust = () => true;
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo');
+        });
+      });
+
+      it('should pass if node does not have throwIfCannotNavigate()', () => {
+        invocation.node.tagName = 'AMP-FOO';
+        invocation.node.getImpl = () => Promise.resolve({});
+
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo');
+        });
+      });
+
+      it('should check throwIfCannotNavigate() for AMP elements', function*() {
+        const userError = sandbox.stub(user(), 'error');
+
+        invocation.node.tagName = 'AMP-FOO';
+
+        // Should succeed if throwIfCannotNavigate() is not implemented.
+        invocation.node.getImpl = () => Promise.resolve({});
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledOnce;
+        expect(navigator.navigateTo).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+
+        // Should succeed if throwIfCannotNavigate() returns null.
+        invocation.node.getImpl = () => Promise.resolve({
+          throwIfCannotNavigate: () => null,
+        });
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledTwice;
+        expect(navigator.navigateTo.getCall(1)).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+
+        // Should fail if throwIfCannotNavigate() throws an error.
+        invocation.node.getImpl = () => Promise.resolve({
+          throwIfCannotNavigate: () => { throw new Error('Fake error.'); },
+        });
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledTwice;
+        expect(userError).to.be.calledWith('STANDARD-ACTIONS',
+            'Fake error.');
+      });
     });
 
     it('should implement goBack', () => {
