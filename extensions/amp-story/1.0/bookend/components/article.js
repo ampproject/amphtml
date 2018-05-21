@@ -44,8 +44,8 @@ export class ArticleComponent {
     user().assert('title' in articleJson && 'url' in articleJson,
         'Articles must contain `title` and `url` fields, skipping invalid.');
 
-    user().assert(isProtocolValid(articleJson['url']), 'Unsupported protocol' +
-        ` for article URL ${articleJson['url']}`);
+    user().assert(isProtocolValid(articleJson['url']), 'Unsupported protocol ' +
+        `for article URL ${articleJson['url']}`);
 
     if (articleJson['image']) {
       user().assert(isProtocolValid(articleJson['image']), 'Unsupported ' +
@@ -84,7 +84,8 @@ export class ArticleComponent {
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const template =
         html`
-        <a class="i-amphtml-story-bookend-article"
+        <a class="i-amphtml-story-bookend-article
+          i-amphtml-story-bookend-component"
           target="_top">
         </a>`;
     addAttributesToElement(template, dict({'href': articleData.url}));

@@ -431,8 +431,8 @@ describes.realWin('amp-story-bookend', {
 
     allowConsoleError(() => {
       expect(() => ctaLinkComponent.assertValidity(userJson)).to.throw(
-          'CTA link component must be an array' +
-          ' and contain at least one link inside it.');
+          'CTA link component must be an array ' +
+          'and contain at least one link inside it.');
     });
   });
 
@@ -466,8 +466,8 @@ describes.realWin('amp-story-bookend', {
 
     allowConsoleError(() => {
       expect(() => landscapeComponent.assertValidity(userJson)).to.throw(
-          'landscape component must contain `title`, `category`, `image`,' +
-          ' and `url` fields, skipping invalid.');
+          'landscape component must contain `title`, `category`, `image`, ' +
+          'and `url` fields, skipping invalid.');
     });
   });
 
@@ -499,9 +499,9 @@ describes.realWin('amp-story-bookend', {
 
     allowConsoleError(() => {
       expect(() => textBoxComponent.assertValidity(userJson)).to.throw(
-          'Textbox component must contain' +
-          ' `text` array and at least one element inside it,' +
-          ' skipping invalid.');
+          'Textbox component must contain ' +
+          '`text` array and at least one element inside it, ' +
+          'skipping invalid.');
     });
   });
 });
