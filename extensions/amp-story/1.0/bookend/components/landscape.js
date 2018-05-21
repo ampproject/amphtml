@@ -58,11 +58,11 @@ export class LandscapeComponent {
       'component must contain `title`, `category`, `image`, and `url` fields,' +
       ' skipping invalid.');
 
-    user().assert(isProtocolValid(landscapeJson['url']), 'Unsupported' +
-    ` protocol for landscape URL ${landscapeJson['url']}`);
+    user().assert(isProtocolValid(landscapeJson['url']), 'Unsupported ' +
+    `protocol for landscape URL ${landscapeJson['url']}`);
 
-    user().assert(isProtocolValid(landscapeJson['image']), 'Unsupported' +
-    `  protocol for landscape image URL ${landscapeJson['image']}`);
+    user().assert(isProtocolValid(landscapeJson['image']), 'Unsupported ' +
+    `protocol for landscape image URL ${landscapeJson['image']}`);
   }
 
   /**
@@ -91,7 +91,8 @@ export class LandscapeComponent {
     const html = htmlFor(doc);
     const el =
         html`
-        <a class="i-amphtml-story-bookend-landscape"
+        <a class="i-amphtml-story-bookend-landscape
+          i-amphtml-story-bookend-component"
           target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
