@@ -1,4 +1,5 @@
 {
+  "extends": ".eslintrc",
   "rules": {
     "amphtml-internal/prefer-deferred-promise": 2,
     "amphtml-internal/unused-private-field": 2,
