@@ -28,6 +28,8 @@ import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';
+export const DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME =
+  'AMP-template-amp-creative';
 
 /** {?AmpAdTemplateHelper} */
 let ampAdTemplateHelper;
@@ -58,7 +60,9 @@ export class TemplateValidator extends Validator {
     // response as the creative, and downstream renderers may attempt to render
     // it as a non-AMP creative within a cross-domain iframe.
     if (!headers ||
-        headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
+        (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache' &&
+         headers.get(DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME) !==
+           'amp-mustache')) {
       return Promise.resolve(
           /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
             creativeData: {

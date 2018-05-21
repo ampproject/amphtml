@@ -17,6 +17,7 @@
 import * as sinon from 'sinon';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
+  DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
   getAmpAdTemplateHelper,
 } from '../template-validator';
@@ -70,6 +71,24 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
 
     it('should have AMP validator result', () => {
       return validatorPromise.then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
+      });
+    });
+
+    it('should have AMP validator result w/ deprecated header name', () => {
+      validator.validate({win: env.win},
+          utf8Encode(JSON.stringify({
+            templateUrl,
+            data: {url: 'https://buy.com/buy-1'},
+            analytics: {foo: 'bar'},
+          })), {
+            get: name => {
+              if (name == DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME) {
+                return 'amp-mustache';
+              }
+            },
+          }).then(validatorOutput => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       });
