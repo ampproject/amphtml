@@ -590,7 +590,7 @@ export class GlobalVariableSource extends VariableSource {
         if (!bind) {
           return '';
         }
-        return bind.getStateValue(key)
+        return bind.getStateValue(/** @type {string} */ (key))
             .then(result => {
               if (isObject(result) || isArray(result)) {
                 return JSON.stringify(result);
@@ -1214,7 +1214,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Window} embedWin
- * @param {*} varSource
+ * @param {!VariableSource} varSource
  */
 export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
