@@ -100,8 +100,8 @@ function writeTarget(filename, fileString, opt_dryrun) {
 }
 
 /**
- * @param {string|boolean}
- * @param {string}
+ * @param {string|boolean} value
+ * @param {string} defaultValue
  * @return {string}
  */
 function valueOrDefault(value, defaultValue) {

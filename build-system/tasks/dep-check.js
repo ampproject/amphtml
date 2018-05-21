@@ -55,7 +55,8 @@ let GlobDef;
 let GlobsDef;
 
 /**
- * @constructor @final @struct
+ * @class @final @struct
+ * @param {!RuleConfigDef} config
  */
 function Rule(config) {
   /** @private @const {!RuleConfigDef} */
@@ -212,7 +213,7 @@ function getEntryModule(extensionFolder) {
  * with nested dependencies. We flatten it so all we have are individual
  * modules and their imports as well as making the entries unique.
  *
- * @param {!ModuleDef} entryModule
+ * @param {!Array<!ModuleDef>} entryPoints
  * @return {!ModuleDef}
  */
 function flattenGraph(entryPoints) {
@@ -287,7 +288,7 @@ function toArrayOrDefault(value, defaultValue) {
 /**
  * Flatten array of arrays.
  *
- * @type {!Array<!Array>}
+ * @param {!Array<!Array>} arr
  */
 function flatten(arr) {
   return [].concat.apply([], arr);
