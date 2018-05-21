@@ -1022,8 +1022,9 @@ export class BaseElement {
 
   /**
    * Called when one or more attributes are mutated.
-   * @note Must be called inside a mutate context.
-   * @note Boolean attributes have a value of `true` and `false` when
+   * Note:
+   * - Must be called inside a mutate context.
+   * - Boolean attributes have a value of `true` and `false` when
    *       present and missing, respectively.
    * @param {
    *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
