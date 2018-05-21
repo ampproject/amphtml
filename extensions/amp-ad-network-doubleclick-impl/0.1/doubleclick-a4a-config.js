@@ -24,7 +24,6 @@ import {
   forceExperimentBranch,
   getExperimentBranch,
   isExperimentOn,
-  randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {
   MANUAL_EXPERIMENT_ID,

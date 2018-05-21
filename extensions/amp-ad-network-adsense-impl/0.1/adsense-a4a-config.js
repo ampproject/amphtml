@@ -26,8 +26,14 @@ import {
   extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {dev} from '../../../src/log';
-import {forceExperimentBranch} from '../../../src/experiments';
-import {supportsNativeCrypto} from '../../../ads/google/a4a/utils';
+import {
+  forceExperimentBranch,
+  getExperimentBranch,
+} from '../../../src/experiments';
+import {
+  isCanonical,
+  supportsNativeCrypto,
+} from '../../../ads/google/a4a/utils';
 import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-manager';
 
 /** @const {string} @visibleForTesting */
@@ -47,32 +53,29 @@ export const ADSENSE_EXPERIMENTS = {
   UNCONDITIONED_CANONICAL_CTL: '21062155',
   CANONICAL_EXP: '21062158',
   CANONICAL_CTL: '21062159',
-}
+};
 
 export const ADSENSE_EXP_NAMES = {
   UNCONDITIONED_CANONICAL: 'expAdsenseUnconditionedCanonical',
   CANONICAL: 'expAdsenseCanonical',
-}
+};
 
+/**
+ * Attempts to select into unconditioned Adsense experiments.
+ */
 function randomlySelectUnconditionedExperiments(win, element) {
- selectAndSetExperiments(win, element,
-                         [ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP,
-                          ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL],
-                         ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL);
+  selectAndSetExperiments(win, element,
+      [ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP,
+        ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL],
+      ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL);
 }
 
 /**
+ * Attempts to select into Adsense experiments.
  * @param {!Window} win
  * @param {!Element} element
- * @param {boolean} useRemoteHtml
- * @return {boolean}
  */
-export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
-  randomlySelectUnconditionedExperiments(win, element);
-  if (useRemoteHtml || !supportsNativeCrypto(win) ||
-      !element.getAttribute('data-ad-client')) {
-    return false;
-  }
+function selectExperiments(win, element) {
   // See if in holdback control/experiment.
   let experimentId;
   const urlExperimentId = extractUrlExperimentId(win, element);
@@ -85,5 +88,31 @@ export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
     addExperimentIdToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
   }
+
+  // If not in the unconditioned canonical experiment, attempt to
+  // select into the undiluted canonical experiment.
+  const inUnconditionedCanonicalExp = !!getExperimentBranch(
+      win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL);
+  if (!inUnconditionedCanonicalExp && isCanonical(win)) {
+    selectAndSetExperiments(win, element,
+        [ADSENSE_EXPERIMENTS.CANONICAL_EXP,
+          ADSENSE_EXPERIMENTS.CANONICAL_CTL],
+        ADSENSE_EXP_NAMES.CANONICAL);
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @param {boolean} useRemoteHtml
+ * @returns {boolean}
+ */
+export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
+  randomlySelectUnconditionedExperiments(win, element);
+  if (useRemoteHtml || !supportsNativeCrypto(win) ||
+      !element.getAttribute('data-ad-client')) {
+    return false;
+  }
+  selectExperiments(win, element);
   return true;
 }

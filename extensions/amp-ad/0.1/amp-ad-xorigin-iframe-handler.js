@@ -34,7 +34,6 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
-import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {setStyle} from '../../../src/style';

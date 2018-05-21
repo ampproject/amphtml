@@ -18,13 +18,10 @@ import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
   forceExperimentBranch,
   getExperimentBranch,
-  isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {
-  MANUAL_EXPERIMENT_ID,
   addExperimentIdToElement,
-  extractUrlExperimentId,
 } from './traffic-experiments';
 
 /**
@@ -48,13 +45,13 @@ export function selectAndSetExperiments(win, element, branches, expName) {
  * @param {!Window} win
  * @param {!Element} element
  * @param {!Array<string>} selectionBranches
- * @param {string} experimentName}
- * @return {?string} Experiment branch ID or null if not selected.
+ * @param {string} experimentName
  * @visibileForTesting
  */
-function maybeSelectExperiment(win, element, selectionBranches, experimentName) {
+function maybeSelectExperiment(
+  win, element, selectionBranches, experimentName) {
   const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+      /** @type {!Object<string, !ExperimentInfo>} */ ({});
   experimentInfoMap[experimentName] = {
     isTrafficEligible: () => true,
     branches: selectionBranches,

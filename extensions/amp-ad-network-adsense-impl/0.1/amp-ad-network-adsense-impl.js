@@ -20,6 +20,10 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {
+  ADSENSE_EXPERIMENTS,
+  ADSENSE_EXP_NAMES,
+} from './adsense-a4a-config';
 import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
@@ -36,6 +40,7 @@ import {
   getEnclosingContainerTypes,
   getIdentityToken,
   googleAdUrl,
+  isCanonical,
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
@@ -56,23 +61,18 @@ import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
-import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-manager';
-import {
-  ADSENSE_EXPERIMENTS,
-  ADSENSE_EXP_NAMES,
-} from './adsense-a4a-config';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -419,24 +419,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   shouldSkipXhr_() {
-    const googleCdnProxyRegex =
-      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-    const isCanonical = !(googleCdnProxyRegex.test(this.win.location.origin));
-    let exp = getExperimentBranch(
-        this.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL);
-    if (!exp) {
-      exp = selectAndSetExperiments(this.win, this.element,
-                                    [ADSENSE_EXPERIMENTS.CANONICAL_EXP,
-                                     ADSENSE_EXPERIMENTS.CANONICAL_CTL],
-                                    ADSENSE_EXP_NAMES.CANONICAL);
+    if (!isCanonical(this.win)) {
+      return false;
     }
+    const exp = getExperimentBranch(
+        this.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ||
+          getExperimentBranch(this.win, ADSENSE_EXP_NAMES.CANONICAL);
     if (exp == ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
         exp == ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP) {
-      const googleCdnProxyRegex =
-      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-      return !(googleCdnProxyRegex.test(this.win.location.origin));
-      /* || getMode(this.win).localDev || getMode(this.win).test);*/
+      return true;
     }
+    return false;
   }
 
   /** @override */
