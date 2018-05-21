@@ -72,7 +72,7 @@ describes.fakeWin('amp-story utils', {}, () => {
     it('should return a default value if wrong parameters', () => {
       allowConsoleError(() => {
         expect(getRGBFromCssColorValue('who dis'))
-            .to.deep.equal({r:0, g: 0, b: 0});
+            .to.deep.equal({r: 0, g: 0, b: 0});
       });
     });
   });

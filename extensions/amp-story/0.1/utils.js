@@ -58,7 +58,7 @@ export function hasTapAction(el) {
 
 /**
  * Calculates a client rect without applying scaling transformations.
- * @note Must be run in a vsync measure context.
+ * Note: must be run in a vsync measure context.
  * @param {!Element} el
  * @return {!ClientRect}
  */
@@ -130,9 +130,9 @@ export function getRGBFromCssColorValue(cssValue) {
   const matches = regexPattern.exec(cssValue);
 
   return {
-    r: +matches[1],
-    g: +matches[2],
-    b: +matches[3],
+    r: Number(matches[1]),
+    g: Number(matches[2]),
+    b: Number(matches[3]),
   };
 }
 
