@@ -154,7 +154,7 @@ export class AmpList extends AMP.BaseElement {
    * @override
    */
   isLoadingReused() {
-    return true;
+    return this.element.hasAttribute('reset-on-refresh');
   }
 
   /**
@@ -191,7 +191,7 @@ export class AmpList extends AMP.BaseElement {
     }
     if (this.element.hasAttribute('reset-on-refresh')) {
       this.togglePlaceholder(true);
-      this.toggleLoading(true);
+      this.toggleLoading(true, this.isLoadingReused());
       this.toggleFallbackInMutate_(false);
       // Remove any previous items before the reload
       removeChildren(dev().assertElement(this.container_));
