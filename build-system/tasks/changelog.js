@@ -342,7 +342,7 @@ function getLastGitTag(gitMetadata) {
 
 /**
  * Runs `git log ${branch}...{tag} --pretty=oneline --first-parent`
- * @param {string} tag
+ * @param {!GitMetadataDef} gitMetadata
  * @return {!Promise<GitMetadataDef>}
  */
 function getGitLog(gitMetadata) {
@@ -409,7 +409,7 @@ function getGithubPullRequestsMetadata(gitMetadata) {
  * we will try and also fetch pulls/${id} first before fetching
  * pulls/${id}/files.
  *
- * @param {!GitMetadataDef}
+ * @param {!GitMetadataDef} gitMetadata
  * @return {!Promise<!GitMetadataDef>}
  */
 function getGithubFilesMetadata(gitMetadata) {
