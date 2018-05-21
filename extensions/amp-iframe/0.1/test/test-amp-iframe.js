@@ -385,33 +385,33 @@ describes.realWin('amp-iframe', {
       const ampIframe = createAmpIframe(env);
       const impl = ampIframe.implementation_;
       allowConsoleError(() => { expect(() => {
-        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+        impl.assertSource_('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin');
       }).to.throw(/must not be equal to container/); });
 
       allowConsoleError(() => { expect(() => {
-        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+        impl.assertSource_('https://google.com/fpp', 'https://google.com/abc',
             'Allow-same-origin');
       }).to.throw(/must not be equal to container/); });
 
       allowConsoleError(() => { expect(() => {
-        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+        impl.assertSource_('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin allow-scripts');
       }).to.throw(/must not be equal to container/); });
       // Same origin, but sandboxed.
-      impl.assertSource('https://google.com/fpp', 'https://google.com/abc', '');
+      impl.assertSource_('https://google.com/fpp', 'https://google.com/abc', '');
 
       allowConsoleError(() => { expect(() => {
-        impl.assertSource('http://google.com/', 'https://foo.com', '');
+        impl.assertSource_('http://google.com/', 'https://foo.com', '');
       }).to.throw(/Must start with https/); });
 
       allowConsoleError(() => { expect(() => {
-        impl.assertSource('./foo', location.href, 'allow-same-origin');
+        impl.assertSource_('./foo', location.href, 'allow-same-origin');
       }).to.throw(/must not be equal to container/); });
 
-      impl.assertSource('http://iframe.localhost:123/foo',
+      impl.assertSource_('http://iframe.localhost:123/foo',
           'https://foo.com', '');
-      impl.assertSource('https://container.com', 'https://foo.com', '');
+      impl.assertSource_('https://container.com', 'https://foo.com', '');
       ampIframe.setAttribute('srcdoc', 'abc');
       ampIframe.setAttribute('sandbox', 'allow-same-origin');
 
@@ -424,11 +424,11 @@ describes.realWin('amp-iframe', {
       });
 
       allowConsoleError(() => { expect(() => {
-        impl.assertSource('https://3p.ampproject.net:999/t',
+        impl.assertSource_('https://3p.ampproject.net:999/t',
             'https://google.com/abc');
       }).to.throw(/not allow embedding of frames from ampproject\.\*/); });
       allowConsoleError(() => { expect(() => {
-        impl.assertSource('https://3p.ampproject.net:999/t',
+        impl.assertSource_('https://3p.ampproject.net:999/t',
             'https://google.com/abc');
       }).to.throw(/not allow embedding of frames from ampproject\.\*/); });
     });
@@ -728,6 +728,35 @@ describes.realWin('amp-iframe', {
           expect(impl.iframeSrc).to.contain(newSrc);
           expect(iframe.getAttribute('src')).to.contain(newSrc);
         });
+
+    describe('throwIfCannotNavigate()', () => {
+      it('should do nothing if top navigation is allowed', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin allow-top-navigation',
+          width: 300,
+          height: 250,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        // Should be allowed if `allow-top-navigation` is set.
+        expect(() => impl.throwIfCannotNavigate()).to.not.throw();
+      });
+
+      it('should throw error if top navigation is not allowed', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin',
+          width: 300,
+          height: 250,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        // Should be allowed if `allow-top-navigation` is set.
+        expect(() => impl.throwIfCannotNavigate())
+            .to.throw(/allow-top-navigation/);
+      });
+    });
 
     describe('two-way messaging', function() {
       let messagingSrc;

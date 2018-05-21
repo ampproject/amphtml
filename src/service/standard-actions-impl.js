@@ -20,6 +20,7 @@ import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {registerServiceBuilderForDoc} from '../service';
+import {startsWith} from '../string';
 import {toWin} from '../types';
 import {tryFocus} from '../dom';
 
@@ -110,9 +111,21 @@ export class StandardActions {
         });
 
       case 'navigateTo':
-        Services.navigationForDoc(this.ampdoc).navigateTo(
-            win, args['url'], `AMP.${method}`);
-        return null;
+        // Some components have additional constraints on allowing navigation.
+        let permission = Promise.resolve();
+        if (startsWith(node.tagName, 'AMP-')) {
+          permission = node.getImpl().then(impl => {
+            if (typeof impl.throwIfCannotNavigate == 'function') {
+              impl.throwIfCannotNavigate();
+            }
+          });
+        }
+        return permission.then(() => {
+          Services.navigationForDoc(this.ampdoc).navigateTo(
+              win, args['url'], `AMP.${method}`);
+        }, /* onrejected */ e => {
+          user().error(TAG, e.message);
+        });
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();
