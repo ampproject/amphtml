@@ -34,7 +34,7 @@ const TEMPLATE_CORS_CONFIG = {
   credentials: 'omit',
 };
 
-export class AmpAdTemplates {
+export class AmpAdTemplateHelper {
 
   /**
    * @param {!Window} win
