@@ -33,6 +33,10 @@ const FxType = {
   PARALLAX: 'parallax',
   FADE_IN: 'fade-in',
   FADE_IN_SCROLL: 'fade-in-scroll',
+  FLY_IN_BOTTOM: 'fly-in-bottom',
+  FLY_IN_LEFT: 'fly-in-left',
+  FLY_IN_RIGHT: 'fly-in-right',
+  FLY_IN_TOP: 'fly-in-top',
 };
 
 /**
