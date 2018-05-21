@@ -175,7 +175,7 @@ function printArgvMessages() {
       log(green('⤷ Use'), cyan('--local-changes'),
           green('to run unit tests from files commited to the local branch.'));
     }
-    if (!argv.testnames && !argv.files) {
+    if (!argv.testnames && !argv.files && !argv['local-changes']) {
       log(green('⤷ Use'), cyan('--testnames'),
           green('to see the names of all tests being run.'));
     }
@@ -266,7 +266,7 @@ function runTests() {
     c.client.captureConsole = true;
   }
 
-  if (argv.testnames || argv['local-changes']) {
+  if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
     c.reporters = ['mocha'];
   }
 
@@ -379,9 +379,10 @@ function runTests() {
   refreshKarmaWdCache();
 
   // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
-  // reporter, since it likely contains copious amounts of logs.
-  const shouldCollapseSummary =
-      process.env.TRAVIS && c.reporters.includes('karmaSimpleReporter');
+  // reporter for full unit test runs, since it likely contains copious amounts
+  // of logs.
+  const shouldCollapseSummary = process.env.TRAVIS &&
+      c.reporters.includes('karmaSimpleReporter') && !argv['local-changes'];
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 
