@@ -58,8 +58,10 @@ module.exports = function(context) {
       if (hasPrivateAnnotation(node.leadingComments) &&
             !hasExplicitNoInline(node.key.name) &&
             !hasTrailingUnderscore(node.key.name)) {
-        context.report(node,
-            'Method marked as private but has no trailing underscore.');
+        context.report({
+          node,
+          message: 'Method marked as private but has no trailing underscore.',
+        });
       }
     },
     AssignmentExpression: function(node) {
@@ -68,8 +70,10 @@ module.exports = function(context) {
             isThisMemberExpression(node.left) &&
             !hasExplicitNoInline(node.left.property.name) &&
             !hasTrailingUnderscore(node.left.property.name)) {
-        context.report(node,
-            'Property marked as private but has no trailing underscore.');
+        context.report({
+          node,
+          message: 'Property marked as private but has no trailing underscore.',
+        });
       }
     },
   };

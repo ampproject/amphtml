@@ -158,10 +158,8 @@ describe('3p ampcontext.js', () => {
   it('should throw error if metadata missing', () => {
     win.name = generateIncorrectAttributes();
     const platform = new Platform(window);
-    allowConsoleError(() => {
-      expect(() => new AmpContext(win)).to.throw(platform.isSafari() ?
-        /undefined is not an object/ : /Cannot read property/);
-    });
+    expect(() => new AmpContext(win)).to.throw(platform.isSafari() ?
+      /undefined is not an object/ : /Cannot read property/);
   });
 
   it('should be able to send an intersection observer request', () => {

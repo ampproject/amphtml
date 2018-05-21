@@ -270,7 +270,7 @@ export function scopeShadowCss(shadowRoot, css) {
   // Patch selectors.
   // Invoke `ShadowCSS.scopeRules` via `call` because the way it uses `this`
   // internally conflicts with Closure compiler's advanced optimizations.
-  const scopeRules = ShadowCSS.scopeRules;
+  const {scopeRules} = ShadowCSS;
   return scopeRules.call(ShadowCSS, rules, `.${id}`, transformRootSelectors);
 }
 
@@ -697,14 +697,13 @@ export class ShadowDomWriterBulk {
 }
 
 /*
- * Remove any noscript elements.
- * @param {!Element} parent
+ * Remove any noscript elements. @param {!Element} parent
  *
- * According to the spec (https://w3c.github.io/DOM-Parsing/#the-domparser-interface),
- * with `DOMParser().parseFromString`, contents of `noscript` get parsed as markup,
- * so we need to remove them manually.
- * Why? ¯\_(ツ)_/¯
- * `createHTMLDocument()` seems to behave the same way.
+ * According to the spec
+ * (https://w3c.github.io/DOM-Parsing/#the-domparser-interface), with
+ * `DOMParser().parseFromString`, contents of `noscript` get parsed as markup,
+ * so we need to remove them manually. Why? ¯\_(ツ)_/¯ `createHTMLDocument()`
+ * seems to behave the same way.
  */
 function removeNoScriptElements(parent) {
   const noscriptElements = childElementsByTag(parent, 'noscript');

@@ -20,6 +20,7 @@ import {
   ConsentPolicyManager,
   MULTI_CONSENT_EXPERIMENT,
 } from './consent-policy-manager';
+import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -131,6 +132,12 @@ export class AmpConsent extends AMP.BaseElement {
     // TODO: Decide what to do with incorrect configuration.
     this.assertAndParseConfig_();
 
+    const children = this.getRealChildren();
+    for (let i = 0; i < children.length; i++) {
+      // <amp-consent> will manualy schedule layout for its children.
+      this.setAsOwner(children[i]);
+    }
+
     const consentPolicyManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANAGER)
             .then(manager => {
@@ -173,7 +180,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
     this.registerAction('prompt', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       let consentId = args && args['consent'];
       if (!this.isMultiSupported_) {
         consentId = Object.keys(this.consentConfig_)[0];
@@ -216,21 +223,25 @@ export class AmpConsent extends AMP.BaseElement {
       if (!this.uiInit_) {
         this.uiInit_ = true;
         toggle(this.element, true);
-        this.getViewport().addToFixedLayer(this.element);
       }
 
       this.element.classList.remove('amp-hidden');
       this.element.classList.add('amp-active');
+      this.getViewport().addToFixedLayer(this.element);
 
       // Display the current instance
       this.currentDisplayInstance_ = instanceId;
-      setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
-          {display: 'block'});
+      const uiElement = this.consentUI_[this.currentDisplayInstance_];
+      setImportantStyles(uiElement, {display: 'block'});
+      // scheduleLayout is required everytime because some AMP element may
+      // get un laid out after toggle display (#unlayoutOnPause)
+      // for example <amp-iframe>
+      this.scheduleLayout(uiElement);
     });
 
-    return new Promise(resolve => {
-      this.dialogResolver_[instanceId] = resolve;
-    });
+    const deferred = new Deferred();
+    this.dialogResolver_[instanceId] = deferred.resolve;
+    return deferred.promise;
   }
 
   /**
@@ -242,10 +253,9 @@ export class AmpConsent extends AMP.BaseElement {
     this.vsync_.mutate(() => {
       this.element.classList.add('amp-hidden');
       this.element.classList.remove('amp-active');
-      // Do not remove from fixed layer because of invoke button
-      // this.getViewport().removeFromFixedLayer(this.element);
+      // Need to remove from fixed layer and add it back to update element's top
+      this.getViewport().removeFromFixedLayer(this.element);
       dev().assert(uiToHide, 'no consent UI to hide');
-
       toggle(uiToHide, false);
     });
     if (this.dialogResolver_[this.currentDisplayInstance_]) {
@@ -367,17 +377,6 @@ export class AmpConsent extends AMP.BaseElement {
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
       return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
     });
-  }
-
-  /**
-   * Init consent policy instances
-   */
-  initConsentPolicy_() {
-    const policyKeys = Object.keys(this.policyConfig_);
-    for (let i = 0; i < policyKeys.length; i++) {
-      this.consentPolicyManager_.registerConsentPolicyInstance(
-          policyKeys[i], this.policyConfig_[policyKeys[i]]);
-    }
   }
 
   /**
@@ -527,8 +526,8 @@ export class AmpConsent extends AMP.BaseElement {
               return;
             }
             // TODO(@zhouyx):
-            // 1. Race condition on consent state change between
-            // schedule to display and display. Add one more check before display
+            // 1. Race condition on consent state change between schedule to
+            //    display and display. Add one more check before display
             // 2. Should not schedule display with DISMISSED UNKNOWN state
             this.scheduleDisplay_(instanceId);
           }
@@ -539,6 +538,7 @@ export class AmpConsent extends AMP.BaseElement {
    * Handles the display of postPromptUI
    */
   handlePostPromptUI_() {
+    const {classList} = this.element;
     this.notificationUiManager_.onQueueEmpty(() => {
       if (!this.postPromptUI_) {
         return;
@@ -547,12 +547,14 @@ export class AmpConsent extends AMP.BaseElement {
         if (!this.uiInit_) {
           this.uiInit_ = true;
           toggle(this.element, true);
-          this.getViewport().addToFixedLayer(this.element);
         }
-        this.element.classList.add('amp-active');
-        this.element.classList.remove('amp-hidden');
+        classList.add('amp-active');
+        classList.remove('amp-hidden');
+        this.getViewport().addToFixedLayer(this.element);
         setImportantStyles(dev().assertElement(this.postPromptUI_),
             {display: 'block'});
+        // Will need to scheduleLayout for postPromptUI
+        // upon request for using AMP component.
       });
     });
 
@@ -562,9 +564,10 @@ export class AmpConsent extends AMP.BaseElement {
       }
       this.vsync_.mutate(() => {
         if (!this.currentDisplayInstance_) {
-          this.element.classList.add('amp-hidden');
-          this.element.classList.remove('amp-active');
+          classList.add('amp-hidden');
+          classList.remove('amp-active');
         }
+        this.getViewport().removeFromFixedLayer(this.element);
         toggle(dev().assertElement(this.postPromptUI_), false);
       });
     });

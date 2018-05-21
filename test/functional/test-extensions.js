@@ -837,9 +837,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(getServiceForDoc(ampdoc, 'service3').a).to.equal(3);
         // Erroneous
         expect(factory3Spy).to.be.calledOnce;
-        allowConsoleError(() => {
-          expect(() => getServiceForDoc(ampdoc, 'service2')).to.throw();
-        });
+        expect(() => getServiceForDoc(ampdoc, 'service2')).to.throw();
         // Extension is marked as declared.
         expect(ampdoc.declaresExtension('amp-test')).to.be.true;
       });

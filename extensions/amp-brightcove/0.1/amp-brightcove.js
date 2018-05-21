@@ -274,9 +274,8 @@ class AmpBrightcove extends AMP.BaseElement {
       reference ids are prefixed 'ref:' and the colon must be preserved unencoded */
     if (id.substring(0, 4) === 'ref:') {
       return `ref:${encodeURIComponent(id.substring(4))}`;
-    } else {
-      return encodeURIComponent(id);
     }
+    return encodeURIComponent(id);
   }
 
   /** @override */
@@ -295,7 +294,15 @@ class AmpBrightcove extends AMP.BaseElement {
     return false;
   }
 
-  /** @override */
+  /**
+   * To prevent improperly setup videos (do not include the pauseCallback
+   * listener script) from playing after being told to pause, we destroy the
+   * iframe. Once the listener script is updated to inform AMP that it is
+   * listening, we can prevent the unlayout.
+   *
+   * See https://github.com/ampproject/amphtml/issues/2224 for information.
+   * @override
+   */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);

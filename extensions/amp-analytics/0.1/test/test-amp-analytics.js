@@ -60,13 +60,16 @@ describes.realWin('amp-analytics', {
   let ampdoc;
   let ins;
   let viewer;
+  let jsonRequestConfigs = {};
 
   const jsonMockResponses = {
     'invalidConfig': '{"transport": {"iframe": "fake.com"}}',
     'config1': '{"vars": {"title": "remote"}}',
     'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
     'config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
+    'https://rewriter.com': '{"vars": {"title": "rewritten"}}',
   };
+  const configRewriterUrl = 'https://rewriter.com';
 
   const trivialConfig = {
     'requests': {'foo': 'https://example.com/bar'},
@@ -80,8 +83,10 @@ describes.realWin('amp-analytics', {
     configWithCredentials = false;
     doc.title = 'Test Title';
     resetServiceForTesting(win, 'xhr');
+    jsonRequestConfigs = {};
     registerServiceBuilder(win, 'xhr', function() {
       return {fetchJson: (url, init) => {
+        jsonRequestConfigs[url] = init;
         expect(init.requireAmpResponseSourceOrigin).to.be.false;
         if (configWithCredentials) {
           expect(init.credentials).to.equal('include');
@@ -212,7 +217,7 @@ describes.realWin('amp-analytics', {
                 });
 
             const variables = variableServiceFor(ampdoc.win);
-            const encodeVars = variables.encodeVars;
+            const {encodeVars} = variables;
             sandbox.stub(variables, 'encodeVars').callsFake(
                 function(name, val) {
                   val = encodeVars.call(this, name, val);
@@ -1963,7 +1968,7 @@ describes.realWin('amp-analytics', {
           'pageview': 'https://ping.example.com/endpoint',
         },
         'triggers': [{
-          'on': 'ini-load',
+          'on': 'visible',
           'request': 'pageview',
           'extraUrlParams': {
             'rt': '${resourceTiming}',
@@ -1973,8 +1978,10 @@ describes.realWin('amp-analytics', {
       };
     };
 
+    this.timeout(400);
+
     const runResourceTimingTest = function(entries, config, expectedPing) {
-      sandbox.stub(win.performance, 'getEntriesByType').returns([entries]);
+      sandbox.stub(win.performance, 'getEntriesByType').returns(entries);
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
@@ -1982,7 +1989,7 @@ describes.realWin('amp-analytics', {
     };
 
     it('should evaluate ${resourceTiming} to be empty by default', () => {
-      runResourceTimingTest(
+      return runResourceTimingTest(
           [], newConfig(), 'https://ping.example.com/endpoint?rt=');
     });
 
@@ -1992,11 +1999,19 @@ describes.realWin('amp-analytics', {
           false);
       const entry2 = newPerformanceResourceTiming(
           'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
-      runResourceTimingTest(
-          [entry1, entry2], newConfig(),
+      const config = newConfig();
+      const trigger = config['triggers'][0];
+      // Check precondition of responseAfter.
+      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.undefined;
+
+      return runResourceTimingTest(
+          [entry1, entry2], config,
           'https://ping.example.com/endpoint?rt=' +
               'foo_bar-script-100-500-7200~' +
               'foo_bar-script-700-100-0');
+
+      // 'responseAfter' should be set to a positive number.
+      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.above(0);
     });
 
     it('should url encode variables', () => {
@@ -2009,12 +2024,11 @@ describes.realWin('amp-analytics', {
       const spec = config['triggers'][0]['resourceTimingSpec'];
       spec['encoding']['entry'] = '${key}?${startTime},${duration}';
       spec['encoding']['delim'] = ':';
-      runResourceTimingTest(
+      return runResourceTimingTest(
           [entry1, entry2], config,
           'https://ping.example.com/endpoint?rt=' +
               'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
     });
-
 
     it('should ignore resourceTimingSpec outside of triggers', () => {
       const entry = newPerformanceResourceTiming(
@@ -2024,18 +2038,142 @@ describes.realWin('amp-analytics', {
       config['resourceTimingSpec'] =
           config['triggers'][0]['resourceTimingSpec'];
       delete config['triggers'][0]['resourceTimingSpec'];
-      runResourceTimingTest(
-          [entry], newConfig(), 'https://ping.example.com/endpoint?rt=');
+      return runResourceTimingTest(
+          [entry], config, 'https://ping.example.com/endpoint?rt=');
+    });
+  });
+
+  describe('should re-write configuration if configured', () => {
+    let errorSpy;
+
+    beforeEach(() => {
+      errorSpy = sandbox.spy();
+      sandbox.stub(log, 'user').callsFake(() => {
+        return {
+          error: errorSpy,
+          assert: () => {
+          },
+        };
+      });
     });
 
-    it('should only report timings on ini-load', () => {
-      const entry = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-          false);
-      const config = newConfig();
-      config['triggers'][0]['on'] = 'visible';
-      runResourceTimingTest(
-          [entry], config, 'https://ping.example.com/endpoint?rt=');
+    it('should fully rewrite a configuration', () => {
+      jsonMockResponses['https://rewriter.com'] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      });
+      const inlineConfig = {
+        'requests': {'foo': 'https://example.com/inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig,
+          {'type': 'rewrite', 'config': 'config-rv2'});
+      analytics.predefinedConfig_ = {
+        'rewrite': {
+          'configRewriter': {
+            'url': 'https://rewriter.com',
+          },
+        },
+      };
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/rewritten');
+      });
+    });
+
+    it('should merge rewritten configuration and use vendor', () => {
+      jsonMockResponses[configRewriterUrl] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': ['foo', 'bar']}],
+      });
+      const inlineConfig = {
+        'requests': {
+          'foo': 'https://example.com/inlinedFoo',
+          'baz': 'https://example.com/inlined',
+        },
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig,
+          {'type': 'rewrite', 'config': 'config-rv2'});
+      analytics.predefinedConfig_ = {
+        'rewrite': {
+          'configRewriter': {
+            'url': configRewriterUrl,
+          },
+          'requests': {
+            'foo': 'https://example.com/vendorFoo',
+            'bar': 'https://example.com/vendor',
+          },
+        },
+      };
+      return waitForSendRequest(analytics).then(() => {
+        jsonRequestConfigs[configRewriterUrl].should.not.be.undefined;
+        jsonRequestConfigs[configRewriterUrl].body.should.deep.equal({
+          'requests': {
+            'foo': 'https://example.com/remote',
+            'baz': 'https://example.com/inlined',
+          },
+          'triggers': [
+            {'on': 'visible', 'request': 'foo'},
+          ],
+        });
+
+        expect(sendRequestSpy.calledTwice).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/rewritten');
+        expect(sendRequestSpy.args[1][0]).to.equal(
+            'https://example.com/vendor');
+      });
+    });
+
+    it('should ignore config rewriter if no url provided', () => {
+      jsonMockResponses['https://rewriter.com'] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': ['foo', 'bar']}],
+      });
+      const inlineConfig = {
+        'requests': {'foo': 'https://example.com/inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig,
+          {'type': 'rewrite', 'config': 'config-rv2'});
+      analytics.predefinedConfig_ = {
+        'rewrite': {
+          'configRewriter': {
+          },
+          'requests': {'bar': 'https://example.com/defaults'},
+        },
+      };
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/remote');
+      });
+    });
+
+    it('should only allow configRewriter in vendors configuration', () => {
+      jsonMockResponses['https://rewriter.com'] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      });
+      const inlineConfig = {
+        'configRewriter': {
+          'url': 'https://rewriter.com',
+        },
+        'requests': {'foo': 'https://example.com/inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/inlined');
+      });
     });
   });
 });

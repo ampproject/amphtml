@@ -39,7 +39,7 @@ import {
   mockWindowInterface,
   stubServiceForDoc,
 } from '../../testing/test-helper';
-import {parseUrl} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {user} from '../../src/log';
@@ -332,10 +332,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should update SOURCE_URL after track impression', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://wrong.com');
+    win.location = parseUrlDeprecated('https://wrong.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return new Promise(resolve => {
-        win.location = parseUrl('https://example.com?gclid=123456');
+        win.location = parseUrlDeprecated('https://example.com?gclid=123456');
         resolve();
       });
     });
@@ -1036,11 +1036,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace QUERY_PARAM with foo', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com?query_string_param1=wrong');
+    win.location = parseUrlDeprecated('https://example.com?query_string_param1=wrong');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return new Promise(resolve => {
         win.location =
-            parseUrl('https://example.com?query_string_param1=foo');
+            parseUrlDeprecated('https://example.com?query_string_param1=foo');
         resolve();
       });
     });
@@ -1053,7 +1053,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace QUERY_PARAM with ""', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com');
+    win.location = parseUrlDeprecated('https://example.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
@@ -1066,7 +1066,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace QUERY_PARAM with default_value', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com');
+    win.location = parseUrlDeprecated('https://example.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
@@ -1079,7 +1079,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should collect vars', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com?p1=foo');
+    win.location = parseUrlDeprecated('https://example.com?p1=foo');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
@@ -1105,11 +1105,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     const element = document.createElement('amp-foo');
     element.setAttribute('src', '?SOURCE_HOST&QUERY_PARAM(p1)&COUNTER');
     element.setAttribute('data-amp-replace', 'QUERY_PARAM(p1)');
-    return Services.urlReplacementsForDoc(win.ampdoc)
-        .collectUnwhitelistedVars(element)
-        .then(res => {
-          expect(res).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
-        });
+    const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
+    const unwhitelisted = urlReplacements.collectUnwhitelistedVarsSync(element);
+    expect(unwhitelisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
   });
 
   it('should reject javascript protocol', () => {
@@ -1268,7 +1266,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a = document.createElement('a');
       win = getFakeWindow();
       win.location =
-          parseUrl('https://example.com/base?foo=bar&bar=abc&gclid=123');
+          parseUrlDeprecated('https://example.com/base?foo=bar&bar=abc&gclid=123');
       urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
     });
 

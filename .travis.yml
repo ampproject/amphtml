@@ -6,6 +6,11 @@ node_js:
 python:
   - "2.7"
 notifications:
+  email:
+    recipients:
+      - amp-build-cop@grotations.appspotmail.com
+    on_success: change
+    on_failure: change
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
@@ -15,7 +20,7 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 before_script:
   - pip install --user protobuf
-  - gem install percy-capybara capybara selenium-webdriver chromedriver-helper rspec-retry
+  - gem install percy-capybara capybara selenium-webdriver chromedriver-helper
   - chromedriver-update 2.35
   - chromedriver -v
 script: node build-system/pr-check.js
@@ -38,8 +43,8 @@ addons:
     - fonts.googleapis.com
   apt:
     packages:
-    - protobuf-compiler
-    - python-protobuf
+      - protobuf-compiler
+      - python-protobuf
 matrix:
   include:
     # For non-greenkeeper branches, use the normal environment.

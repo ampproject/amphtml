@@ -30,7 +30,7 @@ import {
   addParamsToUrl,
   getSourceUrl,
   parseQueryString,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
@@ -186,7 +186,8 @@ export class GlobalVariableSource extends VariableSource {
             if (!referrer) {
               return null;
             }
-            const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
+            const referrerHostname = parseUrlDeprecated(getSourceUrl(referrer))
+                .hostname;
             const currentHostname =
                 WindowInterface.getHostname(this.ampdoc.win);
             return referrerHostname === currentHostname ? null : referrer;
@@ -208,13 +209,13 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the host of the URL for this AMP document.
     this.set('AMPDOC_HOST', () => {
-      const url = parseUrl(this.ampdoc.win.location.href);
+      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
       return url && url.host;
     });
 
     // Returns the hostname of the URL for this AMP document.
     this.set('AMPDOC_HOSTNAME', () => {
-      const url = parseUrl(this.ampdoc.win.location.href);
+      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
       return url && url.hostname;
     });
 
@@ -374,7 +375,8 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set('TIMESTAMP', dateMethod('getTime'));
 
-    //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
+    // Returns the human readable timestamp in format of
+    // 2011-01-01T11:11:11.612Z.
     this.set('TIMESTAMP_ISO', dateMethod('toISOString'));
 
     // Returns the user's time-zone offset from UTC, in minutes.
@@ -411,7 +413,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('VIEWPORT_WIDTH', viewportMethod(viewport, 'getWidth'));
 
 
-    const screen = this.ampdoc.win.screen;
+    const {screen} = this.ampdoc.win;
     // Returns screen.width.
     this.set('SCREEN_WIDTH', screenProperty(screen, 'width'));
 
@@ -591,7 +593,7 @@ export class GlobalVariableSource extends VariableSource {
     return () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
       const value = docInfo[field];
-      return opt_urlProp ? parseUrl(value)[opt_urlProp] : value;
+      return opt_urlProp ? parseUrlDeprecated(value)[opt_urlProp] : value;
     };
   }
 
@@ -628,7 +630,7 @@ export class GlobalVariableSource extends VariableSource {
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
     user().assert(typeof param == 'string', 'param should be a string');
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
       ? params[param] : defaultValue;
@@ -752,14 +754,15 @@ export class UrlReplacements {
 
 
   /**
-   * Synchronously expands the provided source by replacing all known variables with
-   * their resolved values. Optional `opt_bindings` can be used to add new
+   * Synchronously expands the provided source by replacing all known variables
+   * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
+   * opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
-   *     that can be substituted.
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
+   *     names that can be substituted.
    * @return {string}
    */
   expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
@@ -781,14 +784,15 @@ export class UrlReplacements {
   }
 
   /**
-   * Synchronously expands the provided URL by replacing all known variables with
-   * their resolved values. Optional `opt_bindings` can be used to add new
+   * Synchronously expands the provided URL by replacing all known variables
+   * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
+   * opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
-   *     that can be substituted.
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
+   *     names that can be substituted.
    * @return {string}
    */
   expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
@@ -899,8 +903,8 @@ export class UrlReplacements {
     */
   isAllowedOrigin_(url) {
     const docInfo = Services.documentInfoForDoc(this.ampdoc);
-    if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
-        url.origin == parseUrl(docInfo.sourceUrl).origin) {
+    if (url.origin == parseUrlDeprecated(docInfo.canonicalUrl).origin ||
+        url.origin == parseUrlDeprecated(docInfo.sourceUrl).origin) {
       return true;
     }
 
@@ -910,7 +914,7 @@ export class UrlReplacements {
     if (meta && meta.hasAttribute('content')) {
       const whitelist = meta.getAttribute('content').trim().split(/\s+/);
       for (let i = 0; i < whitelist.length; i++) {
-        if (url.origin == parseUrl(whitelist[i]).origin) {
+        if (url.origin == parseUrlDeprecated(whitelist[i]).origin) {
           return true;
         }
       }
@@ -946,7 +950,7 @@ export class UrlReplacements {
     // on subsequent replacements, so that each run gets a fresh value.
     let href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
-    const url = parseUrl(href);
+    const url = parseUrlDeprecated(href);
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
@@ -966,13 +970,13 @@ export class UrlReplacements {
       return element.href = href;
     }
 
-    // Note that defaultUrlParams is treated differently than additionalUrlParameters in two ways
-    // #1: If the outgoing url origin is not whitelisted:
-    // additionalUrlParameters are always appended by not expanded,
-    // defaultUrlParams will not be appended.
-    // #2: If the expansion function is not whitelisted:
-    // additionalUrlParamters will not be expanded,
-    // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
+    // Note that defaultUrlParams is treated differently than
+    // additionalUrlParameters in two ways #1: If the outgoing url origin is not
+    // whitelisted: additionalUrlParameters are always appended by not expanded,
+    // defaultUrlParams will not be appended. #2: If the expansion function is
+    // not whitelisted: additionalUrlParamters will not be expanded,
+    // defaultUrlParams will by default support QUERY_PARAM, and will still be
+    // expanded.
     if (defaultUrlParams) {
       if (!whitelist || !whitelist['QUERY_PARAM']) {
         // override whitelist and expand defaultUrlParams;
@@ -1011,7 +1015,8 @@ export class UrlReplacements {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
         REPLACEMENT_EXP_NAME);
     if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
-      // not supporting syncronous version (yet) or collect_vars with this new structure
+      // not supporting syncronous version (yet) or collect_vars with this new
+      // structure
       return this.expander_./*OK*/expand(url, opt_bindings, opt_whiteList);
     }
 
@@ -1113,20 +1118,21 @@ export class UrlReplacements {
    * Collects substitutions in the `src` attribute of the given element
    * that are _not_ whitelisted via `data-amp-replace` opt-in attribute.
    * @param {!Element} element
-   * @return {!Promise<!Array<string>>}
+   * @return {!Array<string>}
    */
-  collectUnwhitelistedVars(element) {
+  collectUnwhitelistedVarsSync(element) {
     const url = element.getAttribute('src');
-    return this.collectVars(url).then(vars => {
-      const whitelist = this.getWhitelistForElement_(element);
-      const varNames = Object.keys(vars);
-      if (whitelist) {
-        return varNames.filter(v => !whitelist[v]);
-      } else {
-        // All vars are unwhitelisted if the element has no whitelist.
-        return varNames;
-      }
-    });
+    const vars = Object.create(null);
+    this.expandStringSync(url, /* opt_bindings */ undefined, vars);
+    const varNames = Object.keys(vars);
+
+    const whitelist = this.getWhitelistForElement_(element);
+    if (whitelist) {
+      return varNames.filter(v => !whitelist[v]);
+    } else {
+      // All vars are unwhitelisted if the element has no whitelist.
+      return varNames;
+    }
   }
 
   /**
@@ -1138,8 +1144,10 @@ export class UrlReplacements {
    * @return {string}
    */
   ensureProtocolMatches_(url, replacement) {
-    const newProtocol = parseUrl(replacement, /* opt_nocache */ true).protocol;
-    const oldProtocol = parseUrl(url, /* opt_nocache */ true).protocol;
+    const newProtocol = parseUrlDeprecated(replacement, /* opt_nocache */ true)
+        .protocol;
+    const oldProtocol = parseUrlDeprecated(url, /* opt_nocache */ true)
+        .protocol;
     if (newProtocol != oldProtocol) {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
@@ -1162,7 +1170,7 @@ export class UrlReplacements {
  * Extracts client ID from a _ga cookie.
  * https://developers.google.com/analytics/devguides/collection/analyticsjs/cookies-user-id
  * @param {string} gaCookie
- * @returns {string}
+ * @return {string}
  */
 export function extractClientIdFromGaCookie(gaCookie) {
   return gaCookie.replace(/^(GA1|1)\.[\d-]+\./, '');

@@ -15,7 +15,7 @@
  */
 
 import '../amp-brightcove';
-import {parseUrl} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url';
 
 
 describes.realWin('amp-brightcove', {
@@ -70,10 +70,8 @@ describes.realWin('amp-brightcove', {
   });
 
   it('requires data-account', () => {
-    allowConsoleError(() => {
-      return getBrightcove({}).should.eventually.be.rejectedWith(
-          /The data-account attribute is required for/);
-    });
+    return getBrightcove({}).should.eventually.be.rejectedWith(
+        /The data-account attribute is required for/);
   });
 
   it('removes iframe after unlayoutCallback', () => {
@@ -97,7 +95,7 @@ describes.realWin('amp-brightcove', {
       'data-param-my-param': 'hello world',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
-      const params = parseUrl(iframe.src).search.split('&');
+      const params = parseUrlDeprecated(iframe.src).search.split('&');
       expect(params).to.contain('myParam=hello%20world');
     });
   });

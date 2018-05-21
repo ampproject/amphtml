@@ -84,7 +84,6 @@ function onFileThrough(file, enc, cb) {
 /**
  * @param {!Object<string, !Object<string, !Array<number>} filesData
  *    accumulation of files and the rules and z index values.
- * @param {function()} cb callback to end the stream
  * @return {!Array<!Array<string>>}
  */
 function createTable(filesData) {
@@ -107,6 +106,7 @@ function createTable(filesData) {
 
 
 /**
+ * @param {string} glob
  * @return {!Stream}
  */
 function getZindex(glob) {

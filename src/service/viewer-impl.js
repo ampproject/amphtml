@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
@@ -25,12 +26,13 @@ import {
   getSourceOrigin,
   isProxyOrigin,
   parseQueryString,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../url';
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -181,9 +183,6 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
-    /** @private {?function()} */
-    this.whenFirstVisibleResolve_ = null;
-
     /** @private {?Promise} */
     this.nextVisiblePromise_ = null;
 
@@ -205,15 +204,17 @@ export class Viewer {
     /** @private {?Function} */
     this.trustedViewerResolver_ = null;
 
+    const deferred = new Deferred();
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
      * `this.onVisibilityChange_()`.
      * @private @const {!Promise}
      */
-    this.whenFirstVisiblePromise_ = new Promise(resolve => {
-      this.whenFirstVisibleResolve_ = resolve;
-    });
+    this.whenFirstVisiblePromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.whenFirstVisibleResolve_ = deferred.resolve;
 
     // Params can be passed either directly in multi-doc environment or via
     // iframe hash/name with hash taking precedence.
@@ -281,7 +282,7 @@ export class Viewer {
     this.isCctEmbedded_ = !this.isIframed_ &&
         parseQueryString(this.win.location.search)['amp_gsa'] === '1';
 
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     /**
      * Whether the AMP document was served by a proxy.
      * @private @const {boolean}
@@ -342,10 +343,9 @@ export class Viewer {
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
     } else {
       // Wait for comms channel to confirm the origin.
-      trustedViewerResolved = undefined;
-      trustedViewerPromise = new Promise(resolve => {
-        this.trustedViewerResolver_ = resolve;
-      });
+      const deferred = new Deferred();
+      trustedViewerPromise = deferred.promise;
+      this.trustedViewerResolver_ = deferred.resolve;
     }
 
     /** @const @private {!Promise<boolean>} */
@@ -557,7 +557,7 @@ export class Viewer {
       return;
     }
     const sourceOrigin = getSourceOrigin(this.win.location.href);
-    const canonicalUrl = Services.documentInfoForDoc(this.ampdoc).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc);
     const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
     if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
       const oldFragment = getFragment(this.win.location.href);
@@ -717,9 +717,9 @@ export class Viewer {
       return this.nextVisiblePromise_;
     }
 
-    return this.nextVisiblePromise_ = new Promise(resolve => {
-      this.nextVisibleResolve_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.nextVisibleResolve_ = deferred.resolve;
+    return this.nextVisiblePromise_ = deferred.promise;
   }
 
   /**
@@ -795,7 +795,7 @@ export class Viewer {
    * @private
    */
   isTrustedReferrer_(referrer) {
-    const url = parseUrl(referrer);
+    const url = parseUrlDeprecated(referrer);
     if (url.protocol != 'https:') {
       return false;
     }
@@ -864,7 +864,7 @@ export class Viewer {
       return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
     }
     /** @const {!Location} */
-    const url = parseUrl(urlString);
+    const url = parseUrlDeprecated(urlString);
     if (url.protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
@@ -1040,7 +1040,7 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-        Promise.resolve(this.messageDeliverer_(
+        tryResolve(() => this.messageDeliverer_(
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
             awaitResponse)));
@@ -1069,10 +1069,9 @@ export class Viewer {
       message.data = data;
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
-      let responseResolver;
-      const responsePromise = new Promise(r => {
-        responseResolver = r;
-      });
+      const deferred = new Deferred();
+      const {promise: responsePromise, resolve: responseResolver} = deferred;
+
       message = {
         eventType,
         data,
@@ -1132,8 +1131,8 @@ export class Viewer {
 
     try {
       // The origin and source origin must match.
-      const url = parseUrl(this.win.location.href);
-      const replaceUrl = parseUrl(
+      const url = parseUrlDeprecated(this.win.location.href);
+      const replaceUrl = parseUrlDeprecated(
           removeFragment(newUrl) + this.win.location.hash);
       if (url.origin == replaceUrl.origin &&
           getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {

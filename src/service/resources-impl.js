@@ -36,6 +36,7 @@ import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -49,7 +50,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -465,7 +465,7 @@ export class Resources {
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
-      return Promise.resolve(resource.getPageLayoutBox());
+      return tryResolve(() => resource.getPageLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();
@@ -539,7 +539,8 @@ export class Resources {
   }
 
   /**
-   * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * Builds the element if ready to be built, otherwise adds it to pending
+   * resources.
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
    * @param {boolean=} scheduleWhenBuilt
@@ -1012,17 +1013,38 @@ export class Resources {
     return this.vsync_.runPromise({
       measure: measurer || undefined,
       mutate: () => {
+        // TODO(jridgewell): Audit this system. Did this cause a layer
+        // invalidation (new layer, or removal of old layer)? Right now, we're
+        // only dirtying the measurements.
         mutator();
-
-        // TODO(jridgewell): This API needs to be audited. Common practice is
-        // to pass the amp-element in as the root even though we are only
-        // mutating children. If the amp-element is passed, we invalidate
-        // everything in the parent layer above it, where only invalidating the
-        // amp-element was necessary (only children were mutated, only
-        // amp-element's scroll box is affected).
-        this.layers_.dirty(element);
+        this.dirtyElement(element);
       },
     });
+  }
+
+  /**
+   * Dirties the cached element measurements after a mutation occurs.
+   *
+   * TODO(jridgewell): This API needs to be audited. Common practice is
+   * to pass the amp-element in as the root even though we are only
+   * mutating children. If the amp-element is passed, we invalidate
+   * everything in the parent layer above it, where only invalidating the
+   * amp-element was necessary (only children were mutated, only
+   * amp-element's scroll box is affected).
+   *
+   * @param {!Element} element
+   */
+  dirtyElement(element) {
+    if (this.useLayers_) {
+      this.layers_.dirty(element);
+    } else {
+      const isAmpElement = element.classList.contains('i-amphtml-element');
+      if (isAmpElement) {
+        const r = Resource.forElement(element);
+        this.setRelayoutTop_(r.getLayoutBox().top);
+      }
+      this.schedulePass(FOUR_FRAME_DELAY_, !isAmpElement);
+    }
   }
 
 
@@ -1215,11 +1237,8 @@ export class Resources {
     // the overflow callbacks are called.
     const now = Date.now();
     const viewportRect = this.viewport_.getRect();
-    const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
-    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
@@ -1238,14 +1257,12 @@ export class Resources {
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
         /** @const {!Resource} */
-        const resource = request.resource;
+        const {resource} = request;
         const box = resource.getLayoutBox();
-        const iniBox = resource.getInitialLayoutBox();
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
-        let topUnchangedBoundary = box.top;
-        let bottomDisplacedBoundary = box.bottom;
+        let {top: topUnchangedBoundary, bottom: bottomDisplacedBoundary} = box;
         let newMargins = undefined;
         if (request.marginChange) {
           newMargins = request.marginChange.newMargins;
@@ -1313,8 +1330,7 @@ export class Resources {
             this.requestsChangeSize_.push(request);
           }
           continue;
-        } else if (iniBox.bottom >= docBottomOffset ||
-                      box.bottom >= docBottomOffset) {
+        } else if (this.elementNearBottom_(resource, box)) {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
@@ -1391,6 +1407,24 @@ export class Resources {
    */
   mutateWorkViaLayers_() {
     this.mutateWorkViaResources_();
+  }
+
+  /**
+   * Returns true if element is within 15% and 1000px of document bottom.
+   * Caller can provide current/initial layout boxes as an optimization.
+   * @param {!./resource.Resource} resource
+   * @param {!../layout-rect.LayoutRectDef=} opt_layoutBox
+   * @param {!../layout-rect.LayoutRectDef=} opt_initialLayoutBox
+   * @return {boolean}
+   * @private
+   */
+  elementNearBottom_(resource, opt_layoutBox, opt_initialLayoutBox) {
+    const contentHeight = this.viewport_.getContentHeight();
+    const threshold = Math.max(contentHeight * 0.85, contentHeight - 1000);
+
+    const box = opt_layoutBox || resource.getLayoutBox();
+    const initialBox = opt_initialLayoutBox || resource.getInitialLayoutBox();
+    return box.bottom >= threshold || initialBox.bottom >= threshold;
   }
 
   /**
@@ -2145,11 +2179,13 @@ export class Resources {
    * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
-    const prerender = VisibilityState.PRERENDER;
-    const visible = VisibilityState.VISIBLE;
-    const hidden = VisibilityState.HIDDEN;
-    const paused = VisibilityState.PAUSED;
-    const inactive = VisibilityState.INACTIVE;
+    const {
+      PRERENDER: prerender,
+      VISIBLE: visible,
+      HIDDEN: hidden,
+      PAUSED: paused,
+      INACTIVE: inactive,
+    } = VisibilityState;
     const doPass = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();

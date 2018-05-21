@@ -25,8 +25,8 @@ import {
   getFormValidator,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
+import {Services} from '../../../../src/services';
 import {ValidationBubble} from '../validation-bubble';
-
 
 describes.realWin('form-validators', {amp: true}, env => {
   let sandbox;
@@ -91,6 +91,10 @@ describes.realWin('form-validators', {amp: true}, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
+
+    // Force sync mutateElement to make testing easier.
+    const resources = Services.resourcesForDoc(env.ampdoc);
+    sandbox.stub(resources, 'mutateElement').callsArg(1);
   });
 
   describe('getFormValidator', () => {

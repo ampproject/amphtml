@@ -22,7 +22,7 @@ import {
   getCorsUrl,
   getSourceOrigin,
   getWinOrigin,
-  parseUrl,
+  parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
 import {getMode} from '../mode';
@@ -144,9 +144,9 @@ export class Xhr {
           if (interceptorResponse) {
             return interceptorResponse;
           }
-          // After this point, both the native `fetch` and the `fetch` polyfill will
-          // expect a native `FormData` object in the `body` property, so the native
-          // `FormData` object needs to be unwrapped.
+          // After this point, both the native `fetch` and the `fetch` polyfill
+          // will expect a native `FormData` object in the `body` property, so
+          // the native `FormData` object needs to be unwrapped.
           if (isFormDataWrapper(init.body)) {
             init.body = init.body.getFormData();
           }
@@ -385,7 +385,7 @@ export class Xhr {
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
     const currentOrigin = getWinOrigin(this.win);
-    const targetOrigin = parseUrl(input).origin;
+    const targetOrigin = parseUrlDeprecated(input).origin;
     if (currentOrigin == targetOrigin) {
       init['headers'] = init['headers'] || {};
       init['headers']['AMP-Same-Origin'] = 'true';
@@ -761,8 +761,8 @@ export class FetchResponse {
     user().assert(this.xhr_.responseXML,
         'responseXML should exist. Make sure to return ' +
         'Content-Type: text/html header.');
-    return /** @type {!Promise<!Document>} */ (
-      Promise.resolve(dev().assert(this.xhr_.responseXML)));
+    const doc = /** @type {!Document} */(dev().assert(this.xhr_.responseXML));
+    return Promise.resolve(doc);
   }
 
   /**
