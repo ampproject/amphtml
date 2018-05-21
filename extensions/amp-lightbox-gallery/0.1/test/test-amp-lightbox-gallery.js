@@ -16,8 +16,6 @@
 
 import '../../../amp-carousel/0.1/amp-carousel';
 import {installLightboxManager} from '../amp-lightbox-gallery';
-import {toggleExperiment} from '../../../../src/experiments';
-
 
 describes.realWin('amp-lightbox-gallery', {
   amp: {
@@ -37,7 +35,6 @@ describes.realWin('amp-lightbox-gallery', {
   });
 
   function getAmpLightboxViewer(autoLightbox) {
-    toggleExperiment(win, 'amp-lightbox-gallery', true);
     setUpDocument(doc, autoLightbox);
     const viewer = doc.createElement('amp-lightbox-gallery');
     viewer.setAttribute('layout', 'nodisplay');

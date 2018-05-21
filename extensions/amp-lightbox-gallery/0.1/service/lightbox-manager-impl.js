@@ -29,7 +29,6 @@ import {
   iterateCursor,
 } from '../../../../src/dom';
 import {dev, user} from '../../../../src/log';
-import {isExperimentOn} from '../../../../src/experiments';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
@@ -75,9 +74,6 @@ export class LightboxManager {
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
-    // Extra safety check, we don't install this service if experiment is off
-    dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-gallery'));
 
     /** @const @private {!../../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
