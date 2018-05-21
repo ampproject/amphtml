@@ -38,9 +38,9 @@ export class TextBoxComponent {
    * */
   assertValidity(textboxJson) {
     user().assert('text' in textboxJson && isArray(textboxJson['text']) &&
-      textboxJson['text'].length > 0, 'Textbox component must contain' +
-      ' `text` array and at least one element inside it,' +
-      ' skipping invalid.');
+      textboxJson['text'].length > 0, 'Textbox component must contain ' +
+      '`text` array and at least one element inside it, ' +
+      'skipping invalid.');
   }
 
   /**
@@ -48,11 +48,8 @@ export class TextBoxComponent {
    * @return {!TextBoxComponentDef}
    * @override
    * */
-  build(textboxJson) {
-    return {
-      type: textboxJson['type'],
-      text: textboxJson['text'],
-    };
+  build({type, text}) {
+    return {type, text};
   }
 
   /**
@@ -63,7 +60,10 @@ export class TextBoxComponent {
    * */
   buildTemplate(textboxData, doc) {
     const html = htmlFor(doc);
-    const container = html`<div class="i-amphtml-story-bookend-textbox"></div>`;
+    const container =
+        html`
+        <div class="i-amphtml-story-bookend-textbox
+          i-amphtml-story-bookend-component"></div>`;
 
     let textSeed = html`<h3 class="i-amphtml-story-bookend-text"></h3>`;
     textboxData['text'].forEach(currentLine => {
