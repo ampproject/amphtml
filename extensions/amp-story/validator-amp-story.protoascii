@@ -328,9 +328,6 @@ tags: {  # <amp-story-consent>
     name: "id"
     mandatory: true
   }
-  child_tags: {
-    mandatory_num_child_tags: 0
-  }
   amp_layout: {
     supported_layouts: NODISPLAY
   }
