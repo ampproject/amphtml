@@ -175,7 +175,6 @@ tags: {  # <amp-story-page>
 tags: {  # <amp-story-grid-layer>
   html_format: AMP
   tag_name: "AMP-STORY-GRID-LAYER"
-  requires_extension: "amp-story"
   mandatory_ancestor: "AMP-STORY-PAGE"
   attrs: {
     name: "template"
@@ -310,7 +309,6 @@ tags: {
 tags: {  # <amp-story-bookend>
   html_format: AMP
   tag_name: "AMP-STORY-BOOKEND"
-  requires_extension: "amp-story"
   mandatory_ancestor: "AMP-STORY"
   mandatory_last_child: true
   attrs: {
@@ -366,7 +364,6 @@ tags: {  # <amp-story-consent>
 tags: {  # <amp-story-cta-layer>
   html_format: AMP
   tag_name: "AMP-STORY-CTA-LAYER"
-  requires_extension: "amp-story"
   mandatory_ancestor: "AMP-STORY-PAGE"
   descendant_tag_list: "amp-story-cta-layer-allowed-descendants"
   mandatory_last_child: true
