@@ -364,8 +364,7 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined}
-   *     requestedMargins
+   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} requestedMargins
    */
   overflowCallback(overflown, requestedHeight, requestedWidth,
     requestedMargins) {
@@ -934,7 +933,7 @@ export class Resource {
 
   /**
    * Returns the task ID for this resource.
-   * @param localId
+   * @param {string} localId
    * @return {string}
    */
   getTaskId(localId) {
