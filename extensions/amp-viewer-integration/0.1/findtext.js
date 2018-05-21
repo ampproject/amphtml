@@ -22,22 +22,22 @@ import {computedStyle} from '../../../src/style';
  */
 export class CircularBuffer {
   constructor(max) {
-    this.max_ = max
+    this.max_ = max;
     this.buff_ = [];
     this.next_ = 0;
   }
 
   add(item) {
     this.buff_[this.next_] = item;
-    this.next_ = (this.next_+1)%this.max_;
+    this.next_ = (this.next_ + 1) % this.max_;
   }
 
   /**
-   * @param {!number} index The index of an element to get.
+   * @param {number} index The index of an element to get.
    */
   get(index) {
     if (this.buff_.length >= this.max_) {
-      index = (this.next_ + index)%this.max_;
+      index = (this.next_ + index) % this.max_;
     }
     return this.buff_[index];
   }
@@ -50,7 +50,7 @@ export class CircularBuffer {
 export class TextPos {
   /**
    * @param {!Text} node
-   * @param {!number} offset
+   * @param {number} offset
    */
   constructor(node, offset) {
     this.node = node;
@@ -58,7 +58,7 @@ export class TextPos {
   }
 
   /**
-   * @return {!number}
+   * @return {number}
    */
   get char() {
     return this.node.wholeText[this.offset];
@@ -83,8 +83,8 @@ export class TextRange {
 const skipCharRe = /[,.\s\u2022()]/;
 
 /**
- * @param {!string} c input char to normalize.
- * @return {!string}
+ * @param {string} c input char to normalize.
+ * @return {string}
  */
 const normalizeChar = function(c) {
   if (c == '\u2019' || c == '\u2018') {
@@ -97,12 +97,13 @@ const normalizeChar = function(c) {
 };
 
 /**
- * @param {!string} s input string to normalize.
- * @return {!string}
+ * @param {string} s input string to normalize.
+ * @return {string}
  */
 export const normalizeString = function(s) {
-  let buf = [];
-  for (let c of s) {
+  const buf = [];
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
     if (skipCharRe.test(c)) {
       continue;
     }
@@ -118,29 +119,28 @@ export const normalizeString = function(s) {
  * @return {?Array<!TextRange>}
  */
 export const findSentences = function(node, sentences) {
-  let scanner = scanText(node);
-  let matches = [];
+  const scanner = new TextScanner(node);
+  const matches = [];
   for (let senIdx = 0; senIdx < sentences.length; senIdx++) {
-    let sen = normalizeString(sentences[senIdx]);
+    const sen = normalizeString(sentences[senIdx]);
     if (!sen) {
       continue;
     }
     // BM-algorithm with bad-character rules.
-    let skipTable = {};
+    const skipTable = {};
     for (let i = 0; i < sen.length; i++) {
-      let c = sen[i];
-      skipTable[c] = sen.length -1 - i;
+      const c = sen[i];
+      skipTable[c] = sen.length - 1 - i;
     }
-    let buf = new CircularBuffer(sen.length);
+    const buf = new CircularBuffer(sen.length);
     let index = -1;
     let nextIndex = sen.length - 1;
     while (true) {
-      let next = scanner.next();
-      if (next.done) {
+      const pos = scanner.next();
+      if (pos == null) {
         // mismatch
         return null;
       }
-      let pos = next.value;
       if (pos == posDomDelimiter || skipCharRe.test(pos.char)) {
         continue;
       }
@@ -151,8 +151,8 @@ export const findSentences = function(node, sentences) {
       }
       let ok = true;
       for (let j = 0; j < sen.length; j++) {
-        let c = normalizeChar(buf.get(sen.length-j-1).char);
-        if (sen[sen.length-1-j]==c) {
+        const c = normalizeChar(buf.get(sen.length - j - 1).char);
+        if (sen[sen.length - 1 - j] == c) {
           continue;
         }
         ok = false;
@@ -168,8 +168,9 @@ export const findSentences = function(node, sentences) {
         break;
       }
       if (ok) {
-        let endPos = buf.get(sen.length-1);
-        matches.push(new TextRange(buf.get(0), new TextPos(endPos.node, endPos.offset+1)));
+        const endPos = buf.get(sen.length - 1);
+        matches.push(new TextRange(
+            buf.get(0), new TextPos(endPos.node, endPos.offset + 1)));
         break;
       }
     }
@@ -178,28 +179,30 @@ export const findSentences = function(node, sentences) {
 };
 
 /**
- * @params {!Array<!TextRange>} ranges
+ * @param {!Array<!TextRange>} ranges
  * @return {!Array<!Element>} A list of marked nodes.
  */
 export const markTextRangeList = function(ranges) {
   ranges = concatContinuousRanges(ranges);
-  let marked = [];
+  const marked = [];
   for (let i = 0; i < ranges.length; i++) {
-    let r = ranges[i];
+    const r = ranges[i];
     markTextRange(r.start, r.end, ranges, i, marked);
   }
   return marked;
 };
 
 /**
- * @params {!Array<!TextRange>} ranges
+ * @param {!Array<!TextRange>} ranges
  * @return {!Array<!TextRange>}
  */
 const concatContinuousRanges = function(ranges) {
-  let ret = [];
+  const ret = [];
   let prev = null;
-  for (let r of ranges) {
-    if (prev && prev.end.node == r.start.node && prev.end.offset == r.start.offset) {
+  for (let i = 0; i < ranges.length; i++) {
+    const r = ranges[i];
+    if (prev && prev.end.node == r.start.node &&
+        prev.end.offset == r.start.offset) {
       prev.end = r.end;
       continue;
     }
@@ -214,18 +217,19 @@ const concatContinuousRanges = function(ranges) {
  * @param {!TextPos} start
  * @param {!TextPos} end
  * @param {!Array<TextRange>} ranges Other ranges
- * @param {!number} idx
+ * @param {number} idx
  * @param {!Array<!Element>} marked
  */
 const markTextRange = function(start, end, ranges, idx, marked) {
   while (true) {
     if (start.node == end.node) {
-      let newText = markSingleTextNode(start.node, start.offset, end.offset, marked);
+      const newText = markSingleTextNode(
+          start.node, start.offset, end.offset, marked);
       if (!newText) {
         return;
       }
       for (let i = idx + 1; i < ranges.length; i++) {
-        let r = ranges[i];
+        const r = ranges[i];
         if (end.node == r.start.node) {
           r.start.node = newText;
           r.start.offset -= end.offset;
@@ -241,8 +245,9 @@ const markTextRange = function(start, end, ranges, idx, marked) {
       }
       return;
     }
-    let next = nextTextNode(start.node);
-    markSingleTextNode(start.node, start.offset, start.node.wholeText.length, marked);
+    const next = nextTextNode(start.node);
+    markSingleTextNode(
+        start.node, start.offset, start.node.wholeText.length, marked);
     if (!next) {
       break;
     }
@@ -254,22 +259,23 @@ const markTextRange = function(start, end, ranges, idx, marked) {
  * Wraps a text range [start, end) in a single text node.
  * Returns a text node for the suffix text if it exists.
  * @param {!Text} node
- * @param {!number} start
- * @param {!number} end
+ * @param {number} start
+ * @param {number} end
  * @return {?Text}
  * @param {!Array<!Element>} marked
  */
-var markSingleTextNode = function(node, start, end, marked) {
+const markSingleTextNode = function(node, start, end, marked) {
   if (start >= end) {
     // Do nothing
     return null;
   }
-  let parent = node.parentNode;
-  let text = node.wholeText;
+  const parent = node.parentNode;
+  const text = node.wholeText;
   if (start > 0) {
-    parent.insertBefore(document.createTextNode(text.substring(0, start)), node);
+    parent.insertBefore(document.createTextNode(
+        text.substring(0, start)), node);
   }
-  let span = document.createElement('span');
+  const span = document.createElement('span');
   span.appendChild(document.createTextNode(text.substring(start, end)));
   parent.insertBefore(span, node);
   marked.push(span);
@@ -285,11 +291,12 @@ var markSingleTextNode = function(node, start, end, marked) {
 
 
 /**
- * nextTextNode finds the next sibling text node or the next text node in the siblings of the parent.
+ * nextTextNode finds the next sibling text node or
+ *   the next text node in the siblings of the parent.
  * @param {!Text} textNode The node to start to find the next text node.
  * @return {?Text}
  */
-let nextTextNode = function(textNode) {
+const nextTextNode = function(textNode) {
   // If leaving is true, find the next node from siblings or the parent.
   // If leaving is false, find the next node from childrens.
   let leaving = true;
@@ -301,7 +308,7 @@ let nextTextNode = function(textNode) {
       return null;
     }
     if (leaving) {
-      let next = node.nextSibling;
+      const next = node.nextSibling;
       if (next) {
         node = next;
         // visits childrens of node.
@@ -325,72 +332,121 @@ let nextTextNode = function(textNode) {
 
 
 /**
- * A special TextPos object to represent a whitespace injected between two block nodes.
+ * A special TextPos object to represent a whitespace injected
+ *   between two block nodes.
  * @type {!TextPos}
  * Exported for test only.
  */
-export let posDomDelimiter = new TextPos(document.createTextNode(" "), 0);
+export const posDomDelimiter = new TextPos(document.createTextNode(' '), 0);
 
 /**
- * scanText visits DOM nodes under root and returns a generator to interate chars in all text nodes.
- *
- * @param {!Node} root The root node to visit.
- * @return {!Generator<!TextPos>}
+ * TextScanner visits text nodes under a root node and
+ *   returns charcter positions respectively.
  */
-export const scanText = function*(root) {
-  // Omit the last char if it's a space.
-  let prev = null;
-  for (let pos of scanTextInternal_(root, /*needSpace*/ false)) {
-    if (prev) {
-      yield prev;
+export class TextScanner {
+  /**
+   * @param {!Node} root The root node to visit.
+   */
+  constructor(root) {
+    this.internal_ = new TextScannerInternal(root, false);
+    this.next_ = this.internal_.next();
+  }
+
+  /**
+   * next returns the next TextPos.
+   * Returns null when the scanner reaches the end of the text.
+   * @return {?TextPos}
+   */
+  next() {
+    const ret = this.next_;
+    if (ret == null) {
+      return null;
     }
-    prev = pos;
+    this.next_ = this.internal_.next();
+    if (this.next_ == null && /\s/.test(ret.char)) {
+      // Remove the trailing space.
+      return null;
+    }
+    return ret;
   }
-  if (prev != posDomDelimiter && !/\s/.test(prev.char)) {
-    yield prev;
-  }
-};
+}
 
-/**
- * @param {!Node} root The root node to visit.
- * @param {!boolean} needSpace Whether a whitespace should be emitted when it is found.
- * @return {!Generator<!TextPos>}
- */
-let scanTextInternal_ = function*(node, needSpace) {
-  if (node instanceof Text) {
-    let text = node.wholeText;
-    for (let i = 0; i < text.length; i++) {
-      let c = text[i];
+export class TextScannerInternal {
+  /**
+   * @param {!Node} node The root node to visit.
+   * @param {boolean} needSpace Whether spaces should be output if found.
+   */
+  constructor(node, needSpace) {
+    this.node_ = node;
+    this.needSpace_ = needSpace;
+
+    this.textIdx_ = -1;
+    this.child_ = null;
+    this.putDomDelim_ = false;
+    if (node instanceof Text) {
+      this.textIdx_ = 0;
+    } else if (node instanceof Element) {
+      const style = computedStyle(window, node);
+      if (style.display == 'none') {
+        return;
+      }
+      if (this.needSpace_ && style.display != 'inline') {
+        this.putDomDelim_ = true;
+      }
+      const child = node.firstChild;
+      if (child != null) {
+        this.child_ = new TextScannerInternal(child, this.needSpace_);
+      }
+    }
+  }
+
+  /**
+   * @return {?TextPos}
+   */
+  next() {
+    if (this.textIdx_ >= 0) {
+      return this.nextTextPos_();
+    }
+    if (this.putDomDelim_) {
+      this.putDomDelim_ = false;
+      this.needSpace_ = false;
+      return posDomDelimiter;
+    }
+    while (this.child_ != null) {
+      const pos = this.child_.next();
+      if (pos != null) {
+        return pos;
+      }
+      this.needSpace_ = this.child_.needSpace_;
+      const sibling = this.child_.node_.nextSibling;
+      this.child_ = null;
+      if (sibling != null) {
+        this.child_ = new TextScannerInternal(sibling, this.needSpace_);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @return {?TextPos}
+   */
+  nextTextPos_() {
+    const text = this.node_.wholeText;
+    while (this.textIdx_ < text.length) {
+      const idx = this.textIdx_;
+      const c = text[idx];
+      this.textIdx_++;
       if (/\s/.test(c)) {
-        if (!needSpace) {
-          // Multiple spaces.
+        if (!this.needSpace_) {
+          // Multiple spaces. Skip this char.
           continue;
         }
-        needSpace = false;
+        this.needSpace_ = false;
       } else {
-        needSpace = true;
+        this.needSpace_ = true;
       }
-      yield new TextPos(node, i);
+      return new TextPos(/**@type{!Text}*/(this.node_), idx);
     }
-    return needSpace;
+    return null;
   }
-  let style = computedStyle(window, node);
-  if (style.display == 'none') {
-    return needSpace;
-  }
-  let isInline = style.display == 'inline';
-  if (needSpace && !isInline) {
-    yield posDomDelimiter;
-    needSpace = false;
-  }
-  let child = node.firstChild;
-  while (child) {
-    needSpace = yield* scanTextInternal_(child, needSpace);
-    child = child.nextSibling;
-  }
-  if (needSpace && !isInline) {
-    yield posDomDelimiter;
-    needSpace = false;
-  }
-  return needSpace;
-};
+}

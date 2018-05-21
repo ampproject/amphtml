@@ -1128,8 +1128,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             targets: {
               browsers: ['last 2 versions', 'safari >= 9'],
             },
-            // To use function* in amp-viewer-integration without importing 'babel-polyfill'.
-            exclude: ["transform-regenerator"]
           }],
         ],
       })

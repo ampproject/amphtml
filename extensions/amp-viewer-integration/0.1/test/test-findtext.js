@@ -18,7 +18,7 @@ import {
   CircularBuffer,
   normalizeString,
   findSentences,
-  scanText,
+  TextScanner,
   posDomDelimiter,
   TextRange, TextPos,
   markTextRangeList
@@ -111,7 +111,7 @@ describe('findSentences', ()=>{
   });
 });
 
-describes.fakeWin('scanText', {}, ()=>{
+describes.fakeWin('TextScanner', {}, ()=>{
   let root = null;
   beforeEach(()=>{
     // root should be appended to body to compute the style.
@@ -122,7 +122,8 @@ describes.fakeWin('scanText', {}, ()=>{
   it('single text', ()=>{
     root.innerHTML = 'ab cd  ef\n\ng';
     let chars = [];
-    for (let pos of scanText(root)) {
+    let scanner = new TextScanner(root);
+    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
       chars.push(pos.node.wholeText[pos.offset]);
     }
@@ -133,7 +134,8 @@ describes.fakeWin('scanText', {}, ()=>{
     root.innerHTML = ' ab cd  '
 
     let chars = [];
-    for (let pos of scanText(root)) {
+    let scanner = new TextScanner(root);
+    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
       chars.push(pos.node.wholeText[pos.offset]);
     }
@@ -145,9 +147,10 @@ describes.fakeWin('scanText', {}, ()=>{
     document.body.appendChild(root);
 
     let chars = [];
-    for (let pos of scanText(root)) {
+    let scanner = new TextScanner(root, false);
+    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
-      chars.push(pos.char);
+      chars.push(pos.node.wholeText[pos.offset]);
     }
     expect(chars.join('')).to.equal('abcd ef');
   });
@@ -156,12 +159,13 @@ describes.fakeWin('scanText', {}, ()=>{
     root.innerHTML = '<ul><li>a</li><li>b</li></ul>';
 
     let chars = [];
-    for (let pos of scanText(root)) {
+    let scanner = new TextScanner(root, false);
+    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       if (pos == posDomDelimiter) {
         chars.push('_');
         continue;
       }
-      chars.push(pos.char);
+      chars.push(pos.node.wholeText[pos.offset]);
     }
     expect(chars.join('')).to.equal('a_b');
   });
@@ -170,7 +174,8 @@ describes.fakeWin('scanText', {}, ()=>{
     root.innerHTML = '<ul><li>a</li><li>b</li></ul>';
 
     let chars = [];
-    for (let pos of scanText(root)) {
+    let scanner = new TextScanner(root, false);
+    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       if (pos == posDomDelimiter) {
         chars.push('_');
         continue;
@@ -184,7 +189,8 @@ describes.fakeWin('scanText', {}, ()=>{
     root.innerHTML = '<p>hello</p><script>alert("js");</script>';
 
     let chars = [];
-    for (let pos of scanText(root)) {
+    let scanner = new TextScanner(root, false);
+    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
       chars.push(pos.char);
     }
@@ -195,7 +201,8 @@ describes.fakeWin('scanText', {}, ()=>{
     root.innerHTML = '\'"';
 
     let chars = [];
-    for (let pos of scanText(root)) {
+    let scanner = new TextScanner(root, false);
+    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
       chars.push(pos.char);
     }
