@@ -726,7 +726,7 @@ export class BaseElement {
    * @public @final
    */
   toggleLoading(state, opt_force) {
-    this.element.toggleLoading(state, opt_force);
+    this.element.toggleLoading(state, {force: opt_force});
   }
 
   /**
