@@ -286,6 +286,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
   /**
    * Sets the accept button font color to either white or black, depending on
    * the publisher custom background color.
+   * Must be called from the `buildCallback` or in another vsync mutate state.
    * @private
    */
   setAcceptButtonFontColor_() {

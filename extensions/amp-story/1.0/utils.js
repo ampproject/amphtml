@@ -163,6 +163,7 @@ export function getTextColorForRGB({r, g, b}) {
   // Determines which one of the white and black text have a better contrast
   // ratio against the used background color.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+  // @TODO(gmajoulet): Improve the text color for high contrast ratio.
   // 1 is L for #FFF, and 0 is L for #000.
   // (1 + 0.05) / (L + 0.05) > (L + 0.05) / (0 + 0.05) toggles for L = 0.179.
   return L > 0.179 ? '#000' : '#FFF';
