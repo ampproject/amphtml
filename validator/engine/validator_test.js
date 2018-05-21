@@ -665,9 +665,9 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
             (attrSpec.valueUrl.allowRelative !== null)) {
           it('allow_relative can not be false if allowed_protocol is http: ' +
                  attrSpec.name,
-             () => {
-               expect(attrSpec.valueUrl.allowRelative).toEqual(true);
-             });
+          () => {
+            expect(attrSpec.valueUrl.allowRelative).toEqual(true);
+          });
         }
       }
     }
