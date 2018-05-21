@@ -28,7 +28,7 @@ export const CONSENT_POLICY_STATE = {
   UNKNOWN: 4,
 };
 
-// TODO(@zhouyx): Move following functions to a service
+// TODO(@zhouyx): Move following functions to a different file
 
 /**
  * Returns a promise that resolve when all consent state the policy wait
