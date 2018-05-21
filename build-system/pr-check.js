@@ -321,6 +321,9 @@ const command = {
     //   stopSauceConnect();
     // }
   },
+  runUnitTestsOnLocalChanges: function() {
+    timedExecOrDie('gulp test --nobuild --headless --local-changes');
+  },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --integration --nobuild';
@@ -598,6 +601,8 @@ function main() {
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
+        // Before running all tests, run tests modified by the PR. (Fail early.)
+        command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
       }
     }
