@@ -649,34 +649,34 @@ export class Bind {
       return !walker.nextNode() || limitExceeded;
     };
 
-    const {promise, resolve} = new Deferred();
-    const chunktion = idleDeadline => {
-      let completed = false;
-      // If `requestIdleCallback` is available, scan elements until
-      // idle time runs out.
-      if (idleDeadline && !idleDeadline.didTimeout) {
-        while (idleDeadline.timeRemaining() > 1 && !completed) {
-          completed = scanNextNode_();
+    return new Promise(resolve => {
+      const chunktion = idleDeadline => {
+        let completed = false;
+        // If `requestIdleCallback` is available, scan elements until
+        // idle time runs out.
+        if (idleDeadline && !idleDeadline.didTimeout) {
+          while (idleDeadline.timeRemaining() > 1 && !completed) {
+            completed = scanNextNode_();
+          }
+        } else {
+          // If `requestIdleCallback` isn't available, scan elements in buckets.
+          // Bucket size is a magic number that fits within a single frame.
+          const bucketSize = 250;
+          for (let i = 0; i < bucketSize && !completed; i++) {
+            completed = scanNextNode_();
+          }
         }
-      } else {
-        // If `requestIdleCallback` isn't available, scan elements in buckets.
-        // Bucket size is a magic number that fits within a single frame.
-        const bucketSize = 250;
-        for (let i = 0; i < bucketSize && !completed; i++) {
-          completed = scanNextNode_();
+        // If we scanned all elements, resolve. Otherwise, continue chunking.
+        if (completed) {
+          resolve({
+            boundElements, bindings, expressionToElements, limitExceeded,
+          });
+        } else {
+          chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
         }
-      }
-      // If we scanned all elements, resolve. Otherwise, continue chunking.
-      if (completed) {
-        resolve({
-          boundElements, bindings, expressionToElements, limitExceeded,
-        });
-      } else {
-        chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
-      }
-    };
-    chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
-    return promise;
+      };
+      chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+    });
   }
 
   /**
@@ -717,7 +717,7 @@ export class Bind {
       property = attr.substr(14);
       // Ignore `data-amp-bind-foo` if `[foo]` already exists.
       if (element.hasAttribute(`[${property}]`)) {
-        property = null;
+        return null;
       }
     }
 
