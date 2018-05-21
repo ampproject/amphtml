@@ -213,8 +213,9 @@ event.index</pre></td>
   </tr>
   <tr>
     <td><code>message</code></td>
-    <td>Fired when the iframe invokes `postMessage` on the parent AMP page.</td>
-    <td>None</td>
+    <td>Fired when the iframe invokes <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">parent.postMessage</a> as a result of a user gesture in the iframe.</td>
+    <td><pre>// See <a href="https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data">MessageEvent.data</a>.
+event.data</pre></td>
   </tr>
 </table>
 
