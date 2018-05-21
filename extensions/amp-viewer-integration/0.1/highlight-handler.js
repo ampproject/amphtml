@@ -44,8 +44,8 @@ export class HighlightHandler {
   /** @private */
   initHighlight_() {
     const ampdoc = this.ampdoc_;
-    const url = ampdoc.getUrl();
-    const hash = parseUrl(url).hash;
+    const win = ampdoc.win;
+    const hash = win.location.hash;
     const params = parseQueryString(hash);
     const highlightJSON = params['highlight'];
     if (!highlightJSON) {
@@ -53,7 +53,6 @@ export class HighlightHandler {
     }
 
     const highlight = parseJson(highlightJSON);
-    const win = ampdoc.win;
     var sens = findSentences(win.document.body, highlight['s']);
     if (!sens) {
       return;
@@ -79,7 +78,7 @@ export class HighlightHandler {
           return;
         }
         Services.viewportForDoc(ampdoc).animateScrollIntoView(spans[0], 500);
-        viewer.sendMessage('highlightEvent', null);
+        viewer.sendMessage('highlightShown', null);
         called = true;
       });
     }
