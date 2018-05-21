@@ -32,6 +32,7 @@ require('./gen-codeowners');
 require('./extension-generator');
 require('./pr-check');
 require('./process-github-issues');
+require('./process-3p-github-pr');
 require('./json-check');
 require('./lint');
 require('./prepend-global');
