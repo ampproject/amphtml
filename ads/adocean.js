@@ -23,7 +23,7 @@ import {validateData, writeScript} from '../3p/3p';
  */
 const ADO_JS_PATHS = {
   'sync': '/files/js/ado.js',
-  'buffered': '/files/js/ado.FIF.0.99.3.js',
+  'buffered': '/files/js/ado.amp.js',
 };
 
 /**
@@ -37,8 +37,9 @@ function isFalseString(str) {
 /**
  * @param {string} mode
  * @param {!Window} global
+ * @param {boolean} noConsent
  */
-function setupAdoConfig(mode, global) {
+function setupAdoConfig(mode, global, noConsent) {
   if (global['ado']) {
     const config = {
       mode: (mode == 'sync') ? 'old' : 'new',
@@ -46,6 +47,7 @@ function setupAdoConfig(mode, global) {
       fif: {
         enabled: mode != 'sync',
       },
+      consent: !noConsent,
     };
 
     global['ado']['config'](config);
@@ -178,13 +180,26 @@ export function adocean(global, data) {
     'aoKeys',
     'aoVars',
     'aoClusters',
+    'npaOnUnknownConsent',
   ]);
 
   const mode = (data['aoMode'] != 'sync') ? 'buffered' : 'sync';
   const adoUrl = 'https://' + data['aoEmitter'] + ADO_JS_PATHS[mode];
+  let noConsent = false;
+
+  switch (global.context.initialConsentState) {
+    case 0: // CONSENT_POLICY_STATE.UNKNOWN
+      if (data['npaOnUnknownConsent'] != 'true') {
+        // Unknown w/o NPA results in no ad request.
+        return;
+      }
+    case 2: // CONSENT_POLICY_STATE.SUFFICIENT
+      noConsent = true;
+      break;
+  }
 
   writeScript(global, adoUrl, () => {
-    setupAdoConfig(mode, global);
+    setupAdoConfig(mode, global, noConsent);
     setupPreview(global, data);
 
     appendPlacement(mode, global, data);
