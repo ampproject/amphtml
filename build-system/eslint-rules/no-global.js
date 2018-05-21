@@ -24,7 +24,7 @@ GLOBALS.document = 'Reference it as `self.document` or similar instead.';
 module.exports = function(context) {
   return {
     Identifier: function(node) {
-      const name = node.name;
+      const {name} = node;
       if (!(name in GLOBALS)) {
         return;
       }
@@ -47,7 +47,7 @@ module.exports = function(context) {
       if (GLOBALS[name]) {
         message += ' ' + GLOBALS[name];
       }
-      context.report(node, message);
+      context.report({node, message});
     },
   };
 };

@@ -23,7 +23,7 @@ import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
 import {Entitlement} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -210,7 +210,7 @@ export class GoogleSubscriptionsPlatform {
     const viewerUrl = viewer.getParam('viewerUrl');
     if (viewerUrl) {
       this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
-          parseUrl(viewerUrl).hostname);
+          parseUrlDeprecated(viewerUrl).hostname);
     } else {
       // This can only be resolved asynchronously in this case. However, the
       // action execution must be done synchronously. Thus we have to allow
@@ -218,7 +218,7 @@ export class GoogleSubscriptionsPlatform {
       viewer.getViewerOrigin().then(origin => {
         if (origin) {
           this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
-              parseUrl(origin).hostname);
+              parseUrlDeprecated(origin).hostname);
         }
       });
     }

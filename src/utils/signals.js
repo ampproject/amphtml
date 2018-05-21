@@ -74,9 +74,7 @@ export class Signals {
         // Allocate the promise/resolver for when the signal arrives in the
         // future.
         const deferred = new Deferred();
-        const promise = deferred.promise;
-        const resolve = deferred.resolve;
-        const reject = deferred.reject;
+        const {promise, resolve, reject} = deferred;
 
         promiseStruct = {promise, resolve, reject};
       }

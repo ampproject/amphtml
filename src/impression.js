@@ -20,7 +20,7 @@ import {
   addParamsToUrl,
   isProxyOrigin,
   parseQueryString,
-  parseUrl,
+  parseUrlDeprecated,
 } from './url';
 import {dev, user} from './log';
 import {getMode} from './mode';
@@ -58,8 +58,7 @@ export function resetTrackImpressionPromiseForTesting() {
  */
 export function maybeTrackImpression(win) {
   const deferred = new Deferred();
-  const promise = deferred.promise;
-  const resolveImpression = deferred.resolve;
+  const {promise, resolve: resolveImpression} = deferred;
 
 
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
@@ -235,7 +234,7 @@ function applyResponse(win, response) {
 
     const viewer = Services.viewerForDoc(win.document);
     const currentHref = win.location.href;
-    const url = parseUrl(adLocation);
+    const url = parseUrlDeprecated(adLocation);
     const params = parseQueryString(url.search);
     const newHref = addParamsToUrl(currentHref, params);
     // TODO: Avoid overwriting the fragment parameter.
@@ -265,7 +264,7 @@ export function shouldAppendExtraParams(ampdoc) {
  */
 export function getExtraParamsUrl(win, target) {
   // Get an array with extra params that needs to append.
-  const url = parseUrl(win.location.href);
+  const url = parseUrlDeprecated(win.location.href);
   const params = parseQueryString(url.search);
   const appendParams = [];
   for (let i = 0; i < DEFAULT_APPEND_URL_PARAM.length; i++) {
@@ -277,11 +276,11 @@ export function getExtraParamsUrl(win, target) {
 
   // Check if the param already exists
   const additionalUrlParams = target.getAttribute('data-amp-addparams');
-  let href = target.href;
+  let {href} = target;
   if (additionalUrlParams) {
     href = addParamsToUrl(href, parseQueryString(additionalUrlParams));
   }
-  const loc = parseUrl(href);
+  const loc = parseUrlDeprecated(href);
   const existParams = parseQueryString(loc.search);
   for (let i = appendParams.length - 1; i >= 0; i--) {
     const param = appendParams[i];
