@@ -974,7 +974,8 @@ export class BaseElement {
 
   /**
    * Runs the specified measure, then runs the mutation on the element and
-   * ensures that remeasures and layouts are performed for the affected elements.
+   * ensures that remeasures and layouts are performed for the affected
+   * elements.
    *
    * This method should be called whenever a measure and significant mutations
    * are done on the DOM that could affect layout of elements inside this
