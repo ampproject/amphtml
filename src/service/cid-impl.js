@@ -114,6 +114,7 @@ export class Cid {
      * Cached base cid once read from storage to avoid repeated
      * reads.
      * @private {?Promise<string>}
+     * @restricted
      */
     this.baseCid_ = null;
 
@@ -121,6 +122,7 @@ export class Cid {
      * Cache to store external cids. Scope is used as the key and cookie value
      * is the value.
      * @private {!Object<string, !Promise<string>>}
+     * @restricted
      */
     this.externalCidCache_ = Object.create(null);
 
