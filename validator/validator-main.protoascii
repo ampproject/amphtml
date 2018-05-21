@@ -26,7 +26,7 @@ min_validator_revision_required: 328
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 636
+spec_file_revision: 637
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -4580,7 +4580,13 @@ attr_lists: {
   # https://www.ampproject.org/docs/reference/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
-    value_regex_casei: "fade-in|fade-in-scroll|fly-in-bottom|fly-in-left|fly-in-right|fly-in-top|parallax"
+    value_regex_casei: "fade-in|"
+                       "fade-in-scroll|"
+                       "fly-in-bottom|"
+                       "fly-in-left|"
+                       "fly-in-right|"
+                       "fly-in-top|"
+                       "parallax"
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
