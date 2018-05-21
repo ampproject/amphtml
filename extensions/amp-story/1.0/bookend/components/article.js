@@ -85,7 +85,7 @@ export class ArticleComponent {
     const template =
         html`
         <a class="i-amphtml-story-bookend-article
-          i-amphtml-story-bookend-component-container"
+          i-amphtml-story-bookend-component"
           target="_top">
         </a>`;
     addAttributesToElement(template, dict({'href': articleData.url}));

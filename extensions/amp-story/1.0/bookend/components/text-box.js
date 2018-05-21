@@ -63,7 +63,7 @@ export class TextBoxComponent {
     const container =
         html`
         <div class="i-amphtml-story-bookend-textbox
-          i-amphtml-story-bookend-component-container"></div>`;
+          i-amphtml-story-bookend-component"></div>`;
 
     let textSeed = html`<h3 class="i-amphtml-story-bookend-text"></h3>`;
     textboxData['text'].forEach(currentLine => {

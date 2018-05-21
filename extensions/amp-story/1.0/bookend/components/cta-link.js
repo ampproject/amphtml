@@ -84,7 +84,7 @@ export class CtaLinkComponent {
     const container =
         html`
         <div class="i-amphtml-story-bookend-cta-link-wrapper
-          i-amphtml-story-bookend-component-container">
+          i-amphtml-story-bookend-component">
         </div>`;
 
     let linkSeed =

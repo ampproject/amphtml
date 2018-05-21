@@ -88,7 +88,7 @@ export class PortraitComponent {
     const template =
         html`
         <a class="i-amphtml-story-bookend-portrait
-          i-amphtml-story-bookend-component-container"
+          i-amphtml-story-bookend-component"
           target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>

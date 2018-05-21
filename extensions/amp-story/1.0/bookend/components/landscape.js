@@ -92,7 +92,7 @@ export class LandscapeComponent {
     const el =
         html`
         <a class="i-amphtml-story-bookend-landscape
-          i-amphtml-story-bookend-component-container"
+          i-amphtml-story-bookend-component"
           target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
