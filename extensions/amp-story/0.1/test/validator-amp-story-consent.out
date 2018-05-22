@@ -37,15 +37,15 @@ PASS
 |              "checkConsentHref": "http://localhost:8000/get-consent-v1",
 |              "promptUI": "ui0"
 |            }
-|          },
-|          "story-consent": {
-|            "color": "#0379c4",
+|          }
+|        }</script>
+|        <amp-story-consent id="ui0" layout="nodisplay">
+|          <script type="application/json">{
 |            "title": "A message from AMP",
 |            "message": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis pulvinar a quam non tincidunt. Nam dictum non nisi eu consectetur.",
 |            "vendors": ["Example Vendor One", "Example Vendor Two", "Example Vendor Three", "Google Adwords"]
-|          }
-|        }</script>
-|        <amp-story-consent id="ui0" layout="nodisplay"></amp-story-consent>
+|          }</script>
+|        </amp-story-consent>
 |      </amp-consent>
 |      <amp-story-page id="fill-template-title">
 |        <amp-story-grid-layer template="vertical">
