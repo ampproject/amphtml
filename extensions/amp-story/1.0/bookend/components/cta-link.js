@@ -49,15 +49,15 @@ export class CtaLinkComponent {
    * */
   assertValidity(ctaLinksJson) {
     user().assert(ctaLinksJson['links'] && isArray(ctaLinksJson['links']) &&
-      ctaLinksJson['links'].length > 0, 'CTA link component must be an array' +
-      ' and contain at least one link inside it.');
+      ctaLinksJson['links'].length > 0, 'CTA link component must be an array ' +
+      'and contain at least one link inside it.');
 
     ctaLinksJson['links'].forEach(ctaLink => {
       user().assert('text' in ctaLink && 'url' in ctaLink, 'All links in CTA ' +
         'link component must contain `text` field and a `url`.');
 
-      user().assert(isProtocolValid(ctaLink['url']), 'Unsupported protocol' +
-        ` for CTA link URL ${ctaLink['url']}`);
+      user().assert(isProtocolValid(ctaLink['url']), 'Unsupported protocol ' +
+        `for CTA link URL ${ctaLink['url']}`);
     });
   }
 
@@ -83,7 +83,8 @@ export class CtaLinkComponent {
     const html = htmlFor(doc);
     const container =
         html`
-        <div class="i-amphtml-story-bookend-cta-link-wrapper">
+        <div class="i-amphtml-story-bookend-cta-link-wrapper
+          i-amphtml-story-bookend-component">
         </div>`;
 
     let linkSeed =

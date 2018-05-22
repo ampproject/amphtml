@@ -745,3 +745,16 @@ amp-story-page {
 amp-story .i-amphtml-loader {
   display: none !important;
 }
+
+/**
+ * amp-fx
+ */
+
+/**
+  * In ampfx-preset-utils.js we are installing styles once the extension is 
+ * loaded. This cause the element to jump. This is a fix for that, which 
+ * doesn't push the preset's defaults into v0.js making it larger.
+ */
+[amp-fx^="fly-in"] {
+  visibility: hidden;
+}
