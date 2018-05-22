@@ -44,18 +44,21 @@ tags: {  # <amp-date-countdown>
   }
   attrs: {
     name: "offset-seconds"
+    value_regex: "\\d{10}"
   }
   attrs: {
     name: "timestamp-ms"
     mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d{13}"
   }
   attrs: {
     name: "timestamp-seconds"
     mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d{10}"
   }
   attrs: {
     name: "when-ended"
-    value_regex_casei: "stop"
+    value_casei: "stop"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

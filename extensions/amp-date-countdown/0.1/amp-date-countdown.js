@@ -48,7 +48,7 @@ const MILLISECONDS_IN_MINUTE = 60 * 1000;
 const MILLISECONDS_IN_SECOND = 1000;
 
 
-/** @const {Array} */
+/** @const {Object} */
 //https://ctrlq.org/code/19899-google-translate-languages refer to google code
 const LOCALE_WORD = {
   'de': ['Jahren', 'Monaten', 'Tagen', 'Stunden', 'Minuten', 'Sekunden'],
@@ -86,21 +86,30 @@ export class AmpDateCountdown extends AMP.BaseElement {
     this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
 
     /** @private {number} */
-    this.timestampSeconds_ = Number(this.element.getAttribute('timestamp-seconds'));
+    this.timestampSeconds_
+      = Number(this.element.getAttribute('timestamp-seconds'));
 
     /** @private {number} */
-    this.offsetSeconds_ = Number(this.element.getAttribute('offset-seconds')) || DEFAULT_OFFSET_SECONDS;
+    this.offsetSeconds_
+      = Number(this.element.getAttribute('offset-seconds'))
+      || DEFAULT_OFFSET_SECONDS;
 
     /** @private {string} */
-    this.locale_ = (this.element.getAttribute('locale') || DEFAULT_LOCALE).toLowerCase();
+    this.locale_
+      = (this.element.getAttribute('locale')
+      || DEFAULT_LOCALE).toLowerCase();
 
     /** @private {string} */
-    this.whenEnded_ = (this.element.getAttribute('when-ended') || DEFAULT_WHEN_ENDED).toLowerCase();
+    this.whenEnded_
+      = (this.element.getAttribute('when-ended')
+      || DEFAULT_WHEN_ENDED).toLowerCase();
 
     /** @private {string} */
-    this.biggestUnit_ = (this.element.getAttribute('biggest-unit') || DEFAULT_BIGGEST_UNIT).toUpperCase();
+    this.biggestUnit_
+      = (this.element.getAttribute('biggest-unit')
+      || DEFAULT_BIGGEST_UNIT).toUpperCase();
 
-    /** @private {!Object} */
+    /** @private {!Object|null} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
     /** @private {!Object} */
@@ -146,7 +155,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object} items
+   * @param {!Object|!JsonObject} items
    * @return {!Promise}
    * @private
    */
@@ -160,7 +169,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
    * @private
    */
   tickCountDown_(differentBetween) {
-    const DIFF = this.getYDHMSFromMs_(differentBetween);
+    const DIFF = this.getYDHMSFromMs_(differentBetween) || {};
     if (this.whenEnded_ === 'stop' && differentBetween < 1000) {
       Services.actionServiceForDoc(this.element)
           .trigger(this.element, 'timeout', null, ActionTrust.LOW);
@@ -170,7 +179,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   }
 
   /**
-   * @return {number}
+   * @return {number|undefined}
    * @private
    */
   getEpoch_() {
@@ -192,7 +201,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /**
    * @param {string} locale
-   * @return {Object}
+   * @return {!Object}
    * @private
    */
   getLocaleWord_(locale) {
@@ -258,7 +267,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /**
    * @param {number} input
-   * @return {Object}
+   * @return {string}
    * @private
    */
   padStart_(input) {

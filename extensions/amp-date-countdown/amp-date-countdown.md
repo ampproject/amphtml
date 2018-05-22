@@ -42,8 +42,8 @@ The `amp-date-countdown` provides countdown time data that you can render in you
 
 
 ```html
-<amp-date-countdown id="ampdate" 
-    end-date="2020-06-20T00:00:00+08:00" 
+<amp-date-countdown id="ampdate"
+    end-date="2020-06-20T00:00:00+08:00"
     when-ended="stop"
     locale="en"
     height="235" width="500">
@@ -106,7 +106,7 @@ Format | Sample Output | Remarks
 {d} {days} {h} {hours} {m} {minutes} | 50 days 5 hours 10 minutes | -
 {d} {days} {h} {hours} {m} {minutes} | 20 days 5 hours 10 minutes | -
 {h} {hours} {m} {minutes} | 240 hours 10 minutes | `biggest-unit='hours'`
-{d} {days} {h} {hours} {m} {minutes} | 50 天 5 小时 10 分钟 | `locale='zh-CN'`
+{d} {days} {h} {hours} {m} {minutes} | 50 天 5 小时 10 分钟 | `locale='zh-cn'`
 
 
 ## Attributes
@@ -134,8 +134,6 @@ Supported values:
 
 Code | Language
 -- | --
-zh-CN | Chinese Simplified
-zh-TW | Chinese Traditional
 de | German
 en | English
 es | Spanish
@@ -150,6 +148,8 @@ ru | Russian
 th | Thai
 tr | Turkish
 vi | Vietnamese
+zh-cn | Chinese Simplified
+zh-tw | Chinese Traditional
 
 ##### biggest-unit (optional)
 Allows the `amp-date-countdown` component to calculate the time difference based on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays `1210 hours` left.
