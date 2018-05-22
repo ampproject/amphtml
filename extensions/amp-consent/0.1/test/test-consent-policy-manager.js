@@ -297,7 +297,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
           },
         });
         expect(instance.getCurrentPolicyStatus()).to.equal(
-            CONSENT_ITEM_STATE.UNKNOWN);
+            CONSENT_POLICY_STATE.UNKNOWN);
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
         expect(instance.getCurrentPolicyStatus()).to.equal(
             CONSENT_POLICY_STATE.UNKNOWN);

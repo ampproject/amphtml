@@ -37,8 +37,8 @@ export class HeadingComponent {
    * @override
    * */
   assertValidity(headingJson) {
-    user().assert('text' in headingJson, 'Heading component must contain' +
-      ' `text` field, skipping invalid.');
+    user().assert('text' in headingJson, 'Heading component must contain ' +
+      '`text` field, skipping invalid.');
   }
 
   /**
