@@ -365,7 +365,7 @@ describes.realWin('amp-story', {
   describe('desktop attributes', () => {
     it('should add next page attribute', () => {
       sandbox.stub(win.history, 'replaceState');
-      sandbox.stub(utils, 'setAtributeInMutate').callsFake(
+      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
           (el, attr) => el.element.setAttribute(attr, ''));
 
       const pages = createPages(story.element, 2, ['page-0', 'page-1']);
@@ -380,7 +380,7 @@ describes.realWin('amp-story', {
     it('should add previous page attribute', () => {
       sandbox.stub(win.history, 'replaceState');
       sandbox.stub(story, 'maybePreloadBookend_').returns();
-      sandbox.stub(utils, 'setAtributeInMutate').callsFake(
+      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
           (el, attr) => el.element.setAttribute(attr, ''));
 
       const pages = createPages(story.element, 2, ['page-0', 'page-1']);
@@ -396,7 +396,7 @@ describes.realWin('amp-story', {
     it('should add previous visited attribute', () => {
       sandbox.stub(win.history, 'replaceState');
       sandbox.stub(story, 'maybePreloadBookend_').returns();
-      sandbox.stub(utils, 'setAtributeInMutate').callsFake(
+      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
           (el, attr) => el.element.setAttribute(attr, ''));
 
       const pages = createPages(story.element, 2, ['page-0', 'page-1']);
