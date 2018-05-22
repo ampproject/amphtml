@@ -30,7 +30,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     Object.assign(element, {
       getIntersectionChangeEntry: noop,
     });
-    return {element};
+    return {
+      element,
+      signals: () => ({whenSignal: () => ({then: noop})}),
+    };
   }
 
   function mockCenteredVideo(element) {
