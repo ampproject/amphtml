@@ -67,7 +67,7 @@ If the country cannot be determined, the value is set to 'unknown'.  If the grou
 Notes: 
 
 1. It's possible that an IP address with country information in the WHOIS database will not have country information in amp-geo. 
-1. The ISO country code may not be the same as the top level domain.  For example the code for the United Kingdom is "gb" not "uk". 
+1. The ISO country code may not be the same as the top-level domain.  For example, the code for the United Kingdom is "gb" not "uk". 
 
 The `amp-geo` component provides CSS, `amp-bind` and variable substitution interfaces. 
 
