@@ -184,7 +184,7 @@ export class VideoManager {
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    element.signals().signal(VideoEvents.REGISTERED);
+    video.signals().signal(VideoEvents.REGISTERED);
 
     // Add a class to element to indicate it implements the video interface.
     element.classList.add('i-amphtml-video-interface');
@@ -990,7 +990,7 @@ export class AutoFullscreenManager {
     listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_);
     listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_);
 
-    element.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
+    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
         .then(this.boundSelectBestCentered_);
 
     // Set always
