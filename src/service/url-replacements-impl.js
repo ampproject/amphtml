@@ -117,8 +117,7 @@ export class GlobalVariableSource extends VariableSource {
 
     /**
      * @private
-     * @const {function(!./ampdoc-impl.AmpDoc):
-     *     !Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
+     * @const {function(!./ampdoc-impl.AmpDoc):!Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
      */
     this.getAccessService_ = Services.accessServiceForDocOrNull;
 
@@ -580,6 +579,15 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('MAKE_BODY_VISIBLE', () => {
       return Services.performanceFor(this.ampdoc.win).getMakeBodyVisible();
     });
+
+    this.setAsync('AMP_STATE', key => {
+      return Services.bindForDocOrNull(this.ampdoc).then(bind => {
+        if (!bind) {
+          return '';
+        }
+        return bind.getStateValue(/** @type {string} */ (key));
+      });
+    });
   }
 
   /**
@@ -600,8 +608,7 @@ export class GlobalVariableSource extends VariableSource {
   /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!../../extensions/amp-access/0.1/amp-access.AccessService
-   *     ):(T|!Promise<T>)} getter
+   * @param {function(!../../extensions/amp-access/0.1/amp-access.AccessService):(T|!Promise<T>)} getter
    * @param {string} expr
    * @return {T|null}
    * @template T
@@ -740,7 +747,10 @@ export class GlobalVariableSource extends VariableSource {
  * @package For export
  */
 export class UrlReplacements {
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!VariableSource} variableSource
+   */
   constructor(ampdoc, variableSource) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
@@ -758,8 +768,7 @@ export class UrlReplacements {
    * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
-   * opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
    *     names that can be substituted.
@@ -788,8 +797,7 @@ export class UrlReplacements {
    * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
-   * opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
    *     names that can be substituted.
@@ -874,7 +882,7 @@ export class UrlReplacements {
 
   /**
    * Returns a replacement whitelist from elements' data-amp-replace attribute.
-   * @param {!Element} element.
+   * @param {!Element} element
    * @param {!Object<string, boolean>=} opt_supportedReplacement Optional supported
    * replacement that filters whitelist to a subset.
    * @return {!Object<string, boolean>|undefined}
@@ -898,7 +906,7 @@ export class UrlReplacements {
 
   /**
     * Returns whether variable substitution is allowed for given url.
-    * @param {!Location} url.
+    * @param {!Location} url
     * @return {boolean}
     */
   isAllowedOrigin_(url) {
@@ -1192,7 +1200,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Window} embedWin
- * @param {*} varSource
+ * @param {!VariableSource} varSource
  */
 export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
@@ -1200,10 +1208,6 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
 }
 
 /**
- * @typedef {{
- *   incomingFragment: string,
- *   outgoingFragment: string,
- * }}
+ * @typedef {{incomingFragment: string, outgoingFragment: string}}
  */
-
 let ShareTrackingFragmentsDef;
