@@ -1539,6 +1539,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'pageview': '${url}?st=${st}' +
         '&sv=${sv}' +
         '&ap=${ap}' +
+	'&ps=${ps}' +
         '&co=${co}' +
         '&cp=${cp}' +
         '&host=${canonicalHost}' +
