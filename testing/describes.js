@@ -392,13 +392,13 @@ class FixtureInterface {
   isOn() {}
 
   /**
-   * @param {!Object} env
+   * @param {!Object} unusedEnv
    * @return {!Promise|undefined}
    */
   setup(unusedEnv) {}
 
   /**
-   * @param {!Object} env
+   * @param {!Object} unusedEnv
    */
   teardown(unusedEnv) {}
 }
