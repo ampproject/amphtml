@@ -318,6 +318,9 @@ tags: {  # <amp-story-bookend>
       allowed_protocol: "https"
     }
   }
+  child_tags: {
+    mandatory_num_child_tags: 0
+  }
 }
 tags: {  # amp-story-consent (json)
   html_format: AMP
