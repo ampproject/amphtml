@@ -34,7 +34,7 @@ import {
   isCanonical,
   supportsNativeCrypto,
 } from '../../../ads/google/a4a/utils';
-import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-manager';
+import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-utils';
 
 /** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
