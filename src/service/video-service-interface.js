@@ -53,3 +53,9 @@ export class VideoServiceInterface {
    */
   getPlayingState(unusedVideo) {}
 }
+
+
+/** @enum {string} */
+export const VideoServiceSignals = {
+  USER_INTERACTED: 'user-interacted',
+};
