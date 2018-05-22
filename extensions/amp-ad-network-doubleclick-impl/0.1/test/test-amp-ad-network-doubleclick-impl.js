@@ -258,6 +258,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         'height': '50',
         'type': 'doubleclick',
       });
+      doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
       sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);

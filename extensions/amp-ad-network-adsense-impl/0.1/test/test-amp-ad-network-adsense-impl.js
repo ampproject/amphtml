@@ -226,6 +226,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'height': '50',
         'type': 'adsense',
       });
+      doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
