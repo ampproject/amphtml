@@ -15,12 +15,13 @@
  */
 
 import {AmpStoryConsent} from '../amp-story-consent';
-import {Services} from '../../../../src/services';
+import {LocalizationService} from '../localization';
+import {registerServiceBuilder} from '../../../../src/service';
 
-describes.fakeWin('amp-story-consent', {amp: true}, env => {
+describes.realWin('amp-story-consent', {amp: true}, env => {
   let win;
   let defaultConfig;
-  let sandbox;
+  let getComputedStyleStub;
   let storyConsent;
   let storyConsentConfigEl;
   let storyConsentEl;
@@ -31,7 +32,6 @@ describes.fakeWin('amp-story-consent', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = sinon.sandbox.create();
 
     const consentConfig = {
       consents: {ABC: {}},
@@ -43,9 +43,12 @@ describes.fakeWin('amp-story-consent', {amp: true}, env => {
       vendors: ['Item 1', 'Item 2'],
     };
 
-    sandbox.stub(Services, 'localizationService').returns({
-      getLocalizedString: localizedStringId => `string(${localizedStringId})`,
-    });
+    const styles = {'background-color': 'rgb(0, 0, 0)'};
+    getComputedStyleStub =
+        sandbox.stub(win, 'getComputedStyle').returns(styles);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization-v01', () => localizationService);
 
     // Test DOM structure:
     // <fake-amp-consent>
@@ -72,10 +75,6 @@ describes.fakeWin('amp-story-consent', {amp: true}, env => {
     win.document.body.appendChild(consentEl);
 
     storyConsent = new AmpStoryConsent(storyConsentEl);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should parse the config', () => {
@@ -154,5 +153,27 @@ describes.fakeWin('amp-story-consent', {amp: true}, env => {
 
     expect(storyConsent.actions_.trigger).to.have.been.calledOnce;
     expect(storyConsent.actions_.trigger).to.have.been.calledWith(buttonEl);
+  });
+
+  it('should set the font color to black if background is white', () => {
+    const styles = {'background-color': 'rgb(255, 255, 255)'};
+    getComputedStyleStub.returns(styles);
+    storyConsent.buildCallback();
+
+    const buttonEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-action-accept');
+    expect(buttonEl.getAttribute('style'))
+        .to.equal('color: rgb(0, 0, 0) !important;');
+  });
+
+  it('should set the font color to white if background is black', () => {
+    const styles = {'background-color': 'rgba(0, 0, 0, 1)'};
+    getComputedStyleStub.returns(styles);
+    storyConsent.buildCallback();
+
+    const buttonEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-action-accept');
+    expect(buttonEl.getAttribute('style'))
+        .to.equal('color: rgb(255, 255, 255) !important;');
   });
 });
