@@ -184,7 +184,10 @@ export class VideoManager {
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    video.signals().signal(VideoEvents.REGISTERED);
+    const signals =
+        (/** @type {!../base-element.BaseElement} */ (video)).signals();
+
+    signals.signal(VideoEvents.REGISTERED);
 
     // Add a class to element to indicate it implements the video interface.
     element.classList.add('i-amphtml-video-interface');
