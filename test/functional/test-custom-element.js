@@ -331,10 +331,12 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const errorStub = sandbox.stub(element, 'dispatchCustomEventForTesting');
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
-        element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-        expect(element.layoutWidth_).to.equal(111);
-        expect(element.implementation_.layoutWidth_).to.equal(111);
-        expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+        allowConsoleError(() => {
+          element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+          expect(element.layoutWidth_).to.equal(111);
+          expect(element.implementation_.layoutWidth_).to.equal(111);
+          expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+        });
       });
     });
 
