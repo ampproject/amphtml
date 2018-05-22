@@ -515,8 +515,13 @@ message CssLengthSpec {
   // (ie: (<html ⚡> vs <html a4⚡>) this CssLengthSpec is defined for.
   optional HtmlFormat.Code html_format = 1;
 
-  // If set, the cdata contents cannot be greater than this length, in bytes.
+  // If set, the combined style amp-custom cdata contents and all inline style
+  // contents cannot be greater than this length, in bytes.
   optional int32 max_bytes = 2 [default = -1];
+
+  // If set, the inline style content (per use) cannot be greater than this
+  // length, in bytes.
+  optional int32 max_bytes_per_inline_style = 4 [default = -1];
 
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
