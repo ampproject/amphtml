@@ -286,7 +286,7 @@ function uponSanitizeElement(node, data) {
 
 /**
  * @param {!Node} node
- * @param {{attrName: string, attrValue: string, allowedAttributes: !Array<string>}} data
+ * @param {{attrName: string, attrValue: string, allowedAttributes: !Object<string, boolean>}} data
  */
 function uponSanitizeAttribute(node, data) {
   // Beware of DOM Clobbering risk when using properties or functions on `node`.
