@@ -222,7 +222,7 @@ If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/am
 can be added to `amp-ad` element to respect the corresponding `amp-consent` policy.
 In that case, the `amp-ad` element will be blocked from loading until the consent accepted.
 Individual ad network can override this default consent handling by putting a `consentHandlingOverride: true` in `ads/_config.js`.
-Doing so will unblock the ad loading once the consent is responded. It will be then ad network's responsibility
+Doing so will unblock the ad loading once the consent is responded. It will be then the ad network's responsibility
 to respect user's consent choice, for example to serve non-personalized ads on consent rejection.
 AMP runtime provides the following `window.context` APIs for ad network to access the consent state.
 
