@@ -325,7 +325,6 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {string} itemsExpr
-   * @visibleForTesting
    * @private
    */
   fetch_(itemsExpr) {
