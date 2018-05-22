@@ -19,11 +19,16 @@ import {CSS} from '../../../build/amp-story-consent-0.1.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {childElementByTag} from '../../../src/dom';
-import {closestByTag, isJsonScriptTag} from '../../../src/dom';
+import {
+  childElementByTag,
+  closestByTag,
+  isJsonScriptTag,
+} from '../../../src/dom';
+import {computedStyle, setImportantStyles} from '../../../src/style';
 import {createShadowRootWithStyle} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
+import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
@@ -184,6 +189,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
       this.actions_.addToWhitelist('AMP-CONSENT.accept');
       this.actions_.addToWhitelist('AMP-CONSENT.reject');
 
+      this.setAcceptButtonFontColor_();
+
       this.initializeListeners_();
     }
   }
@@ -274,5 +281,23 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.storyConsentConfig_.vendors &&
             isArray(this.storyConsentConfig_.vendors),
         `${TAG}: config requires an array of vendors`);
+  }
+
+  /**
+   * Sets the accept button font color to either white or black, depending on
+   * the publisher custom background color.
+   * Must be called from the `buildCallback` or in another vsync mutate state.
+   * @private
+   */
+  setAcceptButtonFontColor_() {
+    const buttonEl =
+        dev().assertElement(this.storyConsentEl_
+            .querySelector('.i-amphtml-story-consent-action-accept'));
+    const styles = computedStyle(this.win, buttonEl);
+
+    const rgb = getRGBFromCssColorValue(styles['background-color']);
+    const color = getTextColorForRGB(rgb);
+
+    setImportantStyles(buttonEl, {color});
   }
 }

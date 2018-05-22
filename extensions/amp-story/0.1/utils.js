@@ -58,7 +58,7 @@ export function hasTapAction(el) {
 
 /**
  * Calculates a client rect without applying scaling transformations.
- * @note Must be run in a vsync measure context.
+ * Note: must be run in a vsync measure context.
  * @param {!Element} el
  * @return {!ClientRect}
  */
@@ -105,4 +105,66 @@ export function createShadowRootWithStyle(container, element, css) {
   shadowRoot.appendChild(element);
 
   return shadowRoot;
+}
+
+
+/**
+ * Parses the resolved CSS color property, that is always in the form of
+ * `rgba(0, 0, 0, 1)` or `rgb(0, 0, 0)`, that can be retrieved using
+ * `getComputedStyle`.
+ * Returns an object containing the R, G, and B 8bit numbers.
+ * @param  {string} cssValue
+ * @return {!Object<string, number>}
+ */
+export function getRGBFromCssColorValue(cssValue) {
+  const regexPattern = /rgba?\((\d{1,3}), (\d{1,3}), (\d{1,3})/;
+
+  if (!cssValue.match(regexPattern)) {
+    user().error('UTILS', 'getRGBFromCssColorValue expects a parameter in ' +
+        `the form of 'rgba(0, 0, 0, 1)' or 'rgb(0, 0, 0)' but got ${cssValue}`);
+    // Returns a fallback value, to fail 'gracefully' in case a browser we don't
+    // know about gave an unexpected value.
+    return {r: 0, g: 0, b: 0};
+  }
+
+  const matches = regexPattern.exec(cssValue);
+
+  return {
+    r: Number(matches[1]),
+    g: Number(matches[2]),
+    b: Number(matches[3]),
+  };
+}
+
+
+/**
+ * Returns the color, either black or white, that has the best contrast ratio
+ * against the provided RGB 8bit values.
+ * @param  {!Object<string, number>} rgb  ie: {r: 0, g: 0, b: 0}
+ * @return {string} '#fff' or '#000'
+ */
+export function getTextColorForRGB({r, g, b}) {
+  // Calculates the relative luminance L.
+  // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+  const getLinearRGBValue = x => {
+    // 8bit to sRGB.
+    x /= 255;
+
+    // Converts the gamma-compressed RGB values to linear RGB.
+    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+  };
+
+  const linearR = getLinearRGBValue(r);
+  const linearG = getLinearRGBValue(g);
+  const linearB = getLinearRGBValue(b);
+
+  const L = 0.2126 * linearR + 0.7152 * linearG + 0.0722 * linearB;
+
+  // Determines which one of the white and black text have a better contrast
+  // ratio against the used background color.
+  // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+  // @TODO(gmajoulet): Improve the text color for high contrast ratio.
+  // 1 is L for #FFF, and 0 is L for #000.
+  // (1 + 0.05) / (L + 0.05) > (L + 0.05) / (0 + 0.05) toggles for L = 0.179.
+  return L > 0.179 ? '#000' : '#FFF';
 }
