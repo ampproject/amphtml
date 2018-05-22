@@ -870,6 +870,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  unruly: {
+    prefetch: 'https://video.unrulymedia.com/amp-demo/native-loader.js',
+    renderStartImplemented: true,
+  },
+
   valuecommerce: {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [
