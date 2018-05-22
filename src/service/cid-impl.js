@@ -38,7 +38,7 @@ import {
 import {
   getSourceOrigin,
   isProxyOrigin,
-  parseUrl,
+  parseUrlDeprecated,
 } from '../url';
 import {isIframed} from '../dom';
 import {parseJson, tryParseJson} from '../json';
@@ -114,6 +114,7 @@ export class Cid {
      * Cached base cid once read from storage to avoid repeated
      * reads.
      * @private {?Promise<string>}
+     * @restricted
      */
     this.baseCid_ = null;
 
@@ -121,6 +122,7 @@ export class Cid {
      * Cache to store external cids. Scope is used as the key and cookie value
      * is the value.
      * @private {!Object<string, !Promise<string>>}
+     * @restricted
      */
     this.externalCidCache_ = Object.create(null);
 
@@ -212,7 +214,7 @@ export class Cid {
   getExternalCid_(getCidStruct, persistenceConsent) {
     const {scope} = getCidStruct;
     /** @const {!Location} */
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     if (!isProxyOrigin(url)) {
       const apiKey = this.isScopeOptedIn_(scope);
       if (apiKey) {

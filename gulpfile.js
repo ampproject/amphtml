@@ -644,7 +644,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
 
 /**
  * @param {string} path
- * @param {string} css
+ * @param {string} name
  * @param {string} version
  * @param {!Object} options
  */
@@ -820,7 +820,6 @@ function performBuild(watch) {
       polyfillsForTests(),
       buildAlp({watch}),
       buildExaminer({watch}),
-      buildSw({watch}),
       buildWebWorker({watch}),
       buildExtensions({bundleOnlyIfListedInFiles: !watch, watch}),
       compile(watch),
@@ -868,7 +867,6 @@ function dist() {
           buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildExaminer({
             minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildWebWorker({
             minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
@@ -941,9 +939,6 @@ function checkTypes() {
     './src/inabox/amp-inabox.js',
     './ads/alp/install-alp.js',
     './ads/inabox/inabox-host.js',
-    './src/service-worker/shell.js',
-    './src/service-worker/core.js',
-    './src/service-worker/kill.js',
     './src/web-worker/web-worker.js',
   ];
   const extensionValues = Object.keys(extensions).map(function(key) {
@@ -1300,6 +1295,7 @@ function buildWebPushPublisherFiles(options) {
 /**
  * Build amp-web-push publisher files HTML page.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildWebPushPublisherFilesVersion(version, options) {
@@ -1374,6 +1370,7 @@ function buildLoginDone(options) {
 /**
  * Build "Login Done" page for the specified version.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildLoginDoneVersion(version, options) {
@@ -1503,36 +1500,6 @@ function buildExaminer(options) {
     minifiedName: 'examiner.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
   });
-}
-
-/**
- * Build service worker JS.
- *
- * @param {!Object} options
- */
-function buildSw(options) {
-  const opts = Object.assign({}, options);
-  return Promise.all([
-    // The service-worker script loaded by the browser.
-    compileJs('./src/service-worker/', 'shell.js', './dist/', {
-      toName: 'sw.max.js',
-      minifiedName: 'sw.js',
-      watch: opts.watch,
-      minify: opts.minify || argv.minify,
-      preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
-    }),
-    // The service-worker kill script that may be loaded by the browser.
-    compileJs('./src/service-worker/', 'kill.js', './dist/', {
-      toName: 'sw-kill.max.js',
-      minifiedName: 'sw-kill.js',
-      watch: opts.watch,
-      minify: opts.minify || argv.minify,
-      preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
-    }),
-    // The script imported by the service-worker. This is the "core".
-    buildExtensionJs('./src/service-worker', 'cache-service-worker', '0.1',
-        Object.assign({}, opts, {noWrapper: true, filename: 'core.js'})),
-  ]);
 }
 
 /**

@@ -270,14 +270,12 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @private */
   encodeId_(id) {
-    /* id is either a Brightcove-assigned id, or a customer-generated reference
-      id. reference ids are prefixed 'ref:' and the colon must be preserved
-      unencoded */
-    if (id.substring(0,4) === 'ref:') {
+    /* id is either a Brightcove-assigned id, or a customer-generated reference id.
+      reference ids are prefixed 'ref:' and the colon must be preserved unencoded */
+    if (id.substring(0, 4) === 'ref:') {
       return `ref:${encodeURIComponent(id.substring(4))}`;
-    } else {
-      return encodeURIComponent(id);
     }
+    return encodeURIComponent(id);
   }
 
   /** @override */

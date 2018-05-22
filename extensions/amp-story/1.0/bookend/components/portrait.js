@@ -18,7 +18,7 @@ import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrl} from '../../../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
 
 /**
@@ -55,11 +55,11 @@ export class PortraitComponent {
       'url' in portraitJson, 'Portrait component must contain `category`, ' +
       '`image`, and `url` fields, skipping invalid.');
 
-    user().assert(isProtocolValid(portraitJson['url']), 'Unsupported protocol' +
-    ` for article URL ${portraitJson['url']}`);
+    user().assert(isProtocolValid(portraitJson['url']), 'Unsupported ' +
+    `protocol for article URL ${portraitJson['url']}`);
 
-    user().assert(isProtocolValid(portraitJson['image']), 'Unsupported' +
-    `  protocol for article image URL ${portraitJson['image']}`);
+    user().assert(isProtocolValid(portraitJson['image']), 'Unsupported ' +
+    `protocol for article image URL ${portraitJson['image']}`);
   }
 
   /**
@@ -72,7 +72,7 @@ export class PortraitComponent {
       type: portraitJson['type'],
       category: portraitJson['category'],
       url: portraitJson['url'],
-      domainName: parseUrl(portraitJson['url']).hostname,
+      domainName: parseUrlDeprecated(portraitJson['url']).hostname,
       image: portraitJson['image'],
     };
   }
@@ -87,7 +87,8 @@ export class PortraitComponent {
     const html = htmlFor(doc);
     const template =
         html`
-        <a class="i-amphtml-story-bookend-portrait"
+        <a class="i-amphtml-story-bookend-portrait
+          i-amphtml-story-bookend-component"
           target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>

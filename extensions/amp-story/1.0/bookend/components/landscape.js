@@ -18,7 +18,7 @@ import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrl} from '../../../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
 
 /**
@@ -58,11 +58,11 @@ export class LandscapeComponent {
       'component must contain `title`, `category`, `image`, and `url` fields,' +
       ' skipping invalid.');
 
-    user().assert(isProtocolValid(landscapeJson['url']), 'Unsupported' +
-    ` protocol for landscape URL ${landscapeJson['url']}`);
+    user().assert(isProtocolValid(landscapeJson['url']), 'Unsupported ' +
+    `protocol for landscape URL ${landscapeJson['url']}`);
 
-    user().assert(isProtocolValid(landscapeJson['image']), 'Unsupported' +
-    `  protocol for landscape image URL ${landscapeJson['image']}`);
+    user().assert(isProtocolValid(landscapeJson['image']), 'Unsupported ' +
+    `protocol for landscape image URL ${landscapeJson['image']}`);
   }
 
   /**
@@ -76,7 +76,7 @@ export class LandscapeComponent {
       title: landscapeJson['title'],
       category: landscapeJson['category'],
       url: landscapeJson['url'],
-      domainName: parseUrl(landscapeJson['url']).hostname,
+      domainName: parseUrlDeprecated(landscapeJson['url']).hostname,
       image: landscapeJson['image'],
     };
   }
@@ -91,7 +91,8 @@ export class LandscapeComponent {
     const html = htmlFor(doc);
     const el =
         html`
-        <a class="i-amphtml-story-bookend-landscape"
+        <a class="i-amphtml-story-bookend-landscape
+          i-amphtml-story-bookend-component"
           target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
