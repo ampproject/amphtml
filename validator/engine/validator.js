@@ -3578,7 +3578,7 @@ function checkForReferencePointCollision(
 function validateAncestorTags(parsedTagSpec, context, validationResult) {
   const spec = parsedTagSpec.getSpec();
   if (spec.mandatoryAncestor !== null) {
-    const {mandatoryAncestor} = spec;
+    const mandatoryAncestor = /** @type {string} */ (spec.mandatoryAncestor);
     if (!context.getTagStack().hasAncestor(mandatoryAncestor)) {
       if (amp.validator.LIGHT) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
