@@ -18,6 +18,14 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
+import {
+  createFrameFor,
+  isJsonOrObj,
+  mutedOrUnmutedEvent,
+  objOrParseJson,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -32,10 +40,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
 import {setStyles} from '../../../src/style';
-import {startsWith} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
 
 /**
  * @enum {number}
@@ -59,6 +64,15 @@ const PlayerFlags = {
   // Config to tell YouTube to hide annotations by default
   HIDE_ANNOTATION: 3,
 };
+
+
+/** @private @const {!Object<string, (string|Array<string>)} */
+const EventsToDispatch = {
+  [PlayerStates.PAUSED]: VideoEvents.PAUSE,
+  // YT does not fire pause and ended together.
+  [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
+};
+
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -106,11 +120,12 @@ class AmpYoutube extends AMP.BaseElement {
     // we can switch to preloading the full source. For now this doesn't
     // work, because we preload with a different type and in that case
     // responses are only picked up if they are cacheable.
-    this.preconnect.url(this.getVideoIframeSrc_());
+    const {preconnect} = this;
+    preconnect.url(this.getVideoIframeSrc_());
     // Host that YT uses to serve JS needed by player.
-    this.preconnect.url('https://s.ytimg.com', opt_onLayout);
+    preconnect.url('https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
-    this.preconnect.url('https://i.ytimg.com', opt_onLayout);
+    preconnect.url('https://i.ytimg.com', opt_onLayout);
   }
 
   /** @override */
@@ -221,13 +236,7 @@ class AmpYoutube extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     // See https://developers.google.com/youtube/iframe_api_reference
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    const src = this.getVideoIframeSrc_();
-
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = src;
-    this.applyFillContent(iframe);
+    const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
     this.iframe_ = iframe;
 
@@ -237,7 +246,6 @@ class AmpYoutube extends AMP.BaseElement {
         this.handleYoutubeMessages_.bind(this)
     );
 
-    this.element.appendChild(this.iframe_);
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell YT that we want to receive messages
       this.listenToFrame_();
@@ -332,47 +340,53 @@ class AmpYoutube extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleYoutubeMessages_(event) {
-    if (event.origin != 'https://www.youtube.com' ||
-        event.source != this.iframe_.contentWindow) {
+    if (!originMatches(event, this.iframe_, 'https://www.youtube.com')) {
       return;
     }
-    if (!getData(event) || !(isObject(getData(event))
-        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
-      return; // Doesn't look like JSON.
+    const eventData = getData(event);
+    if (!isJsonOrObj(eventData)) {
+      return;
     }
-    /** @const {?JsonObject} */
-    const data = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : tryParseJson(getData(event)));
-    if (data === undefined) {
+
+    const data = objOrParseJson(eventData);
+    if (data == null) {
       return; // We only process valid JSON.
     }
-    if (data['event'] == 'infoDelivery' &&
-        data['info'] && data['info']['playerState'] !== undefined) {
-      const playerState = data['info']['playerState'];
-      if (playerState == PlayerStates.PAUSED) {
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-      } else if (playerState == PlayerStates.ENDED) {
-        // YT does not fire pause and ended together.
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-        this.element.dispatchCustomEvent(VideoEvents.ENDED);
-      } else if (playerState == PlayerStates.PLAYING) {
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+
+    const eventType = data['event'];
+    const info = data['info'] || {};
+
+    const {element} = this;
+
+    const playerState = info['playerState'];
+    if (eventType == 'infoDelivery' && playerState) {
+      redispatch(element, playerState, EventsToDispatch);
+      return;
+    }
+
+    const muted = info['muted'];
+    if (eventType == 'infoDelivery' && info && muted !== undefined) {
+      if (this.muted_ == muted) {
+        return;
       }
-    } else if (data['event'] == 'infoDelivery' &&
-        data['info'] && data['info']['muted'] !== undefined) {
-      if (this.muted_ != data['info']['muted']) {
-        this.muted_ = data['info']['muted'];
-        const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
-        this.element.dispatchCustomEvent(evt);
-      }
-    } else if (data['event'] == 'initialDelivery' && data['info']) {
-      this.info_ = data['info'];
-    } else if (data['event'] == 'infoDelivery' && data['info'] &&
-        data['info']['currentTime'] !== undefined) {
-      this.info_.currentTime = data['info']['currentTime'];
+      this.muted_ = muted;
+      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      return;
+    }
+
+    if (eventType == 'initialDelivery') {
+      this.info_ = info;
+      return;
+    }
+
+    if (eventType == 'infoDelivery' && info['currentTime'] !== undefined) {
+      this.info_.currentTime = info['currentTime'];
+      return;
     }
   }
 
