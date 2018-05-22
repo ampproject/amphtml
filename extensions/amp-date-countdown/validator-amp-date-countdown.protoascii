@@ -30,8 +30,20 @@ tags: {  # <amp-date-countdown>
   tag_name: "AMP-DATE-COUNTDOWN"
   requires_extension: "amp-date-countdown"
   attrs: {
+    name: "biggest-unit"
+    value_regex_casei: "days|hours|minutes|seconds"
+  }
+  attrs: {
     name: "end-date"
     mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])"
+  }
+  attrs: {
+    name: "locale"
+    value_regex_casei: "de|en|es|fr|id|it|ja|ko|nl|pt|ru|th|tr|vi|zh-cn|zh-tw"
+  }
+  attrs: {
+    name: "offset-seconds"
   }
   attrs: {
     name: "timestamp-ms"
@@ -42,19 +54,8 @@ tags: {  # <amp-date-countdown>
     mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
   }
   attrs: {
-    name: "offset-seconds"
-  }
-  attrs: {
     name: "when-ended"
-    value: "(stop|continue)"
-  }
-  attrs: {
-    name: "locale"
-    value: "(zh-CN|zh-TW|de|en|es|fr|id|it|ja|ko|nl|pt|ru|th|tr|vi)"
-  }
-  attrs: {
-    name: "biggest-unit"
-    value: "(days|hours|minutes|seconds)"
+    value_regex_casei: "stop"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

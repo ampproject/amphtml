@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
@@ -51,8 +51,6 @@ const MILLISECONDS_IN_SECOND = 1000;
 /** @const {Array} */
 //https://ctrlq.org/code/19899-google-translate-languages refer to google code
 const LOCALE_WORD = {
-  'zh-CN': ['年', '月', '天', '小时', '分钟', '秒'],
-  'zh-TW': ['年', '月', '天', '小時', '分鐘', '秒'],
   'de': ['Jahren', 'Monaten', 'Tagen', 'Stunden', 'Minuten', 'Sekunden'],
   'en': ['Years', 'Months', 'Days', 'Hours', 'Minutes', 'Seconds'],
   'es': ['años', 'meses', 'días', 'horas', 'minutos', 'segundos'],
@@ -67,6 +65,8 @@ const LOCALE_WORD = {
   'th': ['ปี', 'เดือน', 'วัน', 'ชั่วโมง', 'นาที', 'วินาที'],
   'tr': ['yıl', 'ay', 'gün', 'saat', 'dakika', 'saniye'],
   'vi': ['năm', 'tháng', 'ngày', 'giờ', 'phút', 'giây'],
+  'zh-cn': ['年', '月', '天', '小时', '分钟', '秒'],
+  'zh-tw': ['年', '月', '天', '小時', '分鐘', '秒'],
 };
 
 export class AmpDateCountdown extends AMP.BaseElement {
@@ -92,10 +92,10 @@ export class AmpDateCountdown extends AMP.BaseElement {
     this.offsetSeconds_ = Number(this.element.getAttribute('offset-seconds')) || DEFAULT_OFFSET_SECONDS;
 
     /** @private {string} */
-    this.locale_ = (this.element.getAttribute('locale')) || DEFAULT_LOCALE;
+    this.locale_ = (this.element.getAttribute('locale') || DEFAULT_LOCALE).toLowerCase();
 
     /** @private {string} */
-    this.whenEnded_ = (this.element.getAttribute('when-ended')) || DEFAULT_WHEN_ENDED;
+    this.whenEnded_ = (this.element.getAttribute('when-ended') || DEFAULT_WHEN_ENDED).toLowerCase();
 
     /** @private {string} */
     this.biggestUnit_ = (this.element.getAttribute('biggest-unit') || DEFAULT_BIGGEST_UNIT).toUpperCase();
@@ -113,8 +113,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     Services.viewerForDoc(this.win.document).whenFirstVisible().then(() => {
-      const epoch = this.getEpoch_() + (this.offsetSeconds_ * 1000);
-      this.tickCountDown_(new Date(epoch) - new Date());
+      const EPOCH = this.getEpoch_() + (this.offsetSeconds_ * 1000);
+      this.tickCountDown_(new Date(EPOCH) - new Date());
     });
   }
   /** @override */
@@ -124,13 +124,13 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const epoch = this.getEpoch_() + (this.offsetSeconds_ * 1000);
-    let differentBetween = new Date(epoch) - new Date() - 1000; //substract 1000 here because of buildCallback show the initial time
-    const delay = 1000;
+    const DELAY = 1000;
+    const EPOCH = this.getEpoch_() + (this.offsetSeconds_ * DELAY);
+    let differentBetween = new Date(EPOCH) - new Date() - DELAY; //substract delay (1000ms) here because of buildCallback show the initial time
     this.countDownTimer_ = this.win.setInterval(() => {
       this.tickCountDown_(differentBetween);
-      differentBetween -= delay;
-    }, delay);
+      differentBetween -= DELAY;
+    }, DELAY);
     return Promise.resolve();
   }
 
@@ -160,13 +160,13 @@ export class AmpDateCountdown extends AMP.BaseElement {
    * @private
    */
   tickCountDown_(differentBetween) {
-    const data = this.getYDHMSFromMs_(differentBetween);
+    const DIFF = this.getYDHMSFromMs_(differentBetween);
     if (this.whenEnded_ === 'stop' && differentBetween < 1000) {
       Services.actionServiceForDoc(this.element)
           .trigger(this.element, 'timeout', null, ActionTrust.LOW);
       this.win.clearInterval(this.countDownTimer_);
     }
-    this.renderItems_(Object.assign(data, this.localeWordList_));
+    this.renderItems_(Object.assign(DIFF, this.localeWordList_));
   }
 
   /**
@@ -276,8 +276,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
    * @private
    */
   rendered_(element) {
-    const vsync = Services.vsyncFor(this.win);
-    vsync.mutate(() => {
+    return this.mutateElement(() => {
       const template = this.element.firstElementChild;
       removeChildren(this.element);
       this.element.appendChild(template);
