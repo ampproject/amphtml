@@ -29,6 +29,7 @@ import {dev, user} from '../../../src/log';
 import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {filterSplice} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
+import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -335,6 +336,21 @@ export class Bind {
         });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
+  }
+
+  /**
+   * Returns the stringified value of the global state for a given field-based
+   * expression, e.g. "foo.bar.baz".
+   * @param {string} expr
+   * @return {string}
+   */
+  getStateValue(expr) {
+    const value = getValueForExpr(this.state_, expr);
+    if (isObject(value) || isArray(value)) {
+      return JSON.stringify(/** @type {JsonObject} */(value));
+    } else {
+      return String(value);
+    }
   }
 
   /**
