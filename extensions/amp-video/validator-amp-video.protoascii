@@ -67,7 +67,7 @@ attr_lists: {
   attrs: { name: "placeholder" }
   attrs: {
     name: "preload"
-    value_regex: "(none|metadata|auto|)"
+    value_regex: "auto|metadata|none|"
   }
   attrs: {
     name: "rotate-to-fullscreen"

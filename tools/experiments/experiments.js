@@ -16,6 +16,7 @@
 
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
+import {Deferred} from '../../src/utils/promise';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
@@ -133,11 +134,6 @@ const EXPERIMENTS = [
     id: 'cache-service-worker',
     name: 'AMP Cache Service Worker',
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
-  },
-  {
-    id: 'amp-lightbox-gallery',
-    name: 'Enables a new lightbox experience via the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
   {
     id: 'amp-lightbox-a4a-proto',
@@ -299,6 +295,13 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/3434',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
+  {
+    id: 'amp-fx-fly-in',
+    name: 'Enables amp-fx="fly-in-{bottom,top,left,right}" - ' +
+      'scroll triggered timed fly in animations',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+  },
 ];
 
 if (getMode().localDev) {
@@ -429,6 +432,7 @@ function isExperimentOn_(id) {
 /**
  * Toggles the experiment.
  * @param {string} id
+ * @param {string} name
  * @param {boolean=} opt_on
  */
 function toggleExperiment_(id, name, opt_on) {
@@ -494,18 +498,19 @@ function showConfirmation_(message, callback) {
  * experiment state can reflect the default activated experiments.
  */
 function getAmpConfig() {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', () => {
-      resolve(xhr.responseText);
-    });
-    xhr.addEventListener('error', () => {
-      reject(new Error(xhr.statusText));
-    });
-    // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
-    xhr.open('GET', '/v0.js?' + Math.random(), true);
-    xhr.send(null);
-  }).then(text => {
+  const deferred = new Deferred();
+  const {promise, resolve, reject} = deferred;
+  const xhr = new XMLHttpRequest();
+  xhr.addEventListener('load', () => {
+    resolve(xhr.responseText);
+  });
+  xhr.addEventListener('error', () => {
+    reject(new Error(xhr.statusText));
+  });
+  // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
+  xhr.open('GET', '/v0.js?' + Math.random(), true);
+  xhr.send(null);
+  return promise.then(text => {
     const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
     if (!match) {
       throw new Error('Can\'t find AMP_CONFIG in: ' + text);

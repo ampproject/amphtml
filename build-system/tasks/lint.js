@@ -132,17 +132,33 @@ function jsFilesChanged() {
 }
 
 /**
- * Checks if there are .eslintrc changes in this PR, in which case we must lint
- * all files.
+ * Checks if there are eslint rule changes, in which case we must lint all
+ * files.
  *
  * @return {boolean}
  */
-function eslintrcChanged() {
+function eslintRulesChanged() {
   if (process.env.TRAVIS_EVENT_TYPE === 'push') {
     return false;
   }
   return gitDiffNameOnlyMaster().filter(function(file) {
-    return path.basename(file).includes('.eslintrc');
+    return path.basename(file).includes('.eslintrc') ||
+        path.dirname(file) === 'build-system/eslint-rules';
+  }).length > 0;
+}
+
+/**
+ * Checks if there are validator changes, in which case we don't do strict
+ * linting.
+ *
+ * @return {boolean}
+ */
+function validatorChanged() {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
+    return false;
+  }
+  return gitDiffNameOnlyMaster().filter(function(file) {
+    return path.dirname(file).startsWith('validator');
   }).length > 0;
 }
 
@@ -182,8 +198,10 @@ function lint() {
   }
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
-    enableStrictLinting();
-  } else if (!eslintrcChanged() &&
+    if (!eslintRulesChanged()) {
+      enableStrictLinting();
+    }
+  } else if (!eslintRulesChanged() &&
       (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
        process.env.LOCAL_PR_CHECK ||
        argv['local-changes'])) {
@@ -191,11 +209,10 @@ function lint() {
     if (jsFiles.length == 0) {
       log(colors.green('INFO: ') + 'No JS files in this PR');
       return Promise.resolve();
-    } else if (jsFiles.length > filesInARefactorPr) {
-      // This is probably a refactor, don't enable strict mode.
-      setFilesToLint(jsFiles);
-    } else {
-      setFilesToLint(jsFiles);
+    }
+    setFilesToLint(jsFiles);
+    // For large refactors or validator changes, don't enable strict linting.
+    if (jsFiles.length <= filesInARefactorPr && !validatorChanged()) {
       enableStrictLinting();
     }
   }

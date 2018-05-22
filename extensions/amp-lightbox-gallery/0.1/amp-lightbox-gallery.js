@@ -41,7 +41,6 @@ import {
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
 import {toArray} from '../../../src/types';
@@ -183,8 +182,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} disabled`);
     this.manager_ = dev().assert(manager_);
     this.vsync_ = this.getVsync();
     this.history_ = Services.historyForDoc(this.getAmpDoc());
@@ -1497,13 +1494,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
  * @private visible for testing.
  */
 export function installLightboxManager(win) {
-  if (isExperimentOn(win, TAG)) {
-    // TODO (#12859): This only works for singleDoc mode. We will move
-    // installation of LightboxManager to core after the experiment, okay for
-    // now.
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
-    manager_ = new LightboxManager(ampdoc);
-  }
+  // TODO (#12859): This only works for singleDoc mode. We will move
+  // installation of LightboxManager to core after the experiment, okay for now.
+  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+  manager_ = new LightboxManager(ampdoc);
 }
 
 /**
