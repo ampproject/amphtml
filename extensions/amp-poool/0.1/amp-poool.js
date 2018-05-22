@@ -120,7 +120,7 @@ class AmpPoool extends AMP.BaseElement {
             this.updatePooolConfig_(
                 "config",
                 config,
-                this.element.getAttribute("data-"+config.replace(/_/g, "-")),
+                this.element.getAttribute(`data-${config.replace(/_/g, "-")}`),
                 script,
                 PooolConfig[config].noString
             );
@@ -131,15 +131,15 @@ class AmpPoool extends AMP.BaseElement {
             this.updatePooolConfig_(
                 "style",
                 style,
-                this.element.getAttribute("data-"+style.replace("_", "-")),
+                this.element.getAttribute(`data-${style.replace("_", "-")}`),
                 script
             );
         }
 
         // Apply publisher custom events
         var events = this.win.document.getElementById(
-            this.element.getAttribute("data-events"
-        ));
+            this.element.getAttribute("data-events")
+        );
 
         // Only if publisher want to set custom events
         if(events) {
@@ -201,11 +201,11 @@ class AmpPoool extends AMP.BaseElement {
         if(value != null){
             if(no_string){
                 script.innerHTML +=
-                    "poool('"+type+"', '"+name+"', "+value+");\n";
+                    `poool('${type}', '${name}', ${value});\n`;
             }
             else{
                 script.innerHTML +=
-                    "poool('"+type+"', '"+name+"', '"+value+"');\n";
+                    `poool('${type}', '${name}', '${value}');\n`;
             }
         }
     };
