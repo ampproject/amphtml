@@ -29,7 +29,7 @@ import {setStyles} from '../../../src/style';
 import {tryFocus} from '../../../src/dom';
 
 const TAG = 'amp-accordion';
-const MAX_TRANSITION_DURATION = 1000; // ms
+const MAX_TRANSITION_DURATION = 500; // ms
 const MIN_TRANSITION_DURATION = 200; // ms
 
 class AmpAccordion extends AMP.BaseElement {
@@ -284,10 +284,11 @@ class AmpAccordion extends AMP.BaseElement {
     const sectionChild = section.children[1];
 
     return this.mutateElement(() => {
-      section.setAttribute('expanded', '');
       setStyles(sectionChild, {
         opacity: 0,
+        position: 'fixed',
       });
+      section.setAttribute('expanded', '');
     }).then(() => {
       return this.measureMutateElement(
           () => {
@@ -300,16 +301,19 @@ class AmpAccordion extends AMP.BaseElement {
             setStyles(sectionChild, {
               'opacity': '',
               'height': 0,
+              'position': '',
             });
           });
     }).then(() => {
       return Animation.animate(this.element, setStylesTransition(sectionChild, {
         'height': px(numeric(0, height)),
+        'opacity': numeric(0,1),
       }), duration)
           .thenAlways(() => {
             this.mutateElement(() => {
               setStyles(sectionChild, {
                 height: '',
+                opacity: '',
               });
             });
           });
