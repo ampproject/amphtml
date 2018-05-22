@@ -837,7 +837,7 @@ export class AmpStory extends AMP.BaseElement {
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
-    this.handlePreviewAttributes(targetPage);
+    this.handlePreviewAttributes_(targetPage);
 
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
@@ -865,14 +865,14 @@ export class AmpStory extends AMP.BaseElement {
     this.systemLayer_.setDeveloperLogContextString(
         this.activePage_.element.id);
 
-    if (oldPage) {
-      oldPage.setActive(false);
-      // indication that this should be offscreen to left in desktop view
-      setAttributeInMutate(oldPage, Attributes.VISITED);
-    }
-
     return targetPage.beforeVisible().then(() => {
       this.triggerActiveEventForPage_();
+
+      if (oldPage) {
+        oldPage.setActive(false);
+        // indication that this should be offscreen to left in desktop view
+        setAttributeInMutate(oldPage, Attributes.VISITED);
+      }
 
       targetPage.setActive(true);
 
@@ -897,8 +897,9 @@ export class AmpStory extends AMP.BaseElement {
    * Clear existing preview attributes, Check to see if there is a next or
    * previous page, set new attributes.
    * @param {!./amp-story-page.AmpStoryPage} targetPage
+   * @private
    */
-  handlePreviewAttributes(targetPage) {
+  handlePreviewAttributes_(targetPage) {
     if (this.previousPage_) {
       removeAttributeInMutate(this.previousPage_, Attributes.PREVIOUS);
       this.previousPage_ = null;
@@ -1615,12 +1616,15 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       this.hideBookend_();
     }
-    this.switchTo_(dev().assertElement(this.pages_[0].element).id);
+    const switchPromise = this.switchTo_(
+        dev().assertElement(this.pages_[0].element).id);
 
     // Reset all pages so that they are offscreen to right instead of left in
     // desktop view.
-    this.pages_.forEach(page =>
-      removeAttributeInMutate(page, Attributes.VISITED));
+    switchPromise.then((() => {
+      this.pages_.forEach(page =>
+        removeAttributeInMutate(page, Attributes.VISITED));
+    }));
   }
 
   /** @return {!NavigationState} */
