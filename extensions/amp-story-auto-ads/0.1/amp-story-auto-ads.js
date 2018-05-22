@@ -140,8 +140,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /**
      * Version of the story store service depends on which version of amp-story
      * the publisher is loading. They all have the same implementation.
-     * @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|
-     *           ?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
+     * @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
      */
     this.storeService_ = null;
   }
@@ -243,7 +242,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     user().assert(adAttributes, `<${TAG}>: Error reading config.` +
       'Top level JSON should have an "ad-attributes" key');
 
-    const type = adAttributes.type;
+    const {type} = adAttributes;
     user().assert(type, `<${TAG}>: Error reading config.` +
       'Missing ["ad-attribues"]["type"] key');
   }

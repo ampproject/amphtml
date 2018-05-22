@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
@@ -128,9 +129,9 @@ class AmpBridPlayer extends AMP.BaseElement {
         'attributes must be specified for <amp-brid-player> %s',
         this.element);
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -168,9 +169,9 @@ class AmpBridPlayer extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
   }
 
@@ -182,8 +183,7 @@ class AmpBridPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
-    const partnerID = this.partnerID_;
-    const feedID = this.feedID_;
+    const {partnerID_: partnerID, feedID_: feedID} = this;
 
     this.propagateAttributes(['aria-label'], placeholder);
     if (this.element.hasAttribute('data-video') ||

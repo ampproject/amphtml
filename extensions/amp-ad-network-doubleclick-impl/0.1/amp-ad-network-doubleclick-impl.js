@@ -126,7 +126,7 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
 
 /**
  * @const {string}
- * @visibileForTesting
+ * @visibleForTesting
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
@@ -152,11 +152,11 @@ let windowLocationQueryParameters;
  */
 let LayoutRectOrDimsDef;
 
+/* eslint-disable jsdoc/require-param */
 /**
  * Array of functions used to combine block level request parameters for SRA
  * request.
- * @private @const
- * {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>}
+ * @private @const {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>>}
  */
 const BLOCK_SRA_COMBINERS_ = [
   instances => {
@@ -260,7 +260,7 @@ const BLOCK_SRA_COMBINERS_ = [
     return hasAmpContainer ? {'acts': result.join('|')} : null;
   },
 ];
-
+/* eslint-enable jsdoc/require-param */
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
@@ -446,8 +446,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
       // interaction with refresh.
       const experimentInfoMap =
-          /** @type {!Object<string,
-          !../../../src/experiments.ExperimentInfo>} */ ({});
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
         isTrafficEligible: () => true,
         branches: ['22302764','22302765'],
@@ -459,8 +459,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // requests.
         addExperimentIdToElement(expId, this.element);
         if (expId === CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT) {
-          // TODO(keithwrightbos) - do not clear if at least one slot on the page
-          // is an AMP creative that survived unlayoutCallback in order to
+          // TODO(keithwrightbos) - do not clear if at least one slot on the
+          // page is an AMP creative that survived unlayoutCallback in order to
           // ensure competitive exclusion/roadblocking.  Note this only applies
           // to non-backfill inventory.
           dev().info(TAG, 'resetting page correlator');
@@ -484,9 +484,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   getPageParameters(consentState) {
+    let npa = null;
+    let consent = null;
+    switch (consentState) {
+      case null:
+      case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+        break;
+      case CONSENT_POLICY_STATE.INSUFFICIENT:
+        consent = false;
+      case CONSENT_POLICY_STATE.UNKNOWN:
+        npa = '1';
+        break;
+      case CONSENT_POLICY_STATE.SUFFICIENT:
+        consent = true;
+        break;
+      default:
+        dev().error(TAG, `unknown consent enum ${consentState}`);
+    }
     return {
-      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
+      npa,
+      consent,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
@@ -535,7 +552,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Populate's block-level state for ad URL construction.
    * @param {?CONSENT_POLICY_STATE} consentState
-   * @visibileForTesting
+   * @visibleForTesting
    */
   populateAdUrlState(consentState) {
     this.consentState = consentState;
@@ -1010,7 +1027,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   generateAdKey_(size) {
-    const element = this.element;
+    const {element} = this;
     const domFingerprint = domFingerprintPlain(element);
     const slot = element.getAttribute('data-slot') || '';
     const multiSize = element.getAttribute('data-multi-size') || '';
@@ -1083,7 +1100,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Groups slots by type and networkId from data-slot parameter.  Exposed for
    * ease of testing.
    * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
@@ -1097,7 +1114,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - group by networkID allowing for separate SRA requests
    * - for each grouping, construct SRA request
    * - handle chunks for streaming response for each block
-   * @visibileForTesting
+   * @visibleForTesting
    */
   initiateSraRequests() {
     if (sraRequests) {
@@ -1134,9 +1151,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // Only contained invalid elements.
                 return;
               }
-              // Determine if more than one block for this element, if not do not
-              // set sra request promise which results in sending as
-              // non-SRA request (benefit is it allows direct cache method).
+              // Determine if more than one block for this element, if not do
+              // not set sra request promise which results in sending as non-SRA
+              // request (benefit is it allows direct cache method).
               if (typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
                 typeInstances[0].sraDeferred.resolve(null);
@@ -1232,8 +1249,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       // Publisher explicitly wants SRA so do not attempt to
                       // recover as SRA guarantees cannot be enforced.
                       typeInstances.forEach(instance => {
-                        // Reset ad url to ensure layoutCallback does not fallback to
-                        // frame get which would lose SRA guarantees.
+                        // Reset ad url to ensure layoutCallback does not
+                        // fallback to frame get which would lose SRA
+                        // guarantees.
                         instance.resetAdUrl();
                         instance.attemptCollapse();
                         instance.sraDeferred.reject(error);
@@ -1356,7 +1374,7 @@ export function resetLocationQueryParametersForTesting() {
 /**
  * @param {!Element} element
  * @return {string} networkId from data-ad-slot attribute.
- * @visibileForTesting
+ * @visibleForTesting
  */
 export function getNetworkId(element) {
   const networkId = /^(?:\/)?(\d+)/.exec(

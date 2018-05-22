@@ -72,7 +72,7 @@ describes.realWin('amp-kaltura-player', {
   });
 
   it('requires data-account', () => {
-    allowConsoleError(() => { return getKaltura({}).then(kp => {
+    return allowConsoleError(() => { return getKaltura({}).then(kp => {
       kp.build();
     }).should.eventually.be.rejectedWith(
         /The data-partner attribute is required for/);

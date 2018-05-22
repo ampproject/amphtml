@@ -338,9 +338,9 @@ export function applyStaticLayout(element) {
     return layout;
   }
 
-  // If the layout was already done by server-side rendering (SSR), then the code
-  // below will not run. Any changes below will necessitate a change to SSR and must
-  // be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
+  // If the layout was already done by server-side rendering (SSR), then the
+  // code below will not run. Any changes below will necessitate a change to SSR
+  // and must be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
 
   // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
@@ -447,8 +447,9 @@ export function applyStaticLayout(element) {
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
   } else if (layout == Layout.INTRINSIC) {
-    // Intrinsic uses an svg inside the sizer element rather than the padding trick
-    // Note a naked svg won't work becasue other thing expect the i-amphtml-sizer element
+    // Intrinsic uses an svg inside the sizer element rather than the padding
+    // trick Note a naked svg won't work becasue other thing expect the
+    // i-amphtml-sizer element
     const sizer = htmlFor(element)`
       <i-amphtml-sizer class="i-amphtml-sizer">
         <img class="i-amphtml-intrinsic-sizer" />

@@ -15,14 +15,14 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
+import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {Services} from '../../src/services';
 import {StandardActions} from '../../src/service/standard-actions-impl';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
-
 import {setParentWindow} from '../../src/service';
+import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
@@ -205,41 +205,99 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"AMP" global target', () => {
-    it('should implement navigateTo', () => {
-      const navigator = {navigateTo: sandbox.stub()};
-      sandbox.stub(Services, 'navigationForDoc').returns(navigator);
+    let win;
+    let invocation;
 
-      const win = {};
-      const invocation = {
-        method: 'navigateTo',
-        args: {
-          url: 'http://bar.com',
-        },
+    beforeEach(() => {
+      win = {};
+      invocation = {
         node: {
           ownerDocument: {
             defaultView: win,
           },
         },
+        satisfiesTrust: () => true,
       };
+    });
 
-      // Should check trust and fail.
-      invocation.satisfiesTrust = () => false;
-      standardActions.handleAmpTarget(invocation);
-      expect(navigator.navigateTo).to.be.not.called;
+    describe('navigateTo', () => {
+      let navigator;
 
-      // Should succeed.
-      invocation.satisfiesTrust = () => true;
-      standardActions.handleAmpTarget(invocation);
-      expect(navigator.navigateTo).to.be.calledOnce;
-      expect(navigator.navigateTo).to.be.calledWithExactly(
-          win, 'http://bar.com', 'AMP.navigateTo');
+      beforeEach(() => {
+        navigator = {navigateTo: sandbox.stub()};
+        sandbox.stub(Services, 'navigationForDoc').returns(navigator);
+
+        // Fake ActionInvocation.
+        invocation.method = 'navigateTo';
+        invocation.args = {
+          url: 'http://bar.com',
+        };
+        invocation.node.tagName = 'DIV';
+      });
+
+      it('should be implemented', () => {
+        // Should check trust and fail.
+        invocation.satisfiesTrust = () => false;
+        standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.not.called;
+
+        // Should succeed.
+        invocation.satisfiesTrust = () => true;
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo');
+        });
+      });
+
+      it('should pass if node does not have throwIfCannotNavigate()', () => {
+        invocation.node.tagName = 'AMP-FOO';
+        invocation.node.getImpl = () => Promise.resolve({});
+
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo');
+        });
+      });
+
+      it('should check throwIfCannotNavigate() for AMP elements', function*() {
+        const userError = sandbox.stub(user(), 'error');
+
+        invocation.node.tagName = 'AMP-FOO';
+
+        // Should succeed if throwIfCannotNavigate() is not implemented.
+        invocation.node.getImpl = () => Promise.resolve({});
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledOnce;
+        expect(navigator.navigateTo).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+
+        // Should succeed if throwIfCannotNavigate() returns null.
+        invocation.node.getImpl = () => Promise.resolve({
+          throwIfCannotNavigate: () => null,
+        });
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledTwice;
+        expect(navigator.navigateTo.getCall(1)).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+
+        // Should fail if throwIfCannotNavigate() throws an error.
+        invocation.node.getImpl = () => Promise.resolve({
+          throwIfCannotNavigate: () => { throw new Error('Fake error.'); },
+        });
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledTwice;
+        expect(userError).to.be.calledWith('STANDARD-ACTIONS',
+            'Fake error.');
+      });
     });
 
     it('should implement goBack', () => {
       installHistoryServiceForDoc(ampdoc);
       const history = Services.historyForDoc(ampdoc);
       const goBackStub = sandbox.stub(history, 'goBack');
-      const invocation = {method: 'goBack', satisfiesTrust: () => true};
+      invocation.method = 'goBack';
       standardActions.handleAmpTarget(invocation);
       expect(goBackStub).to.be.calledOnce;
     });
@@ -248,7 +306,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should implement optoutOfCid', function*() {
       const cid = cidServiceForDocForTesting(ampdoc);
       const optoutStub = sandbox.stub(cid, 'optOut');
-      const invocation = {method: 'optoutOfCid', satisfiesTrust: () => true};
+      invocation.method = 'optoutOfCid';
       standardActions.handleAmpTarget(invocation);
       yield macroTask();
       expect(optoutStub).to.be.calledOnce;
@@ -256,87 +314,48 @@ describes.sandboxed('StandardActions', {}, () => {
 
 
     it('should implement setState()', () => {
-      const setStateWithExpression = sandbox.stub();
-      // Bind.setStateWithExpression() doesn't resolve with a value,
+      const invokeSpy = sandbox.stub();
+      // Bind.invoke() doesn't resolve with a value,
       // but add one here to check that the promise is chained.
-      setStateWithExpression.returns(Promise.resolve('set-state-complete'));
+      invokeSpy.returns(Promise.resolve('set-state-complete'));
 
       window.services.bind = {
-        obj: {setStateWithExpression},
+        obj: {invoke: invokeSpy},
       };
 
-      const args = {
-        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+      invocation.method = 'setState';
+      invocation.args = {
+        [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
-      const node = ampdoc;
-      const satisfiesTrust = () => true;
-      const setState = {method: 'setState', args, node, satisfiesTrust};
+      invocation.node = ampdoc;
 
-      return standardActions.handleAmpTarget(setState, 0, []).then(result => {
+      return standardActions.handleAmpTarget(invocation).then(result => {
         expect(result).to.equal('set-state-complete');
-        expect(setStateWithExpression).to.be.calledOnce;
-        expect(setStateWithExpression).to.be.calledWith('{foo: 123}');
+        expect(invokeSpy).to.be.calledOnce;
+        expect(invokeSpy).to.be.calledWith(invocation);
       });
     });
 
     it('should implement pushState()', () => {
-      const pushStateWithExpression = sandbox.stub();
-      // Bind.pushStateWithExpression() doesn't resolve with a value,
+      const invokeSpy = sandbox.stub();
+      // Bind.invoke() doesn't resolve with a value,
       // but add one here to check that the promise is chained.
-      pushStateWithExpression.returns(Promise.resolve('push-state-complete'));
+      invokeSpy.returns(Promise.resolve('push-state-complete'));
 
       window.services.bind = {
-        obj: {pushStateWithExpression},
+        obj: {invoke: invokeSpy},
       };
 
-      const args = {
-        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+      invocation.method = 'pushState';
+      invocation.args = {
+        [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
-      const node = ampdoc;
-      const satisfiesTrust = () => true;
-      const pushState = {method: 'pushState', args, node, satisfiesTrust};
+      invocation.node = ampdoc;
 
-      return standardActions.handleAmpTarget(pushState, 0, []).then(result => {
+      return standardActions.handleAmpTarget(invocation).then(result => {
         expect(result).to.equal('push-state-complete');
-        expect(pushStateWithExpression).to.be.calledOnce;
-        expect(pushStateWithExpression).to.be.calledWith('{foo: 123}');
-      });
-    });
-
-    it('should not allow chained setState', () => {
-      const spy = sandbox.spy();
-      window.services.bind = {
-        obj: {
-          setStateWithExpression: spy,
-        },
-      };
-
-      const firstSetState = {
-        method: 'setState',
-        args: {[OBJECT_STRING_ARGS_KEY]: '{foo: 123}'},
-        node: ampdoc,
-        satisfiesTrust: () => true,
-      };
-      const secondSetState = {
-        method: 'setState',
-        args: {[OBJECT_STRING_ARGS_KEY]: '{bar: 456}'},
-        node: ampdoc,
-        satisfiesTrust: () => true,
-      };
-      const actionInfos = [
-        {target: 'AMP', method: 'setState'},
-        {target: 'AMP', method: 'setState'},
-      ];
-      standardActions.handleAmpTarget(firstSetState, 0, actionInfos);
-      allowConsoleError(() => {
-        standardActions.handleAmpTarget(secondSetState, 1, actionInfos);
-      });
-
-      return Services.bindForDocOrNull(ampdoc).then(() => {
-        // Only first setState call should be allowed.
-        expect(spy).to.be.calledOnce;
-        expect(spy).to.be.calledWith('{foo: 123}');
-        expect(spy).to.not.be.calledWith('{bar: 456}');
+        expect(invokeSpy).to.be.calledOnce;
+        expect(invokeSpy).to.be.calledWith(invocation);
       });
     });
 
@@ -345,13 +364,11 @@ describes.sandboxed('StandardActions', {}, () => {
         print: () => {},
       };
       const printStub = sandbox.stub(windowApi, 'print');
-      const invocation = {
-        method: 'print',
-        satisfiesTrust: () => true,
-        node: {
-          ownerDocument: {
-            defaultView: windowApi,
-          },
+
+      invocation.method = 'print';
+      invocation.node = {
+        ownerDocument: {
+          defaultView: windowApi,
         },
       };
       standardActions.handleAmpTarget(invocation);

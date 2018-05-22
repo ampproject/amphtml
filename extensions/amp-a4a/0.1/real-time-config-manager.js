@@ -21,7 +21,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {
   isSecureUrl,
-  parseUrl,
+  parseUrlDeprecated,
 } from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 
@@ -61,7 +61,8 @@ export const RTC_ERROR_ENUM = {
   UNKNOWN_VENDOR: '9',
   // Occurs when request took longer than timeout
   TIMEOUT: '10',
-  // Occurs when URL expansion time exceeded allowed timeout, request never sent.
+  // Occurs when URL expansion time exceeded allowed timeout, request never
+  // sent.
   MACRO_EXPAND_TIMEOUT: '11',
 };
 
@@ -118,7 +119,7 @@ export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
  * @visibleForTesting
  */
 export function getCalloutParam_(url) {
-  const parsedUrl = parseUrl(url);
+  const parsedUrl = parseUrlDeprecated(url);
   return (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
 }
 
@@ -210,7 +211,7 @@ export function maybeExecuteRealTimeConfig_(
  */
 export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   rtcStartTime, macros, timeoutMillis, errorReportingUrl, opt_vendor) {
-  const win = a4aElement.win;
+  const {win} = a4aElement;
   const ampDoc = a4aElement.getAmpDoc();
   const callout = opt_vendor || getCalloutParam_(url);
   const checkStillCurrent = a4aElement.verifyStillCurrent.bind(a4aElement)();

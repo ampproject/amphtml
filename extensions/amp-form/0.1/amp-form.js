@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-form-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
@@ -129,9 +130,6 @@ export class AmpForm {
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
-
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
 
@@ -179,7 +177,7 @@ export class AmpForm {
 
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
-      const name = inputs[i].name;
+      const {name} = inputs[i];
       user().assert(name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
           'Illegal input name, %s found: %s', name, inputs[i]);
     }
@@ -237,8 +235,9 @@ export class AmpForm {
   }
 
   /**
-   * Returns a promise that will be resolved when all dependencies used inside the form
-   * tag are loaded and built (e.g. amp-selector) or 2 seconds timeout - whichever is first.
+   * Returns a promise that will be resolved when all dependencies used inside
+   * the form tag are loaded and built (e.g. amp-selector) or 2 seconds timeout
+   * - whichever is first.
    * @return {!Promise}
    * @private
    */
@@ -360,12 +359,13 @@ export class AmpForm {
   }
 
   /**
-   * Note on stopImmediatePropagation usage here, it is important to emulate native
-   * browser submit event blocking. Otherwise any other submit listeners would get the
-   * event.
+   * Note on stopImmediatePropagation usage here, it is important to emulate
+   * native browser submit event blocking. Otherwise any other submit listeners
+   * would get the event.
    *
-   * For example, action service shouldn't trigger 'submit' event if form is actually
-   * invalid. stopImmediatePropagation allows us to make sure we don't trigger it.
+   * For example, action service shouldn't trigger 'submit' event if form is
+   * actually invalid. stopImmediatePropagation allows us to make sure we don't
+   * trigger it.
    *
    * This prevents the default submission event in any of following cases:
    *   - The form is still finishing a previous submission.
@@ -505,7 +505,7 @@ export class AmpForm {
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
 
     if (isHeadOrGet) {
-      this.assertNoPasswordFields_();
+      this.assertNoSensitiveFields_();
       const values = this.getFormAsObject_();
       if (opt_extraFields) {
         deepMerge(values, opt_extraFields);
@@ -584,7 +584,7 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
-    this.assertNoPasswordFields_();
+    this.assertNoSensitiveFields_();
     // Non-xhr GET requests replacement should happen synchronously.
     for (let i = 0; i < varSubsFields.length; i++) {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
@@ -593,13 +593,16 @@ export class AmpForm {
   }
 
   /**
-   * Fail if there are password fields present when the function is called.
+   * Fail if there are password or file fields present when the function
+   * is called.
    * @private
    */
-  assertNoPasswordFields_() {
-    const passwordFields = this.form_.querySelectorAll('input[type=password]');
-    user().assert(passwordFields.length == 0,
-        'input[type=password] may only appear in form[method=post]');
+  assertNoSensitiveFields_() {
+    const fields = this.form_.querySelectorAll(
+        'input[type=password],input[type=file]');
+    user().assert(fields.length == 0,
+        'input[type=password] or input[type=file] ' +
+        'may only appear in form[method=post]');
   }
 
   /**
@@ -612,12 +615,7 @@ export class AmpForm {
       // reporting and blocking submission on non-valid forms.
       const isValid = checkUserValidityOnSubmission(this.form_);
       if (this.shouldValidate_) {
-        this.vsync_.run({
-          measure: undefined,
-          mutate: reportValidity,
-        }, {
-          validator: this.validator_,
-        });
+        this.validator_.report();
         return isValid;
       }
     }
@@ -793,15 +791,6 @@ export class AmpForm {
 
 
 /**
- * Reports validity of the form passed through state object.
- * @param {!Object} state
- */
-function reportValidity(state) {
-  state.validator.report();
-}
-
-
-/**
  * Checks user validity for all inputs, fieldsets and the form.
  * @param {!HTMLFormElement} form
  * @return {boolean} Whether the form is currently valid or not.
@@ -857,19 +846,20 @@ function removeValidityStateClasses(form) {
 }
 
 /**
- * Checks user validity which applies .user-valid and .user-invalid AFTER the user
- * interacts with the input by moving away from the input (blur) or by changing its
- * value (input).
+ * Checks user validity which applies .user-valid and .user-invalid AFTER the
+ * user interacts with the input by moving away from the input (blur) or by
+ * changing its value (input).
  *
  * See :user-invalid spec for more details:
  *   https://drafts.csswg.org/selectors-4/#user-pseudos
  *
- * The specs are still not fully specified. The current solution tries to follow a common
- * sense approach for when to apply these classes. As the specs gets clearer, we should
- * strive to match it as much as possible.
+ * The specs are still not fully specified. The current solution tries to follow
+ * a common sense approach for when to apply these classes. As the specs gets
+ * clearer, we should strive to match it as much as possible.
  *
  * @param {!Element} element
- * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
+ * @param {boolean=} propagate Whether to propagate the user validity to
+ * ancestors.
  * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
@@ -915,8 +905,8 @@ function checkUserValidity(element, propagate = false) {
 
 
 /**
- * Responds to user interaction with an input by checking user validity of the input
- * and possibly its input-related ancestors (e.g. feildset, form).
+ * Responds to user interaction with an input by checking user validity of the
+ * input and possibly its input-related ancestors (e.g. feildset, form).
  * @param {!Element} input
  * @private visible for testing.
  */
@@ -940,7 +930,7 @@ export class AmpFormService {
     // Dispatch a test-only event for integration tests.
     if (getMode().test) {
       this.whenInitialized_.then(() => {
-        const win = ampdoc.win;
+        const {win} = ampdoc;
         const event = createCustomEvent(
             win, FormEvents.SERVICE_INIT, null, {bubbles: true});
         win.dispatchEvent(event);
@@ -964,9 +954,9 @@ export class AmpFormService {
    * @private
    */
   installStyles_(ampdoc) {
-    return new Promise(resolve => {
-      installStylesForDoc(ampdoc, CSS, resolve, false, TAG);
-    });
+    const deferred = new Deferred();
+    installStylesForDoc(ampdoc, CSS, deferred.resolve, false, TAG);
+    return deferred.promise;
   }
 
   /**
@@ -986,7 +976,6 @@ export class AmpFormService {
   /**
    * Install submission handler on all forms in the document.
    * @param {?IArrayLike<T>} forms
-   * @previousValidityState
    * @template T
    * @private
    */

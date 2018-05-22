@@ -36,7 +36,7 @@ import {
   getLocation,
 } from './frame-metadata';
 import {getMode} from '../src/mode';
-import {getSourceUrl, isProxyOrigin, parseUrl} from '../src/url';
+import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {
   initLogConstructor,
   isUserErrorMessage,
@@ -209,6 +209,7 @@ import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
 import {uas} from '../ads/uas';
+import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
@@ -412,6 +413,7 @@ register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
 register('uas', uas);
+register('uzou', uzou);
 register('valuecommerce', valuecommerce);
 register('videonow', videonow);
 register('viralize', viralize);
@@ -574,7 +576,7 @@ export function validateParentOrigin(window, parentLocation) {
  * @visibleForTesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
-  const thirdPartyHost = parseUrl(urls.thirdParty).hostname;
+  const thirdPartyHost = parseUrlDeprecated(urls.thirdParty).hostname;
 
   // Everything allowed in default iframe.
   if (window.location.hostname == thirdPartyHost) {
@@ -607,12 +609,13 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   // We prefer the unforgable ancestorOrigins, but referrer is better than
   // nothing.
   const ancestor = ancestors ? ancestors[0] : window.document.referrer;
-  let hostname = parseUrl(ancestor).hostname;
+  let {hostname} = parseUrlDeprecated(ancestor);
   if (isProxyOrigin(ancestor)) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
     // trustable.
-    hostname = parseUrl(getSourceUrl(window.document.referrer)).hostname;
+    hostname = parseUrlDeprecated(getSourceUrl(window.document.referrer))
+        .hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
     // Either the hostname is exactly as whitelisted…

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseUrl, resolveRelativeUrl} from '../src/url';
+import {parseUrlDeprecated, resolveRelativeUrl} from '../src/url';
 
 
 /**
@@ -277,8 +277,10 @@ class EventListeners {
    */
   static intercept(target) {
     target.eventListeners = new EventListeners();
-    const originalAdd = target.addEventListener;
-    const originalRemove = target.removeEventListener;
+    const {
+      addEventListener: originalAdd,
+      removeEventListener: originalRemove,
+    } = target;
     target.addEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
       if (originalAdd) {
@@ -399,7 +401,7 @@ export class FakeLocation {
     this.changes = [];
 
     /** @private {!Location} */
-    this.url_ = parseUrl(href, true);
+    this.url_ = parseUrlDeprecated(href, true);
 
     // href
     Object.defineProperty(this, 'href', {
@@ -426,7 +428,7 @@ export class FakeLocation {
    */
   set_(href) {
     const oldHash = this.url_.hash;
-    this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
+    this.url_ = parseUrlDeprecated(resolveRelativeUrl(href, this.url_));
     if (this.url_.hash != oldHash) {
       this.win.eventListeners.fire({type: 'hashchange'});
     }
@@ -436,7 +438,7 @@ export class FakeLocation {
    * @param {!Object} args
    */
   change_(args) {
-    const change = parseUrl(this.url_.href);
+    const change = parseUrlDeprecated(this.url_.href);
     Object.assign({}, change, args);
     this.changes.push(change);
   }
@@ -478,7 +480,7 @@ export class FakeLocation {
    * @param {string} href
    */
   resetHref(href) {
-    this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
+    this.url_ = parseUrlDeprecated(resolveRelativeUrl(href, this.url_));
   }
 }
 

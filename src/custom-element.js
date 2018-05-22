@@ -45,6 +45,7 @@ import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {toWin} from './types';
+import {tryResolve} from '../src/utils/promise';
 
 const TAG = 'CustomElement';
 
@@ -111,6 +112,7 @@ export function createCustomElementClass(win, name) {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
+     * @param {HTMLElement} self
      */
     constructor(self) {
       return super(self);
@@ -139,6 +141,7 @@ function createBaseCustomElementClass(win) {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
+     * @param {HTMLElement} self
      */
     constructor(self) {
       self = super(self);
@@ -600,11 +603,12 @@ function createBaseCustomElementClass(win) {
     /**
      * If the element has a media attribute, evaluates the value as a media
      * query and based on the result adds or removes the class
-     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the element
-     * which in turn prevents any of the resource loading to happen for the
-     * element.
+     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the
+     * element which in turn prevents any of the resource loading to happen for
+     * the element.
      *
-     * This method is called by Resources and shouldn't be called by anyone else.
+     * This method is called by Resources and shouldn't be called by anyone
+     * else.
      *
      * @final
      * @package @this {!Element}
@@ -617,7 +621,7 @@ function createBaseCustomElementClass(win) {
         this.mediaQuery_ = this.getAttribute('media') || null;
       }
       if (this.mediaQuery_) {
-        const defaultView = this.ownerDocument.defaultView;
+        const {defaultView} = this.ownerDocument;
         this.classList.toggle('i-amphtml-hidden-by-media-query',
             !defaultView.matchMedia(this.mediaQuery_).matches);
       }
@@ -650,8 +654,8 @@ function createBaseCustomElementClass(win) {
     /**
      * Changes the size of the element.
      *
-     * This method is called by Resources and shouldn't be called by anyone else.
-     * This method must always be called in the mutation context.
+     * This method is called by Resources and shouldn't be called by anyone
+     * else. This method must always be called in the mutation context.
      *
      * @param {number|undefined} newHeight
      * @param {number|undefined} newWidth
@@ -901,7 +905,7 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Creates a placeholder for the element.
-     * @returns {?Element}
+     * @return {?Element}
      * @final @this {!Element}
      */
     createPlaceholder() {
@@ -1040,9 +1044,11 @@ function createBaseCustomElementClass(win) {
       if (this.perfOn_) {
         this.getLayoutDelayMeter_().startLayout();
       }
-      const promise = this.implementation_.layoutCallback();
+
+      const promise = tryResolve(() => this.implementation_.layoutCallback());
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
+
       return promise.then(() => {
         if (isLoadEvent) {
           this.signals_.signal(CommonSignals.LOAD_END);
@@ -1165,9 +1171,10 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Requests the resource to resume its activity when the document returns from
-     * an inactive state. The scope is up to the actual component. Among other
-     * things the active playback of video or audio content may be resumed.
+     * Requests the resource to resume its activity when the document returns
+     * from an inactive state. The scope is up to the actual component. Among
+     * other things the active playback of video or audio content may be
+     * resumed.
      *
      * @package @final @this {!Element}
      */
@@ -1272,8 +1279,8 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when one or more attributes are mutated.
-     * @note Must be called inside a mutate context.
-     * @note Boolean attributes have a value of `true` and `false` when
+     * Note Must be called inside a mutate context.
+     * Note Boolean attributes have a value of `true` and `false` when
      *       present and missing, respectively.
      * @param {
      *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
@@ -1339,9 +1346,9 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Returns the original nodes of the custom element without any service nodes
-     * that could have been added for markup. These nodes can include Text,
-     * Comment and other child nodes.
+     * Returns the original nodes of the custom element without any service
+     * nodes that could have been added for markup. These nodes can include
+     * Text, Comment and other child nodes.
      * @return {!Array<!Node>}
      * @package @final @this {!Element}
      */
@@ -1433,10 +1440,10 @@ function createBaseCustomElementClass(win) {
           resourceState == ResourceState.READY_FOR_LAYOUT)) {
         return;
       }
-      // This implementation is notably less efficient then placeholder toggling.
-      // The reasons for this are: (a) "not supported" is the state of the whole
-      // element, (b) some relayout is expected and (c) fallback condition would
-      // be rare.
+      // This implementation is notably less efficient then placeholder
+      // toggling. The reasons for this are: (a) "not supported" is the state of
+      // the whole element, (b) some relayout is expected and (c) fallback
+      // condition would be rare.
       this.classList.toggle('amp-notsupported', show);
       if (show == true) {
         const fallbackElement = this.getFallback();
@@ -1463,12 +1470,13 @@ function createBaseCustomElementClass(win) {
      * @private @this {!Element}
      */
     isLoadingEnabled_() {
-      // No loading indicator will be shown if either one of these
-      // conditions true:
+      // No loading indicator will be shown if either one of these conditions
+      // true:
       // 1. `noloading` attribute is specified;
       // 2. The element has not been whitelisted;
       // 3. The element is too small or has not yet been measured;
-      // 4. The element has already been laid out (include having loading error);
+      // 4. The element has already been laid out (include having loading
+      //    error);
       // 5. The element is a `placeholder` or a `fallback`;
       // 6. The element's layout is not a size-defining layout.
       // 7. The document is A4A.
@@ -1710,8 +1718,7 @@ function isInternalOrServiceNode(node) {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {string} name The name of the custom element.
- * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For
- *     testing only.
+ * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For testing only.
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementProtoForTesting(

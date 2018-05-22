@@ -33,7 +33,7 @@ import {
 } from '../service';
 import {
   isProtocolValid,
-  parseUrl,
+  parseUrlDeprecated,
   parseUrlWithA,
 } from '../url';
 import {toWin} from '../types';
@@ -245,7 +245,7 @@ export class Navigation {
   handleClick_(target, e) {
     this.expandVarsForAnchor_(target);
 
-    const location = this.parseUrl_(target.href);
+    const location = this.parseUrlDeprecated_(target.href);
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
@@ -295,7 +295,7 @@ export class Navigation {
     /** @const {!Window} */
     const win = toWin(target.ownerDocument.defaultView);
     const url = target.href;
-    const protocol = location.protocol;
+    const {protocol} = location;
 
     // On Safari iOS, custom protocol links will fail to open apps when the
     // document is iframed - in order to go around this, we set the top.location
@@ -356,7 +356,7 @@ export class Navigation {
    */
   handleNavClick_(e, target, tgtLoc) {
     /** @const {!Location} */
-    const curLoc = this.parseUrl_('');
+    const curLoc = this.parseUrlDeprecated_('');
     const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
     const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
 
@@ -418,15 +418,14 @@ export class Navigation {
   scrollToElement_(elem, hash) {
     // Scroll to the element if found.
     if (elem) {
-      // The first call to scrollIntoView overrides browsers' default
-      // scrolling behavior. The second call insides setTimeout allows us to
-      // scroll to that element properly.
-      // Without doing this, the viewport will not catch the updated scroll
-      // position on iOS Safari and hence calculate the wrong scrollTop for
-      // the scrollbar jumping the user back to the top for failing to calculate
-      // the new jumped offset.
-      // Without the first call there will be a visual jump due to browser scroll.
-      // See https://github.com/ampproject/amphtml/issues/5334 for more details.
+      // The first call to scrollIntoView overrides browsers' default scrolling
+      // behavior. The second call insides setTimeout allows us to scroll to
+      // that element properly. Without doing this, the viewport will not catch
+      // the updated scroll position on iOS Safari and hence calculate the wrong
+      // scrollTop for the scrollbar jumping the user back to the top for
+      // failing to calculate the new jumped offset. Without the first call
+      // there will be a visual jump due to browser scroll. See
+      // https://github.com/ampproject/amphtml/issues/5334 for more details.
       this.viewport_./*OK*/scrollIntoView(elem);
       Services.timerFor(this.ampdoc.win).delay(() =>
         this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);
@@ -441,7 +440,7 @@ export class Navigation {
    * @return {!Location}
    * @private
    */
-  parseUrl_(url) {
+  parseUrlDeprecated_(url) {
     if (this.isEmbed_) {
       let a = this.embedA_;
       if (!a) {
@@ -451,7 +450,7 @@ export class Navigation {
       }
       return parseUrlWithA(a, url);
     }
-    return parseUrl(url || this.ampdoc.win.location.href);
+    return parseUrlDeprecated(url || this.ampdoc.win.location.href);
   }
 }
 

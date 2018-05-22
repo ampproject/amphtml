@@ -73,7 +73,7 @@ describes.realWin('amp-story-cta-layer', {
     pageElements[0].appendChild(ampStoryCtaLayer.element);
 
     ampStoryCtaLayer.layoutCallback().then(layer => {
-      allowConsoleError(() => {
+      return allowConsoleError(() => {
         return expect(layer).to.throw();
       });
     });

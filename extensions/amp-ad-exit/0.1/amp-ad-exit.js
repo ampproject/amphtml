@@ -32,7 +32,7 @@ import {isObject} from '../../../src/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 const TAG = 'amp-ad-exit';
 
 /**
@@ -223,7 +223,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * passes.
    * @param {!Array<!./filters/filter.Filter>} filters
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @returns {boolean}
+   * @return {boolean}
    */
   filter_(filters, event) {
     return filters.every(filter => {
@@ -244,7 +244,7 @@ export class AmpAdExit extends AMP.BaseElement {
         createFilter('carouselBtns',
             makeInactiveElementSpec('.amp-carousel-button'), this));
 
-    const children = this.element.children;
+    const {children} = this.element;
     user().assert(children.length == 1,
         'The tag should contain exactly one <script> child.');
     const child = children[0];
@@ -290,7 +290,7 @@ export class AmpAdExit extends AMP.BaseElement {
             continue;
           }
           const vendor = matches[1];
-          const origin = parseUrl(assertVendor(vendor)).origin;
+          const {origin} = parseUrlDeprecated(assertVendor(vendor));
           this.expectedOriginToVendor_[origin] =
               this.expectedOriginToVendor_[origin] || vendor;
         }
@@ -310,7 +310,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * This is a pass-through for the version in service.js, solely because
    * the one in service.js isn't stubbable for testing, since only object
    * methods are stubbable.
-   * @returns {?string}
+   * @return {?string}
    * @private
    * @VisibleForTesting
    */
@@ -392,7 +392,8 @@ export class AmpAdExit extends AMP.BaseElement {
     user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
-    const vendorURL = parseUrl(assertVendor(responseMessage['vendor']));
+    const vendorURL = parseUrlDeprecated(assertVendor(
+        responseMessage['vendor']));
     user().assert(vendorURL && vendorURL.origin == eventOrigin,
         'Invalid origin for vendor ' +
         `${responseMessage['vendor']}: ${eventOrigin}`);

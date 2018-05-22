@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-0.1.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from './localization';
@@ -34,10 +34,13 @@ import {throttle} from '../../../src/utils/rate-limit';
 const TAG = 'amp-story-consent';
 
 // TODO(gmajoulet): switch to `htmlFor` static template helper.
-// TODO(gmajoulet): use a CSS variable for the `color` config parameter.
 /**
  * Story consent template.
- * @private @const {function(!Object, string, ?string):!./simple-template.ElementDef}
+ * @param {!Object} config
+ * @param {string} consentId
+ * @param {?string} logoSrc
+ * @return {!./simple-template.ElementDef}
+ * @private @const
  */
 const getTemplate = (config, consentId, logoSrc) => ({
   tag: 'div',
@@ -54,11 +57,7 @@ const getTemplate = (config, consentId, logoSrc) => ({
           children: [
             {
               tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-consent-header',
-                'style': config.color ?
-                  `background-color: ${config.color} !important;` : '',
-              }),
+              attrs: dict({'class': 'i-amphtml-story-consent-header'}),
               children: [
                 {
                   tag: 'div',
@@ -123,9 +122,6 @@ const getTemplate = (config, consentId, logoSrc) => ({
               attrs: dict({
                 'class': 'i-amphtml-story-consent-action ' +
                     'i-amphtml-story-consent-action-accept',
-                'style': config.color ?
-                  `background-color: ${config.color} !important; ` +
-                      `border-color: ${config.color} !important;` : '',
                 'on': `tap:${consentId}.accept`,
               }),
               children: [],
@@ -179,8 +175,11 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.win.document, getTemplate(storyConsentConfig, consentId, logoSrc));
     createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
+    // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
+    this.actions_.addToWhitelist('AMP-CONSENT.accept');
+    this.actions_.addToWhitelist('AMP-CONSENT.reject');
+
     this.initializeListeners_();
-    this.addActionsToWhitelist_();
   }
 
   /** @override */
@@ -237,22 +236,6 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     this.element.getResources()
         .measureMutateElement(this.storyConsentEl_, measurer, mutator);
-  }
-
-  /**
-   * Allows the consent related actions.
-   * @private
-   */
-  addActionsToWhitelist_() {
-    dev().assert(this.consentConfig_, `${TAG}: Consent config must be parsed ` +
-        'before adding the actions to the whitelist.');
-
-    const consentIds = Object.keys(this.consentConfig_.consents);
-
-    consentIds.forEach(consentId => {
-      this.actions_.addToWhitelist(`${consentId}.accept`);
-      this.actions_.addToWhitelist(`${consentId}.reject`);
-    });
   }
 
   /**

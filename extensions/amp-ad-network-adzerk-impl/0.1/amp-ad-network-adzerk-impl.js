@@ -19,7 +19,7 @@ import {
   CreativeMetaDataDef,
   NO_CONTENT_RESPONSE,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
+import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {tryParseJson} from '../../../src/json';
@@ -38,8 +38,8 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
     }} */
 let AmpTemplateCreativeDef;
 
-/** @private {?AmpAdTemplates} */
-let ampAdTemplates;
+/** @private {?AmpAdTemplateHelper} */
+let ampAdTemplateHelper;
 
 /**
  * Fast Fetch implementation for AdZerk network that allows AMP creative
@@ -73,7 +73,8 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     /** @private {?AmpTemplateCreativeDef} */
     this.ampCreativeJson_ = null;
 
-    ampAdTemplates = ampAdTemplates || new AmpAdTemplates(this.win);
+    ampAdTemplateHelper = ampAdTemplateHelper ||
+        new AmpAdTemplateHelper(this.win);
   }
 
   /**
@@ -115,7 +116,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
         (tryParseJson(body) || {});
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
-      return ampAdTemplates
+      return ampAdTemplateHelper
           .fetch(this.ampCreativeJson_.templateUrl)
           .then(parsedTemplate => {
             return utf8Encode(this.parseMetadataFromCreative(parsedTemplate));
@@ -170,12 +171,12 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   /** @override */
   onCreativeRender(unusedMetadata) {
     if (this.ampCreativeJson_ && this.ampCreativeJson_.data) {
-      ampAdTemplates.render(
+      ampAdTemplateHelper.render(
           this.ampCreativeJson_.data,
           this.iframe.contentWindow.document.body)
           .then(renderedElement => {
             if (this.ampCreativeJson_.analytics) {
-              ampAdTemplates.insertAnalytics(
+              ampAdTemplateHelper.insertAnalytics(
                   renderedElement, this.ampCreativeJson_.analytics);
             }
             this.iframe.contentWindow.document.body./*OK*/innerHTML =
