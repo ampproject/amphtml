@@ -71,8 +71,10 @@ export class LruCache {
    * @param {T} payload The payload to cache.
    */
   put(key, payload) {
+    if (!this.has(key)) {
+      this.size_++;
+    }
     this.cache_[key] = {payload, access: this.access_};
-    this.size_++;
     this.evict_();
   }
 
@@ -83,7 +85,6 @@ export class LruCache {
     if (this.size_ <= this.capacity_) {
       return;
     }
-    this.size_--;
 
     dev().warn(TAG, 'Trimming LRU cache');
     const cache = this.cache_;
@@ -99,6 +100,7 @@ export class LruCache {
 
     if (oldestKey !== undefined) {
       delete cache[oldestKey];
+      this.size_--;
     }
   }
 }

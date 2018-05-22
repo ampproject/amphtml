@@ -26,11 +26,20 @@ describe('LruCache', () => {
     }
   });
 
-  it('should create a protype-less object for caching', () => {
+  it('should create a prototype-less object for caching', () => {
     expect(cache.get('constructor')).to.be.undefined;
   });
 
   it('should cache up to capacity', () => {
+    for (let i = 0; i < 5; i++) {
+      expect(cache.get(i)).to.equal(i);
+    }
+  });
+
+  it('should not-evict when putting same key', () => {
+    for (let i = 0; i < 5; i++) {
+      cache.put(0, i);
+    }
     for (let i = 0; i < 5; i++) {
       expect(cache.get(i)).to.equal(i);
     }
