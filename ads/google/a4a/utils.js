@@ -917,7 +917,8 @@ export function getAmpRuntimeTypeParameter(win) {
 
 /**
  * Returns boolean whether the page is canonical AMP, based on the url
- * of the page.
+ * of the page. If we are testing locally, always returns that we are
+ * not on canonical.
  * @param {!Window} win
  * @return {boolean}
  */

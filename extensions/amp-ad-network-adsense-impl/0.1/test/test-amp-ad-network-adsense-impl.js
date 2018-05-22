@@ -1004,7 +1004,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
 
     it('should return false on a non-canonical page', () => {
-      impl.win.location.origin = "https://www.somesite.cdn.ampproject.org";
+      impl.win.location.origin = "https://www-somesite.cdn.ampproject.org";
       expect(impl.shouldSkipXhr_()).to.be.false;
     });
 

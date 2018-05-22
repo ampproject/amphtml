@@ -702,10 +702,9 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           this.adUrl_ = adUrl;
           this.handleLifecycleStage_('urlBuilt');
-          // If the entire request/render should be done by simply setting
-          // the src on an iframe and writing it into the DOM, we
-          // short-circuit here, skipping the XHR, and just go directly
-          // to renderViaCachedcontentiframe
+          // If we should skip the XHR, we will instead request and render
+          // by simply writing a frame into the page using
+          // renderViaFrameGet
           if (this.shouldSkipXhr_()) {
             this.renderViaFrameGet_(this.adUrl_);
             throw new Error(FRAME_GET);
@@ -1528,7 +1527,7 @@ export class AmpA4A extends AMP.BaseElement {
    * it is possible for cache miss to occur which can be detected server-side
    * by missing ORIGIN header.
    *
-   * Additioanlly, this method is also used in certain cases to send the only
+   * Additionally, this method is also used in certain cases to send the only
    * request, i.e. the initial XHR is skipped.
    *
    * Note: As of 2016-10-18, the fill-from-cache assumption appears to fail on

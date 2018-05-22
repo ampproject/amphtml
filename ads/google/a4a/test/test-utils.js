@@ -771,7 +771,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should return false for CDN pages', () => {
-      fakeWin.location.origin = "https://www.somesite.cdn.ampproject.org";
+      fakeWin.location.origin = "https://www-somesite.cdn.ampproject.org";
       expect(isCanonical(fakeWin)).to.be.false;
     });
   });
