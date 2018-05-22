@@ -94,7 +94,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
       videoManager.register(impl);
 
       const entry = videoManager.getEntryForVideo_(impl);
-      entry.userInteractedWithAutoPlay_ = true;
+      sandbox.stub(entry, 'userInteracted').returns(true);
       entry.isVisible_ = true;
       entry.loaded_ = true;
 
@@ -171,7 +171,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
       impl.play();
 
       const entry = videoManager.getEntryForVideo_(impl);
-      entry.userInteractedWithAutoPlay_ = true;
+      sandbox.stub(entry, 'userInteracted').returns(true);
       entry.isVisible_ = false;
 
       impl.pause();
@@ -189,8 +189,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
       const entry = videoManager.getEntryForVideo_(impl);
       entry.isVisible_ = false;
 
-      const userInteracted = videoManager.userInteractedWithAutoPlay(impl);
-      expect(userInteracted).to.be.false;
+      expect(videoManager.userInteracted(impl)).to.be.false;
     });
 
 
@@ -216,36 +215,32 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
     });
 
 
-    it(`no autoplay - should be paused if the
-        user pressed pause after playing`, () => {
+    it('no autoplay - should pause if user presses pause after playing', () => {
+      videoManager.register(impl);
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = false;
 
-          videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
-          entry.isVisible_ = false;
-
-          impl.play();
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-            impl.pause();
-            listenOncePromise(video, VideoEvents.PAUSE).then(() => {
-              const curState = videoManager.getPlayingState(impl);
-              expect(curState).to.equal(PlayingStates.PAUSED);
-            });
-          });
+      impl.play();
+      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+        impl.pause();
+        listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+          const curState = videoManager.getPlayingState(impl);
+          expect(curState).to.equal(PlayingStates.PAUSED);
         });
+      });
+    });
 
-    it(`no autoplay - should be playing manual
-        whenever video is playing`, () => {
+    it('no autoplay - should be playing manual whenever playing', () => {
+      videoManager.register(impl);
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = false;
 
-          videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
-          entry.isVisible_ = false;
-
-          impl.play();
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-            const curState = videoManager.getPlayingState(impl);
-            expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
-          });
-        });
+      impl.play();
+      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+        const curState = videoManager.getPlayingState(impl);
+        expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+      });
+    });
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
