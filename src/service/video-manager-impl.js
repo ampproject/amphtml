@@ -322,13 +322,11 @@ export class VideoManager {
   }
 
   /**
-   * Returns whether the video was interacted with or not
-   *
    * @param {!../video-interface.VideoInterface} video
    * @return {boolean}
    */
-  userInteractedWithAutoPlay(video) {
-    return this.getEntryForVideo_(video).userInteractedWithAutoPlay();
+  userInteracted(video) {
+    return this.getEntryForVideo_(video).userInteracted();
   }
 
   /** @param {!VideoEntry} entry */
@@ -642,7 +640,7 @@ class VideoEntry {
     }
     this.supportsAutoplay_().then(supportsAutoplay => {
       const canAutoplay = this.hasAutoplay &&
-          !this.userInteractedWithAutoPlay();
+          !this.userInteracted();
 
       if (canAutoplay && supportsAutoplay) {
         this.autoplayLoadedVideoVisibilityChanged_();
@@ -871,7 +869,7 @@ class VideoEntry {
 
     if (this.isPlaying_
        && this.playCalledByAutoplay_
-       && !this.userInteractedWithAutoPlay()) {
+       && !this.userInteracted()) {
       return PlayingStates.PLAYING_AUTO;
     }
 
@@ -882,7 +880,7 @@ class VideoEntry {
    * Returns whether the video was interacted with or not
    * @return {boolean}
    */
-  userInteractedWithAutoPlay() {
+  userInteracted() {
     return (
       this.video.signals().get(VideoServiceSignals.USER_INTERACTED) != null);
   }
