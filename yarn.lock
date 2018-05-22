@@ -6870,9 +6870,9 @@ loggly@^1.1.0:
     request "2.75.x"
     timespan "2.3.x"
 
-lolex@2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/lolex/-/lolex-2.5.0.tgz#69d6a667607738564daf108f63240ae8cbd28fb4"
+lolex@2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/lolex/-/lolex-2.6.0.tgz#cf9166f3c9dece3cdeb5d6b01fce50f14a1203e3"
 
 lolex@^1.6.0:
   version "1.6.0"
