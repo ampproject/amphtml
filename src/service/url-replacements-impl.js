@@ -39,10 +39,6 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {
-  isArray,
-  isObject,
-} from '../types';
 import {isExperimentOn} from '../experiments';
 import {isProtocolValid} from '../url';
 
@@ -121,8 +117,7 @@ export class GlobalVariableSource extends VariableSource {
 
     /**
      * @private
-     * @const {function(!./ampdoc-impl.AmpDoc):
-     *     !Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
+     * @const {function(!./ampdoc-impl.AmpDoc):!Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
      */
     this.getAccessService_ = Services.accessServiceForDocOrNull;
 
@@ -590,17 +585,9 @@ export class GlobalVariableSource extends VariableSource {
         if (!bind) {
           return '';
         }
-        return bind.getStateValue(/** @type {string} */ (key))
-            .then(result => {
-              if (isObject(result) || isArray(result)) {
-                return JSON.stringify(result);
-              } else {
-                return String(result);
-              }
-            });
+        return bind.getStateValue(/** @type {string} */ (key));
       });
     });
-
   }
 
   /**
@@ -621,8 +608,7 @@ export class GlobalVariableSource extends VariableSource {
   /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!../../extensions/amp-access/0.1/amp-access.AccessService
-   *     ):(T|!Promise<T>)} getter
+   * @param {function(!../../extensions/amp-access/0.1/amp-access.AccessService):(T|!Promise<T>)} getter
    * @param {string} expr
    * @return {T|null}
    * @template T
@@ -1222,10 +1208,6 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
 }
 
 /**
- * @typedef {{
- *   incomingFragment: string,
- *   outgoingFragment: string,
- * }}
+ * @typedef {{incomingFragment: string, outgoingFragment: string}}
  */
-
 let ShareTrackingFragmentsDef;
