@@ -18,6 +18,7 @@ import {Animation} from '../../../src/animation';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
@@ -31,6 +32,8 @@ import {tryFocus} from '../../../src/dom';
 const TAG = 'amp-accordion';
 const MAX_TRANSITION_DURATION = 500; // ms
 const MIN_TRANSITION_DURATION = 200; // ms
+const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
+const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -284,6 +287,7 @@ class AmpAccordion extends AMP.BaseElement {
     const sectionChild = section.children[1];
 
     return this.mutateElement(() => {
+      // We set posiion and opacity to avoid a FOUC while measuring height
       setStyles(sectionChild, {
         opacity: 0,
         position: 'fixed',
@@ -308,7 +312,7 @@ class AmpAccordion extends AMP.BaseElement {
       return Animation.animate(this.element, setStylesTransition(sectionChild, {
         'height': px(numeric(0, height)),
         'opacity': numeric(0,1),
-      }), duration)
+      }), duration, EXPAND_CURVE_)
           .thenAlways(() => {
             this.mutateElement(() => {
               setStyles(sectionChild, {
@@ -337,7 +341,7 @@ class AmpAccordion extends AMP.BaseElement {
     }).then(() => {
       return Animation.animate(sectionChild, setStylesTransition(sectionChild, {
         'height': px(numeric(height, 0)),
-      }), duration).thenAlways(() => {
+      }), duration, COLLAPSE_CURVE_).thenAlways(() => {
         return this.mutateElement(() => {
           section.removeAttribute('expanded');
           setStyles(sectionChild, {
