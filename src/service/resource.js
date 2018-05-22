@@ -20,7 +20,7 @@ import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
 import {
-  hasSizeChanges,
+  layoutRectSizeEquals,
   layoutRectLtwh,
   layoutRectsOverlap,
   moveLayoutRect,
@@ -431,7 +431,7 @@ export class Resource {
     const box = this.getPageLayoutBox();
 
     // Note that "left" doesn't affect readiness for the layout.
-    const sizeChanges = hasSizeChanges(oldBox, box);
+    const sizeChanges = layoutRectSizeEquals(oldBox, box);
     if (this.state_ == ResourceState.NOT_LAID_OUT ||
           oldBox.top != box.top || sizeChanges) {
       if (this.element.isUpgraded() &&
