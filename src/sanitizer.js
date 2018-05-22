@@ -58,8 +58,9 @@ const BLACKLISTED_TAGS = dict({
 });
 
 /**
- * Whitelist of supported self-closing tags for Caja. Most of these are
- * internally supported in DOMPurify with some exceptions (see below).
+ * Whitelist of supported self-closing tags for Caja. These are used for
+ * correct parsing on Caja and are not necessary for DOMPurify which uses
+ * the browser's HTML parser.
  * @const {!Object<string, boolean>}
  */
 const SELF_CLOSING_TAGS = dict({
@@ -72,9 +73,6 @@ const SELF_CLOSING_TAGS = dict({
   'track': true,
   'wbr': true,
   'area': true,
-  // Note: The following tags are supported in Caja but not in DOMPurify.
-  // Most of these tags are either <head> or obsolete and dropping support for
-  // these in DOMPurify seems harmless.
   'base': true,
   'command': true,
   'embed': true,
@@ -122,21 +120,24 @@ const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'u',
 ];
 
-/** @const {!Array<string>} */
+/**
+ * Tag-agnostic attribute whitelisted used by both Caja and DOMPurify.
+ * @const {!Array<string>}
+ */
 const WHITELISTED_ATTRS = [
-  /* AMP-only attributes that don't exist in HTML. */
+  // AMP-only attributes that don't exist in HTML.
   'fallback',
   'on',
   'option',
   'placeholder',
   'submit-success',
   'submit-error',
-  /* HTML attributes that are scrubbed by Caja but we handle specially. */
+  // HTML attributes that are scrubbed by Caja but we handle specially.
   'href',
   'style',
-  /* Attributes for amp-bind that exist in "[foo]" form. */
+  // Attributes for amp-bind that exist in "[foo]" form.
   'text',
-  /* Attributes for amp-subscriptions. */
+  // Attributes for amp-subscriptions.
   'subscriptions-action',
   'subscriptions-actions',
   'subscriptions-decorate',
@@ -147,13 +148,13 @@ const WHITELISTED_ATTRS = [
 ];
 
 /**
- * Tag-specific attribute whitelist for Caja. DOMPurify uses a tag-agnostic
- * whitelist and custom attrs below are duped into PURIFY_CONFIG['ADD_ATTR'].
+ * Tag-specific attribute whitelist used by both Caja and DOMPurify.
  * @const {!Object<string, !Array<string>>}
  */
 const WHITELISTED_ATTRS_BY_TAGS = dict({
   'a': [
     'rel',
+    'target',
   ],
   'div': [
     'template',
@@ -223,12 +224,6 @@ const INVALID_INLINE_STYLE_REGEX =
 
 /** @const {!Object} */
 const PURIFY_CONFIG = {
-  'ADD_ATTR': [
-    'action-xhr',
-    'custom-validation-reporting',
-    'target',
-    'template',
-  ],
   'USE_PROFILES': {
     'html': true,
     'svg': true,
@@ -261,7 +256,7 @@ export function sanitizeHtml(html) {
  */
 function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
-    'ADD_ATTR': WHITELISTED_ATTRS.concat(PURIFY_CONFIG['ADD_ATTR']),
+    'ADD_ATTR': WHITELISTED_ATTRS,
     'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
   });
@@ -294,8 +289,14 @@ function uponSanitizeElement(node, data) {
  * @param {{attrName: string, attrValue: string, allowedAttributes: !Array<string>}} data
  */
 function uponSanitizeAttribute(node, data) {
-  const tagName = (node.tagName || '').toLowerCase();
-  const {attrName} = data;
+  // Beware of DOM Clobbering risk when using properties or functions on `node`.
+  // DOMPurify checks a few of these for its internal usage (e.g. `nodeName`),
+  // but not others that may be used in custom hooks.
+  // See https://github.com/cure53/DOMPurify/wiki/Security-Goals-&-Threat-Model#security-goals
+  // and https://github.com/cure53/DOMPurify/blob/master/src/purify.js#L527.
+
+  const tagName = node.nodeName.toLocaleLowerCase();
+  const {attrName, allowedAttributes} = data;
   let {attrValue} = data;
 
   // `<A>` has special target rules:
@@ -310,6 +311,13 @@ function uponSanitizeAttribute(node, data) {
       // Always use lowercase values for `target` attr.
       attrValue = lowercaseValue;
     }
+  }
+
+  // Allow if attribute is in tag-specific whitelist.
+  // `allowedAttributes` is scoped to the node being sanitized.
+  const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tagName];
+  if (attrsByTags && attrsByTags.includes(attrName)) {
+    allowedAttributes[attrName] = true;
   }
 
   // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".

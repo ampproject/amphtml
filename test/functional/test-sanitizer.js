@@ -96,6 +96,54 @@ describe('DOMPurify-based', () => {
           .to.equal('<a data-amp-bind-href="foo.bar">link</a>');
     });
   });
+
+  // Select SVG XSS tests from https://html5sec.org/#svg.
+  describe('SVG', () => {
+    it('should prevent XSS via <G> tag and onload attribute', () => {
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg">'
+          + '<g onload="javascript:alert(1)"></g></svg>';
+      expect(sanitizeHtml(svg)).to.equal(
+          '<svg xmlns="http://www.w3.org/2000/svg"><g></g></svg>');
+    });
+
+    it('should prevent XSS via <SCRIPT> tag', () => {
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg">'
+          + '<script>alert(1)</script></svg>';
+      expect(sanitizeHtml(svg)).to.equal(
+          '<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+    });
+
+    it('should prevent automatic execution of onload attribute without other '
+        + 'SVG elements', () => {
+      const svg = '<svg onload="javascript:alert(1)" '
+          + 'xmlns="http://www.w3.org/2000/svg"></svg>';
+      expect(sanitizeHtml(svg)).to.equal(
+          '<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+    });
+
+    it('should prevent simple passive XSS via XLink', () => {
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg">'
+          + '<a xmlns:xlink="http://www.w3.org/1999/xlink" '
+          + 'xlink:href="javascript:alert(1)">'
+          + '<rect width="1000" height="1000" fill="white"/></a></svg>';
+      expect(sanitizeHtml(svg)).to.equal(
+          '<svg xmlns="http://www.w3.org/2000/svg">'
+          + '<a xmlns:xlink="http://www.w3.org/1999/xlink">' +
+          '<rect fill="white" height="1000" width="1000"></rect></a></svg>');
+    });
+
+    it('should prevent XSS via "from" attribute in SVG and inline-SVG', () => {
+      const svg = '<svg>'
+          + '<a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="?">'
+          + '<circle r="400"></circle>'
+          + '<animate attributeName="xlink:href" begin="0" '
+          + 'from="javascript:alert(1)" to="&" />'
+          + '</a></svg>';
+      expect(sanitizeHtml(svg)).to.equal(
+          '<svg><a xlink:href="?" xmlns:xlink="http://www.w3.org/1999/xlink">'
+          + '<circle r="400"></circle></a></svg>');
+    });
+  });
 });
 
 function runSanitizerTests() {
