@@ -70,7 +70,7 @@ export function adsense(global, data) {
   });
   const initializer = {};
   switch (global.context.initialConsentState) {
-    case 0: // CONSENT_POLICY_STATE.UNKNOWN
+    case 4: // CONSENT_POLICY_STATE.UNKNOWN
       if (data['npaOnUnknownConsent'] != 'true') {
         // Unknown w/o NPA results in no ad request.
         return;
