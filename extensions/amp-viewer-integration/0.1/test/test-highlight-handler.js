@@ -14,9 +14,29 @@
  * limitations under the License.
  */
 
-import {HighlightHandler} from '../highlight-handler';
+import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 import {Services} from '../../../../src/services';
+
+describes.fakeWin('getHighlightParam', {
+  win: {
+    // URL encoded '{"s":["amp","highlight"]}'.
+    location: 'page.html#highlight=' +
+        '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D',
+  },
+  amp: {
+    ampdoc: 'single',
+  },
+}, env => {
+  it('get a param', () => {
+    expect(getHighlightParam(env.ampdoc)).to.equal('{"s":["amp","highlight"]}');
+  });
+
+  it('no param', () => {
+    env.win.location = 'page.html';
+    expect(getHighlightParam(env.ampdoc)).to.be.undefined;
+  });
+});
 
 describes.fakeWin('HighlightHandler', {
   win: {
@@ -43,7 +63,7 @@ describes.fakeWin('HighlightHandler', {
     const ampdoc = env.ampdoc;
     const scrollStub = sandbox.stub(
         Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
-    const handler = new HighlightHandler(ampdoc);
+    const handler = new HighlightHandler(ampdoc, getHighlightParam(env.ampdoc));
 
     expect(scrollStub).to.be.calledOnce;
     expect(scrollStub.firstCall.args.length).to.equal(2);

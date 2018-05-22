@@ -15,6 +15,7 @@
  */
 
 import {AmpViewerIntegrationVariableService} from './variable-service';
+import {HighlightHandler, getHighlightParam} from './highlight-handler';
 import {
   Messaging,
   WindowPortEmulator,
@@ -22,7 +23,6 @@ import {
 } from './messaging/messaging';
 import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
-import {HighlightHandler} from './highlight-handler';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -30,11 +30,9 @@ import {
   registerServiceBuilder,
 } from '../../../src/service';
 import {getData} from '../../../src/event-helper';
-import {getSourceUrl, parseUrl, parseQueryString} from '../../../src/url';
+import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
-import {findSentences, markTextRangeList} from './findtext';
-import {setStyles} from '../../../src/style';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -105,11 +103,13 @@ export class AmpViewerIntegration {
                 new Messaging(this.win, receivedPort, this.isWebView_));
           });
     }
-    this.highlightHandler_ = new HighlightHandler(ampdoc);
+    const highlightParam = getHighlightParam(ampdoc);
+    if (highlightParam) {
+      this.highlightHandler_ = new HighlightHandler(ampdoc, highlightParam);
+    }
 
     const port = new WindowPortEmulator(
         this.win, origin, this.win.parent/* target */);
-    // This fails in my localhost demo for some reason.
     return this.openChannelAndStart_(
         viewer, ampdoc, origin, new Messaging(this.win, port, this.isWebView_));
   }
@@ -192,7 +192,9 @@ export class AmpViewerIntegration {
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);
     }
-    this.highlightHandler_.setupMessaging(messaging);
+    if (this.highlightHandler_ != null) {
+      this.highlightHandler_.setupMessaging(messaging);
+    }
   }
 
   /**

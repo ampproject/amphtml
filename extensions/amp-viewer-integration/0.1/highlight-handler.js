@@ -27,34 +27,42 @@ import {parseQueryString} from '../../../src/url';
 const HIGHLIGHT_DISMISS = 'highlightDismiss';
 
 /**
+ * Returns highlight param in the URL hash.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {string}
+ */
+export const getHighlightParam = function(ampdoc) {
+  return parseQueryString(ampdoc.win.location.hash)['highlight'];
+};
+
+/**
  * HighlightHandler reads highlight parameter from URL and
  * highlights specified text in AMP documents.
  */
 export class HighlightHandler {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} json The highlighting info in JSON.
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, json) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private {?Array<Element>} */
     this.highlightedNodes_ = null;
-    this.initHighlight_();
+
+    this.initHighlight_(json);
   }
 
-  /** @private */
-  initHighlight_() {
+  /**
+   * @param {string} json
+    * @private
+    */
+  initHighlight_(json) {
     const ampdoc = this.ampdoc_;
     const win = ampdoc.win;
-    const hash = win.location.hash;
-    const params = parseQueryString(hash);
-    const highlightJSON = params['highlight'];
-    if (!highlightJSON) {
-      return;
-    }
 
-    const highlight = parseJson(highlightJSON);
+    const highlight = parseJson(json);
     const sens = findSentences(win.document.body, highlight['s']);
     if (!sens) {
       return;
@@ -69,7 +77,7 @@ export class HighlightHandler {
       n['style']['color'] = '#333';
     }
     this.highlightedNodes_ = spans;
-    const viewer = Services.viewerForDoc(this.ampdoc_);
+    const viewer = Services.viewerForDoc(ampdoc);
     const visibility = viewer.getVisibilityState();
     if (visibility == 'visible') {
       Services.viewportForDoc(ampdoc).animateScrollIntoView(spans[0], 500);
