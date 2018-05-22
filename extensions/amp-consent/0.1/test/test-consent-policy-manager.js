@@ -341,8 +341,12 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
           'waitFor': {
             'ABC': [],
           },
-          'unblockOn': ['unknown', 'sufficient',
-              'insufficient', 'unknown_not_required'],
+          'unblockOn': [
+            CONSENT_POLICY_STATE.UNKNOWN,
+            CONSENT_POLICY_STATE.SUFFICIENT,
+            CONSENT_POLICY_STATE.INSUFFICIENT,
+            CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+          ],
         });
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
         expect(instance.shouldBlock()).to.equal(true);

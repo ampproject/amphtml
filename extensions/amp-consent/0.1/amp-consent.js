@@ -15,6 +15,7 @@
  */
 
 import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {
   ConsentPolicyManager,
@@ -409,8 +410,13 @@ export class AmpConsent extends AMP.BaseElement {
       'waitFor': defaultWaitForItems,
     };
 
-    const unblockOnAll = ['unknown', 'sufficient',
-        'insufficient', 'unknown_not_required'];
+    // TODO(@zhouyx): unblockOn is internal now.
+    const unblockOnAll = [
+      CONSENT_POLICY_STATE.UNKNOWN,
+      CONSENT_POLICY_STATE.SUFFICIENT,
+      CONSENT_POLICY_STATE.INSUFFICIENT,
+      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+    ];
 
     const predefinedNone = {
       'waitFor': defaultWaitForItems,

@@ -246,8 +246,9 @@ export class ConsentPolicyInstance {
     this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
 
     /** @private {!Array<CONSENT_POLICY_STATE>} */
-    this.unblockStateLists_ =
-        config['unblockOn'] || ['sufficient', 'unknown_not_required'];
+    this.unblockStateLists_ = config['unblockOn'] ||
+        [CONSENT_POLICY_STATE.SUFFICIENT,
+          CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED];
 
     this.init_(pendingItems);
   }
@@ -437,22 +438,6 @@ export class ConsentPolicyInstance {
    * @return {boolean}
    */
   shouldBlock() {
-    let state;
-    //console.error(this.unblockStateLists_);
-    switch (this.status_) {
-      case CONSENT_POLICY_STATE.UNKNOWN:
-        state = 'unknown';
-        break;
-      case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
-        state = 'unknown_not_required';
-        break;
-      case CONSENT_POLICY_STATE.INSUFFICIENT:
-        state = 'insufficient';
-        break;
-      case CONSENT_POLICY_STATE.SUFFICIENT:
-        state = 'sufficient';
-        break;
-    }
-    return (this.unblockStateLists_.indexOf(state) > -1);
+    return (this.unblockStateLists_.indexOf(this.status_) > -1);
   }
 }
