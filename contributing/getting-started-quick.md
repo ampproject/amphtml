@@ -113,7 +113,7 @@ git checkout -b <branch name> master
 1.  Check out the master branch: `git checkout master`
 2.  Pull the latest changes: `git pull`
 3.  Check out your branch: `git checkout <branch name>`
-4.  Rebase the changes to your branch: `git rebase master`
+4.  Merge the changes to your branch: `git merge master`
 
       **Note**: You may need to resolve conflicting changes at this point.
 
