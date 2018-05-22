@@ -999,7 +999,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest').callsFake(
           () => mockSendXhrRequest(undefined, true));
-      sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
+      sandbox.stub(impl, 'renderViaFrameGet_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // Stub ini load otherwise FIE could delay test
       sandbox./*OK*/stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
@@ -1019,7 +1019,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     it('should force iframe to match size of slot', () => {
       sandbox.stub(impl, 'sendXhrRequest').callsFake(
           () => mockSendXhrRequest(undefined, false));
-      sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
+      sandbox.stub(impl, 'renderViaFrameGet_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // This would normally be set in AmpA4a#buildCallback.
       impl.creativeSize_ = {width: 200, height: 50};

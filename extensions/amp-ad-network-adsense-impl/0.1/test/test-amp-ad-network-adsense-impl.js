@@ -43,6 +43,10 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {
+  ADSENSE_EXPERIMENTS,
+  ADSENSE_EXP_NAMES,
+} from '../adsense-a4a-config';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -969,5 +973,44 @@ describes.realWin('amp-ad-network-adsense-impl', {
   describe('#getConsentPolicy', () => {
     it('should return null', () =>
       expect(AmpAdNetworkAdsenseImpl.prototype.getConsentPolicy()).to.be.null);
+  });
+
+  describe('#shouldSkipXhr', () => {
+    beforeEach(() => {
+      impl.win = {
+        location: {}
+      };
+    });
+
+    afterEach(() => {
+      toggleExperiment(
+          impl.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL, false);
+      toggleExperiment(impl.win, ADSENSE_EXP_NAMES.CANONICAL, false);
+    });
+
+    it('should return true if on a canonical page, and in experiment', () => {
+      forceExperimentBranch(impl.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
+                            ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP);
+      impl.win.location.origin = "https://www.somesite.com";
+      expect(impl.shouldSkipXhr_()).to.be.true;
+
+      toggleExperiment(
+          impl.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL, false);
+
+      forceExperimentBranch(impl.win, ADSENSE_EXP_NAMES.CANONICAL,
+                            ADSENSE_EXPERIMENTS.CANONICAL_EXP);
+      impl.win.location.origin = "https://www.somesite.com";
+      expect(impl.shouldSkipXhr_()).to.be.true;
+    });
+
+    it('should return false on a non-canonical page', () => {
+      impl.win.location.origin = "https://www.somesite.cdn.ampproject.org";
+      expect(impl.shouldSkipXhr_()).to.be.false;
+    });
+
+    it('should return false if on a canonical page, not in experiment', () => {
+      impl.win.location.origin = "https://www.somesite.com";
+      expect(impl.shouldSkipXhr_()).to.be.false;
+    });
   });
 });

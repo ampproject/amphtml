@@ -30,6 +30,7 @@ import {
   getIdentityToken,
   getIdentityTokenRequestUrl,
   googleAdUrl,
+  isCanonical,
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
@@ -754,6 +755,24 @@ describe('Google A4A utils', () => {
       const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
       expect(vars['viewerLastVisibleTime']).to.be.a('number');
       expect(vars['viewerLastVisibleTime']).not.to.equal(0);
+    });
+  });
+
+  describe('isCanonical', () => {
+    let fakeWin;
+    beforeEach(() => {
+      fakeWin = {
+        location: {}
+      };
+    });
+    it('should return true for canonical pages', () => {
+      fakeWin.location.origin = "https://www.myampsite.com/canonical";
+      expect(isCanonical(fakeWin)).to.be.true;
+    });
+
+    it('should return false for CDN pages', () => {
+      fakeWin.location.origin = "https://www.somesite.cdn.ampproject.org";
+      expect(isCanonical(fakeWin)).to.be.false;
     });
   });
 });
