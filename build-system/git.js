@@ -27,7 +27,8 @@ const {getStdout} = require('./exec');
  * @return {!Array<string>}
  */
 exports.gitDiffNameOnlyMaster = function() {
-  return getStdout('git diff --name-only master').trim().split('\n');
+  const branch = gitBranchName();
+  return getStdout(`git diff --name-only master...${branch}`).trim().split('\n');
 };
 
 /**
@@ -61,9 +62,10 @@ exports.gitDiffColor = function() {
  * Returns the name of the local branch.
  * @return {string}
  */
-exports.gitBranchName = function() {
+function gitBranchName() {
   return getStdout('git rev-parse --abbrev-ref HEAD').trim();
-};
+}
+exports.gitBranchName = gitBranchName;
 
 /**
  * Returns the email of the author of the latest commit on the local branch.
