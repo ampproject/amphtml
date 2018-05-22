@@ -56,7 +56,7 @@
 
 .i-amphtml-reco-holder-article {
   display: block;
-  height: 72px;
+  overflow: auto;
   padding: 10px 0;
   text-decoration: none;
 }
@@ -72,8 +72,5 @@
 
 .i-amphtml-next-article-title {
   position: relative;
-  top: 5px;
-  height: 60px;
-  overflow: hidden;
-  margin-right: 30px;
+  margin: 5px 30px 5px 0;
 }
