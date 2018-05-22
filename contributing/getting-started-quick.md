@@ -14,76 +14,83 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# About this guide
+# Getting Started: Quick Start
+
+## About this guide
 
 This Quick Start guide is the TL;DR version of the longer [end-to-end guide](getting-started-e2e.md) for people who don't want/need a longer explanation.
 
-# One-time Setup
+## One-time Setup
 
-* [Create a GitHub account](https://help.github.com/articles/signing-up-for-a-new-github-account/) if you don't already have one.
+1. [Create a GitHub account](https://help.github.com/articles/signing-up-for-a-new-github-account/) if you don't already have one.
+2. Set up [2 factor auth](https://help.github.com/articles/about-two-factor-authentication/) for your GitHub account.
+3. [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS.
+4.  Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). An easy way to do so is with `nvm`. (Mac and Linux: [here](https://github.com/creationix/nvm), Windows: [here](https://github.com/coreybutler/nvm-windows))
 
-* Set up [2 factor auth](https://help.github.com/articles/about-two-factor-authentication/) for your GitHub account.
+    ```shell
+    nvm install --lts
+    ```
+5.  Install the stable version of [Yarn](https://yarnpkg.com/). (Mac and Linux: [here](https://yarnpkg.com/en/docs/install#alternatives-stable), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
+    
+    ```shell
+    curl -o- -L https://yarnpkg.com/install.sh | bash
+    ```
+    An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local  
+    development. This will automatically use the current stable version of `yarn`.
 
-* [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS.
+6.  If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
+    
+    ```shell
+    yarn global remove gulp
+    ```
+    
+7.  Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
 
-* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). An easy way to do so is with `nvm`. (Mac and Linux: [here](https://github.com/creationix/nvm), Windows: [here](https://github.com/coreybutler/nvm-windows))
+    ```shell
+    yarn global add gulp-cli
+    ```
+    
+    An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local 
+    development. This will also use the version of `gulp` packaged with the amphtml repository.
 
-   ```
-   nvm install --lts
-   ```
+8.  Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
 
-* Install the stable version of [Yarn](https://yarnpkg.com/). (Mac and Linux: [here](https://yarnpkg.com/en/docs/install#alternatives-stable), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
+9.  Download your fork to a local repository.
+    
+    ```shell
+    git clone git@github.com:<your username>/amphtml.git
+    ```
 
-   ```
-   curl -o- -L https://yarnpkg.com/install.sh | bash
-   ```
-  An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
+10.  Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the 
+     newly created local repository directory and run:
+     
+     ```shell
+     git remote add upstream git@github.com:ampproject/amphtml.git
+     ```
+    
+11.  Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become 
+     outdated).
+     
+     ```shell
+     git branch -u upstream/master master
+     ```
+    
+## Branch (do this each time you want a new branch)
 
-* If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
+Create and go to the branch: 
 
-   ```
-   yarn global remove gulp
-   ```
+```shell
+git checkout -b <branch name> master
+```
 
-* Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
+## Build AMP & run a local server
 
-   ```
-   yarn global add gulp-cli
-   ```
-  An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local development. This will also use the version of `gulp` packaged with the amphtml repository.
+1. Make sure you have the latest packages (after you pull): `yarn`
+1. Start the server: `gulp`
+1. Access your server at [http://localhost:8000](http://localhost:8000)
+1. Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
 
-* Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
-
-* Download your fork to a local repository.
-
-  ```
-  git clone git@github.com:<your username>/amphtml.git
-  ```
-
-* Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the newly created local repository directory and run:
-
-  ```
-  git remote add upstream git@github.com:ampproject/amphtml.git
-  ```
-
-* Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become outdated).
-
-  ```
-  git branch -u upstream/master master
-  ```
-
-# Branch (do this each time you want a new branch)
-
-* Create and go to the branch: `git checkout -b <branch name> master`
-
-# Build AMP & run a local server
-
-* Make sure you have the latest packages (after you pull): `yarn`
-* Start the server: `gulp`
-* Access your server at [http://localhost:8000](http://localhost:8000)
-* Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
-
-# Test AMP
+## Test AMP
 
 * Run the unit tests: `gulp test --unit` (doesn't build the runtime)
 * Run the integration tests: `gulp test --integration` (builds the runtime)
@@ -92,43 +99,48 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * Add the `--watch` flag to any `gulp test` command to automatically re-run the tests when a file changes
 * To run only a certain set of Mocha tests, change  `describe` to `describe.only` for the tests you want to run; combine this with `gulp test --watch` to automatically rerun your test when files are changed   (but make sure to run all the tests before sending your change for review)
 
-# Create commits to contain your changes
+## Create commits to contain your changes
 
-* Edit files in your favorite editor
-* if your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which will automatically update `package.json` and `yarn.lock`
-* if you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
-* Add each file you change: `git add <file>`
-* Create a commit: `git commit -m "<your commit message>"`
-* To avoid having to run `git add` on each file, you can use `git commit -a -m "<your commit message>"` instead
+1.  Edit files in your favorite editor
+2. If your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which automatically updates `package.json` and `yarn.lock`
+3. If you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
+4. Add each file you change: `git add <file>`
+5. Create a commit: `git commit -m "<your commit message>"`
+6. To avoid having to run `git add` on each file, you can use `git commit -a -m "<your commit message>"` instead.
 
-# Pull the latest changes
+## Pull the latest changes
 
-* `git checkout master`
-* `git pull`
-* `git checkout <branch name>`
-* `git rebase master`
-* Note that you may need to resolve conflicting changes at this point
+1.  Check out the master branch: `git checkout master`
+2.  Pull the latest changes: `git pull`
+3.  Check out your branch: `git checkout <branch name>`
+4.  Rebase the changes to your branch: `git rebase master`
 
-# Push your branch & create a Pull Request
+      **Note**: You may need to resolve conflicting changes at this point.
 
-* Pull the latest changes as described above
-* `git checkout <branch name>`
-* `git push -u origin <branch name>`
-* Go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and in the banner indicating you've recently pushed a branch, click the "Compare & pull request"  (if this banner does not appear, go to your fork at `https://github.com/<your username>/amphtml`, choose your branch from the "Branch" dropdown and click "New pull request")
-* Make sure you've signed the CLA (using the same email address as your git config indicates)
-* If your reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again
-* For pushes after the first, just use `git push`
-* If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment
-* If you see visual diffs reported by [Percy](http://percy.io/ampproject/amphtml), and want to access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform).
-* Once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge)
+## Push your branch & create a Pull Request
 
-# Delete your branch after your changes are merged (optional)
+1.  Pull the latest changes as described above.
+2.  Push the changes:
 
-* Go to the master branch: `git checkout master`
-* Delete your local branch: `git branch -D <branch name>`
-* Delete the corresponding GitHub fork branch: `git push -d origin <branch name>`
+    ```shell
+    git checkout <branch name>
+    git push -u origin <branch name>
+    ```
+3. Go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and in the banner indicating you've recently pushed a branch, click the "Compare & pull request"  (if this banner does not appear, go to your fork at `https://github.com/<your username>/amphtml`, choose your branch from the "Branch" dropdown and click "New pull request")
+4. Make sure you've signed the CLA (using the same email address as your git config indicates)
+5. If your reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again.
+6. For pushes after the first, just use `git push`
+7. If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment.
+8. If you see visual diffs reported by [Percy](http://percy.io/ampproject/amphtml), and want to access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform).
+9. Once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge).
 
-# See your changes in production
+## Delete your branch after your changes are merged (optional)
+
+1.  Go to the master branch: `git checkout master`
+2. Delete your local branch: `git branch -D <branch name>`
+3.  Delete the corresponding GitHub fork branch: `git push -d origin <branch name>`
+
+## See your changes in production
 
 * If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.
 * If your change was to the code that runs on AMP pages across the web, you'll have to wait for the change to be included in a production release. Generally, it takes about 1-2 weeks for a change to be live for all users. See the [release schedule](release-schedule.md) for more specific details.
