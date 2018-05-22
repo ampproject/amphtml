@@ -657,6 +657,20 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
         }
       });
     }
+    // If allowed_protocol is http then allow_relative should not be false
+    // except for `data-` attributes.
+    if (!attrSpec.name.startsWith('data-')) {
+      for (const allowedProtocol of attrSpec.valueUrl.allowedProtocol) {
+        if ((allowedProtocol === 'http') &&
+            (attrSpec.valueUrl.allowRelative !== null)) {
+          it('allow_relative can not be false if allowed_protocol is http: ' +
+                 attrSpec.name,
+          () => {
+            expect(attrSpec.valueUrl.allowRelative).toEqual(true);
+          });
+        }
+      }
+    }
   }
   if (attrSpec.valueRegex !== null) {
     it('value_regex valid', () => {

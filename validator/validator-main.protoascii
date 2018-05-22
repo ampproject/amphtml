@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 327
+min_validator_revision_required: 328
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 634
+spec_file_revision: 637
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -34,6 +34,7 @@ script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 css_length_spec: {
   html_format: AMP
   max_bytes: 50000
+  max_bytes_per_inline_style: 1000
   spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 }
 
@@ -4579,7 +4580,13 @@ attr_lists: {
   # https://www.ampproject.org/docs/reference/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
-    value_regex_casei: "fade-in|fade-in-scroll|fly-in-bottom|fly-in-left|fly-in-right|fly-in-top|parallax"
+    value_regex_casei: "fade-in|"
+                       "fade-in-scroll|"
+                       "fly-in-bottom|"
+                       "fly-in-left|"
+                       "fly-in-right|"
+                       "fly-in-top|"
+                       "parallax"
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
