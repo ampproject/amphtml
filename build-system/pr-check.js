@@ -27,11 +27,9 @@
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const colors = require('ansi-colors');
-const exec = require('./exec').exec;
-const execOrDie = require('./exec').execOrDie;
-const getStderr = require('./exec').getStderr;
-const getStdout = require('./exec').getStdout;
 const path = require('path');
+const {execOrDie, exec, getStderr, getStdout} = require('./exec');
+const {gitDiffColor, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -50,6 +48,7 @@ function startTimer(functionName) {
 /**
  * Stops the timer for the given function and prints the execution time.
  * @param {string} functionName
+ * @param {DOMHighResTimeStamp} startTime
  * @return {number}
  */
 function stopTimer(functionName, startTime) {
@@ -91,10 +90,8 @@ function timedExecOrDie(cmd) {
  * @return {!Array<string>}
  */
 function filesInPr() {
-  const files =
-      getStdout('git diff --name-only master...HEAD').trim().split('\n');
-  const changeSummary =
-      getStdout('git -c color.ui=always diff --stat master...HEAD');
+  const files = gitDiffNameOnlyMaster();
+  const changeSummary = gitDiffStatMaster();
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
@@ -217,7 +214,7 @@ function isFlagConfig(filePath) {
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
- * @returns {!Set<string>}
+ * @return {!Set<string>}
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
@@ -324,6 +321,9 @@ const command = {
     //   stopSauceConnect();
     // }
   },
+  runUnitTestsOnLocalChanges: function() {
+    timedExecOrDie('gulp test --nobuild --headless --local-changes');
+  },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --integration --nobuild';
@@ -359,7 +359,7 @@ const command = {
     } else if (opt_mode === 'master') {
       cmd += ' --master';
     }
-    const status = timedExec(cmd).status;
+    const {status} = timedExec(cmd);
     if (status != 0) {
       console.error(fileLogPrefix, colors.red('ERROR:'),
           'Found errors while running', colors.cyan(cmd) +
@@ -470,8 +470,8 @@ function runYarnIntegrityCheck() {
  * Makes sure that yarn.lock was properly updated.
  */
 function runYarnLockfileCheck() {
-  const yarnLockfileCheck = getStdout('git -c color.ui=always diff').trim();
-  if (yarnLockfileCheck.includes('yarn.lock')) {
+  const localChanges = gitDiffColor();
+  if (localChanges.includes('yarn.lock')) {
     console.error(fileLogPrefix, colors.red('ERROR:'),
         'This PR did not properly update', colors.cyan('yarn.lock') + '.');
     console.error(fileLogPrefix, colors.yellow('NOTE:'),
@@ -479,7 +479,7 @@ function runYarnLockfileCheck() {
         ', run', colors.cyan('gulp update-packages') +
         ', and push a new commit containing the changes.');
     console.error(fileLogPrefix, 'Expected changes:');
-    console.log(yarnLockfileCheck);
+    console.log(localChanges);
     process.exit(1);
   }
 }
@@ -513,7 +513,7 @@ function isGreenkeeperLockfilePushBuild() {
 /**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
- * @returns {number}
+ * @return {number}
  */
 function main() {
   const startTime = startTimer('pr-check.js');
@@ -601,6 +601,8 @@ function main() {
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
+        // Before running all tests, run tests modified by the PR. (Fail early.)
+        command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
       }
     }

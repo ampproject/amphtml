@@ -115,19 +115,19 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     this.registerAction('selectUp', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       const delta = (args && args['delta'] !== undefined) ? -args['delta'] : -1;
       this.select_(delta);
     }, ActionTrust.LOW);
 
     this.registerAction('selectDown', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       const delta = (args && args['delta'] !== undefined) ? args['delta'] : 1;
       this.select_(delta);
     }, ActionTrust.LOW);
 
     this.registerAction('toggle', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       user().assert(args['index'] >= 0, '\'index\' must be greater than 0');
       user().assert(args['index'] < this.options_.length, '\'index\' must be ' +
         'less than the length of options in the <amp-selector>');
@@ -390,7 +390,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   keyDownHandler_(event) {
-    const keyCode = event.keyCode;
+    const {keyCode} = event;
     switch (keyCode) {
       case KeyCodes.LEFT_ARROW: /* fallthrough */
       case KeyCodes.UP_ARROW: /* fallthrough */
@@ -465,7 +465,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   selectionKeyDownHandler_(event) {
-    const keyCode = event.keyCode;
+    const {keyCode} = event;
     if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
       if (this.options_.includes(event.target)) {
         event.preventDefault();

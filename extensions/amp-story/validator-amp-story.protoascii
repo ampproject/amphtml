@@ -40,7 +40,6 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: false
     }
   }
   attrs: {
@@ -48,7 +47,6 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: false
     }
   }
   attrs: {
@@ -56,7 +54,6 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: false
     }
   }
   attrs: {
@@ -65,7 +62,6 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: false
     }
   }
   attrs: {
@@ -73,7 +69,6 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: false
     }
   }
   attrs: {
@@ -86,7 +81,6 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: false
     }
   }
   attrs: {
@@ -152,10 +146,6 @@ tags: {  # <amp-story-page>
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY"
   satisfies: "amp-story-page"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
   attrs: { name: "auto-advance-after" }
   attrs: {
     name: "background-audio"
@@ -163,6 +153,10 @@ tags: {  # <amp-story-page>
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
   }
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
@@ -178,7 +172,7 @@ tags: {  # <amp-story-grid-layer>
   mandatory_ancestor: "AMP-STORY-PAGE"
   attrs: {
     name: "template"
-    value_regex: "(fill|horizontal|vertical|thirds)"
+    value_regex: "fill|horizontal|thirds|vertical"
     mandatory: true
   }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
@@ -193,79 +187,79 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-STORY-GRID-LAYER default"
-  attrs: { name: "grid-area" }
   attrs: {
     name: "align-content"
-    value_regex: "(start|"
-        "end|"
-        "center|"
-        "stretch|"
-        "space-around|"
-        "space-between|"
-        "space-evenly)"
+    value_regex: "center|"
+                 "end|"
+                 "space-around|"
+                 "space-between|"
+                 "space-evenly|"
+                 "start|"
+                 "stretch"
   }
   attrs: {
     name: "align-items"
-    value_regex: "(start|"
-        "end|"
-        "center|"
-        "stretch)"
+    value_regex: "center|"
+                 "end|"
+                 "start|"
+                 "stretch"
   }
   attrs: {
     name: "align-self"
-    value_regex: "(start|"
-        "end|"
-        "center|"
-        "stretch)"
-  }
-  attrs: {
-    name: "justify-content"
-    value_regex: "(start|"
-        "end|"
-        "center|"
-        "stretch|"
-        "space-around|"
-        "space-between|"
-        "space-evenly)"
-  }
-  attrs: {
-    name: "justify-items"
-    value_regex: "(start|"
-        "end|"
-        "center|"
-        "stretch)"
-  }
-  attrs: {
-    name: "justify-self"
-    value_regex: "(start|"
-        "end|"
-        "center|"
-        "stretch)"
+    value_regex: "center|"
+                 "end|"
+                 "start|"
+                 "stretch"
   }
   attrs: {
     name: "animate-in"
-    value_regex: "(drop|"
-        "fade-in|"
-        "fly-in-bottom|"
-        "fly-in-left|"
-        "fly-in-right|"
-        "fly-in-top|"
-        "pan-down|"
-        "pan-left|"
-        "pan-right|"
-        "pan-up|"
-        "pulse|"
-        "rotate-in-left|"
-        "rotate-in-right|"
-        "twirl-in|"
-        "whoosh-in-left|"
-        "whoosh-in-right|"
-        "zoom-in|"
-        "zoom-out)"
+    value_regex: "drop|"
+                 "fade-in|"
+                 "fly-in-bottom|"
+                 "fly-in-left|"
+                 "fly-in-right|"
+                 "fly-in-top|"
+                 "pan-down|"
+                 "pan-left|"
+                 "pan-right|"
+                 "pan-up|"
+                 "pulse|"
+                 "rotate-in-left|"
+                 "rotate-in-right|"
+                 "twirl-in|"
+                 "whoosh-in-left|"
+                 "whoosh-in-right|"
+                 "zoom-in|"
+                 "zoom-out"
   }
+  attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
-  attrs: { name: "animate-in-after" }
+  attrs: { name: "grid-area" }
+  attrs: {
+    name: "justify-content"
+    value_regex: "center|"
+                 "end|"
+                 "space-around|"
+                 "space-between|"
+                 "space-evenly|"
+                 "start|"
+                 "stretch"
+  }
+  attrs: {
+    name: "justify-items"
+    value_regex: "center|"
+                 "end|"
+                 "start|"
+                 "stretch"
+  }
+  attrs: {
+    name: "justify-self"
+    value_regex: "center|"
+                 "end|"
+                 "start|"
+                 "stretch"
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
@@ -279,28 +273,28 @@ tags: {
   # reference point different than the grid-area reference point.
   attrs: {
     name: "animate-in"
-    value_regex: "(drop|"
-        "fade-in|"
-        "fly-in-bottom|"
-        "fly-in-left|"
-        "fly-in-right|"
-        "fly-in-top|"
-        "pan-down|"
-        "pan-left|"
-        "pan-right|"
-        "pan-up|"
-        "pulse|"
-        "rotate-in-left|"
-        "rotate-in-right|"
-        "twirl-in|"
-        "whoosh-in-left|"
-        "whoosh-in-right|"
-        "zoom-in|"
-        "zoom-out)"
+    value_regex: "drop|"
+                 "fade-in|"
+                 "fly-in-bottom|"
+                 "fly-in-left|"
+                 "fly-in-right|"
+                 "fly-in-top|"
+                 "pan-down|"
+                 "pan-left|"
+                 "pan-right|"
+                 "pan-up|"
+                 "pulse|"
+                 "rotate-in-left|"
+                 "rotate-in-right|"
+                 "twirl-in|"
+                 "whoosh-in-left|"
+                 "whoosh-in-right|"
+                 "zoom-in|"
+                 "zoom-out"
   }
+  attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
-  attrs: { name: "animate-in-after" }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
@@ -318,18 +312,47 @@ tags: {  # <amp-story-bookend>
       allowed_protocol: "https"
     }
   }
+  child_tags: {
+    mandatory_num_child_tags: 0
+  }
+}
+tags: {  # amp-story-consent (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-consent extension .json script"
+  requires_extension: "amp-consent"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY-CONSENT"
+  unique: true
+  satisfies: "amp-story-consent extension .json script"
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
 }
 tags: {  # <amp-story-consent>
   html_format: AMP
   tag_name: "AMP-STORY-CONSENT"
   requires_extension: "amp-consent"
+  requires_extension: "amp-story"
   mandatory_parent: "AMP-CONSENT"
+  requires: "amp-story-consent extension .json script"
   attrs: {
     name: "id"
     mandatory: true
   }
   child_tags: {
-    mandatory_num_child_tags: 0
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "SCRIPT"
   }
   amp_layout: {
     supported_layouts: NODISPLAY

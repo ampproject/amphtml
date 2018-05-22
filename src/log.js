@@ -462,7 +462,7 @@ function pushIfNonEmpty(array, val) {
  * @return {!Error};
  */
 export function duplicateErrorIfNecessary(error) {
-  const message = error.message;
+  const {message} = error;
   const test = String(Math.random());
   error.message = test;
 
@@ -593,7 +593,7 @@ export function user(opt_element) {
 /**
  * Getter for user logger
  * @param {string=} suffix
- * @returns {!Log}
+ * @return {!Log}
  */
 function getUserLogger(suffix) {
   if (!logConstructor) {
@@ -641,7 +641,7 @@ export function dev() {
 /**
  * @param {!Window} win
  * @param {!Element=} opt_element
- * @returns {boolean} isEmbed
+ * @return {boolean} isEmbed
  */
 export function isFromEmbed(win, opt_element) {
   if (!opt_element) {

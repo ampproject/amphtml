@@ -24,7 +24,7 @@ import {pixelDrop} from './pixel';
 /**
  * Gets data to be passed along in request via params
  * @param {{monitors: *, loc: Location, ampDoc: !../../../../src/service/ampdoc-impl.AmpDoc, pubId: string}} params
- * @returns {{al: (string|undefined), amp: number, dc: number, dp: string, dt: string, fp: string, ict: string, ivh: number, pct: number, pfm: number, ph: number, pub: string, sh: number, sid: string}}
+ * @return {{al: (string|undefined), amp: number, dc: number, dp: string, dt: string, fp: string, ict: string, ivh: number, pct: number, pfm: number, ph: number, pub: string, sh: number, sid: string}}
  */
 const getEngData = ({monitors, loc, ampDoc, pubId}) => {
   const {

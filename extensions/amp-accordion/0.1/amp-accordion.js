@@ -295,7 +295,7 @@ class AmpAccordion extends AMP.BaseElement {
    * links or elements with tap targets, which should not have their default
    * behavior overidden.
    * @param {!Event} event
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   shouldHandleClick_(event) {
@@ -315,7 +315,7 @@ class AmpAccordion extends AMP.BaseElement {
     if (event.defaultPrevented) {
       return;
     }
-    const keyCode = event.keyCode;
+    const {keyCode} = event;
     switch (keyCode) {
       case KeyCodes.UP_ARROW: /* fallthrough */
       case KeyCodes.DOWN_ARROW:

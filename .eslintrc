@@ -51,7 +51,8 @@
           "template",
           "visibleForTesting"
         ]
-      }
+      },
+      "allowOverrideWithoutParam" : true
     }
   },
   "rules": {
@@ -60,14 +61,16 @@
     "amphtml-internal/enforce-private-props": 2,
     "amphtml-internal/html-template": 2,
     "amphtml-internal/no-array-destructuring": 2,
+    "amphtml-internal/no-deep-destructuring": 2,
     "amphtml-internal/no-es2015-number-props": 2,
     "amphtml-internal/no-export-side-effect": 2,
     "amphtml-internal/no-for-of-statement": 2,
     "amphtml-internal/no-global": 0,
     "amphtml-internal/no-spread": 2,
     "amphtml-internal/no-style-property-setting": 2,
+    "amphtml-internal/prefer-deferred-promise": 1,
+    "amphtml-internal/prefer-destructuring": 2,
     "amphtml-internal/query-selector": 2,
-    "amphtml-internal/resolve-inside-promise-resolver": 1,
     "amphtml-internal/todo-format": 0,
     "amphtml-internal/unused-private-field": 1,
     "amphtml-internal/vsync": 1,
@@ -86,7 +89,7 @@
     "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
     "jsdoc/check-param-names": 1,
     "jsdoc/check-tag-names": 1,
-    "jsdoc/check-types": 0,
+    "jsdoc/check-types": 1,
     "jsdoc/require-param": 1,
     "jsdoc/require-param-name": 1,
     "jsdoc/require-param-type": 1,

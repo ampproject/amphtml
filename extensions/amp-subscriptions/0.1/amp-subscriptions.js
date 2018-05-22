@@ -137,7 +137,7 @@ export class SubscriptionService {
 
   /**
    * @private
-   * @returns {!Promise<!JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   getPlatformConfig_() {
     return new Promise((resolve, reject) => {
@@ -153,8 +153,7 @@ export class SubscriptionService {
    * service.
    *
    * @param {string} serviceId
-   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform}
-   * subscriptionPlatformFactory
+   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
@@ -239,7 +238,7 @@ export class SubscriptionService {
 
   /**
    * Starts the amp-subscription Service
-   * @returns {SubscriptionService}
+   * @return {SubscriptionService}
    */
   start() {
     this.initialize_().then(() => {
@@ -271,7 +270,7 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.platformStore_.getAllRegisteredPlatforms().forEach(
+      this.platformStore_.getAvailablePlatforms().forEach(
           subscriptionPlatform => {
             this.fetchEntitlements_(subscriptionPlatform);
           }
@@ -325,7 +324,7 @@ export class SubscriptionService {
 
   /**
    * Returns the singleton Dialog instance
-   * @returns {!Dialog}
+   * @return {!Dialog}
    */
   getDialog() {
     return this.dialog_;
@@ -389,7 +388,7 @@ export class SubscriptionService {
 
   /**
    * Returns Page config
-   * @returns {!PageConfig}
+   * @return {!PageConfig}
    */
   getPageConfig() {
     const pageConfig = dev().assert(this.pageConfig_,
@@ -456,6 +455,14 @@ export class SubscriptionService {
       dev().assert(platform, 'Platform is not registered');
       platform.decorateUI(element, action, options);
     });
+  }
+
+  /**
+   * Evaluates platforms and select the one to be selected for login.
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   */
+  selectPlatformForLogin() {
+    return this.platformStore_.selectPlatformForLogin();
   }
 }
 

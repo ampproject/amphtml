@@ -90,7 +90,7 @@ exports.jsifyCssAsync = function(filename) {
     result.warnings().forEach(function(warn) {
       log(colors.red(warn.toString()));
     });
-    const css = result.css;
+    const {css} = result;
     return css + '\n/*# sourceURL=/' + filename + '*/';
   });
 };

@@ -34,9 +34,12 @@ module.exports = function(context) {
         return;
       }
       if (node.property.name == 'style') {
-        context.report(node, 'The use of Element#style '
-            + '(CSSStyleDeclaration live object) to style elements is ' +
-            'forbidden. Use getStyle and setStyle from style.js');
+        context.report({
+          node,
+          message: 'The use of Element#style (CSSStyleDeclaration live ' +
+              'object) to style elements is forbidden. Use getStyle and ' +
+              'setStyle from style.js',
+        });
       }
     },
   };

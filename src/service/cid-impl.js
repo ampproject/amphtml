@@ -38,7 +38,7 @@ import {
 import {
   getSourceOrigin,
   isProxyOrigin,
-  parseUrl,
+  parseUrlDeprecated,
 } from '../url';
 import {isIframed} from '../dom';
 import {parseJson, tryParseJson} from '../json';
@@ -114,6 +114,7 @@ export class Cid {
      * Cached base cid once read from storage to avoid repeated
      * reads.
      * @private {?Promise<string>}
+     * @restricted
      */
     this.baseCid_ = null;
 
@@ -121,6 +122,7 @@ export class Cid {
      * Cache to store external cids. Scope is used as the key and cookie value
      * is the value.
      * @private {!Object<string, !Promise<string>>}
+     * @restricted
      */
     this.externalCidCache_ = Object.create(null);
 
@@ -210,9 +212,9 @@ export class Cid {
    * @return {!Promise<?string>}
    */
   getExternalCid_(getCidStruct, persistenceConsent) {
-    const scope = getCidStruct.scope;
+    const {scope} = getCidStruct;
     /** @const {!Location} */
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     if (!isProxyOrigin(url)) {
       const apiKey = this.isScopeOptedIn_(scope);
       if (apiKey) {
@@ -362,8 +364,8 @@ function setCidCookie(win, scope, cookie) {
  * @return {!Promise<?string>}
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const win = cid.ampdoc.win;
-  const scope = getCidStruct.scope;
+  const {win} = cid.ampdoc;
+  const {scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
   const existingCookie = getCookie(win, cookieName);
 
@@ -430,7 +432,7 @@ function getBaseCid(cid, persistenceConsent) {
   if (cid.baseCid_) {
     return cid.baseCid_;
   }
-  const win = cid.ampdoc.win;
+  const {win} = cid.ampdoc;
 
   return cid.baseCid_ = read(cid.ampdoc).then(stored => {
     let needsToStore = false;
@@ -467,7 +469,7 @@ function getBaseCid(cid, persistenceConsent) {
  * @param {string} cidString Actual cid string to store.
  */
 function store(ampdoc, persistenceConsent, cidString) {
-  const win = ampdoc.win;
+  const {win} = ampdoc;
   if (isIframed(win)) {
     // If we are being embedded, try to save the base cid to the viewer.
     viewerBaseCid(ampdoc, createCidData(cidString));
@@ -537,7 +539,7 @@ function createCidData(cidString) {
  * @return {!Promise<?BaseCidInfoDef>}
  */
 function read(ampdoc) {
-  const win = ampdoc.win;
+  const {win} = ampdoc;
   let data;
   try {
     data = win.localStorage.getItem('amp-cid');

@@ -85,6 +85,11 @@ limitations under the License.
     <td>When enabled, all eligible slots on the page will be serviced by a single ad request.</td>
     <td>Beta</td>
   </tr>
+  <tr>
+    <td><a href="amp-consent.md">AMP Consent Integration</a></td>
+    <td>Integration with AMP Consent extension.</td>
+    <td>Launched</td>
+  </tr>
 </table>
 
 #### Examples
@@ -135,7 +140,7 @@ See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/37219
   - `"<key_string>":"<value_string>"` or
   - `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
 
-Example with json attribute: 
+Example with json attribute:
 
 ```html
 <amp-ad width=320 height=50

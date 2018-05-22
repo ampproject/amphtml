@@ -28,7 +28,7 @@ import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
 import {isArray} from '../../../../src/types';
-import {isProtocolValid, parseUrl} from '../../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../../src/url';
 import {renderAsElement} from '../simple-template';
 import {throttle} from '../../../../src/utils/rate-limit';
 
@@ -111,7 +111,7 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
       },
       {
         tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
+        attrs: dict({'class': 'i-amphtml-story-bookend-component-meta'}),
         unlocalizedString: domainName,
       },
     ],
@@ -409,7 +409,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * @retun {boolean}
+   * @return {boolean}
    */
   isBuilt() {
     return this.isBuilt_;
@@ -443,7 +443,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
     const fragment = BookendComponent
         .buildTemplates(components, this.win.document);
-    const container = this.getInnerContainer_();
+    const container = dev().assertElement(
+        BookendComponent.buildContainer(this.getInnerContainer_(),
+            this.win.document));
     this.resources_.mutateElement(container,
         () => container.appendChild(fragment));
   }
@@ -496,7 +498,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
             this.win.document.head.querySelector('title'),
             'Please set <title> or structured data (JSON-LD).').textContent,
 
-      domainName: parseUrl(
+      domainName: parseUrlDeprecated(
           Services.documentInfoForDoc(this.getAmpDoc()).canonicalUrl).hostname,
     };
 

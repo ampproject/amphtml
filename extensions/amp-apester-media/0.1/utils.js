@@ -35,7 +35,7 @@ function isWebview(ua) {
 
 /**
  * Gets the user platform.
- * @returns {string}
+ * @return {string}
  */
 export function getPlatform() {
   const webview = isWebview(navigator.userAgent);

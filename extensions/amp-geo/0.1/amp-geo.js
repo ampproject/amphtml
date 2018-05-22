@@ -93,7 +93,7 @@ export class AmpGeo extends AMP.BaseElement {
   buildCallback() {
     // All geo config within the amp-geo component.
     // The validator only allows one amp-geo per page
-    const children = this.element.children;
+    const {children} = this.element;
 
     if (children.length) {
       user().assert(children.length === 1 &&
@@ -101,7 +101,7 @@ export class AmpGeo extends AMP.BaseElement {
       `${TAG} can only have one <script type="application/json"> child`);
     }
 
-    /** @private @const {!Promise<!Object<string, (string|Array<string>)>>} */
+    /** @type {!Promise<!Object<string, (string|Array<string>)>>} */
     const geo = this.addToBody_(
         children.length ?
           parseJson(children[0].textContent) : {});
@@ -109,6 +109,7 @@ export class AmpGeo extends AMP.BaseElement {
     /* resolve the service promise singleton we stashed earlier */
     geoDeferred.resolve(geo);
   }
+
 
   /**
    * findCountry_, sets this.country_ and this.mode_
@@ -120,7 +121,6 @@ export class AmpGeo extends AMP.BaseElement {
 
     if (preRenderMatch && !isProxyOrigin(doc.location)) {
       this.mode_ = mode.GEO_PRERENDER;
-      /** @private {string} */
       this.country_ = preRenderMatch[1];
     } else {
       this.mode_ = mode.GEO_HOT_PATCH;
@@ -140,7 +140,7 @@ export class AmpGeo extends AMP.BaseElement {
       (isCanary(this.win) || getMode(this.win).localDev) &&
       /^\w+$/.test(getMode(this.win).geoOverride)) {
       this.mode_ = mode.GEO_OVERRIDE;
-      this.country_ = getMode(this.win).geoOverride ;
+      this.country_ = getMode(this.win).geoOverride;
     }
   }
   /**
@@ -148,10 +148,9 @@ export class AmpGeo extends AMP.BaseElement {
    * @param {Object} config
    */
   matchCountryGroups_(config) {
-    /* ISOCountryGroups are optional but if specified at least one must exist
-    */
-    /** @private @const {!Object<string, Array<string>>} */
-    const ISOCountryGroups = config.ISOCountryGroups;
+    // ISOCountryGroups are optional but if specified at least one must exist
+    const ISOCountryGroups = /** @type {!Object<string, Array<string>>} */(
+      config.ISOCountryGroups);
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       user().assert(
@@ -174,22 +173,21 @@ export class AmpGeo extends AMP.BaseElement {
 
   /**
    * clearPreRender_()
-   * Removes classes and amp-state block addred by server side
-   * pre-render when debug override is in effect
+   * Returns a list of classes to remove if pre-render has
+   * been invalidated by way of being on an amp cache
    * @param {Document} doc
+   * @return {Array<string>}
    */
   clearPreRender_(doc) {
-    const klasses = doc.body.classList;
+    const {classList} = doc.body;
+    const classesToRemove = [];
     const stripRe = new RegExp('^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX ,'i');
-    for (let i = klasses.length - 1; i > 0; i--) {
-      if (stripRe.test(klasses[i])) {
-        doc.body.classList.remove(klasses[i]);
+    for (let i = classList.length - 1; i > 0; i--) {
+      if (stripRe.test(classList[i])) {
+        classesToRemove.push(classList[i]);
       }
     }
-    const geoState = doc.getElementById(GEO_ID);
-    if (geoState) {
-      geoState.parentNode.removeChild(geoState);
-    }
+    return classesToRemove;
   }
 
   /**
@@ -200,7 +198,7 @@ export class AmpGeo extends AMP.BaseElement {
    */
   addToBody_(config) {
     const doc = this.win.document;
-    /** @private {Object} */
+    /** @type {Object} */
     const states = {};
     const self = this;
 
@@ -210,34 +208,54 @@ export class AmpGeo extends AMP.BaseElement {
       self.findCountry_(doc);
       self.matchCountryGroups_(config);
 
+      let classesToRemove = [];
+
       switch (self.mode_) {
         case mode.GEO_OVERRIDE:
-          self.clearPreRender_(doc);
+          classesToRemove = self.clearPreRender_(doc);
           // Intentionally fall through.
         case mode.GEO_HOT_PATCH:
           // Build the AMP State, add classes
           states.ISOCountry = self.country_;
 
-          for (let group = 0; group < self.matchedGroups_.length; group++) {
-            doc.body.classList.add(GROUP_PREFIX + self.matchedGroups_[group]);
-            states[self.matchedGroups_[group]] = true;
-          }
-          doc.body.classList.add(COUNTRY_PREFIX + this.country_);
-          doc.body.classList.remove('amp-geo-pending');
-          states.ISOCountryGroups = self.matchedGroups_;
+          const classesToAdd = self.matchedGroups_.map(group => {
+            states[group] = true;
+            return GROUP_PREFIX + group;
+          });
 
-          // Only include amp state if user requests it to avoid validator issue
-          // with missing amp-bind js
-          if (config.AmpBind) {
-            const state = doc.createElement('amp-state');
-            const confScript = doc.createElement('script');
-            confScript.setAttribute('type', 'application/json');
-            confScript.textContent =
-                JSON.stringify(/** @type {!JsonObject} */(states)) ;
-            state.appendChild(confScript);
-            state.id = GEO_ID;
-            doc.body.appendChild(state);
-          }
+          states.ISOCountryGroups = self.matchedGroups_;
+          classesToAdd.push(COUNTRY_PREFIX + this.country_);
+
+          // Let the runtime know we're mutating the doc.body
+          // Actual change happens in callback to runtime can
+          // optimize dom mutations.
+          self.mutateElement(() => {
+            const {classList} = doc.body;
+            // Always remove the pending class
+            classesToRemove.push('amp-geo-pending');
+            classesToRemove.forEach(toRemove => classList.remove(toRemove));
+
+            // add the new classes to <body>
+            classesToAdd.forEach(toAdd => classList.add(toAdd));
+
+            // Only include amp state if user requests it to
+            // avoid validator issue with missing amp-bind js
+            if (config.AmpBind) {
+              const geoState = doc.getElementById(GEO_ID);
+              if (geoState) {
+                geoState.parentNode.removeChild(geoState);
+              }
+              const state = doc.createElement('amp-state');
+              const confScript = doc.createElement('script');
+              confScript.setAttribute('type', 'application/json');
+              confScript.textContent =
+                  JSON.stringify(/** @type {!JsonObject} */(states)) ;
+              state.appendChild(confScript);
+              state.id = GEO_ID;
+              doc.body.appendChild(state);
+            }
+          }, doc.body);
+
           break;
         case mode.GEO_PRERENDER:
           break;

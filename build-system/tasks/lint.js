@@ -20,13 +20,13 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
 const eslint = require('gulp-eslint');
-const getStdout = require('../exec').getStdout;
+const eslintIfFixed = require('gulp-eslint-if-fixed');
 const gulp = require('gulp-help')(require('gulp'));
-const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
+const {gitDiffNameOnlyMaster} = require('../git');
 
 const isWatching = (argv.watch || argv.w) || false;
 const filesInARefactorPr = 15;
@@ -34,16 +34,6 @@ const options = {
   fix: false,
 };
 let collapseLintResults = !!process.env.TRAVIS;
-
-/**
- * Checks if current Vinyl file has been fixed by eslint.
- * @param {!Vinyl} file
- * @return {boolean}
- */
-function isFixed(file) {
-  // Has ESLint fixed the file contents?
-  return file.eslint != null && file.eslint.fixed;
-}
 
 /**
  * Initializes the linter stream based on globs
@@ -93,7 +83,7 @@ function runLinter(path, stream, options) {
       .pipe(eslint.formatEach('stylish', function(msg) {
         logOnSameLine(msg.trim() + '\n');
       }))
-      .pipe(gulpIf(isFixed, gulp.dest(path)))
+      .pipe(eslintIfFixed(path))
       .pipe(eslint.result(function(result) {
         if (!process.env.TRAVIS) {
           logOnSameLine(colors.green('Linted: ') + result.filePath);
@@ -118,10 +108,12 @@ function runLinter(path, stream, options) {
           if (!options.fix) {
             log(colors.yellow('NOTE 1:'),
                 'You may be able to automatically fix some of these warnings ' +
-                '/ errors by running', colors.cyan('gulp lint --fix') + '.');
+                '/ errors by running',
+                colors.cyan('gulp lint --local-changes --fix'),
+                'from your local branch.');
             log(colors.yellow('NOTE 2:'),
-                'Since this is a destructive operation (operates on the file',
-                'system), make sure you commit before running the command.');
+                'Since this is a destructive operation (that edits your files',
+                'in-place), make sure you commit before running the command.');
           }
         }
       }))
@@ -133,28 +125,40 @@ function runLinter(path, stream, options) {
  *
  * @return {!Array<string>}
  */
-function jsFilesInPr() {
-  const filesInPr =
-        getStdout('git diff --name-only master...HEAD').trim().split('\n');
-  return filesInPr.filter(function(file) {
+function jsFilesChanged() {
+  return gitDiffNameOnlyMaster().filter(function(file) {
     return path.extname(file) == '.js';
   });
 }
 
 /**
- * Checks if there are .eslintrc changes in this PR, in which case we must lint
- * all files.
+ * Checks if there are eslint rule changes, in which case we must lint all
+ * files.
  *
  * @return {boolean}
  */
-function eslintrcChangesInPr() {
+function eslintRulesChanged() {
   if (process.env.TRAVIS_EVENT_TYPE === 'push') {
     return false;
   }
-  const filesInPr =
-        getStdout('git diff --name-only master...HEAD').trim().split('\n');
-  return filesInPr.filter(function(file) {
-    return path.basename(file).includes('.eslintrc');
+  return gitDiffNameOnlyMaster().filter(function(file) {
+    return path.basename(file).includes('.eslintrc') ||
+        path.dirname(file) === 'build-system/eslint-rules';
+  }).length > 0;
+}
+
+/**
+ * Checks if there are validator changes, in which case we don't do strict
+ * linting.
+ *
+ * @return {boolean}
+ */
+function validatorChanged() {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
+    return false;
+  }
+  return gitDiffNameOnlyMaster().filter(function(file) {
+    return path.dirname(file).startsWith('validator');
   }).length > 0;
 }
 
@@ -166,7 +170,12 @@ function eslintrcChangesInPr() {
 function setFilesToLint(files) {
   config.lintGlobs =
       config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
-  log(colors.green('INFO: ') + 'Running lint on ' + colors.cyan(files));
+  if (!process.env.TRAVIS) {
+    log(colors.green('INFO: ') + 'Running lint on the following files:');
+    files.forEach(file => {
+      log(colors.cyan(file));
+    });
+  }
 }
 
 /**
@@ -189,24 +198,27 @@ function lint() {
   }
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
-    enableStrictLinting();
-  } else if (!eslintrcChangesInPr() &&
+    if (!eslintRulesChanged()) {
+      enableStrictLinting();
+    }
+  } else if (!eslintRulesChanged() &&
       (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
-       process.env.LOCAL_PR_CHECK)) {
-    const jsFiles = jsFilesInPr();
+       process.env.LOCAL_PR_CHECK ||
+       argv['local-changes'])) {
+    const jsFiles = jsFilesChanged();
     if (jsFiles.length == 0) {
       log(colors.green('INFO: ') + 'No JS files in this PR');
       return Promise.resolve();
-    } else if (jsFiles.length > filesInARefactorPr) {
-      // This is probably a refactor, don't enable strict mode.
-      setFilesToLint(jsFiles);
-    } else {
-      setFilesToLint(jsFiles);
+    }
+    setFilesToLint(jsFiles);
+    // For large refactors or validator changes, don't enable strict linting.
+    if (jsFiles.length <= filesInARefactorPr && !validatorChanged()) {
       enableStrictLinting();
     }
   }
-  const stream = initializeStream(config.lintGlobs, {});
-  return runLinter('.', stream, options);
+  const basePath = '.';
+  const stream = initializeStream(config.lintGlobs, {base: basePath});
+  return runLinter(basePath, stream, options);
 }
 
 
@@ -218,6 +230,8 @@ gulp.task(
     {
       options: {
         'watch': '  Watches for changes in files, validates against the linter',
-        'fix': '  Fixes simple lint errors (spacing etc).',
+        'fix': '  Fixes simple lint errors (spacing etc)',
+        'local-changes':
+            '  Lints just the changes commited to the local branch',
       },
     });

@@ -136,11 +136,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
   {
-    id: 'amp-lightbox-gallery',
-    name: 'Enables a new lightbox experience via the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
@@ -290,18 +285,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'amp-fx-fade-in',
-    name: 'Enables amp-fx="fade-in" - scroll triggered timed fade in animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
-  },
-  {
-    id: 'amp-fx-fade-in-scroll',
-    name: 'Enables amp-fx="fade-in-scroll" - a scroll dependent fade animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
-  },
-  {
     id: 'amp-img-native-srcset',
     name: 'Enables native browser implementation of srcset and sizes',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
@@ -317,6 +300,13 @@ const EXPERIMENTS = [
     name: 'Enables SVG support in amp-mustache templates',
     spec: 'https://github.com/ampproject/amphtml/issues/15123',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15360',
+  },
+  {
+    id: 'amp-fx-fly-in',
+    name: 'Enables amp-fx="fly-in-{bottom,top,left,right}" - ' +
+      'scroll triggered timed fly in animations',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
 ];
 
@@ -514,8 +504,8 @@ function showConfirmation_(message, callback) {
  * experiment state can reflect the default activated experiments.
  */
 function getAmpConfig() {
-  const {promise, resolve, reject} = new Deferred();
-
+  const deferred = new Deferred();
+  const {promise, resolve, reject} = deferred;
   const xhr = new XMLHttpRequest();
   xhr.addEventListener('load', () => {
     resolve(xhr.responseText);
@@ -526,7 +516,6 @@ function getAmpConfig() {
   // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
   xhr.open('GET', '/v0.js?' + Math.random(), true);
   xhr.send(null);
-
   return promise.then(text => {
     const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
     if (!match) {

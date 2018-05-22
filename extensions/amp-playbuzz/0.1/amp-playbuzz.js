@@ -45,7 +45,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertAbsoluteHttpOrHttpsUrl,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
 import {dict} from '../../../src/utils/object';
@@ -157,7 +157,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the overflow element
-   * @returns {!Element} overflowElement
+   * @return {!Element} overflowElement
    *
    */
   getOverflowElement_() {
@@ -257,15 +257,15 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the composed embed source url
-   * @returns {string} url
+   * @return {string} url
    *
    */
   generateEmbedSourceUrl_() {
-    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-    const parsedPageUrl = parseUrl(canonicalUrl);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const parsedPageUrl = parseUrlDeprecated(canonicalUrl);
     const params = {
       itemUrl: this.iframeSrcUrl_,
-      relativeUrl: parseUrl(this.iframeSrcUrl_).pathname,
+      relativeUrl: parseUrlDeprecated(this.iframeSrcUrl_).pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,
