@@ -33,6 +33,7 @@ const UNBLOCK_ON_ALL_POLICY = '_none';
 const WHITELIST_POLICY = {
   'default': true,
   '_none': true,
+  '_all': true,
 };
 
 
@@ -167,7 +168,6 @@ export class ConsentPolicyManager {
    * @return {!Promise<boolean>}
    */
   whenPolicyUnblock(policyId) {
-    const unblockOnAll = (policyId == UNBLOCK_ON_ALL_POLICY);
     if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
       // NOTE: UNBLOCK_ON_ALL_POLICY won't work after toggle on flag.
       // Need to register and real consent policy and not reuse default one.
@@ -178,16 +178,10 @@ export class ConsentPolicyManager {
           'is supported now');
         return Promise.resolve(false);
       }
-      policyId = UNBLOCK_ON_DEFAULT_POLICY;
     }
     return this.whenPolicyInstanceReady_(policyId).then(() => {
       return this.instances_[policyId].getReadyPromise().then(() => {
-        if (unblockOnAll) {
-          return true;
-        }
-        const state = this.instances_[policyId].getCurrentPolicyStatus();
-        return state == CONSENT_POLICY_STATE.SUFFICIENT ||
-          state == CONSENT_ITEM_STATE.NOT_REQUIRED;
+        return this.instances_[policyId].shouldBlock();
       });
     });
   }
@@ -256,6 +250,10 @@ export class ConsentPolicyInstance {
 
     /** @private {CONSENT_POLICY_STATE} */
     this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
+
+    /** @private {!Array<CONSENT_POLICY_STATE>} */
+    this.unblockStateLists_ =
+        config['unblockOn'] || ['sufficient', 'unknown_not_required'];
 
     this.init_(pendingItems);
   }
@@ -437,5 +435,29 @@ export class ConsentPolicyInstance {
    */
   getCurrentPolicyStatus() {
     return this.status_;
+  }
+
+  /**
+   * Returns whether the current consent policy state should block
+   * Caller need to make sure that policy status has resolved
+   * @return {boolean}
+   */
+  shouldBlock() {
+    let state;
+    switch (this.status_) {
+      case CONSENT_POLICY_STATE.UNKNOWN:
+        state = 'unknown'
+        break;
+      case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+        state = 'unknown_not_required';
+        break;
+      case CONSENT_POLICY_STATE.INSUFFICIENT:
+        state = 'insufficient';
+        break;
+      case CONSENT_POLICY_STATE.SUFFICIENT:
+        state = 'sufficient';
+        break;
+    }
+    return (this.unblockStateLists_.indexOf(state) > -1);
   }
 }

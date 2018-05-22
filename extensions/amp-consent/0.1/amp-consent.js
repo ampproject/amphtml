@@ -398,9 +398,6 @@ export class AmpConsent extends AMP.BaseElement {
    * Generate default consent policy if not defined
    */
   generateDefaultPolicy_() {
-    if (this.policyConfig_ && this.policyConfig_['default']) {
-      return;
-    }
     // Generate default policy
     const instanceKeys = Object.keys(this.consentConfig_);
     const defaultWaitForItems = {};
@@ -411,6 +408,21 @@ export class AmpConsent extends AMP.BaseElement {
     const defaultPolicy = {
       'waitFor': defaultWaitForItems,
     };
+    const predefinedNone = {
+      'waitFor': defaultWaitForItems,
+      // Experimental config, do not expose
+      'unblockOn': ['unknown', 'sufficient',
+          'insufficient', 'unknown_not_required'],
+    };
+
+    this.policyConfig_['_none'] = predefinedNone;
+
+    this.policyConfig_['_all'] = defaultPolicy;
+
+    if (this.policyConfig_ && this.policyConfig_['default']) {
+      return;
+    }
+
     this.policyConfig_['default'] = defaultPolicy;
   }
 
