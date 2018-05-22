@@ -328,8 +328,10 @@ function proxyToAmpProxy(req, res, mode) {
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'] == '1';
+    // TODO(ccordry): Remove this when story v01 is depricated.
+    const storyV1 = req.query['story_v'] === '1';
     const urlPrefix = getUrlPrefix(req);
-    body = replaceUrls(mode, body, urlPrefix, inabox);
+    body = replaceUrls(mode, body, urlPrefix, inabox, storyV1);
     if (inabox) {
       // Allow CORS requests for A4A.
       const origin = req.headers.origin || urlPrefix;
@@ -1079,10 +1081,17 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
  * @param {string} file
  * @param {string=} hostName
  * @param {boolean=} inabox
+ * @param {boolean=} storyV1
  */
-function replaceUrls(mode, file, hostName, inabox) {
+function replaceUrls(mode, file, hostName, inabox, storyV1) {
   hostName = hostName || '';
   if (mode == 'default') {
+    // TODO:(ccordry) remove this when story 0.1 is deprecated
+    if (storyV1) {
+      file = file.replace(
+          /https:\/\/cdn\.ampproject\.org\/v0\/amp-story-0\.1\.js/g,
+          hostName + '/dist/v0/amp-story-1.0.max.js');
+    }
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/amp.js');
