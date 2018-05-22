@@ -19,27 +19,28 @@ import {Services} from '../../../../src/services';
 
 describes.fakeWin('amp-story-consent', {amp: true}, env => {
   let win;
-  let consentConfigEl;
   let defaultConfig;
   let sandbox;
   let storyConsent;
+  let storyConsentConfigEl;
   let storyConsentEl;
 
   const setConfig = config => {
-    consentConfigEl.textContent = JSON.stringify(config);
+    storyConsentConfigEl.textContent = JSON.stringify(config);
   };
 
   beforeEach(() => {
     win = env.win;
     sandbox = sinon.sandbox.create();
 
-    defaultConfig = {
+    const consentConfig = {
       consents: {ABC: {}},
-      'story-consent': {
-        title: 'Foo title.',
-        message: 'Foo message about the consent.',
-        'vendors': ['Item 1', 'Item 2'],
-      },
+    };
+
+    defaultConfig = {
+      title: 'Foo title.',
+      message: 'Foo message about the consent.',
+      vendors: ['Item 1', 'Item 2'],
     };
 
     sandbox.stub(Services, 'localizationService').returns({
@@ -49,15 +50,22 @@ describes.fakeWin('amp-story-consent', {amp: true}, env => {
     // Test DOM structure:
     // <fake-amp-consent>
     //   <script type="application/json">{JSON Config}</script>
-    //   <amp-story-consent></amp-story-consent>
+    //   <amp-story-consent>
+    //     <script type="application/json">{JSON Config}</script>
+    //   </amp-story-consent>
     // </fake-amp-consent>
     const consentEl = win.document.createElement('fake-amp-consent');
 
-    consentConfigEl = win.document.createElement('script');
+    const consentConfigEl = win.document.createElement('script');
     consentConfigEl.setAttribute('type', 'application/json');
+    consentConfigEl.textContent = JSON.stringify(consentConfig);
+
+    storyConsentConfigEl = win.document.createElement('script');
+    storyConsentConfigEl.setAttribute('type', 'application/json');
     setConfig(defaultConfig);
 
     storyConsentEl = win.document.createElement('amp-story-consent');
+    storyConsentEl.appendChild(storyConsentConfigEl);
 
     consentEl.appendChild(consentConfigEl);
     consentEl.appendChild(storyConsentEl);
@@ -72,50 +80,51 @@ describes.fakeWin('amp-story-consent', {amp: true}, env => {
 
   it('should parse the config', () => {
     storyConsent.buildCallback();
-    expect(storyConsent.consentConfig_).to.deep.equal(defaultConfig);
+    expect(storyConsent.storyConsentConfig_)
+        .to.deep.equal(defaultConfig);
   });
 
   it('should require a story-consent title', () => {
-    delete defaultConfig['story-consent'].title;
+    delete defaultConfig.title;
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('story-consent requires a title');
+      }).to.throw('config requires a title');
     });
   });
 
   it('should require a story-consent message', () => {
-    delete defaultConfig['story-consent'].message;
+    delete defaultConfig.message;
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('story-consent requires a message');
+      }).to.throw('config requires a message');
     });
   });
 
   it('should require a story-consent vendors', () => {
-    delete defaultConfig['story-consent'].vendors;
+    delete defaultConfig.vendors;
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('story-consent requires an array of vendors');
+      }).to.throw('config requires an array of vendors');
     });
   });
 
   it('should require a story-consent vendors of type array', () => {
-    defaultConfig['story-consent'].vendors = 'foo';
+    defaultConfig.vendors = 'foo';
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('story-consent requires an array of vendors');
+      }).to.throw('config requires an array of vendors');
     });
   });
 
