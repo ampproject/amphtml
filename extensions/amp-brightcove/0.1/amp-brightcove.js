@@ -268,10 +268,15 @@ class AmpBrightcove extends AMP.BaseElement {
     }
   }
 
-  /** @private */
+  /**
+    * @param {string} id
+    * @return {string}
+    * @private
+    */
   encodeId_(id) {
-    /* id is either a Brightcove-assigned id, or a customer-generated reference id.
-      reference ids are prefixed 'ref:' and the colon must be preserved unencoded */
+    /* id is either a Brightcove-assigned id, or a customer-generated
+       reference id. reference ids are prefixed 'ref:' and the colon
+       must be preserved unencoded */
     if (id.substring(0, 4) === 'ref:') {
       return `ref:${encodeURIComponent(id.substring(4))}`;
     }
@@ -304,9 +309,11 @@ class AmpBrightcove extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
+
     return true; // Call layoutCallback again.
   }
 
