@@ -14,54 +14,60 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../src/services';
 import {HighlightHandler} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
+import {Services} from '../../../../src/services';
 
 describes.fakeWin('HighlightHandler', {
   win: {
     // URL encoded '{"s":["amp","highlight"]}'.
-    location: 'page.html#highlight=%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D'
+    location: 'page.html#highlight=' +
+        '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D',
   },
   amp: {
-    ampdoc: 'single'
+    ampdoc: 'single',
   },
-}, env=>{
+}, env => {
 
-  it('initialize with visibility=visible', ()=>{
-    let document = env.win.document;
-    let root = document.createElement('div');
+  it('initialize with visibility=visible', () => {
+    const document = env.win.document;
+    const root = document.createElement('div');
     document.body.appendChild(root);
-    let div0 = document.createElement('div');
+    const div0 = document.createElement('div');
     div0.textContent = 'text in amp doc';
     root.appendChild(div0);
-    let div1 = document.createElement('div');
+    const div1 = document.createElement('div');
     div1.textContent = 'highlighted text';
     root.appendChild(div1);
 
-    let ampdoc = env.ampdoc;
-    let scrollStub = sandbox.stub(Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
-    let handler = new HighlightHandler(ampdoc);
+    const ampdoc = env.ampdoc;
+    const scrollStub = sandbox.stub(
+        Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
+    const handler = new HighlightHandler(ampdoc);
 
     expect(scrollStub).to.be.calledOnce;
     expect(scrollStub.firstCall.args.length).to.equal(2);
     expect(scrollStub.firstCall.args[0].textContent).to.equal('amp');
     expect(scrollStub.firstCall.args[1]).to.equal(500);
     expect(root.innerHTML).to.equal(
-        '<div>text in <span style="background-color: rgb(255, 255, 0); color: rgb(51, 51, 51);">amp</span> doc</div><div><span style="background-color: rgb(255, 255, 0); color: rgb(51, 51, 51);">highlight</span>ed text</div>');
+        '<div>text in <span style="background-color: rgb(255, 255, 0); ' +
+          'color: rgb(51, 51, 51);">amp</span> doc</div><div>' +
+          '<span style="background-color: rgb(255, 255, 0); color: ' +
+          'rgb(51, 51, 51);">highlight</span>ed text</div>');
 
     const viewerOrigin = 'http://localhost:9876';
     const port = new WindowPortEmulator(
         window, viewerOrigin);
     port.addEventListener = function() {};
     port.postMessage = function() {};
-    let messaging = new Messaging(env.win, port);
+    const messaging = new Messaging(env.win, port);
 
     handler.setupMessaging(messaging);
     messaging.handleRequest_({
       name: 'highlightDismiss',
     });
     expect(root.innerHTML).to.equal(
-        '<div>text in <span style="">amp</span> doc</div><div><span style="">highlight</span>ed text</div>');
+        '<div>text in <span style="">amp</span> doc</div><div>' +
+          '<span style="">highlight</span>ed text</div>');
   });
 });

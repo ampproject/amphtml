@@ -16,21 +16,21 @@
 
 import {
   CircularBuffer,
-  normalizeString,
-  findSentences,
+  TextPos,
+  TextRange,
   TextScanner,
-  posDomDelimiter,
-  TextRange, TextPos,
-  markTextRangeList
+  findSentences,
+  markTextRangeList,
+  normalizeString,
 } from '../findtext';
 
-describe('CircularBuffer', ()=>{
-  it('add and get', ()=>{
-    let buf = new CircularBuffer(5);
+describe('CircularBuffer', () => {
+  it('add and get', () => {
+    const buf = new CircularBuffer(5);
     for (let i = 0; i < 7; i++) {
       buf.add(i);
     }
-    let elems = [];
+    const elems = [];
     for (let i = 0; i < 10; i++) {
       elems.push(buf.get(i));
     }
@@ -38,8 +38,8 @@ describe('CircularBuffer', ()=>{
   });
 });
 
-describe('normalizeString', ()=>{
-  it('test examples', ()=>{
+describe('normalizeString', () => {
+  it('test examples', () => {
     expect(normalizeString('a b  c')).to.equal('abc');
     expect(normalizeString('abc.d')).to.equal('abcd');
     expect(normalizeString('a\u2019b')).to.equal('a\'b');
@@ -49,15 +49,16 @@ describe('normalizeString', ()=>{
   });
 });
 
-describe('findSentences', ()=>{
-  it('single node', ()=>{
-    let root = document.createElement('div');
+describe('findSentences', () => {
+  it('single node', () => {
+    const root = document.createElement('div');
     root.innerHTML = 'hello world';
-    var ranges = findSentences(root, ['el', 'or']);
+    const ranges = findSentences(root, ['el', 'or']);
     expect(ranges).to.not.be.null;
-    let texts = [];
-    for (let r of ranges) {
-      var range = document.createRange();
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
       range.setStart(r.start.node, r.start.offset);
       range.setEnd(r.end.node, r.end.offset);
       texts.push(range.toString());
@@ -65,14 +66,17 @@ describe('findSentences', ()=>{
     expect(texts).to.deep.equal(['el', 'or']);
   });
 
-  it('multiple nodes', ()=>{
-    let root = document.createElement('div');
-    root.innerHTML = '<h4>header with <b>bold text</b></h4>\n<p>and additional text</p>';
-    var ranges = findSentences(root, ['header with bold text', 'additional text']);
+  it('multiple nodes', () => {
+    const root = document.createElement('div');
+    root.innerHTML =
+        '<h4>header with <b>bold text</b></h4>\n<p>and additional text</p>';
+    const ranges = findSentences(
+        root, ['header with bold text', 'additional text']);
     expect(ranges).to.not.be.null;
-    let texts = [];
-    for (let r of ranges) {
-      var range = document.createRange();
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
       range.setStart(r.start.node, r.start.offset);
       range.setEnd(r.end.node, r.end.offset);
       texts.push(range.toString());
@@ -80,14 +84,17 @@ describe('findSentences', ()=>{
     expect(texts).to.deep.equal(['header with bold text', 'additional text']);
   });
 
-  it('block node', ()=>{
-    let root = document.createElement('div');
-    root.innerHTML = '<p>Here’s an instruction:</p><ul><li>Do something.</li></ul>';
-    var ranges = findSentences(root, ['Here\'s an instruction: Do something.']);
+  it('block node', () => {
+    const root = document.createElement('div');
+    root.innerHTML =
+        '<p>Here’s an instruction:</p><ul><li>Do something.</li></ul>';
+    const ranges = findSentences(
+        root, ['Here\'s an instruction: Do something.']);
     expect(ranges).to.not.be.null;
-    let texts = [];
-    for (let r of ranges) {
-      var range = document.createRange();
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
       range.setStart(r.start.node, r.start.offset);
       range.setEnd(r.end.node, r.end.offset);
       texts.push(range.toString());
@@ -95,14 +102,15 @@ describe('findSentences', ()=>{
     expect(texts).to.deep.equal(['Here’s an instruction:Do something']);
   });
 
-  it('special chars', ()=>{
-    let root = document.createElement('div');
+  it('special chars', () => {
+    const root = document.createElement('div');
     root.innerHTML = '<p>“double ‘single quoted’ quoted text,<p>';
-    var ranges = findSentences(root, ['"double \'single quoted\' quoted']);
+    const ranges = findSentences(root, ['"double \'single quoted\' quoted']);
     expect(ranges).to.not.be.null;
-    let texts = [];
-    for (let r of ranges) {
-      var range = document.createRange();
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
       range.setStart(r.start.node, r.start.offset);
       range.setEnd(r.end.node, r.end.offset);
       texts.push(range.toString());
@@ -111,18 +119,18 @@ describe('findSentences', ()=>{
   });
 });
 
-describes.fakeWin('TextScanner', {}, ()=>{
+describes.fakeWin('TextScanner', {}, () => {
   let root = null;
-  beforeEach(()=>{
+  beforeEach(() => {
     // root should be appended to body to compute the style.
     root = document.createElement('div');
     document.body.appendChild(root);
   });
 
-  it('single text', ()=>{
+  it('single text', () => {
     root.innerHTML = 'ab cd  ef\n\ng';
-    let chars = [];
-    let scanner = new TextScanner(root);
+    const chars = [];
+    const scanner = new TextScanner(root);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
       chars.push(pos.node.wholeText[pos.offset]);
@@ -130,11 +138,11 @@ describes.fakeWin('TextScanner', {}, ()=>{
     expect(chars.join('')).to.equal('ab cd ef\ng');
   });
 
-  it('space suffix and prefix', ()=>{
-    root.innerHTML = ' ab cd  '
+  it('space suffix and prefix', () => {
+    root.innerHTML = ' ab cd  ';
 
-    let chars = [];
-    let scanner = new TextScanner(root);
+    const chars = [];
+    const scanner = new TextScanner(root);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
       chars.push(pos.node.wholeText[pos.offset]);
@@ -142,12 +150,12 @@ describes.fakeWin('TextScanner', {}, ()=>{
     expect(chars.join('')).to.equal('ab cd');
   });
 
-  it('inline', ()=>{
+  it('inline', () => {
     root.innerHTML = 'a<b>b</b>cd <i>ef</i>';
     document.body.appendChild(root);
 
-    let chars = [];
-    let scanner = new TextScanner(root, false);
+    const chars = [];
+    const scanner = new TextScanner(root, false);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
       chars.push(pos.node.wholeText[pos.offset]);
@@ -155,41 +163,33 @@ describes.fakeWin('TextScanner', {}, ()=>{
     expect(chars.join('')).to.equal('abcd ef');
   });
 
-  it('item list', ()=>{
+  it('item list', () => {
     root.innerHTML = '<ul><li>a</li><li>b</li></ul>';
 
-    let chars = [];
-    let scanner = new TextScanner(root, false);
+    const chars = [];
+    const scanner = new TextScanner(root, false);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
-      if (pos == posDomDelimiter) {
-        chars.push('_');
-        continue;
-      }
-      chars.push(pos.node.wholeText[pos.offset]);
-    }
-    expect(chars.join('')).to.equal('a_b');
-  });
-
-  it('block', ()=>{
-    root.innerHTML = '<ul><li>a</li><li>b</li></ul>';
-
-    let chars = [];
-    let scanner = new TextScanner(root, false);
-    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
-      if (pos == posDomDelimiter) {
-        chars.push('_');
-        continue;
-      }
       chars.push(pos.char);
     }
-    expect(chars.join('')).to.equal('a_b');
+    expect(chars.join('')).to.equal('a b');
   });
 
-  it('script', ()=>{
+  it('block', () => {
+    root.innerHTML = '<ul><li>a</li><li>b</li></ul>';
+
+    const chars = [];
+    const scanner = new TextScanner(root, false);
+    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
+      chars.push(pos.char);
+    }
+    expect(chars.join('')).to.equal('a b');
+  });
+
+  it('script', () => {
     root.innerHTML = '<p>hello</p><script>alert("js");</script>';
 
-    let chars = [];
-    let scanner = new TextScanner(root, false);
+    const chars = [];
+    const scanner = new TextScanner(root, false);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
       chars.push(pos.char);
@@ -197,11 +197,11 @@ describes.fakeWin('TextScanner', {}, ()=>{
     expect(chars.join('')).to.equal('hello');
   });
 
-  it('special chars', ()=>{
+  it('special chars', () => {
     root.innerHTML = '\'"';
 
-    let chars = [];
-    let scanner = new TextScanner(root, false);
+    const chars = [];
+    const scanner = new TextScanner(root, false);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       expect(pos.node).to.be.an.instanceof(Text);
       chars.push(pos.char);
@@ -210,36 +210,38 @@ describes.fakeWin('TextScanner', {}, ()=>{
   });
 });
 
-describe('markTextRangeList', ()=>{
-  it('single node', ()=>{
-    let root = document.createElement('div');
-    let text = document.createTextNode('0123456789');
+describe('markTextRangeList', () => {
+  it('single node', () => {
+    const root = document.createElement('div');
+    const text = document.createTextNode('0123456789');
     root.appendChild(text);
     markTextRangeList([
       new TextRange(new TextPos(text, 1), new TextPos(text, 3)),
-      new TextRange(new TextPos(text, 5), new TextPos(text, 7))
+      new TextRange(new TextPos(text, 5), new TextPos(text, 7)),
     ]);
     expect(root.innerHTML).to.equal('0<span>12</span>34<span>56</span>789');
   });
 
-  it('multi nodes', ()=>{
-    let root = document.createElement('div');
+  it('multi nodes', () => {
+    const root = document.createElement('div');
     root.innerHTML = '<b>abc</b><div>def</div><i>ghi</i>';
-    let b = root.querySelector('b');
-    let i = root.querySelector('i');
+    const b = root.querySelector('b');
+    const i = root.querySelector('i');
     markTextRangeList([
-      new TextRange(new TextPos(b.firstChild, 1), new TextPos(i.firstChild, 1))
+      new TextRange(new TextPos(b.firstChild, 1), new TextPos(i.firstChild, 1)),
     ]);
-    expect(root.innerHTML).to.equal('<b>a<span>bc</span></b><div><span>def</span></div><i><span>g</span>hi</i>');
+    expect(root.innerHTML).to.equal(
+        '<b>a<span>bc</span></b><div><span>def</span></div>' +
+          '<i><span>g</span>hi</i>');
   });
 
-  it('concat ranges', ()=>{
-    let root = document.createElement('div');
-    let text = document.createTextNode('0123456789');
+  it('concat ranges', () => {
+    const root = document.createElement('div');
+    const text = document.createTextNode('0123456789');
     root.appendChild(text);
     markTextRangeList([
       new TextRange(new TextPos(text, 1), new TextPos(text, 3)),
-      new TextRange(new TextPos(text, 3), new TextPos(text, 5))
+      new TextRange(new TextPos(text, 3), new TextPos(text, 5)),
     ]);
     expect(root.innerHTML).to.equal('0<span>1234</span>56789');
   });

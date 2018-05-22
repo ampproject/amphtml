@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {parseJson} from '../../../src/json';
-import {Services} from '../../../src/services';
-import {parseUrl, parseQueryString} from '../../../src/url';
-import {findSentences, markTextRangeList} from './findtext';
+
 import {Messaging} from './messaging/messaging';
+import {Services} from '../../../src/services';
+import {findSentences, markTextRangeList} from './findtext';
+import {parseJson} from '../../../src/json';
+import {parseQueryString} from '../../../src/url';
 
 /**
  * The message name sent by viewers to dismiss highlights.
- * @type {!string}
+ * @type {string}
  */
 const HIGHLIGHT_DISMISS = 'highlightDismiss';
 
 /**
- * HighlightHandler reads highlight parameter from URL and highlights specified text in AMP documents.
+ * HighlightHandler reads highlight parameter from URL and
+ * highlights specified text in AMP documents.
  */
 export class HighlightHandler {
   /**
@@ -53,26 +55,27 @@ export class HighlightHandler {
     }
 
     const highlight = parseJson(highlightJSON);
-    var sens = findSentences(win.document.body, highlight['s']);
+    const sens = findSentences(win.document.body, highlight['s']);
     if (!sens) {
       return;
     }
-    let spans = markTextRangeList(sens);
+    const spans = markTextRangeList(sens);
     if (spans.length <= 0) {
       return;
     }
-    for (let n of spans) {
+    for (let i = 0; i < spans.length; i++) {
+      const n = spans[i];
       n['style']['backgroundColor'] = '#ff0';
       n['style']['color'] = '#333';
     }
     this.highlightedNodes_ = spans;
-    let viewer = Services.viewerForDoc(this.ampdoc_);
-    let visibility = viewer.getVisibilityState();
+    const viewer = Services.viewerForDoc(this.ampdoc_);
+    const visibility = viewer.getVisibilityState();
     if (visibility == 'visible') {
       Services.viewportForDoc(ampdoc).animateScrollIntoView(spans[0], 500);
     } else {
       let called = false;
-      viewer.onVisibilityChanged(()=>{
+      viewer.onVisibilityChanged(() => {
         // TODO(yunabe): Unregister the handler.
         if (called || viewer.getVisibilityState() != 'visible') {
           return;
@@ -84,14 +87,16 @@ export class HighlightHandler {
     }
 
     // TODO(yunabe): Unregister this handler when the highlight is dismissed.
-    win.document.body.addEventListener('click', this.dismissHighlight_.bind(this));
+    win.document.body.addEventListener(
+        'click', this.dismissHighlight_.bind(this));
   }
 
   /**
    * @param {!Messaging} messaging
    */
   setupMessaging(messaging) {
-    messaging.registerHandler(HIGHLIGHT_DISMISS, this.handleDismissHighlight_.bind(this));
+    messaging.registerHandler(
+        HIGHLIGHT_DISMISS, this.handleDismissHighlight_.bind(this));
   }
 
   /**
@@ -101,20 +106,17 @@ export class HighlightHandler {
     if (!this.highlightedNodes_) {
       return;
     }
-    for (let n of this.highlightedNodes_) {
+    for (let i = 0; i < this.highlightedNodes_.length; i++) {
+      const n = this.highlightedNodes_[i];
       n['style']['backgroundColor'] = '';
       n['style']['color'] = '';
     }
   }
 
   /**
-   * @param {string} type
-   * @param {*} payload
-   * @param {boolean} awaitResponse
-   * @return {!Promise<?>|undefined}
    * @private
    */
-  handleDismissHighlight_(type, payload, awaitResponse) {
+  handleDismissHighlight_() {
     this.dismissHighlight_();
   }
 }

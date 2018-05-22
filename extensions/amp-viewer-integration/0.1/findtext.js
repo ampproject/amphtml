@@ -335,9 +335,8 @@ const nextTextNode = function(textNode) {
  * A special TextPos object to represent a whitespace injected
  *   between two block nodes.
  * @type {!TextPos}
- * Exported for test only.
  */
-export const posDomDelimiter = new TextPos(document.createTextNode(' '), 0);
+const posDomDelimiter = new TextPos(document.createTextNode(' '), 0);
 
 /**
  * TextScanner visits text nodes under a root node and
