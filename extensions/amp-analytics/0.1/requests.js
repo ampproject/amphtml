@@ -51,6 +51,9 @@ export class RequestHandler {
     this.baseUrl = dev().assert(request['baseUrl']);
 
     /** @private {Array<number>|number|undefined} */
+    this.requestBody_ = JSON.stringify(request['body']) || '';
+
+    /** @private {Array<number>|number|undefined} */
     this.batchInterval_ = request['batchInterval']; //unit is sec
 
     /** @private {?number} */
@@ -68,7 +71,7 @@ export class RequestHandler {
     /** @const {?function(string, !Array<!batchSegmentDef>)} */
     this.batchingPlugin_ = this.batchPluginId_
       ? user().assert(BatchingPluginFunctions[this.batchPluginId_],
-          `Invalid request: unsupported batch plugin ${this.batchPluginId_}`)
+        `Invalid request: unsupported batch plugin ${this.batchPluginId_}`)
       : null;
 
     /** @private {!./variables.VariableService} */
@@ -83,6 +86,9 @@ export class RequestHandler {
 
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
+
+    /** @private {?Promise<string>} */
+    this.requestBodyTemplatePromise_ = null;
 
     /** @private {!Array<!Promise<string>>}*/
     this.extraUrlParamsPromise_ = [];
@@ -132,7 +138,7 @@ export class RequestHandler {
     const isImportant = trigger['important'];
 
     const isImmediate =
-        (trigger['important'] === true) || (!this.batchInterval_);
+      (trigger['important'] === true) || (!this.batchInterval_);
     if (!this.reportRequest_ && !isImportant) {
       // Ignore non important trigger out reportWindow
       return;
@@ -148,23 +154,35 @@ export class RequestHandler {
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
       this.baseUrlTemplatePromise_ =
-          this.variableService_.expandTemplate(this.baseUrl, expansionOption);
+        this.variableService_.expandTemplate(this.baseUrl,
+          expansionOption);
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
         return this.urlReplacementService_.expandUrlAsync(
-            baseUrl, bindings, this.whiteList_);
+          baseUrl, bindings, this.whiteList_);
       });
     }
 
-    const extraUrlParamsPromise = this.expandExtraUrlParams_(
-        configParams, triggerParams, expansionOption)
-        .then(expandExtraUrlParams => {
-          // Construct the extraUrlParamsString: Remove null param and encode
-          // component
-          const expandedExtraUrlParamsStr =
-              this.getExtraUrlParamsString_(expandExtraUrlParams);
+    if (!this.requestBodyPromise_) {
+      this.requestBodyTemplatePromise_ =
+        this.variableService_.expandTemplate(
+          this.requestBody_, expansionOption);
+      this.requestBodyPromise_ =
+        this.requestBodyTemplatePromise_.then(requestBody => {
           return this.urlReplacementService_.expandUrlAsync(
-              expandedExtraUrlParamsStr, bindings, this.whiteList_);
+            requestBody, bindings, this.whiteList_);
         });
+    }
+
+    const extraUrlParamsPromise = this.expandExtraUrlParams_(
+      configParams, triggerParams, expansionOption)
+      .then(expandExtraUrlParams => {
+        // Construct the extraUrlParamsString: Remove null param and encode
+        // component
+        const expandedExtraUrlParamsStr =
+          this.getExtraUrlParamsString_(expandExtraUrlParams);
+        return this.urlReplacementService_.expandUrlAsync(
+          expandedExtraUrlParamsStr, bindings, this.whiteList_);
+      });
 
     if (this.batchingPlugin_) {
       const batchSegment = dict({
@@ -174,7 +192,7 @@ export class RequestHandler {
       });
       this.batchSegmentPromises_.push(extraUrlParamsPromise.then(str => {
         batchSegment['extraUrlParams'] =
-                parseQueryString(str);
+          parseQueryString(str);
         return batchSegment;
       }));
     }
@@ -239,13 +257,17 @@ export class RequestHandler {
         let requestUrlPromise;
         if (this.batchingPlugin_) {
           requestUrlPromise =
-              this.constructBatchSegments_(baseUrl, batchSegmentsPromise);
+            this.constructBatchSegments_(baseUrl,
+              batchSegmentsPromise);
         } else {
           requestUrlPromise =
-              this.constructExtraUrlParamStrs_(baseUrl, extraUrlParamsPromise);
+            this.constructExtraUrlParamStrs_(baseUrl,
+              extraUrlParamsPromise);
         }
         requestUrlPromise.then(requestUrl => {
-          this.handler_(requestUrl, lastTrigger);
+          this.requestBodyPromise_.then(requestBody => {
+            this.handler_(requestUrl, lastTrigger, requestBody);
+          });
         });
       });
     });
@@ -277,15 +299,15 @@ export class RequestHandler {
    */
   constructBatchSegments_(baseUrl, batchSegmentsPromise) {
     dev().assert(this.batchingPlugin_ &&
-        typeof this.batchingPlugin_ == 'function', 'Should never call ' +
-        'constructBatchSegments_ with invalid batchingPlugin function');
+      typeof this.batchingPlugin_ == 'function', 'Should never call ' +
+      'constructBatchSegments_ with invalid batchingPlugin function');
 
     return Promise.all(batchSegmentsPromise).then(batchSegments => {
       try {
         return this.batchingPlugin_(baseUrl, batchSegments);
       } catch (e) {
         dev().error(TAG,
-            `Error: batchPlugin function ${this.batchPluginId_}`, e);
+          `Error: batchPlugin function ${this.batchPluginId_}`, e);
         return '';
       }
     });
@@ -318,17 +340,17 @@ export class RequestHandler {
     // Don't encode param values here,
     // as we'll do it later in the getExtraUrlParamsString_ call.
     const option = new ExpansionOptions(
-        expansionOption.vars,
-        expansionOption.iterations,
-        true /* noEncode */);
+      expansionOption.vars,
+      expansionOption.iterations,
+      true /* noEncode */);
     // Add any given extraUrlParams as query string param
     if (configParams || triggerParams) {
       Object.assign(params, configParams, triggerParams);
       for (const k in params) {
         if (typeof params[k] == 'string') {
           requestPromises.push(
-              this.variableService_.expandTemplate(params[k], option)
-                  .then(value => { params[k] = value; }));
+            this.variableService_.expandTemplate(params[k], option)
+            .then(value => { params[k] = value; }));
         }
       }
     }
@@ -370,12 +392,12 @@ export class RequestHandler {
     for (let i = 0; i < this.batchInterval_.length; i++) {
       let interval = this.batchInterval_[i];
       user().assert(isFiniteNumber(interval),
-          `Invalid batchInterval value: ${this.batchInterval_}` +
-          'interval must be a number');
+        `Invalid batchInterval value: ${this.batchInterval_}` +
+        'interval must be a number');
       interval = Number(interval) * 1000;
       user().assert(interval >= BATCH_INTERVAL_MIN,
-          `Invalid batchInterval value: ${this.batchInterval_}, ` +
-          `interval value must be greater than ${BATCH_INTERVAL_MIN}ms.`);
+        `Invalid batchInterval value: ${this.batchInterval_}, ` +
+        `interval value must be greater than ${BATCH_INTERVAL_MIN}ms.`);
       this.batchInterval_[i] = interval;
     }
 
@@ -404,7 +426,7 @@ export class RequestHandler {
    */
   refreshBatchInterval_() {
     dev().assert(this.batchIntervalPointer_ != null,
-        'Should not start batchInterval without pointer');
+      'Should not start batchInterval without pointer');
     const interval = this.batchIntervalPointer_ < this.batchInterval_.length ?
       this.batchInterval_[this.batchIntervalPointer_++] :
       this.batchInterval_[this.batchInterval_.length - 1];

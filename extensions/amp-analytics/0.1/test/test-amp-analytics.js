@@ -973,8 +973,15 @@ describes.realWin('amp-analytics', {
     it('expands url-replacements vars', () => {
       const analytics = getAnalyticsTag({
         'requests': {
-          'pageview':
-            'https://example.com/test1=${var1}&test2=${var2}&title=TITLE'},
+          'pageview': {
+            'baseUrl': 'https://example.com/test1=${var1}&test2=${var2}&title=TITLE',
+            'body': {
+              'bodyAttr': '${var1}',
+              'bodyAttr2': '${var2}',
+              'bodyAttr3': 'TITLE',
+            }
+          }
+        },
         'triggers': [{
           'on': 'visible',
           'request': 'pageview',
@@ -982,13 +989,16 @@ describes.realWin('amp-analytics', {
             'var1': 'x',
             'var2': 'DOCUMENT_REFERRER',
           },
-        }]});
+        }]
+      });
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
             'https://example.com/test1=x&' +
             'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
             '&title=Test%20Title');
+        expect(sendRequestSpy.args[0][2]).to.equal(
+            '{"bodyAttr":"x","bodyAttr2":"http%3A%2F%2Flocalhost%3A9876%2Fcontext.html","bodyAttr3":"Test%20Title"}');
       });
     });
 

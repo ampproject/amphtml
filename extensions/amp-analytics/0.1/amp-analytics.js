@@ -48,7 +48,7 @@ import {sendRequest, sendRequestUsingIframe} from './transport';
 import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
 
-import { extensionReady } from './extension-events';
+import {extensionReady} from './extension-events';
 
 const TAG = 'amp-analytics';
 
@@ -887,7 +887,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {!JsonObject} trigger
    * @private
    */
-  sendRequest_(request, trigger) {
+  sendRequest_(request, trigger, body) {
     if (!request) {
       const TAG = this.getName_();
       this.user().error(TAG, 'Request not sent. Contents empty.');
@@ -903,7 +903,10 @@ export class AmpAnalytics extends AMP.BaseElement {
           'iframe transport was inadvertently deleted');
       this.iframeTransport_.sendRequest(request);
     } else {
-      sendRequest(this.win, request, this.config_['transport'] || {});
+      sendRequest(this.win,
+          request,
+          this.config_['transport'] || {},
+          body || '');
     }
   }
 

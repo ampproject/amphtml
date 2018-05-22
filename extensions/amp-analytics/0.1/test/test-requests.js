@@ -432,6 +432,12 @@ describes.realWin('Requests', {amp: 1}, env => {
         'bar': {
           'baseUrl': 'test1',
         },
+        'baz': {
+          'baseUrl': 'test2',
+          'body': {
+            'bodyAttr': 'test3',
+          },
+        },
         'foobar': {},
       },
     };
@@ -444,6 +450,12 @@ describes.realWin('Requests', {amp: 1}, env => {
         'bar': {
           'baseUrl': 'test1',
         },
+        'baz': {
+          'baseUrl': 'test2',
+          'body': {
+            'bodyAttr': 'test3',
+          },
+        },
         'foobar': {},
       },
     });
@@ -451,7 +463,14 @@ describes.realWin('Requests', {amp: 1}, env => {
 
   it('should replace dynamic bindings', function* () {
     const spy = sandbox.spy();
-    const r = {'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE'};
+    const r = {
+      'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE',
+      'body': {
+        'testAttr':'${param1}',
+        'testAttr2':'${param3}',
+        'testAttr3':'BASE_VALUE',
+      }
+    };
     const handler = new RequestHandler(
         analyticsMock, r, preconnect, spy, false);
     const expansionOptions = new ExpansionOptions({
@@ -477,14 +496,19 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledOnce;
     expect(spy.args[0][0]).to.equal(
         'r1&key1=val1&key2=val2&key3=val3&val_base');
+    expect(spy.args[0][2]).to.equal(
+        '{"testAttr":"val1","testAttr2":"val3","testAttr3":"val_base"}');
   });
-
 
   it('should replace bindings with v2 flag', function* () {
     toggleExperiment(env.win, REPLACEMENT_EXP_NAME, true);
     const spy = sandbox.spy();
     const r = {
       'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
+      'body': {
+        'testAttr':'BASE_VALUE',
+        'testAttr2':'${foo}'
+      }
     };
     const handler = new RequestHandler(
         analyticsMock, r, preconnect, spy, false);
@@ -512,6 +536,8 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledOnce;
     expect(spy.args[0][0]).to.equal(
         'r1&key1=val1&key2=val2&key3=val3&val_base&foo=ZM9V');
+    expect(spy.args[0][2]).to.equal(
+        '{"testAttr":"val_base","testAttr2":"ZM9V"}');
     toggleExperiment(env.win, REPLACEMENT_EXP_NAME);
   });
 });
