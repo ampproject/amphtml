@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -23,6 +22,7 @@ import {clamp} from '../../../src/utils/math';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {numeric, px, setStyles as setStylesTransition} from '../../../src/transition';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
 import {setStyles} from '../../../src/style';
@@ -303,8 +303,8 @@ class AmpAccordion extends AMP.BaseElement {
             });
           });
     }).then(() => {
-      return Animation.animate(this.element, tr.setStyles(sectionChild, {
-        'height': tr.px(tr.numeric(0, height)),
+      return Animation.animate(this.element, setStylesTransition(sectionChild, {
+        'height': px(numeric(0, height)),
       }), duration)
           .thenAlways(() => {
             this.mutateElement(() => {
@@ -331,8 +331,8 @@ class AmpAccordion extends AMP.BaseElement {
       duration = this.getTransitionDuration_(Math.abs(height),
           viewportHeight);
     }).then(() => {
-      return Animation.animate(sectionChild, tr.setStyles(sectionChild, {
-        'height': tr.px(tr.numeric(height, 0)),
+      return Animation.animate(sectionChild, setStylesTransition(sectionChild, {
+        'height': px(numeric(height, 0)),
       }), duration).thenAlways(() => {
         return this.mutateElement(() => {
           section.removeAttribute('expanded');
