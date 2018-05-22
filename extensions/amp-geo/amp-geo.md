@@ -64,7 +64,10 @@ The `amp-geo` component uses the country from which the request originated in th
 
 If the country cannot be determined, the value is set to 'unknown'.  If the grouping feature is used at least one group must contain 'unknown'.
 
-Note: It's possible that an IP address with country information in the WHOIS database will not have country information in amp-geo. 
+Notes: 
+
+1. It's possible that an IP address with country information in the WHOIS database will not have country information in amp-geo. 
+1. The ISO country code may not be the same as the top-level domain.  For example, the code for the United Kingdom is "gb" not "uk". 
 
 The `amp-geo` component provides CSS, `amp-bind` and variable substitution interfaces. 
 
