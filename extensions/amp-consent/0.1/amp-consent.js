@@ -408,16 +408,30 @@ export class AmpConsent extends AMP.BaseElement {
     const defaultPolicy = {
       'waitFor': defaultWaitForItems,
     };
+
+    const unblockOnAll = ['unknown', 'sufficient',
+        'insufficient', 'unknown_not_required'];
+
     const predefinedNone = {
       'waitFor': defaultWaitForItems,
       // Experimental config, do not expose
-      'unblockOn': ['unknown', 'sufficient',
-          'insufficient', 'unknown_not_required'],
+      'unblockOn': unblockOnAll,
+    };
+
+    const rejectAllOnZero = {
+      'waitFor': defaultWaitForItems,
+      'timeout': {
+        'seconds': 0,
+        'fallbackAction': 'reject',
+      },
+      'unblockOn': unblockOnAll,
     };
 
     this.policyConfig_['_none'] = predefinedNone;
 
     this.policyConfig_['_all'] = defaultPolicy;
+
+    this.policyConfig_['_reject_all'] = rejectAllOnZero;
 
     if (this.policyConfig_ && this.policyConfig_['default']) {
       return;

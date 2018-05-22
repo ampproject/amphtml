@@ -289,7 +289,7 @@ describes.realWin('amp-consent', {
     });
   });
 
-  describe('policy config', () => {
+  describe.only('policy config', () => {
     let defaultConfig;
     let ampConsent;
     let scriptElement;
@@ -319,13 +319,52 @@ describes.realWin('amp-consent', {
     it('create default policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_).to.deep.equal({
-        'default': {
-          'waitFor': {
-            'ABC': undefined,
-            'DEF': undefined,
-          },
+      expect(ampConsent.policyConfig_['default']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        }
+      });
+    });
+
+    it('create predefined _none policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['_none']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
         },
+        'unblockOn': ['unknown', 'sufficient',
+          'insufficient', 'unknown_not_required'],
+      });
+    });
+
+    it('create predefined _all policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['_all']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        }
+      });
+    });
+
+    it('create default _reject_all policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['_reject_all']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        },
+        'timeout': {
+          'seconds': 0,
+          'fallbackAction': 'reject',
+        },
+        'unblockOn': ['unknown', 'sufficient',
+            'insufficient', 'unknown_not_required'],
       });
     });
 
@@ -351,12 +390,16 @@ describes.realWin('amp-consent', {
       ampConsent = new AmpConsent(consentElement);
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_).to.deep.equal({
-        'default': {
-          'waitFor': {
-            'ABC': [],
-          },
-        },
+      expect(ampConsent.policyConfig_['default']).to.deep.equal({
+        'waitFor': {
+          'ABC': [],
+        }
+      });
+      expect(ampConsent.policyConfig_['_all']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        }
       });
     });
   });

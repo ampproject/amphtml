@@ -90,28 +90,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         return promise;
       });
     });
-
-    describe('whenPolicyUnblock', () => {
-      beforeEach(() => {
-        toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, false);
-      });
-
-      it('when policy is not _none', () => {
-        const promise = manager.whenPolicyUnblock('default');
-        manager.registerConsentPolicyInstance('default', {});
-        return promise.then(unblock => {
-          expect(unblock).to.be.false;
-        });
-      });
-
-      it('when policy is _none', () => {
-        const promise = manager.whenPolicyUnblock('_none');
-        manager.registerConsentPolicyInstance('default', {});
-        return promise.then(unblock => {
-          expect(unblock).to.be.true;
-        });
-      });
-    });
   });
 
   describe('Consent Policy Instance', () => {
@@ -340,6 +318,38 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
             CONSENT_ITEM_STATE.NOT_REQUIRED);
         expect(instance.getCurrentPolicyStatus()).to.equal(
             CONSENT_POLICY_STATE.SUFFICIENT);
+      });
+    });
+
+    describe('shouldBlock', () => {
+      it('default should block list', () => {
+        instance = new ConsentPolicyInstance({
+          'waitFor': {
+            'ABC': [],
+          },
+        });
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
+        expect(instance.shouldBlock()).to.equal(false);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
+        expect(instance.shouldBlock()).to.equal(false);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+        expect(instance.shouldBlock()).to.equal(true);
+      });
+
+      it('customized should block list', () => {
+        instance = new ConsentPolicyInstance({
+          'waitFor': {
+            'ABC': [],
+          },
+          'unblockOn': ['unknown', 'sufficient',
+              'insufficient', 'unknown_not_required'],
+        });
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
+        expect(instance.shouldBlock()).to.equal(true);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
+        expect(instance.shouldBlock()).to.equal(true);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+        expect(instance.shouldBlock()).to.equal(true);
       });
     });
 

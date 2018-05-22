@@ -28,12 +28,11 @@ export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
 
-const UNBLOCK_ON_DEFAULT_POLICY = 'default';
-const UNBLOCK_ON_ALL_POLICY = '_none';
 const WHITELIST_POLICY = {
   'default': true,
   '_none': true,
   '_all': true,
+  '_reject_all': true,
 };
 
 
@@ -149,11 +148,9 @@ export class ConsentPolicyManager {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
         user().error(TAG, `can not find defined policy ${policyId}, ` +
-          `only ${UNBLOCK_ON_DEFAULT_POLICY} and ${UNBLOCK_ON_ALL_POLICY} ` +
-          'is supported now');
+          'only supported predefined policy supported now');
         return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
       }
-      policyId = UNBLOCK_ON_DEFAULT_POLICY;
     }
     return this.whenPolicyInstanceReady_(policyId).then(() => {
       return this.instances_[policyId].getReadyPromise().then(() => {
@@ -169,13 +166,10 @@ export class ConsentPolicyManager {
    */
   whenPolicyUnblock(policyId) {
     if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
-      // NOTE: UNBLOCK_ON_ALL_POLICY won't work after toggle on flag.
-      // Need to register and real consent policy and not reuse default one.
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
         user().error(TAG, `can not find defined policy ${policyId}, ` +
-          `only ${UNBLOCK_ON_DEFAULT_POLICY} and ${UNBLOCK_ON_ALL_POLICY} ` +
-          'is supported now');
+          'only supported predefined policy supported now');
         return Promise.resolve(false);
       }
     }
@@ -444,9 +438,10 @@ export class ConsentPolicyInstance {
    */
   shouldBlock() {
     let state;
+    //console.error(this.unblockStateLists_);
     switch (this.status_) {
       case CONSENT_POLICY_STATE.UNKNOWN:
-        state = 'unknown'
+        state = 'unknown';
         break;
       case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
         state = 'unknown_not_required';
