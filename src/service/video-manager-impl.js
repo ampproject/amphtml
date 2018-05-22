@@ -928,7 +928,10 @@ class VideoEntry {
  */
 function supportsFullscreenViaApi(video) {
   // TODO(alanorozco): Determine this via a flag in the component itself.
-  return video.tagName.toLowerCase() == 'amp-dailymotion';
+  return !!({
+    'amp-dailymotion': true,
+    'amp-ima-video': true,
+  }[video.tagName.toLowerCase()]);
 }
 
 

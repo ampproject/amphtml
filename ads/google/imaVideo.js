@@ -1012,6 +1012,7 @@ function onFullscreenChange(global) {
     }
     fullscreen = true;
   }
+  postMessage({event: 'fullscreenchange', isFullscreen: fullscreen});
 }
 
 /**
@@ -1114,6 +1115,18 @@ function onMessage(global, event) {
       if (!adsRequested && imaLoadAllowed) {
         requestAds();
       }
+      break;
+    case 'enterFullscreen':
+      if (fullscreen) {
+        return;
+      }
+      enterFullscreen(global);
+      break;
+    case 'exitFullscreen':
+      if (!fullscreen) {
+        return;
+      }
+      exitFullscreen(global);
       break;
   }
 }
