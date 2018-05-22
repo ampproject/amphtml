@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 import {Deferred} from '../../../src/utils/promise';
+import {assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {assertHttpsUrl} from '../../../src/url';
 
 const isWebGLSupported = () => {
   const canvas = document.createElement('canvas');
