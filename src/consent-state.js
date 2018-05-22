@@ -21,11 +21,14 @@ import {Services} from './services';
  * @enum {number}
  */
 export const CONSENT_POLICY_STATE = {
-  UNKNOWN: 0,
+  // Enum value has external dependency. Please do not change existing value.
   SUFFICIENT: 1,
   INSUFFICIENT: 2,
   UNKNOWN_NOT_REQUIRED: 3,
+  UNKNOWN: 4,
 };
+
+// TODO(@zhouyx): Move following functions to a different file
 
 /**
  * Returns a promise that resolve when all consent state the policy wait
