@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -26,6 +25,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
+import {setStyles} from '../../../src/style';
 import {tryFocus} from '../../../src/dom';
 
 const TAG = 'amp-accordion';
@@ -222,27 +222,20 @@ class AmpAccordion extends AMP.BaseElement {
    * @param {boolean=} opt_forceExpand
    * @private
    */
-  toggle_(section, opt_forceExpand = undefined) {
+  toggle_(section, opt_forceExpand) {
     const sectionComponents = section.children;
     const header = sectionComponents[0];
     const content = sectionComponents[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
-    let toExpand;
-    if (opt_forceExpand === true) {
-      toExpand = true;
-    } else if (opt_forceExpand === false) {
-      toExpand = false;
-    } else {
-      toExpand = !section.hasAttribute('expanded');
-    }
+    const toExpand = (opt_forceExpand == undefined) ?
+      !section.hasAttribute('expanded') : opt_forceExpand;
 
     // Animate Toggle
     if (this.element.hasAttribute('animate')) {
       if (toExpand) {
         header.setAttribute('aria-expanded', 'true');
-        this.animateExpand_(section).then(() => {
-        });
+        this.animateExpand_(section);
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach(sectionIter => {
             if (sectionIter != section) {
@@ -287,23 +280,24 @@ class AmpAccordion extends AMP.BaseElement {
    */
   animateExpand_(section) {
     let height, duration;
+    // Expand the div portion of the section and not the header
     const sectionChild = section.children[1];
 
     return this.mutateElement(() => {
       section.setAttribute('expanded', '');
-      st.setStyles(sectionChild, {
+      setStyles(sectionChild, {
         opacity: 0,
       });
     }).then(() => {
       return this.measureMutateElement(
           () => {
             height = sectionChild./*OK*/offsetHeight;
-            const viewportHeight = this.getViewport().getSize().height;
+            const viewportHeight = this.getViewport().getHeight();
             duration = this.getTransitionDuration_(Math.abs(height),
                 viewportHeight);
           },
           () => {
-            st.setStyles(sectionChild, {
+            setStyles(sectionChild, {
               'opacity': '',
               'height': 0,
             });
@@ -314,7 +308,7 @@ class AmpAccordion extends AMP.BaseElement {
       }), duration)
           .thenAlways(() => {
             this.mutateElement(() => {
-              st.setStyles(sectionChild, {
+              setStyles(sectionChild, {
                 height: '',
               });
             });
@@ -329,6 +323,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   animateCollapse_(section) {
     let height, duration;
+    // Collapse the div portion of the section and not the header
     const sectionChild = section.children[1];
     return this.measureElement(() => {
       height = section./*OK*/offsetHeight;
@@ -341,10 +336,7 @@ class AmpAccordion extends AMP.BaseElement {
       }), duration).thenAlways(() => {
         return this.mutateElement(() => {
           section.removeAttribute('expanded');
-        });
-      }).then(() => {
-        return this.mutateElement(() => {
-          st.setStyles(sectionChild, {
+          setStyles(sectionChild, {
             height: '',
           });
         });
