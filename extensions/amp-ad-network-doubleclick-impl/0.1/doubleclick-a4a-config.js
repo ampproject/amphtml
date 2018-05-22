@@ -35,7 +35,7 @@ import {getMode} from '../../../src/mode';
 import {
   isCdnProxy,
 } from '../../../ads/google/a4a/utils';
-import {selectAndSetExperiments} from '../../../ads/google/experiment-utils';
+import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-utils';
 import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
