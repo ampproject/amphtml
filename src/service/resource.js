@@ -20,7 +20,7 @@ import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
 import {
-  hasMeasureChanges,
+  hasSizeChanges,
   layoutRectLtwh,
   layoutRectsOverlap,
   moveLayoutRect,
@@ -431,9 +431,9 @@ export class Resource {
     const box = this.getPageLayoutBox();
 
     // Note that "left" doesn't affect readiness for the layout.
-    const measureChanges = hasMeasureChanges(oldBox, box);
+    const sizeChanges = hasSizeChanges(oldBox, box);
     if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top || measureChanges) {
+          oldBox.top != box.top || sizeChanges) {
       if (this.element.isUpgraded() &&
               this.state_ != ResourceState.NOT_BUILT &&
               (this.state_ == ResourceState.NOT_LAID_OUT ||
@@ -446,7 +446,7 @@ export class Resource {
       this.initialLayoutBox_ = box;
     }
 
-    this.element.updateLayoutBox(box, measureChanges);
+    this.element.updateLayoutBox(box, sizeChanges);
   }
 
   measureViaResources_() {

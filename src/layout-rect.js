@@ -212,9 +212,9 @@ export function areMarginsChanged(margins, change) {
  * @param {!LayoutRectDef} to
  * @return {boolean}
  */
-export function hasMeasureChanges(from, to) {
-  return from.width != to.width ||
-  from.height != to.height;
+export function hasSizeChanges(from, to) {
+  return from.width !== to.width ||
+      from.height !== to.height;
 }
 
 /**
