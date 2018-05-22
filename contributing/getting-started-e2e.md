@@ -272,10 +272,10 @@ After running that `git pull` command your local master branch has the latest fi
 git checkout <branch name>
 
 # bring the latest changes from your master branch into this branch
-git rebase master
+git merge master
 ```
 
-Since you just ran the `git pull` in your master branch it has the latest changes from the remote amphtml repository so running  `git rebase master` in your other branch effectively brings the latest changes from the remote amphtml repository to this other branch.
+Since you just ran the `git pull` in your master branch it has the latest changes from the remote amphtml repository so running  `git merge master` in your other branch effectively brings the latest changes from the remote amphtml repository to this other branch.
 
 If there are changes that conflict with changes on your branch (e.g. someone modified a file that you're working on) you'll be prompted to resolve them at this point.
 
@@ -412,7 +412,7 @@ Before pushing your changes, make sure you have the latest changes in the amphtm
 git checkout master
 git pull
 git checkout <branch name>
-git rebase master
+git merge master
 ```
 
 Now push your changes to `origin` (the alias for your GitHub fork):
