@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
+
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -39,10 +38,18 @@ import {
   escapeCssSelectorIdent,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
+import {
+  concat as concatTransition,
+  numeric,
+  scale,
+  setStyles as setStylesTransition,
+  translate,
+} from '../../../src/transition';
 import {dev, user} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
+import {px, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
@@ -411,7 +418,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const mutateOverflowState = state => {
         // We toggle visibility instead of display because we rely on the height
         // of this element to measure 1 rem.
-        st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
+        setStyles(dev().assertElement(this.descriptionOverflowMask_), {
           visibility: state.descriptionOverflows || state.isInOverflowMode
             ? 'visible' : 'hidden',
         });
@@ -750,7 +757,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.findOrInitializeLightbox_(lightboxGroupId).then(() => {
       return this.vsync_.mutatePromise(() => {
         toggle(this.element, true);
-        st.setStyles(this.element, {
+        setStyles(this.element, {
           opacity: 0,
           display: '',
         });
@@ -902,34 +909,34 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           }
 
           // Gradually fade in the black background
-          anim.add(0, tr.setStyles(this.element, {
-            opacity: tr.numeric(0, 1),
+          anim.add(0, setStylesTransition(this.element, {
+            opacity: numeric(0, 1),
           }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
           // Fade in the carousel at the end of the animation while fading out
           // the transition layer
           anim.add(MOTION_DURATION_RATIO - 0.01,
-              tr.setStyles(dev().assertElement(this.carousel_), {
-                opacity: tr.numeric(0, 1),
+              setStylesTransition(dev().assertElement(this.carousel_), {
+                opacity: numeric(0, 1),
               }),
               0.01
           );
 
           // At the end of the animation, fade out the transition layer.
-          anim.add(0.9, tr.setStyles(transLayer, {
-            opacity: tr.numeric(1, 0.01),
+          anim.add(0.9, setStylesTransition(transLayer, {
+            opacity: numeric(1, 0.01),
           }), 0.1, EXIT_CURVE_);
 
           return this.vsync_.runPromise({
             measure: () => {
               const rect = layoutRectFromDomRect(sourceElement
                   ./*OK*/getBoundingClientRect());
-              st.setStyles(clone, {
+              setStyles(clone, {
                 position: 'absolute',
-                top: st.px(rect.top),
-                left: st.px(rect.left),
-                width: st.px(rect.width),
-                height: st.px(rect.height),
+                top: px(rect.top),
+                left: px(rect.left),
+                width: px(rect.width),
+                height: px(rect.height),
                 transformOrigin: 'top left',
                 willChange: 'transform',
               });
@@ -942,15 +949,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
               // Animate the position and scale of the transition image to its
               // final lightbox destination in the middle of the page
-              anim.add(0, tr.setStyles(clone, {
-                transform: tr.concat([
-                  tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-                  tr.scale(tr.numeric(1, scaleX)),
+              anim.add(0, setStylesTransition(clone, {
+                transform: concatTransition([
+                  translate(numeric(0, dx), numeric(0, dy)),
+                  scale(numeric(1, scaleX)),
                 ]),
               }), MOTION_DURATION_RATIO, ENTER_CURVE_);
             },
             mutate: () => {
-              st.setStyles(dev().assertElement(this.carousel_), {
+              setStyles(dev().assertElement(this.carousel_), {
                 opacity: 0,
                 display: '',
               });
@@ -961,8 +968,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }).then(() => {
           return anim.start(duration).thenAlways(() => {
             return this.vsync_.mutatePromise(() => {
-              st.setStyles(this.element, {opacity: ''});
-              st.setStyles(dev().assertElement(this.carousel_), {opacity: ''});
+              setStyles(this.element, {opacity: ''});
+              setStyles(dev().assertElement(this.carousel_), {opacity: ''});
               sourceElement.classList.remove('i-amphtml-ghost');
               if (transLayer) {
                 this.element.ownerDocument.body.removeChild(transLayer);
@@ -982,13 +989,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   fade_(startOpacity, endOpacity) {
     const duration = MIN_TRANSITION_DURATION;
     const anim = new Animation(this.element);
-    anim.add(0, tr.setStyles(this.element, {
-      opacity: tr.numeric(startOpacity, endOpacity),
+    anim.add(0, setStylesTransition(this.element, {
+      opacity: numeric(startOpacity, endOpacity),
     }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
     return anim.start(duration).thenAlways(() => {
       return this.vsync_.mutatePromise(() => {
-        st.setStyles(this.element, {opacity: ''});
+        setStyles(this.element, {opacity: ''});
         if (endOpacity == 0) {
           toggle(dev().assertElement(this.carousel_), false);
           toggle(this.element, false);
@@ -1050,12 +1057,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           clone.removeAttribute('class');
           clone.removeAttribute('style');
 
-          st.setStyles(clone, {
+          setStyles(clone, {
             position: 'absolute',
-            top: st.px(imageBox.top),
-            left: st.px(imageBox.left),
-            width: st.px(imageBox.width),
-            height: st.px(imageBox.height),
+            top: px(imageBox.top),
+            left: px(imageBox.left),
+            width: px(imageBox.width),
+            height: px(imageBox.height),
             transform: '',
             transformOrigin: 'top left',
             willChange: 'transform',
@@ -1063,13 +1070,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           transLayer.appendChild(clone);
 
           // Gradually fade out the lightbox
-          anim.add(0, tr.setStyles(this.element, {
-            opacity: tr.numeric(1, 0),
+          anim.add(0, setStylesTransition(this.element, {
+            opacity: numeric(1, 0),
           }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
           // Fade out the transition image.
-          anim.add(MOTION_DURATION_RATIO, tr.setStyles(transLayer, {
-            opacity: tr.numeric(1, 0.01),
+          anim.add(MOTION_DURATION_RATIO, setStylesTransition(transLayer, {
+            opacity: numeric(1, 0.01),
           }), 0.2, EXIT_CURVE_);
 
           const transitionMeasure = () => {
@@ -1088,10 +1095,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
             // Animate the position and scale of the transition image to its
             // final lightbox destination in the middle of the page
             /** @const {!TransitionDef<void>} */
-            const moveAndScale = tr.setStyles(clone, {
-              transform: tr.concat([
-                tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-                tr.scale(tr.numeric(1, scaleX)),
+            const moveAndScale = setStylesTransition(clone, {
+              transform: concatTransition([
+                translate(numeric(0, dx), numeric(0, dy)),
+                scale(numeric(1, scaleX)),
               ]),
             });
 
@@ -1106,7 +1113,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           const transitionMutate = () => {
             sourceElement.classList.add('i-amphtml-ghost');
             this.element.ownerDocument.body.appendChild(transLayer);
-            st.setStyles(dev().assertElement(this.carousel_), {
+            setStyles(dev().assertElement(this.carousel_), {
               opacity: 0,
             });
           };
@@ -1117,10 +1124,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }).then(() => {
           return anim.start(duration).thenAlways(() => {
             return this.mutateElement(() => {
-              st.setStyles(this.element, {
+              setStyles(this.element, {
                 opacity: '',
               });
-              st.setStyles(dev().assertElement(this.carousel_), {
+              setStyles(dev().assertElement(this.carousel_), {
                 opacity: '',
               });
               toggle(dev().assertElement(this.carousel_), false);
