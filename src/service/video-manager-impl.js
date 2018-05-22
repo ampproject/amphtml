@@ -402,9 +402,6 @@ class VideoEntry {
     // Autoplay Variables
 
     /** @private {boolean} */
-    this.userInteractedWithAutoPlay_ = false;
-
-    /** @private {boolean} */
     this.playCalledByAutoplay_ = false;
 
     /** @private {boolean} */
@@ -435,7 +432,7 @@ class VideoEntry {
     listen(video.element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    video.element.signals().whenSignal(VideoEvents.REGISTERED)
+    video.signals().whenSignal(VideoEvents.REGISTERED)
         .then(() => this.onRegister_());
 
     /**
@@ -644,7 +641,8 @@ class VideoEntry {
       return;
     }
     this.supportsAutoplay_().then(supportsAutoplay => {
-      const canAutoplay = this.hasAutoplay && !this.userInteractedWithAutoPlay_;
+      const canAutoplay = this.hasAutoplay &&
+          !this.userInteractedWithAutoPlay();
 
       if (canAutoplay && supportsAutoplay) {
         this.autoplayLoadedVideoVisibilityChanged_();
@@ -730,7 +728,6 @@ class VideoEntry {
     function onInteraction() {
       const {video} = this;
       this.firstPlayEventOrNoop_();
-      this.userInteractedWithAutoPlay_ = true;
       video.showControls();
       video.unmute();
       unlisteners.forEach(unlistener => {
@@ -874,7 +871,7 @@ class VideoEntry {
 
     if (this.isPlaying_
        && this.playCalledByAutoplay_
-       && !this.userInteractedWithAutoPlay_) {
+       && !this.userInteractedWithAutoPlay()) {
       return PlayingStates.PLAYING_AUTO;
     }
 
@@ -886,9 +883,9 @@ class VideoEntry {
    * @return {boolean}
    */
   userInteractedWithAutoPlay() {
-    return this.userInteractedWithAutoPlay_;
+    return (
+      this.video.signals().get(VideoServiceSignals.USER_INTERACTED) != null);
   }
-
 
   /**
    * Collects a snapshot of the current video state for video analytics
