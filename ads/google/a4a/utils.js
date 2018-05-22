@@ -93,7 +93,7 @@ export let NameframeExperimentConfig;
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
 /** @const {Object} */
-const CDN_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
+const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /**
  * Returns the value of navigation start using the performance API or 0 if not
@@ -119,11 +119,8 @@ function getNavStart(win) {
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  const googleCdnProxyRegex =
-        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return supportsNativeCrypto(win) && (
-    !!googleCdnProxyRegex.test(win.location.origin) ||
-        getMode(win).localDev || getMode(win).test);
+    !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test);
 }
 
 /**
@@ -836,9 +833,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
  * @return {boolean}
  */
 export function isCdnProxy(win) {
-  const googleCdnProxyRegex =
-    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-  return googleCdnProxyRegex.test(win.location.origin);
+  return CDN_PROXY_REGEXP.test(win.location.origin);
 }
 
 /**
@@ -902,5 +897,5 @@ function getBrowserCapabilitiesBitmap(win) {
  */
 export function getAmpRuntimeTypeParameter(win) {
   const art = getBinaryTypeNumericalCode(getBinaryType(win));
-  return CDN_REGEXP.test(win.location.href) && art != '0' ? art : null;
+  return isCdnProxy(win) && art != '0' ? art : null;
 }

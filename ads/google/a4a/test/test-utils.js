@@ -236,30 +236,30 @@ describe('Google A4A utils', () => {
     it('should specify that this is canary', () => {
       expect(getAmpRuntimeTypeParameter({
         AMP_CONFIG: {type: 'canary'},
-        location: {href: 'https://www-example-com.cdn.ampproject.org'},
+        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
       })).to.equal('2');
     });
     it('should specify that this is control', () => {
       expect(getAmpRuntimeTypeParameter({
         AMP_CONFIG: {type: 'control'},
-        location: {href: 'https://www-example-com.cdn.ampproject.org'},
+        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
       })).to.equal('1');
     });
     it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
       expect(getAmpRuntimeTypeParameter({
-        location: {href: 'https://www-example-com.cdn.ampproject.org'},
+        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
       })).to.be.null;
     });
     it('should not have `art` parameter when binary type is production', () => {
       expect(getAmpRuntimeTypeParameter({
         AMP_CONFIG: {type: 'production'},
-        location: {href: 'https://www-example-com.cdn.ampproject.org'},
+        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
       })).to.be.null;
     });
     it('should not have `art` parameter when canonical', () => {
       expect(getAmpRuntimeTypeParameter({
         AMP_CONFIG: {type: 'canary'},
-        location: {href: 'https://www.example.com'},
+        location: {origin: 'https://www.example.com'},
       })).to.be.null;
     });
   });
