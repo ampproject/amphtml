@@ -160,7 +160,7 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   } catch (err) {
     // If the file doesn't exist and we're trying to update the file, create it.
     if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
-      fs.writeFileSync(fullOutputFile, "");
+      fs.writeFileSync(fullOutputFile, '');
     } else {
       throw err;
     }
@@ -273,7 +273,7 @@ describe('ValidatorFeatures', () => {
 });
 
 describe('ValidatorOutput', () => {
-  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') return;
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') { return; }
   // What's tested here is that if a URL with #development=1 is passed
   // (or any other hash), the validator output won't include the hash.
   it('produces expected output with hash in the URL', () => {
@@ -294,7 +294,7 @@ describe('ValidatorOutput', () => {
 });
 
 describe('ValidatorCssLengthValidation', () => {
-  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') return;
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') { return; }
   // Rather than encoding some really long author stylesheets in
   // testcases, which would be difficult to read/verify that the
   // testcase is valid, we modify a valid testcase
@@ -447,7 +447,7 @@ describe('ValidatorCssLengthValidation', () => {
 });
 
 describe('CssLength', () => {
-  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') return;
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') { return; }
   it('parses a basic example', () => {
     const parsed = new amp.validator.CssLength(
         '10.1em', /* allowAuto */ false, /* allowFluid */ false);

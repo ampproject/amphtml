@@ -108,9 +108,9 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
             (attrSpec.valueUrl.allowRelative !== null)) {
           it('allow_relative can not be false if allowed_protocol is http: ' +
                  attrSpec.name,
-             () => {
-               expect(attrSpec.valueUrl.allowRelative).toEqual(true);
-             });
+          () => {
+            expect(attrSpec.valueUrl.allowRelative).toEqual(true);
+          });
         }
       }
     }
@@ -199,7 +199,7 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
 // Test which verifies some constraints on the rules file which the validator
 // depends on, but which proto parser isn't robust enough to verify.
 describe('ValidatorRulesMakeSense', () => {
-  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') return;
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') { return; }
   const rules = amp.validator.createRules();
 
   // None of these should be empty.
