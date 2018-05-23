@@ -29,6 +29,7 @@ import {user} from '../src/log';
  *
  * @param {!Window} global
  * @param {function(!Object)} cb
+ * @param {string} locale
  */
 function getFacebookSdk(global, cb, locale) {
   loadScript(global, 'https://connect.facebook.net/' + locale + '/sdk.js', () => {
