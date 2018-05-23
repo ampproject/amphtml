@@ -1252,12 +1252,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @param {string} messages
-   * @param {!Error} error
+   * @param {string} message
+   * @param {*} error
    * @visibleForTesting
    */
   warnOnError(message, error) {
-    this.dev().warn(TAG, message, error);
+    dev().warn(TAG, message, error);
   }
 
   /** @override */
