@@ -15,7 +15,6 @@
  */
 
 import '../amp-3d-gltf';
-import * as sinon from 'sinon';
 import {createIframeWithMessageStub} from '../../../../testing/iframe';
 
 describes.realWin('amp-3d-gltf', {
@@ -75,7 +74,7 @@ describes.realWin('amp-3d-gltf', {
   it('sends toggleAmpViewport(false) when exiting viewport', () => {
     return createElement()
         .then(amp3dGltf => {
-          const postMessageSpy = sinon.spy(amp3dGltf, 'postMessage_');
+          const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
           return amp3dGltf.viewportCallback(false).then(() => {
             expect(postMessageSpy.calledOnce).to.be.true;
             expect(postMessageSpy.firstCall.args[0]).to.equal('action');
@@ -89,7 +88,7 @@ describes.realWin('amp-3d-gltf', {
   it('sends toggleAmpViewport(true) when entering viewport', () => {
     return createElement()
         .then(amp3dGltf => {
-          const postMessageSpy = sinon.spy(amp3dGltf, 'postMessage_');
+          const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
           return amp3dGltf.viewportCallback(true).then(() => {
             expect(postMessageSpy.calledOnce).to.be.true;
             expect(postMessageSpy.firstCall.args[0]).to.equal('action');
