@@ -727,8 +727,8 @@ class VideoEntry {
     // Listen to pause, play and user interaction events.
     const {element} = video;
     const unlisteners = [
-      listen(mask, 'click', triggerUserInteracted),
-      listen(animation, 'click', triggerUserInteracted),
+      listen(mask, 'click', triggerUserInteracted.bind(this)),
+      listen(animation, 'click', triggerUserInteracted.bind(this)),
       listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
       listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
       listen(element, VideoEvents.AD_START, adStart.bind(this)),
@@ -736,22 +736,22 @@ class VideoEntry {
     ];
 
     video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
-        .then(onInteraction);
+        .then(onInteraction.bind(this));
 
     /**
      * @param {boolean} isPlaying
      */
-    const toggleAnimation = isPlaying => {
+    function toggleAnimation(isPlaying) {
       video.mutateElement(() => {
         animation.classList.toggle('amp-video-eq-play', isPlaying);
       });
-    };
+    }
 
-    const triggerUserInteracted = () => {
+    function triggerUserInteracted() {
       userInteractedWith(video);
-    };
+    }
 
-    const onInteraction = () => {
+    function onInteraction() {
       const {video} = this;
       this.firstPlayEventOrNoop_();
       video.showControls();
@@ -762,19 +762,19 @@ class VideoEntry {
       removeElement(animation);
       removeElement(mask);
       video.signals().signal(VideoServiceSignals.USER_INTERACTED);
-    };
+    }
 
-    const adStart = () => {
+    function adStart() {
       setStyles(mask, {
         'display': 'none',
       });
-    };
+    }
 
-    const adEnd = () => {
+    function adEnd() {
       setStyles(mask, {
         'display': 'block',
       });
-    };
+    }
   }
 
   /**
