@@ -159,9 +159,6 @@ export class Activity {
     this.boundHandleActivity_ = this.handleActivity_.bind(this);
 
     /** @private @const {function()} */
-    this.boundHandleInactive_ = this.handleInactive_.bind(this);
-
-    /** @private @const {function()} */
     this.boundHandleVisibilityChange_ = this.handleVisibilityChange_.bind(this);
 
     /**
@@ -304,7 +301,10 @@ export class Activity {
     this.unlistenFuncs_ = [];
   }
 
-  /** @private */
+  /**
+   * @private
+   * @visibleForTesting
+   */
   cleanup_() {
     this.unlisten_();
   }
