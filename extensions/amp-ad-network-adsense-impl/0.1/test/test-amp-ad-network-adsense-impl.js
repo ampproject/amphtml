@@ -862,8 +862,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
       // Stub out vsync tasks to run immediately.
       impl.getVsync().run = (vsyncTaskSpec, vsyncState) => {
-        vsyncTaskSpec.measure(vsyncState);
-        vsyncTaskSpec.mutate(vsyncState);
+        if (vsyncTaskSpec.measure) {
+          vsyncTaskSpec.measure(vsyncState);
+        }
+        if (vsyncTaskSpec.mutate) {
+          vsyncTaskSpec.mutate(vsyncState);
+        }
       };
 
       // Fix the viewport to a consistent size to that the test doesn't depend
