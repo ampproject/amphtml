@@ -53,18 +53,10 @@ import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
 import {setStyles} from '../style';
 import {startsWith} from '../string';
-import {throttle} from '../utils/rate-limit';
 
 
 /** @private @const {string} */
 const TAG = 'video-manager';
-
-
-/**
- * Internal event triggered when a video's visibility changes.
- * @private @const {string}
- */
-const VISIBILITY_CHANGED = 'amp:visibilitychanged';
 
 
 /**
@@ -132,7 +124,7 @@ export class VideoManager {
 
     /** @private @const {function():!AutoFullscreenManager} */
     this.getAutoFullscreenManager_ =
-        once(() => new AutoFullscreenManager(this.ampdoc));
+        once(() => new AutoFullscreenManager(this.ampdoc, this));
 
     /** @private @const {function():!VideoDocking} */
     this.getDocking_ = once(() => new VideoDocking(this.ampdoc, this));
@@ -201,7 +193,10 @@ export class VideoManager {
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    element.signals().signal(VideoEvents.REGISTERED);
+    const signals =
+        (/** @type {!../base-element.BaseElement} */ (video)).signals();
+
+    signals.signal(VideoEvents.REGISTERED);
 
     // Add a class to element to indicate it implements the video interface.
     element.classList.add('i-amphtml-video-interface');
@@ -363,6 +358,14 @@ export class VideoManager {
   /** @param {!VideoEntry} entry */
   registerForDocking(entry) {
     this.getDocking_().register(entry.video);
+  }
+
+  /**
+   * @return {!AutoFullscreenManager}
+   * @visibleForTesting
+   */
+  getAutoFullscreenManagerForTesting_() {
+    return this.getAutoFullscreenManager_();
   }
 }
 
@@ -646,7 +649,6 @@ class VideoEntry {
     if (this.loaded_) {
       this.loadedVideoVisibilityChanged_();
     }
-    this.video.element.dispatchCustomEvent(VISIBILITY_CHANGED);
   }
 
   /**
@@ -759,6 +761,7 @@ class VideoEntry {
       });
       removeElement(animation);
       removeElement(mask);
+      video.signals().signal(VideoServiceSignals.USER_INTERACTED);
     }
 
     function adStart() {
@@ -941,10 +944,6 @@ class VideoEntry {
 }
 
 
-/** @private @const {string} */
-const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
-
-
 /**
  * @param {!AmpElement} video
  * @return {boolean}
@@ -962,38 +961,43 @@ function supportsFullscreenViaApi(video) {
 /** Manages rotate-to-fullscreen video. */
 export class AutoFullscreenManager {
 
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    const {win} = ampdoc;
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./video-service-interface.VideoServiceInterface} manager
+   */
+  constructor(ampdoc, manager) {
+
+    /** @private @const {!./video-service-interface.VideoServiceInterface} */
+    this.manager_ = manager;
 
     /** @private @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {number} */
-    this.nextId_ = 0;
-
-    /** @private @const {!Window} */
-    this.win_ = win;
-
-    /** @private {?VideoEntry} */
+    /** @private {?../video-interface.VideoOrBaseElementDef} */
     this.currentlyInFullscreen_ = null;
 
-    /** @private {?Element} */
+    /** @private {?../video-interface.VideoOrBaseElementDef} */
     this.currentlyCentered_ = null;
 
-    /** @private @const {!Array<!Element>} */
-    this.visibleElements_ = [];
-
-    /**
-     * Maps rotate-to-fullscreen entry id to entry.
-     * @private @const {!Object<string, !VideoEntry>}
-     */
-    this.entries_ = {};
+    /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
+    this.entries_ = [];
 
     /** @private @const {function()} */
-    this.trackOnScroll_ = once(() =>
-      Services.viewportForDoc(ampdoc).onScroll(
-          throttle(this.ampdoc_.win, () => this.selectOnScroll_(), 300)));
+    this.boundSelectBestCentered_ = () => this.selectBestCenteredInPortrait_();
+
+    /**
+     * @param {!../video-interface.VideoOrBaseElementDef} video
+     * @return {boolean}
+     */
+    this.boundIncludeOnlyPlaying_ = video =>
+      this.getPlayingState_(video) == PlayingStates.PLAYING_MANUAL;
+
+    /**
+     * @param {!../video-interface.VideoOrBaseElementDef} a
+     * @param {!../video-interface.VideoOrBaseElementDef} b
+     * @return {number}
+     */
+    this.boundCompareEntries_ = (a, b) => this.compareEntries_(a, b);
 
     this.installOrientationObserver_();
     this.installFullscreenListener_();
@@ -1001,28 +1005,24 @@ export class AutoFullscreenManager {
 
   /** @param {!VideoEntry} entry */
   register(entry) {
-    if (!this.canFullscreen_(entry.video.element)) {
+    const {video} = entry;
+    const {element} = video;
+
+    if (!this.canFullscreen_(element)) {
       return;
     }
 
-    const id = this.nextId_++;
-    const {element} = entry.video;
+    this.entries_.push(video);
 
-    element[AUTO_FULLSCREEN_ID_PROP] = id.toString();
+    listen(element, VideoEvents.PAUSE, this.boundSelectBestCentered_);
+    listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_);
+    listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_);
 
-    this.entries_[id.toString()] = entry;
-
-    listen(element, VISIBILITY_CHANGED, e => {
-      if (isLandscape(this.ampdoc_.win)) {
-        return;
-      }
-      this.updateVisibility_(dev().assertElement(e.target));
-    });
-
-    this.trackOnScroll_();
+    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
+        .then(this.boundSelectBestCentered_);
 
     // Set always
-    this.updateVisibility_(element);
+    this.selectBestCenteredInPortrait_();
   }
 
   /** @private */
@@ -1033,6 +1033,14 @@ export class AutoFullscreenManager {
     listen(root, 'mozfullscreenchange', exitHandler);
     listen(root, 'fullscreenchange', exitHandler);
     listen(root, 'MSFullscreenChange', exitHandler);
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  isInLandscape() {
+    return isLandscape(this.ampdoc_.win);
   }
 
   /**
@@ -1081,11 +1089,10 @@ export class AutoFullscreenManager {
 
   /** @private */
   onRotation_() {
-    if (isLandscape(this.ampdoc_.win)) {
-      if (!this.currentlyCentered_) {
-        return;
+    if (this.isInLandscape()) {
+      if (this.currentlyCentered_ != null) {
+        this.enter_(this.currentlyCentered_);
       }
-      this.enter_(this.getEntryForElement_(this.currentlyCentered_));
       return;
     }
     if (this.currentlyInFullscreen_) {
@@ -1094,19 +1101,13 @@ export class AutoFullscreenManager {
   }
 
   /**
-   * @param {!VideoEntry} entry
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
-  enter_(entry) {
-    const {video} = entry;
+  enter_(video) {
+    const platform = Services.platformFor(this.ampdoc_.win);
 
-    if (entry.getPlayingState() !== PlayingStates.PLAYING_MANUAL) {
-      return;
-    }
-
-    const platform = Services.platformFor(this.win_);
-
-    this.currentlyInFullscreen_ = entry;
+    this.currentlyInFullscreen_ = video;
 
     if (platform.isAndroid() && platform.isChrome()) {
       // Chrome on Android somehow knows what we're doing and executes a nice
@@ -1120,13 +1121,11 @@ export class AutoFullscreenManager {
   }
 
   /**
-   * @param {!VideoEntry} entry
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
-  exit_(entry) {
+  exit_(video) {
     this.currentlyInFullscreen_ = null;
-
-    const {video} = entry;
 
     this.scrollIntoIfNotVisible_(video, 'center')
         .then(() => video.fullscreenExit());
@@ -1167,107 +1166,75 @@ export class AutoFullscreenManager {
   /** @private @return {!Promise} */
   onceOrientationChanges_() {
     const magicNumber = 330;
-    return Services.timerFor(this.win_).promise(magicNumber);
-  }
-
-  /**
-   * @param {!AmpElement} element
-   * @private
-   */
-  updateVisibility_(element) {
-    const intersectionChangeEntry = element.getIntersectionChangeEntry();
-    const isVisible = intersectionChangeEntry.intersectionRatio > 0.75;
-    const i = this.visibleElements_.indexOf(element);
-
-    if (!isVisible) {
-      if (i >= 0) {
-        this.visibleElements_.splice(i, 1);
-      }
-      return;
-    }
-
-    if (i < 0) {
-      this.visibleElements_.push(element);
-    }
-
-    this.selectBestCenteredInPortrait_();
-  }
-
-  /** @private */
-  selectOnScroll_() {
-    if (isLandscape(this.ampdoc_.win)) {
-      return;
-    }
-    this.selectBestCenteredInPortrait_();
+    return Services.timerFor(this.ampdoc_.win).promise(magicNumber);
   }
 
   /** @private */
   selectBestCenteredInPortrait_() {
+    if (this.isInLandscape()) {
+      return this.currentlyCentered_;
+    }
+
     this.currentlyCentered_ = null;
-    this.visibleElements_
-        .map(el => Object.assign({target: el}, el.getIntersectionChangeEntry()))
-        .sort((a, b) => this.compareIntersectionEntries_(a, b))
-        .forEach((entry, i) => {
-          if (entry.intersectionRatio >= 0.8 && i == 0) {
-            this.currentlyCentered_ = entry.target;
-          }
-        });
+
+    const selected = this.entries_
+        .filter(this.boundIncludeOnlyPlaying_)
+        .sort(this.boundCompareEntries_)[0];
+
+    if (selected) {
+      const {intersectionRatio} = selected.element.getIntersectionChangeEntry();
+      if (intersectionRatio >= VISIBILITY_PERCENT / 100) {
+        this.currentlyCentered_ = selected;
+      }
+    }
+
     return this.currentlyCentered_;
   }
 
   /**
-   * Compares two intersection entries in order to sort them by "best centered".
-   * @param {!IntersectionObserverEntry} a
-   * @param {!IntersectionObserverEntry} b
+   * Compares two videos in order to sort them by "best centered".
+   * @param {!../video-interface.VideoOrBaseElementDef} a
+   * @param {!../video-interface.VideoOrBaseElementDef} b
    * @return {number}
    */
-  compareIntersectionEntries_(a, b) {
-    // Prioritize videos that are playing
-    const aPlayingState = this.getEntryForElement_(a.target).getPlayingState();
-    const bPlayingState = this.getEntryForElement_(b.target).getPlayingState();
-    if (aPlayingState == PlayingStates.PLAYING_MANUAL &&
-        bPlayingState != PlayingStates.PLAYING_MANUAL) {
-      return -1;
-    }
-    if (aPlayingState != PlayingStates.PLAYING_MANUAL &&
-        bPlayingState == PlayingStates.PLAYING_MANUAL) {
-      return 1;
-    }
+  compareEntries_(a, b) {
+    const {
+      intersectionRatio: ratioA,
+      boundingClientRect: rectA,
+    } = a.element.getIntersectionChangeEntry();
+    const {
+      intersectionRatio: ratioB,
+      boundingClientRect: rectB,
+    } = b.element.getIntersectionChangeEntry();
 
     // Prioritize by how visible they are, with a tolerance of 10%
     const ratioTolerance = 0.1;
-    const ratioDelta = (a.intersectionRatio - b.intersectionRatio);
-    if (ratioDelta < -ratioTolerance) {
-      return -1;
-    }
-    if (ratioDelta > ratioTolerance) {
-      return 1;
+    const ratioDelta = ratioA - ratioB;
+    if (Math.abs(ratioDelta) > ratioTolerance) {
+      return ratioDelta;
     }
 
     // Prioritize by distance from center.
     const viewport = Services.viewportForDoc(this.ampdoc_);
-    const aCenter = centerDist(viewport, a.boundingClientRect);
-    const bCenter = centerDist(viewport, b.boundingClientRect);
-    if (aCenter < bCenter) {
-      return -1;
-    }
-    if (aCenter > bCenter) {
-      return 1;
+    const centerA = centerDist(viewport, rectA);
+    const centerB = centerDist(viewport, rectB);
+    if (centerA < centerB ||
+        centerA > centerB) {
+      return centerA - centerB;
     }
 
     // Everything else failing, choose the highest element.
-    const topDelta = (a.boundingClientRect.top - b.boundingClientRect.top);
-    return topDelta < 0 ? -1 : (topDelta > 0 ? 1 : 0);
+    return rectA.top - rectB.top;
   }
 
   /**
-   * @param {!Element} element
-   * @return {!VideoEntry}
+   * @param {!../video-interface.VideoOrBaseElementDef} video
+   * @return {!../video-interface.VideoInterface} PlayingStates
    * @private
    */
-  getEntryForElement_(element) {
-    const id = dev().assertString(element[AUTO_FULLSCREEN_ID_PROP]);
-    return dev().assert(this.entries_[id]);
+  getPlayingState_(video) {
+    return this.manager_.getPlayingState(
+        /** @type {!../video-interface.VideoInterface} */ (video));
   }
 }
 
