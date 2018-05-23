@@ -60,9 +60,9 @@ class AmpReddit extends AMP.BaseElement {
 
     const iframe = getIframe(this.win, this.element, 'reddit');
     this.applyFillContent(iframe);
-     listenFor(iframe, 'embed-size', data => {
+    listenFor(iframe, 'embed-size', data => {
       this./*OK*/changeHeight(data['height']);
-     }, /* opt_is3P */true);
+    }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
   }
