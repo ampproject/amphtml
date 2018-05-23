@@ -112,7 +112,7 @@ class AmpPoool extends AMP.BaseElement {
             }(window, document, "script", "https://assets.poool.fr/poool.min.js"
             , "poool");
 
-            poool("init", "`+bundle_id+`");
+            poool("init", "${bundle_id}");
         `;
 
         // Apply publisher custom configs
