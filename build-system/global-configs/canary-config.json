@@ -43,5 +43,6 @@
   "expUnconditionedDfpIdentity": 0.01,
   "expUnconditionedCanonicalHoldback": 0.01,
   "amp-consent": 1,
+  "iframe-messaging": 1,
   "amp-img-native-srcset": 1
 }
