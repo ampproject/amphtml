@@ -41,7 +41,7 @@ limitations under the License.
 
 `amp-iframe` has several important differences from vanilla iframes that are designed to make it more secure and avoid AMP files that are dominated by a single iframe:
 
-- An `amp-iframe` may not appear close to the top of the document (except for iframes that use `placeholder` as described [below](#iframe-with-placeholder)). The iframe must be either 600 px away from the top or not within the first 75% of the viewport when scrolled to the top, whichever is smaller. 
+- An `amp-iframe` may not appear close to the top of the document (except for iframes that use `placeholder` as described [below](#iframe-with-placeholder)). The iframe must be either 600 px away from the top or not within the first 75% of the viewport when scrolled to the top, whichever is smaller.
 - By default, an amp-iframe is sandboxed (see [details](#sandbox)).
 - An `amp-iframe` must only request resources via HTTPS, from a data-URI, or via the `srcdoc` attribute.
 - An `amp-iframe` must not be in the same origin as the container unless they do not allow `allow-same-origin` in the `sandbox` attribute. See the ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) doc for further details on allowed origins for iframes.
@@ -57,7 +57,7 @@ limitations under the License.
 </amp-iframe>
 ```
 
-Renders as: 
+Renders as:
 
 <amp-iframe width="200" height="100"
     sandbox="allow-scripts allow-same-origin"
@@ -111,6 +111,33 @@ See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
+## Iframe with placeholder
+
+It is possible to have an `amp-iframe` appear at the top of a document when the `amp-iframe` has a `placeholder` element as shown in the example below.
+
+- The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder until the iframe is ready to be displayed.
+- Iframe readiness can be known by listening to `onload` of the iframe or an `embed-ready` `postMessage`, which would be sent by the iframe document, whichever comes first.
+
+*Example: Iframe with a placeholder*
+
+```html
+<amp-iframe width=300 height=300
+   layout="responsive"
+   sandbox="allow-scripts allow-same-origin"
+   src="https://foo.com/iframe">
+ <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
+</amp-iframe>
+```
+
+*Example: Iframe embed-ready request*
+
+```javascript
+window.parent.postMessage({
+  sentinel: 'amp',
+  type: 'embed-ready'
+}, '*');
+```
+
 ## Iframe resizing
 
 An `amp-iframe` must have static layout defined as is the case with any other AMP element. However,
@@ -155,33 +182,6 @@ Here are some factors that affect how fast the resize will be executed:
 - Whether the resize is requested for a currently active iframe.
 - Whether the resize is requested for an iframe below the viewport or above the viewport.
 
-## Iframe with placeholder
-
-It is possible to have an `amp-iframe` appear at the top of a document when the `amp-iframe` has a `placeholder` element as shown in the example below.
-
-- The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder until the iframe is ready to be displayed.
-- Iframe readiness can be known by listening to `onload` of the iframe or an `embed-ready` `postMessage`, which would be sent by the iframe document, whichever comes first.
-
-*Example: Iframe with a placeholder*
-
-```html
-<amp-iframe width=300 height=300
-   layout="responsive"
-   sandbox="allow-scripts allow-same-origin"
-   src="https://foo.com/iframe">
- <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
-</amp-iframe>
-```
-
-*Example: Iframe embed-ready request*
-
-```javascript
-window.parent.postMessage({
-  sentinel: 'amp',
-  type: 'embed-ready'
-}, '*');
-```
-
 ## Iframe viewability
 
 Iframes can send a `send-intersections` message to their parents to start receiving IntersectionObserver style [change records](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) of the iframe's intersection with the parent viewport.
@@ -217,6 +217,48 @@ window.addEventListener('message', function(event) {
 ```
 
 The intersection message would be sent by the parent to the iframe when the iframe moves in or out of the viewport (or is partially visible), when the iframe is scrolled or resized.
+
+## Two-way messaging with iframes
+
+In addition to resize and viewability messages, iframes can send and receive generic messages that interface with AMP's [actions and events system](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md).
+
+{% call callout('Note', type='note') %}
+Iframes may only send messages to the parent page in response to a user gesture. Messages that are not triggered by a user gesture will be ignored.
+{% endcall %}
+
+### Sending messages to the iframe with `postMessage` action
+
+`amp-iframe` supports the `postMessage` action which may be invoked in the usual manner. The arguments are also passed to the iframe as key-value pairs in [`MessageEvent.data`](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data). For example:
+
+```html
+<!-- When this button is tapped, sends `{foo: 'bar'}` to the iframe. -->
+<button on="tap:my-iframe.postMessage(foo='bar')">Message iframe</button>
+```
+
+In the iframe:
+
+```js
+// When the button is tapped, prints "Received from page: {foo: "bar"}" .
+window.addEventListener('message', function(event) {
+  console.log('Received from page: ' + JSON.stringify(event.data));
+});
+```
+
+### Receiving messages from the iframe with `message` event
+
+Conversely, `amp-iframe` supports receiving messages from the iframe when a `message` event handler is installed. These messages must be triggered by a user gesture. For example:
+
+```js
+// Tapping this button sends `123` to the parent AMP.
+<button onclick="window.parent.postMessage(123, '*');">Message parent</button>
+```
+
+In the AMP page:
+
+```html
+<!-- When receiving a message from the iframe, set variable `baz` to its contents (`123`). -->
+<amp-iframe id="my-iframe" on="message:AMP.setState({baz: event.data})">
+```
 
 ## Tracking/analytics iframes
 
