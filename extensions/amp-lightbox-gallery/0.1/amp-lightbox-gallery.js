@@ -316,8 +316,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }]`);
     if (existingCarousel) {
       this.carousel_ = existingCarousel;
-      return this.mutateElement(() => {
-        toggle(dev().assertElement(this.carousel_), true);
+      return this.carousel_.getImpl().then(impl => {
+        return this.mutateElement(() => {
+          this.toggleNavControls_(impl.noOfSlides_);
+          toggle(dev().assertElement(this.carousel_), true);
+        });
       });
     } else {
       return this.buildCarousel_(lightboxGroupId);
@@ -347,8 +350,21 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.buildCarouselSlides_(list);
       return this.mutateElement(() => {
         this.carouselContainer_.appendChild(this.carousel_);
+        this.toggleNavControls_(list.length);
       });
     });
+  }
+
+  /**
+   * @param {number} noOfChildren
+   * @private
+   */
+  toggleNavControls_(noOfChildren) {
+    if (noOfChildren > 1) {
+      this.controlsContainer_.classList.remove('i-amphtml-lbg-single');
+    } else {
+      this.controlsContainer_.classList.add('i-amphtml-lbg-single');
+    }
   }
 
   /**
