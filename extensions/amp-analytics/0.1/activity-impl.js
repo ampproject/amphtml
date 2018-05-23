@@ -325,9 +325,10 @@ export class Activity {
    */
   getIncrementalEngagedTime(name, reset = true) {
     if (!this.totalEngagedTimeByTrigger_.hasOwnProperty(name)) {
-      this.totalEngagedTimeByTrigger_[name] =
-        this.getTotalEngagedTime();
-      return this.totalEngagedTimeByTrigger_[name];
+      if (reset) {
+        this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
+      }
+      return this.getTotalEngagedTime();
     }
     const currentIncrementalEngagedTime =
       this.totalEngagedTimeByTrigger_[name];
