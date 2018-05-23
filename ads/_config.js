@@ -738,6 +738,7 @@ export const adConfig = {
 
   realclick: {
     prefetch: 'https://ssp.realclick.co.kr/amp/ad.js',
+    renderStartImplemented: true,
   },
 
   relap: {
