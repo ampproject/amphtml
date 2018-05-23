@@ -727,8 +727,8 @@ class VideoEntry {
     // Listen to pause, play and user interaction events.
     const {element} = video;
     const unlisteners = [
-      listen(mask, 'click', triggerUserInteracted),
-      listen(animation, 'click', triggerUserInteracted),
+      listen(mask, 'click', triggerUserInteracted.bind(this)),
+      listen(animation, 'click', triggerUserInteracted.bind(this)),
       listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
       listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
       listen(element, VideoEvents.AD_START, adStart.bind(this)),
@@ -736,7 +736,7 @@ class VideoEntry {
     ];
 
     video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
-        .then(onInteraction);
+        .then(onInteraction.bind(this));
 
     /**
      * @param {boolean} isPlaying
