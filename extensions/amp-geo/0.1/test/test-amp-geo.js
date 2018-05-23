@@ -170,6 +170,24 @@ describes.realWin('amp-geo', {
     });
   });
 
+  it('should allow uppercase hash to override geo in test', () => {
+    win.AMP_MODE.geoOverride = 'NZ';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForOrNull(win).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+      expectBodyHasClass([
+        'amp-iso-country-nz',
+        'amp-geo-group-anz',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+      ], false);
+    });
+  });
+
   it('should respect pre-rendered geo tags', () => {
     addConfigElement('script');
     doc.body.classList.add('amp-iso-country-nz', 'amp-geo-group-anz');

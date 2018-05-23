@@ -140,7 +140,7 @@ export class AmpGeo extends AMP.BaseElement {
       (isCanary(this.win) || getMode(this.win).localDev) &&
       /^\w+$/.test(getMode(this.win).geoOverride)) {
       this.mode_ = mode.GEO_OVERRIDE;
-      this.country_ = getMode(this.win).geoOverride;
+      this.country_ = getMode(this.win).geoOverride.toLowerCase();
     }
   }
   /**
