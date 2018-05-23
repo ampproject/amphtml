@@ -16,6 +16,7 @@
 'use strict';
 
 const colors = require('ansi-colors');
+const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const {getStdout} = require('../exec');
@@ -27,6 +28,15 @@ const {green, red, cyan, yellow} = colors;
 
 
 function checkBundleSize() {
+  if (!fs.existsSync(runtimeFile)) {
+    log(green('Could not find'), cyan(runtimeFile) +
+        green('. Skipping bundlesize check.'));
+    log(green('To include this check, run'),
+        cyan('gulp dist --fortesting [--noextensions]'),
+        green('before'), cyan('gulp bundle-size') + yellow('.'));
+    return;
+  }
+
   const cmd = `npx bundlesize -f "${runtimeFile}" -s "${maxSize}"`;
   log('Running ' + cyan(cmd) + '...');
   const output = getStdout(cmd);
@@ -35,11 +45,6 @@ function checkBundleSize() {
   const error = output.match(/ERROR .*/);
   if (error && error.length > 0) {
     log(yellow(error[0]));
-    if (!process.env.TRAVIS) {
-      log(yellow('You must run'),
-          cyan('gulp dist --fortesting [--noextensions]'),
-          yellow('before running'), cyan('gulp bundle-size') + yellow('.'));
-    }
   } else if (fail && fail.length > 0) {
     log(red(fail[0]));
     log(red('ERROR:'), cyan('bundlesize'), red('found that'),
