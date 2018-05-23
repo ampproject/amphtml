@@ -208,6 +208,16 @@ export function areMarginsChanged(margins, change) {
 }
 
 /**
+ * @param {!LayoutRectDef} from
+ * @param {!LayoutRectDef} to
+ * @return {boolean}
+ */
+export function layoutRectSizeEquals(from, to) {
+  return from.width == to.width &&
+      from.height === to.height;
+}
+
+/**
  * @param {?LayoutRectDef} r1
  * @param {?LayoutRectDef} r2
  * @return {boolean}
