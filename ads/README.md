@@ -245,6 +245,9 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
   </dd>
 </dl>
 
+After overriding the default consent handling behavior, don't forget to update your publisher facing
+ documentation with the new behaviors on user's consent choices.
+
 ### Optimizing ad performance
 
 #### JS reuse across iframes
