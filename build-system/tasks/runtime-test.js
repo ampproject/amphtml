@@ -203,7 +203,9 @@ function applyAmpConfig() {
   if (argv.unit || argv.a4a) {
     return Promise.resolve();
   }
-  log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  if (!process.env.TRAVIS) {
+    log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  }
   return writeConfig('dist/amp.js').then(() => {
     return writeConfig('dist/v0.js');
   });
@@ -282,8 +284,8 @@ function runTests() {
   } else if (argv['local-changes']) {
     const filesChanged = unitTestFilesChanged();
     if (filesChanged.length == 0) {
-      log(green('No unit test files were changed. Exiting.'));
-      process.exit(0);
+      log(green('INFO: ') + 'No unit test files were changed.');
+      return Promise.resolve();
     }
     c.files = c.files.concat(config.commonUnitTestPaths, filesChanged);
     c.client.failOnConsoleError = true;

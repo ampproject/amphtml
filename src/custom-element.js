@@ -559,9 +559,10 @@ function createBaseCustomElementClass(win) {
      * Updates the layout box of the element.
      * See {@link BaseElement.getLayoutWidth} for details.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
+     * @param {boolean=} opt_measurementsChanged
      * @this {!Element}
      */
-    updateLayoutBox(layoutBox) {
+    updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
@@ -569,6 +570,9 @@ function createBaseCustomElementClass(win) {
       if (this.isBuilt()) {
         try {
           this.implementation_.onLayoutMeasure();
+          if (opt_measurementsChanged) {
+            this.implementation_.onMeasureChanged();
+          }
         } catch (e) {
           reportError(e, this);
         }
