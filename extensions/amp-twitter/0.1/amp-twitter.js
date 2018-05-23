@@ -68,11 +68,14 @@ class AmpTwitter extends AMP.BaseElement {
       this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
     listenFor(iframe, 'no-content', () => {
-      if (this.getFallback()) {
+      const fallback = this.getFallback();
+      if (fallback) {
+        // If there is no content, but a fallback is provided.
         this.togglePlaceholder(false);
         this.toggleFallback(true);
+        this./*OK*/changeHeight(fallback.offsetHeight);
       } else {
-        // else keep placeholder displayed since there's no fallback
+        // Else keep placeholder displayed since there's no fallback.
         const placeholder = this.getPlaceholder();
         if (placeholder) {
           // Only happens if there is no content to render 
