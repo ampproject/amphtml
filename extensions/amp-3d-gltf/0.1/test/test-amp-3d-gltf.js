@@ -79,7 +79,8 @@ describes.realWin('amp-3d-gltf', {
           return amp3dGltf.viewportCallback(false).then(() => {
             expect(postMessageSpy.calledOnce).to.be.true;
             expect(postMessageSpy.firstCall.args[0]).to.equal('action');
-            expect(postMessageSpy.firstCall.args[1].action).to.equal('toggleAmpViewport');
+            expect(postMessageSpy.firstCall.args[1].action)
+                .to.equal('toggleAmpViewport');
             expect(postMessageSpy.firstCall.args[1].args).to.be.false;
           });
         });
@@ -92,7 +93,8 @@ describes.realWin('amp-3d-gltf', {
           return amp3dGltf.viewportCallback(true).then(() => {
             expect(postMessageSpy.calledOnce).to.be.true;
             expect(postMessageSpy.firstCall.args[0]).to.equal('action');
-            expect(postMessageSpy.firstCall.args[1].action).to.equal('toggleAmpViewport');
+            expect(postMessageSpy.firstCall.args[1].action)
+                .to.equal('toggleAmpViewport');
             expect(postMessageSpy.firstCall.args[1].args).to.be.true;
           });
         });
