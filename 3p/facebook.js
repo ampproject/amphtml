@@ -103,6 +103,7 @@ function getCommentsContainer(global, data) {
   container.setAttribute('data-href', data.href);
   container.setAttribute('data-numposts', data.numposts || 10);
   container.setAttribute('data-colorscheme', data.colorscheme || 'light');
+  container.setAttribute('data-order-by', data.orderBy || 'social');
   container.setAttribute('data-width', '100%');
   return container;
 }
