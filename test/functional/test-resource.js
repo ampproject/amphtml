@@ -151,6 +151,39 @@ describes.realWin('Resource', {amp: true}, env => {
     });
   });
 
+  it('should track size changes on measure', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 11, top: 12, width: 111, height: 222})
+          .once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(sinon.match(data => {
+            return data.width == 111 && data.height == 222;
+          }), true)
+          .once();
+      resource.measure();
+    });
+  });
+
+  it('should track no size changes on measure', () => {
+    layoutRectLtwh(0, 0, 0, 0);
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 0, top: 0, width: 0, height: 0})
+          .once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(sinon.match(data => {
+            return data.width == 0 && data.height == 0;
+          }), false)
+          .once();
+      resource.measure();
+    });
+  });
+
   it('should allow to measure when not upgraded', () => {
     elementMock.expects('isUpgraded').returns(false).atLeast(1);
     const viewport = {
@@ -193,7 +226,7 @@ describes.realWin('Resource', {amp: true}, env => {
       elementMock.expects('updateLayoutBox')
           .withExactArgs(sinon.match(data => {
             return data.width == 111 && data.height == 222;
-          }))
+          }), true)
           .once();
       resource.measure();
       expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
