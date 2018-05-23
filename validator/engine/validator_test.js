@@ -151,12 +151,10 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   const fullOutputFile = path.join(
       path.dirname(absolutePathFor(this.ampHtmlFile)),
       path.basename(ampHtmlFile, '.html') + '.out');
-  console/*OK*/.log(fullOutputFile);
   /** @type {string} */
   this.expectedOutput;
   try {
     this.expectedOutput = fs.readFileSync(fullOutputFile, 'utf8').trim();
-    console/*OK*/.log(this.expectedOutput);
   } catch (err) {
     // If the file doesn't exist and we're trying to update the file, create it.
     if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
