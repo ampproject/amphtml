@@ -328,10 +328,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('create predefined _none policy', function* () {
+    it('create predefined _if_responded policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_['_none']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_if_responded']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -345,10 +345,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('create predefined _all policy', function* () {
+    it('create predefined _if_accepted policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_['_all']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -356,10 +356,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('create default _reject_all policy', function* () {
+    it('create default _auto_reject policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_['_reject_all']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_auto_reject']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -404,7 +404,7 @@ describes.realWin('amp-consent', {
           'ABC': [],
         },
       });
-      expect(ampConsent.policyConfig_['_all']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,

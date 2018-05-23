@@ -30,9 +30,9 @@ const TAG = 'consent-policy-manager';
 
 const WHITELIST_POLICY = {
   'default': true,
-  '_none': true,
-  '_all': true,
-  '_reject_all': true,
+  '_if_responded': true,
+  '_if_accepted': true,
+  '_auto_reject': true,
 };
 
 
