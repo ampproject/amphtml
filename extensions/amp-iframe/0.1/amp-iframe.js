@@ -644,16 +644,16 @@ export class AmpIframe extends AMP.BaseElement {
         }
         return;
       }
-      const data = getData(e);
-      let sanitizedData;
+      const unsanitized = getData(e);
+      let sanitized;
       try {
-        sanitizedData = parseJson(JSON.stringify(data));
+        sanitized = parseJson(JSON.stringify(unsanitized));
       } catch (e) {
         user().error(TAG_, 'Data from "message" event must be JSON.');
         return;
       }
       const event =
-          createCustomEvent(this.win, 'amp-iframe:message', sanitizedData);
+          createCustomEvent(this.win, 'amp-iframe:message', {data: sanitized});
       const actionService = Services.actionServiceForDoc(this.getAmpDoc());
       actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
     };

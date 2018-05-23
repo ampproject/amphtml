@@ -204,6 +204,21 @@ event.index</pre></td>
   </tr>
 </table>
 
+### amp-iframe
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>message</code></td>
+    <td>Fired when the iframe invokes <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">parent.postMessage</a> as a result of a user gesture in the iframe.</td>
+    <td><pre>// See <a href="https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data">MessageEvent.data</a>.
+event.data</pre></td>
+  </tr>
+</table>
+
 ### amp-lightbox
 <table>
   <tr>
@@ -373,6 +388,18 @@ event.response</pre></td>
   <tr>
     <td><code>goToSlide(index=INTEGER)</code></td>
     <td>Advances the carousel to a specified slide index.</td>
+  </tr>
+</table>
+
+### amp-iframe
+<table>
+  <tr>
+    <th width="40%">Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>postMessage(...)</code></td>
+    <td>Sends a message to the iframe via <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage</a> with the arguments serialized as key-value pairs under <a href="https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data">MessageEvent.data<a/>.</td>
   </tr>
 </table>
 
