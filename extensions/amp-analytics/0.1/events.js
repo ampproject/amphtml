@@ -361,7 +361,11 @@ export class ClickEventTracker extends EventTracker {
     /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
 
-    /** @private @const */
+    /**
+     * @private {function(!Event)}
+     * @const
+     * @param {!Event} e
+     */
     this.boundOnClick_ = e => {
       this.clickObservable_.fire(e);
     };
@@ -672,6 +676,7 @@ class TimerEventHandler {
 
   /**
    * @param {!Window} win
+   * @restricted
    */
   stopTimer_(win) {
     if (!this.isRunning()) {
@@ -884,7 +889,10 @@ export class VideoEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.sessionObservable_ = new Observable();
 
-    /** @private {?Function} */
+    /**
+     * @private {?function(!Event)}
+     * @param {!Event} e
+     */
     this.boundOnSession_ = e => {
       this.sessionObservable_.fire(e);
     };
@@ -1031,7 +1039,6 @@ export class VisibilityTracker extends EventTracker {
 
   /**
    * @return {!Promise}
-   * @visibleForTesting
    */
   createReportReadyPromise_() {
     const viewer = this.root.getViewer();

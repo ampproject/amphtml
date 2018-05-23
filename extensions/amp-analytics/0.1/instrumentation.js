@@ -169,6 +169,7 @@ export class InstrumentationService {
    * @param {!Element} analyticsElement The element associated with the
    *  config.
    * @private
+   * @restricted
    */
   addListenerDepr_(config, listener, analyticsElement) {
     const eventType = config['on'];
@@ -239,7 +240,7 @@ export class InstrumentationService {
     }
 
     /**
-     * @param {!Object<number, boolean>} bounds.
+     * @param {!Object<number, boolean>} bounds
      * @param {number} scrollPos Number representing the current scroll
      * @param {string} varName variable name to assign to the bound that
      * triggers the event
