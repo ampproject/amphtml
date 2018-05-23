@@ -761,7 +761,6 @@ class VideoEntry {
       });
       removeElement(animation);
       removeElement(mask);
-      video.signals().signal(VideoServiceSignals.USER_INTERACTED);
     }
 
     function adStart() {
