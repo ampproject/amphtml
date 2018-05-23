@@ -24,7 +24,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a> <a href="https://github.com/ampproject/amphtml/blob/3a06c99f259b66998b61935a5ee5f0075481bfd2/tools/experiments/README.md#enable-an-experiment-for-a-particular-document"> (Document opt-in allowed)</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
