@@ -787,12 +787,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-    if (this.isFluid_) {
-      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
-    } else {
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
-    }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
@@ -802,6 +796,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     } else {
       size = this.getSlotSize();
     }
+    // If this is a multi-size creative, fire delayed impression now. If it's
+    // fluid, wait until after resize.
+    if (this.isFluid_ && !size) {
+      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
+    } else {
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
+    }
+
     return size;
   }
 
