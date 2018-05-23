@@ -193,6 +193,38 @@ The prompt UI is defined within the consent instance config. The `promptUI` attr
 
 AMP displays prompt UI on page load or by user interaction. The prompt UI is hidden based on the three user actions described below.
 
+#### Prompt UI for Stories
+
+The `amp-story` extension provides a [default prompt UI](https://user-images.githubusercontent.com/1492044/40135514-8ab56d10-5913-11e8-95a2-72ac01ff31e0.png), that requires using a `<amp-story-consent>` component as the prompt UI. This component content requires a `title`, a `message`, and a list of `vendors`, and has to be specified in its own component configuration.
+
+Note: until the 2018/05/29, the lang of the document needs to be set to `en` for the UI to work: `<html lang="en">`.
+
+*Example*: Displays a prompt user interface on an AMP Story
+
+```html
+<amp-consent layout="nodisplay" id="consent-element">
+  <script type="application/json">
+  {
+    "consents": {
+      "my-consent": {
+        "checkConsentHref": "https://foo.com/api/show-consent",
+        "promptUI": "consent-ui"
+      }
+    }
+  }
+  </script>
+  <amp-story-consent id="consent-ui" layout="nodisplay">
+    <script type="application/json">
+    {
+      “title”: "My title",
+      “message”: "My example message.",
+      “vendors”: ["Item 1", "Item 2", "Item 3", "Item 4"]
+    }
+    </script>
+  </amp-story-consent>
+</amp-consent>
+```
+
 #### Prompt Actions
 
 There are three types of user actions that are associated with the consent prompt: `accept`, `reject` and `dismiss`.
@@ -332,7 +364,7 @@ The table below lists the vendors and components that are integrated with amp-co
 | DoubleClick & AdSense Integration      | 05/10/18 | [Link](https://support.google.com/dfp_premium/answer/7678538) |Yes|
 | AMP IMA Video Integration   |  05/15/18  |   ||
 | AMP Geo |  05/10/18      |  [Link](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/) |Yes|
-| AMP Stories |   05/15/18     |    ||
+| AMP Stories |   05/15/18     |[Link](#prompt-ui-for-stories)|Yes|
 
 
 ## FAQs
