@@ -291,7 +291,7 @@ function warnForConsoleError() {
             'error> });';
     // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
     if (window.__karma__.config.failOnConsoleError) {
-      // throw new Error(errorMessage + '\'\n' + helpMessage);
+      throw new Error(errorMessage + '\'\n' + helpMessage);
     } else {
       originalConsoleError(errorMessage + '\'\n' + helpMessage);
     }
@@ -302,10 +302,10 @@ function warnForConsoleError() {
     try {
       expect(consoleErrorStub).to.have.been.called;
     } catch (e) {
-      // const helpMessage =
-      //     'The test "' + testName + '" contains an "allowConsoleError" block ' +
-      //     'that didn\'t result in a call to console.error.';
-      // throw new Error(helpMessage);
+      const helpMessage =
+          'The test "' + testName + '" contains an "allowConsoleError" block ' +
+          'that didn\'t result in a call to console.error.';
+      throw new Error(helpMessage);
     }
     warnForConsoleError();
     return result;
