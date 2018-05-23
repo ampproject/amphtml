@@ -404,6 +404,7 @@ export class AmpA4A extends AMP.BaseElement {
      * be null before buildCallback() executes or if the impl does not provide
      * an analytice config.
      * @private {?Element}
+     * @visibleForTesting
      */
     this.a4aAnalyticsElement_ = null;
 
@@ -577,7 +578,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -1700,7 +1701,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Receive collapse notifications and record lifecycle events for them.
    *
-   * @param unusedElement {!AmpElement}
+   * @param {!AmpElement} unusedElement
    * @override
    */
   collapsedCallback(unusedElement) {
