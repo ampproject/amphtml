@@ -38,7 +38,7 @@ describe('Amp custom ad', () => {
    * Get a custom amp-ad element
    * @param {string} url The url of the ad server
    * @param {string} slot The alphanumeric slot Id (optional)
-   * @returns {Element} The completed amp-ad element, which has been added to
+   * @return {Element} The completed amp-ad element, which has been added to
    *    the current document body.
    */
   function getCustomAd(url, slot, body = document.body) {

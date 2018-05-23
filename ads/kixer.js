@@ -15,7 +15,7 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
-import {parseUrl} from '../src/url';
+import {parseUrlDeprecated} from '../src/url';
 
 /* global
 __kxamp: false,
@@ -82,7 +82,7 @@ export function kixer(global, data) {
   });
 
   loadScript(global, 'https://cdn.kixer.com/ad/load.js', () => {
-    global.__kx_domain = parseUrl(global.context.sourceUrl).hostname; // Get domain
+    global.__kx_domain = parseUrlDeprecated(global.context.sourceUrl).hostname; // Get domain
     __kxamp[data.adslot] = 1;
     __kx_ad_slots.push(data.adslot);
     __kx_ad_start();

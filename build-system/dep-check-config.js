@@ -42,10 +42,7 @@ exports.rules = [
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
-      'extensions/amp-ad-network-adzerk-impl/0.1/' +
-          'amp-ad-network-adzerk-impl.js->src/sanitizer.js',
       'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
-      'extensions/amp-date-picker/0.1/amp-date-picker.js->src/sanitizer.js',
     ],
   },
   {
@@ -212,6 +209,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
@@ -225,6 +224,10 @@ exports.rules = [
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
+          'src/service/position-observer/position-observer-worker.js',
+      'src/service/video/docking.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'src/service/video/docking.js->' +
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',

@@ -47,7 +47,6 @@ import {
 } from '../doubleclick-a4a-config';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
-import {Preconnect} from '../../../../src/preconnect';
 import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
@@ -89,7 +88,10 @@ const realWinConfigAmpAd = {
  * Creates an iframe promise, and instantiates element and impl, adding the
  * former to the document of the iframe.
  * @param {{width, height, type}} config
- * @return The iframe promise.
+ * @param {!Element} element
+ * @param {!AmpAdNetworkDoubleclickImpl} impl
+ * @param {!Object} env
+ * @return {!Array} The iframe promise.
  */
 function createImplTag(config, element, impl, env) {
   config.type = 'doubleclick';
@@ -403,7 +405,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
   describe('#getAdUrl', () => {
     beforeEach(() => {
-      const sandbox = env.sandbox;
+      const {sandbox} = env;
       element = doc.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'doubleclick');
@@ -545,8 +547,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
-          // With exp dc-use-attr-for-format off, we can't test for specific
-          // numbers, but we know that the values should be numeric.
+        // With exp dc-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
         expect(url).to.match(/sz=[0-9]+x[0-9]+/));
     });
     it('has correct format when width == "auto"',
@@ -557,7 +559,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
+            // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
     it('has correct format with height/width override',
@@ -592,7 +594,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
+            // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
     it('should have the correct ifi numbers - no refresh', function() {
@@ -681,20 +683,29 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should include npa=1 if unknown consent & explicit npa', () => {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-      return expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually
-          .match(/(\?|&)npa=1(&|$)/);
+      return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
+        expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        expect(url).not.to.match(/(\?|&)consent=(&|$)/);
+      });
     });
 
-    it('should include npa=1 if insufficient consent', () =>
-      expect(impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT)).to.eventually
-          .match(/(\?|&)npa=1(&|$)/));
+    it('should include npa=1, consent=false if insufficient consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then(url => {
+        expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        expect(url).to.match(/(\?|&)consent=false(&|$)/);
+      }));
 
-    [CONSENT_POLICY_STATE.SUFFICIENT,
-      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED].forEach(consentState => {
-      it(`should not include npa=1 if ${consentState}`, () =>
-        expect(impl.getAdUrl(consentState)).to.eventually.not
-            .match(/(\?|&)npa=1(&|$)/));
-    });
+    it('should include consent=true and not npa, if sufficient consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then(url => {
+        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        expect(url).to.match(/(\?|&)consent=true(&|$)/);
+      }));
+
+    it('should not include consent or npa, if not required consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
+        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        expect(url).to.not.match(/(\?|&)consent=(&|$)/);
+      }));
   });
 
   describe('#getPageParameters', () => {
@@ -707,7 +718,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.getPageParameters(
-          CONSENT_POLICY_STATE.INSUFFICIENT).npa).to.equal(1);
+          CONSENT_POLICY_STATE.INSUFFICIENT).npa).to.equal('1');
     });
   });
 
@@ -963,7 +974,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 150/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -976,7 +987,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 150/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -996,7 +1007,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 200/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -1012,7 +1023,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
-        const iframe = impl.iframe;
+        const {iframe} = impl;
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 200/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
@@ -1184,44 +1195,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
   });
 
-  describe('#disable safeframe preload experiment', () => {
-
-    const sfPreloadExpName = 'a4a-safeframe-preloading-off';
-    let preloadSpy;
-
-    beforeEach(() => {
-      element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-        height: '250',
-        width: '320',
-      });
-      doc.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-      preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
-    });
-
-    it('should not preload SafeFrame', () => {
-      forceExperimentBranch(impl.win, sfPreloadExpName, '21061136');
-      impl.buildCallback();
-      expect(isInExperiment(element, '21061135')).to.be.false;
-      expect(isInExperiment(element, '21061136')).to.be.true;
-      expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://securepubads.g.doubleclick.net/']);
-      expect(preloadSpy).to.not.be.called;
-    });
-
-    it('should preload SafeFrame', () => {
-      forceExperimentBranch(impl.win, sfPreloadExpName, '21061135');
-      impl.buildCallback();
-      expect(isInExperiment(element, '21061135')).to.be.true;
-      expect(isInExperiment(element, '21061136')).to.be.false;
-      expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://securepubads.g.doubleclick.net/']);
-      expect(preloadSpy).to.be.calledOnce;
-      expect(preloadSpy.args[0]).to.match(/safeframe/);
-    });
-  });
-
   describe('Troubleshoot for AMP pages', () => {
     beforeEach(() => {
       element = doc.createElement('amp-ad');
@@ -1360,10 +1333,10 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           expect(style.left).to.equal('50%');
           expect(style.width).to.equal(expectedSize.width);
           expect(style.height).to.equal(expectedSize.height);
-          // We don't know the exact values by which the frame will be translated,
-          // as this can vary depending on whether we use the height/width
-          // attributes, or the actual size of the frame. To make this less of a
-          // hassle, we'll just match against regexp.
+          // We don't know the exact values by which the frame will be
+          // translated, as this can vary depending on whether we use the
+          // height/width attributes, or the actual size of the frame. To make
+          // this less of a hassle, we'll just match against regexp.
           expect(style.transform).to.match(new RegExp(
               'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
         }
@@ -1564,16 +1537,6 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           });
           doc.body.appendChild(element);
           impl = new AmpAdNetworkDoubleclickImpl(element);
-        });
-
-        it('should preload safeframe', () => {
-          const preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
-          // Note that this causes preconnection to tpc.googlesyndication.com
-          // due to preloading safeframe.
-          expect(impl.getPreconnectUrls()).to.deep.equal(
-              ['https://securepubads.g.doubleclick.net/']);
-          expect(preloadSpy).to.be.calledOnce;
-          expect(preloadSpy.args[0]).to.match(/safeframe/);
         });
       });
 

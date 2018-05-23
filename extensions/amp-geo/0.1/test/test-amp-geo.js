@@ -16,6 +16,7 @@
 
 import {AmpGeo} from '../amp-geo';
 import {Services} from '../../../../src/services';
+import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
 
 describes.realWin('amp-geo', {
@@ -54,7 +55,13 @@ describes.realWin('amp-geo', {
     doc = win.document;
     ampdoc = env.ampdoc;
     const el = doc.createElement('amp-geo');
+    doc.body.appendChild(el);
     el.ampdoc_ = ampdoc;
+    const vsync = vsyncForTesting(win);
+    vsync.schedule_ = () => {
+      vsync.runScheduledTasks_();
+    };
+
     geo = new AmpGeo(el);
   });
 
@@ -102,6 +109,23 @@ describes.realWin('amp-geo', {
       expectBodyHasClass([
         'amp-iso-country-nz',
         'amp-geo-group-anz',
+      ], false);
+    });
+  });
+
+  it('should remove amp-geo-pending class from body element', () => {
+    addConfigElement('script');
+    doc.body.classList.add('amp-geo-pending');
+
+    expectBodyHasClass([
+      'amp-geo-pending',
+    ], true);
+
+    geo.buildCallback();
+    return Services.geoForOrNull(win).then(geo => {
+      expect(geo.ISOCountry).to.equal('unknown');
+      expectBodyHasClass([
+        'amp-geo-pending',
       ], false);
     });
   });

@@ -115,7 +115,7 @@ export class AmpPixel extends BaseElement {
 /**
  * @param {!Element} parentElement
  * @param {string} src
- * @returns {!Element}
+ * @return {!Element}
  */
 function createNoReferrerPixel(parentElement, src) {
   if (isReferrerPolicySupported()) {
@@ -138,7 +138,7 @@ function createNoReferrerPixel(parentElement, src) {
  * @param {!Window} win
  * @param {string} src
  * @param {boolean=} noReferrer
- * @returns {!Image}
+ * @return {!Image}
  */
 function createImagePixel(win, src, noReferrer) {
   const image = new win.Image();
@@ -153,7 +153,7 @@ function createImagePixel(win, src, noReferrer) {
  * Check if element attribute "referrerPolicy" is supported by the browser.
  * At this moment (4/14/2017), Safari does not support it yet.
  *
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isReferrerPolicySupported() {
   return 'referrerPolicy' in Image.prototype;

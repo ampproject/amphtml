@@ -48,7 +48,7 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    *
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!JsonObject} renderState
    */
   render(renderState) {
     return Promise.all([
@@ -58,7 +58,7 @@ export class LocalSubscriptionPlatformRenderer {
   }
 
   /**
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!JsonObject} renderState
    */
   renderActions_(renderState) {
     this.renderActionsInNode_(renderState, this.rootNode_);
@@ -89,7 +89,7 @@ export class LocalSubscriptionPlatformRenderer {
         return this.templates_.renderTemplate(candidate, authResponse)
             .then(element => {
               const renderState =
-                  /** @type {!./amp-subscriptions.RenderState} */(authResponse);
+                /** @type {!JsonObject} */(authResponse);
               return this.renderActionsInNode_(
                   renderState,
                   element);
@@ -109,14 +109,15 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    * Renders actions inside a given node according to an authResponse
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!JsonObject} renderState
    * @param {!Node} rootNode
    * @return {!Promise<Node>}
    * @private
    */
   renderActionsInNode_(renderState, rootNode) {
     return this.ampdoc_.whenReady().then(() => {
-      // Find the matching actions and sections and make them visible if evalutes to true.
+      // Find the matching actions and sections and make them visible if
+      // evalutes to true.
       const querySelectors =
           '[subscriptions-action], [subscriptions-section="actions"],'
               + ' [subscriptions-actions]';

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {
   adoptServiceForEmbed,
@@ -536,10 +537,10 @@ export class Extensions {
       } else if (holder.error) {
         holder.promise = Promise.reject(holder.error);
       } else {
-        holder.promise = new Promise((resolve, reject) => {
-          holder.resolve = resolve;
-          holder.reject = reject;
-        });
+        const deferred = new Deferred();
+        holder.promise = deferred.promise;
+        holder.resolve = deferred.resolve;
+        holder.reject = deferred.reject;
       }
     }
     return holder.promise;

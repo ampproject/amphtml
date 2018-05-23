@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {PlayingStates} from '../video-interface';
 import {Services} from '../services';
 import {dev} from '../log';
 import {getAmpdoc} from '../service';
@@ -23,6 +24,10 @@ import {isExperimentOn} from '../experiments';
 
 /** @private @const {string} */
 const EXTENSION = 'amp-video-service';
+
+
+/** @private @const {string} */
+const TAG = 'video-service';
 
 
 /**
@@ -41,7 +46,7 @@ let VideoServiceDef; // alias for line length.
  * This co-eexists with `VideoManager` (deprecated) while the implementation
  * is migrated.
  *
- * @implements {./video-manager-impl.VideoService}
+ * @implements {./video-service-interface.VideoServiceInterface}
  */
 export class VideoServiceSync {
 
@@ -99,5 +104,17 @@ export class VideoServiceSync {
   getAnalyticsDetails(video) {
     return this.asyncImpl_.then(impl =>
       impl.getAnalyticsDetails(video));
+  }
+
+  /** @override */
+  isMuted(unusedVideo) {
+    dev().warn(TAG, 'isMuted is not implemented');
+    return false;
+  }
+
+  /** @override */
+  getPlayingState(unusedVideo) {
+    dev().warn(TAG, 'getPlayingState is not implemented');
+    return PlayingStates.PAUSED;
   }
 }

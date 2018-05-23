@@ -246,7 +246,7 @@ describe('Poller', () => {
     clock.tick(4000);
 
     expect(poller.lastTimeoutId_).to.be.a('number');
-    let lastTimeoutId_ = poller.lastTimeoutId_;
+    let {lastTimeoutId_} = poller;
 
     // Reject 1
     return poller.lastWorkPromise_.then(() => {

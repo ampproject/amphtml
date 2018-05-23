@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
+
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -39,11 +38,18 @@ import {
   escapeCssSelectorIdent,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
+import {
+  concat as concatTransition,
+  numeric,
+  scale,
+  setStyles as setStylesTransition,
+  translate,
+} from '../../../src/transition';
 import {dev, user} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
+import {px, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
@@ -106,6 +112,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.isActive_ = false;
 
     /** @private {number} */
+    this.historyId_ = -1;
+
+    /** @private {number} */
     this.currentElemId_ = -1;
 
     /** @private {function(!Event)} */
@@ -116,8 +125,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
      */
     this.manager_ = null;
 
-    /** @private {?../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = null;
+    /** @private {?../../../src/service/history-impl.History}*/
+    this.history_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -177,10 +186,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} disabled`);
     this.manager_ = dev().assert(manager_);
-    this.vsync_ = this.getVsync();
+    this.history_ = Services.historyForDoc(this.getAmpDoc());
     this.action_ = Services.actionServiceForDoc(this.element);
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(() => {
@@ -213,7 +220,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.buildDescriptionBox_();
     this.buildTopBar_();
     this.buildNavControls_();
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       this.container_.appendChild(this.controlsContainer_);
     });
   }
@@ -309,7 +316,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }]`);
     if (existingCarousel) {
       this.carousel_ = existingCarousel;
-      return this.vsync_.mutatePromise(() => {
+      return this.mutateElement(() => {
         toggle(dev().assertElement(this.carousel_), true);
       });
     } else {
@@ -338,7 +345,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.carousel_.setAttribute('loop', '');
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
       this.buildCarouselSlides_(list);
-      return this.vsync_.mutatePromise(() => {
+      return this.mutateElement(() => {
         this.carouselContainer_.appendChild(this.carousel_);
       });
     });
@@ -346,6 +353,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * Handles slide change.
+   * @param {!Event} event
    * @private
    */
   slideChangeHandler_(event) {
@@ -386,41 +394,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   updateDescriptionBox_() {
     const descText = this.getCurrentElement_().descriptionText;
     if (!descText) {
-      this.vsync_.mutate(() => {
+      this.mutateElement(() => {
         toggle(dev().assertElement(this.descriptionBox_), false);
       });
     } else {
-      const measureOverflowState = state => {
-        // The height of the description without overflow is set to 4 rem.
-        // The height of the overflow mask is set to 1 rem. We allow 3 lines
-        // for the description and consider it to have overflow if more than 3
-        // lines of text.
-        state.descriptionOverflows = this.descriptionBox_./*OK*/scrollHeight
-            - this.descriptionBox_./*OK*/clientHeight
-            >= this.descriptionOverflowMask_./*OK*/clientHeight;
-
-        state.isInOverflowMode = this.descriptionBox_.classList
-            .contains('i-amphtml-lbg-overflow');
-      };
-
-      const mutateOverflowState = state => {
-        // We toggle visibility instead of display because we rely on the height
-        // of this element to measure 1 rem.
-        st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
-          visibility: state.descriptionOverflows || state.isInOverflowMode
-            ? 'visible' : 'hidden',
-        });
-
-        if (state.isInOverflowMode) {
-          this.clearDescOverflowState_();
-        }
-      };
-
-      this.vsync_.mutatePromise(() => {
-        // The problem with setting innerText is that it not only removes
-        // child nodes from the element, but also permanently destroys all
-        // descendant text nodes. It is okay in this case because the description
-        // text area is a div that does not contain descendant elements.
+      this.mutateElement(() => {
+        // The problem with setting innerText is that it not only removes child
+        // nodes from the element, but also permanently destroys all descendant
+        // text nodes. It is okay in this case because the description text area
+        // is a div that does not contain descendant elements.
         this.descriptionTextArea_./*OK*/innerText = descText;
 
         // Avoid flickering out if transitioning from a slide with no text
@@ -428,10 +410,35 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         toggle(dev().assertElement(this.descriptionBox_), true);
 
       }).then(() => {
-        this.vsync_.run({
-          measure: measureOverflowState,
-          mutate: mutateOverflowState,
-        }, {});
+        let descriptionOverflows, isInOverflowMode;
+
+        const measureOverflowState = () => {
+          // The height of the description without overflow is set to 4 rem.
+          // The height of the overflow mask is set to 1 rem. We allow 3 lines
+          // for the description and consider it to have overflow if more than 3
+          // lines of text.
+          descriptionOverflows = this.descriptionBox_./*OK*/scrollHeight
+              - this.descriptionBox_./*OK*/clientHeight
+              >= this.descriptionOverflowMask_./*OK*/clientHeight;
+
+          isInOverflowMode = this.descriptionBox_.classList
+              .contains('i-amphtml-lbg-overflow');
+        };
+
+        const mutateOverflowState = () => {
+          // We toggle visibility instead of display because we rely on the
+          // height of this element to measure 1 rem.
+          setStyles(dev().assertElement(this.descriptionOverflowMask_), {
+            visibility: descriptionOverflows || isInOverflowMode
+              ? 'visible' : 'hidden',
+          });
+
+          if (isInOverflowMode) {
+            this.clearDescOverflowState_();
+          }
+        };
+
+        this.measureMutateElement(measureOverflowState, mutateOverflowState);
       });
     }
   }
@@ -441,36 +448,34 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   toggleDescriptionOverflow_() {
-    const measureOverflowState = state => {
-      state.isInStandardMode = this.descriptionBox_.classList
+    let isInStandardMode, isInOverflowMode, descriptionOverflows;
+    const measureOverflowState = () => {
+      isInStandardMode = this.descriptionBox_.classList
           .contains('i-amphtml-lbg-standard');
-      state.isInOverflowMode = this.descriptionBox_.classList
+      isInOverflowMode = this.descriptionBox_.classList
           .contains('i-amphtml-lbg-overflow');
 
       // The height of the description without overflow is set to 4 rem.
       // The height of the overflow mask is set to 1 rem. We allow 3 lines
       // for the description and consider it to have overflow if more than 3
       // lines of text.
-      state.descriptionOverflows = this.descriptionBox_./*OK*/scrollHeight
+      descriptionOverflows = this.descriptionBox_./*OK*/scrollHeight
           - this.descriptionBox_./*OK*/clientHeight
           >= this.descriptionOverflowMask_./*OK*/clientHeight;
     };
 
-    const mutateOverflowState = state => {
-      if (state.isInStandardMode && state.descriptionOverflows) {
+    const mutateOverflowState = () => {
+      if (isInStandardMode && descriptionOverflows) {
         this.descriptionBox_.classList.remove('i-amphtml-lbg-standard');
         this.descriptionBox_.classList.add('i-amphtml-lbg-overflow');
         toggle(dev().assertElement(this.navControls_), false);
         toggle(dev().assertElement(this.topBar_), false);
-      } else if (state.isInOverflowMode) {
+      } else if (isInOverflowMode) {
         this.clearDescOverflowState_();
       }
     };
 
-    this.vsync_.run({
-      measure: measureOverflowState,
-      mutate: mutateOverflowState,
-    }, {});
+    this.measureMutateElement(measureOverflowState, mutateOverflowState);
   }
 
   /**
@@ -724,7 +729,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       user().assert(target,
           'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
-    this.open_(dev().assertElement(target));
+    this.open_(dev().assertElement(target)).then(() => {
+      return this.history_.push(this.close_.bind(this));
+    }).then(historyId => {
+      this.historyId_ = historyId;
+    });
   }
 
   /**
@@ -739,9 +748,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
     return this.findOrInitializeLightbox_(lightboxGroupId).then(() => {
-      return this.vsync_.mutatePromise(() => {
+      return this.mutateElement(() => {
         toggle(this.element, true);
-        st.setStyles(this.element, {
+        setStyles(this.element, {
           opacity: 0,
           display: '',
         });
@@ -775,7 +784,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * associated with said element, updates the description, and initializes
    * the image viewer if the element is an amp-img.
    * @param {!Element} element
-   * @returns {!Promise}
+   * @return {!Promise}
    * @private
    */
   openLightboxForElement_(element) {
@@ -789,7 +798,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    * Returns true if the element is loaded and contains an img.
    * @param {!Element} element
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   elementTypeCanBeAnimated_(element) {
@@ -849,7 +858,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    *
    * @param {!Element} target
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   transitionTargetIsInViewport_(target) {
@@ -872,7 +881,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * lightbox.
    * @param {!Element} sourceElement
    * @private
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   transitionIn_(sourceElement) {
     const anim = new Animation(this.element);
@@ -893,67 +902,67 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           }
 
           // Gradually fade in the black background
-          anim.add(0, tr.setStyles(this.element, {
-            opacity: tr.numeric(0, 1),
+          anim.add(0, setStylesTransition(this.element, {
+            opacity: numeric(0, 1),
           }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
           // Fade in the carousel at the end of the animation while fading out
           // the transition layer
           anim.add(MOTION_DURATION_RATIO - 0.01,
-              tr.setStyles(dev().assertElement(this.carousel_), {
-                opacity: tr.numeric(0, 1),
+              setStylesTransition(dev().assertElement(this.carousel_), {
+                opacity: numeric(0, 1),
               }),
               0.01
           );
 
           // At the end of the animation, fade out the transition layer.
-          anim.add(0.9, tr.setStyles(transLayer, {
-            opacity: tr.numeric(1, 0.01),
+          anim.add(0.9, setStylesTransition(transLayer, {
+            opacity: numeric(1, 0.01),
           }), 0.1, EXIT_CURVE_);
 
-          return this.vsync_.runPromise({
-            measure: () => {
-              const rect = layoutRectFromDomRect(sourceElement
-                  ./*OK*/getBoundingClientRect());
-              st.setStyles(clone, {
-                position: 'absolute',
-                top: st.px(rect.top),
-                left: st.px(rect.left),
-                width: st.px(rect.width),
-                height: st.px(rect.height),
-                transformOrigin: 'top left',
-                willChange: 'transform',
-              });
-              const dx = imageBox.left - rect.left;
-              const dy = imageBox.top - rect.top;
-              const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
-              const viewportHeight = this.getViewport().getSize().height;
-              duration = this.getTransitionDuration_(Math.abs(dy),
-                  viewportHeight);
+          return this.measureMutateElement(
+              () => {
+                const rect = layoutRectFromDomRect(sourceElement
+                    ./*OK*/getBoundingClientRect());
+                setStyles(clone, {
+                  position: 'absolute',
+                  top: px(rect.top),
+                  left: px(rect.left),
+                  width: px(rect.width),
+                  height: px(rect.height),
+                  transformOrigin: 'top left',
+                  willChange: 'transform',
+                });
+                const dx = imageBox.left - rect.left;
+                const dy = imageBox.top - rect.top;
+                const scaleX = rect.width != 0 ?
+                  imageBox.width / rect.width : 1;
+                const viewportHeight = this.getViewport().getSize().height;
+                duration = this.getTransitionDuration_(Math.abs(dy),
+                    viewportHeight);
 
-              // Animate the position and scale of the transition image to its
-              // final lightbox destination in the middle of the page
-              anim.add(0, tr.setStyles(clone, {
-                transform: tr.concat([
-                  tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-                  tr.scale(tr.numeric(1, scaleX)),
-                ]),
-              }), MOTION_DURATION_RATIO, ENTER_CURVE_);
-            },
-            mutate: () => {
-              st.setStyles(dev().assertElement(this.carousel_), {
-                opacity: 0,
-                display: '',
+                // Animate the position and scale of the transition image to its
+                // final lightbox destination in the middle of the page
+                anim.add(0, setStylesTransition(clone, {
+                  transform: concatTransition([
+                    translate(numeric(0, dx), numeric(0, dy)),
+                    scale(numeric(1, scaleX)),
+                  ]),
+                }), MOTION_DURATION_RATIO, ENTER_CURVE_);
+              },
+              () => {
+                setStyles(dev().assertElement(this.carousel_), {
+                  opacity: 0,
+                  display: '',
+                });
+                sourceElement.classList.add('i-amphtml-ghost');
+                this.element.ownerDocument.body.appendChild(transLayer);
               });
-              sourceElement.classList.add('i-amphtml-ghost');
-              this.element.ownerDocument.body.appendChild(transLayer);
-            },
-          });
         }).then(() => {
           return anim.start(duration).thenAlways(() => {
-            return this.vsync_.mutatePromise(() => {
-              st.setStyles(this.element, {opacity: ''});
-              st.setStyles(dev().assertElement(this.carousel_), {opacity: ''});
+            return this.mutateElement(() => {
+              setStyles(this.element, {opacity: ''});
+              setStyles(dev().assertElement(this.carousel_), {opacity: ''});
               sourceElement.classList.remove('i-amphtml-ghost');
               if (transLayer) {
                 this.element.ownerDocument.body.removeChild(transLayer);
@@ -967,19 +976,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * If no transition image is applicable, fade the lightbox in and out.
    * @param {number} startOpacity
    * @param {number} endOpacity
-   * @returns {!Promise}
+   * @return {!Promise}
    * @private
    */
   fade_(startOpacity, endOpacity) {
     const duration = MIN_TRANSITION_DURATION;
     const anim = new Animation(this.element);
-    anim.add(0, tr.setStyles(this.element, {
-      opacity: tr.numeric(startOpacity, endOpacity),
+    anim.add(0, setStylesTransition(this.element, {
+      opacity: numeric(startOpacity, endOpacity),
     }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
     return anim.start(duration).thenAlways(() => {
-      return this.vsync_.mutatePromise(() => {
-        st.setStyles(this.element, {opacity: ''});
+      return this.mutateElement(() => {
+        setStyles(this.element, {opacity: ''});
         if (endOpacity == 0) {
           toggle(dev().assertElement(this.carousel_), false);
           toggle(this.element, false);
@@ -995,7 +1004,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   // TODO (cathyxz): make this generalizable to more than just images
   enter_() {
-    const sourceElement = this.getCurrentElement_().sourceElement;
+    const {sourceElement} = this.getCurrentElement_();
     if (!this.elementTypeCanBeAnimated_(sourceElement)) {
       return this.fade_(0, 1);
     }
@@ -1021,7 +1030,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   transitionOut_() {
     const currentElementMetadata = this.getCurrentElement_();
-    const sourceElement = currentElementMetadata.sourceElement;
+    const {sourceElement} = currentElementMetadata;
     let duration = MIN_TRANSITION_DURATION;
     const anim = new Animation(this.element);
     const transLayer = this.element.ownerDocument.createElement('div');
@@ -1041,12 +1050,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           clone.removeAttribute('class');
           clone.removeAttribute('style');
 
-          st.setStyles(clone, {
+          setStyles(clone, {
             position: 'absolute',
-            top: st.px(imageBox.top),
-            left: st.px(imageBox.left),
-            width: st.px(imageBox.width),
-            height: st.px(imageBox.height),
+            top: px(imageBox.top),
+            left: px(imageBox.left),
+            width: px(imageBox.width),
+            height: px(imageBox.height),
             transform: '',
             transformOrigin: 'top left',
             willChange: 'transform',
@@ -1054,13 +1063,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           transLayer.appendChild(clone);
 
           // Gradually fade out the lightbox
-          anim.add(0, tr.setStyles(this.element, {
-            opacity: tr.numeric(1, 0),
+          anim.add(0, setStylesTransition(this.element, {
+            opacity: numeric(1, 0),
           }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
           // Fade out the transition image.
-          anim.add(MOTION_DURATION_RATIO, tr.setStyles(transLayer, {
-            opacity: tr.numeric(1, 0.01),
+          anim.add(MOTION_DURATION_RATIO, setStylesTransition(transLayer, {
+            opacity: numeric(1, 0.01),
           }), 0.2, EXIT_CURVE_);
 
           const transitionMeasure = () => {
@@ -1079,10 +1088,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
             // Animate the position and scale of the transition image to its
             // final lightbox destination in the middle of the page
             /** @const {!TransitionDef<void>} */
-            const moveAndScale = tr.setStyles(clone, {
-              transform: tr.concat([
-                tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-                tr.scale(tr.numeric(1, scaleX)),
+            const moveAndScale = setStylesTransition(clone, {
+              transform: concatTransition([
+                translate(numeric(0, dx), numeric(0, dy)),
+                scale(numeric(1, scaleX)),
               ]),
             });
 
@@ -1097,7 +1106,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           const transitionMutate = () => {
             sourceElement.classList.add('i-amphtml-ghost');
             this.element.ownerDocument.body.appendChild(transLayer);
-            st.setStyles(dev().assertElement(this.carousel_), {
+            setStyles(dev().assertElement(this.carousel_), {
               opacity: 0,
             });
           };
@@ -1108,10 +1117,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }).then(() => {
           return anim.start(duration).thenAlways(() => {
             return this.mutateElement(() => {
-              st.setStyles(this.element, {
+              setStyles(this.element, {
                 opacity: '',
               });
-              st.setStyles(dev().assertElement(this.carousel_), {
+              setStyles(dev().assertElement(this.carousel_), {
                 opacity: '',
               });
               toggle(dev().assertElement(this.carousel_), false);
@@ -1206,7 +1215,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const gestures = Gestures.get(dev().assertElement(this.carousel_));
     gestures.cleanup();
 
-    return this.vsync_.mutatePromise(() => {
+    return this.mutateElement(() => {
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
@@ -1221,12 +1230,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           this.schedulePause(dev().assertElement(this.container_));
           this.pauseLightboxChildren_();
           this.carousel_ = null;
+          if (this.historyId_ != -1) {
+            this.history_.pop(this.historyId_);
+          }
         });
   }
 
   /**
    * Handles keyboard events for the lightbox.
    *  -Esc will close the lightbox.
+   * @param {!Event} event
    * @private
    */
   onKeyDown_(event) {
@@ -1272,7 +1285,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!this.gallery_) {
       this.findOrBuildGallery_();
     }
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       this.container_.setAttribute('gallery-view', '');
       toggle(dev().assertElement(this.navControls_), false);
       toggle(dev().assertElement(this.carousel_), false);
@@ -1282,7 +1295,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * Close gallery view
-   * @returns {!Promise}
+   * @return {!Promise}
    * @private
    */
   closeGallery_() {
@@ -1316,7 +1329,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
       this.initializeThumbnails_();
 
-      this.vsync_.mutate(() => {
+      this.mutateElement(() => {
         this.container_.appendChild(this.gallery_);
       });
     }
@@ -1331,12 +1344,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         .map((thumbnail, index) => Object.assign({index}, thumbnail))
         .filter(thumbnail => VIDEO_TAGS[thumbnail.element.tagName]);
 
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       thumbnails.forEach(thumbnail => {
         thumbnail.timestampPromise.then(ts => {
           // Many video players (e.g. amp-youtube) that don't support this API
-          // will often return 1. So sometimes we will erroneously show a timestamp
-          // of 1 second instead of no timestamp.
+          // will often return 1. So sometimes we will erroneously show a
+          // timestamp of 1 second instead of no timestamp.
           if (!ts || isNaN(ts)) {
             return;
           }
@@ -1372,7 +1385,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           const thumbnailElement = this.createThumbnailElement_(thumbnail);
           thumbnails.push(thumbnailElement);
         });
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       thumbnails.forEach(thumbnailElement => {
         this.gallery_.appendChild(thumbnailElement);
       });
@@ -1400,7 +1413,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    * Converts seconds to a timestamp formatted string.
    * @param {number} seconds
-   * @returns {string}
+   * @return {string}
    */
   secondsToTimestampString_(seconds) {
     const h = Math.floor(seconds / 3600);
@@ -1456,8 +1469,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       timestampDiv.appendChild(playButtonSpan);
       thumbnailObj.timestampPromise.then(ts => {
         // Many video players (e.g. amp-youtube) that don't support this API
-        // will often return 1. This will sometimes result in erroneous values of
-        // 1 second for video players that don't support getDuration.
+        // will often return 1. This will sometimes result in erroneous values
+        // of 1 second for video players that don't support getDuration.
         if (!ts || isNaN(ts)) {
           return;
         }
@@ -1477,15 +1490,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 }
 
 /**
+ * @param {!Window} win
  * @private visible for testing.
  */
 export function installLightboxManager(win) {
-  if (isExperimentOn(win, TAG)) {
-    // TODO (#12859): This only works for singleDoc mode. We will move
-    // installation of LightboxManager to core after the experiment, okay for now.
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
-    manager_ = new LightboxManager(ampdoc);
-  }
+  // TODO (#12859): This only works for singleDoc mode. We will move
+  // installation of LightboxManager to core after the experiment, okay for now.
+  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+  manager_ = new LightboxManager(ampdoc);
 }
 
 /**

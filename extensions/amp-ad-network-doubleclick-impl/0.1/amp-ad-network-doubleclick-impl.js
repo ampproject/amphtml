@@ -54,6 +54,7 @@ import {
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
   experimentFeatureEnabled,
 } from './doubleclick-a4a-config';
+import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
@@ -125,7 +126,7 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
 
 /**
  * @const {string}
- * @visibileForTesting
+ * @visibleForTesting
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
@@ -151,11 +152,11 @@ let windowLocationQueryParameters;
  */
 let LayoutRectOrDimsDef;
 
+/* eslint-disable jsdoc/require-param */
 /**
  * Array of functions used to combine block level request parameters for SRA
  * request.
- * @private @const
- * {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>}
+ * @private @const {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>>}
  */
 const BLOCK_SRA_COMBINERS_ = [
   instances => {
@@ -259,7 +260,7 @@ const BLOCK_SRA_COMBINERS_ = [
     return hasAmpContainer ? {'acts': result.join('|')} : null;
   },
 ];
-
+/* eslint-enable jsdoc/require-param */
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
@@ -316,15 +317,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         experimentFeatureEnabled(this.win, DOUBLECLICK_EXPERIMENT_FEATURE.SRA);
 
 
-    const sraInitializer = this.initializeSraPromise_();
-    /** @protected {?function(?../../../src/service/xhr-impl.FetchResponse)} */
-    this.sraResponseResolver = sraInitializer.resolver;
-
-    /** @protected {?function(*)} */
-    this.sraResponseRejector = sraInitializer.rejector;
-
-    /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
-    this.sraResponsePromise_ = sraInitializer.promise;
+    /** @protected {!Deferred<?../../../src/service/xhr-impl.FetchResponse>} */
+    this.sraDeferred = new Deferred();
 
     /** @private {?RefreshManager} */
     this.refreshManager_ = null;
@@ -346,9 +340,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
     this.identityToken = null;
-
-    /** @private {boolean} */
-    this.preloadSafeframe_ = true;
 
     /** @private {!TroubleshootDataDef} */
     this.troubleshootData_ = /** @type {!TroubleshootDataDef} */ ({});
@@ -376,8 +367,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
-    /** @private {?CONSENT_POLICY_STATE} */
-    this.consentState_ = null;
+    /** @protected {?CONSENT_POLICY_STATE} */
+    this.consentState = null;
   }
 
   /** @override */
@@ -443,21 +434,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     this.win['dbclk_a4a_viz_change'] = true;
 
-    const sfPreloadExpName = 'a4a-safeframe-preloading-off';
-    const experimentInfoMap =
-        /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({});
-    experimentInfoMap[sfPreloadExpName] = {
-      isTrafficEligible: () => true,
-      branches: ['21061135', '21061136'],
-    };
-    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    const sfPreloadExpId = getExperimentBranch(this.win, sfPreloadExpName);
-    if (sfPreloadExpId) {
-      addExperimentIdToElement(sfPreloadExpId, this.element);
-      this.preloadSafeframe_ = sfPreloadExpId == '21061135';
-    }
-
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
       if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
@@ -470,8 +446,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
       // interaction with refresh.
       const experimentInfoMap =
-          /** @type {!Object<string,
-          !../../../src/experiments.ExperimentInfo>} */ ({});
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
         isTrafficEligible: () => true,
         branches: ['22302764','22302765'],
@@ -483,8 +459,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // requests.
         addExperimentIdToElement(expId, this.element);
         if (expId === CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT) {
-          // TODO(keithwrightbos) - do not clear if at least one slot on the page
-          // is an AMP creative that survived unlayoutCallback in order to
+          // TODO(keithwrightbos) - do not clear if at least one slot on the
+          // page is an AMP creative that survived unlayoutCallback in order to
           // ensure competitive exclusion/roadblocking.  Note this only applies
           // to non-backfill inventory.
           dev().info(TAG, 'resetting page correlator');
@@ -503,32 +479,31 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @return {!{
-   *  resolver: ?function(?../../../src/service/xhr-impl.FetchResponse),
-   *  rejector: ?function(*),
-   *  promise: !Promise<?../../../src/service/xhr-impl.FetchResponse>,
-   * }}
-   * @private
-   */
-  initializeSraPromise_() {
-    let resolver = null;
-    let rejector = null;
-    const promise = new Promise((inResolver, inRejector) => {
-      resolver = inResolver;
-      rejector = inRejector;
-    });
-    return {resolver, rejector, promise};
-  }
-
-  /**
    * @param {?CONSENT_POLICY_STATE} consentState
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
   getPageParameters(consentState) {
+    let npa = null;
+    let consent = null;
+    switch (consentState) {
+      case null:
+      case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+        break;
+      case CONSENT_POLICY_STATE.INSUFFICIENT:
+        consent = false;
+      case CONSENT_POLICY_STATE.UNKNOWN:
+        npa = '1';
+        break;
+      case CONSENT_POLICY_STATE.SUFFICIENT:
+        consent = true;
+        break;
+      default:
+        dev().error(TAG, `unknown consent enum ${consentState}`);
+    }
     return {
-      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
+      npa,
+      consent,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
@@ -577,10 +552,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Populate's block-level state for ad URL construction.
    * @param {?CONSENT_POLICY_STATE} consentState
-   * @visibileForTesting
+   * @visibleForTesting
    */
   populateAdUrlState(consentState) {
-    this.consentState_ = consentState;
+    this.consentState = consentState;
     // Allow for pub to override height/width via override attribute.
     const width = Number(this.element.getAttribute('data-override-width')) ||
       Number(this.element.getAttribute('width'));
@@ -654,6 +629,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
     const urlPromise = Promise.all([opt_rtcResponsesPromise, identityPromise])
         .then(results => {
+          this.verifyStillCurrent();
           const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
           return googleAdUrl(
@@ -888,12 +864,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
     // will not be started until resumeCallback).
     sraRequests = null;
-    const sraInitializer = this.initializeSraPromise_();
-    this.sraResponseResolver = sraInitializer.resolver;
-    this.sraResponseRejector = sraInitializer.rejector;
-    this.sraResponsePromise_ = sraInitializer.promise;
+    this.sraDeferred = new Deferred();
     this.qqid_ = null;
-    this.consentState_ = null;
+    this.consentState = null;
   }
 
   /** @override */
@@ -1054,7 +1027,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   generateAdKey_(size) {
-    const element = this.element;
+    const {element} = this;
     const domFingerprint = domFingerprintPlain(element);
     const slot = element.getAttribute('data-slot') || '';
     const multiSize = element.getAttribute('data-multi-size') || '';
@@ -1091,7 +1064,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // response has been returned.
     this.initiateSraRequests();
     // Null response indicates single slot should execute using non-SRA method.
-    return this.sraResponsePromise_.then(
+    return this.sraDeferred.promise.then(
         response => response || super.sendXhrRequest(adUrl));
   }
 
@@ -1127,7 +1100,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Groups slots by type and networkId from data-slot parameter.  Exposed for
    * ease of testing.
    * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
@@ -1141,7 +1114,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - group by networkID allowing for separate SRA requests
    * - for each grouping, construct SRA request
    * - handle chunks for streaming response for each block
-   * @visibileForTesting
+   * @visibleForTesting
    */
   initiateSraRequests() {
     if (sraRequests) {
@@ -1178,12 +1151,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // Only contained invalid elements.
                 return;
               }
-              // Determine if more than one block for this element, if not do not
-              // set sra request promise which results in sending as
-              // non-SRA request (benefit is it allows direct cache method).
+              // Determine if more than one block for this element, if not do
+              // not set sra request promise which results in sending as non-SRA
+              // request (benefit is it allows direct cache method).
               if (typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
-                typeInstances[0].sraResponseResolver(null);
+                typeInstances[0].sraDeferred.resolve(null);
                 return;
               }
               // Construct and send SRA request.
@@ -1191,7 +1164,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // in order of URLs given.  Construct promise for each slot
               // such that its resolver will be called.
               const sraRequestAdUrlResolvers =
-              typeInstances.map(instance => instance.sraResponseResolver);
+              typeInstances.map(instance => instance.sraDeferred.resolve);
               const slotCallback = metaJsonCreativeGrouper(
                   (creative, headersObj, done) => {
                     checkStillCurrent();
@@ -1265,24 +1238,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         this.win, response, slotCallback);
                   })
                   .catch(error => {
-                    assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                     const canceled = isCancellation(error);
-                    if (!canceled) {
+                    if (canceled) {
+                      typeInstances.forEach(instance =>
+                        instance.sraDeferred.reject(error));
+                    } else if (!!this.win.document.querySelector(
+                        'meta[name=amp-ad-doubleclick-sra]')) {
+                      assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                       this.user().error(TAG, 'SRA request failure', error);
-                    }
-                    // Collapse all slots on failure so long as they are not
-                    // cancellation.
-                    typeInstances.forEach(instance => {
-                      // Reset ad url to ensure layoutCallback does not fallback to
-                      // frame get which would lose SRA guarantees.
-                      // TODO(keithwrightbos): publisher should indicate if
-                      // explicit is required!
-                      instance.resetAdUrl();
-                      if (!canceled) {
+                      // Publisher explicitly wants SRA so do not attempt to
+                      // recover as SRA guarantees cannot be enforced.
+                      typeInstances.forEach(instance => {
+                        // Reset ad url to ensure layoutCallback does not
+                        // fallback to frame get which would lose SRA
+                        // guarantees.
+                        instance.resetAdUrl();
                         instance.attemptCollapse();
-                      }
-                      instance.sraResponseRejector(error);
-                    });
+                        instance.sraDeferred.reject(error);
+                      });
+                    } else {
+                      typeInstances.forEach(instance =>
+                        instance.sraDeferred.resolve(null));
+                    }
                   });
             });
           });
@@ -1291,12 +1268,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getPreconnectUrls() {
-    // Note that this getter actually changes state by preloading safeframe.
-    // Plan to cleanup this API as part of generate amp-a4a modularization
-    // refactor.
-    if (this.preloadSafeframe_) {
-      this.preconnect.preload(this.getSafeframePath());
-    }
     return ['https://securepubads.g.doubleclick.net/'];
   }
 
@@ -1403,7 +1374,7 @@ export function resetLocationQueryParametersForTesting() {
 /**
  * @param {!Element} element
  * @return {string} networkId from data-ad-slot attribute.
- * @visibileForTesting
+ * @visibleForTesting
  */
 export function getNetworkId(element) {
   const networkId = /^(?:\/)?(\d+)/.exec(
@@ -1428,7 +1399,7 @@ export function constructSRARequest_(win, doc, instances) {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, googPageLevelParameters,
-                instances[0].getPageParameters(instances[0].consentState_)),
+                instances[0].getPageParameters(instances[0].consentState)),
             startTime);
       });
 }

@@ -282,6 +282,7 @@ const forbiddenTerms = {
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
+      'src/service/video/docking.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -413,11 +414,6 @@ const forbiddenTerms = {
   },
   'indexedDB': {
     message: requiresReviewPrivacy,
-    whitelist: [
-      // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq  // eslint-disable-line max-len
-      'src/service-worker/core.js',
-      'src/service-worker/kill.js',
-    ],
   },
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
@@ -543,7 +539,6 @@ const forbiddenTerms = {
       'src/config.js',
       'src/experiments.js',
       'src/mode.js',
-      'src/service-worker/core.js',
       'src/worker-error-reporting.js',
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
@@ -558,7 +553,6 @@ const forbiddenTerms = {
     message: 'Should only be used in worker entry points',
     whitelist: [
       'src/web-worker/web-worker.js',
-      'src/service-worker/shell.js',
       'src/worker-error-reporting.js',
     ],
   },
@@ -716,6 +710,7 @@ const forbiddenTermsSrcInclusive = {
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-a4a/0.1/template-validator.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
@@ -895,11 +890,10 @@ function stripComments(contents) {
  */
 function matchTerms(file, terms) {
   const contents = stripComments(file.contents.toString());
-  const relative = file.relative;
+  const {relative} = file;
   return Object.keys(terms).map(function(term) {
     let fix;
-    const whitelist = terms[term].whitelist;
-    const checkInTestFolder = terms[term].checkInTestFolder;
+    const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
     if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||

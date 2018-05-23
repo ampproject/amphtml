@@ -146,7 +146,7 @@ export function createFixtureIframe(
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
-      const setTimeout = win.setTimeout;
+      const {setTimeout} = win;
       win.setTimeout = function(fn, ms) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
@@ -310,7 +310,7 @@ const IFRAME_STUB_URL =
  * See /test/fixtures/served/iframe-stub.html for implementation.
  *
  * @param win {!Window}
- * @returns {!HTMLIFrameElement}
+ * @return {!HTMLIFrameElement}
  */
 export function createIframeWithMessageStub(win) {
   const element = win.document.createElement('iframe');
@@ -372,7 +372,7 @@ export function createIframeWithMessageStub(win) {
  * @param sourceWin {!Window}
  * @param targetwin {!Window}
  * @param msg {!Object}
- * @returns {!Promise<!Object>}
+ * @return {!Promise<!Object>}
  */
 export function expectPostMessage(sourceWin, targetwin, msg) {
   return new Promise(resolve => {
@@ -471,7 +471,7 @@ export function expectBodyToBecomeVisible(win, opt_timeout) {
  * @param {!Window} win
  */
 export function doNotLoadExternalResourcesInTest(win) {
-  const createElement = win.document.createElement;
+  const {createElement} = win.document;
   win.document.createElement = function(tagName) {
     const element = createElement.apply(this, arguments);
     tagName = tagName.toLowerCase();
@@ -554,7 +554,7 @@ function maybeSwitchToCompiledJs(html) {
 
 /**
  * @param {*} data
- * @returns {?}
+ * @return {?}
  * @private
  */
 function parseMessageData(data) {
