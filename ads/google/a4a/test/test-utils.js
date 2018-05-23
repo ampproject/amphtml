@@ -154,8 +154,10 @@ describe('Google A4A utils', () => {
         });
         const a4a = new MockA4AImpl(element);
         url = 'not an array';
-        expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
-        expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
+        allowConsoleError(() =>
+          expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok);
+        allowConsoleError(() =>
+          expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null);
         url = [];
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
