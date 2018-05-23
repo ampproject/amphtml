@@ -484,26 +484,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   getPageParameters(consentState) {
-    let npa = null;
-    let consent = null;
-    switch (consentState) {
-      case null:
-      case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
-        break;
-      case CONSENT_POLICY_STATE.INSUFFICIENT:
-        consent = false;
-      case CONSENT_POLICY_STATE.UNKNOWN:
-        npa = '1';
-        break;
-      case CONSENT_POLICY_STATE.SUFFICIENT:
-        consent = true;
-        break;
-      default:
-        dev().error(TAG, `unknown consent enum ${consentState}`);
-    }
     return {
-      npa,
-      consent,
+      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
