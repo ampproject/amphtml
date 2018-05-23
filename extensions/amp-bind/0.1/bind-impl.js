@@ -146,7 +146,7 @@ export class Bind {
      * Upper limit on number of bindings for performance.
      * @private {number}
      */
-    this.maxNumberOfBindings_ = 2000; // Based on ~1ms to parse an expression.
+    this.maxNumberOfBindings_ = 1000; // Based on ~2ms to parse an expression.
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -502,12 +502,6 @@ export class Bind {
         : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
-        // Measuring impact of possibly reducing the binding limit (#11434).
-        const numberOfBindings = this.numberOfBindings();
-        if (numberOfBindings > 1000) {
-          dev().expectedError(TAG, `Over 1000 bindings (${numberOfBindings}).`);
-        }
-
         const {
           boundElements, bindings, expressionToElements, limitExceeded,
         } = results;
@@ -516,7 +510,7 @@ export class Bind {
         Object.assign(this.expressionToElements_, expressionToElements);
 
         if (limitExceeded) {
-          user().error(TAG, 'Maximum number of bindings reached ' +
+          dev().expectedError(TAG, 'Maximum number of bindings reached ' +
               `(${this.maxNumberOfBindings_}). Additional elements with ` +
               'bindings will be ignored.');
         }
