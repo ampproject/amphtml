@@ -798,7 +798,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     // If this is a multi-size creative, fire delayed impression now. If it's
     // fluid, wait until after resize.
-    if (this.isFluid_ && !size) {
+    if (this.isFluid_ && !this.returnedSize_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
