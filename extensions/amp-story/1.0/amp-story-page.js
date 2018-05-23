@@ -595,7 +595,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.getNextPageId(true /* opt_isAutomaticAdvance */);
     const manualAdvanceNext =
         this.getNextPageId(false /* opt_isAutomaticAdvance */);
-    const previous = this.getPreviousPageId_();
+    const previous = this.getPreviousPageId();
 
     if (autoAdvanceNext) {
       adjacentPageIds.push(autoAdvanceNext);
@@ -617,9 +617,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Gets the ID of the previous page in the story (before the current page).
    * @return {?string} Returns the ID of the next page in the story, or null if
    *     there isn't one.
-   * @private
    */
-  getPreviousPageId_() {
+  getPreviousPageId() {
     if (this.element.hasAttribute('i-amphtml-return-to')) {
       return this.element.getAttribute('i-amphtml-return-to');
     }
@@ -663,7 +662,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Navigates to the previous page in the story.
    */
   previous() {
-    const targetPageId = this.getPreviousPageId_();
+    const targetPageId = this.getPreviousPageId();
 
     if (targetPageId === null) {
       dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);

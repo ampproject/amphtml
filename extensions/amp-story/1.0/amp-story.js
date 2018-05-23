@@ -74,8 +74,6 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
-  escapeCssSelectorIdent,
-  matches,
   removeElement,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -93,6 +91,7 @@ import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
+import {removeAttributeInMutate, setAttributeInMutate} from './utils';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsDe from './_locales/de';
@@ -118,12 +117,6 @@ import LocalizedStringsVi from './_locales/vi';
 import LocalizedStringsZh from './_locales/zh';
 import LocalizedStringsZhTw from './_locales/zh-TW';
 
-/** @private @const {string} */
-const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
-
-/** @private @const {string} */
-const AMP_STORY_STANDALONE_ATTRIBUTE = 'standalone';
-
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;
 
@@ -133,17 +126,18 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
-/** @private @const {string} */
-const ADVANCE_TO_ATTR = 'i-amphtml-advance-to';
-
-/** @private @const {string} */
-const RETURN_TO_ATTR = 'i-amphtml-return-to';
-
-/** @private @const {string} */
-const AUTO_ADVANCE_TO_ATTR = 'auto-advance-to';
-
-/** @private @const {string} */
-const AD_SHOWING_ATTR = 'ad-showing';
+/** @enum {string} */
+const Attributes = {
+  STANDALONE: 'standalone',
+  ADVANCE_TO: 'i-amphtml-advance-to',
+  RETURN_TO: 'i-amphtml-return-to',
+  AUTO_ADVANCE_TO: 'auto-advance-to',
+  AD_SHOWING: 'ad-showing',
+  // Attributes that desktop css looks for to decide where pages will be placed
+  PREVIOUS: 'i-amphtml-previous-page', // shown in left pane
+  NEXT: 'i-amphtml-next-page', // shown in right pane
+  VISITED: 'i-amphtml-visited', // stacked offscreen to left
+};
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
@@ -241,6 +235,12 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
 
+    /** @private {?./amp-story-page.AmpStoryPage} */
+    this.previousPage_ = null;
+
+    /** @private {?./amp-story-page.AmpStoryPage} */
+    this.nextPage_ = null;
+
     /** @private @const */
     this.desktopMedia_ = this.win.matchMedia(
         `(min-width: ${DESKTOP_WIDTH_THRESHOLD}px) and ` +
@@ -317,7 +317,7 @@ export class AmpStory extends AMP.BaseElement {
   buildCallback() {
     this.assertAmpStoryExperiment_();
 
-    if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
+    if (this.element.hasAttribute(Attributes.STANDALONE)) {
       this.initializeStandaloneStory_();
     }
 
@@ -783,7 +783,7 @@ export class AmpStory extends AMP.BaseElement {
         'No active page set when navigating to next page.');
 
     const lastPage = this.pages_[this.getPageCount() - 1];
-    if (activePage.element.hasAttribute(ADVANCE_TO_ATTR) ||
+    if (activePage.element.hasAttribute(Attributes.ADVANCE_TO) ||
         activePage !== lastPage) {
       activePage.next(opt_isAutomaticAdvance);
     } else {
@@ -837,18 +837,16 @@ export class AmpStory extends AMP.BaseElement {
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
+    this.handlePreviewAttributes_(targetPage);
+
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     if (targetPage.isAd()) {
       this.storeService_.dispatch(Action.TOGGLE_AD, true);
-      this.vsync_.mutate(() => {
-        this.element.setAttribute(AD_SHOWING_ATTR, '');
-      });
+      setAttributeInMutate(this, Attributes.AD_SHOWING);
     } else {
       this.storeService_.dispatch(Action.TOGGLE_AD, false);
-      this.vsync_.mutate(() => {
-        this.element.removeAttribute(AD_SHOWING_ATTR);
-      });
+      removeAttributeInMutate(this, Attributes.AD_SHOWING);
       // TODO(alanorozco): decouple this using NavigationState
       this.systemLayer_.setActivePageId(targetPageId);
     }
@@ -861,11 +859,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const oldPage = this.activePage_;
 
-    // TODO(cvializ): Move this to the page class?
-    const activePriorSibling = targetPage.element.previousElementSibling;
-    const previousActivePriorSibling = this.element.querySelector(
-        `[${escapeCssSelectorIdent(PRE_ACTIVE_PAGE_ATTRIBUTE_NAME)}]`);
-
     this.activePage_ = targetPage;
 
     this.systemLayer_.resetDeveloperLogs();
@@ -877,18 +870,11 @@ export class AmpStory extends AMP.BaseElement {
 
       if (oldPage) {
         oldPage.setActive(false);
+        // indication that this should be offscreen to left in desktop view
+        setAttributeInMutate(oldPage, Attributes.VISITED);
       }
 
       targetPage.setActive(true);
-
-      if (activePriorSibling &&
-          matches(activePriorSibling, 'amp-story-page')) {
-        activePriorSibling.setAttribute(PRE_ACTIVE_PAGE_ATTRIBUTE_NAME, '');
-      }
-      if (previousActivePriorSibling) {
-        previousActivePriorSibling.removeAttribute(
-            PRE_ACTIVE_PAGE_ATTRIBUTE_NAME);
-      }
 
       // If first navigation.
       if (!oldPage) {
@@ -904,6 +890,38 @@ export class AmpStory extends AMP.BaseElement {
       this.forceRepaintForSafari_();
       this.maybePreloadBookend_();
     });
+  }
+
+
+  /**
+   * Clear existing preview attributes, Check to see if there is a next or
+   * previous page, set new attributes.
+   * @param {!./amp-story-page.AmpStoryPage} targetPage
+   * @private
+   */
+  handlePreviewAttributes_(targetPage) {
+    if (this.previousPage_) {
+      removeAttributeInMutate(this.previousPage_, Attributes.PREVIOUS);
+      this.previousPage_ = null;
+    }
+
+    if (this.nextPage_) {
+      removeAttributeInMutate(this.nextPage_, Attributes.NEXT);
+      this.nextPage_ = null;
+    }
+
+    const prevPageId = targetPage.getPreviousPageId();
+    if (prevPageId) {
+      this.previousPage_ = this.getPageById(prevPageId);
+      setAttributeInMutate(this.previousPage_, Attributes.PREVIOUS);
+    }
+
+    const nextPageId = targetPage.getNextPageId(
+        /* opt_isAutomaticAdvance */ false);
+    if (nextPageId) {
+      this.nextPage_ = this.getPageById(nextPageId);
+      setAttributeInMutate(this.nextPage_, Attributes.NEXT);
+    }
   }
 
 
@@ -1598,7 +1616,15 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       this.hideBookend_();
     }
-    this.switchTo_(dev().assertElement(this.pages_[0].element).id);
+    const switchPromise = this.switchTo_(
+        dev().assertElement(this.pages_[0].element).id);
+
+    // Reset all pages so that they are offscreen to right instead of left in
+    // desktop view.
+    switchPromise.then((() => {
+      this.pages_.forEach(page =>
+        removeAttributeInMutate(page, Attributes.VISITED));
+    }));
   }
 
   /** @return {!NavigationState} */
@@ -1647,15 +1673,15 @@ export class AmpStory extends AMP.BaseElement {
       return false;
     }
 
-    pageBeforeEl.setAttribute(ADVANCE_TO_ATTR, pageToBeInsertedId);
-    pageBeforeEl.setAttribute(AUTO_ADVANCE_TO_ATTR, pageToBeInsertedId);
-    pageToBeInsertedEl.setAttribute(RETURN_TO_ATTR, pageBeforeId);
+    pageBeforeEl.setAttribute(Attributes.ADVANCE_TO, pageToBeInsertedId);
+    pageBeforeEl.setAttribute(Attributes.AUTO_ADVANCE_TO, pageToBeInsertedId);
+    pageToBeInsertedEl.setAttribute(Attributes.RETURN_TO, pageBeforeId);
 
     const nextPageEl = nextPage.element;
     const nextPageId = nextPageEl.id;
-    pageToBeInsertedEl.setAttribute(ADVANCE_TO_ATTR, nextPageId);
-    pageToBeInsertedEl.setAttribute(AUTO_ADVANCE_TO_ATTR, nextPageId);
-    nextPageEl.setAttribute(RETURN_TO_ATTR, pageToBeInsertedId);
+    pageToBeInsertedEl.setAttribute(Attributes.ADVANCE_TO, nextPageId);
+    pageToBeInsertedEl.setAttribute(Attributes.AUTO_ADVANCE_TO, nextPageId);
+    nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
 
     return true;
   }
