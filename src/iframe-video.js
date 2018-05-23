@@ -39,6 +39,9 @@ export function originMatches(event, iframe, host) {
 
 
 /**
+ * Re-dispatches an event received from postMessage as an event in the host
+ * document.
+ *
  * @param {!AmpElement} element
  * @param {string} event
  * @param {!Object<string, string>} events
@@ -88,7 +91,7 @@ export function isJsonOrObj(anything) {
 
 
 /**
- * @param {?} objOrStr
+ * @param {!Object|string} objOrStr
  * @return {!JsonObject}
  */
 export function objOrParseJson(objOrStr) {

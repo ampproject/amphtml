@@ -20,9 +20,9 @@ import {addParamToUrl} from '../../../src/url';
 import {
   createFrameFor,
   isJsonOrObj,
+  mutedOrUnmutedEvent,
   objOrParseJson,
   originMatches,
-  mutedOrUnmutedEvent,
   redispatch,
 } from '../../../src/iframe-video';
 import {dict} from '../../../src/utils/object';
