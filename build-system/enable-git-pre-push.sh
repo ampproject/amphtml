@@ -20,7 +20,7 @@
 # To enable it, run this script: "./build-system/enable-git-pre-push.sh"
 
 
-SCRIPT=`realpath $0`
+SCRIPT=${BASH_SOURCE[0]}
 BUILD_SYSTEM_DIR=$(dirname "$SCRIPT")
 AMPHTML_DIR=$(dirname "$BUILD_SYSTEM_DIR")
 PRE_PUSH_SRC="build-system/default-pre-push"
@@ -32,6 +32,11 @@ GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 
+if [[ $SCRIPT != ./build-system/* ]] ;
+then
+  echo $(YELLOW "This script must be run from the root") $(CYAN "amphtml") $(YELLOW "directory. Exiting.")
+  exit 1
+fi
 
 echo $(YELLOW "-----------------------------------------------------------------------------------------------------------------")
 echo $(GREEN "Running") $(CYAN $SCRIPT)
