@@ -102,3 +102,13 @@ describe.skip('amp-brid-player', () => {
     return video;
   });
 });
+
+describe.skip('amp-brightcove', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-brightcove');
+    video.setAttribute('data-account-id', '1290862519001');
+    video.setAttribute('data-player-id', 'SyIOV8yWM');
+    video.setAttribute('data-video-id', 'amp-test-video');
+    return video;
+  });
+});
