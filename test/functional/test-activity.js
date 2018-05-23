@@ -383,8 +383,6 @@ describe('Activity getIncrementalEngagedTime', () => {
     whenFirstVisibleResolve();
     return viewer.whenFirstVisible().then(() => {
       // don't reset
-      const first = activity.getIncrementalEngagedTime('tests', false);
-      expect(first).to.equal(0);
       mousedownObservable.fire();
       clock.tick(10000);
       // more engaged time, don't reset
