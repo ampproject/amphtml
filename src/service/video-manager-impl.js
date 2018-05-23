@@ -73,6 +73,15 @@ const SECONDS_PLAYED_MIN_DELAY = 1000;
 
 
 /**
+ * @param {!../video-interface.VideoOrBaseElementDef} video
+ * @private
+ */
+function userInteractedWith(video) {
+  video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+}
+
+
+/**
  * VideoManager keeps track of all AMP video players that implement
  * the common Video API {@see ../video-interface.VideoInterface}.
  *
@@ -214,13 +223,22 @@ export class VideoManager {
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    video.registerAction('play', () => video.play(/* isAutoplay */ false),
-        trust);
-    video.registerAction('pause', () => video.pause(), trust);
-    video.registerAction('mute', () => video.mute(), trust);
-    video.registerAction('unmute', () => video.unmute(), trust);
-    video.registerAction('fullscreen', () => video.fullscreenEnter(),
-        trust);
+    registerAction('play', () => video.play(/* isAutoplay */ false));
+    registerAction('pause', () => video.pause());
+    registerAction('mute', () => video.mute());
+    registerAction('unmute', () => video.unmute());
+    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    /**
+     * @param {string} action
+     * @param {function()} fn
+     */
+    function registerAction(action, fn) {
+      video.registerAction(action, () => {
+        userInteractedWith(video);
+        fn();
+      }, trust);
+    }
   }
 
   /**
@@ -692,39 +710,46 @@ class VideoEntry {
    * @private
    */
   autoplayInteractiveVideoBuilt_() {
-    const toggleAnimation = playing => {
-      this.video.mutateElement(() => {
-        animation.classList.toggle('amp-video-eq-play', playing);
-      });
-    };
+    const {video} = this;
 
     // Hide the controls.
-    this.video.hideControls();
+    video.hideControls();
 
     // Create autoplay animation and the mask to detect user interaction.
     const animation = this.createAutoplayAnimation_();
     const mask = this.createAutoplayMask_();
-    this.video.mutateElement(() => {
-      this.video.element.appendChild(animation);
-      this.video.element.appendChild(mask);
+    video.mutateElement(() => {
+      const {element} = this.video;
+      element.appendChild(animation);
+      element.appendChild(mask);
     });
 
     // Listen to pause, play and user interaction events.
-    const unlisteners = [];
-    unlisteners.push(listen(mask, 'click', onInteraction.bind(this)));
-    unlisteners.push(listen(animation, 'click', onInteraction.bind(this)));
+    const {element} = video;
+    const unlisteners = [
+      listen(mask, 'click', triggerUserInteracted),
+      listen(animation, 'click', triggerUserInteracted),
+      listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
+      listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
+      listen(element, VideoEvents.AD_START, adStart.bind(this)),
+      listen(element, VideoEvents.AD_END, adEnd.bind(this)),
+    ];
 
-    unlisteners.push(listen(this.video.element, VideoEvents.PAUSE,
-        toggleAnimation.bind(this, /*playing*/ false)));
+    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
+        .then(onInteraction);
 
-    unlisteners.push(listen(this.video.element, VideoEvents.PLAYING,
-        toggleAnimation.bind(this, /*playing*/ true)));
+    /**
+     * @param {boolean} isPlaying
+     */
+    function toggleAnimation(isPlaying) {
+      video.mutateElement(() => {
+        animation.classList.toggle('amp-video-eq-play', isPlaying);
+      });
+    }
 
-    unlisteners.push(listen(this.video.element, VideoEvents.AD_START,
-        adStart.bind(this)));
-
-    unlisteners.push(listen(this.video.element, VideoEvents.AD_END,
-        adEnd.bind(this)));
+    function triggerUserInteracted() {
+      userInteractedWith(video);
+    }
 
     function onInteraction() {
       const {video} = this;

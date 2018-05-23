@@ -230,7 +230,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
       });
     });
 
-    it('no autoplay - should be playing manual when playing', () => {
+    it('no autoplay - should be playing manual whenever playing', () => {
       videoManager.register(impl);
       const entry = videoManager.getEntryForVideo_(impl);
       entry.isVisible_ = false;
