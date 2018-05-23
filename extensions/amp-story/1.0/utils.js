@@ -136,7 +136,6 @@ export function getRGBFromCssColorValue(cssValue) {
   };
 }
 
-
 /**
  * Returns the color, either black or white, that has the best contrast ratio
  * against the provided RGB 8bit values.
@@ -167,4 +166,30 @@ export function getTextColorForRGB({r, g, b}) {
   // 1 is L for #FFF, and 0 is L for #000.
   // (1 + 0.05) / (L + 0.05) > (L + 0.05) / (0 + 0.05) toggles for L = 0.179.
   return L > 0.179 ? '#000' : '#FFF';
+}
+
+
+/**
+ * Sets given attribute to the given element in next `mutate` phase.
+ * @param {!AMP.BaseElement} elementImpl
+ * @param {string} name
+ * @param {string=} opt_value
+ */
+export function setAttributeInMutate(elementImpl, name, opt_value) {
+  const value = opt_value || '';
+  elementImpl.mutateElement(() => {
+    elementImpl.element.setAttribute(name, value);
+  });
+}
+
+
+/**
+ * Removes given attribute from the given element in next `mutate` phase.
+ * @param {!AMP.BaseElement} elementImpl
+ * @param {string} name
+ */
+export function removeAttributeInMutate(elementImpl, name) {
+  elementImpl.mutateElement(() => {
+    elementImpl.element.removeAttribute(name);
+  });
 }
