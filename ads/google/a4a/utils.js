@@ -21,6 +21,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   escapeCssSelectorIdent,
+  scopedQuerySelector,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {getBinaryType} from '../../../src/experiments';
@@ -212,8 +213,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
         }
         const isAmpAdContainerElement =
           Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!r.element.querySelector(
-              escapeCssSelectorIdent(`amp-ad[type=${type}]`));
+          !!scopedQuerySelector(
+              r.element, escapeCssSelectorIdent(`amp-ad[type=${type}]`));
         return isAmpAdContainerElement;
       })
       // Need to wait on any contained element resolution followed by build
@@ -227,7 +228,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
             // be upgraded.
             return whenUpgradedToCustomElement(
                 dev().assertElement(
-                    resource.element.querySelector(
+                    scopedQuerySelector(
+                        resource.element,
                         escapeCssSelectorIdent(`amp-ad[type=${type}]`))));
           })))
       // Group by networkId.
