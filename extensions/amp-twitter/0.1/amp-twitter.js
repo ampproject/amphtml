@@ -71,8 +71,15 @@ class AmpTwitter extends AMP.BaseElement {
       if (this.getFallback()) {
         this.togglePlaceholder(false);
         this.toggleFallback(true);
+      } else {
+        // else keep placeholder displayed since there's no fallback
+        const placeholder = this.getPlaceholder();
+        if (placeholder) {
+          // Only happens if there is no content to render 
+          // (e.g. tweet was deleted) and there is no fallback.
+          this./*OK*/changeHeight(placeholder.offsetHeight);
+        }        
       }
-      // else keep placeholder displayed since there's no fallback
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
