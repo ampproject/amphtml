@@ -248,14 +248,15 @@ ValidatorTestCase.prototype.run = function() {
   if (observed === this.expectedOutput) {
     return;
   }
-  if (process.env['UPDATE_VALIDATOR_TEST'] === '1' &&
-      this.expectedOutputFile !== null) {
-    console/*OK*/.log('Updating ' + this.expectedOutputFile + ' ...');
-    fs.writeFileSync(absolutePathFor(this.expectedOutputFile), observed);
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    if (this.expectedOutputFile !== null) {
+      console/*OK*/.log('Updating ' + this.expectedOutputFile + ' ...');
+      fs.writeFileSync(absolutePathFor(this.expectedOutputFile), observed);
+    }
     return;
   }
   let message = '';
-  if (this.expectedOutputFile != null) {
+  if (this.expectedOutputFile !== null) {
     message = '\n' + this.expectedOutputFile + ':1:0\n';
   }
   message += 'expected:\n' + this.expectedOutput + '\nsaw:\n' + observed;
@@ -283,6 +284,7 @@ describe('ValidatorFeatures', () => {
 });
 
 describe('ValidatorOutput', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') return;
   // What's tested here is that if a URL with #development=1 is passed
   // (or any other hash), the validator output won't include the hash.
   it('produces expected output with hash in the URL', () => {
@@ -303,6 +305,7 @@ describe('ValidatorOutput', () => {
 });
 
 describe('ValidatorCssLengthValidation', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') return;
   // Rather than encoding some really long author stylesheets in
   // testcases, which would be difficult to read/verify that the
   // testcase is valid, we modify a valid testcase
@@ -455,6 +458,7 @@ describe('ValidatorCssLengthValidation', () => {
 });
 
 describe('CssLength', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') return;
   it('parses a basic example', () => {
     const parsed = new amp.validator.CssLength(
         '10.1em', /* allowAuto */ false, /* allowFluid */ false);
@@ -756,6 +760,7 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
 // Test which verifies some constraints on the rules file which the validator
 // depends on, but which proto parser isn't robust enough to verify.
 describe('ValidatorRulesMakeSense', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') return;
   const rules = amp.validator.createRules();
 
   // None of these should be empty.
