@@ -30,11 +30,10 @@ const TAG = 'amp-bind';
 export let BindExpressionResultDef;
 
 /**
- * Default maximum number of nodes in an expression AST.
- * Double size of a "typical" expression in examples/bind/performance.amp.html.
+ * Maximum number of nodes in an expression AST.
  * @const @private {number}
  */
-const DEFAULT_MAX_AST_SIZE = 50;
+const MAX_AST_SIZE = 100;
 
 /** @const @private {string} */
 const BUILT_IN_FUNCTIONS = 'built-in-functions';
@@ -210,7 +209,7 @@ export class BindExpression {
     this.expressionSize = this.numberOfNodesInAst_(this.ast_);
 
     // Check if this expression string is too large (for performance).
-    const maxSize = opt_maxAstSize || DEFAULT_MAX_AST_SIZE;
+    const maxSize = opt_maxAstSize || MAX_AST_SIZE;
     const skipConstraint = getMode().localDev && !getMode().test;
     if (this.expressionSize > maxSize && !skipConstraint) {
       throw new Error(`Expression size (${this.expressionSize}) exceeds max ` +
