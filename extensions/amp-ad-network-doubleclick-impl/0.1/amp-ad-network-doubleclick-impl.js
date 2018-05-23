@@ -589,9 +589,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.initialSize_.height,
           multiSizeValidation == 'true',
           this.isFluid_);
-      this.parameterSize_ += '|' + dimensions
-          .map(dimension => dimension.join('x'))
-          .join('|');
+      if (dimensions.length) {
+        this.parameterSize_ += '|' + dimensions
+            .map(dimension => dimension.join('x'))
+            .join('|');
+      }
     }
   }
 

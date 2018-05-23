@@ -138,6 +138,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           'data-slot': '/1234/abc/def',
           'json': JSON.stringify(targeting1),
           'data-force-safeframe': forceSafeFrame ? '1' : '0',
+          'data-multi-size': '9999x9999',
         };
         const element1 =
           createElementWithAttributes(doc, 'amp-ad', config1);
