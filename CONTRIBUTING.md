@@ -76,7 +76,7 @@ Follow this process for contributing new features:
 * Familiarize yourself with the [AMP Design Principles](contributing/DESIGN_PRINCIPLES.md)
 * [Create a new GitHub issue](https://github.com/ampproject/amphtml/issues/new) to start discussion of the new feature.
 * Before starting on the code get approval for your feature from an [OWNER](https://github.com/ampproject/amphtml/search?utf8=%E2%9C%93&q=filename%3AOWNERS.yaml&type=Code) of your feature's area and a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md#core-committers).  In most cases the people who can give this approval and are most familiar with your feature's area will get involved proactively or someone else in the community will add them.  If you are having trouble finding the right people add a comment on the issue or reach out on one of the channels in [How to get help](contributing/getting-started-e2e.md#how-to-get-help).
-* Consider bringing the eng design for your feature to our [weekly design review](#weekly-design-review).
+* Consider bringing the eng design for your feature to our [weekly design review](#weekly-design-reviews).
 * Follow the guidelines for [Contributing code](#contributing-code) described above.
 
 ## Contributing extended components
