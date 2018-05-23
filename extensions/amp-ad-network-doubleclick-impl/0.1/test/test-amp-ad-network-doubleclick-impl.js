@@ -997,7 +997,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('amp creative - should force iframe to match size of slot', () => {
       stubForAmpCreative();
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(() => mockSendXhrRequest(undefined, true));
+      sandbox.stub(impl, 'sendXhrRequest').callsFake(
+          () => mockSendXhrRequest(undefined, true));
       sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // Stub ini load otherwise FIE could delay test
@@ -1016,7 +1017,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should force iframe to match size of slot', () => {
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(() => mockSendXhrRequest(undefined, false));
+      sandbox.stub(impl, 'sendXhrRequest').callsFake(
+          () => mockSendXhrRequest(undefined, false));
       sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // This would normally be set in AmpA4a#buildCallback.
@@ -1033,7 +1035,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should issue an ad request even with bad multi-size data attr', () => {
       stubForAmpCreative();
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(() => mockSendXhrRequest(undefined, true));
+      sandbox.stub(impl, 'sendXhrRequest').callsFake(
+          () => mockSendXhrRequest(undefined, true));
       impl.element.setAttribute('data-multi-size', '201x50');
       // Stub ini load otherwise FIE could delay test
       sandbox./*OK*/stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
