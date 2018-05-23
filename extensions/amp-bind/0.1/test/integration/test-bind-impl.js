@@ -27,8 +27,8 @@ import {BindEvents} from '../../bind-events';
 import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
 import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
+import {dev, user} from '../../../../../src/log';
 import {toArray} from '../../../../../src/types';
-import {user} from '../../../../../src/log';
 
 /**
  * @param {!Object} env
@@ -723,7 +723,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
 
     it('should stop scanning once max number of bindings is reached', () => {
       bind.setMaxNumberOfBindingsForTesting(2);
-      const errorStub = env.sandbox.stub(user(), 'error');
+      const errorStub = env.sandbox.stub(dev(), 'expectedError');
 
       const foo = createElement(env, container, '[text]="foo"');
       const bar = createElement(env, container, '[text]="bar" [class]="baz"');
