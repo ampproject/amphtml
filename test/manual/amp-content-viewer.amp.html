@@ -1,0 +1,74 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-content-viewer" src="https://cdn.ampproject.org/v0/amp-content-viewer-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <style amp-custom>
+
+    .container {
+      height: 600;
+      width: 600;
+    }
+
+    .seat-free,
+    .seat-taken,
+    .seat-selected {
+      width: 30px;
+      height: 30px;
+      transition: fill .4s ease;
+    }
+    .seat-free {
+      fill: #ccc;
+    }
+    .seat-free:hover {
+      fill: #999;
+      cursor: pointer;
+    }
+    .seat-taken {
+      fill: #000;
+    }
+    .seat-selected {
+      fill: red;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <amp-state id="seat">
+    <script type="application/json">
+      1
+    </script>
+  </amp-state>
+<article>
+  <h1>Content Viewer</h1>
+  <p>Double tap or pinch to zoom in and out.</p>
+  <amp-layout layout="responsive" width="1" height="1">
+      <amp-content-viewer layout="fill">
+      <svg class="seatmap" viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
+          <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="0" y="0" tabindex="0" role="button" />
+          <rect class="seat-free" [class]="seat == 2 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 2})" x="40" y="0" tabindex="0" role="button" />
+          <rect class="seat-taken" x="120" y="0" />
+          <rect class="seat-taken" x="160" y="0" />
+
+          <rect class="seat-taken" x="0" y="40" />
+          <rect class="seat-free" [class]="seat == 3 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 3})" x="40" y="40" tabindex="0" role="button" />
+          <rect class="seat-free" [class]="seat == 4 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 4})" x="120" y="40" tabindex="0" role="button" />
+          <rect class="seat-free" [class]="seat == 5 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 5})" x="160" y="40" tabindex="0" role="button" />
+
+          <rect class="seat-taken" x="0" y="80" />
+          <rect class="seat-free" [class]="seat == 6 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 6})" x="40" y="80" tabindex="0" role="button" />
+          <rect class="seat-free" [class]="seat == 7 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 7})" x="120" y="80" tabindex="0" role="button" />
+          <rect class="seat-free" [class]="seat == 8 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 8})" x="160" y="80" tabindex="0" role="button" />
+        </svg>
+    </amp-content-viewer>
+  </amp-layout>
+</article>
+</body>
+</html>
+
