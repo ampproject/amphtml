@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body style="background-color:red">
+  <script>
+    window.addEventListener('message', function(event) {
+      console.log('Received from parent window: ' + JSON.stringify(event.data));
+    });
+    function sendToPage() {
+      window.parent.postMessage({'abc': 123}, '*');
+    }
+  </script>
+  <button onclick="sendToPage()">Send {'abc': 123} to page</button>
+</body>
+</html>
