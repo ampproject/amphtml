@@ -38,14 +38,14 @@ let HistoryIdDef;
   stackIndex: number,
   title: string,
   fragment: string,
-  ampBindState: ?JsonObject
+  ampBindState: (JsonObject|undefined)
 }} */
 let HistoryStateDef;
 
 /** @typedef {{
-  title: ?string,
-  fragment: ?string,
-  ampBindState: ?JsonObject
+  title: (string|undefined),
+  fragment: (string|undefined),
+  ampBindState: (JsonObject|undefined)
 }} */
 let HistoryStateUpdateDef;
 
@@ -307,7 +307,7 @@ class HistoryBindingInterface {
 
   /**
    * Configures a callback to be called when the state has been updated.
-   * @param {function(number)} unusedCallback
+   * @param {function(!HistoryStateDef)} unusedCallback
    * @protected
    */
   setOnStateUpdated(unusedCallback) {}
@@ -406,7 +406,7 @@ export class HistoryBindingNatural_ {
      */
     this.waitingState_;
 
-    /** @private {?function(number)} */
+    /** @private {?function(!HistoryStateDef)} */
     this.onStateUpdated_ = null;
 
     // A number of browsers do not support history.state. In this cases,
@@ -582,8 +582,8 @@ export class HistoryBindingNatural_ {
       // Make sure stack has enough space. Whether we are going forward or
       // backward, the stack should have at least one extra cell.
       newStackIndex = this.win.history.length - 2;
-      this.updateHistoryState_(Object.assign({}, state,
-          {stackIndex: newStackIndex}));
+      this.updateHistoryState_(/** @type {!HistoryStateDef} */ (Object.assign({}, state,
+          {stackIndex: newStackIndex})));
     }
 
     if (stackIndex == undefined) {
@@ -606,8 +606,8 @@ export class HistoryBindingNatural_ {
 
     // Update the stack, pop squeezed states.
     if (newStackIndex != this.stackIndex_) {
-      this.updateHistoryState_(Object.assign({}, state,
-          {stackIndex: newStackIndex}));
+      this.updateHistoryState_(/** @type {!HistoryStateDef} */ (Object.assign({}, state,
+          {stackIndex: newStackIndex})));
     }
 
     // User navigation is allowed to move past the starting point of
@@ -697,7 +697,7 @@ export class HistoryBindingNatural_ {
       state[HISTORY_PROP_] = stackIndex;
       this.replaceState_(state);
     }
-    this.updateHistoryState_(Object.assign({}, state, {stackIndex}));
+    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (Object.assign({}, /** @type {?Object} */ (state), {stackIndex})));
   }
 
   /**
@@ -746,7 +746,7 @@ export class HistoryBindingNatural_ {
     const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
     state[HISTORY_PROP_] = stackIndex;
     this.replaceState_(state, title, url);
-    this.updateHistoryState_(Object.assign({}, state, {stackIndex}));
+    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (Object.assign({}, /** @type {?Object} */ (state), {stackIndex})));
   }
 
   /**
@@ -833,12 +833,12 @@ export class HistoryBindingVirtual_ {
 
   /** @override */
   push(opt_stateUpdate) {
-    const message = Object.assign({
+    const message = /** @type {!JsonObject} */ (Object.assign({
       'stackIndex': this.stackIndex_ + 1,
-    }, opt_stateUpdate || {});
+    }, opt_stateUpdate || {}));
     return this.viewer_.sendMessageAwaitResponse('pushHistory', message)
         .then(response => {
-          this.updateHistoryState_(response);
+          this.updateHistoryState_(/** @type {!HistoryStateDef} */ (response));
           return response;
         });
   }
@@ -851,16 +851,16 @@ export class HistoryBindingVirtual_ {
     const message = dict({'stackIndex': this.stackIndex_});
     return this.viewer_.sendMessageAwaitResponse('popHistory', message)
         .then(response => {
-          this.updateHistoryState_(response);
+          this.updateHistoryState_(/** @type {!HistoryStateDef} */ (response));
           return response;
         });
   }
 
   /** @override */
   replace(opt_stateUpdate) {
-    const message = Object.assign({
+    const message = /** @type {!JsonObject} */ (Object.assign({
       'stackIndex': this.stackIndex_,
-    }, opt_stateUpdate || {});
+    }, opt_stateUpdate || {}));
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
         'replaceHistory', message, /* cancelUnsent */true))
         .then(response => {
@@ -884,11 +884,11 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * @param {!HistoryStateDef} historyState
+   * @param {!JsonObject} historyState
    * @private
    */
   onHistoryPopped_(historyState) {
-    this.updateHistoryState_(historyState);
+    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (historyState));
   }
 
   /**
