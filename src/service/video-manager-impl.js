@@ -741,17 +741,17 @@ class VideoEntry {
     /**
      * @param {boolean} isPlaying
      */
-    function toggleAnimation(isPlaying) {
+    const toggleAnimation = isPlaying => {
       video.mutateElement(() => {
         animation.classList.toggle('amp-video-eq-play', isPlaying);
       });
-    }
+    };
 
-    function triggerUserInteracted() {
+    const triggerUserInteracted = () => {
       userInteractedWith(video);
-    }
+    };
 
-    function onInteraction() {
+    const onInteraction = () => {
       const {video} = this;
       this.firstPlayEventOrNoop_();
       video.showControls();
@@ -762,19 +762,19 @@ class VideoEntry {
       removeElement(animation);
       removeElement(mask);
       video.signals().signal(VideoServiceSignals.USER_INTERACTED);
-    }
+    };
 
-    function adStart() {
+    const adStart = () => {
       setStyles(mask, {
         'display': 'none',
       });
-    }
+    };
 
-    function adEnd() {
+    const adEnd = () => {
       setStyles(mask, {
         'display': 'block',
       });
-    }
+    };
   }
 
   /**
