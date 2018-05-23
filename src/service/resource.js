@@ -20,9 +20,9 @@ import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
 import {
-  layoutRectSizeEquals,
   layoutRectLtwh,
   layoutRectsOverlap,
+  layoutRectSizeEquals,
   moveLayoutRect,
 } from '../layout-rect';
 import {isBlockedByConsent} from '../error';
