@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {
   VideoAnalyticsEvents,
@@ -423,6 +424,74 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
+  describe.configure().ifNewChrome().run('Rotate-to-fullscreen', function() {
+    this.timeout(TIMEOUT);
+
+    let video;
+    let sandbox;
+    let playButton;
+    let autoFullscreen;
+    let isInLandscapeStub;
+
+    // TODO(alanorozco): Fails on Chrome 66.
+    it.skip('should enter fullscreen on rotation', function() {
+
+      function mockLandscape(isLandscape) {
+        if (!autoFullscreen) {
+          const manager = Services.videoManagerForDoc(video.getAmpDoc());
+          autoFullscreen = manager.getAutoFullscreenManagerForTesting_();
+        }
+        if (!isInLandscapeStub) {
+          isInLandscapeStub = sandbox.stub(autoFullscreen, 'isInLandscape');
+        }
+        isInLandscapeStub.returns(isLandscape);
+      }
+
+      return getVideoPlayer({
+        autoplay: false,
+        outsideView: true,
+        'rotate-to-fullscreen': true,
+      }).then(r => {
+        video = r.video;
+        playButton = createButton(r, 'play');
+        mockLandscape(false);
+        const whenLoaded = listenOncePromise(video, VideoEvents.LOAD);
+        const viewport = video.implementation_.getViewport();
+        viewport.scrollIntoView(video);
+        return whenLoaded;
+      }).then(() => {
+        const whenPlaying = listenOncePromise(video, VideoEvents.PLAYING);
+        playButton.click();
+        return whenPlaying;
+      }).then(() => {
+        const enter = sandbox.stub(video.implementation_, 'fullscreenEnter');
+        mockLandscape(true);
+        autoFullscreen.onRotation_();
+        return poll('fullscreen enter', () => enter.called);
+      });
+    });
+
+    // Although these tests are not about autoplay, we can ony run them in
+    // browsers that do support autoplay, this is because a synthetic click
+    // event will not be considered a user-action and mobile browsers that
+    // don't support muted autoplay will block it. In real life, the click
+    // would be considered a user-initiated action, but no way to do that in a
+    // scripted test environment.
+    before(function() {
+      this.timeout(TIMEOUT);
+      // Skip autoplay tests if browser does not support autoplay.
+      return skipIfAutoplayUnsupported.call(this, window);
+    });
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+  });
+
   function getVideoPlayer(options) {
     options = options || {};
     const top = options.outsideView ? '100vh' : '0';
@@ -443,12 +512,16 @@ export function runVideoPlayerIntegrationTests(
               video.signals().whenSignal(VideoEvents.REGISTERED)
                   .then(() => ({video, fixture}));
 
-          if (options.autoplay) {
-            video.setAttribute('autoplay', '');
-          }
-          if (options.dock) {
-            video.setAttribute('dock', '');
-          }
+          [
+            'autoplay',
+            'dock',
+            'rotate-to-fullscreen',
+          ].forEach(option => {
+            if (options[option]) {
+              video.setAttribute(option, '');
+            }
+          });
+
           video.setAttribute('id', 'myVideo');
           video.setAttribute('controls', '');
           video.setAttribute('layout', 'fixed');
