@@ -173,9 +173,25 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   /** @type {string} */
   this.ampHtmlFileContents =
       fs.readFileSync(absolutePathFor(this.ampHtmlFile), 'utf8').trim();
+
+  // In the update_tests case, this file may not exist.
+  const fullOutputFile = path.join(
+      path.dirname(absolutePathFor(this.ampHtmlFile)),
+      path.basename(ampHtmlFile, '.html') + '.out');
+  console.log(fullOutputFile);
   /** @type {string} */
-  this.expectedOutput =
-      fs.readFileSync(absolutePathFor(this.expectedOutputFile), 'utf8').trim();
+  this.expectedOutput;
+  try {
+    this.expectedOutput = fs.readFileSync(fullOutputFile, 'utf8').trim();
+    console.log(this.expectedOutput);
+  } catch (err) {
+    // If the file doesn't exist and we're trying to update the file, create it.
+    if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+      fs.writeFileSync(fullOutputFile, "");
+    } else {
+      throw err;
+    }
+  }
 };
 
 /**
