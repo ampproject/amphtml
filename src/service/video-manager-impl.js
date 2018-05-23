@@ -32,6 +32,7 @@ import {Services} from '../services';
 import {VideoDocking} from './video/docking';
 import {
   VideoServiceInterface,
+  VideoServiceSignals,
 } from './video-service-interface';
 import {VideoServiceSync} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
@@ -52,18 +53,10 @@ import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
 import {setStyles} from '../style';
 import {startsWith} from '../string';
-import {throttle} from '../utils/rate-limit';
 
 
 /** @private @const {string} */
 const TAG = 'video-manager';
-
-
-/**
- * Internal event triggered when a video's visibility changes.
- * @private @const {string}
- */
-const VISIBILITY_CHANGED = 'amp:visibilitychanged';
 
 
 /**
@@ -77,6 +70,15 @@ const VISIBILITY_PERCENT = 75;
  * video-seconds-played analytics event.
  */
 const SECONDS_PLAYED_MIN_DELAY = 1000;
+
+
+/**
+ * @param {!../video-interface.VideoOrBaseElementDef} video
+ * @private
+ */
+function userInteractedWith(video) {
+  video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+}
 
 
 /**
@@ -122,7 +124,7 @@ export class VideoManager {
 
     /** @private @const {function():!AutoFullscreenManager} */
     this.getAutoFullscreenManager_ =
-        once(() => new AutoFullscreenManager(this.ampdoc));
+        once(() => new AutoFullscreenManager(this.ampdoc, this));
 
     /** @private @const {function():!VideoDocking} */
     this.getDocking_ = once(() => new VideoDocking(this.ampdoc, this));
@@ -191,7 +193,10 @@ export class VideoManager {
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    element.signals().signal(VideoEvents.REGISTERED);
+    const signals =
+        (/** @type {!../base-element.BaseElement} */ (video)).signals();
+
+    signals.signal(VideoEvents.REGISTERED);
 
     // Add a class to element to indicate it implements the video interface.
     element.classList.add('i-amphtml-video-interface');
@@ -218,13 +223,22 @@ export class VideoManager {
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    video.registerAction('play', () => video.play(/* isAutoplay */ false),
-        trust);
-    video.registerAction('pause', () => video.pause(), trust);
-    video.registerAction('mute', () => video.mute(), trust);
-    video.registerAction('unmute', () => video.unmute(), trust);
-    video.registerAction('fullscreen', () => video.fullscreenEnter(),
-        trust);
+    registerAction('play', () => video.play(/* isAutoplay */ false));
+    registerAction('pause', () => video.pause());
+    registerAction('mute', () => video.mute());
+    registerAction('unmute', () => video.unmute());
+    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    /**
+     * @param {string} action
+     * @param {function()} fn
+     */
+    function registerAction(action, fn) {
+      video.registerAction(action, () => {
+        userInteractedWith(video);
+        fn();
+      }, trust);
+    }
   }
 
   /**
@@ -329,13 +343,11 @@ export class VideoManager {
   }
 
   /**
-   * Returns whether the video was interacted with or not
-   *
    * @param {!../video-interface.VideoInterface} video
    * @return {boolean}
    */
-  userInteractedWithAutoPlay(video) {
-    return this.getEntryForVideo_(video).userInteractedWithAutoPlay();
+  userInteracted(video) {
+    return this.getEntryForVideo_(video).userInteracted();
   }
 
   /** @param {!VideoEntry} entry */
@@ -346,6 +358,14 @@ export class VideoManager {
   /** @param {!VideoEntry} entry */
   registerForDocking(entry) {
     this.getDocking_().register(entry.video);
+  }
+
+  /**
+   * @return {!AutoFullscreenManager}
+   * @visibleForTesting
+   */
+  getAutoFullscreenManagerForTesting_() {
+    return this.getAutoFullscreenManager_();
   }
 }
 
@@ -401,9 +421,6 @@ class VideoEntry {
     // Autoplay Variables
 
     /** @private {boolean} */
-    this.userInteractedWithAutoPlay_ = false;
-
-    /** @private {boolean} */
     this.playCalledByAutoplay_ = false;
 
     /** @private {boolean} */
@@ -434,7 +451,7 @@ class VideoEntry {
     listen(video.element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    video.element.signals().whenSignal(VideoEvents.REGISTERED)
+    video.signals().whenSignal(VideoEvents.REGISTERED)
         .then(() => this.onRegister_());
 
     /**
@@ -632,7 +649,6 @@ class VideoEntry {
     if (this.loaded_) {
       this.loadedVideoVisibilityChanged_();
     }
-    this.video.element.dispatchCustomEvent(VISIBILITY_CHANGED);
   }
 
   /**
@@ -644,7 +660,8 @@ class VideoEntry {
       return;
     }
     this.supportsAutoplay_().then(supportsAutoplay => {
-      const canAutoplay = this.hasAutoplay && !this.userInteractedWithAutoPlay_;
+      const canAutoplay = this.hasAutoplay &&
+          !this.userInteracted();
 
       if (canAutoplay && supportsAutoplay) {
         this.autoplayLoadedVideoVisibilityChanged_();
@@ -693,50 +710,58 @@ class VideoEntry {
    * @private
    */
   autoplayInteractiveVideoBuilt_() {
-    const toggleAnimation = playing => {
-      this.video.mutateElement(() => {
-        animation.classList.toggle('amp-video-eq-play', playing);
-      });
-    };
+    const {video} = this;
 
     // Hide the controls.
-    this.video.hideControls();
+    video.hideControls();
 
     // Create autoplay animation and the mask to detect user interaction.
     const animation = this.createAutoplayAnimation_();
     const mask = this.createAutoplayMask_();
-    this.video.mutateElement(() => {
-      this.video.element.appendChild(animation);
-      this.video.element.appendChild(mask);
+    video.mutateElement(() => {
+      const {element} = this.video;
+      element.appendChild(animation);
+      element.appendChild(mask);
     });
 
     // Listen to pause, play and user interaction events.
-    const unlisteners = [];
-    unlisteners.push(listen(mask, 'click', onInteraction.bind(this)));
-    unlisteners.push(listen(animation, 'click', onInteraction.bind(this)));
+    const {element} = video;
+    const unlisteners = [
+      listen(mask, 'click', triggerUserInteracted),
+      listen(animation, 'click', triggerUserInteracted),
+      listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
+      listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
+      listen(element, VideoEvents.AD_START, adStart.bind(this)),
+      listen(element, VideoEvents.AD_END, adEnd.bind(this)),
+    ];
 
-    unlisteners.push(listen(this.video.element, VideoEvents.PAUSE,
-        toggleAnimation.bind(this, /*playing*/ false)));
+    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
+        .then(onInteraction);
 
-    unlisteners.push(listen(this.video.element, VideoEvents.PLAYING,
-        toggleAnimation.bind(this, /*playing*/ true)));
+    /**
+     * @param {boolean} isPlaying
+     */
+    function toggleAnimation(isPlaying) {
+      video.mutateElement(() => {
+        animation.classList.toggle('amp-video-eq-play', isPlaying);
+      });
+    }
 
-    unlisteners.push(listen(this.video.element, VideoEvents.AD_START,
-        adStart.bind(this)));
-
-    unlisteners.push(listen(this.video.element, VideoEvents.AD_END,
-        adEnd.bind(this)));
+    function triggerUserInteracted() {
+      userInteractedWith(video);
+    }
 
     function onInteraction() {
+      const {video} = this;
       this.firstPlayEventOrNoop_();
-      this.userInteractedWithAutoPlay_ = true;
-      this.video.showControls();
-      this.video.unmute();
+      video.showControls();
+      video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();
       });
       removeElement(animation);
       removeElement(mask);
+      video.signals().signal(VideoServiceSignals.USER_INTERACTED);
     }
 
     function adStart() {
@@ -872,7 +897,7 @@ class VideoEntry {
 
     if (this.isPlaying_
        && this.playCalledByAutoplay_
-       && !this.userInteractedWithAutoPlay_) {
+       && !this.userInteracted()) {
       return PlayingStates.PLAYING_AUTO;
     }
 
@@ -883,10 +908,10 @@ class VideoEntry {
    * Returns whether the video was interacted with or not
    * @return {boolean}
    */
-  userInteractedWithAutoPlay() {
-    return this.userInteractedWithAutoPlay_;
+  userInteracted() {
+    return (
+      this.video.signals().get(VideoServiceSignals.USER_INTERACTED) != null);
   }
-
 
   /**
    * Collects a snapshot of the current video state for video analytics
@@ -919,10 +944,6 @@ class VideoEntry {
 }
 
 
-/** @private @const {string} */
-const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
-
-
 /**
  * @param {!AmpElement} video
  * @return {boolean}
@@ -930,45 +951,53 @@ const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
  */
 function supportsFullscreenViaApi(video) {
   // TODO(alanorozco): Determine this via a flag in the component itself.
-  return video.tagName.toLowerCase() == 'amp-dailymotion';
+  return !!({
+    'amp-dailymotion': true,
+    'amp-ima-video': true,
+  }[video.tagName.toLowerCase()]);
 }
 
 
 /** Manages rotate-to-fullscreen video. */
 export class AutoFullscreenManager {
 
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    const {win} = ampdoc;
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./video-service-interface.VideoServiceInterface} manager
+   */
+  constructor(ampdoc, manager) {
+
+    /** @private @const {!./video-service-interface.VideoServiceInterface} */
+    this.manager_ = manager;
 
     /** @private @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {number} */
-    this.nextId_ = 0;
-
-    /** @private @const {!Window} */
-    this.win_ = win;
-
-    /** @private {?VideoEntry} */
+    /** @private {?../video-interface.VideoOrBaseElementDef} */
     this.currentlyInFullscreen_ = null;
 
-    /** @private {?Element} */
+    /** @private {?../video-interface.VideoOrBaseElementDef} */
     this.currentlyCentered_ = null;
 
-    /** @private @const {!Array<!Element>} */
-    this.visibleElements_ = [];
-
-    /**
-     * Maps rotate-to-fullscreen entry id to entry.
-     * @private @const {!Object<string, !VideoEntry>}
-     */
-    this.entries_ = {};
+    /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
+    this.entries_ = [];
 
     /** @private @const {function()} */
-    this.trackOnScroll_ = once(() =>
-      Services.viewportForDoc(ampdoc).onScroll(
-          throttle(this.ampdoc_.win, () => this.selectOnScroll_(), 300)));
+    this.boundSelectBestCentered_ = () => this.selectBestCenteredInPortrait_();
+
+    /**
+     * @param {!../video-interface.VideoOrBaseElementDef} video
+     * @return {boolean}
+     */
+    this.boundIncludeOnlyPlaying_ = video =>
+      this.getPlayingState_(video) == PlayingStates.PLAYING_MANUAL;
+
+    /**
+     * @param {!../video-interface.VideoOrBaseElementDef} a
+     * @param {!../video-interface.VideoOrBaseElementDef} b
+     * @return {number}
+     */
+    this.boundCompareEntries_ = (a, b) => this.compareEntries_(a, b);
 
     this.installOrientationObserver_();
     this.installFullscreenListener_();
@@ -976,28 +1005,24 @@ export class AutoFullscreenManager {
 
   /** @param {!VideoEntry} entry */
   register(entry) {
-    if (!this.canFullscreen_(entry.video.element)) {
+    const {video} = entry;
+    const {element} = video;
+
+    if (!this.canFullscreen_(element)) {
       return;
     }
 
-    const id = this.nextId_++;
-    const {element} = entry.video;
+    this.entries_.push(video);
 
-    element[AUTO_FULLSCREEN_ID_PROP] = id.toString();
+    listen(element, VideoEvents.PAUSE, this.boundSelectBestCentered_);
+    listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_);
+    listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_);
 
-    this.entries_[id.toString()] = entry;
-
-    listen(element, VISIBILITY_CHANGED, e => {
-      if (isLandscape(this.ampdoc_.win)) {
-        return;
-      }
-      this.updateVisibility_(dev().assertElement(e.target));
-    });
-
-    this.trackOnScroll_();
+    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
+        .then(this.boundSelectBestCentered_);
 
     // Set always
-    this.updateVisibility_(element);
+    this.selectBestCenteredInPortrait_();
   }
 
   /** @private */
@@ -1008,6 +1033,14 @@ export class AutoFullscreenManager {
     listen(root, 'mozfullscreenchange', exitHandler);
     listen(root, 'fullscreenchange', exitHandler);
     listen(root, 'MSFullscreenChange', exitHandler);
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  isInLandscape() {
+    return isLandscape(this.ampdoc_.win);
   }
 
   /**
@@ -1056,11 +1089,10 @@ export class AutoFullscreenManager {
 
   /** @private */
   onRotation_() {
-    if (isLandscape(this.ampdoc_.win)) {
-      if (!this.currentlyCentered_) {
-        return;
+    if (this.isInLandscape()) {
+      if (this.currentlyCentered_ != null) {
+        this.enter_(this.currentlyCentered_);
       }
-      this.enter_(this.getEntryForElement_(this.currentlyCentered_));
       return;
     }
     if (this.currentlyInFullscreen_) {
@@ -1069,19 +1101,13 @@ export class AutoFullscreenManager {
   }
 
   /**
-   * @param {!VideoEntry} entry
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
-  enter_(entry) {
-    const {video} = entry;
+  enter_(video) {
+    const platform = Services.platformFor(this.ampdoc_.win);
 
-    if (entry.getPlayingState() !== PlayingStates.PLAYING_MANUAL) {
-      return;
-    }
-
-    const platform = Services.platformFor(this.win_);
-
-    this.currentlyInFullscreen_ = entry;
+    this.currentlyInFullscreen_ = video;
 
     if (platform.isAndroid() && platform.isChrome()) {
       // Chrome on Android somehow knows what we're doing and executes a nice
@@ -1095,13 +1121,11 @@ export class AutoFullscreenManager {
   }
 
   /**
-   * @param {!VideoEntry} entry
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
-  exit_(entry) {
+  exit_(video) {
     this.currentlyInFullscreen_ = null;
-
-    const {video} = entry;
 
     this.scrollIntoIfNotVisible_(video, 'center')
         .then(() => video.fullscreenExit());
@@ -1142,107 +1166,75 @@ export class AutoFullscreenManager {
   /** @private @return {!Promise} */
   onceOrientationChanges_() {
     const magicNumber = 330;
-    return Services.timerFor(this.win_).promise(magicNumber);
-  }
-
-  /**
-   * @param {!AmpElement} element
-   * @private
-   */
-  updateVisibility_(element) {
-    const intersectionChangeEntry = element.getIntersectionChangeEntry();
-    const isVisible = intersectionChangeEntry.intersectionRatio > 0.75;
-    const i = this.visibleElements_.indexOf(element);
-
-    if (!isVisible) {
-      if (i >= 0) {
-        this.visibleElements_.splice(i, 1);
-      }
-      return;
-    }
-
-    if (i < 0) {
-      this.visibleElements_.push(element);
-    }
-
-    this.selectBestCenteredInPortrait_();
-  }
-
-  /** @private */
-  selectOnScroll_() {
-    if (isLandscape(this.ampdoc_.win)) {
-      return;
-    }
-    this.selectBestCenteredInPortrait_();
+    return Services.timerFor(this.ampdoc_.win).promise(magicNumber);
   }
 
   /** @private */
   selectBestCenteredInPortrait_() {
+    if (this.isInLandscape()) {
+      return this.currentlyCentered_;
+    }
+
     this.currentlyCentered_ = null;
-    this.visibleElements_
-        .map(el => Object.assign({target: el}, el.getIntersectionChangeEntry()))
-        .sort((a, b) => this.compareIntersectionEntries_(a, b))
-        .forEach((entry, i) => {
-          if (entry.intersectionRatio >= 0.8 && i == 0) {
-            this.currentlyCentered_ = entry.target;
-          }
-        });
+
+    const selected = this.entries_
+        .filter(this.boundIncludeOnlyPlaying_)
+        .sort(this.boundCompareEntries_)[0];
+
+    if (selected) {
+      const {intersectionRatio} = selected.element.getIntersectionChangeEntry();
+      if (intersectionRatio >= VISIBILITY_PERCENT / 100) {
+        this.currentlyCentered_ = selected;
+      }
+    }
+
     return this.currentlyCentered_;
   }
 
   /**
-   * Compares two intersection entries in order to sort them by "best centered".
-   * @param {!IntersectionObserverEntry} a
-   * @param {!IntersectionObserverEntry} b
+   * Compares two videos in order to sort them by "best centered".
+   * @param {!../video-interface.VideoOrBaseElementDef} a
+   * @param {!../video-interface.VideoOrBaseElementDef} b
    * @return {number}
    */
-  compareIntersectionEntries_(a, b) {
-    // Prioritize videos that are playing
-    const aPlayingState = this.getEntryForElement_(a.target).getPlayingState();
-    const bPlayingState = this.getEntryForElement_(b.target).getPlayingState();
-    if (aPlayingState == PlayingStates.PLAYING_MANUAL &&
-        bPlayingState != PlayingStates.PLAYING_MANUAL) {
-      return -1;
-    }
-    if (aPlayingState != PlayingStates.PLAYING_MANUAL &&
-        bPlayingState == PlayingStates.PLAYING_MANUAL) {
-      return 1;
-    }
+  compareEntries_(a, b) {
+    const {
+      intersectionRatio: ratioA,
+      boundingClientRect: rectA,
+    } = a.element.getIntersectionChangeEntry();
+    const {
+      intersectionRatio: ratioB,
+      boundingClientRect: rectB,
+    } = b.element.getIntersectionChangeEntry();
 
     // Prioritize by how visible they are, with a tolerance of 10%
     const ratioTolerance = 0.1;
-    const ratioDelta = (a.intersectionRatio - b.intersectionRatio);
-    if (ratioDelta < -ratioTolerance) {
-      return -1;
-    }
-    if (ratioDelta > ratioTolerance) {
-      return 1;
+    const ratioDelta = ratioA - ratioB;
+    if (Math.abs(ratioDelta) > ratioTolerance) {
+      return ratioDelta;
     }
 
     // Prioritize by distance from center.
     const viewport = Services.viewportForDoc(this.ampdoc_);
-    const aCenter = centerDist(viewport, a.boundingClientRect);
-    const bCenter = centerDist(viewport, b.boundingClientRect);
-    if (aCenter < bCenter) {
-      return -1;
-    }
-    if (aCenter > bCenter) {
-      return 1;
+    const centerA = centerDist(viewport, rectA);
+    const centerB = centerDist(viewport, rectB);
+    if (centerA < centerB ||
+        centerA > centerB) {
+      return centerA - centerB;
     }
 
     // Everything else failing, choose the highest element.
-    const topDelta = (a.boundingClientRect.top - b.boundingClientRect.top);
-    return topDelta < 0 ? -1 : (topDelta > 0 ? 1 : 0);
+    return rectA.top - rectB.top;
   }
 
   /**
-   * @param {!Element} element
-   * @return {!VideoEntry}
+   * @param {!../video-interface.VideoOrBaseElementDef} video
+   * @return {!../video-interface.VideoInterface} PlayingStates
    * @private
    */
-  getEntryForElement_(element) {
-    const id = dev().assertString(element[AUTO_FULLSCREEN_ID_PROP]);
-    return dev().assert(this.entries_[id]);
+  getPlayingState_(video) {
+    return this.manager_.getPlayingState(
+        /** @type {!../video-interface.VideoInterface} */ (video));
   }
 }
 

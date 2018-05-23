@@ -20,6 +20,7 @@ import {BindExpressionResultDef} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {BindingDef} from './bind-evaluator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
+import {Deferred} from '../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {debounce} from '../../../src/utils/rate-limit';
@@ -28,6 +29,7 @@ import {dev, user} from '../../../src/log';
 import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {filterSplice} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
+import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -36,6 +38,7 @@ import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/sanitizer';
+import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-bind';
 
@@ -55,22 +58,20 @@ const MAX_MERGE_DEPTH = 10;
 /**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last evaluation.
- * @typedef {{
- *   property: string,
- *   expressionString: string,
- *   previousResult: (./bind-expression.BindExpressionResultDef|undefined),
- * }}
+ * @typedef {{property: string, expressionString: string, previousResult: (./bind-expression.BindExpressionResultDef|undefined)}}
  */
 let BoundPropertyDef;
 
 /**
  * A tuple containing a single element and all of its bound properties.
- * @typedef {{
- *   boundProperties: !Array<BoundPropertyDef>,
- *   element: !Element,
- * }}
+ * @typedef {{boundProperties: !Array<BoundPropertyDef>, element: !Element}}
  */
 let BoundElementDef;
+
+/**
+ * @typedef {{boundElements: !Array<BoundElementDef>, bindings: !Array<./bind-evaluator.BindingDef>, expressionToElements: !Object<string, !Array<!Element>>, limitExceeded: boolean}}
+ */
+let NodeScanDef;
 
 /**
  * A map of tag names to arrays of attributes that do not have non-bind
@@ -338,6 +339,21 @@ export class Bind {
   }
 
   /**
+   * Returns the stringified value of the global state for a given field-based
+   * expression, e.g. "foo.bar.baz".
+   * @param {string} expr
+   * @return {string}
+   */
+  getStateValue(expr) {
+    const value = getValueForExpr(this.state_, expr);
+    if (isObject(value) || isArray(value)) {
+      return JSON.stringify(/** @type {JsonObject} */(value));
+    } else {
+      return String(value);
+    }
+  }
+
+  /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @param {!Node} rootNode
    * @param {?Node} titleNode
@@ -547,7 +563,6 @@ export class Bind {
    * @param {!Array<!Node>} nodes
    * @return {!Promise}
    * @private
-   * @visibleForTesting
    */
   removeBindingsForNodes_(nodes) {
     const before = (getMode().development) ? this.numberOfBindings() : 0;
@@ -600,14 +615,7 @@ export class Bind {
    * a tuple containing bound elements and binding data for the evaluator.
    * @param {!Node} node
    * @param {number} limit
-   * @return {
-   *   !Promise<{
-   *     boundElements: !Array<BoundElementDef>,
-   *     bindings: !Array<./bind-evaluator.BindingDef>,
-   *     expressionToElements: !Object<string, !Array<!Element>>,
-   *     limitExceeded: boolean,
-   *   }>
-   * }
+   * @return {!Promise<NodeScanDef>}
    * @private
    */
   scanNode_(node, limit) {
@@ -715,15 +723,26 @@ export class Bind {
    * @private
    */
   scanAttribute_(attribute, element) {
-    const {tagName} = element;
-    const {name} = attribute;
-    if (name.length > 2 && name[0] === '[' && name[name.length - 1] === ']') {
-      const property = name.substr(1, name.length - 2);
-      if (this.validator_.canBind(tagName, property)) {
+    const tag = element.tagName;
+    const attr = attribute.name;
+
+    let property;
+    if (attr.length > 2 && attr[0] === '[' && attr[attr.length - 1] === ']') {
+      property = attr.substr(1, attr.length - 2);
+    } else if (startsWith(attr, 'data-amp-bind-')) {
+      property = attr.substr(14);
+      // Ignore `data-amp-bind-foo` if `[foo]` already exists.
+      if (element.hasAttribute(`[${property}]`)) {
+        return null;
+      }
+    }
+
+    if (property) {
+      if (this.validator_.canBind(tag, property)) {
         return {property, expressionString: attribute.value};
       } else {
         const err = user().createError(
-            `${TAG}: Binding to [${property}] on <${tagName}> is not allowed.`);
+            `${TAG}: Binding to [${property}] on <${tag}> is not allowed.`);
         reportError(err, element);
       }
     }
@@ -754,9 +773,7 @@ export class Bind {
 
   /**
    * Reevaluates all expressions and returns a map of expressions to results.
-   * @return {!Promise<
-   *     !Object<string, ./bind-expression.BindExpressionResultDef>
-   * >}
+   * @return {!Promise<!Object<string, ./bind-expression.BindExpressionResultDef>>}
    * @private
    */
   evaluate_() {
@@ -805,12 +822,7 @@ export class Bind {
    * new value.
    * @param {!Array<!BoundPropertyDef>} boundProperties
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
-   * @return {
-   *   !Array<{
-   *     boundProperty: !BoundPropertyDef,
-   *     newValue: !./bind-expression.BindExpressionResultDef,
-   *   }>
-   * }
+   * @return {!Array<{boundProperty: !BoundPropertyDef, newValue: !./bind-expression.BindExpressionResultDef}>}
    * @private
    */
   calculateUpdates_(boundProperties, results) {
@@ -928,7 +940,7 @@ export class Bind {
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
    * @param {./bind-expression.BindExpressionResultDef} newValue
-   * @return (?{name: string, value:./bind-expression.BindExpressionResultDef})
+   * @return {?{name: string, value:./bind-expression.BindExpressionResultDef}}
    * @private
    */
   applyBinding_(boundProperty, element, newValue) {
