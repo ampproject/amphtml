@@ -108,6 +108,9 @@ import {preconnectForElement} from './preconnect';
  * element instance. This can be used to do additional style calculations
  * without triggering style recalculations.
  *
+ * When the dimensions of an element has changed, the 'onMeasureChanged'
+ * callback is called.
+ *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
@@ -953,7 +956,7 @@ export class BaseElement {
 
   /**
    * Runs the specified mutation on the element and ensures that remeasures and
-   * layouts performed for the affected elements.
+   * layouts are performed for the affected elements.
    *
    * This method should be called whenever a significant mutations are done
    * on the DOM that could affect layout of elements inside this subtree or
@@ -971,7 +974,8 @@ export class BaseElement {
 
   /**
    * Runs the specified measure, then runs the mutation on the element and
-   * ensures that remeasures and layouts performed for the affected elements.
+   * ensures that remeasures and layouts are performed for the affected
+   * elements.
    *
    * This method should be called whenever a measure and significant mutations
    * are done on the DOM that could affect layout of elements inside this
@@ -1018,8 +1022,9 @@ export class BaseElement {
 
   /**
    * Called when one or more attributes are mutated.
-   * @note Must be called inside a mutate context.
-   * @note Boolean attributes have a value of `true` and `false` when
+   * Note:
+   * - Must be called inside a mutate context.
+   * - Boolean attributes have a value of `true` and `false` when
    *       present and missing, respectively.
    * @param {
    *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
@@ -1037,6 +1042,13 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
+
+  /**
+   * Called only when the measurements of an amp-element changes. This
+   * would not trigger for every measurement invalidation caused by a mutation.
+   * @public
+   */
+  onMeasureChanged() {}
 
   user() {
     return user(this.element);
