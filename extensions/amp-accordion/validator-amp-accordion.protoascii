@@ -27,6 +27,7 @@ tags: {  # amp-accordion
 tags: {  # <amp-accordion>
   tag_name: "AMP-ACCORDION"
   requires_extension: "amp-accordion"
+  attrs: { name: "animate" value: "" }
   attrs: { name: "disable-session-states" value: "" }
   attrs: { name: "expand-single-section" value: "" }
   child_tags: {

@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
+import {Animation} from '../../../src/animation';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {bezierCurve} from '../../../src/curve';
+import {clamp} from '../../../src/utils/math';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {numeric, px, setStyles as setStylesTransition} from '../../../src/transition';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
+import {setStyles} from '../../../src/style';
 import {tryFocus} from '../../../src/dom';
 
 const TAG = 'amp-accordion';
-
+const MAX_TRANSITION_DURATION = 500; // ms
+const MIN_TRANSITION_DURATION = 200; // ms
+const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
+const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -96,7 +104,7 @@ class AmpAccordion extends AMP.BaseElement {
           user().assertElement(
               sectionEl,
               'No element found with id:' + sectionId);
-          this.toggle_(sectionEl);
+          this.toggle_(dev().assertElement(sectionEl));
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
             this.toggle_(this.sections_[i]);
@@ -110,7 +118,7 @@ class AmpAccordion extends AMP.BaseElement {
           user().assertElement(
               sectionEl,
               'No element found with id:' + sectionId);
-          this.expand_(sectionEl);
+          this.expand_(dev().assertElement(sectionEl));
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
             this.expand_(this.sections_[i]);
@@ -124,7 +132,7 @@ class AmpAccordion extends AMP.BaseElement {
           user().assertElement(
               sectionEl,
               'No element found with id:' + sectionId);
-          this.collapse_(sectionEl);
+          this.collapse_(dev().assertElement(sectionEl));
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
             this.collapse_(this.sections_[i]);
@@ -213,48 +221,163 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * Toggles section between expanded or collapsed.
+   * @param {!Element} section
+   * @param {boolean=} opt_forceExpand
    * @private
    */
-  toggle_(section, opt_forceExpand = undefined) {
+  toggle_(section, opt_forceExpand) {
     const sectionComponents = section.children;
     const header = sectionComponents[0];
     const content = sectionComponents[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
-    this.mutateElement(() => {
-      let toExpand;
-      if (opt_forceExpand === true) {
-        toExpand = true;
-      } else if (opt_forceExpand === false) {
-        toExpand = false;
-      } else {
-        toExpand = !section.hasAttribute('expanded');
-      }
+    const toExpand = (opt_forceExpand == undefined) ?
+      !section.hasAttribute('expanded') : opt_forceExpand;
 
+    // Animate Toggle
+    if (this.element.hasAttribute('animate')) {
       if (toExpand) {
-        section.setAttribute('expanded', '');
         header.setAttribute('aria-expanded', 'true');
-        // if expand-single-section is set, only allow one <section> to be
-        // expanded at a time
+        this.animateExpand_(section);
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach(sectionIter => {
             if (sectionIter != section) {
-              sectionIter.removeAttribute('expanded');
+              this.animateCollapse_(sectionIter);
               sectionIter.children[0].setAttribute('aria-expanded', 'false');
             }
           });
         }
       } else {
-        section.removeAttribute('expanded');
         header.setAttribute('aria-expanded', 'false');
+        this.animateCollapse_(section);
       }
-    }, section);
+    } else { // Toggle without animation
+      this.mutateElement(() => {
+        if (toExpand) {
+          section.setAttribute('expanded', '');
+          header.setAttribute('aria-expanded', 'true');
+          // if expand-single-section is set, only allow one <section> to be
+          // expanded at a time
+          if (this.element.hasAttribute('expand-single-section')) {
+            this.sections_.forEach(sectionIter => {
+              if (sectionIter != section) {
+                sectionIter.removeAttribute('expanded');
+                sectionIter.children[0].setAttribute('aria-expanded', 'false');
+              }
+            });
+          }
+        } else {
+          section.removeAttribute('expanded');
+          header.setAttribute('aria-expanded', 'false');
+        }
+      }, section);
+    }
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
   }
 
   /**
+   * @param {!Element} section
+   * @return {!Promise}
+   * @private
+   */
+  animateExpand_(section) {
+    let height, duration;
+    // Expand the div portion of the section and not the header
+    const sectionChild = section.children[1];
+
+    return this.mutateElement(() => {
+      // We set posiion and opacity to avoid a FOUC while measuring height
+      setStyles(sectionChild, {
+        opacity: 0,
+        position: 'fixed',
+      });
+      section.setAttribute('expanded', '');
+    }).then(() => {
+      return this.measureMutateElement(
+          () => {
+            height = sectionChild./*OK*/offsetHeight;
+            const viewportHeight = this.getViewport().getHeight();
+            duration = this.getTransitionDuration_(Math.abs(height),
+                viewportHeight);
+          },
+          () => {
+            setStyles(sectionChild, {
+              'opacity': '',
+              'height': 0,
+              'position': '',
+            });
+          });
+    }).then(() => {
+      return Animation.animate(this.element, setStylesTransition(sectionChild, {
+        'height': px(numeric(0, height)),
+        'opacity': numeric(0,1),
+      }), duration, EXPAND_CURVE_)
+          .thenAlways(() => {
+            this.mutateElement(() => {
+              setStyles(sectionChild, {
+                height: '',
+                opacity: '',
+              });
+            });
+          });
+    });
+  }
+
+  /**
+   * @param {!Element} section
+   * @return {!Promise}
+   * @private
+   */
+  animateCollapse_(section) {
+    let height, duration;
+    // Collapse the div portion of the section and not the header
+    const sectionChild = section.children[1];
+    return this.measureElement(() => {
+      height = section./*OK*/offsetHeight;
+      const viewportHeight = this.getViewport().getSize().height;
+      duration = this.getTransitionDuration_(Math.abs(height),
+          viewportHeight);
+    }).then(() => {
+      return Animation.animate(sectionChild, setStylesTransition(sectionChild, {
+        'height': px(numeric(height, 0)),
+      }), duration, COLLAPSE_CURVE_).thenAlways(() => {
+        return this.mutateElement(() => {
+          section.removeAttribute('expanded');
+          setStyles(sectionChild, {
+            height: '',
+          });
+        });
+      });
+    });
+  }
+
+  /**
+   * Calculates transition duration from vertical distance traveled
+   * @param {number} dy
+   * @param {number} maxY
+   * @param {number=} opt_minDur
+   * @param {number=} opt_maxDur
+   * @return {number}
+   * @private
+   */
+  getTransitionDuration_(
+    dy,
+    maxY,
+    opt_minDur = MIN_TRANSITION_DURATION,
+    opt_maxDur = MAX_TRANSITION_DURATION
+  ) {
+    const distanceAdjustedDuration = Math.abs(dy) / maxY * opt_maxDur;
+    return clamp(
+        distanceAdjustedDuration,
+        opt_minDur,
+        opt_maxDur
+    );
+  }
+
+  /**
    * Force expands the accordion.
+   * @param {!Element} section
    * @private
    */
   expand_(section) {
@@ -263,6 +386,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * Force collapses the accordion.
+   * @param {!Element} section
    * @private
    */
   collapse_(section) {
@@ -277,12 +401,14 @@ class AmpAccordion extends AMP.BaseElement {
   onHeaderPicked_(event) {
     event.preventDefault();
     const header = dev().assertElement(event.currentTarget);
-    const section = header.parentElement;
+    const section = dev().assertElement(header.parentElement);
     this.toggle_(section);
   }
 
   /**
    * Handles clicks on an accordion header to expand/collapse its content.
+   * @param {!Event} event
+   * @private
    */
   clickHandler_(event) {
     if (this.shouldHandleClick_(event)) {
