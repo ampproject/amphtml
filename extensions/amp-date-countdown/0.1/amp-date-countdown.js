@@ -112,7 +112,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @private {!Object|null} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
-    /** @private {!Object} */
+    /** @private {!Object|null} */
     this.countDownTimer_ = null;
 
     /** @const {!../../../src/service/template-impl.Templates} */
@@ -155,7 +155,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object|!JsonObject} items
+   * @param {!JsonObject} items
    * @return {!Promise}
    * @private
    */
@@ -175,6 +175,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
           .trigger(this.element, 'timeout', null, ActionTrust.LOW);
       this.win.clearInterval(this.countDownTimer_);
     }
+    console.log(Object.assign(DIFF, this.localeWordList_));
     this.renderItems_(Object.assign(DIFF, this.localeWordList_));
   }
 

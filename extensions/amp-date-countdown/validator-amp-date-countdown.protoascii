@@ -44,7 +44,7 @@ tags: {  # <amp-date-countdown>
   }
   attrs: {
     name: "offset-seconds"
-    value_regex: "\\d{10}"
+    value_regex: "-?\\d{,10}"
   }
   attrs: {
     name: "timestamp-ms"
