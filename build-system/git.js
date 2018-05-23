@@ -22,35 +22,46 @@
 const {getStdout} = require('./exec');
 
 /**
- * Returns the list of files changed on the local branch relative to master,
- * one on each line.
+ * Returns the branch point of the current branch off of master.
+ * @return {string}
+ */
+function gitBranchPoint() {
+  return getStdout('git merge-base master HEAD').trim();
+}
+
+/**
+ * Returns the list of files changed on the local branch relative to the branch
+ * point off of master, one on each line.
  * @return {!Array<string>}
  */
 exports.gitDiffNameOnlyMaster = function() {
-  return getStdout('git diff --name-only master').trim().split('\n');
+  const branchPoint = gitBranchPoint();
+  return getStdout(`git diff --name-only ${branchPoint}`).trim().split('\n');
 };
 
 /**
- * Returns the list of files changed on the local branch relative to master,
- * in diffstat format.
+ * Returns the list of files changed on the local branch relative to the branch
+ * point off of master, in diffstat format.
  * @return {string}
  */
 exports.gitDiffStatMaster = function() {
-  return getStdout('git -c color.ui=always diff --stat master');
+  const branchPoint = gitBranchPoint();
+  return getStdout(`git -c color.ui=always diff --stat ${branchPoint}`);
 };
 
 /**
- * Returns the list of files added by the local branch relative to master,
- * one on each line.
+ * Returns the list of files added by the local branch relative to the branch
+ * point off of master, one on each line.
  * @return {!Array<string>}
  */
 exports.gitDiffAddedNameOnlyMaster = function() {
-  return getStdout(
-      'git diff --name-only --diff-filter=ARC master').trim().split('\n');
+  const branchPoint = gitBranchPoint();
+  return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
+      .trim().split('\n');
 };
 
 /**
- * Returns the full color diff of the changes on the local branch.
+ * Returns the full color diff of the uncommited changes on the local branch.
  * @return {string}
  */
 exports.gitDiffColor = function() {
