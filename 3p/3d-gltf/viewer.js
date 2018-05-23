@@ -212,7 +212,7 @@ export default class GltfViewer {
 
     loader.load(
         resolvedUrl,
-        /** @param {{scene: THREE.Scene}} gltfData */
+        /** @param {{scene: !THREE.Scene}} gltfData */
         gltfData => {
           this.setupCameraForObject_(gltfData.scene);
           gltfData.scene.children

@@ -22,6 +22,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 
+const TAG = 'amp-3d-gltf';
+
 const isWebGLSupported = () => {
   const canvas = document.createElement('canvas');
   const gl = canvas.getContext('webgl')
@@ -124,7 +126,7 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.iframe_ = iframe;
     this.unlistenMessage_ = this.listenGltfViewerMessages_();
 
-    this.element.appendChild(iframe);
+    this.element.appendChild(this.iframe_);
 
     return this.willBeLoaded_.promise;
   }
@@ -152,25 +154,38 @@ export class Amp3dGltf extends AMP.BaseElement {
   }
 
   /**
-   * Sends a command to the viewer through postMessage.
+   * Sends a command to the viewer via postMessage when iframe is ready
+   *
    * @param {string} action
    * @param {(JsonObject|boolean)=} args
+   * @return {!Promise}
    * @private
-   * */
-  sendCommand_(action, args) {
-    this.willBeReady_.promise.then(() => {
+   */
+  sendCommandWhenReady_(action, args) {
+    return this.willBeReady_.promise.then(() => {
       const message = dict({
         'action': action,
         'args': args,
       });
 
-      postMessage(
-          dev().assertElement(this.iframe_),
-          'action',
-          message,
-          '*',
-          true);
+      this.postMessage_('action', message);
     });
+  }
+
+  /**
+   * Wraps postMessage for testing
+   *
+   * @param {string} type
+   * @param {!JsonObject} message
+   * @private
+   */
+  postMessage_(type, message) {
+    postMessage(
+        dev().assertElement(this.iframe_),
+        type,
+        message,
+        '*',
+        true);
   }
 
   /**
@@ -178,34 +193,32 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @override
    */
   viewportCallback(inViewport) {
-    this.sendCommand_('toggleAmpViewport', inViewport);
+    return this.sendCommandWhenReady_('toggleAmpViewport', inViewport);
   }
 
   /** @override */
   pauseCallback() {
-    this.sendCommand_('toggleAmpPlay', false);
+    this.sendCommandWhenReady_('toggleAmpPlay', false);
   }
 
   /** @override */
   resumeCallback() {
-    this.sendCommand_('toggleAmpPlay', true);
+    this.sendCommandWhenReady_('toggleAmpPlay', true);
   }
 
   onLayoutMeasure() {
     const box = this.getLayoutBox();
-    this.sendCommand_(
+    this.sendCommandWhenReady_(
         'setSize',
         dict({'width': box.width, 'height': box.height}));
   }
 
-  /**
-   * @override
-   * @param {!Layout} layout
-   * @return {boolean}
-   */
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 }
 
-AMP.registerElement('amp-3d-gltf', Amp3dGltf);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, Amp3dGltf);
+});
