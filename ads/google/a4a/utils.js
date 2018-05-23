@@ -29,7 +29,10 @@ import {
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
 import {parseUrlDeprecated} from '../../../src/url';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {
+  escapeCssSelectorIdent,
+  whenUpgradedToCustomElement,
+} from '../../../src/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -209,7 +212,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
         }
         const isAmpAdContainerElement =
           Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!r.element.querySelector(`amp-ad[type=${type}]`);
+          !!r.element.querySelector(
+              escapeCssSelectorIdent(`amp-ad[type=${type}]`));
         return isAmpAdContainerElement;
       })
       // Need to wait on any contained element resolution followed by build
@@ -221,8 +225,10 @@ export function groupAmpAdsByType(win, type, groupFn) {
             }
             // Must be container element so need to wait for child amp-ad to
             // be upgraded.
-            return whenUpgradedToCustomElement(dev().assertElement(
-                resource.element.querySelector(`amp-ad[type=${type}]`)));
+            return whenUpgradedToCustomElement(
+                dev().assertElement(
+                    resource.element.querySelector(
+                        escapeCssSelectorIdent(`amp-ad[type=${type}]`))));
           })))
       // Group by networkId.
       .then(elements => elements.reduce((result, element) => {
