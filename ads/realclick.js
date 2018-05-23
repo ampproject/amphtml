@@ -23,11 +23,7 @@ import {validateData, writeScript} from '../3p/3p';
 export function realclick(global, data) {
   validateData(data, ['mcode']);
   global.rcParams = data;
-  if (data.mcode) {
-    writeScript(global, 'https://ssp.realclick.co.kr/amp/ad.js', () => {
-      global.context.renderStart();
-    });
-  } else {
-    global.context.noContentAvailable();
-  }
+  writeScript(global, 'https://ssp.realclick.co.kr/amp/ad.js', () => {
+    global.context.renderStart();
+  });
 }
