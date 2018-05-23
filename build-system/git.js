@@ -28,7 +28,6 @@ const {getStdout} = require('./exec');
 function gitBranchPoint() {
   return getStdout('git merge-base master HEAD').trim();
 }
-exports.gitBranchPoint = gitBranchPoint;
 
 /**
  * Returns the list of files changed on the local branch relative to the branch
