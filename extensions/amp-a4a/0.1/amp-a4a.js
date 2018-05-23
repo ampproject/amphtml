@@ -404,6 +404,7 @@ export class AmpA4A extends AMP.BaseElement {
      * be null before buildCallback() executes or if the impl does not provide
      * an analytice config.
      * @private {?Element}
+     * @visibleForTesting
      */
     this.a4aAnalyticsElement_ = null;
 
@@ -577,7 +578,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -1139,6 +1140,11 @@ export class AmpA4A extends AMP.BaseElement {
     if (!force && this.isRefreshing) {
       return;
     }
+    // Allow embed to release its resources.
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.destroy();
+      this.friendlyIframeEmbed_ = null;
+    }
     if (this.iframe && this.iframe.parentElement) {
       this.iframe.parentElement.removeChild(this.iframe);
       this.iframe = null;
@@ -1146,11 +1152,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
-    }
-    // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed_) {
-      this.friendlyIframeEmbed_.destroy();
-      this.friendlyIframeEmbed_ = null;
     }
   }
 
@@ -1700,7 +1701,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Receive collapse notifications and record lifecycle events for them.
    *
-   * @param unusedElement {!AmpElement}
+   * @param {!AmpElement} unusedElement
    * @override
    */
   collapsedCallback(unusedElement) {
