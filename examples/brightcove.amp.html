@@ -12,13 +12,18 @@
 </head>
 <body>
   <h2>Brightcove Player</h2>
-
+  <p>With amp support configured</p>
   <amp-brightcove
-      data-account="906043040001"
-      data-video-id="1401169490001"
-      data-player="180a5658-8be8-4f33-8eba-d562ab41b40c"
-      layout="responsive" width="480" height="270">
+    id="myPlayer"
+    dock fullscreen-on-landscape
+    data-account="1290862519001"
+    data-video-id="ref:amp-docs-sample"
+    data-player-id="SyIOV8yWM"
+    layout="responsive" width="480" height="270">
   </amp-brightcove>
-
+  <button on="tap:myPlayer.play">Play</button>
+  <button on="tap:myPlayer.pause">Pause</button>
+  <button on="tap:myPlayer.mute">Mute</button>
+  <button on="tap:myPlayer.unmute">Unmute</button>
 </body>
 </html>
