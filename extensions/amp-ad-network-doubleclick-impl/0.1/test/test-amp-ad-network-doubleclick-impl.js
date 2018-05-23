@@ -903,7 +903,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
               case CREATIVE_SIZE_HEADER:
                 return size;
               case AMP_SIGNATURE_HEADER:
-                return isAmpCreative ? 'fake-sig': undefined;
+                return isAmpCreative ? 'fake-sig' : undefined;
               default:
                 return undefined;
             }
