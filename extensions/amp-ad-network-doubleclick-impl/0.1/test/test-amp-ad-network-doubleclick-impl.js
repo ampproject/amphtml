@@ -891,7 +891,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           () => Promise.resolve(VerificationStatus.OK));
     }
 
-    function mockSendXhrRequest(size) {
+    function mockSendXhrRequest(size, isAmpCreative) {
       return {
         arrayBuffer: () => Promise.resolve(utf8Encode(
             '<html><body>Hello, World!</body></html>')),
@@ -903,7 +903,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
               case CREATIVE_SIZE_HEADER:
                 return size;
               case AMP_SIGNATURE_HEADER:
-                return 'fake-sig';
+                return isAmpCreative ? 'fake-sig': undefined;
               default:
                 return undefined;
             }
@@ -953,18 +953,22 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       sandbox.stub(impl, 'updateLayoutPriority').callsFake(() => {});
 
+      const keyResponse = {
+        body: {'keys': []},
+        headers: {'Content-Type': 'application/jwk-set+json'},
+      };
       env.expectFetch(
           'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-          {'keys': []});
+          keyResponse);
       env.expectFetch(
           'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
-          {'keys': []});
+          keyResponse);
     });
 
     it('amp creative - should force iframe to match size of creative', () => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest').returns(
-          mockSendXhrRequest('150x50'));
+          mockSendXhrRequest('150x50', true));
       // Stub ini load otherwise FIE could delay test
       sandbox./*OK*/stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
           .returns(Promise.resolve());
@@ -980,7 +984,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should force iframe to match size of creative', () => {
       sandbox.stub(impl, 'sendXhrRequest').returns(
-          mockSendXhrRequest('150x50'));
+          mockSendXhrRequest('150x50', false));
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
@@ -993,7 +997,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('amp creative - should force iframe to match size of slot', () => {
       stubForAmpCreative();
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
+      sandbox.stub(impl, 'sendXhrRequest').callsFake(() => mockSendXhrRequest(undefined, true));
       sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // Stub ini load otherwise FIE could delay test
@@ -1012,7 +1016,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should force iframe to match size of slot', () => {
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
+      sandbox.stub(impl, 'sendXhrRequest').callsFake(() => mockSendXhrRequest(undefined, false));
       sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // This would normally be set in AmpA4a#buildCallback.
@@ -1029,7 +1033,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should issue an ad request even with bad multi-size data attr', () => {
       stubForAmpCreative();
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
+      sandbox.stub(impl, 'sendXhrRequest').callsFake(() => mockSendXhrRequest(undefined, true));
       impl.element.setAttribute('data-multi-size', '201x50');
       // Stub ini load otherwise FIE could delay test
       sandbox./*OK*/stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
