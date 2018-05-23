@@ -572,9 +572,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.initialSize_.height,
           multiSizeValidation == 'true',
           this.isFluid_);
-      this.parameterSize_ += '|' + dimensions
-          .map(dimension => dimension.join('x'))
-          .join('|');
+      if (dimensions.length) {
+        this.parameterSize_ += '|' + dimensions
+            .map(dimension => dimension.join('x'))
+            .join('|');
+      }
     }
   }
 
@@ -1228,7 +1230,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     } else if (!!this.win.document.querySelector(
                         'meta[name=amp-ad-doubleclick-sra]')) {
                       assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
-                      this.user().error(TAG, 'SRA request failure', error);
+                      this.warnOnError('SRA request failure', error);
                       // Publisher explicitly wants SRA so do not attempt to
                       // recover as SRA guarantees cannot be enforced.
                       typeInstances.forEach(instance => {
@@ -1247,6 +1249,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             });
           });
         });
+  }
+
+  /**
+   * @param {string} message
+   * @param {*} error
+   * @visibleForTesting
+   */
+  warnOnError(message, error) {
+    dev().warn(TAG, message, error);
   }
 
   /** @override */
