@@ -19,14 +19,14 @@ import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
-import {
-  layoutRectLtwh,
-  layoutRectsOverlap,
-  layoutRectSizeEquals,
-  moveLayoutRect,
-} from '../layout-rect';
 import {isBlockedByConsent} from '../error';
 import {isExperimentOn} from '../experiments';
+import {
+  layoutRectLtwh,
+  layoutRectSizeEquals,
+  layoutRectsOverlap,
+  moveLayoutRect,
+} from '../layout-rect';
 import {startsWith} from '../string';
 import {toWin} from '../types';
 
