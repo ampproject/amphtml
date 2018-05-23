@@ -226,6 +226,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'height': '50',
         'type': 'adsense',
       });
+      doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
@@ -392,9 +393,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when !height && !width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -403,10 +404,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when !height && width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         width: '300',
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -415,10 +416,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when height && !width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         height: '150',
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -649,26 +650,22 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
       return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
         expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        expect(url).not.to.match(/(\?|&)consent=(&|$)/);
       });
     });
 
-    it('should include npa=1, consent=false if insufficient consent', () =>
+    it('should include npa=1 if insufficient consent', () =>
       impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then(url => {
         expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        expect(url).to.match(/(\?|&)consent=false(&|$)/);
       }));
 
-    it('should include consent=true and not npa, if sufficient consent', () =>
+    it('should not include not npa, if sufficient consent', () =>
       impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then(url => {
         expect(url).to.not.match(/(\?|&)npa=(&|$)/);
-        expect(url).to.match(/(\?|&)consent=true(&|$)/);
       }));
 
-    it('should not include consent or npa, if not required consent', () =>
+    it('should not include npa, if not required consent', () =>
       impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
         expect(url).to.not.match(/(\?|&)npa=(&|$)/);
-        expect(url).to.not.match(/(\?|&)consent=(&|$)/);
       }));
   });
 
@@ -865,8 +862,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
       // Stub out vsync tasks to run immediately.
       impl.getVsync().run = (vsyncTaskSpec, vsyncState) => {
-        vsyncTaskSpec.measure(vsyncState);
-        vsyncTaskSpec.mutate(vsyncState);
+        if (vsyncTaskSpec.measure) {
+          vsyncTaskSpec.measure(vsyncState);
+        }
+        if (vsyncTaskSpec.mutate) {
+          vsyncTaskSpec.mutate(vsyncState);
+        }
       };
 
       // Fix the viewport to a consistent size to that the test doesn't depend
@@ -919,7 +920,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         // Right margin is 9px from containerContainer and 25px from container.
         // TODO(charliereams): In the test harness it is also offset by 15px due
         // to strange scrollbar behaviour. Figure out how to disable this.
-        expect(element.style.marginRight).to.be.equal('-49px');
+        expect(element.style.marginRight).to.be.equal('-124px');
         expect(element.style.marginLeft).to.be.equal('');
       });
     });
