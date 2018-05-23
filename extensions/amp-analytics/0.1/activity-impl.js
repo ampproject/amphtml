@@ -317,6 +317,7 @@ export class Activity {
     const secondsSinceStart = Math.floor(this.getTimeSinceStart_() / 1000);
     return this.activityHistory_.getTotalEngagedTime(secondsSinceStart);
   }
+
   /**
    * Get the incremental engaged time since the last push and reset it if asked.
    * @param {string} name
