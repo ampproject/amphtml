@@ -393,9 +393,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when !height && !width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -404,10 +404,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when !height && width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         width: '300',
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -416,10 +416,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when height && !width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         height: '150',
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
