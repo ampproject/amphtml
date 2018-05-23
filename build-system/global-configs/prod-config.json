@@ -1,8 +1,7 @@
 {
   "allow-doc-opt-in": [
-    "amp-animation",
     "amp-date-picker",
-    "amp-ima-video",
+    "amp-next-page",
     "ampdoc-shell",
     "inabox-rov",
     "inline-styles",
