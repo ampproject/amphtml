@@ -900,7 +900,7 @@ function getBrowserCapabilitiesBitmap(win) {
  * Returns an enum value representing the AMP binary type, or null if this is a
  * canonical page.
  * @param {!Window} win
- * @return {?string}
+ * @return {?string} The binary type enum.
  * @visibleForTesting
  */
 export function getAmpRuntimeTypeParameter(win) {
