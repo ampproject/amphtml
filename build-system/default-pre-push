@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+# This script adds a pre-push hook to .git/hooks/, which runs some basic tests
+# before running "git push".
+#
+# Default pre-push hook for AMPHTML. To enable, run:
+#     "./build-system/enable-git-pre-push.sh"
+#
+# Note: The checks in this file must not take more than a few seconds to run.
+# Time consuming checks that call gulp build, or run all the tests are
+# forbidden. If you'd like to add something like that to your pre-push, do so
+# by directly editing .git/hooks/pre-push instead of editing this default hook.
+
+GREEN() { echo -e "\033[0;32m$1\033[0m"; }
+CYAN() { echo -e "\033[0;36m$1\033[0m"; }
+
+GULP_BUNDLE_SIZE="gulp bundle-size"
+GULP_LINT_LOCAL="gulp lint --local-changes"
+GULP_TEST_LOCAL="gulp test --local-changes"
+
+echo $(GREEN "Running") $(CYAN "pre-push") $(GREEN "hooks. (Run") $(CYAN "git push --no-verify") $(GREEN "or") $(CYAN "git push -n") $(GREEN "to skip them.)")
+echo -e "\n"
+
+echo $(GREEN "Running") $(CYAN "$GULP_BUNDLE_SIZE")
+eval $GULP_BUNDLE_SIZE || exit 1
+echo -e "\n"
+
+echo $(GREEN "Running") $(CYAN "$GULP_LINT_LOCAL")
+eval $GULP_LINT_LOCAL || exit 1
+echo -e "\n"
+
+echo $(GREEN "Running") $(CYAN "$GULP_TEST_LOCAL")
+eval $GULP_TEST_LOCAL || exit 1
+echo -e "\n"
+
+echo $(GREEN "Done with") $(CYAN "pre-push") $(GREEN "hooks. Pushing commits to GitHub...")
