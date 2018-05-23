@@ -418,7 +418,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  shouldSkipXhr_() {
+  isXhrAllowed_() {
     if (!isCanonical(this.win)) {
       return false;
     }

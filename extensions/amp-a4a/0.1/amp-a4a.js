@@ -705,7 +705,7 @@ export class AmpA4A extends AMP.BaseElement {
           // If we should skip the XHR, we will instead request and render
           // by simply writing a frame into the page using
           // renderViaFrameGet
-          if (this.shouldSkipXhr_()) {
+          if (this.isXhrAllowed()) {
             this.renderViaFrameGet_(this.adUrl_);
             throw new Error(FRAME_GET);
           }
@@ -1085,7 +1085,7 @@ export class AmpA4A extends AMP.BaseElement {
     });
   }
 
-  shouldSkipXhr_() {
+  isXhrAllowed() {
     return false;
   }
 
