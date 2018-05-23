@@ -202,7 +202,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     });
   });
 
-  describe.only('#initiateSraRequests', () => {
+  describe('#initiateSraRequests', () => {
     let xhrMock;
 
     function createA4aSraInstance(networkId) {
@@ -340,6 +340,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             doubleclickInstances.push(impl);
             sandbox.stub(impl, 'isValidElement').returns(!invalid);
             sandbox.stub(impl, 'promiseErrorHandler_');
+            sandbox.stub(impl, 'warnOnError');
             if (invalid) {
               impl.element.setAttribute('data-test-invalid', 'true');
             }

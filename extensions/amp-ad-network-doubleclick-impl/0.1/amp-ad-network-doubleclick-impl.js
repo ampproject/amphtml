@@ -1247,7 +1247,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     } else if (!!this.win.document.querySelector(
                         'meta[name=amp-ad-doubleclick-sra]')) {
                       assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
-                      this.user().error(TAG, 'SRA request failure', error);
+                      this.warnOnError('SRA request failure', error);
                       // Publisher explicitly wants SRA so do not attempt to
                       // recover as SRA guarantees cannot be enforced.
                       typeInstances.forEach(instance => {
@@ -1266,6 +1266,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             });
           });
         });
+  }
+
+  /**
+   * @param {string} messages
+   * @param {!Error} error
+   * @visibleForTesting
+   */
+  warnOnError(message, error) {
+    this.dev().warn(TAG, message, error);
   }
 
   /** @override */
