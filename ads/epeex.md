@@ -18,11 +18,11 @@ limitations under the License.
 
 ```html
 <amp-embed width="100" height="100"
-heights="(max-width:480px) 460%, (max-width:768px) 130%, (min-width: 769px) 85%, 75%"
-type="epeex"
-layout="responsive"
-data-account="demoepeex"
-data-channel="1">
+	heights="(max-width:480px) 460%, (max-width:768px) 130%, (min-width: 769px) 85%, 75%"
+	type="epeex"
+	layout="responsive"
+	data-account="demoepeex"
+	data-channel="1">
 </amp-embed>
 ```
 
