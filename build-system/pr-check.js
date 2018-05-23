@@ -565,8 +565,8 @@ function main() {
   const files = filesInPr();
   const buildTargets = determineBuildTargets(files);
 
-  // Exit early if flag-config files are mixed with non-flag-config files.
-  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size !== 1) {
+  // Exit early if flag-config files are mixed with runtime files.
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Looks like your PR contains',
         colors.cyan('{prod|canary}-config.json'),
