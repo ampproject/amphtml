@@ -62,6 +62,7 @@ const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
 // Each extension and version must be listed individually here.
+declareExtension('amp-3d-gltf', '0.1');
 declareExtension('amp-3q-player', '0.1');
 declareExtension('amp-access', '0.1', {hasCss: true});
 declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
