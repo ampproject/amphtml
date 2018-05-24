@@ -59,8 +59,10 @@ export class ConsentStateManager {
    * @param {string} instanceId
    */
   registerConsentInstance(instanceId) {
-    dev().assert(!this.instances_[instanceId],
-        `${TAG}: instance already registered`);
+    if (this.instances_[instanceId]) {
+      dev().error(TAG, `instance ${instanceId} already registered`);
+      return;
+    }
     this.instances_[instanceId] = new ConsentInstance(this.ampdoc_, instanceId);
     this.consentChangeObservables_[instanceId] = new Observable();
     if (this.consentReadyResolvers_[instanceId]) {
@@ -76,10 +78,11 @@ export class ConsentStateManager {
    * @param {CONSENT_ITEM_STATE} state
    */
   updateConsentInstanceState(instanceId, state) {
-    dev().assert(this.instances_[instanceId],
-        `${TAG}: cannot find this instance`);
-    dev().assert(this.consentChangeObservables_[instanceId],
-        `${TAG}: should not update ignored consent`);
+    if (!this.instances_[instanceId] ||
+        !this.consentChangeObservables_[instanceId]) {
+      dev().error(TAG, `instance ${instanceId} not registered`);
+      return;
+    }
     this.consentChangeObservables_[instanceId].fire(state);
     this.instances_[instanceId].update(state);
   }

@@ -77,8 +77,9 @@ export class ConsentPolicyManager {
    * @param {!JsonObject} config
    */
   registerConsentPolicyInstance(policyId, config) {
-    dev().assert(!this.instances_[policyId],
-        `${TAG}: instance already registered`);
+    if (this.instances_[policyId]) {
+      dev().error(TAG, `policy ${policyId} already registered`);
+    }
 
     const waitFor = Object.keys(config['waitFor'] || {});
 
@@ -283,8 +284,10 @@ export class ConsentPolicyInstance {
   consentStateChangeHandler(consentId, state) {
     // TODO: Keeping an array can have performance issue, change to using a map
     // if necessary.
-    dev().assert(hasOwn(this.itemToConsentState_, consentId),
-        `cannot find ${consentId} in policy state`);
+    if (!hasOwn(this.itemToConsentState_, consentId)) {
+      dev().error(TAG, `cannot find ${consentId} in policy state`);
+      return;
+    }
 
     if (state == CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
