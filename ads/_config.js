@@ -965,7 +965,7 @@ export const adConfig = {
   },
 
   yieldmo: {
-    prefetch: 'https://static.yieldmo.com/ym.amp1.js',
+    prefetch: 'https://static.yieldmo.com/ym.1.js',
     preconnect: [
       'https://s.yieldmo.com',
       'https://ads.yieldmo.com',
