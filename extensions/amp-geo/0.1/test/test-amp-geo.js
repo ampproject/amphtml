@@ -45,6 +45,14 @@ describes.realWin('amp-geo', {
     },
   };
 
+  const configWithUppercase = {
+    ISOCountryGroups: {
+      nafta: ['CA', 'mx', 'us', 'unknown'],
+      unknown: ['unknown'],
+      anz: ['au', 'NZ'],
+    },
+  };
+
   let win, doc;
   let ampdoc;
   let geo;
@@ -155,6 +163,43 @@ describes.realWin('amp-geo', {
   it('should allow hash to override geo in test', () => {
     win.AMP_MODE.geoOverride = 'nz';
     addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+      expectBodyHasClass([
+        'amp-iso-country-nz',
+        'amp-geo-group-anz',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+      ], false);
+    });
+  });
+
+  it('should allow uppercase hash to override geo in test', () => {
+    win.AMP_MODE.geoOverride = 'NZ';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+      expectBodyHasClass([
+        'amp-iso-country-nz',
+        'amp-geo-group-anz',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+      ], false);
+    });
+  });
+
+  it('should accept uppercase country codes in config', () => {
+    win.AMP_MODE.geoOverride = 'nz';
+    addConfigElement('script', 'application/json',
+        JSON.stringify(configWithUppercase));
     geo.buildCallback();
 
     return Services.geoForDocOrNull(el).then(geo => {
