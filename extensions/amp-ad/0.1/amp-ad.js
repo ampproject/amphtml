@@ -86,7 +86,7 @@ export class AmpAd extends AMP.BaseElement {
         this.getVsync().mutate(() => {
           this.element.setAttribute('data-amp-slot-index', slotId);
 
-          const useRemoteHtml = (!(adConfig[type] || {}).remoteHTMLDisabled &&
+          let useRemoteHtml = (!(adConfig[type] || {}).remoteHTMLDisabled &&
               this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
           // TODO(tdrl): Check amp-ad registry to see if they have this already.
           // TODO(a4a-cam): Shorten this predicate.

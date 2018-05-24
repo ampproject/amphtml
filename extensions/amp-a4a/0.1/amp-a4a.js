@@ -104,6 +104,9 @@ export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 /** @type {string} */
 export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
 
+/** @type {string} */
+export const FRAME_GET = 'FRAME-GET';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
@@ -699,6 +702,14 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           this.adUrl_ = adUrl;
           this.handleLifecycleStage_('urlBuilt');
+          // If the entire request/render should be done by simply setting
+          // the src on an iframe and writing it into the DOM, we
+          // short-circuit here, skipping the XHR, and just go directly
+          // to renderViaCachedcontentiframe
+          if (this.shouldSkipXhr_()) {
+            this.renderViaFrameGet_(this.adUrl_);
+            throw new Error(FRAME_GET);
+          }
           return adUrl && this.sendXhrRequest(adUrl);
         })
         // The following block returns either the response (as a
@@ -836,6 +847,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
         .catch(error => {
           switch (error.message || error) {
+            case FRAME_GET:
             case NETWORK_FAILURE:
               return null;
             case INVALID_SPSA_RESPONSE:
@@ -1072,6 +1084,10 @@ export class AmpA4A extends AMP.BaseElement {
       this.promiseErrorHandler_(error);
       throw cancellation();
     });
+  }
+
+  shouldSkipXhr_() {
+    return false;
   }
 
   /** @override **/
@@ -1360,7 +1376,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.creativeBody_ = null; // Free resources.
     } else if (this.adUrl_) {
       assertHttpsUrl(this.adUrl_, this.element);
-      renderPromise = this.renderViaCachedContentIframe_(this.adUrl_);
+      renderPromise = this.renderViaFrameGet_(this.adUrl_);
     } else {
       // Ad URL may not exist if buildAdUrl throws error or returns empty.
       // If error occurred, it would have already been reported but let's
@@ -1505,10 +1521,15 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Creates iframe whose src matches that of the ad URL.  The response should
+   * Creates iframe whose src matches that of the ad URL. For standard
+   * Fast Fetch running on the AMP cdn, an XHR request will typically have
+   * already been sent to the same adUrl, and the response should
    * have been cached causing the browser to render without callout.  However,
    * it is possible for cache miss to occur which can be detected server-side
    * by missing ORIGIN header.
+   *
+   * Additioanlly, this method is also used in certain cases to send the only
+   * request, i.e. the initial XHR is skipped.
    *
    * Note: As of 2016-10-18, the fill-from-cache assumption appears to fail on
    * Safari-on-iOS, which issues a fresh network request, even though the
@@ -1519,7 +1540,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise} awaiting ad completed insertion.
    * @private
    */
-  renderViaCachedContentIframe_(adUrl) {
+  renderViaFrameGet_(adUrl) {
     this.handleLifecycleStage_('renderCrossDomainStart', {
       'isAmpCreative': this.isVerifiedAmpCreative_,
       'releaseType': this.releaseType_,

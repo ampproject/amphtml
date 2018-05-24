@@ -115,15 +115,12 @@ export class AmpAdXOriginIframeHandler {
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
 
     // To provide position to inabox.
-    if (isExperimentOn(this.win_, 'inabox-position-api')) {
-      this.inaboxPositionApi_ = new SubscriptionApi(
-          this.iframe, MessageType.SEND_POSITIONS, true, () => {
-            // TODO(@zhouyx): Make sendPosition_ only send to message origin
-            // iframe
-            this.sendPosition_();
-            this.registerPosition_();
-          });
-    }
+    this.inaboxPositionApi_ = new SubscriptionApi(
+        this.iframe, MessageType.SEND_POSITIONS, true, () => {
+          // TODO(@zhouyx): Make sendPosition_ only send to message origin iframe
+          this.sendPosition_();
+          this.registerPosition_();
+        });
 
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.

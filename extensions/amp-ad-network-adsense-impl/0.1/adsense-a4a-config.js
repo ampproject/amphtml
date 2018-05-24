@@ -27,7 +27,7 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {dev} from '../../../src/log';
 import {forceExperimentBranch} from '../../../src/experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
+import {supportsNativeCrypto} from '../../../ads/google/a4a/utils';
 
 /** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
@@ -48,7 +48,7 @@ export const URL_EXPERIMENT_MAPPING = {
  * @return {boolean}
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
-  if (useRemoteHtml || !isGoogleAdsA4AValidEnvironment(win) ||
+  if (useRemoteHtml || !supportsNativeCrypto(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
   }

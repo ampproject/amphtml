@@ -410,6 +410,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+  shouldSkipXhr_() {
+    const googleCdnProxyRegex =
+    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+    return !(googleCdnProxyRegex.test(this.win.location.origin));/* ||
+             getMode(this.win).localDev || getMode(this.win).test);*/
+  }
+
+  /** @override */
   onCreativeRender(creativeMetaData) {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
