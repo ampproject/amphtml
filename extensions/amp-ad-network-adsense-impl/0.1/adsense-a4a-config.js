@@ -28,6 +28,7 @@ import {
 import {dev} from '../../../src/log';
 import {forceExperimentBranch} from '../../../src/experiments';
 import {supportsNativeCrypto} from '../../../ads/google/a4a/utils';
+import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-manager';
 
 /** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
@@ -41,6 +42,25 @@ export const URL_EXPERIMENT_MAPPING = {
   '0': null,
 };
 
+export const ADSENSE_EXPERIMENTS = {
+  UNCONDITIONED_CANONICAL_EXP: '21062154',
+  UNCONDITIONED_CANONICAL_CTL: '21062155',
+  CANONICAL_EXP: '21062158',
+  CANONICAL_CTL: '21062159',
+}
+
+export const ADSENSE_EXP_NAMES = {
+  UNCONDITIONED_CANONICAL: 'expAdsenseUnconditionedCanonical',
+  CANONICAL: 'expAdsenseCanonical',
+}
+
+function randomlySelectUnconditionedExperiments(win, element) {
+ selectAndSetExperiments(win, element,
+                         [ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP,
+                          ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL],
+                         ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL);
+}
+
 /**
  * @param {!Window} win
  * @param {!Element} element
@@ -48,6 +68,7 @@ export const URL_EXPERIMENT_MAPPING = {
  * @return {boolean}
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
+  randomlySelectUnconditionedExperiments(win, element);
   if (useRemoteHtml || !supportsNativeCrypto(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
