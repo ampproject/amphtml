@@ -225,6 +225,10 @@ export class AmpGeo extends AMP.BaseElement {
             return GROUP_PREFIX + group;
           });
 
+          if (!self.matchedGroups_.length) {
+            classesToAdd.push('amp-geo-no-group');
+          }
+
           states.ISOCountryGroups = self.matchedGroups_;
           classesToAdd.push(COUNTRY_PREFIX + this.country_);
 
