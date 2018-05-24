@@ -418,18 +418,18 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  isXhrAllowed_() {
+  isXhrAllowed() {
     if (!isCanonical(this.win)) {
-      return false;
+      return true;
     }
     const exp = getExperimentBranch(
         this.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ||
           getExperimentBranch(this.win, ADSENSE_EXP_NAMES.CANONICAL);
     if (exp == ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
         exp == ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP) {
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   /** @override */

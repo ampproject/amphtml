@@ -32,7 +32,8 @@ import {
  * @param {string} expName
  */
 export function selectAndSetExperiments(win, element, branches, expName) {
-  const experimentId = maybeSelectExperiment(
+  const expUtils = new ExperimentUtils();
+  const experimentId = expUtils.maybeSelectExperiment(
       win, element, branches, expName);
   if (!!experimentId) {
     addExperimentIdToElement(experimentId, element);
@@ -41,21 +42,23 @@ export function selectAndSetExperiments(win, element, branches, expName) {
   return experimentId;
 }
 
-/**
- * @param {!Window} win
- * @param {!Element} element
- * @param {!Array<string>} selectionBranches
- * @param {string} experimentName
- * @visibileForTesting
- */
-function maybeSelectExperiment(
-  win, element, selectionBranches, experimentName) {
-  const experimentInfoMap =
-      /** @type {!Object<string, !ExperimentInfo>} */ ({});
-  experimentInfoMap[experimentName] = {
-    isTrafficEligible: () => true,
-    branches: selectionBranches,
-  };
-  randomlySelectUnsetExperiments(win, experimentInfoMap);
-  return getExperimentBranch(win, experimentName);
+export class ExperimentUtils {
+  /**
+   * @param {!Window} win
+   * @param {!Element} element
+   * @param {!Array<string>} selectionBranches
+   * @param {string} experimentName
+   * @visibileForTesting
+   */
+  maybeSelectExperiment(
+    win, element, selectionBranches, experimentName) {
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    experimentInfoMap[experimentName] = {
+      isTrafficEligible: () => true,
+      branches: selectionBranches,
+    };
+    randomlySelectUnsetExperiments(win, experimentInfoMap);
+    return getExperimentBranch(win, experimentName);
+  }
 }

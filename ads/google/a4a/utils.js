@@ -315,7 +315,7 @@ export function googleAdUrl(
   a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
-  const ampAdImplementation = a4a.shouldSkipXhr_() ?
+  const ampAdImplementation = a4a.isXhrAllowed() ?
     AmpAdImplementation.AMP_AD_FRAME_GET :
     AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP;
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime,

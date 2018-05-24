@@ -105,13 +105,14 @@ export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
 
 /** @type {string} */
-export const FRAME_GET = 'FRAME-GET';
+export const IFRAME_GET = 'IFRAME-GET';
 
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
   SAFEFRAME: 'safeframe',
   NAMEFRAME: 'nameframe',
+  IFRAME_GET: 'iframe_get',
 };
 
 /** @type {!Object} @private */
@@ -706,8 +707,9 @@ export class AmpA4A extends AMP.BaseElement {
           // by simply writing a frame into the page using
           // renderViaFrameGet
           if (this.isXhrAllowed()) {
-            this.renderViaFrameGet_(this.adUrl_);
-            throw new Error(FRAME_GET);
+            this.experimentalNonAmpCreativeRenderMethod_ =
+                XORIGIN_MODE.IFRAME_GET;
+            Promise.reject(IFRAME_GET);
           }
           return adUrl && this.sendXhrRequest(adUrl);
         })
@@ -846,7 +848,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
         .catch(error => {
           switch (error.message || error) {
-            case FRAME_GET:
+            case IFRAME_GET:
             case NETWORK_FAILURE:
               return null;
             case INVALID_SPSA_RESPONSE:

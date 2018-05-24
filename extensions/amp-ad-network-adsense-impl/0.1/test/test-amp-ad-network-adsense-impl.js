@@ -974,7 +974,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(AmpAdNetworkAdsenseImpl.prototype.getConsentPolicy()).to.be.null);
   });
 
-  describe('#shouldSkipXhr', () => {
+  describe('#isXhrAllowed', () => {
     beforeEach(() => {
       impl.win = {
         location: {},
@@ -987,11 +987,11 @@ describes.realWin('amp-ad-network-adsense-impl', {
       toggleExperiment(impl.win, ADSENSE_EXP_NAMES.CANONICAL, false);
     });
 
-    it('should return true if on a canonical page, and in experiment', () => {
+    it('should return false if on a canonical page, and in experiment', () => {
       forceExperimentBranch(impl.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
           ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP);
       impl.win.location.origin = 'https://www.somesite.com';
-      expect(impl.shouldSkipXhr_()).to.be.true;
+      expect(impl.isXhrAllowed()).to.be.false;
 
       toggleExperiment(
           impl.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL, false);
@@ -999,17 +999,17 @@ describes.realWin('amp-ad-network-adsense-impl', {
       forceExperimentBranch(impl.win, ADSENSE_EXP_NAMES.CANONICAL,
           ADSENSE_EXPERIMENTS.CANONICAL_EXP);
       impl.win.location.origin = 'https://www.somesite.com';
-      expect(impl.shouldSkipXhr_()).to.be.true;
+      expect(impl.isXhrAllowed()).to.be.false;
     });
 
-    it('should return false on a non-canonical page', () => {
+    it('should return true on a non-canonical page', () => {
       impl.win.location.origin = 'https://www-somesite.cdn.ampproject.org';
-      expect(impl.shouldSkipXhr_()).to.be.false;
+      expect(impl.isXhrAllowed()).to.be.true;
     });
 
-    it('should return false if on a canonical page, not in experiment', () => {
+    it('should return true if on a canonical page, not in experiment', () => {
       impl.win.location.origin = 'https://www.somesite.com';
-      expect(impl.shouldSkipXhr_()).to.be.false;
+      expect(impl.isXhrAllowed()).to.be.true;
     });
   });
 });
