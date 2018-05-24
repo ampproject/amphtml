@@ -71,7 +71,7 @@ export class LandscapeComponent {
     const url = landscapeJson['url'];
     const {hostname: domainName} = Services.urlForDoc(element).parse(url);
 
-    return {
+    const landscape = {
       url,
       domainName,
       type: landscapeJson['type'],
@@ -79,6 +79,12 @@ export class LandscapeComponent {
       category: landscapeJson['category'],
       image: landscapeJson['image'],
     };
+
+    if (landscapeJson['ampdoc']) {
+      landscape.ampdoc = landscapeJson['ampdoc'];
+    }
+
+    return landscape;
   }
 
   /** @override */
@@ -99,6 +105,10 @@ export class LandscapeComponent {
             ref="meta"></div>
         </a>`;
     addAttributesToElement(el, dict({'href': landscapeData.url}));
+
+    if (landscapeData['ampdoc'] === true) {
+      addAttributesToElement(el, dict({'rel': 'amphtml'}));
+    }
 
     const landscapeEls = htmlRefs(el);
     const {

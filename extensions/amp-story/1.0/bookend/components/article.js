@@ -18,7 +18,7 @@ import {BookendComponentInterface} from './bookend-component-interface';
 import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {htmlFor} from '../../../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
 
@@ -31,6 +31,14 @@ import {userAssertValidProtocol} from '../../utils';
  * }}
  */
 export let ArticleComponentDef;
+
+/**
+ * @struct @typedef {{
+ *   heading: !Element,
+ *   meta: !Element,
+ * }}
+ */
+let articleElsDef;
 
 /**
  * Builder class for the small article component.
@@ -74,6 +82,10 @@ export class ArticleComponent {
       article.image = articleJson['image'];
     }
 
+    if (articleJson['ampdoc']) {
+      article.ampdoc = articleJson['ampdoc'];
+    }
+
     return /** @type {!ArticleComponentDef} */ (article);
   }
 
@@ -81,13 +93,20 @@ export class ArticleComponent {
   buildTemplate(articleData, doc) {
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
-    const template =
+    const el =
         html`
         <a class="i-amphtml-story-bookend-article
           i-amphtml-story-bookend-component"
           target="_top">
+          <h2 class="i-amphtml-story-bookend-article-heading" ref="heading">
+          </h2>
+          <div class="i-amphtml-story-bookend-component-meta" ref="meta"></div>
         </a>`;
-    addAttributesToElement(template, dict({'href': articleData.url}));
+    addAttributesToElement(el, dict({'href': articleData.url}));
+
+    if (articleData['ampdoc'] === true) {
+      addAttributesToElement(el, dict({'rel': 'amphtml'}));
+    }
 
     if (articleData.image) {
       const ampImg =
@@ -98,19 +117,18 @@ export class ArticleComponent {
           </amp-img>`;
 
       addAttributesToElement(ampImg, dict({'src': articleData.image}));
-      template.appendChild(ampImg);
+      el.appendChild(ampImg);
     }
 
-    const heading =
-      html`<h2 class="i-amphtml-story-bookend-article-heading"></h2>`;
+    const articleElements = htmlRefs(el);
+    const {
+      heading,
+      meta,
+    } = /** @type {!articleElsDef} */ (articleElements);
+
     heading.textContent = articleData.title;
-    template.appendChild(heading);
+    meta.textContent = articleData.domainName;
 
-    const articleMeta =
-      html`<div class="i-amphtml-story-bookend-component-meta"></div>`;
-    articleMeta.textContent = articleData.domainName;
-    template.appendChild(articleMeta);
-
-    return template;
+    return el;
   }
 }

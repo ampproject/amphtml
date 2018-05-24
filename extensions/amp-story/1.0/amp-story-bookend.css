@@ -297,6 +297,7 @@
 .i-amphtml-story-bookend-cta-link {
   background-color: rgba(255, 255, 255, 0.15) !important;
   border-radius: 100px !important;
+  height: 40px !important;
   overflow: hidden !important;
   text-decoration: none !important;
   width: calc(50% - 6px) !important;
@@ -312,7 +313,6 @@
   font-weight: bold !important;
   line-height: 40px !important;
   padding: 0 24px !important;
-  height: 40px !important;
   text-overflow: ellipsis !important;
   overflow: hidden !important;
   white-space: nowrap !important;

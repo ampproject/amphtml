@@ -58,7 +58,7 @@ export class TextBoxComponent {
    * @return {!Element}
    * @override
    * */
-  buildTemplate(textboxData, doc) {
+  buildElement(textboxData, doc) {
     const html = htmlFor(doc);
     const container =
         html`
