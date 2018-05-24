@@ -672,7 +672,7 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getGeo_(getter, expr) {
-    return Services.geoForOrNull(this.ampdoc.win)
+    return Services.geoForDocOrNull(this.ampdoc)
         .then(geo => {
           user().assert(geo,
               'To use variable %s, amp-geo should be configured',
