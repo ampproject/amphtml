@@ -22,6 +22,6 @@ import {validateSrcPrefix, writeScript} from '../3p/3p';
  */
 export function chargeads(global, data) {
   const {src} = data;
-  validateSrcPrefix('https://www.chargeplatform.com/', src);
+  validateSrcPrefix(['https://www.chargeplatform.com/', 'https://tags.chargeplatform.com/'], src);
   writeScript(global, src);
 }
