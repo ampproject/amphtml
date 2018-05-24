@@ -492,13 +492,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isSwipeLargeEnoughForHint_(deltaX, deltaY) {
-    //console.log("x: " +deltaX + " y: " +deltaY);
-    const sideSwipe  = (Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
-    const upSwipe  = ((-1 * deltaY) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
-    if(upSwipe && !sideSwipe){
-      console.log("x: " +deltaX + " y: " +deltaY);
-    }
-    return (sideSwipe||upSwipe);
+    const sideSwipe = (Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
+    const upSwipe = ((-1 * deltaY) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
+    return (sideSwipe || upSwipe);
   }
 
   /** @private */
