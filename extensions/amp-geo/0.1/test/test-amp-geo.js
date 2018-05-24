@@ -174,6 +174,27 @@ describes.realWin('amp-geo', {
       expectBodyHasClass([
         'amp-iso-country-unknown',
         'amp-geo-group-nafta',
+        'amp-geo-no-group',
+      ], false);
+    });
+  });
+
+
+  it('should set amp-geo-no-group if no group matches', () => {
+    win.AMP_MODE.geoOverride = 'gb';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('gb');
+      expectBodyHasClass([
+        'amp-iso-country-gb',
+        'amp-geo-no-group',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+        'amp-geo-group-anz',
       ], false);
     });
   });
