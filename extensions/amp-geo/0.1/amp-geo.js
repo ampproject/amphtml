@@ -140,7 +140,7 @@ export class AmpGeo extends AMP.BaseElement {
       (isCanary(this.win) || getMode(this.win).localDev) &&
       /^\w+$/.test(getMode(this.win).geoOverride)) {
       this.mode_ = mode.GEO_OVERRIDE;
-      this.country_ = getMode(this.win).geoOverride;
+      this.country_ = getMode(this.win).geoOverride.toLowerCase();
     }
   }
   /**
@@ -164,6 +164,8 @@ export class AmpGeo extends AMP.BaseElement {
         user().assert(
             isArray(ISOCountryGroups[group]),
             `${errorPrefix}[${group}] must be an array`);
+        ISOCountryGroups[group] = ISOCountryGroups[group]
+            .map(country => country.toLowerCase());
         if (ISOCountryGroups[group].includes(this.country_)) {
           this.matchedGroups_.push(group);
         }
