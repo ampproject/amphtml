@@ -20,7 +20,7 @@ import {
   SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
-import {Entitlement} from '../../amp-subscriptions/0.1/entitlement';
+import {Entitlement, GrantReason} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -160,8 +160,9 @@ export class GoogleSubscriptionsPlatform {
         source: swgEntitlement.source,
         raw: swgEntitlements.raw,
         service: PLATFORM_ID,
-        products: swgEntitlement.products,
-        subscriptionToken: swgEntitlement.subscriptionToken,
+        granted: true, //swgEntitlements.getEntitlementForThis makes sure this is true.
+        grantReason: GrantReason.SUBSCRIBER, // there is no other case of subscription for SWG as of now.
+        dataObject: swgEntitlement.json(),
       });
     });
   }

@@ -331,4 +331,48 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     platform.executeAction('subscribe');
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
+
+  describe('getEntitlements', () => {
+    it('should convert granted entitlements to internal shape', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      return platform.getEntitlements().then(entitlement => {
+        expect(entitlement.source).to.be.equal('google');
+        expect(entitlement.granted).to.be.equal(true);
+        expect(entitlement.grantReason).to.be.equal(GrantReason.SUBSCRIBER);
+        expect(entitlement.data).to.deep.equal(entitlementResponse);
+      });
+    });
+
+    it('should convert non granted entitlements to null', () => {
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              entitlements: {
+                source: 'google',
+                products: ['example.org:premium'],
+                subscriptionToken: '',
+              },
+            });
+          },
+        });
+      });
+      return platform.getEntitlements().then(entitlement => {
+        expect(entitlement).to.be.equal(null);
+      });
+    });
+  });
 });
