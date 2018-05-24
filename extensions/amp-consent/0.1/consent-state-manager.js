@@ -183,13 +183,11 @@ export class ConsentInstance {
    * @param {!CONSENT_ITEM_STATE} state
    */
   update(state) {
-    console.log('update value is ', state);
     if (!isEnumValue(CONSENT_ITEM_STATE, state)) {
       state = CONSENT_ITEM_STATE.UNKNOWN;
     }
 
     if (state == CONSENT_ITEM_STATE.DISMISSED) {
-      console.log('this.localValue when dismissed is ', this.localValue_);
       this.localValue_ = this.localValue_ || CONSENT_ITEM_STATE.UNKNOWN;
       return;
     }
@@ -206,7 +204,6 @@ export class ConsentInstance {
     }
 
     this.localValue_ = state;
-    console.log('update localvalue ', this.localValue_);
 
     if (state == CONSENT_ITEM_STATE.UNKNOWN) {
       return;
