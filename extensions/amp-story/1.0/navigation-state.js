@@ -87,7 +87,7 @@ export class NavigationState {
    * @param {string=} pageId
    */
   // TODO(alanorozco): pass whether change was automatic or on user action
-  updateActivePage(pageIndex, totalPages, pageId) {
+  updateActivePage(pageIndex, totalPages, pageId, isFinalPage) {
     const changeValue = {
       pageIndex,
       pageId,
@@ -97,7 +97,7 @@ export class NavigationState {
 
     this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);
 
-    if (pageIndex >= totalPages - 1) {
+    if (isFinalPage) {
       this.hasBookend_().then(hasBookend => {
         if (!hasBookend) {
           this.fire_(StateChangeType.END);
