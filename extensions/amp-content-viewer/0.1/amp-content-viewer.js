@@ -22,12 +22,14 @@ import {
   DoubletapRecognizer,
   PinchRecognizer,
   SwipeXYRecognizer,
+  TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {
   expandLayoutRect,
@@ -291,19 +293,17 @@ export class AmpContentViewer extends AMP.BaseElement {
     // triggering the gesture.
     this.gestures_ = Gestures.get(
         this.element,
-        /* opt_shouldNotPreventDefault */true
+        /* opt_shouldNotPreventDefault */ false
     );
 
     this.gestures_.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
-        event.preventDefault();
       }
     });
 
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
-      event.preventDefault();
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
       const deltaX = this.elementBox_.width / 2 - e.data.clientX;
       const deltaY = this.elementBox_.height / 2 - e.data.clientY;
@@ -313,7 +313,6 @@ export class AmpContentViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
-      event.preventDefault();
       this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
@@ -323,12 +322,17 @@ export class AmpContentViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
-      event.preventDefault();
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
       if (e.data.last) {
         this.onZoomRelease_();
       }
+    });
+
+    // Override all taps
+    this.gestures_.onGesture(TapRecognizer, e => {
+      const event = createCustomEvent(this.win, 'click', null, {bubbles: true});
+      e.data.target.dispatchEvent(event);
     });
   }
 
