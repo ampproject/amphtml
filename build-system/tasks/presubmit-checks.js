@@ -539,7 +539,7 @@ const forbiddenTerms = {
       'src/config.js',
       'src/experiments.js',
       'src/mode.js',
-      'src/worker-error-reporting.js',
+      'src/web-worker/worker-error-reporting.js',
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
       'gulpfile.js',
@@ -553,7 +553,7 @@ const forbiddenTerms = {
     message: 'Should only be used in worker entry points',
     whitelist: [
       'src/web-worker/web-worker.js',
-      'src/worker-error-reporting.js',
+      'src/web-worker/worker-error-reporting.js',
     ],
   },
   'new CustomEvent\\(': {

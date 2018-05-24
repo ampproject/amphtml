@@ -25,7 +25,7 @@ import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
 import {initLogConstructor} from '../log';
-import {installWorkerErrorReporting} from '../worker-error-reporting';
+import {installWorkerErrorReporting} from './worker-error-reporting';
 
 initLogConstructor();
 installWorkerErrorReporting('ww');
@@ -38,7 +38,7 @@ const evaluators_ = [];
 
 self.addEventListener('message', function(event) {
   const {method, args, id, scope} =
-      /** @type {ToWorkerMessageDef} */ (event.data);
+    /** @type {ToWorkerMessageDef} */ (event.data);
 
   let returnValue;
 
