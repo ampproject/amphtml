@@ -23,6 +23,7 @@ import {isBlockedByConsent} from '../error';
 import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
+  layoutRectSizeEquals,
   layoutRectsOverlap,
   moveLayoutRect,
 } from '../layout-rect';
@@ -364,8 +365,7 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined}
-   *     requestedMargins
+   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} requestedMargins
    */
   overflowCallback(overflown, requestedHeight, requestedWidth,
     requestedMargins) {
@@ -431,11 +431,9 @@ export class Resource {
     const box = this.getPageLayoutBox();
 
     // Note that "left" doesn't affect readiness for the layout.
+    const sizeChanges = !layoutRectSizeEquals(oldBox, box);
     if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top ||
-          oldBox.width != box.width ||
-          oldBox.height != box.height) {
-
+          oldBox.top != box.top || sizeChanges) {
       if (this.element.isUpgraded() &&
               this.state_ != ResourceState.NOT_BUILT &&
               (this.state_ == ResourceState.NOT_LAID_OUT ||
@@ -448,7 +446,7 @@ export class Resource {
       this.initialLayoutBox_ = box;
     }
 
-    this.element.updateLayoutBox(box);
+    this.element.updateLayoutBox(box, sizeChanges);
   }
 
   measureViaResources_() {
@@ -934,7 +932,7 @@ export class Resource {
 
   /**
    * Returns the task ID for this resource.
-   * @param localId
+   * @param {string} localId
    * @return {string}
    */
   getTaskId(localId) {

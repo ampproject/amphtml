@@ -857,7 +857,7 @@ describes.realWin('amp-iframe', {
         expect(actions.trigger).to.be.calledTwice;
         const eventMatcher = sinon.match({
           type: 'amp-iframe:message',
-          detail: 'content-iframe:bar-456',
+          detail: sinon.match({data: 'content-iframe:bar-456'}),
         });
         expect(actions.trigger).to.be.calledWith(ampIframe, 'message',
             eventMatcher, ActionTrust.HIGH);

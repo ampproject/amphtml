@@ -321,6 +321,9 @@ const command = {
     //   stopSauceConnect();
     // }
   },
+  runUnitTestsOnLocalChanges: function() {
+    timedExecOrDie('gulp test --nobuild --headless --local-changes');
+  },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --integration --nobuild';
@@ -562,8 +565,8 @@ function main() {
   const files = filesInPr();
   const buildTargets = determineBuildTargets(files);
 
-  // Exit early if flag-config files are mixed with non-flag-config files.
-  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size !== 1) {
+  // Exit early if flag-config files are mixed with runtime files.
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Looks like your PR contains',
         colors.cyan('{prod|canary}-config.json'),
@@ -598,6 +601,8 @@ function main() {
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
+        // Before running all tests, run tests modified by the PR. (Fail early.)
+        command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
       }
     }

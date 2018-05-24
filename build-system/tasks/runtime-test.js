@@ -175,7 +175,7 @@ function printArgvMessages() {
       log(green('⤷ Use'), cyan('--local-changes'),
           green('to run unit tests from files commited to the local branch.'));
     }
-    if (!argv.testnames && !argv.files) {
+    if (!argv.testnames && !argv.files && !argv['local-changes']) {
       log(green('⤷ Use'), cyan('--testnames'),
           green('to see the names of all tests being run.'));
     }
@@ -203,7 +203,9 @@ function applyAmpConfig() {
   if (argv.unit || argv.a4a) {
     return Promise.resolve();
   }
-  log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  if (!process.env.TRAVIS) {
+    log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  }
   return writeConfig('dist/amp.js').then(() => {
     return writeConfig('dist/v0.js');
   });
@@ -266,7 +268,7 @@ function runTests() {
     c.client.captureConsole = true;
   }
 
-  if (argv.testnames || argv['local-changes']) {
+  if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
     c.reporters = ['mocha'];
   }
 
@@ -282,8 +284,8 @@ function runTests() {
   } else if (argv['local-changes']) {
     const filesChanged = unitTestFilesChanged();
     if (filesChanged.length == 0) {
-      log(green('No unit test files were changed. Exiting.'));
-      process.exit(0);
+      log(green('INFO: ') + 'No unit test files were changed.');
+      return Promise.resolve();
     }
     c.files = c.files.concat(config.commonUnitTestPaths, filesChanged);
     c.client.failOnConsoleError = true;
@@ -379,9 +381,10 @@ function runTests() {
   refreshKarmaWdCache();
 
   // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
-  // reporter, since it likely contains copious amounts of logs.
-  const shouldCollapseSummary =
-      process.env.TRAVIS && c.reporters.includes('karmaSimpleReporter');
+  // reporter for full unit test runs, since it likely contains copious amounts
+  // of logs.
+  const shouldCollapseSummary = process.env.TRAVIS &&
+      c.reporters.includes('karmaSimpleReporter') && !argv['local-changes'];
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 

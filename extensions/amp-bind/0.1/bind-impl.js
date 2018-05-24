@@ -29,6 +29,7 @@ import {dev, user} from '../../../src/log';
 import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {filterSplice} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
+import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -145,7 +146,7 @@ export class Bind {
      * Upper limit on number of bindings for performance.
      * @private {number}
      */
-    this.maxNumberOfBindings_ = 2000; // Based on ~1ms to parse an expression.
+    this.maxNumberOfBindings_ = 1000; // Based on ~2ms to parse an expression.
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -338,6 +339,21 @@ export class Bind {
   }
 
   /**
+   * Returns the stringified value of the global state for a given field-based
+   * expression, e.g. "foo.bar.baz".
+   * @param {string} expr
+   * @return {string}
+   */
+  getStateValue(expr) {
+    const value = getValueForExpr(this.state_, expr);
+    if (isObject(value) || isArray(value)) {
+      return JSON.stringify(/** @type {JsonObject} */(value));
+    } else {
+      return String(value);
+    }
+  }
+
+  /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @param {!Node} rootNode
    * @param {?Node} titleNode
@@ -486,12 +502,6 @@ export class Bind {
         : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
-        // Measuring impact of possibly reducing the binding limit (#11434).
-        const numberOfBindings = this.numberOfBindings();
-        if (numberOfBindings > 1000) {
-          dev().expectedError(TAG, `Over 1000 bindings (${numberOfBindings}).`);
-        }
-
         const {
           boundElements, bindings, expressionToElements, limitExceeded,
         } = results;
@@ -500,7 +510,7 @@ export class Bind {
         Object.assign(this.expressionToElements_, expressionToElements);
 
         if (limitExceeded) {
-          user().error(TAG, 'Maximum number of bindings reached ' +
+          dev().expectedError(TAG, 'Maximum number of bindings reached ' +
               `(${this.maxNumberOfBindings_}). Additional elements with ` +
               'bindings will be ignored.');
         }
@@ -649,34 +659,34 @@ export class Bind {
       return !walker.nextNode() || limitExceeded;
     };
 
-    const {promise, resolve} = new Deferred();
-    const chunktion = idleDeadline => {
-      let completed = false;
-      // If `requestIdleCallback` is available, scan elements until
-      // idle time runs out.
-      if (idleDeadline && !idleDeadline.didTimeout) {
-        while (idleDeadline.timeRemaining() > 1 && !completed) {
-          completed = scanNextNode_();
+    return new Promise(resolve => {
+      const chunktion = idleDeadline => {
+        let completed = false;
+        // If `requestIdleCallback` is available, scan elements until
+        // idle time runs out.
+        if (idleDeadline && !idleDeadline.didTimeout) {
+          while (idleDeadline.timeRemaining() > 1 && !completed) {
+            completed = scanNextNode_();
+          }
+        } else {
+          // If `requestIdleCallback` isn't available, scan elements in buckets.
+          // Bucket size is a magic number that fits within a single frame.
+          const bucketSize = 250;
+          for (let i = 0; i < bucketSize && !completed; i++) {
+            completed = scanNextNode_();
+          }
         }
-      } else {
-        // If `requestIdleCallback` isn't available, scan elements in buckets.
-        // Bucket size is a magic number that fits within a single frame.
-        const bucketSize = 250;
-        for (let i = 0; i < bucketSize && !completed; i++) {
-          completed = scanNextNode_();
+        // If we scanned all elements, resolve. Otherwise, continue chunking.
+        if (completed) {
+          resolve({
+            boundElements, bindings, expressionToElements, limitExceeded,
+          });
+        } else {
+          chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
         }
-      }
-      // If we scanned all elements, resolve. Otherwise, continue chunking.
-      if (completed) {
-        resolve({
-          boundElements, bindings, expressionToElements, limitExceeded,
-        });
-      } else {
-        chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
-      }
-    };
-    chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
-    return promise;
+      };
+      chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+    });
   }
 
   /**
@@ -717,7 +727,7 @@ export class Bind {
       property = attr.substr(14);
       // Ignore `data-amp-bind-foo` if `[foo]` already exists.
       if (element.hasAttribute(`[${property}]`)) {
-        property = null;
+        return null;
       }
     }
 
