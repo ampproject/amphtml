@@ -164,7 +164,8 @@ export class AmpGeo extends AMP.BaseElement {
         user().assert(
             isArray(ISOCountryGroups[group]),
             `${errorPrefix}[${group}] must be an array`);
-        ISOCountryGroups[group] = ISOCountryGroups[group].map(country => country.toLowerCase());
+        ISOCountryGroups[group] = ISOCountryGroups[group]
+            .map(country => country.toLowerCase());
         if (ISOCountryGroups[group].includes(this.country_)) {
           this.matchedGroups_.push(group);
         }
