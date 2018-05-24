@@ -321,6 +321,42 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       });
     });
 
+    describe('shouldBlock', () => {
+      it('default should block list', () => {
+        instance = new ConsentPolicyInstance({
+          'waitFor': {
+            'ABC': [],
+          },
+        });
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
+        expect(instance.shouldBlock()).to.equal(false);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
+        expect(instance.shouldBlock()).to.equal(false);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+        expect(instance.shouldBlock()).to.equal(true);
+      });
+
+      it('customized should block list', () => {
+        instance = new ConsentPolicyInstance({
+          'waitFor': {
+            'ABC': [],
+          },
+          'unblockOn': [
+            CONSENT_POLICY_STATE.UNKNOWN,
+            CONSENT_POLICY_STATE.SUFFICIENT,
+            CONSENT_POLICY_STATE.INSUFFICIENT,
+            CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+          ],
+        });
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
+        expect(instance.shouldBlock()).to.equal(true);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
+        expect(instance.shouldBlock()).to.equal(true);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+        expect(instance.shouldBlock()).to.equal(true);
+      });
+    });
+
     it('policy status when there are multiple items to wait', () => {
       instance = new ConsentPolicyInstance({
         'waitFor': {
