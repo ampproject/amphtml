@@ -15,6 +15,7 @@
  */
 
 import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {
   ConsentPolicyManager,
@@ -398,9 +399,6 @@ export class AmpConsent extends AMP.BaseElement {
    * Generate default consent policy if not defined
    */
   generateDefaultPolicy_() {
-    if (this.policyConfig_ && this.policyConfig_['default']) {
-      return;
-    }
     // Generate default policy
     const instanceKeys = Object.keys(this.consentConfig_);
     const defaultWaitForItems = {};
@@ -411,6 +409,40 @@ export class AmpConsent extends AMP.BaseElement {
     const defaultPolicy = {
       'waitFor': defaultWaitForItems,
     };
+
+    // TODO(@zhouyx): unblockOn is internal now.
+    const unblockOnAll = [
+      CONSENT_POLICY_STATE.UNKNOWN,
+      CONSENT_POLICY_STATE.SUFFICIENT,
+      CONSENT_POLICY_STATE.INSUFFICIENT,
+      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+    ];
+
+    const predefinedNone = {
+      'waitFor': defaultWaitForItems,
+      // Experimental config, do not expose
+      'unblockOn': unblockOnAll,
+    };
+
+    const rejectAllOnZero = {
+      'waitFor': defaultWaitForItems,
+      'timeout': {
+        'seconds': 0,
+        'fallbackAction': 'reject',
+      },
+      'unblockOn': unblockOnAll,
+    };
+
+    this.policyConfig_['_if_responded'] = predefinedNone;
+
+    this.policyConfig_['_if_accepted'] = defaultPolicy;
+
+    this.policyConfig_['_auto_reject'] = rejectAllOnZero;
+
+    if (this.policyConfig_ && this.policyConfig_['default']) {
+      return;
+    }
+
     this.policyConfig_['default'] = defaultPolicy;
   }
 
