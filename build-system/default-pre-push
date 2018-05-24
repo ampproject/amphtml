@@ -14,10 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-# This script adds a pre-push hook to .git/hooks/, which runs some basic tests
-# before running "git push".
-#
-# Default pre-push hook for AMPHTML. To enable, run:
+# This file contains the default pre-push hook for AMPHTML. To enable it, run:
 #     "./build-system/enable-git-pre-push.sh"
 #
 # Note: The checks in this file must not take more than a few seconds to run.
