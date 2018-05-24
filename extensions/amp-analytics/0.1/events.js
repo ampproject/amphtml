@@ -361,14 +361,8 @@ export class ClickEventTracker extends EventTracker {
     /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
 
-    /**
-     * @private {function(!Event)}
-     * @const
-     * @param {!Event} e
-     */
-    this.boundOnClick_ = e => {
-      this.clickObservable_.fire(e);
-    };
+    /** @private {function(!Event)} @const */
+    this.boundOnClick_ = this.clickObservable_.fire.bind(this.clickObservable_);
     this.root.getRoot().addEventListener('click', this.boundOnClick_);
   }
 
@@ -889,13 +883,9 @@ export class VideoEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.sessionObservable_ = new Observable();
 
-    /**
-     * @private {?function(!Event)}
-     * @param {!Event} e
-     */
-    this.boundOnSession_ = e => {
-      this.sessionObservable_.fire(e);
-    };
+    /** @private {?function(!Event)} */
+    this.boundOnSession_ =
+        this.sessionObservable_.fire.bind(this.sessionObservable_);
 
     Object.keys(VideoAnalyticsEvents).forEach(key => {
       this.root.getRoot().addEventListener(
