@@ -467,7 +467,7 @@ export class Services {
   /**
    * Returns a promise for the geo service or a promise for null if
    * the service is not available on the current page.
-   * @param {!Window} win
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<?Object<string,(string|Array<string>)>>}
    */
   static geoForDocOrNull(nodeOrDoc) {
