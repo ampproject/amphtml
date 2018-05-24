@@ -73,12 +73,6 @@ export class CtaLinkComponent {
       links: ctaLinksJson['links'],
     };
 
-    ctaLinks.links.forEach(el => {
-      if (el['ampdoc']) {
-        el.ampdoc = el['ampdoc'];
-      }
-    });
-
     return ctaLinks;
   }
 
@@ -103,7 +97,7 @@ export class CtaLinkComponent {
     ctaLinksData['links'].forEach(currentLink => {
       const el = linkSeed.cloneNode(/* deep */ true);
       addAttributesToElement(el, dict({'href': currentLink['url']}));
-      if (currentLink['ampdoc'] === true) {
+      if (currentLink['amphtml'] === true) {
         addAttributesToElement(el, dict({'rel': 'amphtml'}));
       }
 

@@ -80,8 +80,8 @@ export class PortraitComponent {
       image: portraitJson['image'],
     };
 
-    if (portraitJson['ampdoc']) {
-      portrait.ampdoc = portraitJson['ampdoc'];
+    if (portraitJson['amphtml']) {
+      portrait.amphtml = portraitJson['amphtml'];
     }
 
     return portrait;
@@ -106,7 +106,7 @@ export class PortraitComponent {
         </a>`;
     addAttributesToElement(el, dict({'href': portraitData.url}));
 
-    if (portraitData['ampdoc'] === true) {
+    if (portraitData['amphtml'] === true) {
       addAttributesToElement(el, dict({'rel': 'amphtml'}));
     }
 

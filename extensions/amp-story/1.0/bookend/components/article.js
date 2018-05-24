@@ -33,14 +33,6 @@ import {userAssertValidProtocol} from '../../utils';
 export let ArticleComponentDef;
 
 /**
- * @struct @typedef {{
- *   heading: !Element,
- *   meta: !Element,
- * }}
- */
-let articleElsDef;
-
-/**
  * Builder class for the small article component.
  * @implements {BookendComponentInterface}
  */
@@ -82,8 +74,8 @@ export class ArticleComponent {
       article.image = articleJson['image'];
     }
 
-    if (articleJson['ampdoc']) {
-      article.ampdoc = articleJson['ampdoc'];
+    if (articleJson['amphtml']) {
+      article.amphtml = articleJson['amphtml'];
     }
 
     return /** @type {!ArticleComponentDef} */ (article);
@@ -104,7 +96,7 @@ export class ArticleComponent {
         </a>`;
     addAttributesToElement(el, dict({'href': articleData.url}));
 
-    if (articleData['ampdoc'] === true) {
+    if (articleData['amphtml'] === true) {
       addAttributesToElement(el, dict({'rel': 'amphtml'}));
     }
 
@@ -121,10 +113,7 @@ export class ArticleComponent {
     }
 
     const articleElements = htmlRefs(el);
-    const {
-      heading,
-      meta,
-    } = /** @type {!articleElsDef} */ (articleElements);
+    const {heading, meta} = articleElements;
 
     heading.textContent = articleData.title;
     meta.textContent = articleData.domainName;

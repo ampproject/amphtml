@@ -80,8 +80,8 @@ export class LandscapeComponent {
       image: landscapeJson['image'],
     };
 
-    if (landscapeJson['ampdoc']) {
-      landscape.ampdoc = landscapeJson['ampdoc'];
+    if (landscapeJson['amphtml']) {
+      landscape.amphtml = landscapeJson['amphtml'];
     }
 
     return landscape;
@@ -106,7 +106,7 @@ export class LandscapeComponent {
         </a>`;
     addAttributesToElement(el, dict({'href': landscapeData.url}));
 
-    if (landscapeData['ampdoc'] === true) {
+    if (landscapeData['amphtml'] === true) {
       addAttributesToElement(el, dict({'rel': 'amphtml'}));
     }
 

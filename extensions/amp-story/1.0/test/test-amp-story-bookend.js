@@ -311,20 +311,21 @@ describes.realWin('amp-story-bookend', {
             {
               'text': 'buttonA',
               'url': 'google.com',
-              'ampdoc': true,
+              'amphtml': true,
             },
           ],
         },
       ],
     };
-    const CTA_LINK_CLASS_NAME = '.i-amphtml-story-bookend-cta-link-wrapper';
 
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
 
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const ctaLinks = bookend.bookendEl_.querySelector(CTA_LINK_CLASS_NAME);
+      const ctaLinks =
+          bookend.bookendEl_
+              .querySelector('.i-amphtml-story-bookend-cta-link-wrapper');
       expect(ctaLinks.children[0]).to.have.attribute('rel');
       expect(ctaLinks.children[0].getAttribute('rel')).to.equal('amphtml');
     });
@@ -346,25 +347,26 @@ describes.realWin('amp-story-bookend', {
             {
               'text': 'buttonB',
               'url': 'google.com',
-              'ampdoc': '',
+              'amphtml': '',
             },
             {
               'text': 'longtext longtext longtext longtext longtext',
               'url': 'google.com',
-              'ampdoc': false,
+              'amphtml': false,
             },
           ],
         },
       ],
     };
-    const CTA_LINK_CLASS_NAME = '.i-amphtml-story-bookend-cta-link-wrapper';
 
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
 
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const ctaLinks = bookend.bookendEl_.querySelector(CTA_LINK_CLASS_NAME);
+      const ctaLinks =
+          bookend.bookendEl_
+              .querySelector('.i-amphtml-story-bookend-cta-link-wrapper');
       expect(ctaLinks.children[0]).to.not.have.attribute('rel');
       expect(ctaLinks.children[1]).to.not.have.attribute('rel');
     });
@@ -385,19 +387,19 @@ describes.realWin('amp-story-bookend', {
           'title': 'This is an example article!',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
-          'ampdoc': true,
+          'amphtml': true,
         },
       ],
     };
-    const SMALL_ARTICLE_CLASS_NAME = '.i-amphtml-story-bookend-article';
 
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
 
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const articles = bookend.bookendEl_
-          .querySelectorAll(SMALL_ARTICLE_CLASS_NAME);
+      const articles =
+          bookend.bookendEl_
+              .querySelectorAll('.i-amphtml-story-bookend-article');
       expect(articles[0]).to.have.attribute('rel');
       expect(articles[0].getAttribute('rel')).to.equal('amphtml');
     });
@@ -424,11 +426,10 @@ describes.realWin('amp-story-bookend', {
           'title': 'This is an example article!',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
-          'ampdoc': 'true',
+          'amphtml': 'true',
         },
       ],
     };
-    const SMALL_ARTICLE_CLASS_NAME = '.i-amphtml-story-bookend-article';
 
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
@@ -436,7 +437,7 @@ describes.realWin('amp-story-bookend', {
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
       const articles = bookend.bookendEl_
-          .querySelectorAll(SMALL_ARTICLE_CLASS_NAME);
+          .querySelectorAll('.i-amphtml-story-bookend-article');
       expect(articles[0]).to.not.have.attribute('rel');
       expect(articles[1]).to.not.have.attribute('rel');
     });
@@ -457,11 +458,10 @@ describes.realWin('amp-story-bookend', {
           'category': 'example category',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
-          'ampdoc': true,
+          'amphtml': true,
         },
       ],
     };
-    const PORTRAIT_ARTICLE_CLASS_NAME = '.i-amphtml-story-bookend-portrait';
 
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
@@ -469,7 +469,7 @@ describes.realWin('amp-story-bookend', {
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
       const articles = bookend.bookendEl_
-          .querySelectorAll(PORTRAIT_ARTICLE_CLASS_NAME);
+          .querySelectorAll('.i-amphtml-story-bookend-portrait');
       expect(articles[0]).to.have.attribute('rel');
       expect(articles[0].getAttribute('rel')).to.equal('amphtml');
     });
@@ -496,11 +496,10 @@ describes.realWin('amp-story-bookend', {
           'category': 'example category',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
-          'ampdoc': 'true',
+          'amphtml': 'true',
         },
       ],
     };
-    const PORTRAIT_ARTICLE_CLASS_NAME = '.i-amphtml-story-bookend-portrait';
 
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
@@ -508,7 +507,7 @@ describes.realWin('amp-story-bookend', {
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
       const articles = bookend.bookendEl_
-          .querySelectorAll(PORTRAIT_ARTICLE_CLASS_NAME);
+          .querySelectorAll('.i-amphtml-story-bookend-portrait');
       expect(articles[0]).to.not.have.attribute('rel');
       expect(articles[1]).to.not.have.attribute('rel');
     });
@@ -530,11 +529,10 @@ describes.realWin('amp-story-bookend', {
           'title': 'example title',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
-          'ampdoc': true,
+          'amphtml': true,
         },
       ],
     };
-    const LANDSCAPE_ARTICLE_CLASS_NAME = '.i-amphtml-story-bookend-landscape';
 
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
@@ -542,7 +540,7 @@ describes.realWin('amp-story-bookend', {
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
       const articles = bookend.bookendEl_
-          .querySelectorAll(LANDSCAPE_ARTICLE_CLASS_NAME);
+          .querySelectorAll('.i-amphtml-story-bookend-landscape');
       expect(articles[0]).to.have.attribute('rel');
       expect(articles[0].getAttribute('rel')).to.equal('amphtml');
     });
@@ -571,11 +569,10 @@ describes.realWin('amp-story-bookend', {
           'title': 'example title',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
-          'ampdoc': 'true',
+          'amphtml': 'true',
         },
       ],
     };
-    const LANDSCAPE_ARTICLE_CLASS_NAME = '.i-amphtml-story-bookend-landscape';
 
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
         .resolves(userJson);
@@ -583,7 +580,7 @@ describes.realWin('amp-story-bookend', {
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
       const articles = bookend.bookendEl_
-          .querySelectorAll(LANDSCAPE_ARTICLE_CLASS_NAME);
+          .querySelectorAll('.i-amphtml-story-bookend-landscape');
       expect(articles[0]).to.not.have.attribute('rel');
       expect(articles[1]).to.not.have.attribute('rel');
     });
