@@ -58,7 +58,7 @@ describes.realWin('amp-3d-gltf', {
     return amp3dGltfEl.build()
         .then(() => {
           const amp3dGltf = amp3dGltfEl.implementation_;
-          sinon.stub(amp3dGltf, 'iframe_')
+          sandbox.stub(amp3dGltf, 'iframe_')
               .get(() => iframe)
               .set(() => {});
 
