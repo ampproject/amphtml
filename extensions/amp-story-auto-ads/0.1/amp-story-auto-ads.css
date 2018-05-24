@@ -88,10 +88,6 @@ amp-story[ad-showing] .i-amphtml-story-ad-attribution {
   visibility: visible !important;
 }
 
-amp-story[ad-showing][desktop] .i-amphtml-story-ad-attribution {
-  background-color: red !important;
-}
-
 .i-amphtml-glass-pane {
   height: 100% !important;
   width: 100% !important;

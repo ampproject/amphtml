@@ -523,7 +523,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @return {boolean}
    */
   isDesktopView_() {
-    return this.storeService_.get(StateProperty.DESKTOP_STATE);
+    return !!this.storeService_.get(StateProperty.DESKTOP_STATE);
   }
 
 
