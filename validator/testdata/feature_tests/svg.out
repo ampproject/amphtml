@@ -92,11 +92,19 @@ feature_tests/svg.html:82:6 The tag 'stop' contains the attribute 'offset' repea
 |      </radialgradient>
 |    </svg>
 |  
-|    <!-- Invalid xml:base present -->
+|    <!-- Invalid: xml:base present -->
 |    <svg xml:base="javascript:alert('hello world')">
 >>   ^~~~~~~~~
 feature_tests/svg.html:87:2 The attribute 'xml:base' may not appear in tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
 |      <a href="#"><circle r="10"></a>
+|    </svg>
+|  
+|    <!-- Invalid: style tag isn't allowed. Note this is really testing the
+|          parsing of a self closing style tag in an svg, not validity. -->
+|    <svg>
+|      <style/>
+>>     ^~~~~~~~~
+feature_tests/svg.html:94:4 The parent tag of tag 'style amp-custom' is 'svg', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
 |    </svg>
 |  </body>
 |  </html>
