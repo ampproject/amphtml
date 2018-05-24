@@ -92,7 +92,7 @@ export function isJsonOrObj(anything) {
 
 
 /**
- * @param {?JsonObject|string} objOrStr
+ * @param {?JsonObject|string|undefined} objOrStr
  * @return {?JsonObject|undefined}
  */
 export function objOrParseJson(objOrStr) {
