@@ -4958,7 +4958,7 @@ gulp-util@^2.2.19:
     through2 "^0.5.0"
     vinyl "^0.2.1"
 
-gulp-util@^3.0.0, gulp-util@^3.0.3, gulp-util@^3.0.6, gulp-util@^3.0.7:
+gulp-util@^3.0.0, gulp-util@^3.0.6, gulp-util@^3.0.7:
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/gulp-util/-/gulp-util-3.0.8.tgz#0054e1e744502e27c04c187c3ecc505dd54bbb4f"
   dependencies:
@@ -5013,17 +5013,17 @@ gulp-webserver@0.9.1:
     tiny-lr "0.1.4"
     watch "^0.11.0"
 
-gulp-wrap@0.13.0:
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/gulp-wrap/-/gulp-wrap-0.13.0.tgz#90fb0b4a27a266433832ff7c6122db5c1ee894c6"
+gulp-wrap@0.14.0:
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/gulp-wrap/-/gulp-wrap-0.14.0.tgz#15a5c2048e2721e70539a61baf1c34a0bc5f2729"
   dependencies:
     consolidate "^0.14.1"
     es6-promise "^3.1.2"
     fs-readfile-promise "^2.0.1"
-    gulp-util "^3.0.3"
     js-yaml "^3.2.6"
     lodash "^4.11.1"
     node.extend "^1.1.2"
+    plugin-error "^0.1.2"
     through2 "^2.0.1"
     tryit "^1.0.1"
     vinyl-bufferstream "^1.0.1"
