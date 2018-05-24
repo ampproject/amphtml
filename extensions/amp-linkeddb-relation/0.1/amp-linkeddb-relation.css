@@ -1,0 +1,23 @@
+/*
+* @Author: limkeddb
+* @Date:   2018-05-10 10:12:38
+* @Last Modified by:   limkeddb
+* @Last Modified time: 2018-05-10 13:10:14
+*/
+mip-linkeddb-relation .mip-full-box {
+  width: 100%;
+  height: 500px;
+}
+mip-linkeddb-relation .mip-full-box a {
+  color: #658ccd;
+}
+.tooltip {
+  position: fixed;
+  display: block;
+  padding: .4rem;
+  border-radius: .25rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  color: #fff;
+  font-size: .8rem;
+}

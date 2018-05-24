@@ -1,0 +1,166 @@
+<!--
+  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+  This is a (partial) transcription from test/functional/test-layout.js.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <!-- valid: layout=nodisplay -->
+  <amp-img layout="nodisplay" src="itshappening.gif"></amp-img>
+
+  <!-- valid: layout=fixed -->
+  <amp-img layout="fixed" width="100" height="200"
+           src="itshappening.gif"></amp-img>
+
+  <!-- valid: layout=fixed default width/height -->
+  <amp-img width="100" height="200" src="itshappening.gif"></amp-img>
+
+  <!-- invalid: layout=fixed - requires width/height -->
+  <amp-img layout="fixed"  src="itshappening.gif"></amp-img>
+
+  <!-- valid: layout=fixed-height -->
+  <amp-img layout="fixed-height" height="200"  src="itshappening.gif"></amp-img>
+
+  <!-- valid: layout=fixed-height, with width=auto -->
+  <amp-img layout="fixed-height" height="200" width="auto"
+           src="itshappening.gif"></amp-img>
+
+  <!-- invalid: layout=fixed-height, prohibit width!=auto -->
+  <amp-img layout="fixed-height" height="200" width="300"
+           src="itshappening.gif"></amp-img>
+
+  <!-- valid: layout=fixed-height - default with height -->
+  <amp-img height="200" src="itshappening.gif"></amp-img>
+
+  <!-- valid: layout=fixed-height - default with height and width=auto -->
+  <amp-img height="200" width="auto" src="itshappening.gif"></amp-img>
+
+  <!-- invalid: layout=fixed-height - requires height -->
+  <amp-img layout="fixed-height" src="itshappening.gif"></amp-img>
+
+  <!-- valid: layout=responsive -->
+  <amp-img layout="responsive" width="100" height="200"
+           src="itshappening.gif"></amp-img>
+
+  <!-- valid: layout=responsive with sizes -->
+  <amp-img layout="responsive" width="100" height="200" sizes="50vw"
+           src="itshappening.gif"></amp-img>
+
+  <!-- valid: layout=fill -->
+  <amp-img layout="fill" src="itshappening.gif"></amp-img>
+
+  <!-- invalid: layout=fill with height=auto; height=auto is only allowed
+       for flex-item -->
+  <amp-img layout="fill" width="50" height="auto"></amp-img>
+
+  <!-- valid: layout=flex-item -->
+  <amp-img layout="flex-item" src="itshappening.gif"></amp-img>
+  <!-- valid: layout=flex-item with width="auto" -->
+  <amp-img layout="flex-item" width="auto" height="50"
+           src="itshappening.gif"></amp-img>
+  <!-- valid: layout=flex-item with height=auto -->
+  <amp-img layout="flex-item" width="50" height="auto"
+           src="itshappening.gif"></amp-img>
+  <!-- valid: layout=flex-item with width and height -->
+  <amp-img layout="flex-item" width="50" height="50"
+           src="itshappening.gif"></amp-img>
+
+  <!-- invalid: layout=container
+       Note that this would be valid if amp-img allowed container.
+       It doesn't and there is no other element that does.
+       TODO(johannes): Long run we should get rid of container or use it.
+       https://github.com/ampproject/amphtml/issues/1109
+    -->
+  <amp-img layout="container" src="itshappening.gif"></amp-img>
+
+  <!-- invalid: layout=unknown -->
+  <amp-img layout="unknown" src="itshappening.gif"></amp-img>
+
+  <!-- valid: should configure natural dimensions; default layout -->
+  <amp-pixel src="https://www.example.com/make-my-visit-count"></amp-pixel>
+
+  <!-- valid: should configure natural dimensions; default layout;
+       with width -->
+  <amp-pixel src="https://www.example.com/make-my-visit-count" width="11">
+  </amp-pixel>
+
+  <!-- valid: should configure natural dimensions; default layout;
+       with height -->
+  <amp-pixel src="https://www.example.com/make-my-visit-count" height="11">
+  </amp-pixel>
+
+  <!-- valid: should configure natural dimensions; layout=fixed -->
+  <amp-pixel src="https://www.example.com/make-my-visit-count" layout="fixed">
+  </amp-pixel>
+
+  <!-- valid: should configure natural dimensions; layout=fixed -->
+  <amp-pixel src="https://www.example.com/make-my-visit-count"
+             layout="fixed">
+  </amp-pixel>
+
+  <!-- valid: width and hight set with valid css lengths -->
+  <amp-pixel src="https://www.example.com/make-my-visit-count"
+             width="1px" height="1px"></amp-pixel>
+
+  <!-- invalid: width=auto won't work because amp-pixel doesn't
+       support fixed-height layout. -->
+  <amp-pixel src="https://www.example.com/make-my-visit-count"
+             width="auto" height="1px"></amp-pixel>
+
+  <!-- invalid: width=X. -->
+  <amp-pixel src="https://www.example.com/make-my-visit-count"
+             width="X" height="1px"></amp-pixel>
+
+  <!-- invalid: height=X. -->
+  <amp-pixel src="https://www.example.com/make-my-visit-count"
+             height="X" width="1px"></amp-pixel>
+
+  <!-- valid responsive layout with heights -->
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout=responsive
+           heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
+
+  <!-- valid implied responsive layout with heights -->
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300
+           heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
+
+  <!-- invalid: can't have heights with specified layout fixed -->
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout="fixed"
+           heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
+
+  <!-- invalid: can't have heights with implied layout fixed_height -->
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" height=300
+           heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
+  <!-- valid: intrinsic has height and width set with same units -->
+  <amp-img src="img.png" height="30px" width="300px" layout="intrinsic"></amp-img>
+  <!-- invalid: intrinsic has height and width set with different units -->
+  <amp-img src="img.png" height="30px" width="300em" layout="intrinsic"></amp-img>
+  <!-- invalid: intrinsic height and width can not be auto -->
+  <amp-img src="img.png" height="auto" width="300px" layout="intrinsic"></amp-img>
+  <amp-img src="img.png" height="30px" width="auto" layout="intrinsic"></amp-img>
+  <!-- invalid: intrinsic height and width must be set -->
+  <amp-img src="img.png" height="30px" layout="intrinsic"></amp-img>
+  <amp-img src="img.png" width="300px" layout="intrinsic"></amp-img>
+</body>
+</html>

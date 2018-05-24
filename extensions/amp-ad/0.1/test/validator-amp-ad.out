@@ -1,0 +1,71 @@
+FAIL
+|  <!--
+|    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    Tests support for the amp-ad tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+|    <script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js"></script>
+|    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+|  </head>
+|  <body>
+|    <template type="amp-mustache" id="template-1">
+|    </template>
+|    <!-- Valid -->
+|    <amp-ad width=300 height=250
+|            type="a9"
+|            data-aax_size="300x250"
+|            data-aax_pubname="test123"
+|            data-aax_src="302">
+|    </amp-ad>
+|    <!-- Valid -->
+|    <amp-ad width=300 height=250
+|        type="custom"
+|        template="template-1">
+|    </amp-ad>
+|    <!-- Valid -->
+|    <amp-fx-flying-carpet height="300">
+|      <amp-ad height="300" type="foo"></amp-ad>
+|    </amp-fx-flying-carpet>
+|    <!-- Valid -->
+|    <amp-ad type=doubleclick width="100" height="fluid" layout="fluid"></amp-ad>
+|    <!-- Invalid: amp-ad in an amp ad container with data-multi-size attr -->
+|    <amp-fx-flying-carpet height="300">
+|      <amp-ad data-multi-size="" height="300" type="foo"></amp-ad>
+>>     ^~~~~~~~~
+amp-ad/0.1/test/validator-amp-ad.html:55:4 The tag 'amp-ad with data-multi-size attribute' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+|    </amp-fx-flying-carpet>
+|    <!-- Invalid: amp-ad in an amp ad container with data-multi-size attr -->
+|    <amp-fx-flying-carpet height="300">
+|      <amp-embed data-multi-size="" height="300" type="foo"></amp-ad>
+>>     ^~~~~~~~~
+amp-ad/0.1/test/validator-amp-ad.html:59:4 The tag 'amp-embed with data-multi-size attribute' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+|    </amp-fx-flying-carpet>
+|    <!-- Invalid: amp-ad missing layout=fluid for fluid ad -->
+|    <amp-ad type=doubleclick width="100" height="fluid"></amp-ad>
+>>   ^~~~~~~~~
+amp-ad/0.1/test/validator-amp-ad.html:62:2 The attribute 'height' in tag 'amp-ad' is set to the invalid value 'fluid'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_LAYOUT_PROBLEM]
+|  </body>
+|  </html>

@@ -1,0 +1,24 @@
+/*
+* @Author: limkeddb
+* @Date:   2018-05-10 10:12:38
+* @Last Modified by:   limkeddb
+* @Last Modified time: 2018-05-10 13:10:14
+*/
+
+/* body,
+html {
+    height: 100% !important;
+} */
+
+mip-linkeddb-dropdown .m0 {
+    margin: 0;
+}
+
+mip-linkeddb-dropdown .weui-grids {
+    padding: 0;
+}
+
+mip-linkeddb-dropdown .weui-grids:before,
+mip-linkeddb-dropdown .weui-grids:after {
+    display: none;
+}

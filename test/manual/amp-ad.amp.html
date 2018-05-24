@@ -1,0 +1,60 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      max-width: 527px;
+      font-family: 'Questrial', Arial;
+    }
+
+    amp-ad iframe {
+      margin: 30px;
+      padding: 30px;
+      border: 10px solid red;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>AMP #0</h1>
+  <amp-ad width=300 height=250
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="abc123"
+      data-aax_src="302">
+  </amp-ad>
+  <amp-ad width=300 height=200
+      type="adsense"
+      data-ad-client="ca-pub-9350112648257122">
+  </amp-ad>
+    <amp-embed width=300 height=250
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="abc123"
+      data-aax_src="302">
+  </amp-embed>
+  <h2>Doubleclick no ad with placeholder and fallback</h2>
+  <amp-ad width=300 height=200
+      type="doubleclick"
+      data-slot="/4119129/doesnt-exist"
+      >
+     <div class="adv-placeholder" placeholder>
+       <amp-anim width=16 height=16 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1//img/loader.gif">
+           <amp-img placeholder width=16 height=16 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1//img/loader.gif">
+         </amp-img>
+       </amp-anim>
+     </div>
+     <div fallback>
+       <a href="http://www.repubblica.it/sport/2016/02/09/news/app_rep-133068373/">
+         <amp-img placeholder width=300 height=100 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1/img/adv-300-100.jpg">
+       </a>
+     </div>
+  </amp-ad>
+</body>
+</html>

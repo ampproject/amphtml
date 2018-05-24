@@ -1,0 +1,205 @@
+<!---
+  {
+    "skipValidation": "true",
+    "preview": "default"
+  }
+--->
+<!--
+  ## Introduction
+
+  A sidebar provides a way to display meta content intended for temporary access (navigation links, buttons, menus, etc.). The sidebar can be revealed by a button tap while the main content remains visually underneath. However, optional attributes that accept media queries can be used to display meta content in other parts of the site. Child `<nav toolbar="(media query)" toolbar-target="elementID">` will create `toolbar` elements that allow for content within the sidebar to be displayed on other parts of the main content.
+
+  **You must be able to resize your browser window in order to notice the effects of** `toolbar` **elements. In this example,** `toolbar` **elements are best viewed by resiving your window from mobile to desktop.**
+
+-->
+
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-sidebar</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the `amp-sidebar` component.
+  -->
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-sidebar/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-sidebar {
+      width: 250px;
+      padding-right: 10px;
+    }
+    .amp-sidebar-image {
+      line-height: 100px;
+      vertical-align:middle;
+    }
+    .amp-close-image {
+       top: 15px;
+       left: 225px;
+       cursor: pointer;
+    }
+    li {
+      margin-bottom: 20px;
+      margin-left: 10px;
+      margin-right: 10px;
+      list-style: none;
+    }
+
+    .previewOnly {
+      font-weight: bold;
+    }
+
+    #sidebar-right nav.amp-sidebar-toolbar-target-shown {
+        display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    The `amp-sidebar` should be a direct child of the `<body>`. It must have a layout of `nodisplay`. The`amp-sidebar` may not contain any AMP Elements except for `amp-accordion`, `amp-img` and `amp-fit-text`. `amp-fit-text` expands or shrinks its font size to fit the content within the space given to in the menu.
+  -->
+    <amp-sidebar id="sidebar" layout="nodisplay" side="right">
+      <amp-img class="amp-close-image" src="/examples/visual-tests/amp-by-example/img/ic_close_black_18dp_2x.png" width="20" height="20" alt="close sidebar" on="tap:sidebar.close" role="button" tabindex="0"></amp-img>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li> Nav item 1</li>
+        <li>
+          <amp-fit-text width="220" height="20" layout="responsive" max-font-size="24">
+            Nav item 2 - &lt;amp-fit-text&gt;
+          </amp-fit-text>
+        </li>
+        <li>
+          <amp-fit-text width="220" height="20" layout="responsive" max-font-size="24">
+            Nav item 3 - &lt;amp-fit-text&gt; longer text
+          </amp-fit-text>
+        </li>
+        <li> Nav item 4 - Image<amp-img class="amp-sidebar-image" src="/examples/visual-tests/amp-by-example/img/favicon.png" width="20" height="20" alt="an image"></amp-img></li>
+        <li> Nav item 5</li>
+        <li> Nav item 6</li>
+      </ul>
+    </amp-sidebar>
+
+    <!-- ## Sidebar Actions -->
+    <!--
+    Click to toggle the sidebar.
+    -->
+    <button on="tap:sidebar.toggle" class="ampstart-btn caps m2">Toggle sidebar</button>
+
+    <!--
+    Click to open the sidebar.
+    -->
+    <button on="tap:sidebar.open" class="ampstart-btn caps m2">Open sidebar</button>
+
+    <!--
+    Click to close the sidebar.
+    -->
+    <button on="tap:sidebar.close" class="ampstart-btn caps m2">Close sidebar</button>
+
+    <p class="previewOnly m2">
+      Please resize the browser window to view the responsiveness for amp-sidebar's toolbar.
+    </p>
+
+  <!-- ## Toolbar (experimental) -->
+  <!--
+
+    `toolbar` enables elements within the `amp-sidebar` to be displayed on other parts of the `<body>`. This is useful for responsive design, including navigation bars, social footers, etc.
+
+    `toolbar` elements have their own requirements:
+
+    - The sidebar may implement toolbars by adding `nav` elements with the `toolbar` attribute and `toolbar-target` attribute.
+    - The `nav` element must be a child of `<amp-sidebar>` and follow this format: `<nav toolbar="(media-query)" toolbar-target="elementID">`.
+    - The `nav` containing the toolbar attribute must only contain a single `<ul>` element, that contains `<li>` elements.
+    - The `<li>` elements may contain any valid HTML elements (supported by AMP), or any of the AMP elements that `<amp-sidebar>` supports.
+    - Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `toolbar-target` attribute id must exist on the page for the toolbar to be applied.
+  -->
+    <div>
+      <amp-sidebar id="sidebar-left" layout="nodisplay" side="left">
+        <amp-img class="amp-close-image" src="/examples/visual-tests/amp-by-example/img/ic_close_black_18dp_2x.png" width="20" height="20" alt="close sidebar" on="tap:sidebar-left.close" role="button" tabindex="0"></amp-img>
+        <nav toolbar="(min-width: 784px)" toolbar-target="target-element-left">
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li> Nav item 1</li>
+          </ul>
+        </nav>
+        <ul>
+          <li>
+            <amp-fit-text width="220" height="20" layout="responsive" max-font-size="24">
+              Nav item 2 - &lt;amp-fit-text&gt;
+            </amp-fit-text>
+          </li>
+          <li>
+            <amp-fit-text width="220" height="20" layout="responsive" max-font-size="24">
+              Nav item 3 - &lt;amp-fit-text&gt; longer text
+            </amp-fit-text>
+          </li>
+          <li> Nav item 4 - Image<amp-img class="amp-sidebar-image" src="/examples/visual-tests/amp-by-example/img/favicon.png" width="20" height="20" alt="an image"></amp-img></li>
+          <li> Nav item 5</li>
+          <li> Nav item 6</li>
+        </ul>
+      </amp-sidebar>
+
+
+      <button on="tap:sidebar-left.toggle" class="ampstart-btn caps m2">Toggle sidebar</button>
+
+
+      <div id="target-element-left">
+      </div>
+    </div>
+
+  <!-- ## Styling Toolbar (experimental) -->
+  <!--
+    The `toolbar` element within the `<amp-sidebar>` element, will have classes applied to the element depending if the `toolbar-target` element is shown or hidden. This is useful for applying different styles on the `toolbar` element and the `toolbar-target` element. The classes are `amp-sidebar-toolbar-target-shown`, and `amp-sidebar-toolbar-target-hidden`.
+
+    The class `amp-sidebar-toolbar-target-shown` is applied to the `toolbar` element when the `toolbar-target` element is shown. The class `amp-sidebar-toolbar-target-hidden` is applied to the `toolbar` element when the `toolbar-target` element is hidden.
+
+    ```html
+      <style amp-custom="">
+        .amp-sidebar-toolbar-target-shown {
+            display: none;
+        }
+      </style>
+    ```
+  -->
+    <div>
+      <amp-sidebar id="sidebar-right" layout="nodisplay" side="right">
+        <amp-img class="amp-close-image" src="/examples/visual-tests/amp-by-example/img/ic_close_black_18dp_2x.png" width="20" height="20" alt="close sidebar" on="tap:sidebar-left.close" role="button" tabindex="0"></amp-img>
+        <nav toolbar="(min-width: 784px)" toolbar-target="target-element-right">
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li> Nav item 1</li>
+          </ul>
+        </nav>
+        <ul>
+          <li>
+            <amp-fit-text width="220" height="20" layout="responsive" max-font-size="24">
+              Nav item 2 - &lt;amp-fit-text&gt;
+            </amp-fit-text>
+          </li>
+          <li>
+            <amp-fit-text width="220" height="20" layout="responsive" max-font-size="24">
+              Nav item 3 - &lt;amp-fit-text&gt; longer text
+            </amp-fit-text>
+          </li>
+          <li> Nav item 4 - Image<amp-img class="amp-sidebar-image" src="/examples/visual-tests/amp-by-example/img/favicon.png" width="20" height="20" alt="an image"></amp-img></li>
+          <li> Nav item 5</li>
+          <li> Nav item 6</li>
+        </ul>
+      </amp-sidebar>
+
+
+      <button on="tap:sidebar-right.toggle" class="ampstart-btn caps m2">Toggle sidebar</button>
+
+
+      <div id="target-element-right">
+      </div>
+    </div>
+
+</body>
+</html>

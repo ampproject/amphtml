@@ -1,0 +1,28 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<script>
+(function() {
+var v = location.search.substr(1);
+if (!(/^\d+(-canary)?$/.test(v))) return;
+var u = 'https://3p.ampproject.net/'+encodeURIComponent(v)+'/f.js';
+document.write('<script'+' src="'+encodeURI(u)+'"><'+'/script>');
+})();
+</script>
+</head>
+<body style="margin:0">
+<div id="c" style="position:absolute;top:0;left:0;bottom:0;right:0;">
+  <script>
+    draw3p(undefined,
+      // List of expected amp-ad types.
+      ['allowed-ad-type1', 'allowed-ad-type2'],
+      // List of hostnames that are allowed to embed this change.
+      // Please also use ALLOW-FROM X-Frame-Options to get security in
+      // browsers that do not support location.ancestorOrigins.
+      ['your-domain.com']);
+  </script>
+</div>
+<script>if (window.docEndCallback) window.docEndCallback()</script>
+</body>
+</html>

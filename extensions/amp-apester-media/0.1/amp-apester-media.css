@@ -1,0 +1,166 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* amp-apester-iframe */
+
+.amp-apester-iframe {
+  transition: 0.4s opacity;
+  opacity: 0;
+}
+
+.i-amphtml-apester-iframe-ready {
+  transition: opacity 1s ease-out;
+  opacity: 1 !important;
+}
+
+.amp-apester-loader {
+  height: 100%;
+  width: 100%;
+  background-color: white;
+}
+
+.amp-apester-container {
+  max-width: 700px;
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  width: 100%;
+}
+
+.amp-apester-overflow {
+  position: absolute;
+  margin: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.amp-apester-overflow button {
+  border: none;
+  background: white;
+  cursor: pointer;
+  padding: 25px 80px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  outline: none;
+  position: relative;
+}
+
+.amp-apester-loader-blobs {
+  filter: url('#amp-apester-goo');
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+.amp-apester-loader-blob {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #ee2e3d;
+}
+.amp-apester-loader-blob:nth-child(1) {
+  animation: amp-apester-blob-left-anim cubic-bezier(0.77, 0, 0.175, 1) 2s infinite;
+}
+.amp-apester-loader-blob:nth-child(2) {
+  animation: amp-apester-blob-right-anim cubic-bezier(0.77, 0, 0.175, 1) 2s infinite;
+}
+
+@keyframes amp-apester-blob-left-anim {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  33% {
+    transform: scale(0.55, 0.5) translate(80px, 0);
+  }
+  66% {
+    transform: scale(0.8) translate(0, 0);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+@keyframes amp-apester-blob-right-anim {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  33% {
+    transform: scale(0.55, 0.5) translate(-80px, 0);
+  }
+  66% {
+    transform: scale(0.8) translate(0, 0);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+@keyframes amp-apester-loader-logo {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  66% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.amp-apester-loader-logo {
+  background: url('https://app.apester.com/assets/editor/3.4.10/dist/svg/ape-loader.svg') no-repeat center;
+  position: absolute;
+  height: 28px;
+  width: 28px;
+  left: calc(50% - 14px);
+  top: calc(50% - 14px);
+}
+
+.amp-apester-loader-logo svg {
+  height: 100%;
+  width: 100%;
+}
+
+.amp-apester-fullscreen {
+  background: rgba(34, 36, 38, 0.97) !important;
+  position: fixed !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483646 !important;
+  top: 0;
+  zoom: 1;
+  -webkit-overflow-scrolling: touch !important;
+}

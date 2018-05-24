@@ -1,0 +1,59 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Brid.tv Player Example</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-brid-player" src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js"></script>
+  <style amp-custom>
+    .spacer {
+      height: 100vh;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  
+  <h2>Brid Player</h2> 
+  <amp-brid-player
+      id="myVideo"
+      data-partner="264"
+      data-player="4144"
+      data-video="13663"
+      layout="responsive"
+      width="480" height="270">
+  </amp-brid-player>
+  <h3>Actions</h3>
+  <button on="tap:myVideo.play">Play</button>
+  <button on="tap:myVideo.pause">Pause</button>
+  <button on="tap:myVideo.mute">Mute</button>
+  <button on="tap:myVideo.unmute">Unmute</button>
+  <button on="tap:myVideo.fullscreen">Fullscreen</button>
+
+  <h2>Autoplay</h2>
+  <amp-brid-player
+      autoplay
+      data-partner="264"
+      data-player="4144"
+      data-video="13663"
+      layout="responsive"
+      width="480" height="270">
+  </amp-brid-player>
+  
+  <h2>Outstream</h2>
+  <amp-brid-player
+      autoplay
+      data-partner="6205"
+      data-player="0"
+      data-outstream="3828"
+      layout="responsive"
+      width="480" height="270">
+  </amp-brid-player>
+  
+  <div class="spacer"></div>
+
+</body>
+</html>

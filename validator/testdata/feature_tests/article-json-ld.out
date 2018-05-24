@@ -1,0 +1,148 @@
+PASS
+|  <!--
+|    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!doctype html>
+|  <!--
+|        This sample AMP HTML file aims to be a minimalist document that
+|        follows best practices and guidances for publishers to mark up
+|        content for inclusion in various platforms.
+|  -->
+|  <html AMP lang="en">
+|    <!-- you can use "amp" or "AMP" or "⚡" -->
+|    <head>
+|      <meta charset="utf-8">
+|      <title>Lorem Ipsum</title>
+|      <link rel="canonical" href="http://example.ampproject.org/article-metadata.html">
+|      <!--
+|          The canonical document for this article should be linked, as above.
+|  
+|          The canonical document should also have a corresponding <link> tag
+|          within pointing at this AMP HTML file:
+|  
+|            <link rel="amphtml" href="http://example.ampproject.org/article-json-ld.amp.html">
+|  
+|          It is possible that this AMP HTML document is the canonical document
+|          for this article, in which case, the canonical URL should point to this
+|          document, and no "amphtml" link is required.
+|      -->
+|      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|      <!-- only one style tag is allowed, and it must have an "amp-custom" attribute -->
+|      <style amp-custom>
+|        body {
+|          background-color: white;
+|        }
+|        amp-img {
+|          background-color: gray;
+|        }
+|      </style>
+|      <script type="application/ld+json">
+|          //
+|          // The document referenced in mainEntityOfPage should be the same as the
+|          // canonical link above.
+|          //
+|          // Also, please be aware that some platforms that use AMP HTML have
+|          // further restrictions with regards to some schema components.
+|          //
+|          // For example:
+|          //
+|          //   * The leader "image" referenced in the markup below must appear
+|          //   somewhere on the AMP HTML document itself.
+|          //
+|          //   * The URL for that "image" must precisely match the src of the
+|          //   amp-img tag.
+|          //
+|          //   * All marked-up URLs should be absolute.
+|          //
+|          //   * The "logo" dimensions must not exceed 600x60.
+|          //
+|        {
+|          "@context": "http://schema.org",
+|          "@type": "NewsArticle",
+|          "mainEntityOfPage": "http://example.ampproject.org/article-metadata.html",
+|          "headline": "Lorem Ipsum",
+|          "datePublished": "1907-05-05T12:02:41Z",
+|          "dateModified": "1907-05-05T12:02:41Z",
+|          "description": "The Catiline Orations continue to begule engineers and designers alike -- but can it stand the test of time?",
+|          "author": {
+|            "@type": "Person",
+|            "name": "Jordan M Adler"
+|          },
+|          "publisher": {
+|            "@type": "Organization",
+|            "name": "Google",
+|            "logo": {
+|              "@type": "ImageObject",
+|              "url": "http://cdn.ampproject.org/logo.jpg",
+|              "width": 600,
+|              "height": 60
+|            }
+|          },
+|          "image": {
+|            "@type": "ImageObject",
+|            "url": "http://cdn.ampproject.org/leader.jpg",
+|            "height": 2000,
+|            "width": 800
+|          }
+|        }
+|      </script>
+|      <!-- this style tag is required -->
+|      <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|      <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    </head>
+|    <body>
+|      <h1>Lorem Ipsum</h1>
+|      <amp-img src="http://cdn.ampproject.org/leader.jpg" alt="Lorem Ipsum?" height="2000" width="800"></amp-img>
+|      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
+|         odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla
+|         quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent
+|         mauris. Fusce nec tellus sed augue semper porta. Mauris massa.
+|         Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad
+|         litora torquent per conubia nostra, per inceptos himenaeos.</p>
+|      <p>Curabitur sodales ligula in libero. Sed dignissim lacinia nunc.
+|         Curabitur tortor. Pellentesque nibh. Aenean quam. In scelerisque sem at
+|         dolor.  Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc
+|         egestas porttitor. Morbi lectus risus, iaculis vel, suscipit quis, luctus non,
+|         massa.  Fusce ac turpis quis ligula lacinia aliquet. Mauris ipsum.</p>
+|      <p>Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh.
+|         Quisque volutpat condimentum velit. Class aptent taciti sociosqu ad
+|         litora torquent per conubia nostra, per inceptos himenaeos. Nam nec
+|         ante. Sed lacinia, urna non tincidunt mattis, tortor neque adipiscing
+|         diam, a cursus ipsum ante quis turpis. Nulla facilisi. Ut fringilla.
+|         Suspendisse potenti. Nunc feugiat mi a tellus consequat imperdiet.
+|         Vestibulum sapien. Proin quam.</p>
+|      <blockquote>
+|        <p>Quo usque tandem abutere, Catilina, patientia nostra? Quam diu etiam
+|           furor iste tuus nos eludet? Quem ad finem sese effrenata iactabit
+|           audacia?</p>
+|        <p>CICERO</p>
+|      </blockquote>
+|      <p>Etiam ultrices. Suspendisse in justo eu magna luctus suscipit. Sed
+|         lectus. Integer euismod lacus luctus magna. Quisque cursus, metus vitae
+|         pharetra auctor, sem massa mattis sem, at interdum magna augue eget diam.
+|         Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere
+|         cubilia Curae; Morbi lacinia molestie dui. Praesent blandit dolor. Sed
+|         non quam. In vel mi sit amet augue congue elementum. Morbi in ipsum sit
+|         amet pede facilisis laoreet. Donec lacus nunc, viverra nec, blandit vel,
+|         egestas et, augue. Vestibulum tincidunt malesuada tellus. Ut ultrices
+|         ultrices enim.</p>
+|      <p>Curabitur sit amet mauris. Morbi in dui quis est pulvinar ullamcorper.
+|         Nulla facilisi. Integer lacinia sollicitudin massa. Cras metus. Sed
+|         aliquet risus a tortor. Integer id quam. Morbi mi. Quisque nisl felis,
+|         venenatis tristique, dignissim in, ultrices sit amet, augue. Proin
+|         sodales libero eget ante. Nulla quam. Aenean laoreet. Vestibulum nisi
+|         lectus, commodo ac, facilisis ac, ultricies eu, pede.</p>
+|    </body>
+|  </html>

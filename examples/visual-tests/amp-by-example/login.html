@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="215342317408-9rs8ek51mgngt4423t2tbknbbc47cr8t.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <title>Login</title>
+    <style>
+      body {
+          font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+      }
+      .button {
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-body">
+      <main>
+      <h1>
+        Login
+      </h1>
+      <h5>
+        Please use charlie@gmail.com to test a successful login.
+        <h5>
+      <form method="post" action="submit" id="login-form">
+          <div class="label">Email:</div>
+          <input type="email" name="email" value="charlie@gmail.com">
+        <div class="form-line">
+          <div class="label">Password:</div>
+          <input type="password" name="password" value="123456">
+        </div>
+          <input name="returnurl" type="hidden" value="{{.ReturnURL}}">
+          <input name="token" id="token" type="hidden" value="">
+          <input type="submit" value="Login" class="button">
+      </form>
+      <p> Or you can use Google Sign in </p>
+      <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+      <script>
+        function onSignIn(googleUser) {
+          var form = document.getElementById("login-form");
+          var id_token = googleUser.getAuthResponse().id_token;
+          document.getElementById('token').value = id_token;
+          console.log("ID Token: " + id_token);
+          form.submit();
+        };
+      </script>
+      </main>
+    </div>
+  </body>
+</html>
