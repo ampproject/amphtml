@@ -183,7 +183,7 @@ describes.realWin('amp-geo', {
     addConfigElement('script');
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
       expectBodyHasClass([
         'amp-iso-country-nz',
@@ -202,7 +202,7 @@ describes.realWin('amp-geo', {
         JSON.stringify(configWithUppercase));
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
       expectBodyHasClass([
         'amp-iso-country-nz',
