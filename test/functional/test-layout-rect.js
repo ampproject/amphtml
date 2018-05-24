@@ -116,6 +116,20 @@ describe('LayoutRect', () => {
   });
 });
 
+describe('layoutRectSizeEquals', () => {
+  it('should detect changes', () => {
+    const from = lr.layoutRectLtwh(10, 20, 1, 1);
+    const to = lr.layoutRectLtwh(10, 20, 40, 50);
+    expect(lr.layoutRectSizeEquals(from, to)).to.be.false;
+  });
+
+  it('should detect no changes', () => {
+    const from = lr.layoutRectLtwh(10, 20, 1, 1);
+    const to = lr.layoutRectLtwh(10, 20, 1, 1);
+    expect(lr.layoutRectSizeEquals(from, to)).to.be.true;
+  });
+});
+
 describe('areMarginsChanged', () => {
   it('should find margins are not changed when values the same', () => {
     const margins = {
