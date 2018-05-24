@@ -68,10 +68,18 @@ export class CtaLinkComponent {
    * @override
    * */
   build(ctaLinksJson, unusedElement) {
-    return {
+    const ctaLinks = {
       type: ctaLinksJson['type'],
       links: ctaLinksJson['links'],
     };
+
+    ctaLinks.links.forEach(el => {
+      if (el['ampdoc']) {
+        el.ampdoc = el['ampdoc'];
+      }
+    });
+
+    return ctaLinks;
   }
 
   /**

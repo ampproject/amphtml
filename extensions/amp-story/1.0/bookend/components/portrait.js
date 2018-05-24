@@ -80,8 +80,8 @@ export class PortraitComponent {
       image: portraitJson['image'],
     };
 
-    if (portraitJson.ampdoc) {
-      portrait.ampdoc = portraitJson.ampdoc;
+    if (portraitJson['ampdoc']) {
+      portrait.ampdoc = portraitJson['ampdoc'];
     }
 
     return portrait;
