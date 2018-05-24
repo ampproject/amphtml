@@ -1139,9 +1139,7 @@ export class Viewer {
   * @param {?string} newUrl
   */
   replaceUrl(newUrl) {
-    if (!newUrl ||
-        !this.ampdoc.isSingleDoc() ||
-        !this.isProxyOrigin_) {
+    if (!newUrl) {
       return;
     }
 

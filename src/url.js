@@ -351,6 +351,23 @@ export function isProxyOrigin(url) {
 }
 
 /**
+ * Returns whether the URL corresponds to an advertisement with a proxy origin.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isAdFromProxyOrigin(url) {
+  if (typeof url == 'string') {
+    url = parseUrlDeprecated(url);
+  }
+  if (!isProxyOrigin(url)) {
+    return false;
+  }
+  const path = url.pathname.split('/');
+  const prefix = path[1];
+  return prefix == 'a' || prefix == 'ad';
+}
+
+/**
  * Returns whether the URL origin is localhost.
  * @param {string|!Location} url URL of an AMP document.
  * @return {boolean}

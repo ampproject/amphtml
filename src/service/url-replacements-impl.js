@@ -221,11 +221,11 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the Source URL for this AMP document.
     this.setBoth('SOURCE_URL', () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      return removeFragment(docInfo.replaceUrl || docInfo.sourceUrl);
+      return removeFragment(docInfo.sourceUrl);
     }, () => {
       return getTrackImpressionPromise().then(() => {
         const docInfo = Services.documentInfoForDoc(this.ampdoc);
-        return removeFragment(docInfo.replaceUrl || docInfo.sourceUrl);
+        return removeFragment(docInfo.sourceUrl);
       });
     });
 
@@ -236,8 +236,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('SOURCE_HOSTNAME', this.getDocInfoUrl_('sourceUrl', 'hostname'));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH',
-        this.getDocInfoUrl_('replaceUrl', 'pathname', 'sourceUrl'));
+    this.set('SOURCE_PATH', this.getDocInfoUrl_('sourceUrl', 'pathname'));
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
@@ -595,17 +594,13 @@ export class GlobalVariableSource extends VariableSource {
    * Resolves the value via one of document info's urls.
    * @param {string} field A field on the docInfo
    * @param {string=} opt_urlProp A subproperty of the field
-   * @param {string=} opt_fallbackField A fallback field.
    * @return {T}
    * @template T
    */
-  getDocInfoUrl_(field, opt_urlProp, opt_fallbackField) {
+  getDocInfoUrl_(field, opt_urlProp) {
     return () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      let value = docInfo[field];
-      if (!value && opt_fallbackField) {
-        value = docInfo[opt_fallbackField];
-      }
+      const value = docInfo[field];
       return opt_urlProp ? parseUrlDeprecated(value)[opt_urlProp] : value;
     };
   }
@@ -642,9 +637,7 @@ export class GlobalVariableSource extends VariableSource {
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
     user().assert(typeof param == 'string', 'param should be a string');
-    const {replaceUrl} = Services.documentInfoForDoc(this.ampdoc);
-    // If available, prefer the replace URL.
-    const url = parseUrlDeprecated(replaceUrl || this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
       ? params[param] : defaultValue;
@@ -679,7 +672,7 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getGeo_(getter, expr) {
-    return Services.geoForOrNull(this.ampdoc.win)
+    return Services.geoForDocOrNull(this.ampdoc)
         .then(geo => {
           user().assert(geo,
               'To use variable %s, amp-geo should be configured',
