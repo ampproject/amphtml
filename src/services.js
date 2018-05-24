@@ -470,9 +470,9 @@ export class Services {
    * @param {!Window} win
    * @return {!Promise<?Object<string,(string|Array<string>)>>}
    */
-  static geoForOrNull(win) {
+  static geoForDocOrNull(nodeOrDoc) {
     return /** @type {!Promise<?Object<string,(string|Array<string>)>>} */ (
-      getElementServiceIfAvailable(win, 'geo', 'amp-geo', true));
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'geo', 'amp-geo', true));
   }
 
   /**
