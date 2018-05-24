@@ -329,7 +329,7 @@ Right now only customizing the `default` policy instance is supported. The "defa
 #### timeout (optional)
 `timeout` can be used to inform components the current consent state status after specified time.
 
-When used as a single value, `timeout` equals the timeout value in second.
+When used as a single value, `timeout` equals the timeout value in seconds.
 
 ```html
   "default": {
@@ -341,7 +341,7 @@ When used as a single value, `timeout` equals the timeout value in second.
 ```
 
 When used as an object. `timeout` object supports two attributes
-* `seconds`: timeout value in second
+* `seconds`: timeout value in seconds
 * `fallbackAction` (optional): the fallback action at timeout if no user action is taken and no state has been stored. The fallback actions supported are `reject` and `dismiss`. Default action is `dismiss` if not configured. Note the consent state changed due to fallback action at timeout will not be stored on client side.
 
 ```html

@@ -330,7 +330,7 @@ export class AmpConsent extends AMP.BaseElement {
     user().assert(config['checkConsentHref'] ||
         config['promptIfUnknownForGeoGroup'],
     'neither checkConsentHref nor ' +
-    'promptIfUnknownForGeoGroup is defined');
+    'promptIfUnknownForGeoGroup is defined in amp-consent tag');
     let remoteConfigPromise = Promise.resolve(null);
     if (config['checkConsentHref']) {
       remoteConfigPromise = this.getConsentRemote_(instanceId);
@@ -373,8 +373,8 @@ export class AmpConsent extends AMP.BaseElement {
    */
   isConsentRequiredGeo_(geoGroup) {
     return Services.geoForOrNull(this.win).then(geo => {
-      user().assert(geo,
-          'requires <amp-geo> to use promptIfUnknownForGeoGroup');
+      user().assert(geo, '<amp-geo> must be defined when using the ' +
+        'promptIfUnknownForGeoGroup attribute in <amp-consent>');
       return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
     });
   }
@@ -448,7 +448,7 @@ export class AmpConsent extends AMP.BaseElement {
         `${TAG} should have (only) one <script> child`);
     const script = scripts[0];
     user().assert(isJsonScriptTag(script),
-        `${TAG} consent instance config should be put in a <script>` +
+        `${TAG} consent instance config should be put in a <script> ` +
         'tag with type= "application/json"');
     const config = parseJson(script.textContent);
     const consents = config['consents'];
@@ -464,7 +464,7 @@ export class AmpConsent extends AMP.BaseElement {
         const keys = Object.keys(config['policy']);
         for (let i = 0; i < keys.length; i++) {
           if (keys[i] != 'default') {
-            user().warn(TAG, `policy ${keys[i]} is currently not supported` +
+            user().warn(TAG, `policy ${keys[i]} is currently not supported ` +
               'and will be ignored');
             delete config['policy'][keys[i]];
           }
