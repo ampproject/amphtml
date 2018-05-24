@@ -26,11 +26,11 @@ const TAG = 'CONSENT-STATE-MANAGER';
  * @enum {number}
  */
 export const CONSENT_ITEM_STATE = {
-  UNKNOWN: 0,
   GRANTED: 1,
   REJECTED: 2,
   DISMISSED: 3,
   NOT_REQUIRED: 4,
+  UNKNOWN: 5,
   // TODO(@zhouyx): Seperate UI state from consent state. Add consent
   // requirement state ui_state = {pending, active, complete} consent_state =
   // {unknown, granted, rejected}
@@ -183,11 +183,13 @@ export class ConsentInstance {
    * @param {!CONSENT_ITEM_STATE} state
    */
   update(state) {
+    console.log('update value is ', state);
     if (!isEnumValue(CONSENT_ITEM_STATE, state)) {
       state = CONSENT_ITEM_STATE.UNKNOWN;
     }
 
     if (state == CONSENT_ITEM_STATE.DISMISSED) {
+      console.log('this.localValue when dismissed is ', this.localValue_);
       this.localValue_ = this.localValue_ || CONSENT_ITEM_STATE.UNKNOWN;
       return;
     }
@@ -204,6 +206,7 @@ export class ConsentInstance {
     }
 
     this.localValue_ = state;
+    console.log('update localvalue ', this.localValue_);
 
     if (state == CONSENT_ITEM_STATE.UNKNOWN) {
       return;

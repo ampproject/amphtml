@@ -184,6 +184,13 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
     });
 
     describe('get', () => {
+      it('should be able to get stored value', () => {
+        storageValue['amp-consent:test'] = true;
+        return instance.get().then(value => {
+          expect(value).to.equal(CONSENT_ITEM_STATE.GRANTED);
+        });
+      });
+
       it('should be able to get local value', function* () {
         let value;
         yield instance.get().then(v => value = v);
@@ -191,7 +198,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield instance.update(CONSENT_ITEM_STATE.DISMISSED);
         yield instance.get().then(v => value = v);
         expect(value).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
-        storageValue['amp-consent:test'] = true;
+        yield instance.update(CONSENT_ITEM_STATE.GRANTED);
         yield instance.get().then(v => value = v);
         expect(value).to.equal(CONSENT_ITEM_STATE.GRANTED);
         yield instance.update(CONSENT_ITEM_STATE.DISMISSED);

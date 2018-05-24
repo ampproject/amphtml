@@ -334,7 +334,7 @@ function stubConsoleInfoLogWarn() {
   }
   consoleInfoLogWarnSandbox = sinon.sandbox.create();
   consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
-  consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
+  //consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
   consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
 }
 
