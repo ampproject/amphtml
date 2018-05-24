@@ -762,16 +762,16 @@ describe('Google A4A utils', () => {
     let fakeWin;
     beforeEach(() => {
       fakeWin = {
-        location: {}
+        location: {},
       };
     });
     it('should return true for canonical pages', () => {
-      fakeWin.location.origin = "https://www.myampsite.com/canonical";
+      fakeWin.location.origin = 'https://www.myampsite.com/canonical';
       expect(isCanonical(fakeWin)).to.be.true;
     });
 
     it('should return false for CDN pages', () => {
-      fakeWin.location.origin = "https://www-somesite.cdn.ampproject.org";
+      fakeWin.location.origin = 'https://www-somesite.cdn.ampproject.org';
       expect(isCanonical(fakeWin)).to.be.false;
     });
   });

@@ -23,12 +23,15 @@ import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
+import {
+  ADSENSE_EXPERIMENTS,
+  ADSENSE_EXP_NAMES,
+} from '../adsense-a4a-config';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
-} from '../amp-ad-network-adsense-impl';
-import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
+} from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
@@ -43,10 +46,6 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
-import {
-  ADSENSE_EXPERIMENTS,
-  ADSENSE_EXP_NAMES,
-} from '../adsense-a4a-config';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -978,7 +977,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
   describe('#shouldSkipXhr', () => {
     beforeEach(() => {
       impl.win = {
-        location: {}
+        location: {},
       };
     });
 
@@ -990,26 +989,26 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
     it('should return true if on a canonical page, and in experiment', () => {
       forceExperimentBranch(impl.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
-                            ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP);
-      impl.win.location.origin = "https://www.somesite.com";
+          ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP);
+      impl.win.location.origin = 'https://www.somesite.com';
       expect(impl.shouldSkipXhr_()).to.be.true;
 
       toggleExperiment(
           impl.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL, false);
 
       forceExperimentBranch(impl.win, ADSENSE_EXP_NAMES.CANONICAL,
-                            ADSENSE_EXPERIMENTS.CANONICAL_EXP);
-      impl.win.location.origin = "https://www.somesite.com";
+          ADSENSE_EXPERIMENTS.CANONICAL_EXP);
+      impl.win.location.origin = 'https://www.somesite.com';
       expect(impl.shouldSkipXhr_()).to.be.true;
     });
 
     it('should return false on a non-canonical page', () => {
-      impl.win.location.origin = "https://www-somesite.cdn.ampproject.org";
+      impl.win.location.origin = 'https://www-somesite.cdn.ampproject.org';
       expect(impl.shouldSkipXhr_()).to.be.false;
     });
 
     it('should return false if on a canonical page, not in experiment', () => {
-      impl.win.location.origin = "https://www.somesite.com";
+      impl.win.location.origin = 'https://www.somesite.com';
       expect(impl.shouldSkipXhr_()).to.be.false;
     });
   });

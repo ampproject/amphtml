@@ -266,7 +266,8 @@ export function googlePageParameters(
         const visibilityState = Services.viewerForDoc(nodeOrDoc)
             .getVisibilityState();
         return {
-          'is_amp': opt_ampAdImplementation || AMP_AD_XHR_TO_IFRAME_OR_AMP,
+          'is_amp': opt_ampAdImplementation ||
+              AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
           'c': getCorrelator(win, clientId, nodeOrDoc),
