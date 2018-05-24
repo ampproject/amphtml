@@ -296,7 +296,6 @@ describes.realWin('amp-youtube', {
           return 90;
         },
       });
-      imgPlaceholder.triggerLoad();
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;

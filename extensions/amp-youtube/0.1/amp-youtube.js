@@ -362,8 +362,9 @@ class AmpYoutube extends AMP.BaseElement {
     const {element} = this;
 
     const playerState = info['playerState'];
-    if (eventType == 'infoDelivery' && playerState) {
-      redispatch(element, playerState, {
+    if (eventType == 'infoDelivery' && playerState != null) {
+      redispatch(element, playerState.toString(), {
+        [PlayerStates.PLAYING]: VideoEvents.PLAYING,
         [PlayerStates.PAUSED]: VideoEvents.PAUSE,
         // YT does not fire pause and ended together.
         [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
@@ -372,7 +373,7 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     const muted = info['muted'];
-    if (eventType == 'infoDelivery' && info && muted !== undefined) {
+    if (eventType == 'infoDelivery' && info && muted != null) {
       if (this.muted_ == muted) {
         return;
       }

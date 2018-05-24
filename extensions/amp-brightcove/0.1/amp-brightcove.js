@@ -241,8 +241,8 @@ class AmpBrightcove extends AMP.BaseElement {
         `_${encodeURIComponent(embed)}/index.html` +
         // These are encodeURIComponent'd in encodeId_().
         (el.getAttribute('data-playlist-id') ?
-          'playlistId?=' + this.encodeId_(el.getAttribute('data-playlist-id')) :
-          'videoId?=' + this.encodeId_(el.getAttribute('data-video-id')));
+          '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id')) :
+          '?videoId=' + this.encodeId_(el.getAttribute('data-video-id')));
 
     el.setAttribute('data-param-playsinline', 'true');
 
