@@ -116,6 +116,10 @@ amp-story .amp-video-eq {
   display: none !important;
 }
 
+amp-story .amp-video-eq-play {
+  display: block !important;
+}
+
 /** Page level */
 amp-story-page {
   bottom: 0 !important;
