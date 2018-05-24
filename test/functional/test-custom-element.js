@@ -17,7 +17,6 @@
 import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
@@ -572,8 +571,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
           .callsFake(() => {
             return Promise.resolve({
-              whenPolicyResolved: () => {
-                return Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
+              whenPolicyUnblock: () => {
+                return Promise.resolve(true);
               },
             });
           });
@@ -592,8 +591,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
           .callsFake(() => {
             return Promise.resolve({
-              whenPolicyResolved: () => {
-                return Promise.resolve(CONSENT_POLICY_STATE.INSUFFICIENT);
+              whenPolicyUnblock: () => {
+                return Promise.resolve(false);
               },
             });
           });
