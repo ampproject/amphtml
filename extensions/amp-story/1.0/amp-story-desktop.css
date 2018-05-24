@@ -82,10 +82,10 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] amp-story-page {
-  transform: scale(1.0) translateX(-350%) translateY(0%) !important;
-  opacity: .05!important;
-  transform-origin: left!important;
-  border-radius: 16px!important;
+  transform: scale(1.0) translateX(300%) translateY(0%) !important;
+  opacity: .05 !important;
+  transform-origin: left !important;
+  border-radius: 16px !important;
 }
 
 [desktop] amp-story-page[distance="0"],
@@ -141,7 +141,11 @@ amp-story[standalone][desktop] {
   right: 0 !important;
 }
 
-[desktop] amp-story-page[pre-active],
+[desktop] amp-story-page[i-amphtml-visited] {
+  transform: scale(0.9) translateX(-350%) translateY(0%) !important;
+}
+
+[desktop] amp-story-page[i-amphtml-previous-page],
 .prev-container > .i-amphtml-story-page-sentinel {
   /* -150% + 15% */
   transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
@@ -149,24 +153,24 @@ amp-story[standalone][desktop] {
 
 [desktop] amp-story-page[active] {
   transform: scale(1.0) translateX(-50%) translateY(0%) !important;
-  opacity: 1!important;;
+  opacity: 1 !important;
 }
 
-[desktop] amp-story-page[active] + amp-story-page,
+[desktop] amp-story-page[i-amphtml-next-page],
 .next-container > .i-amphtml-story-page-sentinel {
   /* 50% - 15% */
   transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
 }
 
-[desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
-}
 
+/* NOTE: This css for rtl has not been refactored after desktop CSS changes.
+Perhaps better to delete and start over when RTL implementation begins. There be
+dragons here. */
 [dir=rtl] [desktop] amp-story-page {
-  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
+  transform: scale(0.9) translateX(300%) translateY(0%) !important;
 }
 
-[dir=rtl] [desktop] amp-story-page[pre-active] {
+[dir=rtl] [desktop] amp-story-page[i-amphtml-previous-page] {
   /* 50% - 15% */
   transform: scale(0.9) translateX(calc(50% + 64px)) translateY(0%) !important;
   /*transform: scale(1.0) translateX(35%) translateY(0%) !important;*/
@@ -236,7 +240,7 @@ amp-story[standalone][desktop] {
   outline: none!important;
 }
 
-.i-amphtml-story-prev-hover > amp-story-page[pre-active] {
+.i-amphtml-story-prev-hover > amp-story-page[i-amphtml-previous-page] {
   opacity: 0.3 !important;
 }
 

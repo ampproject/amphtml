@@ -16,8 +16,10 @@
 
 import {ACTION_TYPE, AMP_CONSENT_EXPERIMENT, AmpConsent} from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
 import {computedStyle} from '../../../../src/style';
+import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 
 import {
@@ -318,13 +320,60 @@ describes.realWin('amp-consent', {
     it('create default policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_).to.deep.equal({
-        'default': {
-          'waitFor': {
-            'ABC': undefined,
-            'DEF': undefined,
-          },
+      expect(ampConsent.policyConfig_['default']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
         },
+      });
+    });
+
+    it('create predefined _if_responded policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['_if_responded']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        },
+        'unblockOn': [
+          CONSENT_POLICY_STATE.UNKNOWN,
+          CONSENT_POLICY_STATE.SUFFICIENT,
+          CONSENT_POLICY_STATE.INSUFFICIENT,
+          CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+        ],
+      });
+    });
+
+    it('create predefined _if_accepted policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        },
+      });
+    });
+
+    it('create default _auto_reject policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['_auto_reject']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        },
+        'timeout': {
+          'seconds': 0,
+          'fallbackAction': 'reject',
+        },
+        'unblockOn': [
+          CONSENT_POLICY_STATE.UNKNOWN,
+          CONSENT_POLICY_STATE.SUFFICIENT,
+          CONSENT_POLICY_STATE.INSUFFICIENT,
+          CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+        ],
       });
     });
 
@@ -350,11 +399,15 @@ describes.realWin('amp-consent', {
       ampConsent = new AmpConsent(consentElement);
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_).to.deep.equal({
-        'default': {
-          'waitFor': {
-            'ABC': [],
-          },
+      expect(ampConsent.policyConfig_['default']).to.deep.equal({
+        'waitFor': {
+          'ABC': [],
+        },
+      });
+      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
         },
       });
     });
@@ -435,10 +488,10 @@ describes.realWin('amp-consent', {
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.DISMISS);
       yield macroTask();
-      allowConsoleError(() => {
-        expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
-            /No consent is displaying/);
-      });
+      const errorSpy = sandbox.stub(dev(), 'error');
+      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+      expect(errorSpy).to.be.calledWith('amp-consent',
+          'No consent ui is displaying, consent id null');
     });
 
     describe('schedule display', () => {
