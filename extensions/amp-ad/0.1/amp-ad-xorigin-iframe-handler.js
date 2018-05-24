@@ -78,9 +78,6 @@ export class AmpAdXOriginIframeHandler {
     /** @private {boolean} */
     this.isInaboxPositionApiInit_ = false;
 
-    /** @private {?SubscriptionApi} */
-    this.inaboxRequestPositionApi_ = null;
-
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
