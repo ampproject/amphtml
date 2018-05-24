@@ -110,14 +110,6 @@ export function doNotTrackImpression() {
  * @return {!Promise}
  */
 function handleReplaceUrl(win) {
-  const {replaceUrl} = Services.documentInfoForDoc(win.document);
-
-  // If there is already already a replace URL from the "amp_r" parameter, we do
-  // not need to query the viewer further.
-  if (replaceUrl) {
-    return Promise.resolve();
-  }
-
   const viewer = Services.viewerForDoc(win.document);
 
   // ReplaceUrl substitution doesn't have to wait until the document is visible
