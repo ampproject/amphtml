@@ -225,7 +225,6 @@ export class AmpGeo extends AMP.BaseElement {
             return GROUP_PREFIX + group;
           });
 
-
           if (!self.matchedGroups_.length) {
             classesToAdd.push('amp-geo-no-group');
           }
