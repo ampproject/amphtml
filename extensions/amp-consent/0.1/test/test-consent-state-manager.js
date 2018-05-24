@@ -18,6 +18,7 @@ import {
   ConsentInstance,
   ConsentStateManager,
 } from '../consent-state-manager';
+import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
@@ -201,15 +202,16 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         expect(value).to.equal(CONSENT_ITEM_STATE.REJECTED);
       });
 
-      it('should return unknown value with error', function* () {
-        let value;
+      it('should return unknown value with error', () => {
         storageGetSpy = () => {
           const e = new Error('intentional');
           throw e;
         };
+        sandbox.stub(dev(), 'error');
         storageValue['amp-consent:test'] = true;
-        yield instance.get().then(v => value = v);
-        expect(value).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
+        return instance.get().then(value => {
+          expect(value).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
+        });
       });
 
       it('should handle race condition return latest value', function* () {

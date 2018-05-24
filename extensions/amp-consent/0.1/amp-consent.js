@@ -194,8 +194,9 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} instanceId
    */
   scheduleDisplay_(instanceId) {
-    dev().assert(this.notificationUiManager_,
-        'notification ui manager not found');
+    if (!this.notificationUiManager_) {
+      dev().error(TAG, 'notification ui manager not found');
+    }
 
     if (this.consentUIPendingMap_[instanceId]) {
       // Already pending to be shown. Do nothing.
@@ -217,8 +218,11 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise}
    */
   show_(instanceId) {
-    dev().assert(!this.currentDisplayInstance_,
-        'Other consent instance on display');
+    if (this.currentDisplayInstance_) {
+      dev().error(TAG,
+          `other consent instance on display ${this.currentDisplayInstance_}`);
+    }
+
     this.vsync_.mutate(() => {
       if (!this.uiInit_) {
         this.uiInit_ = true;
@@ -255,7 +259,10 @@ export class AmpConsent extends AMP.BaseElement {
       this.element.classList.remove('amp-active');
       // Need to remove from fixed layer and add it back to update element's top
       this.getViewport().removeFromFixedLayer(this.element);
-      dev().assert(uiToHide, 'no consent UI to hide');
+      if (!uiToHide) {
+        dev().error(TAG,
+            `${this.currentDisplayInstance_} no consent ui to hide`);
+      }
       toggle(uiToHide, false);
     });
     if (this.dialogResolver_[this.currentDisplayInstance_]) {
@@ -271,8 +278,16 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {ACTION_TYPE} action
    */
   handleAction_(action) {
-    dev().assert(this.currentDisplayInstance_, 'No consent is displaying');
-    dev().assert(this.consentStateManager_, 'No consent state manager');
+    if (!this.currentDisplayInstance_) {
+      dev().error(TAG, 'No consent ui is displaying, ' +
+          `consent id ${this.currentDisplayInstance_}`);
+      return;
+    }
+
+    if (!this.consentStateManager_) {
+      dev().error(TAG, 'No consent state manager');
+      return;
+    }
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(

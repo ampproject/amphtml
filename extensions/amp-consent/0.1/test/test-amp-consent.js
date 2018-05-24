@@ -18,6 +18,7 @@ import {ACTION_TYPE, AMP_CONSENT_EXPERIMENT, AmpConsent} from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
 import {computedStyle} from '../../../../src/style';
+import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 
 import {
@@ -435,10 +436,10 @@ describes.realWin('amp-consent', {
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.DISMISS);
       yield macroTask();
-      allowConsoleError(() => {
-        expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
-            /No consent is displaying/);
-      });
+      const errorSpy = sandbox.stub(dev(), 'error');
+      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+      expect(errorSpy).to.be.calledWith('amp-consent',
+          'No consent ui is displaying, consent id null');
     });
 
     describe('schedule display', () => {
