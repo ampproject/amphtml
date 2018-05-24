@@ -33,10 +33,7 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {getConsentPolicyUnblockState} from './consent-state';
-import {
-  getIntersectionChangeEntry,
-} from '../src/intersection-observer-polyfill';
+import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
@@ -484,9 +481,15 @@ function createBaseCustomElementClass(win) {
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
-          getConsentPolicyUnblockState(this.getAmpDoc(), policyId).then(
-              state => {
-                if (state == true) {
+          Services.consentPolicyServiceForDocOrNull(this.getAmpDoc())
+              .then(consentPolicy => {
+                if (!consentPolicy) {
+                  return true;
+                }
+                return consentPolicy.whenPolicyUnblock(
+                    /** @type {string} */ (policyId));
+              }).then(shouldUnblock => {
+                if (shouldUnblock == true) {
                   resolve(this.implementation_.buildCallback());
                 } else {
                   reject(blockedByConsentError());
