@@ -401,7 +401,7 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 
 #### Example JSON response
 
-```json
+```text
 {
   // It is required to specify you are using the v1.0 version.
   "bookend-version": "v1.0",
