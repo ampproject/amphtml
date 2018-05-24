@@ -86,7 +86,7 @@
     "fetch-mock": "6.4.2",
     "formidable": "1.2.1",
     "fs-extra": "6.0.1",
-    "greenkeeper-lockfile": "1.14.0",
+    "greenkeeper-lockfile": "1.15.1",
     "gulp": "3.9.1",
     "gulp-ava": "0.19.0",
     "gulp-batch-replace": "0.0.0",
