@@ -31,7 +31,7 @@ import {user} from '../../../src/log';
  * will be handled by the extension loader.
  *
  * @param {string} type
- * @return !string
+ * @return {string}
  * @private
  */
 function networkImplementationTag(type) {
