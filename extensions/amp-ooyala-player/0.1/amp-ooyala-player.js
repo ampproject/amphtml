@@ -34,12 +34,9 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
 
-/**
- * @implements {../../../src/video-interface.VideoInterface}
- */
+
+/** @implements {../../../src/video-interface.VideoInterface} */
 class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -83,16 +80,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     const embedCode = user().assert(
         el.getAttribute('data-embedcode'),
-        'The data-embedcode attribute is required for <amp-ooyala-player> %s',
-        el);
+        'The data-embedcode attribute is required for %s', el);
+
     const pCode = user().assert(
         el.getAttribute('data-pcode'),
-        'The data-pcode attribute is required for <amp-ooyala-player> %s',
-        el);
+        'The data-pcode attribute is required for %s', el);
+
     const playerId = user().assert(
         el.getAttribute('data-playerid'),
-        'The data-playerid attribute is required for <amp-ooyala-player> %s',
-        el);
+        'The data-playerid attribute is required for %s', el);
 
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     const playerVersion = el.getAttribute('data-playerversion') || '';

@@ -50,7 +50,7 @@ describes.realWin('amp-brid-player', {
     timer.promise(50).then(() => {
       const bridTimerIframe = bc.querySelector('iframe');
 
-      bc.implementation_.handleBridMessages_({
+      bc.implementation_.handleBridMessage_({
         origin: 'https://services.brid.tv',
         source: bridTimerIframe.contentWindow,
         data: 'Brid|0|trigger|ready',
@@ -138,7 +138,7 @@ describes.realWin('amp-brid-player', {
 
 
   function sendFakeMessage(bc, iframe, command) {
-    bc.implementation_.handleBridMessages_({
+    bc.implementation_.handleBridMessage_({
       origin: 'https://services.brid.tv',
       source: iframe.contentWindow,
       data: 'Brid|0|' + command,

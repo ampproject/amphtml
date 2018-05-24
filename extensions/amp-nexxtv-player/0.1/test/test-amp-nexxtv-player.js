@@ -47,7 +47,7 @@ describes.realWin('amp-nexxtv-player', {
       return nexxtv.layoutCallback();
     }).then(() => {
       const nexxTimerIframe = nexxtv.querySelector('iframe');
-      nexxtv.implementation_.handleNexxMessages_({
+      nexxtv.implementation_.handleNexxMessage_({
         origin: 'https://embed.nexx.cloud',
         source: nexxTimerIframe.contentWindow,
         data: JSON.stringify({cmd: 'onload'}),
@@ -107,7 +107,7 @@ describes.realWin('amp-nexxtv-player', {
 
 
   function sendFakeMessage(nexxtv, iframe, command) {
-    nexxtv.implementation_.handleNexxMessages_({
+    nexxtv.implementation_.handleNexxMessage_({
       origin: 'https://embed.nexx.cloud',
       source: iframe.contentWindow,
       data: command,

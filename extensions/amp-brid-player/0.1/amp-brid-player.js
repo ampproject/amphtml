@@ -154,7 +154,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
         this.win,
         'message',
-        this.handleBridMessages_.bind(this)
+        this.handleBridMessage_.bind(this)
     );
 
     this.element.appendChild(iframe);
@@ -239,7 +239,7 @@ class AmpBridPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleBridMessages_(event) {
+  handleBridMessage_(event) {
     if (!originMatches(event, this.iframe_, 'https://services.brid.tv')) {
       return;
     }
