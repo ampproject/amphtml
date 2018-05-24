@@ -372,7 +372,7 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise<boolean>}
    */
   isConsentRequiredGeo_(geoGroup) {
-    return Services.geoForOrNull(this.win).then(geo => {
+    return Services.geoForDocOrNull(this.element).then(geo => {
       user().assert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
       return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
