@@ -78,12 +78,12 @@ export class ArticleComponent {
       title: articleJson['title'],
     };
 
-    if (articleJson['image']) {
-      article.image = articleJson['image'];
+    if (articleJson.image) {
+      article.image = articleJson.image;
     }
 
-    if (articleJson['ampdoc']) {
-      article.ampdoc = articleJson['ampdoc'];
+    if (articleJson.ampdoc) {
+      article.ampdoc = articleJson.ampdoc;
     }
 
     return /** @type {!ArticleComponentDef} */ (article);
@@ -121,10 +121,7 @@ export class ArticleComponent {
     }
 
     const articleElements = htmlRefs(el);
-    const {
-      heading,
-      meta,
-    } = /** @type {!articleElsDef} */ (articleElements);
+    const {heading, meta} = /** @type {!articleElsDef} */ (articleElements);
 
     heading.textContent = articleData.title;
     meta.textContent = articleData.domainName;

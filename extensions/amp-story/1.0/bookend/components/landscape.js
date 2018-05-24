@@ -80,8 +80,8 @@ export class LandscapeComponent {
       image: landscapeJson['image'],
     };
 
-    if (landscapeJson['ampdoc']) {
-      landscape.ampdoc = landscapeJson['ampdoc'];
+    if (landscapeJson.ampdoc) {
+      landscape.ampdoc = landscapeJson.ampdoc;
     }
 
     return landscape;
