@@ -36,6 +36,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
+import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -66,17 +67,7 @@ const PlayerFlags = {
 };
 
 
-/** @private @const {!Object<string, (string|Array<string>)} */
-const EventsToDispatch = {
-  [PlayerStates.PAUSED]: VideoEvents.PAUSE,
-  // YT does not fire pause and ended together.
-  [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
-};
-
-
-/**
- * @implements {../../../src/video-interface.VideoInterface}
- */
+/** @implements {../../../src/video-interface.VideoInterface} */
 class AmpYoutube extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -190,7 +181,10 @@ class AmpYoutube extends AMP.BaseElement {
     return `${baseUrl}${descriptor}enablejsapi=1`;
   }
 
-  /** @return {string} */
+  /**
+   * @return {string}
+   * @private
+   */
   getVideoIframeSrc_() {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
@@ -198,7 +192,8 @@ class AmpYoutube extends AMP.BaseElement {
 
     let src = this.getEmbedUrl_();
 
-    const params = getDataParamsFromAttributes(this.element);
+    const {element} = this;
+    const params = getDataParamsFromAttributes(element);
     if ('autoplay' in params) {
       // Autoplay is managed by video manager, do not pass it to YouTube.
       delete params['autoplay'];
@@ -214,7 +209,7 @@ class AmpYoutube extends AMP.BaseElement {
       params['playsinline'] = '1';
     }
 
-    const hasAutoplay = this.element.hasAttribute('autoplay');
+    const hasAutoplay = element.hasAttribute('autoplay');
     if (hasAutoplay) {
       // Unless annotations policy is set explicitly, change the default to
       // hide annotations when autoplay is set.
@@ -280,13 +275,16 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (mutations['data-videoid'] !== undefined) {
-      this.videoid_ = this.getVideoId_();
-      if (this.iframe_) { // `null` if element hasn't been laid out yet.
-        this.sendCommand_('loadVideoById', [this.videoid_]);
-      }
+    if (mutations['data-videoid'] == null) {
+      return;
     }
+    this.videoid_ = this.getVideoId_();
+    if (!this.iframe_) {
+      return;
+    }
+    this.sendCommand_('loadVideoById', [this.videoid_]);
   }
+
   /**
    * @return {?string}
    * @private
@@ -365,7 +363,11 @@ class AmpYoutube extends AMP.BaseElement {
 
     const playerState = info['playerState'];
     if (eventType == 'infoDelivery' && playerState) {
-      redispatch(element, playerState, EventsToDispatch);
+      redispatch(element, playerState, {
+        [PlayerStates.PAUSED]: VideoEvents.PAUSE,
+        // YT does not fire pause and ended together.
+        [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
+      });
       return;
     }
 
@@ -405,7 +407,8 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @private */
   buildImagePlaceholder_() {
-    const imgPlaceholder = this.element.ownerDocument.createElement('img');
+    const {element: el} = this;
+    const imgPlaceholder = htmlFor(el)`<img placeholder referrerpolicy=origin>`;
     const videoid = dev().assertString(this.videoid_);
 
     setStyles(imgPlaceholder, {
@@ -421,8 +424,7 @@ class AmpYoutube extends AMP.BaseElement {
     // player thumbnails for different screen sizes for a cache win!
     imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
         encodeURIComponent(videoid) + '/sddefault.jpg#404_is_fine';
-    imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
+
     if (imgPlaceholder.hasAttribute('aria-label')) {
       imgPlaceholder.setAttribute('alt',
           'Loading video - ' + imgPlaceholder.getAttribute('aria-label')
@@ -431,7 +433,7 @@ class AmpYoutube extends AMP.BaseElement {
       imgPlaceholder.setAttribute('alt', 'Loading video');
     }
     this.applyFillContent(imgPlaceholder);
-    this.element.appendChild(imgPlaceholder);
+    el.appendChild(imgPlaceholder);
 
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.
@@ -459,9 +461,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
-  /**
-   * @override
-   */
+  /** @override */
   supportsPlatform() {
     return true;
   }
@@ -474,51 +474,37 @@ class AmpYoutube extends AMP.BaseElement {
     return true;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   play(unusedIsAutoplay) {
     this.sendCommand_('playVideo');
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   pause() {
     this.sendCommand_('pauseVideo');
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   mute() {
     this.sendCommand_('mute');
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   unmute() {
     this.sendCommand_('unMute');
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   showControls() {
     // Not supported.
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   hideControls() {
     // Not supported.
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   fullscreenEnter() {
     if (!this.iframe_) {
       return;
@@ -526,9 +512,7 @@ class AmpYoutube extends AMP.BaseElement {
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   fullscreenExit() {
     if (!this.iframe_) {
       return;

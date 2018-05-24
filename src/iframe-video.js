@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents} from './video-interface';
 import {dev} from './log';
 import {htmlFor} from './static-template';
 import {isArray, isObject} from './types';
@@ -23,12 +23,12 @@ import {tryParseJson} from './json';
 
 /**
  * @param {!Event} event
- * @param {!Element} iframe
+ * @param {?Element} iframe
  * @param {string|!RegExp} host
  * @return {boolean}
  */
 export function originMatches(event, iframe, host) {
-  if (event.source != iframe.contentWindow) {
+  if (!iframe || event.source != iframe.contentWindow) {
     return false;
   }
   if (typeof host === 'string') {
@@ -44,7 +44,7 @@ export function originMatches(event, iframe, host) {
  *
  * @param {!AmpElement} element
  * @param {string} event
- * @param {!Object<string, string>} events
+ * @param {!Object<string, (string|?Array<string>)>} events
  * @return {boolean}
  */
 export function redispatch(element, event, events) {
@@ -71,10 +71,8 @@ export function createFrameFor(video, src) {
 
   frame.src = src;
 
-  video.mutateElement(() => {
-    video.applyFillContent(frame);
-    element.appendChild(video);
-  });
+  video.applyFillContent(frame);
+  element.appendChild(frame);
 
   return frame;
 }
@@ -85,24 +83,29 @@ export function createFrameFor(video, src) {
  * @return {boolean}
  */
 export function isJsonOrObj(anything) {
-  return anything && (
-    isObject(anything) || startsWith(/** @type {string} */ (anything), '{'));
+  if (!anything) {
+    return false;
+  }
+  return isObject(anything) ||
+    startsWith(/** @type {string} */ (anything), '{');
 }
 
 
 /**
- * @param {!Object|string} objOrStr
- * @return {!JsonObject}
+ * @param {?JsonObject|string} objOrStr
+ * @return {?JsonObject|undefined}
  */
 export function objOrParseJson(objOrStr) {
-  return /** @type {?JsonObject} */ (
-    isObject(objOrStr) ? objOrStr : tryParseJson(objOrStr));
+  if (isObject(objOrStr)) {
+    return /** @type {!JsonObject} */ (objOrStr);
+  }
+  return tryParseJson(objOrStr);
 }
 
 
 /**
  * @param {boolean} isMuted
- * @return {!VideoEvents}
+ * @return {string}
  */
 export function mutedOrUnmutedEvent(isMuted) {
   return isMuted ? VideoEvents.MUTED : VideoEvents.UNMUTED;

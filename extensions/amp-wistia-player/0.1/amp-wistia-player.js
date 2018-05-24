@@ -92,7 +92,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
             'for <amp-wistia-player> %s',
         element);
 
-    const iframe = createFrameFor(element,
+    const iframe = createFrameFor(this,
         `https://fast.wistia.net/embed/iframe/${encodeURIComponent(mediaId)}`);
 
     iframe.setAttribute('title',
