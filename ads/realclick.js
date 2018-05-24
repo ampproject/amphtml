@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
+import {validateData, loadScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -23,7 +23,5 @@ import {validateData, writeScript} from '../3p/3p';
 export function realclick(global, data) {
   validateData(data, ['mcode']);
   global.rcParams = data;
-  writeScript(global, 'https://ssp.realclick.co.kr/amp/ad.js', () => {
-    global.context.renderStart();
-  });
+  loadScript(global, 'https://ssp.realclick.co.kr/amp/ad.js');
 }
