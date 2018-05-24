@@ -25,7 +25,7 @@ describes.realWin('amp-geo', {
   },
 }, env => {
 
-  const expectedState = '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","nafta":true,"unknown":true,"ISOCountryGroups":["nafta","unknown"]}</script></amp-state>'; // eslint-disable-line  
+  const expectedState = '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","nafta":true,"unknown":true,"ISOCountryGroups":["nafta","unknown"]}</script></amp-state>'; // eslint-disable-line
 
 
   const config = {
@@ -48,13 +48,14 @@ describes.realWin('amp-geo', {
   let win, doc;
   let ampdoc;
   let geo;
+  let el;
 
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    const el = doc.createElement('amp-geo');
+    el = doc.createElement('amp-geo');
     doc.body.appendChild(el);
     el.ampdoc_ = ampdoc;
     const vsync = vsyncForTesting(win);
@@ -100,7 +101,7 @@ describes.realWin('amp-geo', {
     addConfigElement('script');
 
     geo.buildCallback();
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('unknown');
       expectBodyHasClass([
         'amp-iso-country-unknown',
@@ -122,7 +123,7 @@ describes.realWin('amp-geo', {
     ], true);
 
     geo.buildCallback();
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('unknown');
       expectBodyHasClass([
         'amp-geo-pending',
@@ -135,7 +136,7 @@ describes.realWin('amp-geo', {
         JSON.stringify(configWithState));
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(() => {
+    return Services.geoForDocOrNull(el).then(() => {
       expect(win.document.getElementById('ampGeo').outerHTML)
           .to.equal(expectedState);
     });
@@ -145,7 +146,7 @@ describes.realWin('amp-geo', {
     addConfigElement('script');
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(() => {
+    return Services.geoForDocOrNull(el).then(() => {
       expect(win.document.getElementById('ampGeo'))
           .to.equal(null);
     });
@@ -156,7 +157,7 @@ describes.realWin('amp-geo', {
     addConfigElement('script');
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
       expectBodyHasClass([
         'amp-iso-country-nz',
@@ -174,7 +175,7 @@ describes.realWin('amp-geo', {
     doc.body.classList.add('amp-iso-country-nz', 'amp-geo-group-anz');
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
       expectBodyHasClass([
         'amp-iso-country-nz',
@@ -193,7 +194,7 @@ describes.realWin('amp-geo', {
     addConfigElement('script');
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
       expectBodyHasClass([
         'amp-iso-country-nz',
