@@ -310,6 +310,7 @@ export class Cid {
  * User will be opted out of Cid issuance for all scopes.
  * When opted-out Cid service will reject all `get` requests.
  *
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise}
  * @visibleForTesting
  */
