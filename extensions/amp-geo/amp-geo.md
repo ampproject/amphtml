@@ -92,7 +92,7 @@ The `ISOCountryGroups` key allows selections by groups of country codes.
 </amp-geo>
 ```
 
-If country groups are specified, `amp-geo` iterates through the groups. For any group that contains the current country, a class named `amp-geo-group-` followed by the group name is added to `<body>`. Group names may only contain a-z, A-Z and 0-9, and may not start with a digit.
+If country groups are specified, `amp-geo` iterates through the groups. For any group that contains the current country, a class named `amp-geo-group-` followed by the group name is added to `<body>`. Group names may only contain a-z, A-Z and 0-9, and may not start with a digit.  If no country group is matched the class `amp-geo-no-group` is added to `body`.
 
 ##### Example: Generated CSS classes
 
