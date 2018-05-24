@@ -29,11 +29,11 @@ const {green, red, cyan, yellow} = colors;
 
 function checkBundleSize() {
   if (!fs.existsSync(runtimeFile)) {
-    log(green('Could not find'), cyan(runtimeFile) +
-        green('. Skipping bundlesize check.'));
-    log(green('To include this check, run'),
+    log(yellow('Could not find'), cyan(runtimeFile) +
+        yellow('. Skipping bundlesize check.'));
+    log(yellow('To include this check, run'),
         cyan('gulp dist --fortesting [--noextensions]'),
-        green('before'), cyan('gulp bundle-size') + yellow('.'));
+        yellow('before'), cyan('gulp bundle-size') + yellow('.'));
     return;
   }
 
