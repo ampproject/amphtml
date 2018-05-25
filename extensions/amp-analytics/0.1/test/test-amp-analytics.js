@@ -77,6 +77,9 @@ describes.realWin('amp-analytics', {
   };
 
   beforeEach(() => {
+    // Temporarily disable console error check until we have a solution
+    // to catch async console errors.
+    dontWarnForConsoleError();
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
@@ -114,6 +117,10 @@ describes.realWin('amp-analytics', {
     return Services.userNotificationManagerForDoc(ampdoc).then(manager => {
       uidService = manager;
     });
+  });
+
+  afterEach(() => {
+    warnForConsoleError();
   });
 
   function getAnalyticsTag(config, attrs) {
