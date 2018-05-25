@@ -671,7 +671,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   isAmpStoryEnabled_() {
-    if (isExperimentOn(this.win, TAG) || getMode().test ||
+    if (isExperimentOn(this.win, 'amp-story-v1') || getMode().test ||
         this.win.location.protocol === 'file:') {
       return true;
     }
