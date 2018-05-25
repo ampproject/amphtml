@@ -151,7 +151,7 @@ export class AmpGeo extends AMP.BaseElement {
    */
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
-    const ISOCountryGroups = /** @type {!Object<string, Array<string>>} */(
+    const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */(
       config.ISOCountryGroups);
     const errorPrefix = `<${TAG}> ISOCountryGroups`; // code size
     if (ISOCountryGroups) {
