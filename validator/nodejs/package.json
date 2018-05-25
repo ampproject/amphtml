@@ -10,7 +10,7 @@
     "Accelerated Mobile Pages"
   ],
   "engines": {
-    "node": ">=0.10.25"
+    "node": "^8.0.0"
   },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
@@ -20,6 +20,9 @@
   },
   "bin": {
     "amphtml-validator": "index.js"
+  },
+  "scripts": {
+    "preinstall": "node ../../build-system/check-package-manager.js"
   },
   "dependencies": {
     "colors": "1.2.5",
