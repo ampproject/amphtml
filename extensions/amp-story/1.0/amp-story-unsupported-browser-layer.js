@@ -107,7 +107,7 @@ export class UnsupportedBrowserLayer {
    * @return {?Element} The root element of the componenet
    */
   get() {
-    if (!this.root_){
+    if (!this.root_) {
       this.build();
     }
     return this.root_;
