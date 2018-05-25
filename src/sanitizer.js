@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as DOMPurify from 'dompurify/dist/purify.cjs';
 import {
   checkCorsUrl,
   getSourceUrl,
@@ -53,13 +54,15 @@ const BLACKLISTED_TAGS = dict({
   'object': true,
   'script': true,
   'style': true,
-  // TODO(dvoytenko, #1156): SVG is blacklisted temporarily. There's no
-  // intention to keep this block for any longer than we have to.
-  'svg': true,
   'video': true,
 });
 
-/** @const {!Object<string, boolean>} */
+/**
+ * Whitelist of supported self-closing tags for Caja. These are used for
+ * correct parsing on Caja and are not necessary for DOMPurify which uses
+ * the browser's HTML parser.
+ * @const {!Object<string, boolean>}
+ */
 const SELF_CLOSING_TAGS = dict({
   'br': true,
   'col': true,
@@ -79,8 +82,13 @@ const SELF_CLOSING_TAGS = dict({
   'param': true,
 });
 
-/** @const {!Array<string>} */
-const WHITELISTED_TAGS = [
+/**
+ * Whitelist of tags allowed in triple mustache e.g. {{{name}}}.
+ * Very restrictive by design since the triple mustache renders unescaped HTML
+ * which, unlike double mustache, won't be processed by the AMP Validator.
+ * @const {!Array<string>}
+ */
+const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'a',
   'b',
   'br',
@@ -112,33 +120,41 @@ const WHITELISTED_TAGS = [
   'u',
 ];
 
-/** @const {!Array<string>} */
+/**
+ * Tag-agnostic attribute whitelisted used by both Caja and DOMPurify.
+ * @const {!Array<string>}
+ */
 const WHITELISTED_ATTRS = [
-  /* AMP-only attributes that don't exist in HTML. */
+  // AMP-only attributes that don't exist in HTML.
   'fallback',
   'on',
   'option',
   'placeholder',
   'submit-success',
   'submit-error',
-  /* HTML attributes that are scrubbed by Caja but we handle specially. */
+  // HTML attributes that are scrubbed by Caja but we handle specially.
   'href',
   'style',
-  /* Attributes for amp-bind that exist in "[foo]" form. */
+  // Attributes for amp-bind that exist in "[foo]" form.
   'text',
-  /* Attributes for amp-subscriptions. */
+  // Attributes for amp-subscriptions.
   'subscriptions-action',
   'subscriptions-actions',
-  'subscriptions-section',
-  'subscriptions-display',
-  'subscriptions-service',
   'subscriptions-decorate',
+  'subscriptions-dialog',
+  'subscriptions-display',
+  'subscriptions-section',
+  'subscriptions-service',
 ];
 
-/** @const {!Object<string, !Array<string>>} */
+/**
+ * Tag-specific attribute whitelist used by both Caja and DOMPurify.
+ * @const {!Object<string, !Array<string>>}
+ */
 const WHITELISTED_ATTRS_BY_TAGS = dict({
   'a': [
     'rel',
+    'target',
   ],
   'div': [
     'template',
@@ -153,7 +169,11 @@ const WHITELISTED_ATTRS_BY_TAGS = dict({
   ],
 });
 
-/** @const {!RegExp} */
+/**
+ * Regex to allow data-*, aria-* and role attributes.
+ * Only needed in Caja. Internally supported by DOMPurify.
+ * @const {!RegExp}
+ */
 const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /** @const {!Array<string>} */
@@ -202,6 +222,16 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 const INVALID_INLINE_STYLE_REGEX =
     /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
+/** @const {!Object} */
+const PURIFY_CONFIG = {
+  'USE_PROFILES': {
+    'html': true,
+    'svg': true,
+    'svgFilters': true,
+  },
+};
+
+
 /**
  * Sanitizes the provided HTML.
  *
@@ -213,6 +243,111 @@ const INVALID_INLINE_STYLE_REGEX =
  * @return {string}
  */
 export function sanitizeHtml(html) {
+  if (isExperimentOn(self, 'svg-in-mustache')) {
+    return purifyHtml(html);
+  } else {
+    return sanitizeWithCaja(html);
+  }
+}
+
+/**
+ * @param {string} dirty
+ * @return {string}
+ */
+function purifyHtml(dirty) {
+  const config = Object.assign({}, PURIFY_CONFIG, {
+    'ADD_ATTR': WHITELISTED_ATTRS,
+    'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
+    'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
+  });
+  DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
+  DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
+  return DOMPurify.sanitize(dirty, config);
+}
+
+/**
+ * @param {!Node} node
+ * @param {{tagName: string, allowedTags: !Object<string, boolean>}} data
+ */
+function uponSanitizeElement(node, data) {
+  const {tagName, allowedTags} = data;
+  // Allow all AMP elements (constrained by AMP Validator since tag
+  // calculation is not possible).
+  if (startsWith(tagName, 'amp-')) {
+    allowedTags[tagName] = true;
+  }
+
+  if (tagName == 'a') {
+    if (node.hasAttribute('href') && !node.hasAttribute('target')) {
+      node.setAttribute('target', '_top');
+    }
+  }
+}
+
+/**
+ * @param {!Node} node
+ * @param {{attrName: string, attrValue: string, allowedAttributes: !Object<string, boolean>}} data
+ */
+function uponSanitizeAttribute(node, data) {
+  // Beware of DOM Clobbering risk when using properties or functions on `node`.
+  // DOMPurify checks a few of these for its internal usage (e.g. `nodeName`),
+  // but not others that may be used in custom hooks.
+  // See https://github.com/cure53/DOMPurify/wiki/Security-Goals-&-Threat-Model#security-goals
+  // and https://github.com/cure53/DOMPurify/blob/master/src/purify.js#L527.
+
+  const tagName = node.nodeName.toLocaleLowerCase();
+  const {attrName, allowedAttributes} = data;
+  let {attrValue} = data;
+
+  // `<A>` has special target rules:
+  // - Default target is "_top";
+  // - Allowed targets are "_blank", "_top";
+  // - All other targets are rewritted to "_top".
+  if (tagName == 'a' && attrName == 'target') {
+    const lowercaseValue = attrValue.toLowerCase();
+    if (!WHITELISTED_TARGETS.includes(lowercaseValue)) {
+      attrValue = '_top';
+    } else {
+      // Always use lowercase values for `target` attr.
+      attrValue = lowercaseValue;
+    }
+  }
+
+  // Allow if attribute is in tag-specific whitelist.
+  // `allowedAttributes` is scoped to the node being sanitized.
+  const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tagName];
+  if (attrsByTags && attrsByTags.includes(attrName)) {
+    allowedAttributes[attrName] = true;
+  }
+
+  // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
+  // This is because DOMPurify eagerly removes attributes and re-adds them
+  // after sanitization, which fails because `[]` are not valid attr chars.
+  const isBinding = attrName[0] == '[' && attrName[attrName.length - 1] == ']';
+  if (isBinding) {
+    const property = attrName.substring(1, attrName.length - 1);
+    node.setAttribute(`data-amp-bind-${property}`, attrValue);
+  }
+
+  if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
+    if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
+      attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
+    }
+  } else {
+    user().error(TAG, `Removing "${attrName}" attribute with invalid `
+        + `value in <${tagName} ${attrName}="${attrValue}">.`);
+    data.keepAttr = false;
+  }
+
+  // Update attribute value.
+  data.attrValue = attrValue;
+}
+
+/**
+ * @param {string} html
+ * @return {string}
+ */
+function sanitizeWithCaja(html) {
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null);
   const output = [];
@@ -223,6 +358,9 @@ export function sanitizeHtml(html) {
       output.push(content);
     }
   }
+
+  // Caja doesn't support SVG.
+  const cajaBlacklistedTags = Object.assign({'svg': true}, BLACKLISTED_TAGS);
 
   const parser = htmlSanitizer.makeSaxParser({
     'startTag': function(tagName, attribs) {
@@ -242,7 +380,7 @@ export function sanitizeHtml(html) {
           attribs[i] = attr.slice(1, -1);
         }
       }
-      if (BLACKLISTED_TAGS[tagName]) {
+      if (cajaBlacklistedTags[tagName]) {
         ignore++;
       } else if (!startsWith(tagName, 'amp-')) {
         // Ask Caja to validate the element as well.
@@ -359,7 +497,13 @@ export function sanitizeHtml(html) {
  * @return {string}
  */
 export function sanitizeTagsForTripleMustache(html) {
-  return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
+  if (isExperimentOn(self, 'svg-in-mustache')) {
+    return DOMPurify.sanitize(html, {
+      'ALLOWED_TAGS': TRIPLE_MUSTACHE_WHITELISTED_TAGS,
+    });
+  } else {
+    return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
+  }
 }
 
 /**
@@ -367,12 +511,26 @@ export function sanitizeTagsForTripleMustache(html) {
  * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
+ * @param {boolean} opt_purify Is true, skips some attribute sanitizations
+ *     that are already covered by DOMPurify.
  * @return {boolean}
  */
-export function isValidAttr(tagName, attrName, attrValue) {
-  // "on*" attributes are not allowed.
-  if (startsWith(attrName, 'on') && attrName != 'on') {
-    return false;
+export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
+  if (!opt_purify) {
+    // "on*" attributes are not allowed.
+    if (startsWith(attrName, 'on') && attrName != 'on') {
+      return false;
+    }
+
+    // No attributes with "javascript" or other blacklisted substrings in them.
+    if (attrValue) {
+      const normalized = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
+      for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
+        if (normalized.indexOf(BLACKLISTED_ATTR_VALUES[i]) >= 0) {
+          return false;
+        }
+      }
+    }
   }
 
   // Inline styles are not allowed.
@@ -383,22 +541,10 @@ export function isValidAttr(tagName, attrName, attrValue) {
     return false;
   }
 
-  // See validator-main.protoascii
-  // https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
-  if (attrName == 'class' &&
-      attrValue &&
-      /(^|\W)i-amphtml-/i.test(attrValue)) {
+  // Don't allow CSS class names with internal AMP prefix.
+  // See https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
+  if (attrName == 'class' && attrValue && /(^|\W)i-amphtml-/i.test(attrValue)) {
     return false;
-  }
-
-  // No attributes with "javascript" or other blacklisted substrings in them.
-  if (attrValue) {
-    const attrValueNorm = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
-    for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
-      if (attrValueNorm.indexOf(BLACKLISTED_ATTR_VALUES[i]) != -1) {
-        return false;
-      }
-    }
   }
 
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
@@ -542,8 +688,7 @@ function tripleMustacheTagPolicy(tagName, attribs) {
       }
     }
   }
-  const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
-  if (!isWhitelistedTag) {
+  if (!TRIPLE_MUSTACHE_WHITELISTED_TAGS.includes(tagName)) {
     return null;
   }
   return {

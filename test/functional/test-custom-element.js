@@ -17,7 +17,6 @@
 import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
@@ -323,7 +322,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.implementation_.layoutWidth_).to.equal(111);
     });
 
-    it('should tolerate erros in onLayoutMeasure', () => {
+    it('should tolerate errors in onLayoutMeasure', () => {
       const element = new ElementClass();
       sandbox.stub(element.implementation_, 'onLayoutMeasure').callsFake(() => {
         throw new Error('intentional');
@@ -331,10 +330,46 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const errorStub = sandbox.stub(element, 'dispatchCustomEventForTesting');
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
-        element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+        allowConsoleError(() => {
+          element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+          expect(element.layoutWidth_).to.equal(111);
+          expect(element.implementation_.layoutWidth_).to.equal(111);
+          expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+        });
+      });
+    });
+
+    it('should not call onMeasureChanged callback when element dimensions '
+        + 'have not changed', () => {
+      const element = new ElementClass();
+      const onMeasureChangeStub =
+          sandbox.stub(element.implementation_, 'onMeasureChanged');
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        element.updateLayoutBox(
+            {top: 0, left: 0, width: 111, height: 51},
+            /* opt_hasMeasurementsChanged */ false
+        );
         expect(element.layoutWidth_).to.equal(111);
         expect(element.implementation_.layoutWidth_).to.equal(111);
-        expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+        expect(onMeasureChangeStub).to.have.not.been.called;
+      });
+    });
+
+    it('should call onMeasureChanged callback when element dimensions '
+        + 'have changed', () => {
+      const element = new ElementClass();
+      const onMeasureChangeStub =
+          sandbox.stub(element.implementation_, 'onMeasureChanged');
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        element.updateLayoutBox(
+            {top: 0, left: 0, width: 111, height: 51},
+            /* opt_hasMeasurementsChanged */ true
+        );
+        expect(element.layoutWidth_).to.equal(111);
+        expect(element.implementation_.layoutWidth_).to.equal(111);
+        expect(onMeasureChangeStub).to.have.been.called;
       });
     });
 
@@ -536,8 +571,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
           .callsFake(() => {
             return Promise.resolve({
-              whenPolicyResolved: () => {
-                return Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
+              whenPolicyUnblock: () => {
+                return Promise.resolve(true);
               },
             });
           });
@@ -556,8 +591,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
           .callsFake(() => {
             return Promise.resolve({
-              whenPolicyResolved: () => {
-                return Promise.resolve(CONSENT_POLICY_STATE.INSUFFICIENT);
+              whenPolicyUnblock: () => {
+                return Promise.resolve(false);
               },
             });
           });

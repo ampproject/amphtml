@@ -53,9 +53,9 @@ A Brightcove player can be invoked by the following:
 
 ```html
 <amp-brightcove
-      data-account="906043040001"
-      data-video-id="1401169490001"
-      data-player="180a5658-8be8-4f33-8eba-d562ab41b40c"
+      data-account="1290862519001"
+      data-video-id="ref:amp-docs-sample"
+      data-player="S1Tt8cgaM"
       layout="responsive" width="480" height="270">
   </amp-brightcove>
 ```

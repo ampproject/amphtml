@@ -218,8 +218,14 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-story',
-    name: 'Visual storytelling in AMP',
+    name: 'Visual storytelling in AMP (v0.1)',
     spec: 'https://github.com/ampproject/amphtml/issues/11329',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
+  },
+  {
+    id: 'amp-story-v1',
+    name: 'Visual storytelling in AMP (v1.0)',
+    spec: 'https://github.com/ampproject/amphtml/issues/14357',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
   {
@@ -294,6 +300,12 @@ const EXPERIMENTS = [
     name: 'Enables the new Layers position/measurement system',
     spec: 'https://github.com/ampproject/amphtml/issues/3434',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
+  },
+  {
+    id: 'svg-in-mustache',
+    name: 'Enables SVG support in amp-mustache templates',
+    spec: 'https://github.com/ampproject/amphtml/issues/15123',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15360',
   },
   {
     id: 'amp-fx-fly-in',
