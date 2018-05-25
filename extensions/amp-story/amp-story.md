@@ -50,6 +50,30 @@ This component is experimental and under active development. For any issues, ple
 
 ## Announcements
 
+### (5/2018) **New features for the bookend**
+
+We are adding new capabilities to the amp-stories bookend, enabling richer component support and visual layouts. The new features are:
+
+* The share providers can now be specified in a specific order.
+* New bookend component: call to action links. Use it to add a 'Subscribe' button!
+* New bookend component: text box. Use it to give photo credits!
+* New bookend component: portrait and landscape cards. Use them to link to other stories or videos!
+
+To use them, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attributes like so:
+
+```html
+<amp-story standalone>
+  <amp-story-page id="cover">
+    ...
+  </amp-story-page>
+  <!-- `src` and `layout=display` are required. -->
+  <amp-story-bookend src="bookendv1.json" layout=nodisplay>
+  </amp-story-bookend>
+<amp-story>
+```
+
+Learn more about the new components and how to specify them in the JSON configuration in the section below: [amp-story-bookend](#Bookend:-`amp-story-bookend`)
+
 ### (4/2018) **New metadata requirements**
 
 We're adding four new required attributes and two optional attributes to the `<amp-story>` element:
@@ -250,11 +274,41 @@ The `amp-story-bookend` is the last screen of the story. It contains related lin
   </amp-anim>
 </figure>
 
+To use it, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attributes like so:
+
+```html
+<amp-story standalone>
+  <amp-story-page id="cover">
+    ...
+  </amp-story-page>
+  <!-- `src` and `layout=display` are required. -->
+  <amp-story-bookend src="bookendv1.json" layout=nodisplay>
+  </amp-story-bookend>
+<amp-story>
+```
+
+Next, you must create a JSON file where you can customize the bookend. The overall structure of the config looks like so:
+
+```text
+{
+  "bookend-version": "v1.0",
+  "share-providers": [
+    ...
+  ],
+  "components": [
+    ...
+  ]
+}
+
+```
+
+It is required to specify you are using the v1.0 version by including the first line.
+
 #### Bookend components
 
 The bookend is made up of a variety of components. These components can be articles, call to action links, text, and more.
 
-Bookend components are specified in the `components` field of the configured JSON. See the [Example JSON response](#example-json-response) section below for an example.
+They are specified in the `components` field of the configured JSON. See the [Example JSON response](#example-json-response) section below for an example.
 
 ##### heading
 
@@ -269,9 +323,9 @@ The `heading` component has a `text` field, which can be used to append a title 
 ```
 
 <amp-img alt="Bookend heading component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-heading.png" width="386" height="123">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-heading.png" width="386" height="123">
   <noscript>
-    <img alt="Bookend heading component" src="img/amp-story-bookend-comopnent-heading.png" />
+    <img alt="Bookend heading component" src="img/amp-story-bookend-component-heading.png" />
   </noscript>
 </amp-img>
 
@@ -290,9 +344,9 @@ The `small` component can be used to link to related articles. This component re
 ```
 
 <amp-img alt="Bookend small component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-small.png" width="379" height="192">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-small.png" width="379" height="192">
   <noscript>
-    <img alt="Bookend small component" src="img/amp-story-bookend-comopnent-small.png" />
+    <img alt="Bookend small component" src="img/amp-story-bookend-component-small.png" />
   </noscript>
 </amp-img>
 
@@ -311,9 +365,9 @@ The `landscape` component can be used for alternative formats of content, like v
 ```
 
 <amp-img alt="Bookend landscape component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-landscape.png" width="388" height="410">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-landscape.png" width="388" height="410">
   <noscript>
-    <img alt="Bookend landscape component" src="img/amp-story-bookend-comopnent-landscape.png" />
+    <img alt="Bookend landscape component" src="img/amp-story-bookend-component-landscape.png" />
   </noscript>
 </amp-img>
 
@@ -331,9 +385,9 @@ The `portrait` component can be used to link to other stories. This component re
 ```
 
 <amp-img alt="Bookend portrait component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-portrait.png" width="382" height="522">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-portrait.png" width="382" height="522">
   <noscript>
-    <img alt="Bookend portrait component" src="img/amp-story-bookend-comopnent-portrait.png" />
+    <img alt="Bookend portrait component" src="img/amp-story-bookend-component-portrait.png" />
   </noscript>
 </amp-img>
 
@@ -357,9 +411,9 @@ The `cta-link` component lets you specify links for call to actions (e.g., `Read
 }
 ```
 <amp-img alt="Bookend cta-links component" layout="fixed"
-src=""https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-cta-links.png" width="381" height="81">
+src=""https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
   <noscript>
-    <img alt="Bookend cta-links component" src="img/amp-story-bookend-comopnent-cta-links.png" />
+    <img alt="Bookend cta-links component" src="img/amp-story-bookend-component-cta-links.png" />
   </noscript>
 </amp-img>
 
@@ -380,9 +434,9 @@ The `textbox` component lets you specify text inside the bookend (for example, p
 ```
 
 <amp-img alt="Bookend textbox component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-textbox.png" width="591" height="358">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-textbox.png" width="591" height="358">
   <noscript>
-    <img alt="Bookend textbox component" src="img/amp-story-bookend-comopnent-textbox.png" />
+    <img alt="Bookend textbox component" src="img/amp-story-bookend-component-textbox.png" />
   </noscript>
 </amp-img>
 
@@ -407,7 +461,7 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 {
   // It is required to specify you are using the v1.0 version.
   "bookend-version": "v1.0",
-  "share-providers": {
+  "share-providers": [
     "email",
     "tumblr",
     {
@@ -420,7 +474,7 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
       // Facebook requires an `app_id` param
       "app_id": "MY_FACEBOOK_APP_ID"
     }
-  },
+  ],
   "components": [
     {
       "type": "heading",
