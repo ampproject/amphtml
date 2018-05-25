@@ -22,6 +22,7 @@ import {
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
+import {LocalizationService} from '../localization';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -39,6 +40,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     registerServiceBuilder(win, 'story-store', () => storeService);
 
     isSystemShareSupported = false;
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
 
     const shareWidget = {
       build: () => win.document.createElement('div'),

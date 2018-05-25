@@ -104,11 +104,18 @@ export class UnsupportedBrowserLayer {
 
   /**
    * Returns the unsupported browser componenet
+   * @return {?Element} The root element of the componenet
    */
   get() {
+    if (!this.root_){
+      this.build();
+    }
     return this.root_;
   }
 
+  /**
+   * Removes the entire layer
+   */
   removeLayer() {
     if (this.root_) {
       removeElement(this.root_);

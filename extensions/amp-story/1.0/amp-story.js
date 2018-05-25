@@ -1134,7 +1134,6 @@ export class AmpStory extends AMP.BaseElement {
       } else {
         this.layoutStory_().then(() => this.mutateElement(() => {
           this.unsupportedBrowserLayer_.removeLayer();
-          //removeElement(this.unsupportedBrowserLayer_.get());
           this.element.classList.remove('i-amphtml-story-fallback');
         }));
 
