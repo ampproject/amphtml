@@ -32,7 +32,9 @@
     "context": false,
     "global": false,
     "describes": true,
-    "allowConsoleError": false
+    "allowConsoleError": false,
+    "dontWarnForConsoleError": false,
+    "warnForConsoleError": false
   },
   "settings": {
     "jsdoc": {

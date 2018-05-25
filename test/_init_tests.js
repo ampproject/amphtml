@@ -52,6 +52,8 @@ let initialWindowState;
 
 // All exposed describes.
 global.describes = describes;
+global.dontWarnForConsoleError = dontWarnForConsoleError;
+global.warnForConsoleError = warnForConsoleError;
 
 // Increase the before/after each timeout since certain times they have timedout
 // during the normal 2000 allowance.
