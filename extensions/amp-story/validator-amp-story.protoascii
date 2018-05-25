@@ -307,6 +307,11 @@ tags: {  # <amp-story-bookend>
   mandatory_ancestor: "AMP-STORY"
   mandatory_last_child: true
   attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
     name: "src"
     value_url: {
       allowed_protocol: "http"
