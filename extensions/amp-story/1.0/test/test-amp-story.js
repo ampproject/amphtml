@@ -70,7 +70,6 @@ describes.realWin('amp-story', {
 
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
-
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
@@ -359,6 +358,46 @@ describes.realWin('amp-story', {
         .then(() => {
           return expect(replaceStub).to.not.have.been.called;
         });
+  });
+  describe('amp-story continue anyway', () => {
+
+    it('should not display layout', () => {
+      AmpStory.isBrowserSupported = () => false;
+      story = new AmpStory(element);
+      const dispatchStub = sandbox.stub(story.storeService_, 'dispatch');
+      createPages(story.element, 2, ['cover', 'page-4']);
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(dispatchStub).to.have.been.calledWith(
+                Action.TOGGLE_SUPPORTED_BROWSER, false
+            );
+          });
+    });
+
+    it('should display the story after clicking "continue" button', () => {
+
+      AmpStory.isBrowserSupported = () => false;
+      story = new AmpStory(element);
+      const dispatchStub = sandbox.stub(
+          story.unsupportedBrowserLayer_.storeService_, 'dispatch');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.buildCallback();
+      //story.layoutCallback();
+
+      //story.unsupportedBrowserLayer_.continueButton_.click();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.unsupportedBrowserLayer_.continueButton_.click();
+          })
+          .then(() => {
+            expect(dispatchStub).to.have.been.calledWith(
+                Action.TOGGLE_SUPPORTED_BROWSER, true
+            );
+          });
+    });
   });
 
 

@@ -36,6 +36,11 @@ export default {
     description: 'Label for a button that allows the user to dismiss the ' +
         'cookie consent dialog.',
   },
+  [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
+    string: 'Continue Anyway',
+    description: 'Button label to allow the user to continue even if they ' +
+        'are not using a supportive browser.',
+  },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
     string: 'View on original domain:',
     description: 'Label for a heading of a dialog that shows the user the ' +

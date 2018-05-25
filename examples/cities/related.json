@@ -1,0 +1,36 @@
+{
+  "share-providers": {
+    "email": true,
+    "twitter": true,
+    "tumblr": true
+  },
+  "related-articles": {
+    "More to Read": [
+      {
+        "title": "My friends, this is India and the best places you should go",
+        "url": "http://a-publisher.com/india",
+        "image": "media/b1.jpg"
+      },
+      {
+        "title": "A wonderful weekend with Tenturi",
+        "url": "http://a-publisher.com/tenturi",
+        "image": "media/b2.jpg"
+      },
+      {
+        "title": "Go to Istanbul, the historical city where east meets west",
+        "url": "http://a-publisher.com/istanbul",
+        "image": "media/b3.jpg"
+      }
+    ],
+    "": [
+      {
+        "title": "Examing the moon",
+        "url": "http://a-publisher.com/the-moon"
+      },
+      {
+        "title": "Architecture in the thousand-year capital",
+        "url": "http://a-publisher.com/architecture"
+      }
+    ]
+  }
+}
