@@ -71,7 +71,7 @@ FAIL
 |          <h1>Advance to see the bookend!</h1>
 |        </amp-story-grid-layer>
 |      </amp-story-page>
-|      <amp-story-bookend src="https://google.com/bookendv1.json">
+|      <amp-story-bookend src="bookendv1.json" layout=nodisplay>
 >>     ^~~~~~~~~
 amp-story/1.0/test/validator-amp-story-bookend-error.html:73:4 Tag 'amp-story-bookend' must have 0 child tags - saw 1 child tags. [AMP_TAG_PROBLEM]
 |        <h1>Illegal child inside amp-story-bookend!</h1>
