@@ -465,7 +465,7 @@ describes.realWin('amp-consent', {
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
       expect(updateConsentInstanceStateSpy).to.be.calledWith(
-          'ABC', CONSENT_ITEM_STATE.GRANTED);
+          'ABC', CONSENT_ITEM_STATE.ACCEPTED);
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.REJECT);
       expect(updateConsentInstanceStateSpy).to.be.calledWith(
@@ -519,9 +519,9 @@ describes.realWin('amp-consent', {
         postPromptUI.setAttribute('id', 'test');
         consentElement.appendChild(postPromptUI);
         storageValue = {
-          'amp-consent:ABC': CONSENT_ITEM_STATE.GRANTED,
-          'amp-consent:DEF': CONSENT_ITEM_STATE.GRANTED,
-          'amp-consent:GH': CONSENT_ITEM_STATE.GRANTED,
+          'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
+          'amp-consent:DEF': CONSENT_ITEM_STATE.ACCEPTED,
+          'amp-consent:GH': CONSENT_ITEM_STATE.ACCEPTED,
         };
         ampConsent.buildCallback();
       });
