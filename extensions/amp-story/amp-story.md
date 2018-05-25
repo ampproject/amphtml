@@ -250,21 +250,16 @@ The `amp-story-bookend` is the last screen of the story. It contains related lin
   </amp-anim>
 </figure>
 
-#### Bookend Components
+#### Bookend components
 
-The bookend is made up of a variety of components. These can be articles, call to action links, text, among others.
+The bookend is made up of a variety of components. These components can be articles, call to action links, text, and more.
 
-They are configured in the `components` field of the configured JSON. See the [Example JSON response](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story.md#example-json-response) section below for an example.
+Bookend components are specified in the `components` field of the configured JSON. See the [Example JSON response](#example-json-response) section below for an example.
 
 ##### heading
-The `heading` component has a `text` field. It can be used to append a title to a group of articles.
 
-<amp-img alt="AMP story bookend heading component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-heading.png" width="386" height="123">
-  <noscript>
-    <img alt="AMP story bookend heading component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-heading.png" />
-  </noscript>
-</amp-img>
+The `heading` component has a `text` field, which can be used to append a title to a group of articles.
+
 
 ```json
 {
@@ -273,16 +268,17 @@ src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-boo
 }
 ```
 
-##### small
-
-<amp-img alt="AMP story bookend small component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-small.png" width="379" height="192">
+<amp-img alt="Bookend heading component" layout="fixed"
+src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-heading.png" width="386" height="123">
   <noscript>
-    <img alt="AMP story bookend small component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-small.png" />
+    <img alt="Bookend heading component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-heading.png" />
   </noscript>
 </amp-img>
 
-The small component can be used to link to related articles. It requires the fields `title` and `url`, and optionally an `image`.
+
+##### small
+
+The `small` component can be used to link to related articles. This component requires the following fields: `title`, `url`, and optionally an `image`.
 
 ```json
 {
@@ -293,16 +289,16 @@ The small component can be used to link to related articles. It requires the fie
 }
 ```
 
-##### landscape
-
-<amp-img alt="AMP story bookend landscape component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-landscape.png" width="388" height="410">
+<amp-img alt="Bookend small component" layout="fixed"
+src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-small.png" width="379" height="192">
   <noscript>
-    <img alt="AMP story bookend landscape component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-landscape.png" />
+    <img alt="Bookend small component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-small.png" />
   </noscript>
 </amp-img>
 
-The landscape component can be used for alternative formats of content, like videos. It requires the fields `title`, `category`, `url`, and an `image`.
+##### landscape
+
+The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `category`, `url`, and an `image`.
 
 ```json
 {
@@ -314,16 +310,16 @@ The landscape component can be used for alternative formats of content, like vid
 }
 ```
 
-##### portrait
-
-<amp-img alt="AMP story bookend portrait component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-portrait.png" width="382" height="522">
+<amp-img alt="Bookend landscape component" layout="fixed"
+src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-landscape.png" width="388" height="410">
   <noscript>
-    <img alt="AMP story bookend portrait component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-portrait.png" />
+    <img alt="Bookend landscape component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-landscape.png" />
   </noscript>
 </amp-img>
 
-The landscape component can be used to link to other stories. It requires the fields `category`, `url`, and an `image`.
+##### portrait
+
+The `portrait` component can be used to link to other stories. This component requires the following fields: `category`, `url`, and an `image`.
 
 ```json
 {
@@ -334,16 +330,16 @@ The landscape component can be used to link to other stories. It requires the fi
 }
 ```
 
-##### cta-link
-
-<amp-img alt="AMP story bookend cta-links component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-cta-links.png" width="381" height="81">
+<amp-img alt="Bookend portrait component" layout="fixed"
+src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-portrait.png" width="382" height="522">
   <noscript>
-    <img alt="AMP story bookend cta-links component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-cta-links.png" />
+    <img alt="Bookend portrait component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-portrait.png" />
   </noscript>
 </amp-img>
 
-The cta-link component lets you specify call to action links. (e.g. `Read More` or `Subscribe`). It is has a `links` key, which value is an array of links. Each link is an object with a `text` and `url` values.
+##### cta-link
+
+The `cta-link` component lets you specify links for call to actions (e.g., `Read More` or `Subscribe`). This component has a `links` key, which specifies an array of links. Each link is an object with a `text` and `url` values.
 
 ```json
 {
@@ -360,17 +356,16 @@ The cta-link component lets you specify call to action links. (e.g. `Read More` 
   ]
 }
 ```
-
-##### textbox
-
-<amp-img alt="AMP story bookend heading component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-heading.png" width="591" height="358">
+<amp-img alt="Bookend cta-links component" layout="fixed"
+src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-cta-links.png" width="381" height="81">
   <noscript>
-    <img alt="AMP story bookend heading component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-heading.png" />
+    <img alt="Bookend cta-links component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-cta-links.png" />
   </noscript>
 </amp-img>
 
-The `textbox` component let you specify text inside the bookend. It can be used for the photo credits, for example. It requires a `text` array, where each element of the array is a line of text.
+##### textbox
+
+The `textbox` component lets you specify text inside the bookend (for example, photo credits). This component requires a `text` array, where each element of the array is a line of text.
 
 ```json
 {
@@ -384,11 +379,18 @@ The `textbox` component let you specify text inside the bookend. It can be used 
 }
 ```
 
+<amp-img alt="Bookend textbox component" layout="fixed"
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-textbox.png" width="591" height="358">
+  <noscript>
+    <img alt="Bookend textbox component" src="img/amp-story-bookend-comopnent-textbox.png" />
+  </noscript>
+</amp-img>
+
 #### Social sharing
 
-The configuration for social sharing is defined in the `share-providers` field of the response object, and is optional.
+The configuration for social sharing is defined in the `share-providers` field of the response object, and it's optional.
 
-This field should contain an a string. Each string respresents a share provider's name (e.g. `twitter`).
+This field should contain a string, where each string respresents a share provider's name (e.g. `twitter`).
 
 When extra parameters are required, an object with key-value pairs should be used. The object should contain a key `provider` with a value (e.g. `facebook`) corresponding to the provider's name. The next key-values will depend on the share provider.
 
@@ -558,8 +560,6 @@ The following are available templates to specify for the layout of the grid laye
 To see the layout templates in use, check out the [layouts demo on AMP By Example](https://ampbyexample.com/stories/features/layouts/).
 {% endcall %}
 
-
-
 ##### fill
 
 The `fill` template shows its first child full bleed. All other children are not shown.
@@ -591,7 +591,6 @@ Names Areas: (none)
     <img alt="Horizontal template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-vertical.png" />
   </noscript>
 </amp-img>
-
 
 ```html
 <amp-story-grid-layer template="vertical">
