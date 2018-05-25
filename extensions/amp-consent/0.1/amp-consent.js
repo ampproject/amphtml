@@ -292,7 +292,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.GRANTED);
+          this.currentDisplayInstance_, CONSENT_ITEM_STATE.ACCEPTED);
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
