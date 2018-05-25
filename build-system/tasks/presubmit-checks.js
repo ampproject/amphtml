@@ -539,7 +539,7 @@ const forbiddenTerms = {
       'src/config.js',
       'src/experiments.js',
       'src/mode.js',
-      'src/worker-error-reporting.js',
+      'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
       'gulpfile.js',
@@ -548,13 +548,6 @@ const forbiddenTerms = {
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
     message: 'SVG data images must use charset=utf-8: ' +
         '"data:image/svg+xml;charset=utf-8,..."',
-  },
-  'installWorkerErrorReporting': {
-    message: 'Should only be used in worker entry points',
-    whitelist: [
-      'src/web-worker/web-worker.js',
-      'src/worker-error-reporting.js',
-    ],
   },
   'new CustomEvent\\(': {
     message: 'Use createCustomEvent() helper instead.',
