@@ -28,7 +28,8 @@ export function yieldmo(global, data) {
   ymElem.dataset['ampEnabled'] = true;
   global.document.getElementById('c').appendChild(ymElem);
 
-  const ymJs = 'https://static.yieldmo.com/ym.amp1.js';
+  const swimLane = Math.round(5 * Math.random() / 3);
+  const ymJs = 'https://static.yieldmo.com/ym.' + swimLane + '.js';
 
   loadScript(global, ymJs);
 }
