@@ -309,7 +309,6 @@ export class AmpList extends AMP.BaseElement {
         }
       });
     } else {
-      // Skip if setState() has _not_ been invoked yet.
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return this.updateBindingsWith_(this.bind_, elements);
       } else {
