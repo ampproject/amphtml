@@ -539,6 +539,7 @@ const forbiddenTerms = {
       'src/config.js',
       'src/experiments.js',
       'src/mode.js',
+      'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
       'gulpfile.js',
