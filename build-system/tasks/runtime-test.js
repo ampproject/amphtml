@@ -18,6 +18,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
+const deglob = require('globs-to-files');
+const findImports = require('find-imports');
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
@@ -231,16 +233,98 @@ function writeConfig(targetFile) {
 }
 
 /**
- * Extracts the list of unit test files changed on the local branch.
+ * Returns true if the given file is a unit test.
+ *
+ * @param {string} file
+ * @return {boolean}
+ */
+function isUnitTest(file) {
+  return config.unitTestPaths.some(pattern => {
+    return minimatch(file, pattern);
+  });
+}
+
+/**
+ * Returns the list of files imported by testFile
+ *
+ * @param {string} testFile
+ * @return {!Array<string>}
+ */
+function getImports(testFile) {
+  const imports = findImports([testFile], {
+    flatten: true,
+    packageImports: false,
+    absoluteImports: true,
+    relativeImports: true,
+  });
+  const files = [];
+  const rootDir = path.dirname(path.dirname(__dirname));
+  const testFileDir = path.dirname(testFile);
+  imports.forEach(function(file) {
+    const fullPath = path.resolve(testFileDir, file) + '.js';
+    if (fs.existsSync(fullPath)) {
+      const relativePath = path.relative(rootDir, fullPath);
+      files.push(relativePath);
+    }
+  });
+  return files;
+}
+
+/**
+ * Returns true if the test file should be run for any one of the source files.
+ *
+ * @param {string} testFile
+ * @param {!Array<string>} srcFiles
+ * @return {boolean}
+ */
+function shouldRunTest(testFile, srcFiles) {
+  const filesImported = getImports(testFile);
+  return filesImported.filter(function(file) {
+    return srcFiles.includes(file);
+  }).length > 0;
+}
+
+/**
+ * Retrieves the set of unit tests that should be run for a set of source files.
+ *
+ * @param {!Array<string>} srcFiles
+ * @return {!Array<string>}
+ */
+function getTestsFor(srcFiles) {
+  const rootDir = path.dirname(path.dirname(__dirname));
+  const allUnitTests = deglob.sync(config.unitTestPaths);
+  return allUnitTests.filter(testFile => {
+    return shouldRunTest(testFile, srcFiles);
+  }).map(fullPath => path.relative(rootDir, fullPath));
+}
+
+/**
+ * Extracts the list of unit tests to run based on the changes in the local
+ * branch.
  *
  * @return {!Array<string>}
  */
-function unitTestFilesChanged() {
-  return gitDiffNameOnlyMaster().filter(function(file) {
-    return config.unitTestPaths.some(pattern => {
-      return minimatch(file, pattern);
-    });
+function unitTestsToRun() {
+  const filesChanged = gitDiffNameOnlyMaster();
+  const testsToRun = [];
+  const srcFiles = [];
+  filesChanged.forEach(file => {
+    if (isUnitTest(file)) {
+      testsToRun.push(file);
+    } else if (path.extname(file) == '.js') {
+      srcFiles.push(file);
+    }
   });
+  if (srcFiles.length > 0) {
+    log(green('INFO: ') + 'Determining which unit tests to run...');
+    const moreTestsToRun = getTestsFor(srcFiles);
+    moreTestsToRun.forEach(test => {
+      if (!testsToRun.includes(test)) {
+        testsToRun.push(test);
+      }
+    });
+  }
+  return testsToRun;
 }
 
 /**
@@ -282,12 +366,17 @@ function runTests() {
       c.reporters = ['mocha'];
     }
   } else if (argv['local-changes']) {
-    const filesChanged = unitTestFilesChanged();
-    if (filesChanged.length == 0) {
-      log(green('INFO: ') + 'No unit test files were changed.');
+    const testsToRun = unitTestsToRun();
+    if (testsToRun.length == 0) {
+      log(green('INFO: ') + 'No unit tests affected by local changes.');
       return Promise.resolve();
+    } else {
+      log(green('INFO: ') + 'Running the following unit tests:');
+      testsToRun.forEach(test => {
+        log(cyan(test));
+      });
     }
-    c.files = c.files.concat(config.commonUnitTestPaths, filesChanged);
+    c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
     c.client.failOnConsoleError = true;
   } else if (argv.integration) {
     c.files = c.files.concat(
