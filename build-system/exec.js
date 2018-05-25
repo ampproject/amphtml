@@ -36,6 +36,7 @@ function spawnProcess(cmd, options) {
 }
 
 /**
+<<<<<<< HEAD
  * Executes the provided command with the given options, returning the process
  * object.
  *
@@ -46,6 +47,15 @@ function spawnProcess(cmd, options) {
 exports.exec = function(cmd, options) {
   options = options || {'stdio': 'inherit'};
   return spawnProcess(cmd, options);
+=======
+ * Executes the provided command, returning the process object.
+ *
+ * @param {string} cmd Command line to execute.
+ * @return {<Object>} Process info.
+ */
+exports.exec = function(cmd) {
+  return spawnProcess(cmd, {'stdio': 'inherit'});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 };
 
 /**

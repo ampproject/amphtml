@@ -75,9 +75,14 @@ describes.realWin('amp-dailymotion', {
   });
 
   it('requires data-videoid', () => {
+<<<<<<< HEAD
     allowConsoleError(() => {
       return getDailymotion('').should.eventually.be.rejectedWith(
           /The data-videoid attribute is required for/);
     });
+=======
+    return getDailymotion('').should.eventually.be.rejectedWith(
+        /The data-videoid attribute is required for/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

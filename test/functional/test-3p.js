@@ -74,6 +74,20 @@ describe('3p', () => {
   });
 
   describe('validateData', () => {
+<<<<<<< HEAD
+=======
+    let sandbox;
+    let clock;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      clock = sandbox.useFakeTimers();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     it('should check mandatory fields', () => {
       validateData({
@@ -96,16 +110,26 @@ describe('3p', () => {
       }, ['foo', 'bar']);
       clock.tick(1);
 
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
+=======
+      expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         validateData({
           width: '',
           type: 'xxxxxx',
           foo: true,
           bar: true,
         }, ['foo', 'bar', 'persika']);
+<<<<<<< HEAD
       }).to.throw(/Missing attribute for xxxxxx: persika./); });
 
       allowConsoleError(() => { expect(() => {
+=======
+      }).to.throw(/Missing attribute for xxxxxx: persika./);
+
+      expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         validateData({
           width: '',
           type: 'xxxxxx',
@@ -114,7 +138,10 @@ describe('3p', () => {
         }, [['red', 'green', 'blue']]);
       }).to.throw(
           /xxxxxx must contain exactly one of attributes: red, green, blue./);
+<<<<<<< HEAD
       });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should check mandatory fields with alternative options', () => {
@@ -153,9 +180,15 @@ describe('3p', () => {
         'not-whitelisted': true,
       }, [], ['foo']);
 
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         clock.tick(1);
       }).to.throw(/Unknown attribute for TEST: not-whitelisted./); });
+=======
+      expect(() => {
+        clock.tick(1);
+      }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should check mandatory and optional fields', () => {

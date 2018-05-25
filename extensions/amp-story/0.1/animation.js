@@ -21,7 +21,11 @@ import {
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
 } from './animation-types';
+<<<<<<< HEAD
 import {PRESETS, setStyleForPreset} from './animation-presets';
+=======
+import {PRESETS} from './animation-presets';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
@@ -33,7 +37,11 @@ import {setStyles} from '../../../src/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
+<<<<<<< HEAD
 export const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
+=======
+const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /** const {string} */
 const ANIMATE_IN_DURATION_ATTRIBUTE_NAME = 'animate-in-duration';
 /** const {string} */
@@ -381,6 +389,12 @@ export class AnimationManager {
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
     /** @private @const */
+<<<<<<< HEAD
+=======
+    this.resources_ = Services.resourcesForDoc(this.ampdoc_);
+
+    /** @private @const */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.timer_ = Services.timerFor(this.ampdoc_.win);
 
     /** @private @const */
@@ -524,7 +538,10 @@ export class AnimationManager {
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
+<<<<<<< HEAD
     setStyleForPreset(el, name);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     return user().assert(
         PRESETS[name],

@@ -15,15 +15,20 @@
  */
 
 import {Filter, FilterType} from './filter';
+<<<<<<< HEAD
 import {dev, user} from '../../../../src/log';
 
 /** @type {string} */
 const TAG = 'amp-ad-exit';
+=======
+import {user} from '../../../../src/log';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 export class ClickDelayFilter extends Filter {
   /**
    * @param {string} name The user-defined name of the filter.
    * @param {!../config.ClickDelayConfig} spec
+<<<<<<< HEAD
    * @param {!Window} win
    */
   constructor(name, spec, win) {
@@ -55,14 +60,41 @@ export class ClickDelayFilter extends Filter {
 
     /** @private {number} */
     this.delay_ = spec.delay;
+=======
+   */
+  constructor(name, spec) {
+    super(name);
+    user().assert(isValidClickDelaySpec(spec), 'Invalid ClickDelay spec');
+
+    this.delay_ = spec.delay;
+
+    /** @private {number} */
+    this.inViewportTime_ = Date.now();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
   filter() {
+<<<<<<< HEAD
     return (Date.now() - this.intervalStart) >= this.delay_;
   }
 }
 
+=======
+    return (Date.now() - this.inViewportTime_) >= this.delay_;
+  }
+}
+
+/**
+ * @param {!../config.FilterConfig} spec
+ * @return {boolean} Whether the config defines a ClickDelay filter.
+ */
+function isValidClickDelaySpec(spec) {
+  return spec.type == FilterType.CLICK_DELAY && typeof spec.delay == 'number' &&
+      spec.delay > 0;
+}
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 export function makeClickDelaySpec(delay) {
   return {type: FilterType.CLICK_DELAY, delay};
 }

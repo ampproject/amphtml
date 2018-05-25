@@ -28,7 +28,10 @@ import {
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+<<<<<<< HEAD
 import {getConsentPolicyState} from '../../../src/consent-state';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {
   getData,
   listen,
@@ -159,6 +162,7 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
+<<<<<<< HEAD
   getConsentPolicy() {
     return null;
   }
@@ -194,6 +198,32 @@ class AmpImaVideo extends AMP.BaseElement {
 
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
+=======
+  layoutCallback() {
+    const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
+        this.element, 'ima-video');
+    iframe.setAttribute('allowfullscreen', 'true');
+    this.applyFillContent(iframe);
+
+    this.iframe_ = iframe;
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handlePlayerMessages_.bind(this)
+    );
+
+    this.element.appendChild(iframe);
+
+    installVideoManagerForDoc(this.element);
+    Services.videoManagerForDoc(this.win.document).register(this);
+
+    return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -371,11 +401,14 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
+<<<<<<< HEAD
   preimplementsAutoFullscreen() {
     return false;
   }
 
   /** @override */
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   getCurrentTime() {
     return this.playerData_.currentTime;
   }

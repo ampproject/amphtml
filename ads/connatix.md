@@ -14,22 +14,41 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<<<<<<< HEAD
 # Connatix
+=======
+# colombia
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="140"
     type="connatix"
     layout="responsive"
     data-connatix="{data-connatix-token:755145ed-72aa-4a35-bc6e-d5dcfb8837d2}">
+=======
+<amp-ad width=320 height=140
+      type="connatix"
+      layout=responsive
+      data-connatix="{data-connatix-token:755145ed-72aa-4a35-bc6e-d5dcfb8837d2}"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, contact contact@connatix.com.
 
 ### Required parameters
 
 - `data-connatix`
+=======
+For semantics of configuration, please see ad network documentation. For support contact contact@connatix.com
+
+Required parameter:
+
+- data-connatix
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

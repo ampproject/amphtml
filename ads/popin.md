@@ -20,9 +20,17 @@ limitations under the License.
 ## Display
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="568"
     type="popin"
     layout="responsive"
+=======
+<amp-ad 
+    type="popin"
+    width="300"
+    height="568"
+    layout=responsive
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     heights="(min-width:1907px) 39%, (min-width:1200px) 46%, (min-width:780px) 64%, (min-width:480px) 98%, (min-width:460px) 167%, 196%"
     data-mediaid="popin_amp">
 </amp-ad>
@@ -30,6 +38,7 @@ limitations under the License.
 
 ### Configuration
 
+<<<<<<< HEAD
 For configuration details, please contact http://www.popin.cc/discovery/#contact.
 
 Supported parameters:
@@ -37,3 +46,12 @@ Supported parameters:
 - `height`
 - `width`
 - `data-mediaid`
+=======
+For configuration details, please contact http://www.popin.cc/discovery/#contact
+
+Supported parameters:
+
+- height
+- width
+- data-mediaid
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

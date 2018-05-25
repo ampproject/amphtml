@@ -16,7 +16,10 @@
 #
 """A build script which (thus far) works on Ubuntu 14."""
 
+<<<<<<< HEAD
 import argparse
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import glob
 import logging
 import os
@@ -663,16 +666,24 @@ def GenerateTestRunner(out_dir):
   logging.info('... success')
 
 
+<<<<<<< HEAD
 def RunTests(update_tests, out_dir):
   """Runs all the minified tests.
 
   Args:
     update_tests: a boolean indicating whether or not to update the test
       output files.
+=======
+def RunTests(out_dir):
+  """Runs all the minified tests.
+
+  Args:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     out_dir: directory name of the output directory. Must not have slashes,
       dots, etc.
   """
   logging.info('entering ...')
+<<<<<<< HEAD
   env = os.environ.copy()
   if update_tests:
     env['UPDATE_VALIDATOR_TEST'] = '1'
@@ -681,6 +692,13 @@ def RunTests(update_tests, out_dir):
 
 
 def Main(parsed_args):
+=======
+  subprocess.check_call(['node', '%s/test_runner' % out_dir])
+  logging.info('... success')
+
+
+def Main():
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
@@ -707,6 +725,7 @@ def Main(parsed_args):
   CompileKeyframesParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
+<<<<<<< HEAD
   RunTests(update_tests=parsed_args.update_tests, out_dir='dist')
 
 if __name__ == '__main__':
@@ -718,3 +737,10 @@ if __name__ == '__main__':
       help=('If True, validator_test will overwrite the .out test files with '
             'the encountered test output.'))
   Main(parser.parse_args())
+=======
+  RunTests(out_dir='dist')
+
+
+if __name__ == '__main__':
+  Main()
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

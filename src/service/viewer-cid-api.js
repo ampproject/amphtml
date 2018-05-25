@@ -17,6 +17,19 @@
 import {Services} from '../services';
 import {dict} from '../utils/object';
 import {parseUrl} from '../url';
+<<<<<<< HEAD
+=======
+import {user} from '../log';
+
+const GOOGLE_CLIENT_ID_API_META_NAME = 'amp-google-client-id-api';
+const CID_API_SCOPE_WHITELIST = {
+  'googleanalytics': 'AMP_ECID_GOOGLE',
+};
+const API_KEYS = {
+  'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
+};
+const TAG = 'ViewerCidApi';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /**
  * Exposes CID API if provided by the Viewer.
@@ -53,11 +66,19 @@ export class ViewerCidApi {
 
   /**
    * Returns scoped CID retrieved from the Viewer.
+<<<<<<< HEAD
    * @param {string|undefined} apiKey
    * @param {string} scope
    * @return {!Promise<?JsonObject|string|undefined>}
    */
   getScopedCid(apiKey, scope) {
+=======
+   * @param {string} scope
+   * @return {!Promise<?JsonObject|string|undefined>}
+   */
+  getScopedCid(scope) {
+    const apiKey = this.isScopeOptedIn(scope);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const payload = dict({
       'scope': scope,
       'clientIdApi': !!apiKey,
@@ -68,4 +89,51 @@ export class ViewerCidApi {
     }
     return this.viewer_.sendMessageAwaitResponse('cid', payload);
   }
+<<<<<<< HEAD
+=======
+
+  /**
+   * Checks if the page has opted in CID API for the given scope.
+   * Returns the API key that should be used, or null if page hasn't opted in.
+   *
+   * @param {string} scope
+   * @return {string|undefined}
+   */
+  isScopeOptedIn(scope) {
+    if (!this.apiKeyMap_) {
+      this.apiKeyMap_ = this.getOptedInScopes_();
+    }
+    return this.apiKeyMap_[scope];
+  }
+
+  /**
+   * @return {!Object<string, string>}
+   */
+  getOptedInScopes_() {
+    const apiKeyMap = {};
+    const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
+        `meta[name=${GOOGLE_CLIENT_ID_API_META_NAME}]`);
+    if (optInMeta && optInMeta.hasAttribute('content')) {
+      const list = optInMeta.getAttribute('content').split(',');
+      list.forEach(item => {
+        item = item.trim();
+        if (item.indexOf('=') > 0) {
+          const pair = item.split('=');
+          const scope = pair[0].trim();
+          apiKeyMap[scope] = pair[1].trim();
+        } else {
+          const clientName = item;
+          const scope = CID_API_SCOPE_WHITELIST[clientName];
+          if (scope) {
+            apiKeyMap[scope] = API_KEYS[clientName];
+          } else {
+            user().error(TAG,
+                `Unsupported client for Google CID API: ${clientName}`);
+          }
+        }
+      });
+    }
+    return apiKeyMap;
+  }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }

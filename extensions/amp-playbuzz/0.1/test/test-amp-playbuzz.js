@@ -79,9 +79,12 @@ describes.realWin('amp-playbuzz', {
     if (params && typeof params.displayComments === 'boolean') {
       ins.setAttribute('data-comments', params.displayComments);
     }
+<<<<<<< HEAD
     if (params && params.arialabel) {
       ins.setAttribute('aria-label', params.arialabel);
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     doc.body.appendChild(ins);
     return ins.build().then(() => {
       if (opt_beforeLayoutCallback) {
@@ -159,11 +162,16 @@ describes.realWin('amp-playbuzz', {
       const iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;
       expect(placeholder.style.display).to.be.equal('');
+<<<<<<< HEAD
       expect(placeholder.getAttribute('aria-label'))
           .to.equal('Loading interactive element');
     }).then(ins => {
       const placeholder = ins.querySelector('[placeholder]');
 
+=======
+    }).then(ins => {
+      const placeholder = ins.querySelector('[placeholder]');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const iframe = ins.querySelector('iframe');
       ins.getVsync = () => {
         return {
@@ -177,6 +185,7 @@ describes.realWin('amp-playbuzz', {
       });
     });
   });
+<<<<<<< HEAD
   it('propagates aria label to placeholder', () => {
     const src = createItemSrc().withUrl('https://www.playbuzz.com/bob/bobs-life');
     return getIns(src, {'arialabel': 'captivating quiz'}, true, ins => {
@@ -193,5 +202,12 @@ describes.realWin('amp-playbuzz', {
       expect(getIns(src)).to.be.rejectedWith(
           /The item attribute is required for/);
     });
+=======
+
+  it('requires item attribute', () => {
+    const src = createItemSrc().withUrl('');
+    expect(getIns(src)).to.be.rejectedWith(
+        /The item attribute is required for/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

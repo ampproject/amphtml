@@ -87,21 +87,35 @@ describes.realWin('amp-brid-player', {
   });
 
   it('requires data-partner', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { return getBridPlayer({
+=======
+    return getBridPlayer({
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       'data-player': '4144',
       'data-video': '13663',
     }).should.eventually.be.rejectedWith(
         /The data-partner attribute is required for/);
+<<<<<<< HEAD
     });
   });
 
   it('requires data-player', () => {
     allowConsoleError(() => { return getBridPlayer({
+=======
+  });
+
+  it('requires data-player', () => {
+    return getBridPlayer({
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       'data-partner': '264',
       'data-video': '13663',
     }).should.eventually.be.rejectedWith(
         /The data-player attribute is required for/);
+<<<<<<< HEAD
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should forward events from brid-player to the amp element', () => {

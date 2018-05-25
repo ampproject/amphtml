@@ -149,8 +149,13 @@ describe('Object', () => {
       destObject.a = {};
       const fromObject = {};
       fromObject.a = fromObject;
+<<<<<<< HEAD
       expect(() => object.deepMerge(destObject, fromObject)).to.throw(
           /Source object has a circular reference./);
+=======
+      expect(() => object.deepMerge(destObject, fromObject))
+          .to.throw(/Source object has a circular reference./);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should merge null and undefined correctly', () => {

@@ -198,20 +198,36 @@ describes.realWin('amp-ad-exit', {
     const el = win.document.createElement('amp-ad-exit');
     el.appendChild(win.document.createElement('p'));
     win.document.body.appendChild(el);
+<<<<<<< HEAD
     let promise;
     allowConsoleError(() => promise = el.build());
     return promise.should.be.rejectedWith(/application\/json/);
+=======
+    return el.build().then(() => {
+      throw new Error('must have failed');
+    }, error => {
+      expect(error.message).to.match(/application\/json/);
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should do nothing for missing targets', () => {
     const open = sandbox.stub(win, 'open');
     try {
+<<<<<<< HEAD
       allowConsoleError(() => element.implementation_.executeAction({
+=======
+      element.implementation_.executeAction({
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         method: 'exit',
         args: {target: 'not-a-real-target'},
         event: makeClickEvent(1001),
         satisfiesTrust: () => true,
+<<<<<<< HEAD
       }));
+=======
+      });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(open).to.not.have.been.called;
     } catch (expected) {}
   });
@@ -645,3 +661,7 @@ describes.realWin('amp-ad-exit', {
         .to.eventually.be.rejectedWith(/Unknown vendor/);
   });
 });
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

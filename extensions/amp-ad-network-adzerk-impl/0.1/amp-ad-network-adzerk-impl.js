@@ -23,7 +23,10 @@ import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {tryParseJson} from '../../../src/json';
+<<<<<<< HEAD
 import {tryResolve} from '../../../src/utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
@@ -110,7 +113,11 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     }
     // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = this.verifyStillCurrent();
+<<<<<<< HEAD
     return tryResolve(() => utf8Decode(bytes)).then(body => {
+=======
+    return Promise.resolve(utf8Decode(bytes)).then(body => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       checkStillCurrent();
       this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
         (tryParseJson(body) || {});

@@ -24,6 +24,10 @@
  * </amp-story>
  * </code>
  */
+<<<<<<< HEAD
+=======
+import './amp-story-auto-ads';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
@@ -35,10 +39,14 @@ import {
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
+<<<<<<< HEAD
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage} from './amp-story-page';
+=======
+import {AmpStoryHint} from './amp-story-hint';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
@@ -185,13 +193,21 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!AmpStoryStoreService} */
     this.storeService_ = new AmpStoryStoreService(this.win);
+<<<<<<< HEAD
     registerServiceBuilder(
         this.win, 'story-store', () => this.storeService_);
+=======
+    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {!AmpStoryRequestService} */
     this.requestService_ = new AmpStoryRequestService(this.win, this.element);
     registerServiceBuilder(
+<<<<<<< HEAD
         this.win, 'story-request-v01', () => this.requestService_);
+=======
+        this.win, 'story-request', () => this.requestService_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private {!NavigationState} */
     this.navigationState_ =
@@ -215,8 +231,17 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
 
+<<<<<<< HEAD
     /** Instantiates the viewport warning layer. */
     new ViewportWarningLayer(this.win, this.element);
+=======
+    /** @private @const {!ViewportWarningLayer} */
+    this.viewportWarningLayer_ =
+        new ViewportWarningLayer(this.win, this.element);
+
+    /** @private @const {!Array<string>} */
+    this.pageHistoryStack_ = [];
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
@@ -283,8 +308,13 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_
         .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
 
+<<<<<<< HEAD
     registerServiceBuilder(
         this.win, 'localization-v01', () => this.localizationService_);
+=======
+    registerServiceBuilder(this.win, 'localization',
+        () => this.localizationService_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
 
@@ -574,6 +604,7 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.switchTo_(initialPageId))
         .then(() => this.preloadPagesByDistance_())
+<<<<<<< HEAD
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
           // button is visible.
@@ -581,6 +612,10 @@ export class AmpStory extends AMP.BaseElement {
             this.shareMenu_.build();
           }
         });
+=======
+        // TODO(gmajoulet): only preload the share menu on mobile.
+        .then(() => this.shareMenu_.build());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
@@ -1019,10 +1054,13 @@ export class AmpStory extends AMP.BaseElement {
         this.updateBackground_(this.activePage_.element, /* initial */ true);
       }
     } else {
+<<<<<<< HEAD
       // Preloads and prerenders the share menu as the share button gets visible
       // on the mobile UI. No-op if already built.
       this.shareMenu_.build();
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       this.vsync_.mutate(() => {
         this.element.removeAttribute('desktop');
       });
@@ -1033,7 +1071,11 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
+<<<<<<< HEAD
     return this.desktopMedia_.matches && !this.platform_.isBot();
+=======
+    return this.desktopMedia_.matches;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -1239,6 +1281,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   preloadPagesByDistance_() {
+<<<<<<< HEAD
     if (this.platform_.isBot()) {
       this.pages_.forEach(page => {
         page.setDistance(0);
@@ -1246,6 +1289,8 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const pagesByDistance = this.getPagesByDistance_();
 
     this.mutateElement(() => {
@@ -1607,7 +1652,10 @@ export class AmpStory extends AMP.BaseElement {
 
 AMP.extension('amp-story', '0.1', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
+<<<<<<< HEAD
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });

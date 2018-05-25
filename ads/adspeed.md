@@ -30,10 +30,19 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, please see [AdSpeed documentation](https://www.adspeed.com/Knowledges/1950/Ad-Tag/Accelerated-Mobile-Pages-Project-AMP-Ad.html).
 
 Supported parameters:
 
 - `data-zone`: the zone ID
 - `data-client`: the publisher ID
+=======
+For semantics of configuration, please see [AdSpeed documentation](https://www.adspeed.com/Knowledges/1950/Ad-Tag/Accelerated-Mobile-Pages-Project-AMP-Ad.html).
+
+Supported parameters:
+
+- data-zone: the zone ID
+- data-client: the publisher ID
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 

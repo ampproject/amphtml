@@ -19,6 +19,10 @@ import {Entitlement} from './entitlement';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+<<<<<<< HEAD
+=======
+import {SubscriptionAnalytics} from './analytics';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
@@ -35,9 +39,14 @@ export class LocalSubscriptionPlatform {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+<<<<<<< HEAD
    * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
   constructor(ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics) {
+=======
+   */
+  constructor(ampdoc, platformConfig, serviceAdapter) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @const */
     this.ampdoc_ = ampdoc;
 
@@ -50,6 +59,12 @@ export class LocalSubscriptionPlatform {
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
 
+<<<<<<< HEAD
+=======
+    /** @const @private {!PageConfig} */
+    this.pageConfig_ = serviceAdapter.getPageConfig();
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
 
@@ -68,8 +83,13 @@ export class LocalSubscriptionPlatform {
     /** @private {!UrlBuilder} */
     this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
 
+<<<<<<< HEAD
     /** @private {!./analytics.SubscriptionAnalytics} */
     this.subscriptionAnalytics_ = subscriptionAnalytics;
+=======
+    /** @private {!SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     user().assert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
@@ -86,7 +106,17 @@ export class LocalSubscriptionPlatform {
 
     /** @private {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
+<<<<<<< HEAD
         serviceAdapter.getDialog(), this.serviceAdapter_);
+=======
+        serviceAdapter.getDialog());
+
+    /** @private {?Entitlement}*/
+    this.entitlement_ = null;
+
+    /** @private @const {boolean} */
+    this.isPingbackEnabled_ = true;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {?string} */
     this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
@@ -139,6 +169,7 @@ export class LocalSubscriptionPlatform {
     this.rootNode_.addEventListener('click', e => {
       const element = closestBySelector(dev().assertElement(e.target),
           '[subscriptions-action]');
+<<<<<<< HEAD
       this.handleClick_(element);
     });
   }
@@ -158,6 +189,13 @@ export class LocalSubscriptionPlatform {
         this.executeAction(action);
       }
     }
+=======
+      if (element) {
+        const action = element.getAttribute('subscriptions-action');
+        this.executeAction(action);
+      }
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -171,7 +209,15 @@ export class LocalSubscriptionPlatform {
     });
   }
 
+<<<<<<< HEAD
   /** @override */
+=======
+  /**
+   * Executes action for the local platform.
+   * @param {string} action
+   * @returns {!Promise<boolean>}
+   */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
@@ -190,7 +236,13 @@ export class LocalSubscriptionPlatform {
           this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
               .then(res => res.json())
               .then(resJson => {
+<<<<<<< HEAD
                 return Entitlement.parseFromJson(resJson);
+=======
+                const entitlement = Entitlement.parseFromJson(resJson);
+                this.entitlement_ = entitlement;
+                return entitlement;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
               }));
   }
 
@@ -216,7 +268,11 @@ export class LocalSubscriptionPlatform {
         headers: {
           'Content-Type': 'text/plain',
         },
+<<<<<<< HEAD
         body: JSON.stringify(selectedEntitlement.jsonForPingback()),
+=======
+        body: selectedEntitlement.raw,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
   }
@@ -225,6 +281,7 @@ export class LocalSubscriptionPlatform {
   supportsCurrentViewer() {
     return false;
   }
+<<<<<<< HEAD
 
   /** @override */
   getBaseScore() {
@@ -233,6 +290,8 @@ export class LocalSubscriptionPlatform {
 
   /** @override */
   decorateUI(unusedNode, unusedAction, unusedOptions) {}
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**

@@ -236,13 +236,21 @@ export class Bookend {
     this.bookendEl_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+<<<<<<< HEAD
     this.requestService_ = Services.storyRequestServiceV01(this.win_);
+=======
+    this.requestService_ = Services.storyRequestService(this.win_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+<<<<<<< HEAD
     this.storeService_ = Services.storyStoreServiceV01(this.win_);
+=======
+    this.storeService_ = Services.storyStoreService(this.win_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -308,10 +316,13 @@ export class Bookend {
       this.onBookendStateUpdate_(isActive);
     });
 
+<<<<<<< HEAD
     this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
       this.onCanShowSharingUisUpdate_(show);
     }, true /** callToInitialize */);
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
@@ -345,6 +356,7 @@ export class Bookend {
   }
 
   /**
+<<<<<<< HEAD
    * Reacts to updates to whether sharing UIs may be shown, and updates the UI
    * accordingly.
    * @param {boolean} canShowSharingUis
@@ -358,6 +370,8 @@ export class Bookend {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Reacts to desktop state updates.
    * @param {boolean} isDesktop
    * @private

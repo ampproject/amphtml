@@ -20,6 +20,7 @@ limitations under the License.
 
 
 ```html
+<<<<<<< HEAD
 <amp-embed width="200" height="200"
     type="postquare"
     layout="responsive"
@@ -27,10 +28,20 @@ limitations under the License.
     data-websiteId="WEBID_1"
     data-publisherId="PUBID_1">
 </amp-embed>
+=======
+  <amp-embed width="200" height="200"
+      type="postquare"
+      layout="responsive"
+      data-widgetIds="WID_1,WID_2"
+      data-websiteId="WEBID_1"
+      data-publisherId="PUBID_1">
+  </amp-embed>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact Postquare or refer to their documentation. 
 
 ### Required parameters
@@ -43,3 +54,14 @@ For details on the configuration semantics, please contact Postquare or refer to
 - `url`: Current none amp version URL
 - `ampUrl`: Current AMP page URL
 - `styleCSS`: Additional style
+=======
+
+Supported parameters:
+
+- widgetIds *(**Required**)* - Widget ids 
+- websiteId *(**Required**)* - Website Id
+- publisherId *(**Required**)* - Publisher Id
+- url *(Optional)* - Current none amp version URL
+- ampUrl *(Optional)* - Current AMP page URL
+- styleCSS *(Optional)* - Additional style
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

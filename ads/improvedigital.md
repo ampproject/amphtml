@@ -23,18 +23,32 @@ information on how to get the required placement IDs and [optional] keyvalue cas
 
 ### Simple ad tag 
 
+<<<<<<< HEAD
 ```html
 <amp-ad width="300" height="250"
+=======
+
+```html
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="improvedigital"
     data-placement="869276"
     data-optin="y">
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 ### Ad tag with keyvalues
 
 ```html
 <amp-ad width="300" height="250"
+=======
+### Ad tag with Keyvalues
+
+
+```html
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="improvedigital"
     data-placement="869276"
     data-optin="y"
@@ -44,7 +58,15 @@ information on how to get the required placement IDs and [optional] keyvalue cas
 
 ### Supported parameters
 
+<<<<<<< HEAD
 - `placement`: mandatory
 - `optin`
 - `keyvalue`: Fill in the keyvalues as written in the example. 
 
+=======
+- `placement`
+- `optin`
+- `keyvalue`
+
+The parameter; placement is mandatory. When using keyvalues please fill in the keyvalues as written in the example. 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

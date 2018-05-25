@@ -14,24 +14,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<<<<<<< HEAD
 # YieldPro
+=======
+# YIELDPRO
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Examples
 
 ### Single ad
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="728" height="90"
   type="yieldpro" 
   data-pubnetwork="12c6fc06"
   data-section-id="100"
   data-slot="107" >
 </amp-ad>
+=======
+  <amp-ad width="728" height="90"
+    type="yieldpro" 
+    data-pubnetwork="12c6fc06"
+    data-section-id="100"
+    data-slot="107" >
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ### Multi instance ads
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="250" height="250"
   type="yieldpro"
   data-pubnetwork="12c6fc06"
@@ -46,11 +60,28 @@ limitations under the License.
   data-slot="650"
   data-instance="2" >
 </amp-ad>
+=======
+  <amp-ad width=250 height=250
+    type="yieldpro"
+    data-pubnetwork="12c6fc06"
+    data-section-id="475"
+    data-slot="650"
+    data-instance="1" >
+  </amp-ad>
+  <amp-ad width=250 height=250
+    type="yieldpro"
+    data-pubnetwork="12c6fc06"
+    data-section-id="475"
+    data-slot="650"
+    data-instance="2" >
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ### Using custom params and custom ad server url
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="728" height="90"
   type="yieldpro" 
   data-pubnetwork="12c6fc06"
@@ -59,10 +90,21 @@ limitations under the License.
   data-custom='{"my_custom_param":"my_custom_value"}'
   data-ad-server-url="//creative.yieldpro.eu/ad" >
 </amp-ad>
+=======
+  <amp-ad width="728" height="90"
+    type="yieldpro" 
+    data-pubnetwork="12c6fc06"
+    data-section-id="100"
+    data-slot="107"
+    data-custom='{"my_custom_param":"my_custom_value"}'
+    data-ad-server-url="//creative.yieldpro.eu/ad" >
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
@@ -89,3 +131,26 @@ For details on the configuration semantics, please contact the ad network or ref
   ```
                     
 
+=======
+Supported parameters:
+
+- `sectionId`: required: ID of this section in ad server.
+- `slot`: required: ID of ad slot in ad server.
+- `pubnetwork`: required: ID of the publisher that in ad server.
+- `instance`: optional: ID of section instance in case we multiple times used the same section on the same page<br/>
+                      Can contain only letters and numbers<br/>
+                      Strictly required to use the same section multiple times per page.
+- `click3rd`: optional: 3rd party click watcher. 
+- `custom`: optional: Custom targetting properties. You may use 3 types for its properties: {String}, {Number} and {Array}.<br/>
+                    Array usage example:
+                    ```
+                    {
+                        arrayKey: [ "value1", 1 ],
+                        stringKey: 'stringValue'
+                    }
+                    ```
+                    Will translate into: arrayKey=value1&arrayKey=1&stringKey=stringValue...
+- `adServerUrl`: optional 
+- `cacheSafe`: optional
+- `pageIdModifier`: optional 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

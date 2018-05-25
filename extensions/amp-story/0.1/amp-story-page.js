@@ -121,6 +121,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
+<<<<<<< HEAD
 
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
@@ -129,6 +130,8 @@ export class AmpStoryPage extends AMP.BaseElement {
      * @private @const {boolean}
      */
     this.isBotUserAgent_ = Services.platformFor(this.win).isBot();
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
 
@@ -370,12 +373,17 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   pauseAllMedia_(rewindToBeginning = false) {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+<<<<<<< HEAD
       if (this.isBotUserAgent_) {
         mediaEl.pause();
       } else {
         return mediaPool.pause(
             /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
       }
+=======
+      return mediaPool.pause(
+          /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
@@ -387,11 +395,15 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+<<<<<<< HEAD
       if (this.isBotUserAgent_) {
         mediaEl.play();
       } else {
         return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
       }
+=======
+      return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
@@ -403,11 +415,15 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   preloadAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+<<<<<<< HEAD
       if (this.isBotUserAgent_) {
         // No-op.
       } else {
         return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
       }
+=======
+      return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
@@ -418,12 +434,16 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   muteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+<<<<<<< HEAD
       if (this.isBotUserAgent_) {
         mediaEl.muted = true;
         mediaEl.setAttribute('muted', '');
       } else {
         return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
       }
+=======
+      return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
@@ -434,12 +454,16 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   unmuteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+<<<<<<< HEAD
       if (this.isBotUserAgent_) {
         mediaEl.muted = false;
         mediaEl.removeAttribute('muted');
       } else {
         return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
       }
+=======
+      return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
@@ -451,11 +475,15 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+<<<<<<< HEAD
       if (this.isBotUserAgent_) {
         // No-op.
       } else {
         return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
       }
+=======
+      return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
@@ -768,3 +796,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }
 }
+<<<<<<< HEAD
+=======
+
+AMP.registerElement('amp-story-page', AmpStoryPage);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

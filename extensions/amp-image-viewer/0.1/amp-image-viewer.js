@@ -27,6 +27,10 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+<<<<<<< HEAD
+=======
+import {Services} from '../../../src/services';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {dev, user} from '../../../src/log';
@@ -63,6 +67,12 @@ export class AmpImageViewer extends AMP.BaseElement {
     /** @private {?Element} */
     this.image_ = null;
 
+<<<<<<< HEAD
+=======
+    /** @private {?../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = null;
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
 
@@ -72,11 +82,19 @@ export class AmpImageViewer extends AMP.BaseElement {
     /** @private {number} */
     this.sourceHeight_ = 0;
 
+<<<<<<< HEAD
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.elementBox_ = null;
 
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.imageBox_ = null;
+=======
+    /** @private {!../../../src/layout-rect.LayoutRectDef} */
+    this.elementBox_ = layoutRectLtwh(0, 0, 0, 0);
+
+    /** @private {!../../../src/layout-rect.LayoutRectDef} */
+    this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private {!UnlistenDef|null} */
     this.unlistenOnSwipePan_ = null;
@@ -123,6 +141,10 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+<<<<<<< HEAD
+=======
+    this.vsync_ = this.getVsync();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.element.classList.add('i-amphtml-image-viewer');
     const children = this.getRealChildren();
 
@@ -138,9 +160,14 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
+<<<<<<< HEAD
     // TODO (14936): refactor resize logic to go in onMeasureChange
     if (this.loadPromise_) {
       this.loadPromise_.then(() => this.resetImageDimensions_());
+=======
+    if (this.loadPromise_) {
+      this.loadPromise_.then(() => this.measure());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
   }
 
@@ -151,10 +178,29 @@ export class AmpImageViewer extends AMP.BaseElement {
     }
     this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
     this.loadPromise_ = this.sourceAmpImage_.signals()
+<<<<<<< HEAD
         .whenSignal(CommonSignals.LOAD_END)
         .then(() => this.init_())
         .then(() => this.resetImageDimensions_())
         .then(() => this.setupGestures_());
+=======
+        .whenSignal(CommonSignals.LOAD_END).then(() => {
+          return this.vsync_.mutatePromise(() => {
+            if (!this.image_) {
+              this.image_ = this.element.ownerDocument.createElement('img');
+              this.image_.classList.add('i-amphtml-image-viewer-image');
+
+              this.init_();
+              this.element.appendChild(this.image_);
+              st.toggle(dev().assertElement(this.sourceAmpImage_), false);
+            }
+          });
+        }).then(() => {
+          return this.measure();
+        }).then(() => {
+          this.setupGestures_();
+        });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return this.loadPromise_;
   }
 
@@ -164,7 +210,11 @@ export class AmpImageViewer extends AMP.BaseElement {
       return;
     }
     this.loadPromise_.then(() => {
+<<<<<<< HEAD
       this.resetImageDimensions_();
+=======
+      this.measure();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       this.cleanupGestures_();
     });
   }
@@ -203,7 +253,11 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /**
    * Returns the boundaries of the image element.
+<<<<<<< HEAD
    * @return {?../../../src/layout-rect.LayoutRectDef}
+=======
+   * @return {!../../../src/layout-rect.LayoutRectDef}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    */
   getImageBox() {
     return this.imageBox_;
@@ -220,10 +274,17 @@ export class AmpImageViewer extends AMP.BaseElement {
   /**
    * Returns the boundaries of the image element with the offset if it was
    * moved by a gesture.
+<<<<<<< HEAD
    * @return {?../../../src/layout-rect.LayoutRectDef}
    */
   getImageBoxWithOffset() {
     if (this.posX_ == 0 && this.posY_ == 0 || !this.imageBox_) {
+=======
+   * @return {!../../../src/layout-rect.LayoutRectDef}
+   */
+  getImageBoxWithOffset() {
+    if (this.posX_ == 0 && this.posY_ == 0) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return this.imageBox_;
     }
     const expansionScale = (this.scale_ - 1) / 2;
@@ -245,6 +306,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
+<<<<<<< HEAD
    * Sets the source width and height based the natural dimensions of the
    * source image if loaded, and the offset dimensions of amp-img element
    * if not.
@@ -262,12 +324,40 @@ export class AmpImageViewer extends AMP.BaseElement {
         this.sourceHeight_ = ampImg./*OK*/offsetHeight;
       }
     });
+=======
+   * @return {number}
+   * @private
+   */
+  getSourceWidth_() {
+    if (this.sourceAmpImage_.hasAttribute('width')) {
+      return parseInt(this.sourceAmpImage_.getAttribute('width'), 10);
+    } else {
+      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
+          'img');
+      return img ? img.naturalWidth : this.sourceAmpImage_./*OK*/offsetWidth;
+    }
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getSourceHeight_() {
+    if (this.sourceAmpImage_.hasAttribute('height')) {
+      return parseInt(this.sourceAmpImage_.getAttribute('height'), 10);
+    } else {
+      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
+          'img');
+      return img ? img.naturalHeight : this.sourceAmpImage_./*OK*/offsetHeight;
+    }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
+<<<<<<< HEAD
    * @returns {!Promise}
    */
   init_() {
@@ -293,6 +383,24 @@ export class AmpImageViewer extends AMP.BaseElement {
       return ampImg.getImpl().then(ampImg => {
         ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
       });
+=======
+   */
+  init_() {
+    this.sourceWidth_ = this.getSourceWidth_();
+    this.sourceHeight_ = this.getSourceHeight_();
+    this.srcset_ = srcsetFromElement(dev().assertElement(this.sourceAmpImage_));
+
+    ARIA_ATTRIBUTES.forEach(key => {
+      if (this.sourceAmpImage_.hasAttribute(key)) {
+        this.image_.setAttribute(key, this.sourceAmpImage_.getAttribute(key));
+      }
+    });
+    st.setStyles(dev().assertElement(this.image_), {
+      top: st.px(0),
+      left: st.px(0),
+      width: st.px(0),
+      height: st.px(0),
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
@@ -300,6 +408,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * Measures the image viewer and image sizes and positioning.
    * This must be called AFTER the source element has already been
    * laid out.
+<<<<<<< HEAD
    * @private
    */
   measure_() {
@@ -351,6 +460,52 @@ export class AmpImageViewer extends AMP.BaseElement {
       return this.mutateElement(() => {
         // Set the actual dimensions of the image
         st.setStyles(image, {
+=======
+   * @return {!Promise}
+   */
+  measure() {
+    return this.vsync_.runPromise({
+      measure: () => {
+        this.elementBox_ = layoutRectFromDomRect(this.element
+            ./*OK*/getBoundingClientRect());
+
+        const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+        let height = Math.min(this.elementBox_.width / sourceAspectRatio,
+            this.elementBox_.height);
+        let width = Math.min(this.elementBox_.height * sourceAspectRatio,
+            this.elementBox_.width);
+
+        if (Math.abs(width - this.sourceWidth_) <= 16
+          && Math.abs(height - this.sourceHeight_ <= 16)) {
+          width = this.sourceWidth_;
+          height = this.sourceHeight_;
+        }
+
+        this.imageBox_ = layoutRectLtwh(
+            Math.round((this.elementBox_.width - width) / 2),
+            Math.round((this.elementBox_.height - height) / 2),
+            Math.round(width),
+            Math.round(height));
+
+        // Adjust max scale to at least fit the screen.
+        const elementBoxRatio = this.elementBox_.width
+          / this.elementBox_.height;
+        const maxScale = Math.max(
+            elementBoxRatio / sourceAspectRatio,
+            sourceAspectRatio / elementBoxRatio
+        );
+        this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
+
+        // Reset zoom and pan.
+        this.startScale_ = this.scale_ = 1;
+        this.startX_ = this.posX_ = 0;
+        this.startY_ = this.posY_ = 0;
+        this.updatePanZoomBounds_(this.scale_);
+      },
+      mutate: () => {
+        // Set the actual dimensions of the image
+        st.setStyles(dev().assertElement(this.image_), {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           top: st.px(this.imageBox_.top),
           left: st.px(this.imageBox_.left),
           width: st.px(this.imageBox_.width),
@@ -359,7 +514,11 @@ export class AmpImageViewer extends AMP.BaseElement {
 
         // Update translation and scaling
         this.updatePanZoom_();
+<<<<<<< HEAD
       },image);
+=======
+      },
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }).then(() => this.updateSrc_());
   }
 
@@ -380,9 +539,19 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
+<<<<<<< HEAD
     return this.mutateElement(() => {
       this.image_.setAttribute('src', src);
     }, this.image_);
+=======
+    // Notice that we will wait until the next event cycle to set the "src".
+    // This ensures that the already available image will show immediately
+    // and then naturally upgrade to a higher quality image.
+    return Services.timerFor(this.win).promise(1).then(() => {
+      this.image_.setAttribute('src', src);
+      return this.image_;
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @private */
@@ -414,7 +583,16 @@ export class AmpImageViewer extends AMP.BaseElement {
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
       event.preventDefault();
+<<<<<<< HEAD
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
+=======
+      let newScale;
+      if (this.scale_ == 1) {
+        newScale = this.maxScale_;
+      } else {
+        newScale = this.minScale_;
+      }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const deltaX = this.elementBox_.width / 2 - e.data.clientX;
       const deltaY = this.elementBox_.height / 2 - e.data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, true).then(() => {

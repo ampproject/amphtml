@@ -45,6 +45,12 @@ export class AmpStoryVariableService {
       [Variable.STORY_PROGRESS]: null,
       [Variable.STORY_IS_MUTED]: null,
     };
+<<<<<<< HEAD
+=======
+
+    /** @private {boolean} */
+    this.isInitialized_ = false;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**

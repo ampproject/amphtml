@@ -23,8 +23,11 @@
 import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+<<<<<<< HEAD
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Navigation} from '../../../src/service/navigation';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {
   QQID_HEADER,
   ValidAdContainerTypes,
@@ -40,10 +43,13 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {Services} from '../../../src/services';
+<<<<<<< HEAD
 import {
   addExperimentIdToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
@@ -55,14 +61,27 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+<<<<<<< HEAD
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {getMode} from '../../../src/mode';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+<<<<<<< HEAD
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
+=======
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
+import {isExperimentOn} from '../../../src/experiments';
+import {
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 
@@ -226,6 +245,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+<<<<<<< HEAD
   getConsentPolicy() {
     // Ensure that build is not blocked by need for consent (delay will occur
     // prior to ad URL construction).
@@ -239,6 +259,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
       return Promise.resolve('');
     }
+=======
+  getAdUrl() {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
@@ -253,6 +276,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         isInManualExperiment(this.element);
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
+<<<<<<< HEAD
 
     const adsenseFormatExpName = 'as-use-attr-for-format';
     const experimentInfoMap =
@@ -271,6 +295,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     addExperimentIdToElement(adsenseFormatExpId, this.element);
 
     this.size_ = adsenseFormatExpId == '21062004'
+=======
+    // Need to ensure these are numbers since width can be set to 'auto'.
+    // Checking height just in case.
+    const useDefinedSizes = isExperimentOn(this.win, 'as-use-attr-for-format')
+        && !this.isResponsive_()
+        && !isNaN(width) && width > 0
+        && !isNaN(height) && height > 0;
+    this.size_ = useDefinedSizes
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       ? {width, height}
       : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
@@ -296,8 +329,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'w': this.size_.width,
       'h': this.size_.height,
       'iu': slotname,
+<<<<<<< HEAD
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       'adtest': adTestOn ? 'on' : null,
       adk,
       'output': 'html',
@@ -419,7 +455,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);
+<<<<<<< HEAD
       Navigation.installAnchorClickInterceptor(
+=======
+      installAnchorClickInterceptor(
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
@@ -513,7 +553,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getPreconnectUrls() {
+<<<<<<< HEAD
     this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return ['https://googleads.g.doubleclick.net'];
   }
 

@@ -42,6 +42,7 @@ export function dable(global, data) {
   }
 
   const itemId = data['itemId'] || '';
+<<<<<<< HEAD
   const opts = {};
 
   if (itemId) {
@@ -52,6 +53,15 @@ export function dable(global, data) {
 
   // call render widget
   global.dable('renderWidget', slot.id, itemId, opts, function(hasAd) {
+=======
+
+  if (itemId) {
+    global.dable('sendLog', 'view', {id: itemId});
+  }
+
+  // call render widget
+  global.dable('renderWidget', slot.id, itemId, function(hasAd) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     if (hasAd) {
       global.context.renderStart();
     } else {

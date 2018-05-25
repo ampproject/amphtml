@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="300"
+=======
+<amp-ad width=320 height=300
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   data-cf-network="dianomi"
   type="cloudflare"
 </amp-ad>
@@ -27,9 +31,15 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics and to learn more about how we can help you deliver AMP Ads, please [contact dianomi](http://www.dianomi.com/).
 
 ### Supported parameters
+=======
+For semantics of configuration and to learn more about how we can help you deliver AMP Ads, please contact [contact dianomi](http://www.dianomi.com/).
+
+__Supported Parameters__
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 - `data-id`
 - `width`
@@ -37,7 +47,12 @@ For configuration semantics and to learn more about how we can help you deliver 
 - `data-cf-a4a`
 - `src`
 
+<<<<<<< HEAD
 ### Required parameters
+=======
+
+__Required:__
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 - `data-cf-network`
 - `type`

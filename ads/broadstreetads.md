@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="broadstreetads"
     data-network="229"
     data-zone="63940">
@@ -27,6 +31,7 @@ limitations under the License.
 ```
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, see the [Broadstreet Ads documentation](https://information.broadstreetads.com/amp-configuration/).
 
 ### Required parameters
@@ -40,3 +45,18 @@ For configuration semantics, see the [Broadstreet Ads documentation](https://inf
 
 - `data-place`
 - `data-keywords`
+=======
+For semantics of configuration, please see [ad network documentation](https://information.broadstreetads.com/amp-configuration/).
+
+Supported parameters:
+
+Required:
+- width
+- height
+- data-network
+- data-zone
+
+Optional:
+- data-place
+- data-keywords
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

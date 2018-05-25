@@ -16,12 +16,19 @@ limitations under the License.
 
 # AdButler
 
+<<<<<<< HEAD
 Serves ads from [AdButler](https://www.adbutler.com/).
 
 ## Example
 
 ```html
 <amp-ad width="300" height="250"
+=======
+## Example
+
+```html
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adbutler"
     data-account="167283"
     data-zone="212491">
@@ -29,6 +36,7 @@ Serves ads from [AdButler](https://www.adbutler.com/).
 ```
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please see [AdButler's documentation](http://www.adbutlerhelp.com/amp-configuration).
 
 ### Required parameters
@@ -42,3 +50,18 @@ For details on the configuration semantics, please see [AdButler's documentation
 
 - `data-place`
 - `data-keyword`
+=======
+For semantics of configuration, please see [ad network documentation](http://www.adbutlerhelp.com/amp-configuration).
+
+Supported parameters:
+
+Required:
+- width
+- height
+- data-account
+- data-zone
+
+Optional:
+- data-place
+- data-keyword
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

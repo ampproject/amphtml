@@ -134,6 +134,12 @@ export class Srcset {
 
     /** @private @const {boolean} */
     this.widthBased_ = hasWidth;
+<<<<<<< HEAD
+=======
+
+    /** @private @const {boolean} */
+    this.dprBased_ = hasDpr;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**

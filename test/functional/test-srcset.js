@@ -178,9 +178,15 @@ describe('Srcset', () => {
     });
 
     it('should not accept mixed sources', () => {
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         parseSrcset(' \n image1 100w\n , \n image2 1.5x\n , image3 ');
       }).to.throw(/Srcset must have width or dpr sources, but not both/); });
+=======
+      expect(() => {
+        parseSrcset(' \n image1 100w\n , \n image2 1.5x\n , image3 ');
+      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should parse misc examples', () => {
@@ -258,11 +264,18 @@ describe('Srcset', () => {
     });
 
     it('should require srcset or src to be available', () => {
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         srcsetFromElement(document.createElement('div'));
       }).to.throw(
           /Either non-empty "srcset" or "src" attribute must be specified/);
       });
+=======
+      expect(() => {
+        srcsetFromElement(document.createElement('div'));
+      }).to.throw(
+          /Either non-empty "srcset" or "src" attribute must be specified/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 
@@ -282,6 +295,7 @@ describe('Srcset', () => {
 
   describe('construct', () => {
     it('should enforce only one type of descriptor per source', () => {
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         new Srcset([{url: 'image-1000', width: 100, dpr: 2}]);
       }).to.throw(/Srcset must have width or dpr sources, but not both/); });
@@ -314,6 +328,40 @@ describe('Srcset', () => {
       allowConsoleError(() => { expect(() => {
         new Srcset([{url: 'image', dpr: 2}, {url: 'image', dpr: 2}]);
       }).to.throw(/Duplicate dpr/); });
+=======
+      expect(() => {
+        new Srcset([{url: 'image-1000', width: 100, dpr: 2}]);
+      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+    });
+
+    it('should not allow 0-width descriptor', () => {
+      expect(() => {
+        new Srcset([{url: 'image-1000', width: 0}]);
+      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+    });
+
+    it('should not allow 0-dpr descriptor', () => {
+      expect(() => {
+        new Srcset([{url: 'image-1000', dpr: 0}]);
+      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+    });
+
+    it('should enforce only one type of descriptor total', () => {
+      expect(() => {
+        new Srcset([{url: 'image-1000', width: 100},
+          {url: 'image-2x', dpr: 2}]);
+      }).to.throw(/Srcset must have width or dpr sources, but not both/);
+    });
+
+    it('should not allow duplicate sources', () => {
+      expect(() => {
+        new Srcset([{url: 'image', width: 100},
+          {url: 'image', width: 100}]);
+      }).to.throw(/Duplicate width/);
+      expect(() => {
+        new Srcset([{url: 'image', dpr: 2}, {url: 'image', dpr: 2}]);
+      }).to.throw(/Duplicate dpr/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 

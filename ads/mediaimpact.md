@@ -19,6 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
     type="mediaimpact"
     data-site="67767"
@@ -27,10 +28,21 @@ limitations under the License.
     data-target=""
     data-slot="4459">
 </amp-ad>
+=======
+  <amp-ad width="300" height="250"
+      type="mediaimpact"
+      data-site="67767"
+      data-page="amp"
+      data-format="4459"
+      data-target=""
+      data-slot="4459">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 for further information regarding this implementation, please contact adtechnology@axelspringer.de  or visit http://www.mediaimpact.de/ 
 
 Supported parameters:
@@ -45,3 +57,20 @@ Supported parameters:
 
 - Loading placeholder for ads, see [Placeholders in amp-ad](https://www.ampproject.org/docs/reference/components/amp-ad#placeholder).
 - No ad fallback for ads, see [No ad in amp-ad](https://www.ampproject.org/docs/reference/components/amp-ad#no-ad-available).
+=======
+Supported parameters:
+
+- data-site: siteid given by mediaimpact
+- data-page: pageName given by mediaimpact
+- data-format: formatid e.g. 4459 (MREC)
+- data-target: for special targeting like "goodCustomer=true;"
+- data-slot: slotid without trailing sas_
+
+for further information regarding this implementation please contact adtechnology@axelspringer.de 
+or visit http://www.mediaimpact.de/ 
+
+## Optional features
+
+- loading placeholder for ads, see [official AMP readme]('../extensions/amp-ad/amp-ad.md#placeholder')
+- noad fallback for ads, see [official AMP readme]('../extensions/amp-ad/amp-ad.md#no-ad-available')
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

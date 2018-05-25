@@ -20,16 +20,22 @@ import {BaseElement} from '../../src/base-element';
 import {LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
+<<<<<<< HEAD
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 describe('amp-img', () => {
   let sandbox;
   let screenWidth;
   let windowWidth;
+<<<<<<< HEAD
   let iframe;
 
   const SRCSET_STRING = `/examples/img/hero@1x.jpg 641w,
                         /examples/img/hero@2x.jpg 1282w`;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -42,10 +48,13 @@ describe('amp-img', () => {
         getWidth: () => windowWidth,
       };
     });
+<<<<<<< HEAD
 
     return createIframePromise().then(iframeFixture => {
       iframe = iframeFixture;
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   afterEach(() => {
@@ -53,6 +62,7 @@ describe('amp-img', () => {
   });
 
   function getImg(attributes, children) {
+<<<<<<< HEAD
     installImg(iframe.win);
     Object.defineProperty(iframe.win.screen, 'width', {
       get: () => screenWidth,
@@ -69,6 +79,26 @@ describe('amp-img', () => {
       }
     }
     return Promise.resolve(iframe.addElement(img));
+=======
+    return createIframePromise().then(iframe => {
+      installImg(iframe.win);
+      Object.defineProperty(iframe.win.screen, 'width', {
+        get: () => screenWidth,
+      });
+
+      const img = iframe.doc.createElement('amp-img');
+      for (const key in attributes) {
+        img.setAttribute(key, attributes[key]);
+      }
+
+      if (children != null) {
+        for (const key in children) {
+          img.appendChild(children[key]);
+        }
+      }
+      return iframe.addElement(img);
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   it('should load an img with more attributes', () => {
@@ -212,6 +242,7 @@ describe('amp-img', () => {
     });
   });
 
+<<<<<<< HEAD
   // The following tests are relevant to the amp-img-native-srcset experiment
 
   it('should propagate srcset and sizes', () => {
@@ -232,6 +263,8 @@ describe('amp-img', () => {
     });
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   describe('#fallback on initial load', () => {
     let el;
     let impl;

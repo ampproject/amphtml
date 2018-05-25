@@ -379,6 +379,7 @@ describe('Activity getIncrementalEngagedTime', () => {
     });
   });
 
+<<<<<<< HEAD
   it('should not reset incremental engaged time if reset is false', () => {
     whenFirstVisibleResolve();
     return viewer.whenFirstVisible().then(() => {
@@ -412,6 +413,8 @@ describe('Activity getIncrementalEngagedTime', () => {
     });
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   it('should keep individual incremental engaged times per name', () => {
     whenFirstVisibleResolve();
     return viewer.whenFirstVisible().then(() => {

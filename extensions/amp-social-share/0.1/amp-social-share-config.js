@@ -84,6 +84,7 @@ const BUILTINS = dict({
       'text': 'TITLE - CANONICAL_URL',
     },
   },
+<<<<<<< HEAD
   'line': {
     'shareEndpoint': 'https://social-plugins.line.me/lineit/share',
     'defaultParams': {
@@ -91,6 +92,8 @@ const BUILTINS = dict({
       'url': 'CANONICAL_URL',
     },
   },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   'sms': {
     'shareEndpoint': 'sms:',
     'defaultParams': {

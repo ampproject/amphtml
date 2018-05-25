@@ -21,7 +21,11 @@ limitations under the License.
 ### Basic
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="265"
+=======
+<amp-ad width=300 height=265
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="pubmine"
     data-siteid="37790885">
 </amp-ad>
@@ -30,7 +34,11 @@ limitations under the License.
 ### With all attributes
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="265"
+=======
+<amp-ad width=300 height=265
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="pubmine"
     data-section="1"
     data-pt="1"
@@ -41,6 +49,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For further configuration information, please [contact Pubmine](https://wordpress.com/help/contact).
 
 Please note that the height parameter should be 15 greater than your ad size to ensure there is enough room for the "Report this ad" link.
@@ -54,3 +63,23 @@ Please note that the height parameter should be 15 greater than your ad size to 
 * `data-section`: Pubmine slot identifier
 * `data-pt`: Enum value for page type
 * `data-ht`: Enum value for hosting type
+=======
+For further Pubmine configuration information, please [contact us](https://wordpress.com/help/contact).
+
+Please note that the height parameter should be 15 greater than your ad size to ensure there is enough
+room for the "Report this ad" link.
+
+### Pubmine Required parameters
+
+| Parameter     | Description |
+|:------------- |:-------------|
+| **`data-siteid`**    | Pubmine publisher site number |
+
+### Pubmine Optional parameters
+
+| Parameter     | Description |
+|:------------- |:-------------|
+| **`data-section`**    | Pubmine slot identifier |
+| **`data-pt`**    | Enum value for page type |
+| **`data-ht`**    | Enum value for hosting type |
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

@@ -15,7 +15,10 @@
  */
 
 import {dashToUnderline} from '../src/string';
+<<<<<<< HEAD
 import {dict} from '../src/utils/object';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {loadScript} from './3p';
 import {setStyle} from '../src/style';
 import {user} from '../src/log';
@@ -160,6 +163,7 @@ export function facebook(global, data) {
     });
 
     FB.init({xfbml: true, version: 'v2.5'});
+<<<<<<< HEAD
 
     // Report to parent that the SDK has loaded and is ready to paint
     const message = JSON.stringify(dict({
@@ -167,5 +171,7 @@ export function facebook(global, data) {
     }));
     global.parent. /*OK*/postMessage(message, '*');
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }, data.locale ? data.locale : dashToUnderline(window.navigator.language));
 }

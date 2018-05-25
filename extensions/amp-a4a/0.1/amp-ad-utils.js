@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+<<<<<<< HEAD
 import {dev} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 
 const TAG = 'amp-ad-util';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /**
  * Sends a CORS XHR request to the given URL.
@@ -34,6 +37,7 @@ export function sendXhrRequest(win, url) {
     credentials: 'include',
   });
 }
+<<<<<<< HEAD
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -131,3 +135,5 @@ export function getAmpAdMetadata(creative) {
     return null;
   }
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

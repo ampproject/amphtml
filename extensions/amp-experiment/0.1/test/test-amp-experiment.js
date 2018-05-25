@@ -82,6 +82,7 @@ describes.realWin('amp-experiment', {
   });
 
   it('should throw if it has no child element', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       experiment.buildCallback();
     }).to.throw(/should contain exactly one/); });
@@ -107,6 +108,33 @@ describes.realWin('amp-experiment', {
       addConfigElement('script', 'wrongtype');
       experiment.buildCallback();
     }).to.throw(/application\/json/); });
+=======
+    expect(() => {
+      experiment.buildCallback();
+    }).to.throw(/should contain exactly one/);
+  });
+
+  it('should throw if it has multiple child elements', () => {
+    expect(() => {
+      addConfigElement('script');
+      addConfigElement('script');
+      experiment.buildCallback();
+    }).to.throw(/should contain exactly one/);
+  });
+
+  it('should throw if the child element is not a <script> element', () => {
+    expect(() => {
+      addConfigElement('a');
+      experiment.buildCallback();
+    }).to.throw(/script/);
+  });
+
+  it('should throw if the child script element is not json typed', () => {
+    expect(() => {
+      addConfigElement('script', 'wrongtype');
+      experiment.buildCallback();
+    }).to.throw(/application\/json/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should throw if the child script element has non-JSON content', () => {

@@ -551,21 +551,28 @@ app.use('/impression-proxy/', (req, res) => {
 app.post('/get-consent-v1/', (req, res) => {
   assertCors(req, res, ['POST']);
   const body = {
+<<<<<<< HEAD
     'promptIfUnknown': true,
     'sharedData': {
       'tfua': true,
       'coppa': true,
     },
+=======
+    'consentRequired': true,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   };
   res.json(body);
 });
 
+<<<<<<< HEAD
 app.post('/get-consent-no-prompt/', (req, res) => {
   assertCors(req, res, ['POST']);
   const body = {};
   res.json(body);
 });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 // Proxy with local JS.
 // Example:
 // http://localhost:8000/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/

@@ -16,7 +16,11 @@
 
 import {UrlBuilder} from '../url-builder';
 
+<<<<<<< HEAD
 describes.fakeWin('UrlBuilder', {amp: true}, env => {
+=======
+describes.realWin('UrlBuilder', {amp: true}, env => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let ampdoc;
   let readerIdPromise;
   let urlBuilder;

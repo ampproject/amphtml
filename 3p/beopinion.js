@@ -96,7 +96,11 @@ function getBeOpinionAsyncInit(global, accountId) {
       onHeightChange: function(newHeight) {
         const c = global.document.getElementById('c');
         const boundingClientRect = c./*REVIEW*/getBoundingClientRect();
+<<<<<<< HEAD
         context.onResizeDenied(context.requestResize.bind(context));
+=======
+        context.onResizeDenied(context.requestResize);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         context.requestResize(boundingClientRect.width, newHeight);
       },
     });

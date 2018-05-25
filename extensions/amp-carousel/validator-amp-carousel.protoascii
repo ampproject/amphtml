@@ -56,6 +56,10 @@ tags: {  # <amp-carousel>
   # <amp-bind>
   attrs: { name: "[slide]" }
   attr_lists: "extended-amp-global"
+<<<<<<< HEAD
+=======
+  attr_lists: "lightboxable-elements"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
@@ -67,6 +71,7 @@ tags: {  # <amp-carousel>
     supported_layouts: RESPONSIVE
   }
 }
+<<<<<<< HEAD
 tags: {  # <amp-carousel> lightbox
   tag_name: "AMP-CAROUSEL"
   spec_name: "AMP-CAROUSEL [lightbox]"
@@ -137,3 +142,5 @@ tags: {
     value_regex_casei: "^[a-z][a-z\\d_-]*"
   }
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

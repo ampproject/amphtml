@@ -16,7 +16,10 @@
 'use strict';
 
 require('./ava');
+<<<<<<< HEAD
 require('./bundle-size');
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 require('./changelog');
 require('./check-links');
 require('./clean');

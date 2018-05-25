@@ -283,7 +283,10 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [MicroAd](../../ads/microad.md)
 - [Mixpo](../../ads/mixpo.md)
 - [Monetizer101](../../ads/monetizer101.md)
+<<<<<<< HEAD
 - [myTarget](../../ads/mytarget.md)
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 - [myWidget](../../ads/mywidget.md)
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)
@@ -292,11 +295,17 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Nokta](../../ads/nokta.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
+<<<<<<< HEAD
 - [Pixels](../../ads/pixels.md)
 - [plista](../../ads/plista.md)
 - [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
 - [PubGuru](../../ads/pubguru.md)
+=======
+- [plista](../../ads/plista.md)
+- [polymorphicAds](../../ads/polymorphicads.md)
+- [popin](../../ads/popin.md)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
 - [PulsePoint](../../ads/pulsepoint.md)

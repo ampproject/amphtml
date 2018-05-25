@@ -173,28 +173,40 @@ describes.realWin('font-stylesheet-timeout', {
     it('should not do anything with experiment off', () => {
       toggleExperiment(win, 'font-display-swap', false);
       fontStylesheetTimeout(win);
+<<<<<<< HEAD
       clock.tick(250);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(fonts[1].display).to.equal('auto');
     });
 
     it('should not change loaded fonts', () => {
       fontStylesheetTimeout(win);
+<<<<<<< HEAD
       clock.tick(250);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(fonts[0].display).to.equal('auto');
     });
 
     it('should change loading fonts to swap', () => {
       fontStylesheetTimeout(win);
+<<<<<<< HEAD
       expect(fonts[1].display).to.equal('auto');
       expect(fonts[2].display).to.equal('auto');
       clock.tick(250);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(fonts[1].display).to.equal('swap');
       expect(fonts[2].display).to.equal('swap');
     });
 
     it('should not override non-default values', () => {
       fontStylesheetTimeout(win);
+<<<<<<< HEAD
       clock.tick(250);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(fonts[3].display).to.equal('optional');
     });
   });

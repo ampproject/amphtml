@@ -111,7 +111,11 @@ export class ViewportWarningLayer {
     this.platform_ = Services.platformFor(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+<<<<<<< HEAD
     this.storeService_ = Services.storyStoreServiceV01(this.win_);
+=======
+    this.storeService_ = Services.storyStoreService(this.win_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;

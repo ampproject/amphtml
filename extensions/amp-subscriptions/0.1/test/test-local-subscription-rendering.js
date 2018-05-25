@@ -17,14 +17,21 @@ import * as sinon from 'sinon';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
+<<<<<<< HEAD
 import {ServiceAdapter} from '../service-adapter';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
   let win, doc, ampdoc;
   let renderer;
+<<<<<<< HEAD
   let dialog, serviceAdapter;
+=======
+  let dialog;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let entitlementsForService1;
 
   beforeEach(() => {
@@ -32,9 +39,13 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     doc = win.document;
     ampdoc = env.ampdoc;
     dialog = new Dialog(ampdoc);
+<<<<<<< HEAD
     serviceAdapter = new ServiceAdapter(null);
     renderer = new LocalSubscriptionPlatformRenderer(
         ampdoc, dialog, serviceAdapter);
+=======
+    renderer = new LocalSubscriptionPlatformRenderer(ampdoc, dialog);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const serviceIds = ['service1', 'service2'];
     const currentProduct = 'currentProductId';
     const sampleEntitlement1 =
@@ -57,7 +68,10 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
   describe('action rendering', () => {
     let actions1, actions2;
     let elements;
+<<<<<<< HEAD
     let delegateUIStub;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     beforeEach(() => {
       actions1 = createElementWithAttributes(doc, 'div', {
         id: 'actions1',
@@ -68,9 +82,12 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
         id: 'actions2',
         'subscriptions-section': 'actions',
         'subscriptions-display': 'subscribed',
+<<<<<<< HEAD
         'subscriptions-action': 'login',
         'subscriptions-service': 'service',
         'subscriptions-decorate': '',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
       elements = [
         actions1, actions2,
@@ -80,10 +97,13 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       });
     });
 
+<<<<<<< HEAD
     beforeEach(() => {
       delegateUIStub = sandbox.stub(serviceAdapter, 'decorateServiceAction');
     });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     function isDisplayed(el) {
       return el.classList.contains('i-amphtml-subs-display');
     }
@@ -107,7 +127,10 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     it('should display actions and action-sections', () => {
       return renderer.render({subscribed: true}).then(() => {
         displayed([actions2]);
+<<<<<<< HEAD
         expect(delegateUIStub).to.be.called;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
   });

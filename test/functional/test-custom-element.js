@@ -124,7 +124,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
       win.ampExtendedElements['amp-test'] = TestElement;
       win.ampExtendedElements['amp-stub'] = ElementStub;
+<<<<<<< HEAD
       ampdoc.declareExtension('amp-stub');
+=======
+      ampdoc.declareExtension_('amp-stub');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       testElementCreatedCallback = sandbox.spy();
       testElementPreconnectCallback = sandbox.spy();
@@ -148,6 +152,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should initialize ampdoc and resources on attach only', () => {
       const element = new ElementClass();
       expect(element.ampdoc_).to.be.null;
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => element.getAmpDoc()).to.throw(/no ampdoc yet/);
       });
@@ -155,6 +160,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
       allowConsoleError(() => {
         expect(() => element.getResources()).to.throw(/no resources yet/);
       });
+=======
+      expect(() => element.getAmpDoc()).to.throw(/no ampdoc yet/);
+      expect(element.resources_).to.be.null;
+      expect(() => element.getResources()).to.throw(/no resources yet/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       // Resources available after attachment.
       container.appendChild(element);
@@ -323,7 +333,12 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.implementation_.layoutWidth_).to.equal(111);
     });
 
+<<<<<<< HEAD
     it('should tolerate erros in onLayoutMeasure', () => {
+=======
+    // TODO(dvoytenko, #14336): Fails due to console errors.
+    it.skip('should tolerate erros in onLayoutMeasure', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const element = new ElementClass();
       sandbox.stub(element.implementation_, 'onLayoutMeasure').callsFake(() => {
         throw new Error('intentional');
@@ -507,9 +522,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('Element - build NOT allowed before attachment', () => {
       const element = new ElementClass();
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         element.build();
       }).to.throw(/upgrade/); });
+=======
+      expect(() => {
+        element.build();
+      }).to.throw(/upgrade/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('Element - build allowed', () => {
@@ -568,8 +589,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       clock.tick(1);
       container.appendChild(element);
+<<<<<<< HEAD
       return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
           /BLOCK_BY_CONSENT/);
+=======
+      return expect(element.whenBuilt())
+          .to.be.eventually.rejectedWith(/BLOCK_BY_CONSENT/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
 
@@ -582,8 +608,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.isBuilt()).to.be.false;
       expect(element).to.have.class('i-amphtml-notbuilt');
       expect(element).to.have.class('amp-notbuilt');
+<<<<<<< HEAD
       return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
           /intentional/);
+=======
+      return expect(element.whenBuilt())
+          .to.be.eventually.rejectedWith(/intentional/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('Element - build creates a placeholder if one does not exist' , () => {
@@ -651,9 +682,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(testElementBuildCallback).to.have.not.been.called;
 
       element.isInTemplate_ = true;
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         element.build();
       }).to.throw(/Must never be called in template/); });
+=======
+      expect(() => {
+        element.build();
+      }).to.throw(/Must never be called in template/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       expect(element.isBuilt()).to.equal(false);
       expect(testElementBuildCallback).to.have.not.been.called;
@@ -664,9 +701,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.isBuilt()).to.equal(false);
       expect(testElementBuildCallback).to.have.not.been.called;
 
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         element.build();
       }).to.throw(/Cannot build unupgraded element/); });
+=======
+      expect(() => {
+        element.build();
+      }).to.throw(/Cannot build unupgraded element/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       expect(element.isBuilt()).to.equal(false);
       expect(testElementBuildCallback).to.have.not.been.called;
@@ -776,9 +819,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(testElementLayoutCallback).to.have.not.been.called;
       expect(element.isBuilt()).to.equal(false);
 
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         element.layoutCallback();
       }).to.throw(/Must be built to receive viewport events/); });
+=======
+      expect(() => {
+        element.layoutCallback();
+      }).to.throw(/Must be built to receive viewport events/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       expect(testElementLayoutCallback).to.have.not.been.called;
     });
@@ -790,18 +839,30 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       expect(element.isUpgraded()).to.equal(false);
       expect(element.isBuilt()).to.equal(false);
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         element.layoutCallback();
       }).to.throw(/Must be built to receive viewport events/); });
+=======
+      expect(() => {
+        element.layoutCallback();
+      }).to.throw(/Must be built to receive viewport events/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       resourcesMock.expects('upgraded').withExactArgs(element).never();
       element.upgrade(TestElement);
 
       expect(element.isUpgraded()).to.equal(false);
       expect(element.isBuilt()).to.equal(false);
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         element.layoutCallback();
       }).to.throw(/Must be built to receive viewport events/); });
+=======
+      expect(() => {
+        element.layoutCallback();
+      }).to.throw(/Must be built to receive viewport events/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       expect(testElementLayoutCallback).to.have.not.been.called;
     });
@@ -862,9 +923,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(testElementLayoutCallback).to.have.not.been.called;
 
         element.isInTemplate_ = true;
+<<<<<<< HEAD
         allowConsoleError(() => { expect(() => {
           element.layoutCallback();
         }).to.throw(/Must never be called in template/); });
+=======
+        expect(() => {
+          element.layoutCallback();
+        }).to.throw(/Must never be called in template/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
 
@@ -873,10 +940,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element.setAttribute('layout', 'fill');
       resourcesMock.expects('upgraded').withExactArgs(element).never();
       element.upgrade(TestElement);
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => element.build()).to.throw(
             /Cannot build unupgraded element/);
       });
+=======
+      expect(() => element.build()).to.throw(/Cannot build unupgraded element/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(element.isUpgraded()).to.equal(false);
       expect(element.isBuilt()).to.equal(false);
       expect(testElementLayoutCallback).to.have.not.been.called;
@@ -964,9 +1035,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       const inv = {};
       element.isInTemplate_ = true;
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         element.enqueAction(inv);
       }).to.throw(/Must never be called in template/); });
+=======
+      expect(() => {
+        element.enqueAction(inv);
+      }).to.throw(/Must never be called in template/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
 
@@ -982,7 +1059,12 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
     });
 
+<<<<<<< HEAD
     it('should apply sizes condition', () => {
+=======
+    // TODO(dvoytenko, #14336): Fails due to console errors.
+    it.skip('should apply sizes condition', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const element1 = new ElementClass();
       element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
       element1.applySizesAndMediaQuery();
@@ -994,7 +1076,12 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element2.style.width).to.equal('50vw');
     });
 
+<<<<<<< HEAD
     it('should apply heights condition', () => {
+=======
+    // TODO(dvoytenko, #14336): Fails due to console errors.
+    it.skip('should apply heights condition', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const element1 = new ElementClass();
       element1.sizerElement = doc.createElement('div');
       element1.setAttribute('layout', 'responsive');
@@ -1133,9 +1220,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const element1 = new ElementClass();
       element1.setAttribute('media', '(min-width: 1px)');
       element1.isInTemplate_ = true;
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         element1.applySizesAndMediaQuery();
       }).to.throw(/Must never be called in template/); });
+=======
+      expect(() => {
+        element1.applySizesAndMediaQuery();
+      }).to.throw(/Must never be called in template/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should change size to zero', () => {
@@ -1408,9 +1501,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
           expect(testElementViewportCallback).to.have.not.been.called;
 
           element.isInTemplate_ = true;
+<<<<<<< HEAD
           allowConsoleError(() => { expect(() => {
             element.viewportCallback(true);
           }).to.throw(/Must never be called in template/); });
+=======
+          expect(() => {
+            element.viewportCallback(true);
+          }).to.throw(/Must never be called in template/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
       });
     });
@@ -1428,7 +1527,11 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     StubElementClass = doc.registerElement('amp-stub2', {
       prototype: createAmpElementProtoForTesting(win, 'amp-stub2', ElementStub),
     });
+<<<<<<< HEAD
     env.ampdoc.declareExtension('amp-stub2');
+=======
+    env.ampdoc.declareExtension_('amp-stub2');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     element = new StubElementClass();
   });
 
@@ -1570,9 +1673,15 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
 
   it('togglePlaceholder should NOT call in template', () => {
     element.isInTemplate_ = true;
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       element.togglePlaceholder(false);
     }).to.throw(/Must never be called in template/); });
+=======
+    expect(() => {
+      element.togglePlaceholder(false);
+    }).to.throw(/Must never be called in template/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 
@@ -1586,6 +1695,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
     let resources;
     let element;
     let vsync;
+<<<<<<< HEAD
+=======
+    let vsyncTasks;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     let resourcesMock;
     let container;
 
@@ -1618,6 +1731,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element.setAttribute('layout', 'fixed');
       element.resources_ = resources;
       vsync = Services.vsyncFor(win);
+<<<<<<< HEAD
       sandbox.stub(vsync, 'run').callsFake(task => {
         if (task.measure) {
           task.measure();
@@ -1625,6 +1739,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
         if (task.mutate) {
           task.mutate();
         }
+=======
+      vsyncTasks = [];
+      sandbox.stub(vsync, 'mutate').callsFake(mutator => {
+        vsyncTasks.push(mutator);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
       container = doc.createElement('div');
       doc.body.appendChild(container);
@@ -1692,14 +1811,22 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should ignore loading-off if never created', () => {
       stubInA4A(false);
       element.toggleLoading(false);
+<<<<<<< HEAD
       expect(element.loadingElement_).to.be.null;
+=======
+      expect(vsyncTasks).to.be.empty;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should ignore loading-on if not allowed', () => {
       stubInA4A(false);
       element.setAttribute('noloading', '');
       element.toggleLoading(true);
+<<<<<<< HEAD
       expect(element.loadingElement_).to.be.null;
+=======
+      expect(vsyncTasks).to.be.empty;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should ignore loading-on if already rendered', () => {
@@ -1707,14 +1834,22 @@ describes.realWin('CustomElement', {amp: true}, env => {
       clock.tick(1);
       element.signals().signal('render-start');
       element.toggleLoading(true);
+<<<<<<< HEAD
       expect(element.loadingElement_).to.be.null;
+=======
+      expect(vsyncTasks).to.be.empty;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should ignore loading-on if already loaded', () => {
       stubInA4A(false);
       element.layoutCount_ = 1;
       element.toggleLoading(true);
+<<<<<<< HEAD
       expect(element.loadingElement_).to.be.null;
+=======
+      expect(vsyncTasks).to.be.empty;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should cancel loading on render-start', () => {
@@ -1730,11 +1865,21 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should create and turn on', () => {
       stubInA4A(false);
       element.toggleLoading(true);
+<<<<<<< HEAD
 
+=======
+      expect(vsyncTasks).to.have.length.of(1);
+
+      vsyncTasks.shift()();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(element.loadingContainer_).to.not.be.null;
       expect(element.loadingContainer_).to.not.have.class('amp-hidden');
       expect(element.loadingElement_).to.not.be.null;
       expect(element.loadingElement_).to.have.class('amp-active');
+<<<<<<< HEAD
+=======
+      expect(vsyncTasks).to.have.length.of(0);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should turn on already created', () => {
@@ -1743,29 +1888,57 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const container = element.loadingContainer_;
       const indicator = element.loadingElement_;
       element.toggleLoading(true);
+<<<<<<< HEAD
 
+=======
+      expect(vsyncTasks).to.have.length.of(1);
+
+      vsyncTasks.shift()();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(element.loadingContainer_).to.equal(container);
       expect(element.loadingContainer_).to.not.have.class('amp-hidden');
       expect(element.loadingElement_).to.equal(indicator);
       expect(element.loadingElement_).to.have.class('amp-active');
+<<<<<<< HEAD
+=======
+      expect(vsyncTasks).to.have.length.of(0);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should turn off', () => {
       stubInA4A(false);
       element.prepareLoading_();
       element.toggleLoading(false);
+<<<<<<< HEAD
 
+=======
+      expect(vsyncTasks).to.have.length.of(1);
+
+      vsyncTasks.shift()();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(element.loadingContainer_).to.not.be.null;
       expect(element.loadingContainer_).to.have.class('amp-hidden');
       expect(element.loadingElement_).to.not.be.null;
       expect(element.loadingElement_).to.not.have.class('amp-active');
+<<<<<<< HEAD
+=======
+      expect(vsyncTasks).to.have.length.of(0);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should turn off and cleanup', () => {
       stubInA4A(false);
       element.prepareLoading_();
+<<<<<<< HEAD
       element.toggleLoading(false, {cleanup: true});
 
+=======
+      resourcesMock.expects('mutateElement').once();
+      element.toggleLoading(false, {cleanup: true});
+
+      expect(vsyncTasks).to.have.length.of(1);
+      vsyncTasks.shift()();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(element.loadingContainer_).to.be.null;
       expect(element.loadingElement_).to.be.null;
     });
@@ -1777,6 +1950,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
           .callsFake(() => true);
       element.toggleLoading(false, {cleanup: true});
 
+<<<<<<< HEAD
+=======
+      expect(vsyncTasks).to.have.length.of(1);
+      vsyncTasks.shift()();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(element.loadingContainer_).to.not.be.null;
       expect(element.loadingElement_).to.not.be.null;
     });
@@ -1784,9 +1962,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should ignore loading-off if never created', () => {
       stubInA4A(false);
       element.isInTemplate_ = true;
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         element.toggleLoading(false);
       }).to.throw(/Must never be called in template/); });
+=======
+      expect(() => {
+        element.toggleLoading(false);
+      }).to.throw(/Must never be called in template/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should turn off when exits viewport', () => {
@@ -1840,6 +2024,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const toggle = sandbox.spy(element, 'toggleLoading');
       element.updateLayoutBox({top: 0, width: 300});
       expect(toggle).to.have.not.been.called;
+<<<<<<< HEAD
+=======
+      expect(vsyncTasks).to.have.length.of(1);
+      vsyncTasks.shift()();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(element.loadingContainer_).to.not.be.null;
       expect(element.loadingContainer_).to.have.class('amp-hidden');
     });
@@ -1897,6 +2086,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
     });
 
+<<<<<<< HEAD
     // TODO(jridgewell): fix this test
     it.skip('should ignore loading "on" if layout completed before vsync',
         () => {
@@ -1919,6 +2109,30 @@ describes.realWin('CustomElement', {amp: true}, env => {
             expect(element.loadingContainer_).to.be.null;
           });
         });
+=======
+    it('should ignore loading "on" if layout completed before vsync', () => {
+      stubInA4A(false);
+      resourcesMock.expects('mutateElement').once();
+      container.appendChild(element);
+      element.prepareLoading_();
+      element.toggleLoading(true);
+      return element.build().then(() => {
+        return element.layoutCallback();
+      }).then(() => {
+        expect(vsyncTasks).to.have.length(2);
+
+        // The first mutate started by toggleLoading(true), but it must
+        // immediately proceed to switch it to off.
+        vsyncTasks.shift()();
+        expect(element.loadingContainer_).to.have.class('amp-hidden');
+        expect(element.loadingElement_).to.not.have.class('amp-active');
+
+        // Second vsync should perform cleanup.
+        vsyncTasks.shift()();
+        expect(element.loadingContainer_).to.be.null;
+      });
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 
@@ -1928,6 +2142,10 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   let element;
   let overflowElement;
   let vsync;
+<<<<<<< HEAD
+=======
+  let vsyncTasks;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let resources;
   let resourcesMock;
 
@@ -1954,6 +2172,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     overflowElement.setAttribute('overflow', '');
     element.appendChild(overflowElement);
     vsync = Services.vsyncFor(win);
+<<<<<<< HEAD
     sandbox.stub(vsync, 'run').callsFake(task => {
       if (task.measure) {
         task.measure();
@@ -1961,6 +2180,11 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       if (task.mutate) {
         task.mutate();
       }
+=======
+    vsyncTasks = [];
+    sandbox.stub(vsync, 'mutate').callsFake(mutator => {
+      vsyncTasks.push(mutator);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 
@@ -2023,10 +2247,18 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     expect(overflowElement).to.have.class('amp-visible');
     resourcesMock.expects('changeSize').withExactArgs(element, 117, 113).once();
 
+<<<<<<< HEAD
     expect(overflowElement.onclick).to.exist;
     expect(overflowElement).to.have.class('amp-visible');
 
     overflowElement.onclick();
+=======
+    overflowElement.onclick();
+
+    expect(vsyncTasks).to.have.length(1);
+    vsyncTasks[0]();
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(overflowElement.onclick).to.not.exist;
     expect(overflowElement).to.not.have.class('amp-visible');
   });

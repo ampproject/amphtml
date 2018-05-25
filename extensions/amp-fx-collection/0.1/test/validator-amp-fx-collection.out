@@ -39,6 +39,9 @@ PASS
 |    <div>
 |      <h1 amp-fx="fade-in"></h1>
 |    </div>
+<<<<<<< HEAD
 |    <amp-img amp-fx="fade-in-scroll" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 |  </body>
 |  </html>

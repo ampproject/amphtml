@@ -39,7 +39,11 @@ describes.realWin('Actions', {amp: true}, env => {
     urlBuilder.setAuthResponse({
       'a': 'A',
     });
+<<<<<<< HEAD
     analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+=======
+    analytics = new SubscriptionAnalytics();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     analyticsMock = sandbox.mock(analytics);
     buildSpy = sandbox.spy(Actions.prototype, 'build');
     actions = new Actions(ampdoc, urlBuilder, analytics, {
@@ -175,6 +179,7 @@ describes.realWin('Actions', {amp: true}, env => {
   });
 
   it('should disallow unknown action', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       actions.execute('unknown');
     }).to.throw(/Action URL is not configured/); });
@@ -184,5 +189,16 @@ describes.realWin('Actions', {amp: true}, env => {
     allowConsoleError(() => { expect(() => {
       actions.execute('login');
     }).to.throw(/Action URL is not ready/); });
+=======
+    expect(() => {
+      actions.execute('unknown');
+    }).to.throw(/Action URL is not configured/);
+  });
+
+  it('should fail before build is complete', () => {
+    expect(() => {
+      actions.execute('login');
+    }).to.throw(/Action URL is not ready/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

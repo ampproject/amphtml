@@ -191,6 +191,7 @@ attr_lists: {
     value: ""
   }
 }
+<<<<<<< HEAD
 
 # HTML5, 4.11.3 The template element
 # The template element is also defined at
@@ -257,3 +258,5 @@ tags: {
     value: "amp-mustache"
   }
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

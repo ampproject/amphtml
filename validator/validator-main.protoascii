@@ -26,7 +26,11 @@ min_validator_revision_required: 322
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
+<<<<<<< HEAD
 spec_file_revision: 616
+=======
+spec_file_revision: 600
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -120,7 +124,10 @@ tags: {
 tags: {
   tag_name: "TITLE"
   spec_name: "title"
+<<<<<<< HEAD
   attrs: { name: "[text]" }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 # 4.2.3 the base element
 tags: {
@@ -834,6 +841,7 @@ tags: {
     mandatory: true
   }
 }
+<<<<<<< HEAD
 # AMP metadata, name=amp-cta-type
 # Specifies the Single Page Story Ad call to action enum
 tags: {
@@ -872,6 +880,8 @@ tags: {
     mandatory: true
   }
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 # 4.2.6 The style
@@ -1591,8 +1601,11 @@ tags: {
       allowed_protocol: "threema"
       allowed_protocol: "twitter"
       allowed_protocol: "viber"
+<<<<<<< HEAD
       allowed_protocol: "webcal"
       allowed_protocol: "web+mastodon"  # See GitHub issue #14793
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       allowed_protocol: "whatsapp"
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -3236,10 +3249,14 @@ tags {  # <form method=GET ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
+<<<<<<< HEAD
     value_regex: "(as-you-go|"
                   "interact-and-submit|"
                   "show-all-on-submit|"
                   "show-first-on-submit)"
+=======
+    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go|interact-and-submit)"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3287,10 +3304,14 @@ tags {  # <form method=POST ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
+<<<<<<< HEAD
     value_regex: "(as-you-go|"
                   "interact-and-submit|"
                   "show-all-on-submit|"
                   "show-first-on-submit)"
+=======
+    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go)"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3338,9 +3359,15 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "custom-validation-reporting"
     value_regex: "(as-you-go|"
+<<<<<<< HEAD
                   "interact-and-submit|"
                   "show-all-on-submit|"
                   "show-first-on-submit)"
+=======
+        "interact-and-submit|"
+        "show-all-on-submit|"
+        "show-first-on-submit)"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3382,9 +3409,14 @@ tags {  # <form method=POST ...>
   attrs: {
     name: "custom-validation-reporting"
     value_regex: "(as-you-go|"
+<<<<<<< HEAD
                   "interact-and-submit|"
                   "show-all-on-submit|"
                   "show-first-on-submit)"
+=======
+        "show-all-on-submit|"
+        "show-first-on-submit)"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3466,6 +3498,7 @@ tags {
   }
 }
 attr_lists: {
+<<<<<<< HEAD
   name: "input-common-attr"
   attrs: { name: "accept" }
   attrs: { name: "accesskey" }
@@ -3518,6 +3551,8 @@ attr_lists: {
   attrs: { name: "[width]" }
 }
 attr_lists: {
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   name: "input-name-attr"
   attrs: {
     name: "name"
@@ -3649,6 +3684,32 @@ tags: {
 # 4.10.5 The input element
 tags: {
   tag_name: "INPUT"
+<<<<<<< HEAD
+=======
+  attrs: { name: "accept" }
+  attrs: { name: "accesskey" }
+  attrs: { name: "autocomplete" }
+  attrs: { name: "autofocus" }
+  attrs: { name: "checked" }
+  attrs: { name: "disabled" }
+  attrs: { name: "height" }
+  attrs: { name: "inputmode" }
+  attrs: { name: "list" }
+  attrs: { name: "max" }
+  attrs: { name: "maxlength" }
+  attrs: { name: "min" }
+  attrs: { name: "minlength" }
+  attrs: { name: "multiple" }
+  attrs: { name: "pattern" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "readonly" }
+  attrs: { name: "required" }
+  attrs: { name: "selectiondirection" }
+  attrs: { name: "size" }
+  attrs: { name: "spellcheck" }
+  attrs: { name: "step" }
+  attrs: { name: "tabindex" }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
@@ -3658,6 +3719,7 @@ tags: {
         "password|"
         ")(\\s|$)"
   }
+<<<<<<< HEAD
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
@@ -3675,6 +3737,35 @@ tags: {
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   mandatory_ancestor: "FORM [method=POST]"
+=======
+  attrs: { name: "value" }
+  attrs: { name: "width" }
+  # <amp-bind>
+  attrs: { name: "[accept]" }
+  attrs: { name: "[accesskey]" }
+  attrs: { name: "[autocomplete]" }
+  attrs: { name: "[checked]" }
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[height]" }
+  attrs: { name: "[inputmode]" }
+  attrs: { name: "[max]" }
+  attrs: { name: "[maxlength]" }
+  attrs: { name: "[min]" }
+  attrs: { name: "[minlength]" }
+  attrs: { name: "[multiple]" }
+  attrs: { name: "[pattern]" }
+  attrs: { name: "[placeholder]" }
+  attrs: { name: "[readonly]" }
+  attrs: { name: "[required]" }
+  attrs: { name: "[selectiondirection]" }
+  attrs: { name: "[size]" }
+  attrs: { name: "[spellcheck]" }
+  attrs: { name: "[step]" }
+  attrs: { name: "[type]" }
+  attrs: { name: "[value]" }
+  attrs: { name: "[width]" }
+  attr_lists: "input-name-attr"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.6 The button element
@@ -4064,6 +4155,14 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "TT"
 }
+<<<<<<< HEAD
+=======
+tags: {
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "XMP"
+}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 # Some additional tags, microformats, allowances.
 
@@ -4522,6 +4621,10 @@ attr_lists: {
   attrs: { name: "placeholder" value: "" }
   # We allow the empty fallback attribute on any element
   attrs: { name: "fallback" value: "" }
+<<<<<<< HEAD
+=======
+  attrs: { name: "lightbox" }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   attrs: { name: "overflow" }
   # amp-access specific attributes, see
   # https://www.ampproject.org/docs/reference/components/amp-access
@@ -4565,7 +4668,11 @@ attr_lists: {
   # https://www.ampproject.org/docs/reference/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
+<<<<<<< HEAD
     value_regex_casei: "(fade-in|fade-in-scroll|parallax)"
+=======
+    value_regex_casei: "(fade-in|parallax)"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
@@ -4597,10 +4704,13 @@ attr_lists: {
     name: "subscriptions-service"
     requires_extension: "amp-subscriptions"
   }
+<<<<<<< HEAD
   attrs: {
     name: "subscriptions-decorate"
     requires_extension: "amp-subscriptions"
   }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
   attrs: { name: "[aria-atomic]" }

@@ -19,9 +19,18 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
   type="holder"
   data-block="1847">
+=======
+<amp-ad 
+  width="300"
+  height="250"
+  type="holder"
+  data-block="1847"
+>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
@@ -31,4 +40,8 @@ For configuration details and to generate your tags, please contact techinfo@hol
 
 Supported parameters:
 
+<<<<<<< HEAD
 - `data-block`
+=======
+- data-block
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

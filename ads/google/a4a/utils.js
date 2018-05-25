@@ -29,7 +29,10 @@ import {
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
 import {parseUrl} from '../../../src/url';
+<<<<<<< HEAD
 import {whenUpgradedToCustomElement} from '../../../src/dom';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -195,6 +198,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {
+<<<<<<< HEAD
   // Look for amp-ad elements of correct type or those contained within
   // standard container type.  Note that display none containers will not be
   // included as they will never be measured.
@@ -231,6 +235,19 @@ export function groupAmpAdsByType(win, type, groupFn) {
         (result[groupId] || (result[groupId] = [])).push(element.getImpl());
         return result;
       }, {}));
+=======
+  return Services.resourcesForDoc(win.document).getMeasuredResources(win,
+      r => r.element.tagName == 'AMP-AD' &&
+        r.element.getAttribute('type') == type)
+      .then(resources => {
+        const result = {};
+        resources.forEach(r => {
+          const groupId = groupFn(r.element);
+          (result[groupId] || (result[groupId] = [])).push(r.element.getImpl());
+        });
+        return result;
+      });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**
@@ -279,9 +296,14 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'vis': visibilityStateCodes[visibilityState] || '0',
           'scr_x': viewport.getScrollLeft(),
           'scr_y': viewport.getScrollTop(),
+<<<<<<< HEAD
           'bc': getBrowserCapabilitiesBitmap(win) || null,
           'debug_experiment_id':
               (/(?:#|,)deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
+=======
+          'debug_experiment_id':
+              (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
@@ -854,6 +876,7 @@ export function setNameframeExperimentConfigs(headers, nameframeConfig) {
     });
   }
 }
+<<<<<<< HEAD
 
 /**
  * Enum for browser capabilities. NOTE: Since JS is 32-bit, do not add anymore
@@ -890,3 +913,5 @@ function getBrowserCapabilitiesBitmap(win) {
   }
   return browserCapabilities;
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

@@ -79,7 +79,12 @@ describes.fakeWin('AccessSource', {
     });
   });
 
+<<<<<<< HEAD
   it('should parse type', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  it.skip('should parse type', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     let config = {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',

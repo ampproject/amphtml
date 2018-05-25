@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
  /** Version: 0.1.22.11 */
+=======
+ /** Version: 0.1.22.3 */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 'use strict';
 
 
@@ -349,7 +353,11 @@ function tryParseJson(json, opt_onFailed) {
 
 
 
+<<<<<<< HEAD
 const ALREADY_SEEN = '__SWG-SEEN__';
+=======
+const ALREADY_SEEN = '__SUBSCRIPTIONS-SEEN__';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 /**

@@ -19,14 +19,20 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="300"
   type="sklik"
+=======
+<amp-ad width=300 height=300
+	type="sklik"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 	json= '{ "zoneId": 0, "w": 300, "h": 300 }'>
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For semantics of configuration, please see [Sklik.czdocumentation](https://napoveda.sklik.cz/partner/reklamni-kod/).
 
 Supported parameters:
@@ -34,4 +40,13 @@ Supported parameters:
 - `width`
 - `height`
 - `json`
+=======
+For semantics of configuration, please see [ad network documentation](https://napoveda.sklik.cz/partner/reklamni-kod/).
+
+Supported parameters:
+
+- width
+- height
+- json
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 

@@ -182,6 +182,7 @@
           "Policy_DEF": {
             "waitFor": {
               "DEF": []
+<<<<<<< HEAD
             },
             "timeout": {
               "seconds": 5,
@@ -190,6 +191,11 @@
           }
         },
         "postPromptUI": "postPromptUI"
+=======
+            }
+          }
+        }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }</script>
       <div id="ui1">
         Please Accept to load image.
@@ -197,10 +203,13 @@
         <button on="tap:ABC.reject" role="button">Reject</button>
         <button on="tap:ABC.dismiss" role="button">Dismiss</button>
       </div>
+<<<<<<< HEAD
       <div id="postPromptUI">
         Post Prompt UI
         <button on="tap:ABC.prompt(consent=ABC)" role="button">Manage</button>
       </div>
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     </amp-consent>
     <article>
 
@@ -217,6 +226,7 @@
 
         <div>
         Revoke consent ABC and DEF
+<<<<<<< HEAD
         <button class="button" on="tap:ABC.prompt(consent=ABC),ABC.prompt(consent=DEF)" role="button">Manage</button>
       </div>
        <div>
@@ -226,6 +236,17 @@
       <div>
         Only revoke DEF
         <button class="button" on="tap:ABC.prompt(consent=DEF)" role="button">Manage</button>
+=======
+        <button class="button" on="tap:ABC.prompt(consentId=ABC),ABC.prompt(consentId=DEF)" role="button">Manage</button>
+      </div>
+       <div>
+        Revoke error consent doesn't exsit
+        <button class="button" on="tap:ABC.prompt(consentId=ABCd)" role="button">Manage</button>
+      </div>
+      <div>
+        Only revoke DEF
+        <button class="button" on="tap:ABC.prompt(consentId=DEF)" role="button">Manage</button>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       </div>
 
         <div class="author">

@@ -32,4 +32,8 @@ For semantics of configuration, please contact [Videonow](http://videonow.ru/htm
 
 Supported parameters:
 
+<<<<<<< HEAD
 - `data-pid`
+=======
+- data-pid
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

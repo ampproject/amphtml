@@ -19,9 +19,15 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
   type="ligatus"
   src="https://a-ssl.ligatus.com/?ids=88443&t=js&s=1&bc=2">
+=======
+<amp-ad width=300 height=250
+    type="ligatus"
+    src="https://a-ssl.ligatus.com/?ids=88443&t=js&s=1&bc=2">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
@@ -31,4 +37,8 @@ For further configuration details, please contact mobile@ligatus.com
 
 Supported parameters:
 
+<<<<<<< HEAD
 - `src`
+=======
+- `src`
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

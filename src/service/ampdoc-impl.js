@@ -29,6 +29,69 @@ const AMPDOC_PROP = '__AMPDOC';
 
 
 /**
+<<<<<<< HEAD
+=======
+ * Adds a declared extension to an ampdoc.
+ * @param {!AmpDoc} ampdoc
+ * @param {string} extensionId
+ * @restricted
+ */
+export function declareExtension(ampdoc, extensionId) {
+  ampdoc.declareExtension_(extensionId);
+}
+
+
+/**
+ * Creates and installs the ampdoc for the shadow root.
+ * @param {!AmpDocService} ampdocService
+ * @param {string} url
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!AmpDocShadow}
+ * @restricted
+ */
+export function installShadowDoc(ampdocService, url, shadowRoot) {
+  return ampdocService.installShadowDoc_(url, shadowRoot);
+}
+
+/**
+ * Creates and installs an ampdoc for the shell in shadow-doc mode.
+ * `AmpDocShell` is a subclass of `AmpDocShadow` that is installed for
+ * `window.document` and allows to use AMP components as part of the shell,
+ * outside shadow roots
+ *
+ * Currently guarded by 'ampdoc-shell' experiment
+ *
+ * @param {!AmpDocService} ampdocService
+ * @returns {!AmpDocShell}
+ */
+export function installShadowDocForShell(ampdocService) {
+  return ampdocService.installShellShadowDoc_();
+}
+
+
+/**
+ * Signals that the shadow doc is ready.
+ * @param {!AmpDocShadow} ampdoc
+ * @restricted
+ */
+export function shadowDocReady(ampdoc) {
+  ampdoc.setReady_();
+}
+
+
+/**
+ * Signals that the shadow doc has a body.
+ * @param {!AmpDocShadow} ampdoc
+ * @param {!Element} body
+ * @restricted
+ */
+export function shadowDocHasBody(ampdoc, body) {
+  ampdoc.setBody_(body);
+}
+
+
+/**
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * This service helps locate an ampdoc (`AmpDoc` instance) for any node,
  * either in the single-doc or shadow-doc environments.
  *
@@ -151,9 +214,15 @@ export class AmpDocService {
    * @param {string} url
    * @param {!ShadowRoot} shadowRoot
    * @return {!AmpDocShadow}
+<<<<<<< HEAD
    * @restricted
    */
   installShadowDoc(url, shadowRoot) {
+=======
+   * @private
+   */
+  installShadowDoc_(url, shadowRoot) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     dev().assert(!shadowRoot[AMPDOC_PROP],
         'The shadow root already contains ampdoc');
     const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
@@ -162,6 +231,7 @@ export class AmpDocService {
   }
 
   /**
+<<<<<<< HEAD
    * Creates and installs an ampdoc for the shell in shadow-doc mode.
    * `AmpDocShell` is a subclass of `AmpDocShadow` that is installed for
    * `window.document` and allows to use AMP components as part of the shell,
@@ -173,14 +243,26 @@ export class AmpDocService {
    * @restricted
    */
   installShellShadowDoc() {
+=======
+   * Creates and installs an ampdoc for the shell in shadow-doc mode
+   * @return {!AmpDocShell}
+   * @private
+   */
+  installShellShadowDoc_() {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     dev().assert(this.singleDoc_ === null,
         'AmpDocShell cannot be installed in single-doc mode');
     this.shellShadowDoc_ = new AmpDocShell(this.win);
     this.win.document[AMPDOC_PROP] = this.shellShadowDoc_;
 
     whenDocumentReady(this.win.document).then(document => {
+<<<<<<< HEAD
       this.shellShadowDoc_.setBody(dev().assertElement(document.body));
       this.shellShadowDoc_.setReady();
+=======
+      this.shellShadowDoc_.setBody_(dev().assertElement(document.body));
+      this.shellShadowDoc_.setReady_();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     return this.shellShadowDoc_;
@@ -243,11 +325,19 @@ export class AmpDoc {
   }
 
   /**
+<<<<<<< HEAD
    * Adds a declared extension to an ampdoc.
    * @param {string} extensionId
    * @restricted
    */
   declareExtension(extensionId) {
+=======
+   * @param {string} extensionId
+   * @private
+   * @restricted
+   */
+  declareExtension_(extensionId) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     if (!this.declaresExtension(extensionId)) {
       this.declaredExtensions_.push(extensionId);
     }
@@ -491,11 +581,18 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /**
+<<<<<<< HEAD
    * Signals that the shadow doc has a body.
    * @param {!Element} body
    * @restricted
    */
   setBody(body) {
+=======
+   * @param {!Element} body
+   * @private
+   */
+  setBody_(body) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     dev().assert(!this.body_, 'Duplicate body');
     this.body_ = body;
     this.bodyResolver_(body);
@@ -512,11 +609,16 @@ export class AmpDocShadow extends AmpDoc {
     return this.ready_;
   }
 
+<<<<<<< HEAD
   /**
    * Signals that the shadow doc is ready.
    * @restricted
    */
   setReady() {
+=======
+  /** @private */
+  setReady_() {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     dev().assert(!this.ready_, 'Duplicate ready state');
     this.ready_ = true;
     this.readyResolver_();

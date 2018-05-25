@@ -619,11 +619,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+<<<<<<< HEAD
   mytarget: {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
   },
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
@@ -678,12 +681,15 @@ export const adConfig = {
     ],
   },
 
+<<<<<<< HEAD
   pixels: {
     prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
     clientIdCookieName: '__AF',
     renderStartImplemented: true,
   },
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   plista: {},
 
   polymorphicads: {
@@ -703,10 +709,13 @@ export const adConfig = {
 
   pubexchange: {},
 
+<<<<<<< HEAD
   pubguru: {
     renderStartImplemented: true,
   },
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },

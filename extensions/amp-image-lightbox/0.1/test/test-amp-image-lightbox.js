@@ -204,6 +204,7 @@ describes.realWin('amp-image-lightbox component', {
   it('should return focus to source element after close', () => {
     return getImageLightbox().then(lightbox => {
       const impl = lightbox.implementation_;
+<<<<<<< HEAD
       impl.enter_ = () => {};
       impl.getHistory_ = () => {
         return {
@@ -212,6 +213,10 @@ describes.realWin('amp-image-lightbox component', {
         };
       };
 
+=======
+
+      impl.enter_ = () => {};
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const tryFocus = sandbox.spy(dom, 'tryFocus');
 
       const sourceElement = doc.createElement('amp-img');
@@ -284,7 +289,10 @@ describes.realWin('amp-image-lightbox image viewer', {
         }
         return undefined;
       },
+<<<<<<< HEAD
       hasAttribute: () => undefined,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     };
 
     imageViewer.init(sourceElement, null);
@@ -304,7 +312,10 @@ describes.realWin('amp-image-lightbox image viewer', {
         }
         return undefined;
       },
+<<<<<<< HEAD
       hasAttribute: () => undefined,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     };
     const sourceImage = {
       complete: false,
@@ -326,7 +337,10 @@ describes.realWin('amp-image-lightbox image viewer', {
         }
         return undefined;
       },
+<<<<<<< HEAD
       hasAttribute: () => undefined,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     };
     const sourceImage = {
       complete: true,

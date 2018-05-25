@@ -17,7 +17,10 @@
 import {ACTION_TYPE, AMP_CONSENT_EXPERIMENT, AmpConsent} from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
+<<<<<<< HEAD
 import {computedStyle} from '../../../../src/style';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {macroTask} from '../../../../testing/yield';
 
 import {
@@ -37,7 +40,10 @@ describes.realWin('amp-consent', {
   let jsonMockResponses;
   let storageValue;
   let requestBody;
+<<<<<<< HEAD
   let ISOCountryGroups;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   beforeEach(() => {
     doc = env.win.document;
@@ -47,9 +53,13 @@ describes.realWin('amp-consent', {
 
     storageValue = {};
     jsonMockResponses = {
+<<<<<<< HEAD
       'response1': '{"promptIfUnknown": true}',
       'response2': '{}',
       'response3': '{"promptIfUnknown": false}',
+=======
+      'response1': '{"consentRequired": true, "prompt": true}',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     };
 
     resetServiceForTesting(win, 'xhr');
@@ -66,6 +76,7 @@ describes.realWin('amp-consent', {
       }};
     });
 
+<<<<<<< HEAD
     resetServiceForTesting(win, 'geo');
     registerServiceBuilder(win, 'geo', function() {
       return Promise.resolve({
@@ -73,6 +84,8 @@ describes.realWin('amp-consent', {
       });
     });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     resetServiceForTesting(win, 'storage');
     registerServiceBuilder(win, 'storage', function() {
       return Promise.resolve({
@@ -126,6 +139,7 @@ describes.realWin('amp-consent', {
         scriptElement.textContent = JSON.stringify(defaultConfig);
         consentElement.appendChild(scriptElement);
         scriptElement.setAttribute('type', '');
+<<<<<<< HEAD
         allowConsoleError(() => {
           expect(() => ampConsent.assertAndParseConfig_()).to.throw();
         });
@@ -134,21 +148,35 @@ describes.realWin('amp-consent', {
         allowConsoleError(() => {
           expect(() => ampConsent.assertAndParseConfig_()).to.throw();
         });
+=======
+        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        doc.body.appendChild(consentElement);
+        const ampConsent = new AmpConsent(consentElement);
+        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
         // Check consent config exists
         scriptElement.setAttribute('type', 'application/json');
         scriptElement.textContent = JSON.stringify({});
+<<<<<<< HEAD
         allowConsoleError(() => {
           expect(() => ampConsent.assertAndParseConfig_()).to.throw();
         });
+=======
+        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
         // Check there is only one script object
         scriptElement.textContent = JSON.stringify(defaultConfig);
         const script2 = doc.createElement('script');
         consentElement.appendChild(script2);
+<<<<<<< HEAD
         allowConsoleError(() => {
           expect(() => ampConsent.assertAndParseConfig_()).to.throw();
         });
+=======
+        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
   });
@@ -184,15 +212,25 @@ describes.realWin('amp-consent', {
     });
 
     it('parse server response', function* () {
+<<<<<<< HEAD
       const parseSpy = sandbox.spy(ampConsent, 'isPromptRequired_');
       ampConsent.buildCallback();
       yield macroTask();
       expect(parseSpy).to.be.calledWith('ABC', {
         'promptIfUnknown': true,
+=======
+      const parseSpy = sandbox.spy(ampConsent, 'parseConsentResponse_');
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(parseSpy).to.be.calledWith('ABC', {
+        'consentRequired': true,
+        'prompt': true,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
   });
 
+<<<<<<< HEAD
   describe('amp-geo integration', () => {
     let defaultConfig;
     let ampConsent;
@@ -293,6 +331,11 @@ describes.realWin('amp-consent', {
     let ampConsent;
     let scriptElement;
     let consentElement;
+=======
+  describe('policy config', () => {
+    let defaultConfig;
+    let ampConsent;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     beforeEach(() => {
       defaultConfig = {
         'consents': {
@@ -304,10 +347,17 @@ describes.realWin('amp-consent', {
           },
         },
       };
+<<<<<<< HEAD
       consentElement = doc.createElement('amp-consent');
       consentElement.setAttribute('id', 'amp-consent');
       consentElement.setAttribute('layout', 'nodisplay');
       scriptElement = doc.createElement('script');
+=======
+      const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('id', 'amp-consent');
+      consentElement.setAttribute('layout', 'nodisplay');
+      const scriptElement = doc.createElement('script');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       scriptElement.setAttribute('type', 'application/json');
       scriptElement.textContent = JSON.stringify(defaultConfig);
       consentElement.appendChild(scriptElement);
@@ -327,6 +377,7 @@ describes.realWin('amp-consent', {
         },
       });
     });
+<<<<<<< HEAD
 
     it('override default policy', function* () {
       defaultConfig = {
@@ -358,6 +409,8 @@ describes.realWin('amp-consent', {
         },
       });
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   describe('UI', () => {
@@ -365,7 +418,10 @@ describes.realWin('amp-consent', {
     let defaultConfig;
     let ampConsent;
     let updateConsentInstanceStateSpy;
+<<<<<<< HEAD
     let consentElement;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     beforeEach(() => {
       defaultConfig = {
         'consents': {
@@ -382,9 +438,14 @@ describes.realWin('amp-consent', {
             'promptUI': '123',
           },
         },
+<<<<<<< HEAD
         'postPromptUI': 'test',
       };
       consentElement = doc.createElement('amp-consent');
+=======
+      };
+      const consentElement = doc.createElement('amp-consent');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       consentElement.setAttribute('id', 'amp-consent');
       consentElement.setAttribute('layout', 'nodisplay');
       const scriptElement = doc.createElement('script');
@@ -396,9 +457,12 @@ describes.realWin('amp-consent', {
       consentElement.appendChild(scriptElement);
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
+<<<<<<< HEAD
       sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
         fn();
       });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('update current displaying consent', function* () {
@@ -407,9 +471,12 @@ describes.realWin('amp-consent', {
       updateConsentInstanceStateSpy =
           sandbox.spy(ampConsent.consentStateManager_,
               'updateConsentInstanceState');
+<<<<<<< HEAD
       yield macroTask();
       yield macroTask();
       yield macroTask();
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
       expect(updateConsentInstanceStateSpy).to.be.calledWith(
           'ABC', CONSENT_ITEM_STATE.GRANTED);
@@ -435,10 +502,15 @@ describes.realWin('amp-consent', {
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.DISMISS);
       yield macroTask();
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
             /No consent is displaying/);
       });
+=======
+      expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
+          /No consent is displaying/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     describe('schedule display', () => {
@@ -457,6 +529,7 @@ describes.realWin('amp-consent', {
         expect(ampConsent.notificationUiManager_.queueSize_).to.equal(3);
       });
     });
+<<<<<<< HEAD
 
     describe('postPromptUI', () => {
       let postPromptUI;
@@ -492,5 +565,7 @@ describes.realWin('amp-consent', {
             ['display']).to.equal('none');
       });
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

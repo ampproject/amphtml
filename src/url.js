@@ -55,9 +55,12 @@ let cache;
 /** @private @const Matches amp_js_* parameters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
+<<<<<<< HEAD
 /** @private @const Matches amp_gsa parameters in query string. */
 const AMP_GSA_PARAMS_REGEX = /[?&]amp_gsa[^&]*/;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /** @private @const Matches usqp parameters from goog experiment in query string. */
 const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
 
@@ -390,7 +393,10 @@ function removeAmpJsParams(urlSearch) {
   }
   const search = urlSearch
       .replace(AMP_JS_PARAMS_REGEX, '')
+<<<<<<< HEAD
       .replace(AMP_GSA_PARAMS_REGEX, '')
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
       .replace(/^[?&]/, ''); // Removes first ? or &.
   return search ? '?' + search : '';

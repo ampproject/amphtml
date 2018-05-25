@@ -14,24 +14,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<<<<<<< HEAD
 # Chargeads
+=======
+# Chargeads ⚡
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ### Basic
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="100" height="283"
     type="chargeads"
     layout="responsive"
     src="https://www.chargeplatform.com/ads/?id={id}">
 </amp-ad>
+=======
+  <amp-ad width=100 height=283
+          type="chargeads"
+          layout="responsive"
+          src="https://www.chargeplatform.com/ads/?id={id}">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, please [contact Chargeads](http://chargeads.com).
 
 Supported parameters:
 
 - `src`
+=======
+For semantics of configuration, please [contact Chargeads](http://chargeads.com).
+
+Supported parameters:
+
+- src
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

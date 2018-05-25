@@ -142,7 +142,10 @@ const TagRegion = {
   IN_HEAD: 1,
   PRE_BODY: 2,  // After closing head tag, but before open body tag.
   IN_BODY: 3,
+<<<<<<< HEAD
   IN_SVG: 4,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   // We don't track the region after the closing body tag.
 };
 
@@ -279,10 +282,13 @@ class TagNameStack {
           // a manufactured one, or the first one encountered.
           return;
         }
+<<<<<<< HEAD
         if (tag.upperName() === 'SVG') {
           this.region_ = TagRegion.IN_SVG;
           break;
         }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         // Check implicit tag closing due to opening tags.
         if (this.stack_.length > 0) {
           const parentTagName = this.stack_[this.stack_.length - 1];
@@ -304,12 +310,15 @@ class TagNameStack {
           }
         }
         break;
+<<<<<<< HEAD
       case TagRegion.IN_SVG:
         if (this.handler_.startTag) {
           this.handler_.startTag(tag);
         }
         this.stack_.push(tag.upperName());
         return;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       default:
         break;
     }
@@ -378,9 +387,12 @@ class TagNameStack {
     for (let idx = this.stack_.length - 1; idx >= 0; idx--) {
       if (this.stack_[idx] === tag.upperName()) {
         while (this.stack_.length > idx) {
+<<<<<<< HEAD
           if (this.stack_[this.stack_.length - 1] === 'SVG') {
             this.region_ = TagRegion.IN_BODY;
           }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           if (this.handler_.endTag) {
             this.handler_.endTag(
                 new amp.htmlparser.ParsedHtmlTag(this.stack_.pop()));

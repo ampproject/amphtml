@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
+=======
+import {ActionTrust} from './action-trust'; // eslint-disable-line no-unused-vars
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
@@ -115,6 +120,7 @@ export class VideoInterface {
 
   /**
    * If this returns true then it will be assumed that the player implements
+<<<<<<< HEAD
    * a feature to enter fullscreen on device rotation internally, so that the
    * video manager does not override it. If not, the video manager will
    * implement this feature automatically for videos with the attribute
@@ -133,6 +139,30 @@ export class VideoInterface {
    * @return {boolean}
    */
   preimplementsMediaSessionAPI() {}
+=======
+   * the MediaSession API internally so that the video manager does not override
+   * it. If not, the video manager will use the metadata variable as well as
+   * inferred meta-data to update the video's Media Session notification.
+   *
+   * @return {boolean}
+   */
+  preimplementsMediaSessionAPI() {}
+
+
+  /**
+   * Automatically comes from {@link ./base-element.BaseElement}
+   *
+   * @return {!AmpElement}
+   */
+  get element() {}
+
+  /**
+   * Automatically comes from {@link ./base-element.BaseElement}
+   *
+   * @return {boolean}
+   */
+  isInViewport() {}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   /**
    * Enables fullscreen on the internal video element
@@ -155,6 +185,19 @@ export class VideoInterface {
    * @return {boolean}
    */
   isFullscreen() {}
+<<<<<<< HEAD
+=======
+
+  /**
+   * Automatically comes from {@link ./base-element.BaseElement}
+   *
+   * @param {string} unusedMethod
+   * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
+   * @param {ActionTrust} unusedMinTrust
+   * @public
+   */
+  registerAction(unusedMethod, unusedHandler, unusedMinTrust) {}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 
@@ -196,7 +239,11 @@ export const VideoAttributes = {
    */
   DOCK: 'dock',
   /**
+<<<<<<< HEAD
    * rotate-to-fullscreen
+=======
+   * fullscreen-on-landscape
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    *
    * If enabled, this automatically expands the currently visible video and
    * playing to fullscreen when the user changes the device's orientation to
@@ -207,7 +254,11 @@ export const VideoAttributes = {
    * http://caniuse.com/#feat=screen-orientation
    * and http://caniuse.com/#feat=fullscreen
    */
+<<<<<<< HEAD
   ROTATE_TO_FULLSCREEN: 'rotate-to-fullscreen',
+=======
+  FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 };
 
 
@@ -446,6 +497,7 @@ export const VideoAnalyticsEvents = {
  * }}
  */
 export let VideoAnalyticsDetailsDef;
+<<<<<<< HEAD
 
 
 /**
@@ -457,3 +509,5 @@ export let VideoAnalyticsDetailsDef;
 export function asBaseElement(video) {
   return /** @type {!./base-element.BaseElement} */ (video);
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

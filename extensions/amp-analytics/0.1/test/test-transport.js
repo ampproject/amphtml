@@ -111,6 +111,7 @@ describe('amp-analytics.transport', () => {
   });
 
   it('asserts that urls are https', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       sendRequest(window, 'http://example.com/test');
     }).to.throw(/https/); });
@@ -120,6 +121,17 @@ describe('amp-analytics.transport', () => {
     allowConsoleError(() => { expect(() => {
       sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
     }).to.throw(/Source origin is not allowed in/); });
+=======
+    expect(() => {
+      sendRequest(window, 'http://example.com/test');
+    }).to.throw(/https/);
+  });
+
+  it('should NOT allow __amp_source_origin', () => {
+    expect(() => {
+      sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
+    }).to.throw(/Source origin is not allowed in/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   describe('sendRequestUsingIframe', () => {
@@ -140,6 +152,7 @@ describe('amp-analytics.transport', () => {
     });
 
     it('iframe asserts that urls are https', () => {
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         sendRequestUsingIframe(window, 'http://example.com/test');
       }).to.throw(/https/); });
@@ -154,3 +167,20 @@ describe('amp-analytics.transport', () => {
     });
   });
 });
+=======
+      expect(() => {
+        sendRequestUsingIframe(window, 'http://example.com/test');
+      }).to.throw(/https/);
+    });
+
+    it('forbids same origin', () => {
+      expect(() => {
+        sendRequestUsingIframe(window, 'http://localhost:9876/');
+      }).to.throw(
+          /Origin of iframe request must not be equal to the document origin./
+      );
+    });
+  });
+});
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

@@ -32,15 +32,23 @@ const TAG = 'amp-fx-collection';
 const FxType = {
   PARALLAX: 'parallax',
   FADE_IN: 'fade-in',
+<<<<<<< HEAD
   FADE_IN_SCROLL: 'fade-in-scroll',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 };
 
 /**
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
  * the specified effects on them.
+<<<<<<< HEAD
  * @visibleForTesting
  */
 export class AmpFxCollection {
+=======
+ */
+class AmpFxCollection {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc

@@ -16,7 +16,11 @@ limitations under the License.
 
 # iBILLBOARD AdServer
 
+<<<<<<< HEAD
 Please visit the [ibillboard website](http://www.ibillboard.com) for more information.
+=======
+Please visit [our website](https://www.ibillboard.com/) for more information.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
@@ -29,6 +33,7 @@ Please visit the [ibillboard website](http://www.ibillboard.com) for more inform
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 
 ## Configuration
 
@@ -37,3 +42,11 @@ For details on the configuration semantics, visit the [ibillboard website](http:
 ### Supported parameters
 
 - `src`: Must use **https** protocol and must be from one of the allowed iBillboard hosts.
+=======
+### Supported parameters
+
+- `src`
+
+The `src` parameter must use **https** protocol and must be from one of the
+allowed iBillboard hosts.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

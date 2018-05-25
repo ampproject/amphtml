@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   type="purch"
   data-pid="2882"
   data-divid="rightcol_top">
@@ -28,9 +32,16 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
 
 - `data-pid`: placement id
 - `data-divid`: div id of unit
+=======
+Supported parameters:
+
+- `data-pid` placement id
+- `data-divid` div id of unit
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

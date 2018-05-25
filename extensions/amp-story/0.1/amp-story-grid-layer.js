@@ -28,7 +28,10 @@
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+<<<<<<< HEAD
 import {setStyle} from '../../../src/style';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -64,9 +67,15 @@ const TEMPLATE_ATTRIBUTE_NAME = 'template';
 
 /**
  * A mapping of template attribute values to CSS class names.
+<<<<<<< HEAD
  * @const {!Object<string, string>}
  */
 export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
+=======
+ * @private @const {!Object<string, string>}
+ */
+const TEMPLATE_CLASS_NAMES = {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   'fill': 'i-amphtml-story-grid-template-fill',
   'vertical': 'i-amphtml-story-grid-template-vertical',
   'horizontal': 'i-amphtml-story-grid-template-horizontal',
@@ -109,7 +118,11 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   applyTemplateClassName_() {
     if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
       const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
+<<<<<<< HEAD
       const templateClassName = GRID_LAYER_TEMPLATE_CLASS_NAMES[templateName];
+=======
+      const templateClassName = TEMPLATE_CLASS_NAMES[templateName];
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       this.element.classList.add(templateClassName);
     }
   }
@@ -129,6 +142,10 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     });
   }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * Copies the whitelisted CSS grid styles for the <amp-story-grid-layer>
    * element itself.
@@ -152,9 +169,18 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       const attributeName = attribute.name.toLowerCase();
       const propertyName = SUPPORTED_CSS_GRID_ATTRIBUTES[attributeName];
       if (propertyName) {
+<<<<<<< HEAD
         setStyle(element, propertyName, attribute.value);
+=======
+        element.style[propertyName] = attribute.value;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         element.removeAttribute(attributeName);
       }
     }
   }
 }
+<<<<<<< HEAD
+=======
+
+AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

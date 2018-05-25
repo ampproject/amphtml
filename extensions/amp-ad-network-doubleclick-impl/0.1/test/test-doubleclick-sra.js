@@ -17,7 +17,10 @@ import '../../../amp-ad/0.1/amp-ad';
 import * as sinon from 'sinon';
 import {
   AmpA4A,
+<<<<<<< HEAD
   EXPERIMENT_FEATURE_HEADER_NAME,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
@@ -36,7 +39,10 @@ import {FetchResponseHeaders, Xhr} from '../../../../src/service/xhr-impl';
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
+<<<<<<< HEAD
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dev} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
@@ -142,7 +148,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         const element1 =
           createElementWithAttributes(doc, 'amp-ad', config1);
         const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
+<<<<<<< HEAD
         sandbox.stub(impl1, 'getPageLayoutBox').returns({top: 123, left: 456});
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
         sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320')
             .returns('13579');
@@ -163,13 +172,19 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           width: 250,
           'data-slot': '/1234/def/xyz',
           'json': JSON.stringify(targeting2),
+<<<<<<< HEAD
           'data-multi-size-validation': 'false',
           'data-multi-size': '1x2,3x4',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         };
         const element2 =
           createElementWithAttributes(doc, 'amp-ad', config2);
         const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
+<<<<<<< HEAD
         sandbox.stub(impl2, 'getPageLayoutBox').returns({top: 789, left: 101});
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         sandbox.stub(impl2, 'generateAdKey_').withArgs('250x300')
             .returns('2468');
         element2.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
@@ -178,13 +193,20 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           'iu_parts': '1234,abc,def,xyz',
           'enc_prev_ius': '0/1/2,0/2/3',
           adks: '13579,2468',
+<<<<<<< HEAD
           'prev_iu_szs': '50x320,250x300|1x2|3x4',
+=======
+          'prev_iu_szs': '50x320,250x300',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           'prev_scp':
             'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
           co: '1',
           adtest: 'on',
+<<<<<<< HEAD
           adxs: '456,101',
           adys: '123,789',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           tfcd: 'some_tfcd',
           eid: MANUAL_EXPERIMENT_ID,
           output: 'ldjh',
@@ -270,10 +292,15 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     function generateNonSraXhrMockCall(impl, creative) {
       // Start with nameframe method, SRA will override to use safeframe.
+<<<<<<< HEAD
       const headers = {
         [RENDERING_TYPE_HEADER]: XORIGIN_MODE.NAMEFRAME,
         [EXPERIMENT_FEATURE_HEADER_NAME]: 'foo=bar',
       };
+=======
+      const headers = {};
+      headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.NAMEFRAME;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const iu = encodeURIComponent(impl.element.getAttribute('data-slot'));
       const urlRegexp = new RegExp(
           '^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
@@ -308,9 +335,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
      * @param {!Array<number|{{
      *    networkId:number,
      *    instances:number,
+<<<<<<< HEAD
      *    xhrFail:(boolean|undefined),
      *    invalidInstances:number,
      *    nestHeaders:(boolean|undefined)}}>} items
+=======
+     *    xhrFail:boolean|undefined,
+     *    invalidInstances:number}}>} items
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
      */
     function executeTest(items) {
       // Store if XHR will fail by networkId.
@@ -318,7 +350,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       // Store if all elements for a given network are invalid.
       const networkValidity = {};
       const doubleclickInstances = [];
+<<<<<<< HEAD
       const networkNestHeaders = [];
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const attemptCollapseSpy =
         sandbox.spy(BaseElement.prototype, 'attemptCollapse');
       let expectedAttemptCollapseCalls = 0;
@@ -342,7 +377,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         networkValidity[network.networkId] =
           network.invalidInstances && !network.instances;
         networkXhrFailure[network.networkId] = !!network.xhrFail;
+<<<<<<< HEAD
         networkNestHeaders[network.networkId] = network.nestHeaders;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         expectedAttemptCollapseCalls += network.xhrFail ? network.instances : 0;
       });
       const grouping = {};
@@ -366,7 +404,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             expect(impl.iframe).to.not.be.ok;
             return;
           }
+<<<<<<< HEAD
           expect(impl.postAdResponseExperimentFeatures['foo']).to.equal('bar');
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           expect(impl.iframe).to.be.ok;
           const name = impl.iframe.getAttribute('name');
           if (isSra) {
@@ -387,6 +428,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         validInstances.forEach(impl => {
           const creative = `slot${idx++}`;
           if (isSra) {
+<<<<<<< HEAD
             let headers = {
               slot: idx,
               [EXPERIMENT_FEATURE_HEADER_NAME]: 'foo=bar',
@@ -395,6 +437,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
               headers = {'nested': headers};
             }
             sraResponses.push({creative, headers});
+=======
+            sraResponses.push({creative, headers: {slot: idx}});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           } else {
             generateNonSraXhrMockCall(impl, creative);
           }
@@ -414,10 +459,25 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     beforeEach(() => {
       xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
+<<<<<<< HEAD
       sandbox.stub(AmpA4A.prototype,
           'getSigningServiceNames').returns(['google']);
       sandbox.stub(SignatureVerifier.prototype, 'loadKeyset')
           .callsFake(() => {});
+=======
+      const xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
+      sandbox.stub(AmpA4A.prototype,
+          'getSigningServiceNames').returns(['google']);
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+          {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(
+          Promise.resolve({keys: []}));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     afterEach(() => {
@@ -432,9 +492,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     it('should correctly use SRA for multiple slots',
         () => executeTest([1234, 1234]));
 
+<<<<<<< HEAD
     it('should correctly handle SRA response with nested headers', () =>
       executeTest([{networkId: 1234, instances: 2, nestHeaders: true}]));
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     it('should not send SRA request if slots are invalid',
         () => executeTest([{networkId: 1234, invalidInstances: 2}]));
 
@@ -444,16 +507,32 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     it('should not send SRA request if only 1 slot is valid', () =>
       executeTest([{networkId: 1234, instances: 1, invalidInstances: 2}]));
 
+<<<<<<< HEAD
     it('should handle xhr failure by not sending subsequent request',
         () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}]));
 
     it('should handle mixture of xhr and non xhr failures', () => executeTest(
+=======
+    // TODO(bradfrizzell, #14336): Fails due to console errors.
+    it.skip('should handle xhr failure by not sending subsequent request',
+        () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}]));
+
+    // TODO(bradfrizzell, #14336): Fails due to console errors.
+    it.skip('should handle mixture of xhr and ' +
+        'non xhr failures', () => executeTest(
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         [{networkId: 1234, instances: 2, xhrFail: true}, 4567, 4567]));
 
     it('should correctly use SRA for multiple slots. multiple networks',
         () => executeTest([1234, 4567, 1234, 4567]));
 
+<<<<<<< HEAD
     it('should handle mixture of all possible scenarios', () => executeTest(
+=======
+    // TODO(bradfrizzell, #14336): Fails due to console errors.
+    it.skip('should handle mixture of all ' +
+        'possible scenarios', () => executeTest(
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
           {networkId: 8901, instances: 3, invalidInstances: 1}]));
   });

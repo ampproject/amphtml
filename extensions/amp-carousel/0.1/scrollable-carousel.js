@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {ActionTrust} from '../../../src/action-trust';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
@@ -80,6 +83,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
 
+<<<<<<< HEAD
     this.registerAction('goToSlide', invocation => {
       const args = invocation.args;
       if (args) {
@@ -88,6 +92,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
       }
     }, ActionTrust.LOW);
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     if (this.useLayers_) {
       this.declareLayer(this.container_);
     }
@@ -136,6 +142,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /**
+<<<<<<< HEAD
    * Scrolls to the slide at the given slide index.
    * @param {number} index
    * @private
@@ -185,6 +192,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Handles scroll on the carousel container.
    * @private
    */

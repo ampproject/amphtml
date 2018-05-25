@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="250"
+=======
+<amp-ad width=320 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adagio"
     data-sid="39"
     data-loc="amp_ampw_amps_ampp_300x250"
@@ -30,6 +34,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
@@ -38,4 +43,14 @@ Supported parameters:
 - `data-loc`
 - `data-keywords`
 - `data-uservars`
+=======
+For semantics of configuration, please see ad network documentation.
+
+Supported parameters:
+
+- data-sid
+- data-loc
+- data-keywords
+- data-uservars
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 

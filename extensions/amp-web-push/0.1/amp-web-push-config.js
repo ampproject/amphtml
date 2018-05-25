@@ -15,6 +15,10 @@
  */
 
 import {CONFIG_TAG, SERVICE_TAG, TAG} from './vars';
+<<<<<<< HEAD
+=======
+import {Layout} from '../../../src/layout';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
@@ -59,6 +63,14 @@ export class WebPushConfig extends AMP.BaseElement {
     super(element);
   }
 
+<<<<<<< HEAD
+=======
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * Validates that this element instance has an ID attribute of 'amp-web-push'
    * and that there are no other elements of the same tag name.

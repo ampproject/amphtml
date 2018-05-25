@@ -139,6 +139,7 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
       // Service 2 (a vendor service)
     }
   ],
+<<<<<<< HEAD
   "score": {
     "supportsViewer": 10,
   },
@@ -149,10 +150,14 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
     "subscriptionToken": "subscription-token",
     "loggedIn": true/false,
   }
+=======
+  "preferViewerSupport": true
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 </script>
 ```
 
+<<<<<<< HEAD
 The `services` property contains an array of service configurations. There must be one "local" service and zero or more vendor services.
 
 If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
@@ -167,6 +172,14 @@ You can add `"baseScore"` < 100 key in any service configuration in case you wan
 
 ## Error fallback
 In case if all configured platforms fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` platform. The document's unblocking will be based on this fallback entitlement.
+=======
+The key is the `services` property that contains an array of service configurations. There must be one "local" service and zero or more vendor services.
+
+Based on `preferViewerSupport` (default: true) this document will give extra preference to the platform supported by the viewer.
+
+If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ### The "local" service configuration
 
@@ -260,6 +273,7 @@ All actions work the same way: the popup window is opened for the specified URL.
 
 Notice, while not explicitly visible, any vendor service can also implement its own actions. Or it can delegate to the "login" service to execute "login" or "subscribe" action.
 
+<<<<<<< HEAD
 ### Action delegation
 
 In the markup the actions can be delegated to other services for them to execute the actions. This can be achieved by specifying `subscriptions-service` attribute.
@@ -282,6 +296,8 @@ In addition to delegation of the action to another service, you can also ask ano
     Subscribe
   </button>
 ```
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Showing/hiding premium and fallback content
 

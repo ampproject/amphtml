@@ -31,6 +31,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 ### Required parameters
@@ -42,3 +43,12 @@ For details on the configuration semantics, please contact the ad network or ref
 
 - `data-section`: tag list, separated by commas
 - `data-s`: dynamic sizing, allowed values: fixed, all, small (default), big
+=======
+Required parameters:
+- id: site ID
+- plc: format ID (unique per page)
+
+Additional parameters:
+- section: tag list, separated by commas
+- s: dynamic sizing, allowed values: fixed, all, small (default), big
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

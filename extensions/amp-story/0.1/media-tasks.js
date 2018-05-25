@@ -16,7 +16,10 @@
 
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
+<<<<<<< HEAD
 import {tryResolve} from '../../../src/utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 
@@ -232,7 +235,11 @@ export class PlayTask extends MediaTask {
     // The play() invocation is wrapped in a Promise.resolve(...) due to the
     // fact that some browsers return a promise from media elements' play()
     // function, while others return a boolean.
+<<<<<<< HEAD
     return tryResolve(() => mediaEl.play());
+=======
+    return Promise.resolve(mediaEl.play());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 }
 
@@ -353,12 +360,24 @@ export class UpdateSourcesTask extends MediaTask {
   /**
    * @param {!Sources} newSources The sources to which the media element should
    *     be updated.
+<<<<<<< HEAD
    */
   constructor(newSources) {
+=======
+   * @param {!../../../src/service/vsync-impl.Vsync} vsync
+   */
+  constructor(newSources, vsync) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     super('update-src');
 
     /** @private @const {!Sources} */
     this.newSources_ = newSources;
+<<<<<<< HEAD
+=======
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsync;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -377,12 +396,24 @@ export class SwapIntoDomTask extends MediaTask {
   /**
    * @param {!HTMLMediaElement} replacedMediaEl The element to be replaced by
    *     the media element on which this task is executed.
+<<<<<<< HEAD
    */
   constructor(replacedMediaEl) {
+=======
+   * @param {!../../../src/service/vsync-impl.Vsync} vsync
+   */
+  constructor(replacedMediaEl, vsync) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     super('swap-into-dom');
 
     /** @private @const {!HTMLMediaElement} */
     this.replacedMediaEl_ = replacedMediaEl;
+<<<<<<< HEAD
+=======
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsync;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -409,12 +440,24 @@ export class SwapOutOfDomTask extends MediaTask {
   /**
    * @param {!HTMLMediaElement} placeholderMediaEl The element to be replaced by
    *     the media element on which this task is executed.
+<<<<<<< HEAD
    */
   constructor(placeholderMediaEl) {
+=======
+   * @param {!../../../src/service/vsync-impl.Vsync} vsync
+   */
+  constructor(placeholderMediaEl, vsync) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     super('swap-out-of-dom');
 
     /** @private @const {!HTMLMediaElement} */
     this.placeholderMediaEl_ = placeholderMediaEl;
+<<<<<<< HEAD
+=======
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsync;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */

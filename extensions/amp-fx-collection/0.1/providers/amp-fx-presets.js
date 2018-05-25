@@ -1,5 +1,9 @@
 /**
+<<<<<<< HEAD
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+=======
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +38,17 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
+<<<<<<< HEAD
       dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // outside viewport
       if (!top || top > fxElement.adjustedViewportHeight) {
+=======
+      dev().assert(fxElement.adjustedViewportHeight_);
+      // outside viewport
+      if (!entry.positionRect ||
+          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         return;
       }
 
@@ -45,9 +56,16 @@ export const Presets = {
       // Also negating number since we are using tranformY so negative = upward,
       // positive = downward.
       const adjustedFactor = -(parseFloat(fxElement.getFactor()) - 1);
+<<<<<<< HEAD
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
       const offset = (fxElement.adjustedViewportHeight - top) * adjustedFactor;
+=======
+      const top = entry.positionRect.top;
+      // Offset is how much extra to move the element which is position within
+      // viewport times adjusted factor.
+      const offset = (fxElement.adjustedViewportHeight_ - top) * adjustedFactor;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       fxElement.setOffset(offset);
 
       if (fxElement.isMutateScheduled()) {
@@ -68,6 +86,7 @@ export const Presets = {
   },
   'fade-in': {
     isFxTypeSupported(win) {
+<<<<<<< HEAD
       return isExperimentOn(win, 'amp-fx-fade-in');
     },
     userAsserts(element) {
@@ -86,6 +105,27 @@ export const Presets = {
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
         fxElement.adjustedViewportHeight) {
+=======
+      user().assert(isExperimentOn(win, 'amp-fx-fade-in'),
+          'amp-fx-fade-in experiment is not turned on.');
+    },
+    userAsserts(element) {
+      if (!element.hasAttribute('data-margin')) {
+        return;
+      }
+      const margin = element.getAttribute('data-margin');
+      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
+          'data-margin must be a number and be between 0 and 1 for: %s',
+          element);
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight_);
+      // Outside viewport
+      if (!entry.positionRect ||
+          entry.positionRect.top >
+            (1 - fxElement.getMargin()) * fxElement.adjustedViewportHeight_) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         return;
       }
 
@@ -106,6 +146,7 @@ export const Presets = {
       });
     },
   },
+<<<<<<< HEAD
   'fade-in-scroll': {
     isFxTypeSupported(win) {
       return isExperimentOn(win, 'amp-fx-fade-in-scroll');
@@ -169,4 +210,6 @@ export const Presets = {
           });
     },
   },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 };

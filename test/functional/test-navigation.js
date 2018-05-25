@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import * as Impression from '../../src/impression';
 import {Services} from '../../src/services';
 import {addParamToUrl} from '../../src/url';
@@ -23,6 +24,14 @@ import {
 } from '../../src/service/url-replacements-impl';
 import {macroTask} from '../../testing/yield';
 import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';
+=======
+import '../../src/service/navigation';
+import * as Impression from '../../src/impression';
+import {Services} from '../../src/services';
+import {addParamToUrl} from '../../src/url';
+import {macroTask} from '../../testing/yield';
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 describes.sandboxed('Navigation', {}, () => {
   let event;
@@ -499,7 +508,12 @@ describes.sandboxed('Navigation', {}, () => {
         win.location.href = 'https://www.pub.com/';
       });
 
+<<<<<<< HEAD
       it('should reject invalid protocols', () => {
+=======
+      // TODO(choumx, #14336): Fails due to console errors.
+      it.skip('should reject invalid protocols', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         const newUrl = /*eslint no-script-url: 0*/ 'javascript:alert(1)';
 
         expect(win.location.href).to.equal('https://www.pub.com/');
@@ -648,6 +662,7 @@ describes.sandboxed('Navigation', {}, () => {
     });
   });
 });
+<<<<<<< HEAD
 
 describes.realWin('anchor-click-interceptor', {amp: true}, env => {
 
@@ -686,3 +701,5 @@ describes.realWin('anchor-click-interceptor', {amp: true}, env => {
   });
 });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

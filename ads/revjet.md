@@ -16,7 +16,12 @@ limitations under the License.
 
 # RevJet
 
+<<<<<<< HEAD
 Serves ads from the [RevJet Marketing Creative Platform](https://www.revjet.com/).
+=======
+[RevJet Marketing Creative Platform](https://www.revjet.com/) - Bring sophistication and power to every ad creative
+discipline.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
@@ -31,6 +36,7 @@ Serves ads from the [RevJet Marketing Creative Platform](https://www.revjet.com/
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 ### Required parameters
@@ -40,6 +46,13 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Optional parameters
 
+=======
+Required parameters:
+- `data-tag`
+- `data-key`
+
+Optional parameters:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 - `data-plc`
 - `data-opts`
 - `data-params`

@@ -588,6 +588,16 @@ export class WebPushService {
   }
 
   /** @private */
+<<<<<<< HEAD
+=======
+  updateWidgetVisibilitiesNotificationPermissionsBlocked_() {
+    this.setWidgetVisibilities(WebPushWidgetVisibilities.UNSUBSCRIBED, false);
+    this.setWidgetVisibilities(WebPushWidgetVisibilities.SUBSCRIBED, false);
+    this.setWidgetVisibilities(WebPushWidgetVisibilities.BLOCKED, true);
+  }
+
+  /** @private */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   updateWidgetVisibilitiesServiceWorkerActivated_() {
     return Services.timerFor(this.ampdoc.win).timeoutPromise(
         5000,

@@ -74,20 +74,34 @@ describe('iframe-transport-client', () => {
   it('fails to create iframeTransportClient if window.name is missing' +
     ' sentinel', () => {
     const oldWindowName = window.name;
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       window.name = JSON.stringify({type: 'some-vendor'});
       new IframeTransportClient(window);
     }).to.throw(/missing sentinel/); });
+=======
+    expect(() => {
+      window.name = JSON.stringify({type: 'some-vendor'});
+      new IframeTransportClient(window);
+    }).to.throw(/missing sentinel/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     window.name = oldWindowName;
   });
 
   it('fails to create iframeTransportClient if window.name is missing' +
     ' type', () => {
     const oldWindowName = window.name;
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       window.name = JSON.stringify({sentinel});
       new IframeTransportClient(window);
     }).to.throw(/must supply vendor name/); });
+=======
+    expect(() => {
+      window.name = JSON.stringify({sentinel});
+      new IframeTransportClient(window);
+    }).to.throw(/must supply vendor name/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     window.name = oldWindowName;
   });
 
@@ -108,11 +122,19 @@ describe('iframe-transport-client', () => {
   });
 
   it('requires onNewContextInstance', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       new IframeTransportContext(window,
           iframeTransportClient.iframeMessagingClient_,
           'my_creative', 'my_vendor');
     }).to.throw(/Must implement onNewContextInstance/); });
+=======
+    expect(() => {
+      new IframeTransportContext(window,
+          iframeTransportClient.iframeMessagingClient_,
+          'my_creative', 'my_vendor');
+    }).to.throw(/Must implement onNewContextInstance/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('calls onNewContextInstance', () => {

@@ -128,6 +128,7 @@ describes.realWin('amp-app-banner', {
   }
 
   function testButtonMissing() {
+<<<<<<< HEAD
     allowConsoleError(() => { return getAppBanner({
       iosMeta,
       androidManifest,
@@ -135,6 +136,13 @@ describes.realWin('amp-app-banner', {
     }).should.eventually.be.rejectedWith(
         /<button open-button> is required/);
     });
+=======
+    return getAppBanner({
+      iosMeta,
+      androidManifest,
+      noOpenButton: true,
+    }).should.eventually.be.rejectedWith(/<button open-button> is required/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   function testRemoveBannerIfDismissed() {
@@ -157,7 +165,12 @@ describes.realWin('amp-app-banner', {
       });
     });
 
+<<<<<<< HEAD
     it('should show banner and set up correctly', testSetupAndShowBanner);
+=======
+    // TODO(aghassemi, #14336): Fails due to console errors.
+    it.skip('should show banner and set up correctly', testSetupAndShowBanner);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     it('should throw if open button is missing', testButtonMissing);
 
@@ -194,12 +207,19 @@ describes.realWin('amp-app-banner', {
     });
 
     it('should parse meta content and validate app-argument url', () => {
+<<<<<<< HEAD
       allowConsoleError(() => { return getAppBanner({
+=======
+      return getAppBanner({
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         iosMeta: {content:
             'app-id=828256236, app-argument=javascript:alert("foo");'},
       }).should.eventually.be.rejectedWith(
           /The url in app-argument has invalid protocol/);
+<<<<<<< HEAD
       });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
@@ -238,7 +258,12 @@ describes.realWin('amp-app-banner', {
       });
     });
 
+<<<<<<< HEAD
     it('should show banner and set up correctly', testSetupAndShowBanner);
+=======
+    // TODO(aghassemi, #14336): Fails due to console errors.
+    it.skip('should show banner and set up correctly', testSetupAndShowBanner);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     it('should throw if open button is missing', testButtonMissing);
 

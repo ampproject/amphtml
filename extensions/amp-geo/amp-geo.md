@@ -16,6 +16,7 @@ limitations under the License.
 
 # <a name="amp-geo"></a> `amp-geo`
 
+<<<<<<< HEAD
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -192,3 +193,8 @@ The string `{{AMP_ISO_COUNTRY_HOTPATCH}}` must be replaced at serving time with 
 
 Adding `#amp-geo=XX` to the document url forces the country to appear as the country `XX`. This allows you to test without having to VPN to a country. For security reasons, to prevent sharing of geo-spoofing urls, this feature is only available to users who have enabled the [Dev Channel](https://www.ampproject.org/docs/reference/experimental) or who are testing locally (i.e., the hostname is `localhost`).
 
+=======
+### Placeholder.
+
+`amp-geo` is still under development will not be fully functional until corresponding infrastructure changes are in place.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

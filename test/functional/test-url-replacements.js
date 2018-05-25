@@ -116,9 +116,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
                     opt_options.withViewerIntegrationVariableService);
               });
         }
+<<<<<<< HEAD
         if (opt_options.withOriginalTitle) {
           iframe.doc.originalTitle = 'Original Pixel Test';
         }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
       replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
@@ -285,6 +288,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+<<<<<<< HEAD
   it('should prefer original title for TITLE', () => {
     return expandUrlAsync('?title=TITLE',
         /*opt_bindings*/undefined, {withOriginalTitle: true}).then(res => {
@@ -292,6 +296,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   it('should replace AMPDOC_URL', () => {
     return expandUrlAsync('?ref=AMPDOC_URL').then(res => {
       expect(res).to.not.match(/AMPDOC_URL/);
@@ -891,9 +897,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
     const p = expect(replacements.expandUrlAsync('?a=ONE')).to.eventually
         .equal('?a=');
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       clock.tick(1);
     }).to.throw(/boom/); });
+=======
+    expect(() => {
+      clock.tick(1);
+    }).to.throw(/boom/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return p;
   });
 
@@ -906,9 +918,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return expect(replacements.expandUrlAsync('?a=ONE'))
         .to.eventually.equal('?a=')
         .then(() => {
+<<<<<<< HEAD
           allowConsoleError(() => { expect(() => {
             clock.tick(1);
           }).to.throw(/boom/); });
+=======
+          expect(() => {
+            clock.tick(1);
+          }).to.throw(/boom/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
   });
 
@@ -1166,10 +1184,17 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should reject javascript protocol', () => {
       const win = getFakeWindow();
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         /*eslint no-script-url: 0*/
         urlReplacements.expandUrlSync('javascript://example.com/?r=RANDOM');
       }).to.throw('invalid protocol'); });
+=======
+      expect(() => {
+        /*eslint no-script-url: 0*/
+        urlReplacements.expandUrlSync('javascript://example.com/?r=RANDOM');
+      }).to.throw('invalid protocol');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 
@@ -1480,10 +1505,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const input = document.createElement('textarea');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
             /Input value expansion only works on hidden input fields/);
       });
+=======
+      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+          /Input value expansion only works on hidden input fields/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(input.value).to.equal('RANDOM');
     });
 
@@ -1493,10 +1523,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const input = document.createElement('input');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
             /Input value expansion only works on hidden input fields/);
       });
+=======
+      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+          /Input value expansion only works on hidden input fields/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(input.value).to.equal('RANDOM');
     });
 

@@ -19,16 +19,24 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="728" height="90"
     type="adreactor"
     data-pid="790"
     data-zid="9"
+=======
+<amp-ad width=728 height=90
+    type="adreactor"
+    data-pid=790
+    data-zid=9
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     data-custom3="No Type">
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
@@ -36,3 +44,12 @@ Supported parameters:
 - `data-pid`
 - `data-zid`
 - `data-custom3`
+=======
+For semantics of configuration, please see ad network documentation.
+
+Supported parameters:
+
+- data-pid
+- data-zid
+- data-custom3
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

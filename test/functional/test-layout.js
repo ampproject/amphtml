@@ -105,6 +105,7 @@ describe('Layout', () => {
     expect(assertLength('10.1em')).to.equal('10.1em');
     expect(assertLength('10.1vmin')).to.equal('10.1vmin');
 
+<<<<<<< HEAD
     allowConsoleError(() => { expect(function() {
       assertLength('10%');
     }).to.throw(/Invalid length value/); });
@@ -123,6 +124,26 @@ describe('Layout', () => {
     allowConsoleError(() => { expect(function() {
       assertLength('');
     }).to.throw(/Invalid length value/); });
+=======
+    expect(function() {
+      assertLength('10%');
+    }).to.throw(/Invalid length value/);
+    expect(function() {
+      assertLength(10);
+    }).to.throw(/Invalid length value/);
+    expect(function() {
+      assertLength('10');
+    }).to.throw(/Invalid length value/);
+    expect(function() {
+      assertLength(undefined);
+    }).to.throw(/Invalid length value/);
+    expect(function() {
+      assertLength(null);
+    }).to.throw(/Invalid length value/);
+    expect(function() {
+      assertLength('');
+    }).to.throw(/Invalid length value/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
 
@@ -136,6 +157,7 @@ describe('Layout', () => {
     expect(assertLengthOrPercent('10.1vmin')).to.equal('10.1vmin');
     expect(assertLengthOrPercent('10.1%')).to.equal('10.1%');
 
+<<<<<<< HEAD
     allowConsoleError(() => { expect(function() {
       assertLengthOrPercent(10);
     }).to.throw(/Invalid length or percent value/); });
@@ -151,6 +173,23 @@ describe('Layout', () => {
     allowConsoleError(() => { expect(function() {
       assertLengthOrPercent('');
     }).to.throw(/Invalid length or percent value/); });
+=======
+    expect(function() {
+      assertLengthOrPercent(10);
+    }).to.throw(/Invalid length or percent value/);
+    expect(function() {
+      assertLengthOrPercent('10');
+    }).to.throw(/Invalid length or percent value/);
+    expect(function() {
+      assertLengthOrPercent(undefined);
+    }).to.throw(/Invalid length or percent value/);
+    expect(function() {
+      assertLengthOrPercent(null);
+    }).to.throw(/Invalid length or percent value/);
+    expect(function() {
+      assertLengthOrPercent('');
+    }).to.throw(/Invalid length or percent value/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
 
@@ -188,10 +227,15 @@ describe('Layout', () => {
 
   it('layout=fixed - requires width/height', () => {
     div.setAttribute('layout', 'fixed');
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(
           /Expected height to be available/);
     });
+=======
+    expect(() => applyStaticLayout(div)).to.throw(
+        /Expected height to be available/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
 
@@ -222,9 +266,15 @@ describe('Layout', () => {
     div.setAttribute('layout', 'fixed-height');
     div.setAttribute('height', 200);
     div.setAttribute('width', 300);
+<<<<<<< HEAD
     allowConsoleError(() => { expect(function() {
       applyStaticLayout(div);
     }).to.throw(/Expected width to be either absent or equal "auto"/); });
+=======
+    expect(function() {
+      applyStaticLayout(div);
+    }).to.throw(/Expected width to be either absent or equal "auto"/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('layout=fixed-height - default with height', () => {
@@ -244,10 +294,15 @@ describe('Layout', () => {
 
   it('layout=fixed-height - requires height', () => {
     div.setAttribute('layout', 'fixed-height');
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(
           /Expected height to be available/);
     });
+=======
+    expect(() => applyStaticLayout(div)).to.throw(
+        /Expected height to be available/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
 
@@ -293,7 +348,11 @@ describe('Layout', () => {
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
+<<<<<<< HEAD
     expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>');
+=======
+    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('layout=intrinsic - default with sizes', () => {
@@ -310,7 +369,11 @@ describe('Layout', () => {
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
+<<<<<<< HEAD
     expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>');
+=======
+    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('layout=fill', () => {
@@ -366,9 +429,15 @@ describe('Layout', () => {
 
   it('layout=unknown', () => {
     div.setAttribute('layout', 'foo');
+<<<<<<< HEAD
     allowConsoleError(() => { expect(function() {
       applyStaticLayout(div);
     }).to.throw(/Unknown layout: foo/); });
+=======
+    expect(function() {
+      applyStaticLayout(div);
+    }).to.throw(/Unknown layout: foo/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
 
@@ -429,16 +498,28 @@ describe('Layout', () => {
 
     // Width=X is invalid.
     pixel.setAttribute('width', 'X');
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       applyStaticLayout(pixel);
     }).to.throw(/Invalid width value/); });
+=======
+    expect(() => {
+      applyStaticLayout(pixel);
+    }).to.throw(/Invalid width value/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Height=X is invalid.
     pixel.setAttribute('height', 'X');
     pixel.setAttribute('width', '1px');
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       applyStaticLayout(pixel);
     }).to.throw(/Invalid height value/); });
+=======
+    expect(() => {
+      applyStaticLayout(pixel);
+    }).to.throw(/Invalid height value/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should trust server layout', () => {
@@ -482,8 +563,12 @@ describe('Layout', () => {
 
   it('should fail when server generates invalid layout', () => {
     div.setAttribute('i-amphtml-layout', 'invalid');
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(/failed/);
     });
+=======
+    expect(() => applyStaticLayout(div)).to.throw(/failed/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

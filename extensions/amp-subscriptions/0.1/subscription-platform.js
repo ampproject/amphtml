@@ -43,19 +43,28 @@ export class SubscriptionPlatform {
   activate(unusedRenderState) {}
 
   /**
+<<<<<<< HEAD
    * Returns if pingback is enabled for this platform.
+=======
+   * Returns if pingback is enabled for this platform
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @returns {boolean}
    */
   isPingbackEnabled() {}
 
   /**
+<<<<<<< HEAD
    * Performs the pingback to the subscription platform.
+=======
+   * Performs the pingback to the subscription platform
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param {!./entitlement.Entitlement} unusedSelectedPlatform
    * @returns {!Promise|undefined}
    */
   pingback(unusedSelectedPlatform) {}
 
   /**
+<<<<<<< HEAD
    * Tells if this platform supports the current viewer.
    * @returns {boolean}
    */
@@ -81,6 +90,12 @@ export class SubscriptionPlatform {
    * @param {?JsonObject} unusedOptions
    */
   decorateUI(unusedElement, unusedAction, unusedOptions) {}
+=======
+   * Tells if this platform supports the current viewer
+   * @returns {boolean}
+   */
+  supportsCurrentViewer() {}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**

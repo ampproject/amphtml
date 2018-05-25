@@ -19,6 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad 
     width=[Width of Ad Widget]
     height=[Height of Ad Widget]
@@ -27,10 +28,21 @@ limitations under the License.
     data-d="[Ad Widget Domain ID]"
     data-wid="[Ad Widget ID]">
 </amp-ad>
+=======
+  <amp-ad 
+      width=[Width of Ad Widget]
+      height=[Height of Ad Widget]
+      type="contentad"
+      data-id="[Ad Widget GUID]"
+      data-d="[Ad Widget Domain ID]"
+      data-wid="[Ad Widget ID]">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, please see [Content.ad AMP Widget](http://help.content.ad/how-can-i-make-widget-amp-mobile-site/) documentation.
 
 Supported parameters:
@@ -38,3 +50,12 @@ Supported parameters:
 - `data-id`: Ad Widget GUID
 - `data-d`: Ad Widget Domain ID
 - `data-wid`: Ad Widget ID
+=======
+For semantics of configuration, please see [Content.ad AMP Widget](http://help.content.ad/how-can-i-make-widget-amp-mobile-site/) documentation.
+
+Supported parameters:
+
+- data-id : Ad Widget GUID
+- data-d : Ad Widget Domain ID
+- data-wid : Ad Widget ID
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

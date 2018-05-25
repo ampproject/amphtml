@@ -80,6 +80,7 @@ describes.realWin('amp-google-vrview-image', {
   });
 
   it('requires src', () => {
+<<<<<<< HEAD
     allowConsoleError(() => {
       return getVrImage({}).should.eventually.be.rejectedWith(
           /must be available/);
@@ -91,5 +92,14 @@ describes.realWin('amp-google-vrview-image', {
       return getVrImage({'src': 'http://example.com/image1'})
           .should.eventually.be.rejectedWith(/https/);
     });
+=======
+    return getVrImage({}).should.eventually.be.rejectedWith(
+        /must be available/);
+  });
+
+  it('requires https src', () => {
+    return getVrImage({'src': 'http://example.com/image1'}).should
+        .eventually.be.rejectedWith(/https/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

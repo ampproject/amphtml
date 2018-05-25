@@ -24,7 +24,10 @@ export const CONSENT_POLICY_STATE = {
   UNKNOWN: 0,
   SUFFICIENT: 1,
   INSUFFICIENT: 2,
+<<<<<<< HEAD
   UNKNOWN_NOT_REQUIRED: 3,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 };
 
 /**
@@ -45,6 +48,7 @@ export function getConsentPolicyState(ampdoc, policyId) {
       });
 }
 
+<<<<<<< HEAD
 /**
  * Returns a promise that resolves to a sharedData retrieved from consent
  * remote endpoint.
@@ -62,3 +66,6 @@ export function getConsentPolicySharedData(ampdoc, policyId) {
             /** @type {string} */ (policyId));
       });
 }
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

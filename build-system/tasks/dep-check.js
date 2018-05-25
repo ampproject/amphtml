@@ -16,7 +16,11 @@
 'use strict';
 
 
+<<<<<<< HEAD
 const babelify = require('babelify');
+=======
+const babel = require('babelify');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 const BBPromise = require('bluebird');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
@@ -175,7 +179,11 @@ function getGraph(entryModule) {
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
   const bundler = browserify(entryModule, {debug: true, deps: true})
+<<<<<<< HEAD
       .transform(babelify, {compact: false});
+=======
+      .transform(babel.configure({}));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({

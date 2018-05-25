@@ -40,6 +40,7 @@ import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
+<<<<<<< HEAD
 // Used to print warnings for unexpected console errors.
 let consoleErrorSandbox;
 let consoleErrorStub;
@@ -49,6 +50,10 @@ let testName;
 // Used to clean up global state between tests.
 let initialGlobalState;
 let initialWindowState;
+=======
+// Used to surface console errors as mocha test failures.
+let consoleSandbox;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 // All exposed describes.
 global.describes = describes;
@@ -272,6 +277,7 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
+<<<<<<< HEAD
 // Used during normal test execution, to detect unexpected console errors.
 function warnForConsoleError() {
   if (consoleErrorSandbox) {
@@ -355,6 +361,15 @@ beforeEach(function() {
   warnForConsoleError();
   initialGlobalState = Object.keys(global);
   initialWindowState = Object.keys(window);
+=======
+beforeEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
+  beforeTest();
+  consoleSandbox = sinon.sandbox.create();
+  consoleSandbox.stub(console, 'error').callsFake((...messages) => {
+    throw new Error(messages.join(' '));
+  });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });
 
 function beforeTest() {
@@ -375,10 +390,14 @@ function beforeTest() {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(function() {
+<<<<<<< HEAD
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
   restoreConsoleError();
   restoreConsoleInfoLogWarn();
+=======
+  consoleSandbox.restore();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {
@@ -400,6 +419,7 @@ afterEach(function() {
   window.context = undefined;
   window.AMP_MODE = undefined;
 
+<<<<<<< HEAD
   if (windowState.length != initialWindowState.length) {
     for (let i = initialWindowState.length; i < windowState.length; ++i) {
       if (window[windowState[i]]) {
@@ -415,6 +435,8 @@ afterEach(function() {
       }
     }
   }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   const forgotGlobal = !!global.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a

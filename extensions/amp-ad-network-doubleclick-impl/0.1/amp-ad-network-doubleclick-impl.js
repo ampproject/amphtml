@@ -47,7 +47,10 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+<<<<<<< HEAD
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {
   DOUBLECLICK_EXPERIMENT_FEATURE,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
@@ -55,7 +58,10 @@ import {
   experimentFeatureEnabled,
 } from './doubleclick-a4a-config';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+<<<<<<< HEAD
 import {Navigation} from '../../../src/service/navigation';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
@@ -88,11 +94,20 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+<<<<<<< HEAD
+=======
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {isCancellation} from '../../../src/error';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+<<<<<<< HEAD
 import {isObject} from '../../../src/types';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {isSecureUrl, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
@@ -101,7 +116,10 @@ import {
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
+<<<<<<< HEAD
 import {tryResolve} from '../../../src/utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
@@ -129,6 +147,12 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
+<<<<<<< HEAD
+=======
+/** @const {string} */
+export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /** @private {?Promise} */
 let sraRequests = null;
 
@@ -194,7 +218,11 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => {
     return {'prev_iu_szs': instances.map(instance =>
+<<<<<<< HEAD
       instance.parameterSize_).join()};
+=======
+      `${instance.initialSize_.width}x${instance.initialSize_.height}`).join()};
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   },
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate TFCD.
@@ -226,10 +254,13 @@ const BLOCK_SRA_COMBINERS_ = [
       if (currEids) {
         currEids.split(',').forEach(eid => eids[eid] = 1);
       }
+<<<<<<< HEAD
       const deid = /(?:#|,)deid=(\d+)/i.exec(instance.win.location.hash);
       if (deid) {
         eids[deid[1]] = 1;
       }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
   },
@@ -244,6 +275,7 @@ const BLOCK_SRA_COMBINERS_ = [
     });
     return safeframeForced ? {'fsfs': forceSafeframes.join(',')} : null;
   },
+<<<<<<< HEAD
   instances => ({'adxs':
     instances.map(instance => instance.getPageLayoutBox().left).join()}),
   instances => ({'adys':
@@ -258,6 +290,8 @@ const BLOCK_SRA_COMBINERS_ = [
     });
     return hasAmpContainer ? {'acts': result.join('|')} : null;
   },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ];
 
 
@@ -293,9 +327,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?LayoutRectOrDimsDef} */
     this.initialSize_ = null;
 
+<<<<<<< HEAD
     /** @private {?string} */
     this.parameterSize_ = null;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {?{width: number, height: number}} */
     this.returnedSize_ = null;
 
@@ -375,9 +412,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.forceSafeframe_ = true;
       }
     }
+<<<<<<< HEAD
 
     /** @private {?CONSENT_POLICY_STATE} */
     this.consentState_ = null;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -520,6 +560,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {resolver, rejector, promise};
   }
 
+<<<<<<< HEAD
   /**
    * @param {?CONSENT_POLICY_STATE} consentState
    * @return {!Object<string,string|boolean|number>}
@@ -529,6 +570,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
+=======
+  /** @return {!Object<string,string|boolean|number>} */
+  getPageParameters_() {
+    return {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
@@ -544,18 +590,53 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getBlockParameters_() {
     dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
+<<<<<<< HEAD
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ = (this.isRefreshing && this.ifi_) ||
         this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd ?
       this.element.getPageLayoutBox() : null;
+=======
+    let sizeStr = this.isFluid_ ?
+      '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
+    const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
+    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
+    if (multiSizeDataStr) {
+      if (this.element.getAttribute('layout') == 'responsive') {
+        // TODO(levitzky) Define the behavior and remove this warning.
+        user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
+            'currently not well defined. Proceed with caution.');
+      }
+      const multiSizeValidation = this.element
+          .getAttribute('data-multi-size-validation') || 'true';
+      // The following call will check all specified multi-size dimensions,
+      // verify that they meet all requirements, and then return all the valid
+      // dimensions in an array.
+      const dimensions = getMultiSizeDimensions(
+          multiSizeDataStr,
+          this.initialSize_.width,
+          this.initialSize_.height,
+          multiSizeValidation == 'true',
+          this.isFluid_);
+      sizeStr += '|' + dimensions
+          .map(dimension => dimension.join('x'))
+          .join('|');
+    }
+    this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
+    this.ifi_ = (this.isRefreshing && this.ifi_) ||
+        this.win['ampAdGoogleIfiCounter']++;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting_ &&
           this.jsonTargeting_['cookieOptOut'] ? '1' : null,
       'adk': this.adKey_,
+<<<<<<< HEAD
       'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize_,
+=======
+      'sz': sizeStr,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       'output': 'html',
       'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,
@@ -569,18 +650,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
+<<<<<<< HEAD
       'spsa': this.isSinglePageStoryAd ?
         `${pageLayoutBox.width}x${pageLayoutBox.height}` : null,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }, googleBlockParameters(this));
   }
 
   /**
    * Populate's block-level state for ad URL construction.
+<<<<<<< HEAD
    * @param {?CONSENT_POLICY_STATE} consentState
    * @visibileForTesting
    */
   populateAdUrlState(consentState) {
     this.consentState_ = consentState;
+=======
+   * @visibileForTesting
+   */
+  populateAdUrlState() {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // Allow for pub to override height/width via override attribute.
     const width = Number(this.element.getAttribute('data-override-width')) ||
       Number(this.element.getAttribute('width'));
@@ -594,6 +684,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
         `${this.initialSize_.width}x${this.initialSize_.height}`);
+<<<<<<< HEAD
     this.parameterSize_ = this.isFluid_ ?
       '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
@@ -637,12 +728,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return Promise.resolve('');
+=======
+  }
+
+  /** @override */
+  getAdUrl(opt_rtcResponsesPromise) {
+    if (this.iframe && !this.isRefreshing) {
+      dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
+      return '';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
     opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
+<<<<<<< HEAD
     this.populateAdUrlState(consentState);
+=======
+    this.populateAdUrlState();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
@@ -659,7 +763,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), this.buildIdentityParams_(),
+<<<<<<< HEAD
                   this.getPageParameters(consentState), rtcParams));
+=======
+                  this.getPageParameters_(), rtcParams));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
@@ -746,7 +854,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
       HREF: () => this.win.location.href,
+<<<<<<< HEAD
       REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       TGT: () =>
         JSON.stringify(
             (tryParseJson(
@@ -767,6 +878,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
+<<<<<<< HEAD
    * Returns the referrer or undefined if the referrer is not resolved
    * before the given timeout
    * @param {number=} opt_timeout
@@ -787,6 +899,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Appends the callout value to the keys of response to prevent a collision
    * case caused by multiple vendors returning the same keys.
    * @param {!Object<string, string>} response
@@ -881,8 +995,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.jsonTargeting_ = null;
     this.isAmpCreative_ = null;
     this.isIdleRender_ = false;
+<<<<<<< HEAD
     this.parameterSize_ = null;
     this.returnedSize_ = null;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // Reset SRA requests to allow for resumeCallback to re-fetch
     // ad requests.  Assumes that unlayoutCallback will be called for all slots
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
@@ -893,7 +1010,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
     this.qqid_ = null;
+<<<<<<< HEAD
     this.consentState_ = null;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -931,9 +1051,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return false;
         }
     }
+<<<<<<< HEAD
     if (this.refreshManager_) {
       this.refreshManager_.unobserve();
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     if (!this.useSra && this.isAmpCreative_) {
       // Allow non-AMP creatives to remain unless SRA.
       return false;
@@ -978,7 +1101,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);
+<<<<<<< HEAD
       Navigation.installAnchorClickInterceptor(
+=======
+      installAnchorClickInterceptor(
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
@@ -1195,6 +1322,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               const slotCallback = metaJsonCreativeGrouper(
                   (creative, headersObj, done) => {
                     checkStillCurrent();
+<<<<<<< HEAD
                     const headerNames = Object.keys(headersObj);
                     if (headerNames.length == 1 &&
                         isObject(headersObj[headerNames[0]])) {
@@ -1208,6 +1336,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                             return newObj;
                           }, {});
                     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
                     // Force safeframe rendering method.
                     headersObj[RENDERING_TYPE_HEADER.toLowerCase()] =
                         XORIGIN_MODE.SAFEFRAME;
@@ -1216,6 +1346,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     const headers =
                   /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
                   ({
+<<<<<<< HEAD
                     get: name => {
                       // TODO(keithwrightbos) - fix upstream so response writes
                       // all metadata values as strings.
@@ -1225,13 +1356,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       }
                       return header;
                     },
+=======
+                    get: name => headersObj[name.toLowerCase()],
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
                     has: name => !!headersObj[name.toLowerCase()],
                   });
                     const fetchResponse =
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
                   ({
                     headers,
+<<<<<<< HEAD
                     arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
+=======
+                    arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
                   });
                     // Pop head off of the array of resolvers as the response
                     // should match the order of blocks declared in the ad url.
@@ -1289,6 +1427,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
   }
 
+<<<<<<< HEAD
   /** @override */
   getPreconnectUrls() {
     // Note that this getter actually changes state by preloading safeframe.
@@ -1298,6 +1437,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.preconnect.preload(this.getSafeframePath());
     }
     return ['https://securepubads.g.doubleclick.net/'];
+=======
+  getPreconnectUrls() {
+    const urls = ['https://partner.googleadservices.com'];
+    if (this.preloadSafeframe_) {
+      urls.push(SAFEFRAME_ORIGIN);
+    }
+    return urls;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -1328,7 +1475,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     dev().assert(creativeSize, 'this.getCreativeSize returned null');
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
+<<<<<<< HEAD
             this, this.isFluid_, /** @type {{height, width}} */(creativeSize),
+=======
+            this, this.isFluid_, this.initialSize_,
+            /** @type {{height, width}} */(creativeSize),
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             this.fluidImpressionUrl_);
 
     return this.safeframeApi_.getSafeframeNameAttr();
@@ -1428,7 +1580,11 @@ export function constructSRARequest_(win, doc, instances) {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, googPageLevelParameters,
+<<<<<<< HEAD
                 instances[0].getPageParameters(instances[0].consentState_)),
+=======
+                instances[0].getPageParameters_()),
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             startTime);
       });
 }
@@ -1436,7 +1592,11 @@ export function constructSRARequest_(win, doc, instances) {
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @return {!Object<string, *>}
+<<<<<<< HEAD
  * @visibleForTesting
+=======
+ * @visibileForTesting
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  */
 export function constructSRABlockParameters(instances) {
   const parameters = {'output': 'ldjh', 'impl': 'fifs'};

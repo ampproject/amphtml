@@ -16,7 +16,12 @@ limitations under the License.
 
 # AdThrive
 
+<<<<<<< HEAD
 Your site must be approved and active with [AdThrive](http://www.adthrive.com) prior to use. AdThrive will install or provide specific tags for your site.
+=======
+Your site must be approved and active with [AdThrive](http://www.adthrive.com) prior to use.
+AdThrive will install or provide specific tags for your site.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Examples
 
@@ -51,11 +56,21 @@ Your site must be approved and active with [AdThrive](http://www.adthrive.com) p
 
 ## Configuration
 
+<<<<<<< HEAD
 ### Required parameters
 
 * `data-site-id` - Your AdThrive site id.
 * `data-ad-unit` - AdThrive provided ad unit.
 
 ### Optional parameters
+=======
+__Required:__
+
+`data-site-id` - Your AdThrive site id.
+
+`data-ad-unit` - AdThrive provided ad unit.
+
+__Optional:__
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 `data-sizes` - Comma separated list of ad sizes this ad slot should support. The iFrame will be resized if allowed.

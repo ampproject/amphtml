@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="ezoic"
     data-slot="slot-name" 
     data-json='{"targeting":{"compid":0}, "extras":{"adsense_text_color":"000000"}'>

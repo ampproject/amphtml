@@ -27,8 +27,17 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration details and to generate your tags, please contact https://www.x-lift.jp/#contact.
 
 #### Required parameters
 
 - `data-mediaid`: For loading JavaScript for each media.
+=======
+For configuration details and to generate your tags, please contact https://www.x-lift.jp/#contact
+
+Supported parameters:
+
+- data-mediaid: For loading javascripts each media. This parameter is required.
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

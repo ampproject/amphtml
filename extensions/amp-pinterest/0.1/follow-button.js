@@ -17,7 +17,10 @@
 import {Util} from './util';
 import {assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
+<<<<<<< HEAD
 import {tryResolve} from '../../../src/utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 import {user} from '../../../src/log';
 
@@ -82,6 +85,10 @@ export class FollowButton {
     }
     this.href += `pins/follow/?guid=${Util.guid}`;
 
+<<<<<<< HEAD
     return tryResolve(() => this.renderTemplate());
+=======
+    return Promise.resolve(this.renderTemplate());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 }

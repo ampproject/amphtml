@@ -73,9 +73,15 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
 
     it('should fail if config is invalid', () => {
       delete validConfig['authorization'];
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         new AccessServerAdapter(ampdoc, validConfig, context);
       }).to.throw(/"authorization" URL must be specified/); });
+=======
+      expect(() => {
+        new AccessServerAdapter(ampdoc, validConfig, context);
+      }).to.throw(/"authorization" URL must be specified/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should tolerate when i-amphtml-access-state is missing', () => {

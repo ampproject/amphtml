@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {Deferred} from './utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from './services';
 import {dev} from './log';
 import {getCurve} from './curve';
@@ -118,6 +121,10 @@ export class Animation {
   start(duration) {
     const player = new AnimationPlayer(this.vsync_, this.contextNode_,
         this.segments_, this.curve_, duration);
+<<<<<<< HEAD
+=======
+    player.start_();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return player;
   }
 }
@@ -167,6 +174,7 @@ class AnimationPlayer {
     this.duration_ = duration;
 
     /** @private {./time.timeDef} */
+<<<<<<< HEAD
     this.startTime_ = Date.now();
 
     /** @private {./time.normtimeDef} */
@@ -177,10 +185,23 @@ class AnimationPlayer {
 
     /** @private {boolean} */
     this.running_ = true;
+=======
+    this.startTime_ = 0;
+
+    /** @private {./time.normtimeDef} */
+    this.normLinearTime_ = 0;
+
+    /** @private {./time.normtimeDef} */
+    this.normTime_ = 0;
+
+    /** @private {boolean} */
+    this.running_ = false;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private {!Object<string, *>} */
     this.state_ = {};
 
+<<<<<<< HEAD
     const deferred = new Deferred();
 
     /** @const @private */
@@ -191,11 +212,25 @@ class AnimationPlayer {
 
     /** @const @private */
     this.reject_ = deferred.reject;
+=======
+    /** @const {function()} */
+    this.resolve_;
+
+    /** @const {function()} */
+    this.reject_;
+
+    /** @private {!Promise} */
+    this.promise_ = new Promise((resolve, reject) => {
+      this.resolve_ = resolve;
+      this.reject_ = reject;
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @const */
     this.task_ = this.vsync_.createAnimTask(this.contextNode_, {
       mutate: this.stepMutate_.bind(this),
     });
+<<<<<<< HEAD
 
     if (this.vsync_.canAnimate(this.contextNode_)) {
       this.task_(this.state_);
@@ -203,6 +238,8 @@ class AnimationPlayer {
       dev().warn(TAG_, 'cannot animate');
       this.complete_(/* success */ false, /* dir */ 0);
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -244,6 +281,23 @@ class AnimationPlayer {
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * @private
+   */
+  start_() {
+    this.startTime_ = Date.now();
+    this.running_ = true;
+    if (this.vsync_.canAnimate(this.contextNode_)) {
+      this.task_(this.state_);
+    } else {
+      dev().warn(TAG_, 'cannot animate');
+      this.complete_(/* success */ false, /* dir */ 0);
+    }
+  }
+
+  /**
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param {boolean} success
    * @param {number} dir
    * @private

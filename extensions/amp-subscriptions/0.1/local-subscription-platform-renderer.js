@@ -27,9 +27,14 @@ export class LocalSubscriptionPlatformRenderer {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!./dialog.Dialog} dialog
+<<<<<<< HEAD
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    */
   constructor(ampdoc, dialog, serviceAdapter) {
+=======
+   */
+  constructor(ampdoc, dialog) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
@@ -41,9 +46,12 @@ export class LocalSubscriptionPlatformRenderer {
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(ampdoc.win);
+<<<<<<< HEAD
 
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -127,6 +135,7 @@ export class LocalSubscriptionPlatformRenderer {
         if (expr && evaluateExpr(expr,
             /** @type {!JsonObject} */(renderState))) {
           candidate.classList.add('i-amphtml-subs-display');
+<<<<<<< HEAD
           if (candidate.getAttribute('subscriptions-service')
             && candidate.getAttribute('subscriptions-action')
             && candidate.getAttribute('subscriptions-decorate') !== 'false') {
@@ -137,6 +146,8 @@ export class LocalSubscriptionPlatformRenderer {
                 null
             );
           }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         } else {
           candidate.classList.remove('i-amphtml-subs-display');
         }

@@ -17,7 +17,11 @@
 import {Entitlement} from '../entitlement';
 
 
+<<<<<<< HEAD
 describes.realWin('EntitlementClass', {}, () => {
+=======
+describes.realWin('entitlement', {}, () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   const service = 'sample-service';
   const source = 'sample-source';
   const products = ['scenic-2017.appspot.com:news',
@@ -92,6 +96,7 @@ describes.realWin('EntitlementClass', {}, () => {
     entitlement.setCurrentProduct('lipsum');
     expect(entitlement.enablesThis()).to.be.false;
   });
+<<<<<<< HEAD
 
   it('should return raw, granStatus and source for pingback', () => {
     const raw = 'raw';
@@ -103,4 +108,6 @@ describes.realWin('EntitlementClass', {}, () => {
     expect(pingbackData.source).to.be.equal(entitlement.source);
     expect(pingbackData.grantState).to.be.equal(entitlement.enablesThis());
   });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });

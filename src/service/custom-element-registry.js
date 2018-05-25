@@ -16,6 +16,10 @@
 
 import {ElementStub, stubbedElements} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
+<<<<<<< HEAD
+=======
+import {declareExtension} from './ampdoc-impl';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {reportError} from '../error';
 import {user} from '../log';
 
@@ -98,7 +102,11 @@ export function stubElementsForDoc(ampdoc) {
   const list = ampdoc.getHeadNode().querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
+<<<<<<< HEAD
     ampdoc.declareExtension(name);
+=======
+    declareExtension(ampdoc, name);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     stubElementIfNotKnown(ampdoc.win, name);
   }
 }

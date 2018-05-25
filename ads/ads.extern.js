@@ -434,6 +434,7 @@ data.dfpSlot;
 data.nc;
 data.auid;
 
+<<<<<<< HEAD
 // pixels.js
 var pixelsAd;
 var pixelsAMPAd;
@@ -445,6 +446,8 @@ data.tag;
 data.clickTracker;
 data.viewability;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 // plista.js
 data.widgetname;
 data.publickey;
@@ -453,12 +456,15 @@ data.item;
 data.geo;
 data.categories;
 
+<<<<<<< HEAD
 // pubguru.js
 data.height;
 data.publisher;
 data.slot;
 data.width;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 // pubmatic.js
 data.kadpageurl;
 

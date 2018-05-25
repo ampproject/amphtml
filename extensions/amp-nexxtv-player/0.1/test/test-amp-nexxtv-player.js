@@ -72,9 +72,14 @@ describes.realWin('amp-nexxtv-player', {
   });
 
   it('fails without client', () => {
+<<<<<<< HEAD
     return getNexxtv('71QQG852413DU7J', null)
         .should.eventually.be.rejectedWith(
             /The data-client attribute is required/);
+=======
+    return getNexxtv('71QQG852413DU7J', null).should.eventually.be.rejectedWith(
+        /The data-client attribute is required/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should forward events from nexxtv-player to the amp element', () => {

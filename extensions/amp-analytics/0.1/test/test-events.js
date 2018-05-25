@@ -79,9 +79,15 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should require selector', () => {
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         tracker.add(analyticsElement, 'click', {selector: ''});
       }).to.throw(/Missing required selector/); });
+=======
+      expect(() => {
+        tracker.add(analyticsElement, 'click', {selector: ''});
+      }).to.throw(/Missing required selector/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should add listener', () => {
@@ -570,6 +576,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should validate timerSpec', () => {
       const handler = sandbox.stub();
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => {
           tracker.add(analyticsElement, 'timer', {}, handler);
@@ -619,6 +626,55 @@ describes.realWin('Events', {amp: 1}, env => {
           }}, handler);
         }).to.throw(/Cannot track timer start/);
       });
+=======
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {}, handler);
+      }).to.throw(/Bad timer specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: 1}, handler);
+      }).to.throw(/Bad timer specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {}}, handler);
+      }).to.throw(/Timer interval specification required/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: null,
+        }}, handler);
+      }).to.throw(/Bad timer interval specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 'two',
+        }}, handler);
+      }).to.throw(/Bad timer interval specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 0.1,
+        }}, handler);
+      }).to.throw(/Bad timer interval specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 0.49,
+        }}, handler);
+      }).to.throw(/Bad timer interval specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 1,
+          maxTimerLength: '',
+        }}, handler);
+      }).to.throw(/Bad maxTimerLength specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 1,
+          maxTimerLength: 0,
+        }}, handler);
+      }).to.throw(/Bad maxTimerLength specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+	  interval: 1,
+	  startSpec: {on: 'timer', selector: '.target'},
+        }}, handler);
+      }).to.throw(/Cannot track timer start/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       expect(handler).to.not.be.called;
       expect(() => {
@@ -724,11 +780,19 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('only fires when the timer interval exceeds the minimum', () => {
       const fn1 = sandbox.stub();
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         tracker.add(analyticsElement, 'timer', {timerSpec: {
           interval: 0,
         }}, fn1);
       }).to.throw(); });
+=======
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 0,
+        }}, fn1);
+      }).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(fn1).to.have.not.been.called;
 
       const fn2 = sandbox.stub();

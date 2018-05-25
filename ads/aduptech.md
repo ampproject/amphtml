@@ -22,8 +22,12 @@ on how to get required ad tag or placement keys.
 ## Examples
 
 ### Fixed size
+<<<<<<< HEAD
 
 Uses fixed size by the given `width` and `height`.
+=======
+Uses fixed size by given ```width``` and ```height```.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-ad type="aduptech"
@@ -37,9 +41,13 @@ Uses fixed size by the given `width` and `height`.
 ```
 
 ### Filled size
+<<<<<<< HEAD
 
 Uses available space of parent html container.
 
+=======
+Uses available space of parent html container.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```html
 <style amp-custom>
     #aduptech-container {
@@ -59,8 +67,12 @@ Uses available space of parent html container.
 ```
 
 ### Fixed height
+<<<<<<< HEAD
 
 Uses available width and the given `height`.
+=======
+Uses available width and given ```height```.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-ad type="aduptech"
@@ -73,8 +85,12 @@ Uses available width and the given `height`.
 ```
 
 ### Responsive
+<<<<<<< HEAD
 
 Uses available space but respecting aspect ratio by given `width` and `height` (for example 10:3).
+=======
+Uses available space but respecting aspect ratio by given ```width``` and ```height``` (for example 10:3).
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-ad type="aduptech"
@@ -89,16 +105,28 @@ Uses available space but respecting aspect ratio by given `width` and `height` (
 
 ## Configuration
 
+<<<<<<< HEAD
 ### Required parameters
 
 * ```data-placementkey```
 
 ### Optional parameters
 
+=======
+##### Required parameters
+* ```data-placementkey```
+
+##### Optional parameters
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 * ```data-query```
 * ```data-mincpc```
 * ```data-adtest```
 
 ## Design/Layout
+<<<<<<< HEAD
 
 Please visit [www.adup-tech.com](http://www.adup-tech.com) and sign up as publisher to create your own placement.
+=======
+Please visit [www.adup-tech.com](http://www.adup-tech.com) and sign up as publisher
+to create your own placement.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

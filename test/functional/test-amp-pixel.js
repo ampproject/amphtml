@@ -100,20 +100,35 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should disallow http URLs', () => {
     const url = 'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
+<<<<<<< HEAD
     return expect(trigger(url)).to.eventually.be.rejectedWith(
         /src attribute must start with/);
+=======
+    return expect(trigger(url)).to.eventually
+        .rejectedWith(/src attribute must start with/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should disallow relative URLs', () => {
     const url = '/activity;dc_iu=1/abc;ord=2';
+<<<<<<< HEAD
     return expect(trigger(url)).to.eventually.be.rejectedWith(
         /src attribute must start with/);
+=======
+    return expect(trigger(url)).to.eventually
+        .rejectedWith(/src attribute must start with/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should disallow fake-protocol URLs', () => {
     const url = 'https/activity;dc_iu=1/abc;ord=2';
+<<<<<<< HEAD
     return expect(trigger(url)).to.eventually.be.rejectedWith(
         /src attribute must start with/);
+=======
+    return expect(trigger(url)).to.eventually
+        .rejectedWith(/src attribute must start with/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should replace URL parameters', () => {
@@ -127,6 +142,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should throw for referrerpolicy with value other than ' +
       'no-referrer', () => {
+<<<<<<< HEAD
     allowConsoleError(() => {
       return createPixel(
           'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
@@ -137,6 +153,16 @@ describes.realWin('amp-pixel', {amp: true}, env => {
             expect(reason.message).to.match(/referrerpolicy/);
           });
     });
+=======
+    return createPixel(
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
+        'origin')
+        .then(() => {
+          throw new Error('must have failed.');
+        }, reason => {
+          expect(reason.message).to.match(/referrerpolicy/);
+        });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 

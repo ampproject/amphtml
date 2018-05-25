@@ -31,6 +31,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
     client = new IframeMessagingClient(win);
     client.setHostWindow(hostWindow);
     client.setSentinel('sentinel-123');
+<<<<<<< HEAD
     client.nextMessageId_ = 1;
   });
 
@@ -122,6 +123,8 @@ describes.realWin('iframe-messaging-client', {}, env => {
       expect(callbackSpy).to.be.calledOnce;
       expect(callbackSpy).to.be.calledWith('result-a');
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   describe('makeRequest', () => {

@@ -20,17 +20,27 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
     type="f1e"
     data-url="https://demo.impact-ad.jp"
     data-target="/SITE=AMPSITE/AREA=AMPAREA/AAMSZ=300X250/OENCJP=UTF8">
+=======
+<amp-ad width=300 height=250
+    type="f1e"
+    data-url="https://demo.impact-ad.jp"
+    data-target="/SITE=AMPSITE/AREA=AMPAREA/AAMSZ=300X250/OENCJP=UTF8" >
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 Supported parameters:
 
 - `data-url` - Must start with "https:"

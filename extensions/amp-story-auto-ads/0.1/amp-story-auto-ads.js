@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
@@ -523,3 +524,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 AMP.extension('amp-story-auto-ads', '0.1', AMP => {
   AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds, CSS);
 });
+=======
+// placeholder file
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

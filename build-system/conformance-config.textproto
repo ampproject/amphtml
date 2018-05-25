@@ -7,6 +7,7 @@ requirement: {
   error_message: 'Should not throw a non-Error object.'
 }
 
+<<<<<<< HEAD
 # Element
 
 requirement: {
@@ -25,6 +26,8 @@ requirement: {
   whitelist: 'src/style.js'
 }
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 # Strings
 
 requirement: {
@@ -41,7 +44,11 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
+<<<<<<< HEAD
   error_message: 'Use string.js#startsWith'
+=======
+  error_message: 'string.prototype.startsWith is not allowed'
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   value: 'string.prototype.startsWith'
 }
 

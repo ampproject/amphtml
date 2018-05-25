@@ -19,10 +19,18 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="400" height="225"
     type="smartclip"
     data-plc="68005"
     data-sz="400x320">
+=======
+<amp-ad width=400 height=225
+      type="smartclip"
+      data-plc="68005"
+      data-sz="400x320"
+      >
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
@@ -34,6 +42,12 @@ Supported parameters:
 
 All parameters are mandatory, only `data-extra` is optional.
 
+<<<<<<< HEAD
 - `data-plc` (String, non-empty)
 - `data-sz` (String, non-empty)
 - `data-extra` (String)
+=======
+- ```data-plc``` (String, non-empty)
+- ```data-sz``` (String, non-empty)
+- ```data-extra``` (String)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

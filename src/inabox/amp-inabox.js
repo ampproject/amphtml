@@ -19,7 +19,10 @@
  */
 
 import '../polyfills';
+<<<<<<< HEAD
 import {Navigation} from '../service/navigation';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from '../services';
 import {
   adopt,
@@ -30,6 +33,10 @@ import {
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
+<<<<<<< HEAD
+=======
+import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {installCacheServiceWorker} from '../service-worker/install';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
@@ -104,7 +111,12 @@ startupChunk(self.document, function initial() {
       stubElementsForDoc(ampdoc);
     });
     startupChunk(self.document, function final() {
+<<<<<<< HEAD
       Navigation.installAnchorClickInterceptor(ampdoc, self);
+=======
+      installAnchorClickInterceptor(ampdoc, self);
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
       installCacheServiceWorker(self);

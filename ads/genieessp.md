@@ -16,7 +16,11 @@ limitations under the License.
 
 # Geniee SSP
 
+<<<<<<< HEAD
 Please visit [Geniee SSP website](https://www.geniee.co.jp/) for more information.
+=======
+Please visit [our website](https://www.geniee.co.jp/) for more information.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
@@ -30,9 +34,18 @@ Please visit [Geniee SSP website](https://www.geniee.co.jp/) for more informatio
 
 ## Configuration
 
+<<<<<<< HEAD
 For semantics of configuration, please see Geniee SSP documentation or [contact Geniee SSP](http://en.geniee.co.jp/inquiry/).
 
 Supported parameters:
 
 - `data-vid`
 - `data-zid`
+=======
+For semantics of configuration, please see our SSP documentation or [contact us](http://en.geniee.co.jp/contact.html).
+
+Supported parameters:
+
+- data-vid
+- data-zid
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

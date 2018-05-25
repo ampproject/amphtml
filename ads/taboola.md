@@ -21,6 +21,7 @@ limitations under the License.
 ### Basic
 
 ```html
+<<<<<<< HEAD
   <amp-embed width="100" height="283"
        type=taboola
        layout=responsive
@@ -29,11 +30,22 @@ limitations under the License.
        data-mode="thumbnails-a"
        data-placement="Ads Example"
        data-article="auto">
+=======
+  <amp-embed width=100 height=283
+             type=taboola
+             layout=responsive
+             heights="(min-width:1907px) 39%, (min-width:1200px) 46%, (min-width:780px) 64%, (min-width:480px) 98%, (min-width:460px) 167%, 196%"
+             data-publisher="amp-demo"
+             data-mode="thumbnails-a"
+             data-placement="Ads Example"
+             data-article="auto">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   </amp-embed>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
@@ -49,3 +61,20 @@ Supported parameters:
 - `data-others`
 - `data-url`
 - `data-referrer`
+=======
+For semantics of configuration, please see ad network documentation.
+
+Supported parameters:
+
+- data-publisher
+- data-placement
+- data-mode
+- data-article
+- data-video
+- data-photo
+- data-home
+- data-category
+- data-others
+- data-url
+- data-referrer
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

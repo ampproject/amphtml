@@ -20,8 +20,11 @@ import {dev, user} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn, map} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
+<<<<<<< HEAD
 import {isFiniteNumber} from '../../../src/types';
 import {isObject} from '../../../src/types';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -45,6 +48,7 @@ export class ConsentPolicyManager {
     /** @private {!Promise} */
     this.ConsentStateManagerPromise_ =
         getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
+<<<<<<< HEAD
 
     /** @private {?function()} */
     this.allConsentInitatedResolver_ = null;
@@ -53,6 +57,8 @@ export class ConsentPolicyManager {
     this.allConsentInitated_ = new Promise(resolve => {
       this.allConsentInitatedResolver_ = resolve;
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -61,11 +67,15 @@ export class ConsentPolicyManager {
    * {
    *   "waitFor": {
    *     "consentABC": [], // Can't support array now. All items will be treated as an empty array
+<<<<<<< HEAD
    *     "consentDEF": [],
    *   }
    *   "timeout": {
    *     "seconds": 1,
    *     "fallbackAction": 'reject'
+=======
+   *     "consentDEF": []
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    *   }
    * }
    *
@@ -79,7 +89,11 @@ export class ConsentPolicyManager {
 
     const waitFor = Object.keys(config['waitFor'] || {});
 
+<<<<<<< HEAD
     const instance = new ConsentPolicyInstance(config);
+=======
+    const instance = new ConsentPolicyInstance(waitFor);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     this.instances_[policyId] = instance;
 
@@ -89,6 +103,7 @@ export class ConsentPolicyManager {
       this.policyInstancePromises_[policyId] = null;
     }
 
+<<<<<<< HEAD
     const initPromises = [];
 
     this.ConsentStateManagerPromise_.then(manager => {
@@ -127,6 +142,20 @@ export class ConsentPolicyManager {
     }
     this.allConsentInitatedResolver_ = null;
   }
+=======
+    this.ConsentStateManagerPromise_.then(manager => {
+      for (let i = 0; i < waitFor.length; i++) {
+        const consentId = waitFor[i];
+        manager.whenConsentReady(consentId).then(() => {
+          manager.onConsentStateChange(consentId, state => {
+            instance.consentStateChangeHandler(consentId, state);
+          });
+        });
+      }
+    });
+  }
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   /**
    * Used to wait for policy to resolve;
@@ -150,6 +179,7 @@ export class ConsentPolicyManager {
   }
 
   /**
+<<<<<<< HEAD
    * Get shared data of a policy. If multiple consent instances return
    * sharedData, a merge will be done. For any conflict keys, the value from
    * later consent instance (as defined in the policy config) will override
@@ -175,6 +205,8 @@ export class ConsentPolicyManager {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Wait for policy instance to be ready.
    * @param {string} policyId
    * @return {!Promise}
@@ -193,12 +225,16 @@ export class ConsentPolicyManager {
 }
 
 export class ConsentPolicyInstance {
+<<<<<<< HEAD
   constructor(config) {
     /** !Array<string> */
     const pendingItems = Object.keys(config['waitFor'] || {});
 
     /** @private {!JsonObject} */
     this.config_ = config;
+=======
+  constructor(pendingItems) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private {!Object<string, ?CONSENT_ITEM_STATE>} */
     this.itemToConsentState_ = map();
@@ -213,7 +249,10 @@ export class ConsentPolicyInstance {
 
     /** @private {CONSENT_POLICY_STATE} */
     this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
+<<<<<<< HEAD
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.init_(pendingItems);
   }
 
@@ -226,6 +265,7 @@ export class ConsentPolicyInstance {
     }
   }
 
+<<<<<<< HEAD
   /** @returns {Array<string>} */
   getConsentInstanceIds() {
     return Object.keys(this.itemToConsentState_);
@@ -273,6 +313,8 @@ export class ConsentPolicyInstance {
 
   }
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * consent instance state change handlerit
    * @param {string} consentId
@@ -289,6 +331,7 @@ export class ConsentPolicyInstance {
       return;
     }
 
+<<<<<<< HEAD
 
     if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
       const shouldOverwrite =
@@ -299,17 +342,26 @@ export class ConsentPolicyInstance {
         this.itemToConsentState_[consentId] = CONSENT_ITEM_STATE.NOT_REQUIRED;
       }
     } else if (state == CONSENT_ITEM_STATE.DISMISSED) {
+=======
+    if (state != CONSENT_ITEM_STATE.DISMISSED) {
+      this.itemToConsentState_[consentId] = state;
+    } else {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       // When dismissed, use the old value
       if (this.itemToConsentState_[consentId] === null) {
         this.itemToConsentState_[consentId] = CONSENT_ITEM_STATE.UNKNOWN;
       }
+<<<<<<< HEAD
     } else {
       this.itemToConsentState_[consentId] = state;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
 
     this.evaluate_();
   }
 
+<<<<<<< HEAD
   /**
    *
    * @param {boolean} isForce
@@ -324,6 +376,11 @@ export class ConsentPolicyInstance {
 
     // A single consent instance is unknown
     let isUnknown = false;
+=======
+
+  evaluate_() {
+    let isSufficient = true;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Decide to traverse item list every time instead of keeping reject/pending counts
     // Performance should be OK since we expect item list to be small.
@@ -331,6 +388,7 @@ export class ConsentPolicyInstance {
     for (let i = 0; i < items.length; i++) {
       const consentId = items[i];
       if (this.itemToConsentState_[consentId] === null) {
+<<<<<<< HEAD
         if (isForce) {
           // Force evaluate on timeout
           const fallbackState = opt_fallbackState || CONSENT_ITEM_STATE.UNKNOWN;
@@ -368,6 +426,18 @@ export class ConsentPolicyInstance {
     } else {
       state = CONSENT_POLICY_STATE.INSUFFICIENT;
     }
+=======
+        return;
+      }
+
+      if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.REJECTED ||
+          this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
+        isSufficient = false;
+      }
+    }
+    const state = isSufficient ?
+      CONSENT_POLICY_STATE.SUFFICIENT : CONSENT_POLICY_STATE.INSUFFICIENT;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     this.status_ = state;
 

@@ -17,7 +17,10 @@
 import {poll} from '../../../../../testing/iframe';
 
 describe.configure().run('amp-image-lightbox', function() {
+<<<<<<< HEAD
   this.timeout(5000);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   const extensions = ['amp-image-lightbox'];
   const imageLightboxBody = `
   <figure>
@@ -49,7 +52,12 @@ describe.configure().run('amp-image-lightbox', function() {
       win = env.win;
     });
 
+<<<<<<< HEAD
     it('should activate on tap of source image', () => {
+=======
+    // TODO(cathyxz, #13458): Find out why this is flaky on master.
+    it.skip('should activate on tap of source image', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const lightbox = win.document.getElementById('image-lightbox-1');
       expect(lightbox.style.display).to.equal('none');
       const ampImage = win.document.getElementById('img0');

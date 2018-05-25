@@ -48,6 +48,7 @@ This component is experimental and under active development. For any issues, ple
 
 [TOC]
 
+<<<<<<< HEAD
 ## Announcements
 
 ### (4/2018) **New metadata requirements**
@@ -88,6 +89,11 @@ The new attributes:
 ## Overview
 
 The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
+=======
+## Overview
+
+The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP Story, you can provide users with bite-sized, visually rich information and content.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -97,6 +103,7 @@ The `amp-story` extension provides a new format for displaying visual content th
   </amp-anim>
 </figure>
 
+<<<<<<< HEAD
 ## AMP story format
 
 An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
@@ -104,6 +111,15 @@ An [AMP story](#story:-amp-story) is a complete AMP HTML document that is compri
 <amp-img alt="AMP story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
     <img alt="AMP story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
+=======
+## AMP Story format
+
+An [AMP Story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
+
+<amp-img alt="AMP Story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
+  <noscript>
+    <img alt="AMP Story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   </noscript>
 </amp-img>
 
@@ -157,12 +173,20 @@ The content in the body creates a story with two pages.  Each page has a full bl
 
 ### Required markup for amp-story
 
+<<<<<<< HEAD
 The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+=======
+The AMP Story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 | RULE | DESCRIPTION |
 | ---- | --- |
+<<<<<<< HEAD
 | The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP story. |
+=======
+| The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP Story. |
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 | Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-0.1.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
 
 ## Story: `amp-story`
@@ -180,6 +204,7 @@ The `amp-story` component represents an entire story.  The component itself  imp
 ### Example
 
 ```html
+<<<<<<< HEAD
 <amp-story
     standalone
     title="My Story"
@@ -190,6 +215,9 @@ The `amp-story` component represents an entire story.  The component itself  imp
     poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
     bookend-config-src="./related.json"
     background-audio="my.mp3">
+=======
+<amp-story standalone bookend-config-src="./related.json" background-audio="my.mp3">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
@@ -202,6 +230,7 @@ The `amp-story` component represents an entire story.  The component itself  imp
 
 Identifies that the AMP document is a story.
 
+<<<<<<< HEAD
 ##### title [required]
 
 The title of the story.
@@ -218,12 +247,15 @@ A URL to the story publisher's logo in square format (1x1 aspect ratio). For exa
 
 A URL to the [story poster](#posters) in portrait format (3x4 aspect ratio).
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ##### bookend-config-src [optional]
 
 A URL endpoint that accepts GET requests and returns a JSON response with links to related and trending stories, to be shown on a screen at the end of the story.  If omitted, the amp-story component renders a default UI for the end screen.  See the [bookend endpoint](#bookend-json-endpoint) section below for the JSON response format.
 
 ##### background-audio [optional]
 
+<<<<<<< HEAD
 A URL to an audio file that plays throughout the story.
 
 ##### poster-square-src [optional]
@@ -237,6 +269,9 @@ A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
 ### Posters
 
 A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although you can use any image that is representative of the story.
+=======
+A URI to an audio file that plays throughout the story.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ### Children (of amp-story)
 
@@ -262,7 +297,11 @@ These are configured in the `related-articles` field of the response object.
 
 #### Social sharing
 
+<<<<<<< HEAD
 The configuration for social sharing is defined in the `share-providers` field of the response object [optional].
+=======
+The configuration for social sharing is defined in the `share-providers` field of the response object (optional).
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 This field should contain an object with key-value pairs. Each key represents a share provider's name (e.g. `facebook`). The value should be set to a non-empty configuration object for the provider or `true` (when no parameters are required).
 
@@ -733,7 +772,11 @@ See a [live demo of all the AMP story animations](https://ampbyexample.com/stori
 
 ### Animation attributes
 
+<<<<<<< HEAD
 #####  animate-in [required]
+=======
+#####  animate-in (required)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 Use this attribute to specify the name of the entrance [animation preset](#animation-presets).
 
@@ -745,7 +788,11 @@ Fly from left!
 </h2>
 ```
 
+<<<<<<< HEAD
 ##### animate-in-duration [optional]
+=======
+##### animate-in-duration (optional)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 Use this attribute to specify the duration of the entrance animation, in seconds or milliseconds (e.g., 0.2s or 200ms). The default duration depends on the animation preset you specified.
 
@@ -757,7 +804,11 @@ Fly from left!
 </h2>
 ```
 
+<<<<<<< HEAD
 ##### animate-in-delay [optional]
+=======
+##### animate-in-delay (optional)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 Use this attribute to specify the delay before starting the animation. The value must be greater than or equal to 0, in seconds or milliseconds (for example, 0.2s or 200ms). The default delay depends on the animation preset you specified.
 
@@ -775,7 +826,11 @@ Fly from left!
 The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
 {% endcall %}
 
+<<<<<<< HEAD
 ##### animate-in-after [optional]
+=======
+##### animate-in-after (optional)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 Use this attribute to chain or sequence animations (for example, animation2 starts after animation1 is complete). Specify the ID of the animated element that this element's animation will follow. The element must be present on the same `<amp-story-page>`. The delay is applied after the previous element's animation has finished. For further details, see the [Sequencing animations](#sequencing-animations) section below.
 

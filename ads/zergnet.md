@@ -21,7 +21,12 @@ limitations under the License.
 ### Basic
 
 ```html
+<<<<<<< HEAD
 <amp-embed width="780" height="100"
+=======
+<amp-embed
+    width="780" height="100"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     heights="(max-width:645px) 100%, (max-width:845px) 31%, 23%"
     layout="responsive"
     type="zergnet"
@@ -31,8 +36,16 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
 
 - `data-zergid`
+=======
+For semantics of configuration, please see ad network documentation.
+
+Supported parameters:
+
+- data-zergid
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

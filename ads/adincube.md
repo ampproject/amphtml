@@ -16,6 +16,7 @@ limitations under the License.
 
 # AdinCube
 
+<<<<<<< HEAD
 Visit [dashboard.adincube.com](https://dashboard.adincube.com/dashboard) to create a publisher account and get access to our AMP ads.
 
 ## Examples
@@ -23,6 +24,14 @@ Visit [dashboard.adincube.com](https://dashboard.adincube.com/dashboard) to crea
 ### In content
 
 Uses fixed size by the given `width` and `height`.
+=======
+Visit [dashboard.adincube.com](https://dashboard.adincube.com/dashboard) to create a publisher account and get access to our amp ads.
+
+## Examples
+
+### IN_CONTENT
+Uses fixed size by given ```width``` and ```height```.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-ad width="300" height="250"
@@ -32,8 +41,13 @@ Uses fixed size by the given `width` and `height`.
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 ### Sticky banner
 Uses fixed size by the given `width` and `height`.
+=======
+### STICKY_BANNER
+Uses fixed size by given ```width``` and ```height```.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-sticky-ad layout="nodisplay">
@@ -44,11 +58,15 @@ Uses fixed size by the given `width` and `height`.
     </amp-ad>
 </amp-sticky-ad>
 ```
+<<<<<<< HEAD
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 Refer to the [amp-sticky-ad](https://www.ampproject.org/docs/reference/components/amp-sticky-ad) documentation to see how to implement this ad.
 
 
 ## Configuration
+<<<<<<< HEAD
 
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
@@ -60,4 +78,13 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Optional parameters
 
+=======
+For semantics of configuration, please see ad network documentation.
+
+##### Required parameters
+* `data-ad-type` - type of the ad
+* `data-site-key` - unique key attached to a website
+
+##### Optional parameters
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 * `data-params` - additional config parameters

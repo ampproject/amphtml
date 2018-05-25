@@ -28,9 +28,19 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For more information, please [contact fluct](https://corp.fluct.jp/en/contact.php).
 
 ### Required parameters
 
 - `data-g`
 - `data-u`
+=======
+For more information, please [contact us](https://corp.fluct.jp/en/contact.php).
+
+Supported parameters:
+
+Required:
+- data-g
+- data-u
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

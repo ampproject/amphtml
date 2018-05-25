@@ -38,8 +38,12 @@ import {toWin} from './types';
 const EMBED_PROP = '__AMP_EMBED__';
 
 /** @const {!Array<string>} */
+<<<<<<< HEAD
 const EXCLUDE_INI_LOAD =
     ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL', 'AMP-AD-EXIT'];
+=======
+const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 /**
@@ -94,6 +98,10 @@ function isSrcdocSupported() {
  * whether the embed is currently in the viewport.
  * @param {!FriendlyIframeEmbed} embed
  * @param {boolean} visible
+<<<<<<< HEAD
+=======
+ * @restricted
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
  */
 export function setFriendlyIframeEmbedVisible(embed, visible) {
@@ -406,10 +414,14 @@ export class FriendlyIframeEmbed {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
   }
 
+<<<<<<< HEAD
   /**
    * @private
    * @restricted
    */
+=======
+  /** @private */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   startRender_() {
     if (this.host) {
       this.host.renderStarted();
@@ -467,7 +479,10 @@ export class FriendlyIframeEmbed {
   /**
    * @param {boolean} visible
    * @private
+<<<<<<< HEAD
    * @restricted
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    */
   setVisible_(visible) {
     if (this.visible_ != visible) {

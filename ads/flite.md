@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="568"
+=======
+<amp-ad width=320 height=568
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type = "flite"
     data-guid = "aa7bf589-6d51-4194-91f4-d22eef8e3688"
     data-mixins="">
@@ -28,9 +32,18 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration and implementation details, please [contact Flite Support](http://www.flite.com/).
 
 Supported parameters:
 
 - `data-guid`
 - `data-mixins`
+=======
+For configuration and implementation details, please [contact Flite Support](http://support.flite.com/).
+
+Supported parameters:
+
+- data-guid
+- data-mixins
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

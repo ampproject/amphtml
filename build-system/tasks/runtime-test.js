@@ -37,7 +37,10 @@ const green = colors.green;
 const yellow = colors.yellow;
 const cyan = colors.cyan;
 const red = colors.red;
+<<<<<<< HEAD
 const bold = colors.bold;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 const preTestTasks =
     argv.nobuild ? [] : ((argv.unit || argv.a4a) ? ['css'] : ['build']);
@@ -80,12 +83,20 @@ function getConfig() {
         'SL_Chrome_latest',
         'SL_Chrome_45',
         'SL_Firefox_latest',
+<<<<<<< HEAD
         // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
         // 'SL_Safari_latest',
         // 'SL_Safari_10',
         // 'SL_Safari_9',
         // 'SL_iOS_latest',
         // 'SL_iOS_10_0',
+=======
+        'SL_Safari_latest',
+        'SL_Safari_10',
+        'SL_Safari_9',
+        'SL_iOS_latest',
+        'SL_iOS_10_0',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         // TODO(rsimha, #14374): Re-enable these after upgrading wd.
         // 'SL_Edge_latest',
         // 'SL_IE_11',
@@ -111,7 +122,11 @@ function getAdTypes() {
   };
 
   // Start with Google ad types
+<<<<<<< HEAD
   const adTypes = ['adsense'];
+=======
+  const adTypes = ['adsense', 'doubleclick'];
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   // Add all other ad types
   const files = fs.readdirSync('./ads/');
@@ -169,7 +184,11 @@ function printArgvMessages() {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
     log(green('⤷ Use'), cyan('--nohelp'),
+<<<<<<< HEAD
         green('to silence these messages.'));
+=======
+        green('to silence these messages.)'));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     if (!argv.unit && !argv.integration && !argv.files && !argv.a4a) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
@@ -310,7 +329,10 @@ function runTests() {
     c.files = c.files.concat(config.coveragePaths);
     c.browserify.transform.push(
         ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
+<<<<<<< HEAD
     c.plugins.push('karma-coverage');
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     c.reporters = c.reporters.concat(['coverage']);
     if (c.preprocessors['src/**/*.js']) {
       c.preprocessors['src/**/*.js'].push('coverage');
@@ -337,6 +359,7 @@ function runTests() {
   }
 
   // Run fake-server to test XHR responses.
+<<<<<<< HEAD
   const server = gulp.src(process.cwd()).pipe(webserver({
     port: 31862,
     host: 'localhost',
@@ -345,6 +368,22 @@ function runTests() {
   }).on('kill', function() {
     log(yellow('Shutting down test responses server on localhost:31862'));
   }));
+=======
+  const server = gulp.src(process.cwd())
+      .pipe(webserver({
+        port: 31862,
+        host: 'localhost',
+        directoryListing: true,
+        middleware: [app],
+      })
+          .on('kill', function() {
+            log(yellow(
+                'Shutting down test responses server on localhost:31862'));
+            process.nextTick(function() {
+              process.exit();
+            });
+          }));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   log(yellow(
       'Started test responses server on localhost:31862'));
 
@@ -354,6 +393,7 @@ function runTests() {
   // Avoid Karma startup errors
   refreshKarmaWdCache();
 
+<<<<<<< HEAD
   // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
   // reporter, since it likely contains copious amounts of logs.
   const shouldCollapseSummary =
@@ -367,11 +407,17 @@ function runTests() {
     if (shouldCollapseSummary) {
       console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
     }
+=======
+  let resolver;
+  const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+  new Karma(c, function(exitCode) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     server.emit('kill');
     if (exitCode) {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
+<<<<<<< HEAD
     }
     // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
     if (process.env.TRAVIS) {
@@ -400,6 +446,24 @@ function runTests() {
     if (shouldCollapseSummary) {
       const result = browser.lastResult;
       let message = browser.name + ': ';
+=======
+      process.exit(exitCode);
+    } else {
+      resolver();
+    }
+  }).on('run_start', function() {
+    if (argv.saucelabs || argv.saucelabs_lite) {
+      console./* OK*/log(green(
+          'Running tests in parallel on ' + c.browsers.length +
+          ' Sauce Labs browser(s)...'));
+    } else {
+      console./* OK*/log(green('Running tests locally...'));
+    }
+  }).on('browser_complete', function(browser) {
+    if (argv.saucelabs || argv.saucelabs_lite) {
+      const result = browser.lastResult;
+      let message = '\n' + browser.name + ': ';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       message += 'Executed ' + (result.success + result.failed) +
           ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
       if (result.failed === 0) {
@@ -408,8 +472,12 @@ function runTests() {
         message += red(result.failed + ' FAILED');
       }
       message += '\n';
+<<<<<<< HEAD
       console./* OK*/log('\n');
       log(message);
+=======
+      console./* OK*/log(message);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
   }).start();
   return deferred.then(() => exitCtrlcHandler(handlerProcess));

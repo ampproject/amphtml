@@ -15,6 +15,10 @@
  */
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
+<<<<<<< HEAD
+=======
+import {Layout} from '../../../src/layout';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
@@ -43,6 +47,14 @@ export class AbstractAppBanner extends AMP.BaseElement {
     this.canShowBuiltinBanner_ = false;
   }
 
+<<<<<<< HEAD
+=======
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * Subclasses should override this method to specify action when open button
    * is clicked.

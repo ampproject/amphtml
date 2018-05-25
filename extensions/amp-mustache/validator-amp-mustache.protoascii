@@ -47,8 +47,11 @@ tags: {  # amp-mustache
   attr_lists: "common-extension-attrs"
 }
 # HTML5, 4.11.3 The template element
+<<<<<<< HEAD
 # The template element is also defined at
 # extensions/amp-date-picker/validator-amp-date-picker.protoascii
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 tags: {
   tag_name: "TEMPLATE"
   # <template> tags may not be nested inside other <template> tags.

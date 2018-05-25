@@ -17,16 +17,27 @@
 import {SubscriptionAnalytics} from '../analytics';
 
 
+<<<<<<< HEAD
 describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
   let analytics;
   let ampdoc;
   beforeEach(() => {
     ampdoc = env.ampdoc;
     analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+=======
+describes.realWin('SubscriptionAnalytics', {amp: true}, () => {
+  let analytics;
+
+  beforeEach(() => {
+    analytics = new SubscriptionAnalytics();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should not fail', () => {
     analytics.event('event1');
+<<<<<<< HEAD
     analytics.serviceEvent('event1', 'serviceId');
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

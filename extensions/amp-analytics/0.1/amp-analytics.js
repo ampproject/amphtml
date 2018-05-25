@@ -33,7 +33,11 @@ import {
   expandConfigRequest,
 } from './requests';
 import {Services} from '../../../src/services';
+<<<<<<< HEAD
 import {assertHttpsUrl} from '../../../src/url';
+=======
+import {appendEncodedParamStringToUrl, assertHttpsUrl} from '../../../src/url';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
@@ -79,6 +83,15 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.consentNotificationId_ = null;
 
+<<<<<<< HEAD
+=======
+    /**
+     * @private {?string} Predefined type associated with the tag. If specified,
+     * the config from the predefined type is merged with the inline config
+     */
+    this.type_ = null;
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {boolean} */
     this.isSandbox_ = false;
 
@@ -810,6 +823,37 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Adds parameters to URL. Similar to the function defined in url.js but with
+   * a different encoding method.
+   * @param {string} request
+   * @param {!Object<string, string>} params
+   * @return {string}
+   * @private
+   */
+  addParamsToUrl_(request, params) {
+    const s = [];
+    for (const k in params) {
+      const v = params[k];
+      if (v == null) {
+        continue;
+      } else {
+        const sv = this.variableService_.encodeVars(k, v);
+        s.push(`${encodeURIComponent(k)}=${sv}`);
+      }
+    }
+
+    const paramString = s.join('&');
+    if (request.indexOf('${extraUrlParams}') >= 0) {
+      return request.replace('${extraUrlParams}', paramString);
+    } else {
+      return appendEncodedParamStringToUrl(request, paramString);
+    }
+  }
+
+  /**
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param {string} request The full request string to send.
    * @param {!JsonObject} trigger
    * @private

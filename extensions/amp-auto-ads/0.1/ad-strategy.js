@@ -15,7 +15,10 @@
  */
 
 import {DataAttributeDef, PlacementState} from './placement';
+<<<<<<< HEAD
 import {tryResolve} from '../../../src/utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {user} from '../../../src/log';
 
 /** @const */
@@ -56,7 +59,11 @@ export class AdStrategy {
    */
   run() {
     if (this.adTracker_.isMaxAdCountReached()) {
+<<<<<<< HEAD
       return tryResolve(() => this.getStrategyResult_());
+=======
+      return Promise.resolve(this.getStrategyResult_());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
     return this.placeNextAd_().then(success => {
       if (success) {

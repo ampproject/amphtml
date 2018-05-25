@@ -283,7 +283,12 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
+<<<<<<< HEAD
       it('should execute play', () => {
+=======
+      // TODO(dvoytenko, #14336): Fails due to console errors.
+      it.skip('should execute play', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         return ampdoc.whenBodyAvailable().then(() => {
           // Pause an animation to test resuming it.
           const pauseInvocation = {
@@ -312,7 +317,12 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
+<<<<<<< HEAD
       it('should execute pause', () => {
+=======
+      // TODO(dvoytenko, #14336): Fails due to console errors.
+      it.skip('should execute pause', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         return ampdoc.whenBodyAvailable().then(() => {
           const invocation = {
             method: 'pause',
@@ -334,7 +344,12 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
+<<<<<<< HEAD
       it('should execute togglePlay', () => {
+=======
+      // TODO(dvoytenko, #14336): Fails due to console errors.
+      it.skip('should execute togglePlay', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         return ampdoc.whenBodyAvailable().then(() => {
           const invocation = {
             method: 'togglePlay',
@@ -355,7 +370,12 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
+<<<<<<< HEAD
       it('should execute gotoAndPlay', () => {
+=======
+      // TODO(dvoytenko, #14336): Fails due to console errors.
+      it.skip('should execute gotoAndPlay', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         return ampdoc.whenBodyAvailable().then(() => {
           const invocation = {
             method: 'gotoAndPlay',
@@ -387,7 +407,12 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
+<<<<<<< HEAD
       it('should execute gotoAndPause', () => {
+=======
+      // TODO(dvoytenko, #14336): Fails due to console errors.
+      it.skip('should execute gotoAndPause', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         return ampdoc.whenBodyAvailable().then(() => {
           // Test handling missing arguments.
           const invocation = {
@@ -414,7 +439,12 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
+<<<<<<< HEAD
       it('should execute gotoAndPlayNTimes', () => {
+=======
+      // TODO(dvoytenko, #14336): Fails due to console errors.
+      it.skip('should execute gotoAndPlayNTimes', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         return ampdoc.whenBodyAvailable().then(() => {
           // Invoking gotoAndPlayNTimes with a negative N value is a no-op.
           const invocationWithBadNValue = {

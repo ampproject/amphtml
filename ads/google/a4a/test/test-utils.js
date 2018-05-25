@@ -123,7 +123,12 @@ describe('Google A4A utils', () => {
       },
     };
 
+<<<<<<< HEAD
     it('should extract correct config from header', () => {
+=======
+    // TODO(zhouyx, #14336): Fails due to console errors.
+    it.skip('should extract correct config from header', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         let url;
@@ -437,6 +442,7 @@ describe('Google A4A utils', () => {
         });
       });
     });
+<<<<<<< HEAD
 
     it('should have correct bc value when everything supported', () => {
       return createIframePromise().then(fixture => {
@@ -515,6 +521,8 @@ describe('Google A4A utils', () => {
         });
       });
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   describe('#mergeExperimentIds', () => {

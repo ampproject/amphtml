@@ -15,7 +15,10 @@
  */
 
 import {BaseElement} from '../src/base-element';
+<<<<<<< HEAD
 import {isExperimentOn} from '../src/experiments';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
 import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
@@ -27,9 +30,12 @@ import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
   'aria-describedby', 'aria-labelledby'];
 
+<<<<<<< HEAD
 const EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE = ATTRIBUTES_TO_PROPAGATE
     .concat(['srcset', 'src', 'sizes']);
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 export class AmpImg extends BaseElement {
 
   /** @param {!AmpElement} element */
@@ -47,14 +53,18 @@ export class AmpImg extends BaseElement {
 
     /** @private {?../src/srcset.Srcset} */
     this.srcset_ = null;
+<<<<<<< HEAD
 
     /** @private @const {boolean} */
     this.useNativeSrcset_ = isExperimentOn(this.win, 'amp-img-native-srcset');
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
     let mutated = false;
+<<<<<<< HEAD
     if (!this.useNativeSrcset_) {
       if (mutations['srcset'] !== undefined) {
         // `srcset` mutations take precedence over `src` mutations.
@@ -85,6 +95,29 @@ export class AmpImg extends BaseElement {
         this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
       }
 
+=======
+    if (mutations['srcset'] !== undefined) {
+      // `srcset` mutations take precedence over `src` mutations.
+      this.srcset_ = srcsetFromElement(this.element);
+      mutated = true;
+    } else if (mutations['src'] !== undefined) {
+      // If only `src` is mutated, then ignore the existing `srcset` attribute
+      // value (may be set automatically as cache optimization).
+      this.srcset_ = srcsetFromSrc(this.element.getAttribute('src'));
+      mutated = true;
+    }
+
+    // This element may not have been laid out yet.
+    if (mutated && this.img_) {
+      this.updateImageSrc_();
+    }
+
+    if (this.img_) {
+      const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
+          value => mutations[value] !== undefined);
+      this.propagateAttributes(
+          attrs, this.img_, /* opt_removeMissingAttrs */ true);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
   }
 
@@ -128,7 +161,11 @@ export class AmpImg extends BaseElement {
     if (this.img_) {
       return;
     }
+<<<<<<< HEAD
     if (!this.useNativeSrcset_ && !this.srcset_) {
+=======
+    if (!this.srcset_) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       this.srcset_ = srcsetFromElement(this.element);
     }
     // If this amp-img IS the fallback then don't allow it to have its own
@@ -156,6 +193,7 @@ export class AmpImg extends BaseElement {
         'be correctly propagated for the underlying <img> element.');
     }
 
+<<<<<<< HEAD
 
     if (this.useNativeSrcset_) {
       this.propagateAttributes(EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE,
@@ -165,6 +203,9 @@ export class AmpImg extends BaseElement {
       this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     }
 
+=======
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
@@ -203,6 +244,7 @@ export class AmpImg extends BaseElement {
   }
 
   /**
+<<<<<<< HEAD
    * Sets the img src to the first url in the srcset if srcset is defined but
    * src is not.
    * @private
@@ -219,6 +261,8 @@ export class AmpImg extends BaseElement {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @return {!Promise}
    * @private
    */
@@ -226,6 +270,7 @@ export class AmpImg extends BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
+<<<<<<< HEAD
 
     if (!this.useNativeSrcset_) {
       const src = this.srcset_.select(
@@ -240,6 +285,19 @@ export class AmpImg extends BaseElement {
       this.img_.setAttribute('src', src);
     }
 
+=======
+    const src = this.srcset_.select(
+        // The width should never be 0, but we fall back to the screen width
+        // just in case.
+        this.getViewport().getWidth() || this.win.screen.width,
+        this.getDpr());
+    if (src == this.img_.getAttribute('src')) {
+      return Promise.resolve();
+    }
+
+    this.img_.setAttribute('src', src);
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return this.loadPromise(this.img_).then(() => {
       // Clean up the fallback if the src has changed.
       if (!this.allowImgLoadFallback_ &&
@@ -266,6 +324,10 @@ export class AmpImg extends BaseElement {
 /**
  * @param {!Window} win Destination window for the new element.
  * @this {undefined}  // Make linter happy
+<<<<<<< HEAD
+=======
+ * @return {undefined}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  */
 export function installImg(win) {
   registerElement(win, 'amp-img', AmpImg);

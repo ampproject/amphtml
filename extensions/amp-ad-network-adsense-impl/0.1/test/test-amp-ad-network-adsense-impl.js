@@ -32,8 +32,11 @@ import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+<<<<<<< HEAD
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Preconnect} from '../../../../src/preconnect';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
@@ -136,7 +139,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
       element.setAttribute('width', '666');
       expect(impl.isValidElement()).to.be.false;
     });
+<<<<<<< HEAD
     it('should NOT be valid (responsive with missing data-full-width)', () => {
+=======
+    it('should NOT be valid (responsive with missing ' +
+        'data-full-width)', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       isResponsiveStub.callsFake(() => true);
       element.setAttribute('height', '320');
       element.setAttribute('width', '100vw');
@@ -429,14 +437,21 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#getAdUrl', () => {
+<<<<<<< HEAD
     const adsenseFormatExpName = 'as-use-attr-for-format';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     beforeEach(() => {
       resetSharedState();
     });
 
     afterEach(() => {
+<<<<<<< HEAD
       toggleExperiment(impl.win, adsenseFormatExpName, false);
+=======
+      toggleExperiment(impl.win, 'as-use-attr-for-format', false);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       toggleExperiment(
           impl.win, 'ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME', false);
     });
@@ -476,6 +491,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
     });
     it('has correct format when as-use-attr-for-format is on', () => {
+<<<<<<< HEAD
       forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
@@ -494,6 +510,26 @@ describes.realWin('amp-ad-network-adsense-impl', {
       return impl.getAdUrl().then(
           url => expect(url).to.match(/eid=[^&]*21062003/));
     });
+=======
+      toggleExperiment(impl.win, 'as-use-attr-for-format', true);
+      const width = element.getAttribute('width');
+      const height = element.getAttribute('height');
+      return impl.getAdUrl().then(url =>
+        // With exp as-use-attr-for-format off, we can't test for specific
+        // numbers, but we know that the values should be numeric.
+        expect(url).to.match(new RegExp(
+            `format=${width}x${height}&w=${width}&h=${height}`)));
+    });
+    it('has correct format when width=auto and as-use-attr-for-format is on',
+        () => {
+          toggleExperiment(impl.win, 'as-use-attr-for-format', true);
+          element.setAttribute('width', 'auto');
+          expect(impl.element.getAttribute('width')).to.equal('auto');
+          return impl.getAdUrl().then(url =>
+              // Ensure that "auto" doesn't appear anywhere here:
+            expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
+        });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     it('includes eid when in amp-auto-ads holdout control', () => {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
@@ -603,7 +639,11 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(adUrl1).to.match(/ifi=1/);
         return impl2.getAdUrl().then(adUrl2 => {
           expect(adUrl2).to.match(/pv=1/);
+<<<<<<< HEAD
           expect(adUrl2).to.match(/prev_fmts=\d+?x\d+?/);
+=======
+          expect(adUrl2).to.match(/prev_fmts=320x50/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           expect(adUrl2).to.not.match(/prev_slotnames/);
           expect(adUrl2).to.match(/ifi=2/);
           return impl3.getAdUrl().then(adUrl3 => {
@@ -613,7 +653,11 @@ describes.realWin('amp-ad-network-adsense-impl', {
             // has a bounding rectangle of 0x0. The important thing to
             // test here is the number of previous formats.
             expect(adUrl3).to.match(
+<<<<<<< HEAD
                 /prev_fmts=(\d+?x\d+?%2C\d+?x\d+?|\d+?x\d+?%2C\d+?x\d+?)/);
+=======
+                /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             expect(adUrl3).to.match(/prev_slotnames=slotname_foo/);
             expect(adUrl3).to.match(/ifi=3/);
           });
@@ -641,6 +685,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       return expect(impl.getAdUrl()).to.eventually
           .match(/pwprc=package_code(&|$)/);
     });
+<<<<<<< HEAD
 
     it('should return empty string if unknown consentState', () => expect(
         impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(''));
@@ -661,6 +706,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(impl.getAdUrl(consentState)).to.eventually.not
             .match(/(\?|&)npa=1(&|$)/));
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   describe('#unlayoutCallback', () => {
@@ -880,8 +927,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
       }
       doc.body.style.direction = '';
     });
+<<<<<<< HEAD
 
     it('should change left margin for responsive', () => {
+=======
+    // TODO(charliereams, #14336): Fails due to console errors.
+    it.skip('should change left margin for responsive', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       containerContainer = doc.createElement('div');
       container = doc.createElement('div');
       return buildImpl({
@@ -896,7 +948,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
     });
 
+<<<<<<< HEAD
     it('should change right margin for responsive in RTL', () => {
+=======
+    // TODO(charliereams, #14336): Fails due to console errors.
+    it.skip('should change right margin for responsive in RTL', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       containerContainer = doc.createElement('div');
       container = doc.createElement('div');
       doc.body.style.direction = 'rtl'; // todo: revert
@@ -945,6 +1002,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           .to.be.true;
     });
   });
+<<<<<<< HEAD
 
   describe('#preconnect', () => {
     it('should preload nameframe', () => {
@@ -960,4 +1018,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should return null', () =>
       expect(AmpAdNetworkAdsenseImpl.prototype.getConsentPolicy()).to.be.null);
   });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });

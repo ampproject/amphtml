@@ -67,6 +67,11 @@ class AmpYoutube extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+<<<<<<< HEAD
+=======
+    /** @private {number} */
+    this.playerState_ = PlayerStates.UNSTARTED;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private {?string}  */
     this.videoid_ = null;
@@ -255,6 +260,10 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
+<<<<<<< HEAD
+=======
+    this.playerState_ = PlayerStates.PAUSED;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
@@ -264,7 +273,15 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
+<<<<<<< HEAD
     if (this.iframe_ && this.iframe_.contentWindow) {
+=======
+    // Only send pauseVideo command if the player is playing. Otherwise
+    // The player breaks if the user haven't played the video yet specially
+    // on mobile.
+    if (this.iframe_ && this.iframe_.contentWindow &&
+        this.playerState_ == PlayerStates.PLAYING) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       this.pause();
     }
   }
@@ -350,6 +367,7 @@ class AmpYoutube extends AMP.BaseElement {
     }
     if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['playerState'] !== undefined) {
+<<<<<<< HEAD
       const playerState = data['info']['playerState'];
       if (playerState == PlayerStates.PAUSED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
@@ -358,6 +376,16 @@ class AmpYoutube extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         this.element.dispatchCustomEvent(VideoEvents.ENDED);
       } else if (playerState == PlayerStates.PLAYING) {
+=======
+      this.playerState_ = data['info']['playerState'];
+      if (this.playerState_ == PlayerStates.PAUSED) {
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      } else if (this.playerState_ == PlayerStates.ENDED) {
+        // YT does not fire pause and ended together.
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
+      } else if (this.playerState_ == PlayerStates.PLAYING) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
     } else if (data['event'] == 'infoDelivery' &&
@@ -542,11 +570,14 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
+<<<<<<< HEAD
   preimplementsAutoFullscreen() {
     return false;
   }
 
   /** @override */
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   getCurrentTime() {
     if (this.info_) {
       return this.info_.currentTime;

@@ -92,9 +92,12 @@ export class GoogleSubscriptionsPlatform {
       });
     });
 
+<<<<<<< HEAD
     /** @const @private {!JsonObject} */
     this.serviceConfig_ = platformConfig;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {boolean} */
     this.isGoogleViewer_ = false;
     this.resolveGoogleViewer_(Services.viewerForDoc(ampdoc));
@@ -223,6 +226,7 @@ export class GoogleSubscriptionsPlatform {
       });
     }
   }
+<<<<<<< HEAD
 
   /** @override */
   getBaseScore() {
@@ -245,6 +249,8 @@ export class GoogleSubscriptionsPlatform {
       this.runtime_.attachButton(element, options, () => {});
     }
   }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 

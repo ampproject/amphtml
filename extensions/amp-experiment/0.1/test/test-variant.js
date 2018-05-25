@@ -58,6 +58,7 @@ describes.sandboxed('allocateVariant', {}, () => {
       allocateVariant(ampdoc, 'name', undefined);
     }).to.throw();
 
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {});
     }).to.throw(/Missing experiment variants config/); });
@@ -67,70 +68,127 @@ describes.sandboxed('allocateVariant', {}, () => {
     }).to.throw(/Missing experiment variants config/); });
 
     allowConsoleError(() => { expect(() => {
+=======
+    expect(() => {
+      allocateVariant(ampdoc, 'name', {});
+    }).to.throw(/Missing experiment variants config/);
+
+    expect(() => {
+      allocateVariant(ampdoc, 'name', {variants: {}});
+    }).to.throw(/Missing experiment variants config/);
+
+    expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       allocateVariant(ampdoc, 'name', {
         variants: {
           'invalid_char_%_in_name': 1,
         },
       });
+<<<<<<< HEAD
     }).to.throw(/Invalid name/); });
 
     allowConsoleError(() => { expect(() => {
+=======
+    }).to.throw(/Invalid name/);
+
+    expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       allocateVariant(ampdoc, 'name', {
         variants: {
           'variant_1': 50,
           'variant_2': 51,
         },
       });
+<<<<<<< HEAD
     }).to.throw(/Total percentage is bigger than 100/); });
 
     allowConsoleError(() => { expect(() => {
+=======
+    }).to.throw(/Total percentage is bigger than 100/);
+
+    expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       allocateVariant(ampdoc, 'name', {
         variants: {
           'negative_percentage': -1,
         },
       });
+<<<<<<< HEAD
     }).to.throw(/Invalid percentage/); });
 
     allowConsoleError(() => { expect(() => {
+=======
+    }).to.throw(/Invalid percentage/);
+
+    expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       allocateVariant(ampdoc, 'name', {
         variants: {
           'too_big_percentage': 101,
         },
       });
+<<<<<<< HEAD
     }).to.throw(/Invalid percentage/); });
 
     allowConsoleError(() => { expect(() => {
+=======
+    }).to.throw(/Invalid percentage/);
+
+    expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       allocateVariant(ampdoc, 'name', {
         variants: {
           'non_number_percentage': '50',
         },
       });
+<<<<<<< HEAD
     }).to.throw(/Invalid percentage/); });
 
     allowConsoleError(() => { expect(() => {
+=======
+    }).to.throw(/Invalid percentage/);
+
+    expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       allocateVariant(ampdoc, 'invalid_name!', {
         variants: {
           'variant_1': 50,
         },
       });
+<<<<<<< HEAD
     }).to.throw(/Invalid name/); });
 
     allowConsoleError(() => { expect(() => {
+=======
+    }).to.throw(/Invalid name/);
+
+    expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       allocateVariant(ampdoc, '', {
         variants: {
           'variant_1': 50,
         },
       });
+<<<<<<< HEAD
     }).to.throw(/Invalid name/); });
 
     allowConsoleError(() => { expect(() => {
+=======
+    }).to.throw(/Invalid name/);
+
+    expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       allocateVariant(ampdoc, 'name', {
         group: 'invalid_group_name!',
         variants: {
           'variant_1': 50,
         },
       });
+<<<<<<< HEAD
     }).to.throw(/Invalid name/); });
+=======
+    }).to.throw(/Invalid name/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should work around float rounding error', () => {
@@ -276,7 +334,11 @@ describes.sandboxed('allocateVariant', {}, () => {
         '-Variant_1': 50,
         '-Variant_2': 50,
       },
+<<<<<<< HEAD
     })).to.eventually.be.rejectedWith('Notification not found: notif-1');
+=======
+    })).to.eventually.rejectedWith('Notification not found: notif-1');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should have no variant allocated if consent is missing', () => {

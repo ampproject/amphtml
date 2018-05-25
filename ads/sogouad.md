@@ -21,7 +21,11 @@ limitations under the License.
 ```html
 <!-- Responsive Ad -->
 <amp-ad width="20" height="3"
+<<<<<<< HEAD
     type="sogouad"
+=======
+    type="sogou_ad"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     layout="responsive"
     data-slot="854370"
     data-w="20"
@@ -30,7 +34,11 @@ limitations under the License.
 
 <!-- Fixed-height Ad -->
 <amp-ad height="69"
+<<<<<<< HEAD
     type="sogouad"
+=======
+    type="sogou_ad"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     layout="fixed-height"
     data-slot="854366"
     data-w="100%"
@@ -40,6 +48,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
@@ -54,3 +63,16 @@ Fixed-height mode:
 - `data-slot`: slot id of Sogou ads
 - `data-w`: always be 100%
 - `data-h` slot's height info from Sogou ads
+=======
+Responsive mode:
+
+- `data-slot` slot id of sogou ads
+- `data-w` always be 20
+- `data-h` slot's height info from sogou ads
+
+Fixed-height mode:
+
+- `data-slot` slot id of sogou ads
+- `data-w` always be 100%
+- `data-h` slot's height info from sogou ads
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

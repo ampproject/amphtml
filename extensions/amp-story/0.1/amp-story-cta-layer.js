@@ -61,3 +61,8 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
     }
   }
 }
+<<<<<<< HEAD
+=======
+
+AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

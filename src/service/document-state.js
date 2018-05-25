@@ -70,6 +70,17 @@ export class DocumentState {
     this.bodyAvailableObservable_ = null;
   }
 
+<<<<<<< HEAD
+=======
+  /** @private */
+  cleanup_() {
+    if (this.visibilityChangeEvent_) {
+      this.document_.removeEventListener(this.visibilityChangeEvent_,
+          this.boundOnVisibilityChanged_);
+    }
+  }
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * Returns the value of "document.hidden" property. The reasons why it may
    * not be visible include document in a non-active tab or when the document

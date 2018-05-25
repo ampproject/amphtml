@@ -94,9 +94,13 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => placements[0].getAdElement()).to.throw(/No ad element/);
       });
+=======
+      expect(() => placements[0].getAdElement()).to.throw(/No ad element/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 

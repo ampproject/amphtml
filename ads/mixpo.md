@@ -18,16 +18,25 @@ limitations under the License.
 
 ## Example
 
+<<<<<<< HEAD
 ```html
 <amp-ad width="300" height="250"
     type="mixpo"
     data-guid="b0caf856-fd92-4adb-aaec-e91948c9ffc8"
     data-subdomain="www">
+=======
+```
+<amp-ad width="300" height="250"
+    type = "mixpo"
+    data-guid = "b0caf856-fd92-4adb-aaec-e91948c9ffc8"
+    data-subdomain = "www">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration and implementation details, please contact Mixpo support: `support@mixpo.com`.
 
 Required Attributes:
@@ -47,3 +56,24 @@ Additional Supported Attributes:
 - `data-enablemraid`
 - `data-jsplayer`
 - `data-loader`
+=======
+For configuration and implementation details, please contact [Mixpo support](support@mixpo.com).
+
+Required Attributes:
+
+- data-guid
+- data-subdomain
+
+Additional Supported Attributes:
+
+- data-embedv
+- data-clicktag
+- data-customtarget
+- data-dynclickthrough
+- data-viewtracking
+- data-customcss
+- data-local
+- data-enablemraid
+- data-jsplayer
+- data-loader
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

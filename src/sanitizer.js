@@ -80,6 +80,7 @@ const SELF_CLOSING_TAGS = dict({
 });
 
 /** @const {!Array<string>} */
+<<<<<<< HEAD
 const WHITELISTED_TAGS = [
   'a',
   'b',
@@ -89,10 +90,18 @@ const WHITELISTED_TAGS = [
   'code',
   'del',
   'div',
+=======
+const WHITELISTED_FORMAT_TAGS = [
+  'b',
+  'br',
+  'code',
+  'del',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   'em',
   'i',
   'ins',
   'mark',
+<<<<<<< HEAD
   'p',
   'q',
   's',
@@ -109,6 +118,15 @@ const WHITELISTED_TAGS = [
   'thead',
   'tfoot',
   'tr',
+=======
+  'q',
+  's',
+  'small',
+  'strong',
+  'sub',
+  'sup',
+  'time',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   'u',
 ];
 
@@ -131,8 +149,11 @@ const WHITELISTED_ATTRS = [
   'subscriptions-actions',
   'subscriptions-section',
   'subscriptions-display',
+<<<<<<< HEAD
   'subscriptions-service',
   'subscriptions-decorate',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ];
 
 /** @const {!Object<string, !Array<string>>} */
@@ -171,7 +192,11 @@ const BLACKLISTED_ATTR_VALUES = [
 /** @const {!Object<string, !Object<string, !RegExp>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
+<<<<<<< HEAD
     'type': /(?:image|file|button)/i,
+=======
+    'type': /(?:image|file|password|button)/i,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   },
 });
 
@@ -213,8 +238,12 @@ const INVALID_INLINE_STYLE_REGEX =
  * @return {string}
  */
 export function sanitizeHtml(html) {
+<<<<<<< HEAD
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null);
+=======
+  const tagPolicy = htmlSanitizer.makeTagPolicy();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   const output = [];
   let ignore = 0;
 
@@ -349,6 +378,7 @@ export function sanitizeHtml(html) {
 }
 
 /**
+<<<<<<< HEAD
  * Sanitizes user provided HTML to mustache templates, used in amp-mustache.
  * WARNING: This method should not be used elsewhere as we do not strip out
  * the style attribute in this method for the inline-style experiment.
@@ -364,6 +394,40 @@ export function sanitizeTagsForTripleMustache(html) {
 
 /**
  * Whether the attribute/value is valid.
+=======
+ * Sanitizes the provided formatting HTML. Only the most basic inline tags are
+ * allowed, such as <b>, <i>, etc.
+ *
+ * @param {string} html
+ * @return {string}
+ */
+export function sanitizeFormattingHtml(html) {
+  return htmlSanitizer.sanitizeWithPolicy(html,
+      function(tagName, attribs) {
+        if (tagName == 'template') {
+          for (let i = 0; i < attribs.length; i += 2) {
+            if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
+              return {
+                tagName,
+                attribs: ['type', 'amp-mustache'],
+              };
+            }
+          }
+        }
+        if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
+          return null;
+        }
+        return {
+          tagName,
+          attribs: [],
+        };
+      }
+  );
+}
+
+/**
+ * Whether the attribute/value are valid.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
@@ -527,6 +591,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
 }
 
 /**
+<<<<<<< HEAD
  * Tag policy for handling what is valid html in templates.
  * @param {string} tagName
  * @param {!Array<string>} attribs
@@ -553,6 +618,8 @@ function tripleMustacheTagPolicy(tagName, attribs) {
 }
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * Non-HTTPs image URLs are rewritten via proxy.
  * @param {string} attrValue
  * @param {!Location} baseUrl

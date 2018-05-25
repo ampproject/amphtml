@@ -17,6 +17,10 @@
 import {endsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /**
  * Finds and extracts keyframes definition for Web Animations from CSS styles.
  * @param {!Document|!ShadowRoot} rootNode

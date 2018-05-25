@@ -4,6 +4,7 @@
   "description": "IFrame API for amp-access",
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
+<<<<<<< HEAD
   "main": "build/index.js",
   "jsnext:main": "amp-iframe-api-export.js",
   "scripts": {
@@ -19,5 +20,10 @@
     "rollup": "^0.57.1",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-cleanup": "^2.0.1"
+=======
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-access/0.1/iframe-api/"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 }

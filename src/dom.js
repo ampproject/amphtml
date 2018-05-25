@@ -324,6 +324,7 @@ export function matches(el, selector) {
  * @return {?Element}
  */
 export function elementByTag(element, tagName) {
+<<<<<<< HEAD
   let elements;
   // getElementsByTagName() is not supported on ShadowRoot.
   if (typeof element.getElementsByTagName === 'function') {
@@ -332,6 +333,10 @@ export function elementByTag(element, tagName) {
     elements = element./*OK*/querySelectorAll(tagName);
   }
   return (elements && elements[0]) || null;
+=======
+  const elements = element.getElementsByTagName(tagName);
+  return elements[0] || null;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 

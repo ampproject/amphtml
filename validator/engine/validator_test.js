@@ -248,12 +248,15 @@ ValidatorTestCase.prototype.run = function() {
   if (observed === this.expectedOutput) {
     return;
   }
+<<<<<<< HEAD
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1' &&
       this.expectedOutputFile !== null) {
     console/*OK*/.log('Updating ' +  this.expectedOutputFile + ' ...');
     fs.writeFileSync(absolutePathFor(this.expectedOutputFile), observed);
     return;
   }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let message = '';
   if (this.expectedOutputFile != null) {
     message = '\n' + this.expectedOutputFile + ':1:0\n';

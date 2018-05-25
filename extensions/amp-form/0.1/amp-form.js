@@ -34,7 +34,10 @@ import {Services} from '../../../src/services';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+<<<<<<< HEAD
   escapeCssSelectorIdent,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   removeElement,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -159,6 +162,15 @@ export class AmpForm {
     /** @const @private {?string} */
     this.xhrVerify_ = this.getXhrUrl_('verify-xhr');
 
+<<<<<<< HEAD
+=======
+    /**
+     * Indicates that the action will submit to canonical or not.
+     * @private {boolean|undefined}
+     */
+    this.isCanonicalAction_ = undefined;
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @const @private {boolean} */
     this.shouldValidate_ = !this.form_.hasAttribute('novalidate');
     // Need to disable browser validation in order to allow us to take full
@@ -220,7 +232,10 @@ export class AmpForm {
   }
 
   /**
+<<<<<<< HEAD
    * Handle actions that require at least high trust.
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @return {?Promise}
    * @private
@@ -230,8 +245,11 @@ export class AmpForm {
       this.whenDependenciesReady_().then(() => {
         this.handleSubmitAction_(invocation);
       });
+<<<<<<< HEAD
     } else if (invocation.method === 'clear') {
       this.handleClearAction_();
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
     return null;
   }
@@ -334,6 +352,7 @@ export class AmpForm {
   }
 
   /**
+<<<<<<< HEAD
    * Handles clearing the form through action service invocations.
    * @private
    */
@@ -360,6 +379,8 @@ export class AmpForm {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Note on stopImmediatePropagation usage here, it is important to emulate native
    * browser submit event blocking. Otherwise any other submit listeners would get the
    * event.
@@ -505,7 +526,10 @@ export class AmpForm {
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
 
     if (isHeadOrGet) {
+<<<<<<< HEAD
       this.assertNoPasswordFields_();
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const values = this.getFormAsObject_();
       if (opt_extraFields) {
         deepMerge(values, opt_extraFields);
@@ -584,7 +608,10 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
+<<<<<<< HEAD
     this.assertNoPasswordFields_();
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // Non-xhr GET requests replacement should happen synchronously.
     for (let i = 0; i < varSubsFields.length; i++) {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
@@ -593,6 +620,7 @@ export class AmpForm {
   }
 
   /**
+<<<<<<< HEAD
    * Fail if there are password fields present when the function is called.
    * @private
    */
@@ -603,6 +631,8 @@ export class AmpForm {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @private
    * @return {boolean} False if the form is invalid.
    */
@@ -843,6 +873,7 @@ function updateInvalidTypesClasses(element) {
   }
 }
 
+<<<<<<< HEAD
 /**
  * Removes all validity classes from elements in the given form.
  * @param {!Element} form
@@ -855,6 +886,8 @@ function removeValidityStateClasses(form) {
     iterateCursor(elements, element => element.classList.remove(validityState));
   }
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /**
  * Checks user validity which applies .user-valid and .user-invalid AFTER the user

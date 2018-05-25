@@ -2959,7 +2959,12 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
     });
 
+<<<<<<< HEAD
     it('should build everything pending when document is ready', () => {
+=======
+    // TODO(mkhatib, #14336): Fails due to console errors.
+    it.skip('should build everything pending when document is ready', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       resources.documentReady_ = true;
       resources.pendingBuildResources_ = [parentResource, resource1, resource2];
       const child1BuildSpy = sandbox.spy();
@@ -2992,7 +2997,12 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       });
     });
 
+<<<<<<< HEAD
     it('should not schedule pass if all builds failed', () => {
+=======
+    // TODO(dvoytenko, #14336): Fails due to console errors.
+    it.skip('should not schedule pass if all builds failed', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       resources.documentReady_ = true;
       resources.pendingBuildResources_ = [resource1];
       const child1BuildSpy = sandbox.spy();

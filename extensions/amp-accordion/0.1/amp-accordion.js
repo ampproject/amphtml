@@ -16,7 +16,10 @@
 
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+<<<<<<< HEAD
 import {Services} from '../../../src/services';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -47,10 +50,13 @@ class AmpAccordion extends AMP.BaseElement {
 
     /** @private {Element} */
     this.sections_ = null;
+<<<<<<< HEAD
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -60,7 +66,10 @@ class AmpAccordion extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+<<<<<<< HEAD
     this.action_ = Services.actionServiceForDoc(this.element);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
 
     // sessionStorage key: special created id for this element, this.sessionId_.
@@ -284,6 +293,7 @@ class AmpAccordion extends AMP.BaseElement {
    * Handles clicks on an accordion header to expand/collapse its content.
    */
   clickHandler_(event) {
+<<<<<<< HEAD
     if (this.shouldHandleClick_(event)) {
       this.onHeaderPicked_(event);
     }
@@ -303,6 +313,18 @@ class AmpAccordion extends AMP.BaseElement {
     const hasAnchor = !!closest(target, e => (e.tagName == 'A'), header);
     const hasTapAction = this.action_.hasAction(target,'tap', header);
     return !hasAnchor && !hasTapAction;
+=======
+    // Need to support clicks on any children of the header except
+    // for on links, which should not have their default behavior
+    // overidden.
+    const target = dev().assertElement(event.target);
+    const header = dev().assertElement(event.currentTarget);
+    const anchor = closest(target, e => e.tagName == 'A', header);
+    if (anchor === null) {
+      // Don't use clicks on links in header to expand/collapse.
+      this.onHeaderPicked_(event);
+    }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**

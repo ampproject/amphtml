@@ -23,12 +23,23 @@ limitations under the License.
     type="directadvert"
     data-block-id="1953045">
 </amp-ad>
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For more information, please [see the Directadvert FAQ](https://www.directadvert.ru/text/help).
 
 ### Required parameters
 
 - `data-block-id`
+=======
+For more information, please [see FAQ](https://www.directadvert.ru/text/help).
+
+Required parameters:
+- data-block-id
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

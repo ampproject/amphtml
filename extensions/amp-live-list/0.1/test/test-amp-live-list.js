@@ -120,9 +120,15 @@ describes.realWin('amp-live-list', {
 
   it('validates that elem has an id on initial load', () => {
     buildElement(elem, {});
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
     }).to.throw(/must have an id/); });
+=======
+    expect(() => {
+      liveList.buildCallback();
+    }).to.throw(/must have an id/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     expect(() => {
       liveList.element.setAttribute('id', 'my-list');
@@ -144,6 +150,7 @@ describes.realWin('amp-live-list', {
     const child = document.createElement('div');
     elem.querySelector('[items]').appendChild(child);
     buildElement(elem, dftAttrs);
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       liveList.validateLiveListItems_(elem.querySelector('[items]'));
     }).to.throw(/children must have id and data-sort-time/); });
@@ -159,6 +166,23 @@ describes.realWin('amp-live-list', {
       child.setAttribute('data-sort-time', Date.now());
       liveList.buildCallback();
     }).to.throw(/children must have id and data-sort-time/); });
+=======
+    expect(() => {
+      liveList.validateLiveListItems_(elem.querySelector('[items]'));
+    }).to.throw(/children must have id and data-sort-time/);
+
+    expect(() => {
+      child.setAttribute('id', 'child-id');
+      liveList.buildCallback();
+    }).to.throw(/children must have id and data-sort-time/);
+
+    child.removeAttribute('id');
+
+    expect(() => {
+      child.setAttribute('data-sort-time', Date.now());
+      liveList.buildCallback();
+    }).to.throw(/children must have id and data-sort-time/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     expect(() => {
       child.setAttribute('id', 'child-id');
@@ -190,9 +214,15 @@ describes.realWin('amp-live-list', {
     // Errors out because no data-max-items-per-page is given
     expect(liveList.element.getAttribute('data-max-items-per-page'))
         .to.equal('');
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
     }).to.throw(/must have data-max-items-per-page/); });
+=======
+    expect(() => {
+      liveList.buildCallback();
+    }).to.throw(/must have data-max-items-per-page/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Errors out because data-max-items-per-page does not exist
     attrs = Object.assign({}, dftAttrs);
@@ -200,18 +230,30 @@ describes.realWin('amp-live-list', {
     delete attrs['data-max-items-per-page'];
     expect('data-max-items-per-page' in attrs).to.be.false;
     buildElement(elem, attrs);
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
     }).to.throw(/must have data-max-items-per-page/); });
+=======
+    expect(() => {
+      liveList.buildCallback();
+    }).to.throw(/must have data-max-items-per-page/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Errors out because data-max-items-per-page is not parseable as a number
     attrs = Object.assign({}, dftAttrs, {'data-max-items-per-page': 'hello'});
     buildElement(elem, attrs);
     expect(liveList.element.getAttribute('data-max-items-per-page'))
         .to.equal('hello');
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
     }).to.throw(/must have data-max-items-per-page/); });
+=======
+    expect(() => {
+      liveList.buildCallback();
+    }).to.throw(/must have data-max-items-per-page/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     attrs = Object.assign({}, dftAttrs, {'data-max-items-per-page': '10'});
     buildElement(elem, attrs);
@@ -245,17 +287,29 @@ describes.realWin('amp-live-list', {
   it('should enforce update slot', () => {
     buildElement(elem, dftAttrs);
     elem.removeChild(elem.querySelector('[update]'));
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
     }).to.throw(/must have an "update" slot/); });
+=======
+    expect(() => {
+      liveList.buildCallback();
+    }).to.throw(/must have an "update" slot/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should enforce items slot', () => {
     buildElement(elem, dftAttrs);
     elem.removeChild(elem.querySelector('[items]'));
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
     }).to.throw(/must have an "items" slot/); });
+=======
+    expect(() => {
+      liveList.buildCallback();
+    }).to.throw(/must have an "items" slot/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should have aria-live=polite by default', () => {
@@ -381,9 +435,15 @@ describes.realWin('amp-live-list', {
       updateLiveListItems.appendChild(document.createElement('div'));
       const stub = sandbox.stub(liveList, 'validateLiveListItems_');
       expect(stub).to.have.not.been.called;
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         liveList.update(update);
       }).to.throw(); });
+=======
+      expect(() => {
+        liveList.update(update);
+      }).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(stub).to.be.calledOnce;
     });
 

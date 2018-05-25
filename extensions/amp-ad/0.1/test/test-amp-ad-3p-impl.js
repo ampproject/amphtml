@@ -17,7 +17,10 @@
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import * as adCid from '../../../../src/ad-cid';
+<<<<<<< HEAD
 import * as consent from '../../../../src/consent-state';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {LayoutPriority} from '../../../../src/layout';
@@ -113,7 +116,13 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should propagete CID to ad iframe', () => {
+<<<<<<< HEAD
       sandbox.stub(adCid, 'getAdCid').resolves('sentinel123');
+=======
+      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
+        return Promise.resolve('sentinel123');
+      });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
@@ -126,6 +135,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should proceed w/o CID', () => {
+<<<<<<< HEAD
       sandbox.stub(adCid, 'getAdCid').resolves(undefined);
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
@@ -158,22 +168,35 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should propagate null consent state to ad iframe', () => {
+=======
+      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
+        return Promise.resolve(undefined);
+      });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
         const data = JSON.parse(frame.name).attributes;
         expect(data).to.be.ok;
         expect(data._context).to.be.ok;
+<<<<<<< HEAD
         expect(data._context.initialConsentState).to.be.null;
+=======
+        expect(data._context.clientId).to.equal(null);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
 
     it('should throw on position:fixed', () => {
       ad3p.element.style.position = 'fixed';
       ad3p.onLayoutMeasure();
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
       });
+=======
+      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should throw on parent being position:fixed', () => {
@@ -184,9 +207,13 @@ describes.realWin('amp-ad-3p-impl', {
       adContainerElement.appendChild(ad3p.element);
 
       ad3p.onLayoutMeasure();
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
       });
+=======
+      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should allow position:fixed with whitelisted ad container', () => {
@@ -229,8 +256,13 @@ describes.realWin('amp-ad-3p-impl', {
             `${remoteUrl}?$internalRuntimeVersion$"]`)).to.be.ok;
       });
     });
+<<<<<<< HEAD
 
     it('should use default path if custom disabled', () => {
+=======
+    // TODO(keithwrightbos, #14336): Fails due to console errors.
+    it.skip('should use default path if custom disabled', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const meta = win.document.createElement('meta');
       meta.setAttribute('name', 'amp-3p-iframe-src');
       meta.setAttribute('content', 'https://example.com/boot/remote.html');
@@ -293,7 +325,12 @@ describes.realWin('amp-ad-3p-impl', {
       });
     });
 
+<<<<<<< HEAD
     it('should not use remote html path for preload if disabled', () => {
+=======
+    // TODO(keithwrightbos, #14336): Fails due to console errors.
+    it.skip('should not use remote html path for preload if disabled', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const meta = win.document.createElement('meta');
       meta.setAttribute('name', 'amp-3p-iframe-src');
       meta.setAttribute('content', 'https://example.com/boot/remote.html');

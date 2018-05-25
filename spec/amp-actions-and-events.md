@@ -176,7 +176,11 @@ event.value</pre>
   </tr>
   <tr>
     <td><code>slideChange</code></td>
+<<<<<<< HEAD
     <td>Fired when the carousel's current slide changes.</td>
+=======
+    <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>
@@ -233,11 +237,14 @@ event.index</pre></td>
     <th width="40%">Data</th>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td><code>firstPlay</code>(low-trust)</td>
     <td>Fired the first time the video is played by the user. On autoplay videos, this is fired as soon as the user interacts with the video. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
     <td></td>
   </tr>
   <tr>
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     <td><code>timeUpdate</code>(low-trust)</td>
     <td>Fired when the playing position of a video has changed. Frequency of the event is controlled by AMP and is currently set at 1 second intervals. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
     <td><code>{time, percent}</code><code>time</code> indicates the current time in seconds, <code>percent</code> is a number between 0 and 1 and indicates current position as percentage of total time.</td>
@@ -501,10 +508,13 @@ The actions below are supported in the following AMP video elements: `amp-video`
     <th>Description</th>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td><code>clear</code></td>
     <td>Clears any values in the form's inputs.</td>
   </tr>
   <tr>
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     <td><code>submit</code></td>
     <td>Submits the form.</td>
   </tr>
@@ -537,10 +547,13 @@ actions that apply to the whole document.
     <td>Opens the Print Dialog to print the current page.</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td>optoutOfCid</td>
     <td>Opts out of Client ID generation for all scopes.</td>
   </tr>
   <tr>
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>
     <td>
       <p>Requires <a href="https://www.ampproject.org/docs/reference/components/amp-bind.html#updating-state-with-ampsetstate">amp-bind</a>.</p>

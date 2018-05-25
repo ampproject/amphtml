@@ -248,9 +248,15 @@ describe('LoginDoneDialog', () => {
           encodeURIComponent(
               encodeURIComponent(encodeURIComponent('https://acme.com/doc1')));
       windowApi.opener = null;
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         dialog.postbackOrRedirect_();
       }).to.throw(/URL must start with/); });
+=======
+      expect(() => {
+        dialog.postbackOrRedirect_();
+      }).to.throw(/URL must start with/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(windowApi.location.replace).to.have.not.been.called;
     });
 
@@ -258,9 +264,15 @@ describe('LoginDoneDialog', () => {
       windowApi.location.search = '?url=' +
           encodeURIComponent(/*eslint no-script-url: 0*/ 'javascript:alert(1)');
       windowApi.opener = null;
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         dialog.postbackOrRedirect_();
       }).to.throw(/URL must start with/); });
+=======
+      expect(() => {
+        dialog.postbackOrRedirect_();
+      }).to.throw(/URL must start with/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(windowApi.location.replace).to.have.not.been.called;
     });
 

@@ -68,6 +68,7 @@ describes.realWin('amp-o2-player', {
   });
 
   it('requires data-pid', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { return getO2player({
       'data-bcid': '50d595ec0364e95588c77bd2',
     }).should.eventually.be.rejectedWith(
@@ -88,6 +89,24 @@ describes.realWin('amp-o2-player', {
       return getO2player({}).should.eventually.be.rejectedWith(
           /data-pid attribute is required for/);
     });
+=======
+    return getO2player({
+      'data-bcid': '50d595ec0364e95588c77bd2',
+    }).should.eventually.be.rejectedWith(
+        /data-pid attribute is required for/);
+  });
+
+  it('requires data-bcid', () => {
+    return getO2player({
+      'data-pid': '573acb47e4b0564ec2e10011',
+    }).should.eventually.be.rejectedWith(
+        /data-bcid attribute is required for/);
+  });
+
+  it('requires data-pid && data-bcid', () => {
+    return getO2player({}).should.eventually.be.rejectedWith(
+        /data-pid attribute is required for/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('renders with data-vid passed', () => {

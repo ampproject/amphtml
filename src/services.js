@@ -289,16 +289,25 @@ export class Services {
 
   /**
    * @param {!Window} win
+<<<<<<< HEAD
    * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
     /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
+=======
+   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>}
+   */
+  static storyVariableServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>} */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       (getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
           true)));
   }
 
   /**
+<<<<<<< HEAD
    * Version of the story store service depends on which version of amp-story
    * the publisher is loading. They all have the same implementation.
    * @param {!Window} win
@@ -309,12 +318,24 @@ export class Services {
     return (
     /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|
                         ?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+=======
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   */
+  static storyStoreServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       (getElementServiceIfAvailable(win, 'story-store', 'amp-story')));
   }
 
   /**
    * @param {!Window} win
+<<<<<<< HEAD
    * @return {!../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
+=======
+   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    */
   static storyStoreService(win) {
     return getService(win, 'story-store');
@@ -322,7 +343,11 @@ export class Services {
 
   /**
    * @param {!Window} win
+<<<<<<< HEAD
    * @return {!../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
+=======
+   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    */
   static storyRequestService(win) {
     return getService(win, 'story-request');
@@ -330,23 +355,36 @@ export class Services {
 
   /**
    * @param {!Window} win
+<<<<<<< HEAD
    * @return {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>}
    */
   static localizationServiceForOrNull(win) {
     return (
     /** @type {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>} */
+=======
+   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
   }
 
   /**
    * @param {!Window} win
+<<<<<<< HEAD
    * @return {!../extensions/amp-story/1.0/localization.LocalizationService}
+=======
+   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    */
   static localizationService(win) {
     return getService(win, 'localization');
   }
 
   /**
+<<<<<<< HEAD
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
@@ -386,6 +424,8 @@ export class Services {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param {!Window} win
    * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
    */
@@ -472,8 +512,13 @@ export class Services {
    * @return {!Promise<?Object<string,(string|Array<string>)>>}
    */
   static geoForOrNull(win) {
+<<<<<<< HEAD
     return /** @type {!Promise<?Object<string,(string|Array<string>)>>} */ (
       getElementServiceIfAvailable(win, 'geo', 'amp-geo', true));
+=======
+    return (/** @type {!Promise<?Object<string,(string|Array<string>)>>} */
+      (getElementServiceIfAvailable(win, 'geo', 'amp-geo', true)));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**

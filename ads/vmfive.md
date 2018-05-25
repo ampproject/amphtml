@@ -58,6 +58,12 @@ For configuration details and to generate your tags, please contact http://vmfiv
 
 Supported parameters:
 
+<<<<<<< HEAD
 - `data-app-key`
 - `data-placement-id`
 - `data-ad-type`
+=======
+- data-app-key
+- data-placement-id
+- data-ad-type
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

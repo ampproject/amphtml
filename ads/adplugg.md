@@ -28,6 +28,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For additional info, see AdPlugg's [AMP Ad Help](https://www.adplugg.com/support/help/amp-ads).
 
 ### Required parameters
@@ -37,4 +38,12 @@ For additional info, see AdPlugg's [AMP Ad Help](https://www.adplugg.com/support
 ### Optional parameters
 
 - `data-zone`: your AdPlugg zone machine name. Recommended.
+=======
+For additional info, see our [AMP Ad Help](https://www.adplugg.com/support/help/amp-ads).
+
+Supported parameters:
+
+- `data-access-code`: your AdPlugg Access Code. Required.
+- `data-zone`: your AdPlugg Zone Machine Name. Recommended.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 

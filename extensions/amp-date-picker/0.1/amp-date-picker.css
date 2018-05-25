@@ -24,7 +24,13 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
   z-index: 10;
 }
 
+<<<<<<< HEAD
 .i-amphtml-date-picker-fullscreen .i-amphtml-date-picker-container {
+=======
+amp-date-picker[fullscreen] .i-amphtml-date-picker-container,
+amp-date-picker[with-full-screen-portal],
+amp-date-picker[with-full-screen-portal] .i-amphtml-date-picker-container {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   position: absolute;
   top: 0;
   right: 0;
@@ -32,6 +38,7 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
   left: 0;
 }
 
+<<<<<<< HEAD
 .i-amphtml-date-picker-fullscreen .DayPicker_weekHeader {
   top: 0;
   padding: 40px 0 5px;
@@ -59,6 +66,8 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
   display: none;
 }
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 .amp-date-picker-calendar-container * {
   box-sizing: border-box;
 }
@@ -215,7 +224,11 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
   background-image: radial-gradient(circle at 50% 82%, rgba(0, 0, 0, 0.1) 0px, rgba(0, 0, 0, 0.1) 2px, transparent 3px, transparent 100%);
 }
 
+<<<<<<< HEAD
 .i-amphtml-date-picker-info {
+=======
+.i-amphtml-amp-date-picker-info {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   display: block;
   padding: 10px;
 }

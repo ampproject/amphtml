@@ -28,10 +28,19 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration details and to generate your tags, please contact https://member.accesstrade.net/atv3/contact.html. 
 
 Supported parameters:
 
 - `data-atops`
 - `data-atrotid`
+=======
+For configuration details and to generate your tags, please contact https://member.accesstrade.net/atv3/contact.html 
+
+Supported parameters:
+
+- data-atops
+- data-atrotid
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 

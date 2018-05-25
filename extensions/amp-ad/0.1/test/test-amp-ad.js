@@ -124,7 +124,13 @@ describes.realWin('Ad loader', {amp: true}, env => {
         });
       });
 
+<<<<<<< HEAD
       it('fails upgrade on A4A upgrade with loadElementClass error', () => {
+=======
+      // TODO(jridgewell, #14336): Fails due to console errors.
+      it.skip('fails upgrade on A4A upgrade with loadElementClass ' +
+          'error', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         a4aRegistry['zort'] = function() {
           return true;
         };
@@ -259,8 +265,13 @@ describes.realWin('Ad loader', {amp: true}, env => {
             const zortInstance = {};
             const zortConstructor = function() { return zortInstance; };
             const extensions = Services.extensionsFor(win);
+<<<<<<< HEAD
             extensions.registerExtension('amp-ad-network-zort-impl', () => {
               extensions.addElement('amp-ad-network-zort-impl',
+=======
+            extensions.registerExtension_('amp-ad-network-zort-impl', () => {
+              extensions.addElement_('amp-ad-network-zort-impl',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
                   zortConstructor);
             }, {});
           });

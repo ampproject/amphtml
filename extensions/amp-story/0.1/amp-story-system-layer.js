@@ -119,7 +119,11 @@ export class SystemLayer {
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+<<<<<<< HEAD
     this.storeService_ = Services.storyStoreServiceV01(this.win_);
+=======
+    this.storeService_ = Services.storyStoreService(this.win_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -198,10 +202,13 @@ export class SystemLayer {
       this.onBookendStateUpdate_(isActive);
     });
 
+<<<<<<< HEAD
     this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
       this.onCanShowSharingUisUpdate_(show);
     }, true /** callToInitialize */);
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
@@ -240,6 +247,7 @@ export class SystemLayer {
   }
 
   /**
+<<<<<<< HEAD
    * Reacts to updates to whether sharing UIs may be shown, and updates the UI
    * accordingly.
    * @param {boolean} canShowSharingUis
@@ -253,6 +261,8 @@ export class SystemLayer {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Reacts to desktop state updates and triggers the desktop UI.
    * @param {boolean} isDesktop
    * @private
@@ -396,6 +406,21 @@ export class SystemLayer {
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Toggles the visibility of the developer log.
+   * @private
+   */
+  toggleDeveloperLog_() {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.developerLog_.toggle();
+  }
+
+  /**
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Hides the developer log in the UI.
    */
   hideDeveloperLog() {

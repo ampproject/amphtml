@@ -16,12 +16,22 @@ limitations under the License.
 
 # Adform
 
+<<<<<<< HEAD
+=======
+Please refer to [Adform Help Center](http://help.adform.com) for more
+information on how to get required ad tag or placement IDs.
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ## Examples
 
 ### Simple ad tag with `data-bn`
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="50"
+=======
+<amp-ad width=320 height=50
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adform"
     data-bn="12345">
 </amp-ad>
@@ -30,7 +40,11 @@ limitations under the License.
 ### Ad placement with `data-mid`
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="50"
+=======
+<amp-ad width=320 height=50
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adform"
     data-mid="12345">
 </amp-ad>
@@ -39,12 +53,17 @@ limitations under the License.
 ### Ad tag or placement with `src`
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="50"
+=======
+<amp-ad width=320 height=50
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adform"
     src="https://track.adform.net/adfscript/?bn=4849385;msrc=1">
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 ## Configuration
 
 Please refer to [Adform Help Center](https://www.adform.com) for more
@@ -63,3 +82,15 @@ allowed Adform hosts.
 
 
 
+=======
+### Supported parameters
+
+- `data-bn`
+- `data-mid`
+- `src`
+
+Only one of the mentioned parameters should be used at the same time.
+
+The `src` parameter must use **https** protocol and must be from one of the
+allowed Adform hosts.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

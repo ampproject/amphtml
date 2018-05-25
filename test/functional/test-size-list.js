@@ -97,6 +97,7 @@ describe('SizeList parseSizeList', () => {
 
   it('should fail on invalid CSS functions', () => {
     // Spaces are not allowed between function name and `(`.
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       parseSizeList('screen calc (111vw + 10px) \n, 10px ');
     }).to.throw(/Invalid CSS function/); });
@@ -108,6 +109,19 @@ describe('SizeList parseSizeList', () => {
     allowConsoleError(() => { expect(() => {
       parseSizeList('screen calc((111vw + 10px) \n, 10px ');
     }).to.throw(/Invalid CSS function/); });
+=======
+    expect(() => {
+      parseSizeList('screen calc (111vw + 10px) \n, 10px ');
+    }).to.throw(/Invalid CSS function/);
+
+    // Parens don't match.
+    expect(() => {
+      parseSizeList('screen calc(111vw + 10px)) \n, 10px ');
+    }).to.throw(/Invalid CSS function/);
+    expect(() => {
+      parseSizeList('screen calc((111vw + 10px) \n, 10px ');
+    }).to.throw(/Invalid CSS function/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should accept percent when allowed', () => {
@@ -119,6 +133,7 @@ describe('SizeList parseSizeList', () => {
   });
 
   it('should not accept percent', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       parseSizeList(' \n 111% \n ', /* opt_allowPercentAsLength */ false);
     }).to.throw(/Invalid length value/); });
@@ -128,6 +143,17 @@ describe('SizeList parseSizeList', () => {
     allowConsoleError(() => { expect(() => {
       parseSizeList(' \n 111 \n ');
     }).to.throw(/Invalid length value/); });
+=======
+    expect(() => {
+      parseSizeList(' \n 111% \n ', /* opt_allowPercentAsLength */ false);
+    }).to.throw(/Invalid length value/);
+  });
+
+  it('should fail bad length', () => {
+    expect(() => {
+      parseSizeList(' \n 111 \n ');
+    }).to.throw(/Invalid length value/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 
@@ -135,6 +161,7 @@ describe('SizeList parseSizeList', () => {
 describe('SizeList construct', () => {
 
   it('should have at least one option', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       new SizeList([]);
     }).to.throw(/SizeList must have at least one option/); });
@@ -158,6 +185,27 @@ describe('SizeList construct', () => {
     }).to.throw(
         /All options except for the last must have a media condition/);
     });
+=======
+    expect(() => {
+      new SizeList([]);
+    }).to.throw(/SizeList must have at least one option/);
+  });
+
+  it('the last option must not have a query', () => {
+    expect(() => {
+      new SizeList([{mediaQuery: 'screen', size: '111px'}]);
+    }).to.throw(/The last option must not have a media condition/);
+    expect(() => {
+      new SizeList([{mediaQuery: 'print', size: '222px'},
+        {mediaQuery: 'screen', size: '111px'}]);
+    }).to.throw(/The last option must not have a media condition/);
+  });
+
+  it('non-last options must have media query', () => {
+    expect(() => {
+      new SizeList([{size: '222px'}, {size: '111px'}]);
+    }).to.throw(/All options except for the last must have a media condition/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 

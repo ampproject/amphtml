@@ -24,11 +24,17 @@ limitations under the License.
   height="50"
   type="caprofitx"
   data-tagid="15217"
+<<<<<<< HEAD
   data-placeid="0">
+=======
+  data-placeid="0"
+>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
+<<<<<<< HEAD
 For configuration details, please email ca_profitx_support@cyberagent.co.jp.
 
 ### Required parameters
@@ -38,3 +44,10 @@ For configuration details, please email ca_profitx_support@cyberagent.co.jp.
 ### Optional parameters
 
 - `data-placeid`
+=======
+For configuration in detail, [please contact us](ca_profitx_support@cyberagent.co.jp).
+
+### parameters
+- (Required) data-tagid
+- (Option) data-placeid
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

@@ -191,7 +191,11 @@ export class ShareWidget {
     this.localizationServicePromise_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+<<<<<<< HEAD
     this.requestService_ = Services.storyRequestServiceV01(this.win);
+=======
+    this.requestService_ = Services.storyRequestService(this.win);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @param {!Window} win */
@@ -208,7 +212,11 @@ export class ShareWidget {
 
     this.ampdoc_ = ampdoc;
     this.localizationServicePromise_ =
+<<<<<<< HEAD
         Services.localizationServiceForOrNullV01(this.win);
+=======
+        Services.localizationServiceForOrNull(this.win);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     this.root = renderAsElement(this.win.document, TEMPLATE);
 
@@ -219,6 +227,7 @@ export class ShareWidget {
     return this.root;
   }
 
+<<<<<<< HEAD
   /**
    * @return {!../../../src/service/ampdoc-impl.AmpDoc}
    * @private
@@ -228,6 +237,8 @@ export class ShareWidget {
       dev().assert(this.ampdoc_));
   }
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /** @private */
   maybeAddLinkShareButton_() {
     if (!isCopyingToClipboardSupported(this.win.document)) {
@@ -249,7 +260,13 @@ export class ShareWidget {
   /** @private */
   // TODO(alanorozco): i18n for toast.
   copyUrlToClipboard_() {
+<<<<<<< HEAD
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
+=======
+    const url = Services.documentInfoForDoc(
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+          dev().assert(this.ampdoc_))).canonicalUrl;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     if (!copyTextToClipboard(this.win, url)) {
       this.localizationServicePromise_.then(localizationService => {
@@ -267,7 +284,11 @@ export class ShareWidget {
 
   /** @private */
   maybeAddSystemShareButton_() {
+<<<<<<< HEAD
     if (!this.isSystemShareSupported()) {
+=======
+    if (!this.isSystemShareSupported_()) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       // `amp-social-share` will hide `system` buttons when not supported, but
       // we also need to avoid adding it for rendering reasons.
       return;
@@ -276,11 +297,16 @@ export class ShareWidget {
     const container = dev().assertElement(this.root).querySelector(
         '.i-amphtml-story-share-system');
 
+<<<<<<< HEAD
     this.loadRequiredExtensions();
+=======
+    this.loadRequiredExtensions_();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     container.appendChild(buildProvider(this.win.document, 'system'));
   }
 
+<<<<<<< HEAD
   /**
    * NOTE(alanorozco): This is a duplicate of the logic in the
    * `amp-social-share` component.
@@ -289,6 +315,15 @@ export class ShareWidget {
    */
   isSystemShareSupported(ampdoc = this.getAmpDoc_()) {
     const viewer = Services.viewerForDoc(ampdoc);
+=======
+  /** @private */
+  // NOTE(alanorozco): This is a duplicate of the logic in the
+  // `amp-social-share` component.
+  isSystemShareSupported_() {
+    const viewer = Services.viewerForDoc(
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+          dev().assert(this.ampdoc_)));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     const platform = Services.platformFor(this.win);
 
@@ -304,7 +339,11 @@ export class ShareWidget {
    * @protected
    */
   loadProviders() {
+<<<<<<< HEAD
     this.loadRequiredExtensions();
+=======
+    this.loadRequiredExtensions_();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     this.requestService_.loadBookendConfig().then(config => {
       const providers = config && config['share-providers'];
@@ -349,10 +388,18 @@ export class ShareWidget {
     });
   }
 
+<<<<<<< HEAD
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc=} ampdoc
    */
   loadRequiredExtensions(ampdoc = this.getAmpDoc_()) {
+=======
+  /** @private */
+  loadRequiredExtensions_() {
+    const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+      dev().assert(this.ampdoc_));
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     Services.extensionsFor(this.win)
         .installExtensionForDoc(ampdoc, 'amp-social-share');
   }

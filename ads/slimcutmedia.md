@@ -19,15 +19,23 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="400" height="225"
     type="slimcutmedia"
     data-pid="amp-3"
     data-ffc="SCMPROMO">
+=======
+<amp-ad width=400 height=225
+      type="slimcutmedia"
+      data-pid="amp-3"
+      data-ffc="SCMPROMO">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 ### Required parameters
@@ -36,3 +44,9 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Optional parameters
 - `data-ffc`
+=======
+Supported parameters:
+
+- data-pid (required)
+- data-ffc
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

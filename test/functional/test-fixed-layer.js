@@ -172,7 +172,10 @@ describe('FixedLayer', () => {
     const children = [];
     const elem = {
       id,
+<<<<<<< HEAD
       ownerDocument: documentApi,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       autoTop: '',
       toString: () => {
         return id;
@@ -305,6 +308,7 @@ describe('FixedLayer', () => {
       cloneNode() {
         return createElement(this.id);
       },
+<<<<<<< HEAD
       get offsetTop() {
         return parseFloat(elem.computedStyle.top);
       },
@@ -320,6 +324,14 @@ describe('FixedLayer', () => {
         this.firstElementChild.style.display = 'none';
       },
     };
+=======
+    };
+    Object.defineProperty(elem, 'offsetTop', {
+      get: () => {
+        return parseFloat(elem.computedStyle.top);
+      },
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return elem;
   }
 

@@ -16,6 +16,7 @@ limitations under the License.
 
 # CxenseDisplay
 
+<<<<<<< HEAD
 ## Example
 
 ### Basic call
@@ -28,11 +29,29 @@ Corresponds to `https://eas4.emediate.eu/eas?cu=12345`
     data-eas-domain="eas4.emediate.eu"
     data-eas-cu="12345">
 </amp-ad>
+=======
+## Supported parameters in the amp-ad tag
+
+- **data-eas-domain** - Required parameter, your ad server domain
+- **data-eas-[parameter]** - Any ad-request parameter, like 'cu'
+
+## Example
+
+### Basic call that corresponds to https://eas4.emediate.eu/eas?cu=12345
+
+```html
+  <amp-ad width=320 height=50
+      type="eas"
+      data-eas-domain="eas4.emediate.eu"
+      data-eas-cu="12345">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ### With targeting parameters
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="50"
     type="eas"
     data-eas-domain="eas4.emediate.eu"
@@ -40,10 +59,20 @@ Corresponds to `https://eas4.emediate.eu/eas?cu=12345`
     data-eas-EASTsomename="somevalue"
     data-eas-kw1="somekeyword">
 </amp-ad>
+=======
+  <amp-ad width=320 height=50
+      type="eas"
+      data-eas-domain="eas4.emediate.eu"
+      data-eas-cu="12345"
+      data-eas-EASTsomename="somevalue"
+      data-eas-kw1="somekeyword">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 ### Required parameters
 
 - `data-eas-domain`: Specify your ad-server domain (e.g., `eas3.emediate.se`); If you're using a custom domain-name (like, `eas.somesite.com`) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
@@ -57,3 +86,6 @@ Corresponds to `https://eas4.emediate.eu/eas?cu=12345`
 
 
 
+=======
+For `data-eas-domain=<YourAdServerDomain>`, use your ad-server domain (e. g. eas3.emediate.se); If you're using a custom domain-name (like eas.somesite.com) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

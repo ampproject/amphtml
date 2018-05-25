@@ -308,6 +308,7 @@ export function validateExperimentIds(idList) {
 
 /**
  * Adds a single experimentID to an element iff it's a valid experiment ID.
+<<<<<<< HEAD
  * No-ops if the experimentId is undefined.
  *
  * @param {string|undefined} experimentId  ID to add to the element.
@@ -317,6 +318,13 @@ export function addExperimentIdToElement(experimentId, element) {
   if (!experimentId) {
     return;
   }
+=======
+ *
+ * @param {string} experimentId  ID to add to the element.
+ * @param element Element to add the experiment ID to.
+ */
+export function addExperimentIdToElement(experimentId, element) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE,

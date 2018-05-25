@@ -384,6 +384,7 @@ function selectRandomItem(arr) {
  *     selection state.
  * @param {!Object<string, !ExperimentInfo>} experiments  Set of experiments to
  *     configure for this page load.
+<<<<<<< HEAD
  * @return {!Object<string, string>} Map of experiment names to selected
  *     branches.
  */
@@ -399,6 +400,17 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     if (win.experimentBranches.hasOwnProperty(experimentName)) {
       selectedExperiments[experimentName] =
           win.experimentBranches[experimentName];
+=======
+ * @visibleForTesting
+ */
+export function randomlySelectUnsetExperiments(win, experiments) {
+  win.experimentBranches = win.experimentBranches || {};
+  for (const experimentName in experiments) {
+    // Skip experimentName if it is not a key of experiments object or if it
+    // has already been populated by some other property.
+    if (!experiments.hasOwnProperty(experimentName) ||
+        win.experimentBranches.hasOwnProperty(experimentName)) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       continue;
     }
 
@@ -415,11 +427,16 @@ export function randomlySelectUnsetExperiments(win, experiments) {
         isExperimentOn(win, experimentName)) {
       const branches = experiments[experimentName].branches;
       win.experimentBranches[experimentName] = selectRandomItem(branches);
+<<<<<<< HEAD
       selectedExperiments[experimentName] =
           win.experimentBranches[experimentName];
     }
   }
   return selectedExperiments;
+=======
+    }
+  }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**

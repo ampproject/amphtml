@@ -97,8 +97,12 @@ The value of `rtc-config` must conform to the following specification:
   },
     "urls": [
         "https://www.exampleA.com/endpoint",
+<<<<<<< HEAD
         {"url": "https://www.exampleb.com/endpoint",
          "errorReportingUrl":"https://www.exampleb.com/endpoint?e=ERROR_TYPE&h=HREF"}],
+=======
+        "https://www.exampleb.com/endpoint"],
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   "timeoutMillis": 500
 }
 ```
@@ -115,9 +119,14 @@ The value of `rtc-config` must conform to the following specification:
 *   `urls`
     *   Optional parameter
     *   Type: Array
+<<<<<<< HEAD
     *    Each value in the array must be a valid RTC endpoint URL, or an object that contains a "url" and an "errorReportingUrl". The array can be a mix of both of these types, as seen in the example above. In the case that an object is specified, the "url" within this object is treated equivalently as if it had been specified directly within the array, and errors from callouts to that URL are sent to its corresponding **errorReportingUrl**. The URLs specified here are the "custom URLs" mentioned above and throughout this document.
         *   See [RTC Callout Endpoint and Response Specification](#rtc-callout-endpoint-and-response-specification) section below on all requirements for endpoint.
         *   See [RTC Error Pingback](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md#rtc-error-pingback) for information on how errorReportingUrl is used to send sampled RTC errors, and how to specify an errorReportingUrl.
+=======
+    *   Each value in the array must be a valid RTC endpoint URL. These are the custom URLs mentioned above.
+        *   See [RTC Callout Endpoint and Response Specification](#response-and-endpoint-specification) section below on all requirements for endpoint.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 *   `timeoutMillis`
     *   Optional parameter
     *   Type: integer

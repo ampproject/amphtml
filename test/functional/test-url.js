@@ -325,6 +325,7 @@ describe('serializeQueryString', () => {
 describe('assertHttpsUrl/isSecureUrl', () => {
   const referenceElement = document.createElement('div');
   it('should NOT allow null or undefined, but allow empty string', () => {
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => {
         assertHttpsUrl(null, referenceElement);
@@ -333,6 +334,14 @@ describe('assertHttpsUrl/isSecureUrl', () => {
         assertHttpsUrl(undefined, referenceElement);
       }).to.throw(/source must be available/);
     });
+=======
+    expect(() => {
+      assertHttpsUrl(null, referenceElement);
+    }).to.throw(/source must be available/);
+    expect(() => {
+      assertHttpsUrl(undefined, referenceElement);
+    }).to.throw(/source must be available/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     assertHttpsUrl('', referenceElement);
   });
   it('should allow https', () => {
@@ -355,6 +364,7 @@ describe('assertHttpsUrl/isSecureUrl', () => {
   });
 
   it('should fail on http', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       assertHttpsUrl('http://twitter.com', referenceElement);
     }).to.throw(/source must start with/); });
@@ -364,6 +374,17 @@ describe('assertHttpsUrl/isSecureUrl', () => {
     allowConsoleError(() => { expect(() => {
       assertHttpsUrl('http://foolocalhost', referenceElement);
     }).to.throw(/source must start with/); });
+=======
+    expect(() => {
+      assertHttpsUrl('http://twitter.com', referenceElement);
+    }).to.throw(/source must start with/);
+    expect(isSecureUrl('http://twitter.com')).to.be.false;
+  });
+  it('should fail on http with localhost in the name', () => {
+    expect(() => {
+      assertHttpsUrl('http://foolocalhost', referenceElement);
+    }).to.throw(/source must start with/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(isSecureUrl('http://foolocalhost')).to.be.false;
   });
 });
@@ -382,6 +403,7 @@ describe('assertAbsoluteHttpOrHttpsUrl', () => {
         .to.equal('https://twitter.com/');
   });
   it('should fail on relative protocol', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       assertAbsoluteHttpOrHttpsUrl('//twitter.com/');
     }).to.throw(/URL must start with/); });
@@ -396,6 +418,22 @@ describe('assertAbsoluteHttpOrHttpsUrl', () => {
       assertAbsoluteHttpOrHttpsUrl(
           /*eslint no-script-url: 0*/ 'javascript:alert');
     }).to.throw(/URL must start with/); });
+=======
+    expect(() => {
+      assertAbsoluteHttpOrHttpsUrl('//twitter.com/');
+    }).to.throw(/URL must start with/);
+  });
+  it('should fail on relative url', () => {
+    expect(() => {
+      assertAbsoluteHttpOrHttpsUrl('/path');
+    }).to.throw(/URL must start with/);
+  });
+  it('should fail on not allowed protocol', () => {
+    expect(() => {
+      assertAbsoluteHttpOrHttpsUrl(
+          /*eslint no-script-url: 0*/ 'javascript:alert');
+    }).to.throw(/URL must start with/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 
@@ -701,9 +739,15 @@ describe('getSourceOrigin/Url', () => {
       'https://origin.com/foo/?f=0');
 
   it('should fail on invalid source origin', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       getSourceOrigin(parseUrl('https://cdn.ampproject.org/v/yyy/'));
     }).to.throw(/Expected a \. in origin http:\/\/yyy/); });
+=======
+    expect(() => {
+      getSourceOrigin(parseUrl('https://cdn.ampproject.org/v/yyy/'));
+    }).to.throw(/Expected a \. in origin http:\/\/yyy/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 
@@ -788,7 +832,12 @@ describe('resolveRelativeUrl', () => {
 
 describe('getCorsUrl', () => {
   it('should error if __amp_source_origin is set', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => getCorsUrl(window, 'http://example.com/?__amp_source_origin')).to.throw(/Source origin is not allowed in/); });
+=======
+    expect(() => getCorsUrl(window, 'http://example.com/?__amp_source_origin'))
+        .to.throw(/Source origin is not allowed in/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(() => getCorsUrl(window, 'http://example.com/?name=hello'))
         .to.not.throw;
   });

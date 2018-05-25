@@ -59,6 +59,7 @@ export function some(promises, count = 1) {
 }
 
 /**
+<<<<<<< HEAD
  * Returns a Deferred struct, which holds a pending promise and its associated
  * resolve and reject functions.
  *
@@ -103,6 +104,8 @@ export function tryResolve(fn) {
 }
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * Resolves with the result of the last promise added.
  * @implements {IThenable}
  */

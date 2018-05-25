@@ -62,9 +62,14 @@ describes.realWin('amp-izlesene', {
   });
 
   it('requires data-videoid', () => {
+<<<<<<< HEAD
     allowConsoleError(() => {
       return getIzlesene('').should.eventually.be.rejectedWith(
           /The data-videoid attribute is required for/);
     });
+=======
+    return getIzlesene('').should.eventually.be.rejectedWith(
+        /The data-videoid attribute is required for/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

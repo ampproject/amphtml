@@ -187,9 +187,12 @@ let adsRequested;
 // Flag that tracks if the user tapped and dragged on the big play button.
 let userTappedAndDragged;
 
+<<<<<<< HEAD
 // User consent state.
 let consentState;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /**
  * The business.
  */
@@ -405,8 +408,11 @@ export function imaVideo(global, data) {
         false);
   });
 
+<<<<<<< HEAD
   consentState = global.context.initialConsentState;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * Set-up code that can't run until the IMA lib loads.
    */
@@ -553,6 +559,7 @@ function onBigPlayTouchMove() {
 export function requestAds() {
   adsRequested = true;
   adRequestFailed = false;
+<<<<<<< HEAD
   if (consentState == 0) { // UNKNOWN
     // We're unaware of the user's consent state - do not request ads.
     imaLoadAllowed = false;
@@ -562,11 +569,17 @@ export function requestAds() {
     // ads.
     adsRequest.adTagUrl += '&npa=1';
   }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   adsLoader.requestAds(adsRequest);
 }
 
 /**
+<<<<<<< HEAD
  * Starts ad playback. If the ad request has not yet resolved, calls itself
+=======
+ * Starts ad playback. If the ad request has not yte resolved, calls itself
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * again after 250ms.
  *
  * @visibleForTesting
@@ -1078,9 +1091,15 @@ function onMessage(global, event) {
  */
 export function getPropertiesForTesting() {
   return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
+<<<<<<< HEAD
     adsManagerHeightOnLoad, adsRequest, contentComplete, controlsDiv,
     hideControlsTimeout, imaLoadAllowed, interactEvent, playbackStarted,
     playerState, PlayerStates, playPauseDiv, progressLine,
+=======
+    adsManagerHeightOnLoad, contentComplete, controlsDiv, hideControlsTimeout,
+    interactEvent, playbackStarted, playerState,
+    PlayerStates, playPauseDiv, progressLine,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     progressMarkerDiv, timeNode, uiTicker, videoPlayer};
 }
 
@@ -1131,6 +1150,7 @@ export function setAdsLoaderForTesting(newAdsLoader) {
 }
 
 /**
+<<<<<<< HEAD
  * Sets the ads request.
  *
  * @visibleForTesting
@@ -1140,6 +1160,8 @@ export function setAdsRequestForTesting(newAdsRequest) {
 }
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * Sets the flag to mute the ads manager when it loads.
  *
  * @visibleForTesting
@@ -1204,6 +1226,7 @@ export function setHideControlsTimeoutForTesting(newTimeout) {
 }
 
 /**
+<<<<<<< HEAD
  * Sets the consent state.
  *
  * @visibleForTesting
@@ -1213,6 +1236,8 @@ export function setConsentStateForTesting(newConsentState) {
 }
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * Events
  *
  * Copied from src/video-interface.js.

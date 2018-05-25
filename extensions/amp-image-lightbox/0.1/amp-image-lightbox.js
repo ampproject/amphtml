@@ -27,6 +27,10 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
+<<<<<<< HEAD
+=======
+import {Layout} from '../../../src/layout';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
@@ -228,6 +232,7 @@ export class ImageViewer {
   }
 
   /**
+<<<<<<< HEAD
    * @param {!Element} sourceElement
    * @param {?Element} sourceImage
    * @return {number}
@@ -258,6 +263,8 @@ export class ImageViewer {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
@@ -265,8 +272,13 @@ export class ImageViewer {
    * @param {?Element} sourceImage
    */
   init(sourceElement, sourceImage) {
+<<<<<<< HEAD
     this.sourceWidth_ = this.getSourceWidth_(sourceElement, sourceImage);
     this.sourceHeight_ = this.getSourceHeight_(sourceElement, sourceImage);
+=======
+    this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
+    this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.srcset_ = srcsetFromElement(sourceElement);
 
     Object.keys(this.ariaAttributes_).forEach(key => {
@@ -757,6 +769,14 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
   }
 
+<<<<<<< HEAD
+=======
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
   * Lazily builds the image-lightbox DOM on the first open.
   * @private

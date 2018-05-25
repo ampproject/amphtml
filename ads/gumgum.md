@@ -19,9 +19,14 @@ limitations under the License.
 ## Example
 
 ### Slot Ad
+<<<<<<< HEAD
 
 ```html
 <amp-ad width="300" height="100"
+=======
+```html
+<amp-ad width=300 height=100
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   type="gumgum"
   data-zone="ggumtest"
   data-slot="3883">
@@ -30,9 +35,20 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For parameters, configuration or any questions, contact [GumGum](http://gumgum.com/contact/).
 
 ### Required parameters
 
 - `data-zone`: GumGum Zone ID
 - `data-slot`: GumGum Slot Ad ID
+=======
+For parameters, configuration or any question please contact [GumGum](http://gumgum.com/contact/).
+
+Supported parameters:
+
+__Required:__
+
+- `data-zone` GumGum Zone ID
+- `data-slot` GumGum Slot Ad ID
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

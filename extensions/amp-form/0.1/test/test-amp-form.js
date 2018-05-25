@@ -126,6 +126,7 @@ describes.repeated('', {
       const form = getForm();
       document.body.appendChild(form);
       form.setAttribute('action-xhr', 'http://example.com');
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => new AmpForm(form)).to.throw(
             /form action-xhr must start with/);
@@ -135,6 +136,13 @@ describes.repeated('', {
         expect(() => new AmpForm(form)).to.throw(
             /form action-xhr should not be on AMP CDN/);
       });
+=======
+      expect(() => new AmpForm(form)).to.throw(
+          /form action-xhr must start with/);
+      form.setAttribute('action-xhr', 'https://cdn.ampproject.org/example.com');
+      expect(() => new AmpForm(form)).to.throw(
+          /form action-xhr should not be on AMP CDN/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       form.setAttribute('action-xhr', 'https://example.com');
       expect(() => new AmpForm(form)).to.not.throw;
       document.body.removeChild(form);
@@ -148,10 +156,15 @@ describes.repeated('', {
       illegalInput.setAttribute('name', '__amp_source_origin');
       illegalInput.value = 'https://example.com';
       form.appendChild(illegalInput);
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => new AmpForm(form)).to.throw(
             /Illegal input name, __amp_source_origin found/);
       });
+=======
+      expect(() => new AmpForm(form)).to.throw(
+          /Illegal input name, __amp_source_origin found/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       document.body.removeChild(form);
     });
 
@@ -237,9 +250,13 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const errorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
       });
+=======
+      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(event.preventDefault).to.be.called;
       expect(ampForm.analyticsEvent_).to.have.not.been.called;
       document.body.removeChild(form);
@@ -299,9 +316,13 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const submitErrorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
       });
+=======
+      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(event.preventDefault).to.be.called;
       document.body.removeChild(form);
     });
@@ -538,7 +559,13 @@ describes.repeated('', {
       });
     });
 
+<<<<<<< HEAD
     it('should allow rendering responses through inlined templates', () => {
+=======
+    // TODO(danielrozenberg, #14336): Fails due to console errors.
+    it.skip('should allow rendering responses through inlined ' +
+        'templates', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
         const form = ampForm.form_;
         // Add a div[submit-error] with a template child.
@@ -1345,6 +1372,7 @@ describes.repeated('', {
       });
     });
 
+<<<<<<< HEAD
     it('should handle clear action and restore initial values', () => {
       const form = getForm();
       document.body.appendChild(form);
@@ -1429,6 +1457,8 @@ describes.repeated('', {
       });
     });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     it('should submit after timeout of waiting for amp-selector', function() {
       this.timeout(3000);
       return getAmpForm(getForm()).then(ampForm => {
@@ -1715,7 +1745,12 @@ describes.repeated('', {
           });
         });
 
+<<<<<<< HEAD
         it('should redirect on error and header is set', () => {
+=======
+        // TODO(cvializ, #14336): Fails due to console errors.
+        it.skip('should redirect on error and header is set', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
           redirectToValue = 'https://example2.com/hello';
           const logSpy = sandbox.spy(user(), 'error');
@@ -1767,6 +1802,7 @@ describes.repeated('', {
           expect(form.submit).to.have.not.been.called;
         });
       });
+<<<<<<< HEAD
 
       it('should not execute form submit with password field present', () => {
         const form = getForm();
@@ -1788,6 +1824,8 @@ describes.repeated('', {
           expect(form.submit).to.have.not.been.called;
         });
       });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
@@ -1796,9 +1834,15 @@ describes.repeated('', {
         form.id = 'registration';
 
         const passwordInput = document.createElement('input');
+<<<<<<< HEAD
         passwordInput.setAttribute('name', 'email');
         passwordInput.setAttribute('type', 'email');
         passwordInput.setAttribute('value', 'j@hnmiller.com');
+=======
+        passwordInput.setAttribute('name', 'password');
+        passwordInput.setAttribute('type', 'password');
+        passwordInput.setAttribute('value', 'god');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         form.appendChild(passwordInput);
 
         const unnamedInput = document.createElement('input');
@@ -1816,7 +1860,11 @@ describes.repeated('', {
         const expectedFormData = {
           'formId': 'registration',
           'formFields[name]': 'John Miller',
+<<<<<<< HEAD
           'formFields[email]': 'j@hnmiller.com',
+=======
+          'formFields[password]': 'god',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         };
         expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(

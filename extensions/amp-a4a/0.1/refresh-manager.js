@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {RefreshIntersectionObserverWrapper} from './refresh-intersection-observer-wrapper';
+=======
+import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 
@@ -131,7 +135,11 @@ const RefreshLifecycleState = {
  * Each IO is configured to a different threshold, and all elements that
  * share the same visiblePercentageMin will be monitored by the same IO.
  *
+<<<<<<< HEAD
  * @const {!Object<string, (!IntersectionObserver|!RefreshIntersectionObserverWrapper)>}
+=======
+ * @const {!Object<string, (!IntersectionObserver|!IntersectionObserverPolyfill)>}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  */
 const observers = {};
 
@@ -221,6 +229,7 @@ export class RefreshManager {
    * Returns an IntersectionObserver configured to the given threshold, creating
    * one if one does not yet exist.
    *
+<<<<<<< HEAD
    * @param {number} threshold
    * @return {(!IntersectionObserver|!RefreshIntersectionObserverWrapper)}
    */
@@ -232,6 +241,17 @@ export class RefreshManager {
           ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
           : new RefreshIntersectionObserverWrapper(
               this.ioCallback_, this.a4a_, {threshold}));
+=======
+   * @param {(string|number)} threshold
+   * @return {(!IntersectionObserver|!IntersectionObserverPolyfill)}
+   */
+  getIntersectionObserverWithThreshold_(threshold) {
+    threshold = String(threshold);
+    return observers[threshold] ||
+        (observers[threshold] = 'IntersectionObserver' in this.win_
+          ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
+          : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -312,7 +332,12 @@ export class RefreshManager {
     return new Promise(resolve => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
         this.state_ = RefreshLifecycleState.INITIAL;
+<<<<<<< HEAD
         this.unobserve();
+=======
+        this.getIntersectionObserverWithThreshold_(
+            this.config_.visiblePercentageMin).unobserve(this.element_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);
       }, /** @type {number} */ (this.refreshInterval_));
@@ -334,6 +359,7 @@ export class RefreshManager {
     config['visiblePercentageMin'] /= 100;
     return config;
   }
+<<<<<<< HEAD
 
   /**
    * Stops the intersection observer from observing the element.
@@ -342,5 +368,7 @@ export class RefreshManager {
     this.getIntersectionObserverWithThreshold_(
         this.config_.visiblePercentageMin).unobserve(this.element_);
   }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 

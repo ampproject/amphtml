@@ -13,17 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
 import {
   CONSTANTS,
+=======
+import {Observable} from '../src/observable';
+import {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   deserializeMessage,
   listen,
   serializeMessage,
 } from '../src/3p-frame-messaging';
+<<<<<<< HEAD
 import {Observable} from '../src/observable';
 import {dev} from '../src/log';
 import {dict, map} from '../src/utils/object';
 import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
+=======
+import {dev} from '../src/log';
+import {getData} from '../src/event-helper';
+import {getMode} from '../src/mode';
+import {map} from '../src/utils/object';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 export class IframeMessagingClient {
 
@@ -39,8 +51,11 @@ export class IframeMessagingClient {
     this.hostWindow_ = win.parent;
     /** @private {?string} */
     this.sentinel_ = null;
+<<<<<<< HEAD
     /** @type {number} */
     this.nextMessageId_ = 1;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /**
      * Map messageType keys to observables to be fired when messages of that
      * type are received.
@@ -51,6 +66,7 @@ export class IframeMessagingClient {
   }
 
   /**
+<<<<<<< HEAD
    * Retrieves data from host.
    *
    * @param {string} requestType
@@ -73,6 +89,8 @@ export class IframeMessagingClient {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Make an event listening request to the host window.
    *
    * @param {string} requestType The type of the request message.

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 export const SubscriptionAnalyticsEvents = {
@@ -50,5 +51,15 @@ export class SubscriptionAnalytics {
    */
   event(eventType, opt_vars) {
     triggerAnalyticsEvent(this.element_, eventType, opt_vars || {});
+=======
+
+export class SubscriptionAnalytics {
+
+  /**
+   * @param {string} unusedType
+   */
+  event(unusedType) {
+    // TODO(dvoytenko): implement.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 }

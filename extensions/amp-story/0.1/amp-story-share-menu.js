@@ -16,15 +16,23 @@
 
 import {Action, StateProperty} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
+<<<<<<< HEAD
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
+=======
+import {ScrollableShareWidget} from './amp-story-share';
+import {Services} from '../../../src/services';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {renderAsElement} from './simple-template';
+<<<<<<< HEAD
 import {setStyle} from '../../../src/style';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 /** @const {string} Class to toggle the share menu. */
@@ -50,6 +58,7 @@ const TEMPLATE = {
   ],
 };
 
+<<<<<<< HEAD
 /**
  * System amp-social-share button template.
  * @private @const {!./simple-template.ElementDef}
@@ -59,6 +68,8 @@ const AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE = {
   attrs: /** @type {!JsonObject} */ (dict({'type': 'system'})),
 };
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 export class ShareMenu {
   /**
@@ -78,6 +89,7 @@ export class ShareMenu {
     /** @private {boolean} */
     this.isBuilt_ = false;
 
+<<<<<<< HEAD
     /** @private {boolean} */
     this.isSystemShareSupported_ = false;
 
@@ -86,6 +98,16 @@ export class ShareMenu {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreServiceV01(this.win_);
+=======
+    /** @private @const {!../../../src/service/platform-impl.Platform} */
+    this.platform_ = Services.platformFor(this.win_);
+
+    /** @private @const {!ScrollableShareWidget} */
+    this.shareWidget_ = ScrollableShareWidget.create(this.win_);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -95,9 +117,13 @@ export class ShareMenu {
   }
 
   /**
+<<<<<<< HEAD
    * Builds and appends the component in the story. Could build either the
    * amp-social-share button to display the native system sharing, or a fallback
    * UI.
+=======
+   * Builds and appends the component in the story.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    */
   build() {
     if (this.isBuilt()) {
@@ -106,6 +132,7 @@ export class ShareMenu {
 
     this.isBuilt_ = true;
 
+<<<<<<< HEAD
     this.isSystemShareSupported_ =
         this.shareWidget_.isSystemShareSupported(getAmpdoc(this.parentEl_));
 
@@ -150,6 +177,15 @@ export class ShareMenu {
     this.element_ = renderAsElement(this.win_.document, TEMPLATE);
     createShadowRootWithStyle(root, this.element_, CSS);
 
+=======
+    const root = this.win_.document.createElement('div');
+    this.element_ = renderAsElement(this.win_.document, TEMPLATE);
+
+    createShadowRootWithStyle(root, this.element_, CSS);
+
+    const ampdoc = getAmpdoc(this.parentEl_);
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.initializeListeners_();
 
     this.vsync_.run({
@@ -160,14 +196,29 @@ export class ShareMenu {
       },
       mutate: () => {
         this.parentEl_.appendChild(root);
+<<<<<<< HEAD
         // Preloads and renders the share widget content.
         const shareWidget = this.shareWidget_.build(getAmpdoc(this.parentEl_));
         this.innerContainerEl_.appendChild(shareWidget);
+=======
+        this.innerContainerEl_.appendChild(this.shareWidget_.build(ampdoc));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       },
     });
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Whether the element has been built.
+   * @return {boolean}
+   */
+  isBuilt() {
+    return this.isBuilt_;
+  }
+
+  /**
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @private
    */
   initializeListeners_() {
@@ -175,6 +226,7 @@ export class ShareMenu {
       this.onShareMenuStateUpdate_(isOpen);
     });
 
+<<<<<<< HEAD
     // Don't listen to click events if the system share is supported, since the
     // native layer handles all the UI interactions.
     if (!this.isSystemShareSupported_) {
@@ -186,10 +238,18 @@ export class ShareMenu {
   /**
    * Reacts to menu state updates and decides whether to show either the native
    * system sharing, or the fallback UI.
+=======
+    this.element_.addEventListener(
+        'click', event => this.onShareMenuClick_(event));
+  }
+
+  /**
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param {boolean} isOpen
    * @private
    */
   onShareMenuStateUpdate_(isOpen) {
+<<<<<<< HEAD
     if (this.isSystemShareSupported_ && isOpen) {
       // Dispatches a click event on the amp-social-share button to trigger the
       // native system sharing UI. This has to be done upon user interaction.
@@ -210,12 +270,22 @@ export class ShareMenu {
 
   /**
    * Handles click events and maybe closes the menu for the fallback UI.
+=======
+    this.vsync_.mutate(() => {
+      this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
+    });
+  }
+
+  /**
+   * Handles click events and maybe closes the menu.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param  {!Event} event
    */
   onShareMenuClick_(event) {
     const el = dev().assertElement(event.target);
     // Closes the menu if click happened outside of the menu main container.
     if (!closest(el, el => el === this.innerContainerEl_, this.element_)) {
+<<<<<<< HEAD
       this.close_();
     }
   }
@@ -227,4 +297,9 @@ export class ShareMenu {
   close_() {
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
   }
+=======
+      this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
+    }
+  }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }

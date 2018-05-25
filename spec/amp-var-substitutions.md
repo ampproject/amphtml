@@ -205,7 +205,10 @@ The tables below list the available URL variables grouped by type of usage. Furt
 |----------------|--------------------|------------------------|
 | [Horizontal Scroll Boundary](#horizontal-scroll-boundary) | N/A | `${horizontalScrollBoundary}` |
 | [Total Engaged Time](#total-engaged-time) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
+<<<<<<< HEAD
 | [Incremental Engaged Time](#incremental-engaged-time) | `INCREMENTAL_ENGAGED_TIME` | `${incrementalEngagedTime}` |
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 | [Vertical Scroll Boundary](#vertical-scroll-boundary) | N/A | `${verticalScrollBoundary}` |
 
 ### Visibility
@@ -248,7 +251,10 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Background State](#background-state) | `BACKGROUND_STATE` | `${backgroundState}` |
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
+<<<<<<< HEAD
 | [Geolocation](#geolocation) | `AMP_GEO` | `${ampGeo}` |
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 | [Page View ID](#page-view-id) | `PAGE_VIEW_ID` | `${pageViewId}` |
 | [Query Parameter](#query-parameter) | `QUERY_PARAM` | `${queryParam}` |
 | [Random](#random) | `RANDOM` | `${random}` |
@@ -618,6 +624,7 @@ Provides the time when the element met visibility conditions for the first time 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${firstVisibleTime}`
 
+<<<<<<< HEAD
 #### Geolocation
 
 Provides the approximate, country level, location of the user provided by the [`amp-geo`](../extensions/amp-geo/amp-geo.md#variable-substitution) extension.
@@ -630,6 +637,8 @@ Provides the approximate, country level, location of the user provided by the [`
 * **amp-analytics variable**: `${ampGeo}`
   * Example value: `ca`
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 #### Horizontal Scroll Boundary
 
 Provides the horizontal scroll boundary that triggered a scroll event. This variable is only available in a `trigger` of type `scroll`. The value of the boundary may be rounded based on the precision supported by the extension. For example, a boundary with value `1` and precision of `5` will result in value of var to be 0.
@@ -639,7 +648,11 @@ Provides the horizontal scroll boundary that triggered a scroll event. This vari
 
 #### HTML Attributes
 
+<<<<<<< HEAD
 Provides values of attributes of HTML elements inside of an amp-ad tag which match a given CSS selector.
+=======
+Provides values of attributes of HTML elements inside of an amp-ad tag which match a given CSS selector. 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 This only allows an amp-analytics tag to query attributes of HTML elements loaded by that amp-analytics tag's parent
 amp-ad tag. It will not allow a publisher to obtain information about the content of an ad, nor will it allow metrics
 of one ad to be seen by the provider of another ad on the page.
@@ -656,6 +669,7 @@ Example:
 This will return the "src" and "decoding" attributes of img tags in the ad.
 
 Caveats:
+<<<<<<< HEAD
 * If the CSS selector matches 20 or more elements, an empty array will be returned. This is because traversing a
 large list of elements is inefficient.
 * Attributes of at most 10 elements will be returned.
@@ -664,6 +678,16 @@ represented in the returned array.
 * The returned values will be in the form of a URL encoded JSON array of objects wherein the object keys are the
 requested attribute names and the object values are the elements' values for those attributes.
 * The CSS selector may contain only letters (upper- and/or lower-case), numbers, hyphens, underscores, and periods.
+=======
+* If the CSS selector matches 20 or more elements, an empty array will be returned. This is because traversing a 
+large list of elements is inefficient. 
+* Attributes of at most 10 elements will be returned.
+* If an element matches the CSS selector but has none of the requested attributes, that element will not be 
+represented in the returned array.
+* The returned values will be in the form of a URL encoded JSON array of objects wherein the object keys are the 
+requested attribute names and the object values are the elements' values for those attributes.
+* The CSS selector may contain only letters (upper- and/or lower-case), numbers, hyphens, underscores, and periods. 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 [Issue #14252](https://github.com/ampproject/amphtml/issues/14252) has been created to address potential future demand for more complex CSS selectors.
 
 
@@ -1077,7 +1101,11 @@ Provides the user's IANA time-zone code (if available).
   ```
 * **amp-analytics variable**: `${timezoneCode}`
   * Example value: `Europe/Rome`.
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 #### Total Engaged Time
 
 Provides the total time (in seconds) the user has been engaged with the page since the page first became visible in the viewport. Total engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
@@ -1086,6 +1114,7 @@ Provides the total time (in seconds) the user has been engaged with the page sin
 * **amp-analytics variable**: `${totalEngagedTime}`
   * Example value: `36`
 
+<<<<<<< HEAD
 #### Incremental Engaged Time
 
 Provides the time (in seconds) the user has been engaged with the page since the last time it was reset. It takes two arguments. The first is the name of the timer, the second is whether or not to reset it (it is optional and defaults to true). Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
@@ -1094,6 +1123,8 @@ Provides the time (in seconds) the user has been engaged with the page since the
 * **amp-analytics variable**: `${incrementalEngagedTime(foo,false)}`
   * Example value: `36`
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 #### Total Time
 
 Provides the total time from the time page has become visible to the time a ping was sent out.

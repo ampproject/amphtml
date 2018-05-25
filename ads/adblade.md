@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adblade"
     data-width="300"
     data-height="250"
@@ -29,6 +33,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For semantics of configuration, see [Adblade's documentation](https://www.adblade.com/doc/publisher-solutions).
 
 Supported parameters:
@@ -36,3 +41,12 @@ Supported parameters:
 - `data-cid`
 - `data-width`
 - `data-height`
+=======
+For semantics of configuration, please see [ad network documentation](https://www.adblade.com/doc/publisher-solutions).
+
+Supported parameters:
+
+- data-cid
+- data-width
+- data-height
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

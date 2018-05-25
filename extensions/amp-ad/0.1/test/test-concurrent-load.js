@@ -62,9 +62,13 @@ describes.realWin('concurrent-load', {}, env => {
       const element = createElementWithAttributes(env.win.document, 'amp-ad', {
         'data-loading-strategy': loadingStrategy,
       });
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => getAmpAdRenderOutsideViewport(element)).to.throw();
       });
+=======
+      expect(() => getAmpAdRenderOutsideViewport(element)).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
   });
 

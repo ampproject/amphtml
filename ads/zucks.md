@@ -30,5 +30,9 @@ limitations under the License.
 For more information, please [contact Zucks](https://zucks.co.jp/contact/).
 
 Supported parameters:
+<<<<<<< HEAD
 
 - `data-frame-id`
+=======
+- data-frame-id
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

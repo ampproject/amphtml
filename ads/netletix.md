@@ -19,17 +19,27 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
     type="netletix"
     data-nxkey="b5f0c5d4-c2b8-4989-a7b9-130ad4417102"
     data-nxunit="/60343726/netzathleten_.de"
     data-nxwidth="300"
     data-nxheight="250">
+=======
+<amp-ad width=300 height=250
+      type="netletix"
+      data-nxkey="b5f0c5d4-c2b8-4989-a7b9-130ad4417102"
+      data-nxunit="/60343726/netzathleten_.de"
+      data-nxwidth="300"
+      data-nxheight="250">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 ### Required parameters
@@ -46,3 +56,16 @@ For details on the configuration semantics, please contact the ad network or ref
 - `data-nxsite`: string, non-empty 
 - `data-nxid`: string, non-empty 
 - `data-nxscript`: string, non-empty 
+=======
+## Mandatory parameters
+- ```data-nxkey``` (mandatory, String, non-empty)
+- ```data-nxunit``` (mandatory, String, non-empty)
+- ```data-nxwidth``` (mandatory, String, non-empty)
+- ```data-nxheight``` (mandatory, String, non-empty)
+## Optional Parameters 
+- ```data-nxasync``` (String, non-empty)
+- ```data-nxv``` (String, non-empty)
+- ```data-nxsite``` (String, non-empty)
+- ```data-nxid``` (String, non-empty)
+- ```data-nxscript``` (String, non-empty)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

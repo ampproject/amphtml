@@ -17,7 +17,10 @@
 
     body.amp-geo-group-anz {
       transform: rotate(180deg);
+<<<<<<< HEAD
       transition: transform .5s .2s;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
     
   </style>
@@ -60,10 +63,14 @@
     </code>
   </pre>
   <p>
+<<<<<<< HEAD
       This means that if your country is "unknown" you will appear in the
       "nafta" and "unknown" groups.  To change the country for testing
       append #amp-geo=&lt;code&gt; to the url and reload the page
       (eg #amp-geo=nz)
+=======
+      This means that if your country is "unknown" you will appear in the "nafta" and "unknown" groups.  To change the country for testing append #amp-go=&lt;code&gt; to the url and reload the page (eg #amp-geo=nz)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   </p>
   
 
@@ -72,7 +79,11 @@
   <p [text]="'Matched country groups: ' + ampGeo.ISOCountryGroups.join(', ') "></p>
 
   <p>There is an amp-pixel variable substitution example here</p>
+<<<<<<< HEAD
   <amp-pixel src="https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?via=pixel&groups=AMP_GEO&country=AMP_GEO(ISOCountry)" layout="nodisplay"></amp-pixel>
+=======
+  <amp-pixel src="https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?via=pixel&groups=AMP_GEO()&country=AMP_GEO(ISOCountry)" layout="nodisplay"></amp-pixel>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   <p>There is an amp-analytics variable substitution example here</p>
   <amp-analytics>
     <script type="application/json">
@@ -86,7 +97,11 @@
                 "on": "visible",
                 "request": "event",
                 "vars": {
+<<<<<<< HEAD
                   "geoGroups": "${ampGeo}",
+=======
+                  "geoGroups": "${ampGeo()}",
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
                   "geoCountry": "${ampGeo(ISOCountry)}"
                 }
               }
@@ -94,5 +109,12 @@
           }
           </script>
   </amp-analytics>
+<<<<<<< HEAD
 </body>
+=======
+
+
+</body>
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </html>

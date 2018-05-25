@@ -311,6 +311,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       expect(platform.isGoogleViewer_).to.be.true;
     });
   });
+<<<<<<< HEAD
 
   it('should attach button given to decorateUI', () => {
     const elem = env.win.document.createElement('div');
@@ -327,4 +328,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     platform.executeAction('subscribe');
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });

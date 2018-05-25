@@ -24,7 +24,12 @@ The Rubicon Project adapter supports Smart Tags directly on the page.
 
 ## Examples
 
+<<<<<<< HEAD
 ### Smart Tag: Basic
+=======
+### Smart Tag
+#### Basic
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-ad width=320 height=50
@@ -37,7 +42,11 @@ The Rubicon Project adapter supports Smart Tags directly on the page.
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 #### Smart Tag: With additional targeting
+=======
+#### With additional targeting
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-ad width="320" height="50"

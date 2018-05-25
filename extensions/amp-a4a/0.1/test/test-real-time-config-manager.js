@@ -20,13 +20,19 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
+<<<<<<< HEAD
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {
   RTC_ERROR_ENUM,
   getCalloutParam_,
   inflateAndSendRtc_,
   maybeExecuteRealTimeConfig_,
+<<<<<<< HEAD
   sendErrorMessage,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   truncUrl_,
   validateRtcConfig_,
 } from '../real-time-config-manager';
@@ -331,8 +337,13 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         vendors, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
+<<<<<<< HEAD
 
     it('should favor publisher URLs over vendor URLs', () => {
+=======
+    // TODO(jeffkaufman, #13422): this test was silently failing
+    it.skip('should favor publisher URLs over vendor URLs', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const urls = generateUrls(3,2);
       const vendors = {
         'fAkeVeNdOR': {SLOT_ID: 0, PAGE_ID: 1},
@@ -343,6 +354,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.2.com/',
         'https://www.3.com/?slot_id=1',
         'https://www.4.com/?slot_id=1&page_id=2',
+<<<<<<< HEAD
+=======
+        'https://localhost:8000/examples/rtcE1.json?slot_id=1&page_id=2&foo_id=3',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       ];
       const rtcCalloutResponses = generateCalloutResponses(6);
       const customMacros = {
@@ -357,10 +372,17 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       }
       expectedRtcArray.push(
           rtcEntry(null, Object.keys(vendors)[0].toLowerCase(),
+<<<<<<< HEAD
               RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED, true));
       const calloutCount = 5;
       return executeTest({
         urls, vendors, customMacros, rtcCalloutResponses,
+=======
+              RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED));
+      const calloutCount = 5;
+      return executeTest({
+        urls, vendors, customMacros, inflatedUrls, rtcCalloutResponses,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
     it('should not send more than one RTC callout to the same url', () => {
@@ -448,6 +470,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         calloutCount, expectedCalloutUrls: urls, expectedRtcArray,
         failXhr: true});
     });
+<<<<<<< HEAD
     for (const consentState in CONSENT_POLICY_STATE) {
       it(`should handle consentState ${consentState}`, () => {
         setRtcConfig({urls: ['https://foo.com']});
@@ -469,6 +492,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         }
       });
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   describe('#validateRtcConfig', () => {
@@ -573,6 +598,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       });
     });
   });
+<<<<<<< HEAD
 
   describe('sendErrorMessage', () => {
     let imageStub, requestUrl, ampDoc;
@@ -611,4 +637,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       expect(imageStub).to.not.be.called;
     });
   });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });

@@ -185,6 +185,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     </td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td>LINE</td>
     <td><code>line</code></td>
     <td>
@@ -195,6 +196,8 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     </td>
   </tr>
   <tr>
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     <td>SMS</td>
     <td><code>sms</code></td>
     <td>

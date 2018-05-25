@@ -67,8 +67,12 @@ The value of `rtc-config` must conform to the following specification:
 	},
     "urls": [
         "https://www.exampleA.com/endpoint",
+<<<<<<< HEAD
         {"url": "https://www.exampleB.com/endpoint",
           "errorReportingUrl":"https://www.exampleB.com/endpoint?e=ERROR_TYPE&h=HREF"}],
+=======
+        "https://www.exampleb.com/endpoint"],
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 	"timeoutMillis": 500
 }
 ```
@@ -85,10 +89,16 @@ The value of `rtc-config` must conform to the following specification:
         *   Vendors can use the same macros as other vendors.
 *   `urls`
     *   Optional parameter
+<<<<<<< HEAD
     *   Type: Array of strings or objects.
     *   Each value in the array must be a valid RTC endpoint URL, or an object that contains a `url` and an `errorReportingUrl` as URL strings. Note that all URL strings must be secure (i.e. start with HTTPS). The array can be a mix of both of these types, as seen in the example above. In the case that an object is specified, the `url` within this object is treated equivalently as if it had been specified directly within the array, and errors from callouts to that URL are sent to its corresponding **errorReportingUrl**. The URLs specified here are the "custom URLs" mentioned above and throughout this document.
         *   See [RTC Callout Endpoint and Response Specification](#rtc-callout-endpoint-and-response-specification) section below on all requirements for endpoint.
         *   See [RTC Error Pingback](#rtc-error-pingback) section below for information on how errorReportingUrl is used to send sampled RTC errors, and how to specify an errorReportingUrl.
+=======
+    *   Type: Array
+    *   Each value in the array must be a valid RTC endpoint URL. These are the custom URLs mentioned above.
+        *   See [RTC Callout Endpoint and Response Specification](#rtc-callout-endpoint-and-response-specification) section below on all requirements for endpoint.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 *   `timeoutMillis`
     *   Optional parameter
     *   Type: integer
@@ -98,15 +108,23 @@ While all three parameters of rtc-config are optional, either "vendors" or "urls
 
 ### Vendor URL Specification
 
+<<<<<<< HEAD
 To spare publishers the details of having to construct URLs for external vendors, vendors may register a URL with macros in a central file called [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js), which maps unique vendor names to an object which includes a URL and a whitelist of macros that can be substituted into `url`. Vendors may include these macros in their URLs, which publishers can then specify the value for. Additionally, vendors may specify an `errorReportingUrl`. This errorReportingUrl will be sent 1% sampled-per-page errors from callouts to their RTC endpoint. For instance:
+=======
+To spare publishers the details of having to construct URLs for external vendors, vendors may register a URL with macros in a central file called [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js), which maps unique vendor names to an object which includes a URL and a whitelist of macros. Vendors may include these macros in their URLs, which publishers can then specify the value for. For instance:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```text
 /** amp-a4a/0.1/callout-vendors.js */
 vendors: {
    "vendor1": {
      "url": "https://vendor1.com/slot_id=SLOT_ID",
+<<<<<<< HEAD
      "macros": ['SLOT_ID'],
      "errorReportingUrl": "https://vendor1.com/e=ERROR_TYPE&h=HREF",
+=======
+     "macros": ['SLOT_ID']
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    }
 };
 ```
@@ -118,8 +136,11 @@ The `macros` attribute is optional, i.e. a vendor could specify a URL that has n
 
 Additionally, macros can be substituted in by the Fast Fetch implementation itself. The URL for a vendor will be expanded with the correct macro values prior to callout. See [URL Macro Substitution](#url-macro-substitution) section below for detailed explanation and example.
 
+<<<<<<< HEAD
 The `errorReportingUrl` property is optional. The only available macros are ERROR_TYPE and HREF. See [RTC Error Pingback](#rtc-error-pingback) section below for more information on how error reporting works.
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ### RTC Callout Request Specification
 
 RTC callout requests are sent from the AMP runtime with the following headers:
@@ -151,6 +172,7 @@ The RTC Response to a GET request must meet the following requirements:
     *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
     *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
 
+<<<<<<< HEAD
 ### RTC Error Pingback
 
 RTC supports sending a 1% per-page sampling of RTC errors to specified errorReportingUrl's. (I.e. 1% of pages will send RTC error pingbacks for all RTC errors that occur on that page). For any given RTC callout URL, a corresponding errorReportingUrl may be specified, which will receive pings for, and only for, errors that resulted from the associated RTC callout. For example, you can not specify one errorReportingUrl that receives batched pings for all RTC callouts from a page. The errorReportingUrl must be a secure URL that uses HTTPS.
@@ -196,6 +218,8 @@ In both cases, the requirements for an errorReportingUrl are the same:
 
 The error ping will be sent by creating an image pixel in the document. See `sendErrorMessage` in [real-time-config-manager.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/real-time-config-manager.js) for implementation details.
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ### URL Macro Substitution
 
 RTC supports macro substitution for building callout URLs. These macros can be specified by vendors, and by Fast Fetch implementations.

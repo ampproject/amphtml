@@ -22,7 +22,10 @@ import {dict} from '../../../src/utils/object';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
+<<<<<<< HEAD
 import {tryResolve} from '../../../src/utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
@@ -126,7 +129,11 @@ export class AmpShareTracking extends AMP.BaseElement {
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
+<<<<<<< HEAD
     return tryResolve(() => base64UrlEncodeFromBytes(
+=======
+    return Promise.resolve(base64UrlEncodeFromBytes(
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         this.getShareTrackingRandomBytes_()));
   }
 

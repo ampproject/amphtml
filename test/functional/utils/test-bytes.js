@@ -47,9 +47,15 @@ describe('stringToBytes', function() {
   });
 
   it('should signal an error with a character >255', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       return stringToBytes('ab☺');
     }).to.throw(); });
+=======
+    expect(() => {
+      return stringToBytes('ab☺');
+    }).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should convert bytes array to string', () => {

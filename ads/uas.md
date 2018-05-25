@@ -20,7 +20,11 @@ limitations under the License.
 ### Basic
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="728" height="90"
+=======
+<amp-ad width=728 height=90
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="uas"
     json='{"accountId": "132109", "adUnit": "10002912", "sizes": [[728, 90]]}'>
 </amp-ad> 
@@ -29,7 +33,11 @@ limitations under the License.
 ### Multi-size Ad
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="728" height="90"
+=======
+<amp-ad width=728 height=90
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="uas"
     json='{"accId": "132109", "adUnit": "10002912", "sizes": [[728, 90], [700, 90], [700, 60]]}'>
 </amp-ad> 
@@ -37,14 +45,20 @@ limitations under the License.
 Note that the `width` and `height` mentioned should be maximum of the width-hight combinations mentioned in `json.sizes`.
 
 ### Targetings
+<<<<<<< HEAD
 
 ```html
 <amp-ad width="728" height="90"
+=======
+```html
+<amp-ad width=728 height=90
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="uas"
     json='{"accId": "132109", "adUnit": "10002912", "sizes": [[728, 90]], "targetings": {"country": ["India", "USA"], "car": "Civic"}}'>
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 ### Sample tag
 
 ```html
@@ -59,17 +73,35 @@ Note that the `width` and `height` mentioned should be maximum of the width-high
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 ### Supported parameters via `json` attribute
+=======
+### Supported parameters via `json` attribute:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 - `accId` Account Id (mandatory)
 - `adUnit` AdUnitId (mandatory)
 - `sizes` Array of sizes (mandatory)
+<<<<<<< HEAD
 - `locLat` Geo-location latitude
+=======
+- `locLat` Geo-location lattitude
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 - `locLon` Geo-location longitude
 - `locSrc` Geo-location source
 - `pageURL` Set custom page URL
 - `targetings` key-value pairs
 - `extraParams` key-value pairs to be passed to PubMatic SSP
 
+<<<<<<< HEAD
+=======
+### Sample tag
+```html
+<amp-ad
+    width=300 height=250
+    type="uas"
+    json='{"accId": "132109", "adUnit": "10002912", "sizes": [[300, 250]], "targetings": {"country": ["India", "USA"], "car": "Civic"}, "locLat": "12.24", "locLon": "24.13", "locSrc": "wifi", "pageURL": "http://mydomain.com"}'>
+</amp-ad>
+```
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ### Unsupported Ad Formats
 - Interstitials

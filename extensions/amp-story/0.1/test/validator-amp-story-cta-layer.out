@@ -50,7 +50,11 @@ PASS
 |    </style>
 |  </head>
 |  <body>
+<<<<<<< HEAD
 |    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg">
+=======
+|    <amp-story standalone>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 |      <amp-story-page id="fill-template-title">
 |        <amp-story-grid-layer template="vertical">
 |          <h1>fill</h1>

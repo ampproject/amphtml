@@ -138,7 +138,11 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(null, []);
+<<<<<<< HEAD
       const task = new UpdateSourcesTask(newSources);
+=======
+      const task = new UpdateSourcesTask(newSources, vsyncApi);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       task.execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
@@ -152,7 +156,11 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, []);
+<<<<<<< HEAD
       const task = new UpdateSourcesTask(newSources);
+=======
+      const task = new UpdateSourcesTask(newSources, vsyncApi);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       task.execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
@@ -165,7 +173,11 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(NEW_SRC_URL, []);
+<<<<<<< HEAD
       const task = new UpdateSourcesTask(newSources);
+=======
+      const task = new UpdateSourcesTask(newSources, vsyncApi);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       task.execute(el);
       expect(el.src).to.equal(NEW_SRC_URL);
       expect(toArray(el.children)).to.be.empty;
@@ -181,7 +193,11 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, NEW_SRC_ELS);
+<<<<<<< HEAD
       const task = new UpdateSourcesTask(newSources);
+=======
+      const task = new UpdateSourcesTask(newSources, vsyncApi);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       task.execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.deep.equal(NEW_SRC_ELS);
@@ -206,7 +222,11 @@ describes.realWin('media-tasks', {}, () => {
       expect(replacedMedia.parentElement).to.equal(parent);
       expect(el.parentElement).to.equal(null);
 
+<<<<<<< HEAD
       const task = new SwapIntoDomTask(replacedMedia);
+=======
+      const task = new SwapIntoDomTask(replacedMedia, vsyncApi);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return task.execute(el).then(() => {
         expect(replacedMedia.parentElement).to.equal(null);
         expect(el.parentElement).to.equal(parent);
@@ -225,7 +245,11 @@ describes.realWin('media-tasks', {}, () => {
       expect(el.parentElement).to.equal(parent);
       expect(placeholderEl.parentElement).to.equal(null);
 
+<<<<<<< HEAD
       const task = new SwapOutOfDomTask(placeholderEl);
+=======
+      const task = new SwapOutOfDomTask(placeholderEl, vsyncApi);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return task.execute(el).then(() => {
         expect(el.parentElement).to.equal(null);
         expect(placeholderEl.parentElement).to.equal(parent);

@@ -20,13 +20,23 @@ limitations under the License.
 
 ```html
 <amp-ad 
+<<<<<<< HEAD
     width="240"
     height="400"
+=======
+    width=240
+    height=400
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="capirs"
     data-begun-auto-pad="1212332"
     data-begun-block-id="5665768"
     data-custom-css="div[id^=begun_block] iframe{margin:0 auto;}"
+<<<<<<< HEAD
     json=""></amp-ad>
+=======
+    json=""
+></amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
@@ -35,6 +45,12 @@ For semantics of configuration, please see Rambler SSP documentation.
 
 Supported parameters:
 
+<<<<<<< HEAD
 - `data-begun-auto-pad`
 - `data-begun-block-id`
 - `data-custom-css`
+=======
+- data-begun-auto-pad
+- data-begun-block-id
+- data-custom-css
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

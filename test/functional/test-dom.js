@@ -792,7 +792,12 @@ describes.sandboxed('DOM', {}, env => {
       expect(res).to.equal(dialog);
     });
 
+<<<<<<< HEAD
     it('should retry on first exception', () => {
+=======
+    // TODO(dvoytenko, #14336): Fails due to console errors.
+    it.skip('should retry on first exception', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const dialog = {};
       windowMock.expects('open')
           .withExactArgs('https://example.com/', '_blank', 'width=1')
@@ -821,7 +826,12 @@ describes.sandboxed('DOM', {}, env => {
       expect(res).to.be.null;
     });
 
+<<<<<<< HEAD
     it('should return the final exception', () => {
+=======
+    // TODO(dvoytenko, #14336): Fails due to console errors.
+    it.skip('should return the final exception', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       windowMock.expects('open')
           .withExactArgs('https://example.com/', '_blank', 'width=1')
           .throws(new Error('intentional1'))
@@ -830,10 +840,17 @@ describes.sandboxed('DOM', {}, env => {
           .withExactArgs('https://example.com/', '_top')
           .throws(new Error('intentional2'))
           .once();
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         dom.openWindowDialog(windowApi, 'https://example.com/',
             '_blank', 'width=1');
       }).to.throw(/intentional2/); });
+=======
+      expect(() => {
+        dom.openWindowDialog(windowApi, 'https://example.com/',
+            '_blank', 'width=1');
+      }).to.throw(/intentional2/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should retry only non-top target', () => {
@@ -1023,10 +1040,15 @@ describes.realWin('DOM', {
 
     it('should not continue if element is not AMP element', () => {
       const element = doc.createElement('div');
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
             'element is not AmpElement');
       });
+=======
+      expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
+          'element is not AmpElement');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should resolve if element has already upgrade', () => {

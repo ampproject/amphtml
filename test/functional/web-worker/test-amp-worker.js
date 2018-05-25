@@ -190,13 +190,21 @@ describe('invokeWebWorker', () => {
       expect(errorStub).to.have.been.calledWith('web-worker');
 
       // Unexpected method at valid `id`.
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
+=======
+      expect(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         fakeWorker.onmessage({data: {
           method: 'bar',
           returnValue: undefined,
           id: 0,
         }});
+<<<<<<< HEAD
       }).to.throw('mismatched method'); });
+=======
+      }).to.throw('mismatched method');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 

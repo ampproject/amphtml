@@ -84,7 +84,12 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     sandbox.restore();
   });
 
+<<<<<<< HEAD
   it('should work for size, layoutRect and position observer', () => {
+=======
+  // TODO(alanorozco, #14336): Fails due to console errors.
+  it.skip('should work for size, layoutRect and position observer', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     stubIframeClientMakeRequest(
         'send-positions',
         'position',
@@ -113,7 +118,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(measureSpy).to.be.calledOnce;
     expect(binding.getLayoutRect(element))
         .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+<<<<<<< HEAD
     sandbox.reset();
+=======
+    sandbox.restore();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Scroll, viewport position changed
     positionCallback({
@@ -126,7 +135,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(measureSpy).to.not.be.called;
     expect(binding.getLayoutRect(element))
         .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+<<<<<<< HEAD
     sandbox.reset();
+=======
+    sandbox.restore();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Resize, viewport size changed
     positionCallback({
@@ -139,7 +152,10 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(measureSpy).to.not.be.called;
     expect(binding.getLayoutRect(element))
         .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+<<<<<<< HEAD
     sandbox.reset();
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // DOM change, target position changed
     sandbox.restore();

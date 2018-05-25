@@ -16,14 +16,23 @@ limitations under the License.
 
 # Adhese
 
+<<<<<<< HEAD
 Serves ads from [Adhese](https://www.adhese.com).
+=======
+Adhese adserver.
+More information about us can be found on our [website](https://www.adhese.com).
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ### Basic setup
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adhese"
     data-location="_sdk_amp_"
     data-position=""
@@ -36,7 +45,11 @@ Serves ads from [Adhese](https://www.adhese.com).
 ### With additional parameters
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adhese"
     data-location="_sdk_amp_"
     data-position=""
@@ -50,9 +63,15 @@ Serves ads from [Adhese](https://www.adhese.com).
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, see the [Adhese website](https://www.adhese.com) or contact Adhese support.
 
 ### Required parameters
+=======
+See ad network documentation or contact Adhese support.
+
+Required parameters:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 - `data-account`
 - `data-request_type`
@@ -60,8 +79,14 @@ For details on the configuration semantics, see the [Adhese website](https://www
 - `data-position`
 - `data-format`
 
+<<<<<<< HEAD
 ### Optional parameter 
 
 The following optional parameter is supported via the 'json' attribute:
 
 - `targeting`
+=======
+Optional parameter supported via 'json' attribute:
+
+- 'targeting'
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

@@ -21,7 +21,10 @@ tags: {  # amp-access-laterpay
   extension_spec: {
     name: "amp-access-laterpay"
     allowed_versions: "0.1"
+<<<<<<< HEAD
     allowed_versions: "0.2"
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     allowed_versions: "latest"
     requires_usage: NONE
   }

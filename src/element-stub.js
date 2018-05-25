@@ -16,16 +16,26 @@
 
 import {BaseElement} from './base-element';
 import {dev} from './log';
+<<<<<<< HEAD
 import {stubbedElementNames} from './element-stub-data';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /** @type {!Array} */
 export const stubbedElements = [];
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
     stubbedElements.push(this);
+<<<<<<< HEAD
     stubbedElementNames.push(element.nodeName.toLowerCase());
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */

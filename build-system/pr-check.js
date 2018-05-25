@@ -256,7 +256,10 @@ function determineBuildTargets(filePaths) {
 }
 
 function startSauceConnect() {
+<<<<<<< HEAD
   process.env['SAUCE_USERNAME'] = 'amphtml';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
       'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken').trim();
   const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
@@ -294,6 +297,7 @@ const command = {
   buildRuntime: function() {
     timedExecOrDie('gulp build');
   },
+<<<<<<< HEAD
   buildRuntimeMinified: function(extensions) {
     let cmd = 'gulp dist --fortesting';
     if (!extensions) {
@@ -303,6 +307,10 @@ const command = {
   },
   runBundleSizeCheck: function() {
     timedExecOrDie('gulp bundle-size');
+=======
+  buildRuntimeMinified: function() {
+    timedExecOrDie('gulp dist --fortesting');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
@@ -315,6 +323,7 @@ const command = {
     }
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd + ' --headless');
+<<<<<<< HEAD
     // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
     // if (process.env.TRAVIS) {
     //   // A subset of unit tests on other browsers via sauce labs
@@ -323,6 +332,15 @@ const command = {
     //   timedExecOrDie(cmd);
     //   stopSauceConnect();
     // }
+=======
+    if (!!process.env.SAUCE_USERNAME) {
+      // A subset of unit tests on other browsers via sauce labs
+      cmd = cmd + ' --saucelabs_lite';
+      startSauceConnect();
+      timedExecOrDie(cmd);
+      stopSauceConnect();
+    }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
@@ -333,7 +351,11 @@ const command = {
     if (compiled) {
       cmd += ' --compiled';
     }
+<<<<<<< HEAD
     if (process.env.TRAVIS) {
+=======
+    if (!!process.env.SAUCE_USERNAME) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       startSauceConnect();
       cmd += ' --saucelabs';
       timedExecOrDie(cmd);
@@ -408,8 +430,12 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
+<<<<<<< HEAD
     command.buildRuntimeMinified(/* extensions */ true);
     command.runBundleSizeCheck();
+=======
+    command.buildRuntimeMinified();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true);
   }
@@ -427,8 +453,11 @@ function runAllCommandsLocally() {
   if (!argv.nobuild) {
     command.cleanBuild();
     command.buildRuntime();
+<<<<<<< HEAD
     command.buildRuntimeMinified(/* extensions */ false);
     command.runBundleSizeCheck();
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   // These tests need a build.
@@ -518,6 +547,7 @@ function isGreenkeeperLockfilePushBuild() {
 function main() {
   const startTime = startTimer('pr-check.js');
 
+<<<<<<< HEAD
   if (isGreenkeeperPrBuild()) {
     console.log(fileLogPrefix,
         'This is a greenkeeper PR build. Tests will be run for the push ' +
@@ -533,6 +563,15 @@ function main() {
     timedExec('./node_modules/.bin/greenkeeper-lockfile-upload');
     console.log(fileLogPrefix, 'Lockfile updated and uploaded. Tests will be ' +
         'run for the subsequent push build with the lockfile update.');
+=======
+  // Eliminate unnecessary testing on greenkeeper branches by running tests only
+  // on the push build that contains the lockfile update.
+  if (isGreenkeeperPrBuild() ||
+      (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild())) {
+    console.log(fileLogPrefix,
+        'Skipping unnecessary testing on greenkeeper branches. ' +
+        'Tests will only be run for the push build with the lockfile update.');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     stopTimer('pr-check.js', startTime);
     return 0;
   }
@@ -543,7 +582,10 @@ function main() {
 
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
+<<<<<<< HEAD
     process.env['LOCAL_PR_CHECK'] = true;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     console.log(fileLogPrefix, 'Running all pr-check commands locally.');
     runAllCommandsLocally();
     stopTimer('pr-check.js', startTime);
@@ -612,18 +654,23 @@ function main() {
         buildTargets.has('VISUAL_DIFF')) {
       command.cleanBuild();
       command.buildRuntime();
+<<<<<<< HEAD
       command.buildRuntimeMinified(/* extensions */ false);
       command.runBundleSizeCheck();
       command.runVisualDiffTests();
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
       command.runVisualDiffTests(/* opt_mode */ 'skip');
+=======
+      command.runVisualDiffTests();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
     command.runPresubmitTests();
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME')) {
       command.runIntegrationTests(/* compiled */ false);
     }
+<<<<<<< HEAD
     // TODO(rsimha, #14851): Failing due to long proessing times.
     // if (buildTargets.has('INTEGRATION_TEST') ||
     //     buildTargets.has('RUNTIME') ||
@@ -633,6 +680,16 @@ function main() {
     //   // Generates a blank Percy build to satisfy the required Github check.
     //   command.runVisualDiffTests(/* opt_mode */ 'skip');
     // }
+=======
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF')) {
+      command.verifyVisualDiffTests();
+    } else {
+      // Generates a blank Percy build to satisfy the required Github check.
+      command.runVisualDiffTests(/* opt_mode */ 'skip');
+    }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
     }

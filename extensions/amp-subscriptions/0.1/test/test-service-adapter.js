@@ -50,6 +50,7 @@ env => {
     });
   });
 
+<<<<<<< HEAD
   describe('delegateAction', () => {
     it('should call delegateActionToLocal of subscription service', () => {
       const p = Promise.resolve();
@@ -64,6 +65,12 @@ env => {
     it('should call delegateActionToService of subscription service', () => {
       const p = Promise.resolve();
       const stub = sandbox.stub(subscriptionService, 'delegateActionToService')
+=======
+  describe('delegateActionToLocal', () => {
+    it('should call delegateActionToLocal of subscription service', () => {
+      const p = Promise.resolve();
+      const stub = sandbox.stub(subscriptionService, 'delegateActionToLocal')
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           .callsFake(() => p);
       const action = 'action';
       const result = serviceAdapter.delegateActionToLocal(action);
@@ -87,6 +94,7 @@ env => {
       expect(stub).to.be.calledOnce;
     });
   });
+<<<<<<< HEAD
 
   describe('decorateServiceAction', () => {
     it('should call decorateServiceAction of '
@@ -99,4 +107,6 @@ env => {
       expect(stub).to.be.calledWith(element, serviceId, 'action');
     });
   });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });

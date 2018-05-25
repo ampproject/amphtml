@@ -30,9 +30,13 @@ import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 describe.configure().skipSafari().run('XHR', function() {
   let sandbox;
   let ampdocServiceForStub;
+<<<<<<< HEAD
   let ampdocViewerStub;
   let xhrCreated;
   let viewer;
+=======
+  let xhrCreated;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   const location = {href: 'https://acme.com/path'};
   const nativeWin = {
@@ -75,6 +79,7 @@ describe.configure().skipSafari().run('XHR', function() {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
+<<<<<<< HEAD
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
     ampdocViewerStub.returns({
       whenFirstVisible: () => Promise.resolve(),
@@ -84,6 +89,9 @@ describe.configure().skipSafari().run('XHR', function() {
       getAmpDoc: () => ampdocViewerStub,
     });
 
+=======
+    ampdocServiceForStub.returns({isSingleDoc: () => false});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     location.href = 'https://acme.com/path';
   });
 
@@ -93,15 +101,24 @@ describe.configure().skipSafari().run('XHR', function() {
 
   scenarios.forEach(test => {
     let xhr;
+<<<<<<< HEAD
     beforeEach(() => {
       xhr = xhrServiceForTesting(test.win);
     });
     // Since it's the Native fetch, it won't use the XHR object so
+=======
+
+    // Since if it's the Native fetch, it won't use the XHR object so
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // mocking and testing the request becomes not doable.
     if (test.desc != 'Native') {
 
       describe('#XHR', () => {
         beforeEach(() => {
+<<<<<<< HEAD
+=======
+          xhr = xhrServiceForTesting(test.win);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           setupMockXhr();
         });
 
@@ -134,9 +151,15 @@ describe.configure().skipSafari().run('XHR', function() {
 
           expect(get).to.not.throw();
           expect(post).to.not.throw();
+<<<<<<< HEAD
           allowConsoleError(() => { expect(put).to.throw(); });
           allowConsoleError(() => { expect(patch).to.throw(); });
           allowConsoleError(() => { expect(deleteMethod).to.throw(); });
+=======
+          expect(put).to.throw();
+          expect(patch).to.throw();
+          expect(deleteMethod).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
 
         it('should allow FormData as body', () => {
@@ -188,6 +211,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
         it('should defend against invalid source origin query ' +
            'parameter', () => {
+<<<<<<< HEAD
           allowConsoleError(() => { expect(() => {
             xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
           }).to.throw(/Source origin is not allowed/); });
@@ -203,6 +227,23 @@ describe.configure().skipSafari().run('XHR', function() {
           allowConsoleError(() => { expect(() => {
             xhr.fetchJson('/get?k=v1&_%5famp_source_origin=#h1');
           }).to.throw(/Source origin is not allowed/); });
+=======
+          expect(() => {
+            xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
+          }).to.throw(/Source origin is not allowed/);
+        });
+
+        it('should defend against empty source origin query parameter', () => {
+          expect(() => {
+            xhr.fetchJson('/get?k=v1&__amp_source_origin=#h1');
+          }).to.throw(/Source origin is not allowed/);
+        });
+
+        it('should defend against re-encoded source origin parameter', () => {
+          expect(() => {
+            xhr.fetchJson('/get?k=v1&_%5famp_source_origin=#h1');
+          }).to.throw(/Source origin is not allowed/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
 
         it('should not include __amp_source_origin if ampCors ' +
@@ -260,6 +301,7 @@ describe.configure().skipSafari().run('XHR', function() {
             expect(error.message).to.contain('Response must contain');
           });
         });
+<<<<<<< HEAD
 
         describe('viewer visibility', () => {
           afterEach(() => {
@@ -284,13 +326,19 @@ describe.configure().skipSafari().run('XHR', function() {
             });
           });
         });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     }
 
     describe('AMP-Same-Origin', () => {
+<<<<<<< HEAD
       beforeEach(() => {
         xhr = xhrServiceForTesting(test.win);
       });
+=======
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       it('should not be set for cross origin requests', () => {
         const init = {};
@@ -326,9 +374,13 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     describe(test.desc, () => {
+<<<<<<< HEAD
       beforeEach(() => {
         xhr = xhrServiceForTesting(test.win);
       });
+=======
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
@@ -447,9 +499,15 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should NOT succeed CORS with invalid credentials', () => {
+<<<<<<< HEAD
         allowConsoleError(() => { expect(() => {
           xhr.fetchJson('https://acme.org/', {credentials: null});
         }).to.throw(/Only credentials=include|omit support: null/); });
+=======
+        expect(() => {
+          xhr.fetchJson('https://acme.org/', {credentials: null});
+        }).to.throw(/Only credentials=include|omit support: null/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
 
       it('should expose HTTP headers', () => {
@@ -710,10 +768,17 @@ describe.configure().skipSafari().run('XHR', function() {
 
         expect(objectFn).to.not.throw();
         expect(arrayFn).to.not.throw();
+<<<<<<< HEAD
         allowConsoleError(() => { expect(stringFn).to.throw(); });
         allowConsoleError(() => { expect(numberFn).to.throw(); });
         allowConsoleError(() => { expect(booleanFn).to.throw(); });
         allowConsoleError(() => { expect(nullFn).to.throw(); });
+=======
+        expect(stringFn).to.throw();
+        expect(numberFn).to.throw();
+        expect(booleanFn).to.throw();
+        expect(nullFn).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
 
     });
@@ -804,8 +869,14 @@ describe.configure().skipSafari().run('XHR', function() {
     const origin = 'https://acme.com';
 
     let interceptionEnabledWin;
+<<<<<<< HEAD
     let optedInDoc;
     let sendMessageStub;
+=======
+    let viewer;
+    let sendMessageStub;
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     function getDefaultResponseOptions() {
       return {
         headers: [
@@ -819,22 +890,38 @@ describe.configure().skipSafari().run('XHR', function() {
     }
 
     beforeEach(() => {
+<<<<<<< HEAD
       optedInDoc = window.document.implementation.createHTMLDocument('');
+=======
+      const optedInDoc = window.document.implementation.createHTMLDocument('');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
       ampdocServiceForStub.returns({
         isSingleDoc: () => true,
         getAmpDoc: () => ({getRootNode: () => optedInDoc}),
       });
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       viewer = {
         hasCapability: () => true,
         isTrustedViewer: () => Promise.resolve(true),
         sendMessageAwaitResponse: getDefaultResponsePromise,
+<<<<<<< HEAD
         whenFirstVisible: () => Promise.resolve(),
       };
       sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
       sendMessageStub.returns(getDefaultResponsePromise());
       ampdocViewerStub.returns(viewer);
+=======
+      };
+      sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      sendMessageStub.returns(getDefaultResponsePromise());
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       interceptionEnabledWin = {
         location: {
           href: `${origin}/path`,
@@ -845,10 +932,14 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     it('should not intercept if AMP doc is not single', () => {
+<<<<<<< HEAD
       ampdocServiceForStub.returns({
         isSingleDoc: () => false,
         getAmpDoc: () => ({getRootNode: () => optedInDoc}),
       });
+=======
+      ampdocServiceForStub.returns({isSingleDoc: () => false});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
       return xhr.fetch('https://cdn.ampproject.org')

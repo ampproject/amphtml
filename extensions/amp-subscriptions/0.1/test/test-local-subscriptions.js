@@ -19,9 +19,14 @@ import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
+<<<<<<< HEAD
 import {SubscriptionAnalytics} from '../analytics';
 
 describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
+=======
+
+describes.fakeWin('local-subscriptions', {amp: true}, env => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let ampdoc;
   let localSubscriptionPlatform;
   let serviceAdapter;
@@ -44,7 +49,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     loggedIn,
   };
   const entitlement = Entitlement.parseFromJson(json);
+<<<<<<< HEAD
   entitlement.setCurrentProduct(products[0]);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   const authUrl = 'https://lipsum.com/login/authorize';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {
@@ -54,7 +62,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         'authorizationUrl': authUrl,
         'actions': actionMap,
         'pingbackUrl': pingbackUrl,
+<<<<<<< HEAD
         'baseScore': 99,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       },
     ],
   };
@@ -67,8 +78,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     sandbox.stub(serviceAdapter, 'getDialog')
         .callsFake(() => new Dialog(ampdoc));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
+<<<<<<< HEAD
         serviceConfig.services[0], serviceAdapter,
         new SubscriptionAnalytics(ampdoc.getRootNode()));
+=======
+        serviceConfig.services[0], serviceAdapter);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {
@@ -81,10 +96,13 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         .to.be.equals('click');
   });
 
+<<<<<<< HEAD
   it('should return baseScore', () => {
     expect(localSubscriptionPlatform.getBaseScore()).to.be.equal(99);
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   it('should fetch the entitlements on getEntitlements', () => {
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
@@ -137,6 +155,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     });
   });
 
+<<<<<<< HEAD
   describe('handleClick_', () => {
     let element;
     beforeEach(() => {
@@ -167,6 +186,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     });
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   describe('executeAction', () => {
     it('should call executeAction on actions_', () => {
       const actionString = 'action';
@@ -205,10 +226,17 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       return localSubscriptionPlatform.pingback(entitlement).then(() => {
         expect(urlBuildStub).to.be.calledOnce;
         expect(sendSignalStub).to.be.calledOnce;
+<<<<<<< HEAD
         expect(sendSignalStub.getCall(0).args[0]).to.be.equal(
             localSubscriptionPlatform.pingbackUrl_);
         expect(sendSignalStub.getCall(0).args[1].body).to.equal(
             JSON.stringify(entitlement.jsonForPingback()));
+=======
+        expect(sendSignalStub.getCall(0).args[0]).to.be
+            .equal(localSubscriptionPlatform.pingbackUrl_);
+        expect(sendSignalStub.getCall(0).args[1].body).to.deep
+            .equal(entitlement.raw);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
   });

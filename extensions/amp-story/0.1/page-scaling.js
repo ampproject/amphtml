@@ -17,10 +17,16 @@ import {Services} from '../../../src/services';
 import {childElementsByTag, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+<<<<<<< HEAD
 import {px, setImportantStyles, setStyle} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {toArray, toWin} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
+=======
+import {px, setImportantStyles} from '../../../src/style';
+import {throttle} from '../../../src/utils/rate-limit';
+import {toArray, toWin} from '../../../src/types';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {unscaledClientRect} from './utils';
 
 
@@ -182,6 +188,12 @@ export class PageScalingService {
    * @param {!Element} rootEl
    */
   constructor(win, rootEl) {
+<<<<<<< HEAD
+=======
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private @const {!Element} */
     this.rootEl_ = rootEl;
 
@@ -235,7 +247,11 @@ export class PageScalingService {
    * @return {!Promise}
    */
   scale(page) {
+<<<<<<< HEAD
     return tryResolve(() => this.scale_(page));
+=======
+    return Promise.resolve(this.scale_(page));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -439,9 +455,16 @@ class CssPropsZoomScalingService extends PageScalingService {
   updateRootProps() {
     const {width, height, factor} = this.targetDimensions_;
     this.vsync_.mutate(() => {
+<<<<<<< HEAD
       setStyle(this.rootEl_, '--i-amphtml-story-width', px(width));
       setStyle(this.rootEl_, '--i-amphtml-story-height', px(height));
       setStyle(this.rootEl_, '--i-amphtml-story-factor', factor.toString());
+=======
+      this.rootEl_.style.setProperty('--i-amphtml-story-width', px(width));
+      this.rootEl_.style.setProperty('--i-amphtml-story-height', px(height));
+      this.rootEl_.style.setProperty('--i-amphtml-story-factor',
+          factor.toString());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 

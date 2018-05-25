@@ -148,7 +148,12 @@ describes.realWin('test-cid-api', {amp: true}, env => {
     });
   });
 
+<<<<<<< HEAD
   it('should return null if API rejects', () => {
+=======
+  // TODO(lannka, #14336): Fails due to console errors.
+  it.skip('should return null if API rejects', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     fetchJsonStub.returns(Promise.reject());
     return api.getScopedCid('api-key', 'scope-a').then(cid => {
       expect(cid).to.be.null;

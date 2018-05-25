@@ -26,6 +26,7 @@ export const data = {
 }
 </script></body></html>`,
 
+<<<<<<< HEAD
   minifiedCreative: '<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>\n    amp-user-notification.amp-active {\n      opacity: 0;\n    }\n  </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body>Hello, world.\n\n</body></html>',
 
 
@@ -79,6 +80,8 @@ export const data = {
 
 
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   original: `<!--
   Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 

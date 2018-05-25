@@ -40,6 +40,7 @@ For configuration details and to generate your tags, please contact https://loka
 
 Supported parameters:
 
+<<<<<<< HEAD
 * `data-unit-params`: JSON value
 
 Required JSON fields:
@@ -52,5 +53,19 @@ Optional JSON fields:
 * `tag`: User specified value
 
 ## Design information
+=======
+* data-unit-params - JSON value
+
+Required JSON fields:
+
+* unit - Ad type
+* id - Delivery ID for Ad
+
+Optional JSON fields:
+
+* tag - User specified value
+
+## For more design information
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 Please visit [SCENE](https://lokaplatform.com/scene) and sign up as publisher to create your own placement.

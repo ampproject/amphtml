@@ -146,9 +146,13 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': '',
     };
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
     });
+=======
+    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should throw if artwork src is invalid - string', () => {
@@ -161,9 +165,13 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': '',
     };
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
     });
+=======
+    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should throw if artwork is not array', () => {
@@ -173,8 +181,12 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       'artwork': 'https://NotArray',
       'title': '',
     };
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
     });
+=======
+    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

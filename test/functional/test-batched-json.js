@@ -83,11 +83,19 @@ describe('batchFetchJsonFor', () => {
           .withArgs(el)
           .returns(Promise.resolve(['BAR']));
       const userError = sandbox.stub(user(), 'error');
+<<<<<<< HEAD
       const optIn = UrlReplacementPolicy.OPT_IN;
       return batchFetchJsonFor(ampdoc, el, null, optIn).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
         expect(userError).calledWithMatch(
             'AMP-LIST', /data-amp-replace="BAR"/);
+=======
+
+      const optIn = UrlReplacementPolicy.OPT_IN;
+      return batchFetchJsonFor(ampdoc, el, null, optIn).then(() => {
+        expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
+        expect(userError).calledWithMatch('AMP-LIST', /data-amp-replace="BAR"/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
 
@@ -98,6 +106,10 @@ describe('batchFetchJsonFor', () => {
           .withArgs('https://data.com?x=FOO&y=BAR')
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
       const userError = sandbox.stub(user(), 'error');
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const all = UrlReplacementPolicy.ALL;
       return batchFetchJsonFor(ampdoc, el, null, all).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');

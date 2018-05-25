@@ -156,6 +156,7 @@ describes.realWin('amp-story', {
         });
   });
 
+<<<<<<< HEAD
   it('should prerender/load the share menu', () => {
     createPages(story.element, 1, ['cover']);
 
@@ -182,6 +183,8 @@ describes.realWin('amp-story', {
         });
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   // TODO(#11639): Re-enable this test.
   it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
     const hideBookendStub = sandbox.stub(

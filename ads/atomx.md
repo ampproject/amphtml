@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="atomx"
     data-id="1234">
 </amp-ad>
@@ -27,6 +31,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration information, see [atomx documentation](https://wiki.atomx.com/tags).
 
 ### Required Parameters
@@ -37,5 +42,15 @@ For configuration information, see [atomx documentation](https://wiki.atomx.com/
 
 * `data-click` - URL to pre-pend to the click URL to enable tracking. 
 * `data-uv1`, `data-uv2`, `data-uv3` - User value to pass in to the tag. Can be used to track & report on custom values. Needs to be a whole number between 1 and 4,294,967,295. 
+=======
+For configuration, please see [atomx documentation](https://wiki.atomx.com/tags).
+
+### Required Parameters:
+* `data-id` - placement ID
+
+### Optional parameters:
+* `data-click` - URL to prepend to the click URL to enable tracking 
+* `data-uv1`, `data-uv2`, `data-uv3` - User Value to pass in to the tag. Can be used to track & report on custom values. Needs to be a whole number between 1 and 4,294,967,295. 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 * `data-context` - Conversion Callback Context
 

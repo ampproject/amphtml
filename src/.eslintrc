@@ -1,6 +1,10 @@
 {
   "rules": {
+<<<<<<< HEAD
     "amphtml-internal/no-global": 2,
     "amphtml-internal/vsync": 1
+=======
+    "amphtml-internal/no-global": 2
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 }

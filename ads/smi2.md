@@ -16,6 +16,7 @@ limitations under the License.
 
 # Smi2
 
+<<<<<<< HEAD
 SMI2 is a service for personalizing content network. Please visit our [smi2.net](https://smi2.net) for more information.
 
 ## Example
@@ -25,13 +26,35 @@ SMI2 is a service for personalizing content network. Please visit our [smi2.net]
     type="smi2"
     data-blockid="90223">
 </amp-embed>
+=======
+SMI2 is a service for personalizing content network.
+
+Please visit our [website](https://smi2.net) for more information about us.
+
+## Examples
+
+```html
+  <amp-embed height="284"
+          type="smi2"
+          data-blockid="90223">
+  </amp-embed>
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 ### Required parameters
 
 - `data-blockid` - insert your block_id
 - `height`
+=======
+height and
+
+Required parameters:
+
+- `data-blockid` - insert your block_id 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

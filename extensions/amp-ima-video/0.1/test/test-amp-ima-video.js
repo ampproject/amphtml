@@ -17,8 +17,11 @@
 import '../amp-ima-video';
 import * as imaVideoObj from '../../../../ads/google/imaVideo';
 
+<<<<<<< HEAD
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 describes.realWin('amp-ima-video', {
   amp: {
@@ -32,7 +35,10 @@ describes.realWin('amp-ima-video', {
 
   beforeEach(() => {
     win = env.win;
+<<<<<<< HEAD
     win.context = {};
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     doc = win.document;
   });
 
@@ -771,6 +777,7 @@ describes.realWin('amp-ima-video', {
     expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
         .to.eql('none');
   });
+<<<<<<< HEAD
 
   it('handles unknown consent', () => {
     const div = doc.createElement('div');
@@ -861,4 +868,6 @@ describes.realWin('amp-ima-video', {
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
         .to.eql('vast.mxl');
   });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });

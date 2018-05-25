@@ -1,0 +1,15 @@
+{
+  "presets": [
+    ["env", {
+      "loose": true,
+      "targets": {
+        "browsers": ["Last 2 versions"]
+      },
+      "modules": "commonjs",
+      "sourceType": "module"
+    }]
+  ],
+  "sourceType": "module",
+  "ignore": ["sha384-generated.js", "access-expr-impl.js"],
+  "plugins": ["transform-remove-strict-mode"]
+}

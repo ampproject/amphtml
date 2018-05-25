@@ -22,6 +22,14 @@ import {
   AmpDocShadow,
   AmpDocShell,
   AmpDocSingle,
+<<<<<<< HEAD
+=======
+  declareExtension,
+  installShadowDoc,
+  installShadowDocForShell,
+  shadowDocHasBody,
+  shadowDocReady,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 } from '../../src/service/ampdoc-impl';
 import {
   ShadowDomVersion,
@@ -132,7 +140,11 @@ describe('AmpDocService', () => {
         service.getAmpDoc(content);
       }).to.throw(/No ampdoc found/);
 
+<<<<<<< HEAD
       const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+=======
+      const newAmpDoc = installShadowDoc(service, 'https://a.org/', shadowRoot);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const ampDoc = service.getAmpDoc(content);
       expect(ampDoc).to.equal(newAmpDoc);
       expect(ampDoc).to.exist;
@@ -155,10 +167,17 @@ describe('AmpDocService', () => {
       if (!shadowRoot) {
         return;
       }
+<<<<<<< HEAD
       service.installShadowDoc('https://a.org/', shadowRoot);
       allowConsoleError(() => { expect(() => {
         service.installShadowDoc('https://a.org/', shadowRoot);
       }).to.throw(/The shadow root already contains ampdoc/); });
+=======
+      installShadowDoc(service, 'https://a.org/', shadowRoot);
+      expect(() => {
+        installShadowDoc(service, 'https://a.org/', shadowRoot);
+      }).to.throw(/The shadow root already contains ampdoc/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -167,7 +186,11 @@ describe('AmpDocService', () => {
         return;
       }
 
+<<<<<<< HEAD
       const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+=======
+      const newAmpDoc = installShadowDoc(service, 'https://a.org/', shadowRoot);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const ampDoc = service.getAmpDoc(content);
       expect(ampDoc).to.equal(newAmpDoc);
 
@@ -206,15 +229,25 @@ describe('AmpDocService', () => {
 
     it('should fail when installing AmpDocShell in single-doc mode', () => {
       const ampdocService = new AmpDocService(window, /* isSingleDoc */ true);
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         ampdocService.installShellShadowDoc();
       }).to.throw(/AmpDocShell cannot be installed in single-doc mode/); });
+=======
+      expect(() => {
+        installShadowDocForShell(ampdocService);
+      }).to.throw(/AmpDocShell cannot be installed in single-doc mode/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should install AmpDocShell in shadow-doc mode', () => {
       expect(ampdocService.hasAmpDocShell()).to.be.false;
 
+<<<<<<< HEAD
       const ampdocShell = ampdocService.installShellShadowDoc();
+=======
+      const ampdocShell = installShadowDocForShell(ampdocService);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       expect(ampdocShell instanceof AmpDocShell).to.be.true;
       expect(window.document['__AMPDOC']).to.equal(ampdocShell);
@@ -222,13 +255,21 @@ describe('AmpDocService', () => {
     });
 
     it('should yield AmpDocShell for window document', () => {
+<<<<<<< HEAD
       const ampdocShell = ampdocService.installShellShadowDoc();
+=======
+      const ampdocShell = installShadowDocForShell(ampdocService);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       expect(ampdocService.getAmpDoc(window.document)).to.equal(ampdocShell);
     });
 
     it('should yield AmpDocShell for custom-element', () => {
+<<<<<<< HEAD
       const ampdocShell = ampdocService.installShellShadowDoc();
+=======
+      const ampdocShell = installShadowDocForShell(ampdocService);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       window.document.body.appendChild(content);
 
       expect(ampdocService.getAmpDoc(content)).to.equal(ampdocShell);
@@ -237,7 +278,11 @@ describe('AmpDocService', () => {
     it('should yield AmpDocShell for custom-element when Shadow Dom is ' +
         'not supported', () => {
       setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
+<<<<<<< HEAD
       const ampdocShell = ampdocService.installShellShadowDoc();
+=======
+      const ampdocShell = installShadowDocForShell(ampdocService);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       window.document.body.appendChild(content);
 
       expect(ampdocService.getAmpDoc(content)).to.equal(ampdocShell);
@@ -273,7 +318,11 @@ describe('AmpDocService', () => {
         });
       });
 
+<<<<<<< HEAD
       const ampdocShell = ampdocService.installShellShadowDoc();
+=======
+      const ampdocShell = installShadowDocForShell(ampdocService);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       expect(ampdocShell.isBodyAvailable()).to.be.false;
       expect(ampdocShell.isReady()).to.be.false;
@@ -361,9 +410,13 @@ describe('AmpDocSingle', () => {
     const ampdoc = new AmpDocSingle(win);
 
     expect(ampdoc.isBodyAvailable()).to.be.false;
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => ampdoc.getBody()).to.throw(/body not available/);
     });
+=======
+    expect(() => ampdoc.getBody()).to.throw(/body not available/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const bodyPromise = ampdoc.whenBodyAvailable();
     const readyPromise = ampdoc.whenReady();
 
@@ -385,23 +438,39 @@ describe('AmpDocSingle', () => {
   it('should declare extension', () => {
     expect(ampdoc.declaresExtension('ext1')).to.be.false;
     expect(ampdoc.declaresExtension('ext2')).to.be.false;
+<<<<<<< HEAD
     ampdoc.declareExtension('ext1');
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
     expect(ampdoc.declaresExtension('ext2')).to.be.false;
 
     ampdoc.declareExtension('ext2');
+=======
+    declareExtension(ampdoc, 'ext1');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2')).to.be.false;
+
+    declareExtension(ampdoc, 'ext2');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
     expect(ampdoc.declaresExtension('ext2')).to.be.true;
   });
 
   it('should ignore duplicate extensions', () => {
     expect(ampdoc.declaresExtension('ext1')).to.be.false;
+<<<<<<< HEAD
     ampdoc.declareExtension('ext1');
+=======
+    declareExtension(ampdoc, 'ext1');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
     expect(ampdoc.declaredExtensions_).to.have.length(1);
 
     // Repeat.
+<<<<<<< HEAD
     ampdoc.declareExtension('ext1');
+=======
+    declareExtension(ampdoc, 'ext1');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(ampdoc.declaredExtensions_).to.have.length(1);
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
   });
@@ -460,15 +529,23 @@ describe('AmpDocShadow', () => {
   it('should update when body is available', () => {
     // Body is still expected.
     expect(ampdoc.isBodyAvailable()).to.be.false;
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => ampdoc.getBody()).to.throw(/body not available/);
     });
+=======
+    expect(() => ampdoc.getBody()).to.throw(/body not available/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(ampdoc.bodyResolver_).to.be.ok;
 
     // Set body.
     const bodyPromise = ampdoc.whenBodyAvailable();
     const body = {nodeType: 1};
+<<<<<<< HEAD
     ampdoc.setBody(body);
+=======
+    shadowDocHasBody(ampdoc, body);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.getBody()).to.equal(body);
     expect(ampdoc.bodyResolver_).to.be.undefined;
@@ -481,10 +558,17 @@ describe('AmpDocShadow', () => {
 
   it('should only allow one body update', () => {
     const body = {nodeType: 1};
+<<<<<<< HEAD
     ampdoc.setBody(body);
     allowConsoleError(() => { expect(() => {
       ampdoc.setBody(body);
     }).to.throw(/Duplicate body/); });
+=======
+    shadowDocHasBody(ampdoc, body);
+    expect(() => {
+      shadowDocHasBody(ampdoc, body);
+    }).to.throw(/Duplicate body/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should update when doc is ready', () => {
@@ -494,7 +578,11 @@ describe('AmpDocShadow', () => {
 
     // Set ready.
     const readyPromise = ampdoc.whenReady();
+<<<<<<< HEAD
     ampdoc.setReady();
+=======
+    shadowDocReady(ampdoc);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(ampdoc.isReady()).to.be.true;
     expect(ampdoc.readyResolver_).to.be.undefined;
     expect(ampdoc.readyPromise_).to.be.ok;
@@ -504,10 +592,17 @@ describe('AmpDocShadow', () => {
   });
 
   it('should only allow one ready update', () => {
+<<<<<<< HEAD
     ampdoc.setReady();
     allowConsoleError(() => { expect(() => {
       ampdoc.setReady();
     }).to.throw(/Duplicate ready state/); });
+=======
+    shadowDocReady(ampdoc);
+    expect(() => {
+      shadowDocReady(ampdoc);
+    }).to.throw(/Duplicate ready state/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 

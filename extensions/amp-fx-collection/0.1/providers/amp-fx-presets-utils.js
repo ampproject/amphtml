@@ -45,6 +45,7 @@ export function convertEasingKeyword(keyword) {
       return keyword;
   }
 }
+<<<<<<< HEAD
 
 export function resolvePercentageToNumber(val) {
   const precentageStrippedVal = parseFloat(val);
@@ -52,3 +53,5 @@ export function resolvePercentageToNumber(val) {
     return precentageStrippedVal / 100;
   }
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

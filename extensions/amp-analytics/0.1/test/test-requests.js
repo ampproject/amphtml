@@ -363,7 +363,12 @@ describes.realWin('Requests', {amp: 1}, env => {
         }
       });
 
+<<<<<<< HEAD
       it('should handle batchPlugin function error', function* () {
+=======
+      // TODO(zhouyx, #14336): Fails due to console errors.
+      it.skip('should handle batchPlugin function error', function* () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': '_ping_'};
         const handler = new RequestHandler(

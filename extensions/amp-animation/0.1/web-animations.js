@@ -41,7 +41,10 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
+<<<<<<< HEAD
 import {setStyles} from '../../../src/style';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 /** @const {string} */
@@ -126,8 +129,16 @@ export class WebAnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
+<<<<<<< HEAD
         setStyles(request.target, request.vars);
       }
+=======
+        for (const k in request.vars) {
+          request.target.style.setProperty(k, String(request.vars[k]));
+        }
+      }
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const player = request.target.animate(request.keyframes, request.timing);
       player.pause();
       return player;

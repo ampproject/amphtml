@@ -46,9 +46,15 @@ describe('TaskQueue', () => {
     expect(queue.getLastEnqueueTime()).to.equal(1000);
     expect(queue.getLastDequeueTime()).to.equal(0);
 
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       queue.enqueue({id: '1'});
     }).to.throw(/Task already enqueued/); });
+=======
+    expect(() => {
+      queue.enqueue({id: '1'});
+    }).to.throw(/Task already enqueued/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     queue.dequeue({id: '1'});
     expect(queue.getTaskById('1')).to.equal(null);

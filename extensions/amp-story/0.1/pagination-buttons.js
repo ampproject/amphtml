@@ -146,7 +146,11 @@ export class PaginationButtons {
   /** @param {!Window} win */
   constructor(win) {
     const doc = win.document;
+<<<<<<< HEAD
     const storeService = Services.storyStoreServiceV01(win);
+=======
+    const storeService = Services.storyStoreService(win);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {!PaginationButton} */
     this.forwardButton_ =

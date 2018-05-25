@@ -23,7 +23,11 @@ For configuration details and to generate your tags, please refer to [your publi
 ## Example - RTA
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="criteo"
     data-tagtype=“rta”
     data-networkid=“76543”
@@ -36,7 +40,11 @@ For configuration details and to generate your tags, please refer to [your publi
 ## Example - PuMP and Passback
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="criteo"
     data-tagtype=“passback”
     data-zone=“567890”>
@@ -46,7 +54,11 @@ For configuration details and to generate your tags, please refer to [your publi
 ## Example - Standalone
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="criteo"
     data-tagtype="standalone"
     data-timeout="700"

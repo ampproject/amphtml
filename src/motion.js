@@ -82,7 +82,11 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
 export function continueMotion(contextNode, startX, startY, veloX, veloY,
   callback, opt_vsync) {
   return new Motion(contextNode, startX, startY, veloX, veloY,
+<<<<<<< HEAD
       callback, opt_vsync).start();
+=======
+      callback, opt_vsync).start_();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 
@@ -133,6 +137,15 @@ export class Motion {
     /** @private {number} */
     this.velocityY_ = 0;
 
+<<<<<<< HEAD
+=======
+    /** @private {time} */
+    this.startTime_ = Date.now();
+
+    /** @private {time} */
+    this.lastTime_ = this.startTime_;
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {!Function} */
     this.resolve_;
 
@@ -149,8 +162,13 @@ export class Motion {
     this.continuing_ = false;
   }
 
+<<<<<<< HEAD
   /** */
   start() {
+=======
+  /** @private */
+  start_() {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.continuing_ = true;
     if (Math.abs(this.maxVelocityX_) <= MIN_VELOCITY_ &&
             Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_) {
@@ -219,6 +237,10 @@ export class Motion {
       return false;
     }
 
+<<<<<<< HEAD
+=======
+    this.lastTime_ = Date.now();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.lastX_ += timeSincePrev * this.velocityX_;
     this.lastY_ += timeSincePrev * this.velocityY_;
     if (!this.fireMove_()) {
@@ -241,6 +263,10 @@ export class Motion {
       return;
     }
     this.continuing_ = false;
+<<<<<<< HEAD
+=======
+    this.lastTime_ = Date.now();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.fireMove_();
     if (success) {
       this.resolve_();

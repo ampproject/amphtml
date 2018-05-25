@@ -29,7 +29,10 @@ const TAG = 'amp-story';
  *    canshowbookend: boolean,
  *    canshownavigationoverlayhint: boolean,
  *    canshowpreviouspagehelp: boolean,
+<<<<<<< HEAD
  *    canshowsharinguis: boolean,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  *    canshowsystemlayerbuttons: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
@@ -51,11 +54,17 @@ export const StateProperty = {
   CAN_SHOW_BOOKEND: 'canshowbookend',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canshownavigationoverlayhint',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canshowpreviouspagehelp',
+<<<<<<< HEAD
   CAN_SHOW_SHARING_UIS: 'canshowsharinguis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
 
   // App States.
   AD_STATE: 'adstate',
+=======
+  CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
+
+  // App States.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
@@ -69,7 +78,10 @@ export const StateProperty = {
 
 /** @private @const @enum {string} */
 export const Action = {
+<<<<<<< HEAD
   TOGGLE_AD: 'togglead',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
@@ -90,10 +102,13 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+<<<<<<< HEAD
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.AD_STATE]: !!data}));
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
       if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
@@ -227,9 +242,13 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+<<<<<<< HEAD
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.AD_STATE]: false,
+=======
+      [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
@@ -259,10 +278,13 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
           [StateProperty.MUTED_STATE]: false,
         };
+<<<<<<< HEAD
       case EmbedMode.NO_SHARING:
         return {
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,
         };
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       default:
         return {};
     }

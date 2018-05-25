@@ -40,7 +40,10 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
   });
 
   afterEach(() => {
+<<<<<<< HEAD
     sandbox.reset();
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     sandbox.restore();
   });
 

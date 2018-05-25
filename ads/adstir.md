@@ -28,9 +28,19 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration details and to generate your tags, please refer to [your publisher account](https://ad-stir.com/login) or [contact AdStir](https://ad-stir.com/contact).
 
 Supported parameters:
 
 - `data-app-id`
 - `data-ad-spot`
+=======
+For configuration details and generate your tags, please refer to [your publisher account](https://ad-stir.com/login) or [contact us](https://ad-stir.com/contact).
+
+
+Supported parameters:
+
+- data-app-id
+- data-ad-spot
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

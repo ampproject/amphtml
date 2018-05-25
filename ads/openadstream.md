@@ -21,6 +21,7 @@ limitations under the License.
 ### Single ad
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
   type="openadstream" 
   data-adhost="oasc-training7.247realmedia.com" 
@@ -28,11 +29,21 @@ limitations under the License.
   data-pos="x04" 
   data-query="keyword=keyvalue&key2=value2" >
 </amp-ad>
+=======
+  <amp-ad width=300 height=250 
+    type="openadstream" 
+    data-adhost="oasc-training7.247realmedia.com" 
+    data-sitepage="dx_tag_pvt_site" 
+    data-pos="x04" 
+    data-query="keyword=keyvalue&key2=value2" >
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ### Multi ads using coordinated positions 
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="728" height="90" 
   type="openadstream" 
   data-adhost="oasc-training7.247realmedia.com" 
@@ -59,3 +70,26 @@ For details on the configuration semantics, please contact the ad network or ref
 ### Optional parameters
 
 - `query`: Query parameter to be sent with request. Keywords and keynames, taxonomy etc. 
+=======
+ <amp-ad width=728 height=90 
+    type="openadstream" 
+    data-adhost="oasc-training7.247realmedia.com" 
+    data-sitepage="dx_tag_pvt_site" 
+    data-pos="x50,x51!x50" >
+  </amp-ad>
+  <amp-ad width=300 height=250 
+    type="openadstream" 
+    data-adhost="oasc-training7.247realmedia.com" 
+    data-sitepage="dx_tag_pvt_site" 
+    data-pos="x50,x51!x51" >
+  </amp-ad>
+```
+## Configuration
+
+Supported parameters:
+
+- adhost: required: OAS cname. Must start with HTTPS.
+- sitepage: required: Sitepage configured for this ad spot.
+- pos: required: Position for the this ad spot.
+- query: optional: Query parameter to be sent with request. Keywords and keynames, taxonomy etc. 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

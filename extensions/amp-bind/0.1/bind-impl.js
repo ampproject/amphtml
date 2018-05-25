@@ -23,13 +23,20 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Services} from '../../../src/services';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
+<<<<<<< HEAD
 import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {filterSplice} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+<<<<<<< HEAD
+=======
+import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
@@ -161,8 +168,12 @@ export class Bind {
      */
     this.initializePromise_ =
         this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
+<<<<<<< HEAD
           const head = (opt_win) ? opt_win.document.head : ampdoc.getHeadNode();
           return this.initialize_(body, head && elementByTag(head, 'title'));
+=======
+          return this.initialize_(body);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
 
     /** @private {Promise} */
@@ -283,6 +294,7 @@ export class Bind {
   /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @param {!Node} rootNode
+<<<<<<< HEAD
    * @param {?Node} titleNode
    * @return {!Promise}
    * @private
@@ -296,6 +308,16 @@ export class Bind {
     let promise = Promise.all([
       this.addMacros_(),
       this.addBindingsForNodes_(nodes)]
+=======
+   * @return {!Promise}
+   * @private
+   */
+  initialize_(rootNode) {
+    dev().fine(TAG, 'Scanning DOM for bindings and macros...');
+    let promise = Promise.all([
+      this.addMacros_(),
+      this.addBindingsForNodes_([rootNode])]
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     ).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
@@ -874,11 +896,14 @@ export class Bind {
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
+<<<<<<< HEAD
         // If this is a <title> element in the <head>, update document title.
         if (tag === 'TITLE'
             && element.parentNode === this.localWin_.document.head) {
           this.localWin_.document.title = String(newValue);
         }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         // Setting `textContent` on TEXTAREA element only works if user
         // has not interacted with the element, therefore `value` also needs
         // to be set (but `value` is not an attribute on TEXTAREA)

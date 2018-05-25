@@ -122,7 +122,11 @@ describes.realWin('SignInProtocol', {amp: true}, env => {
     it('should disallow invalid signinServices', () => {
       // Not an array.
       configJson['signinServices'] = 'https://authority.acme.com';
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => create()).to.throw(/array/); });
+=======
+      expect(() => create()).to.throw(/array/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 

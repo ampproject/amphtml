@@ -29,6 +29,10 @@ import {
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
+<<<<<<< HEAD
+=======
+import {declareExtension} from './ampdoc-impl';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
 import {
@@ -51,6 +55,7 @@ const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
 
 /**
+<<<<<<< HEAD
  * Default milliseconds to wait for all extensions to load before erroring.
  * (8 seconds is the same as the CSS boilerplate timoeout)
  * @const
@@ -58,6 +63,8 @@ const LOADER_PROP = '__AMP_EXT_LDR';
 const LOAD_TIMEOUT = 8000;
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * The structure that contains the declaration of a custom element.
  *
  * @typedef {{
@@ -111,6 +118,79 @@ export function installExtensionsService(window) {
   registerServiceBuilder(window, 'extensions', Extensions);
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Register and process the specified extension. The factory is called
+ * immediately, which in turn is expected to register elements, templates,
+ * services and document factories.
+ * @param {!Extensions} extensions
+ * @param {string} extensionId
+ * @param {function(!Object)} factory
+ * @param {!Object} arg
+ * @restricted
+ */
+export function registerExtension(extensions, extensionId, factory, arg) {
+  extensions.registerExtension_(extensionId, factory, arg);
+}
+
+
+/**
+ * Apply all registered factories to the specified ampdoc.
+ * @param {!Extensions} extensions
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Array<string>} extensionIds
+ * @return {!Promise}
+ * @restricted
+ */
+export function installExtensionsInDoc(extensions, ampdoc, extensionIds) {
+  return extensions.installExtensionsInDoc_(ampdoc, extensionIds);
+}
+
+
+/**
+ * Add an element to the extension currently being registered. This is a
+ * restricted method and it's allowed to be called only during the overall
+ * extension registration.
+ * @param {!Extensions} extensions
+ * @param {string} name
+ * @param {function(new:../base-element.BaseElement, !Element)}
+ *     implementationClass
+ * @param {?string|undefined} css
+ * @restricted
+ */
+export function addElementToExtension(
+  extensions, name, implementationClass, css) {
+  extensions.addElement_(name, implementationClass, css);
+}
+
+/**
+ * Add a service to the extension currently being registered. This is a
+ * restricted method and it's allowed to be called only during the overall
+ * extension registration.
+ * @param {!Extensions} extensions
+ * @param {string} name
+ * @param {function(new:Object, !./ampdoc-impl.AmpDoc)} implementationClass
+ * @restricted
+ */
+export function addServiceToExtension(extensions, name, implementationClass) {
+  extensions.addService_(name, implementationClass);
+}
+
+/**
+ * Add a ampdoc factory to the extension currently being registered. This is a
+ * restricted method and it's allowed to be called only during the overall
+ * extension registration.
+ * @param {!Extensions} extensions
+ * @param {function(!./ampdoc-impl.AmpDoc)} factory
+ * @param {string=} opt_forName
+ * @restricted
+ */
+export function addDocFactoryToExtension(extensions, factory, opt_forName) {
+  extensions.addDocFactory_(factory, opt_forName);
+}
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /**
  * The services that manages extensions in the runtime.
@@ -136,6 +216,7 @@ export class Extensions {
   }
 
   /**
+<<<<<<< HEAD
    * Register and process the specified extension. The factory is called
    * immediately, which in turn is expected to register elements, templates,
    * services and document factories. This method is called by the extension's
@@ -146,6 +227,17 @@ export class Extensions {
    * @restricted
    */
   registerExtension(extensionId, factory, arg) {
+=======
+   * Registers a new extension. This method is called by the extension's script
+   * itself when it's loaded using the regular `AMP.push()` callback.
+   * @param {string} extensionId
+   * @param {function(!Object)} factory
+   * @param {!Object} arg
+   * @private
+   * @restricted
+   */
+  registerExtension_(extensionId, factory, arg) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     try {
       this.currentExtensionId_ = extensionId;
@@ -175,6 +267,7 @@ export class Extensions {
   /**
    * Waits for the previously included extension to complete
    * loading/registration.
+<<<<<<< HEAD
    * @param {!Window} win
    * @param {string} extensionId
    * @param {number=} opt_timeout
@@ -186,6 +279,14 @@ export class Extensions {
           this.waitFor_(
               this.getExtensionHolder_(extensionId, /* auto */ false)),
           `Render timeout waiting for extension ${extensionId} to be load.`));
+=======
+   * @param {string} extensionId
+   * @return {!Promise<!ExtensionDef>}
+   */
+  waitForExtension(extensionId) {
+    return this.waitFor_(this.getExtensionHolder_(
+        extensionId, /* auto */ false));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -262,6 +363,7 @@ export class Extensions {
   }
 
   /**
+<<<<<<< HEAD
    * Add an element to the extension currently being registered. This is a
    * restricted method and it's allowed to be called only during the overall
    * extension registration.
@@ -275,6 +377,19 @@ export class Extensions {
     const holder = this.getCurrentExtensionHolder_(name);
     holder.extension.elements[name] = {implementationClass, css};
     this.addDocFactory(ampdoc => {
+=======
+   * Registers the element implementation with the current extension.
+   * @param {string} name
+   * @param {!Function} implementationClass
+   * @param {?string|undefined} css
+   * @private
+   * @restricted
+   */
+  addElement_(name, implementationClass, css) {
+    const holder = this.getCurrentExtensionHolder_(name);
+    holder.extension.elements[name] = {implementationClass, css};
+    this.addDocFactory_(ampdoc => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       this.installElement_(ampdoc, name, implementationClass, css);
     });
   }
@@ -311,6 +426,7 @@ export class Extensions {
   }
 
   /**
+<<<<<<< HEAD
    * Add a service to the extension currently being registered. This is a
    * restricted method and it's allowed to be called only during the overall
    * extension registration.
@@ -321,6 +437,17 @@ export class Extensions {
     const holder = this.getCurrentExtensionHolder_();
     holder.extension.services.push(name);
     this.addDocFactory(ampdoc => {
+=======
+   * Adds `name` to the list of services registered by the current extension.
+   * @param {string} name
+   * @param {function(new:Object, !./ampdoc-impl.AmpDoc)} implementationClass
+   * @private
+   */
+  addService_(name, implementationClass) {
+    const holder = this.getCurrentExtensionHolder_();
+    holder.extension.services.push(name);
+    this.addDocFactory_(ampdoc => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       registerServiceBuilderForDoc(
           ampdoc,
           name,
@@ -330,6 +457,7 @@ export class Extensions {
   }
 
   /**
+<<<<<<< HEAD
    * Add a ampdoc factory to the extension currently being registered. This is a
    * restricted method and it's allowed to be called only during the overall
    * extension registration.
@@ -338,6 +466,15 @@ export class Extensions {
    * @restricted
    */
   addDocFactory(factory, opt_forName) {
+=======
+   * Registers an ampdoc factory.
+   * @param {function(!./ampdoc-impl.AmpDoc)} factory
+   * @param {string=} opt_forName
+   * @private
+   * @restricted
+   */
+  addDocFactory_(factory, opt_forName) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const holder = this.getCurrentExtensionHolder_(opt_forName);
     holder.docFactories.push(factory);
 
@@ -355,6 +492,7 @@ export class Extensions {
 
   /**
    * Installs all ampdoc factories previously registered with
+<<<<<<< HEAD
    * `addDocFactory`.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Array<string>} extensionIds
@@ -362,6 +500,16 @@ export class Extensions {
    * @restricted
    */
   installExtensionsInDoc(ampdoc, extensionIds) {
+=======
+   * `addDocFactory_`.
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Array<string>} extensionIds
+   * @return {!Promise}
+   * @private
+   * @restricted
+   */
+  installExtensionsInDoc_(ampdoc, extensionIds) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const promises = [];
     extensionIds.forEach(extensionId => {
       promises.push(this.installExtensionInDoc_(ampdoc, extensionId));
@@ -379,7 +527,11 @@ export class Extensions {
   installExtensionInDoc_(ampdoc, extensionId) {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
     return this.waitFor_(holder).then(() => {
+<<<<<<< HEAD
       ampdoc.declareExtension(extensionId);
+=======
+      declareExtension(ampdoc, extensionId);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       holder.docFactories.forEach(factory => {
         try {
           factory(ampdoc);

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {htmlFor} from './static-template';
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /** @private @const */
 const LINE_LOADER_ELEMENTS = {
   'AMP-AD': true,
@@ -29,6 +32,7 @@ const LINE_LOADER_ELEMENTS = {
  * @return {!Element}
  */
 export function createLoaderElement(doc, elementName) {
+<<<<<<< HEAD
   if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
     return htmlFor(doc)`<div class="i-amphtml-loader-line">
           <div class="i-amphtml-loader-moving-line"></div>
@@ -39,4 +43,21 @@ export function createLoaderElement(doc, elementName) {
         <div class="i-amphtml-loader-dot"></div>
         <div class="i-amphtml-loader-dot"></div>
       </div>`;
+=======
+  const loader = doc.createElement('div');
+  if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
+    loader.classList.add('i-amphtml-loader-line');
+    const line = doc.createElement('div');
+    line.classList.add('i-amphtml-loader-moving-line');
+    loader.appendChild(line);
+  } else {
+    loader.classList.add('i-amphtml-loader');
+    for (let i = 0; i < 3; i++) {
+      const dot = doc.createElement('div');
+      dot.classList.add('i-amphtml-loader-dot');
+      loader.appendChild(dot);
+    }
+  }
+  return loader;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }

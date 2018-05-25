@@ -79,29 +79,44 @@ describes.realWin('amp-social-share', {
     const share = doc.createElement('amp-social-share');
     share.setAttribute('type', 'unknown-provider');
     doc.body.appendChild(share);
+<<<<<<< HEAD
     allowConsoleError(() => {
       return expect(loaded(share)).to.eventually.be.rejectedWith(
           /data-share-endpoint attribute is required/);
     });
+=======
+    return expect(loaded(share)).to.be.eventually.rejectedWith(
+        /data-share-endpoint attribute is required/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('errors if type is missing', () => {
     const share = doc.createElement('amp-social-share');
     doc.body.appendChild(share);
+<<<<<<< HEAD
     allowConsoleError(() => {
       return expect(loaded(share)).to.eventually.be.rejectedWith(
           /type attribute is required/);
     });
+=======
+    return expect(loaded(share)).to.be.eventually.rejectedWith(
+        /type attribute is required/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('errors if type has space characters', () => {
     const share = doc.createElement('amp-social-share');
     share.setAttribute('type', 'hello world');
     doc.body.appendChild(share);
+<<<<<<< HEAD
     allowConsoleError(() => {
       return expect(loaded(share)).to.eventually.be.rejectedWith(
           /Space characters are not allowed in type attribute value/);
     });
+=======
+    return expect(loaded(share)).to.be.eventually.rejectedWith(
+        /Space characters are not allowed in type attribute value/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('renders unconfigured providers if share endpoint provided', () => {

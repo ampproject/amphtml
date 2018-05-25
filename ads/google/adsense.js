@@ -29,8 +29,12 @@ export function adsense(global, data) {
   // TODO: check mandatory fields
   validateData(data, [],
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
+<<<<<<< HEAD
         'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth', 'package',
         'npaOnUnknownConsent']);
+=======
+        'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth']);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   if (data['autoFormat'] == 'rspv') {
     user().assert(data.hasOwnProperty('fullWidth'),
@@ -54,8 +58,12 @@ export function adsense(global, data) {
   global.document.body.appendChild(s);
 
   const i = global.document.createElement('ins');
+<<<<<<< HEAD
   ['adChannel', 'adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin',
     'package']
+=======
+  ['adChannel', 'adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin']
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       .forEach(datum => {
         if (data[datum]) {
           i.setAttribute('data-' + camelCaseToDash(datum), data[datum]);
@@ -69,6 +77,7 @@ export function adsense(global, data) {
     height: '100%',
   });
   const initializer = {};
+<<<<<<< HEAD
   switch (global.context.initialConsentState) {
     case 0: // CONSENT_POLICY_STATE.UNKNOWN
       if (data['npaOnUnknownConsent'] != 'true') {
@@ -80,6 +89,8 @@ export function adsense(global, data) {
           ['requestNonPersonalizedAds'] = true;
       break;
   }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   if (data['experimentId']) {
     const experimentIdList = data['experimentId'].split(',');
     if (experimentIdList) {

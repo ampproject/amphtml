@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="1"
+=======
+<amp-ad width=300 height=1
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 	type="sunmedia"
 	layout="responsive"
 	data-cid="sunmedia_test"
@@ -32,6 +36,7 @@ limitations under the License.
 
 For further information, please contact [SunMedia](http://sunmedia.tv/#contact).
 
+<<<<<<< HEAD
 ### Required parameters
 
 - `data-cid`: Client ID provided by SunMedia
@@ -40,3 +45,13 @@ For further information, please contact [SunMedia](http://sunmedia.tv/#contact).
 
 -	`data-cskp`: Indicates skip button enabled
 -	`data-crst`: Indicates restart option enabled
+=======
+Mandatory parameters:
+
+- 	data-cid. Cient Identifier provided by SunMedia
+
+Optional parameters:
+
+-	data-cskp. Skip button enabled
+-	data-crst. Restart option enabled
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

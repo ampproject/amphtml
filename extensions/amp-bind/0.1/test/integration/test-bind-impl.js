@@ -32,6 +32,7 @@ import {user} from '../../../../../src/log';
  * @param {!Object} env
  * @param {!Element} container
  * @param {string} binding
+<<<<<<< HEAD
  * @param {string=} opt_tag Tag name of element (default is <p>).
  * @param {boolean=} opt_amp Is this an AMP element?
  * @param {boolean=} opt_head Add element to document <head>?
@@ -52,6 +53,23 @@ function createElement(env, container, binding, opt_tag, opt_amp, opt_head) {
     container.appendChild(element);
   }
   return element;
+=======
+ * @param {string=} opt_tagName
+ * @param {boolean=} opt_amp
+ * @return {!Element}
+ */
+function createElement(env, container, binding, opt_tagName, opt_amp) {
+  const tag = opt_tagName || 'p';
+  const div = env.win.document.createElement('div');
+  div.innerHTML = `<${tag} ${binding}></${tag}>`;
+  const newElement = div.firstElementChild;
+  if (opt_amp) {
+    newElement.className = 'i-amphtml-foo -amp-foo amp-foo';
+    newElement.mutatedAttributesCallback = () => {};
+  }
+  container.appendChild(newElement);
+  return newElement;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**
@@ -110,7 +128,12 @@ function waitForEvent(env, name) {
   });
 }
 
+<<<<<<< HEAD
 describe.configure().ifNewChrome().run('Bind', function() {
+=======
+// TODO(choumx, #14336): Fails due to console errors.
+describe.skip('Bind', function() {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
@@ -122,16 +145,22 @@ describe.configure().ifNewChrome().run('Bind', function() {
     },
     mockFetch: false,
   }, env => {
+<<<<<<< HEAD
     let fieBind;
     let fieBody;
     let fieWindow;
 
     let hostWindow;
+=======
+    let bind;
+    let container;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     beforeEach(() => {
       // Make sure we have a chunk instance for testing.
       chunkInstanceForTesting(env.ampdoc);
 
+<<<<<<< HEAD
       fieWindow = env.embed.win;
       fieBind = new Bind(env.ampdoc, fieWindow);
       fieBody = env.embed.getBodyElement();
@@ -177,17 +206,58 @@ describe.configure().ifNewChrome().run('Bind', function() {
         ]).then(() => {
           expect(fieBind.numberOfBindings()).to.equal(1);
           expect(hostBind.numberOfBindings()).to.equal(1);
+=======
+      bind = new Bind(env.ampdoc, env.win);
+      container = env.embed.getBodyElement();
+    });
+
+    it('should scan for bindings when ampdoc is ready', () => {
+      createElement(env, container, '[text]="1+1"');
+      expect(bind.numberOfBindings()).to.equal(0);
+      return onBindReady(env, bind).then(() => {
+        expect(bind.numberOfBindings()).to.equal(1);
+      });
+    });
+
+    describe('with Bind in parent window', () => {
+      let parentBind;
+      let parentContainer;
+
+      beforeEach(() => {
+        parentBind = new Bind(env.ampdoc);
+        parentContainer = env.ampdoc.getBody();
+      });
+
+      it('should only scan elements in provided window', () => {
+        createElement(env, container, '[text]="1+1"');
+        createElement(env, parentContainer, '[text]="2+2"');
+        return Promise.all([
+          onBindReady(env, bind),
+          onBindReady(env, parentBind),
+        ]).then(() => {
+          expect(bind.numberOfBindings()).to.equal(1);
+          expect(parentBind.numberOfBindings()).to.equal(1);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
       });
 
       it('should not be able to access variables from other windows', () => {
         const element =
+<<<<<<< HEAD
             createElement(env, fieBody, '[text]="foo + bar"');
         const parentElement =
             createElement(env, hostBody, '[text]="foo + bar"');
         const promises = [
           onBindReadyAndSetState(env, fieBind, {foo: '123', bar: '456'}),
           onBindReadyAndSetState(env, hostBind, {foo: 'ABC', bar: 'DEF'}),
+=======
+            createElement(env, container, '[text]="foo + bar"');
+        const parentElement =
+            createElement(env, parentContainer, '[text]="foo + bar"');
+        const promises = [
+          onBindReadyAndSetState(env, bind, {foo: '123', bar: '456'}),
+          onBindReadyAndSetState(env, parentBind, {foo: 'ABC', bar: 'DEF'}),
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         ];
         return Promise.all(promises).then(() => {
           // `element` only sees `foo` and `parentElement` only sees `bar`.
@@ -223,6 +293,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(bind.numberOfBindings()).to.equal(1);
       });
     });
+<<<<<<< HEAD
 
     it('should not update document title for <title> elements', () => {
       createElement(env, container, '[text]="\'bar\'"', 'title',
@@ -233,6 +304,8 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(env.win.document.title).to.equal('foo');
       });
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }); // in shadow ampdoc
 
   describes.realWin('in single ampdoc', {
@@ -401,6 +474,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+<<<<<<< HEAD
     it('should update document title for <title> elements', () => {
       const element = createElement(env, container, '[text]="\'bar\'"',
           'title', /* opt_amp */ false, /* opt_head */ true);
@@ -426,6 +500,8 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     it('should support binding to CSS classes with strings', () => {
       const element = createElement(env, container, '[class]="[\'abc\']"');
       expect(toArray(element.classList)).to.deep.equal([]);

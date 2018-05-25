@@ -405,11 +405,14 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @override */
+<<<<<<< HEAD
   preimplementsAutoFullscreen() {
     return false;
   }
 
   /** @override */
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   getCurrentTime() {
     // Not supported.
     return 0;

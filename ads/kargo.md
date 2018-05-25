@@ -19,16 +19,27 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="50"
   type="kargo"
   data-site="_tt9gZ3qxCc2RCg6CADfLAAFR"
   data-slot="_vypM8bkVCf"
   data-options='{"targetParams":{"AD_ID":"test-middle","ad_id":"test-middle"}}'>
+=======
+<amp-ad
+    width=320
+    height=50
+    type="kargo"
+    data-site="_tt9gZ3qxCc2RCg6CADfLAAFR"
+    data-slot="_vypM8bkVCf"
+    data-options='{"targetParams":{"AD_ID":"test-middle","ad_id":"test-middle"}}'>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, [contact Kargo](http://www.kargo.com/contact/).
 
 Supported parameters:
@@ -36,3 +47,12 @@ Supported parameters:
 - `data-site`
 - `data-slot`
 - `data-options`
+=======
+For semantics of configuration, please [contact Kargo](http://www.kargo.com/contact/).
+
+Supported parameters:
+
+- data-site
+- data-slot
+- data-options
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

@@ -111,7 +111,12 @@ describes.realWin('Resource', {amp: true}, env => {
     });
   });
 
+<<<<<<< HEAD
   it('should blacklist on build failure', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  it.skip('should blacklist on build failure', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build')
         .returns(Promise.reject(new Error('intentional'))).once();
@@ -459,18 +464,30 @@ describes.realWin('Resource', {amp: true}, env => {
     elementMock.expects('layoutCallback').never();
 
     resource.state_ = ResourceState.NOT_BUILT;
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       resource.startLayout();
     }).to.throw(/Not ready to start layout/); });
+=======
+    expect(() => {
+      resource.startLayout();
+    }).to.throw(/Not ready to start layout/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should ignore startLayout if not visible', () => {
     elementMock.expects('layoutCallback').never();
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       resource.startLayout();
     }).to.throw(/Not displayed/); });
+=======
+    expect(() => {
+      resource.startLayout();
+    }).to.throw(/Not displayed/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should force startLayout for first layout', () => {

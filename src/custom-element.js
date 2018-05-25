@@ -40,7 +40,10 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
+<<<<<<< HEAD
 import {htmlFor} from './static-template';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
@@ -484,8 +487,12 @@ function createBaseCustomElementClass(win) {
           resolve(this.implementation_.buildCallback());
         } else {
           getConsentPolicyState(this.getAmpDoc(), policyId).then(state => {
+<<<<<<< HEAD
             if (state == CONSENT_POLICY_STATE.INSUFFICIENT ||
                 state == CONSENT_POLICY_STATE.UNKNOWN) {
+=======
+            if (state == CONSENT_POLICY_STATE.INSUFFICIENT) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
               // Need to change after support more policy state
               reject(blockedByConsentError());
             } else {
@@ -579,7 +586,17 @@ function createBaseCustomElementClass(win) {
           layoutBox.top >= 0) {
           // Few top elements will also be pre-initialized with a loading
           // element.
+<<<<<<< HEAD
           this.mutateOrInvoke_(() => this.prepareLoading_());
+=======
+          getVsync(this).mutate(() => {
+            // Repeat "loading enabled" check because it could have changed while
+            // waiting for vsync.
+            if (this.isLoadingEnabled_()) {
+              this.prepareLoading_();
+            }
+          });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         }
       }
     }
@@ -667,9 +684,17 @@ function createBaseCustomElementClass(win) {
         // preserved.
         this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
+<<<<<<< HEAD
         this.mutateOrInvoke_(() => {
           dom.removeElement(sizer);
         });
+=======
+        if (this.resources_) {
+          this.resources_.mutateElement(this, () => {
+            dom.removeElement(sizer);
+          });
+        }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }
       if (newHeight !== undefined) {
         setStyle(this, 'height', newHeight, 'px');
@@ -1507,6 +1532,7 @@ function createBaseCustomElementClass(win) {
      * @private @this {!Element}
      */
     prepareLoading_() {
+<<<<<<< HEAD
       if (!this.isLoadingEnabled_()) {
         return;
       }
@@ -1516,6 +1542,15 @@ function createBaseCustomElementClass(win) {
         const container = htmlFor(doc)`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
+=======
+      if (!this.loadingContainer_) {
+        const doc = this.ownerDocument;
+
+        const container = doc.createElement('div');
+        container.classList.add('i-amphtml-loading-container');
+        container.classList.add('i-amphtml-fill-content');
+        container.classList.add('amp-hidden');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
         const element = createLoaderElement(doc, this.elementName());
         container.appendChild(element);
@@ -1553,7 +1588,11 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
+<<<<<<< HEAD
       this.mutateOrInvoke_(() => {
+=======
+      getVsync(this).mutate(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         let state = this.loadingState_;
         // Repeat "loading enabled" check because it could have changed while
         // waiting for vsync.
@@ -1575,7 +1614,11 @@ function createBaseCustomElementClass(win) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
+<<<<<<< HEAD
           this.mutateOrInvoke_(() => {
+=======
+          this.getResources().mutateElement(this, () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             dom.removeElement(loadingContainer);
           });
         }
@@ -1634,9 +1677,15 @@ function createBaseCustomElementClass(win) {
 
         if (overflown) {
           this.overflowElement_.onclick = () => {
+<<<<<<< HEAD
             const resources = this.getResources();
             resources./*OK*/changeSize(this, requestedHeight, requestedWidth);
             resources.mutateElement(this, () => {
+=======
+            this.getResources(). /*OK*/ changeSize(
+                this, requestedHeight, requestedWidth);
+            getVsync(this).mutate(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
               this.overflowCallback(
                   /* overflown */ false, requestedHeight, requestedWidth);
             });
@@ -1646,6 +1695,7 @@ function createBaseCustomElementClass(win) {
         }
       }
     }
+<<<<<<< HEAD
 
     /**
      * Mutates the element using resources if available.
@@ -1660,6 +1710,8 @@ function createBaseCustomElementClass(win) {
         mutator();
       }
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
   win.BaseCustomElementClass = BaseCustomElement;
   return win.BaseCustomElementClass;
@@ -1678,6 +1730,19 @@ function assertNotTemplate(element) {
 
 
 /**
+<<<<<<< HEAD
+=======
+ * @param {!Element} element
+ * @return {!./service/vsync-impl.Vsync}
+ */
+function getVsync(element) {
+  // TODO(dvoytenko, #9177): consider removing this and always resolving via
+  // `createCustomElementClass(win)` object.
+  return Services.vsyncFor(toWin(element.ownerDocument.defaultView));
+}
+
+/**
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * Whether the implementation is a stub.
  * @param {?./base-element.BaseElement} impl
  * @return {boolean}

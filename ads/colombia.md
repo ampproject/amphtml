@@ -14,11 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<<<<<<< HEAD
 # Colombia
+=======
+# colombia
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="140"
     type="colombia"
     layout=responsive
@@ -26,10 +31,20 @@ limitations under the License.
     data-clmb_position="1"
     data-clmb_section="0">
 </amp-ad>
+=======
+<amp-ad width=320 height=140
+      type="colombia"
+      layout=responsive
+      data-clmb_slot="129883"
+      data-clmb_position="1"
+      data-clmb_section="0"
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, contact care@timesadcenter.com.
 
 Supported parameters:
@@ -37,3 +52,12 @@ Supported parameters:
 - `data-clmb_slot`: Ad slot
 - `data-clmb_position` : Ad position
 - `data-clmb_section` : Ad sections
+=======
+For semantics of configuration, please see ad network documentation.For support contact care@timesadcenter.com
+
+Supported parameters:
+
+- data-clmb_slot : Ad Slot
+- data-clmb_position : Ad Position
+- data-clmb_section : Ad Sections
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

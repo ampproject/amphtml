@@ -208,6 +208,7 @@ describe('Amp custom ad', () => {
       removeChildren(elem);
       const ad = new AmpAdCustom(elem);
       ad.buildCallback();
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => {
           ad.handleTemplateData_({
@@ -230,6 +231,28 @@ describe('Amp custom ad', () => {
           });
         }).to.throw('Template data not specified');
       });
+=======
+      expect(() => {
+        ad.handleTemplateData_({
+          'data': {
+            'a': '1',
+            'b': '2',
+          },
+          'vars': {
+            'abc': '456',
+          },
+        });
+      }).to.throw('TemplateId not specified');
+
+      expect(() => {
+        ad.handleTemplateData_({
+          'templateId': '1',
+          'vars': {
+            'abc': '456',
+          },
+        });
+      }).to.throw('Template data not specified');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 });

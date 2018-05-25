@@ -21,7 +21,11 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {installStylesForDoc} from '../../../../src/style-installer';
 
 
+<<<<<<< HEAD
 describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
+=======
+describes.realWin('amp-subscriptions Dialog', {amp: true}, env => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let win, doc, ampdoc;
   let dialog;
   let content;

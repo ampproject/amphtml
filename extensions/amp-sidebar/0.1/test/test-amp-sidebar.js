@@ -76,11 +76,15 @@ describes.realWin('amp-sidebar 0.1 version', {
     return ampSidebar.build().then(() => {
       return ampSidebar.layoutCallback();
     }).then(() => {
+<<<<<<< HEAD
       const impl = ampSidebar.implementation_;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       if (options.toolbars) {
         sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
+<<<<<<< HEAD
         sandbox.stub(impl.vsync_, 'mutatePromise').callsFake(callback => {
           callback();
           return Promise.resolve();
@@ -95,13 +99,28 @@ describes.realWin('amp-sidebar 0.1 version', {
           push: sandbox.stub().resolves(11),
           pop: sandbox.stub().resolves(11),
         });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }
       return ampSidebar;
     });
   }
 
   function getToolbars(options, ampSidebar) {
+<<<<<<< HEAD
 
+=======
+    // Stub our sidebar operations, doing this here as it will
+    // Ease testing our media queries
+    const impl = ampSidebar.implementation_;
+    sandbox.stub(impl.vsync_, 'mutate').callsFake(callback => {
+      callback();
+    });
+    sandbox.stub(impl.vsync_, 'mutatePromise').callsFake(callback => {
+      callback();
+      return Promise.resolve();
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // Create our individual toolbars
     options.toolbars.forEach(toolbarObj => {
       const navToolbar = doc.createElement('nav');
@@ -166,6 +185,7 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
 
     it('should create mask element in DOM', () => {
+<<<<<<< HEAD
       return getAmpSidebar({'stubHistory': true})
           .then(sidebarElement => {
             const impl = sidebarElement.implementation_;
@@ -173,6 +193,19 @@ describes.realWin('amp-sidebar 0.1 version', {
             expect(doc.querySelectorAll('.i-amphtml-sidebar-mask').length)
                 .to.equal(1);
           });
+=======
+      return getAmpSidebar().then(sidebarElement => {
+        const impl = sidebarElement.implementation_;
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+        impl.open_();
+        expect(doc.querySelectorAll('.i-amphtml-sidebar-mask').length)
+            .to.equal(1);
+      });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should create an invisible close \
@@ -211,7 +244,15 @@ describes.realWin('amp-sidebar 0.1 version', {
             },
           };
         };
+<<<<<<< HEAD
 
+=======
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         impl.openOrCloseTimeOut_ = 10;
 
         impl.open_();
@@ -239,6 +280,7 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
 
     it('should close sidebar on button click', () => {
+<<<<<<< HEAD
       return getAmpSidebar({'open': true, 'stubHistory': true})
           .then(sidebarElement => {
             const impl = sidebarElement.implementation_;
@@ -281,11 +323,67 @@ describes.realWin('amp-sidebar 0.1 version', {
 
     it('should toggle sidebar on button click', () => {
       return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
+=======
+      return getAmpSidebar({'open': true}).then(sidebarElement => {
+        const impl = sidebarElement.implementation_;
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
+        impl.schedulePause = sandbox.spy();
+        const historyPushSpy = sandbox.spy();
+        const historyPopSpy = sandbox.spy();
+        impl.scheduleLayout = sandbox.spy();
+        impl.getHistory_ = function() {
+          return {
+            push() {
+              historyPushSpy();
+              return Promise.resolve(11);
+            },
+            pop() {
+              historyPopSpy();
+              return Promise.resolve(11);
+            },
+          };
+        };
+        impl.historyId_ = 100;
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+
+        impl.openOrCloseTimeOut_ = 10;
+        impl.close_();
+        expect(sidebarElement.hasAttribute('open')).to.be.false;
+        expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+        clock.tick(600);
+        expect(sidebarElement.style.display).to.equal('none');
+        expect(impl.schedulePause).to.be.calledOnce;
+        expect(historyPopSpy).to.be.calledOnce;
+        expect(impl.historyId_).to.equal(-1);
+
+        // second call to close_() should be a no-op and not increase call counts.
+        impl.close_();
+        expect(impl.schedulePause).to.be.calledOnce;
+        expect(historyPopSpy).to.be.calledOnce;
+      });
+    });
+
+    it('should toggle sidebar on button click', () => {
+      return getAmpSidebar().then(sidebarElement => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         const impl = sidebarElement.implementation_;
         clock = lolex.install(
             {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.scheduleLayout = sandbox.spy();
         impl.schedulePause = sandbox.spy();
+<<<<<<< HEAD
+=======
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
@@ -308,12 +406,24 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
 
     it('should close sidebar on escape', () => {
+<<<<<<< HEAD
       return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
+=======
+      return getAmpSidebar().then(sidebarElement => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         const impl = sidebarElement.implementation_;
         clock = lolex.install(
             {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
+<<<<<<< HEAD
 
+=======
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         impl.open_();
         expect(sidebarElement.hasAttribute('open')).to.be.true;
@@ -337,12 +447,24 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
 
     it('should reflect state of the sidebar', () => {
+<<<<<<< HEAD
       return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
+=======
+      return getAmpSidebar().then(sidebarElement => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         const impl = sidebarElement.implementation_;
         clock = lolex.install(
             {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
         impl.scheduleResume = sandbox.spy();
+<<<<<<< HEAD
+=======
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
         expect(impl.isOpen_()).to.be.false;
         clock.tick(600);
@@ -376,6 +498,14 @@ describes.realWin('amp-sidebar 0.1 version', {
       sandbox.stub(platform, 'isSafari').returns(true);
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
+<<<<<<< HEAD
+=======
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
@@ -390,6 +520,14 @@ describes.realWin('amp-sidebar 0.1 version', {
       sandbox.stub(platform, 'isSafari').returns(true);
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
+<<<<<<< HEAD
+=======
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
@@ -405,13 +543,25 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
 
     it('should close sidebar if clicked on a non-local anchor', () => {
+<<<<<<< HEAD
       return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
+=======
+      return getAmpSidebar().then(sidebarElement => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
         const impl = sidebarElement.implementation_;
         clock = lolex.install(
             {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
+<<<<<<< HEAD
+=======
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         impl.open_();
         expect(sidebarElement.hasAttribute('open')).to.be.true;
@@ -421,12 +571,23 @@ describes.realWin('amp-sidebar 0.1 version', {
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
+<<<<<<< HEAD
         sandbox.stub(sidebarElement, 'getAmpDoc').returns({
           win: {
             location: {
               href: window.location.href,
             },
           },
+=======
+        sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
+          return {
+            win: {
+              location: {
+                href: window.location.href,
+              },
+            },
+          };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
         anchor.dispatchEvent ?
           anchor.dispatchEvent(eventObj) :
@@ -441,11 +602,23 @@ describes.realWin('amp-sidebar 0.1 version', {
 
     it('should not close sidebar if \
        clicked on a new origin navigation', () => {
+<<<<<<< HEAD
           return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
+=======
+          return getAmpSidebar().then(sidebarElement => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             const anchor = sidebarElement.getElementsByTagName('a')[0];
             anchor.href = '#newloc';
             const impl = sidebarElement.implementation_;
             impl.schedulePause = sandbox.spy();
+<<<<<<< HEAD
+=======
+            impl.vsync_ = {
+              mutate(callback) {
+                callback();
+              },
+            };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             sandbox.stub(timer, 'delay').callsFake(function(callback) {
               callback();
             });
@@ -481,12 +654,24 @@ describes.realWin('amp-sidebar 0.1 version', {
         });
 
     it('should not close sidebar if clicked on new page navigation', () => {
+<<<<<<< HEAD
       return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
+=======
+      return getAmpSidebar().then(sidebarElement => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
         const impl = sidebarElement.implementation_;
         impl.schedulePause = sandbox.spy();
+<<<<<<< HEAD
 
+=======
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
@@ -521,11 +706,23 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
 
     it('should not close sidebar if clicked on non-anchor', () => {
+<<<<<<< HEAD
       return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
         const li = sidebarElement.getElementsByTagName('li')[0];
         const impl = sidebarElement.implementation_;
         impl.schedulePause = sandbox.spy();
 
+=======
+      return getAmpSidebar().then(sidebarElement => {
+        const li = sidebarElement.getElementsByTagName('li')[0];
+        const impl = sidebarElement.implementation_;
+        impl.schedulePause = sandbox.spy();
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
@@ -548,13 +745,19 @@ describes.realWin('amp-sidebar 0.1 version', {
       });
     });
 
+<<<<<<< HEAD
     it('should call onAnimationEnd after open and close', () => {
       return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
+=======
+    it('should listen to animationend/transitionend event', () => {
+      return getAmpSidebar().then(sidebarElement => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         const impl = sidebarElement.implementation_;
         clock = lolex.install(
             {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.boundOnAnimationEnd_ = sandbox.spy();
         impl.buildCallback();
+<<<<<<< HEAD
 
         impl.scheduleLayout = sandbox.stub();
 
@@ -562,6 +765,24 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(impl.boundOnAnimationEnd_).to.be.calledOnce;
 
         impl.close_();
+=======
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+        const animationEndEvent = new Event(
+            'animationend',
+            {bubbles: true}
+        );
+        sidebarElement.firstChild.dispatchEvent(animationEndEvent);
+        expect(impl.boundOnAnimationEnd_).to.be.calledOnce;
+        const transitionEndEvent = new Event(
+            'transitionend',
+            {bubbles: true}
+        );
+        sidebarElement.firstChild.dispatchEvent(transitionEndEvent);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         expect(impl.boundOnAnimationEnd_).to.be.calledTwice;
       });
     });

@@ -64,10 +64,15 @@ describes.realWin('amp-3q-player', {
   });
 
   it('requires data-id', () => {
+<<<<<<< HEAD
     allowConsoleError(() => {
       return get3QElement('').should.eventually.be.rejectedWith(
           /The data-id attribute is required/);
     });
+=======
+    return get3QElement('').should.eventually.be.rejectedWith(
+        /The data-id attribute is required/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should forward events from amp-3q-player to the amp element', () => {

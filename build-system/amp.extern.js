@@ -295,7 +295,11 @@ amp.validator.validateUrlAndLog = function(string, doc, filter) {}
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
 Activity.prototype.getTotalEngagedTime = function() {};
+<<<<<<< HEAD
 Activity.prototype.getIncrementalEngagedTime = function(name, reset) {};
+=======
+Activity.prototype.getIncrementalEngagedTime = function(name) {};
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics

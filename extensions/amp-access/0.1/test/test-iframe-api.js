@@ -67,10 +67,17 @@ describes.fakeWin('AmpAccessIframeApi', {
   it('should authorize', () => {
     controllerMock.expects('authorize')
         .withExactArgs()
+<<<<<<< HEAD
         .returns(Promise.resolve({a: 1}))
         .once();
     return iframeApi.handleCommand_('authorize', {}).then(result => {
       expect(result).to.deep.equal({a: 1});
+=======
+        .returns(Promise.resolve({granted: true}))
+        .once();
+    return iframeApi.handleCommand_('authorize', {}).then(result => {
+      expect(result).to.deep.equal({granted: true});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 
@@ -82,6 +89,7 @@ describes.fakeWin('AmpAccessIframeApi', {
     return iframeApi.handleCommand_('pingback', {});
   });
 
+<<<<<<< HEAD
   it('should tolerate pingback without response', () => {
     controllerMock.expects('pingback')
         .withExactArgs()
@@ -90,6 +98,8 @@ describes.fakeWin('AmpAccessIframeApi', {
     return iframeApi.handleCommand_('pingback', {});
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   it('should ignore unimplemented pingback', () => {
     iframeApi = new AmpAccessIframeApi({}, win);
     return iframeApi.handleCommand_('pingback', {});

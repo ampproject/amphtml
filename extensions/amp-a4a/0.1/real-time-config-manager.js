@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+=======
+import {RTC_VENDORS} from './callout-vendors.js';
+import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {isArray, isObject} from '../../../src/types';
 import {
   isSecureUrl,
@@ -34,9 +40,12 @@ const MAX_RTC_CALLOUTS = 5;
 /** @type {number} */
 const MAX_URL_LENGTH = 16384;
 
+<<<<<<< HEAD
 /** @type {boolean} */
 const ERROR_REPORTING_ENABLED = Math.random() < 0.01;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /**
  * Enum starts at 4 because 1-3 reserved as:
  *  1 = custom remote.html in use.
@@ -68,23 +77,32 @@ export const RTC_ERROR_ENUM = {
 /**
  * @param {string} error
  * @param {string} callout
+<<<<<<< HEAD
  * @param {!Window} win
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * @param {number=} opt_rtcTime
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
+<<<<<<< HEAD
 function buildErrorResponse_(
   error, callout, errorReportingUrl, win, ampDoc, opt_rtcTime) {
   dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
   if (errorReportingUrl) {
     sendErrorMessage(error, errorReportingUrl, win, ampDoc);
   }
+=======
+function buildErrorResponse_(error, callout, opt_rtcTime) {
+  dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   return Promise.resolve(/**@type {rtcResponseDef} */(
     {error, callout, rtcTime: opt_rtcTime || 0}));
 }
 
 /**
+<<<<<<< HEAD
  * @param {string} errorType Uses the RTC_ERROR_ENUM above.
  * @param {string} errorReportingUrl
  * @param {!Window} win
@@ -108,6 +126,8 @@ export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
 }
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * Converts a URL into its corresponding shortened callout string.
  * We also truncate to a maximum length of 50 characters.
  * For instance, if we are passed
@@ -128,6 +148,7 @@ export function getCalloutParam_(url) {
  * @param {!AMP.BaseElement} a4aElement
  * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
  *   substitutions available to use.
+<<<<<<< HEAD
  * @param {?CONSENT_POLICY_STATE} consentState
  * @return {Promise<!Array<!rtcResponseDef>>|undefined}
  * @visibleForTesting
@@ -140,6 +161,12 @@ export function maybeExecuteRealTimeConfig_(
       consentState == CONSENT_POLICY_STATE.UNKNOWN) {
     return;
   }
+=======
+ * @return {Promise<!Array<!rtcResponseDef>>|undefined}
+ * @visibleForTesting
+ */
+export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   const rtcConfig = validateRtcConfig_(a4aElement.element);
   if (!rtcConfig) {
     return;
@@ -150,6 +177,7 @@ export function maybeExecuteRealTimeConfig_(
   const rtcStartTime = Date.now();
   // For each publisher defined URL, inflate the url using the macros,
   // and send the RTC request.
+<<<<<<< HEAD
   (rtcConfig['urls'] || []).forEach(urlObj => {
     let url, errorReportingUrl;
     if (isObject(urlObj)) {
@@ -164,11 +192,19 @@ export function maybeExecuteRealTimeConfig_(
         rtcStartTime, customMacros,
         rtcConfig['timeoutMillis'], errorReportingUrl);
   });
+=======
+  (rtcConfig['urls'] || []).forEach(url =>
+    inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
+        rtcStartTime, customMacros,
+        rtcConfig['timeoutMillis'])
+  );
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   // For each vendor the publisher has specified, inflate the vendor
   // url if it exists, and send the RTC request.
   Object.keys(rtcConfig['vendors'] || []).forEach(vendor => {
     const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
     const url = vendorObject ? vendorObject.url : '';
+<<<<<<< HEAD
     const errorReportingUrl = vendorObject ?
       vendorObject['errorReportingUrl'] : '';
     if (!url) {
@@ -176,6 +212,12 @@ export function maybeExecuteRealTimeConfig_(
           buildErrorResponse_(
               RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor, errorReportingUrl,
               a4aElement.win, a4aElement.getAmpDoc()));
+=======
+    if (!url) {
+      return promiseArray.push(
+          buildErrorResponse_(
+              RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
@@ -190,7 +232,11 @@ export function maybeExecuteRealTimeConfig_(
     // The ad network defined macros override vendor defined/pub specifed.
     const macros = Object.assign(validVendorMacros, customMacros);
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray, rtcStartTime,
+<<<<<<< HEAD
         macros, rtcConfig['timeoutMillis'], errorReportingUrl,
+=======
+        macros, rtcConfig['timeoutMillis'],
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         vendor.toLowerCase());
   });
   return Promise.all(promiseArray);
@@ -204,12 +250,19 @@ export function maybeExecuteRealTimeConfig_(
  * @param {number} rtcStartTime
  * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
  * @param {number} timeoutMillis
+<<<<<<< HEAD
  * @param {string} errorReportingUrl
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * @param {string=} opt_vendor
  * @private
  */
 export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
+<<<<<<< HEAD
   rtcStartTime, macros, timeoutMillis, errorReportingUrl, opt_vendor) {
+=======
+  rtcStartTime, macros, timeoutMillis, opt_vendor) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
   const callout = opt_vendor || getCalloutParam_(url);
@@ -223,6 +276,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
       return buildErrorResponse_(
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
+<<<<<<< HEAD
           callout, errorReportingUrl, win, ampDoc);
     }
     if (!isSecureUrl(url)) {
@@ -232,14 +286,29 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     if (seenUrls[url]) {
       return buildErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
           callout, errorReportingUrl, win, ampDoc);
+=======
+          callout);
+    }
+    if (!isSecureUrl(url)) {
+      return buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
+          callout);
+    }
+    if (seenUrls[url]) {
+      return buildErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
+          callout);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
     seenUrls[url] = true;
     if (url.length > MAX_URL_LENGTH) {
       url = truncUrl_(url);
     }
     return sendRtcCallout_(
+<<<<<<< HEAD
         url, rtcStartTime, win, timeoutMillis,
         callout, errorReportingUrl, ampDoc);
+=======
+        url, rtcStartTime, win, timeoutMillis, callout);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   };
 
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
@@ -253,7 +322,11 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     return send(url);
   }).catch(unused => {
     return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
+<<<<<<< HEAD
         callout, errorReportingUrl, win, ampDoc);
+=======
+        callout);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }));
 }
 
@@ -273,12 +346,19 @@ export function truncUrl_(url) {
  * @param {!Window} win
  * @param {number} timeoutMillis
  * @param {string} callout
+<<<<<<< HEAD
  * @param {string} errorReportingUrl
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
 function sendRtcCallout_(
+<<<<<<< HEAD
   url, rtcStartTime, win, timeoutMillis, callout, errorReportingUrl, ampDoc) {
+=======
+  url, rtcStartTime, win, timeoutMillis, callout) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * Note: Timeout is enforced by timerFor, not the value of
    *   rtcTime. There are situations where rtcTime could thus
@@ -300,8 +380,12 @@ function sendRtcCallout_(
           const response = tryParseJson(text);
           return response ? {response, rtcTime, callout} :
             buildErrorResponse_(
+<<<<<<< HEAD
                 RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout,
                 errorReportingUrl, win, ampDoc, rtcTime);
+=======
+                RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout, rtcTime);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
       })).catch(error => {
     return buildErrorResponse_(
@@ -311,7 +395,11 @@ function sendRtcCallout_(
         // match here.
         (error.message && error.message.match(/^timeout/)) ?
           RTC_ERROR_ENUM.TIMEOUT : RTC_ERROR_ENUM.NETWORK_FAILURE,
+<<<<<<< HEAD
         callout, errorReportingUrl, win, ampDoc, Date.now() - rtcStartTime);
+=======
+        callout, Date.now() - rtcStartTime);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 }
 

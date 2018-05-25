@@ -42,6 +42,10 @@ export function fontStylesheetTimeout(win) {
  * @param {!Window} win
  */
 function maybeTimeoutFonts(win) {
+<<<<<<< HEAD
+=======
+  timeoutFontFaces(win);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let timeSinceResponseStart = 0;
   // If available, we start counting from the time the HTTP response
   // for the page started. The preload scanner should then quickly

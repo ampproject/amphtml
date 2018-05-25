@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {
   CONSTANTS,
   MessageType,
 } from '../../../src/3p-frame-messaging';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {CommonSignals} from '../../../src/common-signals';
 import {
   IntersectionObserver,
 } from '../../../src/intersection-observer';
+<<<<<<< HEAD
+=======
+import {MessageType} from '../../../src/3p-frame-messaging';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
@@ -133,6 +140,7 @@ export class AmpAdXOriginIframeHandler {
           this.element_.creativeId = info.data['id'];
         });
 
+<<<<<<< HEAD
     this.handleOneTimeRequest_(MessageType.GET_HTML, payload => {
       const selector = payload['selector'];
       const attributes = payload['attributes'];
@@ -148,6 +156,31 @@ export class AmpAdXOriginIframeHandler {
         return {consentState};
       });
     });
+=======
+    this.unlisteners_.push(listenFor(this.iframe, 'get-html',
+        (info, source, origin) => {
+          if (!this.iframe) {
+            return;
+          }
+
+          const selector = info['selector'];
+          const attributes = info['attributes'];
+          const messageId = info['messageId'];
+          let content = '';
+
+          if (this.element_.hasAttribute('data-html-access-allowed')) {
+            content = getHtml(this.baseInstance_.win, selector, attributes);
+          }
+
+          postMessageToWindows(
+              this.iframe, [{win: source, origin}],
+              'get-html-result', dict({
+                'content': content,
+                'messageId': messageId,
+              }), true
+          );
+        }, true, false));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
@@ -265,6 +298,7 @@ export class AmpAdXOriginIframeHandler {
   }
 
   /**
+<<<<<<< HEAD
    * @param {string} requestType
    * @param {function(*)} getter
    * @private
@@ -293,6 +327,8 @@ export class AmpAdXOriginIframeHandler {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * callback functon on receiving render-start
    * @param {{data: !JsonObject}=} opt_info
    * @private

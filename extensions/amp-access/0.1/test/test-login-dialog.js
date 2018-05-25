@@ -242,7 +242,12 @@ describes.sandboxed('WebLoginDialog', {}, () => {
     expect(windowApi.open.firstCall.args[0]).to.equal('');
   });
 
+<<<<<<< HEAD
   it('should yield error if window.open fails', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  it.skip('should yield error if window.open fails', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // Open is called twice due to retry on _top.
     windowMock.expects('open').twice().throws('OPEN ERROR');
     return openLoginDialog(ampdoc, 'http://acme.com/login')

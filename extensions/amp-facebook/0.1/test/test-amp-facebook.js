@@ -89,12 +89,15 @@ describes.realWin('amp-facebook', {
     });
   });
 
+<<<<<<< HEAD
   it('adds loading element correctly', () => {
     return getAmpFacebook(fbVideoHref, 'post').then(ampFB => {
       expect(ampFB.implementation_.toggleLoadingCounter_).to.equal(1);
     });
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   it('adds fb-post element correctly', () => {
     const div = document.createElement('div');
     div.setAttribute('id', 'c');

@@ -856,6 +856,7 @@ describe('experiment branch tests', () => {
       expect(isExperimentOn(sandbox.win, 'fooExpt')).to.be.false;
       expect(getExperimentBranch(sandbox.win, 'fooExpt')).to.not.be.ok;
     });
+<<<<<<< HEAD
 
     it('returns empty experiments map', () => {
       // Opt out of experiment.
@@ -904,6 +905,8 @@ describe('experiment branch tests', () => {
         'expt_2': '2_1',
       });
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 
@@ -941,14 +944,24 @@ describes.fakeWin('isOriginExperimentOn', {amp: false}, env => {
         .to.eventually.be.false;
   });
 
+<<<<<<< HEAD
   it('should return false for missing token', () => {
+=======
+  // TODO(choumx, #14336): Fails due to console errors.
+  it.skip('should return false for missing token', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     setupMetaTagWith('');
 
     return expect(isOriginExperimentOn(win, 'foo', true))
         .to.eventually.be.false;
   });
 
+<<<<<<< HEAD
   it('should return false if origin does not match', () => {
+=======
+  // TODO(choumx, #14336): Fails due to console errors.
+  it.skip('should return false if origin does not match', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     setupMetaTagWith(token);
     win.location.href = 'https://not-origin.com';
 

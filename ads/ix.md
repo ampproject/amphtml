@@ -16,15 +16,26 @@ limitations under the License.
 
 # Index Exchange
 
+<<<<<<< HEAD
 Index supports Header Tag style bidding using DoubleClick as the ad server.
+=======
+Index supports Header Tag style bidding using Doubleclick as the ad server.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
   type="ix"
   data-ix-id="54321"
   data-slot="/1234/example">
+=======
+<amp-ad width=300 height=250
+  type="ix"
+  data-ix-id="54321"
+  data-slot="/1234/example"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
@@ -36,12 +47,20 @@ If you use `remote.html` in your AMP pages, you must add `ix` into the array tha
 
 Ad size is based on the `width` and `height` attributes of the `amp-ad` tag by default. Both width and height override attributes (`data-override-width` and `data-override-height`) and multi-size ads (via `data-multi-size`) are supported.
 
+<<<<<<< HEAD
 ### Required parameters
+=======
+__Required:__
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 - `data-ix-id`
 - `data-slot`
 
+<<<<<<< HEAD
 ### Optional parameters
+=======
+__Optional:__
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 - `data-ix-slot`
 - `data-ix-timeout`

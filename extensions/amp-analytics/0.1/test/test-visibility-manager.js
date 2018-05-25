@@ -235,7 +235,12 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getRootVisibility()).to.equal(0);
   });
 
+<<<<<<< HEAD
   it('create correct number of models', () => {
+=======
+  // TODO(zhouyx, #14336): Fails due to console errors.
+  it.skip('create correct number of models', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     let spec = {};
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(1);
@@ -281,6 +286,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.dispose();
   });
 
+<<<<<<< HEAD
   it('does not allow min==max, when they are neither 0 nor 100', () => {
     let spec = {visiblePercentageThresholds: [[50, 50]]};
     allowConsoleError(() => {
@@ -296,6 +302,16 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       //   'visiblePercentageThresholds entry invalid min/max value')
       root.listenRoot(spec, null, null, null);
     });
+=======
+  // TODO(jonkeller, #14336): Fails due to console errors.
+  it.skip('does not allow min==max, when they are neither 0 nor 100', () => {
+    let spec = {visiblePercentageThresholds: [[50, 50]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(0);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[0, 10], [10, 10], [30, 30]]};
+    root.listenRoot(spec, null, null, null);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(root.models_).to.have.length(1);
     root.dispose();
   });

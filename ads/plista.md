@@ -21,7 +21,11 @@ limitations under the License.
 ### Basic
 
 ```html
+<<<<<<< HEAD
 <amp-embed width="300" height="300"
+=======
+<amp-embed width=300 height=300
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="plista"
     layout=responsive
     data-countrycode="de"
@@ -34,7 +38,11 @@ limitations under the License.
 ### With article information
 
 ```html
+<<<<<<< HEAD
 <amp-embed width="300" height="300"
+=======
+<amp-embed width=300 height=300
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="plista"
     layout=responsive
     data-countrycode="de"
@@ -49,6 +57,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For semantics of configuration, please see [Plista's documentation](https://goo.gl/nm9f41).
 
 Supported parameters:
@@ -63,6 +72,22 @@ Supported parameters:
 Supported via `json` attribute:
 
 - `item`
+=======
+For semantics of configuration, please see [ad network documentation](https://goo.gl/nm9f41).
+
+Supported parameters:
+
+- data-countrycode
+- data-publickey
+- data-widgetname
+- data-geo
+- data-urlprefix
+- data-categories
+
+Supported via `json` attribute:
+
+- item
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Layout
 

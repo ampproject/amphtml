@@ -16,22 +16,43 @@ limitations under the License.
 
 # Meg
 
+<<<<<<< HEAD
 Please visit [www.meg.com](https://www.meg.com) for more information. 
+=======
+Please visit our [website](https://www.meg.com) for more information about us. 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="250" 
     type="meg"
     data-code="6rc0ERhN75">
 </amp-ad>
+=======
+  <amp-ad 
+    width=320 
+    height=250 
+    type="meg"
+    data-code="6rc0ERhN75">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact support@meg.com 
 
 Supported parameters:
 
 - `data-code`: unique ad code given by Meg.com
 
+=======
+Supported parameters:
+
+- data-code: unique ad code given by Meg.com
+
+for further information regarding this implementation please contact support@meg.com 
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

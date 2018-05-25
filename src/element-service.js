@@ -18,14 +18,20 @@ import * as dom from './dom';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
+<<<<<<< HEAD
   getService,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   getServicePromise,
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
   getTopWindow,
 } from './service';
+<<<<<<< HEAD
 import {stubbedElementNames} from './element-stub-data';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {toWin} from './types';
 import {user} from './log';
 
@@ -121,6 +127,7 @@ export function getElementServiceIfAvailableForDoc(
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
   }
+<<<<<<< HEAD
 
   return ampdoc.whenBodyAvailable()
       .then(() => waitForExtensionIfStubbed(ampdoc.win, extension))
@@ -134,6 +141,26 @@ export function getElementServiceIfAvailableForDoc(
         }
         return null;
       });
+=======
+  // Microtask is necessary to ensure that window.ampExtendedElements has been
+  // initialized.
+  return Promise.resolve().then(() => {
+    if (!opt_element && isElementScheduled(ampdoc.win, extension)) {
+      return getServicePromiseForDoc(nodeOrDoc, id);
+    }
+    // Wait for HEAD to fully form before denying access to the service.
+    return ampdoc.whenBodyAvailable().then(() => {
+      // If this service is provided by an element, then we can't depend on the
+      // service (they may not use the element).
+      if (opt_element) {
+        return getServicePromiseOrNullForDoc(nodeOrDoc, id);
+      } else if (isElementScheduled(ampdoc.win, extension)) {
+        return getServicePromiseForDoc(nodeOrDoc, id);
+      }
+      return null;
+    });
+  });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**
@@ -187,6 +214,7 @@ function assertService(service, id, extension) {
 }
 
 /**
+<<<<<<< HEAD
  * Waits for an extension if a stub is present
  * @param {!Window} win
  * @param {string} extension
@@ -210,6 +238,8 @@ function waitForExtensionIfStubbed(win, extension) {
 }
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * Returns the promise for service with `id` on the given window if available.
  * Otherwise, resolves with null (service was not registered).
  * @param {!Window} win
@@ -220,6 +250,7 @@ function waitForExtensionIfStubbed(win, extension) {
  * @private
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
+<<<<<<< HEAD
   return dom.waitForBodyPromise(win.document)
       .then(() => waitForExtensionIfStubbed(win, extension))
       .then(() => {
@@ -232,4 +263,24 @@ function getElementServicePromiseOrNull(win, id, extension, opt_element) {
         }
         return null;
       });
+=======
+  // Microtask is necessary to ensure that window.ampExtendedElements has been
+  // initialized.
+  return Promise.resolve().then(() => {
+    if (!opt_element && isElementScheduled(win, extension)) {
+      return getServicePromise(win, id);
+    }
+    // Wait for HEAD to fully form before denying access to the service.
+    return dom.waitForBodyPromise(win.document).then(() => {
+      // If this service is provided by an element, then we can't depend on the
+      // service (they may not use the element).
+      if (opt_element) {
+        return getServicePromiseOrNull(win, id);
+      } else if (isElementScheduled(win, extension)) {
+        return getServicePromise(win, id);
+      }
+      return null;
+    });
+  });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }

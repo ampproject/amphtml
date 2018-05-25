@@ -22,7 +22,10 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
+<<<<<<< HEAD
 import {CacheCidApi} from './cache-cid-api';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {GoogleCidApi, TokenStatus} from './cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
@@ -42,7 +45,10 @@ import {
 } from '../url';
 import {isIframed} from '../dom';
 import {parseJson, tryParseJson} from '../json';
+<<<<<<< HEAD
 import {tryResolve} from '../utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -58,6 +64,7 @@ const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
 const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptOut';
 
 /**
+<<<<<<< HEAD
  * Tag for debug logging.
  * @const @private {string}
  */
@@ -86,6 +93,8 @@ const API_KEYS = {
 };
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * A base cid string value and the time it was last read / stored.
  * @typedef {{time: time, cid: string}}
  */
@@ -125,19 +134,25 @@ export class Cid {
     this.externalCidCache_ = Object.create(null);
 
     /**
+<<<<<<< HEAD
      * @private @const {!CacheCidApi}
      */
     this.cacheCidApi_ = new CacheCidApi(ampdoc);
 
     /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
      * @private {!ViewerCidApi}
      */
     this.viewerCidApi_ = new ViewerCidApi(ampdoc);
 
     this.cidApi_ = new GoogleCidApi(ampdoc);
+<<<<<<< HEAD
 
     /** @private {?Object<string, string>} */
     this.apiKeyMap_ = null;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -214,7 +229,11 @@ export class Cid {
     /** @const {!Location} */
     const url = parseUrl(this.ampdoc.win.location.href);
     if (!isProxyOrigin(url)) {
+<<<<<<< HEAD
       const apiKey = this.isScopeOptedIn_(scope);
+=======
+      const apiKey = this.viewerCidApi_.isScopeOptedIn(scope);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       if (apiKey) {
         return this.cidApi_.getScopedCid(apiKey, scope).then(scopedCid => {
           if (scopedCid == TokenStatus.OPT_OUT) {
@@ -230,6 +249,7 @@ export class Cid {
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
+<<<<<<< HEAD
     if (this.cacheCidApi_.isSupported()) {
       const apiKey = this.isScopeOptedIn_(scope);
       if (!apiKey) {
@@ -241,6 +261,11 @@ export class Cid {
       if (supported) {
         const apiKey = this.isScopeOptedIn_(scope);
         return this.viewerCidApi_.getScopedCid(apiKey, scope);
+=======
+    return this.viewerCidApi_.isSupported().then(supported => {
+      if (supported) {
+        return this.viewerCidApi_.getScopedCid(scope);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }
       return getBaseCid(this, persistenceConsent)
           .then(baseCid => {
@@ -249,6 +274,7 @@ export class Cid {
           });
     });
   }
+<<<<<<< HEAD
 
   /**
    * Checks if the page has opted in CID API for the given scope.
@@ -295,6 +321,8 @@ export class Cid {
     }
     return apiKeyMap;
   }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**
@@ -610,8 +638,12 @@ function getNewCidForCookie(win) {
   } else {
     // If our entropy is a pure random number, we can just directly turn it
     // into base 64
+<<<<<<< HEAD
     const cast = /** @type {!Uint8Array} */(entropy);
     return tryResolve(() => base64UrlEncodeFromBytes(cast)
+=======
+    return Promise.resolve(base64UrlEncodeFromBytes(entropy)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         // Remove trailing padding
         .replace(/\.+$/, ''));
   }

@@ -37,7 +37,11 @@ describes.repeated('', {
 
   /** @private @const {!FontConfig} */
   const FONT_CONFIG = {
+<<<<<<< HEAD
     fontStyle: 'normal',
+=======
+    style: 'normal',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     variant: 'normal',
     weight: '400',
     size: 'medium',
@@ -46,7 +50,11 @@ describes.repeated('', {
 
   /** @private @const {!FontConfig} */
   const FAILURE_FONT_CONFIG = {
+<<<<<<< HEAD
     fontStyle: 'normal',
+=======
+    style: 'normal',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     variant: 'normal',
     weight: '400',
     size: 'medium',

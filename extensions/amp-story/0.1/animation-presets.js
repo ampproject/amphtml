@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
 import {StoryAnimationPresetDef} from './animation-types';
 import {
@@ -67,6 +68,16 @@ export function setStyleForPreset(el, presetName) {
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
 }
+=======
+import {StoryAnimationPresetDef} from './animation-types';
+import {px} from '../../../src/style';
+import {
+  rotateAndTranslate,
+  translate2d,
+  whooshIn,
+} from './animation-presets-utils';
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /** @const {!Object<string, !StoryAnimationPresetDef>} */
 // First keyframe will always be considered offset: 0 and will be applied to the
@@ -228,6 +239,7 @@ export const PRESETS = {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
+<<<<<<< HEAD
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -236,12 +248,18 @@ export const PRESETS = {
       const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
 
       return scaleAndTranslate(offsetX, offsetY, 0, offsetY, scalingFactor);
+=======
+      const offsetX = dimensions.pageWidth - dimensions.targetWidth;
+      const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
+      return translate2d(offsetX, offsetY, 0, offsetY);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     },
   },
   'pan-right': {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
+<<<<<<< HEAD
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -250,12 +268,18 @@ export const PRESETS = {
       const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
 
       return scaleAndTranslate(0, offsetY, offsetX, offsetY, scalingFactor);
+=======
+      const offsetX = dimensions.pageWidth - dimensions.targetWidth;
+      const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
+      return translate2d(0, offsetY, offsetX, offsetY);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     },
   },
   'pan-down': {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
+<<<<<<< HEAD
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -264,12 +288,18 @@ export const PRESETS = {
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       return scaleAndTranslate(offsetX, 0, offsetX, offsetY, scalingFactor);
+=======
+      const offsetX = -dimensions.targetWidth / 2;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+      return translate2d(offsetX, 0, offsetX, offsetY);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     },
   },
   'pan-up': {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
+<<<<<<< HEAD
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -278,6 +308,11 @@ export const PRESETS = {
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       return scaleAndTranslate(offsetX, offsetY, offsetX, 0, scalingFactor);
+=======
+      const offsetX = -dimensions.targetWidth / 2;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+      return translate2d(offsetX, offsetY, offsetX, 0);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     },
   },
   'zoom-in': {

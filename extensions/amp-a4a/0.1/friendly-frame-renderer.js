@@ -27,11 +27,25 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
 
+<<<<<<< HEAD
 /**
  * @typedef {{
  *   creativeMetaData: ./amp-ad-type-defs.CreativeMetaDataDef,
  * }}
  */
+=======
+/** @typedef {{
+      minifiedCreative: string,
+      customElementExtensions: !Array<string>,
+      customStylesheets: !Array<{href: string}>,
+      images: (Array<string>|undefined),
+    }} */
+export let CreativeMetaDataDef;
+
+/** @typedef {{
+      creativeMetaData: CreativeMetaDataDef,
+    }} */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 export let CreativeData;
 
 /**
@@ -76,7 +90,11 @@ export class FriendlyFrameRenderer extends Renderer {
             'allowtransparency': '',
             'scrolling': 'no',
           })));
+<<<<<<< HEAD
     // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
+=======
+    context.applyFillContent(this.iframe_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {

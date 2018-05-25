@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import * as lolex from 'lolex';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
@@ -46,6 +49,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         onConsentStateChange: (id, handler) => {
           consentManagerOnChangeSpy(id, handler);
         },
+<<<<<<< HEAD
         getConsentInstanceSharedData: id => {
           const sharedData = {
             common: id,
@@ -53,6 +57,8 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
           sharedData[id] = true;
           return Promise.resolve(sharedData);
         },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
   });
@@ -95,6 +101,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
   describe('Consent Policy Instance', () => {
     let instance;
     beforeEach(() => {
+<<<<<<< HEAD
       const config = {
         'waitFor': {
           'ABC': [],
@@ -102,6 +109,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         },
       };
       instance = new ConsentPolicyInstance(config);
+=======
+      instance = new ConsentPolicyInstance(['ABC', 'DEF']);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('on consent state change', () => {
@@ -110,12 +120,15 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         'ABC': CONSENT_ITEM_STATE.GRANTED,
         'DEF': null,
       });
+<<<<<<< HEAD
       instance.consentStateChangeHandler('ABC',
           CONSENT_ITEM_STATE.NOT_REQUIRED);
       expect(instance.itemToConsentState_).to.deep.equal({
         'ABC': CONSENT_ITEM_STATE.GRANTED,
         'DEF': null,
       });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.DISMISSED);
       expect(instance.itemToConsentState_).to.deep.equal({
         'ABC': CONSENT_ITEM_STATE.GRANTED,
@@ -138,6 +151,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       });
     });
 
+<<<<<<< HEAD
     it('on consent ignored', () => {
       instance.consentStateChangeHandler('ABC',
           CONSENT_ITEM_STATE.NOT_REQUIRED);
@@ -193,6 +207,11 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
       it('promise should resolve when all consents are gathered', function* () {
         instance = new ConsentPolicyInstance(config);
+=======
+    describe('getReadyPromise', () => {
+      it('promise should resolve when all consents are gathered', function* () {
+        instance = new ConsentPolicyInstance(['ABC']);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         let ready = false;
         instance.getReadyPromise().then(() => ready = true);
         yield macroTask();
@@ -201,7 +220,11 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield macroTask();
         expect(ready).to.be.true;
         ready = false;
+<<<<<<< HEAD
         instance = new ConsentPolicyInstance(config);
+=======
+        instance = new ConsentPolicyInstance(['ABC']);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         instance.getReadyPromise().then(() => ready = true);
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
         yield macroTask();
@@ -209,7 +232,11 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       });
 
       it('promise should resolve when consents are dimissed', function* () {
+<<<<<<< HEAD
         instance = new ConsentPolicyInstance(config);
+=======
+        instance = new ConsentPolicyInstance(['ABC']);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         let ready = false;
         instance.getReadyPromise().then(() => ready = true);
         yield macroTask();
@@ -220,6 +247,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
         yield macroTask();
         expect(ready).to.be.true;
+<<<<<<< HEAD
         expect(instance.getCurrentPolicyStatus()).to.equal(
             CONSENT_POLICY_STATE.UNKNOWN);
       });
@@ -305,12 +333,23 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
             CONSENT_ITEM_STATE.NOT_REQUIRED);
         expect(instance.getCurrentPolicyStatus()).to.equal(
             CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
+=======
+      });
+    });
+
+    describe('getCurrentPolicyStatus', () => {
+      it('should return current policy state', function* () {
+        instance = new ConsentPolicyInstance(['ABC']);
+        expect(instance.getCurrentPolicyStatus()).to.equal(
+            CONSENT_ITEM_STATE.UNKNOWN);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
         expect(instance.getCurrentPolicyStatus()).to.equal(
             CONSENT_POLICY_STATE.INSUFFICIENT);
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
         expect(instance.getCurrentPolicyStatus()).to.equal(
             CONSENT_POLICY_STATE.SUFFICIENT);
+<<<<<<< HEAD
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
         expect(instance.getCurrentPolicyStatus()).to.equal(
             CONSENT_POLICY_STATE.SUFFICIENT);
@@ -376,6 +415,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
             ABC: true,
             DEF: true,
           });
+=======
+      });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 });

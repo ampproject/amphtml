@@ -217,9 +217,15 @@ describe('Gestures', () => {
 
   it('should deny emit if another eventing', () => {
     gestures.eventing_ = {};
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       gestures.signalEmit_(recognizer, {}, null);
     }).to.throw(/Recognizer is not currently allowed/); });
+=======
+    expect(() => {
+      gestures.signalEmit_(recognizer, {}, null);
+    }).to.throw(/Recognizer is not currently allowed/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(onGesture).to.have.not.been.called;
   });
 

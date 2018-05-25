@@ -40,9 +40,12 @@ import {toWin} from '../types';
 
 const TAG = 'navigation';
 
+<<<<<<< HEAD
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /**
  * Install navigation service for ampdoc, which handles navigations from anchor
  * tag clicks and other runtime features like AMP.navigateTo().
@@ -59,10 +62,13 @@ export function installGlobalNavigationHandlerForDoc(ampdoc) {
       /* opt_instantiate */ true);
 }
 
+<<<<<<< HEAD
 export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
 }
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
@@ -127,6 +133,7 @@ export class Navigation {
     this.a2aFeatures_ = null;
   }
 
+<<<<<<< HEAD
   /**
    * Registers a handler that performs URL replacement on the href
    * of an ad click.
@@ -138,6 +145,8 @@ export class Navigation {
         maybeExpandUrlParams.bind(null, ampdoc), /* capture */ true);
   }
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /** @override */
   adoptEmbedWindow(embedWin) {
     installServiceInEmbedScope(embedWin, TAG,
@@ -422,6 +431,7 @@ export class Navigation {
     return parseUrl(url || this.ampdoc.win.location.href);
   }
 }
+<<<<<<< HEAD
 
 /**
  * Handle click on links and replace variables in the click URL.
@@ -466,3 +476,5 @@ function maybeExpandUrlParams(ampdoc, e) {
     target.setAttribute('href', newHref);
   }
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

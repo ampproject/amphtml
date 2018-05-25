@@ -384,6 +384,7 @@ describes.realWin('amp-iframe', {
     it('should deny same origin', () => {
       const ampIframe = createAmpIframe(env);
       const impl = ampIframe.implementation_;
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin');
@@ -408,6 +409,32 @@ describes.realWin('amp-iframe', {
       allowConsoleError(() => { expect(() => {
         impl.assertSource('./foo', location.href, 'allow-same-origin');
       }).to.throw(/must not be equal to container/); });
+=======
+      expect(() => {
+        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+            'allow-same-origin');
+      }).to.throw(/must not be equal to container/);
+
+      expect(() => {
+        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+            'Allow-same-origin');
+      }).to.throw(/must not be equal to container/);
+
+      expect(() => {
+        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+            'allow-same-origin allow-scripts');
+      }).to.throw(/must not be equal to container/);
+      // Same origin, but sandboxed.
+      impl.assertSource('https://google.com/fpp', 'https://google.com/abc', '');
+
+      expect(() => {
+        impl.assertSource('http://google.com/', 'https://foo.com', '');
+      }).to.throw(/Must start with https/);
+
+      expect(() => {
+        impl.assertSource('./foo', location.href, 'allow-same-origin');
+      }).to.throw(/must not be equal to container/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       impl.assertSource('http://iframe.localhost:123/foo',
           'https://foo.com', '');
@@ -415,6 +442,7 @@ describes.realWin('amp-iframe', {
       ampIframe.setAttribute('srcdoc', 'abc');
       ampIframe.setAttribute('sandbox', 'allow-same-origin');
 
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         impl.transformSrcDoc_('<script>try{parent.location.href}catch(e){' +
           'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
@@ -431,6 +459,22 @@ describes.realWin('amp-iframe', {
         impl.assertSource('https://3p.ampproject.net:999/t',
             'https://google.com/abc');
       }).to.throw(/not allow embedding of frames from ampproject\.\*/); });
+=======
+      expect(() => {
+        impl.transformSrcDoc_('<script>try{parent.location.href}catch(e){' +
+          'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
+          '</script>', 'Allow-Same-Origin');
+      }).to.throw(/allow-same-origin is not allowed with the srcdoc attribute/);
+
+      expect(() => {
+        impl.assertSource('https://3p.ampproject.net:999/t',
+            'https://google.com/abc');
+      }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+      expect(() => {
+        impl.assertSource('https://3p.ampproject.net:999/t',
+            'https://google.com/abc');
+      }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should transform source', () => {
@@ -515,7 +559,13 @@ describes.realWin('amp-iframe', {
       expect(attemptChangeSize.firstCall.args[1]).to.be.undefined;
     });
 
+<<<<<<< HEAD
     it('should not resize amp-iframe if request height is small', function* () {
+=======
+    // TODO(zhouyx, #14336): Fails due to console errors.
+    it.skip('should not resize amp-iframe if request height is' +
+        'small', function* () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -530,7 +580,13 @@ describes.realWin('amp-iframe', {
       expect(attemptChangeSize).to.have.not.been.called;
     });
 
+<<<<<<< HEAD
     it('should not resize amp-iframe if it is non-resizable', function* () {
+=======
+    // TODO(zhouyx, #14336): Fails due to console errors.
+    it.skip('should not resize amp-iframe if it is ' +
+        'non-resizable', function* () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -574,7 +630,12 @@ describes.realWin('amp-iframe', {
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
     });
 
+<<<<<<< HEAD
     it('should detect tracking iframes', function* () {
+=======
+    // TODO(zhouyx, #14336): Fails due to console errors.
+    it.skip('should detect tracking iframes', function* () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const ampIframe1 = createAmpIframe(env, {
         src: clickableIframeSrc,
         sandbox: 'allow-scripts allow-same-origin',
@@ -619,7 +680,12 @@ describes.realWin('amp-iframe', {
       expect(ampIframe3.querySelector('iframe')).to.not.be.null;
     });
 
+<<<<<<< HEAD
     it('should not detect traking iframe in amp container', function* () {
+=======
+    // TODO(zhouyx, #14336): Fails due to console errors.
+    it.skip('should not detect traking iframe in amp container', function* () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const ampIframeRealTracking = createAmpIframe(env, {
         src: iframeSrc,
         width: 5,

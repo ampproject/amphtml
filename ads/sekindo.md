@@ -16,6 +16,10 @@ limitations under the License.
 
 # Sekindo
 
+<<<<<<< HEAD
+=======
+Please visit our web (http://www.sekindo.com) for more details
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ## Example
 
 ```html
@@ -27,8 +31,14 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please visit [www.sekindo.com](http://www.sekindo.com).
 
 ### Required parameters
 
 - `data-spaceId` - Ad unit unique id
+=======
+__Required:__
+
+- `data-spaceId` - Adunit unique id
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

@@ -18,7 +18,11 @@ limitations under the License.
 
 ## Examples
 
+<<<<<<< HEAD
 ### For 320x50 ad
+=======
+### For 320x50 Ad
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-ad width="320" height="50"
@@ -28,7 +32,11 @@ limitations under the License.
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 ### For 300x250 ad
+=======
+### For 300x250 Ad
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-ad width="300" height="250"
@@ -48,6 +56,7 @@ limitations under the License.
 | 728x90  |   11   |
 | 120x600 |   13   |
 
+<<<<<<< HEAD
 
 ## Configuration
 
@@ -61,3 +70,13 @@ For details on the configuration semantics, please contact the ad network or ref
 ### Test Ads
 
 To get test ads, you need to enable Diagnostic Mode from Site settings.
+=======
+### Supported parameters:
+
+**Required**
+- data-siteid: Site Id is the InMobi property id. You can get this from InMobi dashboard.
+- data-slotid: Slot Id is the ad size.
+
+**For Test Ads**
+- To get test ads, you need to enable Diagnostic Mode from Site settings.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

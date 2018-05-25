@@ -153,10 +153,15 @@ describes.realWin('amp-instagram', {
   });
 
   it('requires data-shortcode', () => {
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(getIns('')).to.be.rejectedWith(
           /The data-shortcode attribute is required for/);
     });
+=======
+    expect(getIns('')).to.be.rejectedWith(
+        /The data-shortcode attribute is required for/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('resizes in response to messages from Instagram iframe', () => {
@@ -174,7 +179,11 @@ describes.realWin('amp-instagram', {
 
       expect(changeHeight).to.be.calledOnce;
       // Height minus padding
+<<<<<<< HEAD
       expect(changeHeight.firstCall.args[0]).to.equal(newHeight);
+=======
+      expect(changeHeight.firstCall.args[0]).to.equal(newHeight - 64);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 

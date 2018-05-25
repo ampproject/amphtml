@@ -23,7 +23,11 @@ limitations under the License.
 See below for an example of usage or our display tag, adapted for use with AMP websites:
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="weborama-display"
     data-wbo_account_id=51
     data-wbo_tracking_element_id=137
@@ -84,7 +88,11 @@ Here are some extra parameters that might be set on the AMP ad:
 - `data-wbo_debug` - Launch the ad in debug mode.
 - ... ask your contact at Weborama for more details.
 
+<<<<<<< HEAD
 ## Current restrictions
+=======
+## Current restrictions:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 - AMP ads are launched in a cross-origin iframe, so there currently is no support for some rich media, amongst which:
   - Expandables

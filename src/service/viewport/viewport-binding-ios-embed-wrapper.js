@@ -15,6 +15,10 @@
  */
 
 import {Observable} from '../../observable';
+<<<<<<< HEAD
+=======
+import {Services} from '../../services';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
@@ -43,6 +47,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
+<<<<<<< HEAD
     const doc = this.win.document;
     const documentElement = doc.documentElement;
     const topClasses = documentElement.className;
@@ -53,6 +58,19 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.wrapper_ = wrapper;
     wrapper.id = 'i-amphtml-wrapper';
     wrapper.className = topClasses;
+=======
+    const topClasses = this.win.document.documentElement.className;
+    this.win.document.documentElement.className = '';
+    this.win.document.documentElement.classList.add('i-amphtml-ios-embed');
+
+    /** @private @const {!Element} */
+    this.wrapper_ = this.win.document.createElement('html');
+    this.wrapper_.id = 'i-amphtml-wrapper';
+    this.wrapper_.className = topClasses;
+
+    /** @private {!../../service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -72,12 +90,22 @@ export class ViewportBindingIosEmbedWrapper_ {
     // Setup UI.
     /** @private {boolean} */
     this.setupDone_ = false;
+<<<<<<< HEAD
     waitForBody(doc, this.setup_.bind(this));
 
     // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
     // iOS rendering bugs. See #8798 for details.
     whenDocumentReady(doc).then(() => {
       documentElement.classList.add('i-amphtml-ios-overscroll');
+=======
+    waitForBody(this.win.document, this.setup_.bind(this));
+
+    // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
+    // iOS rendering bugs. See #8798 for details.
+    whenDocumentReady(this.win.document).then(() => {
+      this.win.document.documentElement.classList.add(
+          'i-amphtml-ios-overscroll');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     dev().fine(TAG_, 'initialized ios-embed-wrapper viewport');
@@ -114,6 +142,11 @@ export class ViewportBindingIosEmbedWrapper_ {
       get: () => body,
     });
 
+<<<<<<< HEAD
+=======
+    // TODO(dvoytenko): test if checkAndFixIosScrollfreezeBug is required.
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // Make sure the scroll position is adjusted correctly.
     this.onScrolled_();
   }

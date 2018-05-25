@@ -16,7 +16,11 @@ limitations under the License.
 
 # LockerDome
 
+<<<<<<< HEAD
 
+=======
+[LockerDome](https://lockerdome.com)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
@@ -29,8 +33,12 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact [LockerDome](https://lockerdome.com).
 
 ### Required parameters
 
+=======
+Required parameters:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 - `data-slot`

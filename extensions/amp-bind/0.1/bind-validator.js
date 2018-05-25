@@ -322,7 +322,11 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
+<<<<<<< HEAD
         blacklistedValueRegex: '(^|\\s)(button|file|image|)(\\s|$)',
+=======
+        blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       },
       'value': null,
       'width': null,

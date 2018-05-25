@@ -42,8 +42,13 @@ export class AccessVendorAdapter {
     this.vendorName_ = user().assert(configJson['vendor'],
         '"vendor" name must be specified');
 
+<<<<<<< HEAD
     /** @const @private {!JsonObject} */
     this.vendorConfig_ = configJson[this.vendorName_] || {};
+=======
+    /** @const @private {JsonObject} */
+    this.vendorConfig_ = configJson[this.vendorName_];
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @const @private {boolean} */
     this.isPingbackEnabled_ = !configJson['noPingback'];

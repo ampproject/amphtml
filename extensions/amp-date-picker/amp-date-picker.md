@@ -25,7 +25,11 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
+<<<<<<< HEAD
     <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a> <a href="https://github.com/ampproject/amphtml/blob/3a06c99f259b66998b61935a5ee5f0075481bfd2/tools/experiments/README.md#enable-an-experiment-for-a-particular-document"> (Document opt-in allowed)</a></td>
+=======
+    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -90,7 +94,11 @@ By specifying `mode="static"`, the `amp-date-picker` renders a static calendar v
 
 For a static date picker, you must specify a size-defined layout, which can be one of: `fixed`, `fixed-height`, `responsive`, `fill` or `flex-item`.
 
+<<<<<<< HEAD
 When the `static` amp-date-picker is rendered in a `<form>`, if there are no [inputs specified with `*input-selector`](#input-selector-[optional]), the amp-date-picker creates hidden input elements (e.g., `<input type="hidden" ...`). The amp-date-picker names the elements as `date` or `start-date` and `end-date`; if those names are already used in the form, the amp-date-picker attempts to name the input fields with the `id` of the `<amp-date-picker>`.
+=======
+When the `static` amp-date-picker is rendered in a `<form>`, if there are no [inputs specified with `*input-selector`](#input-selector-[optional]), the amp-date-picker creates hidden input elements (e.g., `<input type="hidden" ...`). The amp-date-picker names the elements as `input` or `start-input` and `end-input`; if those names are already used in the form, the amp-date-picker attempts to name the input fields with the `id` of the `<amp-date-picker>`.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 *Example: static date picker in a form field*
 
@@ -114,14 +122,23 @@ This example demonstrates using a static date picker in a form, where the user c
       layout="fixed-height"
       height="360">
     <!-- automatically generates hidden input fields:
+<<<<<<< HEAD
     <input type="hidden" name="start-date">
     <input type="hidden" name="end-date"> -->
+=======
+    <input type="hidden" name="start-input">
+    <input type="hidden" name="end-input"> -->
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   </amp-date-picker>
   <input type="submit" value="Subscribe">
 </fieldset>
 <div submit-success>
 <template type="amp-mustache">
+<<<<<<< HEAD
   Success! Thanks {{name}} for choosing {{start-date}} and {{end-date}}.
+=======
+  Success! Thanks {{name}} for choosing {{start-input}} and {{end-input}}.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </template>
 </div>
 </form>
@@ -182,11 +199,15 @@ and the user can select a single date. This is the default selection type.
 </amp-date-picker>
 ```
 
+<<<<<<< HEAD
 <amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="320" height="356">
   <noscript>
     <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png">
   </noscript>
 </amp-img>
+=======
+<!-- TODO(cvializ): add image -->
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ### `type="range"`
 
@@ -201,11 +222,15 @@ and the user can select a date range with a starting date and ending date.
 </amp-date-picker>
 ```
 
+<<<<<<< HEAD
 <amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png" width="320" height="355">
   <noscript>
     <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png">
   </noscript>
 </amp-img>
+=======
+<!-- TODO(cvializ): add image -->
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Attributes
 
@@ -228,6 +253,7 @@ Specifies the selection type for the date picker. Allowed values are:
 
 A query selector for a single date picker's input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
+<<<<<<< HEAD
 a name of `date` or `${id}-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
 
@@ -237,6 +263,11 @@ initially selected date.
 Specify the `date` property via the [`src` attribute](#src-optional) to set
 an initial date dynamically.
 
+=======
+a name of `input` or `${id}-input` using the date picker's id. If either of these conflict
+with an existing element in the form, an error is emitted.
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```html
 <amp-date-picker
     type="single"
@@ -251,6 +282,7 @@ an initial date dynamically.
 
 A query selector for a date range picker's start date input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
+<<<<<<< HEAD
 a name of `start-date` or `${id}-start-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
 
@@ -263,6 +295,12 @@ an initial end date dynamically.
 ```html
 <input id="a2">
 <input id="b2">
+=======
+a name of `start-input` or `${id}-start-input` using the date picker's id. If either of these conflict
+with an existing element in the form, an error is emitted.
+
+```html
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 <amp-date-picker
     type="range"
     start-input-selector="#a2"
@@ -275,6 +313,7 @@ an initial end date dynamically.
 
 A query selector for a date range picker's end date input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
+<<<<<<< HEAD
 a name of `end-date` or `${id}-end-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
 
@@ -287,6 +326,12 @@ an initial end date dynamically.
 ```html
 <input id="a2">
 <input id="b2">
+=======
+a name of `end-input` or `${id}-end-date` using the date picker's id. If either of these conflict
+with an existing element in the form, an error is emitted.
+
+```html
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 <amp-date-picker
     type="range"
     start-input-selector="#a2"
@@ -364,6 +409,7 @@ By default, this attribute is not present.
 
 ##### src [optional]
 
+<<<<<<< HEAD
 If present, `amp-date-picker` requests JSON data to populate certain attributes dynamically, as well as matching lists of dates to template `id`s for rendering days in the calendar.
 
 If your calendar data is personalized for the user or updates often,
@@ -402,6 +448,14 @@ that do not have an explicitly specified template.
 ```
 
 *Example: Specifying properties via the `src` attribute*
+=======
+If present, `amp-date-picker` requests JSON data to populate the
+`highlighted` and `blocked` lists, as well as matching templates in the document
+to lists of dates.
+
+While waiting for the JSON response, the date picker renders the
+templates specified in the markup.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```json
 {
@@ -415,13 +469,18 @@ that do not have an explicitly specified template.
     {
       "id": "my-second-template-id",
       "dates": [
+<<<<<<< HEAD
         "2018-01-02",
+=======
+        "2018-01-01",
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         "FREQ=WEEKLY;DTSTART=20180101T000000Z;COUNT=52;WKST=SU;BYDAY=TU"
       ]
     },
     {
       "id": "my-default-template-id"
     }
+<<<<<<< HEAD
   ],
   "startDate": "2018-01-01",
   "endDate": "2018-02-02",
@@ -434,6 +493,14 @@ that do not have an explicitly specified template.
 ```html
 <amp-date-picker src="https://www.example.com/date-data.json"
   layout="fixed-height" height="360">
+=======
+  ]
+}
+```
+
+```html
+<amp-date-picker src="https://www.example.com/date-data.json">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   <template type="amp-mustache" date-template id="my-template-id">⚡️</template>
   <template type="amp-mustache" date-template id="my-second-template-id">🌮</template>
   <template type="amp-mustache" date-template id="my-default-template-id">{{D}}</template>
@@ -446,8 +513,13 @@ Renders the picker to fill the space available to it, like in a fullscreen light
 This works best with `layout="fill"`.
 
 ```html
+<<<<<<< HEAD
 <input on="tap:lightbox.open" placeholder="Start" id="start">
 <input on="tap:lightbox.open" placeholder="End" id="end">
+=======
+<input on="tap:lightbox.open" placeholder="Start" id="start"/>
+<input on="tap:lightbox.open" placeholder="End" id="end"/>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 <button on="tap:dp.clear">Clear</button>
 <amp-lightbox id="lightbox" layout="nodisplay">
   <amp-date-picker
@@ -465,16 +537,25 @@ This works best with `layout="fill"`.
 </amp-lightbox>
 ```
 
+<<<<<<< HEAD
 <amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
   <noscript>
     <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png">
   </noscript>
 </amp-img>
+=======
+<!-- TODO(cvializ): add image -->
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ##### open-after-select [optional]
 
 If present, keeps the date picker overlay open after the user selects a date or dates. By default, this attribute is not present.
 
+<<<<<<< HEAD
+=======
+<!-- TODO(cvializ): does it still trigger deactivate? -->
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ##### open-after-clear [optional]
 
 If present, keeps the date picker open after the user clears the date or dates. By default, this attribute is not present.
@@ -570,7 +651,11 @@ These variables are ISO 8601 format string values e.g. `DD`, `D`, `X`, etc.
 rendered after the calendar view renders for the first time.
 
 ```html
+<<<<<<< HEAD
 <amp-date-picker layout="fixed-height" height="360">
+=======
+<amp-date-picker>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   <!-- Render the "party" emoji on New Years Day 2018 -->
   <template type="amp-mustache" date-template dates="2018-01-01">🎉</template>
   <!-- Render the "taco" emoji every Tuesday for 52 weeks starting 2018-01-01 -->
@@ -596,13 +681,18 @@ the calendar view. `info-template`s may contain any valid AMP content and are on
 rendered after the calendar view renders for the first time.
 
 ```html
+<<<<<<< HEAD
 <amp-date-picker layout="fixed-height" height="360">
+=======
+<amp-date-picker>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   <template type="amp-mustache" info-template>
     Warning: Tacos are only available on Tuesday
   </template>
 </amp-date-picker>
 ```
 
+<<<<<<< HEAD
 <!-- ## TODO(cvializ): document styling -->
 
 <!-- ## TODO(cvializ): document tooltips -->
@@ -610,3 +700,14 @@ rendered after the calendar view renders for the first time.
 ## Validation
 
 See [amp-date-picker rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-picker/validator-amp-date-picker.protoascii) in the AMP validator specification.
+=======
+<!-- DO NOT SUBMIT(cvializ): add how to style this -->
+<!-- ## Styling -->
+
+<!--
+TODO(cvializ): uncomment with validation complete
+## Validation
+
+See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-picker/validator-amp-date-picker.protoascii) in the AMP validator specification.
+-->
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

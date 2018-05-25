@@ -42,6 +42,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For semantics of configuration, please see [Revcontent's documentation](https://faq.revcontent.com/).
 
 Supported parameters:
@@ -55,3 +56,18 @@ Supported parameters:
 ## Auto-sizing of Ads
 
 Revcontent's AMP service will be updated to support resizing of ads for improved rendering, no additional tag parameters are required at this time.
+=======
+For semantics of configuration, please see [ad network documentation](http://faq.revcontent.com/support/solutions/5000137293).
+
+Supported parameters:
+
+- data-id
+- data-wrapper
+- data-endpoint
+- data-ssl
+- data-testing
+
+## Auto-sizing of Ads
+
+Revcontent's AMP service will be updated to support resizing of ads for improved rendering, no additional tag parameters are required at this time.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

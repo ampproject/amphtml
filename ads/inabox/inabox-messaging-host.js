@@ -76,6 +76,13 @@ export class InaboxMessagingHost {
    * @param {!Array<!HTMLIFrameElement>} iframes
    */
   constructor(win, iframes) {
+<<<<<<< HEAD
+=======
+
+    /** @private {!Window} */
+    this.win_ = win;
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {!Array<!HTMLIFrameElement>} */
     this.iframes_ = iframes;
 

@@ -202,7 +202,11 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
+<<<<<<< HEAD
     }, ActionTrust.LOW);
+=======
+    }, ActionTrust.HIGH);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -475,7 +479,11 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
+<<<<<<< HEAD
       // TODO(amphtml): Identify more platforms that require
+=======
+      //TODO (camelburrito): Identify more platforms that require
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       // i-amphtml-no-scroll.
       if (this.isIos_) {
         // Make the container non scrollable to stop scroll events.

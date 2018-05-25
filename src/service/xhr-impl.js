@@ -110,6 +110,7 @@ export class Xhr {
     this.win = win;
 
     const ampdocService = Services.ampdocServiceFor(win);
+<<<<<<< HEAD
 
     // The isSingleDoc check is required because if in shadow mode, this will
     // throw a console error because the shellShadowDoc_ is not set when
@@ -117,6 +118,8 @@ export class Xhr {
     // shadow mode tests needs to be fixed or there is a bug in ampdoc impl
     // getAmpDoc.
     // TODO(alabiaga): This should be investigated and fixed
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {?./ampdoc-impl.AmpDoc} */
     this.ampdocSingle_ =
         ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
@@ -132,6 +135,18 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
+<<<<<<< HEAD
+=======
+    if (!getMode().test &&
+        this.ampdocSingle_ &&
+        Math.random() < 0.01 &&
+        parseUrl(input).origin != this.win.location.origin &&
+        !Services.viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
+      dev().error('XHR', 'attempted to fetch %s before viewer was visible',
+          input);
+    }
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -139,6 +154,7 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
+<<<<<<< HEAD
     return this.maybeIntercept_(input, init)
         .then(interceptorResponse => {
           if (interceptorResponse) {
@@ -159,6 +175,29 @@ export class Xhr {
           }
           return (this.win.fetch || fetchPolyfill).apply(null, arguments);
         });
+=======
+
+    return this.maybeIntercept_(input, init).then(interceptorResponse => {
+      if (interceptorResponse) {
+        return interceptorResponse;
+      }
+
+      // After this point, both the native `fetch` and the `fetch` polyfill will
+      // expect a native `FormData` object in the `body` property, so the native
+      // `FormData` object needs to be unwrapped.
+      if (isFormDataWrapper(init.body)) {
+        init.body = init.body.getFormData();
+      }
+      // Fallback to xhr polyfill since `fetch` api does not support
+      // responseType = 'document'. We do this so we don't have to do any
+      // parsing and document construction on the UI thread which would be
+      // expensive.
+      if (init.responseType == 'document') {
+        return fetchPolyfill(input, init);
+      }
+      return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+    });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -183,6 +222,7 @@ export class Xhr {
     if (!this.ampdocSingle_) {
       return Promise.resolve();
     }
+<<<<<<< HEAD
     const viewer = Services.viewerForDoc(this.ampdocSingle_);
     const whenFirstVisible = viewer.whenFirstVisible();
     if (!viewer.hasCapability('xhrInterceptor')) {
@@ -203,6 +243,29 @@ export class Xhr {
       const messagePayload = dict({
         'originalRequest': this.toStructuredCloneable_(input, init),
       });
+=======
+
+    const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
+    const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
+    if (!docOptedIn) {
+      return Promise.resolve();
+    }
+
+    const viewer = Services.viewerForDoc(this.ampdocSingle_);
+    if (!viewer.hasCapability('xhrInterceptor')) {
+      return Promise.resolve();
+    }
+
+    return viewer.isTrustedViewer().then(viewerTrusted => {
+      if (!viewerTrusted && !getMode(this.win).development) {
+        return;
+      }
+
+      const messagePayload = dict({
+        'originalRequest': this.toStructuredCloneable_(input, init),
+      });
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return viewer.sendMessageAwaitResponse('xhr', messagePayload)
           .then(response =>
             this.fromStructuredCloneable_(response, init.responseType));
@@ -761,8 +824,13 @@ export class FetchResponse {
     user().assert(this.xhr_.responseXML,
         'responseXML should exist. Make sure to return ' +
         'Content-Type: text/html header.');
+<<<<<<< HEAD
     const doc = /** @type {!Document} */(dev().assert(this.xhr_.responseXML));
     return Promise.resolve(doc);
+=======
+    return /** @type {!Promise<!Document>} */ (
+      Promise.resolve(dev().assert(this.xhr_.responseXML)));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**

@@ -411,9 +411,14 @@ describe('BindExpression', () => {
       expect(() => { evaluate('baz()', scope); }).to.throw();
       expect(() => { evaluate('foo.bar()', scope); })
           .to.throw(Error, unsupportedFunctionError);
+<<<<<<< HEAD
       expect(() => {
         evaluate('foo.qux("a", "return a")', scope);
       }).to.throw(unsupportedFunctionError);
+=======
+      expect(() => { evaluate('foo.qux("a", "return a")', scope); })
+          .to.throw(unsupportedFunctionError);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('disallow: invocation of prototype functions', () => {

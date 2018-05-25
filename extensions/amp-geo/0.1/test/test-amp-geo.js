@@ -76,12 +76,15 @@ describes.realWin('amp-geo', {
     }
   }
 
+<<<<<<< HEAD
   it('should not throw on empty config', () => {
     expect(() => {
       geo.buildCallback();
     }).to.not.throw();
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   it('should not throw on valid config', () => {
     expect(() => {
       addConfigElement('script');
@@ -182,6 +185,7 @@ describes.realWin('amp-geo', {
     });
   });
 
+<<<<<<< HEAD
   it('should throw if it has multiple script child elements', () => {
     expect(() => {
       addConfigElement('script');
@@ -190,29 +194,46 @@ describes.realWin('amp-geo', {
         geo.buildCallback();
       });
     }).to.throw(/can only have one <script type="application\/json"> child​​​/);
+=======
+  it('should throw if it has multiple child elements', () => {
+    expect(() => {
+      addConfigElement('script');
+      addConfigElement('script');
+      geo.buildCallback();
+    }).to.throw(/should have exactly one <script> child​​​/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should throw if the child element is not a <script> element', () => {
     expect(() => {
       addConfigElement('a');
+<<<<<<< HEAD
       allowConsoleError(() => {
         geo.buildCallback();
       });
+=======
+      geo.buildCallback();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }).to.throw(/script/);
   });
 
   it('should throw if the child script element is not json typed', () => {
     expect(() => {
       addConfigElement('script', 'wrongtype');
+<<<<<<< HEAD
       allowConsoleError(() => {
         geo.buildCallback();
       });
+=======
+      geo.buildCallback();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }).to.throw(/application\/json/);
   });
 
   it('should throw if the child script element has non-JSON content', () => {
     expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
+<<<<<<< HEAD
       allowConsoleError(() => {
         geo.buildCallback();
       });
@@ -226,6 +247,9 @@ describes.realWin('amp-geo', {
       allowConsoleError(() => {
         geo.buildCallback();
       });
+=======
+      geo.buildCallback();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }).to.throw();
   });
 });

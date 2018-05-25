@@ -19,7 +19,11 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
+<<<<<<< HEAD
 import {convertEasingKeyword, resolvePercentageToNumber} from './amp-fx-presets-utils';
+=======
+import {convertEasingKeyword} from './amp-fx-presets-utils';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -33,6 +37,7 @@ const installStyles = {
   'fade-in': {
     'will-change': 'opacity',
     'opacity': 0,
+<<<<<<< HEAD
   },
   'fade-in-scroll': {
     'will-change': 'opacity',
@@ -54,6 +59,12 @@ const marginValues = {
 };
 
 
+=======
+
+  },
+};
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /**
  * Class that implements the various preset animation providers.
  */
@@ -64,6 +75,12 @@ export class FxProvider {
    */
   constructor(ampdoc, fxType) {
 
+<<<<<<< HEAD
+=======
+    /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
@@ -85,8 +102,15 @@ export class FxProvider {
    */
   installOn(element) {
     setStyles(element, installStyles[this.fxType_]);
+<<<<<<< HEAD
     new FxElement(element, this.positionObserver_, this.viewport_,
         this.resources_, this.fxType_);
+=======
+    const parallaxElement = new FxElement(
+        element, this.positionObserver_, this.viewport_, this.resources_,
+        this.fxType_);
+    parallaxElement.initialize_();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 }
 
@@ -111,8 +135,13 @@ export class FxElement {
     /** @const @private {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = resources;
 
+<<<<<<< HEAD
     /** @type {?number} */
     this.adjustedViewportHeight = null;
+=======
+    /** @private {?number} */
+    this.adjustedViewportHeight_ = null;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {!Element} */
     this.element_ = element;
@@ -132,6 +161,7 @@ export class FxElement {
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
 
     /** @private {number} */
+<<<<<<< HEAD
     this.marginStart_ = element.hasAttribute('data-margin-start') ?
       resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
       marginValues[this.fxType_]['start'];
@@ -140,6 +170,10 @@ export class FxElement {
     this.marginEnd_ = element.hasAttribute('data-margin-end') ?
       resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
       marginValues[this.fxType_]['end'];
+=======
+    this.margin_ = element.hasAttribute('data-margin') ?
+      parseFloat(element.getAttribute('data-margin')) : 0.05;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private {string} */
     this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
@@ -148,12 +182,25 @@ export class FxElement {
     /** @private {string} */
     this.duration_ = element.hasAttribute('data-duration') ?
       element.getAttribute('data-duration') : '1000ms';
+<<<<<<< HEAD
 
     /** @private {boolean} */
     this.hasRepeat_ = element.hasAttribute('data-repeat');
 
     this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
       this.adjustedViewportHeight = adjustedViewportHeight;
+=======
+  }
+
+  /**
+   * Handles initializations such as getting initial positions and listening to
+   * events.
+   * @private
+   */
+  initialize_() {
+    this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
+      this.adjustedViewportHeight_ = adjustedViewportHeight;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
       // start observing position of the element.
       this.observePositionChanges_();
@@ -170,7 +217,11 @@ export class FxElement {
 
     this.viewport_.onResize(() => {
       this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
+<<<<<<< HEAD
         this.adjustedViewportHeight = adjustedViewportHeight;
+=======
+        this.adjustedViewportHeight_ = adjustedViewportHeight;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
   }
@@ -216,6 +267,7 @@ export class FxElement {
   /**
    * @returns {number}
    */
+<<<<<<< HEAD
   getMarginStart() {
     return this.marginStart_;
   }
@@ -225,6 +277,10 @@ export class FxElement {
    */
   getMarginEnd() {
     return this.marginEnd_;
+=======
+  getMargin() {
+    return this.margin_;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -270,6 +326,7 @@ export class FxElement {
   }
 
   /**
+<<<<<<< HEAD
    * Boolean dictating whether or not the amp-fx preset has the `repeat`
    * attribute set. The `repeat` attribute allows the animation to be fully
    * dependent on scroll.
@@ -280,6 +337,8 @@ export class FxElement {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param {boolean} mutateScheduled
    */
   setIsMutateScheduled(mutateScheduled) {

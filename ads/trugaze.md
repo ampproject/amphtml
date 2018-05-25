@@ -16,33 +16,66 @@ limitations under the License.
 
 # Trugaze
 
+<<<<<<< HEAD
+=======
+## Supported parameters in the amp-ad tag
+
+| Parameter name  | Description                         | Required |
+|-----------------|-------------------------------------|----------|
+| width           | Primary size width                  | Yes      |
+| height          | Primary size height                 | Yes      |
+| data-public-id  | Application public id               | Yes      |
+| data-slot       | Ad unit code                        | Yes      |
+| data-multi-size | Comma separated list of other sizes | No       |
+| json            | Custom targeting map                | No       |
+
+Note: if any of the required parameters is not present, the ad slot will not be filled.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ### Basic sample
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
     type="trugaze"
     data-public-id="4WMPI6PV"
     data-slot="/134642692/amp-samples">
 </amp-ad>
+=======
+  <amp-ad width=300 height=250
+      type="trugaze"
+      data-public-id="4WMPI6PV"
+      data-slot="/134642692/amp-samples">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ### Sample with multisize
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
     type="trugaze"
     data-public-id="4WMPI6PV"
     data-slot="/134642692/amp-samples"
     data-multi-size="320x50">
 </amp-ad>
+=======
+  <amp-ad width=300 height=250
+      type="trugaze"
+      data-public-id="4WMPI6PV"
+      data-slot="/134642692/amp-samples"
+      data-multi-size="320x50">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ### Sample with targeting
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="50"
     type="trugaze"
     data-public-id="4WMPI6PV"
@@ -67,3 +100,12 @@ For details on the configuration semantics, please contact the ad network or ref
 | json            | Custom targeting map                | No       |
 
 Note: if any of the required parameters is not present, the ad slot will not be filled.
+=======
+  <amp-ad width=320 height=50
+      type="trugaze"
+      data-public-id="4WMPI6PV"
+      data-slot="/134642692/amp-samples"
+      json='{"targeting":{"target":["sample"],"pos":["amp"]}}'>
+  </amp-ad>
+```
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

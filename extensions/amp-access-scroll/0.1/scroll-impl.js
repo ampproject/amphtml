@@ -16,15 +16,22 @@
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
+<<<<<<< HEAD
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-access-scroll-elt';
 
 /** @const {!JsonObject} */
+<<<<<<< HEAD
 const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
+=======
+const CONFIG = /** @type {!JsonObject} */ ({
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   'authorization': 'https://connect.scroll.com/amp/access?' +
                    'rid=READER_ID&o=SOURCE_URL&' +
                    'cid=CLIENT_ID(cid-fallback-cookie)',
@@ -34,6 +41,7 @@ const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
   'namespace': 'scroll',
 });
 
+<<<<<<< HEAD
 const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'scroll': 'https://connect.scroll.com/amp/analytics'
@@ -56,6 +64,8 @@ const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   },
 });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /**
  * amp-access vendor that authenticates against the scroll.com service.
@@ -73,16 +83,23 @@ export class ScrollAccessVendor extends AccessClientAdapter {
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
   constructor(ampdoc, accessService, accessSource) {
+<<<<<<< HEAD
     super(ampdoc, ACCESS_CONFIG, {
+=======
+    super(ampdoc, CONFIG, {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       buildUrl: accessSource.buildUrl.bind(accessSource),
       collectUrlVars: accessSource.collectUrlVars.bind(accessSource),
     });
 
     /** @private {!../../amp-access/0.1/amp-access.AccessService} */
     this.accessService_ = accessService;
+<<<<<<< HEAD
 
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   authorize() {
@@ -92,7 +109,10 @@ export class ScrollAccessVendor extends AccessClientAdapter {
               'amp-story[standalone]');
           if (response && response.scroll && !isStory) {
             new ScrollElement(this.ampdoc).show(this.accessService_);
+<<<<<<< HEAD
             addAnalytics(this.ampdoc, this.accessSource_.getAdapterConfig());
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           }
           return response;
         });
@@ -162,6 +182,7 @@ class ScrollElement {
         });
   }
 }
+<<<<<<< HEAD
 
 /**
  * Add analytics for Scroll to page.
@@ -197,3 +218,5 @@ function addAnalytics(ampdoc, vendorConfig) {
   // Append
   ampdoc.getBody().appendChild(analyticsElem);
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

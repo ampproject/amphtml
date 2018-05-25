@@ -28,7 +28,10 @@ import {
 } from '../service';
 import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
+<<<<<<< HEAD
 import {reportError} from '../error';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -59,7 +62,11 @@ const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
+<<<<<<< HEAD
   'form': ['submit', 'clear'],
+=======
+  'form': ['submit'],
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 };
 
 /**
@@ -126,7 +133,12 @@ export let ActionInfoDef;
  * If the action is chainable, returns a Promise which resolves when the
  * action is complete. Otherwise, returns null.
  *
+<<<<<<< HEAD
  * @typedef {function(!ActionInvocation, number=, !Array<!ActionInfoDef>=):?Promise}
+=======
+ * @typedef {function(
+ *     !ActionInvocation, number=, !Array<!ActionInfoDef>=):?Promise}
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  */
 let ActionHandlerDef;
 
@@ -137,6 +149,7 @@ export let ActionEventDef;
 
 /**
  * The structure that contains all details of the action method invocation.
+<<<<<<< HEAD
  * @struct @const @package For type.
  */
 export class ActionInvocation {
@@ -169,6 +182,24 @@ export class ActionInvocation {
    */
   constructor(target, method, args, source, caller, event, trust,
     targetType = null, index = 0) {
+=======
+ * @struct
+ * @const
+ * TODO(dvoytenko): add action arguments here as well.
+ * @package For type.
+ */
+export class ActionInvocation {
+  /**
+   * @param {!Node} target
+   * @param {string} method
+   * @param {?JsonObject} args
+   * @param {?Element} source Element where the action was triggered.
+   * @param {?Element} caller Element where the action is being handled.
+   * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
+   */
+  constructor(target, method, args, source, caller, event, trust) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
@@ -183,10 +214,13 @@ export class ActionInvocation {
     this.event = event;
     /** @const {ActionTrust} */
     this.trust = trust;
+<<<<<<< HEAD
     /** @const {string} */
     this.targetType = targetType || target.tagName;
     /** @const {number} */
     this.index = index;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -202,8 +236,13 @@ export class ActionInvocation {
       return false;
     }
     if (this.trust < minimumTrust) {
+<<<<<<< HEAD
       user().error(TAG_, `Insufficient trust for "${this.method}" ` +
           `(${this.trust} < ${minimumTrust}).`);
+=======
+      user().error(TAG_, `Trust for '${this.method}' (${this.trust}) ` +
+          `insufficient (min: ${minimumTrust}).`);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return false;
     }
     return true;
@@ -219,6 +258,10 @@ export class ActionInvocation {
  * @implements {../service.EmbeddableService}
  */
 export class ActionService {
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_root
@@ -230,6 +273,7 @@ export class ActionService {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
+<<<<<<< HEAD
     /**
      * Optional whitelist of actions e.g. ["AMP.navigateTo", "amp-form.submit"].
      * If not null, any actions that are not in the whitelist will be ignored
@@ -238,14 +282,29 @@ export class ActionService {
      */
     this.whitelist_ = this.queryWhitelist_();
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @const @private {!Object<string, ActionHandlerDef>} */
     this.globalTargets_ = map();
 
     /**
+<<<<<<< HEAD
      * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
      */
     this.globalMethodHandlers_ = map();
 
+=======
+     * @const @private {!Object<string, {
+      *   handler: ActionHandlerDef,
+      *   minTrust: ActionTrust,
+      * }>}
+      */
+    this.globalMethodHandlers_ = map();
+
+    /** @private {!./vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
@@ -281,9 +340,14 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
+<<<<<<< HEAD
           const role = element.getAttribute('role');
           const isTapEventRole =
               (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
+=======
+          const isTapEventRole = hasOwn(TAPPABLE_ARIA_ROLES,
+              element.getAttribute('role').toLowerCase());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           if (!event.defaultPrevented && isTapEventRole) {
             event.preventDefault();
             this.trigger(element, name, event, ActionTrust.HIGH);
@@ -378,7 +442,11 @@ export class ActionService {
   execute(target, method, args, source, caller, event, trust) {
     const invocation = new ActionInvocation(
         target, method, args, source, caller, event, trust);
+<<<<<<< HEAD
     this.invoke_(invocation);
+=======
+    this.invoke_(invocation, /* actionInfo */ null);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -425,6 +493,7 @@ export class ActionService {
   }
 
   /**
+<<<<<<< HEAD
    * Checks if the given element has registered a particular action type.
    * @param {!Element} target
    * @param {string} actionEventType
@@ -457,6 +526,8 @@ export class ActionService {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param {!Element} source
    * @param {string} actionEventType
    * @param {?ActionEventDef} event
@@ -466,6 +537,7 @@ export class ActionService {
   action_(source, actionEventType, event, trust) {
     const action = this.findAction_(source, actionEventType);
     if (!action) {
+<<<<<<< HEAD
       return;
     }
     // Invoke actions serially, where each action waits for its predecessor
@@ -493,10 +565,49 @@ export class ActionService {
       currentPromise = (currentPromise)
         ? currentPromise.then(invokeAction)
         : invokeAction();
+=======
+      // TODO(dvoytenko): implement default (catch-all) actions.
+      return;
+    }
+
+    // Invoke actions serially, where each action waits for its predecessor
+    // to complete. `currentPromise` is the i'th promise in the chain.
+    let currentPromise = null;
+
+    action.actionInfos.forEach((actionInfo, i) => {
+      // Replace any variables in args with data in `event`.
+      const args = dereferenceExprsInArgs(actionInfo.args, event);
+
+      const invoke = () => {
+        // Global target, e.g. `AMP`.
+        const globalTarget = this.globalTargets_[actionInfo.target];
+        if (globalTarget) {
+          const invocation = new ActionInvocation(this.root_, actionInfo.method,
+              args, source, action.node, event, trust);
+          return globalTarget(invocation, i, action.actionInfos);
+        }
+
+        // Element target via `id` attribute.
+        const target = this.root_.getElementById(actionInfo.target);
+        if (target) {
+          const invocation = new ActionInvocation(target, actionInfo.method,
+              args, source, action.node, event, trust);
+          return this.invoke_(invocation, actionInfo);
+        } else {
+          this.actionInfoError_('target not found', actionInfo, target);
+        }
+      };
+
+      // Wait for the previous action, if applicable.
+      currentPromise = (currentPromise)
+        ? currentPromise.then(invoke)
+        : invoke();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
   /**
+<<<<<<< HEAD
    * @param {string} message
    * @param {?Element=} opt_element
    * @private
@@ -510,10 +621,24 @@ export class ActionService {
     } else {
       user().error(TAG_, message);
     }
+=======
+   * The errors that are a result of action definition.
+   * @param {string} s
+   * @param {?ActionInfoDef} actionInfo
+   * @param {?Element} target
+   * @private
+   */
+  actionInfoError_(s, actionInfo, target) {
+    // Method not found "activate" on ' + target
+    user().assert(false, 'Action Error: ' + s +
+        (actionInfo ? ' in [' + actionInfo.str + ']' : '') +
+        (target ? ' on [' + target + ']' : ''));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
    * @param {!ActionInvocation} invocation
+<<<<<<< HEAD
    * @param {!Array<ActionInfoDef>=} opt_actionInfos Array of infos for all
    *   actions being invoked during a sequence (multiple actions triggered).
    *   TODO(choumx): Remove this param by moving setState limit into this file.
@@ -544,18 +669,41 @@ export class ActionService {
     const target = dev().assertElement(invocation.target);
 
     // Handle global actions e.g. "<any-element-id>.toggle".
+=======
+   * @param {?ActionInfoDef} actionInfo TODO(choumx): Remove this param.
+   * @return {?Promise}
+   * @private visible for testing
+   */
+  invoke_(invocation, actionInfo) {
+    const target = dev().assertElement(invocation.target);
+    const method = invocation.method;
+
+    // Try a global method handler first.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const globalMethod = this.globalMethodHandlers_[method];
     if (globalMethod && invocation.satisfiesTrust(globalMethod.minTrust)) {
       return globalMethod.handler(invocation);
     }
 
+<<<<<<< HEAD
     // Handle element-specific actions.
     const lowerTagName = target.tagName.toLowerCase();
+=======
+    const lowerTagName = target.tagName.toLowerCase();
+    // AMP elements.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     if (lowerTagName.substring(0, 4) == 'amp-') {
       if (target.enqueAction) {
         target.enqueAction(invocation);
       } else {
+<<<<<<< HEAD
         this.error_(`Unrecognized AMP element "${lowerTagName}".`, target);
+=======
+        this.actionInfoError_('Unrecognized AMP element "' +
+            lowerTagName + '". ' +
+            'Did you forget to include it via <script custom-element>?',
+        actionInfo, target);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }
       return null;
     }
@@ -579,9 +727,15 @@ export class ActionService {
       return null;
     }
 
+<<<<<<< HEAD
     // Unsupported method.
     this.error_(`Target (${targetType}) doesn't support "${method}" action.`,
         invocation.caller);
+=======
+    // Unsupported target.
+    this.actionInfoError_('Target element does not support provided action',
+        actionInfo, target);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     return null;
   }
@@ -589,6 +743,7 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} actionEventType
+<<<<<<< HEAD
    * @param {!Element=} opt_stopAt
    * @return {?{node: !Element, actionInfos: !Array<!ActionInfoDef>}}
    */
@@ -599,6 +754,14 @@ export class ActionService {
       if (opt_stopAt && n == opt_stopAt) {
         return null;
       }
+=======
+   * @return {?{node: !Element, actionInfos: !Array<!ActionInfoDef>}}
+   */
+  findAction_(target, actionEventType) {
+    // Go from target up the DOM tree and find the applicable action.
+    let n = target;
+    while (n) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const actionInfos = this.matchActionInfos_(n, actionEventType);
       if (actionInfos && isEnabled(n)) {
         return {node: n, actionInfos: dev().assert(actionInfos)};
@@ -650,6 +813,7 @@ export class ActionService {
   }
 
   /**
+<<<<<<< HEAD
    * Searches for a whitelist meta tag, parses and returns its contents.
    *
    * For example:
@@ -674,6 +838,8 @@ export class ActionService {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Given a browser 'change' or 'input' event, add `details` property to it
    * containing whitelisted properties of the target element.
    * @param {!ActionEventDef} event

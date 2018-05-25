@@ -337,10 +337,15 @@ describes.realWin('amp-auto-ads', {
 
   it('should throw an error if no type', () => {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => ampAutoAds.buildCallback()).to.throw(
           /Missing type attribute​​/);
     });
+=======
+    expect(() => ampAutoAds.buildCallback())
+        .to.throw(/Missing type attribute​​/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(xhr.fetchJson).not.to.have.been.called;
   });
 
@@ -348,10 +353,15 @@ describes.realWin('amp-auto-ads', {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
     ampAutoAdsElem.setAttribute('type', 'unknowntype');
 
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => ampAutoAds.buildCallback()).to.throw(
           /No AdNetworkConfig for type: unknowntype​​​/);
     });
+=======
+    expect(() => ampAutoAds.buildCallback())
+        .to.throw(/No AdNetworkConfig for type: unknowntype​​​/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     expect(xhr.fetchJson).not.to.have.been.called;
   });
@@ -361,9 +371,14 @@ describes.realWin('amp-auto-ads', {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
     ampAutoAdsElem.setAttribute('type', 'adsense');
 
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => ampAutoAds.buildCallback()).to.throw(/Experiment is off​​​/);
     });
+=======
+    expect(() => ampAutoAds.buildCallback())
+        .to.throw(/Experiment is off​​​/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(xhr.fetchJson).not.to.have.been.called;
   });
 

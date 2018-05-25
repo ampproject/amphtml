@@ -160,6 +160,10 @@ export class Viewport {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
     if (this.useLayers_) {
+<<<<<<< HEAD
+=======
+      this.layersSetupDone_ = true;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       installLayersServiceForDoc(this.ampdoc,
           this.binding_.getScrollingElement());
     }
@@ -173,6 +177,12 @@ export class Viewport {
         this.binding_.requiresFixedLayerTransfer());
     this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
+<<<<<<< HEAD
+=======
+    /** @private @const (function()) */
+    this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
     this.viewer_.onMessage(
@@ -1131,7 +1141,11 @@ function createViewport(ampdoc) {
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
   } else {
+<<<<<<< HEAD
     binding = new ViewportBindingNatural_(ampdoc);
+=======
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
   return new Viewport(ampdoc, binding, viewer);
 }

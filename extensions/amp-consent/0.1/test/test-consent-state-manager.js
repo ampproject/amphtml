@@ -69,12 +69,19 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       });
     });
 
+<<<<<<< HEAD
     it.skip('should not register consent instance twice', () => {
       manager.registerConsentInstance('test');
       allowConsoleError(() => {
         expect(() => manager.registerConsentInstance('test')).to.throw(
             'CONSENT-STATE-MANAGER: instance already registered');
       });
+=======
+    it('should not register consent instance twice', () => {
+      manager.registerConsentInstance('test');
+      expect(() => manager.registerConsentInstance('test')).to.throw(
+          'CONSENT-STATE-MANAGER: instance already registered');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('get consent state', function* () {
@@ -107,9 +114,14 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
       it('should call handler when consent is ignored', () => {
         manager.onConsentStateChange('test', spy);
+<<<<<<< HEAD
         manager.updateConsentInstanceState('test',
             CONSENT_ITEM_STATE.NOT_REQUIRED);
         expect(spy).to.be.calledWith(CONSENT_ITEM_STATE.NOT_REQUIRED);
+=======
+        manager.ignoreConsentInstance('test');
+        expect(spy).to.be.calledWith(CONSENT_ITEM_STATE.GRANTED);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
 
       it('should call handler when register observable', function*() {
@@ -146,9 +158,12 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         instance.update(CONSENT_ITEM_STATE.DISMISSED);
         yield macroTask();
         expect(storageSetSpy).to.not.be.called;
+<<<<<<< HEAD
         instance.update(CONSENT_ITEM_STATE.NOT_REQUIRED);
         yield macroTask();
         expect(storageSetSpy).to.not.be.called;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         instance.update(CONSENT_ITEM_STATE.GRANTED);
         yield macroTask();
         expect(storageSetSpy).to.be.calledOnce;
@@ -201,7 +216,12 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         expect(value).to.equal(CONSENT_ITEM_STATE.REJECTED);
       });
 
+<<<<<<< HEAD
       it('should return unknown value with error', function* () {
+=======
+      // TODO(zhouyx, #14336): Fails due to console errors.
+      it.skip('should return unknown value with error', function* () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         let value;
         storageGetSpy = () => {
           const e = new Error('intentional');

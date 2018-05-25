@@ -16,13 +16,31 @@ limitations under the License.
 
 # SmartAdServer
 
+<<<<<<< HEAD
 
+=======
+## Supported Smart AdServer parameters in the amp-ad tag
+
+All of the parameters listed here should be prefixed with "data-" when used.
+
+| Parameter name | Description                         | Required |
+|----------------|-------------------------------------|----------|
+| site           | Your Smart AdServer Site ID         | Yes      |
+| page           | Your Smart AdServer Page ID         | Yes      |
+| format         | Your Smart AdServer Format ID       | Yes      |
+| domain         | Your Smart AdServer call domain     | Yes      |
+| target         | Your targeting string               | No       |
+| tag            | An ID for the tag containing the ad | No       |
+
+Note: If any of the required parameters is missing, the ad slot won't be filled.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ### Basic call
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="50"
     type="smartadserver"
     data-site="94612"
@@ -30,11 +48,21 @@ limitations under the License.
     data-format="38952"
     data-domain="https://<YourSmartAdServerDomain>">
 </amp-ad>
+=======
+  <amp-ad width=320 height=50
+      type="smartadserver"
+      data-site="94612"
+      data-page="629154"
+      data-format="38952"
+      data-domain="https://<YourSmartAdServerDomain>">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ### With targeting
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="50"
     type="smartadserver"
     data-site="94612"
@@ -43,10 +71,21 @@ limitations under the License.
     data-target="foo=bar"
     data-domain="https://<YourSmartAdServerDomain>">
 </amp-ad>
+=======
+  <amp-ad width=320 height=50
+      type="smartadserver"
+      data-site="94612"
+      data-page="629154"
+      data-format="38952"
+      data-target="foo=bar"
+      data-domain="https://<YourSmartAdServerDomain>">
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For ``<YourSmartAdServerDomain>``, use the domain assigned to your network (e. g. www3.smartadserver.com); It can be found in Smart AdServer's config.js library (e.g., `http://www3.smartadserver.com/config.js?nwid=1234`).
 
 For semantics of configuration, please see [Smart AdServer help center](http://help.smartadserver.com/).
@@ -65,3 +104,8 @@ All of the parameters listed here should be prefixed with "data-" when used.
 | tag            | An ID for the tag containing the ad | No       |
 
 Note: If any of the required parameters is missing, the ad slot won't be filled.
+=======
+For ``<YourSmartAdServerDomain>``, use the domain assigned to your network (e. g. www3.smartadserver.com); It can be found in Smart AdServer's config.js library (e. g. http://www3.smartadserver.com/config.js?nwid=1234).
+
+For semantics of configuration, please see [Smart AdServer help center](http://help.smartadserver.com/).
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

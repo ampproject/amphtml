@@ -65,7 +65,11 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+<<<<<<< HEAD
     /** @visibleForTesting {?Promise} */
+=======
+    /** @private {?Promise} */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.iframePromise_ = null;
 
     /** @private {?number} */
@@ -138,12 +142,15 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
+<<<<<<< HEAD
     if (this.element.hasAttribute('aria-label')) {
       placeholder.setAttribute('aria-label', 'Loading - '
           + this.element.getAttribute('aria-label'));
     } else {
       placeholder.setAttribute('aria-label', 'Loading interactive element');
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     placeholder.setAttribute('placeholder', '');
     placeholder.appendChild(this.createPlaybuzzLoader_());
     return placeholder;

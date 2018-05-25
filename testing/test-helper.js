@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {WindowInterface} from '../src/window-interface';
+=======
+import {poll} from './iframe';
+import {xhrServiceForTesting} from '../src/service/xhr-impl';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {
   getService,
   getServiceForDoc,
@@ -22,8 +27,12 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../src/service';
+<<<<<<< HEAD
 import {poll} from './iframe';
 import {xhrServiceForTesting} from '../src/service/xhr-impl';
+=======
+import {WindowInterface} from '../src/window-interface';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.

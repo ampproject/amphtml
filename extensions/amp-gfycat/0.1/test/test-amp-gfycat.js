@@ -109,10 +109,15 @@ describes.realWin('amp-gfycat', {
   }
 
   it('requires data-gfyid', () => {
+<<<<<<< HEAD
     allowConsoleError(() => {
       return getGfycat('').should.eventually.be.rejectedWith(
           /The data-gfyid attribute is required for/);
     });
+=======
+    return getGfycat('').should.eventually.be.rejectedWith(
+        /The data-gfyid attribute is required for/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('renders placeholder with an alt', () => {

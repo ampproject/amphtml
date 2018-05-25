@@ -14,19 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<<<<<<< HEAD
 # CA A.J.A. Infeed
+=======
+# CA A.J.A. Infeed:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ```html
 <amp-ad width="320" height="120" 
+<<<<<<< HEAD
       type="caajainfeed" 
       data-ad-spot="thtuegn1pAQ" 
       data-test="true">
+=======
+        type="caajainfeed" 
+        data-ad-spot="thtuegn1pAQ" 
+        data-test="true">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
+<<<<<<< HEAD
 
 For configuration details, please email amb-nad@cyberagent.co.jp. 
 
@@ -55,3 +66,28 @@ For configuration details, please email amb-nad@cyberagent.co.jp.
 - `data-template`
 - `data-protocol`
 - `data-fields`
+=======
+For configuration in detail, [please contact us](amb-nad@cyberagent.co.jp). 
+
+### parameters
+- (Required) data-ad-spot
+- (Option) data-format
+- (Option) data-test
+- (Option) data-optout
+- (Option) data-offset
+- (Option) data-ipv4
+- (Option) data-ipv6
+- (Option) data-network-reachability
+- (Option) data-os-name
+- (Option) data-os-version
+- (Option) data-os-lang
+- (Option) data-os-timezone
+- (Option) data-device-version
+- (Option) data-app-id
+- (Option) data-app-version
+- (Option) data-kv
+- (Option) data-uids
+- (Option) data-template
+- (Option) data-protocol
+- (Option) data-fields
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

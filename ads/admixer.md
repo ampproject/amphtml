@@ -28,6 +28,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, see [Admixer documentation](http://docs.admixer.net/3/en/topic/amp-configuration).
 
 ### Required parameters 
@@ -36,5 +37,13 @@ For configuration semantics, see [Admixer documentation](http://docs.admixer.net
 
 ### Optional parameters 
 
+=======
+For semantics of configuration, please see Admixer [documentation](http://docs.admixer.net/3/en/topic/amp-configuration).
+
+__Required:__
+- `data-zone`
+
+__Optional:__
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 - `data-sizes`
 

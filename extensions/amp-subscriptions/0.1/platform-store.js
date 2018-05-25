@@ -28,11 +28,18 @@ const TAG = 'amp-subscriptions';
 
 export class PlatformStore {
   /**
+<<<<<<< HEAD
    * @param {!Array<string>} expectedServiceIds
    * @param {!JsonObject} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
    */
   constructor(expectedServiceIds, scoreConfig, fallbackEntitlement) {
+=======
+   *
+   * @param {!Array<string>} expectedServiceIds
+   */
+  constructor(expectedServiceIds) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = dict();
@@ -43,15 +50,21 @@ export class PlatformStore {
     /** @private @const {!Object<string, !./entitlement.Entitlement>} */
     this.entitlements_ = {};
 
+<<<<<<< HEAD
     /** @private @const {!Observable<!EntitlementChangeEventDef>} */
     this.onEntitlementResolvedCallbacks_ = new Observable();
 
     /** @private @const {!Observable<{serviceId: string}>} */
     this.onPlatformResolvedCallbacks_ = new Observable();
+=======
+    /** @private @const {Observable<!EntitlementChangeEventDef>} */
+    this.onChangeCallbacks_ = new Observable();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
+<<<<<<< HEAD
     /** @private @const {!Observable} */
     this.onGrantStateResolvedCallbacks_ = new Observable();
 
@@ -61,11 +74,14 @@ export class PlatformStore {
     /** @private {?Promise<?Entitlement>} */
     this.grantStatusEntitlementPromise_ = null;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
 
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
+<<<<<<< HEAD
 
     /** @private @canst {!./entitlement.Entitlement} */
     this.fallbackEntitlement_ = fallbackEntitlement;
@@ -74,6 +90,8 @@ export class PlatformStore {
     this.scoreConfig_ = Object.assign({
       'supportsViewer': 10,
     }, scoreConfig);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -83,6 +101,7 @@ export class PlatformStore {
    */
   resolvePlatform(serviceId, platform) {
     this.subscriptionPlatforms_[serviceId] = platform;
+<<<<<<< HEAD
     this.onPlatformResolvedCallbacks_.fire({
       serviceId,
     });
@@ -103,16 +122,28 @@ export class PlatformStore {
         }
       });
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
    * Returns the platform for the given id
+<<<<<<< HEAD
    * @param {string} serviceId
    * @returns {!./subscription-platform.SubscriptionPlatform}
    */
   getPlatform(serviceId) {
     const platform = this.subscriptionPlatforms_[serviceId];
     dev().assert(platform, `Platform for id ${serviceId} is not resolved`);
+=======
+   * @private
+   * @param {string} servideId
+   * @returns {!./subscription-platform.SubscriptionPlatform}
+   */
+  getPlatform_(servideId) {
+    const platform = this.subscriptionPlatforms_[servideId];
+    dev().assert(platform, `Platform for id ${servideId} is not resolved`);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return platform;
   }
 
@@ -123,7 +154,11 @@ export class PlatformStore {
   getLocalPlatform() {
     const localPlatform =
         /** @type{!./local-subscription-platform.LocalSubscriptionPlatform} */
+<<<<<<< HEAD
         (this.getPlatform('local'));
+=======
+        (this.getPlatform_('local'));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return localPlatform;
   }
 
@@ -146,7 +181,11 @@ export class PlatformStore {
    * @param {function(!EntitlementChangeEventDef):void} callback
    */
   onChange(callback) {
+<<<<<<< HEAD
     this.onEntitlementResolvedCallbacks_.add(callback);
+=======
+    this.onChangeCallbacks_.add(callback);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -164,7 +203,11 @@ export class PlatformStore {
       this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
     }
     // Call all onChange callbacks.
+<<<<<<< HEAD
     this.onEntitlementResolvedCallbacks_.fire({serviceId, entitlement});
+=======
+    this.onChangeCallbacks_.fire({serviceId, entitlement});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -192,7 +235,10 @@ export class PlatformStore {
       for (const key in this.entitlements_) {
         const entitlement = (this.entitlements_[key]);
         if (entitlement.enablesThis()) {
+<<<<<<< HEAD
           this.saveGrantEntitlement_(entitlement);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           return resolve(true);
         }
       }
@@ -204,7 +250,10 @@ export class PlatformStore {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(({entitlement}) => {
           if (entitlement.enablesThis()) {
+<<<<<<< HEAD
             this.saveGrantEntitlement_(entitlement);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             resolve(true);
           } else if (this.areAllPlatformsResolved_()) {
             resolve(false);
@@ -217,6 +266,7 @@ export class PlatformStore {
   }
 
   /**
+<<<<<<< HEAD
    * Checks and saves the entitlement for grant status
    * @param {!Entitlement} entitlement
    * @private
@@ -260,6 +310,8 @@ export class PlatformStore {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Clears the grant status
    */
   reset() {
@@ -310,6 +362,7 @@ export class PlatformStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
+<<<<<<< HEAD
    * @returns {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   selectPlatform() {
@@ -317,6 +370,16 @@ export class PlatformStore {
     return this.getAllPlatformsEntitlements_().then(() => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
       return this.selectApplicablePlatform_();
+=======
+   * @param {boolean} preferViewerSupport
+   * @returns {!Promise<!./subscription-platform.SubscriptionPlatform>}
+   */
+  selectPlatform(preferViewerSupport) {
+
+    return this.getAllPlatformsEntitlements_().then(() => {
+      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
+      return this.selectApplicablePlatform_(preferViewerSupport);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   }
 
@@ -339,10 +402,18 @@ export class PlatformStore {
    *
    * In the end candidate with max weight is selected.
    * However if candidate's weight is equal to local platform, then local platform is selected.
+<<<<<<< HEAD
    * @returns {!./subscription-platform.SubscriptionPlatform}
    * @private
    */
   selectApplicablePlatform_() {
+=======
+   * @param {boolean} preferViewerSupport
+   * @returns {!./subscription-platform.SubscriptionPlatform}
+   * @private
+   */
+  selectApplicablePlatform_(preferViewerSupport) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const localPlatform = this.getLocalPlatform();
     let localWeight = 0;
     /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
@@ -356,6 +427,7 @@ export class PlatformStore {
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
 
+<<<<<<< HEAD
       // Subscriber wins immediatly.
       if (!!entitlement.subscriptionToken) {
         weight += 100000;
@@ -367,6 +439,16 @@ export class PlatformStore {
       // If supports the current viewer, gains weight 9
       if (platform.supportsCurrentViewer()) {
         weight += this.scoreConfig_['supportsViewer'];
+=======
+      // Subscriber, gains weight 10
+      if (!!entitlement.subscriptionToken) {
+        weight += 10;
+      }
+
+      // If supports the current viewer, gains weight 9
+      if (preferViewerSupport && platform.supportsCurrentViewer()) {
+        weight += 9;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }
 
       platformWeights.push({
@@ -407,10 +489,14 @@ export class PlatformStore {
     }
 
     if (this.failedPlatforms_.length == this.serviceIds_.length) {
+<<<<<<< HEAD
       user().warn(TAG, 'All platforms have failed to resolve, '
           + 'using fallback entitlement for local platform');
       this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
           this.fallbackEntitlement_);
+=======
+      user().error(TAG, 'All platforms have failed to resolve');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
   }
 }

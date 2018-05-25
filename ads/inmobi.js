@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {setStyle} from '../src/style';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {validateData, writeScript} from '../3p/3p';
 
 /**
@@ -31,7 +34,11 @@ export function inmobi(global, data) {
     onError: code => {
       if (code == 'nfr') {
         global.context.noContentAvailable();
+<<<<<<< HEAD
         setStyle(document.getElementById('my-ad-slot'), 'display', 'none');
+=======
+        document.getElementById('my-ad-slot').style./*OK*/display = 'none';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }
     },
     onSuccess: () => {

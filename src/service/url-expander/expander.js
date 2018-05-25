@@ -15,7 +15,10 @@
  */
 
 import {rethrowAsync, user} from '../../log';
+<<<<<<< HEAD
 import {tryResolve} from '../../utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 export const PARSER_IGNORE_FLAG = '`';
 
@@ -207,7 +210,11 @@ export class Expander {
           value = Promise.all(opt_args)
               .then(args => binding.apply(null, args));
         } else {
+<<<<<<< HEAD
           value = tryResolve(binding);
+=======
+          value = Promise.resolve(binding.apply(null, opt_args));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         }
       } else {
         value = Promise.resolve(binding);

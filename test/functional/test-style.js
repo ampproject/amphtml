@@ -63,6 +63,7 @@ describe('Style', () => {
     expect(element.style.height).to.equal('102px');
   });
 
+<<<<<<< HEAD
   it('setImportantStyles', () => {
     const element = document.createElement('div');
     st.setImportantStyles(element, {
@@ -73,6 +74,8 @@ describe('Style', () => {
         .to.equal('important');
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   it('px', () => {
     expect(st.px(0)).to.equal('0px');
     expect(st.px(101)).to.equal('101px');

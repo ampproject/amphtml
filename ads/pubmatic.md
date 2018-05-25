@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 	type="pubmatic"
 	json= '{"pubId":319, "siteId":320, "adId":622270, "width":300, "height":250}'>
 </amp-ad>
@@ -27,6 +31,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
@@ -34,3 +39,12 @@ Supported parameters:
 - `json`
 - `width`
 - `height`
+=======
+For semantics of configuration, please see ad network documentation.
+
+Supported parameters:
+
+- json
+- width
+- height
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

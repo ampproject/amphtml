@@ -228,10 +228,13 @@ exports.rules = [
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
+<<<<<<< HEAD
       'extensions/amp-next-page/0.1/next-page-service.js->' +
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
           'src/service/position-observer/position-observer-worker.js',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       // TODO(calebcordry) remove this once experiment is launched
       'extensions/amp-analytics/0.1/variables.js->' +
           'src/service/url-replacements-impl.js',
@@ -243,6 +246,7 @@ exports.rules = [
       // TODO(alanorozco, #13674): Use async service.
       'extensions/amp-story/0.1/amp-story-page.js->' +
           'src/service/video-manager-impl.js',
+<<<<<<< HEAD
       'extensions/amp-story/1.0/amp-story-page.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-story/1.0/page-advancement.js->' +
@@ -251,6 +255,8 @@ exports.rules = [
           'src/service/navigation.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->' +
           'src/service/navigation.js',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     ],
   },
   {
@@ -304,7 +310,10 @@ exports.rules = [
       'src/3p-frame.js',
       'src/iframe-helper.js',
     ],
+<<<<<<< HEAD
     whitelist: 'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->src/3p-frame.js',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   },
 
   {

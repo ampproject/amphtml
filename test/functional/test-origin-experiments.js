@@ -72,36 +72,61 @@ describe('OriginExperiments', () => {
   it('should throw for an unknown token version number', () => {
     const verify = originExperiments.verifyToken(
         tokenWithBadVersion, 'https://origin.com', publicKey);
+<<<<<<< HEAD
     return expect(verify).to.eventually.be.rejectedWith(
         'Unrecognized token version: 42');
+=======
+    return expect(verify)
+        .to.eventually.be.rejectedWith('Unrecognized token version: 42');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should throw if config length exceeds byte length', () => {
     const verify = originExperiments.verifyToken(
         tokenWithBadConfigLength, 'https://origin.com', publicKey);
+<<<<<<< HEAD
     return expect(verify).to.eventually.be.rejectedWith(
         'Unexpected config length: 999');
+=======
+    return expect(verify)
+        .to.eventually.be.rejectedWith('Unexpected config length: 999');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should throw if signature cannot be verified', () => {
     const verify = originExperiments.verifyToken(
         tokenWithBadSignature, 'https://origin.com', publicKey);
+<<<<<<< HEAD
     return expect(verify).to.eventually.be.rejectedWith(
         'Failed to verify token signature.');
+=======
+    return expect(verify)
+        .to.eventually.be.rejectedWith('Failed to verify token signature.');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should throw if approved origin is not current origin', () => {
     const verify = originExperiments.verifyToken(
         token, 'https://not-origin.com', publicKey);
+<<<<<<< HEAD
     return expect(verify).to.eventually.be.rejectedWith(
         /does not match window/);
+=======
+    return expect(verify)
+        .to.eventually.be.rejectedWith(/does not match window/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should return false if trial has expired', () => {
     const verify = originExperiments.verifyToken(
         tokenWithExpiredExperiment, 'https://origin.com', publicKey);
+<<<<<<< HEAD
     return expect(verify).to.eventually.be.rejectedWith(
         'Experiment "expired" has expired.');
+=======
+    return expect(verify)
+        .to.eventually.be.rejectedWith('Experiment "expired" has expired.');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should return true for a well-formed, unexpired token', () => {

@@ -107,7 +107,11 @@ export function setImportantStyles(element, styles) {
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
+<<<<<<< HEAD
  * @param {?Element} element
+=======
+ * @param {Element} element
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units

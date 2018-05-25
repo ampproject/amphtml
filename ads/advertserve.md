@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       type="advertserve"
       data-client="tester"
       data-pid=0
@@ -31,6 +35,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
@@ -38,3 +43,12 @@ Supported parameters:
 - `data-client`: client id
 - `data-pid`: publisher id
 - `data-zid`: zone id
+=======
+For semantics of configuration, please see ad network documentation.
+
+Supported parameters:
+
+- data-client: client id
+- data-pid: publisher id
+- data-zid: zone id
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

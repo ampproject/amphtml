@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {
   Action,
   AmpStoryStoreService,
@@ -22,11 +23,20 @@ import {
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
+=======
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {ScrollableShareWidget} from '../amp-story-share';
+import {Services} from '../../../../src/services';
+import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {registerServiceBuilder} from '../../../../src/service';
 
 
 describes.realWin('amp-story-share-menu', {amp: true}, env => {
+<<<<<<< HEAD
   let isSystemShareSupported;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let parentEl;
   let shareMenu;
   let shareWidgetMock;
@@ -38,6 +48,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
+<<<<<<< HEAD
     isSystemShareSupported = false;
 
     const shareWidget = {
@@ -47,6 +58,11 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     };
     shareWidgetMock = sandbox.mock(shareWidget);
     sandbox.stub(ShareWidget, 'create').returns(shareWidget);
+=======
+    const shareWidget = {build: () => win.document.createElement('div')};
+    shareWidgetMock = sandbox.mock(shareWidget);
+    sandbox.stub(ScrollableShareWidget, 'create').returns(shareWidget);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Making sure the vsync tasks run synchronously.
     sandbox.stub(Services, 'vsyncFor').returns({
@@ -115,7 +131,10 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     shareMenu.element_.dispatchEvent(new Event('click'));
 
     expect(shareMenu.element_).not.to.have.class(VISIBLE_CLASS);
+<<<<<<< HEAD
     expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should not hide the share menu on click on the widget container', () => {
@@ -126,6 +145,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
   });
+<<<<<<< HEAD
 
   it('should render the amp-social-share button if system share', () => {
     isSystemShareSupported = true;
@@ -177,4 +197,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
   });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });

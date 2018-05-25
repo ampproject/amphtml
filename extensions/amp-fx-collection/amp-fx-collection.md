@@ -83,6 +83,7 @@ In this example, as the user scrolls the page, the h1 element scrolls faster rel
 
 The `fade-in` effect allows an element to fade in once the element being targetted is visible in the viewport.
 
+<<<<<<< HEAD
 ##### data-duration (optional)
 
 This is the duration over which the animation takes places. The default value is `1000ms`.
@@ -96,6 +97,13 @@ In the below example, the animation lasts over `2000ms`.
 ```
 
 ##### data-easing (optional)
+=======
+##### data-duration
+
+This is the duration over which the animation takes places. The default value is `1000ms`.
+
+##### data-easing
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-in` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
 * “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
@@ -104,6 +112,7 @@ This parameter lets you vary the animation's speed over the course of its durati
 * “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
 or specify a `custom-bezier()` input
 
+<<<<<<< HEAD
 In the below example, the animation acceleration curve is a custom specified `cubic-bezier(...)` curve. 
 
 ```html
@@ -140,10 +149,23 @@ In the below example, the `<div>` is fully visible by the time it has crossed 80
 
 ```html
   <div amp-fx="fade-in" data-margin-end="80%">
+=======
+##### data-margin
+
+This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the specified amount of the element being targetted is visible. The default value is `5%`
+
+#### Example: Main image fade in
+
+In this case the image in fades in over a duration of 1500ms.
+
+```html
+  <div amp-fx="fade-in" data-easing="cubic-bezier(0.40, 0.00, 0.40, 1.00)">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
   </div>
 ```
 
+<<<<<<< HEAD
 ##### data-repeat (optional)
 
 By default once the element is fully visible we don't animate the opacity anymore. If you want the opacity to change with the scroll, even when the element has fully loaded, specify this variable on the animation. 
@@ -155,6 +177,8 @@ In the below example, the animation is fully dependent on scroll and the `<div>`
     <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
   </div>
 ```
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Validation
 

@@ -38,6 +38,11 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     /** @private {string} */
     this.src_ = '';
 
+<<<<<<< HEAD
+=======
+    /** @private {?Element} */
+    this.iframe_ = null;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -106,6 +111,10 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.setAttribute('src', this.src_);
     this.element.appendChild(iframe);
+<<<<<<< HEAD
+=======
+    this.iframe_ = iframe;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return this.loadPromise(iframe);
   }
 }

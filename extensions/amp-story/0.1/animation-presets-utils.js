@@ -19,10 +19,14 @@
  * presets.
  */
 
+<<<<<<< HEAD
 import {
   KeyframesDef,
   StoryAnimationDimsDef,
 } from './animation-types';
+=======
+import {KeyframesDef} from './animation-types';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {
   rotate,
   scale,
@@ -80,6 +84,7 @@ export function whooshIn(startX, startY, endX, endY) {
     },
   ];
 }
+<<<<<<< HEAD
 
 /**
  * Checks if either of the target's dimensions are smaller than or equal to
@@ -140,3 +145,5 @@ export function scaleAndTranslate(startX, startY, endX, endY, scalingFactor) {
   return enlargeKeyFrames(
       translate2d(startX, startY, endX, endY), scalingFactor);
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

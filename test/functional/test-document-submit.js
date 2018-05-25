@@ -50,6 +50,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
 
   it('should check target and action attributes', () => {
     tgt.removeAttribute('action');
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => onDocumentFormSubmit_(evt)).to.throw(
           /form action-xhr or action attribute is required for method=GET/);
@@ -68,6 +69,20 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
       expect(() => onDocumentFormSubmit_(evt)).to.throw(
           /form action should not be on AMP CDN/);
     });
+=======
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /form action-xhr or action attribute is required for method=GET/);
+
+    tgt.setAttribute('action', 'http://example.com');
+    tgt.__AMP_INIT_ACTION__ = undefined;
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /form action must start with "https:/);
+
+    tgt.setAttribute('action', 'https://cdn.ampproject.org');
+    tgt.__AMP_INIT_ACTION__ = undefined;
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /form action should not be on AMP CDN/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     tgt.setAttribute('action', 'https://valid.example.com');
     tgt.__AMP_INIT_ACTION__ = undefined;
@@ -77,10 +92,15 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     tgt.setAttribute('action', 'https://valid.example.com');
     tgt.__AMP_INIT_ACTION__ = undefined;
     tgt.setAttribute('target', '_self');
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => onDocumentFormSubmit_(evt)).to.throw(
           /form target=_self is invalid/);
     });
+=======
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /form target=_self is invalid/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     tgt.setAttribute('action', 'https://valid.example.com');
     tgt.__AMP_INIT_ACTION__ = undefined;
@@ -94,28 +114,43 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     illegalInput.setAttribute('name', '__amp_source_origin');
     illegalInput.value = 'https://example.com';
     tgt.appendChild(illegalInput);
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => onDocumentFormSubmit_(evt)).to.throw(
           /Illegal input name, __amp_source_origin found/);
     });
+=======
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /Illegal input name, __amp_source_origin found/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should assert __amp_source_origin is not set in action', () => {
     evt.target.setAttribute('action',
         'https://example.com/?__amp_source_origin=12');
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => onDocumentFormSubmit_(evt)).to.throw(
           /Source origin is not allowed in/);
     });
+=======
+    expect(() => onDocumentFormSubmit_(evt))
+        .to.throw(/Source origin is not allowed in/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should fail when POST and action-xhr is not set', () => {
     evt.target.removeAttribute('action');
     evt.target.setAttribute('method', 'post');
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => onDocumentFormSubmit_(evt)).to.throw(
           /Only XHR based \(via action-xhr attribute\) submissions/);
     });
+=======
+    expect(() => onDocumentFormSubmit_(evt))
+        .to.throw(/Only XHR based \(via action-xhr attribute\) submissions/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(preventDefaultSpy).to.have.been.called;
     const callCount = preventDefaultSpy.callCount;
 
@@ -140,9 +175,13 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
 
   it('should throw if no target', () => {
     evt.target = null;
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => onDocumentFormSubmit_(evt)).to.throw(/Element expected/);
     });
+=======
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(/Element expected/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expect(preventDefaultSpy).to.have.not.been.called;
     expect(tgt.checkValidity).to.have.not.been.called;
   });

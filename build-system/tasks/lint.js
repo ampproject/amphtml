@@ -78,6 +78,7 @@ function logOnSameLine(message) {
  * @return {boolean}
  */
 function runLinter(path, stream, options) {
+<<<<<<< HEAD
   if (!process.env.TRAVIS) {
     log(colors.green('Starting linter...'));
   } else {
@@ -88,10 +89,21 @@ function runLinter(path, stream, options) {
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
         logOnSameLine(msg.trim() + '\n');
+=======
+  let errorsFound = false;
+  if (!process.env.TRAVIS) {
+    log(colors.green('Starting linter...'));
+  }
+  return stream.pipe(eslint(options))
+      .pipe(eslint.formatEach('stylish', function(msg) {
+        errorsFound = true;
+        logOnSameLine(colors.red('Linter error:') + msg + '\n');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }))
       .pipe(gulpIf(isFixed, gulp.dest(path)))
       .pipe(eslint.result(function(result) {
         if (!process.env.TRAVIS) {
+<<<<<<< HEAD
           logOnSameLine(colors.green('Linted: ') + result.filePath);
         }
       }))
@@ -122,6 +134,35 @@ function runLinter(path, stream, options) {
         }
       }))
       .pipe(eslint.failAfterError());
+=======
+          logOnSameLine(colors.green('Linting: ') + result.filePath);
+        }
+      }))
+      .pipe(eslint.results(function(results) {
+        if (results.errorCount == 0) {
+          if (!process.env.TRAVIS) {
+            logOnSameLine(colors.green('Success: ') + 'No linter errors');
+          }
+        } else {
+          logOnSameLine(colors.red('Error: ') + results.errorCount +
+              ' linter error(s) found.');
+          process.exit(1);
+        }
+      }))
+      .pipe(eslint.failAfterError())
+      .on('error', function() {
+        if (errorsFound && !options.fix) {
+          log(colors.red('ERROR:'),
+              'Lint errors found.');
+          log(colors.yellow('NOTE:'),
+              'You can run', colors.cyan('gulp lint --fix'),
+              'to automatically fix some of these lint errors.');
+          log(colors.yellow('WARNING:'),
+              'Since this is a destructive operation (operates on the file',
+              'system), make sure you commit before running the command.');
+        }
+      });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**

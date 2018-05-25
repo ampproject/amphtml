@@ -23,7 +23,10 @@
 import {Services} from './services';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
+<<<<<<< HEAD
 import {htmlFor} from './static-template';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {parseUrl} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
@@ -227,9 +230,16 @@ class PreconnectService {
   }
 
   performPreload_(url) {
+<<<<<<< HEAD
     const preload = htmlFor(this.document_)`
         <link rel="preload" referrerpolicy="origin" />`;
     preload.setAttribute('href', url);
+=======
+    const preload = this.document_.createElement('link');
+    preload.setAttribute('rel', 'preload');
+    preload.setAttribute('href', url);
+    preload.setAttribute('referrerpolicy', 'origin');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // Do not set 'as' attribute to correct value for now, for 2 reasons
     // - document value is not yet supported and dropped
     // - script is blocked due to CSP.

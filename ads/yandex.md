@@ -27,6 +27,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For semantics of configuration, please see [Yandex's documentation](https://yandex.ru/support/direct/index.html).
 
 ### Required parameters
@@ -38,3 +39,15 @@ For semantics of configuration, please see [Yandex's documentation](https://yand
 - `data-html-access-allowed`
 - `data-on-render`
 - `data-on-error`
+=======
+For semantics of configuration, please see [ad network documentation](https://yandex.ru/support/direct/index.html)
+
+Required parameters:
+- data-block-id
+
+Supported parameters:
+- data-data
+- data-html-access-allowed
+- data-on-render
+- data-on-error
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

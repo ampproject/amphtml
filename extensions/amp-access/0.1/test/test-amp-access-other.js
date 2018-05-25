@@ -104,9 +104,15 @@ describes.realWin('AccessOtherAdapter', {amp: true}, env => {
       adapter.isProxyOrigin_ = true;
       adapter.authorizationResponse_ = {};
       contextMock.expects('buildUrl').never();
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         adapter.authorize();
       }).to.throw(); });
+=======
+      expect(() => {
+        adapter.authorize();
+      }).to.throw();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should respond to authorization when not on proxy proxy', () => {

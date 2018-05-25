@@ -166,7 +166,12 @@ describe('Storage', () => {
     });
   });
 
+<<<<<<< HEAD
   it('should recover from binding failure', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  it.skip('should recover from binding failure', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
         .returns(Promise.reject('intentional'))
@@ -179,7 +184,12 @@ describe('Storage', () => {
     });
   });
 
+<<<<<<< HEAD
   it('should recover from binding error', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  it.skip('should recover from binding error', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
         .returns(Promise.resolve('UNKNOWN FORMAT'))
@@ -413,6 +423,7 @@ describe('Store', () => {
   });
 
   it('should prohibit unsafe values', () => {
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => {
         store.set('__proto__', 'value1');
@@ -421,6 +432,14 @@ describe('Store', () => {
         store.set('prototype', 'value1');
       }).to.throw(/Name is not allowed/);
     });
+=======
+    expect(() => {
+      store.set('__proto__', 'value1');
+    }).to.throw(/Name is not allowed/);
+    expect(() => {
+      store.set('prototype', 'value1');
+    }).to.throw(/Name is not allowed/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 
@@ -447,7 +466,12 @@ describe('LocalStorageBinding', () => {
     sandbox.restore();
   });
 
+<<<<<<< HEAD
   it('should throw if localStorage is not supported', () => {
+=======
+  // TODO(erwinmombay, #14336): Fails due to console errors.
+  it.skip('should throw if localStorage is not supported', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const errorSpy = sandbox.spy(dev(), 'expectedError');
 
     expect(errorSpy).to.have.not.been.called;
@@ -505,7 +529,12 @@ describe('LocalStorageBinding', () => {
         });
   });
 
+<<<<<<< HEAD
   it('should bypass loading from localStorage if getItem throws', () => {
+=======
+  // TODO(newmuis, #14336): Fails due to console errors.
+  it.skip('should bypass loading from localStorage if getItem throws', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     localStorageMock.expects('getItem')
         .throws(new Error('unknown'))
         .once();
@@ -548,7 +577,12 @@ describe('LocalStorageBinding', () => {
         });
   });
 
+<<<<<<< HEAD
   it('should bypass saving to localStorage if getItem throws', () => {
+=======
+  // TODO(newmuis, #14336): Fails due to console errors.
+  it.skip('should bypass saving to localStorage if getItem throws', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const setItemSpy = sandbox.spy(windowApi.localStorage, 'setItem');
 
     localStorageMock.expects('getItem')

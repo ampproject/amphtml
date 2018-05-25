@@ -21,7 +21,11 @@ limitations under the License.
 ### Basic
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="297" height="410"
+=======
+<amp-ad width=297 height=410
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="triplelift"
     layout="responsive"
     src="https://ib.3lift.com/ttj?inv_code=[INV_CODE]">
@@ -30,8 +34,16 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, please [contact TripleLift](http://triplelift.com).
 
 Supported parameters:
 
 - `src`
+=======
+For semantics of configuration, please [contact TripleLift](http://triplelift.com).
+
+Supported parameters:
+
+- src
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

@@ -21,9 +21,13 @@ import {dev, duplicateErrorIfNecessary} from '../log';
 import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
+<<<<<<< HEAD
   getFragment,
   getSourceOrigin,
   isProxyOrigin,
+=======
+  getSourceOrigin,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -31,7 +35,10 @@ import {
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+<<<<<<< HEAD
 import {tryResolve} from '../utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -45,6 +52,7 @@ const SENTINEL_ = '__AMP__';
 const VIEWER_ORIGIN_TIMEOUT_ = 1000;
 
 /**
+<<<<<<< HEAD
  * Prefixes to remove when trimming a hostname for comparison.
  * @const
  * @private {!RegExp}
@@ -53,6 +61,8 @@ const TRIM_ORIGIN_PATTERN_ =
   /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * These domains are trusted with more sensitive viewer operations such as
  * propagating the referrer. If you believe your domain should be here,
  * file the issue on GitHub to discuss. The process will be similar
@@ -252,7 +262,10 @@ export class Viewer {
     this.isWebviewEmbedded_ = !this.isIframed_ &&
         this.params_['webview'] == '1';
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe, or
      * a web view, or a shadow doc in PWA.
@@ -275,6 +288,7 @@ export class Viewer {
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
+<<<<<<< HEAD
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
      * @private @const {boolean}
@@ -289,6 +303,8 @@ export class Viewer {
      */
     this.isProxyOrigin_ = isProxyOrigin(url);
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
 
@@ -442,10 +458,13 @@ export class Viewer {
     // instance is constructed, the document is already `visible`.
     this.recheckVisibilityState_();
     this.onVisibilityChange_();
+<<<<<<< HEAD
 
     // This fragment may get cleared by impression tracking. If so, it will be
     // restored afterward.
     this.maybeUpdateFragmentForCct();
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
@@ -530,6 +549,7 @@ export class Viewer {
   }
 
   /**
+<<<<<<< HEAD
    * Whether the document is embedded in a Chrome Custom Tab.
    * @return {boolean}
    */
@@ -588,6 +608,8 @@ export class Viewer {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @return {boolean}
    */
   isRuntimeOn() {
@@ -1041,7 +1063,11 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
+<<<<<<< HEAD
         tryResolve(() => this.messageDeliverer_(
+=======
+        Promise.resolve(this.messageDeliverer_(
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
             awaitResponse)));

@@ -21,6 +21,7 @@ limitations under the License.
 ### Basic
 
 ```html
+<<<<<<< HEAD
 <amp-embed width="600" height="320"
     type="bringhub"
     layout="responsive"
@@ -35,3 +36,17 @@ limitations under the License.
 - `htmlURL`: The URL of the standard html version of the page. Defaults to `global.context.canonicalURL`.
 - `ampURL`: The URL of the AMP version of the page. Defaults to `global.context.sourceUrl`.
 - `articleSelector`: The CSS Selector of the article body on the page. Contact your Bringhub Account Manager for requirements.
+=======
+  <amp-embed width="600" height="320"
+      type="bringhub"
+      layout="responsive"
+      heights="(max-width: 270px) 1280px, (max-width:553px) 640px, 338px">
+  </amp-embed>
+```
+
+## Parameters
+
+- htmlURL *(optional)* - The URL of the standard html version of the page. (Defaults to global.context.canonicalURL)
+- ampURL *(optional)* - The URL of the AMP version of the page. (Defaults to global.context.sourceUrl)
+- articleSelector *(optional)* - The CSS Selector of the article body on the page.  (Contact your Bringhub Account Manager for requirements)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

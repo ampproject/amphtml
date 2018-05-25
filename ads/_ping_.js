@@ -80,6 +80,7 @@ export function _ping_(global, data) {
     global.context.getHtml('a', ['href'], function(html) {
       dev().info('GET-HTML', html);
     });
+<<<<<<< HEAD
     global.context.getConsentState(function(consentState) {
       dev().info('GET-CONSENT-STATE', consentState);
     });
@@ -87,6 +88,8 @@ export function _ping_(global, data) {
       const TAG = 'consentSharedData';
       dev().info(TAG, global.context.consentSharedData);
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   } else {
     global.setTimeout(() => {
       global.context.noContentAvailable();

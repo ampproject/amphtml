@@ -18,13 +18,25 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
+<<<<<<< HEAD
+=======
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {getData, listen} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+<<<<<<< HEAD
 import {removeElement} from '../../../src/dom';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -255,20 +267,41 @@ class AmpGfycat extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
+<<<<<<< HEAD
     // Won't implement.
+=======
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**
    * @override
    */
   fullscreenExit() {
+<<<<<<< HEAD
     // Won't implement.
+=======
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
   isFullscreen() {
+<<<<<<< HEAD
     // Won't implement.
     return false;
+=======
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -282,11 +315,14 @@ class AmpGfycat extends AMP.BaseElement {
   }
 
   /** @override */
+<<<<<<< HEAD
   preimplementsAutoFullscreen() {
     return false;
   }
 
   /** @override */
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   getCurrentTime() {
     // Not supported.
     return 0;

@@ -15,10 +15,13 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
+<<<<<<< HEAD
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
   getConsentPolicyState,
 } from '../../../src/consent-state';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -45,7 +48,10 @@ import {getBinaryType} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
+<<<<<<< HEAD
 import {tryResolve} from '../../../src/utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
@@ -58,7 +64,10 @@ import {
 } from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+<<<<<<< HEAD
 import {isExperimentOn} from '../../../src/experiments';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -75,7 +84,11 @@ const METADATA_STRINGS = [
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
+<<<<<<< HEAD
 export const DEFAULT_SAFEFRAME_VERSION = '1-0-23';
+=======
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-17';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /** @const {string} */
 export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
@@ -101,9 +114,12 @@ export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 /** @type {string} */
 export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 
+<<<<<<< HEAD
 /** @type {string} */
 export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
@@ -129,8 +145,11 @@ export let SizeInfoDef;
       customElementExtensions: !Array<string>,
       customStylesheets: !Array<{href: string}>,
       images: (Array<string>|undefined),
+<<<<<<< HEAD
       ctaType: (string|undefined),
       ctaUrl: (string|undefined),
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }} */
 export let CreativeMetaDataDef;
 
@@ -406,12 +425,15 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?Element}
      */
     this.a4aAnalyticsElement_ = null;
+<<<<<<< HEAD
 
     /**
      * Indicates that this slot is a single page ad within an AMP story.
      * @type {boolean}
      */
     this.isSinglePageStoryAd = false;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -465,8 +487,11 @@ export class AmpA4A extends AMP.BaseElement {
       this.a4aAnalyticsElement_ = insertAnalyticsElement(
           this.element, this.a4aAnalyticsConfig_, true /* loadAnalytics */);
     }
+<<<<<<< HEAD
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -547,13 +572,29 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
+<<<<<<< HEAD
     const preconnect = this.getPreconnectUrls();
+=======
+    this.preconnect.preload(this.getSafeframePath_());
+    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+    const preconnect = this.getPreconnectUrls();
+
+    // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
+    // given preferential treatment.  Currently this would be false when
+    // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
+    // causes preconnect to delay for 1 sec (see custom-element#preconnect)
+    // therefore hard coding to true.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     // NOTE(keithwrightbos): Does not take isValidElement into account so could
     // preconnect unnecessarily, however it is assumed that isValidElement
     // matches amp-ad loader predicate such that A4A impl does not load.
     if (preconnect) {
       preconnect.forEach(p => {
+<<<<<<< HEAD
         this.preconnect.url(p, /*opt_preloadAs*/true);
+=======
+        this.preconnect.url(p, true);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     }
   }
@@ -676,6 +717,7 @@ export class AmpA4A extends AMP.BaseElement {
             return this.getResource().whenWithinRenderOutsideViewport();
           }
         })
+<<<<<<< HEAD
         // Possibly block on amp-consent.
         /** @return {!Promise<?CONSENT_POLICY_STATE>} */
         .then(() => {
@@ -691,6 +733,14 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           return /** @type {!Promise<?string>} */(this.getAdUrl(
               consentState, this.tryExecuteRealTimeConfig_(consentState)));
+=======
+        // This block returns the ad URL, if one is available.
+        /** @return {!Promise<?string>} */
+        .then(() => {
+          checkStillCurrent();
+          return /** @type {!Promise<?string>} */(
+            this.getAdUrl(this.tryExecuteRealTimeConfig_()));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -737,11 +787,14 @@ export class AmpA4A extends AMP.BaseElement {
           const method = this.getNonAmpCreativeRenderingMethod(
               fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
+<<<<<<< HEAD
           if (this.experimentalNonAmpCreativeRenderMethod_ ==
               XORIGIN_MODE.NAMEFRAME) {
             this.preconnect.preload(
                 getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
           }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           const browserSupportsSandbox = this.win.HTMLIFrameElement &&
               'sandbox' in this.win.HTMLIFrameElement.prototype;
           this.shouldSandbox_ = browserSupportsSandbox &&
@@ -751,7 +804,11 @@ export class AmpA4A extends AMP.BaseElement {
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
             this.safeframeVersion = safeframeVersionHeader;
+<<<<<<< HEAD
             this.preconnect.preload(this.getSafeframePath());
+=======
+            this.preconnect.preload(this.getSafeframePath_());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
@@ -833,6 +890,7 @@ export class AmpA4A extends AMP.BaseElement {
           return creativeMetaDataDef;
         })
         .catch(error => {
+<<<<<<< HEAD
           switch (error.message || error) {
             case NETWORK_FAILURE:
               return null;
@@ -843,6 +901,15 @@ export class AmpA4A extends AMP.BaseElement {
                 customElementExtensions: [],
                 customStylesheets: [],
               };
+=======
+          switch (error) {
+            case NETWORK_FAILURE: return null;
+            case NO_CONTENT_RESPONSE: return {
+              minifiedCreative: '',
+              customElementExtensions: [],
+              customStylesheets: [],
+            };
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           }
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad
@@ -882,6 +949,7 @@ export class AmpA4A extends AMP.BaseElement {
             'signatureValidationResult': status,
             'releaseType': this.releaseType_,
           });
+<<<<<<< HEAD
           let result = null;
           switch (status) {
             case VerificationStatus.OK:
@@ -891,18 +959,33 @@ export class AmpA4A extends AMP.BaseElement {
               result = this.shouldPreferentialRenderWithoutCrypto() ?
                 bytes : null;
               break;
+=======
+          switch (status) {
+            case VerificationStatus.OK:
+              return bytes;
+            case VerificationStatus.UNVERIFIED:
+              return null;
+            case VerificationStatus.CRYPTO_UNAVAILABLE:
+              return this.shouldPreferentialRenderWithoutCrypto() ?
+                bytes : null;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             // TODO(@taymonbeal, #9274): differentiate between these
             case VerificationStatus.ERROR_KEY_NOT_FOUND:
             case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
               user().error(
                   TAG, this.element.getAttribute('type'),
                   'Signature verification failed');
+<<<<<<< HEAD
             case VerificationStatus.UNVERIFIED:
           }
           if (this.isSinglePageStoryAd && !result) {
             throw new Error(INVALID_SPSA_RESPONSE);
           }
           return result;
+=======
+              return null;
+          }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
   }
 
@@ -1171,11 +1254,18 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
+<<<<<<< HEAD
    * @param {?CONSENT_POLICY_STATE} unusedConsentState
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
   getAdUrl(unusedConsentState, opt_rtcResponsesPromise) {
+=======
+   * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
+   * @return {!Promise<string>|string}
+   */
+  getAdUrl(opt_rtcResponsesPromise) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     throw new Error('getAdUrl not implemented!');
   }
 
@@ -1478,12 +1568,15 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.shouldSandbox_) {
       mergedAttributes['sandbox'] = IFRAME_SANDBOXING_FLAGS;
     }
+<<<<<<< HEAD
     if (isExperimentOn(this.win, 'no-sync-xhr-in-ads')) {
       // Block synchronous XHR in ad. These are very rare, but super bad for UX
       // as they block the UI thread for the arbitrary amount of time until the
       // request completes.
       mergedAttributes['allow'] = 'sync-xhr \'none\';';
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', /** @type {!JsonObject} */ (
@@ -1549,13 +1642,21 @@ export class AmpA4A extends AMP.BaseElement {
       'releaseType': this.releaseType_,
     });
     const checkStillCurrent = this.verifyStillCurrent();
+<<<<<<< HEAD
     return tryResolve(() => utf8Decode(creativeBody)).then(creative => {
+=======
+    return Promise.resolve(utf8Decode(creativeBody)).then(creative => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       checkStillCurrent();
       let srcPath;
       let name = '';
       switch (method) {
         case XORIGIN_MODE.SAFEFRAME:
+<<<<<<< HEAD
           srcPath = this.getSafeframePath() + '?n=0';
+=======
+          srcPath = this.getSafeframePath_() + '?n=0';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
@@ -1663,6 +1764,7 @@ export class AmpA4A extends AMP.BaseElement {
         // Load maximum of 5 images.
         metaData.images = metaDataObj['images'].splice(0, 5);
       }
+<<<<<<< HEAD
       if (this.isSinglePageStoryAd) {
         if (!metaDataObj['ctaUrl'] || !metaDataObj['ctaType']) {
           throw new Error(INVALID_SPSA_RESPONSE);
@@ -1670,6 +1772,8 @@ export class AmpA4A extends AMP.BaseElement {
         this.element.setAttribute('data-vars-ctatype', metaDataObj['ctaType']);
         this.element.setAttribute('data-vars-ctaurl', metaDataObj['ctaUrl']);
       }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
       // metadata as its in the head?
       metaData.minifiedCreative =
@@ -1681,17 +1785,26 @@ export class AmpA4A extends AMP.BaseElement {
       dev().warn(
           TAG, this.element.getAttribute('type'), 'Invalid amp metadata: %s',
           creative.slice(metadataStart + metadataString.length, metadataEnd));
+<<<<<<< HEAD
       if (this.isSinglePageStoryAd) {
         throw err;
       }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return null;
     }
   }
 
   /**
    * @return {string} full url to safeframe implementation.
+<<<<<<< HEAD
    */
   getSafeframePath() {
+=======
+   * @private
+   */
+  getSafeframePath_() {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return 'https://tpc.googlesyndication.com/safeframe/' +
       `${this.safeframeVersion}/html/container.html`;
   }
@@ -1777,6 +1890,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Attempts to execute Real Time Config, if the ad network has enabled it.
    * If it is not supported by the network, but the publisher has included
    * the rtc-config attribute on the amp-ad element, warn.
+<<<<<<< HEAD
    * @param {?CONSENT_POLICY_STATE} consentState
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
@@ -1785,6 +1899,15 @@ export class AmpA4A extends AMP.BaseElement {
       try {
         return AMP.maybeExecuteRealTimeConfig(
             this, this.getCustomRealTimeConfigMacros_(), consentState);
+=======
+   * @return {Promise<!Array<!rtcResponseDef>>|undefined}
+   */
+  tryExecuteRealTimeConfig_() {
+    if (!!AMP.maybeExecuteRealTimeConfig) {
+      try {
+        return AMP.maybeExecuteRealTimeConfig(
+            this, this.getCustomRealTimeConfigMacros_());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }
@@ -1826,7 +1949,11 @@ export class AmpA4A extends AMP.BaseElement {
       }
     }
     return Services.platformFor(this.win).isIos() ?
+<<<<<<< HEAD
       XORIGIN_MODE.NAMEFRAME : null;
+=======
+      XORIGIN_MODE.SAFEFRAME : null;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**

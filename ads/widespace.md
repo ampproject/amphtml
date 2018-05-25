@@ -19,19 +19,29 @@ limitations under the License.
 
 ## Examples
 
+<<<<<<< HEAD
 ### Basic
 
 ```html
 <amp-ad width="320" height="320"
+=======
+```html
+<amp-ad width=320 height=320
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="widespace"
     data-sid="f666bfaf-69cf-4ed9-9262-08247bb274e4">
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 ### More parameters
 
 ```html
 <amp-ad width="320" height="320"
+=======
+```html
+<amp-ad width=320 height=320
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="widespace"
     data-sid="f666bfaf-69cf-4ed9-9262-08247bb274e4"
     data-demo-Gender="F"
@@ -42,11 +52,16 @@ limitations under the License.
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 ## Configuration
 
 For configuration details, please contact integrations@widespace.com.
 
 ### Required parameters
+=======
+
+### Required parameter
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 - `data-sid`
 
@@ -59,4 +74,10 @@ For configuration details, please contact integrations@widespace.com.
 - `data-demo-Yob`
 
 
+<<<<<<< HEAD
 
+=======
+## Configuration
+
+For configuration details please contact integrations@widespace.com
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

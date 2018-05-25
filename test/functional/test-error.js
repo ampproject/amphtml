@@ -39,6 +39,7 @@ import {
 import {user} from '../../src/log';
 
 describes.fakeWin('installErrorReporting', {}, env => {
+<<<<<<< HEAD
   let sandbox;
   let win;
   let rejectedPromiseError;
@@ -93,6 +94,66 @@ describes.fakeWin('installErrorReporting', {}, env => {
 });
 
 describe('maybeReportErrorToViewer', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  describe.skip('installErrorReporting',() => {
+    let sandbox;
+    let win;
+    let rejectedPromiseError;
+    let rejectedPromiseEvent;
+    let rejectedPromiseEventCancelledSpy;
+
+    beforeEach(() => {
+      win = env.win;
+      installErrorReporting(win);
+      sandbox = env.sandbox;
+      rejectedPromiseEventCancelledSpy = sandbox.spy();
+      rejectedPromiseError = new Error('error');
+      rejectedPromiseEvent = {
+        type: 'unhandledrejection',
+        reason: rejectedPromiseError,
+        preventDefault: rejectedPromiseEventCancelledSpy,
+      };
+    });
+
+    it('should install window.onerror handler', () => {
+      expect(win.onerror).to.not.be.null;
+    });
+
+    it('should install unhandledrejection handler', () => {
+      expect(win.eventListeners.count('unhandledrejection')).to.equal(1);
+    });
+
+    it('should report the normal promise rejection', () => {
+      win.eventListeners.fire(rejectedPromiseEvent);
+      expect(rejectedPromiseError.reported).to.be.true;
+      expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+    });
+
+    it('should allow null errors', () => {
+      rejectedPromiseEvent.reason = null;
+      win.eventListeners.fire(rejectedPromiseEvent);
+      expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+    });
+
+    it('should allow string errors', () => {
+      rejectedPromiseEvent.reason = 'string error';
+      win.eventListeners.fire(rejectedPromiseEvent);
+      expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+    });
+
+    it('should ignore cancellation', () => {
+      rejectedPromiseEvent.reason = rejectedPromiseError = cancellation();
+      win.eventListeners.fire(rejectedPromiseEvent);
+      expect(rejectedPromiseError.reported).to.be.not.be.ok;
+      expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
+    });
+  });
+});
+
+// TODO(dvoytenko, #14336): Fails due to console errors.
+describe.skip('maybeReportErrorToViewer', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let win;
   let viewer;
   let sandbox;
@@ -165,7 +226,12 @@ describe('maybeReportErrorToViewer', () => {
   });
 });
 
+<<<<<<< HEAD
 describe('reportErrorToServer', () => {
+=======
+// TODO(dvoytenko, #14336): Fails due to console errors.
+describe.skip('reportErrorToServer', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let sandbox;
   let onError;
   let nextRandomNumber;
@@ -527,7 +593,12 @@ describes.sandboxed('reportError', {}, () => {
     clock = sandbox.useFakeTimers();
   });
 
+<<<<<<< HEAD
   it('should accept Error type', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  it.skip('should accept Error type', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const error = new Error('error');
     const result = reportError(error);
     expect(result).to.equal(error);
@@ -624,7 +695,12 @@ describes.fakeWin('user error reporting', {amp: true}, env => {
     toggleExperiment(win, 'user-error-reporting', true);
   });
 
+<<<<<<< HEAD
   it('should trigger triggerAnalyticsEvent with correct arguments', () => {
+=======
+  // TODO(tiendao, #14336): Fails due to console errors.
+  it.skip('should trigger triggerAnalyticsEvent with correct arguments', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     reportErrorToAnalytics(error, win);
     expect(analyticsEventSpy).to.have.been.called;
     expect(analyticsEventSpy).to.have.been.calledWith(

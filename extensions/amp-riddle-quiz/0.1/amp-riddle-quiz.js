@@ -34,6 +34,12 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     /** @private {?number} */
     this.riddleId_ = null;
 
+<<<<<<< HEAD
+=======
+    /** @private {!Element} */
+    this.container_ = this.win.document.createElement('div');
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {?Function} */
     this.unlistenMessage_ = null;
   }

@@ -26,8 +26,12 @@ describes.realWin('amp-pinterest', {
 }, env => {
 
   function widgetURL(pinID) {
+<<<<<<< HEAD
     return 'begin:https://widgets.pinterest.com/v3/pidgets/pins/info/?pin_ids='
         + pinID;
+=======
+    return '^https://widgets.pinterest.com/v3/pidgets/pins/info/?pin_ids=' + pinID;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   function getPin(pinDo, pinUrl, pinMedia, pinDescription) {

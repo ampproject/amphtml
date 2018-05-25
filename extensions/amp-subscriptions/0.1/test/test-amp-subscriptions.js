@@ -22,6 +22,7 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
+<<<<<<< HEAD
 import {SubscriptionAnalyticsEvents} from '../analytics';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
@@ -30,13 +31,25 @@ import {setTimeout} from 'timers';
 
 
 describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
+=======
+import {SubscriptionPlatform} from '../subscription-platform';
+import {SubscriptionService} from '../amp-subscriptions';
+import {getWinOrigin} from '../../../../src/url';
+import {setTimeout} from 'timers';
+
+
+describes.realWin('amp-subscriptions', {amp: true}, env => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   let win;
   let ampdoc;
   let element;
   let pageConfig;
   let subscriptionService;
   let configResolver;
+<<<<<<< HEAD
   let analyticsEventStub;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
@@ -44,16 +57,25 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   const serviceConfig = {
     services: [
       {
+<<<<<<< HEAD
         authorizationUrl: 'https://lipsum.com/authorize',
+=======
+        authorizationUrl: 'https://subscribe.google.com/subscription/2/entitlements',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         actions: {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
         },
+<<<<<<< HEAD
+=======
+        pingbackUrl: 'https://lipsum.com/pingback',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       },
       {
         serviceId: 'google.subscription',
       },
     ],
+<<<<<<< HEAD
     fallbackEntitlement: {
       source: 'local',
       products,
@@ -61,6 +83,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       loggedIn: false,
       meteringData: null,
     },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   };
 
   beforeEach(() => {
@@ -81,6 +105,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         });
     sandbox.stub(subscriptionService, 'getPlatformConfig_')
         .callsFake(() => Promise.resolve(serviceConfig));
+<<<<<<< HEAD
     analyticsEventStub = sandbox.stub(
         subscriptionService.subscriptionAnalytics_,
         'event'
@@ -172,6 +197,28 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         expect(delegateStub).to.be.calledOnce;
         expect(processStateStub).to.not.be.called;
       });
+=======
+  });
+
+  it('should call `initialize_` on start', () => {
+    const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
+    expect(subscriptionService.start()).to.throw;
+    expect(initializeStub).to.be.calledOnce;
+  });
+
+  it('should setup store and page on start', () => {
+
+    const renderLoadingStub =
+        sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
+
+    subscriptionService.start();
+    return subscriptionService.initialize_().then(() => {
+      // Should show loading on the page
+      expect(renderLoadingStub).to.be.calledWith(true);
+      // Should setup platform store
+      expect(subscriptionService.platformStore_).to.be
+          .instanceOf(PlatformStore);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 
@@ -187,6 +234,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
   });
 
+<<<<<<< HEAD
   it('should add subscription platform while registering it', () => {
     const serviceData = serviceConfig['services'][1];
     const platform = new SubscriptionPlatform();
@@ -205,17 +253,42 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     subscriptionService.platformConfig_ = serviceConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
 
+=======
+  it('should start auth flow for short circuiting', () => {
+    const authFlowStub = sandbox.stub(subscriptionService,
+        'startAuthorizationFlow_');
+    const delegateStub = sandbox.stub(subscriptionService,
+        'delegateAuthToViewer_');
+    sandbox.stub(subscriptionService, 'initialize_')
+        .callsFake(() => Promise.resolve());
+    subscriptionService.pageConfig_ = pageConfig;
+    subscriptionService.doesViewerProvideAuth_ = true;
+    subscriptionService.start();
+    return subscriptionService.initialize_().then(() => {
+      expect(authFlowStub.withArgs(false)).to.be.calledOnce;
+      expect(delegateStub).to.be.calledOnce;
+    });
+  });
+
+  it('should add subscription platform while registering it', () => {
+    const serviceData = serviceConfig['services'][1];
+    const factoryStub = sandbox.stub().callsFake(() => Promise.resolve());
+    subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return subscriptionService.initialize_().then(() => {
       expect(factoryStub).to.be.calledOnce;
       expect(factoryStub.getCall(0).args[0]).to.be.equal(serviceData);
       expect(factoryStub.getCall(0).args[1]).to.be.equal(
           subscriptionService.serviceAdapter_);
+<<<<<<< HEAD
       expect(analyticsEventStub).to.be.calledWith(
           SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
           {
             serviceId: 'local',
           }
       );
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 
@@ -247,11 +320,18 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   });
 
   describe('selectAndActivatePlatform_', () => {
+<<<<<<< HEAD
     it('should wait for grantStatus and selectPlatform promise', () => {
       sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
+=======
+    it('should wait for grantStatus and selectPlatform promise', done => {
+      subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      subscriptionService.initialize_().then(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         resolveRequiredPromises(subscriptionService);
         const localPlatform =
             subscriptionService.platformStore_.getLocalPlatform();
@@ -259,6 +339,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
             subscriptionService.platformStore_.selectPlatform;
         const activateStub = sandbox.stub(localPlatform, 'activate');
         expect(localPlatform).to.be.not.null;
+<<<<<<< HEAD
         return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(activateStub).to.be.calledOnce;
           expect(selectPlatformStub).to.be.called;
@@ -276,12 +357,31 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
+=======
+        subscriptionService.selectAndActivatePlatform_().then(() => {
+          expect(activateStub).to.be.calledOnce;
+          expect(selectPlatformStub).to.be.calledWith(true);
+          done();
+        });
+      });
+    });
+    it('should call selectPlatform with preferViewerSupport config', done => {
+      subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      subscriptionService.initialize_().then(() => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         resolveRequiredPromises(subscriptionService);
         const selectPlatformStub =
           subscriptionService.platformStore_.selectPlatform;
         subscriptionService.platformConfig_['preferViewerSupport'] = false;
+<<<<<<< HEAD
         return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(selectPlatformStub).to.be.called;
+=======
+        subscriptionService.selectAndActivatePlatform_().then(() => {
+          expect(selectPlatformStub).to.be.calledWith(false);
+          done();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
       });
     });
@@ -310,6 +410,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
               .callsFake(() => Promise.resolve());
       const selectAndActivateStub =
           sandbox.stub(subscriptionService, 'selectAndActivatePlatform_');
+<<<<<<< HEAD
       const performPingbackStub =
           sandbox.stub(subscriptionService, 'performPingback_');
       subscriptionService.startAuthorizationFlow_();
@@ -318,6 +419,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       return subscriptionService.platformStore_.getGrantStatus().then(() => {
         expect(performPingbackStub).to.be.calledOnce;
       });
+=======
+      subscriptionService.startAuthorizationFlow_();
+      expect(getGrantStatusStub).to.be.calledOnce;
+      expect(selectAndActivateStub).to.be.calledOnce;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should not call selectAndActivatePlatform based on param', () => {
@@ -355,11 +461,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
           'reportPlatformFailure');
+<<<<<<< HEAD
       subscriptionService.fetchEntitlements_(platform)
+=======
+      const promise = subscriptionService.fetchEntitlements_(platform)
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
             done();
           });
+<<<<<<< HEAD
+=======
+      expect(promise).to.throw;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }).timeout(7000);
 
     it('should report failure if platform reject promise', done => {
@@ -385,22 +499,35 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       return subscriptionService.fetchEntitlements_(platform).then(() => {
         expect(resolveStub).to.be.calledOnce;
         expect(resolveStub.getCall(0).args[1]).to.deep.equal(entitlement);
+<<<<<<< HEAD
         expect(analyticsEventStub).to.be.calledWith(
             SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
             {
               'serviceId': 'local',
             }
         );
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
   });
 
   describe('viewer authorization', () => {
+<<<<<<< HEAD
     let fetchEntitlementsStub;
+=======
+    let responseStub;
+    let sendAuthTokenStub;
+    const fakeAuthToken = {
+      'authorization': 'faketoken',
+    };
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     beforeEach(() => {
       subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.platformConfig_ = serviceConfig;
       subscriptionService.doesViewerProvideAuth_ = true;
+<<<<<<< HEAD
       sandbox.stub(subscriptionService, 'initialize_')
           .callsFake(() => Promise.resolve());
       sandbox.stub(subscriptionService.viewer_, 'sendMessageAwaitResponse')
@@ -429,6 +556,47 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
     it('should not fetch entitlements for any platform other than '
         + 'local', () => {
+=======
+      responseStub = sandbox.stub(subscriptionService.viewer_,
+          'sendMessageAwaitResponse').callsFake(() =>
+        Promise.resolve(fakeAuthToken));
+      sandbox.stub(subscriptionService, 'initialize_')
+          .callsFake(() => Promise.resolve());
+      sendAuthTokenStub = sandbox.stub(subscriptionService,
+          'sendAuthTokenErrorToViewer_');
+    });
+    it('should not ask for auth if viewer does not have the capability', () => {
+      subscriptionService.doesViewerProvideAuth_ = false;
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(responseStub).to.be.not.called;
+      });
+    });
+
+    it('should ask for auth if viewer has the capability', () => {
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(responseStub).to.be.calledOnce;
+        expect(subscriptionService.platformStore_.serviceIds_)
+            .to.deep.equal(['local']);
+      });
+    });
+
+    it('should call verify with the entitlement given from the'
+        + ' viewer', () => {
+      const verifyStub = sandbox.stub(subscriptionService, 'verifyAuthToken_');
+      subscriptionService.delegateAuthToViewer_();
+      return subscriptionService.viewer_.sendMessageAwaitResponse()
+          .then(() => {
+            expect(verifyStub).to.be.calledWith('faketoken');
+          });
+    });
+
+    it('should not fetch entitlements for any platform other than '
+        + 'local', () => {
+      const fetchEntitlementsStub = sandbox.stub(
+          subscriptionService, 'fetchEntitlements_');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       subscriptionService.start();
       return subscriptionService.initialize_().then(() => {
         subscriptionService.registerPlatform('google.subscription',
@@ -440,13 +608,22 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     it('should fetch entitlements for other platforms if viewer does '
         + 'not provide auth', () => {
       subscriptionService.doesViewerProvideAuth_ = false;
+<<<<<<< HEAD
       subscriptionService.start();
       subscriptionService.registerPlatform('google.subscription',
           () => new SubscriptionPlatform());
+=======
+      const fetchEntitlementsStub = sandbox.stub(
+          subscriptionService, 'fetchEntitlements_');
+      subscriptionService.start();
+      subscriptionService.registerPlatform('google.subscription',
+          new SubscriptionPlatform());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return subscriptionService.initialize_().then(() => {
         expect(fetchEntitlementsStub).to.be.called;
       });
     });
+<<<<<<< HEAD
   });
 
   describe('performPingback_', () => {
@@ -495,10 +672,21 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       const pingbackStub = sandbox.stub(platform, 'pingback');
       return subscriptionService.performPingback_().then(() => {
         expect(pingbackStub).to.be.calledWith(Entitlement.empty('local'));
+=======
+
+    it('should send auth rejection message for rejected verification', () => {
+      const reason = 'Payload is expired';
+      sandbox.stub(subscriptionService, 'verifyAuthToken_').callsFake(
+          () => Promise.reject(reason));
+      subscriptionService.delegateAuthToViewer_();
+      subscriptionService.viewer_.sendMessageAwaitResponse().then(() => {
+        expect(sendAuthTokenStub).to.be.calledWith(reason);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     });
   });
 
+<<<<<<< HEAD
   describe('initializePlatformStore_', () => {
     it('should initialize platform store with the given ids', () => {
       subscriptionService.platformConfig_ = serviceConfig;
@@ -554,6 +742,61 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.decorateServiceAction(element, 'swg-google', 'login');
       expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
       expect(decorateUIStub).to.be.calledWith(element);
+=======
+  describe('verifyAuthToken_', () => {
+    const entitlementData = {source: 'local',
+      service: 'local', products, subscriptionToken: 'token'};
+    const entitlement = Entitlement.parseFromJson(entitlementData);
+    entitlement.service = 'local';
+
+    beforeEach(() => {
+      subscriptionService.pageConfig_ = pageConfig;
+    });
+
+    it('should reject promise for expired payload', () => {
+      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': getWinOrigin(win),
+            'exp': (Date.now() / 1000) - 10,
+            'entitlements': [entitlementData],
+          };});
+      return subscriptionService.verifyAuthToken_('faketoken').catch(reason => {
+        expect(reason.message).to.be.equal('Payload is expired​​​');
+      });
+    });
+
+    it('should reject promise for audience mismatch', () => {
+      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': 'random origin',
+            'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+            'entitlements': [entitlementData],
+          };});
+      return subscriptionService.verifyAuthToken_('faketoken').catch(reason => {
+        expect(reason.message).to.be.equals(
+            'The mismatching "aud" field: random origin​​​');
+      });
+    });
+
+    it('should resolve promise with entitlement', () => {
+      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': getWinOrigin(win),
+            'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+            'entitlements': [entitlementData],
+          };});
+      return subscriptionService.verifyAuthToken_('faketoken').then(
+          resolvedEntitlement => {
+            expect(resolvedEntitlement).to.be.not.undefined;
+            expect(resolvedEntitlement.service).to.equal(entitlement.service);
+            expect(resolvedEntitlement.source).to.equal(entitlement.source);
+            expect(resolvedEntitlement.products).to.deep
+                .equal(entitlement.products);
+            // raw should be the data which was resolved via sendMessageAwaitResponse.
+            expect(resolvedEntitlement.raw).to
+                .equal('faketoken');
+          });
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 });

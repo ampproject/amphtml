@@ -560,6 +560,7 @@ describe('HtmlParser with location', () => {
       ':9:6: endDoc()'
     ]);
   });
+<<<<<<< HEAD
 
   it('Supports SVG with self-closed tags', () => {
     const handler = new LoggingHandlerWithLocation();
@@ -578,4 +579,6 @@ describe('HtmlParser with location', () => {
       ':1:42: endDoc()',
     ]);
   });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 });

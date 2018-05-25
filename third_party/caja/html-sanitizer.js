@@ -990,7 +990,10 @@ html4.ATTRIBS = {
   'select::onfocus': 2,
   'select::required': 0,
   'select::size': 0,
+<<<<<<< HEAD
   'source::src': 1,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   'source::type': 0,
   'table::align': 0,
   'table::bgcolor': 0,

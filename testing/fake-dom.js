@@ -119,13 +119,21 @@ export class FakeWindow {
     this.cookie_ = [];
     Object.defineProperty(this.document, 'cookie', {
       get: () => {
+<<<<<<< HEAD
         const cookie = [];
+=======
+        let cookie = [];
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         for (let i = 0; i < this.cookie_.length; i += 2) {
           cookie.push(`${this.cookie_[i]}=${this.cookie_[i + 1]}`);
         }
         return cookie.join(';');
       },
       set: value => {
+<<<<<<< HEAD
+=======
+        const semi = value.indexOf(';');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         const cookie = value.match(/^([^=]*)=([^;]*)/);
         const expiresMatch = value.match(/expires=([^;]*)(;|$)/);
         const expires = expiresMatch ? Date.parse(expiresMatch[1]) : Infinity;
@@ -140,7 +148,11 @@ export class FakeWindow {
         } else {
           this.cookie_.splice(i, 2, cookie[1], cookie[2]);
         }
+<<<<<<< HEAD
       },
+=======
+      }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     // Create element to enhance test elements.
@@ -179,7 +191,11 @@ export class FakeWindow {
     // Storage.
     /** @const {!FakeStorage|undefined} */
     this.localStorage = spec.localStorageOff ?
+<<<<<<< HEAD
       undefined : new FakeStorage(this);
+=======
+        undefined : new FakeStorage(this);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     // Timers and animation frames.
     /** @const */
@@ -192,7 +208,11 @@ export class FakeWindow {
      * @return {number}
      * @const
      */
+<<<<<<< HEAD
     this.setTimeout = function() {
+=======
+    this.setTimeout = function () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return window.setTimeout.apply(window, arguments);
     };
 
@@ -200,7 +220,11 @@ export class FakeWindow {
      * @param {number} id
      * @const
      */
+<<<<<<< HEAD
     this.clearTimeout = function() {
+=======
+    this.clearTimeout = function () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return window.clearTimeout.apply(window, arguments);
     };
 
@@ -211,7 +235,11 @@ export class FakeWindow {
      * @return {number}
      * @const
      */
+<<<<<<< HEAD
     this.setInterval = function() {
+=======
+    this.setInterval = function () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return window.setInterval.apply(window, arguments);
     };
 
@@ -219,7 +247,11 @@ export class FakeWindow {
      * @param {number} id
      * @const
      */
+<<<<<<< HEAD
     this.clearInterval = function() {
+=======
+    this.clearInterval = function () {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       return window.clearInterval.apply(window, arguments);
     };
 
@@ -309,7 +341,11 @@ class EventListeners {
       type,
       handler,
       capture: typeof captureOrOpts == 'boolean' ? captureOrOpts :
+<<<<<<< HEAD
         typeof captureOrOpts == 'object' ? captureOrOpts.capture || false :
+=======
+          typeof captureOrOpts == 'object' ? captureOrOpts.capture || false :
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           false,
       options: typeof captureOrOpts == 'object' ? captureOrOpts : null,
     };
@@ -408,7 +444,11 @@ export class FakeLocation {
     });
 
     const properties = ['protocol', 'host', 'hostname', 'port', 'pathname',
+<<<<<<< HEAD
       'search', 'hash', 'origin'];
+=======
+        'search', 'hash', 'origin'];
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     properties.forEach(property => {
       Object.defineProperty(this, property, {
         get: () => this.url_[property],
@@ -549,7 +589,11 @@ export class FakeHistory {
     this.index++;
     if (this.index < this.stack.length) {
       // Remove tail.
+<<<<<<< HEAD
       this.stack.splice(this.index, this.stack.length - this.index);
+=======
+      this.stack.splice(this.index, thius.stack.length - this.index);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
     this.stack[this.index] = {
       state: state ? freeze(state) : null,

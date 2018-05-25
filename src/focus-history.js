@@ -43,8 +43,12 @@ export class FocusHistory {
 
     /** @private @const {function(!Event)} */
     this.captureFocus_ = e => {
+<<<<<<< HEAD
       // Hack (#15079) due to Firefox firing focus events on the entire page
       if (e.target && e.target.nodeType == 1) {
+=======
+      if (e.target) {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         this.pushFocus_(dev().assertElement(e.target));
       }
     };
@@ -61,7 +65,11 @@ export class FocusHistory {
     this.win.addEventListener('blur', this.captureBlur_);
   }
 
+<<<<<<< HEAD
   /** @visibleForTesting */
+=======
+  /** @private For testing. */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   cleanup_() {
     this.win.document.removeEventListener('focus', this.captureFocus_, true);
     this.win.removeEventListener('blur', this.captureBlur_);

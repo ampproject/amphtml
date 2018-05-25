@@ -20,13 +20,21 @@ checkMinVersion();
 
 const $$ = require('gulp-load-plugins')();
 const applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
+<<<<<<< HEAD
 const babelify = require('babelify');
+=======
+const babel = require('babelify');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 const closureCompile = require('./build-system/tasks/compile').closureCompile;
 const colors = require('ansi-colors');
 const createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
+<<<<<<< HEAD
+=======
+const exec = require('./build-system/exec').exec;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 const exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs-extra');
 const gulp = $$.help(require('gulp'));
@@ -71,7 +79,10 @@ const unminified3pTarget = 'dist.3p/current/integration.js';
 declareExtension('amp-3q-player', '0.1');
 declareExtension('amp-access', '0.1', {hasCss: true});
 declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
+<<<<<<< HEAD
 declareExtension('amp-access-laterpay', '0.2', {hasCss: true});
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 declareExtension('amp-access-scroll', '0.1', {hasCss: true});
 declareExtension('amp-accordion', '0.1');
 declareExtension('amp-ad', '0.1', {hasCss: true});
@@ -83,7 +94,10 @@ declareExtension('amp-ad-network-triplelift-impl', 0.1);
 declareExtension('amp-ad-network-cloudflare-impl', 0.1);
 declareExtension('amp-ad-network-gmossp-impl', 0.1);
 declareExtension('amp-ad-exit', 0.1);
+<<<<<<< HEAD
 declareExtension('amp-addthis', '0.1');
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 declareExtension('amp-analytics', '0.1');
 declareExtension('amp-anim', '0.1');
 declareExtension('amp-animation', '0.1');
@@ -91,7 +105,10 @@ declareExtension('amp-apester-media', '0.1', {hasCss: true});
 declareExtension('amp-app-banner', '0.1', {hasCss: true});
 declareExtension('amp-audio', '0.1');
 declareExtension('amp-auto-ads', '0.1');
+<<<<<<< HEAD
 declareExtension('amp-beopinion', '0.1');
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 declareExtension('amp-bind', '0.1');
 declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
 declareExtension('amp-brid-player', '0.1');
@@ -104,6 +121,10 @@ declareExtension('amp-compare-slider', '0.1');
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
+<<<<<<< HEAD
+=======
+declareExtension('amp-document-recommendations', '0.1', {hasCss: true});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 declareExtension('amp-dynamic-css-classes', '0.1');
 declareExtension('amp-experiment', '0.1');
 declareExtension('amp-facebook', '0.1');
@@ -119,7 +140,10 @@ declareExtension('amp-geo', '0.1');
 declareExtension('amp-gfycat', '0.1');
 declareExtension('amp-gist', '0.1');
 declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
+<<<<<<< HEAD
 declareExtension('amp-hello-world', '0.1', false);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 declareExtension('amp-hulu', '0.1');
 declareExtension('amp-iframe', '0.1');
 declareExtension('amp-ima-video', '0.1');
@@ -131,15 +155,21 @@ declareExtension('amp-izlesene', '0.1');
 declareExtension('amp-jwplayer', '0.1');
 declareExtension('amp-lightbox', '0.1', {hasCss: true});
 declareExtension('amp-lightbox-gallery', '0.1', {hasCss: true});
+<<<<<<< HEAD
 declareExtension('amp-linkeddb-dropdown', '0.1', {hasCss: true});
 declareExtension('amp-linkeddb-lightbox', '0.1', {hasCss: true});
 declareExtension('amp-linkeddb-relation', '0.1', {hasCss: true});
 declareExtension('amp-linkeddb-showmore', '0.1', {hasCss: true});
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
 declareExtension('amp-mustache', '0.1');
+<<<<<<< HEAD
 declareExtension('amp-next-page', '0.1', {hasCss: true});
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 declareExtension('amp-nexxtv-player', '0.1');
 declareExtension('amp-o2-player', '0.1');
 declareExtension('amp-ooyala-player', '0.1');
@@ -165,6 +195,7 @@ declareExtension('amp-story', '0.1', {
     'amp-story-system-layer',
   ],
 });
+<<<<<<< HEAD
 declareExtension('amp-story', '1.0', {
   hasCss: true,
   cssBinaries: [
@@ -179,6 +210,9 @@ declareExtension('amp-story', '1.0', {
   ],
 });
 declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
+=======
+declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
@@ -824,6 +858,29 @@ function performBuild(watch) {
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * @param {boolean} compiled
+ */
+function checkBinarySize(compiled) {
+  const file = compiled ? './dist/v0.js' : './dist/amp.js';
+  const size = compiled ? '76.2kB' : '332.6kB';
+  const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
+  log(green('Running ') + cyan(cmd) + green('...\n'));
+  const p = exec(cmd);
+  if (p.status != 0) {
+    log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
+        'exceeded its size cap. This is part of a new effort to reduce ' +
+        'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
+    // Terminate Travis builds on failure.
+    if (process.env.TRAVIS) {
+      process.exit(p.status);
+    }
+  }
+}
+
+/**
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * Enables watching for file changes in css, extensions.
  * @return {!Promise}
  */
@@ -838,7 +895,13 @@ function watch() {
  */
 function build() {
   const handlerProcess = createCtrlcHandler('build');
+<<<<<<< HEAD
   return performBuild().then(() => exitCtrlcHandler(handlerProcess));
+=======
+  return performBuild()
+      .then(() => checkBinarySize(/* compiled */ false))
+      .then(() => exitCtrlcHandler(handlerProcess));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**
@@ -890,7 +953,13 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
         }
+<<<<<<< HEAD
       }).then(() => exitCtrlcHandler(handlerProcess));
+=======
+      })
+      .then(() => checkBinarySize(/* compiled */ true))
+      .then(() => exitCtrlcHandler(handlerProcess));
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }
 
 /**
@@ -1119,10 +1188,15 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
+<<<<<<< HEAD
   const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
       .transform(babelify, {
         compact: false,
+=======
+  let bundler = browserify(entryPoint, {debug: true})
+      .transform(babel, {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         presets: [
           ['env', {
             targets: {
@@ -1130,9 +1204,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             },
           }],
         ],
+<<<<<<< HEAD
       })
       .once('transform', () => {
         endBuildStep('Transformed', srcFilename, startTime);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
   if (options.watch) {
     bundler = watchify(bundler);
@@ -1161,11 +1238,16 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(
         bundler.bundle()
             .on('error', function(err) {
+<<<<<<< HEAD
               let message = err;
               if (err.stack) {
                 // Drop the node_modules call stack, which begins with '    at'.
                 message = err.stack.replace(/    at[^]*/, '').trim();
               }
+=======
+              // Drop the node_modules call stack, which begins with '    at'.
+              const message = err.stack.replace(/    at[^]*/, '').trim();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
               console.error(red(message));
               if (failOnError) {
                 process.exit(1);

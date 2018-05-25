@@ -123,10 +123,13 @@ describes.realWin(
           const iframe = ape.querySelector('iframe');
           expect(iframe).to.not.be.null;
           expect(iframe.src).not.to.be.null;
+<<<<<<< HEAD
           const placeholder = ape.querySelector('div[placeholder]');
           expect(placeholder).to.not.be.null;
           expect(placeholder.getAttribute('aria-label'))
               .to.equal('Loading video');
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           const url = new URL(iframe.src);
           const qs = new URLSearchParams(url.searchParams);
           expect(url.hostname).to.equal('renderer.apester.com');
@@ -138,6 +141,7 @@ describes.realWin(
           expect(changeSizeSpy.args[0][0]).to.equal('404');
         });
       });
+<<<<<<< HEAD
       it('propagates aria label to placeholder image', () => {
         return getApester({
           'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
@@ -149,6 +153,9 @@ describes.realWin(
               .to.equal('Loading - scintilating video');
         });
       });
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       it('render playlist', () => {
         return getApester({
           'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
@@ -165,7 +172,10 @@ describes.realWin(
           expect(qs.get('type')).to.equal('playlist');
           expect(attemptChangeSizeSpy).to.be.calledOnce;
           expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
+<<<<<<< HEAD
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
       });
 
@@ -202,10 +212,16 @@ describes.realWin(
       });
 
       it('requires media-id or channel-token', () => {
+<<<<<<< HEAD
         allowConsoleError(() => {
           expect(getApester()).to.be.rejectedWith(
               /The media-id attribute is required for/);
         });
+=======
+        expect(getApester()).to.be.rejectedWith(
+            /The media-id attribute is required for/
+        );
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       });
     }
 );

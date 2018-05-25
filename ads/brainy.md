@@ -28,9 +28,18 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration details and to generate your tags, contact http://www.opt.ne.jp/contact_detail/id=8.
 
 Supported parameters:
 
 - `data-aid`
 - `data-slot-id`
+=======
+For configuration details and to generate your tags, please contact http://www.opt.ne.jp/contact_detail/id=8
+
+Supported parameters:
+
+- data-aid
+- data-slot-id
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

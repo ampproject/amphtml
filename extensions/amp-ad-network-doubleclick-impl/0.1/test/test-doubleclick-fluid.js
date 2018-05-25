@@ -131,7 +131,12 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     expect(fireDelayedImpressionsSpy).to.not.be.calledOnce;
   });
 
+<<<<<<< HEAD
   it('should contain sz=320x50 in ad request by default', () => {
+=======
+  // TODO(glevitzky, #14336): Fails due to console errors.
+  it.skip('should contain sz=320x50 in ad request by default', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     impl.initiateAdRequest();
     return impl.adPromise_.then(() => {
       expect(impl.adUrl_).to.be.ok;
@@ -139,7 +144,12 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
+<<<<<<< HEAD
   it('should contain mulitple sizes in ad request', () => {
+=======
+  // TODO(glevitzky, #14336): Fails due to console errors.
+  it.skip('should contain mulitple sizes in ad request', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     multiSizeImpl.initiateAdRequest();
     return multiSizeImpl.adPromise_.then(() => {
       expect(multiSizeImpl.adUrl_).to.be.ok;
@@ -205,7 +215,11 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.sentinel = 'sentinel';
     impl.initiateAdRequest();
     impl.safeframeApi_ = new SafeframeHostApi(
+<<<<<<< HEAD
         impl, true, impl.creativeSize_);
+=======
+        impl, true, impl.initialSize_, impl.creativeSize_);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
     const connectMessagingChannelSpy =
           sandbox./*OK*/spy(impl.safeframeApi_,

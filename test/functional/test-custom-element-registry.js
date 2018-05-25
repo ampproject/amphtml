@@ -41,7 +41,11 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     doc = win.document;
     ampdoc = env.ampdoc;
     extensions = env.extensions;
+<<<<<<< HEAD
     ampdoc.declareExtension('amp-element1');
+=======
+    ampdoc.declareExtension_('amp-element1');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   function insertElement(name) {
@@ -107,7 +111,11 @@ describes.realWin('CustomElement register', {amp: true}, env => {
   });
 
   it('should not install declared pre-stubbed element extension', () => {
+<<<<<<< HEAD
     ampdoc.declareExtension('amp-element2');
+=======
+    ampdoc.declareExtension_('amp-element2');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const stub = sandbox.stub(extensions, 'installExtensionForDoc');
 
     stubElementIfNotKnown(win, 'amp-element2');

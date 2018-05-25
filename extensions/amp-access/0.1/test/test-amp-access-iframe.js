@@ -17,10 +17,16 @@
 import * as lolex from 'lolex';
 import {AccessIframeAdapter} from '../amp-access-iframe';
 import {Messenger} from '../iframe-api/messenger';
+<<<<<<< HEAD
 import {dev} from '../../../../src/log';
 
 
 describes.fakeWin('AccessIframeAdapter', {
+=======
+
+
+describes.realWin('AccessIframeAdapter', {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   amp: true,
 }, env => {
   let ampdoc;
@@ -77,30 +83,54 @@ describes.fakeWin('AccessIframeAdapter', {
 
     it('should require "iframeSrc"', () => {
       delete validConfig['iframeSrc'];
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
       }).to.throw(/iframeSrc/); });
+=======
+      expect(() => {
+        new AccessIframeAdapter(ampdoc, validConfig, context);
+      }).to.throw(/iframeSrc/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should require "iframeSrc" to be secure', () => {
       validConfig['iframeSrc'] = 'http://acme.com/iframe';
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
       }).to.throw(/https/); });
+=======
+      expect(() => {
+        new AccessIframeAdapter(ampdoc, validConfig, context);
+      }).to.throw(/https/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should require "defaultResponse"', () => {
       delete validConfig['defaultResponse'];
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
       }).to.throw(/defaultResponse/); });
+=======
+      expect(() => {
+        new AccessIframeAdapter(ampdoc, validConfig, context);
+      }).to.throw(/defaultResponse/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should disallow non-array vars', () => {
       validConfig['iframeVars'] = {};
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
       }).to.throw(/array/); });
+=======
+      expect(() => {
+        new AccessIframeAdapter(ampdoc, validConfig, context);
+      }).to.throw(/array/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 
@@ -156,16 +186,27 @@ describes.fakeWin('AccessIframeAdapter', {
   describe('runtime', () => {
     let adapter;
     let messengerMock;
+<<<<<<< HEAD
     let storage, storageMock;
 
     beforeEach(() => {
       storage = {
+=======
+    let storageMock;
+
+    beforeEach(() => {
+      const storage = {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         getItem: () => {},
         setItem: () => {},
         removeItem: () => {},
       };
       storageMock = sandbox.mock(storage);
+<<<<<<< HEAD
       Object.defineProperty(ampdoc.win, 'sessionStorage', {get: () => storage});
+=======
+      Object.defineProperty(ampdoc.win, 'sessionStorage', {value: storage});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
       messengerMock = sandbox.mock(adapter.messenger_);
     });
@@ -195,7 +236,11 @@ describes.fakeWin('AccessIframeAdapter', {
       it('should issue authorization', () => {
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
+<<<<<<< HEAD
             .returns(Promise.resolve({a: 1}))
+=======
+            .returns(Promise.resolve({granted: true, data: {a: 1}}))
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             .once();
         return adapter.authorize().then(result => {
           expect(result).to.deep.equal({a: 1});
@@ -224,7 +269,11 @@ describes.fakeWin('AccessIframeAdapter', {
             .once();
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
+<<<<<<< HEAD
             .returns(Promise.resolve(data))
+=======
+            .returns(Promise.resolve({granted: true, data}))
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             .once();
         return adapter.authorize().then(() => {
           // Skip a microtask.
@@ -275,8 +324,13 @@ describes.fakeWin('AccessIframeAdapter', {
         });
       });
 
+<<<<<<< HEAD
       it('should tolerate storage failures', () => {
         const devErrorStub = sandbox.stub(dev(), 'error');
+=======
+      // TODO(dvoytenko, #14336): Fails due to console errors.
+      it.skip('should tolerate storage failures', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         storageMock.expects('getItem')
             .withExactArgs('amp-access-iframe')
             .throws(new Error('intentional'))
@@ -294,19 +348,30 @@ describes.fakeWin('AccessIframeAdapter', {
         clock.tick(3001);
         return p.then(result => {
           expect(result).to.deep.equal({response: 'default'});
+<<<<<<< HEAD
           expect(devErrorStub).to.be.calledOnce;
           expect(devErrorStub.args[0][1]).to.match(/failed to restore/);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
       });
 
       it('should ignore absent storage', () => {
+<<<<<<< HEAD
         storage = null;
+=======
+        Object.defineProperty(ampdoc.win, 'sessionStorage', {value: null});
+        Object.defineProperty(ampdoc.win, 'localStorage', {value: null});
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         storageMock.expects('getItem')
             .withExactArgs('amp-access-iframe')
             .never();
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
+<<<<<<< HEAD
             // Never resolved.
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
             .returns(new Promise(() => {}))
             .once();
         const p = adapter.authorize();

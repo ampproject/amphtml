@@ -16,6 +16,7 @@
 
 
 import {dashToUnderline} from '../../../src/string';
+<<<<<<< HEAD
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
@@ -24,6 +25,12 @@ import {isObject} from '../../../src/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
+=======
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 class AmpFacebook extends AMP.BaseElement {
 
@@ -38,6 +45,7 @@ class AmpFacebook extends AMP.BaseElement {
     this.dataLocale_ = element.hasAttribute('data-locale') ?
       element.getAttribute('data-locale') :
       dashToUnderline(window.navigator.language);
+<<<<<<< HEAD
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -45,6 +53,8 @@ class AmpFacebook extends AMP.BaseElement {
     /** @private {number} */
     this.toggleLoadingCounter_ = 0;
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /** @override */
@@ -80,6 +90,7 @@ class AmpFacebook extends AMP.BaseElement {
     listenFor(iframe, 'embed-size', data => {
       this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
+<<<<<<< HEAD
     this.unlistenMessage_ = listen(
         this.win,
         'message',
@@ -89,11 +100,14 @@ class AmpFacebook extends AMP.BaseElement {
     if (getMode().test) {
       this.toggleLoadingCounter_++;
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 
+<<<<<<< HEAD
   /** @private */
   handleFacebookMessages_(event) {
     if (this.iframe_ && event.source != this.iframe_.contentWindow) {
@@ -117,6 +131,8 @@ class AmpFacebook extends AMP.BaseElement {
     }
   }
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /** @override */
   unlayoutOnPause() {
     return true;
@@ -128,9 +144,12 @@ class AmpFacebook extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+<<<<<<< HEAD
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     return true;
   }
 }

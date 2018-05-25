@@ -15,7 +15,10 @@
  */
 import {LogLevel, dev} from '../../../src/log';
 import {scopedQuerySelectorAll} from '../../../src/dom';
+<<<<<<< HEAD
 import {tryResolve} from '../../../src/utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
@@ -174,7 +177,11 @@ function getLogType(logTypeKey) {
 function getLogEntry(rootElement, logType, element) {
   const predicate = logType.predicate || (unusedEl => false);
 
+<<<<<<< HEAD
   return tryResolve(() => predicate(element))
+=======
+  return Promise.resolve(predicate(element))
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       .then(conforms => {
         return new Promise(resolve => {
           resolve({

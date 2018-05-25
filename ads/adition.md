@@ -16,14 +16,24 @@ limitations under the License.
 
 # ADITION technologies AG
 
+<<<<<<< HEAD
 ADITION technologies AG specializes in the development and distribution of its own ad server technology, which is called ADITION ad serving. The ADITION ad server now supports AMP.
 
 For more information, visit [www.adition.com](https://www.adition.com).
+=======
+ADITION technologies AG specialises in the development and distribution of its own adserver technology, which is called ADITION adserving. The ADITION adserver now supports AMP.
+
+Please visit our [website](https://www.adition.com) for more information about us.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adition"
     data-version="1"
     data-wp_id="3470234">
@@ -32,7 +42,11 @@ For more information, visit [www.adition.com](https://www.adition.com).
 
 ## Configuration
 
+<<<<<<< HEAD
 For semantics of configuration and examples, sign-in and see the [ADITION documentation](https://wiki.adition.com/index.php?title=ADITION_technologies_AG:Manual/AMP) or [contact ADITION](https://www.adition.com/en/contact/).
+=======
+For semantics of configuration and examples, please sign-in and see ad network [documentation](https://wiki.adition.com/index.php?title=ADITION_technologies_AG:Manual/AMP) or [contact us](https://www.adition.com/en/contact/).
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 Supported parameters:
 

@@ -38,12 +38,18 @@ describe('amp-mustache template', () => {
     expect(result./*OK*/innerHTML).to.equal('value = abc');
   });
 
+<<<<<<< HEAD
   it('should sanitize output', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  it.skip('should sanitize output', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
         'value = <a href="{{value}}">abc</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
+<<<<<<< HEAD
     allowConsoleError(() => {
       const result = template.render({
         value: /*eslint no-script-url: 0*/ 'javascript:alert();',
@@ -51,6 +57,12 @@ describe('amp-mustache template', () => {
       expect(result./*OK*/innerHTML).to.equal(
           'value = <a target="_top">abc</a>');
     });
+=======
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal('value = <a target="_top">abc</a>');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should sanitize templated tag names', () => {
@@ -67,12 +79,18 @@ describe('amp-mustache template', () => {
     expect(result.firstElementChild).to.be.null;
   });
 
+<<<<<<< HEAD
   describe('Sanitizing data- attributes', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  describe.skip('Sanitizing data- attributes', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     it('should sanitize templated attribute names', () => {
       const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
           'value = <a {{value}}="javascript:alert(0)">abc</a>';
+<<<<<<< HEAD
       const template = new AmpMustache(templateElement);
       template.compileCallback();
       allowConsoleError(() => {
@@ -99,6 +117,27 @@ describe('amp-mustache template', () => {
         expect(result.firstElementChild.getAttribute('[onclick]')).to.be.null;
         expect(result.firstElementChild.getAttribute('onclick')).to.be.null;
       });
+=======
+      let template = new AmpMustache(templateElement);
+      template.compileCallback();
+      let result = template.render({
+        value: 'href',
+      });
+      expect(result).to.not.equal('<a href="javascript:alert(0)">abc</a>');
+      expect(result.firstElementChild.getAttribute('href')).to.be.null;
+
+      templateElement./*OK*/innerHTML =
+          'value = <p [{{value}}]="javascript:alert()">ALERT</p>';
+      template = new AmpMustache(templateElement);
+      template.compileCallback();
+      result = template.render({
+        value: 'onclick',
+      });
+      expect(result).to.not
+          .equal('<p [onclick]="javascript:alert()">ALERT</p>');
+      expect(result.firstElementChild.getAttribute('[onclick]')).to.be.null;
+      expect(result.firstElementChild.getAttribute('onclick')).to.be.null;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should parse data-&style=value output correctly', () => {
@@ -107,6 +146,7 @@ describe('amp-mustache template', () => {
           ' data-&style="color:red;">abc</a>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
+<<<<<<< HEAD
       allowConsoleError(() => {
         const result = template.render({
           value: /*eslint no-script-url: 0*/ 'javascript:alert();',
@@ -114,6 +154,13 @@ describe('amp-mustache template', () => {
         expect(result./*OK*/innerHTML).to.equal(
             'value = <a data-="" target="_top">abc</a>');
       });
+=======
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <a data-="" target="_top">abc</a>');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should parse data-&attr=value output correctly', () => {
@@ -135,6 +182,7 @@ describe('amp-mustache template', () => {
           '<a data-my-attr="{{invalidValue}}" data-my-id="{{value}}">abc</a>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
+<<<<<<< HEAD
       allowConsoleError(() => {
         const result = template.render({
           value: 'myid',
@@ -147,12 +195,26 @@ describe('amp-mustache template', () => {
   });
 
   describe('Rendering Form Fields', () => {
+=======
+      const result = template.render({
+        value: 'myid',
+        invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <a data-my-id="myid">abc</a>');
+    });
+  });
+
+  // TODO(mkhatib, #14336): Fails due to console errors.
+  describe.skip('Rendering Form Fields', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     it('should allow rendering inputs', () => {
       const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
           '<input value="{{value}}" type="text" onchange="{{invalidValue}}">';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
+<<<<<<< HEAD
       allowConsoleError(() => {
         const result = template.render({
           value: 'myid',
@@ -161,6 +223,14 @@ describe('amp-mustache template', () => {
         expect(result./*OK*/innerHTML).to.equal(
             'value = <input value="myid" type="text">');
       });
+=======
+      const result = template.render({
+        value: 'myid',
+        invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid" type="text">');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should allow rendering textarea', () => {
@@ -176,12 +246,17 @@ describe('amp-mustache template', () => {
           'value = <textarea>Cool story bro.</textarea>');
     });
 
+<<<<<<< HEAD
     it('should not allow image/file input types rendering', () => {
+=======
+    it('should not allow image/file types rendering', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
           '<input value="{{value}}" type="{{type}}">';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
+<<<<<<< HEAD
       allowConsoleError(() => {
         const result = template.render({
           value: 'myid',
@@ -229,6 +304,42 @@ describe('amp-mustache template', () => {
       });
       expect(result./*OK*/innerHTML).to.equal(
           'value = <input value="myid" type="text">');
+=======
+      let result = template.render({
+        value: 'myid',
+        type: 'image',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+
+      result = template.render({
+        value: 'myid',
+        type: 'file',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+
+      result = template.render({
+        value: 'myid',
+        type: 'text',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid" type="text">');
+
+      result = template.render({
+        value: 'myid',
+        type: 'button',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+
+      result = template.render({
+        value: 'myid',
+        type: 'password',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should sanitize form-related attrs properly', () => {
@@ -240,6 +351,7 @@ describe('amp-mustache template', () => {
           'formenctype="">';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
+<<<<<<< HEAD
       allowConsoleError(() => {
         const result = template.render({
           value: 'myid',
@@ -247,6 +359,13 @@ describe('amp-mustache template', () => {
         expect(result./*OK*/innerHTML).to.equal(
             'value = <input value="myid">');
       });
+=======
+      const result = template.render({
+        value: 'myid',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should not sanitize form tags', () => {
@@ -331,7 +450,12 @@ describe('amp-mustache template', () => {
       expect(nestedResult./*OK*/innerHTML).to.equal('nested: Nested');
     });
 
+<<<<<<< HEAD
     it('should sanitize the inner template when it gets rendered', () => {
+=======
+    // TODO(danielrozenberg, #14336): Fails due to console errors.
+    it.skip('should sanitize the inner template when it gets rendered', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const outerTemplateElement = document.createElement('template');
       outerTemplateElement./*OK*/innerHTML =
           'outer: {{value}} ' +
@@ -346,6 +470,7 @@ describe('amp-mustache template', () => {
       const nestedTemplateElement = outerResult.querySelector('template');
       const nestedTemplate = new AmpMustache(nestedTemplateElement);
       nestedTemplate.compileCallback();
+<<<<<<< HEAD
       allowConsoleError(() => {
         const nestedResult = nestedTemplate.render({
           value: 'Nested',
@@ -353,6 +478,13 @@ describe('amp-mustache template', () => {
         expect(nestedResult./*OK*/innerHTML).to.equal(
             '<div>nested</div>: Nested');
       });
+=======
+      const nestedResult = nestedTemplate.render({
+        value: 'Nested',
+      });
+      expect(nestedResult./*OK*/innerHTML).to.equal(
+          '<div>nested</div>: Nested');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should not allow users to pass data having key that starts with ' +
@@ -387,6 +519,7 @@ describe('amp-mustache template', () => {
 
   });
 
+<<<<<<< HEAD
   describe('triple-mustache', () => {
     it('should sanitize text formatting elements', () => {
       const templateElement = document.createElement('template');
@@ -452,6 +585,15 @@ describe('amp-mustache template', () => {
       expect(result./*OK*/innerHTML).to.equal(
           'value = <a target="_top">test</a>');
     });
+=======
+  it('should sanitize triple-mustache', () => {
+    const templateElement = document.createElement('template');
+    templateElement.content.textContent = 'value = {{{value}}}';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render({value: '<b>abc</b><img><div>def</div>'});
+    expect(result./*OK*/innerHTML).to.equal('value = <b>abc</b>');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should unwrap output', () => {

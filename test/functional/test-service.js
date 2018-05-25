@@ -70,10 +70,15 @@ describe('service', () => {
 
     it('should assert disposable interface', () => {
       expect(assertDisposable(disposable)).to.equal(disposable);
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => assertDisposable(nonDisposable)).to.throw(
             /required to implement Disposable/);
       });
+=======
+      expect(() => assertDisposable(nonDisposable))
+          .to.throw(/required to implement Disposable/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 
@@ -142,6 +147,7 @@ describe('service', () => {
     });
 
     it('should throw before creation if factory is not provided', () => {
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         getService(window, 'c');
       }).to.throw(); });
@@ -151,6 +157,17 @@ describe('service', () => {
       allowConsoleError(() => { expect(() => {
         getService(window, 'not-present');
       }).to.throw(/Expected service not-present to be registered/); });
+=======
+      expect(() => {
+        getService(window, 'c');
+      }).to.throw();
+    });
+
+    it('should fail without factory on initial setup', () => {
+      expect(() => {
+        getService(window, 'not-present');
+      }).to.throw(/Expected service not-present to be registered/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should provide a promise that resolves when instantiated', () => {
@@ -403,9 +420,15 @@ describe('service', () => {
     });
 
     it('should fail without factory on initial setup', () => {
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         getServiceForDoc(node, 'not-present');
       }).to.throw(/Expected service not-present to be registered/); });
+=======
+      expect(() => {
+        getServiceForDoc(node, 'not-present');
+      }).to.throw(/Expected service not-present to be registered/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should provide a promise that resolves when instantiated', () => {
@@ -449,7 +472,12 @@ describe('service', () => {
       expect(getServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
     });
 
+<<<<<<< HEAD
     it('should dispose disposable services', () => {
+=======
+    // TODO(dvoytenko, #14336): Fails due to console errors.
+    it.skip('should dispose disposable services', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       const disposableFactory = function() {
         return {
           dispose: sandbox.spy(),
@@ -603,6 +631,7 @@ describe('service', () => {
         });
 
         it('should refuse adopt of non-embeddable', () => {
+<<<<<<< HEAD
           allowConsoleError(() => { expect(() => {
             adoptServiceForEmbed(embedWin, 'nonEmbeddable');
           }).to.throw(/implement EmbeddableService/); });
@@ -612,6 +641,17 @@ describe('service', () => {
           allowConsoleError(() => { expect(() => {
             adoptServiceForEmbed(embedWin, 'unknown');
           }).to.throw(/unknown/); });
+=======
+          expect(() => {
+            adoptServiceForEmbed(embedWin, 'nonEmbeddable');
+          }).to.throw(/implement EmbeddableService/);
+        });
+
+        it('should refuse adopt of unknown service', () => {
+          expect(() => {
+            adoptServiceForEmbed(embedWin, 'unknown');
+          }).to.throw(/unknown/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         });
       });
 

@@ -16,7 +16,11 @@ limitations under the License.
 
 # yahoo
 
+<<<<<<< HEAD
 ## Display ad
+=======
+## Display
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ```html
 <amp-ad 
@@ -31,6 +35,7 @@ limitations under the License.
 
 ### Configuration
 
+<<<<<<< HEAD
 For configuration details, please contact https://advertising.yahoo.com/contact.
 
 Supported parameters:
@@ -40,3 +45,14 @@ Supported parameters:
 - `data-sid`
 - `data-site`
 - `data-sa`
+=======
+For configuration details, please contact https://advertising.yahoo.com/contact
+
+Supported parameters:
+
+- height
+- width
+- data-sid
+- data-site
+- data-sa
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

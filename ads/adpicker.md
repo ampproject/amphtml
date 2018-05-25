@@ -17,6 +17,11 @@ limitations under the License.
 
 # AdPicker
 
+<<<<<<< HEAD
+=======
+Please visit our website (https://adpicker.net) for more details
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ## Example
 
 ```html
@@ -28,8 +33,15 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, visit [adpicker.net](https://adpicker.net).
 
 ### Required parameters
 
 - `data-ph`: the placement id
+=======
+Supported parameters:
+
+**Required**
+- data-ph:      the placement id
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

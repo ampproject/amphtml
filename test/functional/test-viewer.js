@@ -19,8 +19,11 @@ import {Services} from '../../src/services';
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
+<<<<<<< HEAD
 import {installDocumentInfoServiceForDoc} from
   '../../src/service/document-info-impl';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -57,7 +60,10 @@ describe('Viewer', () => {
     clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowApi = new WindowApi();
+<<<<<<< HEAD
     windowApi.Math = window.Math;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
     windowApi.location = {
@@ -78,7 +84,10 @@ describe('Viewer', () => {
       body: {style: {}},
       documentElement: {style: {}},
       title: 'Awesome doc',
+<<<<<<< HEAD
       querySelector() { return parseUrl('http://www.example.com/'); },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {
@@ -93,7 +102,10 @@ describe('Viewer', () => {
     ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
+<<<<<<< HEAD
     installDocumentInfoServiceForDoc(windowApi.document);
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     events = {};
     errorStub = sandbox.stub(dev(), 'error');
     expectedErrorStub = sandbox.stub(dev(), 'expectedError');
@@ -148,7 +160,11 @@ describe('Viewer', () => {
     expect(viewer.hasCapability('foo')).to.be.false;
   });
 
+<<<<<<< HEAD
   it('should not clear fragment in embedded mode', () => {
+=======
+  it('should NOT clear fragment in embedded mode', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     windowApi.parent = {};
     windowApi.location.href = 'http://www.example.com#test=1';
     windowApi.location.hash = '#origin=g.com&test=1';
@@ -157,6 +173,7 @@ describe('Viewer', () => {
     expect(viewer.getParam('test')).to.equal('1');
   });
 
+<<<<<<< HEAD
   it('should set ampshare fragment within custom tab', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/';
@@ -180,6 +197,8 @@ describe('Viewer', () => {
         '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   it('should clear fragment when click param is present', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#click=abc';
@@ -191,6 +210,7 @@ describe('Viewer', () => {
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
+<<<<<<< HEAD
   it('should restore fragment within custom tab with click param', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#click=abc';
@@ -204,6 +224,8 @@ describe('Viewer', () => {
         '#ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   it('should configure visibilityState visible by default', () => {
     expect(viewer.getVisibilityState()).to.equal('visible');
     expect(viewer.isVisible()).to.equal(true);
@@ -446,11 +468,19 @@ describe('Viewer', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
+<<<<<<< HEAD
       allowConsoleError(() => { expect(() => {
         viewer.receiveMessage('visibilitychange', {
           state: 'what is this',
         });
       }).to.throw('Unknown VisibilityState value'); });
+=======
+      expect(() => {
+        viewer.receiveMessage('visibilitychange', {
+          state: 'what is this',
+        });
+      }).to.throw('Unknown VisibilityState value');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       expect(viewer.getVisibilityState()).to.equal('paused');
       expect(viewer.isVisible()).to.equal(false);
     });
@@ -1071,6 +1101,7 @@ describe('Viewer', () => {
       });
     });
 
+<<<<<<< HEAD
     function testHasRoughlySameOrigin(first, second) {
       it('should find ' + first + ' and ' + second + ' to match', () => {
         const viewer = new Viewer(ampdoc);
@@ -1115,6 +1146,8 @@ describe('Viewer', () => {
       testHasRoughlyDifferentOrigin('https://xyz.google.com:80', 'https://xyz.google.com:81');
     });
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     function test(origin, toBeTrusted, opt_inWebView) {
       it('testing ' + origin, () => {
         const viewer = new Viewer(ampdoc);

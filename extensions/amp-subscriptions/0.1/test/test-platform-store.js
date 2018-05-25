@@ -32,6 +32,7 @@ describes.realWin('Platform store', {}, () => {
     products: ['product3'], subscriptionToken: '', loggedIn: false});
   entitlementsForService1.setCurrentProduct(currentProduct);
   entitlementsForService2.setCurrentProduct(currentProduct);
+<<<<<<< HEAD
   const fallbackEntitlement = new Entitlement({
     source: 'local',
     raw: 'raw',
@@ -45,6 +46,11 @@ describes.realWin('Platform store', {}, () => {
     platformStore = new PlatformStore(serviceIds, {
       supportsViewer: 9,
     }, fallbackEntitlement);
+=======
+
+  beforeEach(() => {
+    platformStore = new PlatformStore(serviceIds);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should instantiate with the service ids', () => {
@@ -52,8 +58,12 @@ describes.realWin('Platform store', {}, () => {
   });
 
   it('should call onChange callbacks on every resolve', () => {
+<<<<<<< HEAD
     const cb = sandbox.stub(platformStore.onEntitlementResolvedCallbacks_,
         'fire');
+=======
+    const cb = sandbox.stub(platformStore.onChangeCallbacks_, 'fire');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     platformStore.onChange(cb);
     platformStore.resolveEntitlement('service2',
         new Entitlement('service2', ['product1'], ''));
@@ -172,6 +182,7 @@ describes.realWin('Platform store', {}, () => {
   describe('selectApplicablePlatform_', () => {
     let localPlatform;
     let anotherPlatform;
+<<<<<<< HEAD
     let localPlatformBaseScore = 0;
     let anotherPlatformBaseScore = 0;
     beforeEach(() => {
@@ -183,6 +194,13 @@ describes.realWin('Platform store', {}, () => {
       sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
       sandbox.stub(anotherPlatform, 'getBaseScore')
           .callsFake(() => anotherPlatformBaseScore);
+=======
+    beforeEach(() => {
+      localPlatform = new SubscriptionPlatform();
+      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       platformStore.resolvePlatform('local', localPlatform);
       platformStore.resolvePlatform('another', anotherPlatform);
     });
@@ -242,7 +260,11 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should not choose a platform based on supports for current '
+<<<<<<< HEAD
         + 'viewer, if prefer supportsViewer is 0', () => {
+=======
+        + 'viewer, if prefer preferViewerSupport is false', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       sandbox.stub(localPlatform, 'supportsCurrentViewer')
           .callsFake(() => false);
       sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
@@ -253,8 +275,12 @@ describes.realWin('Platform store', {}, () => {
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another', products: ['product2'],
         subscriptionToken: null}));
+<<<<<<< HEAD
       platformStore.scoreConfig_ = {supportsViewer: 0};
       expect(platformStore.selectApplicablePlatform_().getServiceId())
+=======
+      expect(platformStore.selectApplicablePlatform_(false).getServiceId())
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           .to.be.equal(localPlatform.getServiceId());
     });
 
@@ -272,6 +298,7 @@ describes.realWin('Platform store', {}, () => {
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(localPlatform.getServiceId());
     });
+<<<<<<< HEAD
 
     it('should use baseScore', () => {
       sandbox.stub(localPlatform, 'supportsCurrentViewer')
@@ -289,11 +316,14 @@ describes.realWin('Platform store', {}, () => {
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(anotherPlatform.getServiceId());
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   describe('reportPlatformFailure_', () => {
     let errorSpy;
     beforeEach(() => {
+<<<<<<< HEAD
       errorSpy = sandbox.spy(user(), 'warn');
     });
 
@@ -468,6 +498,16 @@ describes.realWin('Platform store', {}, () => {
         done();
       });
       platformStore.resolvePlatform('local', localPlatform);
+=======
+      errorSpy = sandbox.spy(user(), 'error');
+    });
+
+    // TODO(prateekbh, #14336): Fails due to console errors.
+    it.skip('should report fatal error if all platforms fail', () => {
+      platformStore.reportPlatformFailure('service1');
+      platformStore.reportPlatformFailure('service2');
+      expect(errorSpy).to.be.calledOnce;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 

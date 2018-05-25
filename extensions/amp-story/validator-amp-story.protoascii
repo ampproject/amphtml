@@ -20,7 +20,10 @@ tags: {  # amp-story
   extension_spec: {
     name: "amp-story"
     allowed_versions: "0.1"
+<<<<<<< HEAD
     allowed_versions: "1.0"
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     allowed_versions: "latest"
   }
   attr_lists: "common-extension-attrs"
@@ -36,6 +39,7 @@ tags: {  # <amp-story>
   # requirement to be expressed on the <amp-story> children, however.
   requires: "amp-story-page"
   attrs: {
+<<<<<<< HEAD
     name: "background-audio"
     value_url: {
       allowed_protocol: "http"
@@ -90,11 +94,14 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     name: "standalone"
     mandatory: true
     value: ""
   }
   attrs: {
+<<<<<<< HEAD
     name: "title"
     mandatory: true
   }
@@ -119,23 +126,33 @@ tags: {  # <amp-story> without metadata (deprecated)
   requires: "amp-story-page"
   attrs: {
     name: "background-audio"
+=======
+    name: "bookend-config-src"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
   }
   attrs: {
+<<<<<<< HEAD
     name: "bookend-config-src"
+=======
+    name: "background-audio"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
   }
+<<<<<<< HEAD
   attrs: {
     name: "standalone"
     mandatory: true
     value: ""
   }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   siblings_disallowed: true
   child_tags: {
     mandatory_min_num_child_tags: 1
@@ -305,6 +322,7 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
+<<<<<<< HEAD
 tags: {  # <amp-story-bookend>
   html_format: AMP
   tag_name: "AMP-STORY-BOOKEND"
@@ -319,6 +337,8 @@ tags: {  # <amp-story-bookend>
     }
   }
 }
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 tags: {  # <amp-story-cta-layer>
   html_format: AMP
   tag_name: "AMP-STORY-CTA-LAYER"

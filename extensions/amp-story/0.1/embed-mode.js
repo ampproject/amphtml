@@ -38,6 +38,7 @@ export const EmbedMode = {
    * - Unmutes audio in the story by default
    */
   NAME_TBD: 1,
+<<<<<<< HEAD
 
   /**
    * This mode is intended for embedders that natively handle sharing the story,
@@ -51,6 +52,8 @@ export const EmbedMode = {
    * - TODO(#14923): Removes the link information from embedded UIs.
    */
   NO_SHARING: 2,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 };
 
 

@@ -16,6 +16,10 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
+<<<<<<< HEAD
+=======
+import {Layout} from '../../../src/layout';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {computedStyle, toggle} from '../../../src/style';
 import {dev,user} from '../../../src/log';
 import {
@@ -53,6 +57,14 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /** @override */
+<<<<<<< HEAD
+=======
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   buildCallback() {
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');

@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="533" height="300"
+=======
+<amp-ad width=533 height=300
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="distroscale"
     layout="responsive"
     data-pid="1"
@@ -28,8 +32,16 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, please [contact DistroScale](http://www.distroscale.com).
 
 ### Required parameters
 
 - `data-pid`: Partner ID
+=======
+For semantics of configuration, please [contact DistroScale](http://www.distroscale.com).
+
+__Required:__
+
+- `data-pid` - Partner ID
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

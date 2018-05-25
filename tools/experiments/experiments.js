@@ -196,6 +196,15 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
+<<<<<<< HEAD
+=======
+    id: '3p-use-ampcontext',
+    name: 'Use AmpContext for window.context messaging',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
+    spec: 'https://github.com/ampproject/amphtml/issues/6829',
+  },
+  {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     id: 'as-use-attr-for-format',
     name: 'Use slot width/height attribute for AdSense size format',
   },
@@ -251,8 +260,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
+<<<<<<< HEAD
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
+=======
+    id: 'amp-document-recommendations',
+    name: 'Docment level recommendations and infinte scroll',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
@@ -271,12 +285,15 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
   },
   {
+<<<<<<< HEAD
     id: 'no-sync-xhr-in-ads',
     name: 'Disables syncronous XHR requests in 3p iframes.',
     spec: 'TODO',
     cleanupIssue: 'TODO',
   },
   {
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     id: 'video-service',
     name: 'Enables new implementation of unified Video Interface services.',
     spec: 'https://github.com/ampproject/amphtml/issues/13674',
@@ -294,6 +311,7 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
+<<<<<<< HEAD
   {
     id: 'amp-fx-fade-in-scroll',
     name: 'Enables amp-fx="fade-in-scroll" - a scroll dependent fade animation',
@@ -305,6 +323,8 @@ const EXPERIMENTS = [
     name: 'Enables native browser implementation of srcset and sizes',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/11575',
   },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ];
 
 if (getMode().localDev) {

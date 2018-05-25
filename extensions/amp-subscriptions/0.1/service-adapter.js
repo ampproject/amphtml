@@ -34,11 +34,16 @@ export class ServiceAdapter {
   }
 
   /**
+<<<<<<< HEAD
    * Delegates actions to local platform.
+=======
+   * Delegates actions to local platform
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @param {string} action
    * @return {!Promise<boolean>}
    */
   delegateActionToLocal(action) {
+<<<<<<< HEAD
     return this.delegateActionToService(action, 'local');
   }
 
@@ -62,6 +67,9 @@ export class ServiceAdapter {
   decorateServiceAction(element, serviceId, action, options) {
     this.subscriptionService_.decorateServiceAction(element, serviceId,
         action, options);
+=======
+    return this.subscriptionService_.delegateActionToLocal(action);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**

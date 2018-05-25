@@ -21,6 +21,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+<<<<<<< HEAD
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Accept',
     description: 'Label for a button that allows the user to consent to ' +
@@ -36,6 +37,8 @@ export default {
     description: 'Label for a button that allows the user to dismiss the ' +
         'cookie consent dialog.',
   },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
     string: 'Enable',
     description: 'Label for a button that enables the amp-story experiment.',

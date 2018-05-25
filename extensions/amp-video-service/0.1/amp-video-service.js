@@ -21,6 +21,7 @@
  * it gets automatically inserted by the runtime when required.
  */
 
+<<<<<<< HEAD
 import {ActionTrust} from '../../../src/action-trust';
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
@@ -31,21 +32,31 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {isFiniteNumber} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
+=======
+import {dev} from '../../../src/log';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 /** @private @const {string} */
 const TAG = 'amp-video-service';
 
 
+<<<<<<< HEAD
 /** @private @const {string} */
 const ENTRY_PROP = '__AMP_VIDEO_ENTRY__';
 
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 /**
  * Manages all AMP video players that implement the common Video API
  * {@see ../src/video-interface.VideoInterface}.
  *
+<<<<<<< HEAD
  * Provides unified behavior for all videos regardless of implementation.
+=======
+* Provides unified behavior for all videos regardless of implementation.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  *
  *
  * __          __              _
@@ -58,8 +69,13 @@ const ENTRY_PROP = '__AMP_VIDEO_ENTRY__';
  *                                     |___/
  *
  * This service is instantiated asynchronously by
+<<<<<<< HEAD
  * {@see ../../../src/service/video-service-sync-impl.VideoServiceSync}. That
  * service should be used by consumers of the APIs exposed here.
+=======
+ * {@see ../../../src/service/video-service-impl.VideoService}. That should be
+ * used by consumers of the APIs exposed here.
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  *
  * If you need to add methods to this class that are public to components,
  * it's most likely that you'll want to implement them here and set wrappers for
@@ -69,6 +85,7 @@ export class VideoService {
 
   /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
+<<<<<<< HEAD
     const {win} = ampdoc;
 
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -138,6 +155,19 @@ export class VideoService {
 
   /**
    * @param {!Element} unusedVideo
+=======
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+  }
+
+  /** @param {!../../../src/video-interface.VideoInterface} unusedVideo */
+  register(unusedVideo) {
+    warnUnimplemented('Video registration');
+  }
+
+  /**
+   * @param {!AmpElement} unusedVideo
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * @return {!Promise}
    */
   getAnalyticsDetails(unusedVideo) {
@@ -147,7 +177,11 @@ export class VideoService {
 
   /**
    * @param {!AmpElement} unusedVideo
+<<<<<<< HEAD
    * @param {!Observable<boolean>} unusedObservable
+=======
+   * @param {!../../../src/observable.Observable<boolean>} unusedObservable
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    */
   delegateAutoplay(unusedVideo, unusedObservable) {
     warnUnimplemented('Autoplay delegation');
@@ -156,6 +190,7 @@ export class VideoService {
 
 
 /**
+<<<<<<< HEAD
  * This union type allows the compiler to treat VideoInterface objects as
  * `BaseElement`s, which they should be anyway.
  *
@@ -314,6 +349,8 @@ export class VideoEntry {
 
 
 /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  * @param {string} feature
  * @private
  */

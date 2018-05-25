@@ -16,7 +16,11 @@
 
 /**
  * @typedef {{
+<<<<<<< HEAD
  *  fontStyle: string,
+=======
+ *  style: string,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
  *  variant: string,
  *  weight: string,
  *  size: string,
@@ -99,7 +103,11 @@ export class FontLoader {
       /* style | variant | weight | size/line-height | family */
       /* font: italic small-caps bolder 16px/3 cursive; */
       const fontString = (
+<<<<<<< HEAD
         this.fontConfig_.fontStyle + ' ' +
+=======
+        this.fontConfig_.style + ' ' +
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         this.fontConfig_.variant + ' ' +
         this.fontConfig_.weight + ' ' +
         this.fontConfig_.size + ' \'' +
@@ -186,7 +194,11 @@ export class FontLoader {
       fontSize: '40px',
       fontVariant: this.fontConfig_.variant,
       fontWeight: this.fontConfig_.weight,
+<<<<<<< HEAD
       fontStyle: this.fontConfig_.fontStyle,
+=======
+      fontStyle: this.fontConfig_.style,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       left: '-999px',
       lineHeight: 'normal',
       margin: 0,

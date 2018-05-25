@@ -572,6 +572,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
     it('should NOT allow invalid values', () => {
       const vh = new VisibilityModel(NO_SPEC, NO_CALC);
+<<<<<<< HEAD
       allowConsoleError(() => {
         expect(() => {
           vh.updateCounters_(-1);
@@ -580,6 +581,14 @@ describes.sandboxed('VisibilityModel', {}, () => {
           vh.updateCounters_(1.00001);
         }).to.throw(/invalid visibility value/);
       });
+=======
+      expect(() => {
+        vh.updateCounters_(-1);
+      }).to.throw(/invalid visibility value/);
+      expect(() => {
+        vh.updateCounters_(1.00001);
+      }).to.throw(/invalid visibility value/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
 
     it('should match custom visibility position', () => {

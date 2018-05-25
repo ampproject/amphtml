@@ -87,9 +87,15 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should fail execution of unregistered action', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       element.executeAction({method: 'method1'}, false);
     }).to.throw(/Method not found/); });
+=======
+    expect(() => {
+      element.executeAction({method: 'method1'}, false);
+    }).to.throw(/Method not found/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('`this` context of handler should not be the holder', () => {

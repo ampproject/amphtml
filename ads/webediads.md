@@ -16,6 +16,7 @@ limitations under the License.
 
 # Webedia Adserver
 
+<<<<<<< HEAD
 Private ad system deployed for all Webedia websites.
 
 ## One call method
@@ -55,11 +56,57 @@ This method allow you to call one ad position with a specific configuration.
     data-page="amp"
     data-position="middle"
     data-query="amptest=1">
+=======
+## 1. Introduction
+
+Private ad system deployed for all Webedia websites.
+
+## 2. One call method
+
+This method allow you to call one ad position with a specific configuration.
+
+### a. Basic Example
+
+```html
+<amp-ad width=300
+        height=250
+        type="webediads"
+        data-site="site_test"
+        data-page="amp"
+        data-position="middle"
+        data-query="">
+</amp-ad>
+```
+
+### b. Query Example
+
+```html
+<amp-ad width=300
+        height=250
+        type="webediads"
+        data-site="site_test"
+        data-page="amp"
+        data-position="middle"
+        data-query="amptest=1">
+</amp-ad>
+```
+
+### c. Placeholder and Fallback example
+```html
+<amp-ad width=300
+        height=250
+        type="webediads"
+        data-site="site_test"
+        data-page="amp"
+        data-position="middle"
+        data-query="amptest=1">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     <div placeholder>Loading...</div>
     <div fallback>No ad</div>
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 ## Configuration
 
 For details on the configuration semantics, please contact the ad network or refer to their documentation.
@@ -77,3 +124,25 @@ All parameters are mandatory, only "query" can be empty.
     - **Example**: `key1=value1|value2|value3&key2=value4&key3=value5|value6`
 
 
+=======
+## 3. Supported Parameters
+
+### "data" Parameters
+
+All parameters are mandatory, only "query" can be empty.
+
+- ```data-site``` (String, non-empty)
+- ```data-page``` (String, non-empty)
+- ```data-position``` (String, non-empty)
+- ```data-query``` (String)
+    - ```key``` are separated with ```&```
+    - ```value``` are separted with ```|```
+
+    __Example__
+    - ```key1=value1|value2|value3&key2=value4&key3=value5|value6```
+
+
+## 5. Support
+
+/╲/\╭༼ : ❛ ◡ ❛ : ༽╮/\╱\
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

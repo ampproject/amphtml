@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adsnative"
     data-anapiid="123456">
 </amp-ad>
@@ -27,6 +31,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration details, see [AdsNative's documentation](http://dev.adsnative.com).
 
 ### Required parameters
@@ -44,3 +49,22 @@ For configuration details, see [AdsNative's documentation](http://dev.adsnative.
 - `data-antid`:   the template id
 - `data-ancat`:   a comma separated list of categories
 - `data-ankv`:    a list of key value pairs in the format `"key1:value1, key2:value2"`.
+=======
+For configuration, please see [ad server documentation](http://dev.adsnative.com).
+
+Supported parameters:
+
+**Required**
+- width:        required by amp
+- height:       required by amp
+- data-anapiid: the api id may be used instead of network and widget id
+- data-annid:   the network id must be paired with widget id
+- data-anwid:   the widget id must be paired with network id
+
+**Optional**
+- data-anapiid: the api id
+- data-anwid:   the widget id
+- data-antid:   the template id
+- data-ancat:   a comma separated list of categories
+- data-ankv:    a list of key value pairs in the format "key1:value1, key2:value2"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

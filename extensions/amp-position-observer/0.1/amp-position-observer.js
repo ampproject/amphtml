@@ -16,6 +16,16 @@
 
 import {ActionTrust} from '../../../src/action-trust';
 import {
+<<<<<<< HEAD
+=======
+  Layout,
+  assertLength,
+  getLengthNumeral,
+  getLengthUnits,
+  parseLength,
+} from '../../../src/layout';
+import {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
 import {
@@ -24,12 +34,15 @@ import {
   layoutRectsRelativePos,
 } from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
+<<<<<<< HEAD
 import {
   assertLength,
   getLengthNumeral,
   getLengthUnits,
   parseLength,
 } from '../../../src/layout';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {getServiceForDoc} from '../../../src/service';
@@ -96,6 +109,14 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   /** @override */
+<<<<<<< HEAD
+=======
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   buildCallback() {
     // Since this is a functional component and not visual,
     // layoutCallback is meaningless. We delay the heavy work until

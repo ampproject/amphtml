@@ -69,9 +69,15 @@ describes.fakeWin('AccessService', {
   it('should default to "client" and fail if authorization is missing', () => {
     const config = {};
     element.textContent = JSON.stringify(config);
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
     }).to.throw(/"authorization" URL must be specified/); });
+=======
+    expect(() => {
+      new AccessService(ampdoc);
+    }).to.throw(/"authorization" URL must be specified/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should fail if config login is malformed', () => {
@@ -81,9 +87,15 @@ describes.fakeWin('AccessService', {
       'login': 'http://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
     }).to.throw(/https\:/); });
+=======
+    expect(() => {
+      new AccessService(ampdoc);
+    }).to.throw(/https\:/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should parse the complete config', () => {
@@ -111,9 +123,15 @@ describes.fakeWin('AccessService', {
       'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
     }).to.throw(/Unknown access type/); });
+=======
+    expect(() => {
+      new AccessService(ampdoc);
+    }).to.throw(/Unknown access type/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should start when enabled', () => {
@@ -186,9 +204,15 @@ describes.fakeWin('AccessService', {
     };
     element.textContent = JSON.stringify(config);
     const accessService = new AccessService(ampdoc);
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       accessService.getVendorSource('vendor1');
     }).to.throw(/can only be used for "type=vendor"/); });
+=======
+    expect(() => {
+      accessService.getVendorSource('vendor1');
+    }).to.throw(/can only be used for "type=vendor"/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should parse multiple sources', () => {
@@ -229,6 +253,7 @@ describes.fakeWin('AccessService', {
       },
     ];
     element.textContent = JSON.stringify(config);
+<<<<<<< HEAD
     allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
     }).to.throw(/Namespace already used/); });
@@ -238,6 +263,17 @@ describes.fakeWin('AccessService', {
     allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
     }).to.throw(/Namespace required/); });
+=======
+    expect(() => {
+      new AccessService(ampdoc);
+    }).to.throw(/Namespace already used/);
+
+    delete (config[0].namespace);
+    element.textContent = JSON.stringify(config);
+    expect(() => {
+      new AccessService(ampdoc);
+    }).to.throw(/Namespace required/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });
 
@@ -468,7 +504,12 @@ describes.fakeWin('AccessService authorization', {
     });
   });
 
+<<<<<<< HEAD
   it('should use fallback on authorization failure when available', () => {
+=======
+  // TODO(dvoytenko, #14336): Fails due to console errors.
+  it.skip('should use fallback on authorization failure when available', () => {
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     expectGetReaderId('reader1');
     adapterMock.expects('authorize')
         .withExactArgs()
@@ -1149,10 +1190,14 @@ describes.fakeWin('AccessService login', {
 
   it('should fail to open dialog if loginUrl is not built yet', () => {
     service.sources_[0].loginUrlMap_[''] = null;
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => service.loginWithType_('')).to.throw(
           /Login URL is not ready/);
     });
+=======
+    expect(() => service.loginWithType_('')).to.throw(/Login URL is not ready/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should succeed login with success=true', () => {

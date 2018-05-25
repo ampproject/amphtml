@@ -16,6 +16,10 @@
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
+<<<<<<< HEAD
+=======
+import {map} from '../../../src/utils/object';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
@@ -43,6 +47,12 @@ export class AmpStoryAnalytics {
 
     /** @private @const {!Element} */
     this.element_ = element;
+<<<<<<< HEAD
+=======
+
+    /** @private @const {!Object<string, boolean>} */
+    this.seenPagesIds_ = map();
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   }
 
   /**

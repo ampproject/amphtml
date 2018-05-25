@@ -19,18 +19,35 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="320" height="50"
   type="yahoojp"
   data-yadsid="79712_113431">
+=======
+<amp-ad 
+  width="320"
+  height="50"
+  type="yahoojp"
+  data-yadsid="79712_113431"
+>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration details and to generate your tags, please contact http://marketing.yahoo.co.jp/contact/.
+=======
+For configuration details and to generate your tags, please contact http://marketing.yahoo.co.jp/contact/
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 
 Supported parameters:
 
+<<<<<<< HEAD
 - `data-yadsid`
+=======
+- data-yadsid
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

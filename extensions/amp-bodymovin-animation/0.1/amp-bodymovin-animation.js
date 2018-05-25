@@ -49,6 +49,12 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     /** @private {?boolean} */
     this.autoplay_ = null;
 
+<<<<<<< HEAD
+=======
+    /** @private {?string} */
+    this.src_ = null;
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -80,6 +86,10 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
+<<<<<<< HEAD
+=======
+    this.src_ = this.element.getAttribute('src');
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });

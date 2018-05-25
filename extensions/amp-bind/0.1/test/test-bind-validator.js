@@ -163,6 +163,10 @@ describe('BindValidator', () => {
       expect(val.isResultValid('INPUT', 'type', 'BUTTON')).to.be.false;
       expect(val.isResultValid('INPUT', 'type', 'file')).to.be.false;
       expect(val.isResultValid('INPUT', 'type', 'image')).to.be.false;
+<<<<<<< HEAD
+=======
+      expect(val.isResultValid('INPUT', 'type', 'password')).to.be.false;
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 

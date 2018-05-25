@@ -22,12 +22,16 @@ import {parseJson} from './json';
 
 /** @const */
 const AMP_MESSAGE_PREFIX = 'amp-';
+<<<<<<< HEAD
 export const CONSTANTS = {
   responseTypeSuffix: '-result',
   messageIdFieldName: 'messageId',
   payloadFieldName: 'payload',
   contentFieldName: 'content',
 };
+=======
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /** @enum {string} */
 export const MessageType = {
@@ -43,7 +47,11 @@ export const MessageType = {
   EMBED_SIZE_DENIED: 'embed-size-denied',
   NO_CONTENT: 'no-content',
   GET_HTML: 'get-html',
+<<<<<<< HEAD
   GET_CONSENT_STATE: 'get-consent-state',
+=======
+  GET_HTML_RESULT: 'get-html-result',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
   // For the frame to be placed in full overlay mode for lightboxes
   FULL_OVERLAY_FRAME: 'full-overlay-frame',

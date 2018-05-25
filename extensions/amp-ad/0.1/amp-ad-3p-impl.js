@@ -16,11 +16,14 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
+<<<<<<< HEAD
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent-state';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {LayoutPriority} from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
@@ -157,11 +160,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /** @override */
+<<<<<<< HEAD
   getConsentPolicy() {
     return null;
   }
 
   /** @override */
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   buildCallback() {
     this.type_ = this.element.getAttribute('type');
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
@@ -315,6 +321,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
+<<<<<<< HEAD
 
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
@@ -329,6 +336,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         container: this.container_,
         initialConsentState: consents[1],
         consentSharedData: consents[2],
+=======
+    this.layoutPromise_ = getAdCid(this).then(cid => {
+      const opt_context = {
+        clientId: cid || null,
+        container: this.container_,
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       };
 
       // In this path, the request and render start events are entangled,
@@ -372,6 +385,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
+<<<<<<< HEAD
    * @returns {!Promise<?CONSENT_POLICY_STATE>}
    */
   getConsentState() {
@@ -382,6 +396,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
    * Send a lifecycle event notification.  Currently, this is active only for
    * Google network ad tags (type=adsense or type=doubleclick) and pings are
    * done via direct image tags.  In the future, this will become an event

@@ -36,7 +36,10 @@ import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+<<<<<<< HEAD
 import {tryResolve} from '../utils/promise';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -466,7 +469,11 @@ export class Resources {
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
+<<<<<<< HEAD
       return tryResolve(() => resource.getPageLayoutBox());
+=======
+      return Promise.resolve(resource.getPageLayoutBox());
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();

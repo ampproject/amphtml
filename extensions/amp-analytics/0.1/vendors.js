@@ -1075,10 +1075,16 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   'mediator': {
     'requests': {
+<<<<<<< HEAD
       'host': '//collector.mediator.media/script/${mediator_id}/amp/',
       'renderstart': '${host}init/?url=${canonicalUrl}',
       'prefix': '${host}register/?url=${canonicalUrl}' +
                 '&ref=${documentReferrer}&',
+=======
+      'host': '//collector.mediator.media/amp/?',
+      'prefix': '${host}cid=${mediator_id}&url=${canonicalUrl}' +
+                '&ref=${documentReferrer}&p=4&',
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       'suffix': 'vh=${viewportHeight}&sh=${scrollHeight}&st=${scrollTop}',
       'pageview': '${prefix}e=v',
       'timer': '${prefix}e=t&${suffix}',
@@ -1091,10 +1097,13 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'mediator_id': '',
     },
     'triggers': {
+<<<<<<< HEAD
       'renderStart': {
         'on': 'render-start',
         'request': 'renderstart',
       },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       'trackPageview': {
         'on': 'visible',
         'request': 'pageview',
@@ -1434,6 +1443,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'visible',
         'request': 'pageview',
       },
+<<<<<<< HEAD
       'defaultHeartbeat': {
         'on': 'timer',
         'enabled': '${incrementalEngagedTime(parsely-js,false)}',
@@ -1443,6 +1453,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         },
         'request': 'heartbeat',
       },
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     },
     'transport': {
       'beacon': false,

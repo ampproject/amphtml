@@ -69,6 +69,7 @@ describes.realWin('amp-jwplayer', {
   });
 
   it('fails if no media is specified', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { return getjwplayer({
       'data-player-id': 'sDZEo0ea',
     }).should.eventually.be.rejectedWith(
@@ -82,6 +83,21 @@ describes.realWin('amp-jwplayer', {
     }).should.eventually.be.rejectedWith(
         /The data-player-id attribute is required for/);
     });
+=======
+    return getjwplayer({
+      'data-player-id': 'sDZEo0ea',
+    }).should.eventually.be.rejectedWith(
+        /Either the data-media-id or the data-playlist-id attributes must be/
+    );
+  });
+
+  it('fails if no player is specified', () => {
+    return getjwplayer({
+      'data-media-id': 'Wferorsv',
+    }).should.eventually.be.rejectedWith(
+        /The data-player-id attribute is required for/
+    );
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('renders with a bad playlist', () => {

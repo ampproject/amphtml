@@ -20,7 +20,11 @@ limitations under the License.
 
 ```html
 <amp-ad width="320" height="50"
+<<<<<<< HEAD
     type="microad"
+=======
+	type="microad"
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     data-spot="b4bf837c5ddd69758d5ac924d04cf502"
     data-url="${COMPASS_EXT_URL}"
     data-referrer="${COMPASS_EXT_REF}"
@@ -36,6 +40,7 @@ For configuration details and to generate your tags, contact compass-support@mic
 
 Supported parameters:
 
+<<<<<<< HEAD
 - `width`
 - `height`
 - `data-spot`
@@ -44,3 +49,13 @@ Supported parameters:
 - `data-ifa`
 - `data-appid`
 - `data-geo`
+=======
+- width
+- height
+- data-spot
+- data-url
+- data-referrer
+- data-ifa
+- data-appid
+- data-geo
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

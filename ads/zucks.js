@@ -22,6 +22,7 @@ import {validateData, writeScript} from '../3p/3p';
  */
 export function zucks(global, data) {
   validateData(data, ['frameId']);
+<<<<<<< HEAD
 
   let script = `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`;
 
@@ -30,4 +31,7 @@ export function zucks(global, data) {
   }
 
   writeScript(global, script);
+=======
+  writeScript(global, `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 }

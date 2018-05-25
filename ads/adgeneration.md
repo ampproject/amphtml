@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adgeneration"
     data-id="10722">
 </amp-ad>
@@ -27,6 +31,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For details on the configuration semantics, please see [Ad Generation's documentation](https://github.com/AdGeneration/sdk/wiki).
 
 Supported parameters:
@@ -37,3 +42,15 @@ Supported parameters:
 - `data-adtype`
 - `data-async`
 - `data-option`
+=======
+For semantics of configuration, please see [ad network documentation](https://github.com/AdGeneration/sdk/wiki).
+
+Supported parameters:
+
+- data-id
+- data-targetid
+- data-displayid
+- data-adtype
+- data-async
+- data-option
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

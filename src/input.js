@@ -91,6 +91,15 @@ export class Input {
     }
   }
 
+<<<<<<< HEAD
+=======
+  /** @private */
+  cleanup_() {
+    this.win.document.removeEventListener('keydown', this.boundOnKeyDown_);
+    this.win.document.removeEventListener('mousedown', this.boundOnMouseDown_);
+  }
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * Whether the touch input has been detected.
    * @return {boolean}

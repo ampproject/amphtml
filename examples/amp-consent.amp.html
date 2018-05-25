@@ -141,8 +141,12 @@
       margin: 0;
     }
   </style>
+<<<<<<< HEAD
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+=======
+   <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -169,8 +173,12 @@
             "checkConsentHref": "http://localhost:8000/get-consent-v1",
             "promptUI": "ui1"
           }
+<<<<<<< HEAD
         },
         "postPromptUI": "postPromptUI"
+=======
+        }
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       }</script>
       <div id="ui1">
         Can I load the image??
@@ -178,10 +186,13 @@
         <button on="tap:ABC.reject" role="button">Reject</button>
         <button on="tap:ABC.dismiss" role="button">Dismiss</button>
       </div>
+<<<<<<< HEAD
       <div id="postPromptUI">
         Post Prompt UI
         <button on="tap:ABC.prompt" role="button">Manage</button>
       </div>
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     </amp-consent>
     <article>
 
@@ -197,8 +208,21 @@
         </header>
 
         <div>
+<<<<<<< HEAD
         Revoke consent
         <button class="button" on="tap:ABC.prompt" role="button">Manage</button>
+=======
+        Revoke consent ABC and DEF
+        <button class="button" on="tap:ABC.prompt(consentId=ABC),ABC.prompt(consentId=DEF)" role="button">Manage</button>
+      </div>
+       <div>
+        Revoke error consent doesn't exsit
+        <button class="button" on="tap:ABC.prompt(consentId=ABCd)" role="button">Manage</button>
+      </div>
+      <div>
+        Only revoke DEF
+        <button class="button" on="tap:ABC.prompt(consentId=DEF)" role="button">Manage</button>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
       </div>
 
         <div class="author">
@@ -223,6 +247,7 @@
             Maecenas sollicitudin felis aliquam tortor vulputate,
             ac posuere velit semper.
           </p>
+<<<<<<< HEAD
           <amp-ad width="320" height="50"
                   data-block-on-consent
                   type="doubleclick"
@@ -230,6 +255,8 @@
                   rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}, "nonexistent-vendor": {"SLOT_ID": "1"}, "fakeVendor2": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1", "https://localhost:4443/abc?timeout=true", "https://broken.zzzzzz", "https://localhost:4443/zqq?slot_id=1"], "timeoutMillis": 500}'
                   json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
           </amp-ad>
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           <p>
             Fusce pretium tempor justo, vitae consequat dolor maximus eget.
             Aliquam iaculis tincidunt quam sed maximus. Suspendisse faucibus
@@ -255,6 +282,7 @@
             ac molestie nulla porttitor ac. Donec porta risus ut enim
             pellentesque, id placerat elit ornare.
           </p>
+<<<<<<< HEAD
 
           <amp-ad width=300 height=250
               type="_ping_"
@@ -263,6 +291,8 @@
               data-valid='true'>
           </amp-ad>
 
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
           <p>
             Curabitur convallis, urna quis pulvinar feugiat, purus diam
             posuere turpis, sit amet tincidunt purus justo et mi. Donec

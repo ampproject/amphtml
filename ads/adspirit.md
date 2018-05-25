@@ -19,7 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
+=======
+<amp-ad width=300 height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="adspirit"
     data-asm-params="&amp;pid=4"
     data-asm-host="help.adspirit.de">
@@ -28,6 +32,7 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 
 For details on the configuration semantics, please see [AdSpirit's documentation](http://help.adspirit.de/help/).
 
@@ -35,3 +40,11 @@ Supported parameters:
 
 - `data-asm-params`
 - `data-asm-host`
+=======
+For semantics of configuration, please see ad network documentation at http://help.adspirit.de/help/.
+
+Supported parameters:
+
+- data-asm-params
+- data-asm-host
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

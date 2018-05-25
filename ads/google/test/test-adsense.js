@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {adsense} from '../adsense';
 
 describes.realWin('adsenseDelayedFetch', {}, env => {
@@ -29,7 +32,10 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
     'adHost': 'data-ad-host',
     'adtest': 'data-adtest',
     'tagOrigin': 'data-tag-origin',
+<<<<<<< HEAD
     'package': 'data-package',
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   };
 
   beforeEach(() => {
@@ -86,15 +92,21 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
     data['fullWidth'] = 'true';
     data['autoFormat'] = 'rspv';
     data['height'] = '666';
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => adsense(env.win, data)).to.throw(
           /Specified height 666 in <amp-ad> tag is not equal to the required/);
     });
+=======
+    expect(() => adsense(env.win, data)).to.throw(
+        /Specified height 666 in <amp-ad> tag is not equal to the required/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('should throw on missing fullWidth field for responsive ad unit', () => {
     data['autoFormat'] = 'rspv';
     data['height'] = '320';
+<<<<<<< HEAD
     allowConsoleError(() => {
       expect(() => adsense(env.win, data)).to.throw(
           /Responsive AdSense ad units require the attribute data-full-width.​/
@@ -184,5 +196,9 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
       });
     }
 
+=======
+    expect(() => adsense(env.win, data)).to.throw(
+        /Responsive AdSense ad units require the attribute data-full-width.​/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

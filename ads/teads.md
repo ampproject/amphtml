@@ -19,17 +19,32 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="1"
     type="teads"
     data-pid="42266"
     layout="responsive">
+=======
+<amp-ad width=300 height=1
+      type="teads"
+      data-pid="42266"
+      layout="responsive">
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 </amp-ad>
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 For configuration semantics, please contact [Teads](http://teads.tv/fr/contact/).
 
 Supported parameters:
 
 - `data-pid`
+=======
+For semantics of configuration, please contact [Teads](http://teads.tv/fr/contact/).
+
+Supported parameters:
+
+- data-pid
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

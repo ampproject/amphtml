@@ -396,6 +396,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
       });
     });
+<<<<<<< HEAD
 
     it('should be able to use get-consent-state API', () => {
       adImpl.getConsentState = () => Promise.resolve(2);
@@ -416,5 +417,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
       });
     });
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 });

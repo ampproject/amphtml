@@ -20,6 +20,10 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
+<<<<<<< HEAD
+=======
+import {Layout} from '../../../src/layout';
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {computedStyle, setImportantStyles} from '../../../src/style';
@@ -28,7 +32,10 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
+<<<<<<< HEAD
 import {tryFocus} from '../../../src/dom';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -97,6 +104,14 @@ class AmpLightbox extends AMP.BaseElement {
     this.registerAction('close', this.close.bind(this));
   }
 
+<<<<<<< HEAD
+=======
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   /**
    * Takes ownership of all AMP element descendants.
    * @private
@@ -184,6 +199,7 @@ class AmpLightbox extends AMP.BaseElement {
         .then(() => this.finalizeOpen_());
   }
 
+<<<<<<< HEAD
   /**
    * Any child of the lightbox with the autofocus attribute should be focused
    * after the lightbox opens.
@@ -199,10 +215,13 @@ class AmpLightbox extends AMP.BaseElement {
   /**
    * @private
    */
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   finalizeOpen_() {
     if (this.isScrollable_) {
       st.setStyle(this.element, 'webkitOverflowScrolling', 'touch');
     }
+<<<<<<< HEAD
 
     // This should be in a mutateElement block, but focus on iOS won't work
     // if triggered asynchronously inside a callback.
@@ -235,6 +254,35 @@ class AmpLightbox extends AMP.BaseElement {
     this.scheduleResume(container);
     this.triggerEvent_(LightboxEvents.OPEN);
 
+=======
+    this.mutateElement(() => {
+      st.setStyles(this.element, {
+        display: '',
+        opacity: 0,
+        // TODO(dvoytenko): use new animations support instead.
+        transition: 'opacity 0.1s ease-in',
+      });
+      Services.vsyncFor(this.win).mutate(() => {
+        st.setStyle(this.element, 'opacity', '');
+      });
+    }).then(() => {
+      const container = dev().assertElement(this.container_);
+      if (!this.isScrollable_) {
+        this.updateInViewport(container, true);
+      } else {
+        this.scrollHandler_();
+        this.updateChildrenInViewport_(this.pos_, this.pos_);
+      }
+      // TODO: instead of laying out children all at once, layout children based
+      // on visibility.
+      this.element.addEventListener('transitionend', this.boundReschedule_);
+      this.element.addEventListener('animationend', this.boundReschedule_);
+      this.scheduleLayout(container);
+      this.scheduleResume(container);
+      this.triggerEvent_(LightboxEvents.OPEN);
+    });
+
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });

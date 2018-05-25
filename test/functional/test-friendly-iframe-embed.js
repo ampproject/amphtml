@@ -329,7 +329,10 @@ describe('friendly-iframe-embed', () => {
     let blacklistedAd;
     let blacklistedAnalytics;
     let blacklistedPixel;
+<<<<<<< HEAD
     let blacklistedAmpAdExit;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
     const context = document.createElement('div');
     document.body.appendChild(context);
@@ -342,7 +345,10 @@ describe('friendly-iframe-embed', () => {
           blacklistedAd = resource('amp-ad', 0),
           blacklistedAnalytics = resource('amp-analytics', 0),
           blacklistedPixel = resource('amp-pixel', 0),
+<<<<<<< HEAD
           blacklistedAmpAdExit = resource('amp-ad-exit', 0),
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
         ]))
         .once();
 
@@ -352,7 +358,10 @@ describe('friendly-iframe-embed', () => {
       expect(blacklistedAd.loadedComplete).to.be.false;
       expect(blacklistedAnalytics.loadedComplete).to.be.false;
       expect(blacklistedPixel.loadedComplete).to.be.false;
+<<<<<<< HEAD
       expect(blacklistedAmpAdExit.loadedComplete).to.be.false;
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     });
   });
 

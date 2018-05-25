@@ -19,6 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
     type="adtech"
     data-atwMN="2842475"
@@ -33,13 +34,31 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters:
 
+=======
+<amp-ad width=300 height=250
+        type="adtech"
+        data-atwMN="2842475"
+        data-atwDiv="adtech-ad-container"
+        >
+```
+
+## Configuration
+For semantics of configuration, please see ad network documentation.
+
+### Required Parameters:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 * `data-atwMN` - magic number for the ad spot
 * `data-atwDiv` - div name of the ad spot; can be class or id
 
 ### Optional parameters:
+<<<<<<< HEAD
 
 * `data-atwPlId` - placement ID (instead of Magic Number)
 * `data-atwOthAT` - generic var to set key/value pairs to send with the ad call; accepts multiple values in a semi-colon delimited list
+=======
+* `data-atwPlId` - placement ID (instead of Magic Number)
+* `data-atwOthAT` - generic var to set key/value pairs to send with the ad call; accepts mulitple values in a semi-colon delimited list
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 * `data-atwCo` - override default country code
 * `data-atwHtNmAT` - override ad host name
 * `data-atwNetId` - network ID
@@ -48,7 +67,11 @@ For details on the configuration semantics, please contact the ad network or ref
 * `data-atwSizes` - this overrides atwWidth/atwHeight; use this to create a comma-separated list of possible ad sizes
 * 'data-atwPolar' - set to "1" to enable Polar.me ad in the ad spot
 
+<<<<<<< HEAD
 ### Direct URL call:
 
+=======
+### Direct URL Call:
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 * `src` - Value must start with `https:` and contain `/addyn/`.  This should only be used in cases where a direct ad call is being used rather than a magic number (MN).
 

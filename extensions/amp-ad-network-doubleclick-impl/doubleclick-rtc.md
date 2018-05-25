@@ -307,7 +307,11 @@ The results will be merged with the value set on the amp-ad element, and the res
 
 _Note: the ordering of items is not guaranteed._
 
+<<<<<<< HEAD
 This resulting object will then be sent on the **scp** parameter of the ad request, as
+=======
+This resulting object will then be sent on the **scp **parameter of the ad request, as
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 
 ```
@@ -319,5 +323,8 @@ https://securepubads.g.doubleclick.net/...scp=loc%3Dusa%26gender%3Df%26r%3Dh%26e
 ## Using RTC In DFP
 
 The results of the RTC Callouts will be added to the DoubleClick Ad Request, allowing you to use the key/value pairs in DFP as you would for any other non-AMP ad request. Please refer to generic key/value targeting documentation for DoubleClick.
+<<<<<<< HEAD
 
 #### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

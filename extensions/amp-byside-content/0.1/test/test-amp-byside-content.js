@@ -72,6 +72,7 @@ describes.realWin('amp-byside-content', {
   });
 
   it('requires data-label', () => {
+<<<<<<< HEAD
     allowConsoleError(() => { return getElement({
       'data-webcare-id': 'D6604AE5D0',
     }).should.eventually.be.rejectedWith(
@@ -85,6 +86,19 @@ describes.realWin('amp-byside-content', {
     }).should.eventually.be.rejectedWith(
         /The data-webcare-id attribute is required for/);
     });
+=======
+    return getElement({
+      'data-webcare-id': 'D6604AE5D0',
+    }).should.eventually.be.rejectedWith(
+        /The data-label attribute is required for/);
+  });
+
+  it('requires data-webcare-id', () => {
+    return (getElement({
+      'data-label': 'placeholder-label',
+    })).should.eventually.be.rejectedWith(
+        /The data-webcare-id attribute is required for/);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   });
 
   it('generates correct default origin', () => {

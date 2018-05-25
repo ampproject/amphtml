@@ -20,7 +20,10 @@
  */
 
 import {dev, user} from './log';
+<<<<<<< HEAD
 import {htmlFor} from './static-template';
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles} from './style';
 import {startsWith} from './string';
@@ -99,10 +102,13 @@ export const LOADING_ELEMENTS_ = {
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
   'AMP-EMBED': true,
+<<<<<<< HEAD
   'AMP-FACEBOOK': true,
   'AMP-FACEBOOK-COMMENTS': true,
   'AMP-FACEBOOK-LIKE': true,
   'AMP-FACEBOOK-PAGE': true,
+=======
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   'AMP-IFRAME': true,
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
@@ -449,6 +455,7 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.INTRINSIC) {
     // Intrinsic uses an svg inside the sizer element rather than the padding trick
     // Note a naked svg won't work becasue other thing expect the i-amphtml-sizer element
+<<<<<<< HEAD
     const sizer = htmlFor(element)`
       <i-amphtml-sizer class="i-amphtml-sizer">
         <img class="i-amphtml-intrinsic-sizer" />
@@ -458,6 +465,16 @@ export function applyStaticLayout(element) {
         `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
     element.insertBefore(sizer, element.firstChild);
     // TODO(jpettitt): sizer is leaked and can't be cleaned up.
+=======
+    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    const intrinsicSizer = element.ownerDocument.createElement('img');
+    sizer.classList.add('i-amphtml-sizer');
+    intrinsicSizer.classList.add('i-amphtml-intrinsic-sizer');
+    intrinsicSizer.setAttribute('src',
+        `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>`);
+    sizer.appendChild(intrinsicSizer);
+    element.insertBefore(sizer, element.firstChild);
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     element.sizerElement = intrinsicSizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.

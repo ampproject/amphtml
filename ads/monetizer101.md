@@ -39,5 +39,10 @@ limitations under the License.
 For more information, please [contact Monetizer101](http://monetizer101.com/apply-now/).
 
 Required parameters:
+<<<<<<< HEAD
 - `data-widget`
 - `data-config`
+=======
+- data-widget
+- data-config
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

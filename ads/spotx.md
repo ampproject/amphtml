@@ -22,24 +22,41 @@ limitations under the License.
 
 ```html
   <amp-ad width="300" height="250"
+<<<<<<< HEAD
       type="spotx"
       data-spotx_channel_id="85394"
       data-spotx_autoplay="1">
+=======
+          type="spotx"
+          data-spotx_channel_id="85394"
+          data-spotx_autoplay="1"
+          >
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
   </amp-ad>
 ```
 
 ### Using Custom Key-Value Pairs
 
 ```html
+<<<<<<< HEAD
 <amp-ad width="300" height="250"
     type="spotx"
     data-spotx_channel_id="85394"
     data-spotx_custom='{"key1": "val1", "key2": "val2"}'>
 </amp-ad>
+=======
+  <amp-ad width="300" height="250"
+          type="spotx"
+          data-spotx_channel_id="85394"
+          data-spotx_custom='{"key1": "val1", "key2": "val2"}'
+          >
+  </amp-ad>
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 ```
 
 ## Configuration
 
+<<<<<<< HEAD
 The SpotX `amp-ad` integration has many of the same capabilities and options as our SpotX EASI integration. For full list of options, please see the [SpotX EASI integration documentation](https://developer.spotxchange.com/content/local/docs/sdkDocs/EASI/README.md#common-javascript-attributes).
 
 ### Required parameters
@@ -47,3 +64,14 @@ The SpotX `amp-ad` integration has many of the same capabilities and options as 
 - `data-spotx_channel_id`
 - `width`
 - `height`
+=======
+The SpotX `amp-ad` integration has many of the same capabilities and options as our SpotX EASI integration. For full list of options, please see the SpotX EASI integration documenation:
+
+https://developer.spotxchange.com/content/local/docs/sdkDocs/EASI/README.md#common-javascript-attributes
+
+Required Parameters:
+
+- data-spotx_channel_id
+- width
+- height
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d

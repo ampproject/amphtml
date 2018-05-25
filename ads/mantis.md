@@ -16,20 +16,37 @@ limitations under the License.
 
 # MANTIS® Ad Network
 
+<<<<<<< HEAD
 Please visit the [MANTIS® Ad Network website](https://www.mantisadnetwork.com) for more information about MANTIS. If you have an issues implementing these tags, please [contact MANTIS](http://www.mantisadnetwork.com/contact/).
+=======
+Please visit our [website](https://www.mantisadnetwork.com) for more information about us. If you have an issues implementing these tags, please [contact us](http://www.mantisadnetwork.com/contact/).
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
 
 ## Examples
 
 ### Display Ads
 
+<<<<<<< HEAD
 ```html
 <amp-ad width="300" height="250"
+=======
+Supported parameters:
+
+- data-property
+- data-zone
+
+```html
+<amp-ad
+    width=300
+    height=250
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type = "mantis-display"
     data-property = "demo"
     data-zone="medium-rectangle">
 </amp-ad>
 ```
 
+<<<<<<< HEAD
 Supported parameters:
 
 - `data-property`
@@ -42,14 +59,33 @@ Depending on your page design, you may need to play with the `"heights="` parame
 
 ```html
 <amp-embed width="100" height="283"
+=======
+### Content Recommendation
+
+Supported parameters:
+
+- data-property
+- data-css (Overrides the default CSS embedded by the script)
+
+Depending on your page design, you may need to play with the "heights=" parameter to ensure the styling works for your layout.
+
+```html
+<amp-embed
+    width=100
+    height=283
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
     type="mantis-recommend"
     layout=responsive
     heights="(min-width:1907px) 56%, (min-width:1100px) 64%, (min-width:780px) 75%, (min-width:480px) 105%, 200%"
     data-property="demo">
 </amp-embed>
+<<<<<<< HEAD
 ```
 
 Supported parameters:
 
 - `data-property`
 - `data-css` (Overrides the default CSS embedded by the script)
+=======
+```
+>>>>>>> ee7394982049dcbe4684c54c263b44407e1efc0d
