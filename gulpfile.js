@@ -1359,7 +1359,6 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
       });
 }
 
-
 /**
  * Build "Login Done" page.
  *
