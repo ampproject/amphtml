@@ -37,6 +37,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {ampGeoPresets} from './amp-geo-presets';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
@@ -143,6 +144,7 @@ export class AmpGeo extends AMP.BaseElement {
       this.country_ = getMode(this.win).geoOverride.toLowerCase();
     }
   }
+
   /**
    * Find matching country groups
    * @param {Object} config
@@ -151,7 +153,7 @@ export class AmpGeo extends AMP.BaseElement {
     // ISOCountryGroups are optional but if specified at least one must exist
     const ISOCountryGroups = /** @type {!Object<string, Array<string>>} */(
       config.ISOCountryGroups);
-    const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
+    const errorPrefix = `<${TAG}> ISOCountryGroups`; // code size
     if (ISOCountryGroups) {
       user().assert(
           isObject(ISOCountryGroups),
@@ -164,13 +166,34 @@ export class AmpGeo extends AMP.BaseElement {
         user().assert(
             isArray(ISOCountryGroups[group]),
             `${errorPrefix}[${group}] must be an array`);
-        ISOCountryGroups[group] = ISOCountryGroups[group]
-            .map(country => country.toLowerCase());
-        if (ISOCountryGroups[group].includes(this.country_)) {
+
+        if (this.checkGroup_(ISOCountryGroups[group])) {
           this.matchedGroups_.push(group);
         }
       });
     }
+  }
+
+  /**
+   * checkGroup_() does this.country_  match the group
+   * @param {!Array<string>} countryGroup The group to match against
+   * @return {boolean}
+   */
+  checkGroup_(countryGroup) {
+    let presetCountries = [];
+    countryGroup = countryGroup.map((country, idx) => {
+      if (/^preset-/.test(country)) {
+        user().assert(
+            isArray(ampGeoPresets[country]),
+            `<${TAG}> preset ${country} not found`);
+        delete countryGroup[idx];
+        presetCountries = presetCountries.concat(ampGeoPresets[country]);
+        return;
+      }
+      return country.toLowerCase();
+    }).concat(presetCountries);
+
+    return countryGroup.includes(this.country_);
   }
 
   /**

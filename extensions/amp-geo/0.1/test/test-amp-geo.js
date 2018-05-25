@@ -32,6 +32,8 @@ describes.realWin('amp-geo', {
     ISOCountryGroups: {
       nafta: ['ca', 'mx', 'us', 'unknown'],
       unknown: ['unknown'],
+      gdpr: ['preset-gdpr'],
+      myGroup: ['preset-gdpr', 'us'],
       anz: ['au', 'nz'],
     },
   };
@@ -175,20 +177,40 @@ describes.realWin('amp-geo', {
         'amp-iso-country-unknown',
         'amp-geo-group-nafta',
         'amp-geo-no-group',
+        'amp-geo-group-gdpr',
+        'amp-geo-group-myGroup',
+      ], false);
+    });
+  });
+
+  it('should allow preset country groups', () => {
+    win.AMP_MODE.geoOverride = 'fr';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('fr');
+      expectBodyHasClass([
+        'amp-iso-country-fr',
+        'amp-geo-group-gdpr',
+        'amp-geo-group-myGroup',
+      ], true);
+      expectBodyHasClass([,
+        'amp-geo-no-group',
       ], false);
     });
   });
 
 
   it('should set amp-geo-no-group if no group matches', () => {
-    win.AMP_MODE.geoOverride = 'gb';
+    win.AMP_MODE.geoOverride = 'za';
     addConfigElement('script');
     geo.buildCallback();
 
     return Services.geoForDocOrNull(el).then(geo => {
-      expect(geo.ISOCountry).to.equal('gb');
+      expect(geo.ISOCountry).to.equal('za');
       expectBodyHasClass([
-        'amp-iso-country-gb',
+        'amp-iso-country-za',
         'amp-geo-no-group',
       ], true);
       expectBodyHasClass([
