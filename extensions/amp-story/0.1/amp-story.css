@@ -112,7 +112,11 @@ amp-story[standalone]:fullscreen {
   max-width: none !important;
 }
 
-amp-story .amp-video-eq {
+amp-story .amp-video-eq .amp-video-eq-col {
+  margin-right: 1px !important;
+}
+
+amp-story .amp-video-eq:not(.amp-video-eq-play) {
   display: none !important;
 }
 

@@ -1599,19 +1599,17 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Shows the audio icon if the story has any media elements or background
-   * audio.
+   * Shows the audio icon if the story has any media elements containing audio,
+   * or background audio at the story or page level.
    * @private
    */
   updateAudioIcon_() {
-    // TODO(#11857): Defer to any playing media element for whether any audio is
-    // being played.
-    const containsMediaElement = !!this.element.querySelector(
-        'amp-audio, amp-video, [background-audio]');
+    const containsMediaElementWithAudio = !!this.element.querySelector(
+        'amp-audio, amp-video:not([noaudio]), [background-audio]');
     const hasStoryAudio = this.element.hasAttribute('background-audio');
 
-    this.storeService_.dispatch(
-        Action.TOGGLE_HAS_AUDIO, containsMediaElement || hasStoryAudio);
+    this.storeService_.dispatch(Action.TOGGLE_HAS_AUDIO,
+        containsMediaElementWithAudio || hasStoryAudio);
   }
 
   /** @private */
