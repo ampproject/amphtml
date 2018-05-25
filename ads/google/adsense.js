@@ -30,7 +30,8 @@ export function adsense(global, data) {
   validateData(data, [],
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
         'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth', 'package',
-        'npaOnUnknownConsent']);
+        'npaOnUnknownConsent', 'matchedContentUiType', 'matchedContentRowsNum',
+        'matchedContentColumnsNum']);
 
   if (data['autoFormat'] == 'rspv') {
     user().assert(data.hasOwnProperty('fullWidth'),
@@ -55,7 +56,8 @@ export function adsense(global, data) {
 
   const i = global.document.createElement('ins');
   ['adChannel', 'adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin',
-    'package']
+    'package', 'matchedContentUiType', 'matchedContentRowsNum',
+    'matchedContentColumnsNum']
       .forEach(datum => {
         if (data[datum]) {
           i.setAttribute('data-' + camelCaseToDash(datum), data[datum]);

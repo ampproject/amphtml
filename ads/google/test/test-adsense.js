@@ -30,6 +30,9 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
     'adtest': 'data-adtest',
     'tagOrigin': 'data-tag-origin',
     'package': 'data-package',
+    'matchedContentUiType': 'data-matched-content-ui-type',
+    'matchedContentRowsNum': 'data-matched-content-rows-num',
+    'matchedContentColumnsNum': 'data-matched-content-columns-num',
   };
 
   beforeEach(() => {
