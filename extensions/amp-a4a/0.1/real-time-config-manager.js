@@ -67,12 +67,18 @@ export const RTC_ERROR_ENUM = {
 
 export class RealTimeConfigManager {
 
+  /**
+   * @param {!./amp-a4a.AmpA4A} a4aElement
+   */
   constructor(a4aElement) {
+    /** @private {!./amp-a4a.AmpA4A} */
     this.a4aElement_ = a4aElement;
 
+    /** @private {!Object} */
     this.urlReplacements_ = Services.urlReplacementsForDoc(
         this.a4aElement_.getAmpDoc());
 
+    /** @private {!Window} */
     this.win_ = this.a4aElement_.win;
 
     /** @private {!Object<string, boolean>} */
@@ -84,6 +90,7 @@ export class RealTimeConfigManager {
     /** @private {!Array<!Promise<!rtcResponseDef>>} */
     this.promiseArray_ = [];
 
+    /** @private {?Object} */
     this.rtcConfig_ = {};
   }
 
@@ -302,7 +309,7 @@ export class RealTimeConfigManager {
    * @private
    */
   sendRtcCallout_(url, timeoutMillis, callout, checkStillCurrent,
-                  errorReportingUrl) {
+    errorReportingUrl) {
     /**
      * Note: Timeout is enforced by timerFor, not the value of
      *   rtcTime. There are situations where rtcTime could thus
