@@ -316,8 +316,8 @@ export function googleAdUrl(
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
   const ampAdImplementation = a4a.isXhrAllowed() ?
-    AmpAdImplementation.AMP_AD_FRAME_GET :
-    AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP;
+      AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP:
+      AmpAdImplementation.AMP_AD_FRAME_GET;
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime,
       ampAdImplementation)
       .then(pageLevelParameters => {
@@ -927,5 +927,6 @@ export function isCanonical(win) {
   const googleCdnProxyRegex =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return !(googleCdnProxyRegex.test(win.location.origin)
-           || getMode(win).localDev || getMode(win).test);
+           || getMode(win).localDev || getMode(win).test) ||
+      isExperimentOn(win, 'LOCAL_force_canonical');
 }

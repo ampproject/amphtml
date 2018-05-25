@@ -706,7 +706,7 @@ export class AmpA4A extends AMP.BaseElement {
           // If we should skip the XHR, we will instead request and render
           // by simply writing a frame into the page using
           // renderViaFrameGet
-          if (this.isXhrAllowed()) {
+          if (!this.isXhrAllowed()) {
             this.experimentalNonAmpCreativeRenderMethod_ =
                 XORIGIN_MODE.IFRAME_GET;
             Promise.reject(IFRAME_GET);
@@ -1088,7 +1088,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   isXhrAllowed() {
-    return false;
+    return true;
   }
 
   /** @override **/
