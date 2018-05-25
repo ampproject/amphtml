@@ -24,6 +24,7 @@ import {
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
   extractAmpAnalyticsConfig,
+  extractHost,
   getAmpRuntimeTypeParameter,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
@@ -774,5 +775,26 @@ describe('Google A4A utils', () => {
       fakeWin.location.origin = 'https://www-somesite.cdn.ampproject.org';
       expect(isCanonical(fakeWin)).to.be.false;
     });
+  });
+
+  describe('#extractHost', () => {
+    [
+      {in: 'http://foo.com/sl?lj=fl', out: 'foo.com'},
+      {in: 'Http://bar.com?lj=fl', out: 'bar.com'},
+      {in: 'htTps://foo.com?lj=fl', out: 'foo.com'},
+      {in: 'http://bar.com', out: 'bar.com'},
+      {in: 'https://foo.com', out: 'foo.com'},
+      {in: 'https://foo.com:8080', out: 'foo.com'},
+      {in: 'https://bar.com:8080/lkjs?a=b', out: 'bar.com'},
+      {in: 'bar.com:8080/lkjs?a=b', out: 'bar.com'},
+      {in: 'bar.com:8080/', out: 'bar.com'},
+      {in: 'bar.com/sl?lj=fl', out: 'bar.com'},
+      {in: 'foo.com/sl/lj=fl?ls=f', out: 'foo.com'},
+      {in: 'bar.com?lj=fl', out: 'bar.com'},
+      {in: 'foo.com?lj=fl', out: 'foo.com'},
+      {in: 'hello.com', out: 'hello.com'},
+      {in: '', out: ''},
+    ].forEach(test =>
+      it(test.in, () => expect(extractHost(test.in)).to.equal(test.out)));
   });
 });
