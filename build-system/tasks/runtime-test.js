@@ -39,7 +39,7 @@ const {green, yellow, cyan, red, bold} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
-
+const tooManyTestsToFix = 15;
 
 /**
  * Read in and process the configuration settings for karma
@@ -377,7 +377,9 @@ function runTests() {
       });
     }
     c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
-    c.client.failOnConsoleError = true;
+    if (testsToRun.length < tooManyTestsToFix) {
+      c.client.failOnConsoleError = true;
+    }
   } else if (argv.integration) {
     c.files = c.files.concat(
         config.commonIntegrationTestPaths, config.integrationTestPaths);
