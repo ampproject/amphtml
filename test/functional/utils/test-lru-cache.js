@@ -40,7 +40,8 @@ describe('LruCache', () => {
     for (let i = 0; i < 5; i++) {
       cache.put(0, i);
     }
-    for (let i = 0; i < 5; i++) {
+    expect(cache.get(0)).to.equal(4);
+    for (let i = 1; i < 5; i++) {
       expect(cache.get(i)).to.equal(i);
     }
   });
