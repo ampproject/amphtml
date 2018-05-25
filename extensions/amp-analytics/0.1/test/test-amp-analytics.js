@@ -169,7 +169,7 @@ describes.realWin('amp-analytics', {
         const interval = setInterval(() => {
           const time = Date.now();
           if (sendRequestSpy.callCount > callCount ||
-                  opt_max && (time - start) > opt_max) {
+            opt_max && (time - start) > opt_max) {
             clearInterval(interval);
             resolve();
           }
@@ -189,8 +189,8 @@ describes.realWin('amp-analytics', {
    * AMP team's approval.
    *
    * @param {!JsonObject} config The inline config to update.
-   * @return {!JsonObject}
-   */
+    * @return {!JsonObject}
+    */
   function clearVendorOnlyConfig(config) {
     for (const t in config.triggers) {
       if (config.triggers[t].iframePing) {
@@ -220,11 +220,12 @@ describes.realWin('amp-analytics', {
 
         for (const name in config.requests) {
           it('should produce request: ' + name +
-              '. If this test fails update vendor-requests.json', function* () {
+            '. If this test fails update vendor-requests.json', function* () {
             const urlReplacements =
                 Services.urlReplacementsForDoc(ampdoc);
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
-            sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
+            sandbox.stub(urlReplacements.getVariableSource(),
+                'get').callsFake(
                 function(name) {
                   expect(this.replacements_).to.have.property(name);
 
@@ -233,7 +234,7 @@ describes.realWin('amp-analytics', {
                   return {
                     sync: paramName => {
                       if (!extraMapping ||
-                        extraMapping[paramName] === undefined) {
+                          extraMapping[paramName] === undefined) {
                         return defaultValue;
                       }
                       return extraMapping[paramName];
@@ -721,7 +722,7 @@ describes.realWin('amp-analytics', {
       return analytics.layoutCallback().then(() => {
         expect(errorSpy).to.be.calledWith('AmpAnalytics <unknown id>',
             'Inline or remote config should not ' +
-            'overwrite vendor transport settings');
+          'overwrite vendor transport settings');
       });
     });
 
@@ -848,7 +849,7 @@ describes.realWin('amp-analytics', {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
             'https://example.com/title=Test%20Title&' +
-            'ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
+          'ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
       });
     });
 
@@ -864,14 +865,14 @@ describes.realWin('amp-analytics', {
     });
 
     it('expands trigger vars with higher precedence' +
-        'than config vars', () => {
+      'than config vars', () => {
       const analytics = getAnalyticsTag({
         'vars': {
           'var1': 'config1',
           'var2': 'config2',
         },
         'requests': {'pageview':
-          'https://example.com/test1=${var1}&test2=${var2}'},
+            'https://example.com/test1=${var1}&test2=${var2}'},
         'triggers': [{
           'on': 'visible',
           'request': 'pageview',
@@ -886,7 +887,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('expands element level vars with higher precedence' +
-        'than trigger vars', () => {
+      'than trigger vars', () => {
       const analytics = getAnalyticsTag();
       const analyticsGroup = ins.createAnalyticsGroup(analytics.element);
 
@@ -908,11 +909,11 @@ describes.realWin('amp-analytics', {
     });
 
     it('expands config vars with higher precedence' +
-        'than platform vars', () => {
+      'than platform vars', () => {
       const analytics = getAnalyticsTag({
         'vars': {'random': 428},
         'requests': {'pageview':
-          'https://example.com/test1=${title}&test2=${random}'},
+            'https://example.com/test1=${title}&test2=${random}'},
         'triggers': [{'on': 'visible', 'request': 'pageview'}],
       });
       return waitForSendRequest(analytics).then(() => {
@@ -923,7 +924,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('expands and encodes requests, config vars,' +
-        'and trigger vars', () => {
+      'and trigger vars', () => {
       const analytics = getAnalyticsTag({
         'vars': {
           'c1': 'config 1',
@@ -966,7 +967,7 @@ describes.realWin('amp-analytics', {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
             'https://example.com/test?' +
-            'c1=Config%2C%20The%20Barbarian,config%201&c2=config%262');
+          'c1=Config%2C%20The%20Barbarian,config%201&c2=config%262');
       });
     });
 
@@ -979,8 +980,8 @@ describes.realWin('amp-analytics', {
               'bodyAttr': '${var1}',
               'bodyAttr2': '${var2}',
               'bodyAttr3': 'TITLE',
-            }
-          }
+            },
+          },
         },
         'triggers': [{
           'on': 'visible',
@@ -989,16 +990,18 @@ describes.realWin('amp-analytics', {
             'var1': 'x',
             'var2': 'DOCUMENT_REFERRER',
           },
-        }]
+        }],
       });
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
             'https://example.com/test1=x&' +
-            'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
-            '&title=Test%20Title');
+          'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
+          '&title=Test%20Title');
         expect(sendRequestSpy.args[0][2]).to.equal(
-            '{"bodyAttr":"x","bodyAttr2":"http%3A%2F%2Flocalhost%3A9876%2Fcontext.html","bodyAttr3":"Test%20Title"}');
+            '{"bodyAttr":"x",' +
+          '"bodyAttr2":"http%3A%2F%2Flocalhost%3A9876%2Fcontext.html",' +
+          '"bodyAttr3":"Test%20Title"}');
       });
     });
 
@@ -1014,7 +1017,7 @@ describes.realWin('amp-analytics', {
           },
         }]});
       const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+        Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
           function(name) {
             return {sync: param => {
@@ -1150,7 +1153,7 @@ describes.realWin('amp-analytics', {
       config = {
         vars: {host: 'example.com', path: 'helloworld'},
         extraUrlParams:
-            {'s.evar0': '0', 's.evar1': '${path}', 'foofoo': 'baz'},
+        {'s.evar0': '0', 's.evar1': '${path}', 'foofoo': 'baz'},
         triggers: {trig: {'on': 'visible', 'request': 'foo'}},
       };
       config['requests'] = {'foo': 'https://${host}/${path}?a=b'};
@@ -1161,7 +1164,7 @@ describes.realWin('amp-analytics', {
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal(
             'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=' +
-            'helloworld&foofoo=baz');
+          'helloworld&foofoo=baz');
       });
     });
 
@@ -1186,12 +1189,12 @@ describes.realWin('amp-analytics', {
 
     it('are supported as a var in URL', () => {
       config['requests'].foo =
-          'https://${host}/${path}?${extraUrlParams}&a=b';
+        'https://${host}/${path}?${extraUrlParams}&a=b';
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal(
             'https://example.com/helloworld?s.evar0=0&s.evar1=helloworld' +
-            '&foofoo=baz&a=b');
+          '&foofoo=baz&a=b');
       });
     });
 
@@ -1477,12 +1480,13 @@ describes.realWin('amp-analytics', {
     });
 
     it('does not allow a request through ' +
-     'if a request param is falsey (0)', () => {
+      'if a request param is falsey (0)', () => {
       const config = getConfig();
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 0});
 
@@ -1492,12 +1496,13 @@ describes.realWin('amp-analytics', {
     });
 
     it('does not allow a request through ' +
-    'if a request param is falsey (false)', () => {
+      'if a request param is falsey (false)', () => {
       const config = getConfig();
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: false});
 
@@ -1507,12 +1512,13 @@ describes.realWin('amp-analytics', {
     });
 
     it('does not allow a request through ' +
-     'if a request param is falsey (null)', () => {
+      'if a request param is falsey (null)', () => {
       const config = getConfig();
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: null});
 
@@ -1522,12 +1528,13 @@ describes.realWin('amp-analytics', {
     });
 
     it('does not allow a request through ' +
-     'if a request param is falsey (NaN)', () => {
+      'if a request param is falsey (NaN)', () => {
       const config = getConfig();
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: NaN});
 
@@ -1537,12 +1544,13 @@ describes.realWin('amp-analytics', {
     });
 
     it('does not allow a request through ' +
-     'if a request param is falsey (undefined)', () => {
+      'if a request param is falsey (undefined)', () => {
       const config = getConfig();
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: undefined});
 
@@ -1563,12 +1571,13 @@ describes.realWin('amp-analytics', {
     });
 
     it('allows a request based on url-replacements ' +
-    'when enabled on tag level', () => {
+      'when enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
@@ -1587,7 +1596,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('does not allow a request through if a variable is missing ' +
-    'when enabled on tag level', () => {
+      'when enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '${undefinedParam}';
       const analytics = getAnalyticsTag(config);
@@ -1598,12 +1607,13 @@ describes.realWin('amp-analytics', {
     });
 
     it('does not allow a request through if a request param is missing ' +
-    'when enabled on tag level', () => {
+      'when enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1612,7 +1622,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('does not allow a request through if a request param is missing ' +
-    'when enabled on tag level but enabled on trigger level', () => {
+      'when enabled on tag level but enabled on trigger level', () => {
       const config = getConfig();
       config.enabled = '${queryParam(undefinedParam)}';
       config.triggers.conditional.enabled = '${foo}';
@@ -1620,7 +1630,8 @@ describes.realWin('amp-analytics', {
 
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1629,13 +1640,14 @@ describes.realWin('amp-analytics', {
     });
 
     it('does not allow a request through if enabled on tag level ' +
-    'but variable is missing on trigger level', () => {
+      'but variable is missing on trigger level', () => {
       const config = getConfig();
       config.enabled = '${pageViewId}';
       config.triggers.conditional.enabled = '${foo}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns('page');
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1658,7 +1670,7 @@ describes.realWin('amp-analytics', {
     it('succeeds for iframePing config in vendor config', function() {
       const analytics = getAnalyticsTag({}, {'type': 'testVendor'});
       const url = 'http://iframe.localhost:9876/test/' +
-              'fixtures/served/iframe.html?title=${title}';
+        'fixtures/served/iframe.html?title=${title}';
       analytics.predefinedConfig_.testVendor = {
         'requests': {
           'pageview': url,
@@ -1813,14 +1825,14 @@ describes.realWin('amp-analytics', {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
             'https://example.com/test1=CLIENT_ID(analytics-abc)&' +
-            'CLIENT_ID(analytics-abc)=test2');
+          'CLIENT_ID(analytics-abc)=test2');
       });
     });
 
     it('should not replace non whitelist variable', () => {
       const analytics = getAnalyticsTag({
         'requests':
-            {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
+        {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {
         'sandbox': 'true',
@@ -1852,7 +1864,7 @@ describes.realWin('amp-analytics', {
     it('should replace for multi whitelisted(or not) variables', () => {
       const analytics = getAnalyticsTag({
         'requests': {'foo':
-            'https://example.com/cid=${clientId(analytics-abc)}random=RANDOM'},
+          'https://example.com/cid=${clientId(analytics-abc)}random=RANDOM'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {
         'sandbox': 'true',
@@ -1914,7 +1926,8 @@ describes.realWin('amp-analytics', {
         'sandbox': 'true',
       }, true);
 
-      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements =
+        Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005))
@@ -1990,7 +2003,7 @@ describes.realWin('amp-analytics', {
     it('succeeds for iframePing config in vendor config', function() {
       const analytics = getAnalyticsTag({}, {'type': 'testVendor'});
       const url = 'http://iframe.localhost:9876/test/' +
-              'fixtures/served/iframe.html?title=${title}';
+        'fixtures/served/iframe.html?title=${title}';
       analytics.predefinedConfig_.testVendor = {
         'requests': {
           'pageview': url,
@@ -2058,8 +2071,8 @@ describes.realWin('amp-analytics', {
       return runResourceTimingTest(
           [entry1, entry2], config,
           'https://ping.example.com/endpoint?rt=' +
-              'foo_bar-script-100-500-7200~' +
-              'foo_bar-script-700-100-0');
+        'foo_bar-script-100-500-7200~' +
+        'foo_bar-script-700-100-0');
 
       // 'responseAfter' should be set to a positive number.
       expect(trigger['resourceTimingSpec']['responseAfter']).to.be.above(0);
@@ -2078,7 +2091,7 @@ describes.realWin('amp-analytics', {
       return runResourceTimingTest(
           [entry1, entry2], config,
           'https://ping.example.com/endpoint?rt=' +
-              'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
+        'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
     });
 
     it('should ignore resourceTimingSpec outside of triggers', () => {
@@ -2087,7 +2100,7 @@ describes.realWin('amp-analytics', {
           false);
       const config = newConfig();
       config['resourceTimingSpec'] =
-          config['triggers'][0]['resourceTimingSpec'];
+        config['triggers'][0]['resourceTimingSpec'];
       delete config['triggers'][0]['resourceTimingSpec'];
       return runResourceTimingTest(
           [entry], config, 'https://ping.example.com/endpoint?rt=');

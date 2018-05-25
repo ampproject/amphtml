@@ -32,22 +32,23 @@ const TAG_ = 'amp-analytics.Transport';
  * @param {!Window} win
  * @param {string} request
  * @param {!Object<string, string>} transportOptions
+ * @param {string} body
  */
 export function sendRequest(win, request, transportOptions, body) {
   assertHttpsUrl(request, 'amp-analytics request');
   checkCorsUrl(request);
   if (transportOptions['beacon'] &&
-      Transport.sendRequestUsingBeacon(win, request, body)) {
+    Transport.sendRequestUsingBeacon(win, request, body)) {
     return;
   }
   if (transportOptions['xhrpost'] &&
-      Transport.sendRequestUsingXhr(win, request, body)) {
+    Transport.sendRequestUsingXhr(win, request, body)) {
     return;
   }
   const image = transportOptions['image'];
   if (image) {
     const suppressWarnings = (typeof image == 'object' &&
-        image['suppressWarnings']);
+      image['suppressWarnings']);
     Transport.sendRequestUsingImage(request, suppressWarnings);
     return;
   }
@@ -73,7 +74,7 @@ export class Transport {
     }).catch(() => {
       if (!suppressWarnings) {
         user().warn(TAG_, 'Response unparseable or failed to send image ' +
-            'request', request);
+          'request', request);
       }
     });
   }
@@ -82,6 +83,7 @@ export class Transport {
    * @param {!Window} win
    * @param {string} request
    * @return {boolean} True if this browser supports navigator.sendBeacon.
+   * @param {string} body
    */
   static sendRequestUsingBeacon(win, request, body = '') {
     if (!win.navigator.sendBeacon) {
@@ -98,6 +100,7 @@ export class Transport {
    * @param {!Window} win
    * @param {string} request
    * @return {boolean} True if this browser supports cross-domain XHR.
+   * @param {string} body
    */
   static sendRequestUsingXhr(win, request, body = '') {
     if (!win.XMLHttpRequest) {
@@ -147,10 +150,10 @@ export function sendRequestUsingIframe(win, request) {
   };
   user().assert(
       parseUrlDeprecated(request).origin !=
-        parseUrlDeprecated(win.location.href).origin,
+    parseUrlDeprecated(win.location.href).origin,
       'Origin of iframe request must not be equal to the document origin.' +
-      ' See https://github.com/ampproject/' +
-      ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+    ' See https://github.com/ampproject/' +
+    ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
   iframe.setAttribute('amp-analytics', '');
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
   iframe.src = request;

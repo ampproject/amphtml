@@ -355,7 +355,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should throw error with unsupported batchPlugin', () => {
         const spy = sandbox.spy();
         const r =
-            {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': 'invalid'};
+          {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': 'invalid'};
         try {
           new RequestHandler(analyticsMock, r, preconnect, spy, false);
         } catch (e) {
@@ -466,10 +466,10 @@ describes.realWin('Requests', {amp: 1}, env => {
     const r = {
       'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE',
       'body': {
-        'testAttr':'${param1}',
-        'testAttr2':'${param3}',
-        'testAttr3':'BASE_VALUE',
-      }
+        'testAttr': '${param1}',
+        'testAttr2': '${param3}',
+        'testAttr3': 'BASE_VALUE',
+      },
     };
     const handler = new RequestHandler(
         analyticsMock, r, preconnect, spy, false);
@@ -506,9 +506,9 @@ describes.realWin('Requests', {amp: 1}, env => {
     const r = {
       'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
       'body': {
-        'testAttr':'BASE_VALUE',
-        'testAttr2':'${foo}'
-      }
+        'testAttr': 'BASE_VALUE',
+        'testAttr2': '${foo}',
+      },
     };
     const handler = new RequestHandler(
         analyticsMock, r, preconnect, spy, false);
