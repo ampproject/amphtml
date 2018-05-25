@@ -411,7 +411,7 @@ The `cta-link` component lets you specify links for call to actions (e.g., `Read
 }
 ```
 <amp-img alt="Bookend cta-links component" layout="fixed"
-src=""https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
   <noscript>
     <img alt="Bookend cta-links component" src="img/amp-story-bookend-component-cta-links.png" />
   </noscript>
