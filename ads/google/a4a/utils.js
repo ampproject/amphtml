@@ -33,7 +33,6 @@ import {
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
-import {parseUrlDeprecated} from '../../../src/url';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -359,6 +358,15 @@ function getHistoryLength(win) {
 }
 
 /**
+ * @param {string} url
+ * @return {string} hostname portion of url
+ * @visibleForTesting
+ */
+export function extractHost(url) {
+  return (/^(?:https?:\/\/)?([^\/\?:]+)/i.exec(url) || [])[1] || url;
+}
+
+/**
  * @param {!Window} win
  * @return {?string}
  */
@@ -373,16 +381,16 @@ function topWindowUrlOrDomain(win) {
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
+      return extractHost(secondFromTop./*OK*/document.referrer);
     }
-    return parseUrlDeprecated(topOrigin).hostname;
+    return extractHost(topOrigin);
   } else {
     try {
       return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
+      return extractHost(secondFromTop./*OK*/document.referrer);
     } catch (e) {}
     return null;
   }
@@ -830,8 +838,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   }
   domain = domain || '.google.com';
   const canonical =
-    parseUrlDeprecated(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl)
-        .hostname;
+    extractHost(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl);
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 
