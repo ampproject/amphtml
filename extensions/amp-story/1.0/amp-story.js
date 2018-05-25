@@ -1133,7 +1133,8 @@ export class AmpStory extends AMP.BaseElement {
         'publisher provided fallback.');
       } else {
         this.layoutStory_().then(() => this.mutateElement(() => {
-          this.unsupportedBrowserLayer_.remove();
+          this.unsupportedBrowserLayer_.removeLayer();
+          //removeElement(this.unsupportedBrowserLayer_.get());
           this.element.classList.remove('i-amphtml-story-fallback');
         }));
 

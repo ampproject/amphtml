@@ -109,7 +109,7 @@ export class UnsupportedBrowserLayer {
     return this.root_;
   }
 
-  remove() {
+  removeLayer() {
     if (this.root_) {
       removeElement(this.root_);
     }
