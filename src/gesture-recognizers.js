@@ -225,7 +225,10 @@ export let SwipeDef;
  */
 class SwipeRecognizer extends GestureRecognizer {
   /**
+   * @param {string} type
    * @param {!./gesture.Gestures} manager
+   * @param {boolean} horiz
+   * @param {boolean} vert
    */
   constructor(type, manager, horiz, vert) {
     super(type, manager);
