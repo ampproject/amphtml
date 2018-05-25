@@ -308,6 +308,13 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
+  {
+    id: 'amp-content-viewer',
+    name: 'Enables zoom / pan manipulation of arbitrary elements' +
+      ' with amp-content-viewer',
+    spec: 'https://github.com/ampproject/amphtml/issues/13602',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/15594',
+  },
 ];
 
 if (getMode().localDev) {

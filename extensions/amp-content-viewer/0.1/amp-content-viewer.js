@@ -37,6 +37,7 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
+import {isExperimentOn} from '../../../src/experiments';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-content-viewer';
@@ -111,6 +112,8 @@ export class AmpContentViewer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(isExperimentOn(this.win, TAG),
+        `Experiment ${TAG} disabled`);
     const children = this.getRealChildren();
 
     user().assert(children.length == 1, SUPPORT_VALIDATION_MSG);
