@@ -1811,18 +1811,11 @@ export class AmpA4A extends AMP.BaseElement {
    * Attempts to execute Real Time Config, if the ad network has enabled it.
    * If it is not supported by the network, but the publisher has included
    * the rtc-config attribute on the amp-ad element, warn.
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?CONSENT_POLICY_STATE} unused
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(consentState) {
-    if (!!AMP.maybeExecuteRealTimeConfig) {
-      try {
-        return AMP.maybeExecuteRealTimeConfig(
-            this, this.getCustomRealTimeConfigMacros_(), consentState);
-      } catch (err) {
-        user().error(TAG, 'Could not perform Real Time Config.', err);
-      }
-    } else if (this.element.getAttribute('rtc-config')) {
+  tryExecuteRealTimeConfig_(unused) {
+    if (this.element.getAttribute('rtc-config')) {
       user().error(TAG, 'RTC not supported for ad network ' +
                    `${this.element.getAttribute('type')}`);
     }

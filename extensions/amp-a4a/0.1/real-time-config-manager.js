@@ -75,11 +75,13 @@ export class RealTimeConfigManager {
 
     this.win = this.a4aElement.win;
 
-    /** @private {!Object<string, boolean>} */
     this.seenUrls = {};
 
-    /** @private {number */
     this.rtcStartTime = null;
+
+    this.promiseArray = [];
+
+    this.rtcConfig = null;
   }
 
   /**
@@ -90,13 +92,13 @@ export class RealTimeConfigManager {
    * @private
    */
   buildErrorResponse_(
-      error, callout, errorReportingUrl, opt_rtcTime) {
+    error, callout, errorReportingUrl, opt_rtcTime) {
     dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
     if (errorReportingUrl) {
       this.sendErrorMessage(error, errorReportingUrl);
     }
     return Promise.resolve(/**@type {rtcResponseDef} */(
-        {error, callout, rtcTime: opt_rtcTime || 0}));
+      {error, callout, rtcTime: opt_rtcTime || 0}));
   }
 
   /**
@@ -104,7 +106,8 @@ export class RealTimeConfigManager {
    * @param {string} errorReportingUrl
    */
   sendErrorMessage(errorType, errorReportingUrl) {
-    if (ERROR_REPORTING_ENABLED || getMode(this.win).localDev || getMode(this.win).test) {
+    if (ERROR_REPORTING_ENABLED || getMode(this.win).localDev
+        || getMode(this.win).test) {
       if (!isSecureUrl(errorReportingUrl)) {
         dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorReportingUrl}`);
         return;
@@ -144,8 +147,7 @@ export class RealTimeConfigManager {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    * @visibleForTesting
    */
-  maybeExecuteRealTimeConfig_(
-      customMacros, consentState) {
+  maybeExecuteRealTimeConfig(customMacros, consentState) {
     // TODO(keithwrightbos) - allow pub to override such that some callouts are
     // still allowed.
     if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
@@ -156,12 +158,11 @@ export class RealTimeConfigManager {
     if (!this.rtcConfig) {
       return;
     }
-    customMacros = assignMacros(customMacros);
-    const promiseArray = [];
+    customMacros = this.assignMacros(customMacros);
     this.rtcStartTime = Date.now();
-    this.handleRtcForCustomUrls();
-    this.handleRtcForVendorUrls();
-    return Promise.all(promiseArray);
+    this.handleRtcForCustomUrls(customMacros);
+    this.handleRtcForVendorUrls(customMacros);
+    return Promise.all(this.promiseArray);
   }
 
   assignMacros(macros) {
@@ -169,7 +170,7 @@ export class RealTimeConfigManager {
     return macros;
   }
 
-  handleRtcForCustomUrls() {
+  handleRtcForCustomUrls(customMacros) {
     // For each publisher defined URL, inflate the url using the macros,
     // and send the RTC request.
     (this.rtcConfig['urls'] || []).forEach(urlObj => {
@@ -182,23 +183,23 @@ export class RealTimeConfigManager {
       } else {
         dev().warn(TAG, `Invalid url: ${urlObj}`);
       }
-      this.inflateAndSendRtc_(url, promiseArray,
-                         customMacros,
-                         errorReportingUrl);
+      this.inflateAndSendRtc_(url,
+          customMacros,
+          errorReportingUrl);
     });
   }
 
-  handleRtcForVendorUrls() {
+  handleRtcForVendorUrls(customMacros) {
     // For each vendor the publisher has specified, inflate the vendor
     // url if it exists, and send the RTC request.
     Object.keys(this.rtcConfig['vendors'] || []).forEach(vendor => {
       const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
       const url = vendorObject ? vendorObject.url : '';
       const errorReportingUrl = vendorObject ?
-            vendorObject['errorReportingUrl'] : '';
+        vendorObject['errorReportingUrl'] : '';
       if (!url) {
-        return promiseArray.push(
-            this.this.buildErrorResponse_(
+        return this.promiseArray.push(
+            this.buildErrorResponse_(
                 RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor, errorReportingUrl));
       }
       const validVendorMacros = {};
@@ -206,33 +207,33 @@ export class RealTimeConfigManager {
         if (vendorObject.macros && vendorObject.macros.includes(macro)) {
           const value = this.rtcConfig['vendors'][vendor][macro];
           validVendorMacros[macro] = isObject(value) || isArray(value) ?
-              JSON.stringify(value) : value;
+            JSON.stringify(value) : value;
         } else {
           user().warn(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
         }
       });
       // The ad network defined macros override vendor defined/pub specifed.
       const macros = Object.assign(validVendorMacros, customMacros);
-      this.inflateAndSendRtc_(url, promiseArray,
-                         macros, errorReportingUrl,
-                         vendor.toLowerCase());
+      this.inflateAndSendRtc_(url,
+          macros, errorReportingUrl,
+          vendor.toLowerCase());
     });
   }
 
   /**
    * @param {string} url
-   * @param {!Array<!Promise<!rtcResponseDef>>} promiseArray
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
    * @param {number} timeoutMillis
    * @param {string} errorReportingUrl
    * @param {string=} opt_vendor
    * @private
    */
-  inflateAndSendRtc_(url, promiseArray,
-                     macros, errorReportingUrl, opt_vendor) {
-    const timeoutMillis = this.rtcConfig['timeoutMillis'];
+  inflateAndSendRtc_(url,
+    macros, errorReportingUrl, opt_vendor) {
+    let timeoutMillis = this.rtcConfig['timeoutMillis'];
     const callout = opt_vendor || this.getCalloutParam_(url);
-    const checkStillCurrent = this.a4aElement.verifyStillCurrent.bind(this.a4aElement)();
+    const checkStillCurrent = this.a4aElement.verifyStillCurrent.bind(
+        this.a4aElement)();
     /**
      * The time that it takes to substitute the macros into the URL can vary
      * depending on what the url requires to be substituted, i.e. a long
@@ -247,11 +248,11 @@ export class RealTimeConfigManager {
       }
       if (!isSecureUrl(url)) {
         return this.buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
-                                   callout, errorReportingUrl);
+            callout, errorReportingUrl);
       }
       if (this.seenUrls[url]) {
         return this.buildErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
-                                   callout, errorReportingUrl);
+            callout, errorReportingUrl);
       }
       this.seenUrls[url] = true;
       if (url.length > MAX_URL_LENGTH) {
@@ -265,17 +266,18 @@ export class RealTimeConfigManager {
     const whitelist = {};
     Object.keys(macros).forEach(key => whitelist[key] = true);
     const urlReplacementStartTime = Date.now();
-    promiseArray.push(Services.timerFor(this.win).timeoutPromise(
+    this.promiseArray.push(Services.timerFor(this.win).timeoutPromise(
         timeoutMillis,
-        this.urlReplacements.expandUrlAsync(url, macros, whitelist)).then(url => {
-          checkStillCurrent();
-          timeoutMillis -= (urlReplacementStartTime - Date.now());
-          return send(url);
-        }).catch(error => {
-          return error.message == 'CANCELLED' ? undefined :
-              this.buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
-                                  callout, errorReportingUrl);
-        }));
+        this.urlReplacements.expandUrlAsync(
+            url, macros, whitelist)).then(url => {
+      checkStillCurrent();
+      timeoutMillis -= (urlReplacementStartTime - Date.now());
+      return send(url);
+    }).catch(error => {
+      return error.message == 'CANCELLED' ? undefined :
+        this.buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
+            callout, errorReportingUrl);
+    }));
   }
 
   /**
@@ -298,8 +300,8 @@ export class RealTimeConfigManager {
    * @private
    */
   sendRtcCallout_(
-      url, timeoutMillis, callout, checkStillCurrent,
-      errorReportingUrl) {
+    url, timeoutMillis, callout, checkStillCurrent,
+    errorReportingUrl) {
     /**
      * Note: Timeout is enforced by timerFor, not the value of
      *   rtcTime. There are situations where rtcTime could thus
@@ -312,30 +314,31 @@ export class RealTimeConfigManager {
             // the request to be cached across sites but for now assume that
             // is not a required feature.
             url, {credentials: 'include'}).then(res => {
-              checkStillCurrent();
-              return res.text().then(text => {
-                checkStillCurrent();
-                const rtcTime = Date.now() - this.rtcStartTime;
-                // An empty text response is allowed, not an error.
-                if (!text) {
-                  return {rtcTime, callout};
-                }
-                const response = tryParseJson(text);
-                return response ? {response, rtcTime, callout} :
-                this.buildErrorResponse_(
-                    RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout,
-                    errorReportingUrl, rtcTime);
-              });
-            })).catch(error => {
-              return error.message == 'CANCELLED' ? undefined : this.buildErrorResponse_(
-                  // The relevant error message for timeout looks like it is
-                  // just 'message' but is in fact 'messageXXX' where the
-                  // X's are hidden special characters. That's why we use
-                  // match here.
-                  (error.message && error.message.match(/^timeout/)) ?
-                    RTC_ERROR_ENUM.TIMEOUT : RTC_ERROR_ENUM.NETWORK_FAILURE,
-                  callout, errorReportingUrl, Date.now() - this.rtcStartTime);
-            });
+          checkStillCurrent();
+          return res.text().then(text => {
+            checkStillCurrent();
+            const rtcTime = Date.now() - this.rtcStartTime;
+            // An empty text response is allowed, not an error.
+            if (!text) {
+              return {rtcTime, callout};
+            }
+            const response = tryParseJson(text);
+            return response ? {response, rtcTime, callout} :
+              this.buildErrorResponse_(
+                  RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout,
+                  errorReportingUrl, rtcTime);
+          });
+        })).catch(error => {
+      return error.message == 'CANCELLED' ? undefined :
+        this.buildErrorResponse_(
+            // The relevant error message for timeout looks like it is
+            // just 'message' but is in fact 'messageXXX' where the
+            // X's are hidden special characters. That's why we use
+            // match here.
+            (error.message && error.message.match(/^timeout/)) ?
+              RTC_ERROR_ENUM.TIMEOUT : RTC_ERROR_ENUM.NETWORK_FAILURE,
+            callout, errorReportingUrl, Date.now() - this.rtcStartTime);
+    });
   }
 
   /**
@@ -365,7 +368,7 @@ export class RealTimeConfigManager {
     let timeout;
     try {
       user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
-                    'RTC Config must specify vendors or urls');
+          'RTC Config must specify vendors or urls');
       Object.keys(rtcConfig).forEach(key => {
         switch (key) {
           case 'vendors':
@@ -400,8 +403,7 @@ export class RealTimeConfigManager {
       return null;
     }
     rtcConfig['timeoutMillis'] = timeout !== undefined ?
-        timeout : defaultTimeoutMillis;
+      timeout : defaultTimeoutMillis;
     this.rtcConfig = rtcConfig;
   }
 }
-AMP.maybeExecuteRealTimeConfig = maybeExecuteRealTimeConfig_;

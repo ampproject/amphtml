@@ -23,12 +23,7 @@ import {AmpA4A} from '../amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   RTC_ERROR_ENUM,
-  getCalloutParam_,
-  inflateAndSendRtc_,
-  maybeExecuteRealTimeConfig_,
-  sendErrorMessage,
-  truncUrl_,
-  validateRtcConfig_,
+  RealTimeConfigManager,
 } from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
 import {Xhr} from '../../../../src/service/xhr-impl';
@@ -41,6 +36,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   let a4aElement;
   let sandbox;
   let fetchJsonStub;
+  let getCalloutParam_, maybeExecuteRealTimeConfig_, validateRtcConfig_;
+  let truncUrl_, inflateAndSendRtc_, sendErrorMessage;
+  let rtc;
 
   beforeEach(() => {
     sandbox = env.sandbox;
@@ -56,6 +54,14 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     doc.body.appendChild(element);
     fetchJsonStub = sandbox.stub(Xhr.prototype, 'fetchJson');
     a4aElement = new AmpA4A(element);
+
+    rtc = new RealTimeConfigManager(a4aElement);
+    maybeExecuteRealTimeConfig_ = rtc.maybeExecuteRealTimeConfig.bind(rtc);
+    getCalloutParam_ = rtc.getCalloutParam_.bind(rtc);
+    validateRtcConfig_ = rtc.validateRtcConfig_.bind(rtc);
+    truncUrl_ = rtc.truncUrl_.bind(rtc);
+    inflateAndSendRtc_ = rtc.inflateAndSendRtc_.bind(rtc);
+    sendErrorMessage = rtc.sendErrorMessage.bind(rtc);
   });
 
   afterEach(() => {
@@ -122,7 +128,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       });
       const customMacros = args['customMacros'] || {};
       const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(
-          a4aElement, customMacros);
+          customMacros);
       return rtcResponsePromiseArray.then(rtcResponseArray => {
         expect(rtcResponseArray.length).to.equal(expectedRtcArray.length);
         expect(fetchJsonStub.callCount).to.equal(calloutCount);
@@ -453,7 +459,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       it(`should handle consentState ${consentState}`, () => {
         setRtcConfig({urls: ['https://foo.com']});
         const rtcResult = maybeExecuteRealTimeConfig_(
-            a4aElement, {}, CONSENT_POLICY_STATE[consentState]);
+            {}, CONSENT_POLICY_STATE[consentState]);
         switch (CONSENT_POLICY_STATE[consentState]) {
           case CONSENT_POLICY_STATE.SUFFICIENT:
           case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
@@ -487,9 +493,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           'https://broken.zzzzzzz'],
         'timeoutMillis': 500};
       setRtcConfig(rtcConfig);
-      validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.ok;
-      expect(validatedRtcConfig).to.deep.equal(rtcConfig);
+      validateRtcConfig_(element);
+      expect(rtc.rtcConfig).to.be.ok;
+      expect(rtc.rtcConfig).to.deep.equal(rtcConfig);
     });
 
     it('should allow timeout of 0', () => {
@@ -501,9 +507,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           'https://broken.zzzzzzz'],
         'timeoutMillis': 0};
       setRtcConfig(rtcConfig);
-      validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.ok;
-      expect(validatedRtcConfig).to.deep.equal(rtcConfig);
+      validateRtcConfig_(element);
+      expect(rtc.rtcConfig).to.be.ok;
+      expect(rtc.rtcConfig).to.deep.equal(rtcConfig);
     });
 
     it('should not allow timeout greater than default', () => {
@@ -522,14 +528,14 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           'https://broken.zzzzzzz'],
         'timeoutMillis': 1000};
       setRtcConfig(rtcConfig);
-      validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.ok;
-      expect(validatedRtcConfig).to.deep.equal(expectedRtcConfig);
+      validateRtcConfig_(element);
+      expect(rtc.rtcConfig).to.be.ok;
+      expect(rtc.rtcConfig).to.deep.equal(expectedRtcConfig);
     });
 
     it('should return null if rtc-config not specified', () => {
-      validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.null;
+      validateRtcConfig_(element);
+      expect(rtc.rtcConfig).to.be.null;
     });
 
     // Test various misconfigurations that are missing vendors or urls.
@@ -557,10 +563,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   describe('#inflateAndSendRtc_', () => {
     it('should not send RTC if macro expansion exceeds timeout', () => {
       const url = 'https://www.example.biz/?dummy=DUMMY';
-      const seenUrls = {};
-      const promiseArray = [];
-      const rtcStartTime = Date.now();
-      const timeoutMillis = 10;
+      rtc.rtcConfig = {
+        timeoutMillis: 10,
+      };
       const macroDelay = 20;
       const macros = {
         DUMMY: () => {
@@ -569,9 +574,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           );
         },
       };
-      inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
-          rtcStartTime, macros, timeoutMillis);
-      return promiseArray[0].then(errorResponse => {
+      inflateAndSendRtc_(url, macros);
+      return rtc.promiseArray[0].then(errorResponse => {
         expect(errorResponse.error).to.equal(
             RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT);
       });
@@ -579,16 +583,14 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     it('should not send RTC if no longer current', () => {
       const url = 'https://www.example.biz/';
-      const seenUrls = {};
-      const promiseArray = [];
-      const rtcStartTime = Date.now();
-      const timeoutMillis = 1000;
+      rtc.rtcConfig = {
+        timeoutMillis: 1000,
+      };
       const macros = {};
       // Simulate an unlayoutCallback call
-      inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
-          rtcStartTime, macros, timeoutMillis);
+      inflateAndSendRtc_(url, macros);
       a4aElement.promiseId_++;
-      return promiseArray[0].then(errorResponse => {
+      return rtc.promiseArray[0].then(errorResponse => {
         expect(errorResponse).to.be.undefined;
       });
 

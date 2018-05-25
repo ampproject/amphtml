@@ -2366,18 +2366,8 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
     errorSpy = sandbox.spy(user(), 'error');
   });
 
-  beforeEach(() => {
-    AMP.maybeExecuteRealTimeConfig = undefined;
-    expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
-  });
-
-  afterEach(() => {
-    AMP.maybeExecuteRealTimeConfig = undefined;
-  });
-
   describe('#tryExecuteRealTimeConfig', () => {
     it('should not execute if RTC never imported', () => {
-      expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
       expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
     });
     it('should log user error if RTC Config set but RTC not supported', () => {
@@ -2389,23 +2379,6 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
       expect(errorSpy.calledWith(
           'amp-a4a',
           'RTC not supported for ad network doubleclick')).to.be.true;
-    });
-    it('should call maybeExecuteRealTimeConfig properly', () => {
-      const macros = {'SLOT_ID': 2};
-      AMP.maybeExecuteRealTimeConfig = sandbox.stub();
-      sandbox.stub(a4a, 'getCustomRealTimeConfigMacros_').returns(macros);
-      a4a.tryExecuteRealTimeConfig_(CONSENT_POLICY_STATE.UNKNOWN);
-      expect(AMP.maybeExecuteRealTimeConfig.called).to.be.true;
-      expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-          a4a, macros, CONSENT_POLICY_STATE.UNKNOWN)).to.be.true;
-    });
-    it('should catch error in maybeExecuteRealTimeConfig', () => {
-      const err = new Error('Test');
-      AMP.maybeExecuteRealTimeConfig = sandbox.stub().throws(err);
-      allowConsoleError(() => a4a.tryExecuteRealTimeConfig_());
-      expect(errorSpy.calledOnce).to.be.true;
-      expect(errorSpy.calledWith(
-          'amp-a4a', 'Could not perform Real Time Config.', err)).to.be.true;
     });
   });
 

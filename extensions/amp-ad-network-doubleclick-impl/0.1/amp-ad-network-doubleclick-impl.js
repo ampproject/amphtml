@@ -20,7 +20,6 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
@@ -52,6 +51,9 @@ import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {
+  RealTimeConfigManager,
+} from '../../amp-a4a/0.1/real-time-config-manager';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
@@ -681,6 +683,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.jsonTargeting_['categoryExclusions'] = Object.keys(exclusions);
     }
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
+  }
+
+  /** @override */
+  tryExecuteRealTimeConfig_(consentState) {
+    const rtcManager = new RealTimeConfigManager(this);
+    try {
+      return rtcManager.maybeExecuteRealTimeConfig(
+          this.getCustomRealTimeConfigMacros_(), consentState);
+    } catch (err) {
+      user().error(TAG, 'Could not perform Real Time Config.', err);
+    }
   }
 
   /** @override */
