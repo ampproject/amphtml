@@ -330,7 +330,7 @@ export class ConsentPolicyInstance {
 
     if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
       const shouldOverwrite =
-          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.GRANTED &&
+          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.ACCEPTED &&
           this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.REJECTED;
       // Ignore the consent item state and overwrite state value.
       if (shouldOverwrite) {
