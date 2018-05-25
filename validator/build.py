@@ -90,16 +90,13 @@ def CheckPrereqs():
     except ImportError:
       Die('%s not found. Try "apt-get install python-protobuf"' % module)
 
-  # Ensure that npm is installed.
+  # Ensure that yarn is installed.
   try:
-    npm_version = subprocess.check_output(['npm', '--version'])
+    yarn_version = subprocess.check_output(['yarn', '--version'])
   except (subprocess.CalledProcessError, OSError):
-    Die('npm package manager not found. Try "apt-get install npm".')
-
-  # Ensure npm version '1.3.10' or newer.
-  m = re.search('^(\\d+)\\.(\\d+)\\.(\\d+)$', npm_version)
-  if (int(m.group(1)), int(m.group(2)), int(m.group(3))) < (1, 3, 10):
-    Die('Expected npm version 1.3.10 or newer, saw: %s' % npm_version)
+    Die('Yarn package manager not found. Run ' +
+        '"curl -o- -L https://yarnpkg.com/install.sh | bash" ' +
+        'or see https://yarnpkg.com/docs/install.')
 
   # Ensure JVM installed. TODO: Check for version?
   try:
@@ -126,17 +123,17 @@ def SetupOutDir(out_dir):
 
 
 def InstallNodeDependencies():
-  """Installs the dependencies using npm."""
+  """Installs the dependencies using yarn."""
   logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
-      ['npm', 'install'],
+      ['yarn', 'install'],
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(
-      ['npm', 'install'],
+      ['yarn', 'install'],
       cwd='nodejs',
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
