@@ -121,12 +121,6 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {?string}
      */
     this.targetOrigin_ = null;
-
-    /**
-     * @return {!../../../src/service/url-impl.Url}
-     * @private
-     */
-    this.getUrlService_ = once(() => Services.urlForDoc(this.element));
   }
 
   /** @override */
@@ -143,14 +137,14 @@ export class AmpIframe extends AMP.BaseElement {
    */
   assertSource_(src, containerSrc, sandbox = '') {
     const {element} = this;
-    const urlService = this.getUrlService_();
+    const urlService = Services.urlForDoc(this.element);
     const url = urlService.parse(src);
     const {hostname, protocol, origin} = url;
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
     user().assert(
-        urlService.isSecureUrl(url) || protocol == 'data:',
+        urlService.isSecure(src) || protocol == 'data:',
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         element);
     const containerUrl = urlService.parse(containerSrc);
@@ -206,7 +200,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!src) {
       return;
     }
-    const {protocol, hash} = this.getUrlService_().parse(src);
+    const {protocol, hash} = Services.urlForDoc(this.element).parse(src);
     // data-URLs are not modified.
     if (protocol == 'data:') {
       return src;

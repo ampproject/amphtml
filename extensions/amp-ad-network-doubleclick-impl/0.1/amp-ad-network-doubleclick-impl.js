@@ -94,11 +94,11 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isObject} from '../../../src/types';
-import {isSecureUrl, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
+import {parseQueryString} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -1064,9 +1064,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!impressions) {
       return;
     }
+    const urls = Services.urlForDoc(this.getAmpDoc());
     impressions.split(',').forEach(url => {
       try {
-        if (!isSecureUrl(url)) {
+        if (!urls.isSecure(url)) {
           dev().warn(TAG, `insecure impression url: ${url}`);
           return;
         }

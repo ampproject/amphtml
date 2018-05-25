@@ -20,7 +20,6 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {
-  isSecureUrl,
   parseUrlDeprecated,
 } from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
@@ -93,7 +92,8 @@ function buildErrorResponse_(
  */
 export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
   if (ERROR_REPORTING_ENABLED || getMode(win).localDev || getMode(win).test) {
-    if (!isSecureUrl(errorReportingUrl)) {
+    const urls = Services.urlForDoc(ampDoc);
+    if (!urls.isSecure(errorReportingUrl)) {
       dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorReportingUrl}`);
       return;
     }
@@ -227,7 +227,9 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
           callout, errorReportingUrl, win, ampDoc);
     }
-    if (!isSecureUrl(url)) {
+
+    const urls = Services.urlForDoc(ampDoc);
+    if (!urls.isSecure(url)) {
       return buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
           callout, errorReportingUrl, win, ampDoc);
     }
