@@ -705,7 +705,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.handleLifecycleStage_('urlBuilt');
           // If we should skip the XHR, we will instead request and render
           // by simply writing a frame into the page using
-          // renderViaFrameGet
+          // renderViaIframeGet
           if (!this.isXhrAllowed()) {
             this.experimentalNonAmpCreativeRenderMethod_ =
                 XORIGIN_MODE.IFRAME_GET;
@@ -1377,7 +1377,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.creativeBody_ = null; // Free resources.
     } else if (this.adUrl_) {
       assertHttpsUrl(this.adUrl_, this.element);
-      renderPromise = this.renderViaFrameGet_(this.adUrl_);
+      renderPromise = this.renderViaIframeGet_(this.adUrl_);
     } else {
       // Ad URL may not exist if buildAdUrl throws error or returns empty.
       // If error occurred, it would have already been reported but let's
@@ -1541,7 +1541,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise} awaiting ad completed insertion.
    * @private
    */
-  renderViaFrameGet_(adUrl) {
+  renderViaIframeGet_(adUrl) {
     this.handleLifecycleStage_('renderCrossDomainStart', {
       'isAmpCreative': this.isVerifiedAmpCreative_,
       'releaseType': this.releaseType_,
