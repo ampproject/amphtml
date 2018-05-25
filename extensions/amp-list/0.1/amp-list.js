@@ -78,6 +78,9 @@ export class AmpList extends AMP.BaseElement {
      */
     this.initialSrc_ = null;
 
+    /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
+    this.bind_ = null;
+
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.fetchList_();
@@ -107,6 +110,10 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
     }
+
+    Services.bindForDocOrNull(this.element).then(bind => {
+      this.bind_ = bind;
+    });
   }
 
   /** @override */
@@ -282,18 +289,22 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * If <amp-bind> is loaded and the page has been mutated via setState(),
+   * evaluates and applies any bindings in the given elements. This ensures
+   * that rendered content is up-to-date with the latest bindable state.
    * @param {!Array<!Element>} elements
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
   updateBindings_(elements) {
-    const forwardElements = () => elements;
-    return Services.bindForDocOrNull(this.element).then(bind => {
-      if (bind) {
-        return bind.scanAndApply(elements, [this.container_]);
-      }
+    // Skip if setState() has _not_ been invoked yet.
+    if (!this.bind_ || !this.bind_.signals().get('FIRST_MUTATE')) {
+      return Promise.resolve(elements);
+    }
     // Forward elements to chained promise on success or failure.
-    }).then(forwardElements, forwardElements);
+    const forwardElements = () => elements;
+    return this.bind_.scanAndApply(elements, [this.container_])
+        .then(forwardElements, forwardElements);
   }
 
   /**
@@ -325,7 +336,6 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {string} itemsExpr
-   * @visibleForTesting
    * @private
    */
   fetch_(itemsExpr) {
