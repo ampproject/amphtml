@@ -269,9 +269,9 @@ The `heading` component has a `text` field, which can be used to append a title 
 ```
 
 <amp-img alt="Bookend heading component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-heading.png" width="386" height="123">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-heading.png" width="386" height="123">
   <noscript>
-    <img alt="Bookend heading component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-heading.png" />
+    <img alt="Bookend heading component" src="img/amp-story-bookend-comopnent-heading.png" />
   </noscript>
 </amp-img>
 
@@ -290,9 +290,9 @@ The `small` component can be used to link to related articles. This component re
 ```
 
 <amp-img alt="Bookend small component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-small.png" width="379" height="192">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-small.png" width="379" height="192">
   <noscript>
-    <img alt="Bookend small component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-small.png" />
+    <img alt="Bookend small component" src="img/amp-story-bookend-comopnent-small.png" />
   </noscript>
 </amp-img>
 
@@ -311,9 +311,9 @@ The `landscape` component can be used for alternative formats of content, like v
 ```
 
 <amp-img alt="Bookend landscape component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-landscape.png" width="388" height="410">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-landscape.png" width="388" height="410">
   <noscript>
-    <img alt="Bookend landscape component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-landscape.png" />
+    <img alt="Bookend landscape component" src="img/amp-story-bookend-comopnent-landscape.png" />
   </noscript>
 </amp-img>
 
@@ -331,9 +331,9 @@ The `portrait` component can be used to link to other stories. This component re
 ```
 
 <amp-img alt="Bookend portrait component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-portrait.png" width="382" height="522">
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-portrait.png" width="382" height="522">
   <noscript>
-    <img alt="Bookend portrait component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-portrait.png" />
+    <img alt="Bookend portrait component" src="img/amp-story-bookend-comopnent-portrait.png" />
   </noscript>
 </amp-img>
 
@@ -357,9 +357,9 @@ The `cta-link` component lets you specify links for call to actions (e.g., `Read
 }
 ```
 <amp-img alt="Bookend cta-links component" layout="fixed"
-src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-cta-links.png" width="381" height="81">
+src=""https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-comopnent-cta-links.png" width="381" height="81">
   <noscript>
-    <img alt="Bookend cta-links component" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-bookend-cta-links.png" />
+    <img alt="Bookend cta-links component" src="img/amp-story-bookend-comopnent-cta-links.png" />
   </noscript>
 </amp-img>
 
