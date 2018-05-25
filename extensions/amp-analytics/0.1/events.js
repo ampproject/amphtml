@@ -361,7 +361,7 @@ export class ClickEventTracker extends EventTracker {
     /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
 
-    /** @private {function(!Event)} @const */
+    /** @private @const {function(!Event)} */
     this.boundOnClick_ = this.clickObservable_.fire.bind(this.clickObservable_);
     this.root.getRoot().addEventListener('click', this.boundOnClick_);
   }
