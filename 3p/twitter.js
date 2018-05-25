@@ -98,6 +98,7 @@ export function twitter(global, data) {
 }
 
 /**
+ * @param {string} tweetid
  * @visibleForTesting
  */
 export function cleanupTweetId_(tweetid) {
