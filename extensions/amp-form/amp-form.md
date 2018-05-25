@@ -103,8 +103,8 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 **Allowed**:
 
-* Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, `<input type=file>`, and so on.
-* `<input type=password>` inside of `<form method=POST action-xhr>`.
+* Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
+* `<input type=password>` and `<input type=file>` inside of `<form method=POST action-xhr>`.
 * [`amp-selector`](https://www.ampproject.org/docs/reference/components/amp-selector)
 
 **Not Allowed**:
