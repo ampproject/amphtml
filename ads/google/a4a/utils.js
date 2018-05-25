@@ -363,7 +363,7 @@ function getHistoryLength(win) {
  * @visibleForTesting
  */
 export function extractHost(url) {
-  return (/^(?:https?:\/\/)?([^\/|\?]+)/i.exec(url) || [])[1] || url;
+  return (/^(?:https?:\/\/)?([^\/|\?|:]+)/i.exec(url) || [])[1] || url;
 }
 
 /**
