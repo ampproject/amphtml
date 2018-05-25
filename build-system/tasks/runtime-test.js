@@ -73,17 +73,14 @@ function getConfig() {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Chrome_android',
         'SL_Chrome_latest',
+        'SL_Chrome_android',
         'SL_Chrome_45',
         'SL_Firefox_latest',
-        // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
-        // 'SL_Safari_latest',
-        // 'SL_Safari_10',
-        // 'SL_Safari_9',
+        'SL_Safari_latest',
+        'SL_Android_latest',
+        // TODO(rsimha, #15510): Enable these.
         // 'SL_iOS_latest',
-        // 'SL_iOS_10_0',
-        // TODO(rsimha, #14374): Re-enable these after upgrading wd.
         // 'SL_Edge_latest',
         // 'SL_IE_11',
       ] : [
