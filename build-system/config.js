@@ -125,7 +125,9 @@ module.exports = {
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party}/**/*.*',
     '!examples/**/*.*',
-    '!{validator/dist,validator/node_modules,validator/nodejs/node_modules}',
+    '!{validator/dist,validator/webui/dist,' +
+        'validator/node_modules,validator/nodejs/node_modules,' +
+        'validator/webui/node_modules}/**/*.*',
     '!eslint-rules/**/*.*',
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
