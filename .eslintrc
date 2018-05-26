@@ -33,8 +33,7 @@
     "global": false,
     "describes": true,
     "allowConsoleError": false,
-    "dontWarnForConsoleError": false,
-    "warnForConsoleError": false
+    "expectAsyncConsoleError": false
   },
   "settings": {
     "jsdoc": {
