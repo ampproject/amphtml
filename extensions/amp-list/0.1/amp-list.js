@@ -27,6 +27,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 
@@ -78,6 +79,9 @@ export class AmpList extends AMP.BaseElement {
      */
     this.initialSrc_ = null;
 
+    /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
+    this.bind_ = null;
+
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.fetchList_();
@@ -107,6 +111,10 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
     }
+
+    Services.bindForDocOrNull(this.element).then(bind => {
+      this.bind_ = bind;
+    });
   }
 
   /** @override */
@@ -270,7 +278,7 @@ export class AmpList extends AMP.BaseElement {
       }
     };
     this.templates_.findAndRenderTemplateArray(this.element, current.items)
-        .then(elements => this.updateBindings_(elements))
+        .then(elements => this.updateBindingsForElements_(elements))
         .then(elements => this.rendered_(elements))
         .then(/* onFulfilled */ () => {
           scheduleNextPass();
@@ -282,18 +290,43 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Evaluates and applies any bindings in the given elements.
+   * Ensures that rendered content is up-to-date with the latest bindable state.
    * @param {!Array<!Element>} elements
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindings_(elements) {
-    const forwardElements = () => elements;
-    return Services.bindForDocOrNull(this.element).then(bind => {
-      if (bind) {
-        return bind.scanAndApply(elements, [this.container_]);
+  updateBindingsForElements_(elements) {
+    // New default behavior is to _not_ block on retrieval of the Bind service
+    // before the first mutation (AMP.setState), because the rendered content
+    // can't be "out of date" if the bindable state hasn't changed.
+    // Allow a temporary opt-out to this behavior in case this causes breaking
+    // changes due to state-independent mutations, e.g. "[text]="1+1".
+    if (isExperimentOn(this.win, 'disable-faster-amp-list')) {
+      return Services.bindForDocOrNull(this.element).then(bind => {
+        if (bind) {
+          return this.updateBindingsWith_(bind, elements);
+        }
+      });
+    } else {
+      if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
+        return this.updateBindingsWith_(this.bind_, elements);
+      } else {
+        return Promise.resolve(elements);
       }
+    }
+  }
+
+  /**
+   * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
+   * @param {!Array<!Element>} elements
+   * @return {!Promise<!Array<!Element>>}
+   */
+  updateBindingsWith_(bind, elements) {
     // Forward elements to chained promise on success or failure.
-    }).then(forwardElements, forwardElements);
+    const forwardElements = () => elements;
+    return bind.scanAndApply(elements, [this.container_])
+        .then(forwardElements, forwardElements);
   }
 
   /**
@@ -325,7 +358,6 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {string} itemsExpr
-   * @visibleForTesting
    * @private
    */
   fetch_(itemsExpr) {
