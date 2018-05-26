@@ -105,7 +105,7 @@ function getAdTypes() {
   };
 
   // Start with Google ad types
-  const adTypes = ['adsense'];
+  const adTypes = ['adsense', 'doubleclick'];
 
   // Add all other ad types
   const files = fs.readdirSync('./ads/');
