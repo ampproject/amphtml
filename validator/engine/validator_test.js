@@ -102,7 +102,6 @@ function isMissingUnicodeGroup(regex) {
  */
 function findHtmlFilesRelativeToTestdata() {
   const testSubdirs = [];
-  console.error('findHtmlFilesRelativeToTestdata');
   for (const root of process.env['TESTDATA_ROOTS'].split(':')) {
     if (path.basename(root) === 'extensions') {
       for (const extension of readdir(root)) {
