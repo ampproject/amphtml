@@ -23,6 +23,7 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
+import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
@@ -185,6 +186,9 @@ export class Bind {
     /** @private {Promise} */
     this.setStatePromise_ = null;
 
+    /** @private @const {!../../../src/utils/signals.Signals} */
+    this.signals_ = new Signals();
+
     // Expose for debugging in the console.
     AMP.printState = this.printState_.bind(this);
   }
@@ -193,6 +197,13 @@ export class Bind {
   adoptEmbedWindow(embedWin) {
     installServiceInEmbedScope(
         embedWin, 'bind', new Bind(this.ampdoc, embedWin));
+  }
+
+  /**
+   * @return {!../../../src/utils/signals.Signals}
+   */
+  signals() {
+    return this.signals_;
   }
 
   /**
@@ -250,6 +261,9 @@ export class Bind {
 
     const expression = args[RAW_OBJECT_ARGS_KEY];
     if (expression) {
+      // Signal on first mutation.
+      this.signals_.signal('FIRST_MUTATE');
+
       const scope = dict();
       if (event && event.detail) {
         scope['event'] = event.detail;
