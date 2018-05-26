@@ -76,10 +76,21 @@ describes.realWin('amp-analytics', {
     'triggers': [{'on': 'visible', 'request': 'foo'}],
   };
 
+  const noTriggersError = '[AmpAnalytics <unknown id>] No triggers were ' +
+      'found in the config. No analytics data will be sent.';
+  const noRequestStringsError = '[AmpAnalytics <unknown id>] No request ' +
+      'strings defined. Analytics data will not be sent from this page.';
+  const oneScriptChildError = '[AmpAnalytics <unknown id>] The tag should ' +
+      'contain only one <script> child.';
+  const configParseError = '[AmpAnalytics <unknown id>] Analytics config ' +
+      'could not be parsed. Is it in a valid JSON format? TypeError: Cannot ' +
+      'read property \'toUpperCase\' of null';
+  const onAndRequestAttributesError = '[AmpAnalytics <unknown id>] "on" and ' +
+      '"request" attributes are required for data to be collected.';
+  const remoteConfigError = '[amp-analytics] Remote configs are not allowed ' +
+      'to specify transport iframe';
+
   beforeEach(() => {
-    // Temporarily disable console error check until we have a solution
-    // to catch async console errors.
-    dontWarnForConsoleError();
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
@@ -119,9 +130,6 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  afterEach(() => {
-    warnForConsoleError();
-  });
 
   function getAnalyticsTag(config, attrs) {
     config = JSON.stringify(config);
@@ -200,6 +208,12 @@ describes.realWin('amp-analytics', {
       }
       actualResults[vendor] = {};
       describe('analytics vendor: ' + vendor, function() {
+        beforeEach(() => {
+          if (!config.triggers) {
+            expectAsyncConsoleError(noTriggersError);
+          }
+        });
+
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', function* () {
@@ -350,6 +364,8 @@ describes.realWin('amp-analytics', {
   });
 
   it('does not send a hit when config is not in a script tag', function() {
+    expectAsyncConsoleError(noTriggersError);
+    expectAsyncConsoleError(noRequestStringsError);
     const config = JSON.stringify(trivialConfig);
     const el = doc.createElement('amp-analytics');
     el.textContent = config;
@@ -390,6 +406,9 @@ describes.realWin('amp-analytics', {
   });
 
   it('does not send a hit when multiple child tags exist', function() {
+    expectAsyncConsoleError(oneScriptChildError);
+    expectAsyncConsoleError(noRequestStringsError);
+    expectAsyncConsoleError(noTriggersError);
     const analytics = getAnalyticsTag(trivialConfig);
     const script2 = document.createElement('script');
     script2.setAttribute('type', 'application/json');
@@ -401,6 +420,9 @@ describes.realWin('amp-analytics', {
 
   it('does not send a hit when script tag does not have a type attribute',
       function() {
+        expectAsyncConsoleError(configParseError);
+        expectAsyncConsoleError(noRequestStringsError);
+        expectAsyncConsoleError(noTriggersError);
         const el = doc.createElement('amp-analytics');
         const script = doc.createElement('script');
         script.textContent = JSON.stringify(trivialConfig);
@@ -418,6 +440,7 @@ describes.realWin('amp-analytics', {
       });
 
   it('does not send a hit when request is not provided', function() {
+    expectAsyncConsoleError(onAndRequestAttributesError);
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible'}],
@@ -429,6 +452,7 @@ describes.realWin('amp-analytics', {
   });
 
   it('does not send a hit when request type is not defined', function() {
+    expectAsyncConsoleError(noRequestStringsError);
     const analytics = getAnalyticsTag({
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
@@ -1181,6 +1205,7 @@ describes.realWin('amp-analytics', {
   });
 
   it('ignore transport iframe from remote config', () => {
+    expectAsyncConsoleError(remoteConfigError);
     const analytics = getAnalyticsTag({
       'vars': {'title': 'local'},
       'requests': {'foo': 'https://example.com/${title}'},
