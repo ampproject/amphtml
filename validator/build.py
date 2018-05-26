@@ -90,16 +90,13 @@ def CheckPrereqs():
     except ImportError:
       Die('%s not found. Try "apt-get install python-protobuf"' % module)
 
-  # Ensure that npm is installed.
+  # Ensure that yarn is installed.
   try:
-    npm_version = subprocess.check_output(['npm', '--version'])
+    yarn_version = subprocess.check_output(['yarn', '--version'])
   except (subprocess.CalledProcessError, OSError):
-    Die('npm package manager not found. Try "apt-get install npm".')
-
-  # Ensure npm version '1.3.10' or newer.
-  m = re.search('^(\\d+)\\.(\\d+)\\.(\\d+)$', npm_version)
-  if (int(m.group(1)), int(m.group(2)), int(m.group(3))) < (1, 3, 10):
-    Die('Expected npm version 1.3.10 or newer, saw: %s' % npm_version)
+    Die('Yarn package manager not found. Run ' +
+        '"curl -o- -L https://yarnpkg.com/install.sh | bash" ' +
+        'or see https://yarnpkg.com/docs/install.')
 
   # Ensure JVM installed. TODO: Check for version?
   try:
@@ -126,17 +123,17 @@ def SetupOutDir(out_dir):
 
 
 def InstallNodeDependencies():
-  """Installs the dependencies using npm."""
+  """Installs the dependencies using yarn."""
   logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
-      ['npm', 'install'],
+      ['yarn', 'install'],
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(
-      ['npm', 'install'],
+      ['yarn', 'install'],
       cwd='nodejs',
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
@@ -331,23 +328,23 @@ def GenValidatorGeneratedLightAmpJs(out_dir):
   logging.info('... done')
 
 
-def CompileWithClosure(js_files, definitions, closure_entry_points,
-                       output_file):
+def CompileWithClosure(js_files, definitions, entry_points, output_file):
   """Compiles the arguments with the Closure compiler for transpilation to ES5.
 
   Args:
     js_files: list of files to compile
     definitions: list of definitions flags to closure compiler
-    closure_entry_points: entry points (these won't be minimized)
+    entry_points: entry points (these won't be minimized)
     output_file: name of the Javascript output file
   """
 
   cmd = [
       'java', '-jar', 'node_modules/google-closure-compiler/compiler.jar',
-      '--language_out=ES5_STRICT',
-      '--js_output_file=%s' % output_file, '--only_closure_dependencies'
+      '--language_out=ES5_STRICT', '--dependency_mode=STRICT',
+      '--js_output_file=%s' % output_file
   ]
-  cmd += ['--closure_entry_point=%s' % e for e in closure_entry_points]
+  cmd += ['--entry_point=%s' % e for e in entry_points]
+  cmd += ['--output_manifest=%s' % ('%s.manifest' % output_file)]
   cmd += [
       'node_modules/google-closure-library/closure/**.js',
       '!node_modules/google-closure-library/closure/**_test.js',
@@ -378,7 +375,7 @@ def CompileValidatorMinified(out_dir):
           'light/dom-walker.js', 'engine/htmlparser-interface.js'
       ],
       definitions=[],
-      closure_entry_points=[
+      entry_points=[
           'amp.validator.validateString',
           'amp.validator.renderValidationResult',
           'amp.validator.renderErrorMessage'
@@ -399,7 +396,8 @@ def RunSmokeTest(out_dir):
       [
           'node', 'nodejs/index.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
-          'testdata/feature_tests/minimum_valid_amp.html'
+          'testdata/feature_tests/minimum_valid_amp.html',
+          '--format=text'
       ],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
@@ -414,7 +412,8 @@ def RunSmokeTest(out_dir):
       [
           'node', 'nodejs/index.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
-          'testdata/feature_tests/empty.html'
+          'testdata/feature_tests/empty.html',
+          '--format=text'
       ],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
@@ -464,7 +463,7 @@ def CompileValidatorTestMinified(out_dir):
           'engine/validator_test.js'
       ],
       definitions=[],
-      closure_entry_points=['amp.validator.ValidatorTest'],
+      entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
   logging.info('... success')
 
@@ -490,7 +489,7 @@ def CompileValidatorLightTestMinified(out_dir):
           'light/validator-light_test.js'
       ],
       definitions=['--define="amp.validator.LIGHT=true"'],
-      closure_entry_points=['amp.validator.ValidatorTest'],
+      entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator-light_test_minified.js' % out_dir)
   logging.info('... success')
 
@@ -509,7 +508,7 @@ def CompileHtmlparserTestMinified(out_dir):
           'engine/htmlparser_test.js'
       ],
       definitions=[],
-      closure_entry_points=['amp.htmlparser.HtmlParserTest'],
+      entry_points=['amp.htmlparser.HtmlParserTest'],
       output_file='%s/htmlparser_test_minified.js' % out_dir)
   logging.info('... success')
 
@@ -531,7 +530,7 @@ def CompileParseCssTestMinified(out_dir):
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
-      closure_entry_points=['parse_css.ParseCssTest'],
+      entry_points=['parse_css.ParseCssTest'],
       output_file='%s/parse-css_test_minified.js' % out_dir)
   logging.info('... success')
 
@@ -553,7 +552,7 @@ def CompileParseUrlTestMinified(out_dir):
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
-      closure_entry_points=['parse_url.ParseURLTest'],
+      entry_points=['parse_url.ParseURLTest'],
       output_file='%s/parse-url_test_minified.js' % out_dir)
   logging.info('... success')
 
@@ -576,7 +575,7 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
-      closure_entry_points=['parse_css.Amp4AdsParseCssTest'],
+      entry_points=['parse_css.Amp4AdsParseCssTest'],
       output_file='%s/amp4ads-parse-css_test_minified.js' % out_dir)
   logging.info('... success')
 
@@ -599,7 +598,7 @@ def CompileKeyframesParseCssTestMinified(out_dir):
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
-      closure_entry_points=['parse_css.KeyframesParseCssTest'],
+      entry_points=['parse_css.KeyframesParseCssTest'],
       output_file='%s/keyframes-parse-css_test_minified.js' % out_dir)
   logging.info('... success')
 
@@ -620,7 +619,7 @@ def CompileParseSrcsetTestMinified(out_dir):
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
-      closure_entry_points=['parse_srcset.ParseSrcsetTest'],
+      entry_points=['parse_srcset.ParseSrcsetTest'],
       output_file='%s/parse-srcset_test_minified.js' % out_dir)
   logging.info('... success')
 

@@ -593,6 +593,7 @@ export const adConfig = {
       'https://tpc.googlesyndication.com',
     ],
     renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   medyanet: {
@@ -870,6 +871,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  unruly: {
+    prefetch: 'https://video.unrulymedia.com/amp-demo/native-loader.js',
+    renderStartImplemented: true,
+  },
+
   valuecommerce: {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [
@@ -959,7 +965,7 @@ export const adConfig = {
   },
 
   yieldmo: {
-    prefetch: 'https://static.yieldmo.com/ym.amp1.js',
+    prefetch: 'https://static.yieldmo.com/ym.1.js',
     preconnect: [
       'https://s.yieldmo.com',
       'https://ads.yieldmo.com',

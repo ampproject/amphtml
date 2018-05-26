@@ -18,6 +18,7 @@ import {
   ConsentInstance,
   ConsentStateManager,
 } from '../consent-state-manager';
+import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
@@ -85,10 +86,10 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       expect(value).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
 
       let value1;
-      manager.updateConsentInstanceState('test', CONSENT_ITEM_STATE.GRANTED);
+      manager.updateConsentInstanceState('test', CONSENT_ITEM_STATE.ACCEPTED);
       const p1 = manager.getConsentInstanceState('test').then(v => value1 = v);
       yield p1;
-      expect(value1).to.equal(CONSENT_ITEM_STATE.GRANTED);
+      expect(value1).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
     });
 
     describe('update consent', () => {
@@ -149,7 +150,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         instance.update(CONSENT_ITEM_STATE.NOT_REQUIRED);
         yield macroTask();
         expect(storageSetSpy).to.not.be.called;
-        instance.update(CONSENT_ITEM_STATE.GRANTED);
+        instance.update(CONSENT_ITEM_STATE.ACCEPTED);
         yield macroTask();
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith('amp-consent:test', true);
@@ -165,16 +166,16 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       });
 
       it('should not write localStorage with same value', function* () {
-        instance.update(CONSENT_ITEM_STATE.GRANTED);
+        instance.update(CONSENT_ITEM_STATE.ACCEPTED);
         yield macroTask();
         expect(storageSetSpy).to.be.calledOnce;
-        instance.update(CONSENT_ITEM_STATE.GRANTED);
+        instance.update(CONSENT_ITEM_STATE.ACCEPTED);
         yield macroTask();
         expect(storageSetSpy).to.be.calledOnce;
       });
 
       it('should handle race condition store latest value', function* () {
-        instance.update(CONSENT_ITEM_STATE.GRANTED);
+        instance.update(CONSENT_ITEM_STATE.ACCEPTED);
         instance.update(CONSENT_ITEM_STATE.REJECTED);
         yield macroTask();
         expect(storageSetSpy).to.be.calledOnce;
@@ -183,6 +184,13 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
     });
 
     describe('get', () => {
+      it('should be able to get stored value', () => {
+        storageValue['amp-consent:test'] = true;
+        return instance.get().then(value => {
+          expect(value).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
+        });
+      });
+
       it('should be able to get local value', function* () {
         let value;
         yield instance.get().then(v => value = v);
@@ -190,26 +198,27 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield instance.update(CONSENT_ITEM_STATE.DISMISSED);
         yield instance.get().then(v => value = v);
         expect(value).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
-        storageValue['amp-consent:test'] = true;
+        yield instance.update(CONSENT_ITEM_STATE.ACCEPTED);
         yield instance.get().then(v => value = v);
-        expect(value).to.equal(CONSENT_ITEM_STATE.GRANTED);
+        expect(value).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         yield instance.update(CONSENT_ITEM_STATE.DISMISSED);
         yield instance.get().then(v => value = v);
-        expect(value).to.equal(CONSENT_ITEM_STATE.GRANTED);
+        expect(value).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         yield instance.update(CONSENT_ITEM_STATE.REJECTED);
         yield instance.get().then(v => value = v);
         expect(value).to.equal(CONSENT_ITEM_STATE.REJECTED);
       });
 
-      it('should return unknown value with error', function* () {
-        let value;
+      it('should return unknown value with error', () => {
         storageGetSpy = () => {
           const e = new Error('intentional');
           throw e;
         };
+        sandbox.stub(dev(), 'error');
         storageValue['amp-consent:test'] = true;
-        yield instance.get().then(v => value = v);
-        expect(value).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
+        return instance.get().then(value => {
+          expect(value).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
+        });
       });
 
       it('should handle race condition return latest value', function* () {

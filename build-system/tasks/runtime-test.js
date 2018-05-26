@@ -18,6 +18,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
+const deglob = require('globs-to-files');
+const findImports = require('find-imports');
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
@@ -37,7 +39,7 @@ const {green, yellow, cyan, red, bold} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
-
+const tooManyTestsToFix = 15;
 
 /**
  * Read in and process the configuration settings for karma
@@ -71,17 +73,14 @@ function getConfig() {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Chrome_android',
         'SL_Chrome_latest',
+        'SL_Chrome_android',
         'SL_Chrome_45',
         'SL_Firefox_latest',
-        // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
-        // 'SL_Safari_latest',
-        // 'SL_Safari_10',
-        // 'SL_Safari_9',
+        'SL_Safari_latest',
+        'SL_Android_latest',
+        // TODO(rsimha, #15510): Enable these.
         // 'SL_iOS_latest',
-        // 'SL_iOS_10_0',
-        // TODO(rsimha, #14374): Re-enable these after upgrading wd.
         // 'SL_Edge_latest',
         // 'SL_IE_11',
       ] : [
@@ -175,7 +174,7 @@ function printArgvMessages() {
       log(green('⤷ Use'), cyan('--local-changes'),
           green('to run unit tests from files commited to the local branch.'));
     }
-    if (!argv.testnames && !argv.files) {
+    if (!argv.testnames && !argv.files && !argv['local-changes']) {
       log(green('⤷ Use'), cyan('--testnames'),
           green('to see the names of all tests being run.'));
     }
@@ -203,7 +202,9 @@ function applyAmpConfig() {
   if (argv.unit || argv.a4a) {
     return Promise.resolve();
   }
-  log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  if (!process.env.TRAVIS) {
+    log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  }
   return writeConfig('dist/amp.js').then(() => {
     return writeConfig('dist/v0.js');
   });
@@ -229,16 +230,98 @@ function writeConfig(targetFile) {
 }
 
 /**
- * Extracts the list of unit test files changed on the local branch.
+ * Returns true if the given file is a unit test.
+ *
+ * @param {string} file
+ * @return {boolean}
+ */
+function isUnitTest(file) {
+  return config.unitTestPaths.some(pattern => {
+    return minimatch(file, pattern);
+  });
+}
+
+/**
+ * Returns the list of files imported by testFile
+ *
+ * @param {string} testFile
+ * @return {!Array<string>}
+ */
+function getImports(testFile) {
+  const imports = findImports([testFile], {
+    flatten: true,
+    packageImports: false,
+    absoluteImports: true,
+    relativeImports: true,
+  });
+  const files = [];
+  const rootDir = path.dirname(path.dirname(__dirname));
+  const testFileDir = path.dirname(testFile);
+  imports.forEach(function(file) {
+    const fullPath = path.resolve(testFileDir, file) + '.js';
+    if (fs.existsSync(fullPath)) {
+      const relativePath = path.relative(rootDir, fullPath);
+      files.push(relativePath);
+    }
+  });
+  return files;
+}
+
+/**
+ * Returns true if the test file should be run for any one of the source files.
+ *
+ * @param {string} testFile
+ * @param {!Array<string>} srcFiles
+ * @return {boolean}
+ */
+function shouldRunTest(testFile, srcFiles) {
+  const filesImported = getImports(testFile);
+  return filesImported.filter(function(file) {
+    return srcFiles.includes(file);
+  }).length > 0;
+}
+
+/**
+ * Retrieves the set of unit tests that should be run for a set of source files.
+ *
+ * @param {!Array<string>} srcFiles
+ * @return {!Array<string>}
+ */
+function getTestsFor(srcFiles) {
+  const rootDir = path.dirname(path.dirname(__dirname));
+  const allUnitTests = deglob.sync(config.unitTestPaths);
+  return allUnitTests.filter(testFile => {
+    return shouldRunTest(testFile, srcFiles);
+  }).map(fullPath => path.relative(rootDir, fullPath));
+}
+
+/**
+ * Extracts the list of unit tests to run based on the changes in the local
+ * branch.
  *
  * @return {!Array<string>}
  */
-function unitTestFilesChanged() {
-  return gitDiffNameOnlyMaster().filter(function(file) {
-    return config.unitTestPaths.some(pattern => {
-      return minimatch(file, pattern);
-    });
+function unitTestsToRun() {
+  const filesChanged = gitDiffNameOnlyMaster();
+  const testsToRun = [];
+  const srcFiles = [];
+  filesChanged.forEach(file => {
+    if (isUnitTest(file)) {
+      testsToRun.push(file);
+    } else if (path.extname(file) == '.js') {
+      srcFiles.push(file);
+    }
   });
+  if (srcFiles.length > 0) {
+    log(green('INFO: ') + 'Determining which unit tests to run...');
+    const moreTestsToRun = getTestsFor(srcFiles);
+    moreTestsToRun.forEach(test => {
+      if (!testsToRun.includes(test)) {
+        testsToRun.push(test);
+      }
+    });
+  }
+  return testsToRun;
 }
 
 /**
@@ -266,7 +349,7 @@ function runTests() {
     c.client.captureConsole = true;
   }
 
-  if (argv.testnames || argv['local-changes']) {
+  if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
     c.reporters = ['mocha'];
   }
 
@@ -280,13 +363,20 @@ function runTests() {
       c.reporters = ['mocha'];
     }
   } else if (argv['local-changes']) {
-    const filesChanged = unitTestFilesChanged();
-    if (filesChanged.length == 0) {
-      log(green('No unit test files were changed. Exiting.'));
-      process.exit(0);
+    const testsToRun = unitTestsToRun();
+    if (testsToRun.length == 0) {
+      log(green('INFO: ') + 'No unit tests affected by local changes.');
+      return Promise.resolve();
+    } else {
+      log(green('INFO: ') + 'Running the following unit tests:');
+      testsToRun.forEach(test => {
+        log(cyan(test));
+      });
     }
-    c.files = c.files.concat(config.commonUnitTestPaths, filesChanged);
-    c.client.failOnConsoleError = true;
+    c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
+    if (testsToRun.length < tooManyTestsToFix) {
+      c.client.failOnConsoleError = true;
+    }
   } else if (argv.integration) {
     c.files = c.files.concat(
         config.commonIntegrationTestPaths, config.integrationTestPaths);
@@ -379,9 +469,10 @@ function runTests() {
   refreshKarmaWdCache();
 
   // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
-  // reporter, since it likely contains copious amounts of logs.
-  const shouldCollapseSummary =
-      process.env.TRAVIS && c.reporters.includes('karmaSimpleReporter');
+  // reporter for full unit test runs, since it likely contains copious amounts
+  // of logs.
+  const shouldCollapseSummary = process.env.TRAVIS &&
+      c.reporters.includes('karmaSimpleReporter') && !argv['local-changes'];
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 

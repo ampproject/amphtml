@@ -289,31 +289,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const pfx = enclosingContainers.includes(
         ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
         enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
-    let npa = null;
-    let consent = null;
-    switch (consentState) {
-      case null:
-      case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
-        break;
-      case CONSENT_POLICY_STATE.INSUFFICIENT:
-        consent = false;
-      case CONSENT_POLICY_STATE.UNKNOWN:
-        npa = '1';
-        break;
-      case CONSENT_POLICY_STATE.SUFFICIENT:
-        consent = true;
-        break;
-      default:
-        dev().error(TAG, `unknown consent enum ${consentState}`);
-    }
     const parameters = {
       'client': adClientId,
       format,
       'w': this.size_.width,
       'h': this.size_.height,
       'iu': slotname,
-      npa,
-      consent,
+      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
       'adtest': adTestOn ? 'on' : null,
       adk,
       'output': 'html',
@@ -334,6 +317,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.isResponsive_() ? 13 : null,
       'pfx': pfx ? '1' : '0',
+      // Matched content specific fields.
+      'crui': this.element.getAttribute('data-matched-content-ui-type'),
+      'cr_row': this.element.getAttribute('data-matched-content-rows-num'),
+      'cr_col': this.element.getAttribute('data-matched-content-columns-num'),
       // Package code (also known as URL group) that was used to
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),

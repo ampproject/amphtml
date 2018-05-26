@@ -21,6 +21,8 @@ goog.provide('amp.validator.annotateWithErrorCategories');
 goog.provide('amp.validator.isSeverityWarning');
 goog.provide('amp.validator.renderErrorMessage');
 goog.provide('amp.validator.renderValidationResult');
+goog.provide('amp.validator.sortAndUniquify');
+goog.provide('amp.validator.subtractDiff');
 goog.provide('amp.validator.validateSaxEvents');
 goog.provide('amp.validator.validateString');
 goog.require('amp.htmlparser.HtmlParser');
@@ -67,6 +69,7 @@ goog.require('parse_url.URL');
  * Sorts and eliminates duplicates in |arrayValue|. Modifies the input in place.
  * @param {!Array<T>} arrayValue
  * @template T
+ * @export
  */
 function sortAndUniquify(arrayValue) {
   if (arrayValue.length < 2) {return;}
@@ -88,6 +91,7 @@ function sortAndUniquify(arrayValue) {
  * @param {!Array<T>} right
  * @return {!Array<T>} Computed difference of left - right.
  * @template T
+ * @export
  */
 function subtractDiff(left, right) {
   let l = 0;
@@ -3578,7 +3582,7 @@ function checkForReferencePointCollision(
 function validateAncestorTags(parsedTagSpec, context, validationResult) {
   const spec = parsedTagSpec.getSpec();
   if (spec.mandatoryAncestor !== null) {
-    const {mandatoryAncestor} = spec;
+    const mandatoryAncestor = /** @type {string} */ (spec.mandatoryAncestor);
     if (!context.getTagStack().hasAncestor(mandatoryAncestor)) {
       if (amp.validator.LIGHT) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;

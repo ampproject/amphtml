@@ -19,6 +19,11 @@ import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {
+  escapeCssSelectorIdent,
+  scopedQuerySelector,
+  whenUpgradedToCustomElement,
+} from '../../../src/dom';
 import {getBinaryType} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -28,8 +33,6 @@ import {
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
-import {parseUrlDeprecated} from '../../../src/url';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -92,6 +95,9 @@ export let NameframeExperimentConfig;
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
+/** @const {Object} */
+const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+
 /**
  * Returns the value of navigation start using the performance API or 0 if not
  * supported by the browser.
@@ -116,11 +122,8 @@ function getNavStart(win) {
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  const googleCdnProxyRegex =
-        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return supportsNativeCrypto(win) && (
-    !!googleCdnProxyRegex.test(win.location.origin) ||
-        getMode(win).localDev || getMode(win).test);
+    !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test);
 }
 
 /**
@@ -209,7 +212,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
         }
         const isAmpAdContainerElement =
           Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!r.element.querySelector(`amp-ad[type=${type}]`);
+          !!scopedQuerySelector(
+              r.element, escapeCssSelectorIdent(`amp-ad[type=${type}]`));
         return isAmpAdContainerElement;
       })
       // Need to wait on any contained element resolution followed by build
@@ -221,8 +225,11 @@ export function groupAmpAdsByType(win, type, groupFn) {
             }
             // Must be container element so need to wait for child amp-ad to
             // be upgraded.
-            return whenUpgradedToCustomElement(dev().assertElement(
-                resource.element.querySelector(`amp-ad[type=${type}]`)));
+            return whenUpgradedToCustomElement(
+                dev().assertElement(
+                    scopedQuerySelector(
+                        resource.element,
+                        escapeCssSelectorIdent(`amp-ad[type=${type}]`))));
           })))
       // Group by networkId.
       .then(elements => elements.reduce((result, element) => {
@@ -254,7 +261,6 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
         const viewportSize = viewport.getSize();
         const visibilityState = Services.viewerForDoc(nodeOrDoc)
             .getVisibilityState();
-        const art = getBinaryTypeNumericalCode(getBinaryType(win));
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
@@ -274,7 +280,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'u_his': getHistoryLength(win),
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
-          'art': art == '0' ? null : art,
+          'art': getAmpRuntimeTypeParameter(win),
           'vis': visibilityStateCodes[visibilityState] || '0',
           'scr_x': viewport.getScrollLeft(),
           'scr_y': viewport.getScrollTop(),
@@ -352,6 +358,15 @@ function getHistoryLength(win) {
 }
 
 /**
+ * @param {string} url
+ * @return {string} hostname portion of url
+ * @visibleForTesting
+ */
+export function extractHost(url) {
+  return (/^(?:https?:\/\/)?([^\/\?:]+)/i.exec(url) || [])[1] || url;
+}
+
+/**
  * @param {!Window} win
  * @return {?string}
  */
@@ -366,16 +381,16 @@ function topWindowUrlOrDomain(win) {
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
+      return extractHost(secondFromTop./*OK*/document.referrer);
     }
-    return parseUrlDeprecated(topOrigin).hostname;
+    return extractHost(topOrigin);
   } else {
     try {
       return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
+      return extractHost(secondFromTop./*OK*/document.referrer);
     } catch (e) {}
     return null;
   }
@@ -823,8 +838,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   }
   domain = domain || '.google.com';
   const canonical =
-    parseUrlDeprecated(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl)
-        .hostname;
+    extractHost(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl);
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 
@@ -834,9 +848,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
  * @return {boolean}
  */
 export function isCdnProxy(win) {
-  const googleCdnProxyRegex =
-    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-  return googleCdnProxyRegex.test(win.location.origin);
+  return CDN_PROXY_REGEXP.test(win.location.origin);
 }
 
 /**
@@ -889,4 +901,16 @@ function getBrowserCapabilitiesBitmap(win) {
     }
   }
   return browserCapabilities;
+}
+
+/**
+ * Returns an enum value representing the AMP binary type, or null if this is a
+ * canonical page.
+ * @param {!Window} win
+ * @return {?string} The binary type enum.
+ * @visibleForTesting
+ */
+export function getAmpRuntimeTypeParameter(win) {
+  const art = getBinaryTypeNumericalCode(getBinaryType(win));
+  return isCdnProxy(win) && art != '0' ? art : null;
 }

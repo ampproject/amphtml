@@ -64,7 +64,10 @@ The `amp-geo` component uses the country from which the request originated in th
 
 If the country cannot be determined, the value is set to 'unknown'.  If the grouping feature is used at least one group must contain 'unknown'.
 
-Note: It's possible that an IP address with country information in the WHOIS database will not have country information in amp-geo. 
+Notes: 
+
+1. It's possible that an IP address with country information in the WHOIS database will not have country information in amp-geo. 
+1. The ISO country code may not be the same as the top-level domain.  For example, the code for the United Kingdom is "gb" not "uk". 
 
 The `amp-geo` component provides CSS, `amp-bind` and variable substitution interfaces. 
 
@@ -89,7 +92,7 @@ The `ISOCountryGroups` key allows selections by groups of country codes.
 </amp-geo>
 ```
 
-If country groups are specified, `amp-geo` iterates through the groups. For any group that contains the current country, a class named `amp-geo-group-` followed by the group name is added to `<body>`. Group names may only contain a-z, A-Z and 0-9, and may not start with a digit.
+If country groups are specified, `amp-geo` iterates through the groups. For any group that contains the current country, a class named `amp-geo-group-` followed by the group name is added to `<body>`. Group names may only contain a-z, A-Z and 0-9, and may not start with a digit.  If no country group is matched the class `amp-geo-no-group` is added to `body`.
 
 ##### Example: Generated CSS classes
 

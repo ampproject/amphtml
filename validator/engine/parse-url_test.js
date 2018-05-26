@@ -289,8 +289,8 @@ describe('parse_url', () => {
     assertStrictEqual('', url.host);
   });
 
-  it('rejects http:/// (empty host)', () => {
-    const urlString = 'http:///';
+  it('rejects http:/// (empty host)', () => {  // NOTYPO
+    const urlString = 'http:///';  // NOTYPO
     const url = new parse_url.URL(urlString);
     assertStrictEqual(false, url.isValid);
     assertStrictEqual('', url.host);

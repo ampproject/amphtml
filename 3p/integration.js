@@ -61,6 +61,7 @@ import {beopinion} from './beopinion';
 import {bodymovinanimation} from './bodymovinanimation';
 import {facebook} from './facebook';
 import {github} from './github';
+import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
@@ -209,6 +210,7 @@ import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
 import {uas} from '../ads/uas';
+import {unruly} from '../ads/unruly';
 import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
@@ -264,6 +266,7 @@ if (getMode().test || getMode().localDev) {
 
 // Keep the list in alphabetic order
 register('24smi', _24smi);
+register('3d-gltf', gltfViewer);
 register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);
@@ -413,6 +416,7 @@ register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
 register('uas', uas);
+register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);
 register('videonow', videonow);
