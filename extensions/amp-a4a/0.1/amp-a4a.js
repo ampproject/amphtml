@@ -17,7 +17,6 @@
 import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-  getConsentPolicyState,
 } from '../../../src/consent-state';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LayoutPriority} from '../../../src/layout';
@@ -43,6 +42,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {getBinaryType} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {getConsentPolicyState} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 import {tryResolve} from '../../../src/utils/promise';
