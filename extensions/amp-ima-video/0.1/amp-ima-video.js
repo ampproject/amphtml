@@ -25,7 +25,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {getConsentPolicyState} from '../../../src/consent-state';
+import {getConsentPolicyState} from '../../../src/consent';
 import {
   getData,
   listen,

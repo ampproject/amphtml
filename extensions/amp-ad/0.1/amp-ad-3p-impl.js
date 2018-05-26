@@ -18,8 +18,6 @@ import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-  getConsentPolicySharedData,
-  getConsentPolicyState,
 } from '../../../src/consent-state';
 import {
   Layout, // eslint-disable-line no-unused-vars
@@ -40,6 +38,10 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from './concurrent-load';
+import {
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {getIframe} from '../../../src/3p-frame';
 import {
   googleLifecycleReporterFactory,

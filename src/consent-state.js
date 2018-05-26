@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+// This file will be imported by 3P scripts.
 
 /**
  * Possible consent policy state to proceed with.
@@ -27,41 +27,3 @@ export const CONSENT_POLICY_STATE = {
   UNKNOWN_NOT_REQUIRED: 3,
   UNKNOWN: 4,
 };
-
-// TODO(@zhouyx): Move following functions to a different file
-
-/**
- * Returns a promise that resolve when all consent state the policy wait
- * for resolve. Or if consent service is not available.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} policyId
- * @return {!Promise<?CONSENT_POLICY_STATE>}
- */
-export function getConsentPolicyState(ampdoc, policyId) {
-  return Services.consentPolicyServiceForDocOrNull(ampdoc)
-      .then(consentPolicy => {
-        if (!consentPolicy) {
-          return null;
-        }
-        return consentPolicy.whenPolicyResolved(
-            /** @type {string} */ (policyId));
-      });
-}
-
-/**
- * Returns a promise that resolves to a sharedData retrieved from consent
- * remote endpoint.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} policyId
- * @return {!Promise<?Object>}
- */
-export function getConsentPolicySharedData(ampdoc, policyId) {
-  return Services.consentPolicyServiceForDocOrNull(ampdoc)
-      .then(consentPolicy => {
-        if (!consentPolicy) {
-          return null;
-        }
-        return consentPolicy.getMergedSharedData(
-            /** @type {string} */ (policyId));
-      });
-}
