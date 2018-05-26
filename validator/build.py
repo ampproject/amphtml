@@ -92,10 +92,10 @@ def CheckPrereqs():
 
   # Ensure that yarn is installed.
   try:
-    yarn_version = subprocess.check_output(['yarn', '--version'])
+    subprocess.check_output(['yarn', '--version'])
   except (subprocess.CalledProcessError, OSError):
-    Die('Yarn package manager not found. Run ' +
-        '"curl -o- -L https://yarnpkg.com/install.sh | bash" ' +
+    Die('Yarn package manager not found. Run '
+        '"curl -o- -L https://yarnpkg.com/install.sh | bash" '
         'or see https://yarnpkg.com/docs/install.')
 
   # Ensure JVM installed. TODO: Check for version?
