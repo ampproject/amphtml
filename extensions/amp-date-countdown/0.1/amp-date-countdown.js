@@ -175,7 +175,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
           .trigger(this.element, 'timeout', null, ActionTrust.LOW);
       this.win.clearInterval(this.countDownTimer_);
     }
-    console.log(Object.assign(DIFF, this.localeWordList_));
+    //console.log(Object.assign(DIFF, this.localeWordList_));
     this.renderItems_(Object.assign(DIFF, this.localeWordList_));
   }
 
