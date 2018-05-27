@@ -117,7 +117,7 @@ describes.realWin('amp-date-countdown', {
   });
 
   it('should calculate timeleft and have biggest-unit up to hours', () => {
-    element.setAttribute('biggest-unit', 'hours');
+    element.setAttribute('biggest-unit', 'HOURS');
     element.build();
     const timeObj =
       Object.assign(
@@ -133,7 +133,7 @@ describes.realWin('amp-date-countdown', {
   });
 
   it('should calculate timeleft and have biggest-unit up to minutes', () => {
-    element.setAttribute('biggest-unit', 'minutes');
+    element.setAttribute('biggest-unit', 'MINUTES');
     element.build();
     const timeObj =
       Object.assign(
@@ -149,7 +149,7 @@ describes.realWin('amp-date-countdown', {
   });
 
   it('should calculate timeleft and have biggest-unit up to seconds', () => {
-    element.setAttribute('biggest-unit', 'seconds');
+    element.setAttribute('biggest-unit', 'SECONDS');
     element.build();
     const timeObj =
       Object.assign(
