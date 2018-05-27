@@ -155,28 +155,21 @@ export class AmpDateCountdown extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JsonObject} items
-   * @return {!Promise}
-   * @private
-   */
-  renderItems_(items) {
-    return this.templates_.findAndRenderTemplate(this.element, items)
-        .then(this.boundRendered_);
-  }
-
-  /**
    * @param {number} differentBetween
    * @private
    */
   tickCountDown_(differentBetween) {
+    const items = /** @type {!JsonObject} */ ({});
     const DIFF = this.getYDHMSFromMs_(differentBetween) || {};
     if (this.whenEnded_ === 'stop' && differentBetween < 1000) {
       Services.actionServiceForDoc(this.element)
           .trigger(this.element, 'timeout', null, ActionTrust.LOW);
       this.win.clearInterval(this.countDownTimer_);
     }
-    //console.log(Object.assign(DIFF, this.localeWordList_));
-    this.renderItems_(Object.assign(DIFF, this.localeWordList_));
+    items['data'] = Object.assign(DIFF, this.localeWordList_);
+    this.templates_
+        .findAndRenderTemplate(this.element, items['data'])
+        .then(this.boundRendered_);
   }
 
   /**
@@ -236,23 +229,26 @@ export class AmpDateCountdown extends AMP.BaseElement {
       MINUTES: 3,
       SECONDS: 4,
     };
-
+    //Math.trunc is used instead of Math.floor to support negative past date
     const d = TimeUnit[this.biggestUnit_] == TimeUnit.DAYS
-      ? (Math.trunc((ms) / MILLISECONDS_IN_DAY))
+      ? this.supportBackDate_(Math.floor((ms) / MILLISECONDS_IN_DAY))
       : 0;
     const h = TimeUnit[this.biggestUnit_] == TimeUnit.HOURS
-      ? (Math.trunc((ms) / MILLISECONDS_IN_HOUR))
+      ? this.supportBackDate_(Math.floor((ms) / MILLISECONDS_IN_HOUR))
       : TimeUnit[this.biggestUnit_] < TimeUnit.HOURS
-        ? (Math.trunc((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR))
+        ? this.supportBackDate_(
+            Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR))
         : 0;
     const m = TimeUnit[this.biggestUnit_] == TimeUnit.MINUTES
-      ? (Math.trunc((ms) / MILLISECONDS_IN_MINUTE))
+      ? this.supportBackDate_(Math.floor((ms) / MILLISECONDS_IN_MINUTE))
       : TimeUnit[this.biggestUnit_] < TimeUnit.MINUTES
-        ? (Math.trunc((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE))
+        ? this.supportBackDate_(
+            Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE))
         : 0;
     const s = TimeUnit[this.biggestUnit_] == TimeUnit.SECONDS
-      ? (Math.trunc((ms) / MILLISECONDS_IN_SECOND))
-      : (Math.trunc((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND));
+      ? this.supportBackDate_(Math.floor((ms) / MILLISECONDS_IN_SECOND))
+      : this.supportBackDate_(
+          Math.floor((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND));
 
     return {
       d,
@@ -279,6 +275,19 @@ export class AmpDateCountdown extends AMP.BaseElement {
     }
 
     return '0' + input;
+  }
+
+  /**
+   * @param {number} input
+   * @return {number}
+   * @private
+   */
+  supportBackDate_(input) {
+    if (input < 0) {
+      return input + 1;
+    }
+
+    return input;
   }
 
   /**

@@ -62,7 +62,7 @@ describes.realWin('amp-date-countdown', {
     const timeObj =
       Object.assign(
           impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate),
-          impl.getLocaleWord_('zh-CN')); // Chinese
+          impl.getLocaleWord_('zh-cn')); // Chinese
     const itemElement = win.document.createElement('div');
     itemElement.textContent = timeObj.d + ' ' + timeObj.days + ' ' +
       timeObj.h + ' ' + timeObj.hours + ' ' +
