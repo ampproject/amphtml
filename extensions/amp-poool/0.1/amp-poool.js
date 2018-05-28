@@ -81,7 +81,7 @@ class AmpPoool extends AMP.BaseElement {
     buildCallback() {
         // Check if required parameter init (bundle-id) isn't missing
         const bundle_id = user().assert(
-            this.element.getAttribute('data-init'),
+            this.element.getAttribute('data-app-id'),
             'The init attribute is required for <amp-poool> %s',
             this.element
         );

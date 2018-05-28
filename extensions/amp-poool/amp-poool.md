@@ -20,7 +20,7 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>
-      Displays any Poool paywall<br />.
+      Displays a Poool paywall<br />.
       See <a href="http://poool.fr">poool.fr</a> and <a href="http://demo.poool.fr">demo.poool.fr</a> for more details.
     </td>
   </tr>
@@ -45,7 +45,7 @@ limitations under the License.
   layout="responsive"
   width="150"
   height="80"
-  data-init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
+  data-app-id="XXXXX-XXXXX-XXXXX-XXXXX"
   data-page-view="premium">
 </amp-poool>
 ```
@@ -63,7 +63,7 @@ For more informations, check our [documentation](https://dev.poool.fr/doc/sdk).
   layout="responsive"
   width="150"
   height="80"
-  data-init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
+  data-app-id="XXXXX-XXXXX-XXXXX-XXXXX"
   data-page-view="premium"
   data-debug="true"
   data-poool-mode="excerpt"
@@ -99,7 +99,7 @@ Update your amp-poool tag with "data-events" attribute. "poool-custom-events" is
   layout="responsive"
   width="150"
   height="80"
-  data-init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
+  data-app-id="XXXXX-XXXXX-XXXXX-XXXXX"
   data-page-view="premium"
   data-debug="true"
   data-poool-mode="excerpt"
@@ -125,7 +125,7 @@ Then create your json script and set your events :
 ## Required attributes
 ### Both required:
 
-**init**
+**app-id**
 
 Your App ID (key given by Poool).
 
