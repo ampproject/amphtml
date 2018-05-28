@@ -459,14 +459,14 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 
 ```text
 {
-  // It is required to specify you are using the v1.0 version.
+  // You must specify version v1.0.
   "bookend-version": "v1.0",
   "share-providers": [
     "email",
     "tumblr",
     {
       "provider": "twitter",
-      // You can add custom sharing parameters depending on the platform.
+      // You can add custom sharing parameters depending on the social platform.
       "text": "This is custom share text that I would like for the Twitter platform"
     },
     {
