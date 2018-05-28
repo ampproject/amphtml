@@ -337,8 +337,10 @@ describes.realWin('amp-auto-ads', {
 
   it('should throw an error if no type', () => {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
-    expect(() => ampAutoAds.buildCallback())
-        .to.throw(/Missing type attribute​​/);
+    allowConsoleError(() => {
+      expect(() => ampAutoAds.buildCallback()).to.throw(
+          /Missing type attribute​​/);
+    });
     expect(xhr.fetchJson).not.to.have.been.called;
   });
 
@@ -346,8 +348,10 @@ describes.realWin('amp-auto-ads', {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
     ampAutoAdsElem.setAttribute('type', 'unknowntype');
 
-    expect(() => ampAutoAds.buildCallback())
-        .to.throw(/No AdNetworkConfig for type: unknowntype​​​/);
+    allowConsoleError(() => {
+      expect(() => ampAutoAds.buildCallback()).to.throw(
+          /No AdNetworkConfig for type: unknowntype​​​/);
+    });
 
     expect(xhr.fetchJson).not.to.have.been.called;
   });
@@ -357,8 +361,9 @@ describes.realWin('amp-auto-ads', {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
     ampAutoAdsElem.setAttribute('type', 'adsense');
 
-    expect(() => ampAutoAds.buildCallback())
-        .to.throw(/Experiment is off​​​/);
+    allowConsoleError(() => {
+      expect(() => ampAutoAds.buildCallback()).to.throw(/Experiment is off​​​/);
+    });
     expect(xhr.fetchJson).not.to.have.been.called;
   });
 
@@ -423,6 +428,56 @@ describes.realWin('amp-auto-ads', {
         waitForChild(env.win.document.body, parent => {
           return parent.firstChild.tagName == 'AMP-STICKY-AD';
         }, () => {
+          resolve();
+        });
+      });
+    });
+  });
+
+  describe('ad constraints', () => {
+    it('should insert 3 ads when using the default ad contraints', () => {
+      ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+      ampAutoAdsElem.setAttribute('type', 'adsense');
+      ampAutoAds.buildCallback();
+
+      return new Promise(resolve => {
+        waitForChild(anchor4, parent => {
+          return parent.childNodes.length > 0;
+        }, () => {
+          expect(anchor1.childNodes).to.have.lengthOf(1);
+          expect(anchor2.childNodes).to.have.lengthOf(1);
+          expect(anchor3.childNodes).to.have.lengthOf(0);
+          expect(anchor4.childNodes).to.have.lengthOf(1);
+          verifyAdElement(anchor1.childNodes[0]);
+          verifyAdElement(anchor2.childNodes[0]);
+          verifyAdElement(anchor4.childNodes[0]);
+          resolve();
+        });
+      });
+    });
+
+    it('should insert 4 ads when using the config ad constraints', () => {
+      configObj.adConstraints = {
+        initialMinSpacing: '499px',
+        maxAdCount: 8,
+      };
+
+      ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+      ampAutoAdsElem.setAttribute('type', 'adsense');
+      ampAutoAds.buildCallback();
+
+      return new Promise(resolve => {
+        waitForChild(anchor4, parent => {
+          return parent.childNodes.length > 0;
+        }, () => {
+          expect(anchor1.childNodes).to.have.lengthOf(1);
+          expect(anchor2.childNodes).to.have.lengthOf(1);
+          expect(anchor3.childNodes).to.have.lengthOf(1);
+          expect(anchor4.childNodes).to.have.lengthOf(1);
+          verifyAdElement(anchor1.childNodes[0]);
+          verifyAdElement(anchor2.childNodes[0]);
+          verifyAdElement(anchor3.childNodes[0]);
+          verifyAdElement(anchor4.childNodes[0]);
           resolve();
         });
       });

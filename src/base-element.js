@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust';
+import {ActionTrust} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {dev, user} from './log';
@@ -108,6 +108,9 @@ import {preconnectForElement} from './preconnect';
  * element instance. This can be used to do additional style calculations
  * without triggering style recalculations.
  *
+ * When the dimensions of an element has changed, the 'onMeasureChanged'
+ * callback is called.
+ *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
@@ -119,7 +122,7 @@ export class BaseElement {
     /** @public @const {!Element} */
     this.element = element;
     /*
-    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
       \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
@@ -265,6 +268,22 @@ export class BaseElement {
   }
 
   /**
+   * Returns the consent policy id that this element should wait for before
+   * buildCallback.
+   * A `null` value indicates to not be blocked by consent.
+   * Subclasses may override.
+   * @return {?string}
+   */
+  getConsentPolicy() {
+    let policyId = null;
+    if (this.element.hasAttribute('data-block-on-consent')) {
+      policyId =
+          this.element.getAttribute('data-block-on-consent') || 'default';
+    }
+    return policyId;
+  }
+
+  /**
    * Intended to be implemented by subclasses. Tests whether the element
    * supports the specified layout. By default only Layout.NODISPLAY is
    * supported.
@@ -389,7 +408,7 @@ export class BaseElement {
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
-   * @returns {?Element}
+   * @return {?Element}
    */
   createPlaceholderCallback() {
     return null;
@@ -713,7 +732,8 @@ export class BaseElement {
   }
 
   /**
-   * Returns whether the loading indicator is reused again after the first render.
+   * Returns whether the loading indicator is reused again after the first
+   * render.
    * @return {boolean}
    * @public
    */
@@ -936,7 +956,7 @@ export class BaseElement {
 
   /**
    * Runs the specified mutation on the element and ensures that remeasures and
-   * layouts performed for the affected elements.
+   * layouts are performed for the affected elements.
    *
    * This method should be called whenever a significant mutations are done
    * on the DOM that could affect layout of elements inside this subtree or
@@ -954,7 +974,8 @@ export class BaseElement {
 
   /**
    * Runs the specified measure, then runs the mutation on the element and
-   * ensures that remeasures and layouts performed for the affected elements.
+   * ensures that remeasures and layouts are performed for the affected
+   * elements.
    *
    * This method should be called whenever a measure and significant mutations
    * are done on the DOM that could affect layout of elements inside this
@@ -1001,8 +1022,9 @@ export class BaseElement {
 
   /**
    * Called when one or more attributes are mutated.
-   * @note Must be called inside a mutate context.
-   * @note Boolean attributes have a value of `true` and `false` when
+   * Note:
+   * - Must be called inside a mutate context.
+   * - Boolean attributes have a value of `true` and `false` when
    *       present and missing, respectively.
    * @param {
    *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
@@ -1020,6 +1042,13 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
+
+  /**
+   * Called only when the measurements of an amp-element changes. This
+   * would not trigger for every measurement invalidation caused by a mutation.
+   * @public
+   */
+  onMeasureChanged() {}
 
   user() {
     return user(this.element);

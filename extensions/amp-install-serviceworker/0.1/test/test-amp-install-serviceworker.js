@@ -16,7 +16,6 @@
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {Services} from '../../../../src/services';
-import {installTimerService} from '../../../../src/service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 import {
   registerServiceBuilder,
@@ -34,16 +33,15 @@ describes.realWin('amp-install-serviceworker', {
 }, env => {
 
   let doc;
-  let clock;
   let sandbox;
   let container;
   let ampdoc;
   let maybeInstallUrlRewriteStub;
+  let whenVisible;
 
   beforeEach(() => {
     doc = env.win.document;
     sandbox = env.sandbox;
-    clock = sandbox.useFakeTimers();
     ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
     container = doc.createElement('div');
     env.win.document.body.appendChild(container);
@@ -55,6 +53,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should install for same origin', () => {
     const install = doc.createElement('div');
     container.appendChild(install);
+    install.getAmpDoc = () => ampdoc;
     install.setAttribute('src', 'https://example.com/sw.js');
     const implementation = new AmpInstallServiceWorker(install);
     let calledSrc;
@@ -74,13 +73,21 @@ describes.realWin('amp-install-serviceworker', {
         },
       },
     };
+    whenVisible = Promise.resolve();
+    registerServiceBuilder(implementation.win, 'viewer', function() {
+      return {
+        whenFirstVisible: () => whenVisible,
+        isVisible: () => true,
+      };
+    });
     implementation.buildCallback();
     expect(calledSrc).to.be.undefined;
-    return loadPromise(implementation.win).then(() => {
-      expect(calledSrc).to.equal('https://example.com/sw.js');
-      // Should not be called before `register` resolves.
-      expect(maybeInstallUrlRewriteStub).to.not.be.called;
-    });
+    return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+        () => {
+          expect(calledSrc).to.equal('https://example.com/sw.js');
+          // Should not be called before `register` resolves.
+          expect(maybeInstallUrlRewriteStub).to.not.be.called;
+        });
   });
 
   it('should be ok without service worker.', () => {
@@ -164,6 +171,7 @@ describes.realWin('amp-install-serviceworker', {
       calledSrc = undefined;
       const p = new Promise(() => {});
       const win = {
+        complete: true,
         location: {
           href: 'https://cdn.ampproject.org/c/s/www.example.com/path',
         },
@@ -182,7 +190,6 @@ describes.realWin('amp-install-serviceworker', {
           createElement: doc.createElement.bind(doc),
         },
       };
-      installTimerService(win);
       win.document.defaultView = win;
       implementation.win = win;
       docInfo = {
@@ -207,9 +214,8 @@ describes.realWin('amp-install-serviceworker', {
     function testIframe() {
       const iframeSrc = 'https://www.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
-      implementation.buildCallback();
       let iframe;
-      const appendChild = install.appendChild;
+      const {appendChild} = install;
       install.appendChild = child => {
         iframe = child;
         iframe.complete = true; // Mark as loaded.
@@ -217,26 +223,23 @@ describes.realWin('amp-install-serviceworker', {
         iframe.src = 'about:blank';
         appendChild.call(install, iframe);
       };
-      let deferredMutate;
-      implementation.mutateElement = fn => {
-        expect(deferredMutate).to.be.undefined;
-        deferredMutate = fn;
-      };
-      return whenVisible.then(() => {
-        clock.tick(9999);
-        expect(deferredMutate).to.be.undefined;
+      const mutateElement = sandbox.stub(implementation, 'mutateElement');
+      mutateElement.callsFake(fn => {
         expect(iframe).to.be.undefined;
-        clock.tick(1);
-        expect(deferredMutate).to.exist;
-        expect(iframe).to.be.undefined;
-        deferredMutate();
+        const returnedValue = fn();
         expect(iframe).to.exist;
         expect(calledSrc).to.undefined;
         expect(install.style.display).to.equal('none');
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.getAttribute('sandbox')).to.equal(
             'allow-same-origin allow-scripts');
+        return returnedValue;
       });
+      implementation.buildCallback();
+      return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+          () => {
+            expect(mutateElement).to.have.been.calledOnce;
+          });
     }
 
     it('should inject iframe on proxy if provided (valid canonical)',
@@ -250,17 +253,20 @@ describes.realWin('amp-install-serviceworker', {
       testIframe();
     });
 
-    it('should reject bad iframe URLs', () => {
-      const iframeSrc = 'https://www2.example.com/install-sw.html';
-      install.setAttribute('data-iframe-src', iframeSrc);
-      expect(() => {
+    it('should reject bad iframe URL (not same origin)', () => {
+      install.setAttribute('data-iframe-src',
+          'https://www2.example.com/install-sw.html');
+      allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
-      }).to.throw(/should be a URL on the same origin as the source/);
+      }).to.throw(/should be a URL on the same origin as the source/); });
+    });
+
+    it('should reject bad iframe URL (not https)', () => {
       install.setAttribute('data-iframe-src',
           'http://www.example.com/install-sw.html');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
-      }).to.throw(/https/);
+      }).to.throw(/https/); });
     });
   });
 });
@@ -338,24 +344,24 @@ describes.fakeWin('url rewriter', {
 
     it('should fail when only mask configured', () => {
       element.removeAttribute('data-no-service-worker-fallback-shell-url');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/must be specified/);
+      }).to.throw(/must be specified/); });
     });
 
     it('should fail when only shell configured', () => {
       element.removeAttribute('data-no-service-worker-fallback-url-match');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/must be specified/);
+      }).to.throw(/must be specified/); });
     });
 
     it('should fail when shell is on different origin', () => {
       element.setAttribute('data-no-service-worker-fallback-shell-url',
           'https://acme.org/shell#abc');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/must be the same as source origin/);
+      }).to.throw(/must be the same as source origin/); });
     });
 
     it('should fail when mask is an invalid expression', () => {

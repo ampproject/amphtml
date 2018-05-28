@@ -20,7 +20,7 @@ import {
   getSourceOrigin,
   isProxyOrigin,
   isSecureUrl,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
 import {closestByTag, removeElement} from '../../../src/dom';
@@ -53,7 +53,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const win = this.win;
+    const {win} = this;
     if (!('serviceWorker' in win.navigator)) {
       this.maybeInstallUrlRewrite_();
       return;
@@ -65,10 +65,10 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
-        const origin = parseUrl(iframeSrc).origin;
+        const {origin} = parseUrlDeprecated(iframeSrc);
         const docInfo = Services.documentInfoForDoc(this.element);
-        const sourceUrl = parseUrl(docInfo.sourceUrl);
-        const canonicalUrl = parseUrl(docInfo.canonicalUrl);
+        const sourceUrl = parseUrlDeprecated(docInfo.sourceUrl);
+        const canonicalUrl = parseUrlDeprecated(docInfo.canonicalUrl);
         user().assert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
@@ -76,13 +76,13 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
             'source (%s) or canonical URL (%s) of the AMP-document.',
             origin, sourceUrl.origin, canonicalUrl.origin);
         this.iframeSrc_ = iframeSrc;
-        this.scheduleIframeLoad_();
+        this.whenLoadedAndVisiblePromise_().then(() => {
+          return this.insertIframe_();
+        });
       }
-      return;
-    }
-
-    if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      this.loadPromise(this.win).then(() => {
+    } else if (parseUrlDeprecated(win.location.href).origin ==
+      parseUrlDeprecated(src).origin) {
+      this.whenLoadedAndVisiblePromise_().then(() => {
         return install(this.win, src);
       });
     } else {
@@ -92,32 +92,31 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  scheduleIframeLoad_() {
-    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      // If the user is longer than 10 seconds on this page, load
-      // the external iframe to install the ServiceWorker. The wait is
-      // introduced to avoid installing SWs for content that the user
-      // only engaged with superficially.
-      Services.timerFor(this.win).delay(() => {
-        this.mutateElement(this.insertIframe_.bind(this));
-      }, 10000);
-    });
+  /**
+   * A promise that resolves when both loadPromise and whenFirstVisible resolve.
+   * @return {!Promise}
+   * @private
+   */
+  whenLoadedAndVisiblePromise_() {
+    return Promise.all([
+      this.loadPromise(this.win),
+      Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible(),
+    ]);
   }
 
-  /** @private */
+  /**
+   * Insert an iframe from the origin domain to install the service worker.
+   * @return {!Promise}
+   * @private
+   */
   insertIframe_() {
-    // If we are no longer visible, we will not do a SW registration on this
-    // page view.
-    if (!Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
-      return;
-    }
-    // The iframe will stil be loaded.
-    setStyle(this.element, 'display', 'none');
-    const iframe = this.win.document.createElement('iframe');
-    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
-    iframe.src = this.iframeSrc_;
-    this.element.appendChild(iframe);
+    return this.mutateElement(() => {
+      setStyle(this.element, 'display', 'none');
+      const iframe = this.win.document.createElement('iframe');
+      iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
+      iframe.src = this.iframeSrc_;
+      this.element.appendChild(iframe);
+    });
   }
 
   /** @private */
@@ -128,8 +127,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     const ampdoc = this.getAmpDoc();
-    const win = this.win;
-    const winUrl = parseUrl(win.location.href);
+    const {win} = this;
+    const winUrl = parseUrlDeprecated(win.location.href);
 
     // Read the url-rewrite config.
     const urlMatch = this.element.getAttribute(
@@ -153,9 +152,10 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       throw user().createError(
           'Invalid "data-no-service-worker-fallback-url-match" expression', e);
     }
-    user().assert(getSourceOrigin(winUrl) == parseUrl(shellUrl).origin,
-        'Shell source origin "%s" must be the same as source origin "%s"',
-        shellUrl, winUrl.href);
+    user().assert(getSourceOrigin(winUrl) ==
+      parseUrlDeprecated(shellUrl).origin,
+    'Shell source origin "%s" must be the same as source origin "%s"',
+    shellUrl, winUrl.href);
 
     // Install URL rewriter.
     this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl);
@@ -172,11 +172,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   waitToPreloadShell_(shellUrl) {
-    // Ensure that document is loaded and visible first.
-    const whenReady = this.loadPromise(this.win);
-    const whenVisible =
-        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
-    return Promise.all([whenReady, whenVisible]).then(() => {
+    return this.whenLoadedAndVisiblePromise_().then(() => {
       this.mutateElement(() => this.preloadShell_(shellUrl));
     });
   }
@@ -186,7 +182,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   preloadShell_(shellUrl) {
-    const win = this.win;
+    const {win} = this;
 
     // Preload the shell by via an iframe with `#preload` fragment.
     const iframe = win.document.createElement('iframe');
@@ -233,7 +229,7 @@ class UrlRewriter_ {
     this.shellUrl_ = shellUrl;
 
     /** @const @private {!Location} */
-    this.shellLoc_ = parseUrl(shellUrl);
+    this.shellLoc_ = parseUrlDeprecated(shellUrl);
 
     listen(ampdoc.getRootNode(), 'click', this.handle_.bind(this));
   }
@@ -253,7 +249,7 @@ class UrlRewriter_ {
     }
 
     // Check the URL matches the mask and doesn't match shell itself.
-    const tgtLoc = parseUrl(target.href);
+    const tgtLoc = parseUrlDeprecated(target.href);
     if (tgtLoc.origin != this.shellLoc_.origin ||
             tgtLoc.pathname == this.shellLoc_.pathname ||
             !this.urlMatchExpr_.test(tgtLoc.href)) {
@@ -267,7 +263,7 @@ class UrlRewriter_ {
 
     // Only rewrite URLs to a different location to avoid breaking fragment
     // navigation.
-    const win = this.win;
+    const {win} = this;
     if (removeFragment(tgtLoc.href) == removeFragment(win.location.href)) {
       return;
     }

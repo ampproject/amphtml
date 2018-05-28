@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseUrl} from './url';
+import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, user} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {startsWith} from './string';
 import {tryParseJson} from './json';
@@ -88,7 +89,7 @@ export function getIframe(
 
   const baseUrl = getBootstrapBaseUrl(
       parentWindow, undefined, opt_type, opt_disallowCustom);
-  const host = parseUrl(baseUrl).hostname;
+  const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
@@ -102,7 +103,7 @@ export function getIframe(
   }));
 
   iframe.src = baseUrl;
-  iframe.ampLocation = parseUrl(baseUrl);
+  iframe.ampLocation = parseUrlDeprecated(baseUrl);
   iframe.name = name;
   // Add the check before assigning to prevent IE throw Invalid argument error
   if (attributes['width']) {
@@ -121,6 +122,12 @@ export function getIframe(
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
+  if (isExperimentOn(parentWindow, 'no-sync-xhr-in-ads')) {
+    // Block synchronous XHR in ad. These are very rare, but super bad for UX
+    // as they block the UI thread for the arbitrary amount of time until the
+    // request completes.
+    iframe.setAttribute('allow', 'sync-xhr \'none\';');
+  }
   iframe.setAttribute('data-amp-3p-sentinel',
       attributes['_context']['sentinel']);
   return iframe;
@@ -136,7 +143,7 @@ export function getIframe(
  * visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {
-  const dataset = element.dataset;
+  const {dataset} = element;
   for (const name in dataset) {
     // data-vars- is reserved for amp-analytics
     // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
@@ -190,7 +197,7 @@ export function preloadBootstrap(
 export function getBootstrapBaseUrl(
   parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
   // The value is cached in a global variable called `bootstrapBaseUrl`;
-  const bootstrapBaseUrl = parentWindow.bootstrapBaseUrl;
+  const {bootstrapBaseUrl} = parentWindow;
   if (bootstrapBaseUrl) {
     return bootstrapBaseUrl;
   }
@@ -296,9 +303,9 @@ function getCustomBootstrapBaseUrl(
   // This is not a security primitive, we just don't want this to happen in
   // practice. People could still redirect to the same origin, but they cannot
   // redirect to the proxy origin which is the important one.
-  const parsed = parseUrl(url);
+  const parsed = parseUrlDeprecated(url);
   user().assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
-      parsed.origin != parseUrl(parentWindow.location.href).origin,
+      parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
   '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,

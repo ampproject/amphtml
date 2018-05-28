@@ -16,7 +16,7 @@
 
 import * as sinon from 'sinon';
 
-import {ActionTrust} from '../../../../src/action-trust';
+import {ActionTrust} from '../../../../src/action-constants';
 import {
   AmpIframe,
   isAdLike,
@@ -130,7 +130,7 @@ describes.realWin('amp-iframe', {
       if (opt_top != undefined) {
         ampIframe.style.top = opt_top.toString() + 'px';
       }
-      const top = ampIframe.style.top;
+      const {top} = ampIframe.style;
       ampIframe.style.position = 'absolute'; //opt_position
       if (opt_translateY) {
         ampIframe.style.transform = `translateY(${opt_translateY}px)`;//'translateY(' + opt_translateY + ')';
@@ -384,51 +384,53 @@ describes.realWin('amp-iframe', {
     it('should deny same origin', () => {
       const ampIframe = createAmpIframe(env);
       const impl = ampIframe.implementation_;
-      expect(() => {
-        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin');
-      }).to.throw(/must not be equal to container/);
+      }).to.throw(/must not be equal to container/); });
 
-      expect(() => {
-        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://google.com/fpp', 'https://google.com/abc',
             'Allow-same-origin');
-      }).to.throw(/must not be equal to container/);
+      }).to.throw(/must not be equal to container/); });
 
-      expect(() => {
-        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin allow-scripts');
-      }).to.throw(/must not be equal to container/);
+      }).to.throw(/must not be equal to container/); });
       // Same origin, but sandboxed.
-      impl.assertSource('https://google.com/fpp', 'https://google.com/abc', '');
+      impl.assertSource_('https://google.com/fpp', 'https://google.com/abc', '');
 
-      expect(() => {
-        impl.assertSource('http://google.com/', 'https://foo.com', '');
-      }).to.throw(/Must start with https/);
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('http://google.com/', 'https://foo.com', '');
+      }).to.throw(/Must start with https/); });
 
-      expect(() => {
-        impl.assertSource('./foo', location.href, 'allow-same-origin');
-      }).to.throw(/must not be equal to container/);
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('./foo', location.href, 'allow-same-origin');
+      }).to.throw(/must not be equal to container/); });
 
-      impl.assertSource('http://iframe.localhost:123/foo',
+      impl.assertSource_('http://iframe.localhost:123/foo',
           'https://foo.com', '');
-      impl.assertSource('https://container.com', 'https://foo.com', '');
+      impl.assertSource_('https://container.com', 'https://foo.com', '');
       ampIframe.setAttribute('srcdoc', 'abc');
       ampIframe.setAttribute('sandbox', 'allow-same-origin');
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         impl.transformSrcDoc_('<script>try{parent.location.href}catch(e){' +
           'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
           '</script>', 'Allow-Same-Origin');
-      }).to.throw(/allow-same-origin is not allowed with the srcdoc attribute/);
+      }).to.throw(
+          /allow-same-origin is not allowed with the srcdoc attribute/);
+      });
 
-      expect(() => {
-        impl.assertSource('https://3p.ampproject.net:999/t',
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://3p.ampproject.net:999/t',
             'https://google.com/abc');
-      }).to.throw(/not allow embedding of frames from ampproject\.\*/);
-      expect(() => {
-        impl.assertSource('https://3p.ampproject.net:999/t',
+      }).to.throw(/not allow embedding of frames from ampproject\.\*/); });
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://3p.ampproject.net:999/t',
             'https://google.com/abc');
-      }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+      }).to.throw(/not allow embedding of frames from ampproject\.\*/); });
     });
 
     it('should transform source', () => {
@@ -727,6 +729,35 @@ describes.realWin('amp-iframe', {
           expect(iframe.getAttribute('src')).to.contain(newSrc);
         });
 
+    describe('throwIfCannotNavigate()', () => {
+      it('should do nothing if top navigation is allowed', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin allow-top-navigation',
+          width: 300,
+          height: 250,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        // Should be allowed if `allow-top-navigation` is set.
+        expect(() => impl.throwIfCannotNavigate()).to.not.throw();
+      });
+
+      it('should throw error if top navigation is not allowed', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin',
+          width: 300,
+          height: 250,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        // Should be allowed if `allow-top-navigation` is set.
+        expect(() => impl.throwIfCannotNavigate())
+            .to.throw(/allow-top-navigation/);
+      });
+    });
+
     describe('two-way messaging', function() {
       let messagingSrc;
 
@@ -826,7 +857,7 @@ describes.realWin('amp-iframe', {
         expect(actions.trigger).to.be.calledTwice;
         const eventMatcher = sinon.match({
           type: 'amp-iframe:message',
-          detail: 'content-iframe:bar-456',
+          detail: sinon.match({data: 'content-iframe:bar-456'}),
         });
         expect(actions.trigger).to.be.calledWith(ampIframe, 'message',
             eventMatcher, ActionTrust.HIGH);

@@ -23,6 +23,7 @@ import {
   URL_EXPERIMENT_MAPPING,
   dfDepRollbackExperiment,
   doubleclickIsA4AEnabled,
+  experimentFeatureEnabled,
 } from '../doubleclick-a4a-config';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {
@@ -30,7 +31,7 @@ import {
   isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {createIframePromise} from '../../../../testing/iframe';
-import {parseUrl} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describe('doubleclick-a4a-config', () => {
@@ -42,16 +43,16 @@ describe('doubleclick-a4a-config', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     mockWin = {
-      location: parseUrl('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
-      document: {
-        querySelector: unused => {return null;},
-      },
+      location: parseUrlDeprecated('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
       crypto: {
         subtle: true,
         webkitSubtle: true,
       },
     };
-    return createIframePromise().then(i => { testFixture = i; });
+    return createIframePromise().then(i => {
+      testFixture = i;
+      mockWin.document = testFixture.doc;
+    });
   });
   afterEach(() => {
     sandbox.restore();
@@ -62,7 +63,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
@@ -74,7 +75,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
@@ -91,7 +92,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
@@ -108,7 +109,7 @@ describe('doubleclick-a4a-config', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
           'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
       const elem = testFixture.doc.createElement('div');
       elem.setAttribute('rtc-config', '{"urls": ["https://www.foo.com/"]}');
@@ -126,7 +127,7 @@ describe('doubleclick-a4a-config', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
           'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
       const elem = testFixture.doc.createElement('div');
       elem.setAttribute(
@@ -143,7 +144,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
       const elem = testFixture.doc.createElement('div');
       elem.setAttribute('rtc-config', '{"urls": ["https://www.foo.com/"]}');
@@ -181,7 +182,7 @@ describe('doubleclick-a4a-config', () => {
 
     it('should honor url forced FF on non-CDN', () => {
       mockWin.AMP_MODE = {test: false, localDev: true};
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://foo.com/some/path/to/content.html?exp=a4a:-1');
       sandbox.stub(DoubleclickA4aEligibility.prototype,
           'isCdnProxy').callsFake(() => false);
@@ -203,7 +204,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
 
       const elem1 = testFixture.doc.createElement('div');
@@ -227,7 +228,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
 
       const elem1 = testFixture.doc.createElement('div');
@@ -250,7 +251,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/content.html?exp=da:6');
       const useRemoteHtml = false;
       const elem1 = testFixture.doc.createElement('div');
@@ -266,7 +267,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/content.html?exp=da:6');
       const useRemoteHtml = false;
       const elem1 = testFixture.doc.createElement('div');
@@ -285,7 +286,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/content.html?exp=da:6');
       const useRemoteHtml = true;
       const elem1 = testFixture.doc.createElement('div');
@@ -302,7 +303,7 @@ describe('doubleclick-a4a-config', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/content.html?exp=da:6');
       const useRemoteHtml = true;
       const elem1 = testFixture.doc.createElement('div');
@@ -318,7 +319,7 @@ describe('doubleclick-a4a-config', () => {
 
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
-        mockWin.location = parseUrl(
+        mockWin.location = parseUrlDeprecated(
             'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:' +
             String(expFlagValue));
         const elem = testFixture.doc.createElement('div');
@@ -370,6 +371,35 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE).includes(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL)
       ).to.be.true;
+    });
+    describe('SRA', () => {
+      let elem;
+      beforeEach(() => {
+        elem = testFixture.doc.createElement('amp-ad');
+        elem.setAttribute('type', 'doubleclick');
+        testFixture.doc.body.appendChild(elem);
+        mockWin.location = parseUrlDeprecated(
+            'https://cdn.ampproject.org/some/path/to/content.html?exp=da:8');
+      });
+      it('should select SRA', () => {
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+        expect(experimentFeatureEnabled(
+            mockWin, DOUBLECLICK_EXPERIMENT_FEATURE.SRA)).to.be.true;
+      });
+      it('should not select SRA if refresh metatag present', () => {
+        const meta = testFixture.doc.createElement('meta');
+        meta.setAttribute('name', 'amp-ad-enable-refresh');
+        testFixture.doc.head.appendChild(meta);
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+        expect(experimentFeatureEnabled(
+            mockWin, DOUBLECLICK_EXPERIMENT_FEATURE.SRA)).to.be.false;
+      });
+      it('should not select SRA if refresh attribute present', () => {
+        elem.setAttribute('data-enable-refresh', 'foo');
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+        expect(experimentFeatureEnabled(
+            mockWin, DOUBLECLICK_EXPERIMENT_FEATURE.SRA)).to.be.false;
+      });
     });
   });
 });

@@ -19,32 +19,28 @@
 checkMinVersion();
 
 const $$ = require('gulp-load-plugins')();
-const applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
-const babel = require('babelify');
+const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
-const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
-const closureCompile = require('./build-system/tasks/compile').closureCompile;
 const colors = require('ansi-colors');
-const createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
-const exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs-extra');
 const gulp = $$.help(require('gulp'));
-const internalRuntimeToken = require('./build-system/internal-version').TOKEN;
-const internalRuntimeVersion = require('./build-system/internal-version').VERSION;
-const jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const minimist = require('minimist');
 const path = require('path');
-const removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
 const rimraf = require('rimraf');
-const serve = require('./build-system/tasks/serve.js').serve;
 const source = require('vinyl-source-stream');
 const touch = require('touch');
-const transpileTs = require('./build-system/typescript').transpileTs;
 const watchify = require('watchify');
+const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global/index.js');
+const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
+const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
+const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
+const {serve} = require('./build-system/tasks/serve.js');
+const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
+const {transpileTs} = require('./build-system/typescript');
 
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
@@ -58,9 +54,7 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 const extensions = {};
 const extensionAliasFilePath = {};
 
-const green = colors.green;
-const red = colors.red;
-const cyan = colors.cyan;
+const {green, red, cyan} = colors;
 
 const minifiedRuntimeTarget = 'dist/v0.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
@@ -68,9 +62,11 @@ const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
 // Each extension and version must be listed individually here.
+declareExtension('amp-3d-gltf', '0.1');
 declareExtension('amp-3q-player', '0.1');
 declareExtension('amp-access', '0.1', {hasCss: true});
 declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
+declareExtension('amp-access-laterpay', '0.2', {hasCss: true});
 declareExtension('amp-access-scroll', '0.1', {hasCss: true});
 declareExtension('amp-accordion', '0.1');
 declareExtension('amp-ad', '0.1', {hasCss: true});
@@ -82,6 +78,7 @@ declareExtension('amp-ad-network-triplelift-impl', 0.1);
 declareExtension('amp-ad-network-cloudflare-impl', 0.1);
 declareExtension('amp-ad-network-gmossp-impl', 0.1);
 declareExtension('amp-ad-exit', 0.1);
+declareExtension('amp-addthis', '0.1');
 declareExtension('amp-analytics', '0.1');
 declareExtension('amp-anim', '0.1');
 declareExtension('amp-animation', '0.1');
@@ -89,6 +86,7 @@ declareExtension('amp-apester-media', '0.1', {hasCss: true});
 declareExtension('amp-app-banner', '0.1', {hasCss: true});
 declareExtension('amp-audio', '0.1');
 declareExtension('amp-auto-ads', '0.1');
+declareExtension('amp-beopinion', '0.1');
 declareExtension('amp-bind', '0.1');
 declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
 declareExtension('amp-brid-player', '0.1');
@@ -101,7 +99,6 @@ declareExtension('amp-compare-slider', '0.1');
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
-declareExtension('amp-document-recommendations', '0.1', {hasCss: true});
 declareExtension('amp-dynamic-css-classes', '0.1');
 declareExtension('amp-experiment', '0.1');
 declareExtension('amp-facebook', '0.1');
@@ -113,6 +110,7 @@ declareExtension('amp-font', '0.1');
 declareExtension('amp-form', '0.1', {hasCss: true});
 declareExtension('amp-fx-collection', '0.1');
 declareExtension('amp-fx-flying-carpet', '0.1', {hasCss: true});
+declareExtension('amp-geo', '0.1');
 declareExtension('amp-gfycat', '0.1');
 declareExtension('amp-gist', '0.1');
 declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
@@ -131,6 +129,7 @@ declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
 declareExtension('amp-mustache', '0.1');
+declareExtension('amp-next-page', '0.1', {hasCss: true});
 declareExtension('amp-nexxtv-player', '0.1');
 declareExtension('amp-o2-player', '0.1');
 declareExtension('amp-ooyala-player', '0.1');
@@ -148,14 +147,29 @@ declareExtension('amp-story', '0.1', {
   hasCss: true,
   cssBinaries: [
     'amp-story-bookend',
+    'amp-story-consent',
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
     'amp-story-share',
+    'amp-story-share-menu',
     'amp-story-system-layer',
   ],
 });
-declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
+declareExtension('amp-story', '1.0', {
+  hasCss: true,
+  cssBinaries: [
+    'amp-story-bookend',
+    'amp-story-consent',
+    'amp-story-hint',
+    'amp-story-unsupported-browser-layer',
+    'amp-story-viewport-warning-layer',
+    'amp-story-share',
+    'amp-story-share-menu',
+    'amp-story-system-layer',
+  ],
+});
+declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
@@ -163,7 +177,7 @@ declareExtension('amp-position-observer', '0.1');
 declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions', '0.1', {hasCss: true});
-declareExtension('amp-subscriptions-google', '0.1');
+declareExtension('amp-subscriptions-google', '0.1', {hasCss: true});
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -195,7 +209,7 @@ declareExtension('amp-video-service', '0.1', {
 declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
-    'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
+    'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
 
 
 /**
@@ -259,25 +273,33 @@ function declareExtension(name, version, options) {
 }
 
 /**
- * This function is used for declaring deprecated extensions. It simply places the current
- * version code in place of the latest versions.
- * This has the ability to break an extension verison, so please be sure that this is
- * the correct one to use.
+ * This function is used for declaring deprecated extensions. It simply places
+ * the current version code in place of the latest versions. This has the
+ * ability to break an extension verison, so please be sure that this is the
+ * correct one to use.
  * @param {string} name
  * @param {string} version E.g. 0.1
- * @param {string} lastestVersion
- * @param {boolean} hasCss
+ * @param {string} latestVersion
+ * @param {!ExtensionOption} options extension options object.
  */
-function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
+function declareExtensionVersionAlias(name, version, latestVersion, options) {
   extensionAliasFilePath[name + '-' + version + '.js'] = {
     'name': name,
-    'file': name + '-' + lastestVersion + '.js',
+    'file': name + '-' + latestVersion + '.js',
   };
-  if (hasCss) {
+  if (options.hasCss) {
     extensionAliasFilePath[name + '-' + version + '.css'] = {
       'name': name,
-      'file': name + '-' + lastestVersion + '.css',
+      'file': name + '-' + latestVersion + '.css',
     };
+  }
+  if (options.cssBinaries) {
+    options.cssBinaries.forEach(cssBinaryName => {
+      extensionAliasFilePath[cssBinaryName + '-' + version + '.css'] = {
+        'name': cssBinaryName,
+        'file': cssBinaryName + '-' + latestVersion + '.css',
+      };
+    });
   }
 }
 
@@ -504,21 +526,35 @@ function compileCss(watch, opt_compileAll) {
     });
   }
 
+  function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
+    return toPromise(gulp.src(`css/${originalCssFilename}`)
+        .pipe($$.file(jsFilename, 'export const cssText = ' +
+          JSON.stringify(css)))
+        .pipe(gulp.dest('build'))
+        .on('end', function() {
+          mkdirSync('build');
+          mkdirSync('build/css');
+          fs.writeFileSync(`build/css/${cssFilename}`, css);
+        }));
+  }
+
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
-      .then(function(css) {
-        return toPromise(gulp.src('css/**.css')
-            .pipe($$.file('css.js', 'export const cssText = ' +
-              JSON.stringify(css)))
-            .pipe(gulp.dest('build'))
-            .on('end', function() {
-              mkdirSync('build');
-              mkdirSync('build/css');
-              fs.writeFileSync('build/css/v0.css', css);
-            }));
-      })
+      .then(css => writeCss(css, 'amp.css', 'css.js', 'v0.css'))
       .then(() => {
         endBuildStep('Recompiled CSS in', 'amp.css', startTime);
+      })
+      .then(() => jsifyCssAsync('css/video-docking.css'))
+      .then(css => writeCss(css,
+          'video-docking.css', 'video-docking.css.js', 'video-docking.css'))
+      .then(() => {
+        endBuildStep('Recompiled CSS in', 'video-docking.css', startTime);
+      })
+      .then(() => jsifyCssAsync('css/video-autoplay.css'))
+      .then(css => writeCss(css,
+          'video-autoplay.css', 'video-autoplay.css.js', 'video-autoplay.css'))
+      .then(() => {
+        endBuildStep('Recompiled CSS in', 'video-autoplay.css', startTime);
       })
       .then(() => {
         return buildExtensions({
@@ -536,6 +572,7 @@ function compileCss(watch, opt_compileAll) {
 function copyCss() {
   const startTime = Date.now();
   fs.copySync('build/css/v0.css', 'dist/v0.css');
+  fs.copySync('build/css/video-docking.css', 'dist/video-docking.css');
   return toPromise(gulp.src('build/css/amp-*.css')
       .pipe(gulp.dest('dist/v0')))
       .then(() => {
@@ -608,7 +645,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
 
 /**
  * @param {string} path
- * @param {string} css
+ * @param {string} name
  * @param {string} version
  * @param {!Object} options
  */
@@ -784,7 +821,6 @@ function performBuild(watch) {
       polyfillsForTests(),
       buildAlp({watch}),
       buildExaminer({watch}),
-      buildSw({watch}),
       buildWebWorker({watch}),
       buildExtensions({bundleOnlyIfListedInFiles: !watch, watch}),
       compile(watch),
@@ -832,7 +868,6 @@ function dist() {
           buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildExaminer({
             minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildWebWorker({
             minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
@@ -905,9 +940,6 @@ function checkTypes() {
     './src/inabox/amp-inabox.js',
     './ads/alp/install-alp.js',
     './ads/inabox/inabox-host.js',
-    './src/service-worker/shell.js',
-    './src/service-worker/core.js',
-    './src/service-worker/kill.js',
     './src/web-worker/web-worker.js',
   ];
   const extensionValues = Object.keys(extensions).map(function(key) {
@@ -1088,22 +1120,20 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  const browsers = [];
-  if (process.env.TRAVIS) {
-    browsers.push('last 2 versions', 'safari >= 9');
-  } else {
-    browsers.push('Last 4 Chrome versions');
-  }
-
+  const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
-      .transform(babel, {
+      .transform(babelify, {
+        compact: false,
         presets: [
           ['env', {
             targets: {
-              browsers,
+              browsers: ['last 2 versions', 'safari >= 9'],
             },
           }],
         ],
+      })
+      .once('transform', () => {
+        endBuildStep('Transformed', srcFilename, startTime);
       });
   if (options.watch) {
     bundler = watchify(bundler);
@@ -1132,8 +1162,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(
         bundler.bundle()
             .on('error', function(err) {
-              // Drop the node_modules call stack, which begins with '    at'.
-              const message = err.stack.replace(/    at[^]*/, '').trim();
+              let message = err;
+              if (err.stack) {
+                // Drop the node_modules call stack, which begins with '    at'.
+                message = err.stack.replace(/    at[^]*/, '').trim();
+              }
               console.error(red(message));
               if (failOnError) {
                 process.exit(1);
@@ -1204,7 +1237,7 @@ function buildExperiments(options) {
   const path = 'tools/experiments';
   const htmlPath = path + '/experiments.html';
   const jsPath = path + '/experiments.js';
-  let watch = options.watch;
+  let {watch} = options;
   if (watch === undefined) {
     watch = argv.watch || argv.w;
   }
@@ -1263,11 +1296,12 @@ function buildWebPushPublisherFiles(options) {
 /**
  * Build amp-web-push publisher files HTML page.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildWebPushPublisherFilesVersion(version, options) {
   options = options || {};
-  const watch = options.watch;
+  const {watch} = options;
   const fileNames =
       ['amp-web-push-helper-frame', 'amp-web-push-permission-dialog'];
   const promises = [];
@@ -1324,7 +1358,6 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
       });
 }
 
-
 /**
  * Build "Login Done" page.
  *
@@ -1337,6 +1370,7 @@ function buildLoginDone(options) {
 /**
  * Build "Login Done" page for the specified version.
  *
+ * @param {string} version
  * @param {!Object} options
  */
 function buildLoginDoneVersion(version, options) {
@@ -1345,7 +1379,7 @@ function buildLoginDoneVersion(version, options) {
   const buildDir = `build/all/amp-access-${version}/`;
   const htmlPath = path + 'amp-login-done.html';
   const jsPath = path + 'amp-login-done.js';
-  let watch = options.watch;
+  let {watch} = options;
   if (watch === undefined) {
     watch = argv.watch || argv.w;
   }
@@ -1415,7 +1449,7 @@ function buildAccessIframeApi(options) {
   const version = '0.1';
   options = options || {};
   const path = `extensions/amp-access/${version}/iframe-api`;
-  let watch = options.watch;
+  let {watch} = options;
   if (watch === undefined) {
     watch = argv.watch || argv.w;
   }
@@ -1466,36 +1500,6 @@ function buildExaminer(options) {
     minifiedName: 'examiner.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
   });
-}
-
-/**
- * Build service worker JS.
- *
- * @param {!Object} options
- */
-function buildSw(options) {
-  const opts = Object.assign({}, options);
-  return Promise.all([
-    // The service-worker script loaded by the browser.
-    compileJs('./src/service-worker/', 'shell.js', './dist/', {
-      toName: 'sw.max.js',
-      minifiedName: 'sw.js',
-      watch: opts.watch,
-      minify: opts.minify || argv.minify,
-      preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
-    }),
-    // The service-worker kill script that may be loaded by the browser.
-    compileJs('./src/service-worker/', 'kill.js', './dist/', {
-      toName: 'sw-kill.max.js',
-      minifiedName: 'sw-kill.js',
-      watch: opts.watch,
-      minify: opts.minify || argv.minify,
-      preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
-    }),
-    // The script imported by the service-worker. This is the "core".
-    buildExtensionJs('./src/service-worker', 'cache-service-worker', '0.1',
-        Object.assign({}, opts, {noWrapper: true, filename: 'core.js'})),
-  ]);
 }
 
 /**

@@ -39,7 +39,7 @@ import {
   mockWindowInterface,
   stubServiceForDoc,
 } from '../../testing/test-helper';
-import {parseUrl} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {user} from '../../src/log';
@@ -115,6 +115,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
                 return Promise.resolve(
                     opt_options.withViewerIntegrationVariableService);
               });
+        }
+        if (opt_options.withOriginalTitle) {
+          iframe.doc.originalTitle = 'Original Pixel Test';
         }
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
@@ -282,6 +285,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should prefer original title for TITLE', () => {
+    return expandUrlAsync('?title=TITLE',
+        /*opt_bindings*/undefined, {withOriginalTitle: true}).then(res => {
+      expect(res).to.equal('?title=Original%20Pixel%20Test');
+    });
+  });
+
   it('should replace AMPDOC_URL', () => {
     return expandUrlAsync('?ref=AMPDOC_URL').then(res => {
       expect(res).to.not.match(/AMPDOC_URL/);
@@ -322,10 +332,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should update SOURCE_URL after track impression', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://wrong.com');
+    win.location = parseUrlDeprecated('https://wrong.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return new Promise(resolve => {
-        win.location = parseUrl('https://example.com?gclid=123456');
+        win.location = parseUrlDeprecated('https://example.com?gclid=123456');
         resolve();
       });
     });
@@ -405,6 +415,21 @@ describes.sandboxed('UrlReplacements', {}, () => {
             expect(result).to.equal('?a=&b=cid-for-xyz&c=');
           });
     });
+  });
+
+  it('should replace AMP_STATE(key)', () => {
+    const win = getFakeWindow();
+    sandbox.stub(Services, 'bindForDocOrNull').returns(Promise.resolve({
+      getStateValue(key) {
+        expect(key).to.equal('foo.bar');
+        return Promise.resolve('baz');
+      },
+    }));
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandUrlAsync('?state=AMP_STATE(foo.bar)')
+        .then(res => {
+          expect(res).to.equal('?state=baz');
+        });
   });
 
   it('should replace VARIANT', () => {
@@ -881,9 +906,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
     const p = expect(replacements.expandUrlAsync('?a=ONE')).to.eventually
         .equal('?a=');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       clock.tick(1);
-    }).to.throw(/boom/);
+    }).to.throw(/boom/); });
     return p;
   });
 
@@ -896,9 +921,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return expect(replacements.expandUrlAsync('?a=ONE'))
         .to.eventually.equal('?a=')
         .then(() => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             clock.tick(1);
-          }).to.throw(/boom/);
+          }).to.throw(/boom/); });
         });
   });
 
@@ -1026,11 +1051,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace QUERY_PARAM with foo', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com?query_string_param1=wrong');
+    win.location = parseUrlDeprecated('https://example.com?query_string_param1=wrong');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return new Promise(resolve => {
         win.location =
-            parseUrl('https://example.com?query_string_param1=foo');
+            parseUrlDeprecated('https://example.com?query_string_param1=foo');
         resolve();
       });
     });
@@ -1043,7 +1068,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace QUERY_PARAM with ""', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com');
+    win.location = parseUrlDeprecated('https://example.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
@@ -1056,7 +1081,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace QUERY_PARAM with default_value', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com');
+    win.location = parseUrlDeprecated('https://example.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
@@ -1069,7 +1094,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should collect vars', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com?p1=foo');
+    win.location = parseUrlDeprecated('https://example.com?p1=foo');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
@@ -1095,11 +1120,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     const element = document.createElement('amp-foo');
     element.setAttribute('src', '?SOURCE_HOST&QUERY_PARAM(p1)&COUNTER');
     element.setAttribute('data-amp-replace', 'QUERY_PARAM(p1)');
-    return Services.urlReplacementsForDoc(win.ampdoc)
-        .collectUnwhitelistedVars(element)
-        .then(res => {
-          expect(res).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
-        });
+    const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
+    const unwhitelisted = urlReplacements.collectUnwhitelistedVarsSync(element);
+    expect(unwhitelisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
   });
 
   it('should reject javascript protocol', () => {
@@ -1156,10 +1179,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should reject javascript protocol', () => {
       const win = getFakeWindow();
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         /*eslint no-script-url: 0*/
         urlReplacements.expandUrlSync('javascript://example.com/?r=RANDOM');
-      }).to.throw('invalid protocol');
+      }).to.throw('invalid protocol'); });
     });
   });
 
@@ -1258,7 +1281,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a = document.createElement('a');
       win = getFakeWindow();
       win.location =
-          parseUrl('https://example.com/base?foo=bar&bar=abc&gclid=123');
+          parseUrlDeprecated('https://example.com/base?foo=bar&bar=abc&gclid=123');
       urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
     });
 
@@ -1470,8 +1493,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const input = document.createElement('textarea');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
-      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
-          /Input value expansion only works on hidden input fields/);
+      allowConsoleError(() => {
+        expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+            /Input value expansion only works on hidden input fields/);
+      });
       expect(input.value).to.equal('RANDOM');
     });
 
@@ -1481,8 +1506,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const input = document.createElement('input');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
-      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
-          /Input value expansion only works on hidden input fields/);
+      allowConsoleError(() => {
+        expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+            /Input value expansion only works on hidden input fields/);
+      });
       expect(input.value).to.equal('RANDOM');
     });
 

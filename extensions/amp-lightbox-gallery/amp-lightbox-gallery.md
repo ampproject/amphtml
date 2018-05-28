@@ -22,10 +22,6 @@ limitations under the License.
     <td width="40%"><strong>Description</strong></td>
     <td>Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.</td>
   </tr>
-   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js">&lt;/script></code></td>
@@ -116,16 +112,14 @@ Lightboxed items have a thumbnail gallery view. You can optionally specify a thu
 #### Example: using `lightbox-thumbnail-id` to specify a thumbnail
 
 ```html
-<amp-facebook
-  lightbox
-  lightbox-thumbnail-id="fb-thumbnail-img"
-  width="552"
-  height="303"
+<amp-youtube width="480"
+  height="270"
   layout="responsive"
-  data-href="https://www.facebook.com/zuck/posts/10102593740125791">
-</amp-facebook>
+  data-videoid="lBTCB7yLs8Y"
+  lightbox-thumbnail-id="my-thumbnail-img">
+</amp-youtube>
 
-<amp-img id="fb-thumbnail-img"
+<amp-img id="my-thumbnail-img"
   width="200"
   height="200"
   layout="nodisplay"

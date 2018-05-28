@@ -17,6 +17,7 @@
 import {Util} from './util';
 import {assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
+import {tryResolve} from '../../../src/utils/promise';
 
 import {user} from '../../../src/log';
 
@@ -57,7 +58,7 @@ export class FollowButton {
 
   /**
    * Render the follow button
-   * @returns {Element}
+   * @return {Element}
    */
   renderTemplate() {
     const followButton = Util.make(this.element.ownerDocument, {'a': {
@@ -72,7 +73,7 @@ export class FollowButton {
 
   /**
    * Prepare the render data, create the node and add handlers
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   render() {
     // Add trailing slash?
@@ -81,6 +82,6 @@ export class FollowButton {
     }
     this.href += `pins/follow/?guid=${Util.guid}`;
 
-    return Promise.resolve(this.renderTemplate());
+    return tryResolve(() => this.renderTemplate());
   }
 }

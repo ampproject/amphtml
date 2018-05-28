@@ -283,11 +283,19 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('does not allow min==max, when they are neither 0 nor 100', () => {
     let spec = {visiblePercentageThresholds: [[50, 50]]};
-    root.listenRoot(spec, null, null, null);
+    allowConsoleError(() => {
+      // Expect user().error(TAG,
+      //   'visiblePercentageThresholds entry invalid min/max value')
+      root.listenRoot(spec, null, null, null);
+    });
     expect(root.models_).to.have.length(0);
     root.dispose();
     spec = {visiblePercentageThresholds: [[0, 10], [10, 10], [30, 30]]};
-    root.listenRoot(spec, null, null, null);
+    allowConsoleError(() => {
+      // On the [10, 10] and [30, 30] only, again expect user().error(TAG,
+      //   'visiblePercentageThresholds entry invalid min/max value')
+      root.listenRoot(spec, null, null, null);
+    });
     expect(root.models_).to.have.length(1);
     root.dispose();
   });
@@ -783,7 +791,7 @@ describes.realWin('EmbedAnalyticsRoot', {
 
   it('should resolve root layout box', () => {
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
-      if (element == embed.host) {
+      if (element == embed.iframe) {
         return layoutRectLtwh(11, 21, 101, 201);
       }
       return null;

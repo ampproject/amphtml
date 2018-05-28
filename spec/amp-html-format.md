@@ -275,11 +275,6 @@ To prevent usage of attribute selectors to circumvent class name limitations it 
 Usage of the `!important` qualifier is not allowed. This is a necessary requirement to enable AMP to enforce its element sizing invariants.
 
 #### Properties
-These CSS properties are permanently banned:
-
-- `behavior`
-- `-moz-binding`
-
 AMP only allows transitions and animations of properties that can be GPU accelerated in common browsers. We currently whitelist: `opacity`, `transform` (also `-vendorPrefix-transform`).
 
 In the following examples `<property>` needs to be in the whitelist above.

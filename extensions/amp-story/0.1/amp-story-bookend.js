@@ -27,7 +27,7 @@ import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {isProtocolValid} from '../../../src/url';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {relatedArticlesFromJson} from './related-articles';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
@@ -40,10 +40,6 @@ import {throttle} from '../../../src/utils/rate-limit';
  * }}
  */
 export let BookendConfigDef;
-
-
-/** @private @const {string} */
-const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
 
 /**
@@ -239,11 +235,14 @@ export class Bookend {
      */
     this.bookendEl_ = null;
 
+    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+    this.requestService_ = Services.storyRequestServiceV01(this.win_);
+
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -309,6 +308,10 @@ export class Bookend {
       this.onBookendStateUpdate_(isActive);
     });
 
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
+      this.onCanShowSharingUisUpdate_(show);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
@@ -342,6 +345,19 @@ export class Bookend {
   }
 
   /**
+   * Reacts to updates to whether sharing UIs may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowSharingUis
+   * @private
+   */
+  onCanShowSharingUisUpdate_(canShowSharingUis) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+    });
+  }
+
+  /**
    * Reacts to desktop state updates.
    * @param {boolean} isDesktop
    * @private
@@ -365,7 +381,7 @@ export class Bookend {
       return Promise.resolve(this.config_);
     }
 
-    return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
+    return this.requestService_.loadBookendConfig()
         .then(response => {
           if (!response) {
             return null;
@@ -388,31 +404,6 @@ export class Bookend {
         .catch(e => {
           user().error(TAG, 'Error fetching bookend configuration', e.message);
           return null;
-        });
-  }
-
-  /**
-   * @param {string} attributeName
-   * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
-   */
-  loadJsonFromAttribute_(attributeName) {
-    if (!this.parentEl_.hasAttribute(attributeName)) {
-      return Promise.resolve(null);
-    }
-
-    const rawUrl = this.parentEl_.getAttribute(attributeName);
-    const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
-
-    const ampdoc = getAmpdoc(this.parentEl_);
-
-    return Services.urlReplacementsForDoc(ampdoc)
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => Services.xhrFor(this.win_).fetchJson(url, opts))
-        .then(response => {
-          user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
-          return response.json();
         });
   }
 
@@ -510,11 +501,6 @@ export class Bookend {
     this.assertBuilt_();
     this.isConfigRendered_ = true;
 
-    if (bookendConfig.shareProviders) {
-      this.shareWidget_.setProviders(
-          dev().assert(bookendConfig.shareProviders));
-    }
-
     this.setRelatedArticles_(bookendConfig.relatedArticles);
   }
 
@@ -579,7 +565,7 @@ export class Bookend {
             this.win_.document.head.querySelector('title'),
             'Please set <title> or structured data (JSON-LD).').textContent,
 
-      domainName: parseUrl(
+      domainName: parseUrlDeprecated(
           Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,
     };
 

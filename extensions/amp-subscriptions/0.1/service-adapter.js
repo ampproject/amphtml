@@ -27,19 +27,41 @@ export class ServiceAdapter {
 
   /**
    * Returns the page config.
-   * @returns {!PageConfig}
+   * @return {!PageConfig}
    */
   getPageConfig() {
     return this.subscriptionService_.getPageConfig();
   }
 
   /**
-   * Delegates actions to local platform
+   * Delegates actions to local platform.
    * @param {string} action
    * @return {!Promise<boolean>}
    */
   delegateActionToLocal(action) {
-    return this.subscriptionService_.delegateActionToLocal(action);
+    return this.delegateActionToService(action, 'local');
+  }
+
+  /**
+   * Delegates actions to a given service.
+   * @param {string} action
+   * @param {string} serviceId
+   * @return {!Promise<boolean>}
+   */
+  delegateActionToService(action, serviceId) {
+    return this.subscriptionService_.delegateActionToService(action, serviceId);
+  }
+
+  /**
+   * Delegate UI decoration to another service.
+   * @param {!Element} element
+   * @param {string} serviceId
+   * @param {string} action
+   * @param {?JsonObject} options
+   */
+  decorateServiceAction(element, serviceId, action, options) {
+    this.subscriptionService_.decorateServiceAction(element, serviceId,
+        action, options);
   }
 
   /**
@@ -52,10 +74,19 @@ export class ServiceAdapter {
 
   /**
    * Returns the singleton Dialog instance
-   * @returns {!./dialog.Dialog}
+   * @return {!./dialog.Dialog}
    */
   getDialog() {
     return this.subscriptionService_.getDialog();
+  }
+
+  /**
+   * Returns login platform based on platform selection
+   *
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   */
+  selectPlatformForLogin() {
+    return this.subscriptionService_.selectPlatformForLogin();
   }
 }
 

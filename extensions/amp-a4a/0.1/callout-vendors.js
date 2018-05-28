@@ -53,7 +53,7 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
   },
   indexexchange: {
-    url: 'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=HREF',
+    url: 'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=CANONICAL_URL',
     macros: ['SITE_ID'],
     disableKeyAppend: true,
   },
@@ -66,6 +66,21 @@ export const RTC_VENDORS = {
     macros: ['YB_PSN', 'YB_SLOT'],
     disableKeyAppend: true,
   },
+  salesforcedmp: {
+    url: 'https://cdn.krxd.net/userdata/v2/amp/ORGANIZATION_ID?segments_key=SEGMENTS_KEY&kuid_key=USER_KEY',
+    macros: ['ORGANIZATION_ID', 'SEGMENTS_KEY', 'USER_KEY'],
+    disableKeyAppend: true,
+  },
+  purch: {
+    url: 'https://ads.servebom.com/tmntag.js?v=1.2&fmt=amp&o={%22p%22%3APLACEMENT_ID}&div_id=DIV_ID',
+    macros: ['PLACEMENT_ID', 'DIV_ID'],
+    disableKeyAppend: true,
+  },
+  aps: {
+    url: 'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&amp=1&u=HREF&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%7D%5D&pj=PARAMS&gdpre=GDPRE&gdprc=GDPRC',
+    macros: ['PUB_ID', 'PARAMS', 'GDPRE', 'GDPRC'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
@@ -76,6 +91,7 @@ if (getMode().localDev || getMode().test) {
   });
   RTC_VENDORS['fakevendor2'] = /** @type {RtcVendorDef} */({
     url: 'https://localhost:8000/examples/rtcE1.json?slot_id=SLOT_ID&page_id=PAGE_ID&foo_id=FOO_ID',
+    errorReportingUrl: 'https://localhost:8000/examples/ERROR_TYPE',
     disableKeyAppend: true,
   });
 }

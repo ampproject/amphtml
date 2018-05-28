@@ -27,9 +27,6 @@ export class Toolbar {
     /** @private {!Element} */
     this.toolbarDomElement_ = element;
 
-    /** @private {number|undefined} */
-    this.height_ = undefined;
-
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
@@ -102,7 +99,7 @@ export class Toolbar {
 
   /**
    * Returns if the sidebar is currently in toolbar media query
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   isToolbarShown_() {
@@ -112,7 +109,7 @@ export class Toolbar {
   /**
    * Function to attempt to show the toolbar,
    * and hide toolbar-only element in the sidebar.
-   * @returns {Promise|undefined}
+   * @return {Promise|undefined}
    * @private
    */
   attemptShow_() {

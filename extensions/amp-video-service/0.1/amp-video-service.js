@@ -21,7 +21,15 @@
  * it gets automatically inserted by the runtime when required.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
+import {CommonSignals} from '../../../src/common-signals';
+import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {isFiniteNumber} from '../../../src/types';
+import {listen} from '../../../src/event-helper';
 
 
 /** @private @const {string} */
@@ -36,7 +44,7 @@ const ENTRY_PROP = '__AMP_VIDEO_ENTRY__';
  * Manages all AMP video players that implement the common Video API
  * {@see ../src/video-interface.VideoInterface}.
  *
-* Provides unified behavior for all videos regardless of implementation.
+ * Provides unified behavior for all videos regardless of implementation.
  *
  *
  * __          __              _
@@ -49,8 +57,8 @@ const ENTRY_PROP = '__AMP_VIDEO_ENTRY__';
  *                                     |___/
  *
  * This service is instantiated asynchronously by
- * {@see ../../../src/service/video-service-impl.VideoService}. That should be
- * used by consumers of the APIs exposed here.
+ * {@see ../../../src/service/video-service-sync-impl.VideoServiceSync}. That
+ * service should be used by consumers of the APIs exposed here.
  *
  * If you need to add methods to this class that are public to components,
  * it's most likely that you'll want to implement them here and set wrappers for
@@ -60,25 +68,43 @@ export class VideoService {
 
   /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
+    const {win} = ampdoc;
+
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
+
+    /** @private {?../../../src/observable.Observable<void>} */
+    this.tick_ = null;
+
+    /** @private @const {function()} */
+    this.boundTick_ = () => this.startTicking_();
+  }
+
+  /** @private */
+  startTicking_() {
+    this.tick_.fire();
+    this.timer_.delay(this.boundTick_, 1000);
   }
 
   /** @param {!../../../src/video-interface.VideoInterface} video */
   register(video) {
-    const {element} = video;
+    const {element} =
+    /** @type {!../../../src/video-interface.VideoOrBaseElementDef} */ (
+        video);
 
     if (this.getEntryOrNull(element)) {
-      return dev().assert(this.getEntryOrNull_(element));
+      return dev().assert(this.getEntryOrNull(element));
     }
 
-    if (!impl.supportsPlatform()) {
+    if (!video.supportsPlatform()) {
       return null;
     }
 
-    const entry = VideoEntry.create(this.ampdoc_, video, this);
+    const entry = VideoEntry.create(this.ampdoc_, this, video);
 
-    entry.install();
     this.setEntry_(element, entry);
 
     return entry;
@@ -92,6 +118,16 @@ export class VideoService {
     return element[ENTRY_PROP];
   }
 
+  /** @param {function()} handler */
+  onTick(handler) {
+    this.tick_ = this.tick_ || new Observable();
+    this.tick_.add(handler);
+
+    if (this.tick_.getHandlerCount() == 1) {
+      this.startTicking_();
+    }
+  }
+
   /**
    * @param {!Element} element
    * @param {!VideoEntry} entry
@@ -102,98 +138,118 @@ export class VideoService {
   }
 
   /**
-   * @param {!Element} video
+   * @param {!Element} unusedVideo
    * @return {!Promise}
    */
-  getAnalyticsDetails(video) {
-    if (!this.getEntryOrNull(video)) {
-      dev().warn(TAG, 'Analytics requested, but no video entry found.');
-      return Promise.resolve();
-    }
-    return dev().assert(this.getEntryOrNull(video)).getAnalyticsDetails();
+  getAnalyticsDetails(unusedVideo) {
+    warnUnimplemented('Video analytics');
+    return Promise.resolve();
   }
 
   /**
-   * @param {!AmpElement} video
-   * @param {!../../../src/observable.Observable<boolean>} unusedObservable
+   * @param {!AmpElement} unusedVideo
+   * @param {!Observable<boolean>} unusedObservable
    */
-  delegateAutoplay(video, unusedObservable) {
+  delegateAutoplay(unusedVideo, unusedObservable) {
     warnUnimplemented('Autoplay delegation');
   }
 }
 
 
-/** @visibleForTesting */
+/**
+ * Handler for a registered video component.
+ * @visibleForTesting
+ */
 export class VideoEntry {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../../../src/video-interface.VideoInterface} video
-   * @param {!../../../src/observable.ObservableInterface} scrollObservable
+   * @param {!VideoService} videoService
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    */
-  constructor(ampdoc, video, scrollObservable) {
+  constructor(ampdoc, videoService, video) {
 
-    /** @private @const{!../../../src/service/ampdoc-impl.AmpDoc} */
-    // TODO(alanorozco): Type
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private @const{!../../../src/video-interface.VideoInterface} */
-    // TODO(alanorozco): Type
+    /** @private @const {!VideoService} */
+    this.service_ = videoService;
+
+    /** @private @const {!../../../src/video-interface.VideoOrBaseElementDef} */
     this.video_ = video;
 
-    /** @private @const {!../../../src/observable.ObservableInterface} */
-    // TODO(alanorozco): Type
-    this.scrollObservable_ = scrollObservable;
-
-    /** @private @const {!LazyObservable<boolean>} */
-    this.autoplayObservable_ =
-        new LazyObservable(() => this.installVisibilityListener_());
-
-    /** @private @const {!<./video-behaviors.VideoBehavior>} */
-    this.autoplay_ = null;
-
-    /** @private @const {!<./video-behaviors.VideoBehavior>} */
-    this.behaviors_ = [];
-  }
-
-  install() {
-    this.video_.element.whenBuilt().then(() => {
-      this.onBuilt_();
-    });
+    /** @private {boolean} */
+    this.isPlaying_ = false;
   }
 
   /**
-   * @return {!Promise<!../../..src/video-interface.VideoAnalyticsDetailsDef>}
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!VideoService} videoService
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    */
-  getAnalyticsDetails() {
-    return Promise.all(this.behaviors_.map(b => b.getAnalyticsDetails()))
-      .then(result =>
-        Object.assign.apply(null, [{
-          'currentTime': video.getCurrentTime(),
-          'duration': video.getDuration(),
-          // TODO(cvializ): add fullscreen
-          'height': height,
-          'id': video.element.id,
-          'muted': this.muted_,
-          'playedTotal': playedTotal,
-          'playedRangesJson': JSON.stringify(playedRanges),
-          'state': this.getPlayingState(),
-          'width': width,
-          // To be overriden, setting a default value for interface conformance.
-          'autoplay': false,
-        };
-      }].concat(result)));
+  static create(ampdoc, videoService, video) {
+    const entry = new VideoEntry(ampdoc, videoService, video);
+    // Called here as opposed to constructor so that tests can stub VideoEntry
+    // methods before install.
+    entry.install();
+    return entry;
   }
 
-  getAutoplayObservable() {
-    return this.autoplayObservable_;
+  /** @param {function()} handler */
+  onPlaybackTick(handler) {
+    this.service_.onTick(() => {
+      if (!this.isPlaying_) {
+        return;
+      }
+      handler();
+    });
   }
 
-  delegateAutoplay(observable) {
-    if (this.autoplay_) {
-      this.autoplay_.delegate(observable);
-    }
-    this.autoplayObservable_ = observable;
+  /** */
+  install() {
+    const {element} = this.video_;
+    const signals = element.signals();
+
+    element.dispatchCustomEvent(VideoEvents.REGISTERED);
+
+    // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
+    // moment in the element's lifecycle and the promise will resolve
+    // appropriately each time.
+    signals.signal(VideoEvents.REGISTERED);
+
+    element.whenBuilt()
+        .then(() => this.onBuilt_());
+
+    signals.whenSignal(CommonSignals.LOAD_START)
+        .then(() => this.onLoadStart_());
+  }
+
+  /** @private */
+  onBuilt_() {
+    const {element} = this.video_;
+
+    this.registerCommonActions_();
+    this.addEventHandlers_();
+
+    element.classList.add('i-amphtml-video-interface');
+  }
+
+  /** @private */
+  onLoadStart_() {
+    this.triggerTimeUpdate_();
+  }
+
+  /** @private */
+  addEventHandlers_() {
+    const {element} = this.video_;
+
+    listen(element, VideoEvents.PAUSE, () => {
+      this.isPlaying_ = false;
+    });
+
+    listen(element, VideoEvents.PLAYING, () => {
+      this.isPlaying_ = true;
+    });
   }
 
   /**
@@ -202,52 +258,46 @@ export class VideoEntry {
    * @private
    */
   registerCommonActions_() {
-    warnUnimplemented('Common actions');
+    const video = this.video_;
+
+    // Only require ActionTrust.LOW for video actions to defer to platform
+    // specific handling (e.g. user gesture requirement for unmuted playback).
+    const trust = ActionTrust.LOW;
+
+    video.registerAction('play', () => video.play(/* isAuto */ false), trust);
+    video.registerAction('pause', () => video.pause(), trust);
+    video.registerAction('mute', () => video.mute(), trust);
+    video.registerAction('unmute', () => video.unmute(), trust);
+    video.registerAction('fullscreen', () => video.fullscreenEnter(), trust);
   }
 
-  /** @private */
-  onBuilt_() {
-    const {element} = this.video;
+  /**
+   * Triggers a LOW-TRUST timeupdate event consumable by AMP actions if
+   * required.
+   * Frequency of this event is controlled by VideoService.onTick() and is
+   * every second for now.
+   * @private
+   */
+  triggerTimeUpdate_() {
+    this.onPlaybackTick(() => {
+      const video = this.video_;
+      const time = video.getCurrentTime();
+      const duration = video.getDuration();
 
-    video.loadPromise(element)
-        .then(() => this.onLoaded_());
+      if (!isFiniteNumber(time) ||
+          !isFiniteNumber(duration) ||
+          duration <= 0) {
+        return;
+      }
 
-    this.registerCommonActions_();
-
-    this.installBehaviors_();
-
-    element.classList.add('i-amphtml-video-interface');
-
-    this.unlisteners_.push(
-        listen(element, VideoEvents.RELOAD, () => this.onLoaded_()),
-        listen(element, VideoEvents.PAUSE, () => {
-          this.isPlaying_ = false;
-        }),
-        listen(element, VideoEvents.PLAYING, () => {
-          this.isPlaying_ = true;
-        }));
-  }
-
-  installBehaviors_() {
-    const {win} = this.ampdoc_;
-
-    if (Autoplay.shouldBeEnabledFor(this.video_)) {
-      this.autoplay_ = Autoplay.create(win, this.impl_, this);
-      this.behaviors_.push(this.autoplay_);
-    }
-  }
-
-  /** @private */
-  onLoaded_() {
-    this.isLoaded_ = true;
-
-    this.loadObservable_.fire();
-
-    this.maybeUpdateVisibility_();
-
-    if (this.isVisible_) {
-      this.onVisibilityChanged_();
-    }
+      const {win} = this.ampdoc_;
+      const {element} = this.video_;
+      const actions = Services.actionServiceForDoc(this.ampdoc_);
+      const name = 'timeUpdate';
+      const percent = time / duration;
+      const event = createCustomEvent(win, `${TAG}.${name}`, {time, percent});
+      actions.trigger(element, name, event, ActionTrust.LOW);
+    });
   }
 }
 

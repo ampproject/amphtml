@@ -38,7 +38,8 @@ describe('Amp custom ad', () => {
    * Get a custom amp-ad element
    * @param {string} url The url of the ad server
    * @param {string} slot The alphanumeric slot Id (optional)
-   * @returns {Element} The completed amp-ad element, which has been added to
+   * @param {HTMLElement} body
+   * @return {Element} The completed amp-ad element, which has been added to
    *    the current document body.
    */
   function getCustomAd(url, slot, body = document.body) {
@@ -208,26 +209,28 @@ describe('Amp custom ad', () => {
       removeChildren(elem);
       const ad = new AmpAdCustom(elem);
       ad.buildCallback();
-      expect(() => {
-        ad.handleTemplateData_({
-          'data': {
-            'a': '1',
-            'b': '2',
-          },
-          'vars': {
-            'abc': '456',
-          },
-        });
-      }).to.throw('TemplateId not specified');
+      allowConsoleError(() => {
+        expect(() => {
+          ad.handleTemplateData_({
+            'data': {
+              'a': '1',
+              'b': '2',
+            },
+            'vars': {
+              'abc': '456',
+            },
+          });
+        }).to.throw('TemplateId not specified');
 
-      expect(() => {
-        ad.handleTemplateData_({
-          'templateId': '1',
-          'vars': {
-            'abc': '456',
-          },
-        });
-      }).to.throw('Template data not specified');
+        expect(() => {
+          ad.handleTemplateData_({
+            'templateId': '1',
+            'vars': {
+              'abc': '456',
+            },
+          });
+        }).to.throw('Template data not specified');
+      });
     });
   });
 });

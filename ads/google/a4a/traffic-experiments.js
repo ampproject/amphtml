@@ -234,7 +234,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
  * that, use validateExperimentIds.
  *
  * @param {?string} idString  String to parse.
- * @returns {!Array<string>}  List of experiment IDs (possibly empty).
+ * @return {!Array<string>}  List of experiment IDs (possibly empty).
  * @see validateExperimentIds
  */
 export function parseExperimentIds(idString) {
@@ -268,7 +268,7 @@ export function isInExperiment(element, id) {
  * #maybeSetExperimentFromUrl has added it).
  *
  * @param {!Element} element  Element to check for manual experiment membership.
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isInManualExperiment(element) {
   return isInExperiment(element, MANUAL_EXPERIMENT_ID);
@@ -282,7 +282,7 @@ export function isInManualExperiment(element) {
  *
  * @param {!Window} win  Host window for the ad.
  * @param {!Element} element  Element to check for pre-launch membership.
- * @returns {boolean}
+ * @return {boolean}
  */
 export function hasLaunched(win, element) {
   switch (element.getAttribute('type')) {
@@ -300,7 +300,7 @@ export function hasLaunched(win, element) {
  * (integer base 10).
  *
  * @param {!Array<string>} idList  List of experiment IDs.  Can be empty.
- * @returns {boolean} Whether all list elements are valid experiment IDs.
+ * @return {boolean} Whether all list elements are valid experiment IDs.
  */
 export function validateExperimentIds(idList) {
   return idList.every(id => { return !isNaN(parseInt(id, 10)); });
@@ -308,11 +308,15 @@ export function validateExperimentIds(idList) {
 
 /**
  * Adds a single experimentID to an element iff it's a valid experiment ID.
+ * No-ops if the experimentId is undefined.
  *
- * @param {string} experimentId  ID to add to the element.
+ * @param {string|undefined} experimentId  ID to add to the element.
  * @param element Element to add the experiment ID to.
  */
 export function addExperimentIdToElement(experimentId, element) {
+  if (!experimentId) {
+    return;
+  }
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE,

@@ -60,10 +60,18 @@ attr_lists: {
     name: "muted"
     value: ""
   }
+  attrs: {
+    name: "noaudio"
+    value: ""
+  }
   attrs: { name: "placeholder" }
   attrs: {
     name: "preload"
-    value_regex: "(none|metadata|auto|)"
+    value_regex: "auto|metadata|none|"
+  }
+  attrs: {
+    name: "rotate-to-fullscreen"
+    value: ""
   }
   attrs: {
     name: "src"

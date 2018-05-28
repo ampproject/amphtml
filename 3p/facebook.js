@@ -15,6 +15,7 @@
  */
 
 import {dashToUnderline} from '../src/string';
+import {dict} from '../src/utils/object';
 import {loadScript} from './3p';
 import {setStyle} from '../src/style';
 import {user} from '../src/log';
@@ -28,6 +29,7 @@ import {user} from '../src/log';
  *
  * @param {!Window} global
  * @param {function(!Object)} cb
+ * @param {string} locale
  */
 function getFacebookSdk(global, cb, locale) {
   loadScript(global, 'https://connect.facebook.net/' + locale + '/sdk.js', () => {
@@ -56,12 +58,12 @@ function getPostContainer(global, data) {
   // If the user hasn't set the `data-embed-as` attribute and the provided href
   // is a video, Force the `data-embed-as` attribute to 'video' and make sure
   // to show the post's text.
-  if (data.href.match(/\/videos\/\d+\/?$/) &&
-    !container.hasAttribute('data-embed-as')) {
+  if (data.href.match(/\/videos\/\d+\/?$/) && !data.embedAs) {
     embedAs = 'video';
     container.setAttribute('data-embed-as', 'video');
-    // Since 'data-embed-as="video"' disables post text, setting the 'data-show-text'
-    // to 'true' enables the ability to see the text (changed from the default 'false')
+    // Since 'data-embed-as="video"' disables post text, setting the
+    // 'data-show-text' to 'true' enables the ability to see the text (changed
+    // from the default 'false')
     container.setAttribute('data-show-text', 'true');
   }
   container.className = 'fb-' + embedAs;
@@ -102,6 +104,7 @@ function getCommentsContainer(global, data) {
   container.setAttribute('data-href', data.href);
   container.setAttribute('data-numposts', data.numposts || 10);
   container.setAttribute('data-colorscheme', data.colorscheme || 'light');
+  container.setAttribute('data-order-by', data.orderBy || 'social');
   container.setAttribute('data-width', '100%');
   return container;
 }
@@ -160,5 +163,12 @@ export function facebook(global, data) {
     });
 
     FB.init({xfbml: true, version: 'v2.5'});
+
+    // Report to parent that the SDK has loaded and is ready to paint
+    const message = JSON.stringify(dict({
+      'action': 'ready',
+    }));
+    global.parent. /*OK*/postMessage(message, '*');
+
   }, data.locale ? data.locale : dashToUnderline(window.navigator.language));
 }

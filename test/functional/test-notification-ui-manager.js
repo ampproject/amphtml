@@ -86,9 +86,9 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
 
     it('queue empty handler', function* () {
       const handler = sandbox.spy();
-      manager.onQueueEmpty(handler);
       manager.registerUI(show1);
       manager.registerUI(show2);
+      manager.onQueueEmpty(handler);
       expect(handler).to.not.be.called;
       resolve1();
       resolve2();

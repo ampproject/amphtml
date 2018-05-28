@@ -337,7 +337,6 @@ export class VisibilityManager {
 
       // Optionally, element-level state.
       let layoutBox;
-
       if (opt_element) {
         const resource =
             this.resources_.getResourceForElementOptional(opt_element);
@@ -582,7 +581,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    */
   createIntersectionObserver_() {
     // Native.
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     if (nativeIntersectionObserverSupported(win)) {
       return new win.IntersectionObserver(
           this.onIntersectionChanges_.bind(this),
@@ -608,7 +607,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @private
    */
   polyfillAmpElementIfNeeded_(element) {
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     if (nativeIntersectionObserverSupported(win)) {
       return;
     }
@@ -702,9 +701,21 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     return this.backgroundedAtStart_;
   }
 
-  /** @override */
+  /**
+   * Gets the layout box of the embedded document. Note that this may be
+   * smaller than the size allocated by the host. In that case, the document
+   * will be centered, and the unfilled space will not be reflected in this
+   * return value.
+   * embed.iframe is used to calculate the root layoutbox, since it is more
+   * important for the embedded document to know its own size, rather than
+   * the size of the host rectangle which it may or may not entirely fill.
+   * embed.host is used to calculate the root visibility, however, since
+   * the visibility of the host element directly determines the embedded
+   * document's visibility.
+   * @override
+   */
   getRootLayoutBox() {
-    const rootElement = dev().assertElement(this.embed.host);
+    const rootElement = dev().assertElement(this.embed.iframe);
     return Services.viewportForDoc(this.ampdoc).getLayoutRect(rootElement);
   }
 

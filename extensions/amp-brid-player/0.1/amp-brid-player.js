@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
@@ -68,9 +69,9 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 
   /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     this.preconnect.url('https://services.brid.tv', opt_onLayout);
     this.preconnect.url('https://cdn.brid.tv', opt_onLayout);
@@ -122,15 +123,15 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     this.feedID_ = user().assert(
         (this.element.getAttribute('data-video') ||
-        this.element.getAttribute('data-playlist') ||
-        this.element.getAttribute('data-outstream')),
+            this.element.getAttribute('data-playlist') ||
+            this.element.getAttribute('data-outstream')),
         'Either the data-video or the data-playlist or the data-outstream ' +
         'attributes must be specified for <amp-brid-player> %s',
         this.element);
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -149,7 +150,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
         this.win,
         'message',
-        this. handleBridMessages_.bind(this)
+        this.handleBridMessages_.bind(this)
     );
 
     this.element.appendChild(iframe);
@@ -168,9 +169,9 @@ class AmpBridPlayer extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
   }
 
@@ -182,27 +183,34 @@ class AmpBridPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
-    const partnerID = this.partnerID_;
-    const feedID = this.feedID_;
+    const {partnerID_: partnerID, feedID_: feedID} = this;
 
+    this.propagateAttributes(['aria-label'], placeholder);
     if (this.element.hasAttribute('data-video') ||
-    		this.element.hasAttribute('data-playlist')) {
+        this.element.hasAttribute('data-playlist')) {
 
       const placeholderFallback = this.win.document.createElement('amp-img');
       placeholderFallback.setAttribute('src',
-    		  'https://cdn.brid.tv/live/default/defaultSnapshot.png');
+          'https://cdn.brid.tv/live/default/defaultSnapshot.png');
       placeholderFallback.setAttribute('referrerpolicy', 'origin');
       placeholderFallback.setAttribute('layout', 'fill');
       placeholderFallback.setAttribute('fallback', '');
       placeholder.appendChild(placeholderFallback);
 
       placeholder.setAttribute('src',
-    		  'https://cdn.brid.tv/live/partners/' +
-    		  encodeURIComponent(partnerID) + '/snapshot/' +
-    		  encodeURIComponent(feedID) + '.jpg');
+          'https://cdn.brid.tv/live/partners/' +
+          encodeURIComponent(partnerID) + '/snapshot/' +
+          encodeURIComponent(feedID) + '.jpg');
       placeholder.setAttribute('layout', 'fill');
       placeholder.setAttribute('placeholder', '');
       placeholder.setAttribute('referrerpolicy', 'origin');
+      if (placeholder.hasAttribute('aria-label')) {
+        placeholder.setAttribute('alt',
+            'Loading video - ' + placeholder.getAttribute('aria-label')
+        );
+      } else {
+        placeholder.setAttribute('alt', 'Loading video');
+      }
       this.applyFillContent(placeholder);
 
       return placeholder;
@@ -214,11 +222,11 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 
   /**
-     * Sends a command to the player through postMessage.
-     * @param {string} command
-     * @param {*=} opt_arg
-     * @private
-     * */
+   * Sends a command to the player through postMessage.
+   * @param {string} command
+   * @param {*=} opt_arg
+   * @private
+   * */
   sendCommand_(command, opt_arg) {
 
     this.playerReadyPromise_.then(() => {
@@ -337,6 +345,11 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
     return false;
   }
 

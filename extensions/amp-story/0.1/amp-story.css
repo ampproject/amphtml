@@ -16,13 +16,22 @@
 
 @import './amp-story-desktop.css';
 @import './amp-story-user-overridable.css';
-@import './amp-story-ads.css';
 @import './amp-story-share.css';
 
 /** Common */
 amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
+}
+
+amp-consent {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: none !important;
+  z-index: initial !important;
 }
 
 .i-amphtml-story-system-reset,
@@ -65,6 +74,13 @@ html.i-amphtml-story-standalone body {
   display: grid !important;
 }
 
+html.i-amphtml-story-standalone #i-amphtml-wrapper body {
+  /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
+      1px bigger than the viewport. */
+  border-top: none !important;
+  overflow: hidden !important;
+}
+
 amp-story[standalone] {
   align-self: center !important;
   box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5) !important;
@@ -96,7 +112,11 @@ amp-story[standalone]:fullscreen {
   max-width: none !important;
 }
 
-amp-story .amp-video-eq {
+amp-story .amp-video-eq .amp-video-eq-col {
+  margin-right: 1px !important;
+}
+
+amp-story .amp-video-eq:not(.amp-video-eq-play) {
   display: none !important;
 }
 
@@ -164,6 +184,21 @@ amp-story:not([desktop]) >
   z-index: 2 !important;
 }
 
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+amp-story amp-video::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
 amp-story-cta-layer, amp-story-grid-layer {
   bottom: 0 !important;
   left: 0 !important;
@@ -188,6 +223,12 @@ amp-story-grid-layer {
 amp-story-grid-layer * {
   box-sizing: border-box !important;
   margin: 0 !important;
+}
+
+.i-amphtml-story-grid-template-with-full-bleed-animation {
+  position: absolute !important;
+  display: block !important;
+  padding: 0 !important;
 }
 
 .i-amphtml-story-grid-template-fill > :not(:first-child) {
@@ -414,35 +455,8 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   color: #222 !important;
 }
 
-.i-amphtml-story-bookend-close {
-  opacity: 0.5 !important;
-  top: 8px !important;
-  left: 8px !important;
-  position: absolute !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
-}
-
-.i-amphtml-story-bookend-fullbleed .i-amphtml-story-bookend-close {
-  opacity: 1 !important;
-  position: fixed !important;
-  z-index: 2 !important;
-}
-
-.i-amphtml-story-bookend-fullbleed::before {
-  content: " " !important;
-  display: block !important;
-  background-image: linear-gradient(0deg, rgba(1,1,1,0.00) 0%, #000000 100%) !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 40px !important;
-  pointer-events: none !important;
-  z-index: 1 !important;
-}
-
 .i-amphtml-story-toast {
-  position: fixed !important;
+  position: absolute !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;

@@ -15,14 +15,13 @@
  */
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isProtocolValid, isProxyOrigin} from '../../../src/url';
 import {openWindowDialog, removeElement} from '../../../src/dom';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;
@@ -42,11 +41,6 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.canShowBuiltinBanner_ = false;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /**
@@ -432,11 +426,11 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @private */
   getAndroidIntentForUrl_(appId) {
-    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-    const parsedUrl = parseUrl(canonicalUrl);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const parsedUrl = parseUrlDeprecated(canonicalUrl);
     const cleanProtocol = parsedUrl.protocol.replace(':', '');
-    const host = parsedUrl.host;
-    const pathname = parsedUrl.pathname;
+    const {host, pathname} = parsedUrl;
+
     return `android-app://${appId}/${cleanProtocol}/${host}${pathname}`;
   }
 }

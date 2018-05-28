@@ -205,7 +205,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.sentinel = 'sentinel';
     impl.initiateAdRequest();
     impl.safeframeApi_ = new SafeframeHostApi(
-        impl, true, impl.initialSize_, impl.creativeSize_);
+        impl, true, impl.creativeSize_);
     sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
     const connectMessagingChannelSpy =
           sandbox./*OK*/spy(impl.safeframeApi_,

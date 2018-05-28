@@ -26,8 +26,8 @@ import {px, setImportantStyles} from '../../style';
 const TAG_ = 'Viewport';
 
 /**
- * Implementation of ViewportBindingDef based on the native window. It assumes that
- * the native window is sized properly and events represent the actual
+ * Implementation of ViewportBindingDef based on the native window. It assumes
+ * that the native window is sized properly and events represent the actual
  * scroll/resize events. This mode is applicable to a standalone document
  * display or when an iframe has a fixed size.
  *
@@ -39,9 +39,8 @@ export class ViewportBindingNatural_ {
 
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../viewer-impl.Viewer} viewer
    */
-  constructor(ampdoc, viewer) {
+  constructor(ampdoc) {
     /** @const {!../ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -50,12 +49,6 @@ export class ViewportBindingNatural_ {
 
     /** @const {!../../service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
-
-    /** @private {!../../service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
-
-    /** @private @const {!../viewer-impl.Viewer} */
-    this.viewer_ = viewer;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -179,7 +172,7 @@ export class ViewportBindingNatural_ {
   getScrollTop() {
     const pageScrollTop = this.getScrollingElement()./*OK*/scrollTop ||
         this.win./*OK*/pageYOffset;
-    const host = this.ampdoc.getRootNode().host;
+    const {host} = this.ampdoc.getRootNode();
     return (host ? pageScrollTop - host./*OK*/offsetTop : pageScrollTop);
   }
 

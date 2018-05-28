@@ -21,7 +21,7 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-ad width=320 height=50
+<amp-ad width="320" height="50"
     type="mads"
     data-adrequest='{"pid":"6252122059"}'>
 </amp-ad>
@@ -33,4 +33,4 @@ For semantics of configuration, please see [MADS documentation](http://wiki.mads
 
 Supported parameters:
 
-- data-adrequest: MADS Adrequest parameters
+- `data-adrequest`: MADS ad request parameters

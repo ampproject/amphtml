@@ -34,6 +34,11 @@ export let SubscriptionService;
 
 export class Services {
   /**
+   * Hint: Add extensions folder path to compile.js with
+   * warnings cannot find modules.
+   */
+
+  /**
    * Returns a promise for the Access service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}
@@ -56,8 +61,8 @@ export class Services {
   }
 
   /**
-   * Returns a promise for the Access service or a promise for null if the service
-   * is not available on the current page.
+   * Returns a promise for the Access service or a promise for null if the
+   * service is not available on the current page.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
    */
@@ -119,9 +124,10 @@ export class Services {
       Services.extensionsFor(ampdoc.win)./*OK*/installExtensionForDoc(
           ampdoc, 'amp-analytics');
     }
-    return (/** @type {!Promise<
-              !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-            >} */ (getElementServiceForDoc(
+    return (
+      /** @type {!Promise<
+        !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+      >} */ (getElementServiceForDoc(
           nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
   }
 
@@ -130,9 +136,10 @@ export class Services {
    * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
   static analyticsForDocOrNull(nodeOrDoc) {
-    return (/** @type {!Promise<
-              ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-            >} */ (getElementServiceIfAvailableForDoc(
+    return (
+      /** @type {!Promise<
+        ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+      >} */ (getElementServiceIfAvailableForDoc(
           nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
   }
 
@@ -284,28 +291,30 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>}
+   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
       (getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
           true)));
   }
 
   /**
+   * Version of the story store service depends on which version of amp-story
+   * the publisher is loading. They all have the same implementation.
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
    */
   static storyStoreServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
-      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', true)));
+    /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story')));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+   * @return {!../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
    */
   static storyStoreService(win) {
     return getService(win, 'story-store');
@@ -313,20 +322,67 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   * @return {!../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
+   */
+  static storyRequestService(win) {
+    return getService(win, 'story-request');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>}
    */
   static localizationServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>} */
       (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   * @return {!../extensions/amp-story/1.0/localization.LocalizationService}
    */
   static localizationService(win) {
     return getService(win, 'localization');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+   */
+  static storyStoreServiceV01(win) {
+    return getService(win, 'story-store');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
+   */
+  static storyRequestServiceV01(win) {
+    return getService(win, 'story-request-v01');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNullV01(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+      (getElementServiceIfAvailable(win, 'localization-v01', 'amp-story',
+          true)));
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   */
+  static localizationServiceV01(win) {
+    return getService(win, 'localization-v01');
   }
 
   /**
@@ -345,8 +401,7 @@ export class Services {
    * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
    */
   static webAnimationServiceFor(nodeOrDoc) {
-    return (/** @type {
-        !Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
+    return (/** @type {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
       (getElementServiceForDoc(nodeOrDoc, 'web-animation', 'amp-animation')));
   }
 
@@ -398,8 +453,31 @@ export class Services {
   }
 
   /**
-   * Returns a promise for the experiment variants or a promise for null if it is
-   * not available on the current page.
+   * Returns a promise for the consentPolicy Service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>}
+   */
+  static consentPolicyServiceForDocOrNull(nodeOrDoc) {
+    return (/** @type {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>} */
+      (getElementServiceIfAvailableForDoc(nodeOrDoc, 'consentPolicyManager',
+          'amp-consent')));
+  }
+
+  /**
+   * Returns a promise for the geo service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?Object<string,(string|Array<string>)>>}
+   */
+  static geoForDocOrNull(nodeOrDoc) {
+    return /** @type {!Promise<?Object<string,(string|Array<string>)>>} */ (
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'geo', 'amp-geo', true));
+  }
+
+  /**
+   * Returns a promise for the experiment variants or a promise for null if it
+   * is not available on the current page.
    * @param {!Window} win
    * @return {!Promise<?Object<string>>}
    */
@@ -410,11 +488,12 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/video-manager-impl.VideoService}
+   * @return {!./service/video-service-interface.VideoServiceInterface}
    */
   static videoManagerForDoc(nodeOrDoc) {
-    return /** @type {!./service/video-manager-impl.VideoService} */ (
-      getServiceForDoc(nodeOrDoc, 'video-manager'));
+    return (
+      /** @type {!./service/video-service-interface.VideoServiceInterface} */ (
+        getServiceForDoc(nodeOrDoc, 'video-manager')));
   }
 
   /**

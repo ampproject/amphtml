@@ -49,6 +49,10 @@ tags: {  # <amp-ima-video>
       allow_relative: true  # Will be set to false at a future date.
     }
   }
+  attrs: {
+    name: "rotate-to-fullscreen"
+    value_regex: ""
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
   amp_layout: {

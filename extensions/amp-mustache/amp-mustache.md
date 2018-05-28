@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>None</td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-mustache/">annotated amp-mustache</a> example.</td>
   </tr>
 </table>
 
@@ -64,8 +64,8 @@ Then, the Mustache templates can be defined in the `template` tags like this:
 </template>
 ```
 
-How templates are discovered, when they are rendered, how data is provided - all decided by the
-target AMP element that uses this template to render its content.
+How templates are discovered, when they are rendered, how data is provided is  all decided by the
+target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
 
 ## Restrictions
 
@@ -74,8 +74,7 @@ that among other things, you can't use `amp-mustache` to:
 
 - Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
 - Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
-- Output arbitrary HTML using `{{{unescaped}}}`. The output of "triple-mustache" is sanitized to only allow
-formatting tags such as `<b>`, `<i>`, and so on.
+- Output arbitrary HTML using `{{{unescaped}}}`. The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `colgroup`, `code`, `del`, `div`, `em`, `i`, `ins`, `mark`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`.
 
 Notice also that because the body of the template has to be specified within the `template` element, it is
 impossible to specify `{{&var}}` expressions - they will always be escaped as `{{&amp;var}}`. The triple-mustache

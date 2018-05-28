@@ -97,7 +97,7 @@ Here's a simple example that tracks page views.  Every time a page is visible, t
 <script type="application/json">
 {
   "requests": {
-    "pageview": "https://foo.com/pixel?RANDOM",
+    "pageview": "https://foo.com/pixel?RANDOM"
   },
   "triggers": {
     "trackPageview": {
@@ -558,9 +558,9 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 
 ##### Timer trigger
 Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
-  - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
+  - `timerSpec` Specification for triggers of type `timer`. The unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
-    - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
+    - `maxTimerLength` Maximum duration for which the timer will fire, in seconds. The default is 2 hours. When a `stopSpec` is present, but no maxTimerLength is specified, the default will be infinity.
     - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
 ```javascript
@@ -575,6 +575,32 @@ Use the timer trigger (`"on": "timer"`) to fire a request on a regular time inte
   }
 }
 ```
+
+To configure a timer which times user events use:
+  - `startSpec` Specification for triggering when a timer starts. Use the value of `on` and `selector` to track specific events. A config with a `startSpec` but no `stopSpec` will only stop after `maxTimerLength` has been reached.
+  - `stopSpec` Specification for triggering when a timer stops. A config with a `stopSpec` but no `startSpec` will start immediately but only stop on the specified event.
+
+```javascript
+"triggers": {
+  "videoPlayTimer": {
+    "on": "timer",
+    "timerSpec": {
+      "interval": 5,
+      "startSpec": {
+        "on": "video-play",
+        "selector": "amp-video"
+      },
+      "stopSpec": {
+        "on": "video-pause",
+        "selector": "amp-video"
+      }
+    },
+    "request": "videoRequest"
+  }
+}
+```
+
+See the spec on [triggers](#triggers) for details on creating nested timer triggers. Note that using a timer trigger to start or stop a timer is not allowed.
 
 ##### Hidden trigger
 
@@ -624,7 +650,7 @@ indicate which transport methods are acceptable.
 
   - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)  can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
   - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
-  - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request.
+  - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request. To suppress console warnings due to empty responses or request failures, set `"image": {"suppressWarnings": true}`.
   - `iframe` The value is a URL string. Indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration. This option is also only available to MRC-accredited vendors.
 
 If more than one of the above transport methods are enabled, the precedence is `iframe` > `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all four methods above are enabled.
