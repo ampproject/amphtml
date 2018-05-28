@@ -91,12 +91,6 @@ export class Input {
     }
   }
 
-  /** @private */
-  cleanup_() {
-    this.win.document.removeEventListener('keydown', this.boundOnKeyDown_);
-    this.win.document.removeEventListener('mousedown', this.boundOnMouseDown_);
-  }
-
   /**
    * Whether the touch input has been detected.
    * @return {boolean}
@@ -174,7 +168,7 @@ export class Input {
     }
 
     // Ignore inputs.
-    const target = e.target;
+    const {target} = e;
     if (target && (target.tagName == 'INPUT' ||
           target.tagName == 'TEXTAREA' ||
           target.tagName == 'SELECT' ||

@@ -91,7 +91,7 @@ If provided, requires confirming the [amp-user-notification](https://www.ampproj
 
 ##### data-loading-strategy (optional)
 
-Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. You must specify a float value in the range of [0, 3]. By default, the value is 3. Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is used but the value is left blank, then a float value is assigned by the system, which optimizes for viewability without drastically impacting the impressions.
+Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. You must specify a float value in the range of [0, 3]. By default, the value is 3. Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is specified but the value is left blank, the system assigns a float value, which optimizes for viewability without drastically impacting the impressions.  Note, specifying `prefer-viewability-over-views` as the value also automatically optimizes viewability.
 
 ##### common attributes
 
@@ -161,9 +161,11 @@ Enforcing origins can be done with the 3rd argument to `draw3p` and must additio
 
 ### Enhance incoming ad configuration
 
-This is completely optional: It is sometimes desired to further process the incoming iframe configuration before drawing the ad using AMP's built-in system.
+This is completely optional: It is sometimes desired to enhance the ad request before making the ad request to the ad server.
 
-This is supported by passing a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
+If your ad network supports [fast fetch](https://www.ampproject.org/docs/ads/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
+
+If your ad network uses delayed fetch, you can pass a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
 
 Example:
 
@@ -198,6 +200,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Adfox](../../ads/adfox.md)
 - [Ad Generation](../../ads/adgeneration.md)
 - [Adhese](../../ads/adhese.md)
+- [Adincube](../../ads/adincube.md)
 - [ADITION](../../ads/adition.md)
 - [Adman](../../ads/adman.md)
 - [AdmanMedia](../../ads/admanmedia.md)
@@ -268,6 +271,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Kargo](../../ads/kargo.md)
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
+- [Kuadio](../../ads/kuadio.md)
 - [Ligatus](../../ads/ligatus.md)
 - [LockerDome](../../ads/lockerdome.md)
 - [LOKA](../../ads/loka.md)
@@ -281,6 +285,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [MicroAd](../../ads/microad.md)
 - [Mixpo](../../ads/mixpo.md)
 - [Monetizer101](../../ads/monetizer101.md)
+- [myTarget](../../ads/mytarget.md)
 - [myWidget](../../ads/mywidget.md)
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)
@@ -289,9 +294,11 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Nokta](../../ads/nokta.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
+- [Pixels](../../ads/pixels.md)
 - [plista](../../ads/plista.md)
 - [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
+- [PubGuru](../../ads/pubguru.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
 - [PulsePoint](../../ads/pulsepoint.md)
@@ -316,13 +323,17 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Teads](../../ads/teads.md)
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
+- [UZOU](../../ads/uzou.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
 - [Videonow](../../ads/videonow.md)
 - [Viralize](../../ads/viralize.md)
+- [UAS](../../ads/uas.md)
+- [Unruly](../../ads/unruly.md)
 - [VMFive](../../ads/vmfive.md)
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
 - [Widespace](../../ads/widespace.md)
+- [WPMedia](../../ads/wpmedia.md)
 - [Xlift](../../ads/xlift.md)
 - [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)

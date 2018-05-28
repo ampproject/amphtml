@@ -24,7 +24,7 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
  * Returns a CustomEvent with a given type and detail; supports fallback for IE.
  * @param {!Window} win
  * @param {string} type
- * @param {Object} detail
+ * @param {Object|string|undefined} detail
  * @param {EventInit=} opt_eventInit
  * @return {!Event}
  */
@@ -145,7 +145,7 @@ export function loadPromise(eleOrWindow) {
   const loadingPromise = new Promise((resolve, reject) => {
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    const tagName = eleOrWindow.tagName;
+    const {tagName} = eleOrWindow;
     if (tagName === 'AUDIO' || tagName === 'VIDEO') {
       unlistenLoad = listenOnce(eleOrWindow, 'loadstart', resolve);
     } else {

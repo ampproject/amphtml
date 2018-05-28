@@ -26,7 +26,6 @@ require 'net/http'
 require 'percy/capybara'
 require 'capybara'
 require 'selenium/webdriver'
-require 'rspec/retry'
 
 
 ENV['PERCY_DEBUG'] = '0'
@@ -42,8 +41,9 @@ CONFIGS = %w(canary prod)
 AMP_RUNTIME_FILE = 'dist/amp.js'
 AMP_3P_FRAME_FILE = 'dist.3p/current/integration.js'
 BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
-BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
-BUILD_PROCESSING_TIMEOUT_SECS = 60 * 10
+BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5 # Poll every 5 seconds
+BUILD_PROCESSING_PROGRESS_POLLS = 12 # Print a message every minute
+BUILD_PROCESSING_TIMEOUT_SECS = 60 * 10 # Wait for up to 10 minutes
 PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds'
 OUT = ENV['TRAVIS'] ? '/dev/null' : :out
 
@@ -150,6 +150,11 @@ def wait_for_build_completion(build_id)
       (status = get_build_status(build_id))['state'])
     sleep(BUILD_PROCESSING_POLLING_INTERVAL_SECS)
     tries += 1
+    if tries % BUILD_PROCESSING_PROGRESS_POLLS == 0
+      log('info',
+          'Still waiting for Percy build ' + cyan("#{build_id}") +
+          ' to be processed...')
+    end
     break if tries > (
         BUILD_PROCESSING_TIMEOUT_SECS / BUILD_PROCESSING_POLLING_INTERVAL_SECS)
   end

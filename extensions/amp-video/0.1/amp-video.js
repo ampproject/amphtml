@@ -22,7 +22,6 @@ import {assertHttpsUrl, isProxyOrigin} from '../../../src/url';
 import {
   childElementByTag,
   childElementsByTag,
-  closestByTag,
   elementByTag,
   fullscreenEnter,
   fullscreenExit,
@@ -89,9 +88,6 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
-
-    /** @private @const {boolean} */
-    this.isStoryVideo_ = !!closestByTag(this.element, 'amp-story');
   }
 
   /**
@@ -205,11 +201,7 @@ class AmpVideo extends AMP.BaseElement {
 
     installVideoManagerForDoc(this.element);
 
-    // amp-story coordinates playback based on page activation, as opposed to
-    // visibility.
-    // TODO(alanorozco, #12712): amp-story should coordinate resumeCallback.
-    Services.videoManagerForDoc(this.element).register(this,
-        /* manageAutoplay */ !this.isStoryVideo_);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
@@ -555,6 +547,11 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     return this.video_.currentTime;
   }
@@ -567,8 +564,8 @@ class AmpVideo extends AMP.BaseElement {
   /** @override */
   getPlayedRanges() {
     // TODO(cvializ): remove this because it can be inferred by other events
-    const played = this.video_.played;
-    const length = played.length;
+    const {played} = this.video_;
+    const {length} = played;
     const ranges = [];
     for (let i = 0; i < length; i++) {
       ranges.push([played.start(i), played.end(i)]);

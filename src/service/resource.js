@@ -15,12 +15,15 @@
  */
 
 import {AmpEvents} from '../amp-events';
+import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
+import {isBlockedByConsent} from '../error';
 import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
+  layoutRectSizeEquals,
   layoutRectsOverlap,
   moveLayoutRect,
 } from '../layout-rect';
@@ -194,13 +197,13 @@ export class Resource {
     /** @private {boolean} */
     this.loadedOnce_ = false;
 
-    /** @private {?Function} */
-    this.loadPromiseResolve_ = null;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise} */
-    this.loadPromise_ = new Promise(resolve => {
-      this.loadPromiseResolve_ = resolve;
-    });
+    this.loadPromise_ = deferred.promise;
+
+    /** @private {?Function} */
+    this.loadPromiseResolve_ = deferred.resolve;
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.hostWin, 'layers');
@@ -327,7 +330,9 @@ export class Resource {
       // in PROD.
       this.element.dispatchCustomEvent(AmpEvents.BUILT);
     }, reason => {
-      dev().error(TAG, 'failed to build:', this.debugid, reason);
+      if (!isBlockedByConsent(reason)) {
+        dev().error(TAG, 'failed to build:', this.debugid, reason);
+      }
       this.isBuilding_ = false;
       this.element.signals().rejectSignal('res-built', reason);
       throw reason;
@@ -360,8 +365,7 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined}
-   *     requestedMargins
+   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} requestedMargins
    */
   overflowCallback(overflown, requestedHeight, requestedWidth,
     requestedMargins) {
@@ -427,11 +431,9 @@ export class Resource {
     const box = this.getPageLayoutBox();
 
     // Note that "left" doesn't affect readiness for the layout.
+    const sizeChanges = !layoutRectSizeEquals(oldBox, box);
     if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top ||
-          oldBox.width != box.width ||
-          oldBox.height != box.height) {
-
+          oldBox.top != box.top || sizeChanges) {
       if (this.element.isUpgraded() &&
               this.state_ != ResourceState.NOT_BUILT &&
               (this.state_ == ResourceState.NOT_LAID_OUT ||
@@ -444,7 +446,7 @@ export class Resource {
       this.initialLayoutBox_ = box;
     }
 
-    this.element.updateLayoutBox(box);
+    this.element.updateLayoutBox(box, sizeChanges);
   }
 
   measureViaResources_() {
@@ -455,8 +457,8 @@ export class Resource {
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
     if (viewport.supportsPositionFixed() && this.isDisplayed()) {
-      const win = this.resources_.win;
-      const body = win.document.body;
+      const {win} = this.resources_;
+      const {body} = win.document;
       for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {
         if (n.isAlwaysFixed && n.isAlwaysFixed()) {
           isFixed = true;
@@ -654,9 +656,9 @@ export class Resource {
     if (this.renderOutsideViewportPromise_) {
       return this.renderOutsideViewportPromise_;
     }
-    return this.renderOutsideViewportPromise_ = new Promise(resolver => {
-      this.renderOutsideViewportResolve_ = resolver;
-    });
+    const deferred = new Deferred();
+    this.renderOutsideViewportResolve_ = deferred.resolve;
+    return this.renderOutsideViewportPromise_ = deferred.promise;
   }
 
   /**
@@ -683,29 +685,26 @@ export class Resource {
     if (multiplier === true || multiplier === false) {
       return multiplier;
     }
+    multiplier = Math.max(multiplier, 0);
+
+    if (this.useLayers_) {
+      const {element} = this;
+      return element.getLayers().iterateAncestry(element,
+          this.layersDistanceRatio_);
+    }
 
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewportBox = this.resources_.getViewport().getRect();
     const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
-    multiplier = Math.max(multiplier, 0);
     let scrollPenalty = 1;
     let distance = 0;
 
-    // TODO(jridgewell): Switch all viewport distance calculations to use
-    // Layer's definition of ancestry layer viewports.
-
-    if (this.useLayers_) {
-      distance += Math.max(0,
-          layoutBox.left - viewportBox.right,
-          viewportBox.left - layoutBox.right);
-    } else {
-      if (viewportBox.right < layoutBox.left ||
-          viewportBox.left > layoutBox.right) {
-        // If outside of viewport's x-axis, element is not in viewport.
-        return false;
-      }
+    if (viewportBox.right < layoutBox.left ||
+        viewportBox.left > layoutBox.right) {
+      // If outside of viewport's x-axis, element is not in viewport.
+      return false;
     }
 
     if (viewportBox.bottom < layoutBox.top) {
@@ -729,6 +728,24 @@ export class Resource {
       return true;
     }
     return distance < viewportBox.height * multiplier / scrollPenalty;
+  }
+
+  /**
+   * Calculates the layout's viewport distance ratio, using an iterative
+   * calculation based on tree depth and number of layer scrolls it would take
+   * to view the element.
+   *
+   * @param {number} currentScore
+   * @param {!./layers-impl.LayoutElement} layout
+   * @param {number} depth
+   * @return {number}
+   */
+  layersDistanceRatio_(currentScore, layout, depth) {
+    const depthPenalty = 1 + (depth / 10);
+    const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
+    const distance = layout.getHorizontalViewportsFromParent() +
+        layout.getVerticalViewportsFromParent();
+    return currentScore + (nonActivePenalty * depthPenalty * distance);
   }
 
   /**
@@ -915,8 +932,8 @@ export class Resource {
 
   /**
    * Returns the task ID for this resource.
-   * @param localId
-   * @returns {string}
+   * @param {string} localId
+   * @return {string}
    */
   getTaskId(localId) {
     return this.debugid + '#' + localId;

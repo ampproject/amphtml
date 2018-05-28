@@ -27,12 +27,13 @@ import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
+import {LayoutPriority} from '../../../src/layout';
 import {
   RequestHandler,
   expandConfigRequest,
 } from './requests';
 import {Services} from '../../../src/services';
-import {appendEncodedParamStringToUrl, assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
@@ -56,7 +57,6 @@ const WHITELIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.HIDDEN,
 ];
 
-
 export class AmpAnalytics extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -77,12 +77,6 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {?string}
      */
     this.consentNotificationId_ = null;
-
-    /**
-     * @private {?string} Predefined type associated with the tag. If specified,
-     * the config from the predefined type is merged with the inline config
-     */
-    this.type_ = null;
 
     /** @private {boolean} */
     this.isSandbox_ = false;
@@ -122,12 +116,19 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
+
+    /**
+     * Maximum time (since epoch) to report resource timing metrics.
+     * We stop reporting after 1 minute.
+     * @private @const {number}
+     */
+    this.maxResourceTimingReportingTime_ = Date.now() + 60 * 1000;
   }
 
   /** @override */
   getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? 0 : 1;
+    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
   }
 
   /** @override */
@@ -221,18 +222,17 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
             })
-            .then(this.onFetchRemoteConfigSuccess_.bind(this));
+            .then(this.processConfigs_.bind(this))
+            .then(this.registerTriggers_.bind(this));
     return this.iniPromise_;
   }
 
   /**
-   * Handle successful fetching of (possibly) remote config.
+   * Registers triggers.
    * @return {!Promise|undefined}
    * @private
    */
-  onFetchRemoteConfigSuccess_() {
-    this.config_ = this.mergeConfigs_();
-
+  registerTriggers_() {
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
       const TAG = this.getName_();
@@ -348,7 +348,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {string} url
    * @param {string=} opt_preloadAs
-   * @VisibleForTesting
+   * @visibleForTesting
    */
   preload(url, opt_preloadAs) {
     this.preconnect.preload(url, opt_preloadAs);
@@ -357,8 +357,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * Gets the resourceID of the parent amp-ad element.
    * Throws an exception if no such element.
-   * @returns {string}
-   * @VisibleForTesting
+   * @return {string}
+   * @visibleForTesting
    */
   assertAmpAdResourceId() {
     return user().assertString(
@@ -424,6 +424,56 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+   * Returns a promise that resolves when configuration is re-written if
+   * configRewriter is configured by a vendor.
+   *
+   * @private
+   * @return {!Promise<undefined>}
+   */
+  processConfigs_() {
+    const configRewriterUrl = this.getConfigRewriter_()['url'];
+
+    const config = dict({});
+    const inlineConfig = this.getInlineConfigNoInline();
+    this.validateTransport_(inlineConfig);
+    this.mergeObjects_(inlineConfig, config);
+    this.mergeObjects_(this.remoteConfig_, config);
+
+    if (!configRewriterUrl || this.isSandbox_) {
+      this.config_ = this.mergeConfigs_(config);
+      // use default configuration merge.
+      return Promise.resolve();
+    }
+
+    assertHttpsUrl(configRewriterUrl, this.element);
+    const TAG = this.getName_();
+    dev().fine(TAG, 'Rewriting config', configRewriterUrl);
+
+    const fetchConfig = {
+      method: 'POST',
+      body: config,
+      requireAmpResponseSourceOrigin: false,
+    };
+    if (this.element.hasAttribute('data-credentials')) {
+      fetchConfig.credentials = this.element.getAttribute('data-credentials');
+    }
+    const ampdoc = this.getAmpDoc();
+    return Services.urlReplacementsForDoc(this.element)
+        .expandUrlAsync(configRewriterUrl)
+        .then(expandedUrl => {
+          return Services.xhrFor(ampdoc.win).fetchJson(
+              expandedUrl, fetchConfig);
+        })
+        .then(res => res.json())
+        .then(jsonValue => {
+          this.config_ = this.mergeConfigs_(jsonValue);
+          dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
+        }, err => {
+          this.user().error(TAG,
+              'Error rewriting configuration: ', configRewriterUrl, err);
+        });
+  }
+  /**
    * Returns a promise that resolves when remote config is ready (or
    * immediately if no remote config is specified.)
    * @private
@@ -471,19 +521,37 @@ export class AmpAnalytics extends AMP.BaseElement {
    * - Default config: Built-in config shared by all amp-analytics tags.
    *
    * @private
+   * @param {!JsonObject} rewrittenConfig
    * @return {!JsonObject}
    */
-  mergeConfigs_() {
-    const inlineConfig = expandConfigRequest(this.getInlineConfigNoInline());
+  mergeConfigs_(rewrittenConfig) {
     // Initialize config with analytics related vars.
     const config = dict({
       'vars': {
         'requestCount': 0,
       },
     });
-    const defaultConfig =
-        expandConfigRequest(this.predefinedConfig_['default'] || {});
+    const defaultConfig = this.predefinedConfig_['default'] || {};
+    this.mergeObjects_(expandConfigRequest(defaultConfig), config);
+    this.mergeObjects_(expandConfigRequest(this.getTypeConfig_()), config,
+        /* predefined */ true);
+    this.mergeObjects_(expandConfigRequest(rewrittenConfig), config);
+    return config;
+  }
 
+  /**
+   * Reads configRewriter from a vendor config.
+   * @return {!JsonObject}
+   */
+  getConfigRewriter_() {
+    return this.getTypeConfig_()['configRewriter'] || {};
+  }
+
+  /**
+   * Reads a vendor configuration.
+   * @return {!JsonObject}
+   */
+  getTypeConfig_() {
     const type = this.element.getAttribute('type');
     if (type == 'googleanalytics-alpha') {
       const TAG = this.getName_();
@@ -492,9 +560,18 @@ export class AmpAnalytics extends AMP.BaseElement {
           'amp-analytics config attribute unless you plan to migrate before ' +
           'deprecation');
     }
-    const typeConfig = expandConfigRequest(this.predefinedConfig_[type] || {});
+    return this.predefinedConfig_[type] || {};
+  }
+
+  /**
+   * Validates transport configuration.
+   * @param {!JsonObject} inlineConfig
+   */
+  validateTransport_(inlineConfig) {
+    const type = this.element.getAttribute('type');
     if (this.predefinedConfig_[type]) {
-      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
+      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport
+      // overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
         const TAG = this.getName_();
         this.user().error(TAG, 'Inline or remote config should not ' +
@@ -517,14 +594,6 @@ export class AmpAnalytics extends AMP.BaseElement {
           'specify transport iframe');
       this.remoteConfig_['transport']['iframe'] = undefined;
     }
-
-    this.remoteConfig_ = expandConfigRequest(this.remoteConfig_);
-
-    this.mergeObjects_(defaultConfig, config);
-    this.mergeObjects_(typeConfig, config, /* predefined */ true);
-    this.mergeObjects_(inlineConfig, config);
-    this.mergeObjects_(this.remoteConfig_, config);
-    return config;
   }
 
   /**
@@ -539,7 +608,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     let inlineConfig = {};
     const TAG = this.getName_();
     try {
-      const children = this.element.children;
+      const {children} = this.element;
       if (children.length == 1) {
         const child = children[0];
         if (isJsonScriptTag(child)) {
@@ -692,21 +761,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     const dynamicBindings = {};
     const resourceTimingSpec = trigger['resourceTimingSpec'];
     if (resourceTimingSpec) {
-      const on = trigger['on'];
-      if (on == 'ini-load') {
+      // Check if we're done reporting resource timing metrics before binding
+      // before binding the resource timing variable.
+      if (!resourceTimingSpec['done'] &&
+          Date.now() < this.maxResourceTimingReportingTime_) {
         const binding = 'RESOURCE_TIMING';
         const analyticsVar = 'resourceTiming';
-        // TODO(warrengm): Consider limiting resource timings to avoid
-        // duplicates by excluding timings that were previously reported.
         dynamicBindings[binding] =
-            serializeResourceTiming(resourceTimingSpec, this.win);
+            serializeResourceTiming(this.win, resourceTimingSpec);
         expansionOptions.vars[analyticsVar] = binding;
-      } else {
-        // TODO(warrengm): Instead of limiting resource timing to ini-load,
-        // analytics should have throttling or de-dupe timings that have already
-        // been reported.
-        user().warn(
-            TAG, 'resource timing is only allowed on ini-load triggers');
       }
     }
     return dynamicBindings;
@@ -781,11 +844,13 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Checks result of 'enabled' spec evaluation. Returns false if spec is provided and value
-   * resolves to a falsey value (empty string, 0, false, null, NaN or undefined).
+   * Checks result of 'enabled' spec evaluation. Returns false if spec is
+   * provided and value resolves to a falsey value (empty string, 0, false,
+   * null, NaN or undefined).
    * @param {string} spec Expression that will be evaluated.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
-   * @return {!Promise<boolean>} False only if spec is provided and value is falsey.
+   * @return {!Promise<boolean>} False only if spec is provided and value is
+   * falsey.
    * @private
    */
   checkSpecEnabled_(spec, expansionOptions) {
@@ -802,7 +867,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Expands spec using provided expansion options and applies url replacement if necessary.
+   * Expands spec using provided expansion options and applies url replacement
+   * if necessary.
    * @param {string} spec Expression that needs to be expanded.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<string>} expanded spec.
@@ -812,34 +878,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
             this.element).expandUrlAsync(key));
-  }
-
-  /**
-   * Adds parameters to URL. Similar to the function defined in url.js but with
-   * a different encoding method.
-   * @param {string} request
-   * @param {!Object<string, string>} params
-   * @return {string}
-   * @private
-   */
-  addParamsToUrl_(request, params) {
-    const s = [];
-    for (const k in params) {
-      const v = params[k];
-      if (v == null) {
-        continue;
-      } else {
-        const sv = this.variableService_.encodeVars(k, v);
-        s.push(`${encodeURIComponent(k)}=${sv}`);
-      }
-    }
-
-    const paramString = s.join('&');
-    if (request.indexOf('${extraUrlParams}') >= 0) {
-      return request.replace('${extraUrlParams}', paramString);
-    } else {
-      return appendEncodedParamStringToUrl(request, paramString);
-    }
   }
 
   /**

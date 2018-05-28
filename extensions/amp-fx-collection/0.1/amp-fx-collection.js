@@ -15,7 +15,8 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
-import {ParallaxProvider} from './providers/parallax';
+import {FxProvider} from './providers/fx-provider';
+import {Presets} from './providers/amp-fx-presets';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {iterateCursor} from '../../../src/dom';
@@ -30,21 +31,20 @@ const TAG = 'amp-fx-collection';
  */
 const FxType = {
   PARALLAX: 'parallax',
+  FADE_IN: 'fade-in',
+  FADE_IN_SCROLL: 'fade-in-scroll',
+  FLY_IN_BOTTOM: 'fly-in-bottom',
+  FLY_IN_LEFT: 'fly-in-left',
+  FLY_IN_RIGHT: 'fly-in-right',
+  FLY_IN_TOP: 'fly-in-top',
 };
-
-/**
- * Map of fx type to fx provider class.
- * @type {Object<FxType, function(new:FxProviderInterface, !../../../src/service/ampdoc-impl.AmpDoc)>}
- */
-const fxProviders = map({
-  [FxType.PARALLAX]: ParallaxProvider,
-});
 
 /**
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
  * the specified effects on them.
+ * @visibleForTesting
  */
-class AmpFxCollection {
+export class AmpFxCollection {
 
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -63,7 +63,7 @@ class AmpFxCollection {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {!Object<FxType, FxProviderInterface>} */
+    /** @private @const {!Object<FxType, FxProvider>} */
     this.fxProviderInstances_ = map();
 
     Promise.all([
@@ -121,7 +121,7 @@ class AmpFxCollection {
    * e.g. `amp-fx="parallax fade-in"
    *
    * @param {!Element} fxElement
-   * @returns {!Array<!FxType>}
+   * @return {!Array<!FxType>}
    */
   getFxTypes_(fxElement) {
     dev().assert(fxElement.hasAttribute('amp-fx'));
@@ -134,6 +134,7 @@ class AmpFxCollection {
 
     // Validate that we support the requested fx types.
     fxTypes.forEach(fxType => {
+      Presets[fxType].isFxTypeSupported(this.ampdoc_.win);
       user().assertEnumValue(FxType, fxType, 'amp-fx');
     });
 
@@ -146,32 +147,12 @@ class AmpFxCollection {
    * @param {FxType} fxType
    */
   getFxProvider_(fxType) {
-    dev().assert(fxProviders[fxType],
-        `No provider for ${fxType} found, did you forget to register it?`);
-
     if (!this.fxProviderInstances_[fxType]) {
-      this.fxProviderInstances_[fxType] = new fxProviders[fxType](this.ampdoc_);
+      this.fxProviderInstances_[fxType] =
+        new FxProvider(this.ampdoc_, fxType);
     }
     return this.fxProviderInstances_[fxType];
   }
-}
-
-/**
- * Defines the expected interface all FxProviders need to implement.
- * @interface
- */
-export class FxProviderInterface {
-
-  /**
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpDoc
-   */
-  constructor(unusedAmpDoc) {}
-
-  /**
-   *
-   * @param {!Element} unusedElement
-   */
-  installOn(unusedElement) {}
 }
 
 AMP.extension(TAG, '0.1', AMP => {

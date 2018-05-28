@@ -26,6 +26,7 @@ const bodyParser = require('body-parser');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
+const multer = require('multer');
 const path = require('path');
 const request = require('request');
 const pc = process;
@@ -199,6 +200,17 @@ app.use('/form/json/poll1', (req, res) => {
   });
 });
 
+const upload = multer();
+
+app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
+  assertCors(req, res, ['POST']);
+
+  const fileData = req.files['myFile'][0];
+  const contents = fileData.buffer.toString();
+
+  res.json({message: contents});
+});
+
 app.use('/form/search-html/get', (req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.end(`
@@ -316,8 +328,10 @@ function proxyToAmpProxy(req, res, mode) {
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'] == '1';
+    // TODO(ccordry): Remove this when story v01 is depricated.
+    const storyV1 = req.query['story_v'] === '1';
     const urlPrefix = getUrlPrefix(req);
-    body = replaceUrls(mode, body, urlPrefix, inabox);
+    body = replaceUrls(mode, body, urlPrefix, inabox, storyV1);
     if (inabox) {
       // Allow CORS requests for A4A.
       const origin = req.headers.origin || urlPrefix;
@@ -551,8 +565,18 @@ app.use('/impression-proxy/', (req, res) => {
 app.post('/get-consent-v1/', (req, res) => {
   assertCors(req, res, ['POST']);
   const body = {
-    'consentRequired': true,
+    'promptIfUnknown': true,
+    'sharedData': {
+      'tfua': true,
+      'coppa': true,
+    },
   };
+  res.json(body);
+});
+
+app.post('/get-consent-no-prompt/', (req, res) => {
+  assertCors(req, res, ['POST']);
+  const body = {};
   res.json(body);
 });
 
@@ -605,7 +629,7 @@ app.get('/a4a_template/*', (req, res) => {
 // Example:
 // http://localhost:8000/iframe-echo-message?message=${payload}
 app.get('/iframe-echo-message', (req, res) => {
-  const message = req.query.message;
+  const {message} = req.query;
   res.send(
       `<!doctype html>
         <body style="background-color: yellow">
@@ -691,9 +715,10 @@ app.use(['/examples/*', '/extensions/*'], (req, res, next) => {
 });
 
 /**
- * Append ?sleep=5 to any included JS file in examples to emulate delay in loading that
- * file. This allows you to test issues with your extension being late to load
- * and testing user interaction with your element before your code loads.
+ * Append ?sleep=5 to any included JS file in examples to emulate delay in
+ * loading that file. This allows you to test issues with your extension being
+ * late to load and testing user interaction with your element before your code
+ * loads.
  *
  * Example delay loading amp-form script by 5 seconds:
  * <script async custom-element="amp-form"
@@ -873,8 +898,11 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
     source: 'local' + req.params.id,
-    products: ['scenic-2017.appspot.com:news',
-      'scenic-2017.appspot.com:product2'],
+    granted: true,
+    grantedReason: 'NOT_SUBSCRIBED',
+    data: {
+      login: true,
+    },
   });
 });
 
@@ -1053,10 +1081,17 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
  * @param {string} file
  * @param {string=} hostName
  * @param {boolean=} inabox
+ * @param {boolean=} storyV1
  */
-function replaceUrls(mode, file, hostName, inabox) {
+function replaceUrls(mode, file, hostName, inabox, storyV1) {
   hostName = hostName || '';
   if (mode == 'default') {
+    // TODO:(ccordry) remove this when story 0.1 is deprecated
+    if (storyV1) {
+      file = file.replace(
+          /https:\/\/cdn\.ampproject\.org\/v0\/amp-story-0\.1\.js/g,
+          hostName + '/dist/v0/amp-story-1.0.max.js');
+    }
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/amp.js');

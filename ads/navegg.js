@@ -23,7 +23,7 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function navegg(global, data) {
   validateData(data, ['acc']);
-  const acc = data.acc;
+  const {acc} = data;
   let seg, nvg = function() {};
   delete data.acc;
   nvg.prototype.getProfile = function() {};

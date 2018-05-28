@@ -23,7 +23,8 @@
 import {Services} from './services';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
-import {parseUrl} from './url';
+import {htmlFor} from './static-template';
+import {parseUrlDeprecated} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -99,7 +100,7 @@ class PreconnectService {
     /** @private @const {!./service/platform-impl.Platform}  */
     this.platform_ = Services.platformFor(win);
     // Mark current origin as preconnected.
-    this.origins_[parseUrl(win.location.href).origin] = true;
+    this.origins_[parseUrlDeprecated(win.location.href).origin] = true;
 
     /**
      * Detect support for the given resource hints.
@@ -149,12 +150,12 @@ class PreconnectService {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
-    const origin = parseUrl(url).origin;
+    const {origin} = parseUrlDeprecated(url);
     const now = Date.now();
     const lastPreconnectTimeout = this.origins_[origin];
     if (lastPreconnectTimeout && now < lastPreconnectTimeout) {
       if (opt_alsoConnecting) {
-        this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS ;
+        this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS;
       }
       return;
     }
@@ -226,10 +227,9 @@ class PreconnectService {
   }
 
   performPreload_(url) {
-    const preload = this.document_.createElement('link');
-    preload.setAttribute('rel', 'preload');
+    const preload = htmlFor(this.document_)`
+        <link rel="preload" referrerpolicy="origin" />`;
     preload.setAttribute('href', url);
-    preload.setAttribute('referrerpolicy', 'origin');
     // Do not set 'as' attribute to correct value for now, for 2 reasons
     // - document value is not yet supported and dropped
     // - script is blocked due to CSP.

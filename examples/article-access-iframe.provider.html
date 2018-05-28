@@ -2,7 +2,7 @@
 <html>
 <head>
   <!-- Currently a sync script. -->
-  <script src="/dist.3p/current/amp-iframe-api-export.js"></script>
+  <script src="/extensions/amp-access/0.1/iframe-api/build/index.js"></script>
   <script>
     function log() {
       if (!console || !console.log) {
@@ -21,7 +21,11 @@
     };
     Controller.prototype.authorize = function() {
       log('authorize');
-      return {granted: true};
+      // This is the JSON expected in the article-access-iframe.amp.html.
+      return Promise.resolve({
+        views: 3,
+        maxViews: 5
+      });
     };
     Controller.prototype.pingback = function() {
       log('pingback');

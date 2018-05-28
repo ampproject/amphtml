@@ -15,6 +15,7 @@
  */
 
 import './access-vendor';
+import {Deferred} from '../../../src/utils/promise';
 import {dev, user} from '../../../src/log';
 
 /** @const {string} */
@@ -42,19 +43,19 @@ export class AccessVendorAdapter {
     this.vendorName_ = user().assert(configJson['vendor'],
         '"vendor" name must be specified');
 
-    /** @const @private {JsonObject} */
-    this.vendorConfig_ = configJson[this.vendorName_];
+    /** @const @private {!JsonObject} */
+    this.vendorConfig_ = configJson[this.vendorName_] || {};
 
     /** @const @private {boolean} */
     this.isPingbackEnabled_ = !configJson['noPingback'];
 
-    /** @private {?function(!./access-vendor.AccessVendor)} */
-    this.vendorResolve_ = null;
+    const deferred = new Deferred();
 
     /** @const @private {!Promise<!./access-vendor.AccessVendor>} */
-    this.vendorPromise_ = new Promise(resolve => {
-      this.vendorResolve_ = resolve;
-    });
+    this.vendorPromise_ = deferred.promise;
+
+    /** @private {?function(!./access-vendor.AccessVendor)} */
+    this.vendorResolve_ = deferred.resolve;
   }
 
   /** @return {string} */
@@ -100,5 +101,10 @@ export class AccessVendorAdapter {
     return this.vendorPromise_.then(vendor => {
       return vendor.pingback();
     });
+  }
+
+  /** @override */
+  postAction() {
+    // TODO(dvoytenko): delegate to vendor adapter.
   }
 }

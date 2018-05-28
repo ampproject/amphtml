@@ -19,6 +19,11 @@ import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {
+  escapeCssSelectorIdent,
+  scopedQuerySelector,
+  whenUpgradedToCustomElement,
+} from '../../../src/dom';
 import {getBinaryType} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -28,7 +33,6 @@ import {
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
-import {parseUrl} from '../../../src/url';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -91,6 +95,9 @@ export let NameframeExperimentConfig;
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
+/** @const {Object} */
+const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+
 /**
  * Returns the value of navigation start using the performance API or 0 if not
  * supported by the browser.
@@ -111,21 +118,18 @@ function getNavStart(win) {
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
- * @returns {boolean}  Whether Google Ads should attempt to render via the A4A
+ * @return {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  const googleCdnProxyRegex =
-        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return supportsNativeCrypto(win) && (
-    !!googleCdnProxyRegex.test(win.location.origin) ||
-        getMode(win).localDev || getMode(win).test);
+    !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test);
 }
 
 /**
  * Checks whether native crypto is supported for win.
  * @param {!Window} win  Host window for the ad.
- * @returns {boolean} Whether native crypto is supported.
+ * @return {boolean} Whether native crypto is supported.
  */
 export function supportsNativeCrypto(win) {
   return win.crypto && (win.crypto.subtle || win.crypto.webkitSubtle);
@@ -147,7 +151,7 @@ export function isReportingEnabled(ampElement) {
   // If any of those fail, we use the `BaseLifecycleReporter`, which is a
   // a no-op (sends no pings).
   const type = ampElement.element.getAttribute('type');
-  const win = ampElement.win;
+  const {win} = ampElement;
   const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
@@ -167,8 +171,7 @@ export function isReportingEnabled(ampElement) {
  * @return {!Object<string,null|number|string>} block level parameters
  */
 export function googleBlockParameters(a4a, opt_experimentIds) {
-  const adElement = a4a.element;
-  const win = a4a.win;
+  const {element: adElement, win} = a4a;
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
@@ -194,17 +197,46 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {
+  // Look for amp-ad elements of correct type or those contained within
+  // standard container type.  Note that display none containers will not be
+  // included as they will never be measured.
+  // TODO(keithwrightbos): what about slots that become measured due to removal
+  // of display none (e.g. user resizes viewport and media selector makes
+  // visible).
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
-      r => r.element.tagName == 'AMP-AD' &&
-        r.element.getAttribute('type') == type)
-      .then(resources => {
-        const result = {};
-        resources.forEach(r => {
-          const groupId = groupFn(r.element);
-          (result[groupId] || (result[groupId] = [])).push(r.element.getImpl());
-        });
+      r => {
+        const isAmpAdType = r.element.tagName == 'AMP-AD' &&
+          r.element.getAttribute('type') == type;
+        if (isAmpAdType) {
+          return true;
+        }
+        const isAmpAdContainerElement =
+          Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
+          !!scopedQuerySelector(
+              r.element, escapeCssSelectorIdent(`amp-ad[type=${type}]`));
+        return isAmpAdContainerElement;
+      })
+      // Need to wait on any contained element resolution followed by build
+      // of child ad.
+      .then(resources => Promise.all(resources.map(
+          resource => {
+            if (resource.element.tagName == 'AMP-AD') {
+              return resource.element;
+            }
+            // Must be container element so need to wait for child amp-ad to
+            // be upgraded.
+            return whenUpgradedToCustomElement(
+                dev().assertElement(
+                    scopedQuerySelector(
+                        resource.element,
+                        escapeCssSelectorIdent(`amp-ad[type=${type}]`))));
+          })))
+      // Group by networkId.
+      .then(elements => elements.reduce((result, element) => {
+        const groupId = groupFn(element);
+        (result[groupId] || (result[groupId] = [])).push(element.getImpl());
         return result;
-      });
+      }, {}));
 }
 
 /**
@@ -223,13 +255,12 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
-        const screen = win.screen;
+        const {screen} = win;
         const viewport = Services.viewportForDoc(nodeOrDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
         const visibilityState = Services.viewerForDoc(nodeOrDoc)
             .getVisibilityState();
-        const art = getBinaryTypeNumericalCode(getBinaryType(win));
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
@@ -249,12 +280,13 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'u_his': getHistoryLength(win),
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
-          'art': art == '0' ? null : art,
+          'art': getAmpRuntimeTypeParameter(win),
           'vis': visibilityStateCodes[visibilityState] || '0',
           'scr_x': viewport.getScrollLeft(),
           'scr_y': viewport.getScrollTop(),
+          'bc': getBrowserCapabilitiesBitmap(win) || null,
           'debug_experiment_id':
-              (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
+              (/(?:#|,)deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
@@ -326,13 +358,22 @@ function getHistoryLength(win) {
 }
 
 /**
+ * @param {string} url
+ * @return {string} hostname portion of url
+ * @visibleForTesting
+ */
+export function extractHost(url) {
+  return (/^(?:https?:\/\/)?([^\/\?:]+)/i.exec(url) || [])[1] || url;
+}
+
+/**
  * @param {!Window} win
  * @return {?string}
  */
 function topWindowUrlOrDomain(win) {
-  const ancestorOrigins = win.location.ancestorOrigins;
+  const {ancestorOrigins} = win.location;
   if (ancestorOrigins) {
-    const origin = win.location.origin;
+    const {origin} = win.location;
     const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
     if (origin == topOrigin) {
       return win.top.location.hostname;
@@ -340,16 +381,16 @@ function topWindowUrlOrDomain(win) {
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
+      return extractHost(secondFromTop./*OK*/document.referrer);
     }
-    return parseUrl(topOrigin).hostname;
+    return extractHost(topOrigin);
   } else {
     try {
       return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
+      return extractHost(secondFromTop./*OK*/document.referrer);
     } catch (e) {}
     return null;
   }
@@ -592,7 +633,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
  *     integer (base 10) experiment IDs.
  * @param {?string} currentIdString  If present, a string containing a
  *   comma-separated list of integer experiment IDs.
- * @returns {string}  New experiment list string, including newId iff it is
+ * @return {string}  New experiment list string, including newId iff it is
  *   a valid (integer) experiment ID.
  * @see parseExperimentIds, validateExperimentIds
  */
@@ -757,10 +798,8 @@ function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
         const token = obj['newToken'];
         const jar = obj['1p_jar'] || '';
         const pucrd = obj['pucrd'] || '';
-        const freshLifetimeSecs =
-            parseInt(obj['freshLifetimeSecs'] || '', 10) || 3600;
-        const validLifetimeSecs =
-            parseInt(obj['validLifetimeSecs'] || '', 10) || 86400;
+        const freshLifetimeSecs = parseInt(obj['freshLifetimeSecs'] || '', 10);
+        const validLifetimeSecs = parseInt(obj['validLifetimeSecs'] || '', 10);
         const altDomain = obj['altDomain'];
         const fetchTimeMs = Date.now() - startTime;
         if (IDENTITY_DOMAIN_REGEXP_.test(altDomain)) {
@@ -799,7 +838,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   }
   domain = domain || '.google.com';
   const canonical =
-    parseUrl(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl).hostname;
+    extractHost(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl);
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 
@@ -809,9 +848,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
  * @return {boolean}
  */
 export function isCdnProxy(win) {
-  const googleCdnProxyRegex =
-    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-  return googleCdnProxyRegex.test(win.location.origin);
+  return CDN_PROXY_REGEXP.test(win.location.origin);
 }
 
 /**
@@ -828,4 +865,52 @@ export function setNameframeExperimentConfigs(headers, nameframeConfig) {
       }
     });
   }
+}
+
+/**
+ * Enum for browser capabilities. NOTE: Since JS is 32-bit, do not add anymore
+ * than 32 capabilities to this enum.
+ * @enum {number}
+ */
+const Capability = {
+  SVG_SUPPORTED: 1 << 0,
+  SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED: 1 << 1,
+  SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED: 1 << 2,
+};
+
+/**
+ * Returns a bitmap representing what features are supported by this browser.
+ * @param {!Window} win
+ * @return {number}
+ */
+function getBrowserCapabilitiesBitmap(win) {
+  let browserCapabilities = 0;
+  const doc = win.document;
+  if (win.SVGElement && doc.createElementNS) {
+    browserCapabilities |= Capability.SVG_SUPPORTED;
+  }
+  const iframeEl = doc.createElement('iframe');
+  if (iframeEl.sandbox && iframeEl.sandbox.supports) {
+    if (iframeEl.sandbox.supports('allow-top-navigation-by-user-activation')) {
+      browserCapabilities |=
+        Capability.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
+    }
+    if (iframeEl.sandbox.supports('allow-popups-to-escape-sandbox')) {
+      browserCapabilities |=
+        Capability.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
+    }
+  }
+  return browserCapabilities;
+}
+
+/**
+ * Returns an enum value representing the AMP binary type, or null if this is a
+ * canonical page.
+ * @param {!Window} win
+ * @return {?string} The binary type enum.
+ * @visibleForTesting
+ */
+export function getAmpRuntimeTypeParameter(win) {
+  const art = getBinaryTypeNumericalCode(getBinaryType(win));
+  return isCdnProxy(win) && art != '0' ? art : null;
 }

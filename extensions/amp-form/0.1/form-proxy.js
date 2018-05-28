@@ -15,7 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {startsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
@@ -176,8 +176,7 @@ function setupLegacyProxy(form, proxy) {
           // The overriding input, if present, has to be removed and re-added
           // (renaming does NOT work). Completely insane, I know.
           const element = dev().assertElement(current);
-          const nextSibling = element.nextSibling;
-          const parent = element.parentNode;
+          const {nextSibling, parentNode: parent} = element;
           parent.removeChild(element);
           try {
             actual = form[name];
@@ -208,7 +207,7 @@ function setupLegacyProxy(form, proxy) {
             } else if (desc.type == LegacyPropDataType.URL) {
               // URLs, e.g. in `action` attribute are resolved against the
               // document's base.
-              value = parseUrl(/** @type {string} */ (value || '')).href;
+              value = parseUrlDeprecated(/** @type {string} */ (value || '')).href;
             }
             return value;
           },

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {doubleclick} from '../ads/google/doubleclick';
 import {getMultiSizeDimensions} from '../ads/google/utils';
 import {loadScript, validateData} from '../3p/3p';
 import {rethrowAsync} from '../src/log';
+import {user} from '../src/log';
 
 /**
  * @param {!Window} global
@@ -71,9 +71,13 @@ export function yieldbot(global, data) {
       } catch (e) {
         rethrowAsync(e);
       }
-      delete data['ybSlot'];
-      delete data['psn'];
-      doubleclick(global, data);
+      user().warn('AMP-AD', 'type="yieldbot" will no longer ' +
+                  'be supported starting on March 29, 2018.' +
+                  ' Please use your amp-ad-network and RTC to configure a' +
+                  ' Yieldbot callout vendor. Refer to' +
+                  ' https://github.com/ampproject/amphtml/blob/master/' +
+                  'extensions/amp-a4a/rtc-publisher-implementation-guide.md' +
+                  '#setting-up-rtc-config for more information.');
     });
   });
 }

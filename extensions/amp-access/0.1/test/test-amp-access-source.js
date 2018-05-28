@@ -85,6 +85,7 @@ describes.fakeWin('AccessSource', {
       'pingback': 'https://acme.com/p',
       'login': 'https://acme.com/l',
       'iframeSrc': 'https://acme.com/i',
+      'defaultResponse': {},
     };
     expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
 

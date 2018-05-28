@@ -96,16 +96,16 @@ describe('3p', () => {
       }, ['foo', 'bar']);
       clock.tick(1);
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         validateData({
           width: '',
           type: 'xxxxxx',
           foo: true,
           bar: true,
         }, ['foo', 'bar', 'persika']);
-      }).to.throw(/Missing attribute for xxxxxx: persika./);
+      }).to.throw(/Missing attribute for xxxxxx: persika./); });
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         validateData({
           width: '',
           type: 'xxxxxx',
@@ -114,6 +114,7 @@ describe('3p', () => {
         }, [['red', 'green', 'blue']]);
       }).to.throw(
           /xxxxxx must contain exactly one of attributes: red, green, blue./);
+      });
     });
 
     it('should check mandatory fields with alternative options', () => {
@@ -152,9 +153,9 @@ describe('3p', () => {
         'not-whitelisted': true,
       }, [], ['foo']);
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         clock.tick(1);
-      }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
+      }).to.throw(/Unknown attribute for TEST: not-whitelisted./); });
     });
 
     it('should check mandatory and optional fields', () => {

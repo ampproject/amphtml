@@ -89,6 +89,12 @@ describes.realWin('amp-facebook', {
     });
   });
 
+  it('adds loading element correctly', () => {
+    return getAmpFacebook(fbVideoHref, 'post').then(ampFB => {
+      expect(ampFB.implementation_.toggleLoadingCounter_).to.equal(1);
+    });
+  });
+
   it('adds fb-post element correctly', () => {
     const div = document.createElement('div');
     div.setAttribute('id', 'c');
@@ -147,6 +153,44 @@ describes.realWin('amp-facebook', {
     expect(fbVideo.getAttribute('data-show-text')).to.equal('true');
   });
 
+  it('retains fb-video element with `data-embed-as=\'video\'`', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK',
+    };
+
+    facebook(win, {
+      embedAs: 'video',
+      href: fbVideoHref,
+      width: 111,
+      height: 222,
+    });
+    const fbVideo = doc.body.getElementsByClassName('fb-video')[0];
+    expect(fbVideo).not.to.be.undefined;
+    expect(fbVideo.classList.contains('fb-video')).to.be.true;
+  });
+
+  it('retains fb-video element with `data-embed-as=\'post\'`', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK',
+    };
+
+    facebook(win, {
+      embedAs: 'post',
+      href: fbVideoHref,
+      width: 111,
+      height: 222,
+    });
+    const fbVideo = doc.body.getElementsByClassName('fb-post')[0];
+    expect(fbVideo).not.to.be.undefined;
+    expect(fbVideo.classList.contains('fb-post')).to.be.true;
+  });
+
   it('check that fb-page element correctly sets `data-adapt-container-width` ' +
     'attribute to \'true\'', () => {
     const div = doc.createElement('div');
@@ -197,8 +241,7 @@ describes.realWin('amp-facebook', {
       setDefaultBootstrapBaseUrlForTesting(iframeSrc);
       return getAmpFacebook(fbPostHref).then(ampFB => {
         return new Promise((resolve, unusedReject) => {
-          const iframe = ampFB.firstChild;
-          const impl = ampFB.implementation_;
+          const {firstChild: iframe, implementation_: impl} = ampFB;
           impl.changeHeight = newHeight => {
             expect(newHeight).to.equal(666);
             resolve(ampFB);

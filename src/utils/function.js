@@ -14,23 +14,30 @@
  * limitations under the License.
  */
 
+// TODO(rsimha, #15334): Enable this rule.
+/* eslint jsdoc/check-types: 0 */
 
 /**
  * Creates a function that is evaluated only once and returns the cached result
  * subsequently.
- * @param {function():(T|undefined)} fn
- * @return {function():(T|undefined)}
+ *
+ * Please note that `once` only takes the function definition into account,
+ * so it will return the same cached value even when the arguments are
+ * different.
+ *
+ * @param {function(...):T} fn
+ * @return {function(...):T}
  * @template T
- * @suppress {checkTypes} Compiler complains about "fn = null" for GC.
  */
 export function once(fn) {
   let evaluated = false;
   let retValue = null;
-  return () => {
+  let callback = fn;
+  return (...args) => {
     if (!evaluated) {
-      retValue = fn();
+      retValue = callback.apply(self, args);
       evaluated = true;
-      fn = null; // GC
+      callback = null; // GC
     }
     return retValue;
   };

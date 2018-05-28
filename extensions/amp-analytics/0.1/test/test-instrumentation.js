@@ -107,9 +107,9 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
 
     it('should reject trigger in a disallowed environment', () => {
       sandbox.stub(root, 'getType').callsFake(() => 'other');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         group.addTrigger({on: 'click', selector: '*'});
-      }).to.throw(/Trigger type "click" is not allowed in the other/);
+      }).to.throw(/Trigger type "click" is not allowed in the other/); });
     });
 
     it('should reject trigger that fails to initialize', () => {

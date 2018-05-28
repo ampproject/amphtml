@@ -38,7 +38,7 @@ const CONFIG_URLS = {
 
 const DEFAULT_REGION = 'eu';
 
-const CONFIG_BASE_PATH = '/api/public/amp?' +
+const CONFIG_BASE_PATH = '/api/v1/public/amp?' +
                          'article_url=CANONICAL_URL' +
                          '&amp_reader_id=READER_ID' +
                          '&return_url=RETURN_URL';
@@ -211,8 +211,8 @@ export class LaterpayVendor {
           }
           return response.json().catch(() => undefined).then(responseJson => {
             this.purchaseConfig_ = responseJson;
-            // empty before rendering, in case authorization is being called again
-            // with the same state
+            // empty before rendering, in case authorization is being called
+            // again with the same state
             this.emptyContainer_()
                 .then(this.renderPurchaseOverlay_.bind(this));
             return {access: false};
@@ -333,7 +333,7 @@ export class LaterpayVendor {
     purchaseButton.textContent = this.i18n_['defaultButton'];
     this.purchaseButton_ = purchaseButton;
     this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
-      const value = this.selectedPurchaseOption_.value;
+      const {value} = this.selectedPurchaseOption_;
       const purchaseType = this.selectedPurchaseOption_.dataset['purchaseType'];
       this.handlePurchase_(ev, value, purchaseType);
     });

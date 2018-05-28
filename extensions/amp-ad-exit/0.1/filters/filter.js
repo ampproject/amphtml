@@ -22,10 +22,15 @@ export const FilterType = {
 };
 
 export class Filter {
-  /** @param {string} name The name given to this filter. */
-  constructor(name) {
+  /**
+   * @param {string} name The name given to this filter.
+   * @param {!FilterType} type
+   */
+  constructor(name, type) {
     /** @const {string} */
     this.name = name;
+    /** @const {!FilterType} */
+    this.type = type;
   }
 
   /**

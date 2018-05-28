@@ -54,7 +54,7 @@ amp-youtube/0.1/test/validator-amp-youtube.html:47:2 The implied layout 'CONTAIN
 |    <!-- Invalid: the attr value must be a video id -->
 |    <amp-youtube width="480" height="270"
 >>   ^~~~~~~~~
-amp-youtube/0.1/test/validator-amp-youtube.html:50:2 The attribute 'data-videoid' in tag 'amp-youtube' is set to the invalid value 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_TAG_PROBLEM]
+amp-youtube/0.1/test/validator-amp-youtube.html:50:2 The attribute 'data-videoid' in tag 'amp-youtube' is set to the invalid value 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [DISALLOWED_HTML]
 |                 data-videoid="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
 |    </amp-youtube>
 |    <!-- Invalid: cannot have both data-videoid and data-live-channelid -->

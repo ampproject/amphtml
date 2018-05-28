@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+import {
+  CONSTANTS,
+  MessageType,
+} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {
   IntersectionObserver,
 } from '../../../src/intersection-observer';
-import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
@@ -74,9 +78,6 @@ export class AmpAdXOriginIframeHandler {
     /** @private {boolean} */
     this.isInaboxPositionApiInit_ = false;
 
-    /** @private {?SubscriptionApi} */
-    this.inaboxRequestPositionApi_ = null;
-
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
@@ -117,7 +118,8 @@ export class AmpAdXOriginIframeHandler {
     if (isExperimentOn(this.win_, 'inabox-position-api')) {
       this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {
-            // TODO(@zhouyx): Make sendPosition_ only send to message origin iframe
+            // TODO(@zhouyx): Make sendPosition_ only send to message origin
+            // iframe
             this.sendPosition_();
             this.registerPosition_();
           });
@@ -130,29 +132,21 @@ export class AmpAdXOriginIframeHandler {
           this.element_.creativeId = info.data['id'];
         });
 
-    this.unlisteners_.push(listenFor(this.iframe, 'get-html',
-        (info, source, origin) => {
-          if (!this.iframe) {
-            return;
-          }
+    this.handleOneTimeRequest_(MessageType.GET_HTML, payload => {
+      const selector = payload['selector'];
+      const attributes = payload['attributes'];
+      let content = '';
+      if (this.element_.hasAttribute('data-html-access-allowed')) {
+        content = getHtml(this.baseInstance_.win, selector, attributes);
+      }
+      return Promise.resolve(content);
+    });
 
-          const selector = info['selector'];
-          const attributes = info['attributes'];
-          const messageId = info['messageId'];
-          let content = '';
-
-          if (this.element_.hasAttribute('data-html-access-allowed')) {
-            content = getHtml(this.baseInstance_.win, selector, attributes);
-          }
-
-          postMessageToWindows(
-              this.iframe, [{win: source, origin}],
-              'get-html-result', dict({
-                'content': content,
-                'messageId': messageId,
-              }), true
-          );
-        }, true, false));
+    this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () => {
+      return this.baseInstance_.getConsentState().then(consentState => {
+        return {consentState};
+      });
+    });
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
@@ -187,21 +181,22 @@ export class AmpAdXOriginIframeHandler {
     }
 
     // Calculate render-start and no-content signals.
-    let renderStartResolve;
-    const renderStartPromise = new Promise(resolve => {
-      renderStartResolve = resolve;
-    });
-    let noContentResolve;
-    const noContentPromise = new Promise(resolve => {
-      noContentResolve = resolve;
-    });
+    const {
+      promise: renderStartPromise,
+      resolve: renderStartResolve,
+    } = new Deferred();
+    const {
+      promise: noContentPromise,
+      resolve: noContentResolve,
+    } = new Deferred();
+
     if (this.baseInstance_.config &&
             this.baseInstance_.config.renderStartImplemented) {
       // When `render-start` is supported, these signals are mutually
       // exclusive. Whichever arrives first wins.
       listenForOncePromise(this.iframe,
           ['render-start', 'no-content'], true).then(info => {
-        const data = info.data;
+        const {data} = info;
         if (data['type'] == 'render-start') {
           this.renderStart_(info);
           renderStartResolve();
@@ -267,6 +262,34 @@ export class AmpAdXOriginIframeHandler {
 
     // The actual ad load is eariliest of iframe.onload event and no-content.
     return Promise.race([iframeLoadPromise, noContentPromise]);
+  }
+
+  /**
+   * @param {string} requestType
+   * @param {function(*)} getter
+   * @private
+   */
+  handleOneTimeRequest_(requestType, getter) {
+    this.unlisteners_.push(listenFor(this.iframe, requestType,
+        (info, source, origin) => {
+          if (!this.iframe) {
+            return;
+          }
+
+          const messageId = info[CONSTANTS.messageIdFieldName];
+          const payload = info[CONSTANTS.payloadFieldName];
+
+          getter(payload).then(content => {
+            const result = dict();
+            result[CONSTANTS.messageIdFieldName] = messageId;
+            result[CONSTANTS.contentFieldName] = content;
+            postMessageToWindows(
+                dev().assertElement(this.iframe), [{win: source, origin}],
+                requestType + CONSTANTS.responseTypeSuffix,
+                result, true
+            );
+          });
+        }, true /* opt_is3P */, false /* opt_includingNestedWindows */));
   }
 
   /**

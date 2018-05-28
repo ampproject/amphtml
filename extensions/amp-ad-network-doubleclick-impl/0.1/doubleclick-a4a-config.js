@@ -158,8 +158,8 @@ export class DoubleclickA4aEligibility {
           (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else {
-        // For unconditioned canonical holdback, in the control branch
-        // we allow Fast Fetch on non-CDN pages, but in the experiment we do not.
+        // For unconditioned canonical holdback, in the control branch we allow
+        // Fast Fetch on non-CDN pages, but in the experiment we do not.
         if (getExperimentBranch(
             win, UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME) !=
             DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP) {
@@ -169,13 +169,22 @@ export class DoubleclickA4aEligibility {
         }
         return false;
       }
+
     } else {
-      // See if in holdback control/experiment.
       if (urlExperimentId != undefined) {
         experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-        dev().info(
-            TAG,
-            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        // For SRA experiments, do not include pages that are using refresh.
+        if ((experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL ||
+          experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA) &&
+          (win.document.querySelector('meta[name=amp-ad-enable-refresh]') ||
+           win.document.querySelector(
+               'amp-ad[type=doubleclick][data-enable-refresh]'))) {
+          experimentId = undefined;
+        } else {
+          dev().info(
+              TAG,
+              `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        }
       }
     }
     if (experimentId) {
@@ -183,13 +192,14 @@ export class DoubleclickA4aEligibility {
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
 
-    // If we need to rollback the launch, or we are in the launch's holdback experiment,
-    // still use Delayed Fetch if USDRUD or custom remote.html in use
+    // If we need to rollback the launch, or we are in the launch's holdback
+    // experiment, still use Delayed Fetch if USDRUD or custom remote.html in
+    // use
     if (isExperimentOn(win, dfDepRollbackExperiment) ||
         experimentId ==
         DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_HOLDBACK_EXPERIMENT) {
-      return !hasUSDRD &&
-          (!useRemoteHtml || !!element.getAttribute('rtc-config'));
+      return !!element.getAttribute('rtc-config') ||
+          !(hasUSDRD || useRemoteHtml);
     }
     return true;
   }
@@ -204,7 +214,7 @@ export class DoubleclickA4aEligibility {
    */
   maybeSelectExperiment(win, element, selectionBranches, experimentName) {
     const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+      /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[experimentName] = {
       isTrafficEligible: () => true,
       branches: selectionBranches,
@@ -221,7 +231,7 @@ const singleton = new DoubleclickA4aEligibility();
  * @param {!Window} win
  * @param {!Element} element
  * @param {boolean} useRemoteHtml
- * @returns {boolean}
+ * @return {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {
   return singleton.isA4aEnabled(win, element, useRemoteHtml);

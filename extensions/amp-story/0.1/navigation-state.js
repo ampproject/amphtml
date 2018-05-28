@@ -53,7 +53,7 @@ export class NavigationState {
     this.win_ = win;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     this.initializeListeners_();
   }
@@ -87,12 +87,13 @@ export class NavigationState {
    * @param {string=} pageId
    */
   // TODO(alanorozco): pass whether change was automatic or on user action
-  updateActivePage(pageIndex, totalPages, pageId = undefined) {
-    const changeValue = {pageIndex, totalPages};
-
-    if (pageId) {
-      changeValue.pageId = pageId;
-    }
+  updateActivePage(pageIndex, totalPages, pageId) {
+    const changeValue = {
+      pageIndex,
+      pageId,
+      totalPages,
+      storyProgress: pageIndex / totalPages,
+    };
 
     this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);
 

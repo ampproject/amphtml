@@ -114,6 +114,23 @@ For example, the following is possible in AMP:
   </tr>
 </table>
 
+## amp-audio
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+  </tr>
+</table>
+
 ### Input elements
 <table>
   <tr>
@@ -176,7 +193,7 @@ event.value</pre>
   </tr>
   <tr>
     <td><code>slideChange</code></td>
-    <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
+    <td>Fired when the carousel's current slide changes.</td>
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>
@@ -184,6 +201,21 @@ event.index</pre></td>
     <td><code>toggleAutoplay</code></td>
     <td>Will, on user tap or click, toggle the autoplay status for the carousel. You can either specify the status you want by specifying it: <code>carousel-id.toggleAutoplay(toggleOn=false)</code> or flip the status by not specifying a value.</td>
     <td><pre>optional toggle status</pre></td>
+  </tr>
+</table>
+
+### amp-iframe
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>message</code></td>
+    <td>Fired when the iframe invokes <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">parent.postMessage</a> as a result of a user gesture in the iframe.</td>
+    <td><pre>// See <a href="https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data">MessageEvent.data</a>.
+event.data</pre></td>
   </tr>
 </table>
 
@@ -231,6 +263,11 @@ event.index</pre></td>
     <th width="25%">Event</th>
     <th width="35%">Description</th>
     <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>firstPlay</code>(low-trust)</td>
+    <td>Fired the first time the video is played by the user. On autoplay videos, this is fired as soon as the user interacts with the video. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
+    <td></td>
   </tr>
   <tr>
     <td><code>timeUpdate</code>(low-trust)</td>
@@ -323,12 +360,20 @@ event.response</pre></td>
   <tr>
     <td><code>play</code></td>
     <td>Plays the animation.</td>
+  </tr>
+  <tr>
     <td><code>pause</code></td>
     <td>Pauses the animation.</td>
+  </tr>
+  <tr>
     <td><code>stop</code></td>
     <td>Stops the animation.</td>
+  </tr>
+  <tr>
     <td><code>seekTo(time=INTEGER)</code></td>
     <td>Sets the currentTime of the animation to the specified value and pauses animation. </td>
+  </tr>
+  <tr>
     <td><code>seekTo(percent=[0,1])</code></td>
     <td>Uses the given percentage value to determine the currentTime of the animation to the specified value and pauses animation. </td>
   </tr>
@@ -343,6 +388,18 @@ event.response</pre></td>
   <tr>
     <td><code>goToSlide(index=INTEGER)</code></td>
     <td>Advances the carousel to a specified slide index.</td>
+  </tr>
+</table>
+
+### amp-iframe
+<table>
+  <tr>
+    <th width="40%">Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>postMessage(...)</code></td>
+    <td>Sends a message to the iframe via <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage</a> with the arguments serialized as key-value pairs under <a href="https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data">MessageEvent.data<a/>.</td>
   </tr>
 </table>
 
@@ -488,6 +545,10 @@ The actions below are supported in the following AMP video elements: `amp-video`
     <th>Description</th>
   </tr>
   <tr>
+    <td><code>clear</code></td>
+    <td>Clears any values in the form's inputs.</td>
+  </tr>
+  <tr>
     <td><code>submit</code></td>
     <td>Submits the form.</td>
   </tr>
@@ -518,6 +579,10 @@ actions that apply to the whole document.
   <tr>
     <td><code>print</code></td>
     <td>Opens the Print Dialog to print the current page.</td>
+  </tr>
+  <tr>
+    <td>optoutOfCid</td>
+    <td>Opts out of Client ID generation for all scopes.</td>
   </tr>
   <tr>
     <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>

@@ -33,6 +33,13 @@ tags: {  # <amp-wistia-player>
     mandatory: true
     value_regex: "[0-9a-zA-Z]+"
   }
+  attrs: {
+    # Does nothing, as the player iframe implements this feature internally
+    # regardless.
+    # Included for consistency with other players.
+    name: "rotate-to-fullscreen"
+    value: ""
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

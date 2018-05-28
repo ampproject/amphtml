@@ -27,11 +27,9 @@
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const colors = require('ansi-colors');
-const exec = require('./exec').exec;
-const execOrDie = require('./exec').execOrDie;
-const getStderr = require('./exec').getStderr;
-const getStdout = require('./exec').getStdout;
 const path = require('path');
+const {execOrDie, exec, getStderr, getStdout} = require('./exec');
+const {gitDiffColor, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -50,6 +48,7 @@ function startTimer(functionName) {
 /**
  * Stops the timer for the given function and prints the execution time.
  * @param {string} functionName
+ * @param {DOMHighResTimeStamp} startTime
  * @return {number}
  */
 function stopTimer(functionName, startTime) {
@@ -91,10 +90,8 @@ function timedExecOrDie(cmd) {
  * @return {!Array<string>}
  */
 function filesInPr() {
-  const files =
-      getStdout('git diff --name-only master...HEAD').trim().split('\n');
-  const changeSummary =
-      getStdout('git -c color.ui=always diff --stat master...HEAD');
+  const files = gitDiffNameOnlyMaster();
+  const changeSummary = gitDiffStatMaster();
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
@@ -217,7 +214,7 @@ function isFlagConfig(filePath) {
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
- * @returns {!Set<string>}
+ * @return {!Set<string>}
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
@@ -255,6 +252,22 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
+function startSauceConnect() {
+  process.env['SAUCE_USERNAME'] = 'amphtml';
+  process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
+      'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken').trim();
+  const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
+  console.log('\n' + fileLogPrefix,
+      'Starting Sauce Connect Proxy:', colors.cyan(startScCmd));
+  exec(startScCmd);
+}
+
+function stopSauceConnect() {
+  const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
+  console.log('\n' + fileLogPrefix,
+      'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
+  exec(stopScCmd);
+}
 
 const command = {
   testBuildSystem: function() {
@@ -278,25 +291,37 @@ const command = {
   buildRuntime: function() {
     timedExecOrDie('gulp build');
   },
-  buildRuntimeMinified: function() {
-    timedExecOrDie('gulp dist --fortesting');
+  buildRuntimeMinified: function(extensions) {
+    let cmd = 'gulp dist --fortesting';
+    if (!extensions) {
+      cmd = cmd + ' --noextensions';
+    }
+    timedExecOrDie(cmd);
+  },
+  runBundleSizeCheck: function() {
+    timedExecOrDie('gulp bundle-size');
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
-    let cmd = 'gulp test --unit --nobuild --headless';
+    let cmd = 'gulp test --unit --nobuild';
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
     // Unit tests with Travis' default chromium
-    timedExecOrDie(cmd);
-    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
+    timedExecOrDie(cmd + ' --headless');
+    if (process.env.TRAVIS) {
       // A subset of unit tests on other browsers via sauce labs
       cmd = cmd + ' --saucelabs_lite';
+      startSauceConnect();
       timedExecOrDie(cmd);
+      stopSauceConnect();
     }
+  },
+  runUnitTestsOnLocalChanges: function() {
+    timedExecOrDie('gulp test --nobuild --headless --local-changes');
   },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
@@ -307,12 +332,15 @@ const command = {
     if (compiled) {
       cmd += ' --compiled';
     }
-    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
+    if (process.env.TRAVIS) {
+      startSauceConnect();
       cmd += ' --saucelabs';
+      timedExecOrDie(cmd);
+      stopSauceConnect();
     } else {
       cmd += ' --headless';
+      timedExecOrDie(cmd);
     }
-    timedExecOrDie(cmd);
   },
   runVisualDiffTests: function(opt_mode) {
     if (process.env.TRAVIS) {
@@ -330,7 +358,7 @@ const command = {
     } else if (opt_mode === 'master') {
       cmd += ' --master';
     }
-    const status = timedExec(cmd).status;
+    const {status} = timedExec(cmd);
     if (status != 0) {
       console.error(fileLogPrefix, colors.red('ERROR:'),
           'Found errors while running', colors.cyan(cmd) +
@@ -379,7 +407,8 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
-    command.buildRuntimeMinified();
+    command.buildRuntimeMinified(/* extensions */ true);
+    command.runBundleSizeCheck();
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true);
   }
@@ -397,6 +426,8 @@ function runAllCommandsLocally() {
   if (!argv.nobuild) {
     command.cleanBuild();
     command.buildRuntime();
+    command.buildRuntimeMinified(/* extensions */ false);
+    command.runBundleSizeCheck();
   }
 
   // These tests need a build.
@@ -438,8 +469,8 @@ function runYarnIntegrityCheck() {
  * Makes sure that yarn.lock was properly updated.
  */
 function runYarnLockfileCheck() {
-  const yarnLockfileCheck = getStdout('git -c color.ui=always diff').trim();
-  if (yarnLockfileCheck.includes('yarn.lock')) {
+  const localChanges = gitDiffColor();
+  if (localChanges.includes('yarn.lock')) {
     console.error(fileLogPrefix, colors.red('ERROR:'),
         'This PR did not properly update', colors.cyan('yarn.lock') + '.');
     console.error(fileLogPrefix, colors.yellow('NOTE:'),
@@ -447,7 +478,7 @@ function runYarnLockfileCheck() {
         ', run', colors.cyan('gulp update-packages') +
         ', and push a new commit containing the changes.');
     console.error(fileLogPrefix, 'Expected changes:');
-    console.log(yarnLockfileCheck);
+    console.log(localChanges);
     process.exit(1);
   }
 }
@@ -481,18 +512,26 @@ function isGreenkeeperLockfilePushBuild() {
 /**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
- * @returns {number}
+ * @return {number}
  */
 function main() {
   const startTime = startTimer('pr-check.js');
 
-  // Eliminate unnecessary testing on greenkeeper branches by running tests only
-  // on the push build that contains the lockfile update.
-  if (isGreenkeeperPrBuild() ||
-      (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild())) {
+  if (isGreenkeeperPrBuild()) {
     console.log(fileLogPrefix,
-        'Skipping unnecessary testing on greenkeeper branches. ' +
-        'Tests will only be run for the push build with the lockfile update.');
+        'This is a greenkeeper PR build. Tests will be run for the push ' +
+        'build with the lockfile update.');
+    stopTimer('pr-check.js', startTime);
+    return 0;
+  }
+
+  if (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild()) {
+    console.log(fileLogPrefix,
+        'This is a greenkeeper push build. Updating and uploading lockfile...');
+    timedExec('./node_modules/.bin/greenkeeper-lockfile-update');
+    timedExec('./node_modules/.bin/greenkeeper-lockfile-upload');
+    console.log(fileLogPrefix, 'Lockfile updated and uploaded. Tests will be ' +
+        'run for the subsequent push build with the lockfile update.');
     stopTimer('pr-check.js', startTime);
     return 0;
   }
@@ -503,6 +542,7 @@ function main() {
 
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
+    process.env['LOCAL_PR_CHECK'] = true;
     console.log(fileLogPrefix, 'Running all pr-check commands locally.');
     runAllCommandsLocally();
     stopTimer('pr-check.js', startTime);
@@ -524,8 +564,8 @@ function main() {
   const files = filesInPr();
   const buildTargets = determineBuildTargets(files);
 
-  // Exit early if flag-config files are mixed with non-flag-config files.
-  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size !== 1) {
+  // Exit early if flag-config files are mixed with runtime files.
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Looks like your PR contains',
         colors.cyan('{prod|canary}-config.json'),
@@ -560,6 +600,8 @@ function main() {
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
+        // Before running all tests, run tests modified by the PR. (Fail early.)
+        command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
       }
     }
@@ -571,21 +613,27 @@ function main() {
         buildTargets.has('VISUAL_DIFF')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.buildRuntimeMinified(/* extensions */ false);
+      command.runBundleSizeCheck();
       command.runVisualDiffTests();
+    } else {
+      // Generates a blank Percy build to satisfy the required Github check.
+      command.runVisualDiffTests(/* opt_mode */ 'skip');
     }
     command.runPresubmitTests();
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME')) {
       command.runIntegrationTests(/* compiled */ false);
     }
-    if (buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF')) {
-      command.verifyVisualDiffTests();
-    } else {
-      // Generates a blank Percy build to satisfy the required Github check.
-      command.runVisualDiffTests(/* opt_mode */ 'skip');
-    }
+    // TODO(rsimha, #14851): Failing due to long proessing times.
+    // if (buildTargets.has('INTEGRATION_TEST') ||
+    //     buildTargets.has('RUNTIME') ||
+    //     buildTargets.has('VISUAL_DIFF')) {
+    //   command.verifyVisualDiffTests();
+    // } else {
+    //   // Generates a blank Percy build to satisfy the required Github check.
+    //   command.runVisualDiffTests(/* opt_mode */ 'skip');
+    // }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
     }

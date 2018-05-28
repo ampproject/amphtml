@@ -23,6 +23,7 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
+import {Deferred} from './utils/promise';
 import {dev} from './log';
 import {toWin} from './types';
 
@@ -198,10 +199,10 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
 
 
 /**
- * Returns a service for the given id and window (a per-window singleton).
- * Users should typically wrap this as a special purpose function (e.g.
- * `Services.vsyncFor(win)`) for type safety and because the factory should not be
- * passed around.
+ * Returns a service for the given id and window (a per-window singleton). Users
+ * should typically wrap this as a special purpose function (e.g.
+ * `Services.vsyncFor(win)`) for type safety and because the factory should not
+ * be passed around.
  * @param {!Window} win
  * @param {string} id of the service.
  * @template T
@@ -214,12 +215,11 @@ export function getService(win, id) {
 
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * `Services.vsyncFor(win)`) for type safety and because the factory should not be
- * passed around.
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. `Services.vsyncFor(win)`) for type safety and because the
+ * factory should not be passed around.
  * @param {!Window} win
  * @param {string} id of the service.
  * @return {!Promise<!Object>}
@@ -465,10 +465,9 @@ function getServicePromiseInternal(holder, id) {
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
-  let resolve;
-  const promise = new Promise(r => {
-    resolve = r;
-  });
+  const deferred = new Deferred();
+  const {promise, resolve} = deferred;
+
   const services = getServices(holder);
   services[id] = {
     obj: null,
@@ -510,7 +509,7 @@ function getServicePromiseOrNullInternal(holder, id) {
  * @return {!Object<string,!ServiceHolderDef>}
  */
 function getServices(holder) {
-  let services = holder.services;
+  let {services} = holder;
   if (!services) {
     services = holder.services = {};
   }

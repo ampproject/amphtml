@@ -41,6 +41,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
+import {setStyles} from '../../../src/style';
 
 
 /** @const {string} */
@@ -125,11 +126,8 @@ export class WebAnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        for (const k in request.vars) {
-          request.target.style.setProperty(k, String(request.vars[k]));
-        }
+        setStyles(request.target, request.vars);
       }
-
       const player = request.target.animate(request.keyframes, request.timing);
       player.pause();
       return player;
@@ -264,7 +262,7 @@ export class WebAnimationRunner {
   getTotalDuration_() {
     let maxTotalDuration = 0;
     for (let i = 0; i < this.requests_.length; i++) {
-      const timing = this.requests_[i].timing;
+      const {timing} = this.requests_[i];
 
       user().assert(isFinite(timing.iterations), 'Animation has infinite ' +
       'timeline, we can not seek to a relative position within an infinite ' +
@@ -306,7 +304,8 @@ class Scanner {
       return false;
     }
 
-    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
+    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|
+    //                   !WebCompAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
     } else if (spec.switch) {
@@ -580,10 +579,12 @@ export class MeasureScanner extends Scanner {
       return impl.getAnimationSpec();
     });
     this.with_(spec, () => {
-      const target = this.target_;
-      const index = this.index_;
-      const vars = this.vars_;
-      const timing = this.timing_;
+      const {
+        target_: target,
+        index_: index,
+        vars_: vars,
+        timing_: timing,
+      } = this;
       const promise = otherSpecPromise.then(otherSpec => {
         if (!otherSpec) {
           return;
@@ -718,10 +719,12 @@ export class MeasureScanner extends Scanner {
    */
   with_(spec, callback) {
     // Save context.
-    const prevTarget = this.target_;
-    const prevIndex = this.index_;
-    const prevVars = this.vars_;
-    const prevTiming = this.timing_;
+    const {
+      target_: prevTarget,
+      index_: prevIndex,
+      vars_: prevVars,
+      timing_: prevTiming,
+    } = this;
 
     // Push new context and perform calculations.
     const targets =
@@ -1062,8 +1065,7 @@ class CssContextImpl {
    * @protected
    */
   withTarget(target, index, callback) {
-    const prev = this.currentTarget_;
-    const prevIndex = this.currentIndex_;
+    const {currentTarget_: prev, currentIndex_: prevIndex} = this;
     this.currentTarget_ = target;
     this.currentIndex_ = index;
     const result = callback(target);

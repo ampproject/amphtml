@@ -26,7 +26,6 @@ Our governance model is as follows:
 * Hongfei Ding (@lannka)
 * Johannes Henkel (@powdercloud). Specialty: Validator
 * Justin Ridgewell (@jridgewell)
-* Sriram Krishnan (@camelburrito)
 * Wassim Gharbi (@wassgha)
 * William Chou (@choumx)
 * Yuxuan Zhou (@zhouyx)

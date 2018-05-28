@@ -69,9 +69,9 @@ describes.fakeWin('AccessService', {
   it('should default to "client" and fail if authorization is missing', () => {
     const config = {};
     element.textContent = JSON.stringify(config);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
-    }).to.throw(/"authorization" URL must be specified/);
+    }).to.throw(/"authorization" URL must be specified/); });
   });
 
   it('should fail if config login is malformed', () => {
@@ -81,9 +81,9 @@ describes.fakeWin('AccessService', {
       'login': 'http://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
-    }).to.throw(/https\:/);
+    }).to.throw(/https\:/); });
   });
 
   it('should parse the complete config', () => {
@@ -111,9 +111,9 @@ describes.fakeWin('AccessService', {
       'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
-    }).to.throw(/Unknown access type/);
+    }).to.throw(/Unknown access type/); });
   });
 
   it('should start when enabled', () => {
@@ -186,9 +186,9 @@ describes.fakeWin('AccessService', {
     };
     element.textContent = JSON.stringify(config);
     const accessService = new AccessService(ampdoc);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       accessService.getVendorSource('vendor1');
-    }).to.throw(/can only be used for "type=vendor"/);
+    }).to.throw(/can only be used for "type=vendor"/); });
   });
 
   it('should parse multiple sources', () => {
@@ -229,15 +229,15 @@ describes.fakeWin('AccessService', {
       },
     ];
     element.textContent = JSON.stringify(config);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
-    }).to.throw(/Namespace already used/);
+    }).to.throw(/Namespace already used/); });
 
     delete (config[0].namespace);
     element.textContent = JSON.stringify(config);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       new AccessService(ampdoc);
-    }).to.throw(/Namespace required/);
+    }).to.throw(/Namespace required/); });
   });
 });
 
@@ -1034,6 +1034,7 @@ describes.fakeWin('AccessService login', {
     service.sources_[0].openLoginDialog_ = () => {};
     service.sources_[0].loginUrlMap_[''] = 'https://acme.com/l?rid=R';
     service.sources_[0].analyticsEvent_ = sandbox.spy();
+    service.sources_[0].getAdapter().postAction = sandbox.spy();
 
     service.viewer_ = {
       broadcast: () => {},
@@ -1074,7 +1075,7 @@ describes.fakeWin('AccessService login', {
         .returns(Promise.resolve('reader1'))
         .once();
     return service.sources_[0].buildLoginUrls_().then(urls => {
-      const url = urls[0].url;
+      const {url} = urls[0];
       expect(url).to.equal('https://acme.com/l?rid=reader1');
       expect(service.sources_[0].loginUrlMap_['']).to.equal(url);
     });
@@ -1128,7 +1129,7 @@ describes.fakeWin('AccessService login', {
         .returns(Promise.resolve('reader1'))
         .once();
     return source.buildLoginUrls_().then(urls => {
-      const url = urls[0].url;
+      const {url} = urls[0];
       expect(url).to.equal('https://acme.com/l?rid=reader1&ret=RETURN_URL');
       expect(source.loginUrlMap_['']).to.equal(url);
     });
@@ -1148,7 +1149,10 @@ describes.fakeWin('AccessService login', {
 
   it('should fail to open dialog if loginUrl is not built yet', () => {
     service.sources_[0].loginUrlMap_[''] = null;
-    expect(() => service.loginWithType_('')).to.throw(/Login URL is not ready/);
+    allowConsoleError(() => {
+      expect(() => service.loginWithType_('')).to.throw(
+          /Login URL is not ready/);
+    });
   });
 
   it('should succeed login with success=true', () => {
@@ -1163,6 +1167,7 @@ describes.fakeWin('AccessService login', {
         .returns(Promise.resolve('#success=true'))
         .once();
     return service.loginWithType_('').then(() => {
+      expect(source.getAdapter().postAction).to.be.calledOnce;
       expect(source.loginPromise_).to.not.exist;
       expect(authorizationStub).to.be.calledOnce;
       expect(authorizationStub).to.be.calledWithExactly(
@@ -1537,12 +1542,14 @@ describes.fakeWin('AccessService multiple sources', {
       isAuthorizationEnabled: () => true,
       isPingbackEnabled: () => true,
       authorize: () => {},
+      postAction: () => {},
     };
     const adapterDonuts = {
       getConfig: () => {},
       isAuthorizationEnabled: () => true,
       isPingbackEnabled: () => true,
       authorize: () => {},
+      postAction: () => {},
     };
     sourceBeer.adapter_ = adapterBeer;
     adapterBeerMock = sandbox.mock(adapterBeer);

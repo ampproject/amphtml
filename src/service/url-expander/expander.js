@@ -15,6 +15,7 @@
  */
 
 import {rethrowAsync, user} from '../../log';
+import {tryResolve} from '../../utils/promise';
 
 export const PARSER_IGNORE_FLAG = '`';
 
@@ -62,7 +63,7 @@ export class Expander {
   findMatches_(url, expression) {
     const matches = [];
     url.replace(expression, (match, name, startPosition) => {
-      const length = match.length;
+      const {length} = match;
       const stopPosition = length + startPosition - 1;
       const info = {
         start: startPosition,
@@ -206,7 +207,7 @@ export class Expander {
           value = Promise.all(opt_args)
               .then(args => binding.apply(null, args));
         } else {
-          value = Promise.resolve(binding.apply(null, opt_args));
+          value = tryResolve(binding);
         }
       } else {
         value = Promise.resolve(binding);

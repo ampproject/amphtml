@@ -15,8 +15,11 @@
  */
 
 import * as sinon from 'sinon';
-import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
+import {
+  ANALYTICS_IFRAME_TRANSPORT_CONFIG,
+} from '../../../amp-analytics/0.1/iframe-transport-vendors';
 import {AmpAdExit} from '../amp-ad-exit';
+import {FilterType} from '../filters/filter';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';
@@ -170,12 +173,14 @@ describes.realWin('amp-ad-exit', {
     addAdDiv();
     // TODO(jonkeller): Remove after rebase
     win.top.document.body.getResourceId = () => '6789';
-    // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
-    ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
-      transport: {
-        iframe: '/nowhere.html',
-      },
-    };
+    // TEST_3P_VENDOR must be in ANALYTICS_IFRAME_TRANSPORT_CONFIG
+    // *before* makeElementWithConfig
+    ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR] =
+      ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR] || {
+        transport: {
+          iframe: '/nowhere.html',
+        },
+      };
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -186,28 +191,28 @@ describes.realWin('amp-ad-exit', {
     env.win.document.body.removeChild(element);
     env.win.document.body.removeChild(env.win.document.getElementById('ad'));
     element = undefined;
+    // Without the following, will break amp-analytics' test-vendor.js
+    delete ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR];
   });
 
   it('should reject non-JSON children', () => {
     const el = win.document.createElement('amp-ad-exit');
     el.appendChild(win.document.createElement('p'));
     win.document.body.appendChild(el);
-    return el.build().then(() => {
-      throw new Error('must have failed');
-    }, error => {
-      expect(error.message).to.match(/application\/json/);
-    });
+    let promise;
+    allowConsoleError(() => promise = el.build());
+    return promise.should.be.rejectedWith(/application\/json/);
   });
 
   it('should do nothing for missing targets', () => {
     const open = sandbox.stub(win, 'open');
     try {
-      element.implementation_.executeAction({
+      allowConsoleError(() => element.implementation_.executeAction({
         method: 'exit',
         args: {target: 'not-a-real-target'},
         event: makeClickEvent(1001),
         satisfiesTrust: () => true,
-      });
+      }));
       expect(open).to.not.have.been.called;
     } catch (expected) {}
   });
@@ -241,6 +246,33 @@ describes.realWin('amp-ad-exit', {
     });
 
     expect(open).to.not.have.been.called;
+  });
+
+  it('should use options.startTimingEvent', () => {
+    return makeElementWithConfig({
+      targets: {
+        navStart: {
+          'finalUrl': 'http://localhost:8000/simple',
+          'filters': ['twoSecond'],
+        },
+      },
+      options: {'startTimingEvent': 'navigationStart'},
+      filters: {
+        'twoSecond': {
+          type: 'clickDelay',
+          delay: 2000,
+        },
+      },
+    }).then(el => {
+      expect(el.implementation_.defaultFilters_.length).to.equal(2);
+      let clickFilter = el.implementation_.defaultFilters_[0];
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
+      clickFilter = el.implementation_.userFilters_['twoSecond'];
+      expect(clickFilter).to.be.ok;
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
+    });
   });
 
   it('should attempt new-tab navigation', () => {
@@ -487,7 +519,8 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.not.have.been.called;
 
-    // The click is within the left border but left border protection is not set.
+    // The click is within the left border but left border protection is not
+    // set.
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'borderProtection'},
@@ -544,7 +577,8 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.not.have.been.called;
 
-    // The click is within the left border but left border protection is not set.
+    // The click is within the left border but left border protection is not
+    // set.
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'borderProtectionRelativeTo'},
@@ -641,4 +675,3 @@ describes.realWin('amp-ad-exit', {
         .to.eventually.be.rejectedWith(/Unknown vendor/);
   });
 });
-

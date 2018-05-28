@@ -16,6 +16,7 @@
 
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {Resources} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
@@ -35,7 +36,8 @@ describes.realWin('Resource', {amp: true}, env => {
     doc = win.document;
 
     element = env.createAmpElement('amp-ad');
-    sandbox.stub(element, 'getLayoutPriority').callsFake(() => 2);
+    sandbox.stub(element, 'getLayoutPriority').callsFake(
+        () => LayoutPriority.ADS);
     elementMock = sandbox.mock(element);
 
     const viewer = Services.viewerForDoc(document);
@@ -61,7 +63,7 @@ describes.realWin('Resource', {amp: true}, env => {
   it('should initialize correctly', () => {
     expect(resource.getId()).to.equal(1);
     expect(resource.debugid).to.equal('amp-ad#1');
-    expect(resource.getLayoutPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
@@ -149,6 +151,39 @@ describes.realWin('Resource', {amp: true}, env => {
     });
   });
 
+  it('should track size changes on measure', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 11, top: 12, width: 111, height: 222})
+          .once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(sinon.match(data => {
+            return data.width == 111 && data.height == 222;
+          }), true)
+          .once();
+      resource.measure();
+    });
+  });
+
+  it('should track no size changes on measure', () => {
+    layoutRectLtwh(0, 0, 0, 0);
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 0, top: 0, width: 0, height: 0})
+          .once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(sinon.match(data => {
+            return data.width == 0 && data.height == 0;
+          }), false)
+          .once();
+      resource.measure();
+    });
+  });
+
   it('should allow to measure when not upgraded', () => {
     elementMock.expects('isUpgraded').returns(false).atLeast(1);
     const viewport = {
@@ -191,7 +226,7 @@ describes.realWin('Resource', {amp: true}, env => {
       elementMock.expects('updateLayoutBox')
           .withExactArgs(sinon.match(data => {
             return data.width == 111 && data.height == 222;
-          }))
+          }), true)
           .once();
       resource.measure();
       expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
@@ -457,18 +492,18 @@ describes.realWin('Resource', {amp: true}, env => {
     elementMock.expects('layoutCallback').never();
 
     resource.state_ = ResourceState.NOT_BUILT;
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       resource.startLayout();
-    }).to.throw(/Not ready to start layout/);
+    }).to.throw(/Not ready to start layout/); });
   });
 
   it('should ignore startLayout if not visible', () => {
     elementMock.expects('layoutCallback').never();
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       resource.startLayout();
-    }).to.throw(/Not displayed/);
+    }).to.throw(/Not displayed/); });
   });
 
   it('should force startLayout for first layout', () => {
@@ -604,19 +639,19 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 
   it('should update priority', () => {
-    expect(resource.getLayoutPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
 
-    resource.updateLayoutPriority(2);
-    expect(resource.getLayoutPriority()).to.equal(2);
+    resource.updateLayoutPriority(LayoutPriority.ADS);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
 
-    resource.updateLayoutPriority(3);
-    expect(resource.getLayoutPriority()).to.equal(3);
+    resource.updateLayoutPriority(LayoutPriority.BACKGROUND);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.BACKGROUND);
 
-    resource.updateLayoutPriority(1);
-    expect(resource.getLayoutPriority()).to.equal(1);
+    resource.updateLayoutPriority(LayoutPriority.METADATA);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
 
-    resource.updateLayoutPriority(0);
-    expect(resource.getLayoutPriority()).to.equal(0);
+    resource.updateLayoutPriority(LayoutPriority.CONTENT);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
   });
 
 
@@ -878,7 +913,7 @@ describe('Resource idleRenderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
-      getLayoutPriority: () => 0,
+      getLayoutPriority: () => LayoutPriority.CONTENT,
     };
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
@@ -934,7 +969,7 @@ describe('Resource renderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
-      getLayoutPriority: () => 0,
+      getLayoutPriority: () => LayoutPriority.CONTENT,
     };
 
     resources = new Resources(new AmpDocSingle(window));

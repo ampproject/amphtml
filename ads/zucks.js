@@ -22,5 +22,12 @@ import {validateData, writeScript} from '../3p/3p';
  */
 export function zucks(global, data) {
   validateData(data, ['frameId']);
-  writeScript(global, `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`);
+
+  let script = `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`;
+
+  if (data['adtype'] === 'native') {
+    script = `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`;
+  }
+
+  writeScript(global, script);
 }
