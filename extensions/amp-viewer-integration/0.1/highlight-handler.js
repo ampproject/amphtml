@@ -27,12 +27,50 @@ import {parseQueryString} from '../../../src/url';
 const HIGHLIGHT_DISMISS = 'highlightDismiss';
 
 /**
+ * The length limit of highlight param to avoid parsing
+ * a incredibley large string as JSON.
+ * @type {number}
+ */
+const HIGHLIGHT_PARAM_LENGTH_LIMIT = 1 << 20;
+
+/**
+ * The limit of # of sentences to highlight.
+ * @type {number}
+ */
+const NUM_SENTENCES_LIMIT = 100;
+
+/**
+ * The length limit of one sentence to highlight.
+ * @type {number}
+ */
+const SENTENCE_LENGTH_LIMIT = 1000;
+
+/**
  * Returns highlight param in the URL hash.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {string}
+ * @return {?JsonObject}
  */
 export const getHighlightParam = function(ampdoc) {
-  return parseQueryString(ampdoc.win.location.hash)['highlight'];
+  const param = parseQueryString(ampdoc.win.location.hash)['highlight'];
+  if (!param || param.length > HIGHLIGHT_PARAM_LENGTH_LIMIT) {
+    return null;
+  }
+  const highlight = parseJson(param);
+  const sens = highlight['s'];
+  if (sens) {
+    if (sens.length > NUM_SENTENCES_LIMIT) {
+      // Too many sentences, do nothing for safety.
+      return null;
+    }
+    for (let i = 0; i < sens.length; i++) {
+      const sen = sens[i];
+      if (sen && sen.length > SENTENCE_LENGTH_LIMIT) {
+        // Too long sentence, do nothing for safety.
+        return null;
+      }
+    }
+  }
+  return highlight;
 };
 
 /**
@@ -42,28 +80,27 @@ export const getHighlightParam = function(ampdoc) {
 export class HighlightHandler {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {string} json The highlighting info in JSON.
+   * @param {!JsonObject} highlightInfo The highlighting info in JSON.
    */
-  constructor(ampdoc, json) {
+  constructor(ampdoc, highlightInfo) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private {?Array<Element>} */
     this.highlightedNodes_ = null;
 
-    this.initHighlight_(json);
+    this.initHighlight_(highlightInfo);
   }
 
   /**
-   * @param {string} json
+   * @param {!JsonObject} highlightInfo
     * @private
     */
-  initHighlight_(json) {
+  initHighlight_(highlightInfo) {
     const ampdoc = this.ampdoc_;
     const win = ampdoc.win;
 
-    const highlight = parseJson(json);
-    const sens = findSentences(win.document.body, highlight['s']);
+    const sens = findSentences(win.document.body, highlightInfo['s']);
     if (!sens) {
       return;
     }

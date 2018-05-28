@@ -103,9 +103,10 @@ export class AmpViewerIntegration {
                 new Messaging(this.win, receivedPort, this.isWebView_));
           });
     }
-    const highlightParam = getHighlightParam(ampdoc);
-    if (highlightParam) {
-      this.highlightHandler_ = new HighlightHandler(ampdoc, highlightParam);
+    /** @type {?JsonObject} */
+    const highlightInfo = getHighlightParam(ampdoc);
+    if (highlightInfo) {
+      this.highlightHandler_ = new HighlightHandler(ampdoc, highlightInfo);
     }
 
     const port = new WindowPortEmulator(

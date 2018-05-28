@@ -19,22 +19,43 @@ import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 import {Services} from '../../../../src/services';
 
 describes.fakeWin('getHighlightParam', {
-  win: {
-    // URL encoded '{"s":["amp","highlight"]}'.
-    location: 'page.html#highlight=' +
-        '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D',
-  },
   amp: {
     ampdoc: 'single',
   },
 }, env => {
   it('get a param', () => {
-    expect(getHighlightParam(env.ampdoc)).to.equal('{"s":["amp","highlight"]}');
+    // URL encoded '{"s":["amp","highlight"]}'.
+    env.win.location = 'page.html#highlight=' +
+        '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D';
+    expect(getHighlightParam(env.ampdoc)).to.deep.equal({
+      's': ['amp', 'highlight'],
+    });
   });
 
   it('no param', () => {
     env.win.location = 'page.html';
-    expect(getHighlightParam(env.ampdoc)).to.be.undefined;
+    expect(getHighlightParam(env.ampdoc)).to.be.a('null');
+  });
+
+  it('too large json', () => {
+    env.win.location = 'page.html#highlight=' +
+        '['.repeat(1 << 20) + ']'.repeat(1 << 20);
+    expect(getHighlightParam(env.ampdoc)).to.be.a('null');
+  });
+
+  it('too many sentences', () => {
+    const sens = [];
+    for (let i = 0; i < 200; i++) {
+      sens.push('a');
+    }
+    env.win.location = 'page.html#highlight=' + JSON.stringify({'s': sens});
+    expect(getHighlightParam(env.ampdoc)).to.be.a('null');
+  });
+
+  it('too long sentence', () => {
+    env.win.location = 'page.html#highlight=' +
+        JSON.stringify({'s': ['a'.repeat(2000)]});
+    expect(getHighlightParam(env.ampdoc)).to.be.a('null');
   });
 });
 
