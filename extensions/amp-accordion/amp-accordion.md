@@ -81,6 +81,10 @@ This action collapses an `amp-accordion`. If it is already collapsed, it will st
 
 #### Attributes
 
+##### `animate`
+
+Set this attribute on the `<amp-accordion>` to allow for expand/collapse to animate.
+
 ##### `disable-session-states`
 
 Set this attribute on the `<amp-accordion>` to opt out of preserving the collapsed/expanded state of the accordion.
