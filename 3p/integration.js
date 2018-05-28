@@ -62,6 +62,7 @@ import {bodymovinanimation} from './bodymovinanimation';
 import {facebook} from './facebook';
 import {github} from './github';
 import {mathml} from './mathml';
+import {poool} from './poool';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
@@ -381,6 +382,7 @@ register('outbrain', outbrain);
 register('pixels', pixels);
 register('plista', plista);
 register('polymorphicads', polymorphicads);
+register('poool', poool);
 register('popin', popin);
 register('postquare', postquare);
 register('pubexchange', pubexchange);
