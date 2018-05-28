@@ -36,12 +36,11 @@
   "amp-animation": 1,
   "amp-live-list-sorting": 1,
   "amp-sidebar toolbar": 1,
-  "svg-in-mustache": 1,
+  "svg-in-mustache": 0,
   "a4a-safeframe-preloading-off": 0.01,
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
   "expUnconditionedCanonicalHoldback": 0.01,
   "amp-consent": 1,
-  "iframe-messaging": 1,
   "amp-img-native-srcset": 1
 }

@@ -562,6 +562,16 @@ describes.realWin('amp-ad-network-adsense-impl', {
           expect(url).to.match(/(\?|&)ramft=13(&|$)/);
         });
       });
+      it('sets matched content specific fields', () => {
+        element.setAttribute('data-matched-content-ui-type', 'ui');
+        element.setAttribute('data-matched-content-rows-num', 'rows');
+        element.setAttribute('data-matched-content-columns-num', 'cols');
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/(\?|&)crui=ui(&|$)/);
+          expect(url).to.match(/(\?|&)cr_row=rows(&|$)/);
+          expect(url).to.match(/(\?|&)cr_col=cols(&|$)/);
+        });
+      });
     });
 
     // Not using arrow function here because otherwise the way closure behaves
