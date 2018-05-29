@@ -15,38 +15,37 @@
  */
 
 import '../amp-poool';
+import {poool} from '../../../../3p/poool';
 
 describes.realWin('amp-poool', {
   amp: {
     extensions: ['amp-poool'],
-  }
+  },
 }, env => {
 
-  let win;
-  let element;
+  let win, doc;
+  const appId = 'Q9X1R-27SFS-MYC31-MCYQ1';
+  const pageType = 'premium';
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
   });
 
-  function getPoool(bundle_id, type, force_widget, debug, main_color, background_color) {
+  function getPoool(appId, pageType, forceWidget, debug) {
     const article = doc.createElement('div');
-    article.id = "need-poool-custom";
-    article.setAttribute("data-poool", 80);
-    article.setAttribute("data-poool-mode", "excerpt");
-    article.innerHTML = "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>";
+    article.id = 'postContent';
+    article.innerHTML = '<p>Lorem ipsum dolor sit amet, consectetur eicbv.</p>';
     doc.body.appendChild(article);
 
     const ampPoool = doc.createElement('amp-poool');
-    ampPoool.setAttribute('height', 400);
-    ampPoool.setAttribute('width', 400);
-    ampPoool.setAttribute('data-init', bundle_id);
-    ampPoool.setAttribute('data-page-view', type);
+    ampPoool.setAttribute('height', 150);
+    ampPoool.setAttribute('width', 80);
+    ampPoool.setAttribute('data-app-id', appId);
+    ampPoool.setAttribute('data-page-type', pageType);
     ampPoool.setAttribute('data-debug', debug);
-    ampPoool.setAttribute('data-force-widget', force_widget);
-    ampPoool.setAttribute('data-main-color', main_color);
-    ampPoool.setAttribute('data-background-color', background_color);
+    ampPoool.setAttribute('data-force-widget', forceWidget);
+    ampPoool.setAttribute('layout', 'responsive');
 
     doc.body.appendChild(ampPoool);
     return ampPoool.build().then(() => {
@@ -57,43 +56,47 @@ describes.realWin('amp-poool', {
   it('should return undefined when needed attributes aren\'t given', () => {
     return getPoool()
         .then(ampPoool => {
-          expect(ampPoool.getAttribute('data-init')).to.equal("undefined");
-          expect(ampPoool.getAttribute('data-page-view')).to.equal("undefined");
+          expect(ampPoool.getAttribute('data-app-id')).to.equal('undefined');
+          expect(ampPoool.getAttribute('data-page-type')).to.equal('undefined');
         });
   });
 
-  it('tests poool-widget division existance', () => {
-    return getPoool('ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH', 'premium')
-        .then(ampPoool => {
-          const _poool = ampPoool.firstChild;
-          expect(_poool).to.not.be.null;
-          expect(_poool.id).to.equal('poool-widget');
-          expect(ampPoool.getAttribute('data-init')).to.not.be.null;
-          expect(ampPoool.getAttribute('data-page-view')).to.not.be.null;
-        });
+  it('renders iframe in amp-poool', () => {
+    return getPoool(appId, pageType).then(ampPoool => {
+      const iframe = ampPoool.firstChild.nextSibling;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    });
   });
 
-  it('verifies needed attributes presence', () => {
-    return getPoool('ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH', 'premium')
-        .then(ampPoool => {
-          expect(ampPoool.getAttribute('data-init')).to.equal("ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH");
-          expect(ampPoool.getAttribute('data-page-view')).to.equal("premium");
-        });
+  it('adds poool paywall correctly', () => {
+    const div = document.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-POOOL',
+    };
+
+    poool(win, {
+      appId: 'Q9X1R-27SFS-MYC31-MCYQ1',
+      pageType: 'premium',
+      layout: 'fixed',
+      width: 150,
+      height: 80,
+    });
+    const pooolWidget = doc.body.querySelector('#poool-widget');
+    expect(pooolWidget).not.to.be.undefined;
   });
 
-  it('tests amp-poool with additional config variables', () => {
-    return getPoool('ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH', 'premium', 'question', true)
-        .then(ampPoool => {
-          expect(ampPoool.getAttribute('data-debug')).to.equal("true");
-          expect(ampPoool.getAttribute('data-force-widget')).to.equal("question");
-        });
-  });
-
-  it('tests amp-poool with additional style variables', () => {
-    return getPoool('ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH', 'premium', 'question', true, '#000', '#123')
-        .then(ampPoool => {
-          expect(ampPoool.getAttribute('data-main-color')).to.equal('#000');
-          expect(ampPoool.getAttribute('data-background-color')).to.equal('#123');
-        });
+  it('removes iframe after unlayoutCallback', () => {
+    return getPoool(appId, pageType, 'gift', false).then(ampPoool => {
+      const iframe = ampPoool.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = ampPoool.implementation_;
+      obj.unlayoutCallback();
+      expect(ampPoool.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+    });
   });
 });
