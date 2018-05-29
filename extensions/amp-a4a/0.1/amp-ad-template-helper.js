@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LRUCache} from '../../../src/utils/lru-cache';
+import {LruCache} from '../../../src/utils/lru-cache';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
@@ -43,8 +43,8 @@ export class AmpAdTemplateHelper {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {LRUCache} */
-    this.cache_ = new LRUCache(5);
+    /** @private {LruCache} */
+    this.cache_ = new LruCache(5);
   }
 
   /**
