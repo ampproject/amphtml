@@ -57,15 +57,15 @@ import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 

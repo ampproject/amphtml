@@ -1378,7 +1378,7 @@ export function getNetworkId(element) {
 
 
 /**
- * @param {! ../../../extensions/amp-a4a/0.1/amp-a4a.A4A} a4a
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @return {!Promise<string>} SRA request URL
  */

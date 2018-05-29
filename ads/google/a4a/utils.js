@@ -44,7 +44,7 @@ const MAX_URL_LENGTH = 16384;
 const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME: '2',
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
-  AMP_AD_FRAME_GET: '5',
+  AMP_AD_IFRAME_GET: '5',
 };
 
 /** @const {!Object} */
@@ -124,7 +124,8 @@ function getNavStart(win) {
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
   return supportsNativeCrypto(win) && (
-    !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test);
+      !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test) &&
+      !isExperimentOn(win, 'LOCAL_disableIsValidEnv');
 }
 
 /**
@@ -241,7 +242,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
 }
 
 /**
- * @param {! ../../../extensions/amp-a4a/0.1/amp-a4a.A4A} a4a
+ * @param {! ../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {number} startTime
  * @return {!Promise<!Object<string,null|number|string>>}
  */
@@ -266,7 +267,7 @@ export function googlePageParameters(a4a, startTime) {
         return {
           'is_amp': a4a.isXhrAllowed() ?
             AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
-            AmpAdImplementation.IFRAME_GET,
+            AmpAdImplementation.AMP_AD_IFRAME_GET,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
           'c': getCorrelator(win, clientId, ampDoc),

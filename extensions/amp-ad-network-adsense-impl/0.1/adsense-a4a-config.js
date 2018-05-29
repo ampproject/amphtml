@@ -32,7 +32,7 @@ import {
 } from '../../../src/experiments';
 import {
   isCanonical,
-  supportsNativeCrypto,
+  isGoogleAdsA4AValidEnvironment,
 } from '../../../ads/google/a4a/utils';
 import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-utils';
 
@@ -109,10 +109,14 @@ function selectExperiments(win, element) {
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
   randomlySelectUnconditionedExperiments(win, element);
-  if (useRemoteHtml || !supportsNativeCrypto(win) ||
-      !element.getAttribute('data-ad-client')) {
+  if (useRemoteHtml || !element.getAttribute('data-ad-client')) {
     return false;
   }
   selectExperiments(win, element);
-  return true;
+  return isGoogleAdsA4AValidEnvironment(win) ||
+      getExperimentBranch(
+          win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ==
+      ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
+      getExperimentBranch(win, ADSENSE_EXP_NAMES.CANONICAL) ==
+      ADSENSE_EXPERIMENTS.CANONICAL_EXP;
 }

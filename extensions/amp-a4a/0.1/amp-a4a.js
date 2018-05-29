@@ -709,7 +709,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!this.isXhrAllowed()) {
             this.experimentalNonAmpCreativeRenderMethod_ =
                 XORIGIN_MODE.IFRAME_GET;
-            Promise.reject(IFRAME_GET);
+            return Promise.reject(IFRAME_GET);
           }
           return adUrl && this.sendXhrRequest(adUrl);
         })
