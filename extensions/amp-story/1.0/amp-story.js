@@ -742,7 +742,7 @@ export class AmpStory extends AMP.BaseElement {
         .getLocalizedString(
             LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
     experimentsLinkEl.addEventListener('click', () => {
-      toggleExperiment(this.win, 'amp-story', true);
+      toggleExperiment(this.win, 'amp-story-v1', true);
       errorIconEl.classList.remove('i-amphtml-story-experiment-icon-error');
       errorIconEl.classList.add('i-amphtml-story-experiment-icon-done');
       errorMsgEl.textContent = this.localizationService_.getLocalizedString(
