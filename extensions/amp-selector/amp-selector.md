@@ -29,6 +29,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>All</td>
   </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-selector/">amp-selector example</a>.</td>
+  </tr>
 </table>
 
 [TOC]
