@@ -356,16 +356,14 @@ Email is structured as a [MIME tree](https://en.wikipedia.org/wiki/MIME). This M
 
 Embedding AMP within an email is simple, add a new MIME part with a content type of `text/x-amp-html` as a descendant of `multipart/alternative`. It should live alongside the existing `text/html` or `text/plain` parts. This ensures that the email message works on all clients.
 
-```html
-<amp-img alt="Bookend heading component"
-    layout="fixed"
+<amp-img alt="AMPHTML Email MIME Parts Diagram"
+    layout="responsive"
     width="752" height="246" 
     src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-email-mime-parts.png">
   <noscript>
     <img alt="AMPHTML Email MIME Parts Diagram" src="img/amp-email-mime-parts.png" />
   </noscript>
 </amp-img>
-```
 
 It is important to note that the `text/x-amp-html` part must be nested under a `multipart/alternative` node, it will not be recognized by the email client otherwise. See the following example:
 
