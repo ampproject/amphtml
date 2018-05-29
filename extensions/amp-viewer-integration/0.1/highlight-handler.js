@@ -28,22 +28,22 @@ const HIGHLIGHT_DISMISS = 'highlightDismiss';
 
 /**
  * The length limit of highlight param to avoid parsing
- * a incredibley large string as JSON.
+ * a incredibley large string as JSON. The limit is 100kB.
  * @type {number}
  */
-const HIGHLIGHT_PARAM_LENGTH_LIMIT = 1 << 20;
+const HIGHLIGHT_PARAM_LENGTH_LIMIT = 100 << 10;
 
 /**
  * The limit of # of sentences to highlight.
  * @type {number}
  */
-const NUM_SENTENCES_LIMIT = 100;
+const NUM_SENTENCES_LIMIT = 15;
 
 /**
  * The length limit of one sentence to highlight.
  * @type {number}
  */
-const SENTENCE_LENGTH_LIMIT = 1000;
+const NUM_ALL_CHARS_LIMIT = 1500;
 
 /**
  * Returns highlight param in the URL hash.
@@ -62,10 +62,15 @@ export const getHighlightParam = function(ampdoc) {
       // Too many sentences, do nothing for safety.
       return null;
     }
+    let sum = 0;
     for (let i = 0; i < sens.length; i++) {
       const sen = sens[i];
-      if (sen && sen.length > SENTENCE_LENGTH_LIMIT) {
-        // Too long sentence, do nothing for safety.
+      if (!sen) {
+        continue;
+      }
+      sum += sen.length;
+      if (sum > NUM_ALL_CHARS_LIMIT) {
+        // Too many chars, do nothing for safety.
         return null;
       }
     }

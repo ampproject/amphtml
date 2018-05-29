@@ -38,23 +38,27 @@ describes.fakeWin('getHighlightParam', {
   });
 
   it('too large json', () => {
+    const rep = 100 << 10;
     env.win.location = 'page.html#highlight=' +
-        '['.repeat(1 << 20) + ']'.repeat(1 << 20);
+        '['.repeat(rep) + ']'.repeat(rep);
     expect(getHighlightParam(env.ampdoc)).to.be.a('null');
   });
 
   it('too many sentences', () => {
     const sens = [];
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 20; i++) {
       sens.push('a');
     }
     env.win.location = 'page.html#highlight=' + JSON.stringify({'s': sens});
     expect(getHighlightParam(env.ampdoc)).to.be.a('null');
   });
 
-  it('too long sentence', () => {
-    env.win.location = 'page.html#highlight=' +
-        JSON.stringify({'s': ['a'.repeat(2000)]});
+  it('too many chars', () => {
+    const sens = [];
+    for (let i = 0; i < 5; i++) {
+      sens.push('a'.repeat(400));
+    }
+    env.win.location = 'page.html#highlight=' + JSON.stringify({'s': sens});
     expect(getHighlightParam(env.ampdoc)).to.be.a('null');
   });
 });
