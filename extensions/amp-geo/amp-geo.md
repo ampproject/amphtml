@@ -22,16 +22,16 @@ limitations under the License.
     <td>Provides an approximate country-level geolocation interface.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Required Script</strong></td>
+    <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</td>
-    <td>Available for testing</td>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-geo/">amp-geo example</a>.</td>
   </tr>
 </table>
 
