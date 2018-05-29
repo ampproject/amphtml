@@ -72,7 +72,7 @@ SSPs will need to provide a new field in the bid response to allow bidders to re
 
 ## Background Docs
 * [AMPHTML Ads for AMP Pages (Github)](https://github.com/ampproject/amphtml/issues/3133)
-* [AMPHTML Ad Creative Format Spec (Github)](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
+* [AMPHTML Ad Creative Format Spec (Github)](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
 * [AMPHTML Ads Overview (Github)](https://github.com/ampproject/amphtml/blob/master/ads/google/a4a/docs/a4a-readme.md)
 * [AMPHTML Ads Website from the AMP Project](https://www.ampproject.org/learn/who-uses-amp/amp-ads/)
 * [Example AMPHTML Ads](https://ampbyexample.com/amp-ads/#amp-ads/introduction)
