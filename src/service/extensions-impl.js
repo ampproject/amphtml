@@ -267,8 +267,7 @@ export class Extensions {
    * restricted method and it's allowed to be called only during the overall
    * extension registration.
    * @param {string} name
-   * @param {function(new:../base-element.BaseElement, !Element)}
-   *     implementationClass
+   * @param {function(new:../base-element.BaseElement, !Element)} implementationClass
    * @param {?string|undefined} css
    * @restricted
    */
@@ -659,6 +658,7 @@ function adoptStandardServicesForEmbed(childWin) {
   // The order of service adoptations is important.
   // TODO(dvoytenko): Refactor service registration if this set becomes
   // to pass the "embeddable" flag if this set becomes too unwieldy.
+  adoptServiceForEmbed(childWin, 'url');
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
   adoptServiceForEmbed(childWin, 'navigation');
