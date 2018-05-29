@@ -52,9 +52,6 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
-  RealTimeConfigManager,
-} from '../../amp-a4a/0.1/real-time-config-manager';
-import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
@@ -686,14 +683,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  tryExecuteRealTimeConfig_(consentState) {
-    const rtcManager = new RealTimeConfigManager(this);
-    try {
-      return rtcManager.maybeExecuteRealTimeConfig(
-          this.getCustomRealTimeConfigMacros_(), consentState);
-    } catch (err) {
-      user().error(TAG, 'Could not perform Real Time Config.', err);
-    }
+  rtcIsSupported() {
+    return true;
   }
 
   /** @override */
