@@ -369,13 +369,13 @@ export class AmpStoryBookend extends AMP.BaseElement {
     if (!this.isActive_()) {
       return;
     }
-    let shouldBeFullBleed;
+    let shouldBeFullBleed = false;
     this.measureMutateElement(() => {
       shouldBeFullBleed =
           this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
     }, () => {
       this.getShadowRoot().classList.toggle(
-          FULLBLEED_CLASSNAME, !!shouldBeFullBleed);
+          FULLBLEED_CLASSNAME, shouldBeFullBleed);
     });
   }
 
