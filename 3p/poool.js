@@ -18,6 +18,7 @@ import {loadScript} from './3p';
 
 import {camelCaseToDash, dashToUnderline} from '../src/string';
 import {dict} from '../src/utils/object';
+import {setStyle} from '../src/style';
 import {user} from '../src/log';
 
 const CONFIG = {
@@ -77,6 +78,7 @@ export function poool(global, data) {
   // Create paywall container
   const container = document.createElement('div');
   container.id = 'poool-widget';
+  setStyle(container, 'padding-top', '50px');
   global.document.querySelector('#c').appendChild(container);
 
   getPooolSDK(global, _poool => {
