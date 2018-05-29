@@ -32,7 +32,18 @@
         <h1>Poool AMP Custom Extension Exemple</h1>
         <h2>To learn how to customize amp-poool extension, please visit our <a href="http://dev.poool.fr/doc/sdk">SDK documentation</a>.</h2>
         <div class="container">
-            <div id="need-poool-custom">
+            <div id="postExcerpt">
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tortor leo, sollicitudin quis posuere sed, pharetra cursus mauris. Donec ultricies nibh sit amet quam feugiat, vel bibendum nisl pellentesque. In hac habitasse platea dictumst. Sed varius eget ante ac pulvinar. Suspendisse fringilla, quam ac imperdiet consequat, leo massa molestie mi, eget condimentum ligula enim ut mauris. Aliquam egestas malesuada vestibulum. Etiam ut nibh turpis. Fusce mattis blandit bibendum. Vestibulum sodales laoreet lacus ut sollicitudin. Donec tempus iaculis viverra. In congue felis quis sem porta iaculis.
+                </p>
+                <p>
+                    Nam ut eleifend augue, ut facilisis turpis. Donec sodales sem gravida sem bibendum, id euismod orci viverra. Ut ornare eu metus et fringilla. Aliquam pulvinar commodo leo, eget ultrices arcu dapibus et. Proin iaculis venenatis ante scelerisque condimentum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla ornare orci eget nisi rutrum gravida. Duis eu malesuada urna.
+                </p>
+                <p>
+                    Duis faucibus dolor in pharetra hendrerit. Integer eu sem et odio congue blandit a et libero. Phasellus tortor metus, semper non metus et, efficitur interdum felis. Morbi eget nisi eros. Sed bibendum tellus at orci tincidunt, quis laoreet nulla porttitor. Proin nunc metus, ornare vitae malesuada non, luctus nec elit. Aliquam erat volutpat. Vivamus bibendum facilisis mollis.
+                </p>
+            </div>
+            <div id="postContent" hidden>
                 <p>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tortor leo, sollicitudin quis posuere sed, pharetra cursus mauris. Donec ultricies nibh sit amet quam feugiat, vel bibendum nisl pellentesque. In hac habitasse platea dictumst. Sed varius eget ante ac pulvinar. Suspendisse fringilla, quam ac imperdiet consequat, leo massa molestie mi, eget condimentum ligula enim ut mauris. Aliquam egestas malesuada vestibulum. Etiam ut nibh turpis. Fusce mattis blandit bibendum. Vestibulum sodales laoreet lacus ut sollicitudin. Donec tempus iaculis viverra. In congue felis quis sem porta iaculis.
                 </p>
@@ -75,27 +86,14 @@
                 layout="responsive"
                 width="150"
                 height="80"
-                data-init="Q9X1R-27SFS-MYC31-MCYQ1"
-                data-page-view="premium"
+                data-app-id="Q9X1R-27SFS-MYC31-MCYQ1"
+                data-page-type="premium"
                 data-debug="true"
-                data-poool-mode="excerpt"
-                data-poool="80"
-                data-post-container="#need-poool-custom"
-                data-force-widget="video"
-                data-main-color="#2e78be"
-                data-background-color="#2e78be"
+                data-force-widget="gift"
+                data-cookies-enabled="true"
                 data-custom-segment="amp-segment"
-                data-events="poool-custom-events">
+                on="release: postExcerpt.hide, postContent.show">
             </amp-poool>
         </div>
-
-        <script id="poool-custom-events" type="application/ld+json">
-            {
-                "on_lock": "function() { console.log('Content Locked !'); }",
-                "on_identityavailable": "function(obj) { console.log('User ID is ' + obj.user_id); }",
-                "on_release": "function(e) { console.log('Released with widget ' + e.widget + ' !'); console.log('Enjoy your premium article !'); }",
-                "on_adblock": "function() { console.log('An adblocker has been detected !'); }"
-            }
-        </script>
     </body>
 </html>
