@@ -83,6 +83,7 @@ class AmpPoool extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'poool');
+    iframe.allowTransparency = true;
     this.applyFillContent(iframe);
 
     // Triggered by context.updateDimensions() inside the iframe.
