@@ -1087,6 +1087,10 @@ export class AmpA4A extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Returns whether or not the ad request may be sent using XHR.
+   * @return {boolean}
+   */
   isXhrAllowed() {
     return true;
   }

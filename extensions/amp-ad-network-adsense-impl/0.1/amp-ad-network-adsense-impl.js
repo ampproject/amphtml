@@ -20,10 +20,6 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {
-  ADSENSE_EXPERIMENTS,
-  ADSENSE_EXP_NAMES,
-} from './adsense-a4a-config';
 import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
@@ -62,7 +58,6 @@ import {
 } from '../../../ads/google/adsense-amp-auto-ads';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
-  getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
@@ -423,17 +418,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isXhrAllowed() {
-    if (!isCanonical(this.win)) {
-      return true;
-    }
-    const exp = getExperimentBranch(
-        this.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ||
-          getExperimentBranch(this.win, ADSENSE_EXP_NAMES.CANONICAL);
-    if (exp == ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
-        exp == ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP) {
-      return false;
-    }
-    return true;
+    return !isCanonical(this.win);
   }
 
   /** @override */

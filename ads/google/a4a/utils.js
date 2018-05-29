@@ -241,35 +241,35 @@ export function groupAmpAdsByType(win, type, groupFn) {
 }
 
 /**
- * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {! ../../../extensions/amp-a4a/0.1/amp-a4a.A4A} a4a
  * @param {number} startTime
- * @param {string=} opt_ampAdImplementation
  * @return {!Promise<!Object<string,null|number|string>>}
  */
-export function googlePageParameters(
-  win, nodeOrDoc, startTime, opt_ampAdImplementation) {
+export function googlePageParameters(a4a, startTime) {
+  const {win} = a4a;
+  const ampDoc = a4a.getAmpDoc();
   return Promise.all([
-    getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga'),
-    Services.viewerForDoc(nodeOrDoc).getReferrerUrl()])
+    getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
+    Services.viewerForDoc(ampDoc).getReferrerUrl()])
       .then(promiseResults => {
         const clientId = promiseResults[0];
-        const documentInfo = Services.documentInfoForDoc(nodeOrDoc);
+        const documentInfo = Services.documentInfoForDoc(ampDoc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
         const {screen} = win;
-        const viewport = Services.viewportForDoc(nodeOrDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
-        const visibilityState = Services.viewerForDoc(nodeOrDoc)
+        const visibilityState = Services.viewerForDoc(ampDoc)
             .getVisibilityState();
         return {
-          'is_amp': opt_ampAdImplementation ||
-              AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+          'is_amp': a4a.isXhrAllowed() ?
+            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
+            AmpAdImplementation.IFRAME_GET,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
-          'c': getCorrelator(win, clientId, nodeOrDoc),
+          'c': getCorrelator(win, clientId, ampDoc),
           'ga_cid': win.gaGlobal.cid || null,
           'ga_hid': win.gaGlobal.hid || null,
           'dt': startTime,
@@ -314,11 +314,7 @@ export function googleAdUrl(
   a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
-  const ampAdImplementation = a4a.isXhrAllowed() ?
-    AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
-    AmpAdImplementation.AMP_AD_FRAME_GET;
-  return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime,
-      ampAdImplementation)
+  return googlePageParameters(a4a, startTime)
       .then(pageLevelParameters => {
         Object.assign(parameters, blockLevelParameters, pageLevelParameters);
         return truncAndTimeUrl(baseUrl, parameters, startTime);

@@ -48,7 +48,7 @@ export class ExperimentUtils {
    * @param {!Element} element
    * @param {!Array<string>} selectionBranches
    * @param {string} experimentName
-   * @visibileForTesting
+   * @visibleForTesting
    */
   maybeSelectExperiment(
     win, element, selectionBranches, experimentName) {
