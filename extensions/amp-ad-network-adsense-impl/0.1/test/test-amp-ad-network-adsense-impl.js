@@ -23,10 +23,6 @@ import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
-import {
-  ADSENSE_EXPERIMENTS,
-  ADSENSE_EXP_NAMES,
-} from '../adsense-a4a-config';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
@@ -989,12 +985,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl.win = {
         location: {},
       };
-    });
-
-    afterEach(() => {
-      toggleExperiment(
-          impl.win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL, false);
-      toggleExperiment(impl.win, ADSENSE_EXP_NAMES.CANONICAL, false);
     });
 
     it('should return false on a canonical page', () => {

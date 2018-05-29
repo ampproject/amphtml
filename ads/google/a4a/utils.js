@@ -124,7 +124,7 @@ function getNavStart(win) {
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
   return supportsNativeCrypto(win) && (
-      !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test) &&
+    !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test) &&
       !isExperimentOn(win, 'LOCAL_disableIsValidEnv');
 }
 
