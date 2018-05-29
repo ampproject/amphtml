@@ -858,7 +858,9 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_.updateActivePage(
         pageIndex,
         this.getPageCount(),
-        targetPage.element.id);
+        targetPage.element.id,
+        targetPage.getNextPageId() === null /* isFinalPage */
+    );
 
     const oldPage = this.activePage_;
 
