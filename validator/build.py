@@ -396,8 +396,7 @@ def RunSmokeTest(out_dir):
       [
           'node', 'nodejs/index.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
-          'testdata/feature_tests/minimum_valid_amp.html',
-          '--format=text'
+          'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
       ],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
@@ -412,8 +411,7 @@ def RunSmokeTest(out_dir):
       [
           'node', 'nodejs/index.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
-          'testdata/feature_tests/empty.html',
-          '--format=text'
+          'testdata/feature_tests/empty.html', '--format=text'
       ],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
