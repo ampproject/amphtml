@@ -163,6 +163,10 @@
   text-transform: uppercase !important;
 }
 
+.i-amphtml-story-consent-action.i-amphtml-hidden {
+  display: none !important;
+}
+
 .i-amphtml-story-consent-action-accept {
   background: var(--primary-color, #000000) !important;
   color: #FFFFFF !important;
