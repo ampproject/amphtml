@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>Dynamically loads more documents recommendended for the user.
+    <td>Dynamically loads more documents recommended for the user.
     </td>
   </tr>
   <tr>
