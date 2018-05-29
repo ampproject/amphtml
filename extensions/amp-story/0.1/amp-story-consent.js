@@ -35,8 +35,16 @@ import {renderAsElement} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
 
-/** @private @const {string} */
+/** @const {string} */
 const TAG = 'amp-story-consent';
+
+/**
+ * Default optional config parameters.
+ * @const {!Object}
+ */
+const DEFAULT_OPTIONAL_PARAMETERS = {
+  onlyAccept: false,
+};
 
 // TODO(gmajoulet): switch to `htmlFor` static template helper.
 /**
@@ -115,7 +123,8 @@ const getTemplate = (config, consentId, logoSrc) => ({
               tag: 'button',
               attrs: dict({
                 'class': 'i-amphtml-story-consent-action ' +
-                    'i-amphtml-story-consent-action-reject',
+                    'i-amphtml-story-consent-action-reject' +
+                    (config.onlyAccept === true ? ' i-amphtml-hidden' : ''),
                 'on': `tap:${consentId}.reject`,
               }),
               children: [],
@@ -271,7 +280,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         'type="application/json"');
 
     this.storyConsentConfig_ =
-      /** @type {Object} */ (parseJson(storyConsentScript.textContent));
+        Object.assign(
+            {},
+            DEFAULT_OPTIONAL_PARAMETERS,
+            /** @type {Object} */ (parseJson(storyConsentScript.textContent)));
 
     user().assertString(
         this.storyConsentConfig_.title, `${TAG}: config requires a title`);
@@ -281,6 +293,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.storyConsentConfig_.vendors &&
             isArray(this.storyConsentConfig_.vendors),
         `${TAG}: config requires an array of vendors`);
+    user().assertBoolean(
+        this.storyConsentConfig_.onlyAccept,
+        `${TAG}: config requires "onlyAccept" to be a boolean`);
   }
 
   /**
