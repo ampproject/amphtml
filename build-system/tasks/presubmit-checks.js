@@ -307,6 +307,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/url.js',
       'src/service/navigation.js',
+      'src/service/url-impl.js',
       'dist.3p/current/integration.js',
     ],
   },
