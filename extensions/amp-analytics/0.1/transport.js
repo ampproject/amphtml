@@ -85,7 +85,7 @@ export class Transport {
    * @return {boolean} True if this browser supports navigator.sendBeacon.
    * @param {string} body
    */
-  static sendRequestUsingBeacon(win, request, body = '') {
+  static sendRequestUsingBeacon(win, request, body) {
     if (!win.navigator.sendBeacon) {
       return false;
     }
@@ -102,7 +102,7 @@ export class Transport {
    * @return {boolean} True if this browser supports cross-domain XHR.
    * @param {string} body
    */
-  static sendRequestUsingXhr(win, request, body = '') {
+  static sendRequestUsingXhr(win, request, body) {
     if (!win.XMLHttpRequest) {
       return false;
     }

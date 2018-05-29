@@ -264,11 +264,10 @@ export class RequestHandler {
             this.constructExtraUrlParamStrs_(baseUrl,
                 extraUrlParamsPromise);
         }
-        requestUrlPromise.then(requestUrl => {
-          this.requestBodyPromise_.then(requestBody => {
-            this.handler_(requestUrl, lastTrigger, requestBody);
-          });
-        });
+        Promise.all([requestUrlPromise, this.requestBodyPromise_])
+            .then(data => {
+              this.handler_(data[0], lastTrigger, data[1]);
+            });
       });
     });
   }
