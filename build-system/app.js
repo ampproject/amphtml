@@ -118,6 +118,12 @@ app.use('/api/echo/post', (req, res) => {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
+app.use('/analytics/:type', (req, res) => {
+  console.log('Analytics event received: ' + req.params.type);
+  console.log(req.query);
+  res.status(204).send();
+});
+
 /**
  * In practice this would be *.ampproject.org and the publishers
  * origin. Please see AMP CORS docs for more details:
