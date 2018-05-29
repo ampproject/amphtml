@@ -19,9 +19,6 @@
 /* Remove overflow hidden property that cut poool paywall */
 .i-amphtml-layout-size-defined {
     overflow: visible !important;
-}
-
-/* Remove unecessary tag causing huge space between article and poool paywall */
-i-amphtml-sizer {
-    display: none !important;
+    position: relative;
+    top: -60px;
 }
