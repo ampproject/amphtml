@@ -128,8 +128,8 @@ class AmpPoool extends AMP.BaseElement {
       return;
     }
 
-    if (EVENTS.indexOf(eventData['action']) > -1) {
-      this.fireEvent_(eventData['action'], eventData['data']);
+    if (EVENTS.indexOf(parsedEventData['action']) > -1) {
+      this.fireEvent_(parsedEventData['action'], parsedEventData['data']);
     }
   }
 
