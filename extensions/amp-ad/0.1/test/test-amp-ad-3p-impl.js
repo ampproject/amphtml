@@ -426,6 +426,26 @@ describes.realWin('amp-ad-3p-impl', {
         expect(callback).to.exist;
         expect(attemptChangeSizeSpy).to.be.calledOnce;
       });
+
+      it('should schedule a resize for core responsive', () => {
+        constructImpl({
+          width: '100vw',
+          height: '280',
+          'data-auto-format': 'corerspv',
+          'data-full-width': '',
+        });
+        const attemptChangeSizeSpy =
+            sandbox.stub(impl, 'attemptChangeSize').callsFake(
+                (height, width) => {
+                  expect(width).to.equal(VIEWPORT_WIDTH);
+                  expect(height).to.equal(1132);
+                  return Promise.resolve();
+                });
+
+        const callback = impl.buildCallback();
+        expect(callback).to.exist;
+        expect(attemptChangeSizeSpy).to.be.calledOnce;
+      });
     });
 
     describe('should align correctly', () => {

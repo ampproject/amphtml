@@ -62,6 +62,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
   let impl;
   let element;
   let isResponsiveStub;
+  let isCoreResponsiveStub;
 
   beforeEach(() => {
     win = env.win;
@@ -86,6 +87,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     impl = new AmpAdNetworkAdsenseImpl(element);
     impl.win['goog_identity_prom'] = Promise.resolve({});
     isResponsiveStub = sandbox.stub(impl, 'isResponsive_');
+    isCoreResponsiveStub = sandbox.stub(impl, 'isCoreResponsive_');
   });
 
   /**
@@ -138,6 +140,33 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('should NOT be valid (responsive with missing data-full-width)', () => {
       isResponsiveStub.callsFake(() => true);
+      element.setAttribute('height', '320');
+      element.setAttribute('width', '100vw');
+      expect(impl.isValidElement()).to.be.false;
+    });
+    it('should be valid (core responsive)', () => {
+      isCoreResponsiveStub.callsFake(() => true);
+      element.setAttribute('data-full-width', 'true');
+      element.setAttribute('height', '320');
+      element.setAttribute('width', '100vw');
+      expect(impl.isValidElement()).to.be.true;
+    });
+    it('should NOT be valid (core responsive with wrong height)', () => {
+      isCoreResponsiveStub.callsFake(() => true);
+      element.setAttribute('data-full-width', 'true');
+      element.setAttribute('height', '666');
+      element.setAttribute('width', '100vw');
+      expect(impl.isValidElement()).to.be.false;
+    });
+    it('should NOT be valid (core responsive with wrong width)', () => {
+      isCoreResponsiveStub.callsFake(() => true);
+      element.setAttribute('data-full-width', 'true');
+      element.setAttribute('height', '320');
+      element.setAttribute('width', '666');
+      expect(impl.isValidElement()).to.be.false;
+    });
+    it('should NOT be valid (corerspv without data-full-width)', () => {
+      isCoreResponsiveStub.callsFake(() => true);
       element.setAttribute('height', '320');
       element.setAttribute('width', '100vw');
       expect(impl.isValidElement()).to.be.false;
@@ -490,7 +519,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           element.setAttribute('width', 'auto');
           expect(impl.element.getAttribute('width')).to.equal('auto');
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
+            // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
         });
     it('includes eid when in amp-auto-ads holdout control', () => {
@@ -558,6 +587,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
         element.setAttribute('data-auto-format', 'rspv');
         return impl.getAdUrl().then(url => {
           expect(url).to.match(/(\?|&)ramft=13(&|$)/);
+        });
+      });
+      it('sets rafmt for core responsive', () => {
+        element.setAttribute('data-ad-slot', 'some_slot');
+        element.setAttribute('data-auto-format', 'corerspv');
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/(\?|&)ramft=15(&|$)/);
         });
       });
     });
@@ -816,6 +852,22 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
       });
     });
+    it('should schedule a resize for core responsive', () => {
+      constructImpl({
+        width: '100vw',
+        height: '100',
+        'data-auto-format': 'corerspv',
+      });
+
+      const callback = impl.buildCallback();
+      expect(callback).to.exist;
+
+      // The returned promise fails for some reason.
+      return callback.then(() => {
+        expect(impl.element.offsetHeight).to.equal(1387);
+        expect(impl.element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+      });
+    });
   });
 
   describe('#onLayoutMeasure', () => {
@@ -855,8 +907,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
       // Stub out vsync tasks to run immediately.
       impl.getVsync().run = (vsyncTaskSpec, vsyncState) => {
-        vsyncTaskSpec.measure(vsyncState);
-        vsyncTaskSpec.mutate(vsyncState);
+        if (vsyncTaskSpec.measure) {
+          vsyncTaskSpec.measure(vsyncState);
+        }
+        if (vsyncTaskSpec.mutate) {
+          vsyncTaskSpec.mutate(vsyncState);
+        }
       };
 
       // Fix the viewport to a consistent size to that the test doesn't depend
@@ -935,6 +991,22 @@ describes.realWin('amp-ad-network-adsense-impl', {
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               {width: 500, height: 667}))
           .to.be.equal(300);
+    });
+  });
+
+  describe('#getCoreResponsiveHeightForContext', () => {
+    it('get Core responsive height for iPhone 6', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getCoreResponsiveHeightForContext_(
+              {width: 375, height: 320}))
+          .to.be.equal(1387);
+    });
+
+    it('get Core responsive height for iPhone 5', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getCoreResponsiveHeightForContext_(
+              {width: 320, height: 320}))
+          .to.be.equal(1200);
     });
   });
 
