@@ -335,8 +335,10 @@ describes.realWin('amp-story', {
 
     return story.layoutCallback()
         .then(() => {
-          expect(dispatchStub)
-              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
+          expect(dispatchStub).to.have.been.calledWith(Action.CHANGE_PAGE, {
+            id: firstPageId,
+            index: 0,
+          });
         });
   });
 
