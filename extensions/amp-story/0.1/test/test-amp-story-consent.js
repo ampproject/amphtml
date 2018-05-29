@@ -16,6 +16,7 @@
 
 import {AmpStoryConsent} from '../amp-story-consent';
 import {LocalizationService} from '../localization';
+import {computedStyle} from '../../../../src/style';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-consent', {amp: true}, env => {
@@ -41,6 +42,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
       title: 'Foo title.',
       message: 'Foo message about the consent.',
       vendors: ['Item 1', 'Item 2'],
+      onlyAccept: false,
     };
 
     const styles = {'background-color': 'rgb(0, 0, 0)'};
@@ -125,6 +127,47 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
         storyConsent.buildCallback();
       }).to.throw('config requires an array of vendors');
     });
+  });
+
+  it('should require onlyAccept to be a boolean', () => {
+    defaultConfig.onlyAccept = 'foo';
+    setConfig(defaultConfig);
+
+    allowConsoleError(() => {
+      expect(() => {
+        storyConsent.buildCallback();
+      }).to.throw('config requires "onlyAccept" to be a boolean');
+    });
+  });
+
+  it('should show the decline button by default', () => {
+    delete defaultConfig.onlyAccept;
+    setConfig(defaultConfig);
+
+    storyConsent.buildCallback();
+
+    const buttonEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-action-reject');
+
+    // For some reason the win object provided by the test environment does not
+    // return all the styles.
+    const styles = computedStyle(window, buttonEl);
+    expect(styles.display).to.equal('block');
+  });
+
+  it('should hide the decline button if onlyAccept is true', () => {
+    defaultConfig.onlyAccept = true;
+    setConfig(defaultConfig);
+
+    storyConsent.buildCallback();
+
+    const buttonEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-action-reject');
+
+    // For some reason the win object provided by the test environment does not
+    // return all the styles.
+    const styles = computedStyle(window, buttonEl);
+    expect(styles.display).to.equal('none');
   });
 
   it('should whitelist the <amp-consent> actions', () => {
