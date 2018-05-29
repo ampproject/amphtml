@@ -413,7 +413,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   /**
-   * @param {StateChangeEventDef} stateChangeEvent
+   * @param {!StateChangeEventDef} stateChangeEvent
    * @private
    */
   handleStateChange_(stateChangeEvent) {

@@ -859,7 +859,7 @@ export class AmpStory extends AMP.BaseElement {
         pageIndex,
         this.getPageCount(),
         targetPage.element.id,
-        targetPage.getNextPageId() === null // isFinalPage
+        targetPage.getNextPageId() === null /* isFinalPage */
     );
 
     const oldPage = this.activePage_;
