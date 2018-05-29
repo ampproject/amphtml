@@ -55,9 +55,10 @@ This component is experimental and under active development. For any issues, ple
 We are adding new capabilities to the amp-stories bookend, enabling richer component support and visual layouts. The new features are:
 
 * The share providers can now be specified in a specific order.
-* New bookend component: call to action links. Use it to add a 'Subscribe' button!
-* New bookend component: text box. Use it to give photo credits!
-* New bookend component: portrait and landscape cards. Use them to link to other stories or videos!
+* New bookend components:
+  * Call to action links
+  * Text box
+  * Portrait and landscape cards
 
 To use them, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attributes like so:
 
