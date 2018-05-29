@@ -28,7 +28,6 @@ eventName:targetId[.methodName[(arg1=value, arg2=value)]]
 
 See the table below for descriptions of each part of the syntax.
 
-
 <table>
   <tr>
     <th width="30%">Syntax</th>
@@ -118,16 +117,16 @@ For example, the following is possible in AMP:
 
 <table>
   <tr>
-    <th>Action</th>
+    <th width="20%">Action</th>
     <th>Description</th>
   </tr>
   <tr>
     <td><code>play</code></td>
-    <td>Plays the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+    <td>Plays the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
   </tr>
   <tr>
     <td><code>pause</code></td>
-    <td>Pauses the audio. Is a no-op if the `<amp-audio>` element is a descendant of `<amp-story>`.</td>
+    <td>Pauses the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
   </tr>
 </table>
 
