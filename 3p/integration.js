@@ -367,7 +367,7 @@ register('mediaimpact', mediaimpact);
 register('medianet', medianet);
 register('mediavine', mediavine);
 register('medyanet', medyanet);
-register('meg', meg);  
+register('meg', meg);
 register('microad', microad);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
