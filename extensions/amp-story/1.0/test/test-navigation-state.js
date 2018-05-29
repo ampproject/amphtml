@@ -75,6 +75,24 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     });
   });
 
+  it('should NOT dispatch END if not on last page', () => {
+    const observer = sandbox.spy();
+
+    navigationState.observe(event => observer(event));
+
+    hasBookend = false;
+
+    navigationState.updateActivePage(1, 2, 'fake-id', false);
+
+    expect(observer).to.have.been.calledWith(sandbox.match(e =>
+      e.type == StateChangeType.ACTIVE_PAGE
+          && e.value.pageIndex === 1
+          && e.value.totalPages === 2));
+
+    expect(observer).to.not.have.been.calledWith(sandbox.match(e =>
+      e.type == StateChangeType.END));
+  });
+
   it('should dispatch END on last page if story does NOT have bookend', () => {
     const observer = sandbox.spy();
 
@@ -82,7 +100,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     hasBookend = false;
 
-    navigationState.updateActivePage(1, 2);
+    navigationState.updateActivePage(1, 2, 'fake-id', true);
 
     expect(observer).to.have.been.calledWith(sandbox.match(e =>
       e.type == StateChangeType.ACTIVE_PAGE
@@ -100,7 +118,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     hasBookend = true;
 
-    navigationState.updateActivePage(1, 2);
+    navigationState.updateActivePage(1, 2, 'fake-id', true);
 
     expect(observer).to.have.been.calledWith(sandbox.match(e =>
       e.type == StateChangeType.ACTIVE_PAGE

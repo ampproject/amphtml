@@ -17,15 +17,14 @@
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {StateChangeType} from '../../amp-story/0.1/navigation-state';
-import {StateProperty} from '../../amp-story/0.1/amp-story-store-service';
+import {StateChangeEventDef, StateChangeType} from '../../amp-story/1.0/navigation-state';
+import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-
 
 /** @const */
 const MIN_INTERVAL = 3;
@@ -44,6 +43,9 @@ const TIMEOUT_LIMIT = 10000; // 10 seconds
 
 /** @const */
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
+
+/** @const */
+const LOADING_ATTR = 'i-amphtml-loading';
 
 /** @const */
 const DATA_ATTR = {
@@ -296,6 +298,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const signals = impl.signals();
       return signals.whenSignal(CommonSignals.INI_LOAD);
     }).then(() => {
+      // remove loading attribute once loaded so that desktop CSS will position
+      // offscren with all other pages
+      const currentPageEl = this.adPageEls_[this.adPageEls_.length - 1];
+      currentPageEl.removeAttribute(LOADING_ATTR);
+
       this.analyticsEvent_(EVENTS.AD_LOADED,
           {[VARS.AD_LOADED]: Date.now()});
       this.isCurrentAdLoaded_ = true;
@@ -315,6 +322,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       'id': `i-amphtml-ad-page-${id}`,
       'ad': '',
       'distance': '2',
+      'i-amphtml-loading': '',
     });
 
     return createElementWithAttributes(
@@ -405,6 +413,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   /**
+   * @param {!StateChangeEventDef} stateChangeEvent
    * @private
    */
   handleStateChange_(stateChangeEvent) {
@@ -462,21 +471,37 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /**
    * Place ad based on user config
-   * @param {string} currentPageId
+   * @param {string} pageBeforeAdId
    * @private
    */
-  tryToPlaceAdAfterPage_(currentPageId) {
+  tryToPlaceAdAfterPage_(pageBeforeAdId) {
     const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
     if (!this.isCurrentAdLoaded_ && this.adTimedOut_()) {
       // timeout fail
       return AD_STATE.FAILED;
     }
 
-    const currentPage = this.ampStory_.getPageById(currentPageId);
-    const nextPage = this.ampStory_.getNextPage(currentPage);
+    let pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
+    let pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
 
-    if (!this.isCurrentAdLoaded_ || currentPage.isAd() ||
-        (nextPage && nextPage.isAd())) {
+    if (!pageAfterAd) {
+      return AD_STATE.PENDING;
+    }
+
+    if (this.isDesktopView_()) {
+      // If we are in desktop view the ad must be inserted 2 pages away because
+      // the next page will already be in view
+      pageBeforeAd = pageAfterAd;
+      pageBeforeAdId = pageAfterAd.element.id;
+      pageAfterAd = this.ampStory_.getNextPage(pageAfterAd);
+    }
+
+    if (!pageAfterAd) {
+      return AD_STATE.PENDING;
+    }
+
+    if (!this.isCurrentAdLoaded_ || pageBeforeAd.isAd() ||
+        pageAfterAd.isAd()) {
       // if we are going to cause two consecutive ads or ad is still
       // loading we will try again on next user interaction
       return AD_STATE.PENDING;
@@ -488,8 +513,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.FAILED;
     }
 
-    this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
+    this.ampStory_.insertPage(pageBeforeAdId, nextAdPageEl.id);
     return AD_STATE.INSERTED;
+  }
+
+
+  /**
+   * @private
+   * @return {boolean}
+   */
+  isDesktopView_() {
+    return !!this.storeService_.get(StateProperty.DESKTOP_STATE);
   }
 
 

@@ -97,6 +97,7 @@ describes.realWin('amp-story-auto-ads', {
       const ad = win.document.createElement('amp-ad');
       ad.getImpl = () => Promise.resolve(fakeImpl);
       sandbox.stub(autoAds, 'createAdElement_').returns(ad);
+      autoAds.adPageEls_ = [ad];
 
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.createAdPage_();
