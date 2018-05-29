@@ -90,7 +90,7 @@ export class RealTimeConfigManager {
     this.promiseArray_ = [];
 
     /** @private {?Object} */
-    this.rtcConfig_ = {};
+    this.rtcConfig_ = null;
   }
 
   /**

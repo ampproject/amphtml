@@ -494,8 +494,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'timeoutMillis': 500};
       setRtcConfig(rtcConfig);
       validateRtcConfig_(element);
-      expect(rtc.rtcConfig).to.be.ok;
-      expect(rtc.rtcConfig).to.deep.equal(rtcConfig);
+      expect(rtc.rtcConfig_).to.be.ok;
+      expect(rtc.rtcConfig_).to.deep.equal(rtcConfig);
     });
 
     it('should allow timeout of 0', () => {
@@ -508,8 +508,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'timeoutMillis': 0};
       setRtcConfig(rtcConfig);
       validateRtcConfig_(element);
-      expect(rtc.rtcConfig).to.be.ok;
-      expect(rtc.rtcConfig).to.deep.equal(rtcConfig);
+      expect(rtc.rtcConfig_).to.be.ok;
+      expect(rtc.rtcConfig_).to.deep.equal(rtcConfig);
     });
 
     it('should not allow timeout greater than default', () => {
@@ -529,13 +529,13 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'timeoutMillis': 1000};
       setRtcConfig(rtcConfig);
       validateRtcConfig_(element);
-      expect(rtc.rtcConfig).to.be.ok;
-      expect(rtc.rtcConfig).to.deep.equal(expectedRtcConfig);
+      expect(rtc.rtcConfig_).to.be.ok;
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
     it('should return null if rtc-config not specified', () => {
       validateRtcConfig_(element);
-      expect(rtc.rtcConfig).to.be.null;
+      expect(rtc.rtcConfig_).to.be.null;
     });
 
     // Test various misconfigurations that are missing vendors or urls.
@@ -563,7 +563,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   describe('#inflateAndSendRtc_', () => {
     it('should not send RTC if macro expansion exceeds timeout', () => {
       const url = 'https://www.example.biz/?dummy=DUMMY';
-      rtc.rtcConfig = {
+      rtc.rtcConfig_ = {
         timeoutMillis: 10,
       };
       const macroDelay = 20;
@@ -575,7 +575,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         },
       };
       inflateAndSendRtc_(url, macros);
-      return rtc.promiseArray[0].then(errorResponse => {
+      return rtc.promiseArray_[0].then(errorResponse => {
         expect(errorResponse.error).to.equal(
             RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT);
       });
@@ -583,14 +583,14 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     it('should not send RTC if no longer current', () => {
       const url = 'https://www.example.biz/';
-      rtc.rtcConfig = {
+      rtc.rtcConfig_ = {
         timeoutMillis: 1000,
       };
       const macros = {};
       // Simulate an unlayoutCallback call
       inflateAndSendRtc_(url, macros);
       a4aElement.promiseId_++;
-      return rtc.promiseArray[0].then(errorResponse => {
+      return rtc.promiseArray_[0].then(errorResponse => {
         expect(errorResponse).to.be.undefined;
       });
 
