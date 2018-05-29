@@ -65,6 +65,30 @@ tags: {  # <amp-poool>
     name: "page-view"
     mandatory: true
   }
+  attrs: {
+    name: "debug"
+  }
+  attrs: {
+    name: "force-widget"
+  }
+  attrs: {
+    name: "login-button-enabled"
+  }
+  attrs: {
+    name: "signature-enabled"
+  }
+  attrs: {
+    name: "user-is-premium"
+  }
+  attrs: {
+    name: "video-client"
+  }
+  attrs: {
+    name: "custom-segment"
+  }
+  attrs: {
+    name: "cookies-enabled"
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-poool"
   amp_layout: {
