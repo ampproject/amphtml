@@ -26,7 +26,6 @@ limitations under the License.
 </amp-embed>
 ```
 
-
 ## Configuration
 
 For semantics of configuration, please contact info@epeex.com.
