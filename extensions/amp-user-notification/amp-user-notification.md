@@ -119,6 +119,39 @@ Example:
 { "showNotification": true }
 ```
 
+##### data-show-if-geo
+
+When specified `amp-user-notification` will only trigger if an `amp-geo` country group matches.
+
+Example:
+
+```html
+<amp-geo layout=nodisplay>
+  <script type="application/json">
+    {
+      "ISOCountryGroups": {
+      "nafta": [ "ca", "mx", "us", "unknown" ],
+      "waldo": [ "unknown" ],
+      "anz": [ "au", "nz" ]
+      }
+    }
+  </script>
+</amp-geo>
+
+<amp-user-notification
+    layout=nodisplay
+    id="amp-user-notification1"
+    data-show-if-geo="nafta"
+    data-dismiss-href="https://example.com/api/echo/post">
+    This notice is only shown in Canada, Mexico and USA.
+    <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
+</amp-user-notification>
+```
+
+Setting `data-show-if-geo="!countryGroup"` will match in the case where no other country group matches.
+
+`data-show-if-geo` and `data-show-if-href` are mutually exclusive, including both will generate an error.
+
 ##### data-dismiss-href (optional)
 
 When specified, AMP will make a CORS POST request to the specified URL transmitting the `elementId` and `ampUserId` only when the user has explicitly agreed.

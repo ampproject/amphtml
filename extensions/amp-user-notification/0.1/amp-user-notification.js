@@ -109,6 +109,12 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.persistDismissal_ = false;
 
     /** @private {?string} */
+    this.showIfGeo_ = null;
+
+    /** @private {?Promise<boolean>} */
+    this.geoPromise_ = null;
+
+    /** @private {?string} */
     this.showIfHref_ = null;
 
     /** @private {string} */
@@ -137,9 +143,20 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     this.storageKey_ = 'amp-user-notification:' + this.elementId_;
 
+    this.showIfGeo_ = this.element.getAttribute('data-show-if-geo');
+
     this.showIfHref_ = this.element.getAttribute('data-show-if-href');
     if (this.showIfHref_) {
       assertHttpsUrl(this.showIfHref_, this.element);
+    }
+
+    user().assert(
+        !(this.showIfHref_ && this.showIfGeo_ !== null),
+        'Only one "data-show-if-*" attribute allowed'
+    );
+
+    if (this.showIfGeo_) {
+      this.geoPromise_ = this.isNotificationRequiredGeo_(this.showIfGeo_);
     }
 
     this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
@@ -168,6 +185,22 @@ export class AmpUserNotification extends AMP.BaseElement {
     userNotificationManagerPromise.then(manager => {
       manager.registerUserNotification(
           dev().assertString(this.elementId_), this);
+    });
+  }
+
+  /**
+   * Returns a promise that if user is in the given geoGroup
+   * @param {string} geoGroup
+   * @return {Promise<boolean>}
+   */
+  isNotificationRequiredGeo_(geoGroup) {
+    return Services.geoForDocOrNull(this.element).then(geo => {
+      user().assert(geo,
+          'requires <amp-geo> to use promptIfUnknownForGeoGroup');
+      return (
+        geo.ISOCountryGroups.indexOf(geoGroup) >= 0 ||
+        (geoGroup === '!countryGroup' && geo.ISOCountryGroups.length === 0)
+      );
     });
   }
 
@@ -322,6 +355,10 @@ export class AmpUserNotification extends AMP.BaseElement {
         // Ask remote endpoint if available. XHR will throw a user error when
         // fails.
         return this.shouldShowViaXhr_();
+      }
+      if (this.geoPromise_) {
+        // Check if we are in the requested geo
+        return this.geoPromise_;
       }
       // Otherwise, show the notification.
       return true;
