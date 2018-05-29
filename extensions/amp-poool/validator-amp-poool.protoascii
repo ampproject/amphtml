@@ -58,11 +58,11 @@ tags: {  # <amp-poool>
   satisfies: "amp-poool"
   requires: "amp-poool extension .js script"
   attrs: {
-    name: "init"
+    name: "app-id"
     mandatory: true
   }
   attrs: {
-    name: "page-view"
+    name: "page-type"
     mandatory: true
   }
   attrs: {
