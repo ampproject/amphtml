@@ -52,9 +52,9 @@ This component is experimental and under active development. For any issues, ple
 
 ### (5/2018) **New features for the bookend**
 
-We are adding new capabilities to the amp-stories bookend, enabling richer component support and visual layouts. The new features are:
+We are adding new capabilities to the amp-stories bookend, enabling richer component support and visual layouts. Some of the new features:
 
-* The share providers can now be specified in a specific order.
+* The share providers will now be sorted according to the JSON configuration.
 * New bookend components:
   * Call to action links
   * Text box
