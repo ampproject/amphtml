@@ -86,9 +86,13 @@ export function poool(global, data) {
     // Init poool
     _poool('init', bundleID);
     _poool('config', 'mode', 'custom', true);
-    _poool('event', 'onIdentityAvailable', function() {
-      const size = container.getBoundingClientRect();
-      global.context.updateDimensions(size.width, size.height);
+
+    // Update iframe dimensions when paywall is removed
+    _poool('event', 'onRelease', function() {
+      setTimeout(() => {
+        const size = container.getBoundingClientRect();
+        global.context.requestResize(size.width, size.height);
+      }, 1);
     });
 
     // Set config
