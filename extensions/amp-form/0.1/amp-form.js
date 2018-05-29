@@ -206,7 +206,7 @@ export class AmpForm {
   getXhrUrl_(attribute) {
     const url = this.form_.getAttribute(attribute);
     if (url) {
-      const urlService = Services.urlForDoc(this.element);
+      const urlService = Services.urlForDoc(this.form_);
       urlService.assertHttpsUrl(url, this.form_, attribute);
       user().assert(!urlService.isProxyOrigin(url),
           `form ${attribute} should not be on AMP CDN: %s`,
@@ -635,7 +635,7 @@ export class AmpForm {
           'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
           'not supported, use target=_top instead. %s', this.form_);
       try {
-        const urlService = Services.urlForDoc(this.element);
+        const urlService = Services.urlForDoc(this.form_);
         urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
         urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
