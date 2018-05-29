@@ -62,6 +62,8 @@ export const ADSENSE_EXP_NAMES = {
 
 /**
  * Attempts to select into unconditioned Adsense experiments.
+ * @param {!Window} win
+ * @param {!Element} element
  */
 function randomlySelectUnconditionedExperiments(win, element) {
   selectAndSetExperiments(win, element,
@@ -105,7 +107,7 @@ function selectExperiments(win, element) {
  * @param {!Window} win
  * @param {!Element} element
  * @param {boolean} useRemoteHtml
- * @returns {boolean}
+ * @return {boolean}
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
   randomlySelectUnconditionedExperiments(win, element);
