@@ -227,8 +227,8 @@ When `items="items"` is specified (which, is the default) the response must be a
 
 #### max-items (optional)
 
-An integer value spcifying the maximum length of the items array to be rendered.
-The `items` array will be trucated to `max-items` entries if the returned value exceeds `max-items`.
+An integer value specifying the maximum length of the items array to be rendered.
+The `items` array will be truncated to `max-items` entries if the returned value exceeds `max-items`.
 
 #### single-item (optional)
 
