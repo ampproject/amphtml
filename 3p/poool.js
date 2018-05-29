@@ -96,20 +96,25 @@ export function poool(global, data) {
     });
 
     // Set config
-    for (const configEntry in Object.entries(CONFIG)) {
+    Object.entries(CONFIG).forEach(configEntry => {
+
       const configKey = configEntry[0],
           configDefaultValue = configEntry[1];
 
-      const configValue = data[configKey] || configDefaultValue;
+      let configValue = data[configKey] || configDefaultValue;
 
       if (configValue) {
+        if (typeof configDefaultValue === 'boolean') {
+          configValue = `${configValue}` === 'true';
+        }
+
         _poool('config', dashToUnderline(camelCaseToDash(configKey)),
             configValue);
       }
-    }
+    });
 
     // Set event handlers
-    for (const eventName in EVENTS) {
+    EVENTS.forEach(eventName => {
       _poool(
           'event',
           `on${eventName[0].toUpperCase()}${eventName.slice(1)}`,
@@ -122,7 +127,7 @@ export function poool(global, data) {
             global.parent.postMessage(message, '*');
           }
       );
-    }
+    });
 
     // Create hit
     _poool('send', 'page-view', pageType);
