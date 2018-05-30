@@ -725,10 +725,11 @@ export class BaseElement {
    * Hides or shows the loading indicator. This function must only
    * be called inside a mutate context.
    * @param {boolean} state
+   * @param {boolean=} opt_force
    * @public @final
    */
-  toggleLoading(state) {
-    this.element.toggleLoading(state, {force: true});
+  toggleLoading(state, opt_force) {
+    this.element.toggleLoading(state, {force: !!opt_force});
   }
 
   /**
