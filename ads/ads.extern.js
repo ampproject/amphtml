@@ -609,6 +609,11 @@ data.tag;
 data.tag.tta;
 data.tag.ttp;
 
+// voluum.js
+data.domain;
+data.placement;
+data.publisher;
+
 // uas.js
 var Phoenix;
 window.Phoenix;
