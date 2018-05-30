@@ -45,7 +45,7 @@ const MAX_ANIMATION_DURATION = 250;
 
 
 const ELIGIBLE_TAGS = {
-  'SVG': true,
+  'svg': true,
   'DIV': true,
   'AMP-IMG': true,
 };
@@ -123,6 +123,7 @@ export class AmpContentViewer extends AMP.BaseElement {
         children[0].tagName + ' is not supported by <amp-content-viewer>'
     );
     this.content_ = children[0];
+    this.content_.classList.add('i-amphtml-content-viewer-child');
   }
 
   /** @override */
