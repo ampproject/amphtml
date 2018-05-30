@@ -901,7 +901,11 @@ export class Resource {
    * @return {boolean}
    */
   isInViewport() {
-    return this.element.isInViewport();
+    const isInViewport = this.element.isInViewport();
+    if (isInViewport) {
+      this.resolveRenderOutsideViewport_();
+    }
+    return isInViewport;
   }
 
   /**

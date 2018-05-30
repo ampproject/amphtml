@@ -656,16 +656,22 @@ describes.realWin('Resource', {amp: true}, env => {
 
 
   describe('setInViewport', () => {
+    let resolveRenderOutsideViewportSpy;
+    beforeEach(() => resolveRenderOutsideViewportSpy =
+      sandbox.spy(resource, 'resolveRenderOutsideViewport_'));
+
     it('should call viewportCallback when not built', () => {
       resource.state_ = ResourceState.NOT_BUILT;
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
+      expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
     });
 
     it('should call viewportCallback when built', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
+      expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
     });
   });
 
