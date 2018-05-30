@@ -28,25 +28,26 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
+import {clamp} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {
-  expandLayoutRect,
   layoutRectFromDomRect,
   layoutRectLtwh,
-  moveLayoutRect,
 } from '../../../src/layout-rect';
-import {isExperimentOn} from '../../../src/experiments';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-content-viewer';
 const DEFAULT_MAX_SCALE = 3;
+const MAX_ANIMATION_DURATION = 250;
+
 
 const ELIGIBLE_TAGS = {
-  'svg': true,
-  'div': true,
-  'amp-img': true,
+  'SVG': true,
+  'DIV': true,
+  'AMP-IMG': true,
 };
 
 const SUPPORT_VALIDATION_MSG = `amp-content-viewer should
@@ -74,32 +75,32 @@ export class AmpContentViewer extends AMP.BaseElement {
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.contentBox_ = null;
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenOnSwipePan_ = null;
 
-    /** @private {number} */
+    /** @private */
     this.scale_ = 1;
-    /** @private {number} */
+    /** @private */
     this.startScale_ = 1;
-    /** @private {number} */
+    /** @private */
     this.minScale_ = 1;
-    /** @private {number} */
+    /** @private */
     this.maxScale_ = DEFAULT_MAX_SCALE;
-    /** @private {number} */
+    /** @private */
     this.startX_ = 0;
-    /** @private {number} */
+    /** @private */
     this.startY_ = 0;
-    /** @private {number} */
+    /** @private */
     this.posX_ = 0;
-    /** @private {number} */
+    /** @private */
     this.posY_ = 0;
-    /** @private {number} */
+    /** @private */
     this.minX_ = 0;
-    /** @private {number} */
+    /** @private */
     this.minY_ = 0;
-    /** @private {number} */
+    /** @private */
     this.maxX_ = 0;
-    /** @private {number} */
+    /** @private */
     this.maxY_ = 0;
 
     /** @private {?../../../src/gesture.Gestures} */
@@ -131,10 +132,6 @@ export class AmpContentViewer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.measureElement(() => {
-      this.sourceWidth_ = this.content_./*OK*/scrollWidth;
-      this.sourceHeight_ = this.content_./*OK*/scrollHeight;
-    });
     return this.resetContentDimensions_()
         .then(() => this.setupGestures_());
   }
@@ -163,45 +160,12 @@ export class AmpContentViewer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED || Layout.FILL;
+    return layout == Layout.FIXED || layout == Layout.FILL;
   }
 
   /** @override */
   isRelayoutNeeded() {
     return true;
-  }
-
-  /**
-   * Returns the boundaries of the content element.
-   * @return {?../../../src/layout-rect.LayoutRectDef}
-   */
-  getContentBox() {
-    return this.contentBox_;
-  }
-
-  /**
-   * Returns the content element.
-   * @return {?Element}
-   */
-  getContent() {
-    return this.content_;
-  }
-
-  /**
-   * Returns the boundaries of the content element with the offset if it was
-   * moved by a gesture.
-   * @return {?../../../src/layout-rect.LayoutRectDef}
-   */
-  getContentBoxWithOffset() {
-    if (this.posX_ == 0 && this.posY_ == 0 || !this.contentBox_) {
-      return this.contentBox_;
-    }
-    const expansionScale = (this.scale_ - 1) / 2;
-    return moveLayoutRect(
-        expandLayoutRect(this.contentBox_, expansionScale, expansionScale),
-        this.posX_,
-        this.posY_
-    );
   }
 
   /**
@@ -211,7 +175,7 @@ export class AmpContentViewer extends AMP.BaseElement {
    * @private
    */
   elementIsSupported_(element) {
-    return ELIGIBLE_TAGS[element.tagName.toLowerCase()];
+    return ELIGIBLE_TAGS[element.tagName];
   }
 
   /**
@@ -221,6 +185,9 @@ export class AmpContentViewer extends AMP.BaseElement {
    * @private
    */
   measure_() {
+    this.sourceWidth_ = this.content_./*OK*/scrollWidth;
+    this.sourceHeight_ = this.content_./*OK*/scrollHeight;
+
     this.elementBox_ = layoutRectFromDomRect(this.element
         ./*OK*/getBoundingClientRect());
 
@@ -264,8 +231,8 @@ export class AmpContentViewer extends AMP.BaseElement {
    * @return {!Promise}
    */
   resetContentDimensions_() {
+    const content = dev().assertElement(this.content_);
     return this.measureElement(() => this.measure_()).then(() => {
-      const content = dev().assertElement(this.content_);
       return this.mutateElement(() => {
         // Set the actual dimensions of the content
         st.setStyles(content, {
@@ -310,24 +277,39 @@ export class AmpContentViewer extends AMP.BaseElement {
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
       const deltaX = this.elementBox_.width / 2 - e.data.clientX;
       const deltaY = this.elementBox_.height / 2 - e.data.clientY;
-      this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
+      this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true).then(() => {
         return this.onZoomRelease_();
       });
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
-      this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
-          e.data.deltaX, e.data.deltaY);
-      if (e.data.last) {
-        this.onTapZoomRelease_(e.data.centerClientX, e.data.centerClientY,
-            e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY);
+      const {
+        centerClientX,
+        centerClientY,
+        deltaX,
+        deltaY,
+        last,
+        velocityX,
+        velocityY,
+      } = e.data;
+      this.onTapZoom_(centerClientX, centerClientY, deltaX, deltaY);
+      if (last) {
+        this.onTapZoomRelease_(centerClientX, centerClientY, deltaX, deltaY,
+            velocityX, velocityY);
       }
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
-      this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
-          e.data.deltaX, e.data.deltaY, e.data.dir);
-      if (e.data.last) {
+      const {
+        centerClientX,
+        centerClientY,
+        deltaX,
+        deltaY,
+        dir,
+        last,
+      } = e.data;
+      this.onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir);
+      if (last) {
         this.onZoomRelease_();
       }
     });
@@ -348,9 +330,16 @@ export class AmpContentViewer extends AMP.BaseElement {
     this.unlistenOnSwipePan_ = this.gestures_
         .onGesture(SwipeXYRecognizer, e => {
           event.preventDefault();
-          this.onMove_(e.data.deltaX, e.data.deltaY, false);
-          if (e.data.last) {
-            this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
+          const {
+            deltaX,
+            deltaY,
+            last,
+            velocityX,
+            velocityY,
+          } = e.data;
+          this.onMove_(deltaX, deltaY, /*animate*/ false);
+          if (last) {
+            this.onMoveRelease_(velocityX, velocityY);
           }
         });
   }
@@ -369,15 +358,15 @@ export class AmpContentViewer extends AMP.BaseElement {
 
   /**
    * Returns value bound to min and max values +/- extent.
-   * @param {number} v
+   * @param {number} value
    * @param {number} min
    * @param {number} max
    * @param {number} extent
    * @return {number}
    * @private
    */
-  boundValue_(v, min, max, extent) {
-    return Math.max(min - extent, Math.min(max + extent, v));
+  boundValue_(value, min, max, extent) {
+    return clamp(value, min - extent, max + extent);
   }
 
   /**
@@ -424,25 +413,13 @@ export class AmpContentViewer extends AMP.BaseElement {
    * @private
    */
   updatePanZoomBounds_(scale) {
-    let maxY = 0;
-    let minY = 0;
     const dh = this.elementBox_.height - this.contentBox_.height * scale;
-    if (dh >= 0) {
-      minY = maxY = 0;
-    } else {
-      minY = dh / 2;
-      maxY = -minY;
-    }
-
-    let maxX = 0;
-    let minX = 0;
     const dw = this.elementBox_.width - this.contentBox_.width * scale;
-    if (dw >= 0) {
-      minX = maxX = 0;
-    } else {
-      minX = dw / 2;
-      maxX = -minX;
-    }
+
+    const minY = dh >= 0 ? 0 : dh / 2;
+    const maxY = dh >= 0 ? 0 : -minY;
+    const minX = dw >= 0 ? 0 : dw / 2;
+    const maxX = dw >= 0 ? 0 : -minX;
 
     this.minX_ = minX;
     this.minY_ = minY;
@@ -551,7 +528,7 @@ export class AmpContentViewer extends AMP.BaseElement {
     const deltaCenterY = this.elementBox_.height / 2 - centerClientY;
     deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
     deltaY = Math.min(deltaCenterY, deltaCenterY * (dist / 100));
-    this.onZoom_(newScale, deltaX, deltaY, false);
+    this.onZoom_(newScale, deltaX, deltaY, /*animate*/ false);
   }
 
   /**
@@ -600,7 +577,7 @@ export class AmpContentViewer extends AMP.BaseElement {
           (x, y) => {
             this.onTapZoom_(centerClientX, centerClientY, x, y);
             return true;
-          }).thenAlways();
+          });
     }
     return promise.then(() => {
       this.onZoomRelease_();
@@ -639,20 +616,15 @@ export class AmpContentViewer extends AMP.BaseElement {
     const dy = newPosY - this.posY_;
     const dist = Math.sqrt(dx * dx + dy * dy);
 
-    let dur = 0;
-    if (animate) {
-      const maxDur = 250;
-      dur = Math.min(maxDur, Math.max(
-          maxDur * dist * 0.01, // Moving component.
-          maxDur * Math.abs(ds))); // Zooming component.
-    }
+    const dur = animate ?
+      Math.min(1, Math.max(
+          dist * 0.01, // Distance
+          Math.abs(ds) // Change in scale
+      )) * MAX_ANIMATION_DURATION : 0;
 
     if (dur > 16 && animate) {
-      /** @const {!TransitionDef<number>} */
       const scaleFunc = tr.numeric(this.scale_, newScale);
-      /** @const {!TransitionDef<number>} */
       const xFunc = tr.numeric(this.posX_, newPosX);
-      /** @const {!TransitionDef<number>} */
       const yFunc = tr.numeric(this.posY_, newPosY);
       return Animation.animate(dev().assertElement(this.content_), time => {
         this.scale_ = scaleFunc(time);
