@@ -802,7 +802,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
     }
 
     return size;
