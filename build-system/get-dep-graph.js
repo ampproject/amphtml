@@ -33,6 +33,8 @@ ClosureCompiler.JAR_PATH = require.resolve(
 //ClosureCompiler.JAR_PATH = require.resolve(
     //'../third_party/closure-compiler/compiler.jar');
 
+patchRegisterElement();
+
 exports.splittable = function(config) {
 
   if (!config || !config.modules) {
@@ -63,8 +65,8 @@ exports.splittable = function(config) {
 exports.getFlags = function(config) {
   // Reasonable defaults.
   var flags = {
-    compilation_level: 'SIMPLE_OPTIMIZATIONS',
-    //compilation_level: 'WHITESPACE_ONLY',
+    //compilation_level: 'ADVANCED',
+    compilation_level: 'ADVANCED',
     process_common_js_modules: true,
     rewrite_polyfills: true,
     create_source_map: '%outname%.map',
@@ -75,9 +77,11 @@ exports.getFlags = function(config) {
       'splittable-build/browser/|/',
       '|/',
     ],
-    new_type_inf: true,
+    //new_type_inf: true,
     language_in: 'ES6',
     language_out: 'ES5',
+    //cross_module_code_motion: null,
+    //cross_chunk_code_motion: false,
     //formatting: 'PRETTY_PRINT',
     //generate_pseudo_names: null,
     module_output_path_prefix: config.writeTo || 'out/',
@@ -191,6 +195,8 @@ exports.getBundleFlags = function(g) {
   });
   flagsArray.push('--js_module_root', './splittable-build/transformed/');
   flagsArray.push('--js_module_root', './splittable-build/browser/');
+  flagsArray.push('--js_module_root', './build/patched-module/');
+  //flagsArray.push('--js_module_root', './node_modules/');
   flagsArray.push('--js_module_root', './');
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return flagsArray;
@@ -564,12 +570,11 @@ exports.getFlags({
   modules: [
     './src/amp.js',
     './extensions/amp-audio/0.1/amp-audio.js',
-    './extensions/amp-subscriptions/0.1/amp-subscriptions.js',
+    //'./extensions/amp-subscriptions/0.1/amp-subscriptions.js',
     //'./extensions/amp-user-notification/0.1/amp-user-notification.js',
     //'./extensions/amp-audio-2/0.1/amp-audio-2.js',
     //'./extensions/amp-live-list/0.1/amp-live-list.js',
     //'./extensions/amp-user-notification/0.1/amp-user-notification.js',
-    //'./src/amp.js',
   ],
   writeTo: './sample/out/',
   externs: externs,
@@ -591,3 +596,36 @@ exports.getFlags({
   })
 });
 
+
+function patchRegisterElement() {
+  let file;
+  // Copies document-register-element into a new file that has an export.
+  // This works around a bug in closure compiler, where without the
+  // export this module does not generate a goog.provide which fails
+  // compilation.
+  // Details https://github.com/google/closure-compiler/issues/1831
+  const patchedName = 'build/patched-module/document-register-element' +
+      '/build/document-register-element.node.js';
+  if (!fs.existsSync(patchedName)) {
+    file = fs.readFileSync(
+        'node_modules/document-register-element/build/' +
+        'document-register-element.node.js').toString();
+    if (argv.fortesting) {
+      // Need to switch global to self since closure doesn't wrap the module
+      // like CommonJS
+      file = file.replace('installCustomElements(global);',
+          'installCustomElements(self);');
+    } else {
+      // Get rid of the side effect the module has so we can tree shake it
+      // better and control installation, unless --fortesting flag
+      // is passed since we also treat `--fortesting` mode as "dev".
+      file = file.replace('installCustomElements(global);', '');
+    }
+    // Closure Compiler does not generate a `default` property even though
+    // to interop CommonJS and ES6 modules. This is the same issue typescript
+    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
+    file = file.replace('module.exports = installCustomElements;',
+        'exports.default = installCustomElements;');
+    fs.writeFileSync(patchedName, file);
+  }
+}

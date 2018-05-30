@@ -8,18 +8,113 @@
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <style amp-custom>
     body {
-      max-width: 527px;
       font-family: 'Questrial', Arial;
     }
-
-    amp-audio audio {
-      margin: 30px;
-      padding: 30px;
-      border: 10px solid red;
+    article {
+      display: block;
+      max-width: 736px;
+      margin: 8px;
     }
+
+    amp-lightbox {
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    .bordered {
+      border: 1px solid black;
+    }
+
+    .box1 {
+      border: 1px solid black;
+      margin: 8px 0;
+    }
+
+    .logo {
+      background: yellow;
+      border: 5px solid black;
+      border-radius: 50%;
+      opacity: 0.7;
+      position: fixed;
+      z-index: 1000;
+      top: 100px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .ear {
+      background: lime;
+      border: 5px solid black;
+      opacity: 0.7;
+      position: absolute;
+      z-index: 999;
+      top: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+    }
+
+    @media screen and (min-width: 380px) {
+      .logo {
+        top: auto;
+      }
+    }
+
+    @media screen and (min-width: 420px) {
+      .logo {
+        position: static;
+        top: auto;
+      }
+    }
+
+    .goto {
+      display: block;
+      margin: 16px;
+    }
+    @font-face {
+      font-family: 'Comic AMP';
+      font-style: bold;
+      font-weight: 700;
+      src: url(fonts/ComicAMP.ttf) format('truetype');
+    }
+    .comic-amp-font-loaded .comic-amp {
+      font-family: 'Comic AMP', serif, sans-serif;
+    }
+
+    .comic-amp-font-loading .comic-amp {
+      color: #0ff;
+    }
+
+    .comic-amp-font-missing .comic-amp {
+      color: #f00;
+    }
+
+    .lightbox-close-button {
+      background: white;
+    }
+
+    .lightbox-text {
+      color: white;
+    }
+
+    #amp-iframe:target {
+      border: 1px solid green;
+    }
+
+    #breaker {
+      height: 100px;
+      background: green;
+    }
+
+    #breaking {
+      height: 200px;
+      width: 200vw;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <script src="/sample/out/_base.js"></script>
   <script src="/sample/out/src-amp.js"></script>
   <script custom-element="amp-audio" src="/sample/out/extensions-amp-audio-0.1-amp-audio.js"></script>
 </head>
@@ -29,5 +124,7 @@
     <source src="/examples/av/audio.mp3" type="audio/mpeg">
     Your browser does not support the audio tag.
   </amp-audio>
+
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fill></amp-img>
 </body>
 </html>
