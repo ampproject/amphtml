@@ -3,6 +3,7 @@
     "amp-date-picker",
     "amp-next-page",
     "ampdoc-shell",
+    "disable-faster-amp-list",
     "inabox-rov",
     "inline-styles",
     "url-replacement-v2"
@@ -36,6 +37,7 @@
   "amp-live-list-sorting": 1,
   "amp-sidebar toolbar": 1,
   "svg-in-mustache": 0,
+  "disable-faster-amp-list": 1,
   "a4a-safeframe-preloading-off": 0.01,
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
