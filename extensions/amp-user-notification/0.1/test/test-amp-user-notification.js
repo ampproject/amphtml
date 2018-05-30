@@ -84,7 +84,9 @@ describes.realWin('amp-user-notification', {
       'layout': 'nodisplay',
     });
     const impl = el.implementation_;
-    expect(impl.buildCallback.bind(impl)).to.throw(/should have an id/);
+    allowConsoleError(() => {
+      expect(impl.buildCallback.bind(impl)).to.throw(/should have an id/);
+    });
   });
 
   it('should NOT require `data-show-if-href`', () => {
@@ -302,6 +304,8 @@ describes.realWin('amp-user-notification', {
     const showEndpointStub = sandbox.stub(impl, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
+    expectAsyncConsoleError(
+        '[amp-user-notification] Failed to read storage intentional');
     return impl.shouldShow().then(shouldShow => {
       expect(shouldShow).to.equal(true);
       expect(cidStub).to.be.calledOnce;
@@ -320,6 +324,8 @@ describes.realWin('amp-user-notification', {
         .withExactArgs('amp-user-notification:n1')
         .returns(Promise.reject('intentional'))
         .once();
+    expectAsyncConsoleError(
+        '[amp-user-notification] Failed to read storage intentional');
     return impl.shouldShow().then(shouldShow => {
       expect(shouldShow).to.equal(true);
       storageMock.verify();
@@ -652,6 +658,8 @@ describes.realWin('amp-user-notification', {
       impl.getCidService_ = () => { return Promise.resolve(cidMock); };
       dismissSpy = sandbox.spy(impl, 'dismiss');
 
+      expectAsyncConsoleError(
+          '[amp-user-notification] Failed to opt out of Cid failed');
       return impl.optoutOfCid_().then(() => {
         expect(dismissSpy).to.be.calledWithExactly(true);
         expect(optOutOfCidStub).to.be.calledOnce;
