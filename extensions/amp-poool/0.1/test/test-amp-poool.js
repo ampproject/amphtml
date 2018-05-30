@@ -32,7 +32,7 @@ describes.realWin('amp-poool', {
     doc = win.document;
   });
 
-  function getPoool(appId, pageType, forceWidget, debug) {
+  function getPoool(appId, pageType, forceWidget, debug, optResponsive) {
     const article = doc.createElement('div');
     article.id = 'postContent';
     article.innerHTML = '<p>Lorem ipsum dolor sit amet, consectetur eicbv.</p>';
@@ -45,7 +45,8 @@ describes.realWin('amp-poool', {
     ampPoool.setAttribute('data-page-type', pageType);
     ampPoool.setAttribute('data-debug', debug);
     ampPoool.setAttribute('data-force-widget', forceWidget);
-    ampPoool.setAttribute('layout', 'responsive');
+    if (optResponsive) {ampPoool.setAttribute('layout', 'responsive');}
+
 
     doc.body.appendChild(ampPoool);
     return ampPoool.build().then(() => {
@@ -63,9 +64,17 @@ describes.realWin('amp-poool', {
 
   it('renders iframe in amp-poool', () => {
     return getPoool(appId, pageType).then(ampPoool => {
-      const iframe = ampPoool.firstChild.nextSibling;
+      const iframe = ampPoool.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    });
+  });
+
+  it('renders responsively', () => {
+    return getPoool(appId, pageType, 'question', false, true).then(poool => {
+      const iframe = poool.querySelector('iframe');
+      expect(iframe).to.not.be.null;
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
@@ -99,4 +108,13 @@ describes.realWin('amp-poool', {
       expect(obj.iframe_).to.be.null;
     });
   });
+
+  // it('requires data-app-id', () => {
+  //   return allowConsoleError(() => {
+  //     return getPoool('', pageType, 'gift', true)
+  //         .should.eventually.be.rejectedWith(
+  //             /The data-app-id attribute is required for/
+  //         );
+  //   });
+  // });
 });
