@@ -249,102 +249,90 @@ describes.realWin('Expander', {
     describe('#expand sync', () => {
 
       it('should handle empty urls', () =>
-        expect(expander.expand('', mockBindings, /* opt_whitelist */ undefined,
-            /*opt_sync*/ true)).to.equal('')
+        expect(expander.expand('', mockBindings, /*opt_sync*/ true))
+            .to.equal('')
       );
 
       it('parses one function, one argument', () =>
         expect(expander.expand('TRIM(aaaaa    )', mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true)).to.equal('aaaaa')
+            /*opt_sync*/ true)).to.equal('aaaaa')
       );
 
       it('parses nested function one level', () =>
         expect(expander.expand('UPPERCASE(TRIM(aaaaa    ))', mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true)).to.equal('AAAAA')
+            /*opt_sync*/ true)).to.equal('AAAAA')
       );
 
       it('parses nested function two levels', () =>
         expect(expander.expand('LOWERCASE(UPPERCASE(TRIM(aAaA    )))',
-            mockBindings, /* opt_whitelist */ undefined, /*opt_sync*/ true))
+            mockBindings, /*opt_sync*/ true))
             .to.equal('aaaa')
       );
 
       it('parses one function, two string arguments', () =>
         expect(expander.expand('CONCAT(aaa,bbb)', mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
-            .to.equal('aaabbb')
+            /*opt_sync*/ true)).to.equal('aaabbb')
       );
 
       it('parses one function, two string arguments with space', () =>
         expect(expander.expand('CONCAT(aaa , bbb)', mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
-            .to.equal('aaabbb')
+            /*opt_sync*/ true)).to.equal('aaabbb')
       );
 
       it('parses function with func then string as args', () =>
         expect(expander.expand('CONCAT(UPPERCASE(aaa),bbb)', mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
-            .to.equal('AAAbbb')
+            /*opt_sync*/ true)).to.equal('AAAbbb')
       );
 
       it('parses function with macro then string as args', () =>
         expect(expander.expand('CONCAT(CANONICAL_URL,bbb)', mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
-            .to.equal('www.google.combbb')
+            /*opt_sync*/ true)).to.equal('www.google.combbb')
       );
 
       it('parses function with string then func as args', () =>
         expect(expander.expand('CONCAT(aaa,UPPERCASE(bbb))', mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
-            .to.equal('aaaBBB')
+            /*opt_sync*/ true)).to.equal('aaaBBB')
       );
 
       it('parses function with two funcs as args', () => {
         const url = 'CONCAT(LOWERCASE(AAA),UPPERCASE(bbb)';
         return expect(expander.expand(url, mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
-            .to.equal('aaaBBB');
+            /*opt_sync*/ true)).to.equal('aaaBBB');
       });
 
       it('parses function with three funcs as args', () => {
         const url = 'CAT_THREE(LOWERCASE(AAA),UPPERCASE(bbb),LOWERCASE(CCC))';
-        return expect(expander.expand(url, mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
-            .to.equal('aaaBBBccc');
+        return expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+            .to.equal('aaaBBBccc')
       });
 
       it('should treat unrecognized keywords as normal strings', () => {
         return expect(expander.expand('TRIM(FAKE(aaaaa))', mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
-            .to.equal('');
+            /*opt_sync*/ true)).to.equal('');
       });
 
       it('ignores commas within backticks', () => {
         const url = 'CONCAT(`he,llo`,UPPERCASE(world)';
-        return expect(expander.expand(url, mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
+        return expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
             .to.equal('he,lloWORLD');
       });
 
       it('ignores left parentheses within backticks', () => {
         const url = 'CONCAT(hello, `wo((rld`)';
-        return expect(expander.expand(url, mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
+        return expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
             .to.equal('hellowo((rld');
       });
 
       it('ignores right parentheses within backticks', () => {
         const url = 'CONCAT(`hello)`,UPPERCASE(world)';
-        return expect(expander.expand(url, mockBindings,
-            /* opt_whitelist */ undefined, /*opt_sync*/ true))
+        return expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
             .to.equal('hello)WORLD');
       });
 
       it('throws on bad input with back ticks', () => {
         const url = 'CONCAT(bad`hello`, world)';
         allowConsoleError(() => { expect(() => {
-          expander.expand(url, mockBindings, /* opt_whitelist */ undefined,
-              /*opt_sync*/ true);
+          expander.expand(url, mockBindings, /*opt_sync*/ true);
         }).to.throw(/bad/); });
       });
 
@@ -354,8 +342,7 @@ describes.realWin('Expander', {
         const url = 'ASYNC';
         const expected = '';
         allowConsoleError(() => {
-          expect(expander.expand(url, mockBindings,
-              /* opt_whitelist */ undefined, /*opt_sync*/ true))
+          expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
               .to.equal(expected);
         });
       });
@@ -364,8 +351,7 @@ describes.realWin('Expander', {
         const url = 'ASYNCFN';
         const expected = '';
         allowConsoleError(() => {
-          expect(expander.expand(url, mockBindings,
-              /* opt_whitelist */ undefined, /*opt_sync*/ true))
+          expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
               .to.equal(expected);
         });
       });
@@ -374,8 +360,7 @@ describes.realWin('Expander', {
         const url = 'ASYNCFN(foo)';
         const expected = '';
         allowConsoleError(() => {
-          expect(expander.expand(url, mockBindings,
-              /* opt_whitelist */ undefined, /*opt_sync*/ true))
+          expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
               .to.equal(expected);
         });
       });
@@ -384,8 +369,7 @@ describes.realWin('Expander', {
         const url = 'http://www.google.com/?test=RANDOMASYNCFN(foo)UPPERCASE(foo)';
         const expected = 'http://www.google.com/?test=123456FOO';
         allowConsoleError(() => {
-          expect(expander.expand(url, mockBindings,
-              /* opt_whitelist */ undefined, /*opt_sync*/ true))
+          expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
               .to.equal(expected);
         });
       });
@@ -394,8 +378,7 @@ describes.realWin('Expander', {
         const url = 'CONCAT(foo, ASYNCFN(bar))UPPERCASE(foo)';
         const expected = 'fooFOO';
         allowConsoleError(() => {
-          expect(expander.expand(url, mockBindings,
-              /* opt_whitelist */ undefined, /*opt_sync*/ true))
+          expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
               .to.equal(expected);
         });
       });
