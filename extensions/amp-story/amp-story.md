@@ -60,15 +60,15 @@ We are adding new capabilities to the amp-stories bookend, enabling richer compo
   * Text box
   * Portrait and landscape cards
 
-To use them, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attributes like so:
+To use these new components, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attributes like so:
 
 ```html
 <amp-story standalone>
   <amp-story-page id="cover">
     ...
   </amp-story-page>
-  <!-- `src` and `layout=display` are required. -->
-  <amp-story-bookend src="bookendv1.json" layout=nodisplay>
+  <!-- `src` and `layout=nodisplay` are required. -->
+  <amp-story-bookend src="bookendv1.json" layout="nodisplay">
   </amp-story-bookend>
 <amp-story>
 ```
