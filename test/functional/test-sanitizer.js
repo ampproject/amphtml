@@ -250,6 +250,26 @@ function runSanitizerTests() {
       expectEqualNodeLists(actual, expected);
     });
 
+    it('should output "layout" attribute', () => {
+      const img = '<amp-img layout="responsive"></amp-img>';
+      expect(sanitizeHtml(img)).to.equal(img);
+    });
+
+    it('should output "media" attribute', () => {
+      const img = '<amp-img media="(min-width: 650px)"></amp-img>';
+      expect(sanitizeHtml(img)).to.equal(img);
+    });
+
+    it('should output "sizes" attribute', () => {
+      const img = '<amp-img sizes="(min-width: 650px) 50vw, 100vw"></amp-img>';
+      expect(sanitizeHtml(img)).to.equal(img);
+    });
+
+    it('should output "heights" attribute', () => {
+      const img = '<amp-img heights="(min-width:500px) 200px, 80%"></amp-img>';
+      expect(sanitizeHtml(img)).to.equal(img);
+    });
+
     it('should default target to _top with href', () => {
       // Can't use string equality since DOMPurify will reorder attributes.
       const actual = serialize(
