@@ -61,34 +61,29 @@ export const ADSENSE_EXP_NAMES = {
 };
 
 /**
- * Attempts to select into unconditioned Adsense experiments.
- * @param {!Window} win
- * @param {!Element} element
- */
-function randomlySelectUnconditionedExperiments(win, element) {
-  selectAndSetExperiments(win, element,
-      [ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP,
-        ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL],
-      ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL);
-}
-
-/**
  * Attempts to select into Adsense experiments.
  * @param {!Window} win
  * @param {!Element} element
  */
 function selectExperiments(win, element) {
+  selectAndSetExperiments(win, element,
+      [ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP,
+        ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL],
+      ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
+      true);
+
+
   // See if in holdback control/experiment.
   let experimentId;
   const urlExperimentId = extractUrlExperimentId(win, element);
   if (urlExperimentId != undefined) {
     experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-    dev().info(
-        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
   }
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
+    dev().info(
+        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
   }
 
   // If not in the unconditioned canonical experiment, attempt to
@@ -99,7 +94,7 @@ function selectExperiments(win, element) {
     selectAndSetExperiments(win, element,
         [ADSENSE_EXPERIMENTS.CANONICAL_EXP,
           ADSENSE_EXPERIMENTS.CANONICAL_CTL],
-        ADSENSE_EXP_NAMES.CANONICAL);
+        ADSENSE_EXP_NAMES.CANONICAL, true);
   }
 }
 
@@ -110,7 +105,6 @@ function selectExperiments(win, element) {
  * @return {boolean}
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
-  randomlySelectUnconditionedExperiments(win, element);
   if (useRemoteHtml || !element.getAttribute('data-ad-client')) {
     return false;
   }

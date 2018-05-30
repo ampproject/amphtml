@@ -30,13 +30,16 @@ import {
  * @param {!Element} element
  * @param {!Array<string>} branches
  * @param {string} expName
+ * @param {boolean=} optAddExpIdToElement
  */
-export function selectAndSetExperiments(win, element, branches, expName) {
-  const expUtils = new ExperimentUtils();
+export function selectAndSetExperiments(
+  win, element, branches, expName, optAddExpIdToElement) {
   const experimentId = expUtils.maybeSelectExperiment(
       win, element, branches, expName);
   if (!!experimentId) {
-    addExperimentIdToElement(experimentId, element);
+    if (!!optAddExpIdToElement) {
+      addExperimentIdToElement(experimentId, element);
+    }
     forceExperimentBranch(win, expName, experimentId);
   }
   return experimentId;
@@ -48,7 +51,6 @@ export class ExperimentUtils {
    * @param {!Element} element
    * @param {!Array<string>} selectionBranches
    * @param {string} experimentName
-   * @visibleForTesting
    */
   maybeSelectExperiment(
     win, element, selectionBranches, experimentName) {
@@ -62,3 +64,5 @@ export class ExperimentUtils {
     return getExperimentBranch(win, experimentName);
   }
 }
+
+const expUtils = new ExperimentUtils();
