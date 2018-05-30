@@ -127,6 +127,8 @@ const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
 const WHITELISTED_ATTRS = [
   // AMP-only attributes that don't exist in HTML.
   'fallback',
+  'heights',
+  'layout',
   'on',
   'option',
   'placeholder',
