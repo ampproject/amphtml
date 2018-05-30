@@ -28,36 +28,36 @@ adopt(window);
 describe('amp-sidebar - toolbar', () => {
   let sandbox;
   let timer;
-  let vsync;
 
   function getToolbars(options) {
     options = options || {};
     return createIframePromise().then(iframe => {
-      vsync = Services.vsyncFor(iframe.win);
-      timer = Services.timerFor(iframe.win);
-      const ampdoc = new AmpDocSingle(iframe.win);
+      const {win} = iframe;
+      const {document: doc} = win;
 
-      // Create toolbar elements
-      const toolbarContainerElement =
-        ampdoc.win.document.createElement('div');
-      const toolbars = [];
-      ampdoc.win.document.body.appendChild(toolbarContainerElement);
-      // Stub our toolbar operations, doing this here as it will
-      // Ease testing our media queries
-      sandbox.stub(vsync, 'mutate').callsFake(callback => {
-        callback();
-      });
-      sandbox.stub(vsync, 'mutatePromise').callsFake(callback => {
-        callback();
-        return Promise.resolve();
-      });
+      timer = Services.timerFor(win);
+
+      const ampdoc = new AmpDocSingle(win);
+      const contextElement = {
+        getAmpDoc: () => ampdoc,
+        mutateElement: cb => {
+          cb();
+          return Promise.resolve();
+        },
+      };
+
       sandbox.stub(timer, 'delay').callsFake(function(callback) {
         callback();
       });
 
+      // Create toolbar elements
+      const toolbarContainerElement = doc.createElement('div');
+      const toolbars = [];
+      doc.body.appendChild(toolbarContainerElement);
+
       // Create our individual toolbars
       options.forEach(toolbarObj => {
-        const navToolbar = ampdoc.win.document.createElement('nav');
+        const navToolbar = doc.createElement('nav');
         if (toolbarObj.media) {
           navToolbar.setAttribute('toolbar', toolbar.media);
         } else {
@@ -66,7 +66,7 @@ describe('amp-sidebar - toolbar', () => {
         if (toolbarObj.toolbarOnlyOnNav) {
           navToolbar.setAttribute('toolbar-only', '');
         }
-        const toolbarTarget = ampdoc.win.document.createElement('div');
+        const toolbarTarget = doc.createElement('div');
         if (toolbarObj.toolbarTarget) {
           toolbarTarget.setAttribute('id', toolbarObj.toolbarTarget);
           navToolbar.setAttribute('toolbar-target', toolbarObj.toolbarTarget);
@@ -76,16 +76,16 @@ describe('amp-sidebar - toolbar', () => {
           toolbarTarget.setAttribute('id', 'toolbar-target');
           navToolbar.setAttribute('toolbar-target', 'toolbar-target');
         }
-        ampdoc.win.document.body.appendChild(toolbarTarget);
-        const toolbarList = ampdoc.win.document.createElement('ul');
+        doc.body.appendChild(toolbarTarget);
+        const toolbarList = doc.createElement('ul');
         for (let i = 0; i < 3; i++) {
-          const li = ampdoc.win.document.createElement('li');
+          const li = doc.createElement('li');
           li.innerHTML = 'Toolbar item ' + i;
           toolbarList.appendChild(li);
         }
         navToolbar.appendChild(toolbarList);
         toolbarContainerElement.appendChild(navToolbar);
-        toolbars.push(new Toolbar(navToolbar, vsync, ampdoc));
+        toolbars.push(new Toolbar(navToolbar, contextElement));
       });
 
       return {iframe, ampdoc, toolbarContainerElement, toolbars};
@@ -300,7 +300,7 @@ describe('amp-sidebar - toolbar', () => {
           resizeIframeToWidth(obj.iframe, '4000px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();
-              expect(toolbar.attemptShow_()).to.be.undefined;
+              expect(toolbar.isToolbarShown_()).to.be.true;
             });
           });
         });

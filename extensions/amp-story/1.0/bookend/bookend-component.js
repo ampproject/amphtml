@@ -47,12 +47,6 @@ export let BookendDataDef;
  */
 export let BookendComponentDef;
 
-const articleComponentBuilder = new ArticleComponent();
-const ctaLinkComponentBuilder = new CtaLinkComponent();
-const headingComponentBuilder = new HeadingComponent();
-const landscapeComponentBuilder = new LandscapeComponent();
-const portraitComponentBuilder = new PortraitComponent();
-const textBoxComponentBuilder = new TextBoxComponent();
 
 /**
  * @typedef {
@@ -66,25 +60,42 @@ const textBoxComponentBuilder = new TextBoxComponent();
  */
 export let BookendComponentClass;
 
+
+/** @private @const {!Object<string, !BookendComponentClass>} */
+const builderInstances = {};
+
+
+/**
+ * @param {string} type
+ * @param {function(new:BookendComponentClass)} ctor
+ * @return {!BookendComponentClass}
+ * @restricted
+ */
+function setBuilderInstance(type, ctor) {
+  return (builderInstances[type] = builderInstances[type] || new ctor());
+}
+
+
 /**
  * Dispatches the components to their specific builder classes.
- * @param {string} componentType
+ * @param {string} type
  * @return {?BookendComponentClass}
+ * @restricted
  */
-function componentBuilderInstanceFor(componentType) {
-  switch (componentType) {
+function componentBuilderInstanceFor(type) {
+  switch (type) {
     case 'small':
-      return articleComponentBuilder;
+      return setBuilderInstance(type, ArticleComponent);
     case 'cta-link':
-      return ctaLinkComponentBuilder;
+      return setBuilderInstance(type, CtaLinkComponent);
     case 'heading':
-      return headingComponentBuilder;
+      return setBuilderInstance(type, HeadingComponent);
     case 'landscape':
-      return landscapeComponentBuilder;
+      return setBuilderInstance(type, LandscapeComponent);
     case 'portrait':
-      return portraitComponentBuilder;
+      return setBuilderInstance(type, PortraitComponent);
     case 'textbox':
-      return textBoxComponentBuilder;
+      return setBuilderInstance(type, TextBoxComponent);
     default:
       return null;
   }
@@ -99,16 +110,17 @@ export class BookendComponent {
    * Takes components from JSON and delegates them to their corresponding
    * builder class.
    * @param {!Array<BookendComponentDef>} components
+   * @param {!Element} el
    * @return {!Array<BookendComponentDef>}
    */
-  static buildFromJson(components) {
+  static buildFromJson(components, el) {
     return components.reduce((builtComponents, component) => {
       const componentBuilder = componentBuilderInstanceFor(component.type);
       if (!componentBuilder) {
         return;
       }
-      componentBuilder.assertValidity(component);
-      builtComponents.push(componentBuilder.build(component));
+      componentBuilder.assertValidity(component, el);
+      builtComponents.push(componentBuilder.build(component, el));
       return builtComponents;
     }, []);
   }

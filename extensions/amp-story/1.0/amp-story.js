@@ -88,7 +88,6 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
@@ -671,12 +670,15 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   isAmpStoryEnabled_() {
-    if (isExperimentOn(this.win, 'amp-story-v1') || getMode().test ||
-        this.win.location.protocol === 'file:') {
+    const {win} = this;
+    const {location} = win;
+
+    if (isExperimentOn(win, 'amp-story-v1') || getMode().test ||
+        location.protocol === 'file:') {
       return true;
     }
 
-    const origin = getSourceOrigin(this.win.location);
+    const origin = Services.urlForDoc(this.element).getSourceOrigin(location);
     return this.isOriginWhitelisted_(origin);
   }
 
@@ -698,8 +700,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isOriginWhitelisted_(origin) {
-    const hostName = parseUrlDeprecated(origin).hostname;
-    const domains = hostName.split('.');
+    const {hostname} = Services.urlForDoc(this.element).parse(origin);
+    const domains = hostname.split('.');
 
     // Check all permutations of the domain to see if any level of the domain is
     // whitelisted.  Taking the example of the whitelisted domain
