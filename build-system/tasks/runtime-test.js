@@ -347,7 +347,7 @@ function runTests() {
 
   if (argv.verbose || argv.v) {
     c.client.captureConsole = true;
-    c.client.debugConsole = true;
+    c.client.verboseLogging = true;
   }
 
   if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
