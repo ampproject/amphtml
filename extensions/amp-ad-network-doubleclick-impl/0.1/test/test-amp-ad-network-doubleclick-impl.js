@@ -251,7 +251,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     it('shouldnt load delayed impression amp-pixels with fluid', () => {
       const fireDelayedImpressionsSpy =
           sandbox.spy(impl, 'fireDelayedImpressions');
-      impl.isFluid_ = true;
+      impl.isFluidRequest_ = true;
       expect(impl.extractSize({
         get(name) {
           switch (name) {
