@@ -27,9 +27,6 @@ import {FormEvents} from './form-events';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
-  assertAbsoluteHttpOrHttpsUrl,
-  assertHttpsUrl,
-  isProxyOrigin,
 } from '../../../src/url';
 import {Services} from '../../../src/services';
 import {
@@ -209,8 +206,9 @@ export class AmpForm {
   getXhrUrl_(attribute) {
     const url = this.form_.getAttribute(attribute);
     if (url) {
-      assertHttpsUrl(url, this.form_, attribute);
-      user().assert(!isProxyOrigin(url),
+      const urlService = Services.urlForDoc(this.form_);
+      urlService.assertHttpsUrl(url, this.form_, attribute);
+      user().assert(!urlService.isProxyOrigin(url),
           `form ${attribute} should not be on AMP CDN: %s`,
           this.form_);
     }
@@ -637,8 +635,9 @@ export class AmpForm {
           'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
           'not supported, use target=_top instead. %s', this.form_);
       try {
-        assertAbsoluteHttpOrHttpsUrl(redirectTo);
-        assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
+        const urlService = Services.urlForDoc(this.form_);
+        urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
+        urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
         user().assert(false, 'The `AMP-Redirect-To` header value must be an ' +
             'absolute URL starting with https://. Found %s', redirectTo);

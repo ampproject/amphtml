@@ -81,13 +81,10 @@ describes.realWin('amp-sidebar 0.1 version', {
         sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
-        sandbox.stub(impl.vsync_, 'mutatePromise').callsFake(callback => {
-          callback();
-          return Promise.resolve();
-        });
       }
-      sandbox.stub(impl.vsync_, 'mutate').callsFake(callback => {
+      sandbox.stub(impl, 'mutateElement').callsFake(callback => {
         callback();
+        return Promise.resolve();
       });
 
       if (options.stubHistory) {
