@@ -135,8 +135,8 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   assertSource_(src, containerSrc, sandbox = '') {
-    const {element: el} = this;
-    const urlService = Services.urlForDoc(el);
+    const {element} = this;
+    const urlService = Services.urlForDoc(element);
     const url = urlService.parse(src);
     const {hostname, protocol, origin} = url;
     // Some of these can be easily circumvented with redirects.
@@ -145,7 +145,7 @@ export class AmpIframe extends AMP.BaseElement {
     user().assert(
         urlService.isSecureUrl(url) || protocol == 'data:',
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
-        el);
+        element);
     const containerUrl = urlService.parse(containerSrc);
     user().assert(
         !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
@@ -153,7 +153,7 @@ export class AmpIframe extends AMP.BaseElement {
         'Origin of <amp-iframe> must not be equal to container %s' +
         'if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
-        el);
+        element);
     user().assert(!(endsWith(hostname, `.${urls.thirdPartyFrameHost}`) ||
         endsWith(hostname, '.ampproject.org')),
     'amp-iframe does not allow embedding of frames from ' +
@@ -600,10 +600,10 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
 
-    const {element: el} = this;
-    const src = el.getAttribute('src');
+    const {element} = this;
+    const src = element.getAttribute('src');
     if (src) {
-      this.targetOrigin_ = Services.urlForDoc(el).parse(src).origin;
+      this.targetOrigin_ = Services.urlForDoc(element).parse(src).origin;
     }
 
     // Register action (even if targetOrigin_ is not available so we can
