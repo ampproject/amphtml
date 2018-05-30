@@ -320,7 +320,7 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
 }
 ```
 
-**Note**: For a working code sample, see [app.js](https://github.com/ampproject/amphtml/blob/master/build-system/app.js#L1129).
+**Note**: For a working code sample, see [app.js](https://github.com/ampproject/amphtml/blob/master/build-system/app.js#L1199).
 
 ### Scenario 1:  Get request from AMP page on same origin
 
