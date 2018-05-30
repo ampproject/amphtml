@@ -23,7 +23,6 @@ import {
   PinchRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
-  TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
@@ -278,26 +277,8 @@ export class AmpContentViewer extends AMP.BaseElement {
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
       const deltaX = this.elementBox_.width / 2 - e.data.clientX;
       const deltaY = this.elementBox_.height / 2 - e.data.clientY;
-      this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true).then(() => {
-        return this.onZoomRelease_();
-      });
-    });
-
-    this.gestures_.onGesture(TapzoomRecognizer, e => {
-      const {
-        centerClientX,
-        centerClientY,
-        deltaX,
-        deltaY,
-        last,
-        velocityX,
-        velocityY,
-      } = e.data;
-      this.onTapZoom_(centerClientX, centerClientY, deltaX, deltaY);
-      if (last) {
-        this.onTapZoomRelease_(centerClientX, centerClientY, deltaX, deltaY,
-            velocityX, velocityY);
-      }
+      this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true)
+          .then(() => this.onZoomRelease_());
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
@@ -496,20 +477,6 @@ export class AmpContentViewer extends AMP.BaseElement {
   }
 
   /**
-   * Performs a one-step tap zoom action.
-   * @param {number} centerClientX
-   * @param {number} centerClientY
-   * @param {number} deltaX
-   * @param {number} deltaY
-   * @private
-   */
-  onTapZoom_(centerClientX, centerClientY, deltaX, deltaY) {
-    const dir = Math.abs(deltaY) > Math.abs(deltaX) ?
-      Math.sign(deltaY) : Math.sign(-deltaX);
-    this.zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir);
-  }
-
-  /**
    * Given center position, zoom delta, and zoom position, computes
    * and updates a zoom action on the content.
    * @param {number} centerClientX
@@ -553,36 +520,6 @@ export class AmpContentViewer extends AMP.BaseElement {
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
     return /** @type {!Promise|undefined} */ (
       this.set_(newScale, newPosX, newPosY, animate));
-  }
-
-  /**
-   * Performs actions after the gesture that was performing zooming has been
-   * released. The zooming may continue based on the final velocity.
-   * @param {number} centerClientX
-   * @param {number} centerClientY
-   * @param {number} deltaX
-   * @param {number} deltaY
-   * @param {number} veloX
-   * @param {number} veloY
-   * @return {!Promise}
-   * @private
-   */
-  onTapZoomRelease_(centerClientX, centerClientY,
-    deltaX, deltaY, veloX, veloY) {
-    let promise;
-    if (veloX == 0 && veloY == 0) {
-      promise = Promise.resolve();
-    } else {
-      promise = continueMotion(dev().assertElement(this.content_),
-          deltaX, deltaY, veloX, veloY,
-          (x, y) => {
-            this.onTapZoom_(centerClientX, centerClientY, x, y);
-            return true;
-          });
-    }
-    return promise.then(() => {
-      this.onZoomRelease_();
-    });
   }
 
   /**
