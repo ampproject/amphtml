@@ -151,7 +151,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     }
 
     user().assert(
-        !(this.showIfHref_ && this.showIfGeo_ !== null),
+        !(this.showIfHref_ && this.showIfGeo_),
         'Only one "data-show-if-*" attribute allowed'
     );
 
