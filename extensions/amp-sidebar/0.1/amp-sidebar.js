@@ -95,23 +95,23 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const {element: el} = this;
+    const {element} = this;
 
-    el.classList.add('i-amphtml-overlay');
+    element.classList.add('i-amphtml-overlay');
 
-    this.side_ = el.getAttribute('side');
+    this.side_ = element.getAttribute('side');
 
     this.viewport_ = this.getViewport();
 
-    this.action_ = Services.actionServiceForDoc(el);
+    this.action_ = Services.actionServiceForDoc(element);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       this.side_ = isRTL(this.document_) ? 'right' : 'left';
-      el.setAttribute('side', this.side_);
+      element.setAttribute('side', this.side_);
     }
 
     // Get the toolbar attribute from the child navs.
-    const toolbarElements = toArray(el.querySelectorAll('nav[toolbar]'));
+    const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
 
     toolbarElements.forEach(toolbarElement => {
       try {
@@ -121,7 +121,6 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
-
     if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
     }
@@ -129,14 +128,14 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       this.open_();
     } else {
-      el.setAttribute('aria-hidden', 'true');
+      element.setAttribute('aria-hidden', 'true');
     }
 
-    if (!el.hasAttribute('role')) {
-      el.setAttribute('role', 'menu');
+    if (!element.hasAttribute('role')) {
+      element.setAttribute('role', 'menu');
     }
     // Make sidebar programmatically focusable and focus on `open` for a11y.
-    el.tabIndex = -1;
+    element.tabIndex = -1;
 
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
@@ -146,7 +145,7 @@ export class AmpSidebar extends AMP.BaseElement {
     });
 
     // Replacement label for invisible close button set value in amp sidebar
-    const ariaLabel = el.getAttribute('data-close-button-aria-label')
+    const ariaLabel = element.getAttribute('data-close-button-aria-label')
     || 'Close the sidebar';
 
     // Invisible close button at the end of sidebar for screen-readers.
@@ -159,16 +158,16 @@ export class AmpSidebar extends AMP.BaseElement {
     screenReaderCloseButton.addEventListener('click', () => {
       this.close_();
     });
-    el.appendChild(screenReaderCloseButton);
+    element.appendChild(screenReaderCloseButton);
 
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
-    el.addEventListener('click', e => {
+    element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
-        const tgtLoc = Services.urlForDoc(el).parse(target.href);
+        const tgtLoc = Services.urlForDoc(element).parse(target.href);
         const currentHref = this.getAmpDoc().win.location.href;
         // Important: Only close sidebar (and hence pop sidebar history entry)
         // when navigating locally, Chrome might cancel navigation request
