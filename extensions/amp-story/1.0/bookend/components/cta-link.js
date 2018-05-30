@@ -50,7 +50,8 @@ export class CtaLinkComponent {
   assertValidity(ctaLinksJson, element) {
     const links = ctaLinksJson['links'];
     user().assert(links && isArray(links) && links.length > 0,
-        'CTA link component must be an array and contain at least one item.');
+        'CTA link component must be an array and contain at least one link ' +
+        'inside it.');
 
     links.forEach(ctaLink => {
       user().assert('text' in ctaLink && 'url' in ctaLink,
