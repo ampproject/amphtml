@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
+import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-content-viewer-0.1.css';
 import {
@@ -36,6 +35,9 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
 } from '../../../src/layout-rect';
+import {numeric} from '../../../src/transition';
+
+import {px, scale, setStyles, translate} from '../../../src/style';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-content-viewer';
@@ -235,11 +237,11 @@ export class AmpContentViewer extends AMP.BaseElement {
     return this.measureElement(() => this.measure_()).then(() => {
       return this.mutateElement(() => {
         // Set the actual dimensions of the content
-        st.setStyles(content, {
-          top: st.px(this.contentBox_.top),
-          left: st.px(this.contentBox_.left),
-          width: st.px(this.contentBox_.width),
-          height: st.px(this.contentBox_.height),
+        setStyles(content, {
+          top: px(this.contentBox_.top),
+          left: px(this.contentBox_.left),
+          width: px(this.contentBox_.width),
+          height: px(this.contentBox_.height),
         });
         // Update translation and scaling
         this.updatePanZoom_();
@@ -296,7 +298,7 @@ export class AmpContentViewer extends AMP.BaseElement {
       }
     });
 
-    // Override all taps
+    // Override all taps to enable tap events on content
     this.gestures_.onGesture(TapRecognizer, e => {
       const event = createCustomEvent(this.win, 'click', null, {bubbles: true});
       e.data.target.dispatchEvent(event);
@@ -414,9 +416,9 @@ export class AmpContentViewer extends AMP.BaseElement {
    * @private
    */
   updatePanZoom_() {
-    st.setStyles(dev().assertElement(this.content_), {
-      transform: st.translate(this.posX_, this.posY_) +
-          ' ' + st.scale(this.scale_),
+    setStyles(dev().assertElement(this.content_), {
+      transform: translate(this.posX_, this.posY_) +
+          ' ' + scale(this.scale_),
     });
   }
 
@@ -536,6 +538,14 @@ export class AmpContentViewer extends AMP.BaseElement {
       } else {
         this.registerPanningGesture_();
       }
+
+      // TODO: fire a zoom end event
+      const zoomEndEvent =
+      createCustomEvent(this.win, `${TAG}.zoomEnd`, {
+        scale: this.scale_,
+      });
+      this.action_.trigger(this.element, 'zoomEnd', zoomEndEvent,
+          ActionTrust.HIGH);
     });
   }
 
@@ -561,9 +571,9 @@ export class AmpContentViewer extends AMP.BaseElement {
       )) * MAX_ANIMATION_DURATION : 0;
 
     if (dur > 16 && animate) {
-      const scaleFunc = tr.numeric(this.scale_, newScale);
-      const xFunc = tr.numeric(this.posX_, newPosX);
-      const yFunc = tr.numeric(this.posY_, newPosY);
+      const scaleFunc = numeric(this.scale_, newScale);
+      const xFunc = numeric(this.posX_, newPosX);
+      const yFunc = numeric(this.posY_, newPosY);
       return Animation.animate(dev().assertElement(this.content_), time => {
         this.scale_ = scaleFunc(time);
         this.posX_ = xFunc(time);
