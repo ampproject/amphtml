@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {user} from '../../../src/log';
@@ -192,4 +192,13 @@ export function removeAttributeInMutate(elementImpl, name) {
   elementImpl.mutateElement(() => {
     elementImpl.element.removeAttribute(name);
   });
+}
+
+/**
+ * @param {!Element} element
+ * @param {string|!Location} url
+ */
+export function userAssertValidProtocol(element, url) {
+  user().assert(Services.urlForDoc(element).isProtocolValid(url),
+      'Unsupported protocol for URL %s', url);
 }
