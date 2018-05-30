@@ -363,6 +363,10 @@ function stubConsoleInfoLogWarn() {
     consoleInfoLogWarnSandbox.restore();
   }
   consoleInfoLogWarnSandbox = sinon.sandbox.create();
+  const {debugConsole} = window.__karma__.config;
+  if (debugConsole) {
+    return;
+  }
   consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
   consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
   consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
