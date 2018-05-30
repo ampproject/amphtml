@@ -906,7 +906,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       sendRequest(this.win,
           request,
           this.config_['transport'] || {},
-          body || '');
+          body);
     }
   }
 

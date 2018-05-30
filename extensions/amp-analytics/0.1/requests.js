@@ -50,7 +50,7 @@ export class RequestHandler {
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
 
-    /** @private {Array<number>|number|undefined} */
+    /** @private {string} */
     this.requestBody_ = JSON.stringify(request['body']) || '';
 
     /** @private {Array<number>|number|undefined} */
