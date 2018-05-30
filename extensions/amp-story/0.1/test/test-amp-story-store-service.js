@@ -117,12 +117,26 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(listenerSpy).to.have.been.calledWith(true);
   });
 
-  it('should update the current page', () => {
+  it('should update the current page id', () => {
     const listenerSpy = sandbox.spy();
     storeService.subscribe(StateProperty.CURRENT_PAGE_ID, listenerSpy);
-    storeService.dispatch(Action.CHANGE_PAGE, 'test-page');
+    storeService.dispatch(Action.CHANGE_PAGE, {
+      id: 'test-page',
+      index: 1,
+    });
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith('test-page');
+  });
+
+  it('should update the current page index', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.CURRENT_PAGE_INDEX, listenerSpy);
+    storeService.dispatch(Action.CHANGE_PAGE, {
+      id: 'test-page',
+      index: 1,
+    });
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(1);
   });
 
   it('should toggle the has audio state', () => {
