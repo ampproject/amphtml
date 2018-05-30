@@ -481,20 +481,21 @@ describes.realWin('amp-user-notification', {
     });
   });
 
-  it('shouldShow should return false if geo does not match with comma separated groups', () => {
-    ISOCountryGroups = ['nafta'];
-    const el = getUserNotification({
-      id: 'n1',
-      'data-show-if-geo': 'eea',
-      'layout': 'nodisplay',
-    });
-    const impl = el.implementation_;
-    impl.buildCallback();
+  it('shouldShow should return false no match and comma separated groups',
+      () => {
+        ISOCountryGroups = ['nafta'];
+        const el = getUserNotification({
+          id: 'n1',
+          'data-show-if-geo': 'eea',
+          'layout': 'nodisplay',
+        });
+        const impl = el.implementation_;
+        impl.buildCallback();
 
-    return impl.shouldShow().then(shouldShow => {
-      expect(shouldShow).to.equal(false);
-    });
-  });
+        return impl.shouldShow().then(shouldShow => {
+          expect(shouldShow).to.equal(false);
+        });
+      });
 
   it('shouldShow should return true when not geo is used',
       () => {
