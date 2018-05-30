@@ -81,7 +81,7 @@ describes.realWin('amp-list component', {
     const fetch = Promise.resolve(fetched);
     if (opts.resetOnRefresh) {
       listMock.expects('togglePlaceholder').withExactArgs(true).once();
-      listMock.expects('toggleLoading').withExactArgs(true).once();
+      listMock.expects('toggleLoading').withExactArgs(true, true).once();
     }
     listMock.expects('fetch_')
         .withExactArgs(opts.expr).returns(fetch).atLeast(1);
