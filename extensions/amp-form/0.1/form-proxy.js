@@ -213,6 +213,7 @@ function setupLegacyProxy(form, proxy) {
               const str = /** @type {string} */ (value || '');
               return Services.urlForDoc(form).parse(str).href;
             }
+            return value;
           },
           set(value) {
             if (desc.type == LegacyPropDataType.TOGGLE) {
