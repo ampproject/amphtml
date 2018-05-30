@@ -119,7 +119,7 @@ export function expandTemplate(template, getter, opt_maxIterations) {
  * @return {string} 32-bit unsigned hash of the string
  */
 export function stringHash32(str) {
-  const length = str.length;
+  const {length} = str;
   let hash = 5381;
   for (let i = 0; i < length; i++) {
     hash = hash * 33 ^ str.charCodeAt(i);

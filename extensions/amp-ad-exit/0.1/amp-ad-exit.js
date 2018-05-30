@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FilterType} from './filters/filter';
 import {
   MessageType,
   deserializeMessage,
@@ -27,10 +28,11 @@ import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {isObject} from '../../../src/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 const TAG = 'amp-ad-exit';
 
 /**
@@ -221,7 +223,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * passes.
    * @param {!Array<!./filters/filter.Filter>} filters
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @returns {boolean}
+   * @return {boolean}
    */
   filter_(filters, event) {
     return filters.every(filter => {
@@ -235,13 +237,14 @@ export class AmpAdExit extends AMP.BaseElement {
   buildCallback() {
     this.element.setAttribute('aria-hidden', 'true');
 
+    // Note that order is expected as part of applying default filter options.
     this.defaultFilters_.push(
         createFilter('minDelay', makeClickDelaySpec(1000), this));
     this.defaultFilters_.push(
         createFilter('carouselBtns',
             makeInactiveElementSpec('.amp-carousel-button'), this));
 
-    const children = this.element.children;
+    const {children} = this.element;
     user().assert(children.length == 1,
         'The tag should contain exactly one <script> child.');
     const child = children[0];
@@ -251,9 +254,20 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
+      let defaultClickStartTimingEvent;
+      if (isObject(config.options) &&
+          typeof config.options.startTimingEvent === 'string') {
+        defaultClickStartTimingEvent = config.options.startTimingEvent;
+        this.defaultFilters_.splice(0, 1, createFilter('minDelay',
+            makeClickDelaySpec(1000, config.options.startTimingEvent), this));
+      }
       for (const name in config.filters) {
-        this.userFilters_[name] =
-            createFilter(name, config.filters[name], this);
+        const spec = config.filters[name];
+        if (spec.type == FilterType.CLICK_DELAY) {
+          spec.startTimingEvent =
+              spec.startTimingEvent || defaultClickStartTimingEvent;
+        }
+        this.userFilters_[name] = createFilter(name, spec, this);
       }
       for (const name in config.targets) {
         const target = config.targets[name];
@@ -276,7 +290,7 @@ export class AmpAdExit extends AMP.BaseElement {
             continue;
           }
           const vendor = matches[1];
-          const origin = parseUrl(assertVendor(vendor)).origin;
+          const {origin} = parseUrlDeprecated(assertVendor(vendor));
           this.expectedOriginToVendor_[origin] =
               this.expectedOriginToVendor_[origin] || vendor;
         }
@@ -296,7 +310,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * This is a pass-through for the version in service.js, solely because
    * the one in service.js isn't stubbable for testing, since only object
    * methods are stubbable.
-   * @returns {?string}
+   * @return {?string}
    * @private
    * @VisibleForTesting
    */
@@ -378,7 +392,8 @@ export class AmpAdExit extends AMP.BaseElement {
     user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
-    const vendorURL = parseUrl(assertVendor(responseMessage['vendor']));
+    const vendorURL = parseUrlDeprecated(assertVendor(
+        responseMessage['vendor']));
     user().assert(vendorURL && vendorURL.origin == eventOrigin,
         'Invalid origin for vendor ' +
         `${responseMessage['vendor']}: ${eventOrigin}`);

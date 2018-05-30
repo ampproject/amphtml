@@ -16,6 +16,7 @@
 
 import {AmpGeo} from '../amp-geo';
 import {Services} from '../../../../src/services';
+import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
 
 describes.realWin('amp-geo', {
@@ -24,7 +25,7 @@ describes.realWin('amp-geo', {
   },
 }, env => {
 
-  const expectedState = '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","nafta":true,"unknown":true,"ISOCountryGroups":["nafta","unknown"]}</script></amp-state>'; // eslint-disable-line  
+  const expectedState = '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","nafta":true,"unknown":true,"ISOCountryGroups":["nafta","unknown"]}</script></amp-state>'; // eslint-disable-line
 
 
   const config = {
@@ -44,17 +45,32 @@ describes.realWin('amp-geo', {
     },
   };
 
+  const configWithUppercase = {
+    ISOCountryGroups: {
+      nafta: ['CA', 'mx', 'us', 'unknown'],
+      unknown: ['unknown'],
+      anz: ['au', 'NZ'],
+    },
+  };
+
   let win, doc;
   let ampdoc;
   let geo;
+  let el;
 
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    const el = doc.createElement('amp-geo');
+    el = doc.createElement('amp-geo');
+    doc.body.appendChild(el);
     el.ampdoc_ = ampdoc;
+    const vsync = vsyncForTesting(win);
+    vsync.schedule_ = () => {
+      vsync.runScheduledTasks_();
+    };
+
     geo = new AmpGeo(el);
   });
 
@@ -93,7 +109,7 @@ describes.realWin('amp-geo', {
     addConfigElement('script');
 
     geo.buildCallback();
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('unknown');
       expectBodyHasClass([
         'amp-iso-country-unknown',
@@ -106,12 +122,29 @@ describes.realWin('amp-geo', {
     });
   });
 
+  it('should remove amp-geo-pending class from body element', () => {
+    addConfigElement('script');
+    doc.body.classList.add('amp-geo-pending');
+
+    expectBodyHasClass([
+      'amp-geo-pending',
+    ], true);
+
+    geo.buildCallback();
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('unknown');
+      expectBodyHasClass([
+        'amp-geo-pending',
+      ], false);
+    });
+  });
+
   it('should insert an amp-state if enabled', () => {
     addConfigElement('script', 'application/json',
         JSON.stringify(configWithState));
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(() => {
+    return Services.geoForDocOrNull(el).then(() => {
       expect(win.document.getElementById('ampGeo').outerHTML)
           .to.equal(expectedState);
     });
@@ -121,7 +154,7 @@ describes.realWin('amp-geo', {
     addConfigElement('script');
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(() => {
+    return Services.geoForDocOrNull(el).then(() => {
       expect(win.document.getElementById('ampGeo'))
           .to.equal(null);
     });
@@ -132,7 +165,65 @@ describes.realWin('amp-geo', {
     addConfigElement('script');
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+      expectBodyHasClass([
+        'amp-iso-country-nz',
+        'amp-geo-group-anz',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+        'amp-geo-no-group',
+      ], false);
+    });
+  });
+
+
+  it('should set amp-geo-no-group if no group matches', () => {
+    win.AMP_MODE.geoOverride = 'gb';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('gb');
+      expectBodyHasClass([
+        'amp-iso-country-gb',
+        'amp-geo-no-group',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+        'amp-geo-group-anz',
+      ], false);
+    });
+  });
+
+  it('should allow uppercase hash to override geo in test', () => {
+    win.AMP_MODE.geoOverride = 'NZ';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+      expectBodyHasClass([
+        'amp-iso-country-nz',
+        'amp-geo-group-anz',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+      ], false);
+    });
+  });
+
+  it('should accept uppercase country codes in config', () => {
+    win.AMP_MODE.geoOverride = 'nz';
+    addConfigElement('script', 'application/json',
+        JSON.stringify(configWithUppercase));
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
       expectBodyHasClass([
         'amp-iso-country-nz',
@@ -150,7 +241,7 @@ describes.realWin('amp-geo', {
     doc.body.classList.add('amp-iso-country-nz', 'amp-geo-group-anz');
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
       expectBodyHasClass([
         'amp-iso-country-nz',
@@ -169,7 +260,7 @@ describes.realWin('amp-geo', {
     addConfigElement('script');
     geo.buildCallback();
 
-    return Services.geoForOrNull(win).then(geo => {
+    return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
       expectBodyHasClass([
         'amp-iso-country-nz',

@@ -24,7 +24,7 @@ import {installDocumentInfoServiceForDoc} from
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {parseUrl, removeFragment} from '../../src/url';
+import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
 
 describe('Viewer', () => {
@@ -78,7 +78,7 @@ describe('Viewer', () => {
       body: {style: {}},
       documentElement: {style: {}},
       title: 'Awesome doc',
-      querySelector() { return parseUrl('http://www.example.com/'); },
+      querySelector() { return parseUrlDeprecated('http://www.example.com/'); },
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {
@@ -292,7 +292,7 @@ describe('Viewer', () => {
 
   describe('replaceUrl', () => {
     function setUrl(href) {
-      const url = parseUrl(href);
+      const url = parseUrlDeprecated(href);
       windowApi.location.href = url.href;
       windowApi.location.hash = url.hash;
     }
@@ -920,9 +920,9 @@ describe('Viewer', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
       const viewer = new Viewer(ampdoc);
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         viewer.setMessageDeliverer(() => {});
-      }).to.throw(/message channel must have an origin/); });
+      }).to.throw(/message channel must have an origin/);
     });
 
     it('should allow channel without origin thats an empty string', () => {
@@ -971,9 +971,9 @@ describe('Viewer', () => {
         windowApi.location.hash = '#webview=1';
         windowApi.location.ancestorOrigins = [];
         const viewer = new Viewer(ampdoc);
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           viewer.setMessageDeliverer(() => {});
-        }).to.throw(/message channel must have an origin/); });
+        }).to.throw(/message channel must have an origin/);
       });
 
       it('should decide non-trusted on connection with wrong origin', () => {
@@ -1043,9 +1043,9 @@ describe('Viewer', () => {
         windowApi.location.hash = '#origin=g.com&webview=1';
         windowApi.location.ancestorOrigins = null;
         const viewer = new Viewer(ampdoc);
-        allowConsoleError(() => { expect(() => {
+        expect(() => {
           viewer.setMessageDeliverer(() => {});
-        }).to.throw(/message channel must have an origin/); });
+        }).to.throw(/message channel must have an origin/);
       });
 
       it('should decide non-trusted on connection with wrong origin', () => {

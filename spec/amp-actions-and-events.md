@@ -28,7 +28,6 @@ eventName:targetId[.methodName[(arg1=value, arg2=value)]]
 
 See the table below for descriptions of each part of the syntax.
 
-
 <table>
   <tr>
     <th width="30%">Syntax</th>
@@ -114,6 +113,23 @@ For example, the following is possible in AMP:
   </tr>
 </table>
 
+## amp-audio
+
+<table>
+  <tr>
+    <th width="20%">Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
+  </tr>
+</table>
+
 ### Input elements
 <table>
   <tr>
@@ -184,6 +200,21 @@ event.index</pre></td>
     <td><code>toggleAutoplay</code></td>
     <td>Will, on user tap or click, toggle the autoplay status for the carousel. You can either specify the status you want by specifying it: <code>carousel-id.toggleAutoplay(toggleOn=false)</code> or flip the status by not specifying a value.</td>
     <td><pre>optional toggle status</pre></td>
+  </tr>
+</table>
+
+### amp-iframe
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>message</code></td>
+    <td>Fired when the iframe invokes <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">parent.postMessage</a> as a result of a user gesture in the iframe.</td>
+    <td><pre>// See <a href="https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data">MessageEvent.data</a>.
+event.data</pre></td>
   </tr>
 </table>
 
@@ -356,6 +387,18 @@ event.response</pre></td>
   <tr>
     <td><code>goToSlide(index=INTEGER)</code></td>
     <td>Advances the carousel to a specified slide index.</td>
+  </tr>
+</table>
+
+### amp-iframe
+<table>
+  <tr>
+    <th width="40%">Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>postMessage(...)</code></td>
+    <td>Sends a message to the iframe via <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage</a> with the arguments serialized as key-value pairs under <a href="https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data">MessageEvent.data<a/>.</td>
   </tr>
 </table>
 

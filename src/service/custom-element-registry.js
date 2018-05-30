@@ -62,7 +62,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
-    const element = stub.element;
+    const {element} = stub;
     if (element.tagName.toLowerCase() == name &&
             element.ownerDocument.defaultView == win) {
       tryUpgradeElementNoInline(element, toClass);

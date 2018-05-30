@@ -33,12 +33,16 @@ import {
 } from '../service';
 import {
   isProtocolValid,
-  parseUrl,
+  parseUrlDeprecated,
   parseUrlWithA,
 } from '../url';
 import {toWin} from '../types';
 
 const TAG = 'navigation';
+/** @private @const {string} */
+const EVENT_TYPE_CLICK = 'click';
+/** @private @const {string} */
+const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -112,8 +116,8 @@ export class Navigation {
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
-    this.rootNode_.addEventListener('click', this.boundHandle_);
-
+    this.rootNode_.addEventListener(EVENT_TYPE_CLICK, this.boundHandle_);
+    this.rootNode_.addEventListener(EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     /** @private {boolean} */
     this.appendExtraParams_ = false;
     shouldAppendExtraParams(this.ampdoc).then(res => {
@@ -149,7 +153,9 @@ export class Navigation {
    */
   cleanup() {
     if (this.boundHandle_) {
-      this.rootNode_.removeEventListener('click', this.boundHandle_);
+      this.rootNode_.removeEventListener(EVENT_TYPE_CLICK, this.boundHandle_);
+      this.rootNode_.removeEventListener(
+          EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     }
   }
 
@@ -213,23 +219,33 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-
     const target = closestByTag(dev().assertElement(e.target), 'A');
     if (!target || !target.href) {
       return;
     }
-
-    // First check if need to handle external link decoration.
-    let defaultExpandParamsUrl = null;
-    if (this.appendExtraParams_ && !this.isEmbed_) {
-      // Only decorate outgoing link when needed to and is not in FIE.
-      defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, target);
+    if (e.type == EVENT_TYPE_CLICK) {
+      this.handleClick_(target, e);
+    } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
+      // Handles contextmenu click. Note that currently this only deals
+      // with url variable substitution and expansion, as there is
+      // straightforward way of determining what the user clicked in the
+      // context menu, required for A2A navigation and custom link protocol
+      // handling.
+      // TODO(alabiaga): investigate fix for handling A2A and custom link
+      // protocols.
+      this.expandVarsForAnchor_(target);
     }
+  }
 
-    const urlReplacements = Services.urlReplacementsForDoc(target);
-    urlReplacements.maybeExpandLink(target, defaultExpandParamsUrl);
+  /**
+   * @param {!Element} target
+   * @param {!Event} e
+   * @private
+   */
+  handleClick_(target, e) {
+    this.expandVarsForAnchor_(target);
 
-    const location = this.parseUrl_(target.href);
+    const location = this.parseUrlDeprecated_(target.href);
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
@@ -243,6 +259,22 @@ export class Navigation {
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
+  }
+
+  /**
+   * @param {!Element} el
+   * @private
+   */
+  expandVarsForAnchor_(el) {
+    // First check if need to handle external link decoration.
+    let defaultExpandParamsUrl = null;
+    if (this.appendExtraParams_ && !this.isEmbed_) {
+      // Only decorate outgoing link when needed to and is not in FIE.
+      defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, el);
+    }
+
+    const urlReplacements = Services.urlReplacementsForDoc(el);
+    urlReplacements.maybeExpandLink(el, defaultExpandParamsUrl);
   }
 
   /**
@@ -263,7 +295,7 @@ export class Navigation {
     /** @const {!Window} */
     const win = toWin(target.ownerDocument.defaultView);
     const url = target.href;
-    const protocol = location.protocol;
+    const {protocol} = location;
 
     // On Safari iOS, custom protocol links will fail to open apps when the
     // document is iframed - in order to go around this, we set the top.location
@@ -324,7 +356,7 @@ export class Navigation {
    */
   handleNavClick_(e, target, tgtLoc) {
     /** @const {!Location} */
-    const curLoc = this.parseUrl_('');
+    const curLoc = this.parseUrlDeprecated_('');
     const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
     const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
 
@@ -386,15 +418,14 @@ export class Navigation {
   scrollToElement_(elem, hash) {
     // Scroll to the element if found.
     if (elem) {
-      // The first call to scrollIntoView overrides browsers' default
-      // scrolling behavior. The second call insides setTimeout allows us to
-      // scroll to that element properly.
-      // Without doing this, the viewport will not catch the updated scroll
-      // position on iOS Safari and hence calculate the wrong scrollTop for
-      // the scrollbar jumping the user back to the top for failing to calculate
-      // the new jumped offset.
-      // Without the first call there will be a visual jump due to browser scroll.
-      // See https://github.com/ampproject/amphtml/issues/5334 for more details.
+      // The first call to scrollIntoView overrides browsers' default scrolling
+      // behavior. The second call insides setTimeout allows us to scroll to
+      // that element properly. Without doing this, the viewport will not catch
+      // the updated scroll position on iOS Safari and hence calculate the wrong
+      // scrollTop for the scrollbar jumping the user back to the top for
+      // failing to calculate the new jumped offset. Without the first call
+      // there will be a visual jump due to browser scroll. See
+      // https://github.com/ampproject/amphtml/issues/5334 for more details.
       this.viewport_./*OK*/scrollIntoView(elem);
       Services.timerFor(this.ampdoc.win).delay(() =>
         this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);
@@ -409,7 +440,7 @@ export class Navigation {
    * @return {!Location}
    * @private
    */
-  parseUrl_(url) {
+  parseUrlDeprecated_(url) {
     if (this.isEmbed_) {
       let a = this.embedA_;
       if (!a) {
@@ -419,7 +450,7 @@ export class Navigation {
       }
       return parseUrlWithA(a, url);
     }
-    return parseUrl(url || this.ampdoc.win.location.href);
+    return parseUrlDeprecated(url || this.ampdoc.win.location.href);
   }
 }
 

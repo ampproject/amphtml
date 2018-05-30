@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
@@ -49,7 +50,7 @@ export class PlatformStore {
     /** @private @const {!Observable<{serviceId: string}>} */
     this.onPlatformResolvedCallbacks_ = new Observable();
 
-    /** @private {?Promise<boolean>} */
+    /** @private {?Deferred} */
     this.grantStatusPromise_ = null;
 
     /** @private @const {!Observable} */
@@ -58,10 +59,10 @@ export class PlatformStore {
     /** @private {?Entitlement} */
     this.grantStatusEntitlement_ = null;
 
-    /** @private {?Promise<?Entitlement>} */
+    /** @private {?Deferred<?Entitlement>} */
     this.grantStatusEntitlementPromise_ = null;
 
-    /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
+    /** @private {?Deferred<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
 
     /** @private {!Array<string>} */
@@ -91,6 +92,7 @@ export class PlatformStore {
   /**
    *Calls a callback for when a platform is resolved.
    * @param {string} serviceId
+   * @param {!Function} callback
    */
   onPlatformResolves(serviceId, callback) {
     const platform = this.subscriptionPlatforms_[serviceId];
@@ -108,7 +110,7 @@ export class PlatformStore {
   /**
    * Returns the platform for the given id
    * @param {string} serviceId
-   * @returns {!./subscription-platform.SubscriptionPlatform}
+   * @return {!./subscription-platform.SubscriptionPlatform}
    */
   getPlatform(serviceId) {
     const platform = this.subscriptionPlatforms_[serviceId];
@@ -118,7 +120,7 @@ export class PlatformStore {
 
   /**
    * Returns the local platform;
-   * @returns {!./local-subscription-platform.LocalSubscriptionPlatform}
+   * @return {!./local-subscription-platform.LocalSubscriptionPlatform}
    */
   getLocalPlatform() {
     const localPlatform =
@@ -128,10 +130,11 @@ export class PlatformStore {
   }
 
   /**
-   * Returns all the platforms;
-   * @returns {!Array<!./subscription-platform.SubscriptionPlatform>}
+   * Returns all available platforms.
+   *
+   * @return {!Array<!./subscription-platform.SubscriptionPlatform>}
    */
-  getAllRegisteredPlatforms() {
+  getAvailablePlatforms() {
     const platforms = [];
     for (const platformKey in this.subscriptionPlatforms_) {
       const subscriptionPlatform =
@@ -142,7 +145,8 @@ export class PlatformStore {
   }
 
   /**
-   * This registers a callback which is called whenever a service id is resolved with an entitlement.
+   * This registers a callback which is called whenever a service id is resolved
+   * with an entitlement.
    * @param {function(!EntitlementChangeEventDef):void} callback
    */
   onChange(callback) {
@@ -170,7 +174,7 @@ export class PlatformStore {
   /**
    * Returns entitlement for a platform
    * @param {string} serviceId
-   * @returns {!./entitlement.Entitlement} entitlement
+   * @return {!./entitlement.Entitlement} entitlement
    */
   getResolvedEntitlementFor(serviceId) {
     dev().assert(this.entitlements_[serviceId],
@@ -179,41 +183,40 @@ export class PlatformStore {
   }
 
   /**
-   * @returns {!Promise<boolean>}
+   * @return {!Promise<boolean>}
    */
   getGrantStatus() {
     if (this.grantStatusPromise_ !== null) {
-      return this.grantStatusPromise_;
+      return this.grantStatusPromise_.promise;
     }
 
-    this.grantStatusPromise_ = new Promise(resolve => {
+    this.grantStatusPromise_ = new Deferred();
 
-      // Check if current entitlements unblocks the reader
-      for (const key in this.entitlements_) {
-        const entitlement = (this.entitlements_[key]);
-        if (entitlement.enablesThis()) {
+    // Check if current entitlements unblocks the reader
+    for (const key in this.entitlements_) {
+      const entitlement = (this.entitlements_[key]);
+      if (entitlement.granted) {
+        this.saveGrantEntitlement_(entitlement);
+        this.grantStatusPromise_.resolve(true);
+      }
+    }
+
+    if (this.areAllPlatformsResolved_()) {
+      // Resolve with null if non of the entitlements unblocks the reader
+      this.grantStatusPromise_.resolve(false);
+    } else {
+      // Listen if any upcoming entitlements unblock the reader
+      this.onChange(({entitlement}) => {
+        if (entitlement.granted) {
           this.saveGrantEntitlement_(entitlement);
-          return resolve(true);
+          this.grantStatusPromise_.resolve(true);
+        } else if (this.areAllPlatformsResolved_()) {
+          this.grantStatusPromise_.resolve(false);
         }
-      }
+      });
+    }
 
-      if (this.areAllPlatformsResolved_()) {
-        // Resolve with null if non of the entitlements unblocks the reader
-        return resolve(false);
-      } else {
-        // Listen if any upcoming entitlements unblock the reader
-        this.onChange(({entitlement}) => {
-          if (entitlement.enablesThis()) {
-            this.saveGrantEntitlement_(entitlement);
-            resolve(true);
-          } else if (this.areAllPlatformsResolved_()) {
-            resolve(false);
-          }
-        });
-      }
-    });
-
-    return this.grantStatusPromise_;
+    return this.grantStatusPromise_.promise;
   }
 
   /**
@@ -222,11 +225,12 @@ export class PlatformStore {
    * @private
    */
   saveGrantEntitlement_(entitlement) {
-    // The entitlement will be stored either if its the first one
-    // or last one was metered and new one has full subscription.
-    if ((!this.grantStatusEntitlement_) || (this.grantStatusEntitlement_
-      && (this.grantStatusEntitlement_.metering
-          && entitlement.subscriptionToken))) {
+    // The entitlement will be stored either if its the first one to grant
+    // or the new one has full subscription but the last one didn't.
+    if ((!this.grantStatusEntitlement_ && entitlement.granted)
+        || (this.grantStatusEntitlement_
+          && !this.grantStatusEntitlement_.isSubscriber()
+          && entitlement.isSubscriber())) {
       this.grantStatusEntitlement_ = entitlement;
       this.onGrantStateResolvedCallbacks_.fire();
     }
@@ -234,29 +238,27 @@ export class PlatformStore {
 
   /**
    * Returns the entitlement which unlocked the document
-   * @returns {!Promise<?Entitlement>}
+   * @return {!Promise<?Entitlement>}
    */
   getGrantEntitlement() {
     if (this.grantStatusEntitlementPromise_) {
-      return (this.grantStatusEntitlementPromise_);
+      return (this.grantStatusEntitlementPromise_.promise);
     }
-
-    this.grantStatusEntitlementPromise_ = new Promise(resolve => {
-      if ((this.grantStatusEntitlement_
-          && this.grantStatusEntitlement_.subscriptionToken)
+    this.grantStatusEntitlementPromise_ = new Deferred();
+    if ((this.grantStatusEntitlement_
+        && this.grantStatusEntitlement_.isSubscriber())
           || this.areAllPlatformsResolved_()) {
-        resolve(this.grantStatusEntitlement_);
-      } else {
-        this.onGrantStateResolvedCallbacks_.add(() => {
-          if (this.grantStatusEntitlement_.subscriptionToken
-              || this.areAllPlatformsResolved_()) {
-            resolve(this.grantStatusEntitlement_);
-          }
-        });
-      }
-    });
-
-    return this.grantStatusEntitlementPromise_;
+      this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
+    } else {
+      this.onGrantStateResolvedCallbacks_.add(() => {
+        if (this.grantStatusEntitlement_.granted
+            || this.areAllPlatformsResolved_()) {
+          this.grantStatusEntitlementPromise_.resolve(
+              this.grantStatusEntitlement_);
+        }
+      });
+    }
+    return this.grantStatusEntitlementPromise_.promise;
   }
 
   /**
@@ -269,34 +271,33 @@ export class PlatformStore {
   /**
    * Returns entitlements when all services are done fetching them.
    * @private
-   * @returns {!Promise<!Array<!./entitlement.Entitlement>>}
+   * @return {!Promise<!Array<!./entitlement.Entitlement>>}
    */
   getAllPlatformsEntitlements_() {
     if (this.allResolvedPromise_) {
-      return this.allResolvedPromise_;
+      return this.allResolvedPromise_.promise;
     }
-
-    this.allResolvedPromise_ = new Promise(resolve => {
-      if (this.areAllPlatformsResolved_()) {
-        // Resolve with null if non of the entitlements unblocks the reader
-        return resolve(this.getAvailablePlatformsEntitlements_());
-      } else {
-        // Listen if any upcoming entitlements unblock the reader
-        this.onChange(() => {
-          if (this.areAllPlatformsResolved_()) {
-            resolve(this.getAvailablePlatformsEntitlements_());
-          }
-        });
-      }
-    });
-
-    return this.allResolvedPromise_;
+    this.allResolvedPromise_ = new Deferred();
+    if (this.areAllPlatformsResolved_()) {
+      // Resolve with null if non of the entitlements unblocks the reader
+      this.allResolvedPromise_.resolve(
+          this.getAvailablePlatformsEntitlements_());
+    } else {
+      // Listen if any upcoming entitlements unblock the reader
+      this.onChange(() => {
+        if (this.areAllPlatformsResolved_()) {
+          this.allResolvedPromise_.resolve(
+              this.getAvailablePlatformsEntitlements_());
+        }
+      });
+    }
+    return this.allResolvedPromise_.promise;
   }
 
   /**
    * Returns entitlements for resolved platforms.
    * @private
-   * @returns {!Array<!./entitlement.Entitlement>}
+   * @return {!Array<!./entitlement.Entitlement>}
    */
   getAvailablePlatformsEntitlements_() {
     const entitlements = [];
@@ -310,19 +311,20 @@ export class PlatformStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @returns {!Promise<!./subscription-platform.SubscriptionPlatform>}
+   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   selectPlatform() {
 
     return this.getAllPlatformsEntitlements_().then(() => {
-      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
+      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs
+      // waiting for all entitlement.
       return this.selectApplicablePlatform_();
     });
   }
 
   /**
    * Returns the number of entitlements resolved
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   areAllPlatformsResolved_() {
@@ -331,15 +333,15 @@ export class PlatformStore {
   }
 
   /**
-   * Returns most qualified platform.
-   * Qualification of a platform is based on an integer weight.
-   * Every platform starts with weight 0 and evaluated against the following parameters,
+   * Returns most qualified platform. Qualification of a platform is based on an
+   * integer weight. Every platform starts with weight 0 and evaluated against
+   * the following parameters,
    * - user is subscribed with platform (Gives weight 10)
    * - supports the current viewer (Gives weight 9)
    *
-   * In the end candidate with max weight is selected.
-   * However if candidate's weight is equal to local platform, then local platform is selected.
-   * @returns {!./subscription-platform.SubscriptionPlatform}
+   * In the end candidate with max weight is selected. However if candidate's
+   * weight is equal to local platform, then local platform is selected.
+   * @return {!./subscription-platform.SubscriptionPlatform}
    * @private
    */
   selectApplicablePlatform_() {
@@ -351,13 +353,13 @@ export class PlatformStore {
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
-    this.getAllRegisteredPlatforms().forEach(platform => {
+    this.getAvailablePlatforms().forEach(platform => {
       let weight = 0;
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
 
       // Subscriber wins immediatly.
-      if (!!entitlement.subscriptionToken) {
+      if (entitlement.isSubscriber()) {
         weight += 100000;
       }
 
@@ -412,5 +414,33 @@ export class PlatformStore {
       this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
           this.fallbackEntitlement_);
     }
+  }
+
+  /**
+   * Evaluates platforms and select the one to be selected for login.
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   */
+  selectPlatformForLogin() {
+    const platformScores = [];
+    this.getAvailablePlatforms().forEach(platform => {
+      let score = 0;
+      if (platform.supportsCurrentViewer()) {
+        score += 1000;
+      }
+      platformScores.push({
+        platform,
+        score,
+      });
+    });
+
+    platformScores.sort(function(platform1, platform2) {
+      return platform2.weight - platform1.weight;
+    });
+
+    if (platformScores.length === 0 || platformScores[0].score === 0) {
+      return this.getLocalPlatform();
+    }
+
+    return platformScores[0].platform;
   }
 }

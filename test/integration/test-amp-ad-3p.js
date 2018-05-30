@@ -74,8 +74,8 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
         htmlAccessAllowed: '',
       });
 
-      // make sure the context.data is the same instance as the data param passed
-      // into the vendor function. see #10628
+      // make sure the context.data is the same instance as the data param
+      // passed into the vendor function. see #10628
       expect(context.data).to.equal(
           iframe.contentWindow.networkIntegrationDataParamForTesting);
 
@@ -87,7 +87,7 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
         top: platform.isIos() ? 1001 : 1000, // the iOS 1px trick
         width: 300,
       });
-      const initialIntersection = context.initialIntersection;
+      const {initialIntersection} = context;
       expect(initialIntersection.rootBounds).to.deep
           .equal(layoutRectLtwh(0, 0, 500, 3000));
       expect(initialIntersection.boundingClientRect).to.deep

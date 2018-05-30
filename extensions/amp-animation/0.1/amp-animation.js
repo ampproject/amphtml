@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {Builder} from './web-animations';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
@@ -359,8 +359,7 @@ export class AmpAnimation extends AMP.BaseElement {
   onResize_() {
     // Store the previous `triggered` and `pausedByAction` value since
     // `cancel` may reset it.
-    const triggered = this.triggered_;
-    const pausedByAction = this.pausedByAction_;
+    const {triggered_: triggered, pausedByAction_: pausedByAction} = this;
 
     // Stop animation right away.
     if (this.runner_) {

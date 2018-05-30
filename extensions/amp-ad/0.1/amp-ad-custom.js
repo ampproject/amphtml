@@ -112,10 +112,10 @@ export class AmpAdCustom extends AMP.BaseElement {
         Services.templatesFor(this.win)
             .findAndRenderTemplate(this.element, templateData)
             .then(renderedElement => {
-              // Get here when the template has been rendered
-              // Clear out the child template and replace it by the rendered version
-              // Note that we can't clear templates that's not ad's child because
-              // they maybe used by other ad component.
+              // Get here when the template has been rendered Clear out the
+              // child template and replace it by the rendered version Note that
+              // we can't clear templates that's not ad's child because they
+              // maybe used by other ad component.
               removeChildren(this.element);
               this.element.appendChild(renderedElement);
               this.signals().signal(CommonSignals.INI_LOAD);
@@ -194,7 +194,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /**
    * @private getFullUrl_ Get a URL which includes a parameter indicating
    * all slots to be fetched from this web server URL
-   * @returns {string} The URL with the "ampslots" parameter appended
+   * @return {string} The URL with the "ampslots" parameter appended
    */
   getFullUrl_() {
     // If this ad doesn't have a slot defined, just return the base URL

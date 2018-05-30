@@ -296,7 +296,8 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * We want clicks on certain elements to be exempted from normal page navigation
+   * We want clicks on certain elements to be exempted from normal page
+   * navigation
    * @param {!Event} event
    * @return {boolean}
    */

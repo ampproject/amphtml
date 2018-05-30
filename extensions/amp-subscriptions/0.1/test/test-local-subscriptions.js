@@ -15,7 +15,7 @@
  */
 
 import {Dialog} from '../dialog';
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
@@ -32,19 +32,13 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   };
   const service = 'sample-service';
   const source = 'sample-source';
-  const products = ['scenic-2017.appspot.com:news',
-    'scenic-2017.appspot.com:product2'];
-  const subscriptionToken = 'token';
-  const loggedIn = true;
   const json = {
     service,
     source,
-    products,
-    subscriptionToken,
-    loggedIn,
+    granted: true,
+    grantReason: GrantReason.SUBSCRIBER,
   };
   const entitlement = Entitlement.parseFromJson(json);
-  entitlement.setCurrentProduct(products[0]);
   const authUrl = 'https://lipsum.com/login/authorize';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {
@@ -142,6 +136,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     beforeEach(() => {
       element = document.createElement('div');
       element.setAttribute('subscriptions-action', 'subscribe');
+      element.setAttribute('subscriptions-service', 'local');
     });
 
     it('should call executeAction with subscriptions-action value', () => {
@@ -164,6 +159,46 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       localSubscriptionPlatform.handleClick_(element);
       expect(executeStub).to.not.be.called;
       expect(delegateStub).to.be.called;
+    });
+
+    it('should delegate service selection to scoreBasedLogin if no service '
+        + 'name is specified', () => {
+      element.removeAttribute('subscriptions-service');
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'selectPlatformForLogin'
+      ).callsFake(() => platform);
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.be.called;
+      expect(delegateStub).to.be.calledWith(
+          element.getAttribute('subscriptions-action'),
+          serviceId,
+      );
+    });
+
+    it('should delegate service selection to scoreBasedLogin '
+      + 'service specified is auto', () => {
+      element.removeAttribute('subscriptions-service');
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'selectPlatformForLogin'
+      ).callsFake(() => platform);
+      sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.be.called;
     });
   });
 
@@ -188,7 +223,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     it('should call renderer\'s render method', () => {
       const renderStub =
         sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
-      localSubscriptionPlatform.activate({entitlement});
+      localSubscriptionPlatform.activate(entitlement);
       return localSubscriptionPlatform.actions_.build().then(() => {
         expect(renderStub).to.be.calledOnce;
       });

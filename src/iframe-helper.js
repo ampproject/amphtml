@@ -19,7 +19,7 @@ import {dev} from './log';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
-import {parseUrl} from './url';
+import {parseUrlDeprecated} from './url';
 import {tryParseJson} from './json';
 
 /**
@@ -37,13 +37,14 @@ const UNLISTEN_SENTINEL = 'unlisten';
 let WindowEventsDef;
 
 /**
- * Returns a mapping from a URL's origin to an array of windows and their listenFor listeners.
+ * Returns a mapping from a URL's origin to an array of windows and their
+ * listenFor listeners.
  * @param {!Window} parentWin the window that created the iframe
  * @param {boolean=} opt_create create the mapping if it does not exist
  * @return {?Object<string, !Array<!WindowEventsDef>>}
  */
 function getListenFors(parentWin, opt_create) {
-  let listeningFors = parentWin.listeningFors;
+  let {listeningFors} = parentWin;
 
   if (!listeningFors && opt_create) {
     listeningFors = parentWin.listeningFors = Object.create(null);
@@ -52,7 +53,8 @@ function getListenFors(parentWin, opt_create) {
 }
 
 /**
- * Returns an array of WindowEventsDef that have had any listenFor listeners registered for this sentinel.
+ * Returns an array of WindowEventsDef that have had any listenFor listeners
+ * registered for this sentinel.
  * @param {!Window} parentWin the window that created the iframe
  * @param {string} sentinel the sentinel of the message
  * @param {boolean=} opt_create create the array if it does not exist
@@ -80,7 +82,7 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
  */
 function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
-  const origin = parseUrl(iframe.src).origin;
+  const {origin} = parseUrlDeprecated(iframe.src);
   const sentinel = getSentinel_(iframe, opt_is3P);
   const listenSentinel = getListenForSentinel(parentWin, sentinel, true);
 
@@ -126,7 +128,7 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
   let windowEvents;
   for (let i = 0; i < listenSentinel.length; i++) {
     const we = listenSentinel[i];
-    const contentWindow = we.frame.contentWindow;
+    const {contentWindow} = we.frame;
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
     } else if (sentinel === 'amp') {
@@ -176,7 +178,7 @@ function dropListenSentinel(listenSentinel) {
     if (!windowEvents.frame.contentWindow) {
       listenSentinel.splice(i, 1);
 
-      const events = windowEvents.events;
+      const {events} = windowEvents;
       for (const name in events) {
         // Splice here, so that each unlisten does not shift the array
         events[name].splice(0, Infinity).forEach(event => {
@@ -371,7 +373,7 @@ export function postMessageToWindows(iframe, targets, type, object, opt_is3P) {
  * Gets the sentinel string.
  * @param {!Element} iframe The iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @returns {string} Sentinel string.
+ * @return {string} Sentinel string.
  * @private
  */
 function getSentinel_(iframe, opt_is3P) {
@@ -381,7 +383,7 @@ function getSentinel_(iframe, opt_is3P) {
 /**
  * JSON parses event.data if it needs to be
  * @param {*} data
- * @returns {?JsonObject} object message
+ * @return {?JsonObject} object message
  * @private
  * @visibleForTesting
  */

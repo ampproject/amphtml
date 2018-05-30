@@ -85,8 +85,6 @@ describe('PriorityQueue', function() {
   });
 
   it('should throw error when priority is NaN', () => {
-    allowConsoleError(() => {
-      expect(() => { pq.enqueue(NaN); }).to.throw(Error);
-    });
+    expect(() => { pq.enqueue(NaN); }).to.throw(Error);
   });
 });

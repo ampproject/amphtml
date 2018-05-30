@@ -35,20 +35,25 @@ module.exports = {
   ],
 
   preprocessors: {
-    'test/fixtures/*.html': ['html2js'],
-    'test/**/*.js': ['browserify'],
-    'ads/**/test/test-*.js': ['browserify'],
-    'extensions/**/test/**/*.js': ['browserify'],
-    'testing/**/*.js': ['browserify'],
+    './test/fixtures/*.html': ['html2js'],
+    './test/**/*.js': ['browserify'],
+    './ads/**/test/test-*.js': ['browserify'],
+    './extensions/**/test/**/*.js': ['browserify'],
+    './testing/**/*.js': ['browserify'],
   },
+
+  // Sauce labs on Safari doesn't support 'localhost' addresses. See #14848.
+  // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
+  hostname: process.platform === 'darwin' ? '127.0.0.1' : 'localhost',
 
   browserify: {
     watch: true,
     debug: true,
+    basedir: __dirname + '/../../',
     transform: [
       ['babelify', {compact: false}],
     ],
-    bundleDelay: 900,
+    bundleDelay: 1200,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
@@ -128,19 +133,19 @@ module.exports = {
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      flags: COMMON_CHROME_FLAGS,
+      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome_android: {
-      base: 'SauceLabs',
-      browserName: 'android',
-      version: 'latest',
-    },
     SL_Chrome_latest: {
       base: 'SauceLabs',
       browserName: 'chrome',
+      version: 'latest',
+    },
+    SL_Chrome_android: {
+      base: 'SauceLabs',
+      browserName: 'android',
       version: 'latest',
     },
     SL_Chrome_45: {
@@ -148,15 +153,19 @@ module.exports = {
       browserName: 'chrome',
       version: '45',
     },
-    SL_iOS_latest: {
+    SL_Android_latest: {
       base: 'SauceLabs',
-      browserName: 'iphone',
+      device: 'Android Emulator',
+      browserName: 'android',
+      platform: 'android',
       version: 'latest',
     },
-    SL_iOS_10_0: {
+    SL_iOS_latest: {
       base: 'SauceLabs',
+      device: 'iPhone Simulator',
       browserName: 'iphone',
-      version: '10.0',
+      platform: 'iOS',
+      version: 'latest',
     },
     SL_Firefox_latest: {
       base: 'SauceLabs',
@@ -167,16 +176,6 @@ module.exports = {
       base: 'SauceLabs',
       browserName: 'safari',
       version: 'latest',
-    },
-    SL_Safari_10: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 10,
-    },
-    SL_Safari_9: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 9,
     },
     SL_Edge_latest: {
       base: 'SauceLabs',
@@ -194,6 +193,9 @@ module.exports = {
     testName: 'AMP HTML on Sauce',
     tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
     startConnect: false,
+    connectOptions: {
+      noSslBumpDomains: 'all',
+    },
   },
 
   client: {

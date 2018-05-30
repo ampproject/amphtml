@@ -123,7 +123,7 @@ describes.realWin('performance', {amp: true}, env => {
 
       expect(perf.events_.length).to.equal(0);
 
-      for (let i = 0; i < 50 ; i++) {
+      for (let i = 0; i < 50; i++) {
         perf.tick(`start${i}`);
       }
 

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
@@ -80,16 +81,16 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     // Register relevant actions
     this.registerAction('play', () => { this.play_(); }, ActionTrust.LOW);
     this.registerAction('pause', () => { this.pause_(); }, ActionTrust.LOW);
     this.registerAction('stop', () => { this.stop_(); }, ActionTrust.LOW);
     this.registerAction('seekTo', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       if (args) {
         this.seekTo_(args);
       }
@@ -131,9 +132,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true;
   }
 

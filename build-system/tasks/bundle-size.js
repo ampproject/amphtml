@@ -16,34 +16,37 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const getStdout = require('../exec').getStdout;
+const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
+const {getStdout} = require('../exec');
 
 const runtimeFile = './dist/v0.js';
-const maxSize = '77.23KB';
+const maxSize = '77.2KB';
 
-const green = colors.green;
-const red = colors.red;
-const cyan = colors.cyan;
-const yellow = colors.yellow;
+const {green, red, cyan, yellow} = colors;
 
 
 function checkBundleSize() {
+  if (!fs.existsSync(runtimeFile)) {
+    log(yellow('Could not find'), cyan(runtimeFile) +
+        yellow('. Skipping bundlesize check.'));
+    log(yellow('To include this check, run'),
+        cyan('gulp dist --fortesting [--noextensions]'),
+        yellow('before'), cyan('gulp bundle-size') + yellow('.'));
+    return;
+  }
+
   const cmd = `npx bundlesize -f "${runtimeFile}" -s "${maxSize}"`;
   log('Running ' + cyan(cmd) + '...');
   const output = getStdout(cmd);
   const pass = output.match(/PASS .*/);
   const fail = output.match(/FAIL .*/);
   const error = output.match(/ERROR .*/);
-  if (error) {
-    log(yellow(error));
-    if (!process.env.TRAVIS) {
-      log(yellow('You must run'), cyan('gulp dist'),
-          yellow('before running this task.'));
-    }
-  } else if (fail) {
-    log(red(fail));
+  if (error && error.length > 0) {
+    log(yellow(error[0]));
+  } else if (fail && fail.length > 0) {
+    log(red(fail[0]));
     log(red('ERROR:'), cyan('bundlesize'), red('found that'),
         cyan(runtimeFile), red('has exceeded its size cap of'),
         cyan(maxSize) + red('.'));
@@ -51,8 +54,8 @@ function checkBundleSize() {
         'This is part of a new effort to reduce AMP\'s binary size (#14392).'));
     log(red('Please contact @choumx or @jridgewell for assistance.'));
     process.exitCode = 1;
-  } else if (pass) {
-    log(green(pass));
+  } else if (pass && pass.length > 0) {
+    log(green(pass[0]));
   } else {
     log(yellow(output));
   }

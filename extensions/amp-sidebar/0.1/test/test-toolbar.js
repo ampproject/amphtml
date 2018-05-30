@@ -122,7 +122,7 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar header should be hidden for a \
    non-matching window size for (min-width: 768px)', () => {
         return getToolbars([{}]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           resizeIframeToWidth(obj.iframe, '1024px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();
@@ -145,7 +145,7 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar header should be shown for a \
    matching window size for (min-width: 768px)', () => {
         return getToolbars([{}]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           resizeIframeToWidth(obj.iframe, '4000px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();
@@ -166,7 +166,7 @@ describe('amp-sidebar - toolbar', () => {
         return getToolbars([{
           'toolbar-target': targetId,
         }]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           resizeIframeToWidth(obj.iframe, '1024px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();
@@ -187,7 +187,7 @@ describe('amp-sidebar - toolbar', () => {
         return getToolbars([{
           'toolbar-target': targetId,
         }]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           const toolbarTargets =
                 toArray(obj.ampdoc.getRootNode()
                     .querySelectorAll(`#${targetId}`));
@@ -209,7 +209,7 @@ describe('amp-sidebar - toolbar', () => {
         return getToolbars([{
           'toolbar-target': targetId,
         }]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           const toolbarTargets =
                 toArray(obj.ampdoc.getRootNode()
                     .querySelectorAll(`#${targetId}`));
@@ -230,7 +230,7 @@ describe('amp-sidebar - toolbar', () => {
         return getToolbars([{
           toolbarOnlyOnNav: true,
         }]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           resizeIframeToWidth(obj.iframe, '4000px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();
@@ -251,7 +251,7 @@ describe('amp-sidebar - toolbar', () => {
         return getToolbars([{
           toolbarOnlyOnNav: true,
         }]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           resizeIframeToWidth(obj.iframe, '0px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();
@@ -270,7 +270,7 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should be in the hidden state \
    when it is not being displayed', () => {
         return getToolbars([{}]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           resizeIframeToWidth(obj.iframe, '1px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();
@@ -283,7 +283,7 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should be in the shown state \
    when it is being displayed', () => {
         return getToolbars([{}]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           resizeIframeToWidth(obj.iframe, '4000px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();
@@ -296,7 +296,7 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should not be able to be shown \
    if already in the shown state', () => {
         return getToolbars([{}]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           resizeIframeToWidth(obj.iframe, '4000px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();
@@ -309,7 +309,7 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should be able to be shown \
    if not in the shown state, and return a promise', () => {
         return getToolbars([{}]).then(obj => {
-          const toolbars = obj.toolbars;
+          const {toolbars} = obj;
           resizeIframeToWidth(obj.iframe, '1px', () => {
             toolbars.forEach(toolbar => {
               toolbar.onLayoutChange();

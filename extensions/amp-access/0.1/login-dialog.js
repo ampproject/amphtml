@@ -20,7 +20,7 @@ import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/dom';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';
 
 /** @const */
@@ -219,7 +219,7 @@ export class WebLoginDialog {
 
   /** @private */
   openInternal_() {
-    const screen = this.win.screen;
+    const {screen} = this.win;
     const w = Math.floor(Math.min(700, screen.width * 0.9));
     const h = Math.floor(Math.min(450, screen.height * 0.9));
     const x = Math.floor((screen.width - w) / 2);
@@ -266,7 +266,7 @@ export class WebLoginDialog {
    * @private
    */
   setupDialog_(returnUrl) {
-    const returnOrigin = parseUrl(returnUrl).origin;
+    const returnOrigin = parseUrlDeprecated(returnUrl).origin;
 
     this.heartbeatInterval_ = this.win.setInterval(() => {
       if (this.dialog_.closed) {

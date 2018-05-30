@@ -20,7 +20,7 @@
  * that parses to NaN, returns NaN.
  *
  * @param {number} x
- * @returns {number}
+ * @return {number}
  */
 export function sign(x) {
   x = Number(x);

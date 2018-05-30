@@ -17,7 +17,6 @@
 import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-  getConsentPolicyState,
 } from '../../../src/consent-state';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LayoutPriority} from '../../../src/layout';
@@ -43,8 +42,10 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {getBinaryType} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {getConsentPolicyState} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
+import {tryResolve} from '../../../src/utils/promise';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
@@ -403,6 +404,7 @@ export class AmpA4A extends AMP.BaseElement {
      * be null before buildCallback() executes or if the impl does not provide
      * an analytice config.
      * @private {?Element}
+     * @visibleForTesting
      */
     this.a4aAnalyticsElement_ = null;
 
@@ -576,7 +578,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -699,8 +701,9 @@ export class AmpA4A extends AMP.BaseElement {
           this.handleLifecycleStage_('urlBuilt');
           return adUrl && this.sendXhrRequest(adUrl);
         })
-        // The following block returns either the response (as a {bytes, headers}
-        // object), or null if no response is available / response is empty.
+        // The following block returns either the response (as a
+        // {bytes, headers} object), or null if no response is available /
+        // response is empty.
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
           checkStillCurrent();
@@ -1137,6 +1140,11 @@ export class AmpA4A extends AMP.BaseElement {
     if (!force && this.isRefreshing) {
       return;
     }
+    // Allow embed to release its resources.
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.destroy();
+      this.friendlyIframeEmbed_ = null;
+    }
     if (this.iframe && this.iframe.parentElement) {
       this.iframe.parentElement.removeChild(this.iframe);
       this.iframe = null;
@@ -1144,11 +1152,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
-    }
-    // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed_) {
-      this.friendlyIframeEmbed_.destroy();
-      this.friendlyIframeEmbed_ = null;
     }
   }
 
@@ -1548,7 +1551,7 @@ export class AmpA4A extends AMP.BaseElement {
       'releaseType': this.releaseType_,
     });
     const checkStillCurrent = this.verifyStillCurrent();
-    return Promise.resolve(utf8Decode(creativeBody)).then(creative => {
+    return tryResolve(() => utf8Decode(creativeBody)).then(creative => {
       checkStillCurrent();
       let srcPath;
       let name = '';
@@ -1561,8 +1564,8 @@ export class AmpA4A extends AMP.BaseElement {
           // Name will be set for real below in nameframe case.
           break;
         default:
-          // Shouldn't be able to get here, but...  Because of the assert, above,
-          // we can only get here in non-dev mode, so give user feedback.
+          // Shouldn't be able to get here, but...  Because of the assert,
+          // above, we can only get here in non-dev mode, so give user feedback.
           user().error('A4A', 'A4A received unrecognized cross-domain name'
               + ' attribute iframe rendering mode request: %s.  Unable to'
               + ' render a creative for'
@@ -1698,7 +1701,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Receive collapse notifications and record lifecycle events for them.
    *
-   * @param unusedElement {!AmpElement}
+   * @param {!AmpElement} unusedElement
    * @override
    */
   collapsedCallback(unusedElement) {
@@ -1804,8 +1807,8 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Whether preferential render should still be utilized if web crypto is unavailable,
-   * and crypto signature header is present.
+   * Whether preferential render should still be utilized if web crypto is
+   * unavailable, and crypto signature header is present.
    * @return {boolean}
    */
   shouldPreferentialRenderWithoutCrypto() {

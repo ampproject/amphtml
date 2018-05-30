@@ -92,7 +92,7 @@ export class FormVerifier {
    * @private
    */
   isDirty_() {
-    const elements = this.form_.elements;
+    const {elements} = this.form_;
     for (let i = 0; i < elements.length; i++) {
       const field = elements[i];
       if (field.disabled) {
@@ -101,7 +101,7 @@ export class FormVerifier {
       switch (field.type) {
         case 'select-multiple':
         case 'select-one':
-          const options = field.options;
+          const {options} = field;
           for (let j = 0; j < options.length; j++) {
             if (options[j].selected !== options[j].defaultSelected) {
               return true;
@@ -129,7 +129,7 @@ export class FormVerifier {
    * @private
    */
   clearVerificationErrors_() {
-    const elements = this.form_.elements;
+    const {elements} = this.form_;
     if (elements) {
       iterateCursor(elements, e => {
         e.setCustomValidity('');

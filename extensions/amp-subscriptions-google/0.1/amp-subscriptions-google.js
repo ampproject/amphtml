@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
 import {
   ConfiguredRuntime,
   Fetcher,
   SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
-import {Entitlement} from '../../amp-subscriptions/0.1/entitlement';
+import {Entitlement, GrantReason} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {parseUrl} from '../../../src/url';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -98,6 +100,9 @@ export class GoogleSubscriptionsPlatform {
     /** @private {boolean} */
     this.isGoogleViewer_ = false;
     this.resolveGoogleViewer_(Services.viewerForDoc(ampdoc));
+
+    // Install styles.
+    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
   }
 
   /**
@@ -160,8 +165,9 @@ export class GoogleSubscriptionsPlatform {
         source: swgEntitlement.source,
         raw: swgEntitlements.raw,
         service: PLATFORM_ID,
-        products: swgEntitlement.products,
-        subscriptionToken: swgEntitlement.subscriptionToken,
+        granted: true, //swgEntitlements.getEntitlementForThis makes sure this is true.
+        grantReason: GrantReason.SUBSCRIBER, // there is no other case of subscription for SWG as of now.
+        dataObject: swgEntitlement.json(),
       });
     });
   }
@@ -172,19 +178,19 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  activate(renderState) {
+  activate(entitlement) {
     // Offers or abbreviated offers may need to be shown depending on
     // whether the access has been granted and whether user is a subscriber.
-    if (!renderState.granted) {
+    if (!entitlement.granted) {
       this.runtime_.showOffers({list: 'amp'});
-    } else if (!renderState.subscribed) {
+    } else if (!entitlement.isSubscriber()) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
   }
 
   /**
    * Returns if pingback is enabled for this platform
-   * @returns {boolean}
+   * @return {boolean}
    */
   isPingbackEnabled() {
     return false;
@@ -210,7 +216,7 @@ export class GoogleSubscriptionsPlatform {
     const viewerUrl = viewer.getParam('viewerUrl');
     if (viewerUrl) {
       this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
-          parseUrl(viewerUrl).hostname);
+          parseUrlDeprecated(viewerUrl).hostname);
     } else {
       // This can only be resolved asynchronously in this case. However, the
       // action execution must be done synchronously. Thus we have to allow
@@ -218,7 +224,7 @@ export class GoogleSubscriptionsPlatform {
       viewer.getViewerOrigin().then(origin => {
         if (origin) {
           this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
-              parseUrl(origin).hostname);
+              parseUrlDeprecated(origin).hostname);
         }
       });
     }
@@ -230,8 +236,11 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  executeAction(unusedAction) {
-    //TODO: implement this
+  executeAction(action) {
+    if (action === 'subscribe') {
+      this.runtime_.showOffers({list: 'amp', isClosable: true});
+      return Promise.resolve(true);
+    }
     return Promise.resolve(false);
   }
 

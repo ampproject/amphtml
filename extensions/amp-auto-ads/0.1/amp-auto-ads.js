@@ -15,7 +15,11 @@
  */
 
 import {AdStrategy} from './ad-strategy';
-import {AdTracker, getExistingAds} from './ad-tracker';
+import {
+  AdTracker,
+  getAdConstraintsFromConfigObj,
+  getExistingAds,
+} from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Services} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
@@ -60,13 +64,19 @@ export class AmpAutoAds extends AMP.BaseElement {
       if (!configObj) {
         return;
       }
+      const noConfigReason = configObj['noConfigReason'];
+      if (noConfigReason) {
+        this.user().warn(TAG, noConfigReason);
+        return;
+      }
 
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
       const attributes = /** @type {!JsonObject} */ (
         Object.assign(adNetwork.getAttributes(),
             getAttributesFromConfigObj(configObj)));
-      const adTracker =
-          new AdTracker(getExistingAds(ampdoc), adNetwork.getAdConstraints());
+      const adConstraints = getAdConstraintsFromConfigObj(ampdoc, configObj) ||
+          adNetwork.getDefaultAdConstraints();
+      const adTracker = new AdTracker(getExistingAds(ampdoc), adConstraints);
       new AdStrategy(placements, attributes, adTracker).run();
       new AnchorAdStrategy(ampdoc, attributes, configObj).run();
     });

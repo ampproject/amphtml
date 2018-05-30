@@ -28,6 +28,7 @@ import {
   AnimationManager,
   hasAnimations,
 } from './animation';
+import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
@@ -97,19 +98,16 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.markPageAsLoaded_();
     });
 
-    let mediaPoolResolveFn, mediaPoolRejectFn;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise<!MediaPool>} */
-    this.mediaPoolPromise_ = new Promise((resolve, reject) => {
-      mediaPoolResolveFn = resolve;
-      mediaPoolRejectFn = reject;
-    });
+    this.mediaPoolPromise_ = deferred.promise;
 
     /** @private @const {!function(!MediaPool)} */
-    this.mediaPoolResolveFn_ = mediaPoolResolveFn;
+    this.mediaPoolResolveFn_ = deferred.resolve;
 
     /** @private @const {!function(*)} */
-    this.mediaPoolRejectFn_ = mediaPoolRejectFn;
+    this.mediaPoolRejectFn_ = deferred.reject;
 
     /** @private @const {boolean} Only prerender the first story page. */
     this.prerenderAllowed_ = matches(this.element,

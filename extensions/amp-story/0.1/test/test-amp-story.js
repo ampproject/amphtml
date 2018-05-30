@@ -18,7 +18,9 @@ import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../localization';
 import {PaginationButtons} from '../pagination-buttons';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
@@ -70,11 +72,15 @@ describes.realWin('amp-story', {
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization-v01', () => localizationService);
+
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_').callsFake(NOOP);
+    // sandbox.stub(element.implementation_,
+    // 'triggerActiveEventForPage_').callsFake(NOOP);
   });
 
   afterEach(() => {
@@ -329,8 +335,10 @@ describes.realWin('amp-story', {
 
     return story.layoutCallback()
         .then(() => {
-          expect(dispatchStub)
-              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
+          expect(dispatchStub).to.have.been.calledWith(Action.CHANGE_PAGE, {
+            id: firstPageId,
+            index: 0,
+          });
         });
   });
 

@@ -128,7 +128,7 @@ export class JankMeter {
 
   /**
    * Calculate Good Frame Probability, which is a value range from 0 to 100.
-   * @returns {number}
+   * @return {number}
    * @private
    */
   calculateGfp_() {
@@ -173,7 +173,7 @@ export class JankMeter {
 
 /**
  * @param {!Window} win
- * @returns {boolean}
+ * @return {boolean}
  */
 function isJankMeterEnabled(win) {
   return isExperimentOn(win, 'jank-meter');
@@ -181,7 +181,7 @@ function isJankMeterEnabled(win) {
 
 /**
  * @param {!Window} win
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isLongTaskApiSupported(win) {
   return !!win.PerformanceObserver
@@ -191,7 +191,7 @@ export function isLongTaskApiSupported(win) {
 
 /**
  * @param {!Window} unusedWin
- * @returns {boolean}
+ * @return {boolean}
  */
 function isBatteryApiSupported(unusedWin) {
   // TODO: (@lannka, #9749)

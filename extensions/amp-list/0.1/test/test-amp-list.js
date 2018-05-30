@@ -16,8 +16,8 @@
 
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
+import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
-
 
 describes.realWin('amp-list component', {
   amp: {
@@ -29,7 +29,7 @@ describes.realWin('amp-list component', {
   let element;
   let list;
   let listMock;
-  let bindForDocOrNull;
+  let setBindService;
 
   beforeEach(() => {
     win = env.win;
@@ -44,8 +44,12 @@ describes.realWin('amp-list component', {
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
 
-    bindForDocOrNull = sandbox.stub(Services, 'bindForDocOrNull')
-        .returns(Promise.resolve(null));
+    const {promise, resolve} = new Deferred();
+    // By default, don't resolve the promise returned by bindForDocOrNull().
+    // This tests that we don't block render on retrieval of the Bind service.
+    sandbox.stub(Services, 'bindForDocOrNull').returns(promise);
+    // Tests can resolve the promise and set a mock by calling setBindService().
+    setBindService = resolve;
 
     list = new AmpList(element);
     list.buildCallback();
@@ -182,18 +186,39 @@ describes.realWin('amp-list component', {
     });
   });
 
-  it('should call scanAndApply() if amp-bind is available', () => {
-    const bind = {scanAndApply: sandbox.spy()};
-    bindForDocOrNull.returns(Promise.resolve(bind));
+  it('should not call Bind.scanAndApply() before FIRST_MUTATE', function*() {
+    const bind = {
+      scanAndApply: sandbox.stub().returns(Promise.resolve()),
+      signals: () => {
+        return {get: unusedName => false};
+      },
+    };
+    setBindService(bind);
 
     const items = [{title: 'Title1'}];
     const output = [doc.createElement('div')];
     const rendered = expectFetchAndRender(items, output);
+    yield list.layoutCallback().then(() => rendered);
 
-    return list.layoutCallback().then(() => rendered).then(() => {
-      expect(bind.scanAndApply).to.have.been.calledOnce;
-      expect(bind.scanAndApply).calledWithExactly(output, [list.container_]);
-    });
+    expect(bind.scanAndApply).to.not.have.been.called;
+  });
+
+  it('should call Bind.scanAndApply() after FIRST_MUTATE', function*() {
+    const bind = {
+      scanAndApply: sandbox.stub().returns(Promise.resolve()),
+      signals: () => {
+        return {get: name => (name === 'FIRST_MUTATE')};
+      },
+    };
+    setBindService(bind);
+
+    const items = [{title: 'Title1'}];
+    const output = [doc.createElement('div')];
+    const rendered = expectFetchAndRender(items, output);
+    yield list.layoutCallback().then(() => rendered);
+
+    expect(bind.scanAndApply).to.have.been.calledOnce;
+    expect(bind.scanAndApply).calledWithExactly(output, [list.container_]);
   });
 
   it('should _not_ refetch if [src] attribute changes (before layout)', () => {

@@ -220,10 +220,11 @@ Note that if the creative needs to resize on user interaction, the creative can 
 ### amp-consent integration
 If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute
 can be added to `amp-ad` element to respect the corresponding `amp-consent` policy.
-In that case, the `amp-ad` element will be blocked for loading until the consent
-responded. Once `amp-ad` is unblocked, 3rd party ad scripts can access the consent
-related information via the following
-`window.context` APIs.
+In that case, the `amp-ad` element will be blocked from loading until the consent accepted.
+Individual ad network can override this default consent handling by putting a `consentHandlingOverride: true` in `ads/_config.js`.
+Doing so will unblock the ad loading once the consent is responded. It will be then the ad network's responsibility
+to respect user's consent choice, for example to serve non-personalized ads on consent rejection.
+AMP runtime provides the following `window.context` APIs for ad network to access the consent state.
 
 <dl>
   <dt><code>window.context.initialConsentState</code></dt>
@@ -232,12 +233,20 @@ related information via the following
     The states are integers defined <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#advanced-blocking-behaviors">here</a>
     (<a href="https://github.com/ampproject/amphtml/blob/master/src/consent-state.js#L23">code</a>).
   </dd>
+  <dt><code>window.context.getConsentState(callback)</code></dt>
+  <dd>
+    Queries the current consent state asynchronously. The `callback` function 
+    will be invoked with the current consent state.
+  </dd>
   <dt><code>window.context.consentSharedData</code></dt>
   <dd>
     Provides additional user privacy related data retrieved from publishers.
     See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response">here</a> for details.
   </dd>
 </dl>
+
+After overriding the default consent handling behavior, don't forget to update your publisher facing
+ documentation with the new behaviors on user's consent choices.
 
 ### Optimizing ad performance
 

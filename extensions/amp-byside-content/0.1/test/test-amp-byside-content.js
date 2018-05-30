@@ -72,7 +72,7 @@ describes.realWin('amp-byside-content', {
   });
 
   it('requires data-label', () => {
-    allowConsoleError(() => { return getElement({
+    return allowConsoleError(() => { return getElement({
       'data-webcare-id': 'D6604AE5D0',
     }).should.eventually.be.rejectedWith(
         /The data-label attribute is required for/);
@@ -80,7 +80,7 @@ describes.realWin('amp-byside-content', {
   });
 
   it('requires data-webcare-id', () => {
-    allowConsoleError(() => { return getElement({
+    return allowConsoleError(() => { return getElement({
       'data-label': 'placeholder-label',
     }).should.eventually.be.rejectedWith(
         /The data-webcare-id attribute is required for/);

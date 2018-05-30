@@ -15,34 +15,31 @@
  */
 'use strict';
 
-const app = require('../test-server').app;
-const applyConfig = require('./prepend-global/index.js').applyConfig;
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
-const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
-const exec = require('../exec').exec;
-const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
+const deglob = require('globs-to-files');
+const findImports = require('find-imports');
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
 const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
+const minimatch = require('minimatch');
 const path = require('path');
-const removeConfig = require('./prepend-global/index.js').removeConfig;
 const webserver = require('gulp-webserver');
+const {applyConfig, removeConfig} = require('./prepend-global/index.js');
+const {app} = require('../test-server');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {exec} = require('../exec');
+const {gitDiffNameOnlyMaster} = require('../git');
 
+const {green, yellow, cyan, red, bold} = colors;
 
-const green = colors.green;
-const yellow = colors.yellow;
-const cyan = colors.cyan;
-const red = colors.red;
-const bold = colors.bold;
-
-const preTestTasks =
-    argv.nobuild ? [] : ((argv.unit || argv.a4a) ? ['css'] : ['build']);
+const preTestTasks = argv.nobuild ? [] : (
+  (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
-
+const tooManyTestsToFix = 15;
 
 /**
  * Read in and process the configuration settings for karma
@@ -76,17 +73,14 @@ function getConfig() {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Chrome_android',
         'SL_Chrome_latest',
+        'SL_Chrome_android',
         'SL_Chrome_45',
         'SL_Firefox_latest',
-        // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
-        // 'SL_Safari_latest',
-        // 'SL_Safari_10',
-        // 'SL_Safari_9',
+        'SL_Safari_latest',
+        'SL_Android_latest',
+        // TODO(rsimha, #15510): Enable these.
         // 'SL_iOS_latest',
-        // 'SL_iOS_10_0',
-        // TODO(rsimha, #14374): Re-enable these after upgrading wd.
         // 'SL_Edge_latest',
         // 'SL_IE_11',
       ] : [
@@ -164,18 +158,23 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
+    'local-changes':
+        'Running unit tests from files commited to the local branch.',
   };
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
     log(green('⤷ Use'), cyan('--nohelp'),
-        green('to silence these messages.)'));
-    if (!argv.unit && !argv.integration && !argv.files && !argv.a4a) {
+        green('to silence these messages.'));
+    if (!argv.unit && !argv.integration && !argv.files && !argv.a4a &&
+        !argv['local-changes']) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
           green('to run just the unit tests or integration tests.'));
+      log(green('⤷ Use'), cyan('--local-changes'),
+          green('to run unit tests from files commited to the local branch.'));
     }
-    if (!argv.testnames && !argv.files) {
+    if (!argv.testnames && !argv.files && !argv['local-changes']) {
       log(green('⤷ Use'), cyan('--testnames'),
           green('to see the names of all tests being run.'));
     }
@@ -203,7 +202,9 @@ function applyAmpConfig() {
   if (argv.unit || argv.a4a) {
     return Promise.resolve();
   }
-  log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  if (!process.env.TRAVIS) {
+    log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  }
   return writeConfig('dist/amp.js').then(() => {
     return writeConfig('dist/v0.js');
   });
@@ -226,6 +227,101 @@ function writeConfig(targetFile) {
   } else {
     return Promise.resolve();
   }
+}
+
+/**
+ * Returns true if the given file is a unit test.
+ *
+ * @param {string} file
+ * @return {boolean}
+ */
+function isUnitTest(file) {
+  return config.unitTestPaths.some(pattern => {
+    return minimatch(file, pattern);
+  });
+}
+
+/**
+ * Returns the list of files imported by testFile
+ *
+ * @param {string} testFile
+ * @return {!Array<string>}
+ */
+function getImports(testFile) {
+  const imports = findImports([testFile], {
+    flatten: true,
+    packageImports: false,
+    absoluteImports: true,
+    relativeImports: true,
+  });
+  const files = [];
+  const rootDir = path.dirname(path.dirname(__dirname));
+  const testFileDir = path.dirname(testFile);
+  imports.forEach(function(file) {
+    const fullPath = path.resolve(testFileDir, file) + '.js';
+    if (fs.existsSync(fullPath)) {
+      const relativePath = path.relative(rootDir, fullPath);
+      files.push(relativePath);
+    }
+  });
+  return files;
+}
+
+/**
+ * Returns true if the test file should be run for any one of the source files.
+ *
+ * @param {string} testFile
+ * @param {!Array<string>} srcFiles
+ * @return {boolean}
+ */
+function shouldRunTest(testFile, srcFiles) {
+  const filesImported = getImports(testFile);
+  return filesImported.filter(function(file) {
+    return srcFiles.includes(file);
+  }).length > 0;
+}
+
+/**
+ * Retrieves the set of unit tests that should be run for a set of source files.
+ *
+ * @param {!Array<string>} srcFiles
+ * @return {!Array<string>}
+ */
+function getTestsFor(srcFiles) {
+  const rootDir = path.dirname(path.dirname(__dirname));
+  const allUnitTests = deglob.sync(config.unitTestPaths);
+  return allUnitTests.filter(testFile => {
+    return shouldRunTest(testFile, srcFiles);
+  }).map(fullPath => path.relative(rootDir, fullPath));
+}
+
+/**
+ * Extracts the list of unit tests to run based on the changes in the local
+ * branch.
+ *
+ * @return {!Array<string>}
+ */
+function unitTestsToRun() {
+  const filesChanged = gitDiffNameOnlyMaster();
+  const testsToRun = [];
+  const srcFiles = [];
+  filesChanged.forEach(file => {
+    if (isUnitTest(file)) {
+      testsToRun.push(file);
+    } else if (path.extname(file) == '.js') {
+      srcFiles.push(file);
+    }
+  });
+  if (srcFiles.length > 0) {
+    log(green('INFO: ') + 'Determining which unit tests to run...');
+    const moreTestsToRun = getTestsFor(srcFiles);
+    moreTestsToRun.forEach(test => {
+      if (!testsToRun.includes(test)) {
+        testsToRun.push(test);
+      }
+    });
+  }
+  return testsToRun;
 }
 
 /**
@@ -253,7 +349,7 @@ function runTests() {
     c.client.captureConsole = true;
   }
 
-  if (argv.testnames) {
+  if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
     c.reporters = ['mocha'];
   }
 
@@ -262,17 +358,35 @@ function runTests() {
   c.files = argv.saucelabs ? [] : config.chaiAsPromised;
 
   if (argv.files) {
-    c.files = c.files.concat(config.commonTestPaths, argv.files);
+    c.files = c.files.concat(config.commonIntegrationTestPaths, argv.files);
     if (!argv.saucelabs && !argv.saucelabs_lite) {
       c.reporters = ['mocha'];
     }
+  } else if (argv['local-changes']) {
+    const testsToRun = unitTestsToRun();
+    if (testsToRun.length == 0) {
+      log(green('INFO: ') + 'No unit tests affected by local changes.');
+      return Promise.resolve();
+    } else {
+      log(green('INFO: ') + 'Running the following unit tests:');
+      testsToRun.forEach(test => {
+        log(cyan(test));
+      });
+    }
+    c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
+    if (testsToRun.length < tooManyTestsToFix) {
+      c.client.failOnConsoleError = true;
+    }
   } else if (argv.integration) {
-    c.files = c.files.concat(config.integrationTestPaths);
+    c.files = c.files.concat(
+        config.commonIntegrationTestPaths, config.integrationTestPaths);
   } else if (argv.unit) {
     if (argv.saucelabs_lite) {
-      c.files = c.files.concat(config.unitTestOnSaucePaths);
+      c.files = c.files.concat(
+          config.commonUnitTestPaths, config.unitTestOnSaucePaths);
     } else {
-      c.files = c.files.concat(config.unitTestPaths);
+      c.files = c.files.concat(
+          config.commonUnitTestPaths, config.unitTestPaths);
     }
   } else if (argv.a4a) {
     c.files = c.files.concat(config.a4aTestPaths);
@@ -337,7 +451,7 @@ function runTests() {
   }
 
   // Run fake-server to test XHR responses.
-  const server = gulp.src(process.cwd()).pipe(webserver({
+  const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
     port: 31862,
     host: 'localhost',
     directoryListing: true,
@@ -355,9 +469,10 @@ function runTests() {
   refreshKarmaWdCache();
 
   // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
-  // reporter, since it likely contains copious amounts of logs.
-  const shouldCollapseSummary =
-      process.env.TRAVIS && c.reporters.includes('karmaSimpleReporter');
+  // reporter for full unit test runs, since it likely contains copious amounts
+  // of logs.
+  const shouldCollapseSummary = process.env.TRAVIS &&
+      c.reporters.includes('karmaSimpleReporter') && !argv['local-changes'];
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 
@@ -374,9 +489,13 @@ function runTests() {
           yellow('Karma test failed with exit code ' + exitCode));
     }
     // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-    setTimeout(() => {
-      process.exit(exitCode);
-    }, 5000);
+    if (process.env.TRAVIS) {
+      setTimeout(() => {
+        process.exit(exitCode);
+      }, 5000);
+    } else {
+      process.exitCode = exitCode;
+    }
     resolver();
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
@@ -445,5 +564,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
+    'local-changes': '  Run unit tests from files changed in the local branch',
   },
 });

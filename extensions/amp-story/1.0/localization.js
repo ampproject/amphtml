@@ -16,7 +16,6 @@
 import {closest} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 
-
 /**
  * A unique identifier for each localized string.  Localized string IDs should:
  *
@@ -81,7 +80,7 @@ export let LocalizedStringBundleDef;
  * Language code used if there is no language code specified by the document.
  * @const {string}
  */
-const DEFAULT_LANGUAGE_CODE = 'default';
+const FALLBACK_LANGUAGE_CODE = 'default';
 
 
 /**
@@ -95,6 +94,9 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @return {!Array<string>} A list of language codes.
  */
 export function getLanguageCodesFromString(languageCode) {
+  if (!languageCode) {
+    return ['en'];
+  }
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce((fallbackLanguageCodeList, chunk, index) => {
     const fallbackLanguageCode = matches.slice(0, index + 1)
@@ -102,7 +104,7 @@ export function getLanguageCodesFromString(languageCode) {
         .toLowerCase();
     fallbackLanguageCodeList.unshift(fallbackLanguageCode);
     return fallbackLanguageCodeList;
-  }, [DEFAULT_LANGUAGE_CODE]);
+  }, [FALLBACK_LANGUAGE_CODE]);
 }
 
 

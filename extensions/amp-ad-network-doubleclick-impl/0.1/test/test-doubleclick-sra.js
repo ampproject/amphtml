@@ -138,6 +138,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           'data-slot': '/1234/abc/def',
           'json': JSON.stringify(targeting1),
           'data-force-safeframe': forceSafeFrame ? '1' : '0',
+          'data-multi-size': '9999x9999',
         };
         const element1 =
           createElementWithAttributes(doc, 'amp-ad', config1);
@@ -311,8 +312,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
      *    xhrFail:(boolean|undefined),
      *    invalidInstances:number,
      *    nestHeaders:(boolean|undefined)}}>} items
+     * @param {boolean=} opt_implicitSra where SRA implicitly enabled (meaning
+     *    pub did not enable via meta).
      */
-    function executeTest(items) {
+    function executeTest(items, opt_implicitSra) {
+      if (!opt_implicitSra) {
+        createAndAppendAdElement(
+            {name: 'amp-ad-doubleclick-sra'}, 'meta', doc.head);
+      }
       // Store if XHR will fail by networkId.
       const networkXhrFailure = {};
       // Store if all elements for a given network are invalid.
@@ -332,6 +339,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             const impl = createA4aSraInstance(network.networkId);
             doubleclickInstances.push(impl);
             sandbox.stub(impl, 'isValidElement').returns(!invalid);
+            sandbox.stub(impl, 'promiseErrorHandler_');
+            sandbox.stub(impl, 'warnOnError');
             if (invalid) {
               impl.element.setAttribute('data-test-invalid', 'true');
             }
@@ -343,7 +352,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           network.invalidInstances && !network.instances;
         networkXhrFailure[network.networkId] = !!network.xhrFail;
         networkNestHeaders[network.networkId] = network.nestHeaders;
-        expectedAttemptCollapseCalls += network.xhrFail ? network.instances : 0;
+        expectedAttemptCollapseCalls +=
+            network.xhrFail && !opt_implicitSra ? network.instances : 0;
       });
       const grouping = {};
       const groupingPromises = {};
@@ -364,6 +374,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         return impl.layoutCallback().then(() => {
           if (noRender) {
             expect(impl.iframe).to.not.be.ok;
+            return;
+          }
+          if (opt_implicitSra) {
+            expect(impl.iframe).to.be.ok;
+            expect(impl.iframe.src).to.match(
+                /securepubads\.g\.doubleclick\.net/);
             return;
           }
           expect(impl.postAdResponseExperimentFeatures['foo']).to.equal('bar');
@@ -400,7 +416,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           }
           layoutCallbacks.push(getLayoutCallback(
               impl, creative, isSra,
-              networkXhrFailure[networkId] ||
+              (!opt_implicitSra && networkXhrFailure[networkId]) ||
             impl.element.getAttribute('data-test-invalid') == 'true'));
         });
         if (isSra) {
@@ -446,6 +462,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     it('should handle xhr failure by not sending subsequent request',
         () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}]));
+
+    it('should handle xhr failure by via subsequent request if implicit',
+        () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}],
+            true));
 
     it('should handle mixture of xhr and non xhr failures', () => executeTest(
         [{networkId: 1234, instances: 2, xhrFail: true}, 4567, 4567]));

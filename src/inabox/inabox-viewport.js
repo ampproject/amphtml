@@ -388,7 +388,7 @@ export function installInaboxViewportService(ampdoc) {
 /**
  * @param {!../layout-rect.LayoutRectDef} newRect
  * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
+ * @return {boolean}
  */
 function isChanged(newRect, oldRect) {
   return isMoved(newRect, oldRect) || isResized(newRect, oldRect);
@@ -397,7 +397,7 @@ function isChanged(newRect, oldRect) {
 /**
  * @param {!../layout-rect.LayoutRectDef} newRect
  * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
+ * @return {boolean}
  */
 function isMoved(newRect, oldRect) {
   return newRect.left != oldRect.left || newRect.top != oldRect.top;
@@ -406,7 +406,7 @@ function isMoved(newRect, oldRect) {
 /**
  * @param {!../layout-rect.LayoutRectDef} newRect
  * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
+ * @return {boolean}
  */
 function isResized(newRect, oldRect) {
   return newRect.width != oldRect.width || newRect.height != oldRect.height;

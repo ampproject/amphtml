@@ -66,7 +66,7 @@ export function mapRange(val, min1, max1, min2, max2) {
  *
  * @param {number} a
  * @param {number} b
- * @returns {number} returns the modulus of the two numbers.
+ * @return {number} returns the modulus of the two numbers.
  * @example
  *
  * _.min(10, 5);

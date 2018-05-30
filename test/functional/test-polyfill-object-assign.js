@@ -18,12 +18,10 @@ import {assign} from '../../src/polyfills/object-assign';
 
 describe('Object.assign', () => {
   it('should throw an error if target is null or undefined', () => {
-    allowConsoleError(() => {
-      expect(() => assign(null, {a: 1})).to.throw(
-          /Cannot convert undefined or null to object/);
-      expect(() => assign(undefined, {a: 1})).to.throw(
-          /Cannot convert undefined or null to object/);
-    });
+    expect(() => assign(null, {a: 1})).to.throw(
+        /Cannot convert undefined or null to object/);
+    expect(() => assign(undefined, {a: 1})).to.throw(
+        /Cannot convert undefined or null to object/);
   });
 
   it('should ignore null or undefined sources', () => {

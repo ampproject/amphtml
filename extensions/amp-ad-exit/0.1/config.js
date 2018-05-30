@@ -16,15 +16,23 @@
 
 import {
   ANALYTICS_IFRAME_TRANSPORT_CONFIG,
-} from '../../amp-analytics/0.1/vendors';
+} from '../../amp-analytics/0.1/iframe-transport-vendors';
 import {FilterType} from './filters/filter';
 import {user} from '../../../src/log';
 
 /**
  * @typedef {{
+ *   startTimingEvent: (string|undefined)
+ * }}
+ */
+export let AmpAdExitConfigOptions;
+
+/**
+ * @typedef {{
  *   targets: !Object<string, !NavigationTargetConfig>,
  *   filters: (!Object<string, !FilterConfig>|undefined),
- *   transport: (!Object<TransportMode, boolean>|undefined)
+ *   transport: (!Object<TransportMode, boolean>|undefined),
+ *   options: (!AmpAdExitConfigOptions|undefined)
  * }}
  */
 export let AmpAdExitConfig;

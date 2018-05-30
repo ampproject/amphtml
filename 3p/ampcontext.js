@@ -20,7 +20,7 @@ import {dev} from '../src/log';
 import {dict} from '../src/utils/object';
 import {isObject} from '../src/types';
 import {nextTick} from './3p';
-import {parseUrl} from '../src/url';
+import {parseUrlDeprecated} from '../src/url';
 import {tryParseJson} from '../src/json';
 
 export class AbstractAmpContext {
@@ -40,7 +40,7 @@ export class AbstractAmpContext {
     /** @private {?string} */
     this.cachedFrameName_ = this.win_.name || null;
 
-    /** @type {?string} */
+    /** @protected {?string} */
     this.embedType_ = null;
 
     // ----------------------------------------------------
@@ -148,7 +148,7 @@ export class AbstractAmpContext {
    *  Listen to page visibility changes.
    *  @param {function({hidden: boolean})} callback Function to call every time
    *    we receive a page visibility message.
-   *  @returns {function()} that when called stops triggering the callback
+   *  @return {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
   onPageVisibilityChange(callback) {
@@ -161,7 +161,7 @@ export class AbstractAmpContext {
    *  Send message to runtime to start sending intersection messages.
    *  @param {function(Array<Object>)} callback Function to call every time we
    *    receive an intersection message.
-   *  @returns {function()} that when called stops triggering the callback
+   *  @return {function()} that when called stops triggering the callback
    *    every time we receive an intersection message.
    */
   observeIntersection(callback) {
@@ -294,7 +294,7 @@ export class AbstractAmpContext {
     this.initialConsentState = context.initialConsentState;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
-    this.location = parseUrl(context.location.href);
+    this.location = parseUrlDeprecated(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
     this.referrer = context.referrer;

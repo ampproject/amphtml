@@ -30,7 +30,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     Object.assign(element, {
       getIntersectionChangeEntry: noop,
     });
-    return {element};
+    return {
+      element,
+      signals: () => ({whenSignal: () => ({then: noop})}),
+    };
   }
 
   function mockCenteredVideo(element) {
@@ -55,7 +58,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
 
     mockCenteredVideo(video.element);
 
-    sandbox.stub(autoFullscreenManager, 'updateVisibility_');
+    sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
     autoFullscreenManager.register(entry);
     mockOrientation('landscape');
     autoFullscreenManager.onRotation_();
@@ -70,7 +73,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
 
     mockCenteredVideo(null);
 
-    sandbox.stub(autoFullscreenManager, 'updateVisibility_');
+    sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
     autoFullscreenManager.register(entry);
     mockOrientation('landscape');
     autoFullscreenManager.onRotation_();
@@ -83,7 +86,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     const entry = {video};
     const exit = sandbox.stub(autoFullscreenManager, 'exit_');
 
-    sandbox.stub(autoFullscreenManager, 'updateVisibility_');
+    sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
     autoFullscreenManager.register(entry);
     autoFullscreenManager.currentlyInFullscreen_ = entry;
     mockOrientation('portrait');
@@ -97,7 +100,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     const entry = {video};
     const exit = sandbox.stub(autoFullscreenManager, 'exit_');
 
-    sandbox.stub(autoFullscreenManager, 'updateVisibility_');
+    sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
     autoFullscreenManager.register(entry);
     autoFullscreenManager.currentlyInFullscreen_ = null;
     mockOrientation('portrait');
@@ -147,20 +150,19 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const entry1 = {video: video1};
-    const entry2 = {video: video2};
-    const entry3 = {video: video3};
+    const getPlayingState =
+      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
 
-    entry1.getPlayingState = () => PlayingStates.PAUSED;
-    entry2.getPlayingState = () => PlayingStates.PLAYING_AUTO;
-    entry3.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+    getPlayingState.withArgs(video1).returns(PlayingStates.PAUSED);
+    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_AUTO);
+    getPlayingState.withArgs(video3).returns(PlayingStates.PLAYING_MANUAL);
 
-    autoFullscreenManager.register(entry1);
-    autoFullscreenManager.register(entry2);
-    autoFullscreenManager.register(entry3);
+    autoFullscreenManager.register({video: video1});
+    autoFullscreenManager.register({video: video2});
+    autoFullscreenManager.register({video: video3});
 
     expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video3.element);
+        .to.equal(video3);
   });
 
   it('selects center-most video among those visible and playing', () => {
@@ -204,20 +206,19 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const entry1 = {video: video1};
-    const entry2 = {video: video2};
-    const entry3 = {video: video3};
+    const getPlayingState =
+      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
 
-    entry1.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
-    entry2.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
-    entry3.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video3).returns(PlayingStates.PLAYING_MANUAL);
 
-    autoFullscreenManager.register(entry1);
-    autoFullscreenManager.register(entry2);
-    autoFullscreenManager.register(entry3);
+    autoFullscreenManager.register({video: video1});
+    autoFullscreenManager.register({video: video2});
+    autoFullscreenManager.register({video: video3});
 
     expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video2.element);
+        .to.equal(video2);
   });
 
   it('selects top-most video if two videos are equally centered', () => {
@@ -250,17 +251,17 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const entry1 = {video: video1};
-    const entry2 = {video: video2};
+    const getPlayingState =
+      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
 
-    entry1.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
-    entry2.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
 
-    autoFullscreenManager.register(entry1);
-    autoFullscreenManager.register(entry2);
+    autoFullscreenManager.register({video: video1});
+    autoFullscreenManager.register({video: video2});
 
     expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video1.element);
+        .to.equal(video1);
   });
 
   it('selects the highest intersection ratio if two videos are visible', () => {
@@ -292,16 +293,16 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const entry1 = {video: video1};
-    const entry2 = {video: video2};
+    const getPlayingState =
+      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
 
-    entry1.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
-    entry2.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
 
-    autoFullscreenManager.register(entry1);
-    autoFullscreenManager.register(entry2);
+    autoFullscreenManager.register({video: video1});
+    autoFullscreenManager.register({video: video2});
 
     expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video2.element);
+        .to.equal(video2);
   });
 });

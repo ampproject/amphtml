@@ -70,7 +70,7 @@ describes.realWin('amp-vk', {
   it('requires data-embedtype', () => {
     const params = Object.assign({}, POST_PARAMS);
     delete params['embedtype'];
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return createAmpVkElement(params).should.eventually.be.rejectedWith(
           /The data-embedtype attribute is required for/);
     });
@@ -93,7 +93,7 @@ describes.realWin('amp-vk', {
   it('post::requires data-hash', () => {
     const params = Object.assign({}, POST_PARAMS);
     delete params['hash'];
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return createAmpVkElement(params).should.eventually.be.rejectedWith(
           /The data-hash attribute is required for/);
     });
@@ -102,7 +102,7 @@ describes.realWin('amp-vk', {
   it('post::requires data-owner-id', () => {
     const params = Object.assign({}, POST_PARAMS);
     delete params['owner-id'];
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return createAmpVkElement(params).should.eventually.be.rejectedWith(
           /The data-owner-id attribute is required for/);
     });
@@ -111,7 +111,7 @@ describes.realWin('amp-vk', {
   it('post::requires data-post-id', () => {
     const params = Object.assign({}, POST_PARAMS);
     delete params['post-id'];
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return createAmpVkElement(params).should.eventually.be.rejectedWith(
           /The data-post-id attribute is required for/);
     });
@@ -157,7 +157,7 @@ describes.realWin('amp-vk', {
   it('poll::requires data-api-id', () => {
     const params = Object.assign({}, POLL_PARAMS);
     delete params['api-id'];
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return createAmpVkElement(params).should.eventually.be.rejectedWith(
           /The data-api-id attribute is required for/);
     });
@@ -166,7 +166,7 @@ describes.realWin('amp-vk', {
   it('poll::requires data-poll-id', () => {
     const params = Object.assign({}, POLL_PARAMS);
     delete params['poll-id'];
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return createAmpVkElement(params).should.eventually.be.rejectedWith(
           /The data-poll-id attribute is required for/);
     });

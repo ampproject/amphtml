@@ -62,9 +62,7 @@ describes.realWin('amp-vimeo', {
   });
 
   it('requires data-videoid', () => {
-    allowConsoleError(() => {
-      return getVimeo('').should.eventually.be.rejectedWith(
-          /The data-videoid attribute is required for/);
-    });
+    return getVimeo('').should.eventually.be.rejectedWith(
+        /The data-videoid attribute is required for/);
   });
 });

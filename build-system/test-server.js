@@ -16,7 +16,8 @@
 'use strict';
 
 /**
- * @fileoverview Creates an http server to handle responses for different test cases.
+ * @fileoverview Creates an http server to handle responses for different test
+ * cases.
  */
 const app = require('express')();
 const bodyParser = require('body-parser');

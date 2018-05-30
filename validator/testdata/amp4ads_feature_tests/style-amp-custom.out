@@ -33,11 +33,9 @@ FAIL
 |        transition: transform 2s;
 |      }
 |  
-|      /* Invalid: non-animation property (color) invalid in animation selector */
+|      /* Valid: non-animation property (color) valid in animation selector */
 |      .amp-animate .box {
 |        color: red;
->>       ^~~~~~~~~
-amp4ads_feature_tests/style-amp-custom.html:37:6 CSS syntax error in tag 'style amp-custom (AMP4ADS)' - the property 'color' is disallowed together with 'transition'. Allowed properties: ['animation', 'opacity', 'transform', 'transition', 'visibility']. [AUTHOR_STYLESHEET_PROBLEM]
 |        transform: rotate(180deg);
 |        transition: transform 2s;
 |      }
@@ -101,11 +99,9 @@ amp4ads_feature_tests/style-amp-custom.html:79:8 CSS syntax error in tag 'style 
 |        -webkit-transition: transform 2s;
 |      }
 |  
-|      /* Invalid: non-animation property (color) invalid in animation selector */
+|      /* Valid: non-animation property (color) valid in animation selector */
 |      .amp-animate .box {
 |        color: red;
->>       ^~~~~~~~~
-amp4ads_feature_tests/style-amp-custom.html:93:6 CSS syntax error in tag 'style amp-custom (AMP4ADS)' - the property 'color' is disallowed together with '-o-transition'. Allowed properties: ['animation', 'opacity', 'transform', 'transition', 'visibility']. [AUTHOR_STYLESHEET_PROBLEM]
 |        -webkit-transform: rotate(180deg);
 |        -o-transition: -o-transform 2s;
 |      }

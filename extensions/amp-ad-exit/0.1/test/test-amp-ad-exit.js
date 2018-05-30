@@ -17,8 +17,9 @@
 import * as sinon from 'sinon';
 import {
   ANALYTICS_IFRAME_TRANSPORT_CONFIG,
-} from '../../../amp-analytics/0.1/vendors';
+} from '../../../amp-analytics/0.1/iframe-transport-vendors';
 import {AmpAdExit} from '../amp-ad-exit';
+import {FilterType} from '../filters/filter';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';
@@ -245,6 +246,33 @@ describes.realWin('amp-ad-exit', {
     });
 
     expect(open).to.not.have.been.called;
+  });
+
+  it('should use options.startTimingEvent', () => {
+    return makeElementWithConfig({
+      targets: {
+        navStart: {
+          'finalUrl': 'http://localhost:8000/simple',
+          'filters': ['twoSecond'],
+        },
+      },
+      options: {'startTimingEvent': 'navigationStart'},
+      filters: {
+        'twoSecond': {
+          type: 'clickDelay',
+          delay: 2000,
+        },
+      },
+    }).then(el => {
+      expect(el.implementation_.defaultFilters_.length).to.equal(2);
+      let clickFilter = el.implementation_.defaultFilters_[0];
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
+      clickFilter = el.implementation_.userFilters_['twoSecond'];
+      expect(clickFilter).to.be.ok;
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
+    });
   });
 
   it('should attempt new-tab navigation', () => {
@@ -491,7 +519,8 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.not.have.been.called;
 
-    // The click is within the left border but left border protection is not set.
+    // The click is within the left border but left border protection is not
+    // set.
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'borderProtection'},
@@ -548,7 +577,8 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.not.have.been.called;
 
-    // The click is within the left border but left border protection is not set.
+    // The click is within the left border but left border protection is not
+    // set.
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'borderProtectionRelativeTo'},

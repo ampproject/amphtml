@@ -62,7 +62,7 @@ export const PROFILING_BRANCHES = {
  * @visibleForTesting
  */
 export function getLifecycleReporter(ampElement, slotId) {
-  const win = ampElement.win;
+  const {win} = ampElement;
   randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
   if (isReportingEnabled(ampElement) &&
       (!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
@@ -132,30 +132,31 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
 }
 
 function setupPageLoadMetricsReporter_(ampElement) {
-  const win = ampElement.win;
+  const {win} = ampElement;
   const correlator = getCorrelator(win);
   win.ampAnalyticsPageLoadMetricsConfig =
-      win.ampAnalyticsPageLoadMetricsConfig || dict({
-      'requests': {
-        'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
-            `&c=${correlator}&met.a4a=` +
-	    'makeBodyVisible.${makeBodyVisible}~' +
-	    'firstVisibleTime.${firstVisibleTime}~' +
-	    'firstContentfulPaint.${firstContentfulPaint}~' +
-	    'firstViewportReady.${firstViewportReady}',
-      },
-      'transport': {
-        'beacon': false,
-        'xhrpost': false,
-      },
-      'triggers': {
-        'iniLoad': {
-          'on': 'visible',
-          'request': 'fvt',
-          'selector': 'body',
+      win.ampAnalyticsPageLoadMetricsConfig ||
+      dict({
+        'requests': {
+          'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
+              `&c=${correlator}&met.a4a=` +
+              'makeBodyVisible.${makeBodyVisible}~' +
+              'firstVisibleTime.${firstVisibleTime}~' +
+              'firstContentfulPaint.${firstContentfulPaint}~' +
+              'firstViewportReady.${firstViewportReady}',
         },
-      },
-    });
+        'transport': {
+          'beacon': false,
+          'xhrpost': false,
+        },
+        'triggers': {
+          'iniLoad': {
+            'on': 'visible',
+            'request': 'fvt',
+            'selector': 'body',
+          },
+        },
+      });
 
   // Load amp-analytics extensions
   win.ampAnalyticsPageLoadMetricsElement =
