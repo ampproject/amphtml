@@ -233,8 +233,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           switch (name) {
             case 'X-AmpImps':
               return 'https://a.com?a=b,https://b.com?c=d';
-            case 'X-AmpRSImps':
-              return 'https://c.com?e=f,https://d.com?g=h';
             default:
               return undefined;
           }
@@ -245,8 +243,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       })).to.deep.equal(size);
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
-      expect(fireDelayedImpressionsSpy.withArgs(
-          'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
     });
     it('shouldnt load delayed impression amp-pixels with fluid', () => {
       const fireDelayedImpressionsSpy =
@@ -257,8 +253,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           switch (name) {
             case 'X-AmpImps':
               return 'https://a.com?a=b,https://b.com?c=d';
-            case 'X-AmpRSImps':
-              return 'https://c.com?e=f,https://d.com?g=h';
             default:
               return undefined;
           }
@@ -269,8 +263,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       })).to.deep.equal(size);
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://a.com?a=b,https://b.com?c=d')).to.not.be.called;
-      expect(fireDelayedImpressionsSpy.withArgs(
-          'https://c.com?e=f,https://d.com?g=h', true)).to.not.be.called;
     });
     it('should load delayed impression amp-pixels with fluid + multi-size',
         () => {
@@ -283,8 +275,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
               switch (name) {
                 case 'X-AmpImps':
                   return 'https://a.com?a=b,https://b.com?c=d';
-                case 'X-AmpRSImps':
-                  return 'https://c.com?e=f,https://d.com?g=h';
                 case 'X-CreativeSize':
                   return '200x50';
                 default:
@@ -297,8 +287,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           })).to.deep.equal(size);
           expect(fireDelayedImpressionsSpy.withArgs(
               'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
-          expect(fireDelayedImpressionsSpy.withArgs(
-              'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
         });
   });
 
