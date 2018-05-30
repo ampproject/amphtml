@@ -86,7 +86,6 @@ startupChunk(self.document, function initial() {
       installBuiltins(self);
     });
     startupChunk(self.document, function adoptWindow() {
-      debugger;
       adopt(self);
     });
     startupChunk(self.document, function stub() {
