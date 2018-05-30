@@ -18,9 +18,9 @@ import {Observable} from '../../observable';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
+import {isIframed, waitForBody} from '../../dom';
 import {layoutRectLtwh} from '../../layout-rect';
 import {px, setImportantStyles} from '../../style';
-import {waitForBody} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 
 const TAG_ = 'Viewport';
@@ -138,7 +138,8 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
-    return true;
+    const {win} = this;
+    return isIframed(win) || getMode(win).localDev || getMode(win).development;
   }
 
   /** @override */

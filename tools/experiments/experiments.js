@@ -321,6 +321,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/15311',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15610',
   },
+  {
+    id: 'unified-ios-viewport',
+    name: 'Use a unified iOS Embeded Viewport in all viewers',
+    spec: 'https://github.com/ampproject/amphtml/issues/11445',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14940',
+  },
 ];
 
 if (getMode().localDev) {
