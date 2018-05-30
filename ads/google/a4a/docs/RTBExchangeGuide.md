@@ -76,7 +76,7 @@ SSPs will need to provide a new field in the bid response to allow bidders to re
 * [AMPHTML Ads Overview (Github)](https://github.com/ampproject/amphtml/blob/master/ads/google/a4a/docs/a4a-readme.md)
 * [AMPHTML Ads Website from the AMP Project](https://www.ampproject.org/learn/who-uses-amp/amp-ads/)
 * [Example AMPHTML Ads](https://ampbyexample.com/amp-ads/#amp-ads/introduction)
-* [Speed comparison](https://ampbyexample.com/amp-ads/introduction/amp_ads_vs_non-amp_ads/): see how fast an AMP Ad loads in comparison to a regular ad. Best viewed on a 3G connection.
+* [Speed comparison](https://ampbyexample.com/amp-ads/introduction/amphtml_ads_vs_non-amp_ads/): see how fast an AMP Ad loads in comparison to a regular ad. Best viewed on a 3G connection.
 * [Discussion in OpenRTB Dev Forum](https://groups.google.com/forum/#!topic/openrtb-dev/0wyPsF5D07Q): RTB Specific Proposal
  
  
