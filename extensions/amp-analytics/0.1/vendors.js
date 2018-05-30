@@ -1483,7 +1483,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'ctype=web&'+
           'blang=${browserLanguage}&'+
           'v=2.0&'+
-          'dist=Javascript'
+          'dist=Javascript',
+          'pageview': '${basePrefix}&eventtype=pageview',
       },
       'triggers': {
           'defaultPageview': {
