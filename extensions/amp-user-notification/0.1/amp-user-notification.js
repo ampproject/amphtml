@@ -111,6 +111,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     /** @private {?string} */
     this.showIfGeo_ = null;
 
+    /** @private {?string} */
+    this.showIfNotGeo_ = null;
+
     /** @private {?Promise<boolean>} */
     this.geoPromise_ = null;
 
@@ -144,19 +147,31 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.storageKey_ = 'amp-user-notification:' + this.elementId_;
 
     this.showIfGeo_ = this.element.getAttribute('data-show-if-geo');
+    this.showIfNotGeo_ = this.element.getAttribute('data-show-if-not-geo');
 
     this.showIfHref_ = this.element.getAttribute('data-show-if-href');
     if (this.showIfHref_) {
       assertHttpsUrl(this.showIfHref_, this.element);
     }
 
+    // Casts string to boolean using !!(string) then coerce that to
+    // number using when we add them so we can see easily test
+    // how many flags were set.  We want 0 or 1.
     user().assert(
-        !(this.showIfHref_ && this.showIfGeo_),
+        !!this.showIfHref_ +
+        !!this.showIfGeo_ +
+        !!this.showIfNotGeo_ <= 1,
         'Only one "data-show-if-*" attribute allowed'
     );
 
     if (this.showIfGeo_) {
-      this.geoPromise_ = this.isNotificationRequiredGeo_(this.showIfGeo_);
+      this.geoPromise_ =
+        this.isNotificationRequiredGeo_(this.showIfGeo_, true);
+    }
+
+    if (this.showIfNotGeo_) {
+      this.geoPromise_ =
+        this.isNotificationRequiredGeo_(this.showIfNotGeo_, false);
     }
 
     this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
@@ -191,16 +206,20 @@ export class AmpUserNotification extends AMP.BaseElement {
   /**
    * Returns a promise that if user is in the given geoGroup
    * @param {string} geoGroup
+   * @param {boolean} includeGeos
    * @return {Promise<boolean>}
    */
-  isNotificationRequiredGeo_(geoGroup) {
+  isNotificationRequiredGeo_(geoGroup, includeGeos) {
     return Services.geoForDocOrNull(this.element).then(geo => {
       user().assert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
-      return (
-        geo.ISOCountryGroups.indexOf(geoGroup) >= 0 ||
-        (geoGroup === '!countryGroup' && geo.ISOCountryGroups.length === 0)
-      );
+
+      const matchedGeos = geoGroup.split(/,\s*/).filter(group => {
+        return geo.ISOCountryGroups.indexOf(group) >= 0;
+      });
+
+      // Invert if includeGeos is false
+      return !!(includeGeos ? matchedGeos.length : !matchedGeos.length);
     });
   }
 

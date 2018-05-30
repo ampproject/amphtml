@@ -67,14 +67,16 @@
     <script type="application/json">
       {
         "ISOCountryGroups": {
-        "nafta": [ "ca", "mx", "us", "unknown" ],
-        "waldo": [ "unknown" ],
-        "anz": [ "au", "nz" ]
+          "nafta": [ "ca", "mx", "us", "unknown" ],
+          "waldo": [ "unknown" ],
+          "anz": [ "au", "nz" ],
+          "britainAndIreland": [ "gb", "ie" ]
         }
       }
     </script>
   </amp-geo>
 
+  <!-- single country group case -->
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification1"
@@ -84,21 +86,23 @@
      <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
   </amp-user-notification>
 
+  <!-- multi country group case -->
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification2"
-      data-show-if-geo="anz"
+      data-show-if-geo="anz, britainAndIreland"
       data-dismiss-href="https://example.com/api/echo/post">
-      Australia and New Zealand notice.
+      Australia, New Zealand. Britain and Ireland notice.
      <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
   </amp-user-notification>
 
+  <!-- negative match case -->
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification3"
-      data-show-if-geo="!countryGroup"
+      data-show-if-not-geo="nafta, britainAndIreland, anz"
       data-dismiss-href="https://example.com/api/echo/post">
-      Unmatched country.
+      Everywhere else including unknown countries.
      <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
   </amp-user-notification>
 

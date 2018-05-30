@@ -117,7 +117,7 @@ describes.realWin('amp-user-notification', {
     expect(impl.buildCallback.bind(impl)).to.not.throw;
   });
 
-  it('should throw if data-show-if-geo and data-how-if-href are both defined',
+  it('should throw if more than one data-how-if-* attrib is defined',
       () => {
         const el = getUserNotification({
           'data-show-if-href': 'https://www.ampproject.org/get/here',
@@ -446,6 +446,26 @@ describes.realWin('amp-user-notification', {
     });
   });
 
+  it('shouldShow should hande comma separated country groups', () => {
+    const el = getUserNotification({
+      id: 'n1',
+      'data-show-if-geo': 'eea, nafta, anz',
+      'layout': 'nodisplay',
+    });
+    ISOCountryGroups = ['nafta'];
+    const impl = el.implementation_;
+    impl.buildCallback();
+
+    storageMock.expects('get')
+        .withExactArgs('amp-user-notification:n1')
+        .returns(Promise.resolve(false))
+        .once();
+
+    return impl.shouldShow().then(shouldShow => {
+      expect(shouldShow).to.equal(true);
+    });
+  });
+
   it('shouldShow should return false if geo does not match', () => {
     ISOCountryGroups = ['nafta'];
     const el = getUserNotification({
@@ -461,12 +481,27 @@ describes.realWin('amp-user-notification', {
     });
   });
 
-  it('shouldShow should return true when no match and !countryGroup is used',
+  it('shouldShow should return false if geo does not match with comma separated groups', () => {
+    ISOCountryGroups = ['nafta'];
+    const el = getUserNotification({
+      id: 'n1',
+      'data-show-if-geo': 'eea',
+      'layout': 'nodisplay',
+    });
+    const impl = el.implementation_;
+    impl.buildCallback();
+
+    return impl.shouldShow().then(shouldShow => {
+      expect(shouldShow).to.equal(false);
+    });
+  });
+
+  it('shouldShow should return true when not geo is used',
       () => {
         ISOCountryGroups = [];
         const el = getUserNotification({
           id: 'n1',
-          'data-show-if-geo': '!countryGroup',
+          'data-show-if-not-geo': 'anz',
           'layout': 'nodisplay',
         });
         const impl = el.implementation_;
@@ -477,12 +512,12 @@ describes.realWin('amp-user-notification', {
         });
       });
 
-  it('shouldShow should return false when any match and !countryGroup is used',
+  it('shouldShow should return false when any match not geo is used',
       () => {
         ISOCountryGroups = ['waldo'];
         const el = getUserNotification({
           id: 'n1',
-          'data-show-if-geo': '!countryGroup',
+          'data-show-if-geo': 'eea, nafta, anz',
           'layout': 'nodisplay',
         });
         const impl = el.implementation_;
