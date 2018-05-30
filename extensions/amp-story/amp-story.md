@@ -73,7 +73,7 @@ To use these new components, include an `<amp-story-bookend>` tag as the child o
 <amp-story>
 ```
 
-Learn more about the new components and how to specify them in the JSON configuration in the section below: [amp-story-bookend](#Bookend:-`amp-story-bookend`)
+Learn more about the new components and how to specify them in the JSON configuration in the section below: [amp-story-bookend](#bookend-amp-story-bookend)
 
 ### (4/2018) **New metadata requirements**
 
