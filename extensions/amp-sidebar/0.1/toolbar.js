@@ -20,18 +20,18 @@ import {user} from '../../../src/log';
 export class Toolbar {
   /**
   * @param {!Element} element
-  * @param {!../../../src/service/vsync-impl.Vsync} vsync
-  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+  * @param {!AMP.BaseElement} contextElement
   */
-  constructor(element, vsync, ampdoc) {
+  constructor(element, contextElement) {
+
+    /** @private @const {!AMP.BaseElement} */
+    this.context_ = contextElement;
+
     /** @private {!Element} */
     this.toolbarDomElement_ = element;
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsync;
-
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    this.ampdoc_ = contextElement.getAmpDoc();
 
     /** @private {string} */
     this.toolbarMedia_ = this.toolbarDomElement_.getAttribute('toolbar');
@@ -63,10 +63,7 @@ export class Toolbar {
 
     // Remove and add the toolbar dynamically
     if (matchesMedia) {
-      const showResponse = this.attemptShow_();
-      if (showResponse) {
-        showResponse.then(onShowCallback);
-      }
+      this.attemptShow_().then(onShowCallback);
     } else {
       this.hideToolbar_();
     }
@@ -109,16 +106,16 @@ export class Toolbar {
   /**
    * Function to attempt to show the toolbar,
    * and hide toolbar-only element in the sidebar.
-   * @return {Promise|undefined}
+   * @return {Promise}
    * @private
    */
   attemptShow_() {
     if (this.isToolbarShown_()) {
-      return;
+      return Promise.resolve();
     }
 
     // Display the elements
-    return this.vsync_.mutatePromise(() => {
+    return this.context_.mutateElement(() => {
       if (this.toolbarTarget_) {
         toggle(this.toolbarTarget_, true);
         if (!this.toolbarTarget_.contains(this.toolbarClone_)) {
@@ -143,7 +140,7 @@ export class Toolbar {
       return;
     }
 
-    this.vsync_.mutate(() => {
+    this.context_.mutateElement(() => {
       // Hide the elements
       if (this.toolbarTarget_) {
         toggle(this.toolbarTarget_, false);
