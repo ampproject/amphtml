@@ -37,7 +37,6 @@ import {dict, map} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
-import {scopedQuerySelector} from '../../../src/dom';
 import {setImportantStyles, toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -523,8 +522,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (config['postPromptUI']) {
       const postPromptUI = config['postPromptUI'];
       this.postPromptUI_ = this.getAmpDoc().getElementById(postPromptUI);
-      if (!this.postPromptUI_ || !this.element.contains(this.postPromptUI_)) {
-        this.postPromptUI_ = null;
+      if (!this.postPromptUI_) {
         this.user().error(TAG, 'child element of <amp-consent> with ' +
           `postPromptUI id ${postPromptUI} not found`);
       }
