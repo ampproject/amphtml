@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "amp-html",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "Fastish HTML",
   "main": "index.js",
   "engines": {
