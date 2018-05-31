@@ -330,13 +330,21 @@ export class Resource {
       // in PROD.
       this.element.dispatchCustomEvent(AmpEvents.BUILT);
     }, reason => {
-      if (!isBlockedByConsent(reason)) {
-        dev().error(TAG, 'failed to build:', this.debugid, reason);
-      }
+      this.maybeReportErrorOnBuildFailure(reason);
       this.isBuilding_ = false;
       this.element.signals().rejectSignal('res-built', reason);
       throw reason;
     });
+  }
+
+  /**
+   * @param {*} reason
+   * @visibleForTesting
+   */
+  maybeReportErrorOnBuildFailure(reason) {
+    if (!isBlockedByConsent(reason)) {
+      dev().error(TAG, 'failed to build:', this.debugid, reason);
+    }
   }
 
   /**
@@ -901,7 +909,11 @@ export class Resource {
    * @return {boolean}
    */
   isInViewport() {
-    return this.element.isInViewport();
+    const isInViewport = this.element.isInViewport();
+    if (isInViewport) {
+      this.resolveRenderOutsideViewport_();
+    }
+    return isInViewport;
   }
 
   /**
