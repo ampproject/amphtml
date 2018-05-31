@@ -56,10 +56,11 @@ setInterval(function() {
   }
 }, 1000);
 
-const middleware = [app];
+const middleware = [];
 if (!quiet) {
   middleware.push(morgan('dev'));
 }
+middleware.push(app);
 if (sendCachingHeaders) {
   middleware.push(header({
     'cache-control': ' max-age=600',
