@@ -428,11 +428,17 @@ export function imaVideo(global, data) {
 
   consentState = global.context.initialConsentState;
 
-  // Set-up code that can't run until the IMA lib loads.
-  loadScript(
-      /** @type {!Window} */ (global),
-      'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
-      () => onImaLoadSuccess(global, data), onImaLoadFail);
+  if (consentState == 4) { // UNKNOWN
+    // On unknown consent state, do not load IMA. Treat this the same as if IMA
+    // failed to load.
+    onImaLoadFail();
+  } else {
+    // Set-up code that can't run until the IMA lib loads.
+    loadScript(
+        /** @type {!Window} */ (global),
+        'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
+        () => onImaLoadSuccess(global, data), onImaLoadFail);
+  }
 }
 
 function onImaLoadSuccess(global, data) {
