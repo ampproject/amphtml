@@ -383,25 +383,20 @@ export class BindExpression {
         const member = this.eval_(args[1], scope);
 
         if (target === null || member === null) {
-          this.memberAccessWarning_(target, member);
           return null;
         }
         const targetType = typeof target;
         if (targetType !== 'string' && targetType !== 'object') {
-          this.memberAccessWarning_(target, member);
           return null;
         }
         const memberType = typeof member;
         if (memberType !== 'string' && memberType !== 'number') {
-          this.memberAccessWarning_(target, member);
           return null;
         }
         // Ignore Closure's type constraint for `hasOwnProperty`.
         if (Object.prototype.hasOwnProperty.call(
             /** @type {Object} */ (target), member)) {
           return target[member];
-        } else {
-          this.memberAccessWarning_(target, member);
         }
         return null;
 
@@ -524,18 +519,6 @@ export class BindExpression {
       default:
         throw new Error(`Unexpected AstNodeType: ${type}.`);
     }
-  }
-
-  /**
-   * @param {*} target
-   * @param {*} member
-   * @private
-   */
-  memberAccessWarning_(target, member) {
-    // Cast valid, because we don't care for the logging.
-    const stringified = JSON.stringify(/** @type {!JsonObject} */ (member));
-    user().warn(TAG, `Cannot read property ${stringified} of ` +
-        `${stringified}; returning null.`);
   }
 
   /**
