@@ -69,13 +69,13 @@ export function createFixtureIframe(
       [AmpEvents.ATTACHED]: 0,
       [AmpEvents.DOM_UPDATE]: 0,
       [AmpEvents.ERROR]: 0,
+      [AmpEvents.LOAD_END]: 0,
       [AmpEvents.LOAD_START]: 0,
       [AmpEvents.STUBBED]: 0,
       [BindEvents.INITIALIZE]: 0,
       [BindEvents.SET_STATE]: 0,
       [BindEvents.RESCAN_TEMPLATE]: 0,
       [FormEvents.SERVICE_INIT]: 0,
-      [AmpEvents.LOAD_END]: 0,
     };
     const messages = [];
     let html = __html__[fixture]; // eslint-disable-line no-undef
