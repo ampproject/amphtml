@@ -10,9 +10,9 @@
 </head>
 <body>
   <span id="spanToHide">This text will be hidden by #hideBtn</span>
-  <button id="hideBtn" on="tap:spanToHide.hide">Toggle visibility for #img</button>
+  <button id="hideBtn" on="tap:spanToHide.hide">Hide #spanToHide</button>
 
-  <amp-img id="imgToToggle" width=200 height=100 src="/examples/img/sample.jpg" layout=responsive></amp-img>
+  <amp-img id="imgToToggle" width=200 height=100 src="/examples/img/sample.jpg" layout=fixed></amp-img>
   <button id="toggleBtn" on="tap:imgToToggle.toggleVisibility">Toggle visibility for #img</button>
 
   <button id="navigateBtn" on="tap:AMP.navigateTo(url='https://google.com')">Navigate to google.com</button>
