@@ -45,32 +45,24 @@ export class CircularBuffer {
 
 /**
  * TextPos is a pointer to a character in a Text node.
- * Exported for test only.
+ * @typedef {{node: !Text, offset: number}}
  */
-export class TextPos {
-  /**
-   * @param {!Text} node
-   * @param {number} offset
-   */
-  constructor(node, offset) {
-    this.node = node;
-    this.offset = offset;
-  }
+let TextPos;
 
-  /**
-   * @return {number}
-   */
-  get char() {
-    return this.node.wholeText[this.offset];
-  }
+/**
+ * Returns a char pointed by pos.
+ * @param {!TextPos} pos
+ * @return {string}
+ */
+export function textPosChar(pos) {
+  return pos.node.wholeText[pos.offset];
 }
 
 /**
  * TextRange represents a text range.
- * Exported for test only.
  * @typedef {{start: !TextPos, end: !TextPos}}
  */
-export let TextRange;
+let TextRange;
 
 const skipCharRe = /[,.\s\u2022()]/;
 
@@ -137,7 +129,7 @@ export function findSentences(node, sentences) {
         // mismatch
         return null;
       }
-      if (pos == posDomDelimiter || skipCharRe.test(pos.char)) {
+      if (pos == posDomDelimiter || skipCharRe.test(textPosChar(pos))) {
         continue;
       }
       buf.add(pos);
@@ -147,7 +139,7 @@ export function findSentences(node, sentences) {
       }
       let ok = true;
       for (let j = 0; j < sen.length; j++) {
-        const c = canonicalizeChar(buf.get(sen.length - j - 1).char);
+        const c = canonicalizeChar(textPosChar(buf.get(sen.length - j - 1)));
         if (sen[sen.length - 1 - j] == c) {
           continue;
         }
@@ -167,7 +159,7 @@ export function findSentences(node, sentences) {
         const endPos = buf.get(sen.length - 1);
         matches.push({
           start: buf.get(0),
-          end: new TextPos(endPos.node, endPos.offset + 1),
+          end: {node: endPos.node, offset: endPos.offset + 1},
         });
         break;
       }
@@ -249,7 +241,7 @@ function markTextRange(start, end, ranges, idx, marked) {
     if (!next) {
       break;
     }
-    start = new TextPos(next, 0);
+    start = {node: next, offset: 0};
   }
 }
 
@@ -332,7 +324,7 @@ function nextTextNode(textNode) {
  *   between two block nodes.
  * @type {!TextPos}
  */
-const posDomDelimiter = new TextPos(document.createTextNode(' '), 0);
+const posDomDelimiter = {node: document.createTextNode(' '), offset: 0};
 
 /**
  * TextScanner visits text nodes under a root node and
@@ -358,7 +350,7 @@ export class TextScanner {
       return null;
     }
     this.next_ = this.internal_.next();
-    if (this.next_ == null && /\s/.test(ret.char)) {
+    if (this.next_ == null && /\s/.test(textPosChar(ret))) {
       // Remove the trailing space.
       return null;
     }
@@ -443,7 +435,7 @@ export class TextScannerInternal {
       } else {
         this.needSpace_ = true;
       }
-      return new TextPos(/**@type{!Text}*/(this.node_), idx);
+      return {node: /**@type{!Text}*/(this.node_), offset: idx};
     }
     return null;
   }
