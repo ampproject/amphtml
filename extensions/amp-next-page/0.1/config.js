@@ -88,6 +88,9 @@ function assertReco(reco, origin, sourceOrigin) {
   user().assertString(reco.title, 'title must be a string');
 
   if (sourceOrigin) {
-    reco.ampUrl = reco.ampUrl.replace(url.origin, origin);
+    reco.ampUrl = `${origin}/c/` +
+        (url.protocol === 'https:' ? 's/' : '') +
+        encodeURIComponent(url.host) +
+        url.pathname + (url.search || '') + (url.hash || '');
   }
 }
