@@ -150,9 +150,9 @@ In this example if the user is located in Mexico (`mx`) the `amp-geo` will retur
 </amp-user-notification>
 ```
 
-##### data-show-if--not-geo
+##### data-show-if-not-geo
 
-This is the opposite of `data-show-if-geo`.  When specified `amp-user-notification` will only trigger if the `amp-geo` country group does nort match the supplied list.
+This is the opposite of `data-show-if-geo`.  When specified `amp-user-notification` will only trigger if the `amp-geo` country group does not match the supplied list.
 
 Example: 
 
