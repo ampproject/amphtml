@@ -83,9 +83,15 @@
     </radialgradient>
   </svg>
 
-  <!-- Invalid xml:base present -->
+  <!-- Invalid: xml:base present -->
   <svg xml:base="javascript:alert('hello world')">
     <a href="#"><circle r="10"></a>
+  </svg>
+
+  <!-- Invalid: style tag isn't allowed. Note this is really testing the
+        parsing of a self closing style tag in an svg, not validity. -->
+  <svg>
+    <style/>
   </svg>
 </body>
 </html>

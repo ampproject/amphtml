@@ -36,7 +36,7 @@ import {
   getLocation,
 } from './frame-metadata';
 import {getMode} from '../src/mode';
-import {getSourceUrl, isProxyOrigin, parseUrl} from '../src/url';
+import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {
   initLogConstructor,
   isUserErrorMessage,
@@ -61,6 +61,7 @@ import {beopinion} from './beopinion';
 import {bodymovinanimation} from './bodymovinanimation';
 import {facebook} from './facebook';
 import {github} from './github';
+import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
@@ -95,6 +96,7 @@ import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {adthrive} from '../ads/adthrive';
+import {adunity} from '../ads/adunity';
 import {aduptech} from '../ads/aduptech';
 import {adventive} from '../ads/adventive';
 import {adverline} from '../ads/adverline';
@@ -209,6 +211,8 @@ import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
 import {uas} from '../ads/uas';
+import {unruly} from '../ads/unruly';
+import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
@@ -263,6 +267,7 @@ if (getMode().test || getMode().localDev) {
 
 // Keep the list in alphabetic order
 register('24smi', _24smi);
+register('3d-gltf', gltfViewer);
 register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);
@@ -289,6 +294,7 @@ register('adspirit', adspirit);
 register('adstir', adstir);
 register('adtech', adtech);
 register('adthrive', adthrive);
+register('adunity', adunity);
 register('aduptech', aduptech);
 register('adventive', adventive);
 register('adverline', adverline);
@@ -412,6 +418,8 @@ register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
 register('uas', uas);
+register('unruly', unruly);
+register('uzou', uzou);
 register('valuecommerce', valuecommerce);
 register('videonow', videonow);
 register('viralize', viralize);
@@ -574,7 +582,7 @@ export function validateParentOrigin(window, parentLocation) {
  * @visibleForTesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
-  const thirdPartyHost = parseUrl(urls.thirdParty).hostname;
+  const thirdPartyHost = parseUrlDeprecated(urls.thirdParty).hostname;
 
   // Everything allowed in default iframe.
   if (window.location.hostname == thirdPartyHost) {
@@ -607,12 +615,13 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   // We prefer the unforgable ancestorOrigins, but referrer is better than
   // nothing.
   const ancestor = ancestors ? ancestors[0] : window.document.referrer;
-  let hostname = parseUrl(ancestor).hostname;
+  let {hostname} = parseUrlDeprecated(ancestor);
   if (isProxyOrigin(ancestor)) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
     // trustable.
-    hostname = parseUrl(getSourceUrl(window.document.referrer)).hostname;
+    hostname = parseUrlDeprecated(getSourceUrl(window.document.referrer))
+        .hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
     // Either the hostname is exactly as whitelisted…

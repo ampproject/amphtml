@@ -175,7 +175,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     // Adjust viewport based on exclusion margins
     const adjViewportRect = this.applyMargins_(entry.viewportRect);
-    const positionRect = entry.positionRect;
+    const {positionRect} = entry;
 
     // Relative position of the element to the adjusted viewport.
     let relPos;

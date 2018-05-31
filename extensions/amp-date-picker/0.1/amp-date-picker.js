@@ -640,7 +640,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   getHiddenInputId_(form, type) {
-    const id = this.element.id;
+    const {id} = this.element;
     const name = DateFieldNameByType[type];
     if (!form) {
       return '';
@@ -1308,6 +1308,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   /**
    * Render the template that corresponds to the date with its data.
    * @param {!moment} date
+   * @return {!Promise<string>}
    * @private
    */
   renderDayTemplate_(date) {

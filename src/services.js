@@ -467,12 +467,22 @@ export class Services {
   /**
    * Returns a promise for the geo service or a promise for null if
    * the service is not available on the current page.
-   * @param {!Window} win
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<?Object<string,(string|Array<string>)>>}
    */
-  static geoForOrNull(win) {
+  static geoForDocOrNull(nodeOrDoc) {
     return /** @type {!Promise<?Object<string,(string|Array<string>)>>} */ (
-      getElementServiceIfAvailable(win, 'geo', 'amp-geo', true));
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'geo', 'amp-geo', true));
+  }
+
+  /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/url-impl.Url}
+   */
+  static urlForDoc(nodeOrDoc) {
+    return /** @type {!./service/url-impl.Url} */ (
+      getExistingServiceForDocInEmbedScope(
+          nodeOrDoc, 'url', /* opt_fallbackToTopWin */ true));
   }
 
   /**
@@ -488,11 +498,12 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/video-manager-impl.VideoService}
+   * @return {!./service/video-service-interface.VideoServiceInterface}
    */
   static videoManagerForDoc(nodeOrDoc) {
-    return /** @type {!./service/video-manager-impl.VideoService} */ (
-      getServiceForDoc(nodeOrDoc, 'video-manager'));
+    return (
+      /** @type {!./service/video-service-interface.VideoServiceInterface} */ (
+        getServiceForDoc(nodeOrDoc, 'video-manager')));
   }
 
   /**

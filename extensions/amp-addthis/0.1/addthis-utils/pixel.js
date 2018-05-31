@@ -22,7 +22,7 @@ import {getData} from '../../../../src/event-helper';
 import {isObject} from '../../../../src/types';
 import {parseJson} from '../../../../src/json';
 
-import {parseUrl} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url';
 import {setStyles} from '../../../../src/style';
 
 const RE_IFRAME = /#iframe$/;
@@ -83,7 +83,7 @@ export const pixelDrop = (url, ampDoc) => {
   doc.body.appendChild(ampPixel);
 };
 
-const getIframeName = url => parseUrl(url).host
+const getIframeName = url => parseUrlDeprecated(url).host
     .split('.')
     .concat(pixelatorFrameTitle.toLowerCase().replace(/\s/, '_'));
 

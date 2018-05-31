@@ -15,12 +15,10 @@
  */
 
 const colors = require('ansi-colors');
-const exec = require('./exec').exec;
-const execScriptAsync = require('./exec').execScriptAsync;
 const log = require('fancy-log');
+const {execScriptAsync, exec} = require('./exec');
 
-const green = colors.green;
-const cyan = colors.cyan;
+const {green, cyan} = colors;
 
 const killCmd =
     (process.platform == 'win32') ? 'taskkill /f /pid' : 'kill -KILL';

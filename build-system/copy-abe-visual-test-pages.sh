@@ -27,8 +27,7 @@ RUN() {
   $* || { echo $(RED "ERROR:") "Command" $(CYAN $1) "failed"  ; exit 1; }
 }
 
-#SCRIPT=${BASH_SOURCE[0]}
-SCRIPT=`realpath $0`
+SCRIPT=${BASH_SOURCE[0]}
 BUILD_SYSTEM_DIR=$(dirname "$SCRIPT")
 AMPHTML_DIR=$(dirname "$BUILD_SYSTEM_DIR")
 SRC_DIR=$(dirname "$AMPHTML_DIR")
@@ -38,6 +37,12 @@ ABE_TESTS_DIR="$AMPHTML_DIR/$ABE_TESTS_PATH"
 ABE_TESTS_JSON_FILE="$AMPHTML_DIR/test/visual-diff/visual-tests.js"
 ABE_COMPONENTS_DIR="$ABE_TESTS_DIR/components"
 ABE_CLONE_PATH="git@github.com:ampproject/amp-by-example.git"
+
+if [[ $SCRIPT != ./build-system/* ]] ;
+then
+  echo $(YELLOW "This script must be run from the root") $(CYAN "amphtml") $(YELLOW "directory. Exiting.")
+  exit 1
+fi
 
 echo $(YELLOW "-----------------------------------------------------------------------------------------------------------------")
 echo $(GREEN "Running") $(CYAN $SCRIPT)

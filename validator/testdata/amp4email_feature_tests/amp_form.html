@@ -47,12 +47,12 @@
   <!-- Invalid: input can not be type="button|file|image". -->
   <form method="post" action-xhr="https://example.com/subscribe">
     <input type="button" name="button">
-    <input type="file" name="file">
     <input type="image" name="image">
   </form>
   <!-- Invalid: input can not be type="password" -->
   <form method="post" action-xhr="https://example.com/subscribe">
     <input type="password" name="password">
+    <input type="file" name="file">
   </form>
 </body>
 </html>

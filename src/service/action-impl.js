@@ -156,7 +156,7 @@ export class ActionInvocation {
    * @param {string} method Name of the action being invoked.
    * @param {?JsonObject} args Named action arguments.
    * @param {?Element} source Element that generated the `event`.
-   * @param {?Element} caller Element that contains the invoked handler.
+   * @param {?Element} caller Element containing the on="..." action handler.
    * @param {?ActionEventDef} event The event that triggered this action.
    * @param {ActionTrust} trust The trust level of this invocation's trigger.
    * @param {?string} tagOrTarget The global target name or the element tagName.
@@ -275,7 +275,7 @@ export class ActionService {
       });
       this.root_.addEventListener('keydown', event => {
         const element = dev().assertElement(event.target);
-        const keyCode = event.keyCode;
+        const {keyCode} = event;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
@@ -471,7 +471,7 @@ export class ActionService {
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
     action.actionInfos.forEach(actionInfo => {
-      const target = actionInfo.target;
+      const {target} = actionInfo;
       // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
       const invokeAction = () => {
@@ -517,11 +517,9 @@ export class ActionService {
    * @param {!ActionInvocation} invocation
    * @return {?Promise}
    * @private
-   * @visibleForTesting
    */
   invoke_(invocation) {
-    const method = invocation.method;
-    const tagOrTarget = invocation.tagOrTarget;
+    const {method, tagOrTarget} = invocation;
 
     // Check that this action is whitelisted (if a whitelist is set).
     if (this.whitelist_) {
@@ -660,7 +658,7 @@ export class ActionService {
    * @private
    */
   queryWhitelist_() {
-    const head = this.ampdoc.getRootNode().head;
+    const {head} = this.ampdoc.getRootNode();
     if (!head) {
       return null;
     }
@@ -679,7 +677,7 @@ export class ActionService {
    */
   addTargetPropertiesAsDetail_(event) {
     const detail = /** @type {!JsonObject} */ (map());
-    const target = event.target;
+    const {target} = event;
 
     if (target.value !== undefined) {
       detail['value'] = target.value;
@@ -857,15 +855,14 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
     // Don't parse object literals. Tokenize as a single expression
     // fragment and delegate to specific action handler.
     args = map();
-    const value = toks.next().value;
+    const {value} = toks.next();
     args[RAW_OBJECT_ARGS_KEY] = value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....
     do {
       tok = toks.next();
-      const type = tok.type;
-      const value = tok.value;
+      const {type, value} = tok;
       if (type == TokenType.SEPARATOR && (value == ',' || value == ')')) {
         // Expected: ignore.
       } else if (type == TokenType.LITERAL || type == TokenType.ID) {
@@ -957,7 +954,7 @@ export function dereferenceExprsInArgs(args, event) {
  * @param {!Element} context
  * @param {?T} condition
  * @param {string=} opt_message
- * @return T
+ * @return {T}
  * @template T
  * @private
  */

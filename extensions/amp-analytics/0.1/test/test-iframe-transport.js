@@ -59,7 +59,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     const url = 'https://example.com/test';
     const config = {iframe: url};
     iframeTransport.sendRequest('hello, world!', config);
-    const queue = IframeTransport.getFrameData(iframeTransport.getType()).queue;
+    const {queue} = IframeTransport.getFrameData(iframeTransport.getType());
     expect(queue.queueSize()).to.equal(1);
     iframeTransport.sendRequest('hello again, world!', config);
     expect(queue.queueSize()).to.equal(2);
@@ -186,8 +186,7 @@ describes.realWin('amp-analytics.iframe-transport',
             {iframe: frameUrl2}, frameUrl2 + '-3');
         sandbox.restore();
         const errorSpy = sandbox.spy(user(), 'error');
-        const frame =
-            IframeTransport.getFrameData('some_other_vendor_type').frame;
+        const {frame} = IframeTransport.getFrameData('some_other_vendor_type');
         frame.setAttribute('style', '');
         env.ampdoc.win.document.body.appendChild(frame);
         return new Promise((resolve,unused) => {

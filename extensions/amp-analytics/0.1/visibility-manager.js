@@ -581,7 +581,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    */
   createIntersectionObserver_() {
     // Native.
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     if (nativeIntersectionObserverSupported(win)) {
       return new win.IntersectionObserver(
           this.onIntersectionChanges_.bind(this),
@@ -607,7 +607,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @private
    */
   polyfillAmpElementIfNeeded_(element) {
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     if (nativeIntersectionObserverSupported(win)) {
       return;
     }

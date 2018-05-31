@@ -151,11 +151,16 @@ export class LocalSubscriptionPlatform {
   handleClick_(element) {
     if (element) {
       const action = element.getAttribute('subscriptions-action');
-      if (element.hasAttribute('subscriptions-service')) {
+      if (element.getAttribute('subscriptions-service') === 'local') {
+        this.executeAction(action);
+      } else if ((element.getAttribute('subscriptions-service') || 'auto')
+        == 'auto') {
+        const platform = this.serviceAdapter_.selectPlatformForLogin();
+        this.serviceAdapter_.delegateActionToService(
+            action, platform.getServiceId());
+      } else if (element.getAttribute('subscriptions-service')) {
         const serviceId = element.getAttribute('subscriptions-service');
         this.serviceAdapter_.delegateActionToService(action, serviceId);
-      } else {
-        this.executeAction(action);
       }
     }
   }

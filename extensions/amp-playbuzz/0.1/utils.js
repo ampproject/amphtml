@@ -19,7 +19,7 @@ import {dict} from './../../../src/utils/object';
 import {getData} from './../../../src/event-helper';
 import {parseJson} from './../../../src/json';
 import {
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
@@ -158,7 +158,7 @@ export function composeItemSrcUrl(src, itemId) {
 
   const iframeSrcUrl = itemId ?
     DEFAULT_BASE_URL + 'item/' + itemId :
-    sanitizeUrl(parseUrl(src));
+    sanitizeUrl(parseUrlDeprecated(src));
 
   return iframeSrcUrl;
 }

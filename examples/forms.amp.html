@@ -779,3 +779,14 @@
 
     <div submit-success template="submit_success_template"></div>
 </form>
+
+<h4>File upload</h4>
+<form method="post" action-xhr="/form/json/upload" enctype="multipart/form-data" target="_blank">
+    <label>
+        <p>Upload a file:</p>
+        <input type="file" name="myFile" accept="text/plain">
+    </label>
+    <div><input type="submit"></div>
+    <div submit-success><template type="amp-mustache">Way to go 🎉 {{message}}</template></div>
+    <div submit-error>Way to fail</div>
+</form>

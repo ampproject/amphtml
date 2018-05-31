@@ -31,7 +31,8 @@ describes.fakeWin('AccessIframeAdapter', {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    clock = lolex.install({target: ampdoc.win});
+    clock = lolex.install({
+      target: ampdoc.win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
 
     validConfig = {
       'iframeSrc': 'https://acme.com/iframe',

@@ -17,7 +17,7 @@
 import {endsWith} from './string';
 import {
   isProxyOrigin,
-  parseUrl,
+  parseUrlDeprecated,
   tryDecodeUriComponent,
 } from './url';
 import {urls} from './config';
@@ -159,8 +159,8 @@ function checkOriginForSettingCookie(win, options, name) {
         + name);
   }
 
-  const current = parseUrl(win.location.href).hostname.toLowerCase();
-  const proxy = parseUrl(urls.cdn).hostname.toLowerCase();
+  const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
+  const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
   if (current == proxy || endsWith(current, '.' + proxy)) {
     throw new Error('Should never attempt to set cookie on proxy origin.'
         + ' (in depth check): ' + name);

@@ -24,6 +24,8 @@ import {
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
   extractAmpAnalyticsConfig,
+  extractHost,
+  getAmpRuntimeTypeParameter,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
@@ -48,7 +50,7 @@ import {installXhrService} from '../../../../src/service/xhr-impl';
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
   installExtensionsService(fixture.win);
-  const doc = fixture.doc;
+  const {doc} = fixture;
   // TODO(a4a-cam@): This is necessary in the short term, until A4A is
   // smarter about host document styling.  The issue is that it needs to
   // inherit the AMP runtime style element in order for shadow DOM-enclosed
@@ -153,8 +155,10 @@ describe('Google A4A utils', () => {
         });
         const a4a = new MockA4AImpl(element);
         url = 'not an array';
-        expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
-        expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
+        allowConsoleError(() =>
+          expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok);
+        allowConsoleError(() =>
+          expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null);
         url = [];
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
@@ -231,6 +235,38 @@ describe('Google A4A utils', () => {
     });
   });
 
+  describe('#getAmpRuntimeTypeParameter', () => {
+    it('should specify that this is canary', () => {
+      expect(getAmpRuntimeTypeParameter({
+        AMP_CONFIG: {type: 'canary'},
+        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+      })).to.equal('2');
+    });
+    it('should specify that this is control', () => {
+      expect(getAmpRuntimeTypeParameter({
+        AMP_CONFIG: {type: 'control'},
+        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+      })).to.equal('1');
+    });
+    it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
+      expect(getAmpRuntimeTypeParameter({
+        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+      })).to.be.null;
+    });
+    it('should not have `art` parameter when binary type is production', () => {
+      expect(getAmpRuntimeTypeParameter({
+        AMP_CONFIG: {type: 'production'},
+        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+      })).to.be.null;
+    });
+    it('should not have `art` parameter when canonical', () => {
+      expect(getAmpRuntimeTypeParameter({
+        AMP_CONFIG: {type: 'canary'},
+        location: {origin: 'https://www.example.com'},
+      })).to.be.null;
+    });
+  });
+
   describe('#googleAdUrl', () => {
     let sandbox;
 
@@ -247,7 +283,7 @@ describe('Google A4A utils', () => {
       this.timeout(5000);
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -265,90 +301,10 @@ describe('Google A4A utils', () => {
       });
     });
 
-    it('should specify that this is canary', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = {type: 'canary'};
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/[&?]art=2/);
-          });
-        });
-      });
-    });
-    it('should specify that this is control', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = {type: 'control'};
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/[&?]art=1/);
-          });
-        });
-      });
-    });
-    it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.not.match(/[&?]art=/);
-          });
-        });
-      });
-    });
-    it('should not have `art` parameter when binary type is production', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = {type: 'production'};
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.not.match(/[&?]art=/);
-          });
-        });
-      });
-    });
-
     it('should include scroll position', function() {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -376,7 +332,7 @@ describe('Google A4A utils', () => {
       this.timeout(5000);
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -397,7 +353,7 @@ describe('Google A4A utils', () => {
     it('should include debug_experiment_id if local mode w/ deid hash', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -419,7 +375,7 @@ describe('Google A4A utils', () => {
     it('should include GA cid/hid', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -441,7 +397,7 @@ describe('Google A4A utils', () => {
     it('should have correct bc value when everything supported', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -467,7 +423,7 @@ describe('Google A4A utils', () => {
     it('should have correct bc value when sandbox not supported', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -491,7 +447,7 @@ describe('Google A4A utils', () => {
     it('should not include bc when nothing supported', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        const doc = fixture.doc;
+        const {doc} = fixture;
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
@@ -800,5 +756,26 @@ describe('Google A4A utils', () => {
       expect(vars['viewerLastVisibleTime']).to.be.a('number');
       expect(vars['viewerLastVisibleTime']).not.to.equal(0);
     });
+  });
+
+  describe('#extractHost', () => {
+    [
+      {in: 'http://foo.com/sl?lj=fl', out: 'foo.com'},
+      {in: 'Http://bar.com?lj=fl', out: 'bar.com'},
+      {in: 'htTps://foo.com?lj=fl', out: 'foo.com'},
+      {in: 'http://bar.com', out: 'bar.com'},
+      {in: 'https://foo.com', out: 'foo.com'},
+      {in: 'https://foo.com:8080', out: 'foo.com'},
+      {in: 'https://bar.com:8080/lkjs?a=b', out: 'bar.com'},
+      {in: 'bar.com:8080/lkjs?a=b', out: 'bar.com'},
+      {in: 'bar.com:8080/', out: 'bar.com'},
+      {in: 'bar.com/sl?lj=fl', out: 'bar.com'},
+      {in: 'foo.com/sl/lj=fl?ls=f', out: 'foo.com'},
+      {in: 'bar.com?lj=fl', out: 'bar.com'},
+      {in: 'foo.com?lj=fl', out: 'foo.com'},
+      {in: 'hello.com', out: 'hello.com'},
+      {in: '', out: ''},
+    ].forEach(test =>
+      it(test.in, () => expect(extractHost(test.in)).to.equal(test.out)));
   });
 });
