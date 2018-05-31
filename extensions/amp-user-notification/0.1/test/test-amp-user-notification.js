@@ -426,6 +426,25 @@ describes.realWin('amp-user-notification', {
     });
   });
 
+  it('shouldShow should return true if no datashow-if-* is specified', () => {
+    const el = getUserNotification({
+      id: 'n1',
+      'layout': 'nodisplay',
+    });
+    ISOCountryGroups = [];
+    const impl = el.implementation_;
+    impl.buildCallback();
+
+    storageMock.expects('get')
+        .withExactArgs('amp-user-notification:n1')
+        .returns(Promise.resolve(false))
+        .once();
+
+    return impl.shouldShow().then(shouldShow => {
+      expect(shouldShow).to.equal(true);
+    });
+  });
+
   it('shouldShow should return true if geo matches', () => {
     const el = getUserNotification({
       id: 'n1',
