@@ -213,7 +213,7 @@ describes.realWin('amp-geo', {
     });
   });
 
-  it('isInCountryGroup works single and multiple groups.', () => {
+  it('isInCountryGroup works with multiple group targets', () => {
     win.AMP_MODE.geoOverride = 'nz';
     addConfigElement('script');
     geo.buildCallback();
@@ -221,20 +221,30 @@ describes.realWin('amp-geo', {
     return Services.geoForDocOrNull(el).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
 
-      /* single gropup case */
-      expect(geo.isInCountryGroup('anz'))
-          .to.equal(GEO_IN_GROUP.IN);
-      expect(geo.isInCountryGroup('nafta'))
-          .to.equal(GEO_IN_GROUP.NOT_IN);
-      expect(geo.isInCountryGroup('foobar'))
-          .to.equal(GEO_IN_GROUP.NOT_DEFINED);
-
       /* multi group case */
       expect(geo.isInCountryGroup('nafta, anz'))
           .to.equal(GEO_IN_GROUP.IN);
       expect(geo.isInCountryGroup('nafta, unknown'))
           .to.equal(GEO_IN_GROUP.NOT_IN);
       expect(geo.isInCountryGroup('nafta, foobar'))
+          .to.equal(GEO_IN_GROUP.NOT_DEFINED);
+    });
+  });
+
+  it('isInCountryGroup works with single group targets', () => {
+    win.AMP_MODE.geoOverride = 'nz';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+
+      /* single group case */
+      expect(geo.isInCountryGroup('anz'))
+          .to.equal(GEO_IN_GROUP.IN);
+      expect(geo.isInCountryGroup('nafta'))
+          .to.equal(GEO_IN_GROUP.NOT_IN);
+      expect(geo.isInCountryGroup('foobar'))
           .to.equal(GEO_IN_GROUP.NOT_DEFINED);
     });
   });
