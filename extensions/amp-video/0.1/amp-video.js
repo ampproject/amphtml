@@ -18,7 +18,6 @@ import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
-import {assertHttpsUrl, isProxyOrigin} from '../../../src/url';
 import {
   childElementByTag,
   childElementsByTag,
@@ -35,6 +34,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
+import {once} from '../../../src/utils/function';
 import {toArray} from '../../../src/types';
 
 
@@ -88,6 +88,12 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
+
+    /**
+     * @return {!../../../src/service/url-impl.Url}
+     * @private
+     */
+    this.getUrlService_ = once(() => Services.urlForDoc(this.element));
   }
 
   /**
@@ -97,15 +103,12 @@ class AmpVideo extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     const videoSrc = this.getVideoSourceForPreconnect_();
     if (videoSrc) {
-      assertHttpsUrl(videoSrc, this.element);
+      this.getUrlService_().assertHttpsUrl(videoSrc, this.element);
       this.preconnect.url(videoSrc, opt_onLayout);
     }
   }
 
   /**
-   * @override
-   *
-   * @overview
    * AMP Cache may selectively cache certain video sources (based on various
    * heuristics such as video type, extensions, etc...).
    * When AMP Cache does so, it rewrites the `src` for `amp-video` and
@@ -137,6 +140,8 @@ class AmpVideo extends AMP.BaseElement {
    * Note that this flag does not impact prerendering of the `poster` as poster
    * is fetched (and is always cached) during `buildCallback` which is not
    * dependent on the value of `prerenderAllowed()`.
+   *
+   * @override
    */
   prerenderAllowed() {
     return this.isPrerenderAllowed_;
@@ -164,9 +169,11 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.video_ = this.element.ownerDocument.createElement('video');
+    const {element} = this;
 
-    const poster = this.element.getAttribute('poster');
+    this.video_ = element.ownerDocument.createElement('video');
+
+    const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
       console/*OK*/.error(
           'No "poster" attribute has been provided for amp-video.');
@@ -183,13 +190,13 @@ class AmpVideo extends AMP.BaseElement {
         /* opt_removeMissingAttrs */ true);
     this.installEventHandlers_();
     this.applyFillContent(this.video_, true);
-    this.element.appendChild(this.video_);
+    element.appendChild(this.video_);
 
     // Gather metadata
-    const artist = this.element.getAttribute('artist');
-    const title = this.element.getAttribute('title');
-    const album = this.element.getAttribute('album');
-    const artwork = this.element.getAttribute('artwork');
+    const artist = element.getAttribute('artist');
+    const title = element.getAttribute('title');
+    const album = element.getAttribute('album');
+    const artwork = element.getAttribute('artwork');
     this.metadata_ = {
       'title': title || '',
       'artist': artist || '',
@@ -199,9 +206,9 @@ class AmpVideo extends AMP.BaseElement {
       ],
     };
 
-    installVideoManagerForDoc(this.element);
+    installVideoManagerForDoc(element);
 
-    Services.videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(element).register(this);
   }
 
   /** @override */
@@ -209,8 +216,10 @@ class AmpVideo extends AMP.BaseElement {
     if (!this.video_) {
       return;
     }
+    const {element} = this;
     if (mutations['src']) {
-      assertHttpsUrl(this.element.getAttribute('src'), this.element);
+      const urlService = this.getUrlService_();
+      urlService.assertHttpsUrl(element.getAttribute('src'), element);
       this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
     const attrs = ATTRS_TO_PROPAGATE.filter(
@@ -220,25 +229,25 @@ class AmpVideo extends AMP.BaseElement {
         dev().assertElement(this.video_),
         /* opt_removeMissingAttrs */ true);
     if (mutations['src']) {
-      this.element.dispatchCustomEvent(VideoEvents.RELOAD);
+      element.dispatchCustomEvent(VideoEvents.RELOAD);
     }
     if (mutations['artwork'] || mutations['poster']) {
-      const artwork = this.element.getAttribute('artwork');
-      const poster = this.element.getAttribute('poster');
+      const artwork = element.getAttribute('artwork');
+      const poster = element.getAttribute('poster');
       this.metadata_['artwork'] = [
         {'src': artwork || poster || ''},
       ];
     }
     if (mutations['album']) {
-      const album = this.element.getAttribute('album');
+      const album = element.getAttribute('album');
       this.metadata_['album'] = album || '';
     }
     if (mutations['title']) {
-      const title = this.element.getAttribute('title');
+      const title = element.getAttribute('title');
       this.metadata_['title'] = title || '';
     }
     if (mutations['artist']) {
-      const artist = this.element.getAttribute('artist');
+      const artist = element.getAttribute('artist');
       this.metadata_['artist'] = artist || '';
     }
     // TODO(@aghassemi, 10756) Either make metadata observable or submit
@@ -325,17 +334,20 @@ class AmpVideo extends AMP.BaseElement {
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
+    const {element} = this;
+    const urlService = this.getUrlService_();
+
     // If the `src` of `amp-video` itself is NOT cached, set it on video
-    if (this.element.hasAttribute('src') &&
-        !this.isCachedByCDN_(this.element)) {
-      assertHttpsUrl(this.element.getAttribute('src'), this.element);
+    if (element.hasAttribute('src') &&
+        !this.isCachedByCDN_(element)) {
+      urlService.assertHttpsUrl(element.getAttribute('src'), element);
       this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
 
     sources.forEach(source => {
       // Cached sources should have been moved from <amp-video> to <video>.
       dev().assert(!this.isCachedByCDN_(source));
-      assertHttpsUrl(source.getAttribute('src'), source);
+      urlService.assertHttpsUrl(source.getAttribute('src'), source);
       this.video_.appendChild(source);
     });
 
@@ -350,19 +362,21 @@ class AmpVideo extends AMP.BaseElement {
           origSource, cachedSource);
     });
 
-    const tracks = toArray(childElementsByTag(this.element, 'track'));
+    const tracks = toArray(childElementsByTag(element, 'track'));
     tracks.forEach(track => {
       this.video_.appendChild(track);
     });
   }
 
   /**
+   * @param {!Element} element
+   * @return {boolean}
    * @private
    */
   isCachedByCDN_(element) {
     const src = element.getAttribute('src');
     const hasOrigSrcAttr = element.hasAttribute('amp-orig-src');
-    return hasOrigSrcAttr && isProxyOrigin(src);
+    return hasOrigSrcAttr && this.getUrlService_().isProxyOrigin(src);
   }
 
   /**
@@ -372,8 +386,9 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    */
   createSourceElement_(src, type) {
-    assertHttpsUrl(src, this.element);
-    const source = this.element.ownerDocument.createElement('source');
+    const {element} = this;
+    this.getUrlService_().assertHttpsUrl(src, element);
+    const source = element.ownerDocument.createElement('source');
     source.setAttribute('src', src);
     if (type) {
       source.setAttribute('type', type);
@@ -385,8 +400,9 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    */
   hasAnyCachedSources_() {
-    const sources = toArray(childElementsByTag(this.element, 'source'));
-    sources.push(this.element);
+    const {element} = this;
+    const sources = toArray(childElementsByTag(element, 'source'));
+    sources.push(element);
 
     for (let i = 0; i < sources.length; i++) {
       if (this.isCachedByCDN_(sources[i])) {
