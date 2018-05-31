@@ -268,7 +268,11 @@ export class AmpGeo extends AMP.BaseElement {
           break;
       }
 
-      return {ISOCountry: self.country_, ISOCountryGroups: self.matchedGroups_};
+      return {
+        ISOCountry: self.country_,
+        ISOCountryGroups: self.matchedGroups_,
+        AllCountryGroups: Object.keys(config.ISOCountryGroups || {}),
+      };
     });
   }
 }

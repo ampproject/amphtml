@@ -199,6 +199,27 @@ describes.realWin('amp-geo', {
     });
   });
 
+  it('should set return a list of configured group in `geo` service', () => {
+    win.AMP_MODE.geoOverride = 'gb';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('gb');
+      expect(geo.AllCountryGroups)
+          .to.deep.equal(Object.keys(config.ISOCountryGroups));
+      expectBodyHasClass([
+        'amp-iso-country-gb',
+        'amp-geo-no-group',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+        'amp-geo-group-anz',
+      ], false);
+    });
+  });
+
   it('should allow uppercase hash to override geo in test', () => {
     win.AMP_MODE.geoOverride = 'NZ';
     addConfigElement('script');
