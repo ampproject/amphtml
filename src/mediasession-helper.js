@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {Services} from './services';
 import {dev, user} from './log';
 import {isArray, isObject} from './types';
-import {isProtocolValid} from './url';
 import {tryParseJson} from './json';
 
 /**
@@ -41,15 +40,13 @@ export const EMPTY_METADATA = {
 
 /**
  * Updates the Media Session API's metadata
- * @param {!Window} win
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!MetadataDef} metadata
  * @param {function()=} playHandler
  * @param {function()=} pauseHandler
  */
-export function setMediaSession(win,
-  metadata,
-  playHandler,
-  pauseHandler) {
+export function setMediaSession(ampdoc, metadata, playHandler, pauseHandler) {
+  const {win} = ampdoc;
   const {navigator} = win;
   if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two
@@ -57,7 +54,7 @@ export function setMediaSession(win,
     navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
 
     // Add metadata
-    validateMetadata(metadata);
+    validateMetadata(ampdoc, metadata);
     navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
 
     navigator.mediaSession.setActionHandler('play', playHandler);
@@ -135,16 +132,20 @@ export function parseFavicon(doc) {
 }
 
 /**
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!MetadataDef} metadata
  * @private
  */
-function validateMetadata(metadata) {
+function validateMetadata(ampdoc, metadata) {
+  const urlService = Services.urlForDoc(ampdoc);
   // Ensure src of artwork has valid protocol
   if (metadata && metadata.artwork) {
-    dev().assert(isArray(metadata.artwork));
-    metadata.artwork.forEach(artwork => {
-      if (artwork) {
-        const src = isObject(artwork) ? artwork.src : artwork;
-        user().assert(isProtocolValid(src));
+    const {artwork} = metadata;
+    dev().assert(isArray(artwork));
+    artwork.forEach(item => {
+      if (item) {
+        const src = isObject(item) ? item.src : item;
+        user().assert(urlService.isProtocolValid(src));
       }
     });
   }
