@@ -156,7 +156,7 @@ export class ActionInvocation {
    * @param {string} method Name of the action being invoked.
    * @param {?JsonObject} args Named action arguments.
    * @param {?Element} source Element that generated the `event`.
-   * @param {?Element} caller Element that contains the invoked handler.
+   * @param {?Element} caller Element containing the on="..." action handler.
    * @param {?ActionEventDef} event The event that triggered this action.
    * @param {ActionTrust} trust The trust level of this invocation's trigger.
    * @param {?string} tagOrTarget The global target name or the element tagName.
@@ -517,7 +517,6 @@ export class ActionService {
    * @param {!ActionInvocation} invocation
    * @return {?Promise}
    * @private
-   * @visibleForTesting
    */
   invoke_(invocation) {
     const {method, tagOrTarget} = invocation;
@@ -955,7 +954,7 @@ export function dereferenceExprsInArgs(args, event) {
  * @param {!Element} context
  * @param {?T} condition
  * @param {string=} opt_message
- * @return T
+ * @return {T}
  * @template T
  * @private
  */
