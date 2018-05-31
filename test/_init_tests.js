@@ -377,7 +377,10 @@ beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  stubConsoleInfoLogWarn();
+  const {verboseLogging} = window.__karma__.config;
+  if (!verboseLogging) {
+    stubConsoleInfoLogWarn();
+  }
   warnForConsoleError();
   initialGlobalState = Object.keys(global);
   initialWindowState = Object.keys(window);
