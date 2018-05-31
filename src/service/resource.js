@@ -338,7 +338,7 @@ export class Resource {
   }
 
   /**
-   * @param {*} errorOrMessage
+   * @param {*} reason
    * @visibleForTesting
    */
   maybeReportErrorOnBuildFailure(reason) {
