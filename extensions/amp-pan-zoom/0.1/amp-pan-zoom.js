@@ -25,6 +25,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
@@ -64,6 +65,9 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.content_ = null;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
 
     /** @private {number} */
     this.sourceWidth_ = 0;
@@ -117,6 +121,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment ${TAG} disabled`);
+    this.action_ = Services.actionServiceForDoc(this.element);
     const children = this.getRealChildren();
 
     user().assert(children.length == 1, SUPPORT_VALIDATION_MSG);
