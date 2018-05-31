@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -48,9 +48,9 @@ This component is experimental and under active development. For any issues, ple
 
 [TOC]
 
-## Announcements
+## Migrating from 0.1 to 1.0
 
-### (5/2018) **New features for the bookend**
+### **New features for the bookend**
 
 We are adding new capabilities to the amp-stories bookend, enabling richer component support and visual layouts. Some of the new features:
 
@@ -60,7 +60,7 @@ We are adding new capabilities to the amp-stories bookend, enabling richer compo
   * Text box
   * Portrait and landscape cards
 
-To use these new components, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attributes like so:
+To use these new components, include an `<amp-story-bookend>` tag as the last child of your `<amp-story>` with the required attributes like so:
 
 ```html
 <amp-story standalone>
@@ -75,7 +75,7 @@ To use these new components, include an `<amp-story-bookend>` tag as the child o
 
 Learn more about the new components and how to specify them in the JSON configuration in the section below: [amp-story-bookend](#bookend-amp-story-bookend)
 
-### (4/2018) **New metadata requirements**
+### **New metadata requirements**
 
 We're adding four new required attributes and two optional attributes to the `<amp-story>` element:
 
@@ -144,7 +144,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
-        src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <title>Hello, amp-story</title>
     <link rel="canonical" href="http://example.ampproject.org/my-story.html" />
     <meta name="viewport"
@@ -173,6 +173,8 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
           <h1>The End</h1>
         </amp-story-grid-layer>
       </amp-story-page>
+      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
+      </amp-story-bookend>
     </amp-story>
   </body>
 </html>
@@ -188,7 +190,7 @@ The AMP story HTML format follows the [same markup requirements as a valid AMP H
 | RULE | DESCRIPTION |
 | ---- | --- |
 | The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP story. |
-| Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-0.1.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
+| Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-1.0.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
 
 ## Story: `amp-story`
 
