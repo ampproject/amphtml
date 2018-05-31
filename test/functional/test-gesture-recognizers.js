@@ -102,9 +102,12 @@ describe('TapRecognizer', () => {
   it('should emit and end on start', () => {
     recognizer.lastX_ = 101;
     recognizer.lastY_ = 201;
+    const target = new EventTarget();
+    recognizer.target_ = target;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
-          return data.clientX == 101 && data.clientY == 201;
+          return data.clientX == 101 && data.clientY == 201
+            && data.target === target;
         }), null).once();
     gesturesMock.expects('signalEnd_').withExactArgs(recognizer).once();
     recognizer.acceptStart();
