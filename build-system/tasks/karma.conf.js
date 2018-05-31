@@ -208,6 +208,7 @@ module.exports = {
     failOnConsoleError: !process.env.TRAVIS && !process.env.LOCAL_PR_CHECK,
     // TODO(rsimha, #14432): Set to false after all tests are fixed.
     captureConsole: true,
+    verboseLogging: false,
   },
 
   singleRun: true,
