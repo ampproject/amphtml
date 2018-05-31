@@ -264,7 +264,10 @@ export class AmpConsent extends AMP.BaseElement {
         dev().error(TAG,
             `${this.currentDisplayInstance_} no consent ui to hide`);
       }
-      toggle(uiToHide, false);
+      // Cannot use #toggle() because Safari bug with version older than 10.3
+      // element.style['display] = 'none' cannot overwrite style set with
+      // !important.
+      setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
     });
     if (this.dialogResolver_[this.currentDisplayInstance_]) {
       this.dialogResolver_[this.currentDisplayInstance_]();
@@ -615,7 +618,11 @@ export class AmpConsent extends AMP.BaseElement {
           classList.remove('amp-active');
         }
         this.getViewport().removeFromFixedLayer(this.element);
-        toggle(dev().assertElement(this.postPromptUI_), false);
+        // Cannot use #toggle() because Safari bug with version older than 10.3
+        // element.style['display] = 'none' cannot overwrite style set with
+        // !important.
+        setImportantStyles(dev().assertElement(this.postPromptUI_),
+            {display: 'none'});
       });
     });
   }
