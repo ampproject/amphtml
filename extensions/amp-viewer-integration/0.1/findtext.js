@@ -68,25 +68,19 @@ export class TextPos {
 /**
  * TextRange represents a text range.
  * Exported for test only.
+ * @typedef {{start: !TextPos, end: !TextPos}}
  */
-export class TextRange {
-  /**
-   * @param {!TextPos} start
-   * @param {!TextPos} end
-   */
-  constructor(start, end) {
-    this.start = start;
-    this.end = end;
-  }
-}
+export let TextRange;
 
 const skipCharRe = /[,.\s\u2022()]/;
 
 /**
- * @param {string} c input char to normalize.
+ * Canonicalizes a char to emulate the canonicalizion applied in backends
+ * where texts to highlight are generated.
+ * @param {string} c input char to canonicalize.
  * @return {string}
  */
-const normalizeChar = function(c) {
+function canonicalizeChar(c) {
   if (c == '\u2019' || c == '\u2018') {
     return '\'';
   }
@@ -94,23 +88,25 @@ const normalizeChar = function(c) {
     return '"';
   }
   return c.toLowerCase();
-};
+}
 
 /**
- * @param {string} s input string to normalize.
+ * Canonicalizes a string to emulate the canonicalizion applied in backends
+ * where texts to highlight are generated.
+ * @param {string} s input string to canonicalize.
  * @return {string}
  */
-export const normalizeString = function(s) {
+export function canonicalizeString(s) {
   const buf = [];
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
     if (skipCharRe.test(c)) {
       continue;
     }
-    buf.push(normalizeChar(c));
+    buf.push(canonicalizeChar(c));
   }
   return buf.join('');
-};
+}
 
 /**
  * findSentences find sentences from node and returns a list of TextRange.
@@ -118,11 +114,11 @@ export const normalizeString = function(s) {
  * @param {!Array<string>} sentences
  * @return {?Array<!TextRange>}
  */
-export const findSentences = function(node, sentences) {
+export function findSentences(node, sentences) {
   const scanner = new TextScanner(node);
   const matches = [];
   for (let senIdx = 0; senIdx < sentences.length; senIdx++) {
-    const sen = normalizeString(sentences[senIdx]);
+    const sen = canonicalizeString(sentences[senIdx]);
     if (!sen) {
       continue;
     }
@@ -151,7 +147,7 @@ export const findSentences = function(node, sentences) {
       }
       let ok = true;
       for (let j = 0; j < sen.length; j++) {
-        const c = normalizeChar(buf.get(sen.length - j - 1).char);
+        const c = canonicalizeChar(buf.get(sen.length - j - 1).char);
         if (sen[sen.length - 1 - j] == c) {
           continue;
         }
@@ -169,20 +165,22 @@ export const findSentences = function(node, sentences) {
       }
       if (ok) {
         const endPos = buf.get(sen.length - 1);
-        matches.push(new TextRange(
-            buf.get(0), new TextPos(endPos.node, endPos.offset + 1)));
+        matches.push({
+          start: buf.get(0),
+          end: new TextPos(endPos.node, endPos.offset + 1),
+        });
         break;
       }
     }
   }
   return matches.length > 0 ? matches : null;
-};
+}
 
 /**
  * @param {!Array<!TextRange>} ranges
  * @return {!Array<!Element>} A list of marked nodes.
  */
-export const markTextRangeList = function(ranges) {
+export function markTextRangeList(ranges) {
   ranges = concatContinuousRanges(ranges);
   const marked = [];
   for (let i = 0; i < ranges.length; i++) {
@@ -190,13 +188,13 @@ export const markTextRangeList = function(ranges) {
     markTextRange(r.start, r.end, ranges, i, marked);
   }
   return marked;
-};
+}
 
 /**
  * @param {!Array<!TextRange>} ranges
  * @return {!Array<!TextRange>}
  */
-const concatContinuousRanges = function(ranges) {
+function concatContinuousRanges(ranges) {
   const ret = [];
   let prev = null;
   for (let i = 0; i < ranges.length; i++) {
@@ -211,7 +209,7 @@ const concatContinuousRanges = function(ranges) {
     continue;
   }
   return ret;
-};
+}
 
 /**
  * @param {!TextPos} start
@@ -220,7 +218,7 @@ const concatContinuousRanges = function(ranges) {
  * @param {number} idx
  * @param {!Array<!Element>} marked
  */
-const markTextRange = function(start, end, ranges, idx, marked) {
+function markTextRange(start, end, ranges, idx, marked) {
   while (true) {
     if (start.node == end.node) {
       const newText = markSingleTextNode(
@@ -253,7 +251,7 @@ const markTextRange = function(start, end, ranges, idx, marked) {
     }
     start = new TextPos(next, 0);
   }
-};
+}
 
 /**
  * Wraps a text range [start, end) in a single text node.
@@ -264,7 +262,7 @@ const markTextRange = function(start, end, ranges, idx, marked) {
  * @return {?Text}
  * @param {!Array<!Element>} marked
  */
-const markSingleTextNode = function(node, start, end, marked) {
+function markSingleTextNode(node, start, end, marked) {
   if (start >= end) {
     // Do nothing
     return null;
@@ -287,8 +285,7 @@ const markSingleTextNode = function(node, start, end, marked) {
   }
   parent.removeChild(node);
   return endText;
-};
-
+}
 
 /**
  * nextTextNode finds the next sibling text node or
@@ -296,7 +293,7 @@ const markSingleTextNode = function(node, start, end, marked) {
  * @param {!Text} textNode The node to start to find the next text node.
  * @return {?Text}
  */
-const nextTextNode = function(textNode) {
+function nextTextNode(textNode) {
   // If leaving is true, find the next node from siblings or the parent.
   // If leaving is false, find the next node from childrens.
   let leaving = true;
@@ -328,8 +325,7 @@ const nextTextNode = function(textNode) {
       node = node.firstChild;
     }
   }
-};
-
+}
 
 /**
  * A special TextPos object to represent a whitespace injected
@@ -385,11 +381,14 @@ export class TextScannerInternal {
     if (node instanceof Text) {
       this.textIdx_ = 0;
     } else if (node instanceof Element) {
-      const style = computedStyle(window, node);
-      if (style.display == 'none') {
+      // Accessing display of computed styles does not force layout/reflow
+      // unless media queries that require relayout are used.
+      // https://jsfiddle.net/7c7rq2ot/
+      const display = computedStyle(window, node).display;
+      if (display == 'none') {
         return;
       }
-      if (this.needSpace_ && style.display != 'inline') {
+      if (this.needSpace_ && display != 'inline') {
         this.putDomDelim_ = true;
       }
       const child = node.firstChild;

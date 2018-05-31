@@ -17,11 +17,10 @@
 import {
   CircularBuffer,
   TextPos,
-  TextRange,
   TextScanner,
   findSentences,
   markTextRangeList,
-  normalizeString,
+  canonicalizeString,
 } from '../findtext';
 
 describe('CircularBuffer', () => {
@@ -38,14 +37,14 @@ describe('CircularBuffer', () => {
   });
 });
 
-describe('normalizeString', () => {
+describe('canonicalizeString', () => {
   it('test examples', () => {
-    expect(normalizeString('a b  c')).to.equal('abc');
-    expect(normalizeString('abc.d')).to.equal('abcd');
-    expect(normalizeString('a\u2019b')).to.equal('a\'b');
-    expect(normalizeString('\u201chello\u201d')).to.equal('\"hello\"');
-    expect(normalizeString('\u2022 hello')).to.equal('hello');
-    expect(normalizeString('a,b.c')).to.equal('abc');
+    expect(canonicalizeString('a b  c')).to.equal('abc');
+    expect(canonicalizeString('abc.d')).to.equal('abcd');
+    expect(canonicalizeString('a\u2019b')).to.equal('a\'b');
+    expect(canonicalizeString('\u201chello\u201d')).to.equal('\"hello\"');
+    expect(canonicalizeString('\u2022 hello')).to.equal('hello');
+    expect(canonicalizeString('a,b.c')).to.equal('abc');
   });
 });
 
@@ -216,8 +215,8 @@ describe('markTextRangeList', () => {
     const text = document.createTextNode('0123456789');
     root.appendChild(text);
     markTextRangeList([
-      new TextRange(new TextPos(text, 1), new TextPos(text, 3)),
-      new TextRange(new TextPos(text, 5), new TextPos(text, 7)),
+      {start: new TextPos(text, 1), end: new TextPos(text, 3)},
+      {start: new TextPos(text, 5), end: new TextPos(text, 7)},
     ]);
     expect(root.innerHTML).to.equal('0<span>12</span>34<span>56</span>789');
   });
@@ -228,7 +227,7 @@ describe('markTextRangeList', () => {
     const b = root.querySelector('b');
     const i = root.querySelector('i');
     markTextRangeList([
-      new TextRange(new TextPos(b.firstChild, 1), new TextPos(i.firstChild, 1)),
+      {start: new TextPos(b.firstChild, 1), end: new TextPos(i.firstChild, 1)},
     ]);
     expect(root.innerHTML).to.equal(
         '<b>a<span>bc</span></b><div><span>def</span></div>' +
@@ -240,8 +239,8 @@ describe('markTextRangeList', () => {
     const text = document.createTextNode('0123456789');
     root.appendChild(text);
     markTextRangeList([
-      new TextRange(new TextPos(text, 1), new TextPos(text, 3)),
-      new TextRange(new TextPos(text, 3), new TextPos(text, 5)),
+      {start: new TextPos(text, 1), end: new TextPos(text, 3)},
+      {start: new TextPos(text, 3), end: new TextPos(text, 5)},
     ]);
     expect(root.innerHTML).to.equal('0<span>1234</span>56789');
   });

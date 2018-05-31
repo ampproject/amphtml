@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {Messaging} from './messaging/messaging';
 import {Services} from '../../../src/services';
 import {findSentences, markTextRangeList} from './findtext';
+import {listenOnce} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
+import {resetStyles} from '../../../src/style';
 
 /**
  * The message name sent by viewers to dismiss highlights.
@@ -50,7 +51,7 @@ const NUM_ALL_CHARS_LIMIT = 1500;
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {?JsonObject}
  */
-export const getHighlightParam = function(ampdoc) {
+export function getHighlightParam(ampdoc) {
   const param = parseQueryString(ampdoc.win.location.hash)['highlight'];
   if (!param || param.length > HIGHLIGHT_PARAM_LENGTH_LIMIT) {
     return null;
@@ -76,7 +77,7 @@ export const getHighlightParam = function(ampdoc) {
     }
   }
   return highlight;
-};
+}
 
 /**
  * HighlightHandler reads highlight parameter from URL and
@@ -91,7 +92,7 @@ export class HighlightHandler {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {?Array<Element>} */
+    /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
 
     this.initHighlight_(highlightInfo);
@@ -103,9 +104,7 @@ export class HighlightHandler {
     */
   initHighlight_(highlightInfo) {
     const ampdoc = this.ampdoc_;
-    const win = ampdoc.win;
-
-    const sens = findSentences(win.document.body, highlightInfo['s']);
+    const sens = findSentences(ampdoc.getBody(), highlightInfo['s']);
     if (!sens) {
       return;
     }
@@ -136,13 +135,11 @@ export class HighlightHandler {
       });
     }
 
-    // TODO(yunabe): Unregister this handler when the highlight is dismissed.
-    win.document.body.addEventListener(
-        'click', this.dismissHighlight_.bind(this));
+    listenOnce(ampdoc.getBody(), 'click', this.dismissHighlight_.bind(this));
   }
 
   /**
-   * @param {!Messaging} messaging
+   * @param {!./messaging/messaging.Messaging} messaging
    */
   setupMessaging(messaging) {
     messaging.registerHandler(
@@ -157,9 +154,7 @@ export class HighlightHandler {
       return;
     }
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
-      const n = this.highlightedNodes_[i];
-      n['style']['backgroundColor'] = '';
-      n['style']['color'] = '';
+      resetStyles(this.highlightedNodes_[i], ['backgroundColor', 'color']);
     }
   }
 
