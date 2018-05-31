@@ -36,7 +36,7 @@ import {
   getEnclosingContainerTypes,
   getIdentityToken,
   googleAdUrl,
-  isCanonical,
+  isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
@@ -418,7 +418,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isXhrAllowed() {
-    return !isCanonical(this.win);
+    return isCdnProxy(this.win);
   }
 
   /** @override */

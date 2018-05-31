@@ -121,6 +121,9 @@ export class AmpAdXOriginIframeHandler {
         this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
 
+    // TODO(bradfrizzell): Would be better to turn this on if
+    // A4A.isXhrEnabled() is false, or if we simply decide it is
+    // ok to turn this on for all traffic.
     if (getExperimentBranch(
         this.win_, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ==
        ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||

@@ -918,17 +918,3 @@ export function getAmpRuntimeTypeParameter(win) {
   const art = getBinaryTypeNumericalCode(getBinaryType(win));
   return isCdnProxy(win) && art != '0' ? art : null;
 }
-
-/**
- * Returns boolean whether the page is canonical AMP, based on the url
- * of the page. If we are testing locally, always returns that we are
- * not on canonical.
- * @param {!Window} win
- * @return {boolean}
- */
-export function isCanonical(win) {
-  const googleCdnProxyRegex =
-  /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-  return !(googleCdnProxyRegex.test(win.location.origin)
-           || getMode(win).localDev || getMode(win).test);
-}

@@ -31,7 +31,7 @@ import {
   getExperimentBranch,
 } from '../../../src/experiments';
 import {
-  isCanonical,
+  isCdnProxy,
   isGoogleAdsA4AValidEnvironment,
 } from '../../../ads/google/a4a/utils';
 import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-utils';
@@ -48,6 +48,7 @@ export const URL_EXPERIMENT_MAPPING = {
   '0': null,
 };
 
+/** @const @type {!Object<string, string>} */
 export const ADSENSE_EXPERIMENTS = {
   UNCONDITIONED_CANONICAL_EXP: '21062154',
   UNCONDITIONED_CANONICAL_CTL: '21062155',
@@ -55,6 +56,7 @@ export const ADSENSE_EXPERIMENTS = {
   CANONICAL_CTL: '21062159',
 };
 
+/** @const @type {!Object<string, string>} */
 export const ADSENSE_EXP_NAMES = {
   UNCONDITIONED_CANONICAL: 'expAdsenseUnconditionedCanonical',
   CANONICAL: 'expAdsenseCanonical',
@@ -87,7 +89,7 @@ function selectExperiments(win, element) {
   // select into the undiluted canonical experiment.
   const inUnconditionedCanonicalExp = !!getExperimentBranch(
       win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL);
-  if (!inUnconditionedCanonicalExp && isCanonical(win)) {
+  if (!inUnconditionedCanonicalExp && !isCdnProxy(win)) {
     selectAndSetExperiments(win, element,
         [ADSENSE_EXPERIMENTS.CANONICAL_EXP,
           ADSENSE_EXPERIMENTS.CANONICAL_CTL],
