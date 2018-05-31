@@ -22,7 +22,7 @@ import {dict} from '../../../src/utils/object';
 import {isProtocolValid, isProxyOrigin} from '../../../src/url';
 import {openWindowDialog, removeElement} from '../../../src/dom';
 import {parseUrlDeprecated} from '../../../src/url';
-
+// JUST TESTING TRAVIS BUILD
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;
 
