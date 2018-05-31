@@ -284,10 +284,13 @@ export class AmpGeo extends AMP.BaseElement {
         ISOCountry: self.country_,
         matchedISOCountryGroups: self.matchedGroups_,
         allISOCountryGroups: Object.keys(config.ISOCountryGroups || {}),
+        /* API */
         isInCountryGroup: this.isInCountryGroup.bind(this),
         /**
          * Temp still return old interface to avoid version skew
          * with consuming extensions.  This will go away don't use it!
+         * replace with matchedISOCountryGroups or use the isInCountryGroup
+         * API
          */
         ISOCountryGroups: self.matchedGroups_,
       };
