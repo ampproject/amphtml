@@ -158,8 +158,8 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
-    'local-changes':
-        'Running unit tests from files commited to the local branch.',
+    'local-changes': 'Running unit tests affected by the files changed in the' +
+        ' local branch.',
   };
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
@@ -565,6 +565,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
-    'local-changes': '  Run unit tests from files changed in the local branch',
+    'local-changes': '  Run unit tests affected by the files changed in the ' +
+        'local branch',
   },
 });
