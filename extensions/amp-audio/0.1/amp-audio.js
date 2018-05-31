@@ -201,11 +201,7 @@ export class AmpAudio extends AMP.BaseElement {
 
     // Update the media session
     setMediaSession(
-        this.getAmpDoc().win,
-        this.metadata_,
-        playHandler,
-        pauseHandler
-    );
+        this.getAmpDoc(), this.metadata_, playHandler, pauseHandler);
   }
 }
 
