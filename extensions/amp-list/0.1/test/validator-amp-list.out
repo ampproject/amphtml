@@ -57,7 +57,7 @@ amp-list/0.1/test/validator-amp-list.html:43:2 The attribute '[state]' in tag 'a
 |    <!-- Invalid: width is mistyped. -->
 |    <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL"
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:55:2 The attribute 'wdith' may not appear in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:55:2 The attribute 'wdith' may not appear in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |              wdith=10 height=10>
 |      <div></div>
 |    </amp-list>

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 
@@ -75,8 +76,13 @@ export function incrementLoadingAds(win, opt_loadingPromise) {
     win[LOADING_ADS_WIN_ID_] = 0;
   }
   win[LOADING_ADS_WIN_ID_]++;
-  throttlePromise_ = throttlePromise_ ||
-      new Promise(resolver => throttlePromiseResolver_ = resolver);
+
+  if (!throttlePromise_) {
+    const deferred = new Deferred();
+    throttlePromise_ = deferred.promise;
+    throttlePromiseResolver_ = deferred.resolve;
+  }
+
   Services.timerFor(win)
       .timeoutPromise(1000, opt_loadingPromise)
       .catch(() => {})

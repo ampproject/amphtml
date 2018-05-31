@@ -25,7 +25,7 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {getService} from '../../../src/service';
-import {getSourceOrigin, isProxyOrigin, parseUrl} from '../../../src/url';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -72,7 +72,7 @@ export class AmpNextPage extends AMP.BaseElement {
     });
 
     const docInfo = Services.documentInfoForDoc(this.element);
-    const url = parseUrl(docInfo.url);
+    const url = parseUrlDeprecated(docInfo.url);
     const sourceOrigin = getSourceOrigin(url);
     const config = assertConfig(configJson, url.origin, sourceOrigin);
 
@@ -86,11 +86,9 @@ export class AmpNextPage extends AMP.BaseElement {
     user().assert(separatorElements.length <= 1,
         `${TAG} should contain at most one <div separator> child`);
 
-    let separator;
+    let separator = null;
     if (separatorElements.length === 1) {
       separator = separatorElements[0];
-    } else {
-      separator = this.win.document.createElement('div');
     }
 
     this.service_.register(this.element, config, separator);

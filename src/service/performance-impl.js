@@ -322,7 +322,8 @@ export class Performance {
       this.mark(label);
     }
 
-    // Store certain page visibility metrics to be exposed as analytics variables.
+    // Store certain page visibility metrics to be exposed as analytics
+    // variables.
     const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
 				 : value - this.initTime_);
     switch (label) {
@@ -453,9 +454,9 @@ export class Performance {
   }
 
   /**
-   * Identifies if the viewer is able to track performance.
-   * If the document is not embedded, there is no messaging channel,
-   * so no performance tracking is needed since there is nobody to forward the events.
+   * Identifies if the viewer is able to track performance. If the document is
+   * not embedded, there is no messaging channel, so no performance tracking is
+   * needed since there is nobody to forward the events.
    * @return {boolean}
    */
   isPerformanceTrackingOn() {

@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
-import {
-  Layout,
-  assertLength,
-  getLengthNumeral,
-  getLengthUnits,
-  parseLength,
-} from '../../../src/layout';
+import {ActionTrust} from '../../../src/action-constants';
 import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
@@ -31,6 +24,12 @@ import {
   layoutRectsRelativePos,
 } from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
+import {
+  assertLength,
+  getLengthNumeral,
+  getLengthUnits,
+  parseLength,
+} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {getServiceForDoc} from '../../../src/service';
@@ -94,11 +93,6 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     /** @private {number} */
     this.scrollProgress_ = 0;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
@@ -181,7 +175,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     // Adjust viewport based on exclusion margins
     const adjViewportRect = this.applyMargins_(entry.viewportRect);
-    const positionRect = entry.positionRect;
+    const {positionRect} = entry;
 
     // Relative position of the element to the adjusted viewport.
     let relPos;
@@ -275,8 +269,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   parseAttributes_() {
-    // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>"
-    // e.g, "0.5 1": use 50% visibility at top and 100% at the bottom of viewport.
+    // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>" e.g,
+    // "0.5 1": use 50% visibility at top and 100% at the bottom of viewport.
     const ratios = this.element.getAttribute('intersection-ratios');
     if (ratios) {
       const topBottom = ratios.trim().split(' ');
@@ -287,8 +281,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       }
     }
 
-    // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}> <bottom:{px,vh}>"
-    // e.g, "100px 10vh": exclude 100px from top and 10vh from bottom of viewport.
+    // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}>
+    // <bottom:{px,vh}>" e.g, "100px 10vh": exclude 100px from top and 10vh from
+    // bottom of viewport.
     const margins = this.element.getAttribute('viewport-margins');
     if (margins) {
       const topBottom = margins.trim().split(' ');

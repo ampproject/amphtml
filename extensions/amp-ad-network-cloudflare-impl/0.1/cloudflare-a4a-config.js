@@ -19,7 +19,7 @@
  * @param {!Window} win
  * @param {!Element} element
  * @param {boolean} useRemoteHtml
- * @returns {boolean}
+ * @return {boolean}
  */
 export function cloudflareIsA4AEnabled(win, element, useRemoteHtml) {
   // We assume fast fetch for all content, but this will gracefully degrade,

@@ -27,7 +27,7 @@ import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {isProtocolValid} from '../../../src/url';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {relatedArticlesFromJson} from './related-articles';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
@@ -308,6 +308,10 @@ export class Bookend {
       this.onBookendStateUpdate_(isActive);
     });
 
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
+      this.onCanShowSharingUisUpdate_(show);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
@@ -338,6 +342,19 @@ export class Bookend {
    */
   onBookendStateUpdate_(isActive) {
     this.toggle_(isActive);
+  }
+
+  /**
+   * Reacts to updates to whether sharing UIs may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowSharingUis
+   * @private
+   */
+  onCanShowSharingUisUpdate_(canShowSharingUis) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+    });
   }
 
   /**
@@ -548,7 +565,7 @@ export class Bookend {
             this.win_.document.head.querySelector('title'),
             'Please set <title> or structured data (JSON-LD).').textContent,
 
-      domainName: parseUrl(
+      domainName: parseUrlDeprecated(
           Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,
     };
 

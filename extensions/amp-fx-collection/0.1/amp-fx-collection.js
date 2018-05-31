@@ -33,13 +33,18 @@ const FxType = {
   PARALLAX: 'parallax',
   FADE_IN: 'fade-in',
   FADE_IN_SCROLL: 'fade-in-scroll',
+  FLY_IN_BOTTOM: 'fly-in-bottom',
+  FLY_IN_LEFT: 'fly-in-left',
+  FLY_IN_RIGHT: 'fly-in-right',
+  FLY_IN_TOP: 'fly-in-top',
 };
 
 /**
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
  * the specified effects on them.
+ * @visibleForTesting
  */
-class AmpFxCollection {
+export class AmpFxCollection {
 
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -116,7 +121,7 @@ class AmpFxCollection {
    * e.g. `amp-fx="parallax fade-in"
    *
    * @param {!Element} fxElement
-   * @returns {!Array<!FxType>}
+   * @return {!Array<!FxType>}
    */
   getFxTypes_(fxElement) {
     dev().assert(fxElement.hasAttribute('amp-fx'));

@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 |  
@@ -26,11 +26,14 @@ PASS
 |      the test harnesses with various lenghts of valid CSS stylesheets. We use
 |      this test to verify the max_byte_length rules for CSS author stylesheets.
 |    -->
-|    <style amp-custom>.replaceme {}</style>
+|    <style amp-custom>.replace_amp_custom {}</style>
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
 |  Hello, world.
+|  <div style="replace_inline_style"></div>
+>> ^~~~~~~~~
+feature_tests/css_length.html:34:0 The inline 'style' attribute is not allowed in AMP documents. Use 'style amp-custom' tag instead. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]
 |  </body>
 |  </html>

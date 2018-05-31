@@ -174,7 +174,7 @@ describes.realWin('amp-instagram', {
 
       expect(changeHeight).to.be.calledOnce;
       // Height minus padding
-      expect(changeHeight.firstCall.args[0]).to.equal(newHeight - 64);
+      expect(changeHeight.firstCall.args[0]).to.equal(newHeight);
     });
   });
 

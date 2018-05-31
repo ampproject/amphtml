@@ -37,10 +37,7 @@ import {
 import {cssText} from '../build/css';
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
-import {
-  installDocService,
-  installShadowDocForShell,
-} from './service/ampdoc-impl';
+import {installDocService} from './service/ampdoc-impl';
 import {installPerformanceService} from './service/performance-impl';
 import {isExperimentOn} from './experiments';
 import {stubElementsForDoc} from './service/custom-element-registry';
@@ -63,7 +60,7 @@ if (isExperimentOn(self, 'ampdoc-shell')) {
   //Shadow mode with an Ampdoc for the shell
   installPerformanceService(self);
   const ampdocService = Services.ampdocServiceFor(self);
-  const ampdocShell = installShadowDocForShell(ampdocService);
+  const ampdocShell = ampdocService.installShellShadowDoc();
   installStylesForDoc(ampdocShell, cssText, () => {
     installAmpdocServices(ampdocShell);
 

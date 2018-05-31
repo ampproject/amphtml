@@ -60,7 +60,8 @@ export class PostMessageDispatcher {
   }
 
   /**
-   * Handles messages posted from amp-addthis iframes, ensuring the correct origin, etc.
+   * Handles messages posted from amp-addthis iframes, ensuring the correct
+   * origin, etc.
    */
   handleAddThisMessage(event) {
     if (event.origin !== ORIGIN || !getData(event)) {

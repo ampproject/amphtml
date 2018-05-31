@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
-import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
@@ -40,9 +39,6 @@ const TAG = 'amp-subscriptions';
 
 /** @const */
 const SERVICE_TIMEOUT = 3000;
-
-/** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !JsonObject, metered: boolean}} */
-export let RenderState;
 
 export class SubscriptionService {
   /**
@@ -99,9 +95,6 @@ export class SubscriptionService {
 
     /** @private @const {boolean} */
     this.doesViewerProvideAuth_ = this.viewer_.hasCapability('auth');
-
-    /** @private @const {!JwtHelper} */
-    this.jwtHelper_ = new JwtHelper(ampdoc.win);
   }
 
   /**
@@ -144,7 +137,7 @@ export class SubscriptionService {
 
   /**
    * @private
-   * @returns {!Promise<!JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   getPlatformConfig_() {
     return new Promise((resolve, reject) => {
@@ -156,7 +149,8 @@ export class SubscriptionService {
   }
 
   /**
-   * This method registers an auto initialized subcription platform with this service.
+   * This method registers an auto initialized subcription platform with this
+   * service.
    *
    * @param {string} serviceId
    * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
@@ -206,11 +200,6 @@ export class SubscriptionService {
    * @private
    */
   resolveEntitlementsToStore_(serviceId, entitlement) {
-    const productId = /** @type {string} */ (dev().assert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-    ));
-    entitlement.setCurrentProduct(productId);
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
     this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
@@ -249,7 +238,7 @@ export class SubscriptionService {
 
   /**
    * Starts the amp-subscription Service
-   * @returns {SubscriptionService}
+   * @return {SubscriptionService}
    */
   start() {
     this.initialize_().then(() => {
@@ -261,6 +250,11 @@ export class SubscriptionService {
       if (this.doesViewerProvideAuth_) {
         this.delegateAuthToViewer_();
         this.startAuthorizationFlow_(false);
+        return;
+      } else if (this.platformConfig_['alwaysGrant']) {
+        // If service config has `alwaysGrant` key as true, publisher wants it
+        // to be open always until a sviewer decides otherwise.
+        this.processGrantState_(true);
         return;
       }
 
@@ -276,7 +270,7 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.platformStore_.getAllRegisteredPlatforms().forEach(
+      this.platformStore_.getAvailablePlatforms().forEach(
           subscriptionPlatform => {
             this.fetchEntitlements_(subscriptionPlatform);
           }
@@ -306,12 +300,8 @@ export class SubscriptionService {
   delegateAuthToViewer_() {
     const serviceIds = ['local'];
     const origin = getWinOrigin(this.ampdoc_.win);
-    const currentProductId = /** @type {string} */ (user().assert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-    ));
-
     this.initializePlatformStore_(serviceIds);
+
     this.platformConfig_['services'].forEach(service => {
       if ((service['serviceId'] || 'local') == 'local') {
         const viewerPlatform = new ViewerSubscriptionPlatform(
@@ -322,19 +312,19 @@ export class SubscriptionService {
             this.subscriptionAnalytics_
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);
-        viewerPlatform.getEntitlements()
-            .then(entitlement => {
-              entitlement.setCurrentProduct(currentProductId);
-              // Viewer authorization is redirected to use local platform instead.
-              this.platformStore_.resolveEntitlement('local', entitlement);
-            });
+        viewerPlatform.getEntitlements().then(entitlement => {
+          dev().assert(entitlement, 'Entitlement is null');
+          // Viewer authorization is redirected to use local platform instead.
+          this.platformStore_.resolveEntitlement('local',
+              /** @type {!./entitlement.Entitlement}*/ (entitlement));
+        });
       }
     });
   }
 
   /**
    * Returns the singleton Dialog instance
-   * @returns {!Dialog}
+   * @return {!Dialog}
    */
   getDialog() {
     return this.dialog_;
@@ -364,20 +354,11 @@ export class SubscriptionService {
     ]);
 
     return requireValuesPromise.then(resolvedValues => {
-      const grantState = resolvedValues[0];
       const selectedPlatform = resolvedValues[1];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
           selectedPlatform.getServiceId());
-      /** @type {!RenderState} */
-      const renderState = {
-        entitlement: selectedEntitlement.json(),
-        loggedIn: selectedEntitlement.loggedIn,
-        subscribed: !!selectedEntitlement.subscriptionToken,
-        granted: grantState,
-        metered: !!selectedEntitlement.metering,
-      };
 
-      selectedPlatform.activate(renderState);
+      selectedPlatform.activate(selectedEntitlement);
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId()
@@ -407,7 +388,7 @@ export class SubscriptionService {
 
   /**
    * Returns Page config
-   * @returns {!PageConfig}
+   * @return {!PageConfig}
    */
   getPageConfig() {
     const pageConfig = dev().assert(this.pageConfig_,
@@ -432,22 +413,56 @@ export class SubscriptionService {
   }
 
   /**
-   * Delegates an action to local platform
+   * Delegates an action to local platform.
    * @param {string} action
    * @return {!Promise<boolean>}
    */
   delegateActionToLocal(action) {
-    const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
-      dev().assert(this.platformStore_.getLocalPlatform(),
-          'Local platform is not registered'));
-    // TODO: add which service is passing this event
-    this.subscriptionAnalytics_.event(
-        SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-        {
-          action,
-        }
-    );
-    return localPlatform.executeAction(action);
+    return this.delegateActionToService(action, 'local');
+  }
+
+  /**
+   * Delegates an action to specified platform.
+   * @param {string} action
+   * @param {string} serviceId
+   * @return {!Promise<boolean>}
+   */
+  delegateActionToService(action, serviceId) {
+    return new Promise(resolve => {
+      this.platformStore_.onPlatformResolves(serviceId, platform => {
+        dev().assert(platform, 'Platform is not registered');
+        this.subscriptionAnalytics_.event(
+            SubscriptionAnalyticsEvents.ACTION_DELEGATED,
+            {
+              action,
+              serviceId,
+            }
+        );
+        resolve(platform.executeAction(action));
+      });
+    });
+  }
+
+  /**
+   * Delegate UI decoration to another service.
+   * @param {!Element} element
+   * @param {string} serviceId
+   * @param {string} action
+   * @param {?JsonObject} options
+   */
+  decorateServiceAction(element, serviceId, action, options) {
+    this.platformStore_.onPlatformResolves(serviceId, platform => {
+      dev().assert(platform, 'Platform is not registered');
+      platform.decorateUI(element, action, options);
+    });
+  }
+
+  /**
+   * Evaluates platforms and select the one to be selected for login.
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   */
+  selectPlatformForLogin() {
+    return this.platformStore_.selectPlatformForLogin();
   }
 }
 

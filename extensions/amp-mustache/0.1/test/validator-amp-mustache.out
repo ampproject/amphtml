@@ -244,7 +244,7 @@ amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' requi
 |  <!-- Inside a template, attribute value restrictions are relaxed. -->
 |  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{invalid}}">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:112:0 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value '{{invalid}}'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:112:0 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value '{{invalid}}'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
 >> ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:112:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <template type="amp-mustache">

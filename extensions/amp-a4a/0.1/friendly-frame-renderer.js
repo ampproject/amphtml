@@ -54,9 +54,8 @@ export class FriendlyFrameRenderer extends Renderer {
 
     creativeData = /** @type {CreativeData} */ (creativeData);
 
-    const size = context.size;
-    const adUrl = context.requestUrl;
-    const creativeMetaData = creativeData.creativeMetaData;
+    const {size, requestUrl: adUrl} = context;
+    const {creativeMetaData} = creativeData;
 
     dev().assert(size, 'missing creative size');
     dev().assert(adUrl, 'missing ad request url');
@@ -76,7 +75,7 @@ export class FriendlyFrameRenderer extends Renderer {
             'allowtransparency': '',
             'scrolling': 'no',
           })));
-    context.applyFillContent(this.iframe_);
+    // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
 
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {

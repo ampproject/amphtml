@@ -282,7 +282,7 @@ export class VariableSource {
       return this.variableWhitelist_;
     }
 
-    const head = this.ampdoc.getRootNode().head;
+    const {head} = this.ampdoc.getRootNode();
     if (!head) {
       return null;
     }
@@ -302,17 +302,5 @@ export class VariableSource {
     this.variableWhitelist_ = meta.getAttribute('content').split(',')
         .map(variable => variable.trim());
     return this.variableWhitelist_;
-  }
-
-  /**
-   * Returns `true` if a variable whitelist is *not* present or the present
-   * whitelist contains the given variable name.
-   * @param {string} varName
-   * @return {boolean}
-   * @private
-   */
-  isWhitelisted_(varName) {
-    return !this.getUrlMacroWhitelist_() ||
-      this.getUrlMacroWhitelist_().includes(varName);
   }
 }

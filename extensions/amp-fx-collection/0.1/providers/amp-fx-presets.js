@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {computedStyle} from '../../../../src/style';
 import {dev, user} from '../../../../src/log';
 import {isExperimentOn} from '../../../../src/experiments';
 import {setStyles} from '../../../../src/style';
@@ -34,10 +35,10 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // outside viewport
-      if (!top || top > fxElement.adjustedViewportHeight_) {
+      if (!top || top > fxElement.adjustedViewportHeight) {
         return;
       }
 
@@ -47,7 +48,7 @@ export const Presets = {
       const adjustedFactor = -(parseFloat(fxElement.getFactor()) - 1);
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
-      const offset = (fxElement.adjustedViewportHeight_ - top) * adjustedFactor;
+      const offset = (fxElement.adjustedViewportHeight - top) * adjustedFactor;
       fxElement.setOffset(offset);
 
       if (fxElement.isMutateScheduled()) {
@@ -66,27 +67,252 @@ export const Presets = {
           });
     },
   },
-  'fade-in': {
+  'fly-in-bottom': {
     isFxTypeSupported(win) {
-      user().assert(isExperimentOn(win, 'amp-fx-fade-in'),
-          'amp-fx-fade-in experiment is not turned on.');
+      return isExperimentOn(win, 'amp-fx-fly-in');
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart < 100,
+      user().assert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
+      const top = entry.positionRect ? entry.positionRect.top : null;
+      // Outside viewport
+      if (!top || top - (fxElement.adjustedViewportHeight *
+        fxElement.getFlyInDistance() / 100) >
+          (1 - fxElement.getMarginStart()) *
+            fxElement.adjustedViewportHeight) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // only do this on the first element
+      if (!fxElement.initialTrigger) {
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'top': `calc(${style.top} + ${fxElement.getFlyInDistance()}vh)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'transform': `translateY(-${fxElement.getFlyInDistance()}vh)`,
+            });
+          });
+    },
+  },
+  'fly-in-left': {
+    isFxTypeSupported(win) {
+      return isExperimentOn(win, 'amp-fx-fly-in');
+    },
+    userAsserts(element) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
+        return;
+      }
+      user().assert(marginStart >= 0 && marginStart <= 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight_) {
+        fxElement.adjustedViewportHeight) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // only do this on the first element
+      if (!fxElement.initialTrigger) {
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'left':
+                  `calc(${style.left} - ${fxElement.getFlyInDistance()}vw)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'transform': `translateX(${fxElement.getFlyInDistance()}vw)`,
+            });
+          });
+    },
+  },
+  'fly-in-right': {
+    isFxTypeSupported(win) {
+      return isExperimentOn(win, 'amp-fx-fly-in');
+    },
+    userAsserts(element) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
+        return;
+      }
+      user().assert(marginStart >= 0 && marginStart <= 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight);
+      const top = entry.positionRect ? entry.positionRect.top : null;
+      // Outside viewport
+      if (!top || top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // only do this on the first element
+      if (!fxElement.initialTrigger) {
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'left':
+                  `calc(${style.left} + ${fxElement.getFlyInDistance()}vw)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'transform': `translateX(-${fxElement.getFlyInDistance()}vw)`,
+            });
+          });
+    },
+  },
+  'fly-in-top': {
+    isFxTypeSupported(win) {
+      return isExperimentOn(win, 'amp-fx-fly-in');
+    },
+    userAsserts(element) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
+        return;
+      }
+      user().assert(marginStart >= 0 && marginStart <= 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight);
+      const top = entry.positionRect ? entry.positionRect.top : null;
+      // Outside viewport
+      if (!top || top + (fxElement.adjustedViewportHeight *
+        fxElement.getFlyInDistance() / 100) >
+          (1 - fxElement.getMarginStart()) *
+            fxElement.adjustedViewportHeight) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // only do this on the first element
+      if (!fxElement.initialTrigger) {
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'top': `calc(${style.top} - ${fxElement.getFlyInDistance()}vh)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'transform': `translateY(${fxElement.getFlyInDistance()}vh)`,
+            });
+          });
+    },
+  },
+  'fade-in': {
+    isFxTypeSupported(unusedWin) {
+      return true;
+    },
+    userAsserts(element) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
+        return;
+      }
+      user().assert(marginStart >= 0 && marginStart <= 100,
+          'data-margin-start must be a percentage value ' +
+          'and be between 0% and 100% for: %s', element);
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight);
+      const top = entry.positionRect ? entry.positionRect.top : null;
+      // Outside viewport
+      if (!top || top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight) {
         return;
       }
 
@@ -96,21 +322,21 @@ export const Presets = {
 
       // If above the threshold of trigger-position
       fxElement.setIsMutateScheduled(true);
-      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
-        fxElement.setIsMutateScheduled(false);
-        // Translate the element offset pixels.
-        setStyles(fxElement.getElement(), {
-          'transition-duration': fxElement.getDuration(),
-          'transition-timing-function': fxElement.getEasing(),
-          'opacity': 1,
-        });
-      });
+      fxElement.getResources().mutateElement(
+          fxElement.getElement(), function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {
+              'transition-duration': fxElement.getDuration(),
+              'transition-timing-function': fxElement.getEasing(),
+              'opacity': 1,
+            });
+          });
     },
   },
   'fade-in-scroll': {
-    isFxTypeSupported(win) {
-      user().assert(isExperimentOn(win, 'amp-fx-fade-in-scroll'),
-          'amp-fx-fade-in-scroll experiment is not turned on.');
+    isFxTypeSupported(unusedWin) {
+      return true;
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
@@ -119,11 +345,11 @@ export const Presets = {
       if (!marginStart && !marginEnd) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart < 100,
+      user().assert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
-      user().assert(marginEnd >= 0 && marginEnd < 100,
-          'data-margin-start must be a percentage value ' +
+      user().assert(marginEnd >= 0 && marginEnd <= 100,
+          'data-margin-end must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
 
       user().assert(marginEnd > marginStart,
@@ -132,11 +358,11 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport or margins
       if (!top || (top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight_)) {
+        fxElement.adjustedViewportHeight)) {
         return;
       }
 
@@ -144,7 +370,8 @@ export const Presets = {
         return;
       }
 
-      // Early exit if the animation doesn't need to repeat and it is fully opaque.
+      // Early exit if the animation doesn't need to repeat and it is fully
+      // opaque.
       if (!fxElement.hasRepeat() && fxElement.getOffset() >= 1) {
         return;
       }
@@ -152,9 +379,9 @@ export const Presets = {
       const marginDelta = fxElement.getMarginEnd() - fxElement.getMarginStart();
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
-      const offset = 1 * (fxElement.adjustedViewportHeight_ - top -
-        (fxElement.getMarginStart() * fxElement.adjustedViewportHeight_)) /
-        (marginDelta * fxElement.adjustedViewportHeight_);
+      const offset = 1 * (fxElement.adjustedViewportHeight - top -
+        (fxElement.getMarginStart() * fxElement.adjustedViewportHeight)) /
+        (marginDelta * fxElement.adjustedViewportHeight);
       fxElement.setOffset(offset);
 
       if (fxElement.isMutateScheduled()) {

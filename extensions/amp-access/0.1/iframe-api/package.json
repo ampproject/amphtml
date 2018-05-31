@@ -4,8 +4,20 @@
   "description": "IFrame API for amp-access",
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
+  "main": "build/index.js",
+  "jsnext:main": "amp-iframe-api-export.js",
+  "scripts": {
+    "build": "./node_modules/.bin/rollup -c rollup.config.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-access/0.1/iframe-api/"
+  },
+  "devDependencies": {
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
+    "rollup": "^0.57.1",
+    "rollup-plugin-babel": "^3.0.3",
+    "rollup-plugin-cleanup": "^2.0.1"
   }
 }

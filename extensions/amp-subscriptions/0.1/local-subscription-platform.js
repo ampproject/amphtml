@@ -50,9 +50,6 @@ export class LocalSubscriptionPlatform {
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
 
-    /** @const @private {!PageConfig} */
-    this.pageConfig_ = serviceAdapter.getPageConfig();
-
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
 
@@ -89,13 +86,7 @@ export class LocalSubscriptionPlatform {
 
     /** @private {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
-        serviceAdapter.getDialog());
-
-    /** @private {?Entitlement}*/
-    this.entitlement_ = null;
-
-    /** @private @const {boolean} */
-    this.isPingbackEnabled_ = true;
+        serviceAdapter.getDialog(), this.serviceAdapter_);
 
     /** @private @const {?string} */
     this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
@@ -113,7 +104,7 @@ export class LocalSubscriptionPlatform {
   /**
    * Validates the action map
    * @param {!JsonObject<string, string>} actionMap
-   * @returns {!JsonObject<string, string>}
+   * @return {!JsonObject<string, string>}
    */
   validateActionMap(actionMap) {
     user().assert(actionMap['login'],
@@ -148,29 +139,42 @@ export class LocalSubscriptionPlatform {
     this.rootNode_.addEventListener('click', e => {
       const element = closestBySelector(dev().assertElement(e.target),
           '[subscriptions-action]');
-      if (element) {
-        const action = element.getAttribute('subscriptions-action');
-        this.executeAction(action);
-      }
+      this.handleClick_(element);
     });
   }
 
   /**
-   * Renders the platform specific UI
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * Handle click on subscription-action
+   * @private
+   * @param {Node} element
    */
-  activate(renderState) {
-    this.urlBuilder_.setAuthResponse(renderState.entitlement);
+  handleClick_(element) {
+    if (element) {
+      const action = element.getAttribute('subscriptions-action');
+      if (element.getAttribute('subscriptions-service') === 'local') {
+        this.executeAction(action);
+      } else if ((element.getAttribute('subscriptions-service') || 'auto')
+        == 'auto') {
+        const platform = this.serviceAdapter_.selectPlatformForLogin();
+        this.serviceAdapter_.delegateActionToService(
+            action, platform.getServiceId());
+      } else if (element.getAttribute('subscriptions-service')) {
+        const serviceId = element.getAttribute('subscriptions-service');
+        this.serviceAdapter_.delegateActionToService(action, serviceId);
+      }
+    }
+  }
+
+  /** @override */
+  activate(entitlement) {
+    const renderState = entitlement.json();
+    this.urlBuilder_.setAuthResponse(renderState);
     this.actions_.build().then(() => {
       this.renderer_.render(renderState);
     });
   }
 
-  /**
-   * Executes action for the local platform.
-   * @param {string} action
-   * @returns {!Promise<boolean>}
-   */
+  /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
@@ -189,9 +193,7 @@ export class LocalSubscriptionPlatform {
           this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
               .then(res => res.json())
               .then(resJson => {
-                const entitlement = Entitlement.parseFromJson(resJson);
-                this.entitlement_ = entitlement;
-                return entitlement;
+                return Entitlement.parseFromJson(resJson);
               }));
   }
 
@@ -231,6 +233,9 @@ export class LocalSubscriptionPlatform {
   getBaseScore() {
     return this.serviceConfig_['baseScore'] || 0;
   }
+
+  /** @override */
+  decorateUI(unusedNode, unusedAction, unusedOptions) {}
 }
 
 /**

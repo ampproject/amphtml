@@ -17,14 +17,14 @@
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {StateChangeType} from '../../amp-story/0.1/navigation-state';
-import {StateProperty} from '../../amp-story/0.1/amp-story-store-service';
+import {StateChangeEventDef, StateChangeType} from '../../amp-story/1.0/navigation-state';
+import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
-
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
 const MIN_INTERVAL = 3;
@@ -40,6 +40,12 @@ const MUSTACHE_TAG = 'amp-mustache';
 
 /** @const */
 const TIMEOUT_LIMIT = 10000; // 10 seconds
+
+/** @const */
+const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
+
+/** @const */
+const LOADING_ATTR = 'i-amphtml-loading';
 
 /** @const */
 const DATA_ATTR = {
@@ -58,15 +64,37 @@ const CTA_TYPES = {
 /** @const */
 const AD_STATE = {
   PENDING: 0,
-  PLACED: 1,
+  INSERTED: 1,
   FAILED: 2,
 };
 
 /** @const */
 const ALLOWED_AD_TYPES = map({
   'custom': true,
+  'doubleclick': true,
 });
 
+/** @enum {string} */
+const EVENTS = {
+  AD_REQUESTED: 'story-ad-request',
+  AD_LOADED: 'story-ad-load',
+  AD_INSERTED: 'story-ad-insert',
+  AD_VIEWED: 'story-ad-view',
+  AD_CLICKED: 'story-ad-click',
+  AD_EXITED: 'story-ad-exit',
+  AD_DISCARDED: 'story-ad-discard',
+};
+
+/** @enum {string} */
+const VARS = {
+  AD_REQUESTED: 'requestTime', // when ad is requested
+  AD_LOADED: 'loadTime', // when ad emits `INI_LOAD` signal
+  AD_INSERTED: 'insertTime', // added as page after next
+  AD_VIEWED: 'viewTime', // page becomes active
+  AD_CLICKED: 'clickTime', // optional
+  AD_EXITED: 'exitTime', // page moves from active => inactive
+  AD_DISCARDED: 'discardTime', // discared due to bad metadata etc
+};
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
 
@@ -107,11 +135,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {Object<string, string>} */
     this.config_ = {};
 
+    /** @private {Object<string, *>} */
+    this.analyticsData_ = {};
+
+
     /**
      * Version of the story store service depends on which version of amp-story
      * the publisher is loading. They all have the same implementation.
-     * @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|
-     *           ?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
+     * @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
      */
     this.storeService_ = null;
   }
@@ -131,9 +162,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           `<${TAG}> should be child of <amp-story>`);
 
       const ampdoc = this.getAmpDoc();
-      Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+      const extensionService = Services.extensionsFor(this.win);
+      extensionService./*OK*/installExtensionForDoc(
           ampdoc, AD_TAG);
-      Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+      extensionService./*OK*/installExtensionForDoc(
           ampdoc, MUSTACHE_TAG);
 
       return ampStoryElement.getImpl().then(impl => {
@@ -191,10 +223,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdOverlay_() {
-    const container = document.createElement('aside');
+    const container = this.win.document.createElement('aside');
     container.className = 'i-amphtml-ad-overlay-container';
 
-    const span = document.createElement('p');
+    const span = this.win.document.createElement('p');
     span.className = 'i-amphtml-story-ad-attribution';
     span.textContent = 'Ad';
 
@@ -212,7 +244,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     user().assert(adAttributes, `<${TAG}>: Error reading config.` +
       'Top level JSON should have an "ad-attributes" key');
 
-    const type = adAttributes.type;
+    const {type} = adAttributes;
     user().assert(type, `<${TAG}>: Error reading config.` +
       'Missing ["ad-attribues"]["type"] key');
   }
@@ -227,6 +259,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adPageEls_.push(page);
 
     this.ampStory_.element.appendChild(page);
+    this.analyticsEvent_(EVENTS.AD_REQUESTED,
+        {[VARS.AD_REQUESTED]: Date.now()});
 
     page.getImpl().then(impl => {
       this.ampStory_.addPage(impl);
@@ -243,10 +277,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampStoryAdPage = this.createPageElement_();
     const ampAd = this.createAdElement_();
 
-    const gridLayer = document.createElement('amp-story-grid-layer');
+    const glassPane = this.win.document.createElement('div');
+    glassPane.classList.add(GLASS_PANE_CLASS);
+
+    const gridLayer = this.win.document.createElement('amp-story-grid-layer');
     gridLayer.setAttribute('template', 'fill');
+
+    const paneGridLayer = gridLayer.cloneNode(false);
+
     gridLayer.appendChild(ampAd);
+    paneGridLayer.appendChild(glassPane);
     ampStoryAdPage.appendChild(gridLayer);
+    ampStoryAdPage.appendChild(paneGridLayer);
 
     this.currentAdElement_ = ampAd;
     this.isCurrentAdLoaded_ = false;
@@ -256,6 +298,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const signals = impl.signals();
       return signals.whenSignal(CommonSignals.INI_LOAD);
     }).then(() => {
+      // remove loading attribute once loaded so that desktop CSS will position
+      // offscren with all other pages
+      const currentPageEl = this.adPageEls_[this.adPageEls_.length - 1];
+      currentPageEl.removeAttribute(LOADING_ATTR);
+
+      this.analyticsEvent_(EVENTS.AD_LOADED,
+          {[VARS.AD_LOADED]: Date.now()});
       this.isCurrentAdLoaded_ = true;
     });
 
@@ -273,10 +322,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       'id': `i-amphtml-ad-page-${id}`,
       'ad': '',
       'distance': '2',
+      'i-amphtml-loading': '',
     });
 
     return createElementWithAttributes(
-        document, 'amp-story-page', attributes);
+        this.win.document, 'amp-story-page', attributes);
   }
 
 
@@ -307,7 +357,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         configAttrs, requiredAttrs));
 
     return createElementWithAttributes(
-        document, 'amp-ad', attributes);
+        this.win.document, 'amp-ad', attributes);
   }
 
 
@@ -344,7 +394,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @return {boolean}
    */
   createCtaLayer_(adPageElement, ctaText, ctaUrl) {
-    const a = document.createElement('a');
+    const a = this.win.document.createElement('a');
     a.className = 'i-amphtml-story-ad-link';
     a.setAttribute('target', '_blank');
     a.href = ctaUrl;
@@ -355,7 +405,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return false;
     }
 
-    const ctaLayer = document.createElement('amp-story-cta-layer');
+    const ctaLayer = this.win.document.createElement('amp-story-cta-layer');
     ctaLayer.appendChild(a);
     adPageElement.appendChild(ctaLayer);
     return true;
@@ -363,6 +413,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   /**
+   * @param {!StateChangeEventDef} stateChangeEvent
    * @private
    */
   handleStateChange_(stateChangeEvent) {
@@ -391,13 +442,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (this.uniquePagesCount_ > MIN_INTERVAL) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
-      if (adState === AD_STATE.PLACED) {
+      if (adState === AD_STATE.INSERTED) {
+        this.analyticsEvent_(EVENTS.AD_INSERTED,
+            {[VARS.AD_INSERTED]: Date.now()});
         this.adsPlaced_++;
         // start loading next ad
         this.startNextPage_();
       }
 
       if (adState === AD_STATE.FAILED) {
+        this.analyticsEvent_(EVENTS.AD_DISCARDED,
+            {[VARS.AD_DISCARDED]: Date.now()});
         this.startNextPage_();
       }
     }
@@ -416,21 +471,37 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /**
    * Place ad based on user config
-   * @param {string} currentPageId
+   * @param {string} pageBeforeAdId
    * @private
    */
-  tryToPlaceAdAfterPage_(currentPageId) {
+  tryToPlaceAdAfterPage_(pageBeforeAdId) {
     const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
     if (!this.isCurrentAdLoaded_ && this.adTimedOut_()) {
       // timeout fail
       return AD_STATE.FAILED;
     }
 
-    const currentPage = this.ampStory_.getPageById(currentPageId);
-    const nextPage = this.ampStory_.getNextPage(currentPage);
+    let pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
+    let pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
 
-    if (!this.isCurrentAdLoaded_ || currentPage.isAd() ||
-        (nextPage && nextPage.isAd())) {
+    if (!pageAfterAd) {
+      return AD_STATE.PENDING;
+    }
+
+    if (this.isDesktopView_()) {
+      // If we are in desktop view the ad must be inserted 2 pages away because
+      // the next page will already be in view
+      pageBeforeAd = pageAfterAd;
+      pageBeforeAdId = pageAfterAd.element.id;
+      pageAfterAd = this.ampStory_.getNextPage(pageAfterAd);
+    }
+
+    if (!pageAfterAd) {
+      return AD_STATE.PENDING;
+    }
+
+    if (!this.isCurrentAdLoaded_ || pageBeforeAd.isAd() ||
+        pageAfterAd.isAd()) {
       // if we are going to cause two consecutive ads or ad is still
       // loading we will try again on next user interaction
       return AD_STATE.PENDING;
@@ -442,8 +513,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.FAILED;
     }
 
-    this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
-    return AD_STATE.PLACED;
+    this.ampStory_.insertPage(pageBeforeAdId, nextAdPageEl.id);
+    return AD_STATE.INSERTED;
+  }
+
+
+  /**
+   * @private
+   * @return {boolean}
+   */
+  isDesktopView_() {
+    return !!this.storeService_.get(StateProperty.DESKTOP_STATE);
   }
 
 
@@ -454,9 +534,25 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   adTimedOut_() {
     return (Date.now() - this.timeCurrentPageCreated_) > TIMEOUT_LIMIT;
   }
+
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>=} vars A map of vars and their values.
+   * @private
+   */
+  analyticsEvent_(eventType, vars) {
+    const adIndex = this.adPagesCreated_;
+    if (this.analyticsData_['adIndex'] !== adIndex) {
+      this.analyticsData_ = {adIndex};
+    }
+    this.analyticsData_ = Object.assign(this.analyticsData_,
+        vars);
+    triggerAnalyticsEvent(this.element, eventType,
+        this.analyticsData_);
+  }
 }
 
 AMP.extension('amp-story-auto-ads', '0.1', AMP => {
   AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds, CSS);
 });
-

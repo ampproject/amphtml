@@ -19,7 +19,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle} from '../../../src/style';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
@@ -66,9 +66,9 @@ const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 
 /**
- * Event listener callback for message events. If message is a Safeframe message,
- * handles the message.
- * This listener is registered within SafeframeHostApi.
+ * Event listener callback for message events. If message is a Safeframe
+ * message, handles the message. This listener is registered within
+ * SafeframeHostApi.
  * @param {!Event} event
  */
 export function safeframeListener(event) {
@@ -102,34 +102,36 @@ export function safeframeListener(event) {
  * Safeframe container APIs to work:
  *   - $sf.ext.expand()
  *   - $sf.ext.collapse()
- *   - $sf.ext.geom()
- * Expand and collapse are both implemented utilizing AMP's built in element
- * resizing.
+ *   - $sf.ext.geom() Expand and collapse are both implemented utilizing AMP's
+ *     built in element resizing.
  *
- * For geom, the host needs to send geometry updates into the container
- *  whenever a position change happens, at a max frequency of 1 message/second.
- *  To implement this messaging, we are leveraging the existing IntersectionObserver
- *  class that works with AMP elements. However, the safeframe iframe that we
- *  need to monitor is not an AMP element, but rather contained within an amp-ad.
- *  So, we are doing intersection observing on the amp-ad, and calculating
- *  the correct position for the iframe whenever we get an update.
+ * For geom, the host needs to send geometry updates into the container whenever
+ *  a position change happens, at a max frequency of 1 message/second. To
+ *  implement this messaging, we are leveraging the existing
+ *  IntersectionObserver class that works with AMP elements. However, the
+ *  safeframe iframe that we need to monitor is not an AMP element, but rather
+ *  contained within an amp-ad. So, we are doing intersection observing on the
+ *  amp-ad, and calculating the correct position for the iframe whenever we get
+ *  an update.
  *
- * We pass an instance of this class into the IntersectionObserver class, which then
- *  calls the instance of send() below whenever an update occurs.
+ * We pass an instance of this class into the IntersectionObserver class, which
+ *  then calls the instance of send() below whenever an update occurs.
  */
 export class SafeframeHostApi {
 
   /**
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    * @param {boolean} isFluid
-   * @param {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} initialSize
    * @param {{width:number, height:number}} creativeSize
    * @param {?string} fluidImpressionUrl
    */
-  constructor(baseInstance, isFluid, initialSize, creativeSize,
-    fluidImpressionUrl) {
+  constructor(baseInstance, isFluid, creativeSize, fluidImpressionUrl) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
+
+    /** @private {!Function} */
+    this.checkStillCurrent_ = this.baseInstance_.verifyStillCurrent.bind(
+        this.baseInstance_)();
 
     /** @private {!Window} */
     this.win_ = this.baseInstance_.win;
@@ -154,9 +156,6 @@ export class SafeframeHostApi {
 
     /** @private {boolean} */
     this.isFluid_ = isFluid;
-
-    /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
-    this.slotSize_ = initialSize;
 
     /** @private {{width:number, height:number}} */
     this.creativeSize_ = creativeSize;
@@ -246,8 +245,8 @@ export class SafeframeHostApi {
     // Don't allow for referrer policy same-origin,
     // as Safeframe will always be a different origin.
     // Don't allow for no-referrer.
-    const canonicalUrl = Services.documentInfoForDoc(
-        this.baseInstance_.getAmpDoc()).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(
+        this.baseInstance_.getAmpDoc());
     const metaReferrer = this.win_.document.querySelector(
         "meta[name='referrer']");
     if (!metaReferrer) {
@@ -259,7 +258,7 @@ export class SafeframeHostApi {
       case 'no-referrer':
         return;
       case 'origin':
-        return parseUrl(canonicalUrl).origin;
+        return parseUrlDeprecated(canonicalUrl).origin;
     }
     return canonicalUrl;
   }
@@ -354,12 +353,13 @@ export class SafeframeHostApi {
       return;
     }
     this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
+      this.checkStillCurrent_();
       const formattedGeom = this.formatGeom_(iframeBox);
       this.sendMessage_({
         newGeometry: formattedGeom,
         uid: this.uid_,
       }, SERVICE.GEOMETRY_UPDATE);
-    });
+    }).catch(err => dev().error(TAG, err));
   }
 
   /**
@@ -371,15 +371,21 @@ export class SafeframeHostApi {
    */
   formatGeom_(iframeBox) {
     const viewportSize = this.viewport_.getSize();
+    const scrollLeft = this.viewport_.getScrollLeft();
+    const scrollTop = this.viewport_.getScrollTop();
     const currentGeometry = /** @type {JsonObject} */({
       'windowCoords_t': 0,
       'windowCoords_r': viewportSize.width,
       'windowCoords_b': viewportSize.height,
       'windowCoords_l': 0,
-      'frameCoords_t': iframeBox.top,
-      'frameCoords_r': iframeBox.right,
-      'frameCoords_b': iframeBox.bottom,
-      'frameCoords_l': iframeBox.left,
+      'frameCoords_t': iframeBox.top + scrollTop,
+      'frameCoords_r': iframeBox.right + scrollLeft,
+      'frameCoords_b': iframeBox.bottom + scrollTop,
+      'frameCoords_l': iframeBox.left + scrollLeft,
+      'posCoords_t': iframeBox.top,
+      'posCoords_b': iframeBox.bottom,
+      'posCoords_r': iframeBox.right,
+      'posCoords_l': iframeBox.left,
       'styleZIndex': getStyle(this.baseInstance_.element, 'zIndex'),
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
@@ -423,8 +429,10 @@ export class SafeframeHostApi {
    * @private
    */
   sendMessage_(payload, serviceName) {
-    dev().assert(this.iframe_.contentWindow,
-        'Frame contentWindow unavailable.');
+    if (!this.iframe_.contentWindow) {
+      dev().error(TAG, 'Frame contentWindow unavailable.');
+      return;
+    }
     const message = dict();
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
     message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify(
@@ -562,13 +570,15 @@ export class SafeframeHostApi {
    * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
-    if (!optIsCollapse &&
-        width <= this.slotSize_.width &&
-        height <= this.slotSize_.height) {
-      this.resizeSafeframe(height, width, messageType);
-    } else {
-      this.resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse);
-    }
+    return this.viewport_.getClientRectAsync(
+        this.baseInstance_.element).then(box => {
+      if (!optIsCollapse && width <= box.width && height <= box.height) {
+        this.resizeSafeframe(height, width, messageType);
+      } else {
+        this.resizeAmpAdAndSafeframe(height, width, messageType,
+            optIsCollapse);
+      }
+    });
   }
 
   /**
@@ -605,6 +615,7 @@ export class SafeframeHostApi {
       return;
     }
     this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
+      this.checkStillCurrent_();
       const formattedGeom = this.formatGeom_(iframeBox);
       this.sendMessage_({
         uid: this.uid_,
@@ -616,7 +627,7 @@ export class SafeframeHostApi {
         'expand_l': this.currentGeometry_['allowedExpansion_l'],
         push: true,
       }, messageType);
-    });
+    }).catch(err => dev().error(TAG, err));
   }
 
   /**
@@ -632,14 +643,10 @@ export class SafeframeHostApi {
     // First, attempt to resize the Amp-Ad that is the parent of the
     // safeframe
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
+      this.checkStillCurrent_();
       // If this resize succeeded, we always resize the safeframe.
       // resizeSafeframe also sends the resize response.
       this.resizeSafeframe(height, width, messageType);
-      // Update our stored record of what the amp-ad's size is. This
-      // is just for caching. Setting it here doesn't actually change
-      // the size of the amp-ad, the attempt change size above did that.
-      this.slotSize_.height = height;
-      this.slotSize_.width = width;
     }, /** REJECT CALLBACK */ () => {
       // If the resize initially failed, it may have been queued
       // as a pendingChangeSize, which will cause the size change
@@ -660,6 +667,10 @@ export class SafeframeHostApi {
         this.sendResizeResponse(false, messageType);
       }
     }).catch(err => {
+      if (err.message == 'CANCELLED') {
+        dev().error(TAG, err);
+        return;
+      }
       dev().error(TAG, `Resizing failed: ${err}`);
       this.sendResizeResponse(false, messageType);
     });
@@ -678,8 +689,14 @@ export class SafeframeHostApi {
       return;
     }
     this.baseInstance_.attemptChangeHeight(newHeight)
-        .then(() => this.onFluidResize_())
-        .catch(() => {
+        .then(() => {
+          this.checkStillCurrent_();
+          this.onFluidResize_();
+        }).catch(err => {
+          if (err.message == 'CANCELLED') {
+            dev().error(TAG, err);
+            return;
+          }
           // TODO(levitzky) Add more error handling here
           this.baseInstance_.forceCollapse();
         });

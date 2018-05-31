@@ -16,28 +16,18 @@
 
 
 /**
- * @fileoverview Embeds an instagram photo.
- * The data-shortcode attribute can be easily copied from a normal instagram
- * URL.
- * Example:
- * <code>
- * <amp-instagram
- *   data-shortcode="fBwFP"
- *   data-captioned
- *   data-default-framing
- *   alt="Fastest page in the west."
- *   width="320"
- *   height="392"
- *   layout="responsive">
- * </amp-instagram>
+ * @fileoverview Embeds an instagram photo. The data-shortcode attribute can be
+ * easily copied from a normal instagram URL. Example: <code> <amp-instagram
+ * data-shortcode="fBwFP" data-captioned data-default-framing alt="Fastest page
+ * in the west." width="320" height="392" layout="responsive"> </amp-instagram>
  * </code>
  *
- * For responsive embedding the width and height can be left unchanged from
- * the example above and should produce the correct aspect ratio. amp-instagram
- * will attempt to resize on load based on the height reported by the embedded
- * frame. If captions are specified (data-captioned) then a resize will be
- * requested every time due to the fact that it's not possible to know the height
- * of the caption in advance.
+ * For responsive embedding the width and height can be left unchanged from the
+ * example above and should produce the correct aspect ratio. amp-instagram will
+ * attempt to resize on load based on the height reported by the embedded frame.
+ * If captions are specified (data-captioned) then a resize will be requested
+ * every time due to the fact that it's not possible to know the height of the
+ * caption in advance.
  *
  * If captions are included it is stringly reccomended that an overflow element
  * is also included.  See description of overflow in amp-iframe.
@@ -56,16 +46,6 @@ import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
-/*
- * These padding values are specifc to intagram embeds with
- * ?cr=1&v=7 if you change to a different version of the embed
- * these will need to be recalculated.
- */
-const PADDING_LEFT = 0;
-const PADDING_RIGHT = 0;
-const PADDING_BOTTOM = 0;
-const PADDING_TOP = 64;
-
 class AmpInstagram extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -75,9 +55,6 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
-    this.iframePromise_ = null;
-
     /** @private {?string} */
     this.shortcode_ = '';
 
@@ -86,6 +63,12 @@ class AmpInstagram extends AMP.BaseElement {
 
     /** @private {string}  */
     this.captioned_ = '';
+
+    /**
+    * @private {?Promise}
+    * @visibleForTesting
+    */
+    this.iframePromise_ = null;
   }
   /**
   * @param {boolean=} opt_onLayout
@@ -141,10 +124,10 @@ class AmpInstagram extends AMP.BaseElement {
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
     setStyles(image, {
-      'top': PADDING_TOP + 'px',
-      'bottom': PADDING_BOTTOM + 'px',
-      'left': PADDING_LEFT + 'px',
-      'right': PADDING_RIGHT + 'px',
+      'top': '0 px',
+      'bottom': '0 px',
+      'left': '0 px',
+      'right': '0 px',
     });
     placeholder.appendChild(image);
     return placeholder;
@@ -208,9 +191,7 @@ class AmpInstagram extends AMP.BaseElement {
       const height = data['details']['height'];
       this.getVsync().measure(() => {
         if (this.iframe_ && this.iframe_./*OK*/offsetHeight !== height) {
-          // Height returned by Instagram includes header, so
-          // subtract 48px top padding
-          this./*OK*/changeHeight(height - (PADDING_TOP + PADDING_BOTTOM));
+          this./*OK*/changeHeight(height);
         }
       });
     }

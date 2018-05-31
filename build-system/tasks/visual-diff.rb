@@ -26,7 +26,6 @@ require 'net/http'
 require 'percy/capybara'
 require 'capybara'
 require 'selenium/webdriver'
-require 'rspec/retry'
 
 
 ENV['PERCY_DEBUG'] = '0'

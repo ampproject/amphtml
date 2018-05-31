@@ -45,7 +45,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertAbsoluteHttpOrHttpsUrl,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
 import {dict} from '../../../src/utils/object';
@@ -65,7 +65,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
+    /** @visibleForTesting {?Promise} */
     this.iframePromise_ = null;
 
     /** @private {?number} */
@@ -138,6 +138,12 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
+    if (this.element.hasAttribute('aria-label')) {
+      placeholder.setAttribute('aria-label', 'Loading - '
+          + this.element.getAttribute('aria-label'));
+    } else {
+      placeholder.setAttribute('aria-label', 'Loading interactive element');
+    }
     placeholder.setAttribute('placeholder', '');
     placeholder.appendChild(this.createPlaybuzzLoader_());
     return placeholder;
@@ -151,7 +157,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the overflow element
-   * @returns {!Element} overflowElement
+   * @return {!Element} overflowElement
    *
    */
   getOverflowElement_() {
@@ -251,15 +257,15 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the composed embed source url
-   * @returns {string} url
+   * @return {string} url
    *
    */
   generateEmbedSourceUrl_() {
-    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-    const parsedPageUrl = parseUrl(canonicalUrl);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const parsedPageUrl = parseUrlDeprecated(canonicalUrl);
     const params = {
       itemUrl: this.iframeSrcUrl_,
-      relativeUrl: parseUrl(this.iframeSrcUrl_).pathname,
+      relativeUrl: parseUrlDeprecated(this.iframeSrcUrl_).pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,

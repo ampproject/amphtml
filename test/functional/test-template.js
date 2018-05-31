@@ -254,9 +254,9 @@ describes.fakeWin('BaseTemplate', {}, env => {
   });
 
   it('should require render override', () => {
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       new BaseTemplate(templateElement).render();
-    }).to.throw(/Not implemented/); });
+    }).to.throw(/Not implemented/);
   });
 
   it('should unwrap single element', () => {

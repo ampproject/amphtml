@@ -231,7 +231,7 @@ export class MediaPool {
           const sources = this.getDefaultSource_(type);
           mediaEl.setAttribute('pool-element', elId++);
           this.enqueueMediaElementTask_(mediaEl,
-              new UpdateSourcesTask(sources, this.vsync_));
+              new UpdateSourcesTask(sources));
           // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
           // is returned.  If so, we should adjust the pool size/distribution
           // between media types.
@@ -462,12 +462,12 @@ export class MediaPool {
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = domMediaEl.id;
 
     return this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapIntoDomTask(domMediaEl, this.vsync_))
+        new SwapIntoDomTask(domMediaEl))
         .then(() => {
           this.maybeResetAmpMedia_(ampMediaForPoolEl);
           this.maybeResetAmpMedia_(ampMediaForDomEl);
           this.enqueueMediaElementTask_(poolMediaEl,
-              new UpdateSourcesTask(sources, this.vsync_));
+              new UpdateSourcesTask(sources));
           this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
         }, () => {
           this.forceDeallocateMediaElement_(poolMediaEl);
@@ -504,7 +504,7 @@ export class MediaPool {
     const defaultSources = this.getDefaultSource_(mediaType);
 
     return this.enqueueMediaElementTask_(poolMediaEl,
-        new UpdateSourcesTask(defaultSources, this.vsync_));
+        new UpdateSourcesTask(defaultSources));
   }
 
 
@@ -524,7 +524,7 @@ export class MediaPool {
         'No media element to put back into DOM after eviction.'));
 
     const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapOutOfDomTask(oldDomMediaEl, this.vsync_))
+        new SwapOutOfDomTask(oldDomMediaEl))
         .then(() => {
           poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
         });

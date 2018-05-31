@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {
   KeyframesDef,
   KeyframesOrFilterFnDef,
@@ -217,7 +218,8 @@ class AnimationRunner {
     let promise = Promise.resolve();
 
     if (this.animationDef_.startAfterId) {
-      const startAfterId = this.animationDef_.startAfterId;
+      const startAfterId = /** @type {string} */(
+        this.animationDef_.startAfterId);
       promise = promise.then(() => this.sequence_.waitFor(startAfterId));
     }
 
@@ -379,9 +381,6 @@ export class AnimationManager {
 
     /** @private @const */
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
-
-    /** @private @const */
-    this.resources_ = Services.resourcesForDoc(this.ampdoc_);
 
     /** @private @const */
     this.timer_ = Services.timerFor(this.ampdoc_.win);
@@ -573,9 +572,9 @@ class AnimationSequence {
    */
   waitFor(id) {
     if (!(id in this.subscriptionPromises_)) {
-      this.subscriptionPromises_[id] = new Promise(resolve => {
-        this.subscriptionResolvers_[id] = resolve;
-      });
+      const deferred = new Deferred();
+      this.subscriptionPromises_[id] = deferred.promise;
+      this.subscriptionResolvers_[id] = deferred.resolve;
     }
     return this.subscriptionPromises_[id];
   }

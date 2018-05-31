@@ -15,7 +15,7 @@
  */
 
 import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
-import {getSourceUrl, parseUrl} from '../src/url';
+import {getSourceUrl, parseUrlDeprecated} from '../src/url';
 
 const mandatoryParams = ['tagtype', 'cid'],
     optionalParams = [
@@ -26,7 +26,8 @@ const mandatoryParams = ['tagtype', 'cid'],
       'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
       'experimentId', 'multiSize', 'multiSizeValidation',
     ];
-//useSameDomainRenderingUntilDeprecated is included to ensure publisher amp-tags don't break before 29th March
+// useSameDomainRenderingUntilDeprecated is included to ensure publisher
+// amp-tags don't break before 29th March
 
 /**
  * @param {!Window} global
@@ -174,7 +175,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
       },
     };
     global.advBidxc.amp = getCallbacksObject();
-    const publisherDomain = parseUrl(publisherUrl).hostname;
+    const publisherDomain = parseUrlDeprecated(publisherUrl).hostname;
     writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid) + '&dn=' + encodeURIComponent(publisherDomain), () => {
       done(null);
     });

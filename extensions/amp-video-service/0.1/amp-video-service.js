@@ -21,7 +21,7 @@
  * it gets automatically inserted by the runtime when required.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
@@ -91,7 +91,9 @@ export class VideoService {
 
   /** @param {!../../../src/video-interface.VideoInterface} video */
   register(video) {
-    const {element} = video;
+    const {element} =
+    /** @type {!../../../src/video-interface.VideoOrBaseElementDef} */ (
+        video);
 
     if (this.getEntryOrNull(element)) {
       return dev().assert(this.getEntryOrNull(element));
@@ -163,7 +165,7 @@ export class VideoEntry {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!VideoService} videoService
-   * @param {!../../../src/video-interface.VideoInterface} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    */
   constructor(ampdoc, videoService, video) {
 
@@ -173,7 +175,7 @@ export class VideoEntry {
     /** @private @const {!VideoService} */
     this.service_ = videoService;
 
-    /** @private @const {!../../../src/video-interface.VideoInterface} */
+    /** @private @const {!../../../src/video-interface.VideoOrBaseElementDef} */
     this.video_ = video;
 
     /** @private {boolean} */
@@ -183,7 +185,7 @@ export class VideoEntry {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!VideoService} videoService
-   * @param {!../../../src/video-interface.VideoInterface} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    */
   static create(ampdoc, videoService, video) {
     const entry = new VideoEntry(ampdoc, videoService, video);

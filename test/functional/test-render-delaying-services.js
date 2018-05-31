@@ -67,9 +67,7 @@ describe('waitForServices', () => {
     dynamicCssResolve();
     experimentResolve(); // 'amp-experiment' is actually blocked by 'variant'
     clock.tick(3000);
-    allowConsoleError(() => {
-      return expect(promise).to.eventually.be.rejectedWith('variant');
-    });
+    return expect(promise).to.eventually.be.rejectedWith('variant');
   });
 
   it('should resolve when all extensions are ready', () => {

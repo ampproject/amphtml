@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {parseUrl} from '../../../src/url';
 import {startsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
@@ -176,8 +176,7 @@ function setupLegacyProxy(form, proxy) {
           // The overriding input, if present, has to be removed and re-added
           // (renaming does NOT work). Completely insane, I know.
           const element = dev().assertElement(current);
-          const nextSibling = element.nextSibling;
-          const parent = element.parentNode;
+          const {nextSibling, parentNode: parent} = element;
           parent.removeChild(element);
           try {
             actual = form[name];
@@ -198,17 +197,21 @@ function setupLegacyProxy(form, proxy) {
         const attr = desc.attr || name;
         Object.defineProperty(proxy, name, {
           get() {
-            let value = proxy.getAttribute(attr);
+            const value = proxy.getAttribute(attr);
             if (value == null && desc.def !== undefined) {
-              value = desc.def;
-            } else if (desc.type == LegacyPropDataType.BOOL) {
-              value = (value === 'true');
-            } else if (desc.type == LegacyPropDataType.TOGGLE) {
-              value = (value != null);
-            } else if (desc.type == LegacyPropDataType.URL) {
+              return desc.def;
+            }
+            if (desc.type == LegacyPropDataType.BOOL) {
+              return (value === 'true');
+            }
+            if (desc.type == LegacyPropDataType.TOGGLE) {
+              return (value != null);
+            }
+            if (desc.type == LegacyPropDataType.URL) {
               // URLs, e.g. in `action` attribute are resolved against the
               // document's base.
-              value = parseUrl(/** @type {string} */ (value || '')).href;
+              const str = /** @type {string} */ (value || '');
+              return Services.urlForDoc(form).parse(str).href;
             }
             return value;
           },

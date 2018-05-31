@@ -84,7 +84,7 @@ export class InstrumentationService {
     this.scrollHandlerRegistered_ = false;
 
     /** @private {!Observable<
-        !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
+      !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
   }
 
@@ -169,6 +169,7 @@ export class InstrumentationService {
    * @param {!Element} analyticsElement The element associated with the
    *  config.
    * @private
+   * @restricted
    */
   addListenerDepr_(config, listener, analyticsElement) {
     const eventType = config['on'];
@@ -239,7 +240,7 @@ export class InstrumentationService {
     }
 
     /**
-     * @param {!Object<number, boolean>} bounds.
+     * @param {!Object<number, boolean>} bounds
      * @param {number} scrollPos Number representing the current scroll
      * @param {string} varName variable name to assign to the bound that
      * triggers the event
@@ -252,10 +253,14 @@ export class InstrumentationService {
       // Goes through each of the boundaries and fires an event if it has not
       // been fired so far and it should be.
       for (const b in bounds) {
-        if (!bounds.hasOwnProperty(b) || b > scrollPos || bounds[b]) {
+        if (!bounds.hasOwnProperty(b)) {
           continue;
         }
-        bounds[b] = true;
+        const bound = parseInt(b, 10);
+        if (bound > scrollPos || bounds[bound]) {
+          continue;
+        }
+        bounds[bound] = true;
         const vars = Object.create(null);
         vars[varName] = b;
         listener(this.createEventDepr_(AnalyticsEventType.SCROLL, vars));
@@ -399,9 +404,9 @@ export class AnalyticsGroup {
 
 
 /**
- * It's important to resolve instrumentation asynchronously in elements that depends on
- * it in multi-doc scope. Otherwise an element life-cycle could resolve way before we
- * have the service available.
+ * It's important to resolve instrumentation asynchronously in elements that
+ * depends on it in multi-doc scope. Otherwise an element life-cycle could
+ * resolve way before we have the service available.
  *
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<InstrumentationService>}

@@ -29,6 +29,7 @@ import {user} from '../src/log';
  *
  * @param {!Window} global
  * @param {function(!Object)} cb
+ * @param {string} locale
  */
 function getFacebookSdk(global, cb, locale) {
   loadScript(global, 'https://connect.facebook.net/' + locale + '/sdk.js', () => {
@@ -60,8 +61,9 @@ function getPostContainer(global, data) {
   if (data.href.match(/\/videos\/\d+\/?$/) && !data.embedAs) {
     embedAs = 'video';
     container.setAttribute('data-embed-as', 'video');
-    // Since 'data-embed-as="video"' disables post text, setting the 'data-show-text'
-    // to 'true' enables the ability to see the text (changed from the default 'false')
+    // Since 'data-embed-as="video"' disables post text, setting the
+    // 'data-show-text' to 'true' enables the ability to see the text (changed
+    // from the default 'false')
     container.setAttribute('data-show-text', 'true');
   }
   container.className = 'fb-' + embedAs;
@@ -102,6 +104,7 @@ function getCommentsContainer(global, data) {
   container.setAttribute('data-href', data.href);
   container.setAttribute('data-numposts', data.numposts || 10);
   container.setAttribute('data-colorscheme', data.colorscheme || 'light');
+  container.setAttribute('data-order-by', data.orderBy || 'social');
   container.setAttribute('data-width', '100%');
   return container;
 }

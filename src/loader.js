@@ -31,12 +31,12 @@ const LINE_LOADER_ELEMENTS = {
 export function createLoaderElement(doc, elementName) {
   if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
     return htmlFor(doc)`<div class="i-amphtml-loader-line">
-          <div class="i-amphtml-loader-moving-line" />
+          <div class="i-amphtml-loader-moving-line"></div>
         </div>`;
   }
   return htmlFor(doc)`<div class="i-amphtml-loader">
-        <div class="i-amphtml-loader-dot" />
-        <div class="i-amphtml-loader-dot" />
-        <div class="i-amphtml-loader-dot" />
+        <div class="i-amphtml-loader-dot"></div>
+        <div class="i-amphtml-loader-dot"></div>
+        <div class="i-amphtml-loader-dot"></div>
       </div>`;
 }

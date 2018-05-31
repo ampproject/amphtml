@@ -17,7 +17,6 @@
 import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-  getConsentPolicyState,
 } from '../../../src/consent-state';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LayoutPriority} from '../../../src/layout';
@@ -43,8 +42,10 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {getBinaryType} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {getConsentPolicyState} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
+import {tryResolve} from '../../../src/utils/promise';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
@@ -100,6 +101,9 @@ export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 /** @type {string} */
 export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 
+/** @type {string} */
+export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
@@ -125,6 +129,8 @@ export let SizeInfoDef;
       customElementExtensions: !Array<string>,
       customStylesheets: !Array<{href: string}>,
       images: (Array<string>|undefined),
+      ctaType: (string|undefined),
+      ctaUrl: (string|undefined),
     }} */
 export let CreativeMetaDataDef;
 
@@ -398,8 +404,15 @@ export class AmpA4A extends AMP.BaseElement {
      * be null before buildCallback() executes or if the impl does not provide
      * an analytice config.
      * @private {?Element}
+     * @visibleForTesting
      */
     this.a4aAnalyticsElement_ = null;
+
+    /**
+     * Indicates that this slot is a single page ad within an AMP story.
+     * @type {boolean}
+     */
+    this.isSinglePageStoryAd = false;
   }
 
   /** @override */
@@ -453,6 +466,8 @@ export class AmpA4A extends AMP.BaseElement {
       this.a4aAnalyticsElement_ = insertAnalyticsElement(
           this.element, this.a4aAnalyticsConfig_, true /* loadAnalytics */);
     }
+
+    this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
   }
 
   /** @override */
@@ -563,7 +578,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -686,8 +701,9 @@ export class AmpA4A extends AMP.BaseElement {
           this.handleLifecycleStage_('urlBuilt');
           return adUrl && this.sendXhrRequest(adUrl);
         })
-        // The following block returns either the response (as a {bytes, headers}
-        // object), or null if no response is available / response is empty.
+        // The following block returns either the response (as a
+        // {bytes, headers} object), or null if no response is available /
+        // response is empty.
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
           checkStillCurrent();
@@ -819,13 +835,16 @@ export class AmpA4A extends AMP.BaseElement {
           return creativeMetaDataDef;
         })
         .catch(error => {
-          switch (error) {
-            case NETWORK_FAILURE: return null;
-            case NO_CONTENT_RESPONSE: return {
-              minifiedCreative: '',
-              customElementExtensions: [],
-              customStylesheets: [],
-            };
+          switch (error.message || error) {
+            case NETWORK_FAILURE:
+              return null;
+            case INVALID_SPSA_RESPONSE:
+            case NO_CONTENT_RESPONSE:
+              return {
+                minifiedCreative: '',
+                customElementExtensions: [],
+                customStylesheets: [],
+              };
           }
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad
@@ -865,22 +884,27 @@ export class AmpA4A extends AMP.BaseElement {
             'signatureValidationResult': status,
             'releaseType': this.releaseType_,
           });
+          let result = null;
           switch (status) {
             case VerificationStatus.OK:
-              return bytes;
-            case VerificationStatus.UNVERIFIED:
-              return null;
+              result = bytes;
+              break;
             case VerificationStatus.CRYPTO_UNAVAILABLE:
-              return this.shouldPreferentialRenderWithoutCrypto() ?
+              result = this.shouldPreferentialRenderWithoutCrypto() ?
                 bytes : null;
+              break;
             // TODO(@taymonbeal, #9274): differentiate between these
             case VerificationStatus.ERROR_KEY_NOT_FOUND:
             case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
               user().error(
                   TAG, this.element.getAttribute('type'),
                   'Signature verification failed');
-              return null;
+            case VerificationStatus.UNVERIFIED:
           }
+          if (this.isSinglePageStoryAd && !result) {
+            throw new Error(INVALID_SPSA_RESPONSE);
+          }
+          return result;
         });
   }
 
@@ -935,8 +959,11 @@ export class AmpA4A extends AMP.BaseElement {
         return Services.timerFor(this.win).promise(1000).then(() => {
           this.isRelayoutNeededFlag = true;
           this.getResource().layoutCanceled();
-          Services.resourcesForDoc(this.getAmpDoc())
-              ./*OK*/requireLayout(this.element);
+          // Only Require relayout after page visible
+          Services.viewerForDoc(this.getAmpDoc()).whenNextVisible().then(() => {
+            Services.resourcesForDoc(this.getAmpDoc())
+                ./*OK*/requireLayout(this.element);
+          });
         });
       });
     });
@@ -1116,6 +1143,11 @@ export class AmpA4A extends AMP.BaseElement {
     if (!force && this.isRefreshing) {
       return;
     }
+    // Allow embed to release its resources.
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.destroy();
+      this.friendlyIframeEmbed_ = null;
+    }
     if (this.iframe && this.iframe.parentElement) {
       this.iframe.parentElement.removeChild(this.iframe);
       this.iframe = null;
@@ -1123,11 +1155,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
-    }
-    // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed_) {
-      this.friendlyIframeEmbed_.destroy();
-      this.friendlyIframeEmbed_ = null;
     }
   }
 
@@ -1527,7 +1554,7 @@ export class AmpA4A extends AMP.BaseElement {
       'releaseType': this.releaseType_,
     });
     const checkStillCurrent = this.verifyStillCurrent();
-    return Promise.resolve(utf8Decode(creativeBody)).then(creative => {
+    return tryResolve(() => utf8Decode(creativeBody)).then(creative => {
       checkStillCurrent();
       let srcPath;
       let name = '';
@@ -1540,8 +1567,8 @@ export class AmpA4A extends AMP.BaseElement {
           // Name will be set for real below in nameframe case.
           break;
         default:
-          // Shouldn't be able to get here, but...  Because of the assert, above,
-          // we can only get here in non-dev mode, so give user feedback.
+          // Shouldn't be able to get here, but...  Because of the assert,
+          // above, we can only get here in non-dev mode, so give user feedback.
           user().error('A4A', 'A4A received unrecognized cross-domain name'
               + ' attribute iframe rendering mode request: %s.  Unable to'
               + ' render a creative for'
@@ -1641,6 +1668,13 @@ export class AmpA4A extends AMP.BaseElement {
         // Load maximum of 5 images.
         metaData.images = metaDataObj['images'].splice(0, 5);
       }
+      if (this.isSinglePageStoryAd) {
+        if (!metaDataObj['ctaUrl'] || !metaDataObj['ctaType']) {
+          throw new Error(INVALID_SPSA_RESPONSE);
+        }
+        this.element.setAttribute('data-vars-ctatype', metaDataObj['ctaType']);
+        this.element.setAttribute('data-vars-ctaurl', metaDataObj['ctaUrl']);
+      }
       // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
       // metadata as its in the head?
       metaData.minifiedCreative =
@@ -1652,6 +1686,9 @@ export class AmpA4A extends AMP.BaseElement {
       dev().warn(
           TAG, this.element.getAttribute('type'), 'Invalid amp metadata: %s',
           creative.slice(metadataStart + metadataString.length, metadataEnd));
+      if (this.isSinglePageStoryAd) {
+        throw err;
+      }
       return null;
     }
   }
@@ -1667,7 +1704,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Receive collapse notifications and record lifecycle events for them.
    *
-   * @param unusedElement {!AmpElement}
+   * @param {!AmpElement} unusedElement
    * @override
    */
   collapsedCallback(unusedElement) {
@@ -1773,8 +1810,8 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Whether preferential render should still be utilized if web crypto is unavailable,
-   * and crypto signature header is present.
+   * Whether preferential render should still be utilized if web crypto is
+   * unavailable, and crypto signature header is present.
    * @return {boolean}
    */
   shouldPreferentialRenderWithoutCrypto() {

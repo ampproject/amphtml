@@ -243,8 +243,8 @@ export class LaterpayVendor {
             this.purchaseConfig_ = responseJson;
             this.purchaseOptions_ = this.parseConfigIntoOptions_(
                 responseJson.purchase_options);
-            // empty before rendering, in case authorization is being called again
-            // with the same state
+            // empty before rendering, in case authorization is being called
+            // again with the same state
             this.emptyContainer_()
                 .then(this.renderPurchaseOverlay_.bind(this));
             return {access: false};
@@ -383,7 +383,7 @@ export class LaterpayVendor {
     purchaseButton.textContent = this.i18n_['defaultButton'];
     this.purchaseButton_ = purchaseButton;
     this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
-      const value = this.selectedPurchaseOption_.value;
+      const {value} = this.selectedPurchaseOption_;
       const purchaseType = this.selectedPurchaseOption_.dataset['purchaseType'];
       this.handlePurchase_(ev, value, purchaseType);
     });

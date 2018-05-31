@@ -20,6 +20,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles, setStyle} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {toArray, toWin} from '../../../src/types';
+import {tryResolve} from '../../../src/utils/promise';
 import {unscaledClientRect} from './utils';
 
 
@@ -181,9 +182,6 @@ export class PageScalingService {
    * @param {!Element} rootEl
    */
   constructor(win, rootEl) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-
     /** @private @const {!Element} */
     this.rootEl_ = rootEl;
 
@@ -237,7 +235,7 @@ export class PageScalingService {
    * @return {!Promise}
    */
   scale(page) {
-    return Promise.resolve(this.scale_(page));
+    return tryResolve(() => this.scale_(page));
   }
 
   /**

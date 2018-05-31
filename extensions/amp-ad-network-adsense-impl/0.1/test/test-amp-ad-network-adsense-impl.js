@@ -226,6 +226,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'height': '50',
         'type': 'adsense',
       });
+      doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
@@ -276,8 +277,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
             }
           },
         };
-        // Next two lines are to ensure that internal parts not relevant for this
-        // test are properly set.
+        // Next two lines are to ensure that internal parts not relevant for
+        // this test are properly set.
         impl.size_ = {width: 200, height: 50};
         impl.iframe = impl.win.document.createElement('iframe');
         if (exp) {
@@ -392,9 +393,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when !height && !width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -403,10 +404,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when !height && width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         width: '300',
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -415,10 +416,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when height && !width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         height: '150',
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -429,13 +430,14 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#getAdUrl', () => {
+    const adsenseFormatExpName = 'as-use-attr-for-format';
 
     beforeEach(() => {
       resetSharedState();
     });
 
     afterEach(() => {
-      toggleExperiment(impl.win, 'as-use-attr-for-format', false);
+      toggleExperiment(impl.win, adsenseFormatExpName, false);
       toggleExperiment(
           impl.win, 'ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME', false);
     });
@@ -475,24 +477,24 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
     });
     it('has correct format when as-use-attr-for-format is on', () => {
-      toggleExperiment(impl.win, 'as-use-attr-for-format', true);
+      forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
       return impl.getAdUrl().then(url =>
-        // With exp as-use-attr-for-format off, we can't test for specific
-        // numbers, but we know that the values should be numeric.
         expect(url).to.match(new RegExp(
             `format=${width}x${height}&w=${width}&h=${height}`)));
     });
-    it('has correct format when width=auto and as-use-attr-for-format is on',
+    it('has experiment eid in adsense frmt exp and width/height numeric',
         () => {
-          toggleExperiment(impl.win, 'as-use-attr-for-format', true);
-          element.setAttribute('width', 'auto');
-          expect(impl.element.getAttribute('width')).to.equal('auto');
-          return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
-            expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
+          forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+          return impl.getAdUrl().then(
+              url => expect(url).to.match(/eid=[^&]*21062004/));
         });
+    it('has control eid in adsense frmt exp and width/height numeric', () => {
+      forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
+      return impl.getAdUrl().then(
+          url => expect(url).to.match(/eid=[^&]*21062003/));
+    });
     it('includes eid when in amp-auto-ads holdout control', () => {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
@@ -560,6 +562,16 @@ describes.realWin('amp-ad-network-adsense-impl', {
           expect(url).to.match(/(\?|&)ramft=13(&|$)/);
         });
       });
+      it('sets matched content specific fields', () => {
+        element.setAttribute('data-matched-content-ui-type', 'ui');
+        element.setAttribute('data-matched-content-rows-num', 'rows');
+        element.setAttribute('data-matched-content-columns-num', 'cols');
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/(\?|&)crui=ui(&|$)/);
+          expect(url).to.match(/(\?|&)cr_row=rows(&|$)/);
+          expect(url).to.match(/(\?|&)cr_col=cols(&|$)/);
+        });
+      });
     });
 
     // Not using arrow function here because otherwise the way closure behaves
@@ -602,7 +614,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(adUrl1).to.match(/ifi=1/);
         return impl2.getAdUrl().then(adUrl2 => {
           expect(adUrl2).to.match(/pv=1/);
-          expect(adUrl2).to.match(/prev_fmts=320x50/);
+          expect(adUrl2).to.match(/prev_fmts=\d+?x\d+?/);
           expect(adUrl2).to.not.match(/prev_slotnames/);
           expect(adUrl2).to.match(/ifi=2/);
           return impl3.getAdUrl().then(adUrl3 => {
@@ -612,7 +624,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
             // has a bounding rectangle of 0x0. The important thing to
             // test here is the number of previous formats.
             expect(adUrl3).to.match(
-                /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+                /prev_fmts=(\d+?x\d+?%2C\d+?x\d+?|\d+?x\d+?%2C\d+?x\d+?)/);
             expect(adUrl3).to.match(/prev_slotnames=slotname_foo/);
             expect(adUrl3).to.match(/ifi=3/);
           });
@@ -646,20 +658,25 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
     it('should include npa=1 if unknown consent & explicit npa', () => {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-      return expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually
-          .match(/(\?|&)npa=1(&|$)/);
+      return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
+        expect(url).to.match(/(\?|&)npa=1(&|$)/);
+      });
     });
 
     it('should include npa=1 if insufficient consent', () =>
-      expect(impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT)).to.eventually
-          .match(/(\?|&)npa=1(&|$)/));
+      impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then(url => {
+        expect(url).to.match(/(\?|&)npa=1(&|$)/);
+      }));
 
-    [CONSENT_POLICY_STATE.SUFFICIENT,
-      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED].forEach(consentState => {
-      it(`should not include npa=1 if ${consentState}`, () =>
-        expect(impl.getAdUrl(consentState)).to.eventually.not
-            .match(/(\?|&)npa=1(&|$)/));
-    });
+    it('should not include not npa, if sufficient consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then(url => {
+        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+      }));
+
+    it('should not include npa, if not required consent', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
+        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+      }));
   });
 
   describe('#unlayoutCallback', () => {
@@ -855,8 +872,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
       // Stub out vsync tasks to run immediately.
       impl.getVsync().run = (vsyncTaskSpec, vsyncState) => {
-        vsyncTaskSpec.measure(vsyncState);
-        vsyncTaskSpec.mutate(vsyncState);
+        if (vsyncTaskSpec.measure) {
+          vsyncTaskSpec.measure(vsyncState);
+        }
+        if (vsyncTaskSpec.mutate) {
+          vsyncTaskSpec.mutate(vsyncState);
+        }
       };
 
       // Fix the viewport to a consistent size to that the test doesn't depend
@@ -909,7 +930,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         // Right margin is 9px from containerContainer and 25px from container.
         // TODO(charliereams): In the test harness it is also offset by 15px due
         // to strange scrollbar behaviour. Figure out how to disable this.
-        expect(element.style.marginRight).to.be.equal('-49px');
+        expect(element.style.marginRight).to.be.equal('-124px');
         expect(element.style.marginLeft).to.be.equal('');
       });
     });

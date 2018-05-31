@@ -16,8 +16,10 @@
 
 import {ACTION_TYPE, AMP_CONSENT_EXPERIMENT, AmpConsent} from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
 import {computedStyle} from '../../../../src/style';
+import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 
 import {
@@ -47,7 +49,9 @@ describes.realWin('amp-consent', {
 
     storageValue = {};
     jsonMockResponses = {
-      'response1': '{"promptIfUnknown": true, "prompt": true}',
+      'response1': '{"promptIfUnknown": true}',
+      'response2': '{}',
+      'response3': '{"promptIfUnknown": false}',
     };
 
     resetServiceForTesting(win, 'xhr');
@@ -182,12 +186,11 @@ describes.realWin('amp-consent', {
     });
 
     it('parse server response', function* () {
-      const parseSpy = sandbox.spy(ampConsent, 'parseConsentResponse_');
+      const parseSpy = sandbox.spy(ampConsent, 'isPromptRequired_');
       ampConsent.buildCallback();
       yield macroTask();
       expect(parseSpy).to.be.calledWith('ABC', {
         'promptIfUnknown': true,
-        'prompt': true,
       });
     });
   });
@@ -195,6 +198,8 @@ describes.realWin('amp-consent', {
   describe('amp-geo integration', () => {
     let defaultConfig;
     let ampConsent;
+    let scriptElement;
+    let consentElement;
     beforeEach(() => {
       defaultConfig = {
         'consents': {
@@ -203,18 +208,18 @@ describes.realWin('amp-consent', {
           },
         },
       };
-      const consentElement = doc.createElement('amp-consent');
+      consentElement = doc.createElement('amp-consent');
       consentElement.setAttribute('id', 'amp-consent');
       consentElement.setAttribute('layout', 'nodisplay');
-      const scriptElement = doc.createElement('script');
+      scriptElement = doc.createElement('script');
       scriptElement.setAttribute('type', 'application/json');
       scriptElement.textContent = JSON.stringify(defaultConfig);
-      consentElement.appendChild(scriptElement);
       doc.body.appendChild(consentElement);
-      ampConsent = new AmpConsent(consentElement);
     });
 
     it('in geo group', function* () {
+      consentElement.appendChild(scriptElement);
+      ampConsent = new AmpConsent(consentElement);
       ISOCountryGroups = ['unknown', 'testGroup'];
       ampConsent.buildCallback();
       yield macroTask();
@@ -222,16 +227,74 @@ describes.realWin('amp-consent', {
     });
 
     it('not in geo group', function* () {
+      consentElement.appendChild(scriptElement);
+      ampConsent = new AmpConsent(consentElement);
       ISOCountryGroups = ['unknown'];
       ampConsent.buildCallback();
       yield macroTask();
       expect(ampConsent.consentRequired_['ABC']).to.equal(false);
+    });
+
+    it('promptIfUnknow override geo', function* () {
+      ISOCountryGroups = ['unknown'];
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': 'response1',
+            'promptIfUnknownForGeoGroup': 'testGroup',
+          },
+        },
+      };
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      ampConsent = new AmpConsent(consentElement);
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.consentRequired_['ABC']).to.equal(true);
+    });
+
+    it('promptIfUnknow override geo with false value', function* () {
+      ISOCountryGroups = ['unknown'];
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': 'response3',
+            'promptIfUnknownForGeoGroup': 'unknown',
+          },
+        },
+      };
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      ampConsent = new AmpConsent(consentElement);
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.consentRequired_['ABC']).to.equal(false);
+    });
+
+    it('checkConsentHref w/o promptIfUnknow not override geo', function* () {
+      ISOCountryGroups = ['testGroup'];
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': 'response2',
+            'promptIfUnknownForGeoGroup': 'testGroup',
+          },
+        },
+      };
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      ampConsent = new AmpConsent(consentElement);
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.consentRequired_['ABC']).to.equal(true);
     });
   });
 
   describe('policy config', () => {
     let defaultConfig;
     let ampConsent;
+    let scriptElement;
+    let consentElement;
     beforeEach(() => {
       defaultConfig = {
         'consents': {
@@ -243,10 +306,10 @@ describes.realWin('amp-consent', {
           },
         },
       };
-      const consentElement = doc.createElement('amp-consent');
+      consentElement = doc.createElement('amp-consent');
       consentElement.setAttribute('id', 'amp-consent');
       consentElement.setAttribute('layout', 'nodisplay');
-      const scriptElement = doc.createElement('script');
+      scriptElement = doc.createElement('script');
       scriptElement.setAttribute('type', 'application/json');
       scriptElement.textContent = JSON.stringify(defaultConfig);
       consentElement.appendChild(scriptElement);
@@ -257,12 +320,94 @@ describes.realWin('amp-consent', {
     it('create default policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_).to.deep.equal({
-        'default': {
-          'waitFor': {
-            'ABC': undefined,
-            'DEF': undefined,
+      expect(ampConsent.policyConfig_['default']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        },
+      });
+    });
+
+    it('create predefined _if_responded policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['_if_responded']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        },
+        'unblockOn': [
+          CONSENT_POLICY_STATE.UNKNOWN,
+          CONSENT_POLICY_STATE.SUFFICIENT,
+          CONSENT_POLICY_STATE.INSUFFICIENT,
+          CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+        ],
+      });
+    });
+
+    it('create predefined _if_accepted policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        },
+      });
+    });
+
+    it('create default _auto_reject policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['_auto_reject']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        },
+        'timeout': {
+          'seconds': 0,
+          'fallbackAction': 'reject',
+        },
+        'unblockOn': [
+          CONSENT_POLICY_STATE.UNKNOWN,
+          CONSENT_POLICY_STATE.SUFFICIENT,
+          CONSENT_POLICY_STATE.INSUFFICIENT,
+          CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+        ],
+      });
+    });
+
+    it('override default policy', function* () {
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': 'response1',
           },
+          'DEF': {
+            'checkConsentHref': 'response1',
+          },
+        },
+        'policy': {
+          'default': {
+            'waitFor': {
+              'ABC': [],
+            },
+          },
+        },
+      };
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      ampConsent = new AmpConsent(consentElement);
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_['default']).to.deep.equal({
+        'waitFor': {
+          'ABC': [],
+        },
+      });
+      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
         },
       });
     });
@@ -320,7 +465,7 @@ describes.realWin('amp-consent', {
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
       expect(updateConsentInstanceStateSpy).to.be.calledWith(
-          'ABC', CONSENT_ITEM_STATE.GRANTED);
+          'ABC', CONSENT_ITEM_STATE.ACCEPTED);
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.REJECT);
       expect(updateConsentInstanceStateSpy).to.be.calledWith(
@@ -343,10 +488,10 @@ describes.realWin('amp-consent', {
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.DISMISS);
       yield macroTask();
-      allowConsoleError(() => {
-        expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
-            /No consent is displaying/);
-      });
+      const errorSpy = sandbox.stub(dev(), 'error');
+      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+      expect(errorSpy).to.be.calledWith('amp-consent',
+          'No consent ui is displaying, consent id null');
     });
 
     describe('schedule display', () => {
@@ -374,9 +519,9 @@ describes.realWin('amp-consent', {
         postPromptUI.setAttribute('id', 'test');
         consentElement.appendChild(postPromptUI);
         storageValue = {
-          'amp-consent:ABC': CONSENT_ITEM_STATE.GRANTED,
-          'amp-consent:DEF': CONSENT_ITEM_STATE.GRANTED,
-          'amp-consent:GH': CONSENT_ITEM_STATE.GRANTED,
+          'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
+          'amp-consent:DEF': CONSENT_ITEM_STATE.ACCEPTED,
+          'amp-consent:GH': CONSENT_ITEM_STATE.ACCEPTED,
         };
         ampConsent.buildCallback();
       });

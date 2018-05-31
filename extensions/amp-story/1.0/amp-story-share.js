@@ -61,6 +61,12 @@ const DEFAULT_BUTTON_PADDING = 16;
  */
 const MIN_BUTTON_PADDING = 10;
 
+/**
+ * Share providers tag.
+ * @private @const {string}
+ */
+const SHARE_PROVIDERS = 'share-providers';
+
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -110,6 +116,7 @@ function buildProviderParams(opt_params) {
 
   if (opt_params) {
     Object.keys(opt_params).forEach(field => {
+      if (field === 'provider') { return; }
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }
@@ -307,7 +314,7 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      const providers = config && config['share-providers'];
+      const providers = config && config[SHARE_PROVIDERS];
       if (!providers) {
         return;
       }
@@ -316,36 +323,26 @@ export class ShareWidget {
   }
 
   /**
-   * @param {!Object<string, (!JsonObject|boolean)>} providers
+   * @param {(!Object<string, (!JsonObject|boolean)> | !Array<!Object|string>)} providers
    * @private
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
-    Object.keys(providers).forEach(type => {
-      if (type == 'system') {
+    providers.forEach(provider => {
+      if (isObject(provider)) {
+        this.add_(buildProvider(this.win.document,
+            provider['provider'], provider));
+        return;
+      }
+
+      if (provider == 'system') {
         user().warn('AMP-STORY',
             '`system` is not a valid share provider type. Native sharing is ' +
             'enabled by default and cannot be turned off.',
-            type);
+            provider);
         return;
       }
-
-      if (isObject(providers[type])) {
-        this.add_(buildProvider(this.win.document, type,
-            /** @type {!JsonObject} */ (providers[type])));
-        return;
-      }
-
-      // Bookend config API requires real boolean, not just truthy
-      if (providers[type] === true) {
-        this.add_(buildProvider(this.win.document, type));
-        return;
-      }
-
-      user().warn('AMP-STORY',
-          'Invalid amp-story bookend share configuration for %s. ' +
-          'Value must be `true` or a params object.',
-          type);
+      this.add_(buildProvider(this.win.document, provider));
     });
   }
 

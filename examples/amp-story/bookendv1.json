@@ -1,0 +1,98 @@
+{
+  "bookend-version": "v1.0",
+  "share-providers": [
+    "email",
+    {"provider": "facebook", "app_id": "254325784911610"},
+    {"provider": "twitter", "text": "This is custom share text that I would like for the Twitter platform"},
+    "whatsapp"
+  ],
+  "components": [
+    {
+      "type": "heading",
+      "text": "test"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article2",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article3",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "heading",
+      "text": "test2"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "portrait",
+      "category": "This is an example portrait",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/312x416"
+    },
+    {
+      "type": "landscape",
+      "title": "TRAPPIST-1 Planets May Still Be Wet Enough for Life",
+      "url": "http://example.com/article.html",
+      "category": "astronomy",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
+      "type": "cta-link",
+      "links": [
+        {
+          "text": "buttonA",
+          "url": "google.com"
+        },
+        {
+          "text": "buttonB",
+          "url": "google.com"
+        },
+        {
+          "text": "longtext longtext longtext longtext longtext longtext longt",
+          "url": "google.com"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "credits"
+    },
+    {
+      "type": "textbox",
+      "text": [
+        "Food by Enrique McPizza",
+        "Choreography by Gabriel Filly",
+        "Script by Alan Ecma S.",
+        "Direction by Jon Tarantino"
+      ]
+    }
+  ]
+}

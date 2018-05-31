@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -25,14 +26,14 @@ const TAG = 'CONSENT-STATE-MANAGER';
  * @enum {number}
  */
 export const CONSENT_ITEM_STATE = {
-  UNKNOWN: 0,
-  GRANTED: 1,
+  ACCEPTED: 1,
   REJECTED: 2,
   DISMISSED: 3,
   NOT_REQUIRED: 4,
-  // TODO(@zhouyx): Seperate UI state from consent state. Add consent requirement state
-  // ui_state = {pending, active, complete}
-  // consent_state = {unknown, granted, rejected}
+  UNKNOWN: 5,
+  // TODO(@zhouyx): Seperate UI state from consent state. Add consent
+  // requirement state ui_state = {pending, active, complete} consent_state =
+  // {unknown, accepted, rejected}
 };
 
 export class ConsentStateManager {
@@ -58,8 +59,10 @@ export class ConsentStateManager {
    * @param {string} instanceId
    */
   registerConsentInstance(instanceId) {
-    dev().assert(!this.instances_[instanceId],
-        `${TAG}: instance already registered`);
+    if (this.instances_[instanceId]) {
+      dev().error(TAG, `instance ${instanceId} already registered`);
+      return;
+    }
     this.instances_[instanceId] = new ConsentInstance(this.ampdoc_, instanceId);
     this.consentChangeObservables_[instanceId] = new Observable();
     if (this.consentReadyResolvers_[instanceId]) {
@@ -75,10 +78,11 @@ export class ConsentStateManager {
    * @param {CONSENT_ITEM_STATE} state
    */
   updateConsentInstanceState(instanceId, state) {
-    dev().assert(this.instances_[instanceId],
-        `${TAG}: cannot find this instance`);
-    dev().assert(this.consentChangeObservables_[instanceId],
-        `${TAG}: should not update ignored consent`);
+    if (!this.instances_[instanceId] ||
+        !this.consentChangeObservables_[instanceId]) {
+      dev().error(TAG, `instance ${instanceId} not registered`);
+      return;
+    }
     this.consentChangeObservables_[instanceId].fire(state);
     this.instances_[instanceId].update(state);
   }
@@ -112,6 +116,33 @@ export class ConsentStateManager {
     return unlistener;
   }
 
+
+  /**
+   * Sets a promise which resolves to a shareData object that is to be returned
+   * from the remote endpoint.
+   *
+   * @param {string} instanceId
+   * @param {Promise<?Object>} sharedDataPromise
+   */
+  setConsentInstanceSharedData(instanceId, sharedDataPromise) {
+    dev().assert(this.instances_[instanceId],
+        `${TAG}: cannot find this instance`);
+    this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
+  }
+
+  /**
+   * Returns a promise that resolves to a shareData object that is returned
+   * from the remote endpoint.
+   *
+   * @param {string} instanceId
+   * @return {?Promise<?Object>}
+   */
+  getConsentInstanceSharedData(instanceId) {
+    dev().assert(this.instances_[instanceId],
+        `${TAG}: cannot find this instance`);
+    return this.instances_[instanceId].sharedDataPromise;
+  }
+
   /**
    * Returns a promise that's resolved when consent instance is ready.
    * @param {string} instanceId
@@ -121,9 +152,9 @@ export class ConsentStateManager {
       return Promise.resolve();
     }
     if (!this.consentReadyPromises_[instanceId]) {
-      this.consentReadyPromises_[instanceId] = new Promise(resolve => {
-        this.consentReadyResolvers_[instanceId] = resolve;
-      });
+      const deferred = new Deferred();
+      this.consentReadyPromises_[instanceId] = deferred.promise;
+      this.consentReadyResolvers_[instanceId] = deferred.resolve;
     }
     return this.consentReadyPromises_[instanceId];
   }
@@ -134,6 +165,9 @@ export class ConsentStateManager {
  */
 export class ConsentInstance {
   constructor(ampdoc, id) {
+    /** @public {?Promise<Object>} */
+    this.sharedDataPromise = null;
+
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
@@ -175,7 +209,7 @@ export class ConsentInstance {
       return;
     }
 
-    const value = (state == CONSENT_ITEM_STATE.GRANTED);
+    const value = (state == CONSENT_ITEM_STATE.ACCEPTED);
     this.storagePromise_.then(storage => {
       if (state != this.localValue_) {
         // If state has changed. do not store.
@@ -207,7 +241,7 @@ export class ConsentInstance {
         this.localValue_ = CONSENT_ITEM_STATE.UNKNOWN;
       } else {
         this.localValue_ = storedValue ?
-          CONSENT_ITEM_STATE.GRANTED : CONSENT_ITEM_STATE.REJECTED;
+          CONSENT_ITEM_STATE.ACCEPTED : CONSENT_ITEM_STATE.REJECTED;
       }
       return this.localValue_;
     }).catch(e => {

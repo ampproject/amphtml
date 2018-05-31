@@ -88,7 +88,7 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 <dl>
   <dt><code>window.context.getHtml (selector, attrs, callback)</code></dt>
-  <dd>Retrieves the specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. <code>selector</code> is a CSS selector of the node to take content from. <code>attrs</code> takes an array of tag attributes to be left in the stringified HTML representation (for instance, <code>['id', 'class']</code>). All not specified attributes will be cut off from the result string. <code>callback</code> takes a function to be called when the content is ready. <code>getHtml</code> invokes callback with the only argument of type string.</dd>
+  <dd>Retrieves the specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. <code>selector</code> is a CSS selector of the node to take content from. <code>attrs</code> takes an array of tag attributes to be left in the stringified HTML representation (for instance, <code>['id', 'class']</code>). All not specified attributes will be cut off from the result string. <code>callback</code> takes a function to be called when the content is ready. <code>getHtml</code> invokes callback with the only argument of type string.<p>This API is by default disabled. To enable it, the `amp-ad` needs to put attribute <code>data-html-access-allowed</code> to explicitly opt-in.</dd>
   <dt><code>window.context.noContentAvailable()</code></dt>
   <dd>Informs the AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise tries to collapse the ad slot.</dd>
   <dt><code>window.context.renderStart(opt_data)</code></dt>
@@ -217,6 +217,37 @@ window.context.renderStart({width: 200, height: 100});
 
 Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height)` API. Details in [Ad Resizing](#ad-resizing).
 
+### amp-consent integration
+If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute
+can be added to `amp-ad` element to respect the corresponding `amp-consent` policy.
+In that case, the `amp-ad` element will be blocked from loading until the consent accepted.
+Individual ad network can override this default consent handling by putting a `consentHandlingOverride: true` in `ads/_config.js`.
+Doing so will unblock the ad loading once the consent is responded. It will be then the ad network's responsibility
+to respect user's consent choice, for example to serve non-personalized ads on consent rejection.
+AMP runtime provides the following `window.context` APIs for ad network to access the consent state.
+
+<dl>
+  <dt><code>window.context.initialConsentState</code></dt>
+  <dd>
+    Provides the initial consent state when the ad is unblocked.
+    The states are integers defined <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#advanced-blocking-behaviors">here</a>
+    (<a href="https://github.com/ampproject/amphtml/blob/master/src/consent-state.js#L23">code</a>).
+  </dd>
+  <dt><code>window.context.getConsentState(callback)</code></dt>
+  <dd>
+    Queries the current consent state asynchronously. The `callback` function 
+    will be invoked with the current consent state.
+  </dd>
+  <dt><code>window.context.consentSharedData</code></dt>
+  <dd>
+    Provides additional user privacy related data retrieved from publishers.
+    See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response">here</a> for details.
+  </dd>
+</dl>
+
+After overriding the default consent handling behavior, don't forget to update your publisher facing
+ documentation with the new behaviors on user's consent choices.
+
 ### Optimizing ad performance
 
 #### JS reuse across iframes
@@ -232,7 +263,7 @@ Add the JS URLs that an ad **always** fetches or always connects to (if you know
 This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
 
 ### Ad markup
-Ads are loaded using the `<amp-ad>` tag containing the specified `type`  for the ad netowkr, and name value pairs of configuration. 
+Ads are loaded using the `<amp-ad>` tag containing the specified `type`  for the ad netowkr, and name value pairs of configuration.
 
 This is an example for the A9 network:
 
@@ -292,7 +323,7 @@ If you're adding support for a new third-party ad service, changes to the follow
 
 To verify the examples that you have put in `/examples/ads.amp.html`:
 
-1. Start a local gulp web server by running command `npx gulp`.
+1. Start a local gulp web server by running command `gulp`.
 2. Visit `http://localhost:8000/examples/ads.amp.html?type=yournetwork` in your browser to make sure the examples load ads.
 
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only will it be a more confident example for publishers to follow, but also allows the AMP team to catch any regression bug during AMP releases.
@@ -306,14 +337,15 @@ Please verify your ad is fully functioning, for example, by clicking on an ad. W
 Please make sure your changes pass the tests:
 
 ```
-npx gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
+gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
+
 ```
 
 If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/functional/ads/test-yournetwork.js` is highly recommended.
 
 ### Lint and type-check
 
-To speed up the review process, please run `npx gulp lint` and `npx gulp check-types`, then fix errors, if any, before sending out the PR.
+To speed up the review process, please run `gulp lint` and `gulp check-types`, then fix errors, if any, before sending out the PR.
 
 ### Other tips
 
@@ -322,6 +354,6 @@ To speed up the review process, please run `npx gulp lint` and `npx gulp check-t
   1. Using a different email address in the git commit.
   2. Not providing the exact company name in the PR thread.
 
-## Developer announcements for ads related API changes 
+## Developer announcements for ads related API changes
 
-For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, the AMP Project will notify the [amp-ads-announce@googlegroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes. 
+For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, the AMP Project will notify the [amp-ads-announce@googlegroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes.

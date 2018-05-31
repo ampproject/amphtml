@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+
+[desktop] amp-story-page[i-amphtml-loading] {
+  /* Move below viewport so that ad preloads */
+  transform: scale(1.0) translateX(-100%) translateY(200%) !important;
+}
+
 .i-amphtml-story-ad-link {
   background-color: #FFFFFF !important;
   border-radius: 20px !important;
@@ -82,6 +88,8 @@ amp-story[ad-showing] .i-amphtml-story-ad-attribution {
   visibility: visible !important;
 }
 
-amp-story[ad-showing] .i-amphtml-story-progress-bar {
-  visibility: hidden !important;
+.i-amphtml-glass-pane {
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 1 !important;
 }

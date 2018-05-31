@@ -28,6 +28,7 @@ import {
   AnimationManager,
   hasAnimations,
 } from './animation';
+import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
@@ -36,6 +37,7 @@ import {PageScalingService} from './page-scaling';
 import {Services} from '../../../src/services';
 import {
   closestBySelector,
+  iterateCursor,
   matches,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -58,10 +60,15 @@ const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 
 
 /**
- * Selector for which media to wait for on page layout.
- * @const {string}
+ * Selectors for media elements
+ * @enum {string}
  */
-const PAGE_MEDIA_SELECTOR = 'amp-audio, amp-video, amp-img, amp-anim';
+const Selectors = {
+  // which media to wait for on page layout.
+  ALL_AMP_MEDIA: 'amp-audio, amp-video, amp-img, amp-anim',
+  ALL_MEDIA: 'audio, video',
+  ALL_VIDEO: 'video',
+};
 
 
 /** @private @const {string} */
@@ -97,19 +104,16 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.markPageAsLoaded_();
     });
 
-    let mediaPoolResolveFn, mediaPoolRejectFn;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise<!MediaPool>} */
-    this.mediaPoolPromise_ = new Promise((resolve, reject) => {
-      mediaPoolResolveFn = resolve;
-      mediaPoolRejectFn = reject;
-    });
+    this.mediaPoolPromise_ = deferred.promise;
 
     /** @private @const {!function(!MediaPool)} */
-    this.mediaPoolResolveFn_ = mediaPoolResolveFn;
+    this.mediaPoolResolveFn_ = deferred.resolve;
 
     /** @private @const {!function(*)} */
-    this.mediaPoolRejectFn_ = mediaPoolRejectFn;
+    this.mediaPoolRejectFn_ = deferred.reject;
 
     /** @private @const {boolean} Only prerender the first story page. */
     this.prerenderAllowed_ = matches(this.element,
@@ -121,6 +125,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
+
+    /**
+     * Whether the user agent matches a bot.  This is used to prevent resource
+     * optimizations that make the document less useful at crawl time, e.g.
+     * removing sources from videos.
+     * @private @const {boolean}
+     */
+    this.isBotUserAgent_ = Services.platformFor(this.win).isBot();
   }
 
 
@@ -259,7 +271,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   waitForMediaLayout_() {
-    const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
+    const mediaSet = this.getMediaBySelector_(Selectors.ALL_AMP_MEDIA);
+
     const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
       return new Promise(resolve => {
         switch (mediaEl.tagName.toLowerCase()) {
@@ -316,21 +329,45 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Gets all media elements on this page.
-   * @return {!NodeList<!Element>}
+   * @return {!Array<?Element>}
    * @private
    */
   getAllMedia_() {
-    return this.element.querySelectorAll('audio, video');
+    return this.getMediaBySelector_(Selectors.ALL_MEDIA);
   }
 
 
   /**
    * Gets all video elements on this page.
-   * @return {!NodeList<!Element>}
+   * @return {!Array<?Element>}
    * @private
    */
   getAllVideos_() {
-    return this.element.querySelectorAll('video');
+    return this.getMediaBySelector_(Selectors.ALL_VIDEO);
+  }
+
+
+  /**
+   * Gets media on page by given selector. Finds elements through friendly
+   * iframe (if one exists).
+   * @param {string} selector
+   * @return {!Array<?Element>}
+   */
+  getMediaBySelector_(selector) {
+    const iframe = this.element.querySelector('iframe');
+    const iframeDoc = iframe && iframe.contentDocument;
+    const mediaSet = [];
+
+    iterateCursor(scopedQuerySelectorAll(this.element, selector),
+        el => mediaSet.push(el));
+
+    if (!iframeDoc) {
+      return mediaSet;
+    }
+
+    iterateCursor(iframeDoc.querySelectorAll(selector),
+        el => mediaSet.push(el));
+    return mediaSet;
   }
 
 
@@ -362,8 +399,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   pauseAllMedia_(rewindToBeginning = false) {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.pause(
-          /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
+      if (this.isBotUserAgent_) {
+        mediaEl.pause();
+      } else {
+        return mediaPool.pause(
+            /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
+      }
     });
   }
 
@@ -375,7 +416,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        mediaEl.play();
+      } else {
+        return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -387,7 +432,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   preloadAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        // No-op.
+      } else {
+        return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -398,7 +447,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   muteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        mediaEl.muted = true;
+        mediaEl.setAttribute('muted', '');
+      } else {
+        return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -409,7 +463,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   unmuteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        mediaEl.muted = false;
+        mediaEl.removeAttribute('muted');
+      } else {
+        return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -421,7 +480,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        // No-op.
+      } else {
+        return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -532,7 +595,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.getNextPageId(true /* opt_isAutomaticAdvance */);
     const manualAdvanceNext =
         this.getNextPageId(false /* opt_isAutomaticAdvance */);
-    const previous = this.getPreviousPageId_();
+    const previous = this.getPreviousPageId();
 
     if (autoAdvanceNext) {
       adjacentPageIds.push(autoAdvanceNext);
@@ -554,9 +617,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Gets the ID of the previous page in the story (before the current page).
    * @return {?string} Returns the ID of the next page in the story, or null if
    *     there isn't one.
-   * @private
    */
-  getPreviousPageId_() {
+  getPreviousPageId() {
     if (this.element.hasAttribute('i-amphtml-return-to')) {
       return this.element.getAttribute('i-amphtml-return-to');
     }
@@ -600,7 +662,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Navigates to the previous page in the story.
    */
   previous() {
-    const targetPageId = this.getPreviousPageId_();
+    const targetPageId = this.getPreviousPageId();
 
     if (targetPageId === null) {
       dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);

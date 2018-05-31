@@ -38,8 +38,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     /** @private {string} */
     this.src_ = '';
 
-    /** @private {?Element} */
-    this.iframe_ = null;
   }
 
   /** @override */
@@ -108,7 +106,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.setAttribute('src', this.src_);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 }

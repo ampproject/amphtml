@@ -29,7 +29,9 @@ const TAG = 'amp-story';
  *    canshowbookend: boolean,
  *    canshownavigationoverlayhint: boolean,
  *    canshowpreviouspagehelp: boolean,
+ *    canshowsharinguis: boolean,
  *    canshowsystemlayerbuttons: boolean,
+ *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
  *    hasaudiostate: boolean,
@@ -50,9 +52,11 @@ export const StateProperty = {
   CAN_SHOW_BOOKEND: 'canshowbookend',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canshownavigationoverlayhint',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canshowpreviouspagehelp',
+  CAN_SHOW_SHARING_UIS: 'canshowsharinguis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
 
   // App States.
+  AD_STATE: 'adstate',
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
@@ -66,6 +70,7 @@ export const StateProperty = {
 
 /** @private @const @enum {string} */
 export const Action = {
+  TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
@@ -86,6 +91,10 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    // Triggers the ad UI.
+    case Action.TOGGLE_AD:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.AD_STATE]: !!data}));
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
       if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
@@ -219,7 +228,9 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+      [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
@@ -231,9 +242,9 @@ export class AmpStoryStoreService {
     });
   }
 
+  // @TODO(gmajoulet): These should get their own file if they start growing.
   /**
    * Retrieves the embed mode config, that will override the default state.
-   * @todo(gmajoulet): These should get their own file if they start growing.
    * @return {!Object<StateProperty, *>} Partial state
    * @private
    */
@@ -248,6 +259,10 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
           [StateProperty.MUTED_STATE]: false,
+        };
+      case EmbedMode.NO_SHARING:
+        return {
+          [StateProperty.CAN_SHOW_SHARING_UIS]: false,
         };
       default:
         return {};

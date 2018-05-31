@@ -17,7 +17,7 @@
 import {TAG} from './vars';
 import {dev} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{
  *    CONNECT_HANDSHAKE: string,
@@ -97,7 +97,7 @@ export class WindowMessenger {
    * @param {Array<string>} allowedOrigins A list of string origins to check
    *     against when receiving connection messages. A message from outside this
    *     list of origins won't be accepted.
-   * @returns {Promise} A Promise that resolves when another frame successfully
+   * @return {Promise} A Promise that resolves when another frame successfully
    *      establishes a messaging channel, or rejects on error.
    */
   listen(allowedOrigins) {
@@ -147,16 +147,16 @@ export class WindowMessenger {
    *
    * @param {string} origin
    * @param {Array<string>} allowedOrigins
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   isAllowedOrigin_(origin, allowedOrigins) {
-    const normalizedOrigin = parseUrl(origin).origin;
+    const normalizedOrigin = parseUrlDeprecated(origin).origin;
     for (let i = 0; i < allowedOrigins.length; i++) {
       const allowedOrigin = allowedOrigins[i];
       // A user might have mistyped the allowed origin, so let's normalize our
       // comparisons first
-      if (parseUrl(allowedOrigin).origin === normalizedOrigin) {
+      if (parseUrlDeprecated(allowedOrigin).origin === normalizedOrigin) {
         return true;
       }
     }
@@ -259,7 +259,8 @@ export class WindowMessenger {
             topic: WindowMessenger.Topics.CONNECT_HANDSHAKE,
           }), expectedRemoteOrigin === '*' ?
             '*' :
-            parseUrl(expectedRemoteOrigin).origin, [this.channel_.port2]);
+            parseUrlDeprecated(expectedRemoteOrigin).origin,
+          [this.channel_.port2]);
       dev().fine(TAG, `Opening channel to ${expectedRemoteOrigin}...`);
     });
   }
@@ -320,7 +321,7 @@ export class WindowMessenger {
     if (this.messages_[message['id']] && message['isReply']) {
       const existingMessage = this.messages_[message['id']];
       delete this.messages_[message['id']];
-      const promiseResolver = existingMessage.promiseResolver;
+      const {promiseResolver} = existingMessage;
       // Set new incoming message data on existing message
       existingMessage.message = message['data'];
       if (this.debug_) {

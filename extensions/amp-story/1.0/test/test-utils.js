@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {timeStrToMillis} from '../utils';
+import {
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+  timeStrToMillis,
+} from '../utils';
 
 describes.fakeWin('amp-story utils', {}, () => {
   describe('timeStrToMillis', () => {
@@ -45,6 +49,41 @@ describes.fakeWin('amp-story utils', {}, () => {
     it('should return undefined for invalid types', () => {
       const convertedMillis = timeStrToMillis('10kg');
       expect(convertedMillis).to.be.NaN;
+    });
+  });
+
+  describe('getRGBFromCssColorValue', () => {
+    it('should accept rgb parameters', () => {
+      expect(getRGBFromCssColorValue('rgb(0, 10, 100)'))
+          .to.deep.equal({r: 0, g: 10, b: 100});
+    });
+
+    it('should accept rgba parameters', () => {
+      expect(getRGBFromCssColorValue('rgba(0, 10, 100, 0.1)'))
+          .to.deep.equal({r: 0, g: 10, b: 100});
+    });
+
+    it('should throw an error if wrong parameters', () => {
+      allowConsoleError(() => {
+        getRGBFromCssColorValue('who dis');
+      });
+    });
+
+    it('should return a default value if wrong parameters', () => {
+      allowConsoleError(() => {
+        expect(getRGBFromCssColorValue('who dis'))
+            .to.deep.equal({r: 0, g: 0, b: 0});
+      });
+    });
+  });
+
+  describe('getTextColorForRGB', () => {
+    it('should return white for a dark background', () => {
+      expect(getTextColorForRGB({r: 10, g: 10, b: 10})).to.equal('#FFF');
+    });
+
+    it('should return white for a light background', () => {
+      expect(getTextColorForRGB({r: 200, g: 200, b: 200})).to.equal('#000');
     });
   });
 });

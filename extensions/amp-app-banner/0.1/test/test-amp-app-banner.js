@@ -128,7 +128,7 @@ describes.realWin('amp-app-banner', {
   }
 
   function testButtonMissing() {
-    allowConsoleError(() => { return getAppBanner({
+    return allowConsoleError(() => { return getAppBanner({
       iosMeta,
       androidManifest,
       noOpenButton: true,
@@ -194,7 +194,7 @@ describes.realWin('amp-app-banner', {
     });
 
     it('should parse meta content and validate app-argument url', () => {
-      allowConsoleError(() => { return getAppBanner({
+      return allowConsoleError(() => { return getAppBanner({
         iosMeta: {content:
             'app-id=828256236, app-argument=javascript:alert("foo");'},
       }).should.eventually.be.rejectedWith(
