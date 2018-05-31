@@ -317,6 +317,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.isResponsive_() ? 13 : null,
       'pfx': pfx ? '1' : '0',
+      // Matched content specific fields.
+      'crui': this.element.getAttribute('data-matched-content-ui-type'),
+      'cr_row': this.element.getAttribute('data-matched-content-rows-num'),
+      'cr_col': this.element.getAttribute('data-matched-content-columns-num'),
       // Package code (also known as URL group) that was used to
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),

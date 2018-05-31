@@ -16,7 +16,6 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
-
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {

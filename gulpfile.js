@@ -151,6 +151,7 @@ declareExtension('amp-story', '0.1', {
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
+    'amp-story-info-dialog',
     'amp-story-share',
     'amp-story-share-menu',
     'amp-story-system-layer',
@@ -164,6 +165,7 @@ declareExtension('amp-story', '1.0', {
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
+    // TODO(newmuis): 'amp-story-info-dialog',
     'amp-story-share',
     'amp-story-share-menu',
     'amp-story-system-layer',
@@ -1358,7 +1360,6 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
         }
       });
 }
-
 
 /**
  * Build "Login Done" page.

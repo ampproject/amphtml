@@ -35,8 +35,6 @@ export class IframeTransportMessageQueue {
    * messages to
    */
   constructor(win, frame) {
-    /** @private {!Window} */
-    this.win_ = win;
 
     /** @private {!HTMLIFrameElement} */
     this.frame_ = frame;
@@ -62,7 +60,7 @@ export class IframeTransportMessageQueue {
   /**
    * Returns whether the queue has been marked as ready yet
    * @return {boolean}
-   * @VisibleForTesting
+   * @visibleForTesting
    */
   isReady() {
     return this.isReady_;
@@ -71,7 +69,7 @@ export class IframeTransportMessageQueue {
   /**
    * Indicate that a cross-domain frame is ready to receive messages, and
    * send all messages that were previously queued for it.
-   * @VisibleForTesting
+   * @visibleForTesting
    */
   setIsReady() {
     this.isReady_ = true;
@@ -81,7 +79,7 @@ export class IframeTransportMessageQueue {
   /**
    * Returns how many creativeId -> message(s) mappings there are
    * @return {number}
-   * @VisibleForTesting
+   * @visibleForTesting
    */
   queueSize() {
     return this.pendingEvents_.length;
