@@ -108,18 +108,16 @@ export class Expander {
           // find out where this keyword is coming from
           if (opt_bindings && opt_bindings.hasOwnProperty(match.name)) {
             // the optional bindings
-            binding = opt_bindings[match.name];
+            binding = {
+              // This construction helps us save the match name and determine
+              // precedence of resolution choices in #expandBinding_ later.
+              name: match.name,
+              optional: opt_bindings[match.name],
+            };
           } else {
             // or the global source
             binding = this.variableSource_.get(match.name);
-            if (opt_sync && binding.sync) {
-              binding = binding.sync;
-            } else if (opt_sync) {
-              user().error(TAG, 'ignoring async replacement key: ', match.name);
-              binding = '';
-            } else {
-              binding = binding.async || binding.sync;
-            }
+            binding.name = match.name;
           }
 
           urlIndex = match.stop + 1;
@@ -176,7 +174,9 @@ export class Expander {
           urlIndex++;
         }
 
-        else if (url[urlIndex] === ')' && !ignoringChars) {
+        // Invoke a function on every right parenthesis unless the stack is
+        // empty.
+        else if (numOfPendingCalls && url[urlIndex] === ')' && !ignoringChars) {
           urlIndex++;
           numOfPendingCalls--;
           const binding = stack.pop();
@@ -214,10 +214,34 @@ export class Expander {
     return evaluateNextLevel();
   }
 
+
+  /**
+   * Called when a binding is ready to be resolved. Looks to
+   * @param {Object<string, *>} binding An object containing the name of macro
+   * and value to be resolved.
+   * @param {Array} opt_args Arguments passed to the macro.
+   * @param {*} opt_sync Whether the binding should be resolved synchronously.
+   */
   evaluateBinding_(binding, opt_args, opt_sync) {
+    if (binding.optional) {
+      // If a binding is passed in through opt_bindings it always takes
+      // precedence.
+      binding = binding.optional;
+    } else if (opt_sync && binding.sync) {
+      // Use the sync resolution if avaliable when called synchronously.
+      binding = binding.sync;
+    } else if (opt_sync) {
+      // If there is no sync resolution we can not wait.
+      user().error(TAG, 'ignoring async replacement key: ', binding.name);
+      binding = '';
+    } else {
+      // Prefer the async over the sync but it may not exist.
+      binding = binding.async || binding.sync;
+    }
     return opt_sync ? this.evaluateBindingSync_(binding, opt_args) :
       this.evaluateBindingAsync_(binding, opt_args);
   }
+
 
   /**
    * resolves binding to value to be substituted asyncronously

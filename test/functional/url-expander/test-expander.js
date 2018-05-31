@@ -203,7 +203,7 @@ describes.realWin('Expander', {
       {
         description: 'should treat unrecognized keywords as normal strings',
         input: 'TRIM(FAKE(aaaaa))',
-        output: '',
+        output: 'FAKE(aaaaa)',
       },
       {
         description: 'ignores commas within backticks',
