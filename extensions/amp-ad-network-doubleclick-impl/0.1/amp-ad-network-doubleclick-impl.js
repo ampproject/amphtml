@@ -303,7 +303,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.adKey_ = 0;
 
     /** @private {!Array<string>} */
-    this.experimentIds_ = this.getPageLevelExperiments();
+    this.experimentIds_ = [];
+    this.setPageLevelExperiments(this.getPageLevelExperiments(
+        extractUrlExperimentId(this.win, this.element)));
 
     /** @protected @const {boolean} */
     this.useSra = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
@@ -408,10 +410,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @return {!Array<string>} page level enabled experiments
+   * @param {string} urlExperimentId
    * @visibleForTesting
    */
-  getPageLevelExperiments() {
+  setPageLevelExperiments(urlExperimentId) {
     const warnDeprecation = feature => user().warn(
         TAG, `${feature} is no longer supported for DoubleClick.` +
           'Please refer to ' +
@@ -428,7 +430,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (useRemoteHtml) {
       warnDeprecation('remote.html');
     }
-    const urlExperimentId = extractUrlExperimentId(this.win, this.element);
     const experimentId = {
       // Delay Request
       '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
@@ -437,21 +438,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
       '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
     }[urlExperimentId];
-    if (!experimentId) {
-      return;
-    }
-    // For SRA experiments, do not include pages that are using refresh.
-    if ((experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL ||
+    if (!experimentId ||
+      // For SRA experiments, do not include pages that are using refresh.
+      (experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL ||
       experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA) &&
       (this.win.document.querySelector('meta[name=amp-ad-enable-refresh]') ||
        this.win.document.querySelector(
            'amp-ad[type=doubleclick][data-enable-refresh]'))) {
-      return [];
-    } 
+      return;
+    }
     dev().info(
         TAG,
         `url experiment selection ${urlExperimentId}: ${experimentId}.`)
-    return [experimentId];
+    this.experimentIds_.push(experimentId);
   }
 
   /** @override */

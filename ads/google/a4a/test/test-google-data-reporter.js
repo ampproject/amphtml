@@ -21,9 +21,6 @@ import {
   BaseLifecycleReporter,
   GoogleAdLifecycleReporter,
 } from '../performance';
-import {
-  DOUBLECLICK_A4A_EXPERIMENT_NAME,
-} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
 import {EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '../utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {forceExperimentBranch} from '../../../../src/experiments';
@@ -47,7 +44,7 @@ describe('#getLifecycleReporter', () => {
 
   it('should not create reporter if sampling is not enabled', () => {
     forceExperimentBranch(win, 'a4aProfilingRate', null);
-    forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, '1234');
+    //forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, '1234');
     const element = doc.createElement('div');
     element.setAttribute('type', 'doubleclick');
     doc.body.appendChild(element);

@@ -39,12 +39,6 @@ import {
   resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {
-  DOUBLECLICK_A4A_EXPERIMENT_NAME,
-  DOUBLECLICK_EXPERIMENT_FEATURE,
-  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
-  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
-} from '../doubleclick-a4a-config';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
 import {
@@ -870,8 +864,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should return true if in experiment', () => {
-      forceExperimentBranch(impl.win, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+      impl.setPageLevelExperiments('4');
       expect(impl.delayAdRequestEnabled()).to.be.true;
     });
 
@@ -1170,32 +1163,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(onVisibilityChangedHandler).to.not.be.ok;
       expect(isInExperiment(elem2, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
           .to.be.true;
-    });
-  });
-
-  describe('shouldPreferentialRenderWithoutCrypto', () => {
-    beforeEach(() => {
-      element = doc.createElement('amp-ad');
-      element.setAttribute('type', 'doubleclick');
-      element.setAttribute('data-ad-client', 'adsense');
-      doc.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-    });
-
-    afterEach(() => {
-      doc.body.removeChild(element);
-    });
-
-    it('should return true by default', () => {
-      expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.true;
-    });
-
-    it('should return false when in canonical holdback experiment', () => {
-      forceExperimentBranch(
-          impl.win,
-          UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP);
-      expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.false;
     });
   });
 
