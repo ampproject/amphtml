@@ -580,7 +580,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
           env, bind, '{"onePlusOne": one + one}', {one: 1});
       return promise.then(() => {
         expect(replaceHistorySpy).calledOnce;
-        expect(replaceHistorySpy.firstCall.args[0].ampBindState)
+        expect(replaceHistorySpy.firstCall.args[0].data['amp-bind'])
             .to.deep.equal({onePlusOne: 2});
       });
     });

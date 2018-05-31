@@ -297,7 +297,9 @@ export class Bind {
         .then(result => this.setState(result))
         .then(() => {
           this.history_.replace({
-            ampBindState: this.state_,
+            data: {
+              'amp-bind': this.state_,
+            },
             title: this.localWin_.document.title,
           });
         });
@@ -328,7 +330,9 @@ export class Bind {
       return this.setState(result)
           .then(() => {
             this.history_.push(onPop, {
-              ampBindState: this.state_,
+              data: {
+                'amp-bind': this.state_,
+              },
               title: this.localWin_.document.title,
             });
           });

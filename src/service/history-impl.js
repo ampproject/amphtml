@@ -35,17 +35,17 @@ const HISTORY_PROP_ = 'AMP.History';
 let HistoryIdDef;
 
 /** @typedef {{
-  stackIndex: number,
+  stackIndex: HistoryIdDef,
   title: string,
   fragment: string,
-  ampBindState: (JsonObject|undefined)
+  data: (Object<string,*>|undefined)
 }} */
 let HistoryStateDef;
 
 /** @typedef {{
   title: (string|undefined),
   fragment: (string|undefined),
-  ampBindState: (JsonObject|undefined)
+  data: (Object<string,*>|undefined)
 }} */
 let HistoryStateUpdateDef;
 
@@ -115,12 +115,12 @@ export class History {
    * with the new head state within the history stack. All states coming
    * after the supplied state will also be popped, and their
    * callbacks executed in the same fashion.
-   * @param {!HistoryIdDef} stackIndex
+   * @param {!HistoryIdDef} stateId
    * @return {!Promise}
    */
-  pop(stackIndex) {
+  pop(stateId) {
     return this.enque_(() => {
-      return this.binding_.pop(stackIndex).then(historyState => {
+      return this.binding_.pop(stateId).then(historyState => {
         this.onStateUpdated_(historyState);
       });
     }, 'pop');
@@ -513,11 +513,10 @@ export class HistoryBindingNatural_ {
   /** @override */
   push(opt_stateUpdate) {
     return this.whenReady_(() => {
-      const updatedState = Object.assign({},
-          this.getState_(),
+      const updatedState = this.mergeStateUpdate_(this.getState_(),
           opt_stateUpdate || {});
       this.historyPushState_(updatedState);
-      return tryResolve(() => Object.assign({}, updatedState,
+      return tryResolve(() => this.mergeStateUpdate_(updatedState,
           {stackIndex: this.stackIndex_}));
     });
   }
@@ -529,7 +528,7 @@ export class HistoryBindingNatural_ {
     return this.whenReady_(() => {
       return this.back_(this.stackIndex_ - stackIndex + 1);
     }).then(newStackIndex => {
-      return Object.assign({}, this.getState_(), {
+      return this.mergeStateUpdate_(this.getState_(), {
         stackIndex: newStackIndex,
       });
     });
@@ -538,12 +537,12 @@ export class HistoryBindingNatural_ {
   /** @override */
   replace(opt_stateUpdate) {
     return this.whenReady_(() => {
-      const updatedState = Object.assign({},
+      const updatedState = this.mergeStateUpdate_(
           this.getState_(),
           opt_stateUpdate || {});
       this.historyReplaceState_(updatedState, '',
           '#' + (updatedState.fragment || ''));
-      return tryResolve(() => Object.assign({}, updatedState, {
+      return tryResolve(() => this.mergeStateUpdate_(updatedState, {
         stackIndex: this.stackIndex_,
       }));
     });
@@ -551,7 +550,7 @@ export class HistoryBindingNatural_ {
 
   /** @override */
   get() {
-    return tryResolve(() => Object.assign({}, this.getState_(), {
+    return tryResolve(() => this.mergeStateUpdate_(this.getState_(), {
       stackIndex: this.stackIndex_,
     }));
   }
@@ -582,8 +581,8 @@ export class HistoryBindingNatural_ {
       // Make sure stack has enough space. Whether we are going forward or
       // backward, the stack should have at least one extra cell.
       newStackIndex = this.win.history.length - 2;
-      this.updateHistoryState_(/** @type {!HistoryStateDef} */ (Object.assign({}, state,
-          {stackIndex: newStackIndex})));
+      this.updateHistoryState_(this.mergeStateUpdate_(state,
+          {stackIndex: newStackIndex}));
     }
 
     if (stackIndex == undefined) {
@@ -606,8 +605,8 @@ export class HistoryBindingNatural_ {
 
     // Update the stack, pop squeezed states.
     if (newStackIndex != this.stackIndex_) {
-      this.updateHistoryState_(/** @type {!HistoryStateDef} */ (Object.assign({}, state,
-          {stackIndex: newStackIndex})));
+      this.updateHistoryState_(this.mergeStateUpdate_(state,
+          {stackIndex: newStackIndex}));
     }
 
     // User navigation is allowed to move past the starting point of
@@ -697,7 +696,7 @@ export class HistoryBindingNatural_ {
       state[HISTORY_PROP_] = stackIndex;
       this.replaceState_(state);
     }
-    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (Object.assign({}, /** @type {?Object} */ (state), {stackIndex})));
+    this.updateHistoryState_(this.mergeStateUpdate_(state, {stackIndex}));
   }
 
   /**
@@ -746,7 +745,7 @@ export class HistoryBindingNatural_ {
     const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
     state[HISTORY_PROP_] = stackIndex;
     this.replaceState_(state, title, url);
-    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (Object.assign({}, /** @type {?Object} */ (state), {stackIndex})));
+    this.updateHistoryState_(this.mergeStateUpdate_(state, {stackIndex}));
   }
 
   /**
@@ -779,6 +778,17 @@ export class HistoryBindingNatural_ {
   updateFragment(fragment) {
     return this.replace({fragment});
   }
+
+  /**
+   * @param {!HistoryStateDef} state
+   * @param {!HistoryStateUpdateDef} stateUpdate
+   * @return {!HistoryStateDef}
+   */
+  mergeStateUpdate_(state, stateUpdate) {
+    const mergedData = Object.assign({}, state.data, stateUpdate.data);
+    return Object.assign({}, state, stateUpdate, {data: mergedData});
+  }
+
 }
 
 
@@ -877,7 +887,7 @@ export class HistoryBindingVirtual_ {
           return {
             fragment: response['fragment'],
             stackIndex: response['stackIndex'],
-            ampBindState: response['ampBindState'],
+            data: response['data'],
             title: response['title'],
           };
         });
@@ -960,7 +970,6 @@ function createHistory(ampdoc) {
   }
   return new History(ampdoc, binding);
 }
-
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
