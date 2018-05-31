@@ -218,48 +218,6 @@ window.addEventListener('message', function(event) {
 
 The intersection message would be sent by the parent to the iframe when the iframe moves in or out of the viewport (or is partially visible), when the iframe is scrolled or resized.
 
-## Two-way messaging with iframes
-
-In addition to resize and viewability messages, iframes can send and receive generic messages that interface with AMP's [actions and events system](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md).
-
-{% call callout('Note', type='note') %}
-Iframes may only send messages to the parent page in response to a user gesture. Messages that are not triggered by a user gesture will be ignored.
-{% endcall %}
-
-### Sending messages to the iframe with `postMessage` action
-
-`amp-iframe` supports the `postMessage` action which may be invoked in the usual manner. The arguments are also passed to the iframe as key-value pairs in [`MessageEvent.data`](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data). For example:
-
-```html
-<!-- When this button is tapped, sends `{foo: 'bar'}` to the iframe. -->
-<button on="tap:my-iframe.postMessage(foo='bar')">Message iframe</button>
-```
-
-In the iframe:
-
-```js
-// When the button is tapped, prints "Received from page: {foo: "bar"}" .
-window.addEventListener('message', function(event) {
-  console.log('Received from page: ' + JSON.stringify(event.data));
-});
-```
-
-### Receiving messages from the iframe with `message` event
-
-Conversely, `amp-iframe` supports receiving messages from the iframe when a `message` event handler is installed. These messages must be triggered by a user gesture. For example:
-
-```js
-// Tapping this button sends `123` to the parent AMP.
-<button onclick="window.parent.postMessage(123, '*');">Message parent</button>
-```
-
-In the AMP page:
-
-```html
-<!-- When receiving a message from the iframe, set variable `baz` to its contents (`123`). -->
-<amp-iframe id="my-iframe" on="message:AMP.setState({baz: event.data})">
-```
-
 ## Tracking/analytics iframes
 
 We strongly recommend using [`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics) for analytics purposes, because it is significantly more robust, complete and an efficient solution which can be configured for a wide range of analytics vendors.
