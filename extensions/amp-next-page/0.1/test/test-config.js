@@ -52,7 +52,7 @@ describe('amp-next-page config', () => {
           .to.not.throw();
     });
 
-    it('allows canonical URLs when served from the cache', () => {
+    it('rewrites canonical URLs when served from the cache', () => {
       const cdnOrigin = 'https://example-com.cdn.ampproject.org';
       const config = {
         pages: [
@@ -62,13 +62,33 @@ describe('amp-next-page config', () => {
             title: 'Article 1',
           },
           {
-            ampUrl: 'https://example.com/article2',
+            ampUrl: 'https://example.com/art2?x=1',
             image: 'https://example.com/image.png',
             title: 'Article 1',
           },
         ],
       };
       expect(() => assertConfig(config, cdnOrigin, origin)).to.not.throw();
+      expect(config.pages[1].ampUrl).to.equal(
+          'https://example-com.cdn.ampproject.org/c/s/example.com/art2?x=1');
+    });
+
+    it('rewrites non-HTTPS canonical URLs when served from the cache', () => {
+      const insecureOrigin = 'http://example.com';
+      const cdnOrigin = 'https://example-com.cdn.ampproject.org';
+      const config = {
+        pages: [
+          {
+            ampUrl: 'http://example.com/art2?x=1',
+            image: 'http://example.com/image.png',
+            title: 'Article 1',
+          },
+        ],
+      };
+      expect(() => assertConfig(config, cdnOrigin, insecureOrigin))
+          .to.not.throw();
+      expect(config.pages[0].ampUrl).to.equal(
+          'https://example-com.cdn.ampproject.org/c/example.com/art2?x=1');
     });
 
     it('throws on null config', () => {
