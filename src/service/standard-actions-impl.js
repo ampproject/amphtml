@@ -100,7 +100,7 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return null;
     }
-    const {node, method, args} = invocation;
+    const {node, caller, method, args} = invocation;
     const win = (node.ownerDocument || node).defaultView;
     switch (method) {
       case 'pushState':
@@ -113,8 +113,8 @@ export class StandardActions {
       case 'navigateTo':
         // Some components have additional constraints on allowing navigation.
         let permission = Promise.resolve();
-        if (startsWith(node.tagName, 'AMP-')) {
-          permission = node.getImpl().then(impl => {
+        if (startsWith(caller.tagName, 'AMP-')) {
+          permission = caller.getImpl().then(impl => {
             if (typeof impl.throwIfCannotNavigate == 'function') {
               impl.throwIfCannotNavigate();
             }
