@@ -959,8 +959,11 @@ export class AmpA4A extends AMP.BaseElement {
         return Services.timerFor(this.win).promise(1000).then(() => {
           this.isRelayoutNeededFlag = true;
           this.getResource().layoutCanceled();
-          Services.resourcesForDoc(this.getAmpDoc())
-              ./*OK*/requireLayout(this.element);
+          // Only Require relayout after page visible
+          Services.viewerForDoc(this.getAmpDoc()).whenNextVisible().then(() => {
+            Services.resourcesForDoc(this.getAmpDoc())
+                ./*OK*/requireLayout(this.element);
+          });
         });
       });
     });
