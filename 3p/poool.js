@@ -60,7 +60,7 @@ function getPooolSDK(global, cb) {
   });
 }
 
-export function poool(global, data) {
+export function poool(global, data, onIdentityAvailable) {
 
   // Check for required attributes
   const bundleID = user().assert(
@@ -86,6 +86,11 @@ export function poool(global, data) {
     // Init poool
     _poool('init', bundleID);
     _poool('config', 'mode', 'custom', true);
+
+    // Check for paywall available if callback is provided (usefull for tests)
+    if (onIdentityAvailable) {
+      _poool('event', 'onIdentityAvailable', onIdentityAvailable);
+    }
 
     // Update iframe dimensions when paywall is removed
     _poool('event', 'onRelease', function() {
