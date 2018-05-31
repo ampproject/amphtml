@@ -330,13 +330,21 @@ export class Resource {
       // in PROD.
       this.element.dispatchCustomEvent(AmpEvents.BUILT);
     }, reason => {
-      if (!isBlockedByConsent(reason)) {
-        dev().error(TAG, 'failed to build:', this.debugid, reason);
-      }
+      this.maybeReportErrorOnBuildFailure(reason);
       this.isBuilding_ = false;
       this.element.signals().rejectSignal('res-built', reason);
       throw reason;
     });
+  }
+
+  /**
+   * @param {*} errorOrMessage
+   * @visibleForTesting
+   */
+  maybeReportErrorOnBuildFailure(reason) {
+    if (!isBlockedByConsent(reason)) {
+      dev().error(TAG, 'failed to build:', this.debugid, reason);
+    }
   }
 
   /**

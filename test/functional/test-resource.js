@@ -42,6 +42,8 @@ describes.realWin('Resource', {amp: true}, env => {
 
     const viewer = Services.viewerForDoc(document);
     sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
+    sandbox.stub(Resources.prototype, 'rebuildDomWhenReady')
+        .callsFake(() => {});
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
@@ -112,6 +114,8 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 
   it('should blacklist on build failure', () => {
+    sandbox.stub(resource, 'maybeReportErrorOnBuildFailure')
+        .callsFake(() => {});
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build')
         .returns(Promise.reject(new Error('intentional'))).once();
@@ -615,7 +619,7 @@ describes.realWin('Resource', {amp: true}, env => {
   it('should not record layout schedule time in startLayout', () => {
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    resource.startLayout();
+    allowConsoleError(() => resource.startLayout());
 
     expect(resource.element.layoutScheduleTime).to.be.undefined;
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
