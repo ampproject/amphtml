@@ -50,17 +50,19 @@ This component is experimental and under active development. For any issues, ple
 
 ## Migrating from 0.1 to 1.0
 
-### **New features for the bookend**
+We've added new capabilities and features to AMP stories that are available in v1.0 of amp-story. You should consider migrating your stories to v1.0 to take advantage of these new features.
 
-We are adding new capabilities to the amp-stories bookend, enabling richer component support and visual layouts. Some of the new features:
+### New bookend capabilities
 
-* The share providers will now be sorted according to the JSON configuration.
+We've added new capabilities to the amp-stories bookend, enabling richer component support and visual layouts. Some of the changes include:
+
+* Share providers are sorted according to the JSON configuration.
 * New bookend components:
   * Call to action links
   * Text box
   * Portrait and landscape cards
 
-To use these new components, include an `<amp-story-bookend>` tag as the last child of your `<amp-story>` with the required attributes like so:
+To use these new capabilities, add an `<amp-story-bookend>` tag as the last child of your `<amp-story>` with the required attributes like so:
 
 ```html
 <amp-story standalone>
@@ -73,11 +75,11 @@ To use these new components, include an `<amp-story-bookend>` tag as the last ch
 <amp-story>
 ```
 
-Learn more about the new components and how to specify them in the JSON configuration in the section below: [amp-story-bookend](#bookend-amp-story-bookend)
+Learn more about the new components and how to specify them in the JSON configuration in the [amp-story-bookend](#bookend-amp-story-bookend) section.
 
-### **New metadata requirements**
+### New metadata requirements
 
-We're adding four new required attributes and two optional attributes to the `<amp-story>` element:
+We've added new metadata attributes to the `<amp-story>` element. These metadata attributes will be used for displaying a preview of the story across the AMP stories ecosystem. For example, these attributes can be used to render an engaging preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP stories surfaces to come.
 
 ```html
 <!-- `title`, `publisher`, `publisher-logo-src` and `poster-portrait-src` will soon be required. -->
@@ -94,8 +96,6 @@ We're adding four new required attributes and two optional attributes to the `<a
     poster-square-src="https://example.com/my-story/poster/1x1.jpg"
     poster-landscape-src="https://example.com/my-story/poster/4x3.jpg">
 ```
-
-These metadata attributes will be used for displaying a preview of this story across the AMP stories ecosystem. For example, these attributes can be used to render an engaging preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP stories surfaces to come.
 
 Note that these metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
 
