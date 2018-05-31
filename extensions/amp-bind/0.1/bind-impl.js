@@ -823,9 +823,9 @@ export class Bind {
    * Verifies expression results vs. current DOM state and returns an
    * array of bindings with mismatches (if any).
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
-   * @param {?Array<!Element>} elements If provided, only verifies bindings
+   * @param {?Array<!Element>=} elements If provided, only verifies bindings
    *     contained within the given elements. Otherwise, verifies all bindings.
-   * @param {boolean} warn If true, emits a user warning for verification
+   * @param {boolean=} warn If true, emits a user warning for verification
    *     mismatches. Otherwise, does not emit a warning.
    * @return {!Array<string>}
    * @private
@@ -1191,11 +1191,7 @@ export class Bind {
         break;
     }
 
-    if (match) {
-      return null;
-    } else {
-      return {expected: expectedValue, actual: initialValue};
-    }
+    return match ? null : {expected: expectedValue, actual: initialValue};
   }
 
   /**
