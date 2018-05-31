@@ -81,9 +81,11 @@ describes.realWin('amp-poool', {
       layout: 'responsive',
       width: 150,
       height: 80,
+    }, function() {
+      const pooolWidget = doc.body.querySelector('#poool-widget');
+      expect(pooolWidget).not.to.be.undefined;
+      expect(pooolWidget.querySelector('.p3-widget')).to.not.be.null;
     });
-    const pooolWidget = doc.body.querySelector('#poool-widget');
-    expect(pooolWidget).not.to.be.undefined;
   });
 
   it('removes iframe after unlayoutCallback', () => {
