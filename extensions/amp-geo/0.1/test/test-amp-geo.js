@@ -230,7 +230,6 @@ describes.realWin('amp-geo', {
           .to.equal(GEO_IN_GROUP.NOT_DEFINED);
 
       /* multi group case */
-            
       expect(geo.isInCountryGroup('nafta, anz'))
           .to.equal(GEO_IN_GROUP.IN);
       expect(geo.isInCountryGroup('nafta, unknown'))
