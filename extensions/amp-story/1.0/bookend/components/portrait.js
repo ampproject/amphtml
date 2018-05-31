@@ -15,11 +15,12 @@
  */
 
 import {BookendComponentInterface} from './bookend-component-interface';
+import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrlDeprecated} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
+import {userAssertValidProtocol} from '../../utils';
 
 /**
  * @typedef {{
@@ -46,43 +47,32 @@ let portraitElsDef;
  * @implements {BookendComponentInterface}
  */
 export class PortraitComponent {
-  /**
-   * @param {!../bookend-component.BookendComponentDef} portraitJson
-   * @override
-   * */
-  assertValidity(portraitJson) {
+
+  /** @override */
+  assertValidity(portraitJson, element) {
     user().assert('category' in portraitJson && 'image' in portraitJson &&
       'url' in portraitJson, 'Portrait component must contain `category`, ' +
       '`image`, and `url` fields, skipping invalid.');
 
-    user().assert(isProtocolValid(portraitJson['url']), 'Unsupported ' +
-    `protocol for article URL ${portraitJson['url']}`);
-
-    user().assert(isProtocolValid(portraitJson['image']), 'Unsupported ' +
-    `protocol for article image URL ${portraitJson['image']}`);
+    userAssertValidProtocol(element, portraitJson['url']);
+    userAssertValidProtocol(element, portraitJson['image']);
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} portraitJson
-   * @return {!PortraitComponentDef}
-   * @override
-   * */
-  build(portraitJson) {
+  /** @override */
+  build(portraitJson, element) {
+    const url = portraitJson['url'];
+    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+
     return {
+      url,
+      domainName,
       type: portraitJson['type'],
       category: portraitJson['category'],
-      url: portraitJson['url'],
-      domainName: parseUrlDeprecated(portraitJson['url']).hostname,
       image: portraitJson['image'],
     };
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} portraitData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
+  /** @override */
   buildTemplate(portraitData, doc) {
     const html = htmlFor(doc);
     const template =
@@ -99,12 +89,8 @@ export class PortraitComponent {
         </a>`;
     addAttributesToElement(template, dict({'href': portraitData.url}));
 
-    const portraitElements = htmlRefs(template);
-    const {
-      category,
-      image,
-      meta,
-    } = /** @type {!portraitElsDef} */ (portraitElements);
+    const {category, image, meta} =
+      /** @type {!portraitElsDef} */ (htmlRefs(template));
 
     category.textContent = portraitData.category;
     addAttributesToElement(image, dict({'src': portraitData.image}));

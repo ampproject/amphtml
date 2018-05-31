@@ -57,6 +57,7 @@ import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStylesForDoc} from './style-installer';
 import {installTemplatesService} from './service/template-impl';
 import {installTimerService} from './service/timer-impl';
+import {installUrlForDoc} from './service/url-impl';
 import {installUrlReplacementsServiceForDoc} from
   './service/url-replacements-impl';
 import {installViewerServiceForDoc, setViewerVisibilityState} from
@@ -105,6 +106,7 @@ export function installRuntimeServices(global) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
+  installUrlForDoc(ampdoc);
   installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
