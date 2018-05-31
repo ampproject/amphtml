@@ -17,7 +17,6 @@
 import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-  getConsentPolicyState,
 } from '../../../src/consent-state';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LayoutPriority} from '../../../src/layout';
@@ -43,6 +42,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {getBinaryType} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {getConsentPolicyState} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 import {tryResolve} from '../../../src/utils/promise';
@@ -959,8 +959,11 @@ export class AmpA4A extends AMP.BaseElement {
         return Services.timerFor(this.win).promise(1000).then(() => {
           this.isRelayoutNeededFlag = true;
           this.getResource().layoutCanceled();
-          Services.resourcesForDoc(this.getAmpDoc())
-              ./*OK*/requireLayout(this.element);
+          // Only Require relayout after page visible
+          Services.viewerForDoc(this.getAmpDoc()).whenNextVisible().then(() => {
+            Services.resourcesForDoc(this.getAmpDoc())
+                ./*OK*/requireLayout(this.element);
+          });
         });
       });
     });
