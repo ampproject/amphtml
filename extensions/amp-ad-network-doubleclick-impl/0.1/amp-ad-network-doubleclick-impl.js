@@ -304,8 +304,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {!Array<string>} */
     this.experimentIds_ = [];
-    this.setPageLevelExperiments(this.getPageLevelExperiments(
-        extractUrlExperimentId(this.win, this.element)));
+    this.setPageLevelExperiments(
+      extractUrlExperimentId(this.win, this.element));
 
     /** @protected @const {boolean} */
     this.useSra = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
