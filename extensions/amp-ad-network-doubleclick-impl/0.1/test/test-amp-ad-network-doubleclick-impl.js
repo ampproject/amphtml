@@ -233,8 +233,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           switch (name) {
             case 'X-AmpImps':
               return 'https://a.com?a=b,https://b.com?c=d';
-            case 'X-AmpRSImps':
-              return 'https://c.com?e=f,https://d.com?g=h';
             default:
               return undefined;
           }
@@ -245,9 +243,51 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       })).to.deep.equal(size);
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
-      expect(fireDelayedImpressionsSpy.withArgs(
-          'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
     });
+    it('shouldnt load delayed impression amp-pixels with fluid', () => {
+      const fireDelayedImpressionsSpy =
+          sandbox.spy(impl, 'fireDelayedImpressions');
+      impl.isFluidRequest_ = true;
+      expect(impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'X-AmpImps':
+              return 'https://a.com?a=b,https://b.com?c=d';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      })).to.deep.equal(size);
+      expect(fireDelayedImpressionsSpy.withArgs(
+          'https://a.com?a=b,https://b.com?c=d')).to.not.be.called;
+    });
+    it('should load delayed impression amp-pixels with fluid + multi-size',
+        () => {
+          const fireDelayedImpressionsSpy =
+              sandbox.spy(impl, 'fireDelayedImpressions');
+          sandbox.stub(impl, 'handleResize_');
+          impl.isFluid_ = true;
+          expect(impl.extractSize({
+            get(name) {
+              switch (name) {
+                case 'X-AmpImps':
+                  return 'https://a.com?a=b,https://b.com?c=d';
+                case 'X-CreativeSize':
+                  return '200x50';
+                default:
+                  return undefined;
+              }
+            },
+            has(name) {
+              return !!this.get(name);
+            },
+          })).to.deep.equal(size);
+          expect(fireDelayedImpressionsSpy.withArgs(
+              'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
+        });
   });
 
   describe('#onCreativeRender', () => {
