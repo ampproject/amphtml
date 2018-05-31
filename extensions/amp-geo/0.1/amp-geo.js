@@ -302,6 +302,7 @@ export class AmpGeo extends AMP.BaseElement {
    * isInCountryGroup API
    * @param {string} targetGroup group or comma delimited list of groups
    * @return {GEO_IN_GROUP}
+   * @public
    */
   isInCountryGroup(targetGroup) {
     const targets = targetGroup.trim().split(/,\s*/);
