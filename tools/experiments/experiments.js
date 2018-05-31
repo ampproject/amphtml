@@ -309,9 +309,9 @@ const EXPERIMENTS = [
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
   {
-    id: 'amp-content-viewer',
+    id: 'amp-pan-zoom',
     name: 'Enables zoom / pan manipulation of arbitrary elements' +
-      ' with amp-content-viewer',
+      ' with amp-pan-zoom',
     spec: 'https://github.com/ampproject/amphtml/issues/13602',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/15594',
   },

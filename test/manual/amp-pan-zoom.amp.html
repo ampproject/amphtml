@@ -6,7 +6,7 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <script async custom-element="amp-content-viewer" src="https://cdn.ampproject.org/v0/amp-content-viewer-0.1.js"></script>
+  <script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <style amp-custom>
 
@@ -53,7 +53,7 @@
   <h1>Content Viewer</h1>
   <p>Double tap or pinch to zoom in and out.</p>
   <amp-layout layout="responsive" width="4" height="3">
-      <amp-content-viewer layout="fill">
+      <amp-pan-zoom layout="fill">
       <svg class="seatmap" viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
           <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="0" y="0" tabindex="0" role="button" />
           <rect class="seat-free" [class]="seat == 2 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 2})" x="40" y="0" tabindex="0" role="button" />
@@ -70,7 +70,7 @@
           <rect class="seat-free" [class]="seat == 7 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 7})" x="120" y="80" tabindex="0" role="button" />
           <rect class="seat-free" [class]="seat == 8 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 8})" x="160" y="80" tabindex="0" role="button" />
         </svg>
-    </amp-content-viewer>
+    </amp-pan-zoom>
   </amp-layout>
 </article>
 </body>

@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-content-viewer-0.1.css';
+import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
@@ -40,7 +40,7 @@ import {numeric} from '../../../src/transition';
 import {px, scale, setStyles, translate} from '../../../src/style';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
-const TAG = 'amp-content-viewer';
+const TAG = 'amp-pan-zoom';
 const DEFAULT_MAX_SCALE = 3;
 const MAX_ANIMATION_DURATION = 250;
 
@@ -51,10 +51,11 @@ const ELIGIBLE_TAGS = {
   'AMP-IMG': true,
 };
 
-const SUPPORT_VALIDATION_MSG = `amp-content-viewer should
+const SUPPORT_VALIDATION_MSG = `${TAG} should
   have its target element as the one and only child`;
 
-export class AmpContentViewer extends AMP.BaseElement {
+export class AmpPanZoom extends AMP.BaseElement {
+  // TODO (): refactor this to share code with amp-image-viewer
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -121,10 +122,10 @@ export class AmpContentViewer extends AMP.BaseElement {
     user().assert(children.length == 1, SUPPORT_VALIDATION_MSG);
     user().assert(
         this.elementIsSupported_(children[0]),
-        children[0].tagName + ' is not supported by <amp-content-viewer>'
+        children[0].tagName + ` is not supported by ${TAG}`
     );
     this.content_ = children[0];
-    this.content_.classList.add('i-amphtml-content-viewer-child');
+    this.content_.classList.add('i-amphtml-pan-zoom-child');
   }
 
   /** @override */
@@ -615,5 +616,5 @@ export class AmpContentViewer extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpContentViewer, CSS);
+  AMP.registerElement(TAG, AmpPanZoom, CSS);
 });
