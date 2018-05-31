@@ -113,7 +113,7 @@ export class StandardActions {
       case 'navigateTo':
         // Some components have additional constraints on allowing navigation.
         let permission = Promise.resolve();
-        if (startsWith(node.tagName, 'AMP-')) {
+        if (node.tagName && startsWith(node.tagName, 'AMP-')) {
           permission = node.getImpl().then(impl => {
             if (typeof impl.throwIfCannotNavigate == 'function') {
               impl.throwIfCannotNavigate();
