@@ -61,8 +61,7 @@ __Example: Basic paywall (with default values)__
   data-app-id="XXXXX-XXXXX-XXXXX-XXXXX"
   data-page-type="premium"
   data-cookies-enabled="true"
-  on="lock:myContent.lock"
-  on="release:myContent.release">
+  on="lock:myContent.lock, release:myContent.release">
 </amp-poool>
 ```
 
@@ -78,8 +77,7 @@ __Example: Show a paywall for a user in a custom group/segment called "myCustomS
   data-debug="true"
   data-custom-segment="myCustomSegment"
   data-cookies-enabled="true"
-  on="lock:myContent.lock"
-  on="release:myContent.release">
+  on="lock:myContent.lock, release:myContent.release">
 </amp-poool>
 ```
 
