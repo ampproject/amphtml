@@ -51,4 +51,4 @@ Each potential consent state will result in different behavior by the extension.
 | ------------- | ------------------------ |
 | `UNKNOWN_NOT_REQUIRED` or `SUFFICIENT` | Request ads as normal. |
 | `INSUFFICIENT` | Request ads with "&npa=1" appended to the ad tag. For more info, see [Personalized and non-personalized ads](https://support.google.com/dfp_premium/answer/9005435). |
-| `UNKNOWN` | Do not request ads - only play the content video. |
+| `UNKNOWN` | Do not initialize the IMA SDK or request ads - only play the content video. |
