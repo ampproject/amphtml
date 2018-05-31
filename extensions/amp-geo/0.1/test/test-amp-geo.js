@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpGeo} from '../amp-geo';
+import {AmpGeo, GEO_IN_GROUP} from '../amp-geo';
 import {Services} from '../../../../src/services';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
@@ -199,24 +199,44 @@ describes.realWin('amp-geo', {
     });
   });
 
-  it('should set return a list of configured group in `geo` service', () => {
-    win.AMP_MODE.geoOverride = 'gb';
+  it('should return configured and matched groups in `geo` service', () => {
+    win.AMP_MODE.geoOverride = 'nz';
     addConfigElement('script');
     geo.buildCallback();
 
     return Services.geoForDocOrNull(el).then(geo => {
-      expect(geo.ISOCountry).to.equal('gb');
-      expect(geo.AllCountryGroups)
+      expect(geo.ISOCountry).to.equal('nz');
+      expect(geo.allISOCountryGroups)
           .to.deep.equal(Object.keys(config.ISOCountryGroups));
-      expectBodyHasClass([
-        'amp-iso-country-gb',
-        'amp-geo-no-group',
-      ], true);
-      expectBodyHasClass([
-        'amp-iso-country-unknown',
-        'amp-geo-group-nafta',
-        'amp-geo-group-anz',
-      ], false);
+      expect(geo.matchedISOCountryGroups)
+          .to.deep.equal(['anz']);
+    });
+  });
+
+  it('isInCountryGroup works single and multiple groups.', () => {
+    win.AMP_MODE.geoOverride = 'nz';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+
+      /* single gropup case */
+      expect(geo.isInCountryGroup('anz'))
+          .to.equal(GEO_IN_GROUP.IN);
+      expect(geo.isInCountryGroup('nafta'))
+          .to.equal(GEO_IN_GROUP.NOT_IN);
+      expect(geo.isInCountryGroup('foobar'))
+          .to.equal(GEO_IN_GROUP.NOT_DEFINED);
+
+      /* multi group case */
+            
+      expect(geo.isInCountryGroup('nafta, anz'))
+          .to.equal(GEO_IN_GROUP.IN);
+      expect(geo.isInCountryGroup('nafta, unknown'))
+          .to.equal(GEO_IN_GROUP.NOT_IN);
+      expect(geo.isInCountryGroup('nafta, foobar'))
+          .to.equal(GEO_IN_GROUP.NOT_DEFINED);
     });
   });
 
