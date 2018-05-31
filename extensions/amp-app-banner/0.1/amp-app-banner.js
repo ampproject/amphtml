@@ -59,13 +59,13 @@ export class AbstractAppBanner extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Element} openButton
+   * @param {!Element} button
    * @param {string} openInAppUrl
    * @param {string} installAppUrl
    * @protected
    */
-  setupOpenButton_(openButton, openInAppUrl, installAppUrl) {
-    openButton.addEventListener('click', () => {
+  setupOpenButton_(button, openInAppUrl, installAppUrl) {
+    button.addEventListener('click', () => {
       this.openButtonClicked(openInAppUrl, installAppUrl);
     });
   }
@@ -299,7 +299,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
-    this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+    this.setupOpenButton_(
+        dev().assertElement(this.openButton_), openInAppUrl, installAppUrl);
   }
 }
 
@@ -345,7 +346,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     this.manifestLink_ = win.document.head.querySelector(
         'link[rel=manifest],link[rel=origin-manifest]');
 
-    const platform = Services.platformFor();
+    const platform = Services.platformFor(win);
     // We want to fallback to browser builtin mechanism when possible.
     const isChromeAndroid = platform.isAndroid() && platform.isChrome();
     const isProxyOrigin = this.getUrlService().isProxyOrigin(win.location);
@@ -432,7 +433,8 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         const installAppUrl = 'https://play.google.com/store/apps/details' +
             `?id=${app['id']}`;
         const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-        this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+        this.setupOpenButton_(
+            dev().assertElement(this.openButton_), openInAppUrl, installAppUrl);
         return;
       }
     }
