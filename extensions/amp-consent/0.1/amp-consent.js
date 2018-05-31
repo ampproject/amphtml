@@ -523,8 +523,8 @@ export class AmpConsent extends AMP.BaseElement {
       const postPromptUI = config['postPromptUI'];
       this.postPromptUI_ = this.getAmpDoc().getElementById(postPromptUI);
       if (!this.postPromptUI_) {
-        this.user().error(TAG, 'child element of <amp-consent> with ' +
-          `postPromptUI id ${postPromptUI} not found`);
+        this.user().error(TAG, 'postPromptUI element with ' +
+          `id=${postPromptUI} not found`);
       }
     }
     this.policyConfig_ = config['policy'] || this.policyConfig_;
