@@ -46,18 +46,25 @@ export class AbstractAppBanner extends AMP.BaseElement {
   /**
    * Subclasses should override this method to specify action when open button
    * is clicked.
+   * @param {string} unusedOpenInAppUrl
+   * @param {string} unusedInstallAppUrl
    * @protected
    */
   openButtonClicked(unusedOpenInAppUrl, unusedInstallAppUrl) {
     // Subclasses may override.
   }
 
-  /** @protected */
-  setupOpenButton_(openButton, openInAppUrl, installAppUrl) {
-    openButton.addEventListener('click', () => {
-      this.openButtonClicked(openInAppUrl, installAppUrl);
-    });
-  }
+  /**
+   * @param {!Element} button
+   * @param {string} openInAppUrl
+   * @param {string} installAppUrl
+   * @protected
+   */
+  setupOpenButton_(button, openInAppUrl, installAppUrl) {
+    button.addEventListener('click', () => {
+       this.openButtonClicked(openInAppUrl, installAppUrl);
+     });
+   }
 
   /**
    * Creates and append a close button.
@@ -391,7 +398,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     openWindowDialog(this.win, openInAppUrl, '_top');
   }
 
-  /** @private */
+  /** @private @param {string} link */
   redirectTopLocation_(link) {
     this.win.top.location.assign(link);
   }
@@ -424,7 +431,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         this.element);
   }
 
-  /** @private */
+  /** @private @param {string} appId */
   getAndroidIntentForUrl_(appId) {
     const {canonicalUrl} = Services.documentInfoForDoc(this.element);
     const parsedUrl = parseUrlDeprecated(canonicalUrl);
