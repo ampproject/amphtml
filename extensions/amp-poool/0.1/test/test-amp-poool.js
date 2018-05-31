@@ -99,12 +99,15 @@ describes.realWin('amp-poool', {
     });
   });
 
-  // it('requires data-app-id', () => {
-  //   return allowConsoleError(() => {
-  //     return getPoool('', pageType, 'gift', true)
-  //         .should.eventually.be.rejectedWith(
-  //             /The data-app-id attribute is required for/
-  //         );
-  //   });
-  // });
+  it('requires data-app-id', () => {
+    expect(getPoool('', pageType, 'gift', true)).to.be.rejectedWith(
+        /The data-app-id attribute is required for/
+    );
+  });
+
+  it('requires data-page-type', () => {
+    expect(getPoool(appId, '', 'newsletter', false)).to.be.rejectedWith(
+        /The data-page-type attribute is required for/
+    );
+  });
 });
