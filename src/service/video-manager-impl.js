@@ -541,12 +541,7 @@ class VideoEntry {
         this.video.pause();
       };
       // Update the media session
-      setMediaSession(
-          this.ampdoc_.win,
-          this.metadata_,
-          playHandler,
-          pauseHandler
-      );
+      setMediaSession(this.ampdoc_, this.metadata_, playHandler, pauseHandler);
     }
 
     this.actionSessionManager_.beginSession();
