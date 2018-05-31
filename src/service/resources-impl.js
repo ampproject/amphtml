@@ -267,6 +267,11 @@ export class Resources {
 
     this.schedulePass();
 
+    this.rebuildDomWhenReady();
+  }
+
+  /** @visibleForTesting */
+  rebuildDomWhenReady() {
     // Ensure that we attempt to rebuild things when DOM is ready.
     this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
