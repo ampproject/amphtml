@@ -37,7 +37,10 @@ import {
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, loadPromise} from '../../../src/event-helper';
-import {getExperimentBranch} from '../../../src/experiments';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+} from '../../../src/experiments';
 import {getHtml} from '../../../src/get-html';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
@@ -122,7 +125,8 @@ export class AmpAdXOriginIframeHandler {
         this.win_, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ==
        ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
        getExperimentBranch(this.win_, ADSENSE_EXP_NAMES.CANONICAL) ==
-       ADSENSE_EXPERIMENTS.CANONICAL_EXP) {
+        ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
+       isExperimentOn(this.win_, 'inabox-position-api')) {
       // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {

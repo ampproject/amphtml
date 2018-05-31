@@ -350,8 +350,6 @@ describe('doubleclick-a4a-config', () => {
           UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME)
           .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP);
     });
     it('should select into unconditioned canonical holdback ctl', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
@@ -367,11 +365,6 @@ describe('doubleclick-a4a-config', () => {
           UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME)
           .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE).includes(
-          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT)).to.be.true;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE).includes(
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL)
-      ).to.be.true;
     });
     describe('SRA', () => {
       let elem;
