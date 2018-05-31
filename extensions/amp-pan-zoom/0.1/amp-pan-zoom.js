@@ -55,7 +55,7 @@ const SUPPORT_VALIDATION_MSG = `${TAG} should
   have its target element as the one and only child`;
 
 export class AmpPanZoom extends AMP.BaseElement {
-  // TODO (): refactor this to share code with amp-image-viewer
+  // TODO (#15685): refactor this to share code with amp-image-viewer
 
   /** @param {!AmpElement} element */
   constructor(element) {
