@@ -73,6 +73,11 @@ moment.prototype.startOf = function(unit) {};
 moment.prototype.add = function(amount, unit) {};
 
 /**
+ * @return {number}
+ */
+moment.prototype.year = function() {};
+
+/**
  * @struct
  * @constructor
  */
