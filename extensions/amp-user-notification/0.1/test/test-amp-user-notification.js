@@ -21,6 +21,8 @@ import {
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
+  registerServiceBuilder,
+  resetServiceForTesting,
 } from '../../../../src/service';
 import {macroTask} from '../../../../testing/yield';
 
@@ -35,6 +37,7 @@ describes.realWin('amp-user-notification', {
   let win;
   let dftAttrs;
   let storageMock;
+  let ISOCountryGroups;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -47,6 +50,13 @@ describes.realWin('amp-user-notification', {
     };
     const storage = getServiceForDoc(ampdoc, 'storage');
     storageMock = sandbox.mock(storage);
+
+    resetServiceForTesting(win, 'geo');
+    registerServiceBuilder(win, 'geo', function() {
+      return Promise.resolve({
+        'ISOCountryGroups': ISOCountryGroups,
+      });
+    });
 
     return getServicePromiseForDoc(ampdoc, 'userNotificationManager')
         .then(manager => {
@@ -92,10 +102,35 @@ describes.realWin('amp-user-notification', {
   it('should NOT require `data-show-if-href`', () => {
     const el = getUserNotification({
       id: 'n1',
+      'data-show-if-geo': 'nafta',
     });
     const impl = el.implementation_;
     expect(impl.buildCallback.bind(impl)).to.not.throw;
   });
+
+  it('should NOT require `data-show-if-geo`', () => {
+    const el = getUserNotification({
+      id: 'n1',
+      'data-show-if-href': 'https://www.ampproject.org/get',
+    });
+    const impl = el.implementation_;
+    expect(impl.buildCallback.bind(impl)).to.not.throw;
+  });
+
+  it('should throw if more than one data-how-if-* attrib is defined',
+      () => {
+        const el = getUserNotification({
+          'data-show-if-href': 'https://www.ampproject.org/get/here',
+          'data-show-if-geo': 'foo',
+          'id': 'n1',
+          'layout': 'nodisplay',
+        });
+        const impl = el.implementation_;
+        allowConsoleError(() =>
+          expect(impl.buildCallback.bind(impl)).to.throw(
+              /Only one "data-show-if-\*" attribute allowed​​​/)
+        );
+      });
 
   it('should NOT require `data-dismiss-href`', () => {
     const el = getUserNotification({
@@ -290,6 +325,8 @@ describes.realWin('amp-user-notification', {
   });
 
   it('shouldShow should recover from error to xhr', () => {
+    expectAsyncConsoleError(
+        '[amp-user-notification] Failed to read storage intentional');
     const el = getUserNotification(dftAttrs);
     const impl = el.implementation_;
     impl.buildCallback();
@@ -315,6 +352,8 @@ describes.realWin('amp-user-notification', {
   });
 
   it('shouldShow should recover from error and return true with no xhr', () => {
+    expectAsyncConsoleError(
+        '[amp-user-notification] Failed to read storage intentional');
     const el = getUserNotification({id: 'n1'});
     const impl = el.implementation_;
     impl.buildCallback();
@@ -386,6 +425,128 @@ describes.realWin('amp-user-notification', {
       storageMock.verify();
     });
   });
+
+  it('shouldShow should return true if no datashow-if-* is specified', () => {
+    const el = getUserNotification({
+      id: 'n1',
+      'layout': 'nodisplay',
+    });
+    ISOCountryGroups = [];
+    const impl = el.implementation_;
+    impl.buildCallback();
+
+    storageMock.expects('get')
+        .withExactArgs('amp-user-notification:n1')
+        .returns(Promise.resolve(false))
+        .once();
+
+    return impl.shouldShow().then(shouldShow => {
+      expect(shouldShow).to.equal(true);
+    });
+  });
+
+  it('shouldShow should return true if geo matches', () => {
+    const el = getUserNotification({
+      id: 'n1',
+      'data-show-if-geo': 'nafta',
+      'layout': 'nodisplay',
+    });
+    ISOCountryGroups = ['nafta'];
+    const impl = el.implementation_;
+    impl.buildCallback();
+
+    storageMock.expects('get')
+        .withExactArgs('amp-user-notification:n1')
+        .returns(Promise.resolve(false))
+        .once();
+
+    return impl.shouldShow().then(shouldShow => {
+      expect(shouldShow).to.equal(true);
+    });
+  });
+
+  it('shouldShow should hande comma separated country groups', () => {
+    const el = getUserNotification({
+      id: 'n1',
+      'data-show-if-geo': 'eea, nafta, anz',
+      'layout': 'nodisplay',
+    });
+    ISOCountryGroups = ['nafta'];
+    const impl = el.implementation_;
+    impl.buildCallback();
+
+    storageMock.expects('get')
+        .withExactArgs('amp-user-notification:n1')
+        .returns(Promise.resolve(false))
+        .once();
+
+    return impl.shouldShow().then(shouldShow => {
+      expect(shouldShow).to.equal(true);
+    });
+  });
+
+  it('shouldShow should return false if geo does not match', () => {
+    ISOCountryGroups = ['nafta'];
+    const el = getUserNotification({
+      id: 'n1',
+      'data-show-if-geo': 'eea',
+      'layout': 'nodisplay',
+    });
+    const impl = el.implementation_;
+    impl.buildCallback();
+
+    return impl.shouldShow().then(shouldShow => {
+      expect(shouldShow).to.equal(false);
+    });
+  });
+
+  it('shouldShow should return false no match and comma separated groups',
+      () => {
+        ISOCountryGroups = ['nafta'];
+        const el = getUserNotification({
+          id: 'n1',
+          'data-show-if-geo': 'eea',
+          'layout': 'nodisplay',
+        });
+        const impl = el.implementation_;
+        impl.buildCallback();
+
+        return impl.shouldShow().then(shouldShow => {
+          expect(shouldShow).to.equal(false);
+        });
+      });
+
+  it('shouldShow should return true when not geo is used',
+      () => {
+        ISOCountryGroups = [];
+        const el = getUserNotification({
+          id: 'n1',
+          'data-show-if-not-geo': 'anz',
+          'layout': 'nodisplay',
+        });
+        const impl = el.implementation_;
+        impl.buildCallback();
+
+        return impl.shouldShow().then(shouldShow => {
+          expect(shouldShow).to.equal(true);
+        });
+      });
+
+  it('shouldShow should return false when any match not geo is used',
+      () => {
+        ISOCountryGroups = ['waldo'];
+        const el = getUserNotification({
+          id: 'n1',
+          'data-show-if-geo': 'eea, nafta, anz',
+          'layout': 'nodisplay',
+        });
+        const impl = el.implementation_;
+        impl.buildCallback();
+
+        return impl.shouldShow().then(shouldShow => {
+          expect(shouldShow).to.equal(false);
+        });
+      });
 
   it('should not store value on dismiss if persist-dismissal=no', () => {
     dftAttrs['data-persist-dismissal'] = 'no';
@@ -651,6 +812,9 @@ describes.realWin('amp-user-notification', {
     });
 
     it('should dissmiss without persistence if cid.optOut() fails', () => {
+      expectAsyncConsoleError(
+          '[amp-user-notification] Failed to opt out of Cid failed');
+
       const element = getUserNotification({id: 'n1'});
       const impl = element.implementation_;
       impl.buildCallback();
