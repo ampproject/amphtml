@@ -60,18 +60,35 @@ describes.realWin('amp-analytics', {
   let ampdoc;
   let ins;
   let viewer;
+  let jsonRequestConfigs = {};
 
   const jsonMockResponses = {
     'invalidConfig': '{"transport": {"iframe": "fake.com"}}',
     'config1': '{"vars": {"title": "remote"}}',
     'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
     'config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
+    'https://rewriter.com': '{"vars": {"title": "rewritten"}}',
   };
+  const configRewriterUrl = 'https://rewriter.com';
 
   const trivialConfig = {
     'requests': {'foo': 'https://example.com/bar'},
     'triggers': [{'on': 'visible', 'request': 'foo'}],
   };
+
+  const noTriggersError = '[AmpAnalytics <unknown id>] No triggers were ' +
+      'found in the config. No analytics data will be sent.';
+  const noRequestStringsError = '[AmpAnalytics <unknown id>] No request ' +
+      'strings defined. Analytics data will not be sent from this page.';
+  const oneScriptChildError = '[AmpAnalytics <unknown id>] The tag should ' +
+      'contain only one <script> child.';
+  const configParseError = '[AmpAnalytics <unknown id>] Analytics config ' +
+      'could not be parsed. Is it in a valid JSON format? TypeError: Cannot ' +
+      'read property \'toUpperCase\' of null';
+  const onAndRequestAttributesError = '[AmpAnalytics <unknown id>] "on" and ' +
+      '"request" attributes are required for data to be collected.';
+  const remoteConfigError = '[amp-analytics] Remote configs are not allowed ' +
+      'to specify transport iframe';
 
   beforeEach(() => {
     win = env.win;
@@ -80,8 +97,10 @@ describes.realWin('amp-analytics', {
     configWithCredentials = false;
     doc.title = 'Test Title';
     resetServiceForTesting(win, 'xhr');
+    jsonRequestConfigs = {};
     registerServiceBuilder(win, 'xhr', function() {
       return {fetchJson: (url, init) => {
+        jsonRequestConfigs[url] = init;
         expect(init.requireAmpResponseSourceOrigin).to.be.false;
         if (configWithCredentials) {
           expect(init.credentials).to.equal('include');
@@ -110,6 +129,7 @@ describes.realWin('amp-analytics', {
       uidService = manager;
     });
   });
+
 
   function getAnalyticsTag(config, attrs) {
     config = JSON.stringify(config);
@@ -188,6 +208,12 @@ describes.realWin('amp-analytics', {
       }
       actualResults[vendor] = {};
       describe('analytics vendor: ' + vendor, function() {
+        beforeEach(() => {
+          if (!config.triggers) {
+            expectAsyncConsoleError(noTriggersError);
+          }
+        });
+
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', function* () {
@@ -212,7 +238,7 @@ describes.realWin('amp-analytics', {
                 });
 
             const variables = variableServiceFor(ampdoc.win);
-            const encodeVars = variables.encodeVars;
+            const {encodeVars} = variables;
             sandbox.stub(variables, 'encodeVars').callsFake(
                 function(name, val) {
                   val = encodeVars.call(this, name, val);
@@ -338,6 +364,8 @@ describes.realWin('amp-analytics', {
   });
 
   it('does not send a hit when config is not in a script tag', function() {
+    expectAsyncConsoleError(noTriggersError);
+    expectAsyncConsoleError(noRequestStringsError);
     const config = JSON.stringify(trivialConfig);
     const el = doc.createElement('amp-analytics');
     el.textContent = config;
@@ -378,6 +406,9 @@ describes.realWin('amp-analytics', {
   });
 
   it('does not send a hit when multiple child tags exist', function() {
+    expectAsyncConsoleError(oneScriptChildError);
+    expectAsyncConsoleError(noRequestStringsError);
+    expectAsyncConsoleError(noTriggersError);
     const analytics = getAnalyticsTag(trivialConfig);
     const script2 = document.createElement('script');
     script2.setAttribute('type', 'application/json');
@@ -389,6 +420,9 @@ describes.realWin('amp-analytics', {
 
   it('does not send a hit when script tag does not have a type attribute',
       function() {
+        expectAsyncConsoleError(configParseError);
+        expectAsyncConsoleError(noRequestStringsError);
+        expectAsyncConsoleError(noTriggersError);
         const el = doc.createElement('amp-analytics');
         const script = doc.createElement('script');
         script.textContent = JSON.stringify(trivialConfig);
@@ -406,6 +440,7 @@ describes.realWin('amp-analytics', {
       });
 
   it('does not send a hit when request is not provided', function() {
+    expectAsyncConsoleError(onAndRequestAttributesError);
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible'}],
@@ -417,6 +452,7 @@ describes.realWin('amp-analytics', {
   });
 
   it('does not send a hit when request type is not defined', function() {
+    expectAsyncConsoleError(noRequestStringsError);
     const analytics = getAnalyticsTag({
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
@@ -1169,6 +1205,7 @@ describes.realWin('amp-analytics', {
   });
 
   it('ignore transport iframe from remote config', () => {
+    expectAsyncConsoleError(remoteConfigError);
     const analytics = getAnalyticsTag({
       'vars': {'title': 'local'},
       'requests': {'foo': 'https://example.com/${title}'},
@@ -2035,6 +2072,140 @@ describes.realWin('amp-analytics', {
       delete config['triggers'][0]['resourceTimingSpec'];
       return runResourceTimingTest(
           [entry], config, 'https://ping.example.com/endpoint?rt=');
+    });
+  });
+
+  describe('should re-write configuration if configured', () => {
+    let errorSpy;
+
+    beforeEach(() => {
+      errorSpy = sandbox.spy();
+      sandbox.stub(log, 'user').callsFake(() => {
+        return {
+          error: errorSpy,
+          assert: () => {
+          },
+        };
+      });
+    });
+
+    it('should fully rewrite a configuration', () => {
+      jsonMockResponses['https://rewriter.com'] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      });
+      const inlineConfig = {
+        'requests': {'foo': 'https://example.com/inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig,
+          {'type': 'rewrite', 'config': 'config-rv2'});
+      analytics.predefinedConfig_ = {
+        'rewrite': {
+          'configRewriter': {
+            'url': 'https://rewriter.com',
+          },
+        },
+      };
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/rewritten');
+      });
+    });
+
+    it('should merge rewritten configuration and use vendor', () => {
+      jsonMockResponses[configRewriterUrl] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': ['foo', 'bar']}],
+      });
+      const inlineConfig = {
+        'requests': {
+          'foo': 'https://example.com/inlinedFoo',
+          'baz': 'https://example.com/inlined',
+        },
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig,
+          {'type': 'rewrite', 'config': 'config-rv2'});
+      analytics.predefinedConfig_ = {
+        'rewrite': {
+          'configRewriter': {
+            'url': configRewriterUrl,
+          },
+          'requests': {
+            'foo': 'https://example.com/vendorFoo',
+            'bar': 'https://example.com/vendor',
+          },
+        },
+      };
+      return waitForSendRequest(analytics).then(() => {
+        jsonRequestConfigs[configRewriterUrl].should.not.be.undefined;
+        jsonRequestConfigs[configRewriterUrl].body.should.deep.equal({
+          'requests': {
+            'foo': 'https://example.com/remote',
+            'baz': 'https://example.com/inlined',
+          },
+          'triggers': [
+            {'on': 'visible', 'request': 'foo'},
+          ],
+        });
+
+        expect(sendRequestSpy.calledTwice).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/rewritten');
+        expect(sendRequestSpy.args[1][0]).to.equal(
+            'https://example.com/vendor');
+      });
+    });
+
+    it('should ignore config rewriter if no url provided', () => {
+      jsonMockResponses['https://rewriter.com'] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': ['foo', 'bar']}],
+      });
+      const inlineConfig = {
+        'requests': {'foo': 'https://example.com/inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig,
+          {'type': 'rewrite', 'config': 'config-rv2'});
+      analytics.predefinedConfig_ = {
+        'rewrite': {
+          'configRewriter': {
+          },
+          'requests': {'bar': 'https://example.com/defaults'},
+        },
+      };
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/remote');
+      });
+    });
+
+    it('should only allow configRewriter in vendors configuration', () => {
+      jsonMockResponses['https://rewriter.com'] = JSON.stringify({
+        'requests': {'foo': 'https://example.com/rewritten'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      });
+      const inlineConfig = {
+        'configRewriter': {
+          'url': 'https://rewriter.com',
+        },
+        'requests': {'foo': 'https://example.com/inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      };
+
+      const analytics = getAnalyticsTag(inlineConfig);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/inlined');
+      });
     });
   });
 });

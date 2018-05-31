@@ -78,9 +78,6 @@ export class AmpAdXOriginIframeHandler {
     /** @private {boolean} */
     this.isInaboxPositionApiInit_ = false;
 
-    /** @private {?SubscriptionApi} */
-    this.inaboxRequestPositionApi_ = null;
-
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
@@ -184,12 +181,14 @@ export class AmpAdXOriginIframeHandler {
     }
 
     // Calculate render-start and no-content signals.
-    const renderDeferred = new Deferred();
-    const renderStartPromise = renderDeferred.promise;
-    const renderStartResolve = renderDeferred.resolve;
-    const noContentDeferred = new Deferred();
-    const noContentPromise = noContentDeferred.promise;
-    const noContentResolve = noContentDeferred.resolve;
+    const {
+      promise: renderStartPromise,
+      resolve: renderStartResolve,
+    } = new Deferred();
+    const {
+      promise: noContentPromise,
+      resolve: noContentResolve,
+    } = new Deferred();
 
     if (this.baseInstance_.config &&
             this.baseInstance_.config.renderStartImplemented) {
@@ -197,7 +196,7 @@ export class AmpAdXOriginIframeHandler {
       // exclusive. Whichever arrives first wins.
       listenForOncePromise(this.iframe,
           ['render-start', 'no-content'], true).then(info => {
-        const data = info.data;
+        const {data} = info;
         if (data['type'] == 'render-start') {
           this.renderStart_(info);
           renderStartResolve();

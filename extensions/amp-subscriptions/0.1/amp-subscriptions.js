@@ -153,8 +153,7 @@ export class SubscriptionService {
    * service.
    *
    * @param {string} serviceId
-   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform}
-   * subscriptionPlatformFactory
+   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
@@ -271,7 +270,7 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.platformStore_.getAllRegisteredPlatforms().forEach(
+      this.platformStore_.getAvailablePlatforms().forEach(
           subscriptionPlatform => {
             this.fetchEntitlements_(subscriptionPlatform);
           }
@@ -456,6 +455,14 @@ export class SubscriptionService {
       dev().assert(platform, 'Platform is not registered');
       platform.decorateUI(element, action, options);
     });
+  }
+
+  /**
+   * Evaluates platforms and select the one to be selected for login.
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   */
+  selectPlatformForLogin() {
+    return this.platformStore_.selectPlatformForLogin();
   }
 }
 

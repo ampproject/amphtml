@@ -228,7 +228,7 @@ function preprocess(str) {
       code = /* '\n' */ 0xa;
       i++;
     }
-    if (code === /* '\r' */ 0xd || code === 0xc) code = /* '\n' */ 0xa;
+    if (code === /* '\r' */ 0xd || code === 0xc) {code = /* '\n' */ 0xa;}
     if (code === 0x0) {
       code = 0xfffd;
     }
@@ -443,7 +443,7 @@ class Tokenizer {
           this.areAValidEscape(this.next(1), this.next(2))) {
         let type = null;
         if (this.wouldStartAnIdentifier(
-                this.next(1), this.next(2), this.next(3))) {
+            this.next(1), this.next(2), this.next(3))) {
           type = 'id';
         }
         const token = new parse_css.HashToken();
@@ -516,7 +516,7 @@ class Tokenizer {
         this.reconsume();
         return mark.copyPosTo(this.consumeANumericToken());
       } else if (
-          this.next(1) === /* '-' */ 0x2d && this.next(2) === /* '>' */ 0x3e) {
+        this.next(1) === /* '-' */ 0x2d && this.next(2) === /* '>' */ 0x3e) {
         this.consume(2);
         if (amp.validator.LIGHT) {
           return TRIVIAL_CDC_TOKEN;
@@ -567,7 +567,7 @@ class Tokenizer {
       }
     } else if (this.code_ === /* '@' */ 0x40) {
       if (this.wouldStartAnIdentifier(
-              this.next(1), this.next(2), this.next(3))) {
+          this.next(1), this.next(2), this.next(3))) {
         const token = new parse_css.AtKeywordToken();
         token.value = this.consumeAName();
         return mark.copyPosTo(token);
@@ -755,7 +755,7 @@ class Tokenizer {
         token.value = name;
         return token;
       } else if (
-          whitespace(this.next()) &&
+        whitespace(this.next()) &&
           (this.next(2) === /* '"' */ 0x22 ||
            this.next(2) === /* ''' */ 0x27)) {
         const token = new parse_css.FunctionToken();
@@ -850,7 +850,7 @@ class Tokenizer {
               amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         }
       } else if (
-          this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
+        this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
           this.code_ === /* '(' */ 0x28 || nonPrintable(this.code_)) {
         this.consumeTheRemnantsOfABadURL();
         if (amp.validator.LIGHT) {
@@ -884,7 +884,7 @@ class Tokenizer {
   consumeEscape() {
     // Assume the the current character is the \
     // and the next code point is not a newline.
-    this.consume();  // '\'
+    this.consume(); // '\'
     if (hexDigit(this.code_)) {
       // Consume 1-6 hex digits
       const digits = [this.code_];
@@ -1039,19 +1039,19 @@ class Tokenizer {
     let type = 'integer';
     if (this.next() === /* '+' */ 0x2b || this.next() === /* '-' */ 0x2d) {
       this.consume();
-      repr += stringFromCode(this.code_);  // + or -
+      repr += stringFromCode(this.code_); // + or -
     }
     while (digit(this.next())) {
       this.consume();
-      repr += stringFromCode(this.code_);  // 0-9
+      repr += stringFromCode(this.code_); // 0-9
     }
     if (this.next(1) === /* '.' */ 0x2e && digit(this.next(2))) {
       this.consume();
-      repr += stringFromCode(this.code_);  // '.'
+      repr += stringFromCode(this.code_); // '.'
       type = 'number';
       while (digit(this.next())) {
         this.consume();
-        repr += stringFromCode(this.code_);  // 0-9
+        repr += stringFromCode(this.code_); // 0-9
       }
     }
     const c1 = this.next(1);
@@ -1059,23 +1059,23 @@ class Tokenizer {
     const c3 = this.next(3);
     if ((c1 === /* 'E' */ 0x45 || c1 === /* 'e' */ 0x65) && digit(c2)) {
       this.consume();
-      repr += stringFromCode(this.code_);  // E or e
+      repr += stringFromCode(this.code_); // E or e
       type = 'number';
       while (digit(this.next())) {
         this.consume();
-        repr += stringFromCode(this.code_);  // 0-9
+        repr += stringFromCode(this.code_); // 0-9
       }
     } else if (
-        (c1 === /* 'E' */ 0x45 || c1 === /* 'e' */ 0x65) &&
+      (c1 === /* 'E' */ 0x45 || c1 === /* 'e' */ 0x65) &&
         (c2 === /* '+' */ 0x2b || c2 === /* '-' */ 0x2d) && digit(c3)) {
       this.consume();
-      repr += stringFromCode(this.code_);  // E or e
+      repr += stringFromCode(this.code_); // E or e
       this.consume();
-      repr += stringFromCode(this.code_);  // + or -
+      repr += stringFromCode(this.code_); // + or -
       type = 'number';
       while (digit(this.next())) {
         this.consume();
-        repr += stringFromCode(this.code_);  // 0-9
+        repr += stringFromCode(this.code_); // 0-9
       }
     }
     const numberToken = new parse_css.NumberToken();
@@ -1092,7 +1092,7 @@ class Tokenizer {
    */
   convertAStringToANumber(string) {
     // CSS's number rules are identical to JS, afaik.
-    return +string;
+    return Number(string);
   }
 
   /**
@@ -1118,33 +1118,33 @@ class Tokenizer {
 parse_css.TokenType = {
   UNKNOWN: 0,
   AT_KEYWORD: 1,
-  CDC: 2,  // -->
-  CDO: 3,  // <!--
+  CDC: 2, // -->
+  CDO: 3, // <!--
   CLOSE_CURLY: 4,
   CLOSE_PAREN: 5,
   CLOSE_SQUARE: 6,
   COLON: 7,
-  COLUMN: 8,  // ||
+  COLUMN: 8, // ||
   COMMA: 9,
-  DASH_MATCH: 10,  // |=
+  DASH_MATCH: 10, // |=
   DELIM: 11,
   DIMENSION: 12,
-  EOF_TOKEN: 13,  // Can't call this EOF due to symbol conflict in C.
+  EOF_TOKEN: 13, // Can't call this EOF due to symbol conflict in C.
   ERROR: 14,
   FUNCTION_TOKEN: 15,
-  HASH: 16,  // #
+  HASH: 16, // #
   IDENT: 17,
-  INCLUDE_MATCH: 18,  // ~=
+  INCLUDE_MATCH: 18, // ~=
   NUMBER: 19,
   OPEN_CURLY: 20,
   OPEN_PAREN: 21,
   OPEN_SQUARE: 22,
   PERCENTAGE: 23,
-  PREFIX_MATCH: 24,  // ^=
+  PREFIX_MATCH: 24, // ^=
   SEMICOLON: 25,
   STRING: 26,
-  SUBSTRING_MATCH: 27,  // *=
-  SUFFIX_MATCH: 28,     // $=
+  SUBSTRING_MATCH: 27, // *=
+  SUFFIX_MATCH: 28, // $=
   WHITESPACE: 29,
   URL: 30,
 
@@ -1167,7 +1167,7 @@ parse_css.TokenType = {
   CLASS_SELECTOR: 42,
   SIMPLE_SELECTOR_SEQUENCE: 43,
   COMBINATOR: 44,
-  SELECTORS_GROUP: 45
+  SELECTORS_GROUP: 45,
 };
 
 /** @type {!Array<string>} */
@@ -1256,7 +1256,7 @@ if (!amp.validator.LIGHT) {
     return {
       'tokenType': TokenType_NamesById[this.tokenType],
       'line': this.line,
-      'col': this.col
+      'col': this.col,
     };
   };
 }

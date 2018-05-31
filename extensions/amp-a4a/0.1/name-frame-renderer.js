@@ -28,7 +28,7 @@ import {utf8Decode} from '../../../src/utils/bytes';
 export class NameFrameRenderer extends Renderer {
   /** @override */
   render(context, element, creativeData) {
-    const crossDomainData = creativeData.crossDomainData;
+    const {crossDomainData} = creativeData;
     dev().assert(crossDomainData, 'CrossDomain data undefined!');
 
     const creative = utf8Decode(crossDomainData.rawCreativeBytes);

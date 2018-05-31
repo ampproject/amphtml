@@ -104,6 +104,7 @@ exports.rules = [
       '3p/**->src/3p-frame-messaging.js',
       '3p/**->src/observable.js',
       '3p/**->src/amp-events.js',
+      '3p/**->src/consent-state.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/messaging.js->src/event-helper.js',
@@ -129,6 +130,7 @@ exports.rules = [
       'ads/**->src/types.js',
       'ads/**->src/string.js',
       'ads/**->src/style.js',
+      'ads/**->src/consent-state.js',
       'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
       'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
@@ -198,6 +200,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-viqeo-player/0.1/amp-viqeo-player.js->' +
       'src/service/video-manager-impl.js',
+      'extensions/amp-brightcove/0.1/amp-brightcove.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
@@ -210,6 +214,8 @@ exports.rules = [
       'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
           'src/service/video-manager-impl.js',

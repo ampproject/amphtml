@@ -113,16 +113,16 @@ amp-live-list/0.1/test/validator-amp-live-list.html:93:6 The tag 'li', a child t
 |        <li id="2" data-sort-time="43" data-update-time="44">2</li>
 |        <li data-update-time="44">3</li> <!-- id and data-sort-time missing -->
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:95:6 The mandatory attribute 'id' is missing in tag 'AMP-LIVE-LIST [items] item'. (see https://www.ampproject.org/docs/reference/components/amp-live-list#items) [DISALLOWED_HTML]
->>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:95:6 The mandatory attribute 'data-sort-time' is missing in tag 'AMP-LIVE-LIST [items] item'. (see https://www.ampproject.org/docs/reference/components/amp-live-list#items) [DISALLOWED_HTML]
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:95:6 The mandatory attribute 'id' is missing in tag 'AMP-LIVE-LIST [items] item'. (see https://www.ampproject.org/docs/reference/components/amp-live-list#items) [DISALLOWED_HTML]
 >>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:95:6 The tag 'li', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://www.ampproject.org/docs/reference/components/amp-live-list#items) [AMP_TAG_PROBLEM]
 |        <p>junk</p> <!-- id, data-sort-time missing -->
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:96:6 The mandatory attribute 'id' is missing in tag 'AMP-LIVE-LIST [items] item'. (see https://www.ampproject.org/docs/reference/components/amp-live-list#items) [DISALLOWED_HTML]
->>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:96:6 The mandatory attribute 'data-sort-time' is missing in tag 'AMP-LIVE-LIST [items] item'. (see https://www.ampproject.org/docs/reference/components/amp-live-list#items) [DISALLOWED_HTML]
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:96:6 The mandatory attribute 'id' is missing in tag 'AMP-LIVE-LIST [items] item'. (see https://www.ampproject.org/docs/reference/components/amp-live-list#items) [DISALLOWED_HTML]
 >>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:96:6 The tag 'p', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://www.ampproject.org/docs/reference/components/amp-live-list#items) [AMP_TAG_PROBLEM]
 |      </ul>

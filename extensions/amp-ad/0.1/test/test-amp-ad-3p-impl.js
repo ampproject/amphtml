@@ -17,14 +17,16 @@
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import * as adCid from '../../../../src/ad-cid';
-import * as consent from '../../../../src/consent-state';
+import * as consent from '../../../../src/consent';
 import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {LayoutPriority} from '../../../../src/layout';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
 import {stubService} from '../../../../testing/test-helper';
+import {user} from '../../../../src/log';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -140,7 +142,7 @@ describes.realWin('amp-ad-3p-impl', {
     it('should propagate consent state to ad iframe', () => {
       ad3p.element.setAttribute('data-block-on-consent', '');
       sandbox.stub(consent, 'getConsentPolicyState')
-          .resolves(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+          .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
       sandbox.stub(consent, 'getConsentPolicySharedData')
           .resolves({a: 1, b: 2});
 
@@ -151,7 +153,7 @@ describes.realWin('amp-ad-3p-impl', {
         expect(data).to.be.ok;
         expect(data._context).to.be.ok;
         expect(data._context.initialConsentState)
-            .to.equal(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+            .to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
         expect(data._context.consentSharedData)
             .to.deep.equal({a: 1, b: 2});
       });
@@ -237,6 +239,7 @@ describes.realWin('amp-ad-3p-impl', {
       win.document.head.appendChild(meta);
       ad3p.config.remoteHTMLDisabled = true;
       ad3p.onLayoutMeasure();
+      sandbox.stub(user(), 'error');
       return ad3p.layoutCallback().then(() => {
         expect(win.document.querySelector('iframe[src="' +
             'http://ads.localhost:9876/dist.3p/current/frame.max.html"]'))
@@ -300,7 +303,9 @@ describes.realWin('amp-ad-3p-impl', {
       win.document.head.appendChild(meta);
       ad3p.config.remoteHTMLDisabled = true;
       ad3p.buildCallback();
-      ad3p.preconnectCallback();
+      allowConsoleError(() => {
+        ad3p.preconnectCallback();
+      });
       return whenFirstVisible.then(() => {
         expect(Array.from(win.document.querySelectorAll('link[rel=preload]'))
             .some(link => link.href ==

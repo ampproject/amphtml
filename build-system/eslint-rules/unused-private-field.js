@@ -61,7 +61,7 @@ module.exports = {
           "It's marked @restricted, but it's used in the class.",
           'Please remove the @restricted annotation.',
         ].join('\n\t');
-        context.report(node, message);
+        context.report({node, message});
         return;
       }
 
@@ -93,7 +93,7 @@ module.exports = {
         `Unused restricted private "${name}".`.padEnd(80),
         "It's marked @restricted, but it's still unused in the file.",
       ].join('\n\t');
-      context.report(node, message);
+      context.report({node, message});
     }
 
     // VisibleForTestings must not be used in the class.
@@ -107,7 +107,7 @@ module.exports = {
         "It's marked @visibleForTesting, but it's used in the class.",
         'Please remove the @visibleForTesting annotation.',
       ].join('\n\t');
-      context.report(node, message);
+      context.report({node, message});
     }
 
     // Protected and Override are uncheckable. Let Closure handle that.
@@ -129,7 +129,7 @@ module.exports = {
         'If this is an override of a protected, `@override`.',
         'If none of these exceptions applies, please contact @jridgewell.',
       ].join('\n\t');
-      context.report(node, message);
+      context.report({node, message});
     }
 
 

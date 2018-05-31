@@ -51,6 +51,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
+import {InfoDialog} from './amp-story-info-dialog';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {
@@ -90,7 +91,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin, parseUrl} from '../../../src/url';
+import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
@@ -206,6 +207,20 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
+    /** @private @const {!LocalizationService} */
+    this.localizationService_ = new LocalizationService(this.win);
+    this.localizationService_
+        .registerLocalizedStringBundle('default', LocalizedStringsDefault)
+        .registerLocalizedStringBundle('en', LocalizedStringsEn);
+
+    const enXaPseudoLocaleBundle =
+        createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
+    this.localizationService_
+        .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
+
+    registerServiceBuilder(
+        this.win, 'localization-v01', () => this.localizationService_);
+
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
 
@@ -274,20 +289,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
-
-    /** @private @const {!LocalizationService} */
-    this.localizationService_ = new LocalizationService(this.win);
-    this.localizationService_
-        .registerLocalizedStringBundle('default', LocalizedStringsDefault)
-        .registerLocalizedStringBundle('en', LocalizedStringsEn);
-
-    const enXaPseudoLocaleBundle =
-        createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
-    this.localizationService_
-        .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
-
-    registerServiceBuilder(
-        this.win, 'localization-v01', () => this.localizationService_);
   }
 
 
@@ -376,8 +377,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
-      const pageId = e.detail.pageId;
-      const progress = e.detail.progress;
+      const {pageId, progress} = e.detail;
 
       if (pageId !== this.activePage_.element.id) {
         // Ignore progress update events from inactive pages.
@@ -453,7 +453,11 @@ export class AmpStory extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @param {number} deltaX
+   * @return {boolean}
+   * @private
+   */
   isSwipeLargeEnoughForHint_(deltaX) {
     return (Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
   }
@@ -471,7 +475,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   lockBody_() {
-    const document = this.win.document;
+    const {document} = this.win;
     setImportantStyles(document.documentElement, {
       'overflow': 'hidden',
     });
@@ -487,7 +491,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   maybeLockScreenOrientation_() {
-    const screen = this.win.screen;
+    const {screen} = this.win;
     if (!screen || !this.canRotateToDesktopMedia_.matches) {
       return;
     }
@@ -582,6 +586,12 @@ export class AmpStory extends AMP.BaseElement {
           // button is visible.
           if (!this.storeService_.get(StateProperty.DESKTOP_STATE)) {
             this.shareMenu_.build();
+          }
+
+          const infoDialog = Services.viewerForDoc(this.element).isEmbedded() ?
+            new InfoDialog(this.win, this.element) : null;
+          if (infoDialog) {
+            infoDialog.build();
           }
         });
 
@@ -692,7 +702,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isOriginWhitelisted_(origin) {
-    const hostName = parseUrl(origin).hostname;
+    const hostName = parseUrlDeprecated(origin).hostname;
     const domains = hostName.split('.');
 
     // Check all permutations of the domain to see if any level of the domain is
@@ -829,10 +839,13 @@ export class AmpStory extends AMP.BaseElement {
    */
   // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
-    this.storeService_.dispatch(Action.CHANGE_PAGE, targetPageId);
-
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
+
+    this.storeService_.dispatch(Action.CHANGE_PAGE, {
+      id: targetPageId,
+      index: pageIndex,
+    });
 
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
@@ -983,7 +996,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const history = this.win.history;
+    const {history} = this.win;
     if (history.replaceState && this.getHistoryStatePageId_() !== pageId) {
       history.replaceState({
         ampStoryPageId: pageId,
@@ -997,7 +1010,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {?string}
    */
   getHistoryStatePageId_() {
-    const history = this.win.history;
+    const {history} = this.win;
     if (history && history.state) {
       return history.state.ampStoryPageId;
     }
@@ -1530,19 +1543,17 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Shows the audio icon if the story has any media elements or background
-   * audio.
+   * Shows the audio icon if the story has any media elements containing audio,
+   * or background audio at the story or page level.
    * @private
    */
   updateAudioIcon_() {
-    // TODO(#11857): Defer to any playing media element for whether any audio is
-    // being played.
-    const containsMediaElement = !!this.element.querySelector(
-        'amp-audio, amp-video, [background-audio]');
+    const containsMediaElementWithAudio = !!this.element.querySelector(
+        'amp-audio, amp-video:not([noaudio]), [background-audio]');
     const hasStoryAudio = this.element.hasAttribute('background-audio');
 
-    this.storeService_.dispatch(
-        Action.TOGGLE_HAS_AUDIO, containsMediaElement || hasStoryAudio);
+    this.storeService_.dispatch(Action.TOGGLE_HAS_AUDIO,
+        containsMediaElementWithAudio || hasStoryAudio);
   }
 
   /** @private */

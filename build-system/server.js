@@ -27,10 +27,13 @@ const log = require('fancy-log');
 const morgan = require('morgan');
 const webserver = require('gulp-webserver');
 
-const host = process.env.SERVE_HOST;
-const port = process.env.SERVE_PORT;
+const {
+  SERVE_HOST: host,
+  SERVE_PORT: port,
+  SERVE_PROCESS_ID: gulpProcess,
+} = process.env;
+
 const useHttps = process.env.SERVE_USEHTTPS == 'true';
-const gulpProcess = process.env.SERVE_PROCESS_ID;
 const quiet = process.env.SERVE_QUIET == 'true';
 const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
 const header = require('connect-header');

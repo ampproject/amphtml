@@ -126,7 +126,7 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
 
 /**
  * @const {string}
- * @visibileForTesting
+ * @visibleForTesting
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
@@ -152,6 +152,7 @@ let windowLocationQueryParameters;
  */
 let LayoutRectOrDimsDef;
 
+/* eslint-disable jsdoc/require-param */
 /**
  * Array of functions used to combine block level request parameters for SRA
  * request.
@@ -259,7 +260,7 @@ const BLOCK_SRA_COMBINERS_ = [
     return hasAmpContainer ? {'acts': result.join('|')} : null;
   },
 ];
-
+/* eslint-enable jsdoc/require-param */
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
@@ -329,7 +330,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ifi_ = 0;
 
     /** @private {boolean} */
-    this.isFluid_ = false;
+    this.isFluidRequest_ = false;
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
@@ -396,8 +397,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isFluid_ = layout == Layout.FLUID;
-    return this.isFluid_ || isLayoutSizeDefined(layout);
+    this.isFluidRequest_ = layout == Layout.FLUID;
+    return this.isFluidRequest_ || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -520,7 +521,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
       'frc': Number(this.fromResumeCallback) || null,
-      'fluid': this.isFluid_ ? 'height' : null,
+      'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe_ ? '1' : null,
       'scp': serializeTargeting_(
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
@@ -534,7 +535,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Populate's block-level state for ad URL construction.
    * @param {?CONSENT_POLICY_STATE} consentState
-   * @visibileForTesting
+   * @visibleForTesting
    */
   populateAdUrlState(consentState) {
     this.consentState = consentState;
@@ -543,7 +544,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = this.isFluid_ ? {width: 0, height: 0} :
+    this.initialSize_ = this.isFluidRequest_ ? {width: 0, height: 0} :
       (width && height ?
         // width/height could be 'auto' in which case we fallback to measured.
         {width, height} : this.getIntersectionElementLayoutBox());
@@ -551,7 +552,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
         `${this.initialSize_.width}x${this.initialSize_.height}`);
-    this.parameterSize_ = this.isFluid_ ?
+    this.parameterSize_ = this.isFluidRequest_ ?
       '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -570,10 +571,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.initialSize_.width,
           this.initialSize_.height,
           multiSizeValidation == 'true',
-          this.isFluid_);
-      this.parameterSize_ += '|' + dimensions
-          .map(dimension => dimension.join('x'))
-          .join('|');
+          this.isFluidRequest_);
+      if (dimensions.length) {
+        this.parameterSize_ += '|' + dimensions
+            .map(dimension => dimension.join('x'))
+            .join('|');
+      }
     }
   }
 
@@ -784,12 +787,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-    if (this.isFluid_) {
-      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
-    } else {
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
-    }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
@@ -799,6 +796,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     } else {
       size = this.getSlotSize();
     }
+    // If this is a multi-size creative, fire delayed impression now. If it's
+    // fluid, wait until after resize.
+    if (this.isFluidRequest_ && !this.returnedSize_) {
+      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
+    } else {
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+    }
+
     return size;
   }
 
@@ -965,7 +970,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // the slot. This ensures that the creative is centered in the former case,
     // and not truncated in the latter.
     const size = this.returnedSize_ || this.getSlotSize();
-    const isMultiSizeFluid = this.isFluid_ && this.returnedSize_ &&
+    const isMultiSizeFluid = this.isFluidRequest_ && this.returnedSize_ &&
         // TODO(@glevitzky, 11583) Remove this clause once we stop sending back
         // the size header for fluid ads. Fluid size headers always come back as
         // 0x0.
@@ -1009,7 +1014,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   generateAdKey_(size) {
-    const element = this.element;
+    const {element} = this;
     const domFingerprint = domFingerprintPlain(element);
     const slot = element.getAttribute('data-slot') || '';
     const multiSize = element.getAttribute('data-multi-size') || '';
@@ -1030,7 +1035,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if ((this.isFluid_ && width && height) ||
+    if ((this.isFluidRequest_ && width && height) ||
         (width != pWidth || height != pHeight) &&
         (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
@@ -1082,7 +1087,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Groups slots by type and networkId from data-slot parameter.  Exposed for
    * ease of testing.
    * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
@@ -1096,7 +1101,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - group by networkID allowing for separate SRA requests
    * - for each grouping, construct SRA request
    * - handle chunks for streaming response for each block
-   * @visibileForTesting
+   * @visibleForTesting
    */
   initiateSraRequests() {
     if (sraRequests) {
@@ -1227,7 +1232,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     } else if (!!this.win.document.querySelector(
                         'meta[name=amp-ad-doubleclick-sra]')) {
                       assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
-                      this.user().error(TAG, 'SRA request failure', error);
+                      this.warnOnError('SRA request failure', error);
                       // Publisher explicitly wants SRA so do not attempt to
                       // recover as SRA guarantees cannot be enforced.
                       typeInstances.forEach(instance => {
@@ -1248,6 +1253,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
   }
 
+  /**
+   * @param {string} message
+   * @param {*} error
+   * @visibleForTesting
+   */
+  warnOnError(message, error) {
+    dev().warn(TAG, message, error);
+  }
+
   /** @override */
   getPreconnectUrls() {
     return ['https://securepubads.g.doubleclick.net/'];
@@ -1255,8 +1269,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    return this.forceSafeframe_ || this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
-      super.getNonAmpCreativeRenderingMethod(headerValue);
+    return this.forceSafeframe_ || this.isFluidRequest_
+      ? XORIGIN_MODE.SAFEFRAME
+      : super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
 
@@ -1274,14 +1289,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdditionalContextMetadata(isSafeFrame = false) {
-    if (!this.isFluid_ && !isSafeFrame) {
+    if (!this.isFluidRequest_ && !isSafeFrame) {
       return;
     }
     const creativeSize = this.getCreativeSize();
     dev().assert(creativeSize, 'this.getCreativeSize returned null');
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
-            this, this.isFluid_, /** @type {{height, width}} */(creativeSize),
+            this, this.isFluidRequest_,
+            /** @type {{height, width}} */(creativeSize),
             this.fluidImpressionUrl_);
 
     return this.safeframeApi_.getSafeframeNameAttr();
@@ -1356,7 +1372,7 @@ export function resetLocationQueryParametersForTesting() {
 /**
  * @param {!Element} element
  * @return {string} networkId from data-ad-slot attribute.
- * @visibileForTesting
+ * @visibleForTesting
  */
 export function getNetworkId(element) {
   const networkId = /^(?:\/)?(\d+)/.exec(

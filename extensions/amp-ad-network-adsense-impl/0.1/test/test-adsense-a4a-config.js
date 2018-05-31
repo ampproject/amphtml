@@ -24,7 +24,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
-import {isProxyOrigin, parseUrl} from '../../../../src/url';
+import {isProxyOrigin, parseUrlDeprecated} from '../../../../src/url';
 import {urls} from '../../../../src/config';
 
 describe('adsense-a4a-config', () => {
@@ -36,7 +36,7 @@ describe('adsense-a4a-config', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     mockWin = {
-      location: parseUrl('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
+      location: parseUrlDeprecated('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
       document: {
         querySelector: unused => {return null;},
       },
@@ -54,7 +54,7 @@ describe('adsense-a4a-config', () => {
   describe('#adsenseIsA4AEnabled', () => {
 
     it('should not enable a4a when missing data-ad-client', () => {
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
@@ -62,7 +62,7 @@ describe('adsense-a4a-config', () => {
     });
 
     it('should not enable a4a when useRemoteHtml is true', () => {
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/some/path/to/content.html');
       sandbox.stub(urls, 'cdnProxyRegex').callsFake(
           /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/);
@@ -75,7 +75,7 @@ describe('adsense-a4a-config', () => {
 
     // TODO(bradfrizzell, #12476): Make this test work with sinon 4.0.
     it.skip('should not enable a4a when on a non-Google AMP cache', () => {
-      mockWin.location = parseUrl(
+      mockWin.location = parseUrlDeprecated(
           'https://amp.cloudflare.com/some/path/to/content.html');
       sandbox.stub(urls, 'cdnProxyRegex').callsFake(
           /^https:\/\/([a-zA-Z0-9_-]+\.)?amp\.cloudflare\.com/);
@@ -88,7 +88,7 @@ describe('adsense-a4a-config', () => {
 
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
-        mockWin.location = parseUrl(
+        mockWin.location = parseUrlDeprecated(
             'https://cdn.ampproject.org/some/path/to/content.html?exp=aa:' +
             String(expFlagValue));
         const elem = testFixture.doc.createElement('div');
