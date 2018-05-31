@@ -216,10 +216,7 @@ const BLOCK_SRA_COMBINERS_ = [
   instances => {
     const eids = {};
     instances.forEach(instance => {
-      const currEids = instance.element.getAttribute('data-experiment-id');
-      if (currEids) {
-        currEids.split(',').forEach(eid => eids[eid] = 1);
-      }
+      instance.experimentIds.forEach(eid => eids[eid] = 1);
       const deid = /(?:#|,)deid=(\d+)/i.exec(instance.win.location.hash);
       if (deid) {
         eids[deid[1]] = 1;
@@ -302,8 +299,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {number} */
     this.adKey_ = 0;
 
-    /** @private {!Array<string>} */
-    this.experimentIds_ = [];
+    /** @protected {!Array<string>} */
+    this.experimentIds = [];
     this.setPageLevelExperiments(
       extractUrlExperimentId(this.win, this.element));
 
@@ -312,7 +309,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win.location.search) ||
         !!this.win.document.querySelector(
             'meta[name=amp-ad-doubleclick-sra]') ||
-        this.experimentIds_.includes(DOUBLECLICK_EXPERIMENT_FEATURE.SRA);
+        this.experimentIds.includes(DOUBLECLICK_EXPERIMENT_FEATURE.SRA);
 
     /** @protected {!Deferred<?../../../src/service/xhr-impl.FetchResponse>} */
     this.sraDeferred = new Deferred();
@@ -405,7 +402,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return this.experimentIds_.includes(
+    return this.experimentIds.includes(
       DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
   }
 
@@ -450,7 +447,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     dev().info(
         TAG,
         `url experiment selection ${urlExperimentId}: ${experimentId}.`)
-    this.experimentIds_.push(experimentId);
+    this.experimentIds.push(experimentId);
   }
 
   /** @override */
@@ -612,7 +609,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), this.buildIdentityParams_(),
-                  this.getPageParameters(consentState), rtcParams));
+                  this.getPageParameters(consentState), rtcParams),
+                  this.experimentIds);
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
