@@ -74,11 +74,8 @@ function selectExperiments(win, element) {
 
 
   // See if in holdback control/experiment.
-  let experimentId;
   const urlExperimentId = extractUrlExperimentId(win, element);
-  if (urlExperimentId != undefined) {
-    experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-  }
+  const experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId || ''];
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);

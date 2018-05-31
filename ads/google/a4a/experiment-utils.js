@@ -37,9 +37,8 @@ export function selectAndSetExperiments(
   const experimentId = expUtils.maybeSelectExperiment(
       win, element, branches, expName);
   if (!!experimentId) {
-    if (!!optAddExpIdToElement) {
-      addExperimentIdToElement(experimentId, element);
-    }
+    addExperimentIdToElement(optAddExpIdToElement ?
+      experimentId : undefined, element);
     forceExperimentBranch(win, expName, experimentId);
   }
   return experimentId;
@@ -65,4 +64,8 @@ export class ExperimentUtils {
   }
 }
 
+/**
+ * ExperimentUtils singleton.
+ * @type {!ExperimentUtils}
+*/
 const expUtils = new ExperimentUtils();

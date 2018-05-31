@@ -124,8 +124,7 @@ function getNavStart(win) {
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
   return supportsNativeCrypto(win) && (
-    !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test) &&
-      !isExperimentOn(win, 'LOCAL_disableIsValidEnv');
+    !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test);
 }
 
 /**
@@ -931,6 +930,5 @@ export function isCanonical(win) {
   const googleCdnProxyRegex =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return !(googleCdnProxyRegex.test(win.location.origin)
-           || getMode(win).localDev || getMode(win).test) ||
-      isExperimentOn(win, 'LOCAL_force_canonical');
+           || getMode(win).localDev || getMode(win).test);
 }
