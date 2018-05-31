@@ -93,7 +93,6 @@ describe('TapRecognizer', () => {
     expect(res).to.equal(false);
   });
 
-
   it('should signal ready on touchend', () => {
     gesturesMock.expects('signalReady_').withExactArgs(recognizer, 0).once();
     recognizer.onTouchEnd({});
@@ -102,7 +101,7 @@ describe('TapRecognizer', () => {
   it('should emit and end on start', () => {
     recognizer.lastX_ = 101;
     recognizer.lastY_ = 201;
-    const target = new EventTarget();
+    const target = element;
     recognizer.target_ = target;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
