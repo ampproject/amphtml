@@ -62,6 +62,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
   let impl;
   let element;
   let isResponsiveStub;
+  let isCoreResponsiveStub;
 
   beforeEach(() => {
     win = env.win;
@@ -86,6 +87,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     impl = new AmpAdNetworkAdsenseImpl(element);
     impl.win['goog_identity_prom'] = Promise.resolve({});
     isResponsiveStub = sandbox.stub(impl, 'isResponsive_');
+    isCoreResponsiveStub = sandbox.stub(impl, 'isCoreResponsive_');
   });
 
   /**
@@ -138,6 +140,33 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('should NOT be valid (responsive with missing data-full-width)', () => {
       isResponsiveStub.callsFake(() => true);
+      element.setAttribute('height', '320');
+      element.setAttribute('width', '100vw');
+      expect(impl.isValidElement()).to.be.false;
+    });
+    it('should be valid (core responsive)', () => {
+      isCoreResponsiveStub.callsFake(() => true);
+      element.setAttribute('data-full-width', 'true');
+      element.setAttribute('height', '320');
+      element.setAttribute('width', '100vw');
+      expect(impl.isValidElement()).to.be.true;
+    });
+    it('should NOT be valid (core responsive with wrong height)', () => {
+      isCoreResponsiveStub.callsFake(() => true);
+      element.setAttribute('data-full-width', 'true');
+      element.setAttribute('height', '666');
+      element.setAttribute('width', '100vw');
+      expect(impl.isValidElement()).to.be.false;
+    });
+    it('should NOT be valid (core responsive with wrong width)', () => {
+      isCoreResponsiveStub.callsFake(() => true);
+      element.setAttribute('data-full-width', 'true');
+      element.setAttribute('height', '320');
+      element.setAttribute('width', '666');
+      expect(impl.isValidElement()).to.be.false;
+    });
+    it('should NOT be valid (corerspv without data-full-width)', () => {
+      isCoreResponsiveStub.callsFake(() => true);
       element.setAttribute('height', '320');
       element.setAttribute('width', '100vw');
       expect(impl.isValidElement()).to.be.false;
@@ -562,6 +591,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
           expect(url).to.match(/(\?|&)ramft=13(&|$)/);
         });
       });
+      it('sets rafmt for core responsive', () => {
+        element.setAttribute('data-ad-slot', 'some_slot');
+        element.setAttribute('data-auto-format', 'corerspv');
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/(\?|&)ramft=15(&|$)/);
+        });
+      });
       it('sets matched content specific fields', () => {
         element.setAttribute('data-matched-content-ui-type', 'ui');
         element.setAttribute('data-matched-content-rows-num', 'rows');
@@ -833,6 +869,22 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
       });
     });
+    it('should schedule a resize for core responsive', () => {
+      constructImpl({
+        width: '100vw',
+        height: '100',
+        'data-auto-format': 'corerspv',
+      });
+
+      const callback = impl.buildCallback();
+      expect(callback).to.exist;
+
+      // The returned promise fails for some reason.
+      return callback.then(() => {
+        expect(impl.element.offsetHeight).to.equal(1387);
+        expect(impl.element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+      });
+    });
   });
 
   describe('#onLayoutMeasure', () => {
@@ -956,6 +1008,22 @@ describes.realWin('amp-ad-network-adsense-impl', {
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               {width: 500, height: 667}))
           .to.be.equal(300);
+    });
+  });
+
+  describe('#getCoreResponsiveHeightForContext', () => {
+    it('get Core responsive height for iPhone 6', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getCoreResponsiveHeightForContext_(
+              {width: 375, height: 320}))
+          .to.be.equal(1387);
+    });
+
+    it('get Core responsive height for iPhone 5', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getCoreResponsiveHeightForContext_(
+              {width: 320, height: 320}))
+          .to.be.equal(1200);
     });
   });
 

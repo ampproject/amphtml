@@ -34,7 +34,7 @@ export function adsense(global, data) {
         'npaOnUnknownConsent', 'matchedContentUiType', 'matchedContentRowsNum',
         'matchedContentColumnsNum']);
 
-  if (data['autoFormat'] == 'rspv') {
+  if (data['autoFormat'] == 'rspv' || data['autoFormat'] == 'corerspv') {
     user().assert(data.hasOwnProperty('fullWidth'),
         'Responsive AdSense ad units require the attribute data-full-width.');
 

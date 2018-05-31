@@ -161,6 +161,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return this.autoFormat_ == 'rspv';
   }
 
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isCoreResponsive_() {
+    return this.autoFormat_ == 'corerspv';
+  }
+
   /** @override */
   isValidElement() {
     /**
@@ -170,7 +178,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
      * that it has been verified.
      */
-    if (this.isResponsive_()) {
+    if (this.isResponsive_() || this.isCoreResponsive_()) {
       if (!this.element.hasAttribute('data-full-width')) {
         user().warn(TAG,
             'Responsive AdSense ad units require the attribute ' +
@@ -221,6 +229,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               viewportSize),
           viewportSize.width).catch(() => {});
+    } else if (this.isCoreResponsive_()) {
+      const viewportSize = this.getViewport().getSize();
+      return this.attemptChangeSize(
+          AmpAdNetworkAdsenseImpl.getCoreResponsiveHeightForContext_(
+              viewportSize),
+          viewportSize.width).catch(() => {});
     }
   }
 
@@ -259,6 +273,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         !../../../src/experiments.ExperimentInfo>} */ ({});
     experimentInfoMap[adsenseFormatExpName] = {
       isTrafficEligible: () => !this.isResponsive_() &&
+        !this.isCoreResponsive_() &&
         !isNaN(width) && width > 0 &&
         !isNaN(height) && height > 0,
       branches: ['21062003', '21062004'],
@@ -315,7 +330,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
-      'rafmt': this.isResponsive_() ? 13 : null,
+      'rafmt': this.isResponsive_() ?
+          13 : (this.isCoreResponsive_() ? 15 : null),
       'pfx': pfx ? '1' : '0',
       // Matched content specific fields.
       'crui': this.element.getAttribute('data-matched-content-ui-type'),
@@ -543,6 +559,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // We aim for a 6:5 aspect ratio.
     const idealHeight = Math.round(viewportSize.width / 1.2);
     return clamp(idealHeight, minHeight, maxHeight);
+  }
+
+  /**
+   * Calculates the appropriate height for a full-width responsive core ad of
+   * the give width.
+   * @param {!{width: number, height: number}} viewportSize
+   * @return {number}
+   * @private
+   */
+  static getCoreResponsiveHeightForContext_(viewportSize) {
+    return Math.floor(viewportSize.width * 3.4 + 112);
   }
 }
 
