@@ -37,11 +37,11 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
-import {isProxyOrigin} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 import {waitForBodyPromise} from '../../../src/dom';
@@ -119,7 +119,8 @@ export class AmpGeo extends AMP.BaseElement {
     // First see if we've been pre-rendered with a country, if so set it
     const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
 
-    if (preRenderMatch && !isProxyOrigin(doc.location)) {
+    if (preRenderMatch &&
+        !Services.urlForDoc(doc).isProxyOrigin(doc.location)) {
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
     } else {
