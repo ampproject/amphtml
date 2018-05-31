@@ -306,6 +306,8 @@ export class AmpList extends AMP.BaseElement {
       return Services.bindForDocOrNull(this.element).then(bind => {
         if (bind) {
           return this.updateBindingsWith_(bind, elements);
+        } else {
+          return Promise.resolve(elements);
         }
       });
     } else {
