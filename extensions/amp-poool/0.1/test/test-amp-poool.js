@@ -33,12 +33,8 @@ describes.realWin('amp-poool', {
   });
 
   function getPoool(appId, pageType, forceWidget, debug, optResponsive) {
-    const article = doc.createElement('div');
-    article.id = 'postContent';
-    article.innerHTML = '<p>Lorem ipsum dolor sit amet, consectetur eicbv.</p>';
-    doc.body.appendChild(article);
-
     const ampPoool = doc.createElement('amp-poool');
+
     ampPoool.setAttribute('height', 150);
     ampPoool.setAttribute('width', 80);
     ampPoool.setAttribute('data-app-id', appId);
@@ -47,20 +43,12 @@ describes.realWin('amp-poool', {
     ampPoool.setAttribute('data-force-widget', forceWidget);
     if (optResponsive) {ampPoool.setAttribute('layout', 'responsive');}
 
-
     doc.body.appendChild(ampPoool);
+
     return ampPoool.build().then(() => {
       return ampPoool.layoutCallback();
     }).then(() => ampPoool);
   }
-
-  it('should return undefined when needed attributes aren\'t given', () => {
-    return getPoool()
-        .then(ampPoool => {
-          expect(ampPoool.getAttribute('data-app-id')).to.equal('undefined');
-          expect(ampPoool.getAttribute('data-page-type')).to.equal('undefined');
-        });
-  });
 
   it('renders iframe in amp-poool', () => {
     return getPoool(appId, pageType).then(ampPoool => {
@@ -90,7 +78,7 @@ describes.realWin('amp-poool', {
     poool(win, {
       appId: 'Q9X1R-27SFS-MYC31-MCYQ1',
       pageType: 'premium',
-      layout: 'fixed',
+      layout: 'responsive',
       width: 150,
       height: 80,
     });
