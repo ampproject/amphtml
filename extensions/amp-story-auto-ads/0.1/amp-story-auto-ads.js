@@ -396,7 +396,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   createCtaLayer_(adPageElement, ctaText, ctaUrl) {
     const a = this.win.document.createElement('a');
     a.className = 'i-amphtml-story-ad-link';
-    a.setAttribute('target', '_blank');
+    a.setAttribute('target', '_top');
     a.href = ctaUrl;
     a.textContent = ctaText;
 
