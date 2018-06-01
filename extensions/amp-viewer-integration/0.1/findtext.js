@@ -129,7 +129,7 @@ export function findSentences(node, sentences) {
         // mismatch
         return null;
       }
-      if (pos == posDomDelimiter || skipCharRe.test(textPosChar(pos))) {
+      if (skipCharRe.test(textPosChar(pos))) {
         continue;
       }
       buf.add(pos);
@@ -204,6 +204,29 @@ function concatContinuousRanges(ranges) {
 }
 
 /**
+ * Fixes text ranges that point a text node removed when pos is marked.
+ * @param {!TextPosDef} pos
+ * @param {!Text} newText
+ * @param {number} from
+ * @param {!Array<TextRangeDef>} ranges
+ */
+function fixTextRangesWithRemovedText(pos, newText, from, ranges) {
+  for (let i = from; i < ranges.length; i++) {
+    const r = ranges[i];
+    if (pos.node != r.start.node) {
+      return;
+    }
+    r.start.node = newText;
+    r.start.offset -= pos.offset;
+    if (pos.node != r.end.node) {
+      return;
+    }
+    r.end.node = newText;
+    r.end.offset -= pos.offset;
+  }
+}
+
+/**
  * @param {!TextPosDef} start
  * @param {!TextPosDef} end
  * @param {!Array<TextRangeDef>} ranges Other ranges
@@ -215,23 +238,8 @@ function markTextRange(start, end, ranges, idx, marked) {
     if (start.node == end.node) {
       const newText = markSingleTextNode(
           start.node, start.offset, end.offset, marked);
-      if (!newText) {
-        return;
-      }
-      for (let i = idx + 1; i < ranges.length; i++) {
-        const r = ranges[i];
-        if (end.node == r.start.node) {
-          r.start.node = newText;
-          r.start.offset -= end.offset;
-        } else {
-          break;
-        }
-        if (end.node == r.end.node) {
-          r.end.node = newText;
-          r.end.offset -= end.offset;
-        } else {
-          break;
-        }
+      if (newText) {
+        fixTextRangesWithRemovedText(end, newText, idx + 1, ranges);
       }
       return;
     }
@@ -320,56 +328,19 @@ function nextTextNode(textNode) {
 }
 
 /**
- * A special TextPosDef object to represent a whitespace injected
- *   between two block nodes.
- * @type {!TextPosDef}
- */
-const posDomDelimiter = {node: document.createTextNode(' '), offset: 0};
-
-/**
  * TextScanner visits text nodes under a root node and
  *   returns charcter positions respectively.
  */
 export class TextScanner {
   /**
-   * @param {!Node} root The root node to visit.
-   */
-  constructor(root) {
-    this.internal_ = new TextScannerInternal(root, false);
-    this.next_ = this.internal_.next();
-  }
-
-  /**
-   * next returns the next TextPos.
-   * Returns null when the scanner reaches the end of the text.
-   * @return {?TextPosDef}
-   */
-  next() {
-    const ret = this.next_;
-    if (ret == null) {
-      return null;
-    }
-    this.next_ = this.internal_.next();
-    if (this.next_ == null && /\s/.test(textPosChar(ret))) {
-      // Remove the trailing space.
-      return null;
-    }
-    return ret;
-  }
-}
-
-export class TextScannerInternal {
-  /**
    * @param {!Node} node The root node to visit.
-   * @param {boolean} needSpace Whether spaces should be output if found.
    */
-  constructor(node, needSpace) {
+  constructor(node) {
+    /** @const */
     this.node_ = node;
-    this.needSpace_ = needSpace;
 
     this.textIdx_ = -1;
     this.child_ = null;
-    this.putDomDelim_ = false;
     if (node instanceof Text) {
       this.textIdx_ = 0;
     } else if (node instanceof Element) {
@@ -380,39 +351,29 @@ export class TextScannerInternal {
       if (display == 'none') {
         return;
       }
-      if (this.needSpace_ && display != 'inline') {
-        this.putDomDelim_ = true;
-      }
       const child = node.firstChild;
       if (child != null) {
-        this.child_ = new TextScannerInternal(child, this.needSpace_);
+        this.child_ = new TextScanner(child);
       }
     }
   }
 
   /**
+   * Returns the next TextPosDef.
+   * Returns null when the scanner reaches the end of the text.
    * @return {?TextPosDef}
    */
   next() {
     if (this.textIdx_ >= 0) {
       return this.nextTextPos_();
     }
-    if (this.putDomDelim_) {
-      this.putDomDelim_ = false;
-      this.needSpace_ = false;
-      return posDomDelimiter;
-    }
     while (this.child_ != null) {
       const pos = this.child_.next();
       if (pos != null) {
         return pos;
       }
-      this.needSpace_ = this.child_.needSpace_;
       const sibling = this.child_.node_.nextSibling;
-      this.child_ = null;
-      if (sibling != null) {
-        this.child_ = new TextScannerInternal(sibling, this.needSpace_);
-      }
+      this.child_ = sibling != null ? new TextScanner(sibling) : null;
     }
     return null;
   }
@@ -424,17 +385,7 @@ export class TextScannerInternal {
     const text = this.node_.wholeText;
     while (this.textIdx_ < text.length) {
       const idx = this.textIdx_;
-      const c = text[idx];
       this.textIdx_++;
-      if (/\s/.test(c)) {
-        if (!this.needSpace_) {
-          // Multiple spaces. Skip this char.
-          continue;
-        }
-        this.needSpace_ = false;
-      } else {
-        this.needSpace_ = true;
-      }
       return {node: /**@type{!Text}*/(this.node_), offset: idx};
     }
     return null;

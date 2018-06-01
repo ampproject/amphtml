@@ -71,7 +71,7 @@ export function getHighlightParam(ampdoc) {
   let sum = 0;
   for (let i = 0; i < sens.length; i++) {
     const sen = sens[i];
-    if (typeof sen != "string" || !sen) {
+    if (typeof sen != 'string' || !sen) {
       // Invalid element in sens.
       return null;
     }

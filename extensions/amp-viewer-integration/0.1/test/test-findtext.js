@@ -133,7 +133,7 @@ describes.fakeWin('TextScanner', {}, () => {
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       chars.push(pos.node.wholeText[pos.offset]);
     }
-    expect(chars.join('')).to.equal('ab cd ef\ng');
+    expect(chars.join('')).to.equal('ab cd  ef\n\ng');
   });
 
   it('space suffix and prefix', () => {
@@ -144,11 +144,12 @@ describes.fakeWin('TextScanner', {}, () => {
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       chars.push(pos.node.wholeText[pos.offset]);
     }
-    expect(chars.join('')).to.equal('ab cd');
+    expect(chars.join('')).to.equal(' ab cd  ');
   });
 
-  it('inline', () => {
-    root.innerHTML = 'a<b>b</b>cd <i>ef</i>';
+  it('elements', () => {
+    root.innerHTML = '<b>bold</b><i>italic</i><div>block</div>' +
+        '<ul><li>nest0</li><li>nest1</li></ul>';
     document.body.appendChild(root);
 
     const chars = [];
@@ -156,29 +157,7 @@ describes.fakeWin('TextScanner', {}, () => {
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       chars.push(pos.node.wholeText[pos.offset]);
     }
-    expect(chars.join('')).to.equal('abcd ef');
-  });
-
-  it('item list', () => {
-    root.innerHTML = '<ul><li>a</li><li>b</li></ul>';
-
-    const chars = [];
-    const scanner = new TextScanner(root, false);
-    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
-      chars.push(textPosChar(pos));
-    }
-    expect(chars.join('')).to.equal('a b');
-  });
-
-  it('block', () => {
-    root.innerHTML = '<ul><li>a</li><li>b</li></ul>';
-
-    const chars = [];
-    const scanner = new TextScanner(root, false);
-    for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
-      chars.push(textPosChar(pos));
-    }
-    expect(chars.join('')).to.equal('a b');
+    expect(chars.join('')).to.equal('bolditalicblocknest0nest1');
   });
 
   it('script', () => {
