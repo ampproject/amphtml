@@ -302,6 +302,9 @@ function createElementRules_() {
     'FIELDSET': {
       'disabled': null,
     },
+    'image': {
+      'xlink:href': null,
+    },
     'INPUT': {
       'accept': null,
       'accesskey': null,

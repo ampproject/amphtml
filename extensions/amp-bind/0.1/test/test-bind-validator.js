@@ -235,5 +235,9 @@ describe('BindValidator', () => {
       expect(val.isResultValid('AMP-VIDEO', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
     });
+
+    it('should support svg image', () => {
+      expect(val.canBind('image', 'xlink:href')).to.be.true;
+    });
   });
 });
