@@ -58,8 +58,9 @@ setInterval(function() {
 
 const middleware = [];
 if (!quiet) {
-  middleware.push(morgan('dev'), app);
+  middleware.push(morgan('dev'));
 }
+middleware.push(app);
 if (sendCachingHeaders) {
   middleware.push(header({
     'cache-control': ' max-age=600',
