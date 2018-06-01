@@ -413,6 +413,7 @@ The `cta-link` component lets you specify links for call to actions (e.g., `Read
   ]
 }
 ```
+
 <amp-img alt="Bookend cta-links component" layout="fixed"
 src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
   <noscript>
@@ -864,18 +865,21 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
     <div class="content" grid-area="lower-third">Paragraph 3</div>
   </amp-story-grid-layer>
   <amp-story-cta-layer>
-    <a href="http://www.google.com" class="button"> Call to action! </a>
+    <a href="https://www.ampproject.org" class="button">Outlink here!</a>
   </amp-story-cta-layer>
 </amp-story-page>
 ```
 
-[Complete example found at the examples directory](https://github.com/ampproject/amphtml/blob/master/examples/amp-story/cta-layer-outlink.html)
+<amp-img alt="CTA Layer" layout="fixed"
+    src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png"
+    width="404" height="678">
+  <noscript>
+    <img width="404" height="678"
+         src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" /> 
+  </noscript>
+</amp-img>
 
-<div class="flex-images">
-  <amp-img alt="CTA Layer" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" width="404" height="678">
-  <noscript><img width="404" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" /></noscript>
-  </amp-img>
-</div>
+[Complete example found in the examples directory](https://github.com/ampproject/amphtml/blob/master/examples/amp-story/cta-layer-outlink.html)
 
 #### Children
 
