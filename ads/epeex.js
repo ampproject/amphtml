@@ -31,6 +31,6 @@ export function epeex(global, data) {
     testMode: data['testmode'] || 'false',
   });
 
-  // load the Epeex AMP remote js file
+  // load the epeex AMP remote js file
   loadScript(global, 'https://epeex.com/related/service/widget/amp/remote.js');
 }
