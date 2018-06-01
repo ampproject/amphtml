@@ -221,8 +221,8 @@
   },
   "piStats": {
     "host": "https://events.pi-stats.com",
-    "basePrefix": "https://events.pi-stats.com/eventsamp/?e=PageLoad&pid=piStats&url=pistats.com&cnt=2345&lang=english&ref=pistats.com&id=6789&ua=sjagd&ctype=web&blang=en&v=2.0&dist=Javascript",
-    "pageview": "https://events.pi-stats.com/eventsamp/?e=PageLoad&pid=piStats&url=pistats.com&cnt=2345&lang=english&ref=pistats.com&id=6789&ua=sjagd&ctype=web&blang=en&v=2.0&dist=Javascript&eventtype=pageview"
+    "basePrefix": "https://events.pi-stats.com/eventsamp/?e=PageLoad&pid=$property&url=_ampdoc_url_&cnt=$cntId&lang=$language&ref=_document_referrer_&id=_client_id_&ua=_user_agent_&ctype=web&blang=_browser_language_&v=2.0&dist=Javascript",
+    "pageview": "https://events.pi-stats.com/eventsamp/?e=PageLoad&pid=$property&url=_ampdoc_url_&cnt=$cntId&lang=$language&ref=_document_referrer_&id=_client_id_&ua=_user_agent_&ctype=web&blang=_browser_language_&v=2.0&dist=Javascript&eventtype=pageview"
   },
   "quantcast": {
     "host": "https://pixel.quantserve.com/pixel",
