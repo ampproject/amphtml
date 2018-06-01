@@ -772,7 +772,26 @@ describes.realWin('amp-ima-video', {
         .to.eql('none');
   });
 
-  it('handles unknown consent', () => {
+  it('suppresses IMA load with unknown consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    win.context.initialConsentState = CONSENT_POLICY_STATE.UNKNOWN;
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    // TODO: When I can spy on internals, verify that onImaLoadSuccess() is not
+    // called, and that onImaLoadFail is called.
+    expect(imaVideoObj.getPropertiesForTesting().imaLoadAllowed).to.eql(false);
+  });
+
+
+  it('handles unknown consent with request ads call', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
     doc.body.appendChild(div);
