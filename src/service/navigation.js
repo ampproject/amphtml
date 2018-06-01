@@ -346,7 +346,8 @@ export class Navigation {
    * @private
    */
   handleNavClick_(e, target, tgtLoc) {
-    const curLoc = this.parseUrl_('');
+    const baseHref = getMode().test ? this.ampdoc.win.location.href : '';
+    const curLoc = this.parseUrl_(baseHref);
     const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
     const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
 
