@@ -295,7 +295,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
-    this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+    this.setupOpenButton_(
+        dev().assertElement(this.openButton_), openInAppUrl, installAppUrl);
   }
 }
 
@@ -425,7 +426,8 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         const installAppUrl = 'https://play.google.com/store/apps/details' +
             `?id=${app['id']}`;
         const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-        this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+        this.setupOpenButton_(
+            dev().assertElement(this.openButton_), openInAppUrl, installAppUrl);
         return;
       }
     }
