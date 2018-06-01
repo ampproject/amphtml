@@ -751,6 +751,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  realclick: {
+    renderStartImplemented: true,
+  },
+
   relap: {
     renderStartImplemented: true,
   },
