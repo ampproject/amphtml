@@ -63,8 +63,8 @@ describes.realWin('amp-analytics', {
   let jsonRequestConfigs = {};
 
   const jsonMockResponses = {
-    'invalidConfig': '{"transport": {"iframe": "fake.com"}}',
-    'config1': '{"vars": {"title": "remote"}}',
+    '//invalidConfig': '{"transport": {"iframe": "fake.com"}}',
+    '//config1': '{"vars": {"title": "remote"}}',
     'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
     '//config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
     'https://rewriter.com': '{"vars": {"title": "rewritten"}}',
@@ -1197,7 +1197,7 @@ describes.realWin('amp-analytics', {
       'requests': {'foo': 'https://example.com/${title}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'config1',
+      'config': '//config1',
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
@@ -1211,7 +1211,7 @@ describes.realWin('amp-analytics', {
       'requests': {'foo': 'https://example.com/${title}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'invalidConfig',
+      'config': '//invalidConfig',
     });
     return waitForSendRequest(analytics).then(() => {
       expect(analytics.config_['transport']['iframe']).to.be.undefined;
@@ -1225,7 +1225,7 @@ describes.realWin('amp-analytics', {
       'requests': {'foo': 'https://example.com/${title}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'config1',
+      'config': '//config1',
       'data-credentials': 'include',
     });
     return waitForSendRequest(analytics).then(() => {
@@ -1719,7 +1719,7 @@ describes.realWin('amp-analytics', {
         'requests': {'foo': 'https://example.com/${title}'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {
-        'config': 'config1',
+        'config': '//config1',
         'sandbox': 'true',
       }, true);
       return waitForSendRequest(analytics).then(() => {
