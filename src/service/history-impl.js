@@ -696,7 +696,7 @@ export class HistoryBindingNatural_ {
       state[HISTORY_PROP_] = stackIndex;
       this.replaceState_(state);
     }
-    this.updateHistoryState_(this.mergeStateUpdate_(state, {stackIndex}));
+    this.updateHistoryState_(this.mergeStateUpdate_(/** @type {!HistoryStateDef} */ (state), {stackIndex}));
   }
 
   /**
@@ -745,7 +745,7 @@ export class HistoryBindingNatural_ {
     const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
     state[HISTORY_PROP_] = stackIndex;
     this.replaceState_(state, title, url);
-    this.updateHistoryState_(this.mergeStateUpdate_(state, {stackIndex}));
+    this.updateHistoryState_(this.mergeStateUpdate_(/** @type {!HistoryStateDef} */ (state), {stackIndex}));
   }
 
   /**
@@ -785,8 +785,9 @@ export class HistoryBindingNatural_ {
    * @return {!HistoryStateDef}
    */
   mergeStateUpdate_(state, stateUpdate) {
-    const mergedData = Object.assign({}, state.data, stateUpdate.data);
-    return Object.assign({}, state, stateUpdate, {data: mergedData});
+    const mergedData = Object.assign({}, state.data, stateUpdate['data']);
+    return /** @type {!HistoryStateDef} */(Object.assign(
+        {}, state, stateUpdate, {data: mergedData}));
   }
 
 }
