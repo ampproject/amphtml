@@ -128,6 +128,7 @@ const WHITELISTED_ATTRS = [
   // AMP-only attributes that don't exist in HTML.
   'fallback',
   'heights',
+  'layout',
   'on',
   'option',
   'placeholder',
