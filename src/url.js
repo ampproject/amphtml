@@ -247,7 +247,7 @@ export function serializeQueryString(params) {
  * @param {string|!Location} url
  * @return {boolean}
  */
-export function isSecureUrl(url) {
+export function isSecureUrlDeprecated(url) {
   if (typeof url == 'string') {
     url = parseUrlDeprecated(url);
   }
@@ -273,7 +273,7 @@ export function assertHttpsUrl(
       elementContext, sourceName);
   // (erwinm, #4560): type cast necessary until #4560 is fixed.
   const theUrlString = /** @type {string} */ (urlString);
-  user().assert(isSecureUrl(theUrlString) || /^(\/\/)/.test(theUrlString),
+  user().assert(isSecureUrlDeprecated(theUrlString) || /^(\/\/)/.test(theUrlString),
       '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',

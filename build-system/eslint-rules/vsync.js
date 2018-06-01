@@ -32,6 +32,15 @@ module.exports = function(context) {
         return;
       }
 
+      if (property.leadingComments) {
+        const ok = property.leadingComments.some(comment => {
+          return comment.value === 'OK';
+        });
+        if (ok) {
+          return;
+        }
+      }
+
       context.report({
         node,
         message: [

@@ -20,7 +20,6 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {
-  isSecureUrl,
   parseUrlDeprecated,
 } from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
@@ -69,6 +68,7 @@ export const RTC_ERROR_ENUM = {
 /**
  * @param {string} error
  * @param {string} callout
+ * @param {string} errorReportingUrl
  * @param {!Window} win
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {number=} opt_rtcTime
@@ -93,7 +93,8 @@ function buildErrorResponse_(
  */
 export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
   if (ERROR_REPORTING_ENABLED || getMode(win).localDev || getMode(win).test) {
-    if (!isSecureUrl(errorReportingUrl)) {
+    const urls = Services.urlForDoc(ampDoc);
+    if (!urls.isSecure(errorReportingUrl)) {
       dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorReportingUrl}`);
       return;
     }
@@ -215,19 +216,20 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   const ampDoc = a4aElement.getAmpDoc();
   const callout = opt_vendor || getCalloutParam_(url);
   const checkStillCurrent = a4aElement.verifyStillCurrent.bind(a4aElement)();
-  /**
-   * The time that it takes to substitute the macros into the URL can vary
-   * depending on what the url requires to be substituted, i.e. a long
-   * async call. Thus, however long the URL replacement took is treated as a
-   * time penalty.
-   */
+
+  // The time that it takes to substitute the macros into the URL can vary
+  // depending on what the url requires to be substituted, i.e. a long
+  // async call. Thus, however long the URL replacement took is treated as a
+  // time penalty.
   const send = url => {
     if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
       return buildErrorResponse_(
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
           callout, errorReportingUrl, win, ampDoc);
     }
-    if (!isSecureUrl(url)) {
+
+    const urls = Services.urlForDoc(ampDoc);
+    if (!urls.isSecure(url)) {
       return buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
           callout, errorReportingUrl, win, ampDoc);
     }
@@ -279,6 +281,7 @@ export function truncUrl_(url) {
  * @param {string} callout
  * @param {!Function} checkStillCurrent
  * @param {string} errorReportingUrl
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
