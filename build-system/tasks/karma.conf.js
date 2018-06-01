@@ -175,7 +175,7 @@ module.exports = {
     SL_Safari_latest: {
       base: 'SauceLabs',
       browserName: 'safari',
-      version: 'latest',
+      version: '11.0', // Use 'latest' when 11.1 failures are fixed (#15748).
     },
     SL_Edge_latest: {
       base: 'SauceLabs',
