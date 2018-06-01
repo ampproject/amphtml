@@ -925,7 +925,7 @@ See a [live demo of all the AMP story animations](https://ampbyexample.com/stori
 
 #####  animate-in [required]
 
-Use this attribute to specify the name of the entrance [animation preset](#animation-presets).
+Use this attribute to specify the name of the entrance [animation preset](#animation-effects).
 
 *Example*: A heading flies in from left of the page.
 
