@@ -66,7 +66,7 @@ describes.realWin('amp-analytics', {
     'invalidConfig': '{"transport": {"iframe": "fake.com"}}',
     'config1': '{"vars": {"title": "remote"}}',
     'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
-    'config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
+    '//config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
     'https://rewriter.com': '{"vars": {"title": "rewritten"}}',
   };
   const configRewriterUrl = 'https://rewriter.com';
@@ -308,7 +308,7 @@ describes.realWin('amp-analytics', {
               },
             },
             'requests': {
-              'sample_visibility_request': 'fake-request',
+              'sample_visibility_request': '//fake-request',
             },
           },
         }
@@ -340,7 +340,7 @@ describes.realWin('amp-analytics', {
               },
             },
             'requests': {
-              'sample_visibility_request': 'fake-request',
+              'sample_visibility_request': '//fake-request',
             },
           },
         }
@@ -682,7 +682,7 @@ describes.realWin('amp-analytics', {
         'requests': {'foo': 'https://example.com/${title}'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {
-        'config': 'config-rv2',
+        'config': '//config-rv2',
       });
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
@@ -2100,7 +2100,7 @@ describes.realWin('amp-analytics', {
       };
 
       const analytics = getAnalyticsTag(inlineConfig,
-          {'type': 'rewrite', 'config': 'config-rv2'});
+          {'type': 'rewrite', 'config': '//config-rv2'});
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {
@@ -2129,7 +2129,7 @@ describes.realWin('amp-analytics', {
       };
 
       const analytics = getAnalyticsTag(inlineConfig,
-          {'type': 'rewrite', 'config': 'config-rv2'});
+          {'type': 'rewrite', 'config': '//config-rv2'});
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {
@@ -2172,7 +2172,7 @@ describes.realWin('amp-analytics', {
       };
 
       const analytics = getAnalyticsTag(inlineConfig,
-          {'type': 'rewrite', 'config': 'config-rv2'});
+          {'type': 'rewrite', 'config': '//config-rv2'});
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {
