@@ -157,7 +157,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl);
 
     // Cache shell.
-    if (urlService.isSecureUrl(shellUrl)) {
+    if (urlService.isSecure(shellUrl)) {
       this.waitToPreloadShell_(shellUrl);
     }
   }

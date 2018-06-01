@@ -20,7 +20,7 @@ import {
   assertHttpsUrl,
   getSourceOrigin,
   isProxyOrigin,
-  isSecureUrl,
+  isSecureUrlDeprecated,
   parseUrlDeprecated,
 } from '../../../../src/url';
 import {loadPromise} from '../../../../src/event-helper';
@@ -36,7 +36,7 @@ function stubUrlService(sandbox) {
     assertHttpsUrl,
     getSourceOrigin,
     isProxyOrigin,
-    isSecureUrl,
+    isSecure: isSecureUrlDeprecated,
     parse: parseUrlDeprecated,
   });
 }

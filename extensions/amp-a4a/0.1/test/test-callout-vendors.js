@@ -15,7 +15,7 @@
  */
 
 import {RTC_VENDORS} from '../callout-vendors';
-import {isSecureUrl} from '../../../../src/url';
+import {isSecureUrlDeprecated} from '../../../../src/url';
 
 // The keys of RTC_VENDORS are not allowed to have any capital letters.
 // This test acts as a presubmit to enforce that.
@@ -26,8 +26,8 @@ describe('RTC_VENDORS', () => {
     ));
   it('should all use https', () =>
     Object.keys(RTC_VENDORS).forEach(key => {
-      expect(isSecureUrl(RTC_VENDORS[key].url)).to.be.true;
-      expect(!RTC_VENDORS[key].errorReportingUrl ||
-           isSecureUrl(RTC_VENDORS[key].errorReportingUrl)).to.be.true;
+      expect(isSecureUrlDeprecated(RTC_VENDORS[key].url)).to.be.true;
+      expect(!RTC_VENDORS[key].errorReportingUrl || isSecureUrlDeprecated(
+          RTC_VENDORS[key].errorReportingUrl)).to.be.true;
     }));
 });

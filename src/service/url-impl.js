@@ -21,7 +21,7 @@ import {
   getSourceOrigin,
   isProtocolValid,
   isProxyOrigin,
-  isSecureUrl,
+  isSecureUrlDeprecated,
   parseUrlWithA,
 } from '../url';
 import {
@@ -91,14 +91,6 @@ export class Url {
   }
 
   /**
-   * @param {string|!Location} url
-   * @return {boolean}
-   */
-  isSecureUrl(url) {
-    return isSecureUrl(url);
-  }
-
-  /**
    * Asserts that a given url is HTTPS or protocol relative. It's a user-level
    * assert.
    *
@@ -129,6 +121,16 @@ export class Url {
    */
   isProxyOrigin(url) {
     return isProxyOrigin(url);
+  }
+
+  /*
+   * Returns `true` if the URL is secure: either HTTPS or localhost (for
+   * testing).
+   * @param {string} url
+   * @return {boolean}
+   */
+  isSecure(url) {
+    return isSecureUrlDeprecated(this.parse(url));
   }
 }
 
