@@ -72,6 +72,7 @@ export class PositionObserver {
    * @param {!Element} element
    * @param {!PositionObserverFidelity} fidelity
    * @param {function(?./position-observer-worker.PositionInViewportEntryDef)} handler
+   * @return {!UnlistenDef}
    */
   observe(element, fidelity, handler) {
     const worker =
@@ -84,6 +85,13 @@ export class PositionObserver {
     }
 
     worker.update();
+
+    return () => {
+      const i = this.workers_.indexOf(worker);
+      if (i >= 0) {
+        this.workers_.splice(i, 1);
+      }
+    };
   }
 
   /**
