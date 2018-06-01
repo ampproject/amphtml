@@ -91,3 +91,25 @@ export function relatedArticlesFromJson(opt_articleSetsResponse) {
       return /** @type {!RelatedArticleSetDef} */ (articleSet);
     }));
 }
+
+/**
+ * @param {!JsonObject=} bookendComponents
+ * @return {!Array<!RelatedArticleSetDef>}
+ */
+export function parseArticlesToClassicApi(bookendComponents) {
+  const articleSet = {};
+  articleSet.articles = [];
+
+  bookendComponents.forEach(component => {
+    if (component.type != 'small') {
+      user().warn(component.type + ' is not supported in amp-story-0.1, ' +
+      'upgrade to v1.0 to use this feature.');
+    } else {
+      articleSet.articles.push(buildArticleFromJson_(component));
+    }
+  });
+
+  const articles = [];
+  articles.push(articleSet);
+  return articles;
+}
