@@ -32,4 +32,7 @@ attr_lists: {
     name: "lightbox-thumbnail-id"
     value_regex_casei: "^[a-z][a-z\\d_-]*"
   }
+  attrs: {
+    name: "lightbox-exclude"
+  }
 }

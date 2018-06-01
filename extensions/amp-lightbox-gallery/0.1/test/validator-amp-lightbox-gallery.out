@@ -27,6 +27,7 @@ FAIL
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
+|    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
 |    <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 |    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 |    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
@@ -38,13 +39,6 @@ FAIL
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox="a"></amp-img>
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>
-|  
-|    <!-- Invalid: missing value for lightbox-thumbnail-id -->
-|    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
->>   ^~~~~~~~~
-amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:42:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
-|    <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->
-|    <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
 |  
 |    <!-- Valid -->
 |    <amp-video
@@ -95,16 +89,21 @@ amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:42:2 The attri
 |        data-aax_src="302">
 |      </amp-ad>
 |    </amp-carousel>
-|   
+|  
+|    <!-- Valid: <amp-selector> with the options as lightboxed carousel images -->
+|    <amp-selector layout="container" name="multi_image_select_1" multiple>
+|      <amp-carousel id="carousel-1" width=200 height=60 controls lightbox>
+|        <amp-img src="/img1.png" width=80 height=60 option="a"></amp-img>
+|        <amp-img src="/img2.png" width=80 height=60 option="b" selected></amp-img>
+|        <amp-img src="/img3.png" width=80 height=60 option="c"></amp-img>
+|        <amp-img src="/img4.png" width=80 height=60 option="d" disabled></amp-img>
+|      </amp-carousel>
+|    </amp-selector>
+|  
 |    <!-- Invalid: missing value for lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
 >>   ^~~~~~~~~
-amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:97:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
-|    <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->
-|    <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
-|    <!-- Invalid: invalid use of lightbox-exclude -->
-|    <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
->>   ^~~~~~~~~
-amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:101:2 The attribute 'lightbox-exclude' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:103:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+|  
 |  </body>
 |  </html>
