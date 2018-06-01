@@ -282,6 +282,7 @@ function warnForConsoleError() {
   consoleErrorSandbox = sinon.sandbox.create();
   const originalConsoleError = console/*OK*/.error;
   consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
+    debugger;
     const message = messages.join(' ');
     if (expectedAsyncErrors.includes(message)) {
       expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);

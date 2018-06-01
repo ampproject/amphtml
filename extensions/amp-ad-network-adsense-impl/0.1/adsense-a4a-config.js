@@ -25,6 +25,7 @@ import {
   addExperimentIdToElement,
   extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {forceExperimentBranch} from '../../../src/experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
@@ -54,7 +55,8 @@ export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
   }
   // See if in holdback control/experiment.
   let experimentId;
-  const urlExperimentId = extractUrlExperimentId(win, element);
+  const urlExperimentId = extractUrlExperimentId(
+      win, element, Services.ampdocServiceFor(win).getAmpDoc());
   if (urlExperimentId != undefined) {
     experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
     dev().info(

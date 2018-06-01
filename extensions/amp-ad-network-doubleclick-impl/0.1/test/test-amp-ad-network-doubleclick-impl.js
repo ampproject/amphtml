@@ -122,8 +122,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     beforeEach(() => {
       element = doc.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
-      element.setAttribute('data-ad-client', 'adsense');
-      doc.body.appendChild(element);
+      element.setAttribute('data-ad-client', 'doubleclick');
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
 
@@ -897,10 +896,11 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
   describe('#delayAdRequestEnabled', () => {
     beforeEach(() => {
-      impl = new AmpAdNetworkDoubleclickImpl(
-          createElementWithAttributes(doc, 'amp-ad', {
-            type: 'doubleclick',
-          }));
+      const element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+      });
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
     });
 
     it('should return true if in experiment', () => {
@@ -1080,129 +1080,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(impl.adUrl_).to.be.ok;
         expect(impl.adUrl_.length).to.be.ok;
       });
-    });
-  });
-
-  describe('#correlator clear experiment', () => {
-    let onVisibilityChangedHandler;
-    let visabilityState;
-
-    beforeEach(() => {
-      onVisibilityChangedHandler = null;
-      visabilityState = VisibilityState.PAUSED;
-      const viewer = {
-        isVisible: () => true,
-        onVisibilityChanged: handler => {
-          onVisibilityChangedHandler = handler;
-        },
-        getVisibilityState: () => visabilityState,
-        whenFirstVisible: () => Promise.resolve(),
-      };
-      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
-      element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-        height: '250',
-        width: '320',
-      });
-      doc.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.win.ampAdPageCorrelator = 12345;
-    });
-
-    it('clears if in experiment', () => {
-      forceExperimentBranch(impl.win, CORRELATOR_CLEAR_EXP_NAME,
-          CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT);
-      impl.buildCallback();
-      expect(onVisibilityChangedHandler).to.be.ok;
-      onVisibilityChangedHandler();
-      expect(impl.win.ampAdPageCorrelator).to.not.be.ok;
-      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.CONTROL))
-          .to.be.false;
-      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
-          .to.be.true;
-    });
-
-    it('does not clear if in control', () => {
-      forceExperimentBranch(impl.win, CORRELATOR_CLEAR_EXP_NAME,
-          CORRELATOR_CLEAR_EXP_BRANCHES.CONTROL);
-      impl.buildCallback();
-      expect(onVisibilityChangedHandler).to.be.ok;
-      onVisibilityChangedHandler();
-      expect(impl.win.ampAdPageCorrelator).to.equal(12345);
-      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.CONTROL))
-          .to.be.true;
-      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
-          .to.be.false;
-    });
-
-    it('does not clear if in neither branch', () => {
-      forceExperimentBranch(impl.win, CORRELATOR_CLEAR_EXP_NAME, null);
-      impl.buildCallback();
-      expect(onVisibilityChangedHandler).to.be.ok;
-      onVisibilityChangedHandler();
-      expect(impl.win.ampAdPageCorrelator).to.equal(12345);
-      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.CONTROL))
-          .to.be.false;
-      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
-          .to.be.false;
-    });
-
-    it('attempts to select into branch', () => {
-      impl.buildCallback();
-      expect(onVisibilityChangedHandler).to.be.ok;
-      onVisibilityChangedHandler();
-      // TODO(jeffkaufman, #13422): this test was silently failing
-      // expect(impl.win.experimentBranches[
-      //     CORRELATOR_CLEAR_EXP_NAME]).not.to.be.undefined;
-    });
-
-    it('does not attempt to select into branch if SRA', () => {
-      impl.useSra = true;
-      impl.buildCallback();
-      expect(onVisibilityChangedHandler).to.be.ok;
-      onVisibilityChangedHandler();
-      expect(impl.win.ampAdPageCorrelator).to.equal(12345);
-      expect(impl.win.experimentBranches[
-          CORRELATOR_CLEAR_EXP_NAME]).to.be.undefined;
-    });
-
-    it('does not attempt to select into branch if no correlator', () => {
-      impl.win.ampAdPageCorrelator = undefined;
-      impl.buildCallback();
-      expect(onVisibilityChangedHandler).to.be.ok;
-      onVisibilityChangedHandler();
-      expect(impl.win.experimentBranches[
-          CORRELATOR_CLEAR_EXP_NAME]).to.be.undefined;
-    });
-
-    it('does not attempt to select into branch if not pause', () => {
-      visabilityState = VisibilityState.VISIBLE;
-      impl.buildCallback();
-      expect(onVisibilityChangedHandler).to.be.ok;
-      onVisibilityChangedHandler();
-      expect(impl.win.experimentBranches[
-          CORRELATOR_CLEAR_EXP_NAME]).to.be.undefined;
-    });
-
-    it('set experiment for second block', () => {
-      forceExperimentBranch(impl.win, CORRELATOR_CLEAR_EXP_NAME,
-          CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT);
-      impl.buildCallback();
-      expect(onVisibilityChangedHandler).to.be.ok;
-      onVisibilityChangedHandler();
-      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
-          .to.be.true;
-      onVisibilityChangedHandler = null;
-      const elem2 = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-        height: '250',
-        width: '320',
-      });
-      doc.body.appendChild(elem2);
-      new AmpAdNetworkDoubleclickImpl(elem2).buildCallback();
-      expect(onVisibilityChangedHandler).to.not.be.ok;
-      expect(isInExperiment(elem2, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
-          .to.be.true;
     });
   });
 

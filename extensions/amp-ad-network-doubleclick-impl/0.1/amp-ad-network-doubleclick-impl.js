@@ -301,15 +301,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {!Array<string>} */
     this.experimentIds = [];
-    this.setPageLevelExperiments(
-      extractUrlExperimentId(this.win, this.element));
 
-    /** @protected @const {boolean} */
-    this.useSra = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
-        this.win.location.search) ||
-        !!this.win.document.querySelector(
-            'meta[name=amp-ad-doubleclick-sra]') ||
-        this.experimentIds.includes(DOUBLECLICK_EXPERIMENT_FEATURE.SRA);
+    /** @protected {boolean} */
+    this.useSra = false;
 
     /** @protected {!Deferred<?../../../src/service/xhr-impl.FetchResponse>} */
     this.sraDeferred = new Deferred();
@@ -453,6 +447,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.setPageLevelExperiments(extractUrlExperimentId(
+        this.win, this.element, this.getAmpDoc()));
+    this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
+        this.win.location.search)) ||
+        !!this.win.document.querySelector(
+            'meta[name=amp-ad-doubleclick-sra]') ||
+        this.experimentIds.includes(DOUBLECLICK_EXPERIMENT_FEATURE.SRA);
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
