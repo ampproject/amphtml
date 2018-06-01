@@ -73,6 +73,13 @@ Linkedin is one of the pre-configured providers, so you do not need to provide t
 
 Selects a provider type. This is required for both pre-configured and non-configured providers.
 
+##### data-target
+
+Specifies the target in which to open the target. The default is `_blank` for all cases other than email/SMS on iOS, in which case the target is set to `_top`.
+
+Please note that we only suggest using this override for email.
+
+
 ##### data-share-endpoint
 
 This attribute is **required for non-configured providers**.
