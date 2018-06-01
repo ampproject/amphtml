@@ -425,7 +425,7 @@ describes.realWin('amp-story-bookend', {
 
     allowConsoleError(() => {
       expect(() => articleComponent.assertValidity(userJson)).to.throw(
-          'Articles must contain `title` and `url` fields, ' +
+          'Small article component must contain `title`, `url` fields, ' +
           'skipping invalid.​​​');
     });
   });
@@ -451,7 +451,7 @@ describes.realWin('amp-story-bookend', {
 
     allowConsoleError(() => {
       expect(() => portraitComponant.assertValidity(userJson)).to.throw(
-          'Portrait component must contain `category`, `title`, `image`, and ' +
+          'Portrait component must contain `title`, `image`, ' +
           '`url` fields, skipping invalid.');
     });
   });
@@ -519,8 +519,8 @@ describes.realWin('amp-story-bookend', {
 
     allowConsoleError(() => {
       expect(() => landscapeComponent.assertValidity(userJson)).to.throw(
-          'landscape component must contain `title`, `category`, `image`, ' +
-          'and `url` fields, skipping invalid.');
+          'Landscape component must contain `title`, `image`, ' +
+          '`url` fields, skipping invalid.');
     });
   });
 

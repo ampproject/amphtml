@@ -52,10 +52,15 @@ export class PortraitComponent {
 
   /** @override */
   assertValidity(portraitJson, element) {
-    user().assert('category' in portraitJson && 'title' in portraitJson &&
-      'image' in portraitJson && 'url' in portraitJson, 'Portrait component ' +
-      'must contain `category`, `title`, `image`, and `url` fields, skipping ' +
-      'invalid.');
+
+    const requiredFields = ['title', 'image', 'url'];
+    const hasAllRequiredFields =
+        !requiredFields.some(field => !(field in portraitJson));
+    user().assert(
+        hasAllRequiredFields,
+        'Portrait component must contain ' +
+        requiredFields.map(field => '`' + field + '`').join(', ') +
+        ' fields, skipping invalid.');
 
     userAssertValidProtocol(element, portraitJson['url']);
     userAssertValidProtocol(element, portraitJson['image']);
