@@ -347,6 +347,9 @@ export class TextScanner {
       // Accessing display of computed styles does not force layout/reflow
       // unless media queries that require relayout are used.
       // https://jsfiddle.net/7c7rq2ot/
+      //
+      // Note this does not eliminate all hidden elements (e.g. visibility:hidden).
+      // TODO(yunabe): Support more hidden element patterns if necessary.
       const display = computedStyle(window, node).display;
       if (display == 'none') {
         return;
