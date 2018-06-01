@@ -67,10 +67,9 @@ config.run('amp-fx-collection', function() {
       expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
       const initialLeft = getComputedLeft(win);
       win.scrollTo(0, 0.5 * getViewportHeight(win));
-      return Promise.resolve().then(timeout(10000))
-          .then(() => {
-            expect(getComputedLeft(win)).to.be.above(initialLeft);
-          });
+      return timeout(2000).then(() => {
+        expect(getComputedLeft(win)).to.be.above(initialLeft);
+      });
     });
   });
 
@@ -103,10 +102,9 @@ config.run('amp-fx-collection', function() {
       expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
       const initialLeft = getComputedLeft(win);
       win.scrollTo(0, 0.5 * getViewportHeight(win));
-      return Promise.resolve().then(timeout(10000))
-          .then(() => {
-            expect(getComputedLeft(win)).to.be.below(initialLeft);
-          });
+      return timeout(2000).then(() => {
+        expect(getComputedLeft(win)).to.be.below(initialLeft);
+      });
     });
   });
 
@@ -139,10 +137,9 @@ config.run('amp-fx-collection', function() {
       expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
       const initialTop = getComputedTop(win);
       win.scrollTo(0, 0.5 * getViewportHeight(win));
-      return Promise.resolve().then(timeout(2000))
-          .then(() => {
-            expect(getComputedTop(win)).to.be.below(initialTop);
-          });
+      return timeout(2000).then(() => {
+        expect(getComputedTop(win)).to.be.below(initialTop);
+      });
     });
   });
 });
@@ -162,6 +159,5 @@ function getViewportHeight(win) {
 }
 
 function timeout(ms) {
-  return () => new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
-
