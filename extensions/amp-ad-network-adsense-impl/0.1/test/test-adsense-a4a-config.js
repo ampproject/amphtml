@@ -15,12 +15,17 @@
  */
 
 import * as sinon from 'sinon';
+import {
+  ADSENSE_EXPERIMENTS,
+  ADSENSE_EXP_NAMES,
+} from '../adsense-a4a-config';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {
   URL_EXPERIMENT_MAPPING,
   adsenseIsA4AEnabled,
 } from '../adsense-a4a-config';
 import {createIframePromise} from '../../../../testing/iframe';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
@@ -70,6 +75,91 @@ describe('adsense-a4a-config', () => {
       elem.setAttribute('data-ad-client', 'ca-pub-somepub');
       testFixture.doc.body.appendChild(elem);
       const useRemoteHtml = true;
+      expect(adsenseIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.false;
+    });
+
+    it('should use FF | uncond. canon. exp. | page = canonical', () => {
+      mockWin.location = parseUrlDeprecated(
+          'https://some-pub-site.com/path/to/content.html');
+      sandbox.stub(urls, 'cdnProxyRegex').callsFake(
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/);
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = false;
+      forceExperimentBranch(mockWin, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
+          ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP);
+      expect(adsenseIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.true;
+    });
+
+    it('should use FF | uncond. canon. exp. | page = amp cache', () => {
+      mockWin.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      sandbox.stub(urls, 'cdnProxyRegex').callsFake(
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/);
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = false;
+      forceExperimentBranch(mockWin, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
+          ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP);
+      expect(adsenseIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.true;
+    });
+
+    it('should use DF | uncond. canon. ctl. | page = canonical', () => {
+      mockWin.location = parseUrlDeprecated(
+          'https://some-pub-site.com/path/to/content.html');
+      sandbox.stub(urls, 'cdnProxyRegex').callsFake(
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/);
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = false;
+      forceExperimentBranch(mockWin, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
+          ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL);
+      expect(adsenseIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.false;
+    });
+
+    it('should use FF | uncond. canon. ctl. | page = amp cache', () => {
+      mockWin.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      sandbox.stub(urls, 'cdnProxyRegex').callsFake(
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/);
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = false;
+      forceExperimentBranch(mockWin, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
+          ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL);
+      expect(adsenseIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.true;
+    });
+
+
+    it('should use FF | canonical exp. | page = canonical', () => {
+      mockWin.location = parseUrlDeprecated(
+          'https://some-pub-site.com/path/to/content.html');
+      sandbox.stub(urls, 'cdnProxyRegex').callsFake(
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/);
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = false;
+      forceExperimentBranch(mockWin, ADSENSE_EXP_NAMES.CANONICAL,
+          ADSENSE_EXPERIMENTS.CANONICAL_EXP);
+      expect(adsenseIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.true;
+    });
+
+    it('should use DF | canonical ctl. | page = canonical', () => {
+      mockWin.location = parseUrlDeprecated(
+          'https://some-pub-site.com/path/to/content.html');
+      sandbox.stub(urls, 'cdnProxyRegex').callsFake(
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/);
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = false;
+      forceExperimentBranch(mockWin, ADSENSE_EXP_NAMES.CANONICAL,
+          ADSENSE_EXPERIMENTS.CANONICAL_CTL);
       expect(adsenseIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.false;
     });
 

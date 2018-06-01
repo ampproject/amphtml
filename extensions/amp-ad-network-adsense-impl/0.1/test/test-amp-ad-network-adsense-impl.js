@@ -27,8 +27,7 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
-} from '../amp-ad-network-adsense-impl';
-import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
+} from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
@@ -979,5 +978,23 @@ describes.realWin('amp-ad-network-adsense-impl', {
   describe('#getConsentPolicy', () => {
     it('should return null', () =>
       expect(AmpAdNetworkAdsenseImpl.prototype.getConsentPolicy()).to.be.null);
+  });
+
+  describe('#isXhrAllowed', () => {
+    beforeEach(() => {
+      impl.win = {
+        location: {},
+      };
+    });
+
+    it('should return false on a canonical page', () => {
+      impl.win.location.origin = 'https://www.somesite.com';
+      expect(impl.isXhrAllowed()).to.be.false;
+    });
+
+    it('should return true on a non-canonical page', () => {
+      impl.win.location.origin = 'https://www-somesite.cdn.ampproject.org';
+      expect(impl.isXhrAllowed()).to.be.true;
+    });
   });
 });
