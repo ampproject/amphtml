@@ -217,26 +217,27 @@ export class Expander {
 
   /**
    * Called when a binding is ready to be resolved. Looks to
-   * @param {Object<string, *>} binding An object containing the name of macro
+   * @param {Object<string, *>} bindingInfo An object containing the name of macro
    * and value to be resolved.
-   * @param {Array} opt_args Arguments passed to the macro.
-   * @param {*} opt_sync Whether the binding should be resolved synchronously.
+   * @param {Array=} opt_args Arguments passed to the macro.
+   * @param {*=} opt_sync Whether the binding should be resolved synchronously.
    */
-  evaluateBinding_(binding, opt_args, opt_sync) {
-    if (binding.optional) {
+  evaluateBinding_(bindingInfo, opt_args, opt_sync) {
+    let binding;
+    if (bindingInfo.optional) {
       // If a binding is passed in through opt_bindings it always takes
       // precedence.
-      binding = binding.optional;
-    } else if (opt_sync && binding.sync) {
+      binding = bindingInfo.optional;
+    } else if (opt_sync && bindingInfo.sync) {
       // Use the sync resolution if avaliable when called synchronously.
-      binding = binding.sync;
+      binding = bindingInfo.sync;
     } else if (opt_sync) {
       // If there is no sync resolution we can not wait.
-      user().error(TAG, 'ignoring async replacement key: ', binding.name);
+      user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
       binding = '';
     } else {
       // Prefer the async over the sync but it may not exist.
-      binding = binding.async || binding.sync;
+      binding = bindingInfo.async || bindingInfo.sync;
     }
     return opt_sync ? this.evaluateBindingSync_(binding, opt_args) :
       this.evaluateBindingAsync_(binding, opt_args);
