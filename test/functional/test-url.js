@@ -26,7 +26,7 @@ import {
   isLocalhostOrigin,
   isProtocolValid,
   isProxyOrigin,
-  isSecureUrl,
+  isSecureUrlDeprecated,
   parseQueryString,
   parseUrlDeprecated,
   removeFragment,
@@ -337,34 +337,34 @@ describe('assertHttpsUrl/isSecureUrl', () => {
   });
   it('should allow https', () => {
     assertHttpsUrl('https://twitter.com', referenceElement);
-    expect(isSecureUrl('https://twitter.com')).to.be.true;
+    expect(isSecureUrlDeprecated('https://twitter.com')).to.be.true;
   });
   it('should allow protocol relative', () => {
     assertHttpsUrl('//twitter.com', referenceElement);
     // `isSecureUrl` always resolves relative URLs.
-    expect(isSecureUrl('//twitter.com'))
+    expect(isSecureUrlDeprecated('//twitter.com'))
         .to.be.equal(window.location.protocol == 'https:');
   });
   it('should allow localhost with http', () => {
     assertHttpsUrl('http://localhost:8000/sfasd', referenceElement);
-    expect(isSecureUrl('http://localhost:8000/sfasd')).to.be.true;
+    expect(isSecureUrlDeprecated('http://localhost:8000/sfasd')).to.be.true;
   });
   it('should allow localhost with http suffix', () => {
     assertHttpsUrl('http://iframe.localhost:8000/sfasd', referenceElement);
-    expect(isSecureUrl('http://iframe.localhost:8000/sfasd')).to.be.true;
+    expect(isSecureUrlDeprecated('http://iframe.localhost:8000/sfasd')).to.be.true;
   });
 
   it('should fail on http', () => {
     allowConsoleError(() => { expect(() => {
       assertHttpsUrl('http://twitter.com', referenceElement);
     }).to.throw(/source must start with/); });
-    expect(isSecureUrl('http://twitter.com')).to.be.false;
+    expect(isSecureUrlDeprecated('http://twitter.com')).to.be.false;
   });
   it('should fail on http with localhost in the name', () => {
     allowConsoleError(() => { expect(() => {
       assertHttpsUrl('http://foolocalhost', referenceElement);
     }).to.throw(/source must start with/); });
-    expect(isSecureUrl('http://foolocalhost')).to.be.false;
+    expect(isSecureUrlDeprecated('http://foolocalhost')).to.be.false;
   });
 });
 

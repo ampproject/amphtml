@@ -16,7 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from '../iframe-transport-vendors';
-import {isSecureUrl} from '../../../../src/url';
+import {isSecureUrlDeprecated} from '../../../../src/url';
 
 describe('analytics vendors', () => {
   it('googleanalytics & googleanalytics-alpha should be identical', () => {
@@ -33,7 +33,7 @@ describe('analytics vendors', () => {
       expect(vendorITEntry.transport).to.exist;
       expect(Object.keys(vendorITEntry.transport).length).to.equal(1);
       expect(vendorITEntry.transport.iframe).to.exist;
-      expect(isSecureUrl(vendorITEntry.transport.iframe)).to.be.true;
+      expect(isSecureUrlDeprecated(vendorITEntry.transport.iframe)).to.be.true;
     }
   });
 

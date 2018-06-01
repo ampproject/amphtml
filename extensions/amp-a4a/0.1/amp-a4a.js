@@ -24,7 +24,6 @@ import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
   assertHttpsUrl,
-  isSecureUrl,
   tryDecodeUriComponent,
 } from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
@@ -829,9 +828,11 @@ export class AmpA4A extends AMP.BaseElement {
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
             this.preconnect.preload(font.href));
+
+          const urls = Services.urlForDoc(this.getAmpDoc());
           // Preload any AMP images.
           (creativeMetaDataDef.images || []).forEach(image =>
-            isSecureUrl(image) && this.preconnect.preload(image));
+            urls.isSecure(image) && this.preconnect.preload(image));
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -1656,10 +1657,12 @@ export class AmpA4A extends AMP.BaseElement {
         if (!isArray(metaData.customStylesheets)) {
           throw new Error(errorMsg);
         }
+
+        const urls = Services.urlForDoc(this.getAmpDoc());
         metaData.customStylesheets.forEach(stylesheet => {
           if (!isObject(stylesheet) || !stylesheet['href'] ||
               typeof stylesheet['href'] !== 'string' ||
-              !isSecureUrl(stylesheet['href'])) {
+              !urls.isSecure(stylesheet['href'])) {
             throw new Error(errorMsg);
           }
         });
