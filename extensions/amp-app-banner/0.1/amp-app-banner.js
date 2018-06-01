@@ -22,7 +22,7 @@ import {dict} from '../../../src/utils/object';
 import {isProtocolValid, isProxyOrigin} from '../../../src/url';
 import {openWindowDialog, removeElement} from '../../../src/dom';
 import {parseUrlDeprecated} from '../../../src/url';
-
+// JUST TESTING TRAVIS BUILD
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;
 
@@ -46,15 +46,22 @@ export class AbstractAppBanner extends AMP.BaseElement {
   /**
    * Subclasses should override this method to specify action when open button
    * is clicked.
+   * @param {string} unusedOpenInAppUrl
+   * @param {string} unusedInstallAppUrl
    * @protected
    */
   openButtonClicked(unusedOpenInAppUrl, unusedInstallAppUrl) {
     // Subclasses may override.
   }
 
-  /** @protected */
-  setupOpenButton_(openButton, openInAppUrl, installAppUrl) {
-    openButton.addEventListener('click', () => {
+  /**
+   * @param {!Element} button
+   * @param {string} openInAppUrl
+   * @param {string} installAppUrl
+   * @protected
+   */
+  setupOpenButton_(button, openInAppUrl, installAppUrl) {
+    button.addEventListener('click', () => {
       this.openButtonClicked(openInAppUrl, installAppUrl);
     });
   }
@@ -288,7 +295,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
-    this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+    this.setupOpenButton_(
+        dev().assertElement(this.openButton_), openInAppUrl, installAppUrl);
   }
 }
 
@@ -391,7 +399,10 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     openWindowDialog(this.win, openInAppUrl, '_top');
   }
 
-  /** @private */
+  /**
+   * @private
+   * @param {string} link
+   */
   redirectTopLocation_(link) {
     this.win.top.location.assign(link);
   }
@@ -415,7 +426,8 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         const installAppUrl = 'https://play.google.com/store/apps/details' +
             `?id=${app['id']}`;
         const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-        this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+        this.setupOpenButton_(
+            dev().assertElement(this.openButton_), openInAppUrl, installAppUrl);
         return;
       }
     }
@@ -424,7 +436,10 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         this.element);
   }
 
-  /** @private */
+  /**
+   * @private
+   * @param {string} appId
+   */
   getAndroidIntentForUrl_(appId) {
     const {canonicalUrl} = Services.documentInfoForDoc(this.element);
     const parsedUrl = parseUrlDeprecated(canonicalUrl);
