@@ -28,7 +28,7 @@ describes.fakeWin('getHighlightParam', {
     env.win.location = 'page.html#highlight=' +
         '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D';
     expect(getHighlightParam(env.ampdoc)).to.deep.equal({
-      's': ['amp', 'highlight'],
+      sentences: ['amp', 'highlight'],
     });
   });
 
@@ -59,6 +59,23 @@ describes.fakeWin('getHighlightParam', {
       sens.push('a'.repeat(400));
     }
     env.win.location = 'page.html#highlight=' + JSON.stringify({'s': sens});
+    expect(getHighlightParam(env.ampdoc)).to.be.a('null');
+  });
+
+  it('if s is not array', () => {
+    env.win.location = 'page.html#highlight=' +
+        JSON.stringify({'s': 'invalid'});
+    expect(getHighlightParam(env.ampdoc)).to.be.a('null');
+  });
+
+  it('empty in an array', () => {
+    env.win.location = 'page.html#highlight=' +
+        JSON.stringify({'s': ['a', '', 'b']});
+    expect(getHighlightParam(env.ampdoc)).to.be.a('null');
+  });
+
+  it('number array', () => {
+    env.win.location = 'page.html#highlight=' + JSON.stringify({'s': [1, 2]});
     expect(getHighlightParam(env.ampdoc)).to.be.a('null');
   });
 });

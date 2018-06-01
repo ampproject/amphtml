@@ -15,7 +15,7 @@
  */
 
 import {AmpViewerIntegrationVariableService} from './variable-service';
-import {HighlightHandler, getHighlightParam} from './highlight-handler';
+import {HighlightHandler, HighlightInfoDef, getHighlightParam} from './highlight-handler';
 import {
   Messaging,
   WindowPortEmulator,
@@ -103,7 +103,7 @@ export class AmpViewerIntegration {
                 new Messaging(this.win, receivedPort, this.isWebView_));
           });
     }
-    /** @type {?JsonObject} */
+    /** @type {?HighlightInfoDef} */
     const highlightInfo = getHighlightParam(ampdoc);
     if (highlightInfo) {
       this.highlightHandler_ = new HighlightHandler(ampdoc, highlightInfo);

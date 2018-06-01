@@ -221,10 +221,10 @@ describe('markTextRangeList', () => {
     root.innerHTML = '<b>abc</b><div>def</div><i>ghi</i>';
     const b = root.querySelector('b');
     const i = root.querySelector('i');
-    markTextRangeList([
-      {start: {node: b.firstChild, offset: 1},
-       end: {node: i.firstChild, offset: 1}},
-    ]);
+    markTextRangeList([{
+      start: {node: b.firstChild, offset: 1},
+      end: {node: i.firstChild, offset: 1},
+    }]);
     expect(root.innerHTML).to.equal(
         '<b>a<span>bc</span></b><div><span>def</span></div>' +
           '<i><span>g</span>hi</i>');

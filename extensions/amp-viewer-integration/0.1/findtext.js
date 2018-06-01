@@ -44,14 +44,14 @@ export class CircularBuffer {
 }
 
 /**
- * TextPos is a pointer to a character in a Text node.
+ * TextPosDef is a pointer to a character in a Text node.
  * @typedef {{node: !Text, offset: number}}
  */
-let TextPos;
+let TextPosDef;
 
 /**
  * Returns a char pointed by pos.
- * @param {!TextPos} pos
+ * @param {!TextPosDef} pos
  * @return {string}
  */
 export function textPosChar(pos) {
@@ -59,10 +59,10 @@ export function textPosChar(pos) {
 }
 
 /**
- * TextRange represents a text range.
- * @typedef {{start: !TextPos, end: !TextPos}}
+ * TextRangeDef represents a text range.
+ * @typedef {{start: !TextPosDef, end: !TextPosDef}}
  */
-let TextRange;
+let TextRangeDef;
 
 const skipCharRe = /[,.\s\u2022()]/;
 
@@ -101,10 +101,10 @@ export function canonicalizeString(s) {
 }
 
 /**
- * findSentences find sentences from node and returns a list of TextRange.
+ * findSentences find sentences from node and returns a list of TextRangeDef.
  * @param {!Node} node
  * @param {!Array<string>} sentences
- * @return {?Array<!TextRange>}
+ * @return {?Array<!TextRangeDef>}
  */
 export function findSentences(node, sentences) {
   const scanner = new TextScanner(node);
@@ -169,7 +169,7 @@ export function findSentences(node, sentences) {
 }
 
 /**
- * @param {!Array<!TextRange>} ranges
+ * @param {!Array<!TextRangeDef>} ranges
  * @return {!Array<!Element>} A list of marked nodes.
  */
 export function markTextRangeList(ranges) {
@@ -183,8 +183,8 @@ export function markTextRangeList(ranges) {
 }
 
 /**
- * @param {!Array<!TextRange>} ranges
- * @return {!Array<!TextRange>}
+ * @param {!Array<!TextRangeDef>} ranges
+ * @return {!Array<!TextRangeDef>}
  */
 function concatContinuousRanges(ranges) {
   const ret = [];
@@ -204,9 +204,9 @@ function concatContinuousRanges(ranges) {
 }
 
 /**
- * @param {!TextPos} start
- * @param {!TextPos} end
- * @param {!Array<TextRange>} ranges Other ranges
+ * @param {!TextPosDef} start
+ * @param {!TextPosDef} end
+ * @param {!Array<TextRangeDef>} ranges Other ranges
  * @param {number} idx
  * @param {!Array<!Element>} marked
  */
@@ -320,9 +320,9 @@ function nextTextNode(textNode) {
 }
 
 /**
- * A special TextPos object to represent a whitespace injected
+ * A special TextPosDef object to represent a whitespace injected
  *   between two block nodes.
- * @type {!TextPos}
+ * @type {!TextPosDef}
  */
 const posDomDelimiter = {node: document.createTextNode(' '), offset: 0};
 
@@ -342,7 +342,7 @@ export class TextScanner {
   /**
    * next returns the next TextPos.
    * Returns null when the scanner reaches the end of the text.
-   * @return {?TextPos}
+   * @return {?TextPosDef}
    */
   next() {
     const ret = this.next_;
@@ -391,7 +391,7 @@ export class TextScannerInternal {
   }
 
   /**
-   * @return {?TextPos}
+   * @return {?TextPosDef}
    */
   next() {
     if (this.textIdx_ >= 0) {
@@ -418,7 +418,7 @@ export class TextScannerInternal {
   }
 
   /**
-   * @return {?TextPos}
+   * @return {?TextPosDef}
    */
   nextTextPos_() {
     const text = this.node_.wholeText;

@@ -47,9 +47,15 @@ const NUM_SENTENCES_LIMIT = 15;
 const NUM_ALL_CHARS_LIMIT = 1500;
 
 /**
+ * TextRange represents a text range.
+ * @typedef {{sentences: !Array<string>}}
+ */
+let HighlightInfoDef;
+
+/**
  * Returns highlight param in the URL hash.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {?JsonObject}
+ * @return {?HighlightInfoDef}
  */
 export function getHighlightParam(ampdoc) {
   const param = parseQueryString(ampdoc.win.location.hash)['highlight'];
@@ -58,25 +64,26 @@ export function getHighlightParam(ampdoc) {
   }
   const highlight = parseJson(param);
   const sens = highlight['s'];
-  if (sens) {
-    if (sens.length > NUM_SENTENCES_LIMIT) {
-      // Too many sentences, do nothing for safety.
+  if (!(sens instanceof Array) || sens.length > NUM_SENTENCES_LIMIT) {
+    // Too many sentences, do nothing for safety.
+    return null;
+  }
+  let sum = 0;
+  for (let i = 0; i < sens.length; i++) {
+    const sen = sens[i];
+    if (typeof sen != "string" || !sen) {
+      // Invalid element in sens.
       return null;
     }
-    let sum = 0;
-    for (let i = 0; i < sens.length; i++) {
-      const sen = sens[i];
-      if (!sen) {
-        continue;
-      }
-      sum += sen.length;
-      if (sum > NUM_ALL_CHARS_LIMIT) {
-        // Too many chars, do nothing for safety.
-        return null;
-      }
+    sum += sen.length;
+    if (sum > NUM_ALL_CHARS_LIMIT) {
+      // Too many chars, do nothing for safety.
+      return null;
     }
   }
-  return highlight;
+  return {
+    sentences: sens,
+  };
 }
 
 /**
@@ -86,7 +93,7 @@ export function getHighlightParam(ampdoc) {
 export class HighlightHandler {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JsonObject} highlightInfo The highlighting info in JSON.
+   * @param {!HighlightInfoDef} highlightInfo The highlighting info in JSON.
    */
   constructor(ampdoc, highlightInfo) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -99,12 +106,12 @@ export class HighlightHandler {
   }
 
   /**
-   * @param {!JsonObject} highlightInfo
+   * @param {!HighlightInfoDef} highlightInfo
     * @private
     */
   initHighlight_(highlightInfo) {
     const ampdoc = this.ampdoc_;
-    const sens = findSentences(ampdoc.getBody(), highlightInfo['s']);
+    const sens = findSentences(ampdoc.getBody(), highlightInfo.sentences);
     if (!sens) {
       return;
     }
