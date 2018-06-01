@@ -174,11 +174,20 @@ export class RealTimeConfigManager {
     return Promise.all(this.promiseArray_);
   }
 
+  /**
+   * Assigns constant macros that should exist for all RTC to object of custom
+   * per-network macros.
+   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
+   */
   assignMacros(macros) {
     macros['TIMEOUT'] = () => this.rtcConfig_['timeoutMillis'];
     return macros;
   }
 
+  /**
+   * Manages sending the RTC callouts for the Custom URLs.
+   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   */
   handleRtcForCustomUrls(customMacros) {
     // For each publisher defined URL, inflate the url using the macros,
     // and send the RTC request.
@@ -198,6 +207,10 @@ export class RealTimeConfigManager {
     });
   }
 
+  /**
+   * Manages sending the RTC callouts for all specified vendors.
+   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   */
   handleRtcForVendorUrls(customMacros) {
     // For each vendor the publisher has specified, inflate the vendor
     // url if it exists, and send the RTC request.
