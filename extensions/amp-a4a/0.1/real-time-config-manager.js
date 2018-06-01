@@ -68,6 +68,7 @@ export const RTC_ERROR_ENUM = {
 /**
  * @param {string} error
  * @param {string} callout
+ * @param {string} errorReportingUrl
  * @param {!Window} win
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {number=} opt_rtcTime
@@ -215,12 +216,11 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   const ampDoc = a4aElement.getAmpDoc();
   const callout = opt_vendor || getCalloutParam_(url);
   const checkStillCurrent = a4aElement.verifyStillCurrent.bind(a4aElement)();
-  /**
-   * The time that it takes to substitute the macros into the URL can vary
-   * depending on what the url requires to be substituted, i.e. a long
-   * async call. Thus, however long the URL replacement took is treated as a
-   * time penalty.
-   */
+
+  // The time that it takes to substitute the macros into the URL can vary
+  // depending on what the url requires to be substituted, i.e. a long
+  // async call. Thus, however long the URL replacement took is treated as a
+  // time penalty.
   const send = url => {
     if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
       return buildErrorResponse_(
@@ -281,6 +281,7 @@ export function truncUrl_(url) {
  * @param {string} callout
  * @param {!Function} checkStillCurrent
  * @param {string} errorReportingUrl
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */

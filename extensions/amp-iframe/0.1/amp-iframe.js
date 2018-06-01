@@ -30,7 +30,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {once} from '../../../src/utils/function';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';
