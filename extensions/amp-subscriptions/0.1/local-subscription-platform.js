@@ -151,16 +151,21 @@ export class LocalSubscriptionPlatform {
   handleClick_(element) {
     if (element) {
       const action = element.getAttribute('subscriptions-action');
-      if (element.getAttribute('subscriptions-service') === 'local') {
+      const serviceAttr = element.getAttribute('subscriptions-service');
+      if (serviceAttr == 'local') {
         this.executeAction(action);
-      } else if ((element.getAttribute('subscriptions-service') || 'auto')
-        == 'auto') {
-        const platform = this.serviceAdapter_.selectPlatformForLogin();
-        this.serviceAdapter_.delegateActionToService(
-            action, platform.getServiceId());
-      } else if (element.getAttribute('subscriptions-service')) {
-        const serviceId = element.getAttribute('subscriptions-service');
-        this.serviceAdapter_.delegateActionToService(action, serviceId);
+      } else if ((serviceAttr || 'auto') == 'auto') {
+        if (action == 'login') {
+          // The "login" action is somewhat special b/c viewers can
+          // enhance this action, e.g. to provide save/link feature.
+          const platform = this.serviceAdapter_.selectPlatformForLogin();
+          this.serviceAdapter_.delegateActionToService(
+              action, platform.getServiceId());
+        } else {
+          this.executeAction(action);
+        }
+      } else if (serviceAttr) {
+        this.serviceAdapter_.delegateActionToService(action, serviceAttr);
       }
     }
   }
