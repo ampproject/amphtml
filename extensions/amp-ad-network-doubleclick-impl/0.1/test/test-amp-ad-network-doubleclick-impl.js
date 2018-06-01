@@ -79,7 +79,7 @@ const realWinConfig = {
 };
 
 const realWinConfigAmpAd = {
-  amp: true,
+  amp: {ampdoc: 'amp-ad'},
   ampAdCss: true,
   allowExternalResources: true,
 };
@@ -1344,11 +1344,9 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       let doc;
       let impl;
       let element;
-      let ampdoc;
 
       beforeEach(() => {
         doc = env.win.document;
-        ampdoc = env.ampdoc;
       });
 
       describe('#onNetworkFailure', () => {
@@ -1446,7 +1444,6 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
             'type': 'doubleclick',
           });
           impl = new AmpAdNetworkDoubleclickImpl(element);
-          sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
         });
 
         it('should handle null impressions', () => {
