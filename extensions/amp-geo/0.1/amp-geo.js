@@ -50,9 +50,9 @@ import {waitForBodyPromise} from '../../../src/dom';
  * @enum {number}
  */
 export const GEO_IN_GROUP = {
-  NOT_DEFINED: 0,
-  IN: 1,
-  NOT_IN: 2,
+  NOT_DEFINED: 1,
+  IN: 2,
+  NOT_IN: 3,
 };
 
 /** @const */
@@ -283,7 +283,7 @@ export class AmpGeo extends AMP.BaseElement {
       return {
         ISOCountry: self.country_,
         matchedISOCountryGroups: self.matchedGroups_,
-        allISOCountryGroups: Object.keys(config.ISOCountryGroups || {}),
+        allISOCountryGroups: this.definedGroups_,
         /* API */
         isInCountryGroup: this.isInCountryGroup.bind(this),
         /**
