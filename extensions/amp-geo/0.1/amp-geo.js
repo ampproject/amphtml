@@ -314,14 +314,14 @@ export class AmpGeo extends AMP.BaseElement {
       return GEO_IN_GROUP.NOT_DEFINED;
     }
 
-    // If any of the groups match it'sa a match
+    // If any of the groups match it's a match
     if (targets.filter(group => {
       return this.matchedGroups_.indexOf(group) >= 0;
     }).length > 0) {
       return GEO_IN_GROUP.IN;
     }
 
-    // If we got here noting matched
+    // If we got here nothing matched
     return GEO_IN_GROUP.NOT_IN;
   }
 }
