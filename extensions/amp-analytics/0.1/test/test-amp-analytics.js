@@ -331,7 +331,7 @@ describes.realWin('amp-analytics', {
         {
           'foo': {
             'transport': {
-              'iframe': 'https://www.google.com',
+              'iframe': 'http://example.com',
             },
             'triggers': {
               'sample_visibility_trigger': {
