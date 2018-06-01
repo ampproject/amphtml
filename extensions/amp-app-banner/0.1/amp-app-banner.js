@@ -62,9 +62,9 @@ export class AbstractAppBanner extends AMP.BaseElement {
    */
   setupOpenButton_(button, openInAppUrl, installAppUrl) {
     button.addEventListener('click', () => {
-       this.openButtonClicked(openInAppUrl, installAppUrl);
-     });
-   }
+      this.openButtonClicked(openInAppUrl, installAppUrl);
+    });
+  }
 
   /**
    * Creates and append a close button.
@@ -398,7 +398,10 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     openWindowDialog(this.win, openInAppUrl, '_top');
   }
 
-  /** @private @param {string} link */
+  /** 
+   * @private 
+   * @param {string} link 
+   */
   redirectTopLocation_(link) {
     this.win.top.location.assign(link);
   }
@@ -431,7 +434,10 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         this.element);
   }
 
-  /** @private @param {string} appId */
+  /** 
+   * @private 
+   * @param {string} appId 
+   */
   getAndroidIntentForUrl_(appId) {
     const {canonicalUrl} = Services.documentInfoForDoc(this.element);
     const parsedUrl = parseUrlDeprecated(canonicalUrl);
