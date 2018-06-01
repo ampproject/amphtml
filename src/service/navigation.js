@@ -346,7 +346,9 @@ export class Navigation {
    * @private
    */
   handleNavClick_(e, target, tgtLoc) {
-    const baseHref = getMode().test ? this.ampdoc.win.location.href : '';
+    const baseHref = getMode().test && !this.isEmbed_
+      ? this.ampdoc.win.location.href
+      : '';
     const curLoc = this.parseUrl_(baseHref);
     const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
     const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
@@ -432,7 +434,7 @@ export class Navigation {
    * @private
    */
   parseUrl_(url) {
-    return Services.urlForDoc(this.ampdoc).parse(url);
+    return Services.urlForDoc(this.rootNode_).parse(url);
   }
 }
 
