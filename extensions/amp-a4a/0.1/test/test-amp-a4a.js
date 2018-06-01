@@ -580,7 +580,7 @@ describe('amp-a4a', () => {
       });
     });
 
-    describe('#renderViaCachedContentIframe', () => {
+    describe('#renderViaIframeGet', () => {
       beforeEach(() => {
         // Verify client cache iframe rendering.
         adResponse.headers[RENDERING_TYPE_HEADER] = 'client_cache';
