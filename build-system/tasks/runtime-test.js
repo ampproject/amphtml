@@ -39,7 +39,7 @@ const {green, yellow, cyan, red, bold} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
-
+const tooManyTestsToFix = 15;
 
 /**
  * Read in and process the configuration settings for karma
@@ -73,17 +73,14 @@ function getConfig() {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Chrome_android',
         'SL_Chrome_latest',
+        'SL_Chrome_android',
         'SL_Chrome_45',
         'SL_Firefox_latest',
-        // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
-        // 'SL_Safari_latest',
-        // 'SL_Safari_10',
-        // 'SL_Safari_9',
+        'SL_Safari_latest',
+        'SL_Android_latest',
+        // TODO(rsimha, #15510): Enable these.
         // 'SL_iOS_latest',
-        // 'SL_iOS_10_0',
-        // TODO(rsimha, #14374): Re-enable these after upgrading wd.
         // 'SL_Edge_latest',
         // 'SL_IE_11',
       ] : [
@@ -161,8 +158,8 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
-    'local-changes':
-        'Running unit tests from files commited to the local branch.',
+    'local-changes': 'Running unit tests affected by the files changed in the' +
+        ' local branch.',
   };
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
@@ -350,6 +347,7 @@ function runTests() {
 
   if (argv.verbose || argv.v) {
     c.client.captureConsole = true;
+    c.client.verboseLogging = true;
   }
 
   if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
@@ -377,7 +375,9 @@ function runTests() {
       });
     }
     c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
-    c.client.failOnConsoleError = true;
+    if (testsToRun.length < tooManyTestsToFix) {
+      c.client.failOnConsoleError = true;
+    }
   } else if (argv.integration) {
     c.files = c.files.concat(
         config.commonIntegrationTestPaths, config.integrationTestPaths);
@@ -565,6 +565,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
-    'local-changes': '  Run unit tests from files changed in the local branch',
+    'local-changes': '  Run unit tests affected by the files changed in the ' +
+        'local branch',
   },
 });

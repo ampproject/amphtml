@@ -26,14 +26,14 @@ const TAG = 'CONSENT-STATE-MANAGER';
  * @enum {number}
  */
 export const CONSENT_ITEM_STATE = {
-  UNKNOWN: 0,
-  GRANTED: 1,
+  ACCEPTED: 1,
   REJECTED: 2,
   DISMISSED: 3,
   NOT_REQUIRED: 4,
+  UNKNOWN: 5,
   // TODO(@zhouyx): Seperate UI state from consent state. Add consent
   // requirement state ui_state = {pending, active, complete} consent_state =
-  // {unknown, granted, rejected}
+  // {unknown, accepted, rejected}
 };
 
 export class ConsentStateManager {
@@ -209,7 +209,7 @@ export class ConsentInstance {
       return;
     }
 
-    const value = (state == CONSENT_ITEM_STATE.GRANTED);
+    const value = (state == CONSENT_ITEM_STATE.ACCEPTED);
     this.storagePromise_.then(storage => {
       if (state != this.localValue_) {
         // If state has changed. do not store.
@@ -241,7 +241,7 @@ export class ConsentInstance {
         this.localValue_ = CONSENT_ITEM_STATE.UNKNOWN;
       } else {
         this.localValue_ = storedValue ?
-          CONSENT_ITEM_STATE.GRANTED : CONSENT_ITEM_STATE.REJECTED;
+          CONSENT_ITEM_STATE.ACCEPTED : CONSENT_ITEM_STATE.REJECTED;
       }
       return this.localValue_;
     }).catch(e => {
