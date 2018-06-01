@@ -106,7 +106,7 @@ export class VideoServiceSync {
   }
 
   /**
-   * @param  {!../../video-interface.VideoOrBaseElementDef} video
+   * @param  {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
   maybeInstallAutoplay_(video) {
@@ -120,7 +120,11 @@ export class VideoServiceSync {
   delegateAutoplay(video, optObservable = null) {
     // TODO(alanorozco): Make observable required once implementation of
     // `VideoService` finalizes.
-    this.getAutoplay_().delegate(video, dev().assert(optObservable));
+    if (optObservable == null) {
+      dev().assert(false, 'Autoplay delegation requires an observable.');
+      return;
+    }
+    this.getAutoplay_().delegate(video, optObservable);
   }
 
   /** @override */
@@ -161,7 +165,9 @@ export class VideoEntry {
   /** @private */
   listenToAutoplay_() {
     // TODO(alanorozco): Keep track of session
-    listen(this.element_, AutoplayEvents.PLAY, () => this.video_.play());
-    listen(this.element_, AutoplayEvents.PUASE, () => this.video_.pause());
+    listen(this.element_, AutoplayEvents.PLAY,
+        () => this.video_.play(/* auto */ true));
+
+    listen(this.element_, AutoplayEvents.PAUSE, () => this.video_.pause());
   }
 }

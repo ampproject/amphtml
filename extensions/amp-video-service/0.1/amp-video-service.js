@@ -26,7 +26,9 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {VideoServiceSignals} from '../video-service-interface';
+import {
+  VideoServiceSignals,
+} from '../../../src/service/video-service-interface';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {isFiniteNumber} from '../../../src/types';
