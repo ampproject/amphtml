@@ -94,7 +94,7 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isObject} from '../../../src/types';
-import {isSecureUrl, parseQueryString} from '../../../src/url';
+import {isSecureUrlDeprecated, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
@@ -1066,7 +1066,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     impressions.split(',').forEach(url => {
       try {
-        if (!isSecureUrl(url)) {
+        if (!isSecureUrlDeprecated(url)) {
           dev().warn(TAG, `insecure impression url: ${url}`);
           return;
         }
