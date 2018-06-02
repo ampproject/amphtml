@@ -473,6 +473,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           .callsFake(() => Promise.resolve(entitlement));
       const resetStub = sandbox.stub(subscriptionService.platformStore_,
           'resetEntitlementFor');
+      sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
       return subscriptionService.reAuthorizePlatform(platform).then(() => {
         expect(resetStub).to.be.calledOnce.calledWith('local');
       });
