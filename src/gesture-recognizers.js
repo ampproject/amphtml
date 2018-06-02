@@ -50,11 +50,15 @@ export class TapRecognizer extends GestureRecognizer {
 
     /** @private {number} */
     this.lastY_ = 0;
+
+    /** @private {?EventTarget} */
+    this.target_ = null;
   }
 
   /** @override */
   onTouchStart(e) {
     const {touches} = e;
+    this.target_ = e.target;
     if (touches && touches.length == 1) {
       this.startX_ = touches[0].clientX;
       this.startY_ = touches[0].clientY;
@@ -86,7 +90,11 @@ export class TapRecognizer extends GestureRecognizer {
 
   /** @override */
   acceptStart() {
-    this.signalEmit({clientX: this.lastX_, clientY: this.lastY_}, null);
+    this.signalEmit({
+      clientX: this.lastX_,
+      clientY: this.lastY_,
+      target: this.target_,
+    }, null);
     this.signalEnd();
   }
 }
@@ -217,7 +225,10 @@ export let SwipeDef;
  */
 class SwipeRecognizer extends GestureRecognizer {
   /**
+   * @param {string} type
    * @param {!./gesture.Gestures} manager
+   * @param {boolean} horiz
+   * @param {boolean} vert
    */
   constructor(type, manager, horiz, vert) {
     super(type, manager);
