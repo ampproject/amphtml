@@ -19,11 +19,6 @@ import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  escapeCssSelectorIdent,
-  scopedQuerySelector,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
 import {getBinaryType} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -33,6 +28,10 @@ import {
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
+import {
+  scopedQuerySelector,
+  whenUpgradedToCustomElement,
+} from '../../../src/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';

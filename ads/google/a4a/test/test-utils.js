@@ -38,7 +38,6 @@ import {
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
-import {Resource} from '../../../../src/service/resource';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -789,31 +788,77 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     doc = win.document;
   });
 
-  function createAmpAdResource(type) {
-    const element = doc.createElement('amp-ad');
-    element.setAttribute('type', type);
-    element.setAttribute('width', 500);
-    element.setAttribute('height', 300);
-    doc.body.appendChild(element);
+  function createResource(config, tagName = 'amp-ad', parent = doc.body) {
+    const element = createElementWithAttributes(doc, tagName, config);
+    parent.appendChild(element);
     element.getImpl = () => Promise.resolve({element});
     return {element};
   }
 
   it('should find amp-ad of only given type', () => {
-    return Promise.all([
-      createAmpAdResource('doubleclick'), createAmpAdResource('blah')])
-      .then(resources => {
-        sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources').
-          callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
-        return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(
-          result => {
-            expect(Object.keys(result).length).to.equal(1);
-            expect(result['foo']).to.be.ok;
-            expect(result['foo'].length).to.equal(1);
-            return result['foo'][0].then(baseElement =>
-              expect(baseElement.element.getAttribute('type'))
-                .to.equal('doubleclick'));
-          });
+    const resources = [createResource({type: 'doubleclick'}),
+      createResource({type: 'blah'}), createResource({}, 'amp-foo')];
+    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+        .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
+      expect(Object.keys(result).length).to.equal(1);
+      expect(result['foo']).to.be.ok;
+      expect(result['foo'].length).to.equal(1);
+      return result['foo'][0].then(baseElement =>
+        expect(baseElement.element.getAttribute('type'))
+            .to.equal('doubleclick'));
     });
+  });
+
+  it('should find amp-ad within sticky container', () => {
+    const stickyResource = createResource({}, 'amp-sticky-ad');
+    const resources = [stickyResource, createResource({}, 'amp-foo')];
+    // Do not expect ampAdResource to be returned by getMeasuredResources
+    // as its owned by amp-sticky-ad.  It will locate associated element
+    // and block on whenUpgradedToCustomElement so override createdCallback
+    // to cause it to return immediately.
+    const ampAdResource =
+      createResource({type: 'doubleclick'}, 'amp-ad', stickyResource.element);
+    ampAdResource.element.createdCallback = true;
+    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+        .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(
+        result => {
+          expect(Object.keys(result).length).to.equal(1);
+          expect(result['foo']).to.be.ok;
+          expect(result['foo'].length).to.equal(1);
+          return result['foo'][0].then(baseElement =>
+            expect(baseElement.element.getAttribute('type'))
+                .to.equal('doubleclick'));
+        });
+  });
+
+  it('should find and group multiple, some in containers', () => {
+    const stickyResource = createResource({}, 'amp-sticky-ad');
+    const resources = [stickyResource, createResource({}, 'amp-foo'),
+      createResource({type: 'doubleclick', foo: 'bar'}),
+      createResource({type: 'doubleclick', foo: 'hello'})];
+    // Do not expect ampAdResource to be returned by getMeasuredResources
+    // as its owned by amp-sticky-ad.  It will locate associated element
+    // and block on whenUpgradedToCustomElement so override createdCallback
+    // to cause it to return immediately.
+    const ampAdResource = createResource({type: 'doubleclick', foo: 'bar'},
+        'amp-ad', stickyResource.element);
+    ampAdResource.element.createdCallback = true;
+    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+        .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    return groupAmpAdsByType(
+        win, 'doubleclick', element => element.getAttribute('foo')).then(
+        result => {
+          expect(Object.keys(result).length).to.equal(2);
+          expect(result['bar']).to.be.ok;
+          expect(result['bar'].length).to.equal(2);
+          expect(result['hello']).to.be.ok;
+          expect(result['hello'].length).to.equal(1);
+          return Promise.all(result['bar'].concat(result['hello'])).then(
+              baseElements => baseElements.forEach(baseElement =>
+                expect(baseElement.element.getAttribute('type'))
+                    .to.equal('doubleclick')));
+        });
   });
 });
