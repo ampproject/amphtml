@@ -80,6 +80,7 @@ export class Gestures {
 
   /**
    * @param {!Element} element
+   * @param {boolean} shouldNotPreventDefault
    */
   constructor(element, shouldNotPreventDefault) {
     /** @private {!Element} */
