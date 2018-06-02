@@ -25,7 +25,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 
   let sandbox;
   let iframeTransport;
-  const frameUrl = 'https://www.google.com';
+  const frameUrl = 'http://example.com';
 
   beforeEach(() => {
     sandbox = env.sandbox;
