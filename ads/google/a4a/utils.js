@@ -204,6 +204,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // TODO(keithwrightbos): what about slots that become measured due to removal
   // of display none (e.g. user resizes viewport and media selector makes
   // visible).
+  const ampAdSelector =
+      r => scopedQuerySelector(r.element, `amp-ad[type=${type}]`);
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
       r => {
         const isAmpAdType = r.element.tagName == 'AMP-AD' &&
@@ -213,8 +215,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
         }
         const isAmpAdContainerElement =
           Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!scopedQuerySelector(
-              r.element, escapeCssSelectorIdent(`amp-ad[type=${type}]`));
+          !!ampAdSelector(r);
         return isAmpAdContainerElement;
       })
       // Need to wait on any contained element resolution followed by build
@@ -227,10 +228,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
             // Must be container element so need to wait for child amp-ad to
             // be upgraded.
             return whenUpgradedToCustomElement(
-                dev().assertElement(
-                    scopedQuerySelector(
-                        resource.element,
-                        escapeCssSelectorIdent(`amp-ad[type=${type}]`))));
+                dev().assertElement(ampAdSelector(resource)));
           })))
       // Group by networkId.
       .then(elements => elements.reduce((result, element) => {

@@ -31,12 +31,14 @@ import {
   getIdentityToken,
   getIdentityTokenRequestUrl,
   googleAdUrl,
+  groupAmpAdsByType,
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
+import {Resource} from '../../../../src/service/resource';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -777,5 +779,41 @@ describe('Google A4A utils', () => {
       {in: '', out: ''},
     ].forEach(test =>
       it(test.in, () => expect(extractHost(test.in)).to.equal(test.out)));
+  });
+});
+
+describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
+  let doc, win;
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  function createAmpAdResource(type) {
+    const element = doc.createElement('amp-ad');
+    element.setAttribute('type', type);
+    element.setAttribute('width', 500);
+    element.setAttribute('height', 300);
+    doc.body.appendChild(element);
+    element.getImpl = () => Promise.resolve({element});
+    return {element};
+  }
+
+  it('should find amp-ad of only given type', () => {
+    return Promise.all([
+      createAmpAdResource('doubleclick'), createAmpAdResource('blah')])
+      .then(resources => {
+        sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources').
+          callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+        return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(
+          result => {
+            expect(Object.keys(result).length).to.equal(1);
+            expect(result['foo']).to.be.ok;
+            expect(result['foo'].length).to.equal(1);
+            return result['foo'][0].then(baseElement =>
+              expect(baseElement.element.getAttribute('type'))
+                .to.equal('doubleclick'));
+          });
+    });
   });
 });
