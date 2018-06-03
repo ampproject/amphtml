@@ -48,7 +48,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
       hideControls: sandbox.spy(),
       showControls: sandbox.spy(),
       mutateElement: sandbox.stub().callsArg(0),
-      isInteractive: () => false,
+      isInteractive: () => true,
       signals: () => signals,
     };
 
@@ -105,6 +105,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
       return whenUserInteracts.then(() => {
         expect(video.element.querySelector('i-amphtml-video-mask')).to.be.null;
         expect(video.unmute).to.have.been.calledOnce;
+        expect(video.showControls).to.have.been.calledOnce;
       });
     });
   });
