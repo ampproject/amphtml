@@ -28,10 +28,7 @@ import {
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
-import {
-  scopedQuerySelector,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -203,8 +200,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // TODO(keithwrightbos): what about slots that become measured due to removal
   // of display none (e.g. user resizes viewport and media selector makes
   // visible).
-  const ampAdSelector =
-      r => scopedQuerySelector(r.element, `amp-ad[type=${type}]`);
+  const ampAdSelector = r => r.element.querySelector(`amp-ad[type=${type}]`);
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
       r => {
         const isAmpAdType = r.element.tagName == 'AMP-AD' &&
