@@ -166,16 +166,27 @@ export class VideoEntry {
     this.listenToAutoplayEvents_();
   }
 
+  /**
+   * @param {string} event
+   * @param {function(!Event)} handler
+   * @private
+   */
+  listenOnLoad_(event, handler) {
+    listen(this.element_, event, e => {
+      this.loadPromise_.then(() => {
+        handler(e);
+      });
+    });
+  }
+
   /** @private */
   listenToAutoplayEvents_() {
     // TODO(alanorozco): Keep track of session
-    listen(this.element_, AutoplayEvents.PLAY, () => {
-      this.loadPromise_.then(() => {
-        this.video_.play(/* auto */ true);
-      });
+    this.listenOnLoad_(AutoplayEvents.PLAY, () => {
+      this.video_.play(/* auto */ true);
     });
 
-    listen(this.element_, AutoplayEvents.PAUSE, () => {
+    this.listenOnLoad_(AutoplayEvents.PAUSE, () => {
       this.video_.pause();
     });
   }
