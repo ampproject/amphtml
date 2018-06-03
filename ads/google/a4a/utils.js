@@ -19,11 +19,6 @@ import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  escapeCssSelectorIdent,
-  scopedQuerySelector,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
 import {getBinaryType} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -33,6 +28,7 @@ import {
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -204,6 +200,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // TODO(keithwrightbos): what about slots that become measured due to removal
   // of display none (e.g. user resizes viewport and media selector makes
   // visible).
+  const ampAdSelector =
+      r => r.element./*OK*/querySelector(`amp-ad[type=${type}]`);
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
       r => {
         const isAmpAdType = r.element.tagName == 'AMP-AD' &&
@@ -213,8 +211,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
         }
         const isAmpAdContainerElement =
           Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!scopedQuerySelector(
-              r.element, escapeCssSelectorIdent(`amp-ad[type=${type}]`));
+          !!ampAdSelector(r);
         return isAmpAdContainerElement;
       })
       // Need to wait on any contained element resolution followed by build
@@ -227,10 +224,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
             // Must be container element so need to wait for child amp-ad to
             // be upgraded.
             return whenUpgradedToCustomElement(
-                dev().assertElement(
-                    scopedQuerySelector(
-                        resource.element,
-                        escapeCssSelectorIdent(`amp-ad[type=${type}]`))));
+                dev().assertElement(ampAdSelector(resource)));
           })))
       // Group by networkId.
       .then(elements => elements.reduce((result, element) => {
