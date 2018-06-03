@@ -200,7 +200,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // TODO(keithwrightbos): what about slots that become measured due to removal
   // of display none (e.g. user resizes viewport and media selector makes
   // visible).
-  const ampAdSelector = 
+  const ampAdSelector =
       r => r.element./*OK*/querySelector(`amp-ad[type=${type}]`);
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
       r => {
