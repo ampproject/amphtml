@@ -15,13 +15,14 @@
  */
 
 import {Autoplay, AutoplayEvents} from './video/autoplay';
-import {PlayingStates, VideoAttributes} from '../video-interface';
+import {Deferred} from '../utils/promise';
+import {PlayingStates, VideoAttributes, VideoEvents} from '../video-interface';
 import {Services} from '../services';
 import {dev} from '../log';
 import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
 import {isExperimentOn} from '../experiments';
-import {listen} from '../event-helper';
+import {listen, listenOncePromise} from '../event-helper';
 import {once} from '../utils/function';
 
 
@@ -159,15 +160,23 @@ export class VideoEntry {
     /** @private @const {!AmpElement} */
     this.element_ = video.element;
 
-    this.listenToAutoplay_();
+    /** @private @const {!Promise} */
+    this.loadPromise_ = listenOncePromise(this.element_, VideoEvents.LOAD);
+
+    this.listenToAutoplayEvents_();
   }
 
   /** @private */
-  listenToAutoplay_() {
+  listenToAutoplayEvents_() {
     // TODO(alanorozco): Keep track of session
-    listen(this.element_, AutoplayEvents.PLAY,
-        () => this.video_.play(/* auto */ true));
+    listen(this.element_, AutoplayEvents.PLAY, () => {
+      this.loadPromise_.then(() => {
+        this.video_.play(/* auto */ true);
+      });
+    });
 
-    listen(this.element_, AutoplayEvents.PAUSE, () => this.video_.pause());
+    listen(this.element_, AutoplayEvents.PAUSE, () => {
+      this.video_.pause();
+    });
   }
 }
