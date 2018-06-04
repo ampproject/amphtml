@@ -339,14 +339,28 @@ export class Bind {
    * @return {!Promise}
    */
   scanAndApply(added, removed, timeout = 2000) {
+    const beforeFirstMutate = !this.signals_.get('FIRST_MUTATE');
+
     const promise = this.removeBindingsForNodes_(removed)
         .then(() => this.addBindingsForNodes_(added))
         .then(numberOfBindingsAdded => {
           // Don't reevaluate/apply if there are no bindings.
-          if (numberOfBindingsAdded > 0) {
-            return this.evaluate_().then(results =>
-              this.applyElements_(results, added));
+          if (numberOfBindingsAdded == 0) {
+            return;
           }
+          return this.evaluate_().then(results => {
+            // Before first mutate, verify `added` elements and throw expected
+            // error to measure the impact of "faster-amp-list" breaking change.
+            if (beforeFirstMutate) {
+              const mismatches = this.verify_(results, added, /* warn */ false);
+              if (mismatches.length) {
+                // Cap size of mismatch string to 30 chars.
+                user().expectedError(TAG, 'Pre-gesture mismatch: '
+                    + String(mismatches).substr(0, 30));
+              }
+            }
+            return this.applyElements_(results, added);
+          });
         });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
@@ -806,21 +820,71 @@ export class Bind {
   }
 
   /**
-   * Verifies expression results against current DOM state.
+   * Verifies expression results vs. current DOM state and returns an
+   * array of bindings with mismatches (if any).
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {?Array<!Element>=} elements If provided, only verifies bindings
+   *     contained within the given elements. Otherwise, verifies all bindings.
+   * @param {boolean=} warn If true, emits a user warning for verification
+   *     mismatches. Otherwise, does not emit a warning.
+   * @return {!Array<string>}
    * @private
    */
-  verify_(results) {
+  verify_(results, elements = null, warn = true) {
+    // Collate strings containing details of verification mismatches to return.
+    const mismatches = {};
+
     this.boundElements_.forEach(boundElement => {
       const {element, boundProperties} = boundElement;
 
-      boundProperties.forEach(binding => {
-        const newValue = results[binding.expressionString];
-        if (newValue !== undefined) {
-          this.verifyBinding_(binding, element, newValue);
+      // If provided, filter elements that are _not_ children of `opt_elements`.
+      if (elements && !this.elementsContains_(elements, element)) {
+        return;
+      }
+
+      boundProperties.forEach(boundProperty => {
+        const newValue = results[boundProperty.expressionString];
+        if (newValue === undefined) {
+          return;
+        }
+        const mismatch = this.verifyBinding_(boundProperty, element, newValue);
+        if (!mismatch) {
+          return;
+        }
+        const {tagName} = element;
+        const {property, expressionString} = boundProperty;
+        const {expected, actual} = mismatch;
+
+        // Only store unique mismatches (dupes possible when rendering an array
+        // of data to a template).
+        mismatches[`${tagName}[${property}]${expected}:${actual}`] = true;
+
+        if (warn) {
+          user().warn(TAG, `Default value (${actual}) does not match first `
+            + `result (${expected}) for <${tagName} [${property}]="`
+            + `${expressionString}">. We recommend writing expressions with `
+            + 'matching default values, but this can be safely ignored if '
+            + 'intentional.');
         }
       });
     });
+    return Object.keys(mismatches);
+  }
+
+  /**
+   * Returns true if `el` is contained within any element in `elements`.
+   * @param {!Array<!Element>} elements
+   * @param {!Element} el
+   * @return {boolean}
+   * @private
+   */
+  elementsContains_(elements, el) {
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i].contains(el)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -1058,22 +1122,23 @@ export class Bind {
   }
 
   /**
-   * If current bound element state equals `expectedValue`, returns true.
-   * Otherwise, returns false.
+   * If current state of `element` matches `expectedValue`, returns null.
+   * Otherwise, returns a tuple containing the expected and actual values.
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
    * @param {./bind-expression.BindExpressionResultDef} expectedValue
+   * @return {?{expected: *, actual: *}}
    * @private
    */
   verifyBinding_(boundProperty, element, expectedValue) {
-    const {property, expressionString} = boundProperty;
+    const {property} = boundProperty;
     const {tagName} = element;
 
     // Don't show a warning for bind-only attributes,
     // like 'slide' on amp-carousel.
     const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[tagName];
     if (bindOnlyAttrs && bindOnlyAttrs.includes(property)) {
-      return;
+      return null;
     }
 
     let initialValue;
@@ -1114,8 +1179,7 @@ export class Bind {
         break;
 
       default:
-        const attribute = element.getAttribute(property);
-        initialValue = attribute;
+        initialValue = element.getAttribute(property);
         // Boolean attributes return values of either '' or null.
         if (expectedValue === true) {
           match = (initialValue === '');
@@ -1127,13 +1191,7 @@ export class Bind {
         break;
     }
 
-    if (!match) {
-      user().warn(TAG,
-          `Default value for <${tagName} [${property}]="${expressionString}"> `
-          + `does not match first result (${expectedValue}). We recommend `
-          + 'writing expressions with matching default values, but this can be '
-          + 'safely ignored if intentional.');
-    }
+    return match ? null : {expected: expectedValue, actual: initialValue};
   }
 
   /**
