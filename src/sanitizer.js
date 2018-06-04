@@ -23,6 +23,7 @@ import {
   resolveRelativeUrl,
 } from './url';
 import {dict, map} from './utils/object';
+import {filterSplice} from './utils/array';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
@@ -351,17 +352,18 @@ function uponSanitizeAttribute(node, data) {
  * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
  */
 function afterSanitizeAttributes(node) {
-  const i = this.removed.findIndex(r => (r.from === node) && r.attribute);
-  if (i < 0) {
-    return;
-  }
-  const {name, value} = this.removed[i].attribute;
-  // Restore the `on` attribute which DOMPurify incorrectly flags as an
-  // unknown protocol due to presence of the `:` character.
-  if (name.toLocaleLowerCase() === 'on') {
-    node.setAttribute(name, value);
-    this.removed.splice(i, 1);
-  }
+  filterSplice(this.removed, r => {
+    if (r.from === node && r.attribute) {
+      const {name, value} = r.attribute;
+      // Restore the `on` attribute which DOMPurify incorrectly flags as an
+      // unknown protocol due to presence of the `:` character.
+      if (name.toLocaleLowerCase() === 'on') {
+        node.setAttribute('on', value);
+        return false; // Remove from array once processed.
+      }
+    }
+    return true;
+  });
 }
 
 /**
