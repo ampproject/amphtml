@@ -134,7 +134,6 @@ export class AmpFxCollection {
 
     // Validate that we support the requested fx types.
     fxTypes.forEach(fxType => {
-      Presets[fxType].isFxTypeSupported(this.ampdoc_.win);
       user().assertEnumValue(FxType, fxType, 'amp-fx');
     });
 
