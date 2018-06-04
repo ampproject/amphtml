@@ -141,7 +141,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 
 /**
  * @param {!Window} win
- * @param {!Element} element
+ * @param {!Element} element Ad tag Element.
  * @return {?string} experiment extracted from page url.
  */
 export function extractUrlExperimentId(win, element) {
