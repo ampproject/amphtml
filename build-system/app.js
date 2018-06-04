@@ -1198,44 +1198,42 @@ function enableCors(req, res, origin, opt_exposeHeaders) {
 
 function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
   opt_ignoreMissingSourceOrigin) {
-  // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
-  if (req.query.cors == '0') {
-    return;
-  }
-
   const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
   const invalidMethod = req.method + ' method is not allowed. Use POST.';
   const invalidOrigin = 'Origin header is invalid.';
   const invalidSourceOrigin = '__amp_source_origin parameter is invalid.';
   const unauthorized = 'Unauthorized Request';
-  let origin;
+  let {origin} = req.headers;
 
-  if (validMethods.indexOf(req.method) == -1) {
-    res.statusCode = 405;
-    res.end(JSON.stringify({message: invalidMethod}));
-    throw invalidMethod;
-  }
-
-  if (req.headers.origin) {
-    origin = req.headers.origin;
-    if (!ORIGIN_REGEX.test(req.headers.origin)) {
-      res.statusCode = 500;
-      res.end(JSON.stringify({message: invalidOrigin}));
-      throw invalidOrigin;
+  // Allow disabling CORS check if 'cors=0' query is passed (useful in
+  // integration test fixture iframes which have origin 'about:srcdoc').
+  if (req.query.cors !== '0') {
+    if (validMethods.indexOf(req.method) == -1) {
+      res.statusCode = 405;
+      res.end(JSON.stringify({message: invalidMethod}));
+      throw invalidMethod;
     }
 
-    if (!opt_ignoreMissingSourceOrigin &&
-        !SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
-      res.statusCode = 500;
-      res.end(JSON.stringify({message: invalidSourceOrigin}));
-      throw invalidSourceOrigin;
+    if (origin) {
+      if (!ORIGIN_REGEX.test(origin)) {
+        res.statusCode = 500;
+        res.end(JSON.stringify({message: invalidOrigin}));
+        throw invalidOrigin;
+      }
+
+      if (!opt_ignoreMissingSourceOrigin &&
+          !SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+        res.statusCode = 500;
+        res.end(JSON.stringify({message: invalidSourceOrigin}));
+        throw invalidSourceOrigin;
+      }
+    } else if (req.headers['amp-same-origin'] == 'true') {
+      origin = getUrlPrefix(req);
+    } else {
+      res.statusCode = 401;
+      res.end(JSON.stringify({message: unauthorized}));
+      throw unauthorized;
     }
-  } else if (req.headers['amp-same-origin'] == 'true') {
-    origin = getUrlPrefix(req);
-  } else {
-    res.statusCode = 401;
-    res.end(JSON.stringify({message: unauthorized}));
-    throw unauthorized;
   }
 
   enableCors(req, res, origin, opt_exposeHeaders);
