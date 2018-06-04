@@ -91,13 +91,19 @@ Keys and values will be URI encoded. Keys will be camel cased.
 - `data-param-language="de"` becomes `&language=de`
 - `data-param-custom-ad-data="key:value;key2:value2"` becomes `&customAdData=key%3Avalue%3Bkey2%3Avalue2`
 
+##### autoplay
+
+If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Player configuration
 
-To support AMP's video interface, which is recommended, make sure you configure players used with the AMP Support plugin. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions. 
+To support AMP's video interface, which is recommended, make sure you configure players used with the AMP Support plugin. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions.
 
 ## Validation
 
