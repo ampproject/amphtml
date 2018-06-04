@@ -44,7 +44,6 @@ describe('#getLifecycleReporter', () => {
 
   it('should not create reporter if sampling is not enabled', () => {
     forceExperimentBranch(win, 'a4aProfilingRate', null);
-    //forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, '1234');
     const element = doc.createElement('div');
     element.setAttribute('type', 'doubleclick');
     doc.body.appendChild(element);
@@ -67,7 +66,6 @@ describe('#getLifecycleReporter', () => {
 
   it('should create reporter for doubleclick', () => {
     forceExperimentBranch(win, 'a4aProfilingRate', 'unused');
-    forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, '1234');
     const element = doc.createElement('div');
     element.setAttribute('type', 'doubleclick');
     doc.body.appendChild(element);
@@ -135,7 +133,8 @@ describes.sandboxed('#googleLifecycleReporterFactory', {}, () => {
       fakeElt.setAttribute('type', 'doubleclick');
       fakeElt.setAttribute(EXPERIMENT_ATTRIBUTE, '1234');
       fakeElt.setAttribute('data-a4a-upgrade-type', 'foo');
-      forceExperimentBranch(env.win, DOUBLECLICK_A4A_EXPERIMENT_NAME, '1234');
+      // Google lifecycle disabled by default for test environment.
+      env.win.AMP_MODE = {localDev: true};
       env.win.document.body.appendChild(fakeElt);
       env.win.ampAdPageCorrelator = 7777777;
       const a4aContainer = {

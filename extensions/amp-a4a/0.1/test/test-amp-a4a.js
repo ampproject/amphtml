@@ -729,8 +729,8 @@ describe('amp-a4a', () => {
                   return a4a.layoutCallback().then(() => {
                     if (headerVal == 'some_random_thing') {
                       expect(devStub.withArgs('AMP-A4A',
-                        `cross-origin render mode header ${headerVal}`))
-                        .to.be.calledOnce;
+                          `cross-origin render mode header ${headerVal}`))
+                          .to.be.calledOnce;
                     } else {
                       expect(devStub).to.not.be.called;
                     }
@@ -825,8 +825,8 @@ describe('amp-a4a', () => {
                   return a4a.layoutCallback().then(() => {
                     if (headerVal == 'some_random_thing') {
                       expect(devStub.withArgs('AMP-A4A',
-                        `cross-origin render mode header ${headerVal}`))
-                        .to.be.calledOnce;
+                          `cross-origin render mode header ${headerVal}`))
+                          .to.be.calledOnce;
                     } else {
                       expect(devStub).to.not.be.called;
                     }

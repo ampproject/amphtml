@@ -33,8 +33,6 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
-  CORRELATOR_CLEAR_EXP_BRANCHES,
-  CORRELATOR_CLEAR_EXP_NAME,
   getNetworkId,
   resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
@@ -45,14 +43,8 @@ import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
 import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {
-  addExperimentIdToElement,
-  isInExperiment,
-} from '../../../../ads/google/a4a/traffic-experiments';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {
-  forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
 import {utf8Encode} from '../../../../src/utils/bytes';
@@ -475,8 +467,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('returns the right URL', () => {
-      new AmpAd(element).upgradeCallback();
-      addExperimentIdToElement('12345678', element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.experimentIds = ['12345678'];
       return impl.getAdUrl().then(url => {
         [
           /^https:\/\/securepubads\.g\.doubleclick\.net\/gampad\/ads/,

@@ -47,7 +47,7 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state'
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
@@ -58,18 +58,13 @@ import {
 } from '../../amp-a4a/0.1/refresh-manager';
 import {SafeframeHostApi} from './safeframe-host';
 import {Services} from '../../../src/services';
-import {VisibilityState} from '../../../src/visibility-state';
-import {
-  extractUrlExperimentId,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
+  extractUrlExperimentId,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -397,7 +392,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   delayAdRequestEnabled() {
     return this.experimentIds.includes(
-      DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+        DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
   }
 
   /**
@@ -429,19 +424,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
       '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
     }[urlExperimentId];
-    if (!experimentId ||
-      // For SRA experiments, do not include pages that are using refresh.
-      (experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL ||
-      experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA) &&
-      (this.win.document.querySelector('meta[name=amp-ad-enable-refresh]') ||
-       this.win.document.querySelector(
-           'amp-ad[type=doubleclick][data-enable-refresh]'))) {
-      return;
+    switch (experimentId) {
+      case undefined:
+        break;
+      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL:
+      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA:
+        // For SRA experiments, do not include pages that are using refresh.
+        if (this.win.document./*OK*/querySelector(
+            'meta[name=amp-ad-enable-refresh], ' +
+            'amp-ad[type=doubleclick][data-enable-refresh]')) {
+          return;
+        }
+      default:
+        dev().info(
+            TAG,
+            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        this.experimentIds.push(experimentId);
     }
-    dev().info(
-        TAG,
-        `url experiment selection ${urlExperimentId}: ${experimentId}.`)
-    this.experimentIds.push(experimentId);
   }
 
   /** @override */
@@ -611,7 +610,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), this.buildIdentityParams_(),
                   this.getPageParameters(consentState), rtcParams),
-                  this.experimentIds);
+              this.experimentIds);
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;

@@ -62,7 +62,8 @@ export function getLifecycleReporter(ampElement, slotId) {
   const {win} = ampElement;
   randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
   if (isReportingEnabled(ampElement) &&
-      !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME)) {
+      (ampElement.element.getAttribute('type') != 'adsense' ||
+      !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
     setupPageLoadMetricsReporter_(ampElement);
     return new GoogleAdLifecycleReporter(
         win, ampElement.element, Number(slotId));
