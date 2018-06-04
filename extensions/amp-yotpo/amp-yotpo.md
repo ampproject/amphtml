@@ -19,7 +19,10 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Display Yotpo's widgets.</td>
+    <td>
+    Display Yotpo's widgets.<br /> 
+    Can be any on site widget taken from <a href="https://support.yotpo.com/en/on-site/reviews-widget">Yotpo's site</a>.
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,9 +34,12 @@ limitations under the License.
   </tr>
 </table>
 
-## Examples
+## Overview
 
-  ```html
+You can use the `amp-yotpo` extension in order to display<a href="https://support.yotpo.com/en/on-site/reviews-widget">on site widgets</a>.
+
+For example, in order to display yotpo's bottom line widget use the following code: 
+```html
   <amp-yotpo
           width="550"
           height="100"
@@ -41,8 +47,11 @@ limitations under the License.
           data-widget-type="BottomLine"
           data-product-id="9408616206">
   </amp-yotpo>
-  ```
-  ```html
+```
+
+  
+In order to display the reviews widgets use this code:
+```html
   <amp-yotpo
           width="550"
           height="700"
@@ -56,127 +65,31 @@ limitations under the License.
           data-descriptipn="skates"
           data-yotpo-element-id="1">
   </amp-yotpo>
-  ```
-  ```html
-  <amp-yotpo
-          width="200"
-          height="200"
-          data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-          data-widget-type="Badge">
-  </amp-yotpo>
-  ```
-  ```html
-  <amp-yotpo
-          layout="responsive"
-          data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-          data-widget-type="ReviewsTab">
-  </amp-yotpo>
-  ```
-  ```html
-  <amp-yotpo
-          width="1280"
-          height="200"
-          layout="responsive"
-          data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-          data-widget-type="ProductGallery"
-          data-product-id="nb2b_picture_slider_1"
-          data-demo="true"
-          data-layout-rows="3"
-          data-layout-scroll="1"
-          data-spacing="0"
-          data-source="all"
-          data-title="0"
-          data-hover-color="#ffffff"
-          data-hover-opacity="0.8"
-          data-hover-icon="true"
-          data-upload-button="0"
-          data-preview="true"
-          data-yotpo-element-id="1">
-  </amp-yotpo>
-  ```
-  ```html
-  <amp-yotpo
-          width="1280"
-          height="300"
-          data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-          data-widget-type="EmbeddedWidget"
-          data-product-id="top_rated_products"
-          data-demo="true"
-          data-width="100"
-          data-layout="basic"
-          data-reviews="5"
-          data-header-text="Top Rated Products"
-          data-header-background-color="919191"
-          data-body-background-color="FFFFFF"
-          data-font-size="18"
-          data-font-color="FFFFFF"
-          data-yotpo-element-id="1">
-  </amp-yotpo>
-  ```
-  ```html
-  <amp-yotpo
-          width="550"
-          height="200"
-          layout="responsive"
-          data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-          data-widget-type="PhotosCarousel"
-          data-product-id="nb2b_picture_slider_1"
-          data-demo="true">
-  </amp-yotpo>
-  ```
-  ```html
-  <amp-yotpo
-          width="550"
-          height="200"
-          layout="responsive"
-          data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-          data-widget-type="PromotedProducts"
-          data-product-id="9408616206"
-          data-demo="true">
-  </amp-yotpo>
-  ```
-  ```html
-  <amp-yotpo
-          width="550"
-          height="200"
-          layout="responsive"
-          data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-          data-widget-type="VisualUgcGallery">
-  </amp-yotpo>
-  ```
-  ```html
-  <amp-yotpo
-          width="550"
-          height="200"
-          layout="responsive"
-          data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-          data-widget-type="ReviewsCarousel"
-          data-backgroud-color="transparent"
-          data-mode="manual"
-          data-review-ids="354,356,355"
-          data-show-bottom-line="1"
-          data-autoplay-enabled="1"
-          data-autoplay-speed="3000"
-          data-show-navigation="1"
-          data-yotpo-element-id="3">
-  </amp-yotpo>
-  ```
-  ```html
-  <amp-yotpo
-          width="550"
-          height="300"
-          layout="responsive"
-          data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-          data-widget-type="PicturesGallery"
-          data-layout="full_page"
-          data-layout-scroll="1"
-          data-spacing="0"
-          data-source="all"
-          data-title="0"
-          data-hover-color="#ffffff"
-          data-hover-opacity="0.8"
-          data-hover-icon="true"
-          data-cta-text="Shop Now"
-          data-cta-color="Shop Now">
-  </amp-yotpo>
-  ```
+```
+
+## Attributes
+
+##### data-app-key (required)
+
+The account app key. For example, `liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5`.
+
+##### data-widget-type (required)
+
+The widget type. For example, `MainWidget`, `BottomLine`, etc..
+
+##### other yotpo's markups (optional)
+
+For each widget there are optional data attributes. 
+
+For example, the reviews widget has an optional markup named `product-id`. In amp extension
+
+each yotpo's markup being added to the `data` attribute. So in that case the `product-id` markup
+
+will be `data-product-id`.
+
+You could see yotpo's markups under [yotpo's site](https://support.yotpo.com/en/on-site). 
+
+
+## Validation
+
+See [amp-yotpo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-yotpo/validator-amp-yotpo.protoascii) in the AMP validator specification.

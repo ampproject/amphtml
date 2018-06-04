@@ -20,16 +20,19 @@ import {loadScript} from './3p';
  * Get the correct script for the container.
  * @param {!Window} global
  * @param {string} scriptSource The source of the script, different for post and comment embeds.
- * @param {function(!Object)} cb
+ * @param {function(!Object, !Object)} cb
  */
 function getContainerScript(global, scriptSource, cb) {
   loadScript(global, scriptSource, () => {
-    window.Yotpo = window.Yotpo || {};
-    delete window.Yotpo.widgets['testimonials'];
+    global.Yotpo = global.Yotpo || {};
+    delete global.Yotpo.widgets['testimonials'];
     const yotpoWidget =
-      (typeof window.yotpo === 'undefined') ? undefined : window.yotpo;
+      (typeof global.yotpo === 'undefined') ? undefined : global.yotpo;
     yotpoWidget.on('CssReady', function() {
-      cb(yotpoWidget);
+        cb(yotpoWidget, 'cssLoaded');
+    });
+    yotpoWidget.on('BatchReady', function() {
+        cb(yotpoWidget, 'batchLoaded');
     });
   });
 }
@@ -264,7 +267,6 @@ function getPromotedProductsContainer(global, data) {
 export function yotpo(global, data) {
   const {widgetType} = data;
   let container;
-
   if (widgetType == 'BottomLine') {
     container = getBottomLineContainer(global, data);
   } else if (widgetType == 'ReviewsCarousel') {
@@ -291,12 +293,26 @@ export function yotpo(global, data) {
 
   global.document.getElementById('c').appendChild(container);
 
+
+  let cssLoaded = false;
+  let batchLoaded = false;
   const scriptSource = 'https://staticw2.yotpo.com/' + data.appKey + '/widget.js';
-  getContainerScript(global, scriptSource, function(yotpoWidget) {
-    if (yotpoWidget.widgets[0]) {
-      context.updateDimensions(
-          yotpoWidget.widgets[0].element.offsetWidth,
-          yotpoWidget.widgets[0].element.offsetHeight);
+  getContainerScript(global, scriptSource, (yotpoWidget, eventType) => {
+    if (eventType === 'cssLoaded') {
+      cssLoaded = true;
+    }
+    if (eventType === 'batchLoaded') {
+      batchLoaded = true;
+    }
+
+    if (batchLoaded && cssLoaded) {
+      setTimeout(() => {
+        if (yotpoWidget.widgets[0]) {
+          context.updateDimensions(
+            yotpoWidget.widgets[0].element./*OK*/offsetWidth,
+            yotpoWidget.widgets[0].element./*OK*/offsetHeight);
+        }
+      }, 100);
     }
   });
 }
