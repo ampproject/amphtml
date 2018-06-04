@@ -1358,10 +1358,10 @@ function createBaseCustomElementClass(win) {
         // data-block-on-consent attribute not set
         return null;
       }
-      if (policyId == '') {
+      if (policyId == '' || policyId == 'default') {
         // data-block-on-consent value not set, up to individual element
         // Note: data-block-on-consent and data-block-on-consent='default' is
-        // treated differently
+        // treated exactly the same
         return this.implementation_.getConsentPolicy();
       }
       return policyId;
