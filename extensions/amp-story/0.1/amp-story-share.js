@@ -321,7 +321,7 @@ export class ShareWidget {
     providers.forEach(currentProvider => {
       if (isObject(currentProvider) &&
           currentProvider['provider'] == 'facebook') {
-        providersMap['facebook'] = ({'app_id': currentProvider['app-id']});
+        providersMap['facebook'] = ({'app_id': currentProvider['app_id']});
       } else if (isObject(currentProvider)) {
         providersMap[currentProvider['provider']] = true;
       } else {
