@@ -31,6 +31,10 @@ tags: {  # <amp-brightcove>
   tag_name: "AMP-BRIGHTCOVE"
   requires_extension: "amp-brightcove"
   attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
     name: "data-account"
     mandatory: true
   }
