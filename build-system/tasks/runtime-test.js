@@ -78,8 +78,7 @@ function getConfig() {
         'SL_Chrome_android',
         'SL_Chrome_latest',
         'SL_Firefox_latest',
-        // TODO(amphtml, #15748): Uncomment when Safari 11.1 failures are fixed.
-        // 'SL_Safari_latest',
+        'SL_Safari_latest',
         // TODO(rsimha, #15510): Enable these.
         // 'SL_iOS_latest',
         // 'SL_Edge_latest',
