@@ -69,13 +69,13 @@ export function createFixtureIframe(
       [AmpEvents.ATTACHED]: 0,
       [AmpEvents.DOM_UPDATE]: 0,
       [AmpEvents.ERROR]: 0,
+      [AmpEvents.LOAD_END]: 0,
       [AmpEvents.LOAD_START]: 0,
       [AmpEvents.STUBBED]: 0,
       [BindEvents.INITIALIZE]: 0,
       [BindEvents.SET_STATE]: 0,
       [BindEvents.RESCAN_TEMPLATE]: 0,
       [FormEvents.SERVICE_INIT]: 0,
-      [AmpEvents.LOAD_END]: 0,
     };
     const messages = [];
     let html = __html__[fixture]; // eslint-disable-line no-undef
@@ -309,7 +309,7 @@ const IFRAME_STUB_URL =
  *
  * See /test/fixtures/served/iframe-stub.html for implementation.
  *
- * @param win {!Window}
+ * @param {!Window} win
  * @return {!HTMLIFrameElement}
  */
 export function createIframeWithMessageStub(win) {
@@ -318,6 +318,7 @@ export function createIframeWithMessageStub(win) {
 
   /**
    * Instructs the iframe to send a message to parent window.
+   * @param {!Object} msg
    */
   element.postMessageToParent = msg => {
     element.src = IFRAME_STUB_URL + encodeURIComponent(JSON.stringify(msg));
@@ -369,9 +370,9 @@ export function createIframeWithMessageStub(win) {
  * Returns a Promise that resolves when a post message is observed from the
  * given source window to target window.
  *
- * @param sourceWin {!Window}
- * @param targetwin {!Window}
- * @param msg {!Object}
+ * @param {!Window} sourceWin
+ * @param {!Window} targetwin
+ * @param {!Object} msg
  * @return {!Promise<!Object>}
  */
 export function expectPostMessage(sourceWin, targetwin, msg) {
