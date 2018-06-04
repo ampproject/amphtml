@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
@@ -23,21 +22,13 @@ import {
 
 describe.configure().retryOnSaucelabs().run('amp-list', () => {
   let fixture;
-  let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-
     return createFixtureIframe('test/fixtures/amp-list.html', 500).then(f => {
       fixture = f;
-
       // Wait for one <amp-list> element to load.
       return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
     });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should render items', function*() {
