@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
-import {
-  createFixtureIframe,
-  poll,
-} from '../../testing/iframe.js';
+import {poll} from '../../testing/iframe';
 
-describe.configure().retryOnSaucelabs().run('amp-list', () => {
-  let fixture;
+const body =
+    '<amp-list id="list" width=300 height=100 ' +
+        'src="http://localhost:9876/list/fruit-data/get?cors=0">' +
+      '<template type="amp-mustache">' +
+        '{{name}} : {{quantity}} @ ${{unitPrice}}' +
+      '</template>' +
+    '</amp-list>';
 
-  beforeEach(() => {
-    return createFixtureIframe('test/fixtures/amp-list.html', 500).then(f => {
-      fixture = f;
-      // Wait for one <amp-list> element to load.
-      return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
-    });
-  });
-
+describes.integration('amp-list (integration)', {
+  body, extensions: ['amp-list', 'amp-mustache'],
+}, env => {
   it('should render items', function*() {
-    const list = fixture.doc.getElementById('list');
+    const list = env.win.document.getElementById('list');
 
     let children;
     yield poll('#list render', () => {
