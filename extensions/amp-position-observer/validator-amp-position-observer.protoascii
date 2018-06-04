@@ -39,7 +39,7 @@ tags: {  # <amp-position-observer>
     value_regex: "^([0]*?\\.\\d*$|1$|0$)|([0]*?\\.\\d*|1|0)\\s{1}([0]*?\\.\\d*$|1$|0$)"
   }
   attrs: { name: "target" }
-  attrs: { name: "norepeat", value: "" }
+  attrs: { name: "once", value: "" }
   attrs: {
     name: "viewport-margins"
     # Regex: ^(\d+$|\d+px$|\d+vh$)|((\d+|\d+px|\d+vh)\s{1}(\d+$|\d+px$|\d+vh$))
