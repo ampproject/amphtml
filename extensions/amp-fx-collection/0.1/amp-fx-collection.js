@@ -16,7 +16,6 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {FxProvider} from './providers/fx-provider';
-import {Presets} from './providers/amp-fx-presets';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {iterateCursor} from '../../../src/dom';
