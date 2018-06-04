@@ -49,9 +49,9 @@ describes.realWin('amp-consent', {
 
     storageValue = {};
     jsonMockResponses = {
-      'response1': '{"promptIfUnknown": true}',
-      'response2': '{}',
-      'response3': '{"promptIfUnknown": false}',
+      '//response1': '{"promptIfUnknown": true}',
+      '//response2': '{}',
+      '//response3': '{"promptIfUnknown": false}',
     };
 
     resetServiceForTesting(win, 'xhr');
@@ -98,10 +98,10 @@ describes.realWin('amp-consent', {
         defaultConfig = {
           'consents': {
             'ABC': {
-              'checkConsentHref': 'response1',
+              'checkConsentHref': '//response1',
             },
             'DEF': {
-              'checkConsentHref': 'response1',
+              'checkConsentHref': '//response1',
             },
           },
         };
@@ -162,7 +162,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
         },
       };
@@ -240,7 +240,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
@@ -258,7 +258,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response3',
+            'checkConsentHref': '//response3',
             'promptIfUnknownForGeoGroup': 'unknown',
           },
         },
@@ -276,7 +276,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response2',
+            'checkConsentHref': '//response2',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
@@ -299,10 +299,10 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
           'DEF': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
         },
       };
@@ -381,10 +381,10 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
           'DEF': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
         },
         'policy': {
@@ -424,15 +424,15 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptUI': '123',
           },
           'DEF': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptUI': '123',
           },
           'GH': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptUI': '123',
           },
         },

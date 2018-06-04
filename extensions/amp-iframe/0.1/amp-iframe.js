@@ -20,6 +20,7 @@ import {
 } from '../../../src/intersection-observer-polyfill';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {ancestorElementsByTag} from '../../../src/dom';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {closestBySelector, removeElement} from '../../../src/dom';
 import {createCustomEvent, getData} from '../../../src/event-helper';
@@ -58,6 +59,8 @@ let trackingIframeCount = 0;
 
 /** @type {number}  */
 let trackingIframeTimeout = 5000;
+
+export const EXTERNAL_CONSENT_FLOW = 'external-consent-flow';
 
 export class AmpIframe extends AMP.BaseElement {
 
@@ -120,6 +123,12 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {?string}
      */
     this.targetOrigin_ = null;
+
+    /**
+     * The parent amp-consent component
+     * @private {?Element}
+     */
+    this.consentContainer_ = null;
   }
 
   /** @override */
@@ -163,6 +172,11 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @private */
   assertPosition_() {
+    if (this.consentContainer_) {
+      // We don't assert position for external consent flow iframe
+      return;
+    }
+
     const pos = this.element.getLayoutBox();
     const minTop = Math.min(600, this.getViewport().getSize().height * .75);
     user().assert(pos.top >= minTop,
@@ -274,6 +288,11 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     this.container_ = makeIOsScrollable(this.element);
+
+    if (isExperimentOn(this.win, EXTERNAL_CONSENT_FLOW)) {
+      this.consentContainer_ =
+          ancestorElementsByTag(this.element, 'amp-consent')[0] || null;
+    }
 
     this.registerIframeMessaging_();
   }
@@ -402,6 +421,12 @@ export class AmpIframe extends AMP.BaseElement {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
+    if (this.consentContainer_) {
+      listenFor(iframe, 'consent-response', data => {
+        this.propagateConsent_(data);
+      });
+    }
+
     this.container_.appendChild(iframe);
 
     return this.loadPromise(iframe).then(() => {
@@ -511,6 +536,21 @@ export class AmpIframe extends AMP.BaseElement {
           '<amp-iframe> when its "sandbox" attribute contains ' +
           '"allow-top-navigation".');
     }
+  }
+
+  /**
+   * Propage consent related data to consent container component
+   * @param {!Object} data
+   */
+  propagateConsent_(data) {
+    if (!this.consentContainer_) {
+      return;
+    }
+    const consentEvent = createCustomEvent(this.win,
+        'amp-iframe:consent-message',
+        data,
+    );
+    this.consentContainer_.dispatchEvent(consentEvent);
   }
 
   /**
@@ -756,6 +796,10 @@ export function isAdLike(element) {
  */
 export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
+}
+
+export function setTrackingIframeCountForTesting() {
+  trackingIframeCount = 0;
 }
 
 AMP.extension(TAG_, '0.1', AMP => {

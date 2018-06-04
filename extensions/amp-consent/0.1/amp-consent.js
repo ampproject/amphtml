@@ -35,6 +35,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setImportantStyles, toggle} from '../../../src/style';
@@ -46,13 +47,13 @@ const TAG = 'amp-consent';
 export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
 
 /**
- * @enum {number}
+ * @enum {string}
  * @visibleForTesting
  */
 export const ACTION_TYPE = {
-  ACCEPT: 0,
-  REJECT: 1,
-  DISMISS: 2,
+  ACCEPT: 'accept',
+  REJECT: 'reject',
+  DISMISS: 'dismiss',
 };
 
 
@@ -180,6 +181,12 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
+
+    this.element.addEventListener('amp-iframe:consent-message', e => {
+      const action = e.detail && e.detail.action;
+      this.handleAction_(action);
+    });
+
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
       let consentId = args && args['consent'];
@@ -278,9 +285,14 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Handler User action
-   * @param {ACTION_TYPE} action
+   * @param {string} action
    */
   handleAction_(action) {
+    if (!isEnumValue(ACTION_TYPE, action)) {
+      // Unrecognized action
+      return;
+    }
+
     if (!this.currentDisplayInstance_) {
       dev().error(TAG, 'No consent ui is displaying, ' +
           `consent id ${this.currentDisplayInstance_}`);
