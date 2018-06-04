@@ -111,11 +111,12 @@ export class HighlightHandler {
     */
   initHighlight_(highlightInfo) {
     const ampdoc = this.ampdoc_;
-    const sens = findSentences(ampdoc.getBody(), highlightInfo.sentences);
+    const {win} = ampdoc;
+    const sens = findSentences(win, ampdoc.getBody(), highlightInfo.sentences);
     if (!sens) {
       return;
     }
-    const spans = markTextRangeList(sens);
+    const spans = markTextRangeList(win, sens);
     if (spans.length <= 0) {
       return;
     }

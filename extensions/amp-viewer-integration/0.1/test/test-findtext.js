@@ -48,11 +48,17 @@ describe('canonicalizeString', () => {
   });
 });
 
-describe('findSentences', () => {
+describes.realWin('findSentences', {}, env => {
+  let win, document;
+  beforeEach(() => {
+    win = env.win;
+    document = win.document;
+  });
+
   it('single node', () => {
     const root = document.createElement('div');
     root.innerHTML = 'hello world';
-    const ranges = findSentences(root, ['el', 'or']);
+    const ranges = findSentences(win, root, ['el', 'or']);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -70,7 +76,7 @@ describe('findSentences', () => {
     root.innerHTML =
         '<h4>header with <b>bold text</b></h4>\n<p>and additional text</p>';
     const ranges = findSentences(
-        root, ['header with bold text', 'additional text']);
+        win, root, ['header with bold text', 'additional text']);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -88,7 +94,7 @@ describe('findSentences', () => {
     root.innerHTML =
         '<p>Here’s an instruction:</p><ul><li>Do something.</li></ul>';
     const ranges = findSentences(
-        root, ['Here\'s an instruction: Do something.']);
+        win, root, ['Here\'s an instruction: Do something.']);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -104,7 +110,8 @@ describe('findSentences', () => {
   it('special chars', () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>“double ‘single quoted’ quoted text,<p>';
-    const ranges = findSentences(root, ['"double \'single quoted\' quoted']);
+    const ranges = findSentences(
+        win, root, ['"double \'single quoted\' quoted']);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -118,18 +125,19 @@ describe('findSentences', () => {
   });
 });
 
-describes.fakeWin('TextScanner', {}, () => {
-  let root = null;
+describes.realWin('TextScanner', {}, env => {
+  let win, root;
   beforeEach(() => {
+    win = env.win;
     // root should be appended to body to compute the style.
-    root = document.createElement('div');
-    document.body.appendChild(root);
+    root = win.document.createElement('div');
+    win.document.body.appendChild(root);
   });
 
   it('single text', () => {
     root.innerHTML = 'ab cd  ef\n\ng';
     const chars = [];
-    const scanner = new TextScanner(root);
+    const scanner = new TextScanner(win, root);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       chars.push(pos.node.wholeText[pos.offset]);
     }
@@ -140,7 +148,7 @@ describes.fakeWin('TextScanner', {}, () => {
     root.innerHTML = ' ab cd  ';
 
     const chars = [];
-    const scanner = new TextScanner(root);
+    const scanner = new TextScanner(win, root);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       chars.push(pos.node.wholeText[pos.offset]);
     }
@@ -150,10 +158,9 @@ describes.fakeWin('TextScanner', {}, () => {
   it('elements', () => {
     root.innerHTML = '<b>bold</b><i>italic</i><div>block</div>' +
         '<ul><li>nest0</li><li>nest1</li></ul>';
-    document.body.appendChild(root);
 
     const chars = [];
-    const scanner = new TextScanner(root, false);
+    const scanner = new TextScanner(win, root);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       chars.push(pos.node.wholeText[pos.offset]);
     }
@@ -164,7 +171,7 @@ describes.fakeWin('TextScanner', {}, () => {
     root.innerHTML = '<p>hello</p><script>alert("js");</script>';
 
     const chars = [];
-    const scanner = new TextScanner(root, false);
+    const scanner = new TextScanner(win, root);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       chars.push(textPosChar(pos));
     }
@@ -175,7 +182,7 @@ describes.fakeWin('TextScanner', {}, () => {
     root.innerHTML = '\'"';
 
     const chars = [];
-    const scanner = new TextScanner(root, false);
+    const scanner = new TextScanner(win, root);
     for (let pos = scanner.next(); pos != null; pos = scanner.next()) {
       chars.push(textPosChar(pos));
     }
@@ -183,12 +190,18 @@ describes.fakeWin('TextScanner', {}, () => {
   });
 });
 
-describe('markTextRangeList', () => {
+describes.realWin('markTextRangeList', {}, env => {
+  let win, document;
+  beforeEach(() => {
+    win = env.win;
+    document = win.document;
+  });
+
   it('single node', () => {
     const root = document.createElement('div');
     const text = document.createTextNode('0123456789');
     root.appendChild(text);
-    markTextRangeList([
+    markTextRangeList(win, [
       {start: {node: text, offset: 1}, end: {node: text, offset: 3}},
       {start: {node: text, offset: 5}, end: {node: text, offset: 7}},
     ]);
@@ -200,10 +213,11 @@ describe('markTextRangeList', () => {
     root.innerHTML = '<b>abc</b><div>def</div><i>ghi</i>';
     const b = root.querySelector('b');
     const i = root.querySelector('i');
-    markTextRangeList([{
+    markTextRangeList(win, [{
       start: {node: b.firstChild, offset: 1},
       end: {node: i.firstChild, offset: 1},
     }]);
+    '<b>a<span>bc</span></b><div>def</div><i>ghi</i>';
     expect(root.innerHTML).to.equal(
         '<b>a<span>bc</span></b><div><span>def</span></div>' +
           '<i><span>g</span>hi</i>');
@@ -213,7 +227,7 @@ describe('markTextRangeList', () => {
     const root = document.createElement('div');
     const text = document.createTextNode('0123456789');
     root.appendChild(text);
-    markTextRangeList([
+    markTextRangeList(win, [
       {start: {node: text, offset: 1}, end: {node: text, offset: 3}},
       {start: {node: text, offset: 3}, end: {node: text, offset: 5}},
     ]);

@@ -102,12 +102,13 @@ export function canonicalizeString(s) {
 
 /**
  * findSentences find sentences from node and returns a list of TextRangeDef.
+ * @param {!Window} win
  * @param {!Node} node
  * @param {!Array<string>} sentences
  * @return {?Array<!TextRangeDef>}
  */
-export function findSentences(node, sentences) {
-  const scanner = new TextScanner(node);
+export function findSentences(win, node, sentences) {
+  const scanner = new TextScanner(win, node);
   const matches = [];
   for (let senIdx = 0; senIdx < sentences.length; senIdx++) {
     const sen = canonicalizeString(sentences[senIdx]);
@@ -169,15 +170,16 @@ export function findSentences(node, sentences) {
 }
 
 /**
+ * @param {!Window} win
  * @param {!Array<!TextRangeDef>} ranges
  * @return {!Array<!Element>} A list of marked nodes.
  */
-export function markTextRangeList(ranges) {
+export function markTextRangeList(win, ranges) {
   ranges = concatContinuousRanges(ranges);
   const marked = [];
   for (let i = 0; i < ranges.length; i++) {
     const r = ranges[i];
-    markTextRange(r.start, r.end, ranges, i, marked);
+    markTextRange(win, r.start, r.end, ranges, i, marked);
   }
   return marked;
 }
@@ -227,25 +229,26 @@ function fixTextRangesWithRemovedText(pos, newText, from, ranges) {
 }
 
 /**
+ * @param {!Window} win
  * @param {!TextPosDef} start
  * @param {!TextPosDef} end
  * @param {!Array<TextRangeDef>} ranges Other ranges
  * @param {number} idx
  * @param {!Array<!Element>} marked
  */
-function markTextRange(start, end, ranges, idx, marked) {
+function markTextRange(win, start, end, ranges, idx, marked) {
   while (true) {
     if (start.node == end.node) {
       const newText = markSingleTextNode(
-          start.node, start.offset, end.offset, marked);
+          win, start.node, start.offset, end.offset, marked);
       if (newText) {
         fixTextRangesWithRemovedText(end, newText, idx + 1, ranges);
       }
       return;
     }
-    const next = nextTextNode(start.node);
+    const next = nextTextNode(win, start.node);
     markSingleTextNode(
-        start.node, start.offset, start.node.wholeText.length, marked);
+        win, start.node, start.offset, start.node.wholeText.length, marked);
     if (!next) {
       break;
     }
@@ -256,30 +259,31 @@ function markTextRange(start, end, ranges, idx, marked) {
 /**
  * Wraps a text range [start, end) in a single text node.
  * Returns a text node for the suffix text if it exists.
+ * @param {!Window} win
  * @param {!Text} node
  * @param {number} start
  * @param {number} end
  * @return {?Text}
  * @param {!Array<!Element>} marked
  */
-function markSingleTextNode(node, start, end, marked) {
+function markSingleTextNode(win, node, start, end, marked) {
   if (start >= end) {
     // Do nothing
     return null;
   }
+  const doc = win.document;
   const {parentNode: parent, wholeText: text} = node;
   if (start > 0) {
-    parent.insertBefore(document.createTextNode(
-        text.substring(0, start)), node);
+    parent.insertBefore(doc.createTextNode(text.substring(0, start)), node);
   }
-  const span = document.createElement('span');
-  span.appendChild(document.createTextNode(text.substring(start, end)));
+  const span = doc.createElement('span');
+  span.appendChild(doc.createTextNode(text.substring(start, end)));
   parent.insertBefore(span, node);
   marked.push(span);
 
   let endText = null;
   if (end < text.length) {
-    endText = document.createTextNode(text.substring(end));
+    endText = doc.createTextNode(text.substring(end));
     parent.insertBefore(endText, node);
   }
   parent.removeChild(node);
@@ -289,10 +293,11 @@ function markSingleTextNode(node, start, end, marked) {
 /**
  * nextTextNode finds the next sibling text node or
  *   the next text node in the siblings of the parent.
+ * @param {!Window} win
  * @param {!Text} textNode The node to start to find the next text node.
  * @return {?Text}
  */
-function nextTextNode(textNode) {
+function nextTextNode(win, textNode) {
   // If leaving is true, find the next node from siblings or the parent.
   // If leaving is false, find the next node from childrens.
   let leaving = true;
@@ -315,7 +320,7 @@ function nextTextNode(textNode) {
       }
       continue;
     }
-    if (node instanceof Text) {
+    if (node instanceof win.Text) {
       return node;
     }
     if (!node.firstChild) {
@@ -332,17 +337,20 @@ function nextTextNode(textNode) {
  */
 export class TextScanner {
   /**
+   * @param {!Window} win
    * @param {!Node} node The root node to visit.
    */
-  constructor(node) {
+  constructor(win, node) {
+    /** @const */
+    this.win_ = win;
     /** @const */
     this.node_ = node;
 
     this.textIdx_ = -1;
     this.child_ = null;
-    if (node instanceof Text) {
+    if (node instanceof win.Text) {
       this.textIdx_ = 0;
-    } else if (node instanceof Element) {
+    } else if (node instanceof win.Element) {
       // Accessing display of computed styles does not force layout/reflow
       // unless media queries that require relayout are used.
       // https://jsfiddle.net/7c7rq2ot/
@@ -350,13 +358,13 @@ export class TextScanner {
       // Note this does not eliminate all hidden elements
       // (e.g. visibility:hidden).
       // TODO(yunabe): Support more hidden element patterns if necessary.
-      const {display} = computedStyle(window, node);
+      const {display} = computedStyle(win, node);
       if (display == 'none') {
         return;
       }
       const child = node.firstChild;
       if (child != null) {
-        this.child_ = new TextScanner(child);
+        this.child_ = new TextScanner(win, child);
       }
     }
   }
@@ -376,7 +384,8 @@ export class TextScanner {
         return pos;
       }
       const sibling = this.child_.node_.nextSibling;
-      this.child_ = sibling != null ? new TextScanner(sibling) : null;
+      this.child_ = sibling != null ?
+        new TextScanner(this.win_, sibling) : null;
     }
     return null;
   }

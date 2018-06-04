@@ -80,12 +80,8 @@ describes.fakeWin('getHighlightParam', {
   });
 });
 
-describes.fakeWin('HighlightHandler', {
-  win: {
-    // URL encoded '{"s":["amp","highlight"]}'.
-    location: 'page.html#highlight=' +
-        '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D',
-  },
+describes.realWin('HighlightHandler', {
+  // We can not overwrite win.location with realWin.
   amp: {
     ampdoc: 'single',
   },
@@ -105,7 +101,8 @@ describes.fakeWin('HighlightHandler', {
     const {ampdoc} = env;
     const scrollStub = sandbox.stub(
         Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
-    const handler = new HighlightHandler(ampdoc, getHighlightParam(env.ampdoc));
+    const handler = new HighlightHandler(
+        ampdoc,{sentences: ['amp', 'highlight']});
 
     expect(scrollStub).to.be.calledOnce;
     expect(scrollStub.firstCall.args.length).to.equal(2);
