@@ -20,7 +20,7 @@ import {loadScript} from './3p';
  * Get the correct script for the container.
  * @param {!Window} global
  * @param {string} scriptSource The source of the script, different for post and comment embeds.
- * @param {function(!Object, !Object)} cb
+ * @param {function(!Object, string)} cb
  */
 function getContainerScript(global, scriptSource, cb) {
   loadScript(global, scriptSource, () => {
@@ -29,10 +29,10 @@ function getContainerScript(global, scriptSource, cb) {
     const yotpoWidget =
       (typeof global.yotpo === 'undefined') ? undefined : global.yotpo;
     yotpoWidget.on('CssReady', function() {
-        cb(yotpoWidget, 'cssLoaded');
+      cb(yotpoWidget, 'cssLoaded');
     });
     yotpoWidget.on('BatchReady', function() {
-        cb(yotpoWidget, 'batchLoaded');
+      cb(yotpoWidget, 'batchLoaded');
     });
   });
 }
@@ -309,8 +309,8 @@ export function yotpo(global, data) {
       setTimeout(() => {
         if (yotpoWidget.widgets[0]) {
           context.updateDimensions(
-            yotpoWidget.widgets[0].element./*OK*/offsetWidth,
-            yotpoWidget.widgets[0].element./*OK*/offsetHeight);
+              yotpoWidget.widgets[0].element./*OK*/offsetWidth,
+              yotpoWidget.widgets[0].element./*OK*/offsetHeight);
         }
       }, 100);
     }
