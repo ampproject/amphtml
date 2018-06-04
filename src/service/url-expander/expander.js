@@ -112,7 +112,7 @@ export class Expander {
               // This construction helps us save the match name and determine
               // precedence of resolution choices in #expandBinding_ later.
               name: match.name,
-              optional: opt_bindings[match.name],
+              prioritized: opt_bindings[match.name],
             };
           } else {
             // or the global source
@@ -224,10 +224,10 @@ export class Expander {
    */
   evaluateBinding_(bindingInfo, opt_args, opt_sync) {
     let binding;
-    if (bindingInfo.optional) {
+    if (bindingInfo.prioritized) {
       // If a binding is passed in through opt_bindings it always takes
       // precedence.
-      binding = bindingInfo.optional;
+      binding = bindingInfo.prioritized;
     } else if (opt_sync && bindingInfo.sync) {
       // Use the sync resolution if avaliable when called synchronously.
       binding = bindingInfo.sync;
