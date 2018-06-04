@@ -780,12 +780,13 @@ export class HistoryBindingNatural_ {
   }
 
   /**
-   * @param {!HistoryStateDef} state
-   * @param {!HistoryStateUpdateDef} stateUpdate
+   * @param {!HistoryStateDef|null} state
+   * @param {!HistoryStateUpdateDef|null} stateUpdate
    * @return {!HistoryStateDef}
    */
   mergeStateUpdate_(state, stateUpdate) {
-    const mergedData = Object.assign({}, state.data, stateUpdate['data']);
+    const mergedData = Object.assign({}, state && state.data || {},
+        stateUpdate && stateUpdate.data || {});
     return /** @type {!HistoryStateDef} */(Object.assign(
         {}, state, stateUpdate, {data: mergedData}));
   }
