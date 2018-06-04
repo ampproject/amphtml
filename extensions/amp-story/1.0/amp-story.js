@@ -1142,7 +1142,7 @@ export class AmpStory extends AMP.BaseElement {
       this.mutateElement(() => {
         this.element.classList.add('i-amphtml-story-fallback');
       });
-      // Displays the publisher provided fallback, or fallbacks to the default
+      // Displays the publisher provided fallback or fallbacks to the default
       // unsupported browser layer.
       if (fallbackEl) {
         this.toggleFallback(true);
