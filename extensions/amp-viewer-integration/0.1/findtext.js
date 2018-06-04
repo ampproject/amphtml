@@ -267,8 +267,7 @@ function markSingleTextNode(node, start, end, marked) {
     // Do nothing
     return null;
   }
-  const parent = node.parentNode;
-  const text = node.wholeText;
+  const {parentNode: parent, wholeText: text} = node;
   if (start > 0) {
     parent.insertBefore(document.createTextNode(
         text.substring(0, start)), node);
@@ -348,9 +347,10 @@ export class TextScanner {
       // unless media queries that require relayout are used.
       // https://jsfiddle.net/7c7rq2ot/
       //
-      // Note this does not eliminate all hidden elements (e.g. visibility:hidden).
+      // Note this does not eliminate all hidden elements
+      // (e.g. visibility:hidden).
       // TODO(yunabe): Support more hidden element patterns if necessary.
-      const display = computedStyle(window, node).display;
+      const {display} = computedStyle(window, node);
       if (display == 'none') {
         return;
       }

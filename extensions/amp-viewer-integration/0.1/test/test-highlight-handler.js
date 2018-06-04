@@ -92,7 +92,7 @@ describes.fakeWin('HighlightHandler', {
 }, env => {
 
   it('initialize with visibility=visible', () => {
-    const document = env.win.document;
+    const {document} = env.win;
     const root = document.createElement('div');
     document.body.appendChild(root);
     const div0 = document.createElement('div');
@@ -102,7 +102,7 @@ describes.fakeWin('HighlightHandler', {
     div1.textContent = 'highlighted text';
     root.appendChild(div1);
 
-    const ampdoc = env.ampdoc;
+    const {ampdoc} = env;
     const scrollStub = sandbox.stub(
         Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
     const handler = new HighlightHandler(ampdoc, getHighlightParam(env.ampdoc));
