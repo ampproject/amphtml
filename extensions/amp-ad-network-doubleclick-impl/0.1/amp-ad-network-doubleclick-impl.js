@@ -447,8 +447,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.setPageLevelExperiments(extractUrlExperimentId(
-        this.win, this.element, this.getAmpDoc()));
+    this.setPageLevelExperiments(
+        extractUrlExperimentId(this.win, this.element));
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search)) ||
         !!this.win.document.querySelector(

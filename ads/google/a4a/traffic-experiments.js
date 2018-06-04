@@ -142,11 +142,10 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 /**
  * @param {!Window} win
  * @param {!Element} element
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {?string} experiment extracted from page url.
  */
-export function extractUrlExperimentId(win, element, nodeOrDoc) {
-  const expParam = Services.viewerForDoc(nodeOrDoc).getParam('exp') ||
+export function extractUrlExperimentId(win, element) {
+  const expParam = Services.viewerForDoc(element).getParam('exp') ||
     parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return null;
