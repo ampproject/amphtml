@@ -3439,9 +3439,11 @@ doctrine@^2.0.2:
   dependencies:
     esutils "^2.0.2"
 
-document-register-element@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/document-register-element/-/document-register-element-1.5.0.tgz#a91bc20afd9340d50cdb6a493afaf10932c12e00"
+document-register-element@1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/document-register-element/-/document-register-element-1.8.0.tgz#434566ea4ff508e1633b8770616d1ad3d49f4300"
+  dependencies:
+    lightercollective "^0.0.0"
 
 dom-serialize@^2.2.0:
   version "2.2.1"
@@ -6739,6 +6741,10 @@ liftoff@^2.1.0:
     object.map "^1.0.0"
     rechoir "^0.6.2"
     resolve "^1.1.7"
+
+lightercollective@^0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/lightercollective/-/lightercollective-0.0.0.tgz#5b85f6755b78c1f94db590e479f954cbfeeb0409"
 
 link-check@^4.4.1:
   version "4.4.1"
