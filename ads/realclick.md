@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,27 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Relap
+# Realclick
 
 ## Example
 
 ```html
-<amp-ad width="auto" height="750"
-    type="relap"
-    layout="fixed-height"
-    data-token="D3UMgQWBqleq1tPW"
-    data-url="http://bigpicture.ru"
-    data-anchorid="i0xMMY1MoliiZWVl">
+<amp-ad width="300" height="250"
+        type="realclick"
+        data-mcode="d290anI3MTEyMDAwMDFfMTU3Ng==">
 </amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see Relap's documentation. Currently supports all anchor-based widgets.
+For configuration details and to generate your tags, please contact [Realclick](http://www.realclick.co.kr/)
+
 
 Supported parameters:
 
-- `data-token`
-- `data-url`
-- `data-anchorid`
-- `data-version`
+- `data-mcode`
