@@ -198,13 +198,18 @@ function waitForExtensionIfStubbed(win, extension) {
    * the extensions is in cache.  If there is no stub then it's either loaded,
    * not present, or the service was defined by a test. In those cases
    * we don't wait around for an extension that may not exist.
+   *
+   * IMPORTANT: Wait one microtask.  We do this because stubElementsForDoc()
+   * may be waiting on the body promise after us and we want to be sure the
+   * element is stubbed.
    */
-  if (stubbedElementNames.includes(extension)) {
-    const extensions = getService(win, 'extensions');
-    return /** @type {!Promise<?Object>} */ (
-      extensions.waitForExtension(win, extension));
-  }
-  return Promise.resolve();
+  return Promise.resolve().then(() => {
+    if (stubbedElementNames.includes(extension)) {
+      const extensions = getService(win, 'extensions');
+      return /** @type {!Promise<?Object>} */ (
+        extensions.waitForExtension(win, extension));
+    }
+  });
 }
 
 /**
