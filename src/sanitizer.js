@@ -264,6 +264,7 @@ function purifyHtml(dirty) {
   });
   DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
+  DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
   return DOMPurify.sanitize(dirty, config);
 }
 
@@ -343,6 +344,24 @@ function uponSanitizeAttribute(node, data) {
 
   // Update attribute value.
   data.attrValue = attrValue;
+}
+
+/**
+ * @param {!Node} node
+ * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
+ */
+function afterSanitizeAttributes(node) {
+  const i = this.removed.findIndex(r => (r.from === node) && r.attribute);
+  if (i < 0) {
+    return;
+  }
+  const {name, value} = this.removed[i].attribute;
+  // Restore the `on` attribute which DOMPurify incorrectly flags as an
+  // unknown protocol due to presence of the `:` character.
+  if (name.toLocaleLowerCase() === 'on') {
+    node.setAttribute(name, value);
+    this.removed.splice(i, 1);
+  }
 }
 
 /**
