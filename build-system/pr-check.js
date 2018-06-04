@@ -312,14 +312,13 @@ const command = {
     }
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd + ' --headless');
-    // TODO(amphtml, #15748): Uncomment when Safari 11.1 failures are fixed.
-    // if (process.env.TRAVIS) {
-    //   // A subset of unit tests on other browsers via sauce labs
-    //   cmd = cmd + ' --saucelabs_lite';
-    //   startSauceConnect();
-    //   timedExecOrDie(cmd);
-    //   stopSauceConnect();
-    // }
+    if (process.env.TRAVIS) {
+      // A subset of unit tests on other browsers via sauce labs
+      cmd = cmd + ' --saucelabs_lite';
+      startSauceConnect();
+      timedExecOrDie(cmd);
+      stopSauceConnect();
+    }
   },
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
@@ -594,13 +593,15 @@ function main() {
       command.testDocumentLinks();
     }
     if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('INTEGRATION_TEST')) {
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildCss();
       command.runJsonCheck();
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
-      if (buildTargets.has('RUNTIME')) {
+      if (buildTargets.has('RUNTIME') ||
+          buildTargets.has('BUILD_SYSTEM')) {
         // Before running all tests, run tests modified by the PR. (Fail early.)
         command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
@@ -612,7 +613,8 @@ function main() {
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
         buildTargets.has('VISUAL_DIFF') ||
-        buildTargets.has('FLAG_CONFIG')) {
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
       command.buildRuntimeMinified(/* extensions */ false);
@@ -624,13 +626,15 @@ function main() {
     }
     command.runPresubmitTests();
     if (buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('RUNTIME')) {
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
       command.runIntegrationTests(/* compiled */ false);
     }
     // TODO(rsimha, #14851): Failing due to long proessing times.
     // if (buildTargets.has('INTEGRATION_TEST') ||
     //     buildTargets.has('RUNTIME') ||
-    //     buildTargets.has('VISUAL_DIFF')) {
+    //     buildTargets.has('VISUAL_DIFF') ||
+    //     buildTargets.has('BUILD_SYSTEM')) {
     //   command.verifyVisualDiffTests();
     // } else {
     //   // Generates a blank Percy build to satisfy the required Github check.
