@@ -21,6 +21,7 @@ import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LandscapeComponent} from '../bookend/components/landscape';
 import {LocalizationService} from '../localization';
+import {PortraitComponent} from '../bookend/components/portrait';
 import {TextBoxComponent} from '../bookend/components/text-box';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -45,6 +46,14 @@ describes.realWin('amp-story-bookend', {
     {
       'type': 'small',
       'title': 'This is an example article',
+      'domainName': 'example.com',
+      'url': 'http://example.com/article.html',
+      'image': 'http://placehold.it/256x128',
+    },
+    {
+      'type': 'portrait',
+      'title': 'This is an example article',
+      'category': 'This is an example article',
       'domainName': 'example.com',
       'url': 'http://example.com/article.html',
       'image': 'http://placehold.it/256x128',
@@ -130,6 +139,9 @@ describes.realWin('amp-story-bookend', {
     registerServiceBuilder(win, 'localization', () => localizationService);
 
     bookend = new AmpStoryBookend(bookendElem);
+
+    // Force sync mutateElement.
+    sandbox.stub(bookend, 'mutateElement').callsArg(0);
   });
 
   it('should build the users json', () => {
@@ -148,6 +160,13 @@ describes.realWin('amp-story-bookend', {
         {
           'type': 'small',
           'title': 'This is an example article',
+          'url': 'http://example.com/article.html',
+          'image': 'http://placehold.it/256x128',
+        },
+        {
+          'type': 'portrait',
+          'title': 'This is an example article',
+          'category': 'This is an example article',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
         },
@@ -216,6 +235,14 @@ describes.realWin('amp-story-bookend', {
         {
           'type': 'small',
           'title': 'This is an example article',
+          'url': 'http://example.com/article.html',
+          'image': 'http://placehold.it/256x128',
+        },
+        {
+          'type': 'portrait',
+          'title': 'This is an example article',
+          'category': 'This is an example article',
+          'domainName': 'example.com',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
         },
@@ -398,8 +425,34 @@ describes.realWin('amp-story-bookend', {
 
     allowConsoleError(() => {
       expect(() => articleComponent.assertValidity(userJson)).to.throw(
-          'Articles must contain `title` and `url` fields, ' +
+          'Small article component must contain `title`, `url` fields, ' +
           'skipping invalid.​​​');
+    });
+  });
+
+  it('should reject invalid user json for portrait article', () => {
+    const portraitComponant = new PortraitComponent();
+    const userJson = {
+      'bookend-version': 'v1.0',
+      'share-providers': [
+        'email',
+        {'provider': 'facebook', 'app_id': '254325784911610'},
+        'whatsapp',
+      ],
+      'components': [
+        {
+          'type': 'portrait',
+          'category': 'sample',
+          'url': 'http://example.com/article.html',
+          'image': 'http://placehold.it/256x128',
+        },
+      ],
+    };
+
+    allowConsoleError(() => {
+      expect(() => portraitComponant.assertValidity(userJson)).to.throw(
+          'Portrait component must contain `title`, `image`, ' +
+          '`url` fields, skipping invalid.');
     });
   });
 
@@ -466,8 +519,8 @@ describes.realWin('amp-story-bookend', {
 
     allowConsoleError(() => {
       expect(() => landscapeComponent.assertValidity(userJson)).to.throw(
-          'landscape component must contain `title`, `category`, `image`, ' +
-          'and `url` fields, skipping invalid.');
+          'Landscape component must contain `title`, `image`, ' +
+          '`url` fields, skipping invalid.');
     });
   });
 

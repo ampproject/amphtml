@@ -41,6 +41,7 @@
     },
     {
       "type": "portrait",
+      "title": "Heading for portrait",
       "category": "This is an example portrait",
       "url": "http://example.com/article.html",
       "image": "http://placehold.it/312x416"
