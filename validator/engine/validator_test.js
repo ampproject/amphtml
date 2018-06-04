@@ -647,12 +647,14 @@ function compareAttrNames(a, b) {
  * @param {!amp.validator.ValidatorRules} rules
  */
 function attrRuleShouldMakeSense(attrSpec, rules) {
-  const attrSpecNameRegex = new RegExp('[^A-Z]+');
   // name
   it('attr_spec name defined', () => {
     expect(attrSpec.name).toBeDefined();
+  });
+  it('attr_spec name is lower case', () => {
     // Attribute Spec names are matched against lowercased attributes,
     // so the rules *must* also be lower case or non-cased.
+    const attrSpecNameRegex = new RegExp('^[^A-Z]+$');
     expect(attrSpecNameRegex.test(attrSpec.name)).toBe(true);
   });
   if (attrSpec.valueUrl !== null) {
