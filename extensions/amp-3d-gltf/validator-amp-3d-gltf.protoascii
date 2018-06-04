@@ -37,15 +37,15 @@ tags: {  # <amp-3d-gltf>
     value_regex: "false|true"
   }
   attrs: {
-    name: "autoRotate"
+    name: "autorotate"
     value_regex: "false|true"
   }
   attrs: {
-    name: "enableZoom"
+    name: "enablezoom"
     value_regex: "false|true"
   }
   attrs: {
-    name: "maxPixelRatio"
+    name: "maxpixelratio"
     value_regex: "[+-]?(\\d*\\.)?\\d+"
   }
   attrs: {
