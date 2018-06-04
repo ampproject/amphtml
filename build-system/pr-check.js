@@ -312,7 +312,7 @@ const command = {
     }
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd + ' --headless');
-    // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
+    // TODO(amphtml, #15748): Uncomment when Safari 11.1 failures are fixed.
     // if (process.env.TRAVIS) {
     //   // A subset of unit tests on other browsers via sauce labs
     //   cmd = cmd + ' --saucelabs_lite';
@@ -611,7 +611,8 @@ function main() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF')) {
+        buildTargets.has('VISUAL_DIFF') ||
+        buildTargets.has('FLAG_CONFIG')) {
       command.cleanBuild();
       command.buildRuntime();
       command.buildRuntimeMinified(/* extensions */ false);

@@ -24,7 +24,6 @@ import {
   forceExperimentBranch,
   getExperimentBranch,
   isExperimentOn,
-  randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {
   MANUAL_EXPERIMENT_ID,
@@ -36,6 +35,7 @@ import {getMode} from '../../../src/mode';
 import {
   isCdnProxy,
 } from '../../../ads/google/a4a/utils';
+import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-utils';
 import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
@@ -105,27 +105,11 @@ export class DoubleclickA4aEligibility {
    * @param {!Element} element
    */
   unconditionedExperimentSelection(win, element) {
-    this.selectAndSetUnconditionedExp(
+    selectAndSetExperiments(
         win, element,
         [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL,
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP],
         UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME);
-  }
-
-  /**
-   * Attempts to select into experiment and forces branch if selected.
-   * @param {!Window} win
-   * @param {!Element} element
-   * @param {!Array<string>} branches
-   * @param {string} expName
-   */
-  selectAndSetUnconditionedExp(win, element, branches, expName) {
-    const experimentId = this.maybeSelectExperiment(
-        win, element, branches, expName);
-    if (!!experimentId) {
-      addExperimentIdToElement(experimentId, element);
-      forceExperimentBranch(win, expName, experimentId);
-    }
   }
 
   /** Whether Fast Fetch is enabled
@@ -204,24 +188,6 @@ export class DoubleclickA4aEligibility {
     return true;
   }
 
-  /**
-   * @param {!Window} win
-   * @param {!Element} element
-   * @param {!Array<string>} selectionBranches
-   * @param {string} experimentName}
-   * @return {?string} Experiment branch ID or null if not selected.
-   * @visibileForTesting
-   */
-  maybeSelectExperiment(win, element, selectionBranches, experimentName) {
-    const experimentInfoMap =
-      /** @type {!Object<string, !ExperimentInfo>} */ ({});
-    experimentInfoMap[experimentName] = {
-      isTrafficEligible: () => true,
-      branches: selectionBranches,
-    };
-    randomlySelectUnsetExperiments(win, experimentInfoMap);
-    return getExperimentBranch(win, experimentName);
-  }
 }
 
 /** @const {!DoubleclickA4aEligibility} */
