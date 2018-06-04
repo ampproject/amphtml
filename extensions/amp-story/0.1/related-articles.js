@@ -39,6 +39,9 @@ export let RelatedArticleDef;
  */
 export let RelatedArticleSetDef;
 
+/** New bookend components only supported in amp-story 1.0. */
+const NEW_COMPONENTS =
+['landscape', 'portrait', 'cta-link', 'heading', 'textbox'];
 
 /**
  * @param {!JsonObject} articleJson
@@ -98,14 +101,12 @@ export function relatedArticlesFromJson(opt_articleSetsResponse) {
  */
 export function parseArticlesToClassicApi(bookendComponents) {
   const articleSet = {};
-  const newComponents =
-    ['landscape', 'portrait', 'cta-link', 'heading', 'textbox'];
   articleSet.articles = [];
 
   bookendComponents.forEach(component => {
     if (component.type == 'small') {
       articleSet.articles.push(buildArticleFromJson_(component));
-    } else if (newComponents.includes(component.type)) {
+    } else if (NEW_COMPONENTS.includes(component.type)) {
       user().warn(component.type + ' is not supported in amp-story-0.1, ' +
       'upgrade to v1.0 to use this feature.');
     } else {
