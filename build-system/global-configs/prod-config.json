@@ -44,5 +44,5 @@
   "expUnconditionedDfpIdentity": 0.01,
   "expUnconditionedCanonicalHoldback": 0.01,
   "amp-consent": 1,
-  "amp-img-native-srcset": 0.3
+  "amp-img-native-srcset": 0.7
 }
