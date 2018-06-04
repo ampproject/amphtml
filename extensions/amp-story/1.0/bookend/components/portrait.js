@@ -26,6 +26,7 @@ import {userAssertValidProtocol} from '../../utils';
  * @typedef {{
  *   type: string,
  *   category: string,
+ *   title: string,
  *   url: string,
  *   domainName: string,
  *   image: string
@@ -36,6 +37,7 @@ export let PortraitComponentDef;
 /**
  * @struct @typedef {{
  *   category: !Element,
+ *   title: !Element,
  *   image: !Element,
  *   meta: !Element,
  * }}
@@ -50,9 +52,15 @@ export class PortraitComponent {
 
   /** @override */
   assertValidity(portraitJson, element) {
-    user().assert('category' in portraitJson && 'image' in portraitJson &&
-      'url' in portraitJson, 'Portrait component must contain `category`, ' +
-      '`image`, and `url` fields, skipping invalid.');
+
+    const requiredFields = ['title', 'image', 'url'];
+    const hasAllRequiredFields =
+        !requiredFields.some(field => !(field in portraitJson));
+    user().assert(
+        hasAllRequiredFields,
+        'Portrait component must contain ' +
+        requiredFields.map(field => '`' + field + '`').join(', ') +
+        ' fields, skipping invalid.');
 
     userAssertValidProtocol(element, portraitJson['url']);
     userAssertValidProtocol(element, portraitJson['image']);
@@ -68,6 +76,7 @@ export class PortraitComponent {
       domainName,
       type: portraitJson['type'],
       category: portraitJson['category'],
+      title: portraitJson['title'],
       image: portraitJson['image'],
     };
   }
@@ -82,6 +91,8 @@ export class PortraitComponent {
           target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
+          <h2 class="i-amphtml-story-bookend-article-heading"
+            ref="title"></h2>
           <amp-img class="i-amphtml-story-bookend-portrait-image"
             layout="fixed" width="0" height="0" ref="image"></amp-img>
           <div class="i-amphtml-story-bookend-component-meta"
@@ -89,10 +100,11 @@ export class PortraitComponent {
         </a>`;
     addAttributesToElement(template, dict({'href': portraitData.url}));
 
-    const {category, image, meta} =
+    const {category, title, image, meta} =
       /** @type {!portraitElsDef} */ (htmlRefs(template));
 
     category.textContent = portraitData.category;
+    title.textContent = portraitData.title;
     addAttributesToElement(image, dict({'src': portraitData.image}));
     meta.textContent = portraitData.domainName;
 
