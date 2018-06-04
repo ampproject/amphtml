@@ -109,7 +109,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.init_.bind(this));
 
-    this.runOnce_ = !!this.element.getAttribute('once');
+    this.runOnce_ = this.element.hasAttribute('once');
   }
 
   /**
@@ -169,6 +169,11 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   positionChanged_(entry) {
+
+    if (this.runOnce_ && this.firstIterationComplete_) {
+      return;
+    }
+
     const wasVisible = this.isVisible_;
     const prevViewportHeight = this.viewportRect_ && this.viewportRect_.height;
 
@@ -195,7 +200,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       this.updateVisibility_(positionRect, adjViewportRect, relPos);
     }
 
-    if (wasVisible && !this.isVisible_ && !this.firstIterationComplete_) {
+    if (wasVisible && !this.isVisible_) {
       // Send final scroll progress state before exiting to handle fast-scroll.
       this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
       this.triggerScroll_();
@@ -203,12 +208,12 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       this.firstIterationComplete_ = true;
     }
 
-    if (!wasVisible && this.isVisible_ && !this.firstIterationComplete_) {
+    if (!wasVisible && this.isVisible_) {
       this.triggerEnter_();
     }
 
     // Send scroll progress if visible.
-    if (this.isVisible_ && !this.firstIterationComplete_) {
+    if (this.isVisible_) {
       this.updateScrollProgress_(positionRect, adjViewportRect);
       this.triggerScroll_();
     }
