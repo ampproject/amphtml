@@ -96,7 +96,7 @@ export function relatedArticlesFromJson(opt_articleSetsResponse) {
 }
 
 /**
- * @param {!JsonObject=} bookendComponents
+ * @param {!Array<!JsonObject>} bookendComponents
  * @return {!Array<!RelatedArticleSetDef>}
  */
 export function parseArticlesToClassicApi(bookendComponents) {
@@ -104,13 +104,13 @@ export function parseArticlesToClassicApi(bookendComponents) {
   articleSet.articles = [];
 
   bookendComponents.forEach(component => {
-    if (component.type == 'small') {
+    if (component['type'] == 'small') {
       articleSet.articles.push(buildArticleFromJson_(component));
-    } else if (NEW_COMPONENTS.includes(component.type)) {
-      user().warn(component.type + ' is not supported in amp-story-0.1, ' +
-      'upgrade to v1.0 to use this feature.');
+    } else if (NEW_COMPONENTS.includes(component['type'])) {
+      user().warn(TAG, component['type'] + ' is not supported in ' +
+      'amp-story-0.1, upgrade to v1.0 to use this feature.,');
     } else {
-      user().warn(component.type + ' is not valid, ' +
+      user().warn(TAG, component['type'] + ' is not valid, ' +
       'skipping invalid.');
     }
   });
