@@ -213,9 +213,9 @@ You can specify different values for top vs. bottom by providing two values (`<t
 - `viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom. Effectively only considering the middle 50% of the viewport.
 - `viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
 
-#### once (optional)
+#### norepeat (optional)
 
-Only runs the position-observer once.
+Only triggers the position-observer once. Once the first iteration of the animation associated with the position-observer has finished, the position-observer doesn't update the position anymore.
 
 ## Validation
 

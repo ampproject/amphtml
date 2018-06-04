@@ -109,7 +109,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.init_.bind(this));
 
-    this.runOnce_ = this.element.hasAttribute('once');
+    this.noRepeat_ = this.element.hasAttribute('norepeat');
   }
 
   /**
@@ -170,7 +170,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   positionChanged_(entry) {
 
-    if (this.runOnce_ && this.firstIterationComplete_) {
+    if (this.noRepeat_ && this.firstIterationComplete_) {
       return;
     }
 
