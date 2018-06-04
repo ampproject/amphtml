@@ -472,6 +472,9 @@ export class AmpSlideScroll extends BaseSlides {
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    */
   updateOnScroll_(currentScrollLeft) {
+    if (currentScrollLeft == NaN || this.slideIndex_ == null) {
+      return;
+    }
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
