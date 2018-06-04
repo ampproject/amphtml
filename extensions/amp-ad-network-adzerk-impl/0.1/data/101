@@ -1,0 +1,9 @@
+{
+  "templateUrl": "456",
+  "data": {
+    "USER_NAME": "bar",
+    "USER_NUM": 1234,
+    "HTML_CONTENT": "<img src=https://img.com/>",
+    "IMG_SRC": "https://image.slidesharecdn.com/nativeadsguide-161205215856/95/a-native-ads-guide-for-publishers-38-638.jpg?cb=1480975246"
+  }
+}

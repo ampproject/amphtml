@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import * as sinon from 'sinon';
+import {Services} from '../../../../src/services';
 import {
   installFormProxy,
   setBlacklistedPropertiesForTesting,
 } from '../form-proxy';
+import {parseUrlDeprecated} from '../../../../src/url';
 
 const PROPS = ['id', 'action', 'method', 'style', 'acceptCharset',
   'attributes', 'elements', 'children', 'draggable', 'hidden',
@@ -33,6 +35,22 @@ describes.repeated('installFormProxy', {
 }, (name, variant) => {
   let form;
   let inputs;
+  let sandbox;
+
+  before(() => {
+    sandbox = sinon.sandbox.create();
+
+    // Stub only to work around the fact that there's no Ampdoc, so the service
+    // cannot be retrieved.
+    // Otherwise this test would barf because `form` is detached.
+    sandbox.stub(Services, 'urlForDoc').returns({
+      parse: parseUrlDeprecated,
+    });
+  });
+
+  after(() => {
+    sandbox.restore();
+  });
 
   beforeEach(() => {
     form = document.createElement('form');
@@ -91,14 +109,14 @@ describes.repeated('installFormProxy', {
 
   it('should proxy methods', () => {
     expect(form.$p.getAttribute('id')).to.equal('form1');
-    expect(form.$p.submit).to.be.function;
+    expect(form.$p.submit).to.be.a('function');
     if (inputs) {
       expect(form.getAttribute).to.equal(inputs.getAttribute);
       expect(form.submit).to.equal(inputs.submit);
     } else {
-      expect(form.getAttribute).to.be.function;
+      expect(form.getAttribute).to.be.a('function');
       expect(form.getAttribute('id')).to.equal('form1');
-      expect(form.submit).to.be.function;
+      expect(form.submit).to.be.a('function');
     }
   });
 

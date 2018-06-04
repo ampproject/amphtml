@@ -1,0 +1,19 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+    Sebastian Benz -- @sebabenz
+    Julian Toledo -- @juliantoledo
+    Jeff Kingyens -- @jkingyens 
+
+# THANKS
+
+    Ade Oshineye -- @ade_oshineye
+
+# TECHNOLOGY COLOPHON
+
+    AMP, CSS3, HTML5
+    Gulp, Node
+
+    Source: https://github.com/ampproject/amp-by-example

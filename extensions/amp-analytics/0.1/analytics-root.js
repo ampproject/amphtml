@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
@@ -27,7 +28,7 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
+import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
 const TAG = 'amp-analytics';
@@ -142,6 +143,21 @@ export class AnalyticsRoot {
   getElementById(unusedId) {}
 
   /**
+   * Returns the tracker for the specified name and list of allowed types.
+   *
+   * @param {string} name
+   * @param {!Object<string, function(new:./events.EventTracker)>} whitelist
+   * @return {?./events.EventTracker}
+   */
+  getTrackerForWhitelist(name, whitelist) {
+    const trackerProfile = whitelist[name];
+    if (trackerProfile) {
+      return this.getTracker(name, trackerProfile);
+    }
+    return null;
+  }
+
+  /**
    * Returns the tracker for the specified name and type. If the tracker
    * has not been requested before, it will be created.
    *
@@ -181,7 +197,7 @@ export class AnalyticsRoot {
     // Special case selectors. The selection method is irrelavant.
     // And no need to wait for document ready.
     if (selector == ':root') {
-      return Promise.resolve(this.getRootElement());
+      return tryResolve(() => this.getRootElement());
     }
     if (selector == ':host') {
       return new Promise(resolve => {
@@ -195,13 +211,18 @@ export class AnalyticsRoot {
       let found;
       let result = null;
       // Query search based on the selection method.
-      if (selectionMethod == 'scope') {
-        found = scopedQuerySelector(context, selector);
-      } else if (selectionMethod == 'closest') {
-        found = closestBySelector(context, selector);
-      } else {
-        found = this.getRoot().querySelector(selector);
+      try {
+        if (selectionMethod == 'scope') {
+          found = scopedQuerySelector(context, selector);
+        } else if (selectionMethod == 'closest') {
+          found = closestBySelector(context, selector);
+        } else {
+          found = this.getRoot().querySelector(selector);
+        }
+      } catch (e) {
+        user().assert(false, `Invalid query selector ${selector}`);
       }
+
       // DOM search can "look" outside the boundaries of the root, thus make
       // sure the result is contained.
       if (found && this.contains(found)) {
@@ -245,7 +266,7 @@ export class AnalyticsRoot {
    * @return {function(!Event)}
    */
   createSelectiveListener(
-      listener, context, selector, selectionMethod = null) {
+    listener, context, selector, selectionMethod = null) {
     return event => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path
@@ -257,7 +278,7 @@ export class AnalyticsRoot {
       const rootElement = this.getRootElement();
       const isSelectAny = (selector == '*');
       const isSelectRoot = (selector == ':root');
-      let target = event.target;
+      let {target} = event;
       while (target) {
 
         // Target must be contained by this root.
@@ -440,7 +461,7 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
 
 /**
  * @param  {!Element} el
- * @param  {!string} selector
+ * @param  {string} selector
  * @return {boolean}
  */
 function matchesNoInline(el, selector) {

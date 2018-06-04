@@ -15,9 +15,9 @@
  */
 
 import {
-  layoutRectLtwh,
   LayoutRectDef,
   layoutRectFromDomRect,
+  layoutRectLtwh,
 } from '../../src/layout-rect';
 import {Observable} from '../../src/observable';
 import {throttle} from '../../src/utils/rate-limit';
@@ -54,6 +54,7 @@ export class PositionObserver {
    * TODO: maybe take DOM mutation into consideration
    * @param element {!Element}
    * @param callback {function(!PositionEntryDef)}
+   * @return {!UnlistenDef}
    */
   observe(element, callback) {
     if (!this.positionObservable_) {
@@ -68,7 +69,7 @@ export class PositionObserver {
     }
     // Send the 1st ping immediately
     callback(this.getPositionEntry_(element));
-    this.positionObservable_.add(() => {
+    return this.positionObservable_.add(() => {
       callback(this.getPositionEntry_(element));
     });
   }
@@ -79,7 +80,7 @@ export class PositionObserver {
 
   /**
    * @param element {!Element}
-   * @returns {!PositionEntryDef}
+   * @return {!PositionEntryDef}
    * @private
    */
   getPositionEntry_(element) {
@@ -95,8 +96,8 @@ export class PositionObserver {
    * A  method to get viewport rect
    */
   getViewportRect() {
-    const scrollingElement = this.scrollingElement_;
-    const win = this.win_;
+    const {scrollingElement_: scrollingElement, win_: win} = this;
+
     const scrollLeft = scrollingElement./*OK*/scrollLeft ||
         win./*OK*/pageXOffset;
     const scrollTop = scrollingElement./*OK*/scrollTop ||
@@ -111,7 +112,7 @@ export class PositionObserver {
 
 /**
  * @param win {!Window}
- * @returns {!Element}
+ * @return {!Element}
  */
 function getScrollingElement(win) {
   const doc = win.document;

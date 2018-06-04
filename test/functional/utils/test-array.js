@@ -17,6 +17,8 @@
 import {
   filterSplice,
   findIndex,
+  fromIterator,
+  pushIfNotExist,
 } from '../../../src/utils/array';
 
 describe('filterSplice', function() {
@@ -70,5 +72,45 @@ describe('findIndex', function() {
     findIndex([1, 2, 3], (element, i, array) => {
       expect(array).to.deep.equal([1, 2, 3]);
     });
+  });
+});
+
+describe('fromIterator', function() {
+  it('should return empty array for empty iterator', () => {
+    const iterator = {
+      next() {
+        return {value: undefined, done: true};
+      },
+    };
+
+    expect(fromIterator(iterator)).to.be.an('array').that.is.empty;
+  });
+
+  it('should return non-empty array for non-empty iterator', () => {
+    let index = 0;
+    const iterator = {
+      next() {
+        return index < 3 ?
+          {value: (index++) * 2, done: false} :
+          {value: undefined, done: true};
+      },
+    };
+
+    expect(fromIterator(iterator)).to.deep.equal([0, 2, 4]);
+  });
+});
+
+describe('pushIfNotExist', () => {
+  it('should push element', () => {
+    const array = [1, 2, 3, 4];
+    pushIfNotExist(array, 5);
+    expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+    pushIfNotExist(array, 2.3);
+    expect(array).to.deep.equal([1, 2, 3, 4, 5, 2.3]);
+  });
+  it('should not push element', () => {
+    const array = [1, 2, 3, 4];
+    pushIfNotExist(array, 1);
+    expect(array).to.deep.equal([1, 2, 3, 4]);
   });
 });

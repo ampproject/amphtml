@@ -1,3 +1,62 @@
 PASS
-feature_tests/spec_example.html:59:7 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DEPRECATION]
-feature_tests/spec_example.html:59:7 The extension 'amp-carousel' was found on this page, but is unused (no 'amp-carousel' tag seen). This may become an error in the future. [DEPRECATION]
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    This is the sample document from the AMP spec.
+|    https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|    <head>
+|      <meta charset="utf-8">
+|      <title>Sample document</title>
+|      <link rel="canonical" href="./regular-html-version.html">
+|      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|      <style amp-custom>
+|        h1 {color: red}
+|      </style>
+|      <script type="application/ld+json">
+|      {
+|        "@context": "http://schema.org",
+|        "@type": "NewsArticle",
+|        "headline": "Article headline",
+|        "image": [
+|          "thumbnail1.jpg"
+|        ],
+|        "datePublished": "2015-02-05T08:00:00+08:00"
+|      }
+|      </script>
+|      <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+|      <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|      <script async nonce="cryptographic-nonce" src="https://cdn.ampproject.org/v0.js"></script>
+|    </head>
+|    <body>
+|      <h1>Sample document</h1>
+|      <p>
+|        Some text
+|        <amp-img src=sample.jpg width=300 height=300></amp-img>
+|      </p>
+|      <amp-ad width=300 height=250
+|          type="a9"
+|          data-aax_size="300x250"
+|          data-aax_pubname="test123"
+|          data-aax_src="302">
+|      </amp-ad>
+|    </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/spec_example.html:59:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DEPRECATION]

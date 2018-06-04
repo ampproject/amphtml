@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {tryParseJson} from '../../../src/json';
-import {user, dev} from '../../../src/log';
+import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {dev, user} from '../../../src/log';
 import {
-  removeElement,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
-import {listen, getData} from '../../../src/event-helper';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {tryParseJson} from '../../../src/json';
 
 const TAG = 'amp-3q-player';
 
@@ -74,9 +75,9 @@ class Amp3QPlayer extends AMP.BaseElement {
         'The data-id attribute is required for <amp-3q-player> %s',
         this.element);
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -103,7 +104,7 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     return this.loadPromise(this.iframe_).then(() =>
-        this.playerReadyPromise_);
+      this.playerReadyPromise_);
   }
 
   /** @override */
@@ -116,9 +117,9 @@ class Amp3QPlayer extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     return true;
   }
@@ -148,8 +149,8 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
 
     const data = isObject(getData(event))
-        ? getData(event)
-        : tryParseJson(getData(event));
+      ? getData(event)
+      : tryParseJson(getData(event));
     if (data === undefined) {
       return;
     }
@@ -258,6 +259,11 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
     return false;
   }
 

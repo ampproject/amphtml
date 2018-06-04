@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
+import * as dom from './dom';
 import {
-  getExistingServiceForDocInEmbedScope,
-  getServicePromise,
-  getServicePromiseOrNull,
   getAmpdoc,
+  getExistingServiceForDocInEmbedScope,
+  getService,
+  getServicePromise,
   getServicePromiseForDoc,
+  getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
   getTopWindow,
 } from './service';
-import {user} from './log';
-import * as dom from './dom';
+import {stubbedElementNames} from './element-stub-data';
 import {toWin} from './types';
+import {user} from './log';
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * Services.viewportForDoc(...)) for type safety and because the factory should not be
- * passed around.
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. Services.viewportForDoc(...)) for type safety and because the
+ * factory should not be passed around.
  * @param {!Window} win
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
- * @param {boolean=} opt_element Whether this service is provided by an
- *     element, not the extension.
+ * @param {boolean=} opt_element Whether this service is provided by an element,
+ *     not the extension.
  * @return {!Promise<*>}
  */
 export function getElementService(win, id, extension, opt_element) {
@@ -81,18 +82,17 @@ function isElementScheduled(win, elementName) {
 
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * Services.viewportForDoc(...)) for type safety and because the factory should not be
- * passed around.
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. Services.viewportForDoc(...)) for type safety and because the
+ * factory should not be passed around.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
- * @param {boolean=} opt_element Whether this service is provided by an
- *     element, not the extension.
+ * @param {boolean=} opt_element Whether this service is provided by an element,
+ *     not the extension.
  * @return {!Promise<*>}
  */
 export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
@@ -113,30 +113,25 @@ export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDoc(
-    nodeOrDoc, id, extension, opt_element) {
+  nodeOrDoc, id, extension, opt_element) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const s = getServicePromiseOrNullForDoc(nodeOrDoc, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
   }
-  // Microtask is necessary to ensure that window.ampExtendedElements has been
-  // initialized.
-  return Promise.resolve().then(() => {
-    if (!opt_element && isElementScheduled(ampdoc.win, extension)) {
-      return getServicePromiseForDoc(nodeOrDoc, id);
-    }
-    // Wait for HEAD to fully form before denying access to the service.
-    return ampdoc.whenBodyAvailable().then(() => {
-      // If this service is provided by an element, then we can't depend on the
-      // service (they may not use the element).
-      if (opt_element) {
-        return getServicePromiseOrNullForDoc(nodeOrDoc, id);
-      } else if (isElementScheduled(ampdoc.win, extension)) {
-        return getServicePromiseForDoc(nodeOrDoc, id);
-      }
-      return null;
-    });
-  });
+
+  return ampdoc.whenBodyAvailable()
+      .then(() => waitForExtensionIfStubbed(ampdoc.win, extension))
+      .then(() => {
+        // If this service is provided by an element, then we can't depend on
+        // the service (they may not use the element).
+        if (opt_element) {
+          return getServicePromiseOrNullForDoc(nodeOrDoc, id);
+        } else if (isElementScheduled(ampdoc.win, extension)) {
+          return getServicePromiseForDoc(nodeOrDoc, id);
+        }
+        return null;
+      });
 }
 
 /**
@@ -150,7 +145,7 @@ export function getElementServiceIfAvailableForDoc(
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDocInEmbedScope(
-    nodeOrDoc, id, extension) {
+  nodeOrDoc, id, extension) {
   const s = getExistingServiceForDocInEmbedScope(nodeOrDoc, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (Promise.resolve(s));
@@ -158,7 +153,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
   // Return embed-scope element service promise if scheduled.
   if (nodeOrDoc.nodeType) {
     const win = toWin(/** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
+      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     const topWin = getTopWindow(win);
     // In embeds, doc-scope services are window-scope. But make sure to
     // only do this for embeds (not the top window), otherwise we'd grab
@@ -190,6 +185,29 @@ function assertService(service, id, extension) {
 }
 
 /**
+ * Waits for an extension if a stub is present
+ * @param {!Window} win
+ * @param {string} extension
+ * @return {!Promise}
+ * @private
+ */
+function waitForExtensionIfStubbed(win, extension) {
+  /**
+   * If there is (or was) a stubbed extension wait for it to load before trying
+   * to get the service.  Prevents a race condition when everything but
+   * the extensions is in cache.  If there is no stub then it's either loaded,
+   * not present, or the service was defined by a test. In those cases
+   * we don't wait around for an extension that may not exist.
+   */
+  if (stubbedElementNames.includes(extension)) {
+    const extensions = getService(win, 'extensions');
+    return /** @type {!Promise<?Object>} */ (
+      extensions.waitForExtension(win, extension));
+  }
+  return Promise.resolve();
+}
+
+/**
  * Returns the promise for service with `id` on the given window if available.
  * Otherwise, resolves with null (service was not registered).
  * @param {!Window} win
@@ -200,22 +218,16 @@ function assertService(service, id, extension) {
  * @private
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
-  // Microtask is necessary to ensure that window.ampExtendedElements has been
-  // initialized.
-  return Promise.resolve().then(() => {
-    if (!opt_element && isElementScheduled(win, extension)) {
-      return getServicePromise(win, id);
-    }
-    // Wait for HEAD to fully form before denying access to the service.
-    return dom.waitForBodyPromise(win.document).then(() => {
-      // If this service is provided by an element, then we can't depend on the
-      // service (they may not use the element).
-      if (opt_element) {
-        return getServicePromiseOrNull(win, id);
-      } else if (isElementScheduled(win, extension)) {
-        return getServicePromise(win, id);
-      }
-      return null;
-    });
-  });
+  return dom.waitForBodyPromise(win.document)
+      .then(() => waitForExtensionIfStubbed(win, extension))
+      .then(() => {
+        // If this service is provided by an element, then we can't depend on
+        // the service (they may not use the element).
+        if (opt_element) {
+          return getServicePromiseOrNull(win, id);
+        } else if (isElementScheduled(win, extension)) {
+          return getServicePromise(win, id);
+        }
+        return null;
+      });
 }

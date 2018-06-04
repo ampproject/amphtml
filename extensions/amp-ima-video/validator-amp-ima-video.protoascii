@@ -28,6 +28,10 @@ tags: {  # <amp-ima-video>
   html_format: AMP
   tag_name: "AMP-IMA-VIDEO"
   requires_extension: "amp-ima-video"
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-src"
@@ -44,6 +48,10 @@ tags: {  # <amp-ima-video>
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
+  }
+  attrs: {
+    name: "rotate-to-fullscreen"
+    value_regex: ""
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"

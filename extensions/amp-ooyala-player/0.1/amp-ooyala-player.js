@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {tryParseJson} from '../../../src/json';
-import {user, dev} from '../../../src/log';
+import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {dev, user} from '../../../src/log';
 import {
-  removeElement,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
-import {getData, listen} from '../../../src/event-helper';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -63,9 +64,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -131,10 +132,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
-
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true;
   }
 
@@ -162,8 +162,8 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   handleOoyalaMessages_(event) {
     /** @const {?JsonObject|undefined} */
     const data = /** @type {?JsonObject} */ (isObject(getData(event))
-        ? getData(event)
-        : tryParseJson(getData(event)));
+      ? getData(event)
+      : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
@@ -266,6 +266,11 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
     return false;
   }
 

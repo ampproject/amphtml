@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {Pass} from '../../src/pass';
 import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 describe('Pass', () => {
 

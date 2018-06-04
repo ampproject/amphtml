@@ -20,10 +20,10 @@
  */
 
 import {dev, user} from './log';
+import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles} from './style';
 import {startsWith} from './string';
-
 
 /**
  * @enum {string}
@@ -36,6 +36,21 @@ export const Layout = {
   CONTAINER: 'container',
   FILL: 'fill',
   FLEX_ITEM: 'flex-item',
+  FLUID: 'fluid',
+  INTRINSIC: 'intrinsic',
+};
+
+
+/**
+ * Layout priorities to use with BaseElement#getLayoutPriority() and
+ * BaseElement#updateLayoutPriority().
+ * @enum {number}
+ */
+export const LayoutPriority = {
+  CONTENT: 0,
+  METADATA: 1,
+  ADS: 2,
+  BACKGROUND: 3,
 };
 
 
@@ -84,6 +99,10 @@ export const LOADING_ELEMENTS_ = {
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
   'AMP-EMBED': true,
+  'AMP-FACEBOOK': true,
+  'AMP-FACEBOOK-COMMENTS': true,
+  'AMP-FACEBOOK-LIKE': true,
+  'AMP-FACEBOOK-PAGE': true,
   'AMP-IFRAME': true,
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
@@ -130,7 +149,9 @@ export function isLayoutSizeDefined(layout) {
       layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE ||
       layout == Layout.FILL ||
-      layout == Layout.FLEX_ITEM);
+      layout == Layout.FLEX_ITEM ||
+      layout == Layout.FLUID ||
+      layout == Layout.INTRINSIC);
 }
 
 
@@ -306,7 +327,8 @@ export function applyStaticLayout(element) {
   if (completedLayoutAttr) {
     const layout = /** @type {!Layout} */ (dev().assert(
         parseLayout(completedLayoutAttr)));
-    if (layout == Layout.RESPONSIVE && element.firstElementChild) {
+    if ((layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC)
+      && element.firstElementChild) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
           element.querySelector('i-amphtml-sizer') || undefined;
@@ -316,9 +338,9 @@ export function applyStaticLayout(element) {
     return layout;
   }
 
-  // If the layout was already done by server-side rendering (SSR), then the code
-  // below will not run. Any changes below will necessitate a change to SSR and must
-  // be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
+  // If the layout was already done by server-side rendering (SSR), then the
+  // code below will not run. Any changes below will necessitate a change to SSR
+  // and must be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
 
   // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
@@ -331,9 +353,10 @@ export function applyStaticLayout(element) {
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
   user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
-      parseLength(widthAttr) : widthAttr;
+    parseLength(widthAttr) : widthAttr;
   user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
-  const inputHeight = heightAttr ? parseLength(heightAttr) : null;
+  const inputHeight = (heightAttr && heightAttr != 'fluid') ?
+    parseLength(heightAttr) : heightAttr;
   user().assert(inputHeight !== undefined, 'Invalid height value: %s',
       heightAttr);
 
@@ -350,7 +373,7 @@ export function applyStaticLayout(element) {
     // width/height and are defined to have natural browser dimensions.
     const dimensions = getNaturalDimensions(element);
     width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
-        dimensions.width;
+      dimensions.width;
     height = inputHeight || dimensions.height;
   } else {
     width = inputWidth;
@@ -362,6 +385,8 @@ export function applyStaticLayout(element) {
     layout = inputLayout;
   } else if (!width && !height) {
     layout = Layout.CONTAINER;
+  } else if (height == 'fluid') {
+    layout = Layout.FLUID;
   } else if (height && (!width || width == 'auto')) {
     layout = Layout.FIXED_HEIGHT;
   } else if (height && width && (sizesAttr || heightsAttr)) {
@@ -372,7 +397,7 @@ export function applyStaticLayout(element) {
 
   // Verify layout attributes.
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.RESPONSIVE) {
+      layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
     user().assert(height, 'Expected height to be available: %s', heightAttr);
   }
   if (layout == Layout.FIXED_HEIGHT) {
@@ -380,12 +405,14 @@ export function applyStaticLayout(element) {
         'Expected width to be either absent or equal "auto" ' +
         'for fixed-height layout: %s', widthAttr);
   }
-  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
+  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE ||
+      layout == Layout.INTRINSIC) {
     user().assert(width && width != 'auto',
         'Expected width to be available and not equal to "auto": %s',
         widthAttr);
   }
-  if (layout == Layout.RESPONSIVE) {
+
+  if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
     user().assert(getLengthUnits(width) == getLengthUnits(height),
         'Length units should be the same for width and height: %s, %s',
         widthAttr, heightAttr);
@@ -419,6 +446,20 @@ export function applyStaticLayout(element) {
     });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
+  } else if (layout == Layout.INTRINSIC) {
+    // Intrinsic uses an svg inside the sizer element rather than the padding
+    // trick Note a naked svg won't work becasue other thing expect the
+    // i-amphtml-sizer element
+    const sizer = htmlFor(element)`
+      <i-amphtml-sizer class="i-amphtml-sizer">
+        <img class="i-amphtml-intrinsic-sizer" />
+      </i-amphtml-sizer>`;
+    const intrinsicSizer = sizer.firstElementChild;
+    intrinsicSizer.setAttribute('src',
+        `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
+    element.insertBefore(sizer, element.firstChild);
+    // TODO(jpettitt): sizer is leaked and can't be cleaned up.
+    element.sizerElement = intrinsicSizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {
@@ -434,6 +475,12 @@ export function applyStaticLayout(element) {
     if (height) {
       setStyle(element, 'height', height);
     }
+  } else if (layout == Layout.FLUID) {
+    element.classList.add('i-amphtml-layout-awaiting-size');
+    if (width) {
+      setStyle(element, 'width', width);
+    }
+    setStyle(element, 'height', 0);
   }
   return layout;
 }

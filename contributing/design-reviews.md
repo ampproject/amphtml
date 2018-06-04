@@ -1,9 +1,11 @@
 # Design Reviews
 
-The AMP Project community holds weekly design reviews via [video conference](https://hangouts.google.com/hangouts/_/google.com/amp-eng-desrev) on Wednesdays at [1pm Pacific](https://www.google.com/?#q=1pm+pacific+in+local+time).
+The AMP Project community holds weekly public design reviews via [video conference](https://hangouts.google.com/hangouts/_/google.com/amp-eng-desrev).  We encourage everyone in the community to attend these design reviews to discuss the design challenges being faced by the community.
 
 * [Upcoming design reviews](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review)
 * [Past design reviews](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22+is%3Aclosed)
+
+Because AMP contributors are located all over the world we rotate the design review times to accomodate people in different time zones.  The time and date for a design review will be specified in that design review's issue.  If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
 
 The GitHub issue for a given week's design review will have links to the designs being discussed that week.  When the design review is over the GitHub issue will include notes from the design review discussion.
 
@@ -35,12 +37,8 @@ The process for bringing a design to the design review is as follows:
 
 * Perform a design pre-review with at least one [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md); you can request a pre-review in the [#design-review Slack channel](https://amphtml.slack.com/messages/design-review/) ([sign up](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877)).  It is fine to request a pre-review before your design doc is complete.
 
-* When your design is ready to be discussed at a design review add a comment on the appropriate Design Review GitHub issue.  Post a link to the design doc and a brief summary by **1pm Pacific Monday** on the week of your design review.
+* When your design is ready to be discussed at a design review add a comment on the appropriate Design Review GitHub issue.  Post a link to the design doc and a brief summary by **Monday** on the week of your design review.
 
 * Update your design based on the feedback in the design review and any followup conversations in other channels.  Once your design is finalized, please provide a brief update at the start of a future design review (if you are able to attend) and submit a PDF version of your design doc in the [ampproject design-doc](https://github.com/ampproject/design-docs) repository.
 
 Although design documents are strongly encouraged, for some smaller features a well-documented design in its own GitHub issue may be sufficient for a design review.
-
-## Flexible design review time
-
-If you have a design you would like to present but can never make the 1pm Pacific design review (e.g. you are in a different time zone) please reach out in an upcoming design review issue or on [Slack](https://amphtml.slack.com/messages/design-review/) ([sign up](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877)) and we will try to find a time that works for you.

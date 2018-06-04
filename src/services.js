@@ -15,12 +15,12 @@
  */
 
 import {
+  getAmpdoc,
+  getExistingServiceForDocInEmbedScope,
+  getExistingServiceOrNull,
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
-  getExistingServiceOrNull,
-  getExistingServiceForDocInEmbedScope,
-  getAmpdoc,
 } from './service';
 import {
   getElementServiceForDoc,
@@ -29,7 +29,15 @@ import {
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
+/** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
+export let SubscriptionService;
+
 export class Services {
+  /**
+   * Hint: Add extensions folder path to compile.js with
+   * warnings cannot find modules.
+   */
+
   /**
    * Returns a promise for the Access service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
@@ -42,8 +50,19 @@ export class Services {
   }
 
   /**
-   * Returns a promise for the Access service or a promise for null if the service
-   * is not available on the current page.
+   * Returns a promise for the Subscriptions service.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!SubscriptionService>}
+   */
+  static subscriptionsServiceForDoc(nodeOrDoc) {
+    return (/** @type {!Promise<SubscriptionService>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'subscriptions',
+          'amp-subscriptions')));
+  }
+
+  /**
+   * Returns a promise for the Access service or a promise for null if the
+   * service is not available on the current page.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
    */
@@ -59,8 +78,8 @@ export class Services {
    */
   static actionServiceForDoc(nodeOrDoc) {
     return /** @type {!./service/action-impl.ActionService} */ (
-        getExistingServiceForDocInEmbedScope(
-            nodeOrDoc, 'action', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(
+          nodeOrDoc, 'action', /* opt_fallbackToTopWin */ true));
   }
 
   /**
@@ -69,7 +88,7 @@ export class Services {
    */
   static activityForDoc(nodeOrDoc) {
     return /** @type {!Promise<!Activity>} */ (
-        getElementServiceForDoc(nodeOrDoc, 'activity', 'amp-analytics'));
+      getElementServiceForDoc(nodeOrDoc, 'activity', 'amp-analytics'));
   }
 
   /**
@@ -81,7 +100,7 @@ export class Services {
    */
   static ampdocServiceFor(window) {
     return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
-        getService(window, 'ampdoc'));
+      getService(window, 'ampdoc'));
   }
 
   /**
@@ -105,10 +124,11 @@ export class Services {
       Services.extensionsFor(ampdoc.win)./*OK*/installExtensionForDoc(
           ampdoc, 'amp-analytics');
     }
-    return (/** @type {!Promise<
-              !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-            >} */ (getElementServiceForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+    return (
+      /** @type {!Promise<
+        !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+      >} */ (getElementServiceForDoc(
+          nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
   }
 
   /**
@@ -116,10 +136,11 @@ export class Services {
    * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
   static analyticsForDocOrNull(nodeOrDoc) {
-    return (/** @type {!Promise<
-              ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-            >} */ (getElementServiceIfAvailableForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+    return (
+      /** @type {!Promise<
+        ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+      >} */ (getElementServiceIfAvailableForDoc(
+          nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
   }
 
   /**
@@ -128,7 +149,7 @@ export class Services {
    */
   static batchedXhrFor(window) {
     return /** @type {!./service/batched-xhr-impl.BatchedXhr} */ (
-        getService(window, 'batched-xhr'));
+      getService(window, 'batched-xhr'));
   }
 
   /**
@@ -137,8 +158,8 @@ export class Services {
    */
   static bindForDocOrNull(nodeOrDoc) {
     return /** @type {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
-        getElementServiceIfAvailableForDocInEmbedScope(
-            nodeOrDoc, 'bind', 'amp-bind'));
+      getElementServiceIfAvailableForDocInEmbedScope(
+          nodeOrDoc, 'bind', 'amp-bind'));
   }
 
   /**
@@ -147,7 +168,16 @@ export class Services {
    */
   static cidForDoc(nodeOrDoc) {
     return /** @type {!Promise<!./service/cid-impl.Cid>} */ (
-        getServicePromiseForDoc(nodeOrDoc, 'cid'));
+      getServicePromiseForDoc(nodeOrDoc, 'cid'));
+  }
+
+  /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/navigation.Navigation}
+   */
+  static navigationForDoc(nodeOrDoc) {
+    return /** @type {!./service/navigation.Navigation} */ (
+      getServiceForDoc(nodeOrDoc, 'navigation'));
   }
 
   /**
@@ -156,7 +186,7 @@ export class Services {
    */
   static cryptoFor(window) {
     return (/** @type {!./service/crypto-impl.Crypto} */ (
-        getService(window, 'crypto')));
+      getService(window, 'crypto')));
   }
 
   /**
@@ -165,7 +195,7 @@ export class Services {
    */
   static documentInfoForDoc(nodeOrDoc) {
     return /** @type {!./service/document-info-impl.DocInfo} */ (
-        getServiceForDoc(nodeOrDoc, 'documentInfo')).get();
+      getServiceForDoc(nodeOrDoc, 'documentInfo')).get();
   }
 
   /**
@@ -182,7 +212,7 @@ export class Services {
    */
   static extensionsFor(window) {
     return /** @type {!./service/extensions-impl.Extensions} */ (
-        getService(window, 'extensions'));
+      getService(window, 'extensions'));
   }
 
   /**
@@ -192,7 +222,7 @@ export class Services {
    */
   static historyForDoc(nodeOrDoc) {
     return /** @type {!./service/history-impl.History} */ (
-        getServiceForDoc(nodeOrDoc, 'history'));
+      getServiceForDoc(nodeOrDoc, 'history'));
   }
 
   /**
@@ -201,15 +231,15 @@ export class Services {
    */
   static inputFor(win) {
     return getService(win, 'input');
-  };
+  }
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/parallax-impl.ParallaxService}
+   * @return {!./service/layers-impl.LayoutLayers}
    */
-  static parallaxForDoc(nodeOrDoc) {
-    return /** @type {!./service/parallax-impl.ParallaxService} */ (
-        getServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
+  static layersForDoc(nodeOrDoc) {
+    return /** @type {!./service/layers-impl.LayoutLayers} */ (
+      getServiceForDoc(nodeOrDoc, 'layers'));
   }
 
   /**
@@ -218,7 +248,7 @@ export class Services {
    */
   static performanceFor(window) {
     return /** @type {!./service/performance-impl.Performance}*/ (
-        getService(window, 'performance'));
+      getService(window, 'performance'));
   }
 
   /**
@@ -227,7 +257,7 @@ export class Services {
    */
   static performanceForOrNull(window) {
     return /** @type {!./service/performance-impl.Performance}*/ (
-        getExistingServiceOrNull(window, 'performance'));
+      getExistingServiceOrNull(window, 'performance'));
   }
 
   /**
@@ -236,7 +266,7 @@ export class Services {
    */
   static platformFor(window) {
     return /** @type {!./service/platform-impl.Platform} */ (
-        getService(window, 'platform'));
+      getService(window, 'platform'));
   }
 
   /**
@@ -245,7 +275,7 @@ export class Services {
    */
   static resourcesForDoc(nodeOrDoc) {
     return /** @type {!./service/resources-impl.Resources} */ (
-        getServiceForDoc(nodeOrDoc, 'resources'));
+      getServiceForDoc(nodeOrDoc, 'resources'));
   }
 
   /**
@@ -255,8 +285,124 @@ export class Services {
   static shareTrackingForOrNull(win) {
     return (/** @type {
       !Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (
-      getElementServiceIfAvailable(win, 'share-tracking', 'amp-share-tracking',
+        getElementServiceIfAvailable(win, 'share-tracking',
+            'amp-share-tracking', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
+   */
+  static storyVariableServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
           true)));
+  }
+
+  /**
+   * Version of the story store service depends on which version of amp-story
+   * the publisher is loading. They all have the same implementation.
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   */
+  static storyStoreServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story')));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
+   */
+  static storyStoreService(win) {
+    return getService(win, 'story-store');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
+   */
+  static storyRequestService(win) {
+    return getService(win, 'story-request');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>} */
+      (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/1.0/localization.LocalizationService}
+   */
+  static localizationService(win) {
+    return getService(win, 'localization');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+   */
+  static storyStoreServiceV01(win) {
+    return getService(win, 'story-store');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
+   */
+  static storyRequestServiceV01(win) {
+    return getService(win, 'story-request-v01');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNullV01(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+      (getElementServiceIfAvailable(win, 'localization-v01', 'amp-story',
+          true)));
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   */
+  static localizationServiceV01(win) {
+    return getService(win, 'localization-v01');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
+   */
+  static viewerIntegrationVariableServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>} */
+      (getElementServiceIfAvailable(win, 'viewer-integration-variable',
+          'amp-viewer-integration', true)));
+  }
+
+  /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
+   */
+  static webAnimationServiceFor(nodeOrDoc) {
+    return (/** @type {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
+      (getElementServiceForDoc(nodeOrDoc, 'web-animation', 'amp-animation')));
   }
 
   /**
@@ -265,7 +411,7 @@ export class Services {
    */
   static storageForDoc(nodeOrDoc) {
     return /** @type {!Promise<!./service/storage-impl.Storage>} */ (
-        getServicePromiseForDoc(nodeOrDoc, 'storage'));
+      getServicePromiseForDoc(nodeOrDoc, 'storage'));
   }
 
   /**
@@ -274,7 +420,7 @@ export class Services {
    */
   static templatesFor(window) {
     return /** @type {!./service/template-impl.Templates} */ (
-        getService(window, 'templates'));
+      getService(window, 'templates'));
   }
 
   /**
@@ -283,7 +429,7 @@ export class Services {
    */
   static timerFor(window) {
     return /** @type {!./service/timer-impl.Timer} */ (
-        getService(window, 'timer'));
+      getService(window, 'timer'));
   }
 
   /**
@@ -292,8 +438,8 @@ export class Services {
    */
   static urlReplacementsForDoc(nodeOrDoc) {
     return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-        getExistingServiceForDocInEmbedScope(
-            nodeOrDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(
+          nodeOrDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
   }
 
   /**
@@ -302,28 +448,62 @@ export class Services {
    */
   static userNotificationManagerForDoc(nodeOrDoc) {
     return (/** @type {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>} */
-        (getElementServiceForDoc(nodeOrDoc, 'userNotificationManager',
-            'amp-user-notification')));
+      (getElementServiceForDoc(nodeOrDoc, 'userNotificationManager',
+          'amp-user-notification')));
   }
 
   /**
-   * Returns a promise for the experiment variants or a promise for null if it is
-   * not available on the current page.
+   * Returns a promise for the consentPolicy Service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>}
+   */
+  static consentPolicyServiceForDocOrNull(nodeOrDoc) {
+    return (/** @type {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>} */
+      (getElementServiceIfAvailableForDoc(nodeOrDoc, 'consentPolicyManager',
+          'amp-consent')));
+  }
+
+  /**
+   * Returns a promise for the geo service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?Object<string,(string|Array<string>)>>}
+   */
+  static geoForDocOrNull(nodeOrDoc) {
+    return /** @type {!Promise<?Object<string,(string|Array<string>)>>} */ (
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'geo', 'amp-geo', true));
+  }
+
+  /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/url-impl.Url}
+   */
+  static urlForDoc(nodeOrDoc) {
+    return /** @type {!./service/url-impl.Url} */ (
+      getExistingServiceForDocInEmbedScope(
+          nodeOrDoc, 'url', /* opt_fallbackToTopWin */ true));
+  }
+
+  /**
+   * Returns a promise for the experiment variants or a promise for null if it
+   * is not available on the current page.
    * @param {!Window} win
    * @return {!Promise<?Object<string>>}
    */
   static variantForOrNull(win) {
     return /** @type {!Promise<?Object<string>>} */ (
-        getElementServiceIfAvailable(win, 'variant', 'amp-experiment', true));
+      getElementServiceIfAvailable(win, 'variant', 'amp-experiment', true));
   }
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/video-manager-impl.VideoManager}
+   * @return {!./service/video-service-interface.VideoServiceInterface}
    */
   static videoManagerForDoc(nodeOrDoc) {
-    return /** @type {!./service/video-manager-impl.VideoManager} */ (
-        getServiceForDoc(nodeOrDoc, 'video-manager'));
+    return (
+      /** @type {!./service/video-service-interface.VideoServiceInterface} */ (
+        getServiceForDoc(nodeOrDoc, 'video-manager')));
   }
 
   /**
@@ -332,7 +512,7 @@ export class Services {
    */
   static viewerForDoc(nodeOrDoc) {
     return /** @type {!./service/viewer-impl.Viewer} */ (
-        getServiceForDoc(nodeOrDoc, 'viewer'));
+      getServiceForDoc(nodeOrDoc, 'viewer'));
   }
 
   /**
@@ -344,7 +524,7 @@ export class Services {
    */
   static viewerPromiseForDoc(nodeOrDoc) {
     return /** @type {!Promise<!./service/viewer-impl.Viewer>} */ (
-        getServicePromiseForDoc(nodeOrDoc, 'viewer'));
+      getServicePromiseForDoc(nodeOrDoc, 'viewer'));
   }
 
   /**
@@ -353,7 +533,7 @@ export class Services {
    */
   static vsyncFor(window) {
     return /** @type {!./service/vsync-impl.Vsync} */ (
-        getService(window, 'vsync'));
+      getService(window, 'vsync'));
   }
 
   /**
@@ -362,7 +542,7 @@ export class Services {
    */
   static viewportForDoc(nodeOrDoc) {
     return /** @type {!./service/viewport/viewport-impl.Viewport} */ (
-        getServiceForDoc(nodeOrDoc, 'viewport'));
+      getServiceForDoc(nodeOrDoc, 'viewport'));
   }
 
   /**

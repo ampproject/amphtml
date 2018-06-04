@@ -24,7 +24,6 @@
    * Margin:0 is currently needed for iOS viewer embeds.
    * See:
    * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
-   * and {@link ViewportBindingNaturalIosEmbed_} for more info.
    */
   body {
     margin: 0 !important;
@@ -44,8 +43,6 @@
 </head>
 <body>
   <h1>amp #0</h1>
-  <button onclick="AMP.toggleExperiment('slidescroll-disable-css-snap');window.location.href=window.location.href;">Toggle CSS SNAP</button>
-
   <h1>No Loops for you</h1>
   <amp-carousel id="carousel-1" width=400 height=300 type=slides controls>
     <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>

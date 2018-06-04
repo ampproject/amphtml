@@ -19,32 +19,9 @@ import {dev} from '../log';
 /**
  * Interpret a byte array as a UTF-8 string.
  * @param {!BufferSource} bytes
- * @return {!Promise<string>}
+ * @return {string}
  */
 export function utf8Decode(bytes) {
-  if (typeof TextDecoder !== 'undefined') {
-    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
-  }
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => {
-      reject(reader.error);
-    };
-    reader.onloadend = () => {
-      resolve(reader.result);
-    };
-    reader.readAsText(new Blob([bytes]));
-  });
-}
-
-// TODO(aghassemi, #6139): Remove the async version of utf8 encoding and rename
-// the sync versions to the canonical utf8Decode/utf8Encode.
-/**
- * Interpret a byte array as a UTF-8 string.
- * @param {!BufferSource} bytes
- * @return {!string}
- */
-export function utf8DecodeSync(bytes) {
   if (typeof TextDecoder !== 'undefined') {
     return new TextDecoder('utf-8').decode(bytes);
   }
@@ -55,32 +32,9 @@ export function utf8DecodeSync(bytes) {
 /**
  * Turn a string into UTF-8 bytes.
  * @param {string} string
- * @return {!Promise<!Uint8Array>}
- */
-export function utf8Encode(string) {
-  if (typeof TextEncoder !== 'undefined') {
-    return Promise.resolve(new TextEncoder('utf-8').encode(string));
-  }
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => {
-      reject(reader.error);
-    };
-    reader.onloadend = () => {
-      // Because we used readAsArrayBuffer, we know the result must be an
-      // ArrayBuffer.
-      resolve(new Uint8Array(/** @type {ArrayBuffer} */ (reader.result)));
-    };
-    reader.readAsArrayBuffer(new Blob([string]));
-  });
-}
-
-/**
- * Turn a string into UTF-8 bytes.
- * @param {string} string
  * @return {!Uint8Array}
  */
-export function utf8EncodeSync(string) {
+export function utf8Encode(string) {
   if (typeof TextEncoder !== 'undefined') {
     return new TextEncoder('utf-8').encode(string);
   }
@@ -102,7 +56,7 @@ export function stringToBytes(str) {
     bytes[i] = charCode;
   }
   return bytes;
-};
+}
 
 /**
  * Converts a 8-bit bytes array into a string
@@ -117,7 +71,7 @@ export function bytesToString(bytes) {
     array[i] = String.fromCharCode(bytes[i]);
   }
   return array.join('');
-};
+}
 
 /**
  * Converts a 4-item byte array to an unsigned integer.
@@ -140,7 +94,7 @@ export function bytesToUInt32(bytes) {
 /**
  * Generate a random bytes array with specific length using
  * win.crypto.getRandomValues. Return null if it is not available.
- * @param {!number} length
+ * @param {number} length
  * @return {?Uint8Array}
  */
 export function getCryptoRandomBytesArray(win, length) {

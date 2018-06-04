@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import {
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-  getService,
-} from '../service';
-import {getMode} from '../mode';
+import {Deferred} from '../utils/promise';
+import {Services} from '../services';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
-import {Services} from '../services';
+import {getMode} from '../mode';
+import {
+  getService,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../service';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -127,8 +128,9 @@ export class History {
   }
 
   /**
-   * Helper method to handle navigation to a local target, e.g. When a user clicks an
-   * anchor link to a local hash - <a href="#section1">Go to section 1</a>.
+   * Helper method to handle navigation to a local target, e.g. When a user
+   * clicks an anchor link to a local hash - <a href="#section1">Go to section
+   * 1</a>.
    *
    * @param {string} target
    * @return {!Promise}
@@ -205,12 +207,8 @@ export class History {
    * @private
    */
   enque_(callback, name) {
-    let resolve;
-    let reject;
-    const promise = new Promise((aResolve, aReject) => {
-      resolve = aResolve;
-      reject = aReject;
-    });
+    const deferred = new Deferred();
+    const {promise, resolve, reject} = deferred;
 
     // TODO(dvoytenko, #8785): cleanup after tracing.
     const trace = new Error('history trace for ' + name + ': ');
@@ -330,7 +328,7 @@ export class HistoryBindingNatural_ {
     /** @private @const {!../service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    const history = this.win.history;
+    const {history} = this.win;
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
@@ -682,7 +680,7 @@ export class HistoryBindingNatural_ {
 
   /** @override */
   getFragment() {
-    let hash = this.win.location.hash;
+    let {hash} = this.win.location;
     /* Strip leading '#' */
     hash = hash.substr(1);
     return Promise.resolve(hash);
@@ -753,8 +751,8 @@ export class HistoryBindingVirtual_ {
     this.updateStackIndex_(this.stackIndex_ + 1);
     return this.viewer_.sendMessageAwaitResponse(
         'pushHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
-          return this.stackIndex_;
-        });
+      return this.stackIndex_;
+    });
   }
 
   /** @override */
@@ -764,9 +762,9 @@ export class HistoryBindingVirtual_ {
     }
     return this.viewer_.sendMessageAwaitResponse(
         'popHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
-          this.updateStackIndex_(stackIndex - 1);
-          return this.stackIndex_;
-        });
+      this.updateStackIndex_(stackIndex - 1);
+      return this.stackIndex_;
+    });
   }
 
   /**

@@ -21,7 +21,7 @@ tags: {  # amp-kaltura-player
     name: "amp-kaltura-player"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"

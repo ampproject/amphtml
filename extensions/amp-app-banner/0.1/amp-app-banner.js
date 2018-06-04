@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {dict} from '../../../src/utils/object';
-import {user, dev, rethrowAsync} from '../../../src/log';
-import {Services} from '../../../src/services';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {removeElement, openWindowDialog} from '../../../src/dom';
-import {parseUrl} from '../../../src/url';
-import {isProxyOrigin, isProtocolValid} from '../../../src/url';
+import {dev, rethrowAsync, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {isProtocolValid, isProxyOrigin} from '../../../src/url';
+import {openWindowDialog, removeElement} from '../../../src/dom';
+import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;
@@ -42,11 +41,6 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.canShowBuiltinBanner_ = false;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /**
@@ -432,11 +426,11 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @private */
   getAndroidIntentForUrl_(appId) {
-    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-    const parsedUrl = parseUrl(canonicalUrl);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const parsedUrl = parseUrlDeprecated(canonicalUrl);
     const cleanProtocol = parsedUrl.protocol.replace(':', '');
-    const host = parsedUrl.host;
-    const pathname = parsedUrl.pathname;
+    const {host, pathname} = parsedUrl;
+
     return `android-app://${appId}/${cleanProtocol}/${host}${pathname}`;
   }
 }
@@ -476,7 +470,7 @@ function measureBanner(state) {
 
 /**
  * Updates viewport padding to add padding on the bottom.
- * @param {!Object} state.
+ * @param {!Object} state
  */
 function updateViewportPadding(state) {
   state.viewport.updatePaddingBottom(state.bannerHeight);

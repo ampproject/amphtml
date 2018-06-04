@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {checkAndFix} from '../../src/service/ie-media-bug';
 import {dev} from '../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('ie-media-bug', () => {
@@ -84,11 +84,11 @@ describe('ie-media-bug', () => {
     let intervalCallback;
     windowMock.expects('setInterval')
         .withExactArgs(
-        sinon.match(arg => {
-          intervalCallback = arg;
-          return true;
-        }),
-        10
+            sinon.match(arg => {
+              intervalCallback = arg;
+              return true;
+            }),
+            10
         )
         .returns(intervalId)
         .once();
@@ -142,11 +142,11 @@ describe('ie-media-bug', () => {
     let intervalCallback;
     windowMock.expects('setInterval')
         .withExactArgs(
-        sinon.match(arg => {
-          intervalCallback = arg;
-          return true;
-        }),
-        10
+            sinon.match(arg => {
+              intervalCallback = arg;
+              return true;
+            }),
+            10
         )
         .returns(intervalId)
         .once();

@@ -18,31 +18,29 @@
  * The entry point for AMP inabox runtime (inabox-v0.js).
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
+import {Navigation} from '../service/navigation';
 import {Services} from '../services';
-import {startupChunk} from '../chunk';
-import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
-import {installPerformanceService} from '../service/performance-impl';
-import {installStylesForDoc, makeBodyVisible} from '../style-installer';
-import {installErrorReporting} from '../error';
-import {installDocService} from '../service/ampdoc-impl';
-import {installCacheServiceWorker} from '../service-worker/install';
-import {stubElementsForDoc} from '../service/custom-element-registry';
 import {
-    installAmpdocServices,
-    installBuiltins,
-    installRuntimeServices,
-    adopt,
+  adopt,
+  installAmpdocServices,
+  installBuiltins,
+  installRuntimeServices,
 } from '../runtime';
 import {cssText} from '../../build/css';
-import {maybeValidate} from '../validator-integration';
-import {maybeTrackImpression} from '../impression';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
-import {installInaboxViewportService} from './inabox-viewport';
-import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
+import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
+import {installDocService} from '../service/ampdoc-impl';
+import {installErrorReporting} from '../error';
+import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
+import {installInaboxViewportService} from './inabox-viewport';
+import {installPerformanceService} from '../service/performance-impl';
+import {installStylesForDoc, makeBodyVisible} from '../style-installer';
+import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {maybeTrackImpression} from '../impression';
+import {maybeValidate} from '../validator-integration';
+import {startupChunk} from '../chunk';
+import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
 
@@ -55,11 +53,11 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisible on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  installDocService(self,  /* isSingleDoc */ true);
+  installDocService(self, /* isSingleDoc */ true);
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
@@ -105,11 +103,9 @@ startupChunk(self.document, function initial() {
       stubElementsForDoc(ampdoc);
     });
     startupChunk(self.document, function final() {
-      installAnchorClickInterceptor(ampdoc, self);
-
+      Navigation.installAnchorClickInterceptor(ampdoc, self);
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
-      installCacheServiceWorker(self);
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');

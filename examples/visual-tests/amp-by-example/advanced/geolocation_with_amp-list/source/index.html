@@ -1,0 +1,141 @@
+<!--
+  ## Introduction
+
+  While the AMP Caches don't offer support for geolocation, you can enable
+  geo-based features with geolocation logic on your backend and
+  [amp-list](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-list).
+  This adds an additional XHR request but you can mitigate the negative UX
+  effects with a skeleton layout in the placeholder attribute.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://ampbyexample.com/../examples/visual-tests/amp-by-example/advanced/geolocation_with_amp-list/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the `amp-list` component ... -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <!-- ... and the `amp-mustache` component -->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .geolist-preview {
+      width: 100vw;
+      max-width: 400px;
+    }
+
+    .geolist-preview p.title {
+      font-weight: bold;
+      line-height: 16px;
+      margin: 10px;
+    }
+
+    .geolist-preview ul.results {
+      list-style: none;
+      margin: 0;
+      padding: 0 10px;
+      overflow: auto; /* Fixes collapsing margins on the LIs */
+    }
+
+    .geolist-preview ul.results li {
+      height: 100px;
+      background: #fff;
+      border-radius: 2px;
+      margin-bottom: 15px;
+      position: relative;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    }
+    .geolist-preview ul.results p {
+      margin: 0;
+    }
+    .geolist-preview ul.results amp-img {
+      background-image: url(/examples/visual-tests/amp-by-example/img/geolocation_map_skeleton.png);
+      background-size: 150px 100px;
+      float: left;
+      margin-right: 5px;
+    }
+    .geolist-preview div[placeholder] ul.results li {
+      background: url(/examples/visual-tests/amp-by-example/img/geolocation_map_skeleton.png), /* Image */
+        linear-gradient(#cccccc 100%, transparent 0), /* Image Placeholder */
+        linear-gradient(#bbbbbb 100%, transparent 0), /* City */
+        linear-gradient(#cccccc 100%, transparent 0), /* State */
+        linear-gradient(#cccccc 100%, transparent 0); /* Country */
+      background-size: 150px 100px, /* Image */
+        150px 100px, /* Image Placeholder */
+        150px 15px, /* City */
+        130px 15px, /* State */
+        130px 15px; /* Country */
+      background-position: 0 0, /* Image */
+        0 0, /* Image Placholder */
+        155px 4px, /* City */
+        155px 29px, /* State */
+        155px 53px; /* Country */
+      background-repeat: no-repeat;
+    }
+    .geolist-preview span.placeholder {
+      display: inline-block;
+      height: 14px;
+      width: 150px;
+      background-color: #cccccc;
+      position: relative;
+      top: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ## Geo-based Search Results -->
+  <!-- `amp-list` makes a request to a server backend which does IP-based
+  geolocation and returns relevant search results. For this demo, it calls an
+  API to get nearby cities. The backend returns JSON results which `amp-list`
+  renders with `amp-mustache`. The backend makes two remote API calls (and also
+  adds 500ms of simulated delay); to mitigate the UX effects of this delay we
+  use `amp-list`'s `placeholder` to lay out a skeleton.
+
+  Since we need to have an initial fixed-size for amp-list we manually calculate
+  that each card is 100 + 15px margin and the title is 16px + 20px margin:
+
+  > `16px + 20px + (5 * (100 + 15px)) = 611px`
+
+  The placeholder list items largely use CSS to draw the skeleton elements as
+  described in [CSS-Tricks](https://css-tricks.com/building-skeleton-screens-css-custom-properties/).
+  The skeleton includes a tiny blurred map to add to the realism, and that map
+  is also used while `<amp-img>` loads the actual images to prevent a
+  flash when the placeholder is removed.
+  -->
+  <amp-list class="geolist-preview" width="auto" height="611" layout="fixed-height"
+            noloading
+            src="https://caramel-wolf.glitch.me//location-specific-results.json"
+            single-item items=".">
+    <template type="amp-mustache" id="amp-template-id">
+      <p class="title">You are in {{location}}</p>
+      <ul class="results">
+        {{#results}}
+          <li>
+            <amp-img
+              alt="{{placeName}} Map" noloading
+              layout="fixed" width="150" height="100"
+              src="https://maps.googleapis.com/maps/api/staticmap?markers={{lat}},{{lng}}&zoom=9&size=150x100&maptype=roadmap&key=AIzaSyByT-0aYa-nEF0gGqJHNpEEK1bus00losI">
+            </amp-img>
+            <p>
+              <strong>{{placeName}}</strong><br>
+              {{adminName1}}<br>
+              {{countryCode}}
+            </p>
+          </li>
+        {{/results}}
+      </ul>
+    </template>
+    <div placeholder>
+      <p class="title">You are in <span class="placeholder"></span></p>
+      <ul class="results">
+        <li></li><li></li><li></li><li></li><li></li>
+      </ul>
+    </div>
+  </amp-list>
+
+</body>
+</html>

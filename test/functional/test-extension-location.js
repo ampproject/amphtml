@@ -15,8 +15,8 @@
  */
 
 import {
-  calculateExtensionScriptUrl,
   calculateEntryPointScriptUrl,
+  calculateExtensionScriptUrl,
 } from '../../src/service/extension-location';
 import {
   initLogConstructor,
@@ -40,7 +40,7 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'amp-ad', true);
+      }, 'amp-ad', /*opt_extensionVersion*/ undefined, true);
       expect(script).to.equal(
           'http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.js');
     });
@@ -51,7 +51,7 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'amp-ad', false);
+      }, 'amp-ad', /*opt_extensionVersion*/ undefined, false);
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
     });

@@ -15,17 +15,32 @@
  */
 'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var execOrDie = require('../exec.js').execOrDie;
-var gulp = require('gulp-help')(require('gulp'));
+const argv = require('minimist')(process.argv.slice(2));
+const gulp = require('gulp-help')(require('gulp'));
+const {execOrDie} = require('../exec');
+const {gitBranchName, gitCommitterEmail} = require('../git');
 
+/**
+ * Disambiguates branch names by decorating them with the commit author name.
+ * We do this for all non-push builds in order to prevent them from being used
+ * as baselines for future builds.
+ */
+function setPercyBranch() {
+  if (!argv.master || !process.env['TRAVIS']) {
+    const userName = gitCommitterEmail();
+    const branchName = process.env['TRAVIS'] ?
+      process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
+    process.env['PERCY_BRANCH'] = userName + '-' + branchName;
+  }
+}
 
 /**
  * Simple wrapper around the ruby based visual diff tests.
  */
 function visualDiff() {
-  var cmd = 'ruby build-system/tasks/visual-diff.rb';
-  for (var arg in argv) {
+  setPercyBranch();
+  let cmd = 'ruby build-system/tasks/visual-diff.rb';
+  for (const arg in argv) {
     if (arg !== '_') {
       cmd = cmd + ' --' + arg;
     }
@@ -42,10 +57,11 @@ gulp.task(
         'master': '  Includes a blank snapshot (baseline for skipped builds)',
         'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
+        'headless': '  Runs Chrome in headless mode',
         'percy_debug': '  Prints debug info from Percy libraries',
-        'phantomjs_debug': '  Prints debug info from PhantomJS libraries',
+        'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
-      }
+      },
     }
 );

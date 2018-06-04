@@ -1,0 +1,58 @@
+<!doctype html>
+<html amp4ads>
+  <head>
+    <title>Ad with 3p Analytics and amp-ad-exit</title>
+    <meta charset=utf-8>
+    <script async src='https://cdn.ampproject.org/v0.js'></script>
+    <script async custom-element='amp-analytics' src='https://cdn.ampproject.org/v0/amp-analytics-0.1.js'></script>
+    <script async custom-element='amp-ad-exit' src='https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js'></script>
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <meta name=viewport content=width=device-width,minimum-scale=1>
+  </head>
+  <body>
+    Before using this example page, please add the following to
+    extensions/amp-analytics/0.1/vendors.js:
+    <pre>
+      'example-3p-vendor': {
+        'transport': {'beacon': true, 'xhrpost': true, 'image': true},
+      },
+    </pre>
+    Then look at the network log, and see the requests including "imgData="
+    <amp-analytics type='example-3p-vendor'>
+      <script type='application/json'>
+        {
+          "requests": {
+            "sample_visibility_request": "//nowhere/imgData=${htmlAttr(img,src,decoding)}"
+          },
+          "triggers": {
+            "sample_visibility_trigger": {
+              "on": "visible",
+              "request": "sample_visibility_request"
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
+    <div id='ad'>
+      <div class='golden_retriever'>
+        <amp-img id='img1' src='https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg' width=300 height=249></amp-img>
+        <p class='frob'>
+          By Golden Trvs Gol twister (Own work) [CC BY-SA 4.0 (http://creativecommons.org/licenses/by-sa/4.0)], via Wikimedia Commons
+        </p>
+      </div>
+      <div class='shiba_inu'>
+        <amp-img id='img2' src='https://upload.wikimedia.org/wikipedia/commons/a/a3/Taro_%28black_and_tan%2C_reu%29_-_Chiko_%28rood%2C_reu%29_-_Ichigo_%28rood%2C_teef%29.jpg' width=300 height=200></amp-img>
+        <p class='frob'>
+          By Wesl90 (Own work) [CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0)], via Wikimedia Commons
+        </p>
+      </div>
+      <div class='saint_bernard'>
+        <amp-img id='img3' src='https://upload.wikimedia.org/wikipedia/commons/f/f6/St_Bernard_Dog_001.jpg' width=300 height=225></amp-img>
+        <p class='frob'>
+          By Cassie J (Own work) [CC BY 2.0 (http://creativecommons.org/licenses/by/2.0)], via Wikimedia Commons
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+

@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import * as dom from '../../src/dom';
+import * as ext from '../../src/service/extensions-impl';
+import * as sinon from 'sinon';
+import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';
+import {Services} from '../../src/services';
 import {
   adopt,
   adoptShadowMode,
@@ -31,14 +36,9 @@ import {
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {vsyncForTesting} from '../../src/service/vsync-impl';
-import {Services} from '../../src/services';
 import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
-import * as ext from '../../src/service/extensions-impl';
-import * as styles from '../../src/style-installer';
-import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
+import {vsyncForTesting} from '../../src/service/vsync-impl';
 
 
 describes.fakeWin('runtime', {
@@ -183,7 +183,7 @@ describes.fakeWin('runtime', {
       expect(progress).to.equal('12345');
       expect(queueExtensions).to.have.length(0);
     });
-  };
+  }
 
   it('should execute scheduled extensions & execute new extensions',
       extensionRegistrationTest);
@@ -192,7 +192,7 @@ describes.fakeWin('runtime', {
     toggleExperiment(win, 'pump-early-frame', true);
     // Make document.body be null on first invocation to simulate
     // JS executing before the rest of the doc has been parsed.
-    const body = win.document.body;
+    const {body} = win.document;
     let accessedOnce = false;
     Object.defineProperty(win.document, 'body', {
       get: () => {
@@ -328,8 +328,8 @@ describes.fakeWin('runtime', {
 
         ext.installExtensionsService(win);
         const extensions = Services.extensionsFor(win);
-        const ext1 = extensions.waitForExtension('ext1');
-        const ext2 = extensions.waitForExtension('ext2');
+        const ext1 = extensions.waitForExtension(win, 'ext1');
+        const ext2 = extensions.waitForExtension(win, 'ext2');
         return Promise.all([ext1, ext2]);
       }, 0);
     }, 0);
@@ -340,7 +340,7 @@ describes.fakeWin('runtime', {
     const bodyPromise = new Promise(resolve => {
       bodyResolver = resolve;
     });
-    sandbox.stub(dom, 'waitForBodyPromise', () => bodyPromise);
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => bodyPromise);
 
     function skipMicro() {
       return Promise.resolve().then(() => Promise.resolve());
@@ -408,7 +408,7 @@ describes.fakeWin('runtime', {
     const bodyPromise = new Promise(resolve => {
       bodyResolver = resolve;
     });
-    sandbox.stub(dom, 'waitForBodyPromise', () => bodyPromise);
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => bodyPromise);
 
     function skipMicro() {
       return Promise.resolve().then(() => Promise.resolve());
@@ -535,7 +535,7 @@ describes.fakeWin('runtime', {
       const servicePromise = getServicePromise(win, 'amp-ext');
       const installStylesStub = sandbox.stub(styles, 'installStylesForDoc');
 
-      ampdoc.declareExtension_('amp-ext');
+      ampdoc.declareExtension('amp-ext');
       win.AMP.push({
         n: 'amp-ext',
         f: amp => {
@@ -543,7 +543,7 @@ describes.fakeWin('runtime', {
         },
       });
       runChunksForTesting(win.document);
-      yield extensions.waitForExtension('amp-ext');
+      yield extensions.waitForExtension(win, 'amp-ext');
 
       // Extension is added immediately. Can't find for micro-tasks here.
       const ext = extensions.extensions_['amp-ext'].extension;
@@ -559,7 +559,7 @@ describes.fakeWin('runtime', {
 
       // Service and extensions are resolved.
       yield Promise.all([
-        extensions.waitForExtension('amp-ext'),
+        extensions.waitForExtension(win, 'amp-ext'),
         servicePromise]);
     });
 
@@ -567,12 +567,13 @@ describes.fakeWin('runtime', {
       const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
       const servicePromise = getServicePromise(win, 'amp-ext');
       let installStylesCallback;
-      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc',
-          (doc, cssText, cb) => {
-            installStylesCallback = cb;
-          });
+      const installStylesStub =
+          sandbox.stub(styles, 'installStylesForDoc').callsFake(
+              (doc, cssText, cb) => {
+                installStylesCallback = cb;
+              });
 
-      ampdoc.declareExtension_('amp-ext');
+      ampdoc.declareExtension('amp-ext');
       win.AMP.push({
         n: 'amp-ext',
         f: amp => {
@@ -582,7 +583,7 @@ describes.fakeWin('runtime', {
       runChunksForTesting(win.document);
 
       // Extension is added immediately. Can't find for micro-tasks here.
-      yield extensions.waitForExtension('amp-ext');
+      yield extensions.waitForExtension(win, 'amp-ext');
       const ext = extensions.extensions_['amp-ext'].extension;
       expect(ext.elements['amp-ext']).exist;
       expect(ext.elements['amp-ext'].implementationClass)
@@ -604,14 +605,14 @@ describes.fakeWin('runtime', {
 
       // Service and extensions are resolved.
       yield Promise.all([
-        extensions.waitForExtension('amp-ext'),
+        extensions.waitForExtension(win, 'amp-ext'),
         servicePromise]);
     });
 
     it('should register doc-service as ctor and install imm', function* () {
       class Service1 {}
       const ampdoc = new AmpDocSingle(win);
-      ampdoc.declareExtension_('amp-ext');
+      ampdoc.declareExtension('amp-ext');
       ampdocServiceMock.expects('getAmpDoc')
           .returns(ampdoc)
           .atLeast(1);
@@ -624,7 +625,7 @@ describes.fakeWin('runtime', {
       runChunksForTesting(win.document);
 
       // No factories
-      yield extensions.waitForExtension('amp-ext');
+      yield extensions.waitForExtension(win, 'amp-ext');
       const extHolder = extensions.extensions_['amp-ext'];
       expect(extHolder.docFactories).to.have.length(1);
 
@@ -642,7 +643,7 @@ describes.fakeWin('runtime', {
         return {str: 'A'};
       }
       const ampdoc = new AmpDocSingle(win);
-      ampdoc.declareExtension_('amp-ext');
+      ampdoc.declareExtension('amp-ext');
       ampdocServiceMock.expects('getAmpDoc')
           .returns(ampdoc)
           .atLeast(1);
@@ -655,7 +656,7 @@ describes.fakeWin('runtime', {
       runChunksForTesting(win.document);
 
       // No factories
-      yield extensions.waitForExtension('amp-ext');
+      yield extensions.waitForExtension(win, 'amp-ext');
       const extHolder = extensions.extensions_['amp-ext'];
       expect(extHolder.docFactories).to.have.length(1);
 
@@ -703,7 +704,7 @@ describes.fakeWin('runtime', {
       runChunksForTesting(win.document);
 
       // Extension is added immediately. Can't find for micro-tasks here.
-      yield extensions.waitForExtension('amp-ext');
+      yield extensions.waitForExtension(win, 'amp-ext');
       const extHolder = extensions.extensions_['amp-ext'];
       const ext = extHolder.extension;
       expect(ext.elements['amp-ext']).exist;
@@ -724,17 +725,18 @@ describes.fakeWin('runtime', {
 
       // Service and extensions are resolved.
       yield Promise.all([
-        extensions.waitForExtension('amp-ext'),
+        extensions.waitForExtension(win, 'amp-ext'),
         servicePromise]);
     });
 
     it('should register element with CSS', function* () {
       const servicePromise = getServicePromise(win, 'amp-ext');
       let installStylesCallback;
-      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc',
-          (doc, cssText, cb) => {
-            installStylesCallback = cb;
-          });
+      const installStylesStub =
+          sandbox.stub(styles, 'installStylesForDoc').callsFake(
+              (doc, cssText, cb) => {
+                installStylesCallback = cb;
+              });
 
       win.AMP.push({
         n: 'amp-ext',
@@ -745,7 +747,7 @@ describes.fakeWin('runtime', {
       runChunksForTesting(win.document);
 
       // Extension is added immediately. Can't find for micro-tasks here.
-      yield extensions.waitForExtension('amp-ext');
+      yield extensions.waitForExtension(win, 'amp-ext');
       const extHolder = extensions.extensions_['amp-ext'];
       const ext = extHolder.extension;
       expect(ext.elements['amp-ext']).exist;
@@ -775,7 +777,7 @@ describes.fakeWin('runtime', {
 
       // Service and extensions are resolved.
       yield Promise.all([
-        extensions.waitForExtension('amp-ext'),
+        extensions.waitForExtension(win, 'amp-ext'),
         servicePromise]);
     });
 
@@ -790,7 +792,7 @@ describes.fakeWin('runtime', {
       runChunksForTesting(win.document);
 
       // Factory recorded.
-      yield extensions.waitForExtension('amp-ext');
+      yield extensions.waitForExtension(win, 'amp-ext');
       const extHolder = extensions.extensions_['amp-ext'];
       expect(extHolder.docFactories).to.have.length(1);
 
@@ -845,10 +847,10 @@ describes.realWin('runtime multidoc', {
       const shadowRoot = createShadowRoot(hostElement);
       ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
 
-      ampdocServiceMock.expects('installShadowDoc_')
+      ampdocServiceMock.expects('installShadowDoc')
           .withExactArgs(
-          docUrl,
-          sinon.match(arg => arg == getShadowRoot(hostElement)))
+              docUrl,
+              sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -896,7 +898,7 @@ describes.realWin('runtime multidoc', {
 
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
 
-      return extensions.waitForExtension('amp-ext').then(() => {
+      return extensions.waitForExtension(win, 'amp-ext').then(() => {
         // Factories have been applied.
         expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
       });
@@ -1002,6 +1004,19 @@ describes.realWin('runtime multidoc', {
           .to.contain('.custom');
     });
 
+    it('should import keyframes style', () => {
+      const styleEl = win.document.createElement('style');
+      styleEl.setAttribute('amp-keyframes', '');
+      styleEl.textContent = '.keyframes{}';
+      importDoc.head.appendChild(styleEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const shadowRoot = getShadowRoot(hostElement);
+      expect(shadowRoot.querySelector('style[amp-custom]')).to.not.exist;
+      expect(shadowRoot.querySelector('style[amp-keyframes]')).to.exist;
+      expect(shadowRoot.querySelector('style[amp-keyframes]').textContent)
+          .to.contain('.keyframes');
+    });
+
     it('should ignore runtime extension', () => {
       extensionsMock.expects('preloadExtension').never();
 
@@ -1027,7 +1042,7 @@ describes.realWin('runtime multidoc', {
 
     it('should import extension element', () => {
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({
             elements: {
               'amp-ext1': function() {},
@@ -1044,9 +1059,28 @@ describes.realWin('runtime multidoc', {
           .to.not.exist;
     });
 
+    it('should import extension element with version ≠ 0.1', () => {
+      extensionsMock.expects('preloadExtension')
+          .withExactArgs('amp-ext1', '1.0')
+          .returns(Promise.resolve({
+            elements: {
+              'amp-ext1': function() { },
+            },
+          }))
+          .once();
+
+      const scriptEl = win.document.createElement('script');
+      scriptEl.setAttribute('custom-element', 'amp-ext1');
+      scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-ext1-1.0.js');
+      importDoc.head.appendChild(scriptEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(win.document.querySelector('script[custom-element="amp-ext1"]'))
+          .to.not.exist;
+    });
+
     it('should import extension template', () => {
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({elements: {}}))
           .once();
 
@@ -1102,7 +1136,7 @@ describes.realWin('runtime multidoc', {
     it('should expose visibility method', () => {
       const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       const viewer = getServiceForDoc(ampdoc, 'viewer');
-      expect(amp.setVisibilityState).to.be.function;
+      expect(amp.setVisibilityState).to.be.a('function');
       expect(viewer.getVisibilityState()).to.equal('visible');
 
       amp.setVisibilityState('inactive');
@@ -1112,7 +1146,7 @@ describes.realWin('runtime multidoc', {
     it('should expose close method and dispose services', () => {
       const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       const viewer = getServiceForDoc(ampdoc, 'viewer');
-      expect(amp.close).to.be.function;
+      expect(amp.close).to.be.a('function');
       expect(viewer.getVisibilityState()).to.equal('visible');
 
       viewer.dispose = sandbox.spy();
@@ -1137,10 +1171,10 @@ describes.realWin('runtime multidoc', {
       const shadowRoot = createShadowRoot(hostElement);
       ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
 
-      ampdocServiceMock.expects('installShadowDoc_')
+      ampdocServiceMock.expects('installShadowDoc')
           .withExactArgs(
-          docUrl,
-          sinon.match(arg => arg == getShadowRoot(hostElement)))
+              docUrl,
+              sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -1188,7 +1222,7 @@ describes.realWin('runtime multidoc', {
       writer.write('<body>');
 
       return ampdoc.whenBodyAvailable().then(() => {
-        return extensions.waitForExtension('amp-ext').then(() => {
+        return extensions.waitForExtension(win, 'amp-ext').then(() => {
           // Factories have been applied.
           expect(getServiceForDoc(ampdoc, 'service1'))
               .to.be.instanceOf(Service1);
@@ -1354,7 +1388,7 @@ describes.realWin('runtime multidoc', {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({
             elements: {
               'amp-ext1': function() {},
@@ -1374,7 +1408,7 @@ describes.realWin('runtime multidoc', {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({elements: {}}))
           .once();
       writer.write(
@@ -1442,7 +1476,7 @@ describes.realWin('runtime multidoc', {
       writer.write('<body>');
       return ampdoc.whenBodyAvailable().then(() => {
         const viewer = getServiceForDoc(ampdoc, 'viewer');
-        expect(shadowDoc.setVisibilityState).to.be.function;
+        expect(shadowDoc.setVisibilityState).to.be.a('function');
         expect(viewer.getVisibilityState()).to.equal('visible');
 
         shadowDoc.setVisibilityState('inactive');
@@ -1456,7 +1490,7 @@ describes.realWin('runtime multidoc', {
       writer.write('<body>');
       return ampdoc.whenBodyAvailable().then(() => {
         const viewer = getServiceForDoc(ampdoc, 'viewer');
-        expect(shadowDoc.close).to.be.function;
+        expect(shadowDoc.close).to.be.a('function');
         expect(viewer.getVisibilityState()).to.equal('visible');
 
         viewer.dispose = sandbox.spy();
@@ -1484,10 +1518,10 @@ describes.realWin('runtime multidoc', {
       const shadowRoot = createShadowRoot(hostElement);
       const ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
 
-      ampdocServiceMock.expects('installShadowDoc_')
+      ampdocServiceMock.expects('installShadowDoc')
           .withExactArgs(
-          docUrl,
-          sinon.match(arg => arg == getShadowRoot(hostElement)))
+              docUrl,
+              sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')

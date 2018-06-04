@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import './polyfills';
+
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
 import {IframeTransportClient} from './iframe-transport-client.js';
 import {initLogConstructor, setReportError} from '../src/log';
 
@@ -23,15 +26,11 @@ initLogConstructor();
 setReportError(() => {});
 
 /**
- *  If window.iframeTransportClient does not exist, we must instantiate and
- *  assign it to window.iframeTransportClient, to provide the creative with
+ *  Instantiate IframeTransportClient, to provide the creative with
  *  all the required functionality.
  */
 try {
-  const iframeTransportClientCreated =
-      new Event('amp-iframeTransportClientCreated');
-  window.iframeTransportClient = new IframeTransportClient(window);
-  window.dispatchEvent(iframeTransportClientCreated);
+  new IframeTransportClient(window);
 } catch (err) {
   // do nothing with error
 }

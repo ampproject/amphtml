@@ -1,0 +1,59 @@
+<!--
+  ## Introduction
+  The [amp-google-vrview-image](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-google-vrview-image) extension allows embedding 360 degree VR media into AMP pages.
+
+  If experimenting with this sample on a desktop web browser, you can interact with the displayed image by clicking on it and dragging the mouse around. The best way to perceive the effects enabled by this component is to
+  view it on a mobile device and interact with the images by moving the device around using the
+  [cardboard](https://vr.google.com/cardboard/) viewer.
+
+  The attributes supported by this component are:
+  * **src**: the source of the image being displayed
+  * **stereo**: if provided, the image is considered to be a stereoscopic image; otherwise it is a monoscopic image.
+  * **yaw**: initial [yaw rotation](https://en.wikipedia.org/wiki/Yaw_(rotation) of the viewer
+  * **yaw-only**: if specified, restrict motion to yaw rotations only
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-google-vrview-image</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the `amp-google-vrview-image` component in the header.
+  -->
+  <script async custom-element="amp-google-vrview-image" src="https://cdn.ampproject.org/v0/amp-google-vrview-image-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-google-vrview-image/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+    <!-- ## Basic Usage -->
+    <!-- By default `amp-google-vrview-image` expects a mono image and the yaw value is 0. -->
+    <amp-google-vrview-image
+        src="https://storage.googleapis.com/vrview/examples/coral.jpg"
+        width="400" height="300" layout="responsive">
+    </amp-google-vrview-image>
+    <!-- Add the `stereo` attribute for stereoscopic images -->
+    <amp-google-vrview-image
+        src="https://storage.googleapis.com/vrview/examples/coral.jpg"
+        stereo
+        width="400" height="300" layout="responsive">
+    </amp-google-vrview-image>
+    <!-- Add the `stereo` attribute for stereoscopic images. The initial yaw value is 90 degrees -->
+    <amp-google-vrview-image
+        src="https://storage.googleapis.com/vrview/examples/coral.jpg"
+        stereo
+        yaw="90"
+        width="400" height="300" layout="responsive">
+    </amp-google-vrview-image>
+    <!-- Use the `yaw-only` attribute to restrict motion to the yaw axis only -->
+    <amp-google-vrview-image
+        src="https://storage.googleapis.com/vrview/examples/coral.jpg"
+        stereo
+        yaw-only
+        width="400" height="300" layout="responsive">
+    </amp-google-vrview-image>
+</body>
+</html>

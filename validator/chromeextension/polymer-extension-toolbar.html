@@ -1,0 +1,67 @@
+<!---
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<link href="polymer.html" rel="import">
+<dom-module id="extension-toolbar">
+  <style scope="extension-toolbar">
+    paper-toolbar {
+      background-color: #fff;
+      color: #000;
+      z-index: 1000;
+      --paper-toolbar-title: {
+        font-weight: inherit;
+        margin-left: 0 !important;
+        overflow: visible;
+      };
+    }
+    #ampLogo {
+      background-image: url('icon-128.png');
+      background-position: center left;
+      background-repeat: no-repeat;
+      background-size: 30px 30px;
+      padding: 30px 20px;
+      white-space: nowrap;
+    }
+    paper-spinner {
+      float: right;
+      height: 24px;
+      width: 24px;
+      --paper-spinner-stroke-width: 2px;
+    }
+  </style>
+  <template>
+    <paper-toolbar>
+      <span class="title">
+        <span id="ampLogo"></span>
+        {{ extensionName }}
+        <paper-spinner id="spinner" active></paper-spinner>
+      </span>
+    </paper-toolbar>
+  </template>
+  <script>
+    Polymer({
+      is: 'extension-toolbar',
+      changeSpinnerState: function(state) {
+        this.$.spinner.active = state;
+      },
+      properties: {
+        extensionName: {
+          type: String,
+          value: chrome.i18n.getMessage("extensionName"),
+        },
+      },
+    });
+  </script>
+</dom-module>

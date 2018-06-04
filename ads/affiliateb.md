@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=250
+<amp-ad width="300" height="250"
     type="affiliateb"
     data-afb_a="l44x-y174897c"
     data-afb_p="g2m"
@@ -29,8 +29,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://www.affiliate-b.com/web/contact/form.php
+For configuration details and to generate your tags, please contact [AffiliateB](https://www.affiliate-b.com/web/contact/form.php).
 
 Supported parameters:
 
-- data-nend_params
+- `data-nend_params`

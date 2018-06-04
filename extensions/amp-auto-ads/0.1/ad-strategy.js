@@ -15,6 +15,7 @@
  */
 
 import {DataAttributeDef, PlacementState} from './placement';
+import {tryResolve} from '../../../src/utils/promise';
 import {user} from '../../../src/log';
 
 /** @const */
@@ -55,7 +56,7 @@ export class AdStrategy {
    */
   run() {
     if (this.adTracker_.isMaxAdCountReached()) {
-      return Promise.resolve(this.getStrategyResult_());
+      return tryResolve(() => this.getStrategyResult_());
     }
     return this.placeNextAd_().then(success => {
       if (success) {

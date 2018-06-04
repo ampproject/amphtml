@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Animation} from '../../src/animation';
 import * as sinon from 'sinon';
+import {Animation} from '../../src/animation';
 
 describe('Animation', () => {
 
@@ -77,57 +77,57 @@ describe('Animation', () => {
     expect(tr2).to.equal(-1);
 
     tr1 = tr2 = -1;
-    clock.tick(100);  // 100
+    clock.tick(100); // 100
     runVsync();
     expect(tr1).to.be.closeTo(0.1 / 0.8, 1e-3);
     expect(tr2).to.equal(-1);
 
     tr1 = tr2 = -1;
-    clock.tick(100);  // 200
+    clock.tick(100); // 200
     runVsync();
     expect(tr1).to.be.closeTo(0.2 / 0.8, 1e-3);
     expect(tr2).to.equal(0);
 
     tr1 = tr2 = -1;
-    clock.tick(100);  // 300
+    clock.tick(100); // 300
     runVsync();
     expect(tr1).to.be.closeTo(0.3 / 0.8, 1e-3);
     expect(tr2).to.be.closeTo(0.1 / 0.8, 1e-3);
 
     tr1 = tr2 = -1;
-    clock.tick(200);  // 500
+    clock.tick(200); // 500
     runVsync();
     expect(tr1).to.be.closeTo(0.5 / 0.8, 1e-3);
     expect(tr2).to.be.closeTo(0.3 / 0.8, 1e-3);
 
     tr1 = tr2 = -1;
-    clock.tick(200);  // 700
+    clock.tick(200); // 700
     runVsync();
     expect(tr1).to.be.closeTo(0.7 / 0.8, 1e-3);
     expect(tr2).to.be.closeTo(0.5 / 0.8, 1e-3);
 
     tr1 = tr2 = -1;
-    clock.tick(100);  // 800
+    clock.tick(100); // 800
     runVsync();
     expect(tr1).to.equal(1);
     expect(tr2).to.be.closeTo(0.6 / 0.8, 1e-3);
 
     tr1 = tr2 = -1;
-    clock.tick(100);  // 900
+    clock.tick(100); // 900
     runVsync();
     expect(tr1).to.equal(-1);
     expect(tr2).to.be.closeTo(0.7 / 0.8, 1e-3);
 
     tr1 = tr2 = -1;
     expect(resolveCalled).to.equal(false);
-    clock.tick(100);  // 1000
+    clock.tick(100); // 1000
     runVsync();
     expect(tr1).to.equal(-1);
     expect(tr2).to.equal(1, 1e-3);
     expect(resolveCalled).to.equal(true);
 
     tr1 = tr2 = -1;
-    clock.tick(100);  // 1100
+    clock.tick(100); // 1100
     runVsync();
     expect(tr1).to.equal(-1);
     expect(tr2).to.equal(-1);
@@ -147,16 +147,16 @@ describe('Animation', () => {
     expect(tr1).to.equal(-0.5);
 
     tr1 = -1;
-    clock.tick(500);  // 500
+    clock.tick(500); // 500
     runVsync();
     expect(tr1).to.be.closeTo(0.5, 1e-3);
 
     tr1 = -1;
-    clock.tick(400);  // 900
+    clock.tick(400); // 900
     runVsync();
     expect(tr1).to.be.closeTo(1.3, 1e-3);
 
-    clock.tick(100);  // 1000
+    clock.tick(100); // 1000
     runVsync();
     expect(tr1).to.equal(1);
   });

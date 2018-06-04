@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
-import {user, dev} from '../../../src/log';
-import {setStyle} from '../../../src/style';
+import {dev, user} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
-import {AmpEvents} from '../../../src/amp-events';
+import {setStyle} from '../../../src/style';
 
 const TAG = 'amp-fx-flying-carpet';
 
@@ -111,6 +111,9 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const layoutBox = this.element.getLayoutBox();
     const viewport = this.getViewport();
     const viewportHeight = viewport.getHeight();
+    // TODO(jridgewell): This should really be the parent scroller, not
+    // necessarily the root. But, flying carpet only works as a child of the
+    // root scroller, for now.
     const docHeight = viewport.getScrollHeight();
     // Hmm, can the page height change and affect us?
     const minTop = viewportHeight * 0.75;

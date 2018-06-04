@@ -15,11 +15,11 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {Services} from '../src/services';
+import {createElementWithAttributes} from '../src/dom';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {registerElement} from '../src/service/custom-element-registry';
-import {Services} from '../src/services';
-import {createElementWithAttributes} from '../src/dom';
 import {toWin} from '../src/types';
 
 const TAG = 'amp-pixel';
@@ -59,6 +59,11 @@ export class AmpPixel extends BaseElement {
           `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".`
           + ' Only "no-referrer" is supported');
     }
+    if (this.element.hasAttribute('i-amphtml-ssr') &&
+        this.element.querySelector('img')) {
+      dev().info(TAG, 'inabox img already present');
+      return;
+    }
     // Trigger, but only when visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.trigger_.bind(this));
@@ -82,11 +87,11 @@ export class AmpPixel extends BaseElement {
         return;
       }
       return Services.urlReplacementsForDoc(this.element)
-          .expandAsync(this.assertSource_(src))
+          .expandUrlAsync(this.assertSource_(src))
           .then(src => {
             const pixel = this.referrerPolicy_
-                ? createNoReferrerPixel(this.element, src)
-                : createImagePixel(this.win, src);
+              ? createNoReferrerPixel(this.element, src)
+              : createImagePixel(this.win, src);
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });
@@ -110,7 +115,7 @@ export class AmpPixel extends BaseElement {
 /**
  * @param {!Element} parentElement
  * @param {string} src
- * @returns {!Element}
+ * @return {!Element}
  */
 function createNoReferrerPixel(parentElement, src) {
   if (isReferrerPolicySupported()) {
@@ -133,7 +138,7 @@ function createNoReferrerPixel(parentElement, src) {
  * @param {!Window} win
  * @param {string} src
  * @param {boolean=} noReferrer
- * @returns {!Image}
+ * @return {!Image}
  */
 function createImagePixel(win, src, noReferrer) {
   const image = new win.Image();
@@ -148,7 +153,7 @@ function createImagePixel(win, src, noReferrer) {
  * Check if element attribute "referrerPolicy" is supported by the browser.
  * At this moment (4/14/2017), Safari does not support it yet.
  *
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isReferrerPolicySupported() {
   return 'referrerPolicy' in Image.prototype;

@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../src/utils/object';
-import {dev} from '../src/log';
+import {AmpEvents} from '../src/amp-events';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
-import {nextTick} from './3p';
-import {tryParseJson} from '../src/json';
+import {dev} from '../src/log';
+import {dict} from '../src/utils/object';
 import {isObject} from '../src/types';
-import {AmpEvents} from '../src/amp-events';
-import {parseUrl} from '../src/url';
+import {nextTick} from './3p';
+import {parseUrlDeprecated} from '../src/url';
+import {tryParseJson} from '../src/json';
 
 export class AbstractAmpContext {
 
@@ -40,7 +40,7 @@ export class AbstractAmpContext {
     /** @private {?string} */
     this.cachedFrameName_ = this.win_.name || null;
 
-    /** @type {?string} */
+    /** @protected {?string} */
     this.embedType_ = null;
 
     // ----------------------------------------------------
@@ -59,6 +59,9 @@ export class AbstractAmpContext {
     /** @type {?string|undefined} */
     this.container = null;
 
+    /** @type {?Object} */
+    this.consentSharedData = null;
+
     /** @type {?Object<string, *>} */
     this.data = null;
 
@@ -67,6 +70,9 @@ export class AbstractAmpContext {
 
     /** @type {?boolean} */
     this.hidden = null;
+
+    /** @type {?number} */
+    this.initialConsentState = null;
 
     /** @type {?Object} */
     this.initialLayoutRect = null;
@@ -106,7 +112,6 @@ export class AbstractAmpContext {
     this.client_.setSentinel(dev().assertString(this.sentinel));
 
     this.listenForPageVisibility_();
-    this.report3pError_();
   }
 
   /**
@@ -143,7 +148,7 @@ export class AbstractAmpContext {
    *  Listen to page visibility changes.
    *  @param {function({hidden: boolean})} callback Function to call every time
    *    we receive a page visibility message.
-   *  @returns {function()} that when called stops triggering the callback
+   *  @return {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
   onPageVisibilityChange(callback) {
@@ -156,7 +161,7 @@ export class AbstractAmpContext {
    *  Send message to runtime to start sending intersection messages.
    *  @param {function(Array<Object>)} callback Function to call every time we
    *    receive an intersection message.
-   *  @returns {function()} that when called stops triggering the callback
+   *  @return {function()} that when called stops triggering the callback
    *    every time we receive an intersection message.
    */
   observeIntersection(callback) {
@@ -176,7 +181,31 @@ export class AbstractAmpContext {
     });
 
     return unlisten;
-  };
+  }
+
+  /**
+   *  Requests HTML snippet from the parent window.
+   *  @param {string} selector CSS selector
+   *  @param {!Array<string>} attributes whitelisted attributes to be kept
+   *    in the returned HTML string
+   *  @param {function(*)} callback to be invoked with the HTML string
+   */
+  getHtml(selector, attributes, callback) {
+    this.client_.getData(MessageType.GET_HTML, dict({
+      'selector': selector,
+      'attributes': attributes,
+    }), callback);
+  }
+
+  /**
+   * Requests consent state from the parent window.
+   *
+   * @param {function(*)} callback
+   */
+  getConsentState(callback) {
+    this.client_.getData(
+        MessageType.GET_CONSENT_STATE, null, callback);
+  }
 
   /**
    *  Send message to runtime requesting to resize ad to height and width.
@@ -189,7 +218,7 @@ export class AbstractAmpContext {
       'width': width,
       'height': height,
     }));
-  };
+  }
 
   /**
    *  Allows a creative to set the callback function for when the resize
@@ -201,7 +230,7 @@ export class AbstractAmpContext {
   onResizeSuccess(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
       callback(obj['requestedHeight'], obj['requestedWidth']); });
-  };
+  }
 
   /**
    *  Allows a creative to set the callback function for when the resize
@@ -214,7 +243,7 @@ export class AbstractAmpContext {
     this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
-  };
+  }
 
   /**
    *  Takes the current name on the window, and attaches it to
@@ -258,12 +287,14 @@ export class AbstractAmpContext {
     this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
+    this.consentSharedData = context.consentSharedData;
     this.container = context.container;
     this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
+    this.initialConsentState = context.initialConsentState;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
-    this.location = parseUrl(context.location.href);
+    this.location = parseUrlDeprecated(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
     this.referrer = context.referrer;
@@ -302,7 +333,7 @@ export class AbstractAmpContext {
     // TODO(alanorozco): why the heck could AMP_CONTEXT_DATA be two different
     // types? FIX THIS.
     if (isObject(this.win_.sf_) && this.win_.sf_.cfg) {
-      this.setupMetadata_(/** @type {!string}*/(this.win_.sf_.cfg));
+      this.setupMetadata_(/** @type {string}*/(this.win_.sf_.cfg));
     } else if (this.win_.AMP_CONTEXT_DATA) {
       if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
         this.sentinel = this.win_.AMP_CONTEXT_DATA;
@@ -316,22 +347,20 @@ export class AbstractAmpContext {
 
   /**
    * Send 3p error to parent iframe
-   * @private
+   * @param {!Error} e
    */
-  report3pError_() {
-    this.win_.onerror = message => {
-      if (message) {
-        this.client_.sendMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
-          'message': message,
-        }));
-      }
-      return false;
-    };
+  report3pError(e) {
+    if (!e.message) {
+      return;
+    }
+    this.client_.sendMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
+      'message': e.message,
+    }));
   }
 }
 
 export class AmpContext extends AbstractAmpContext {
-  /** @return {boolean} */
+  /** @override */
   isAbstractImplementation_() {
     return false;
   }

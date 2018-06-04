@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
+import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
-import * as sinon from 'sinon';
+import {toggleExperiment} from '../../src/experiments';
+import {user} from '../../src/log';
 
 
 describe('FixedLayer', () => {
@@ -47,7 +50,7 @@ describe('FixedLayer', () => {
     element2 = createElement('element2');
     element3 = createElement('element3');
     element4 = createElement('element4');
-    element5 = createElement('element4');
+    element5 = createElement('element5');
     docBody.appendChild(element1);
     docBody.appendChild(element2);
     docBody.appendChild(element3);
@@ -171,16 +174,75 @@ describe('FixedLayer', () => {
     const children = [];
     const elem = {
       id,
+      ownerDocument: documentApi,
       autoTop: '',
       toString: () => {
         return id;
       },
       style: {
-        top: '15px',
-        bottom: '',
-        position: '',
-        opacity: '0.9',
-        visibility: 'visible',
+        _top: '15px',
+        _bottom: '',
+        _position: '',
+        _opacity: '0.9',
+        _visibility: 'visible',
+        _transition: '',
+
+        get top() {
+          return this._top;
+        },
+        set top(v) {
+          elem.style.setProperty('top', v);
+        },
+        get bottom() {
+          return this._bottom;
+        },
+        set bottom(v) {
+          elem.style.setProperty('bottom', v);
+        },
+        get position() {
+          return this._position;
+        },
+        set position(v) {
+          elem.style.setProperty('position', v);
+        },
+        get opacity() {
+          return this._opacity;
+        },
+        set opacity(v) {
+          elem.style.setProperty('opacity', v);
+        },
+        get visibility() {
+          return this._visibility;
+        },
+        set visibility(v) {
+          elem.style.setProperty('visibility', v);
+        },
+        get transition() {
+          return this._transition;
+        },
+        set transition(v) {
+          elem.style.setProperty('transition', v);
+        },
+
+        setProperty(prop, value, priority) {
+          const privProp = '_' + prop;
+
+          // Override if important
+          if (priority === 'important') {
+            elem.style[privProp] = `${value} !${priority}`;
+          } else if (elem.style[privProp] ||
+              !endsWith(elem.computedStyle[prop], '!important')) {
+            if (prop === 'transition' && !value &&
+                endsWith(elem.style[privProp] || '', '!important')) {
+              // Emulate a stupid Safari bug.
+              // noop.
+            } else {
+              // If element style is already set, we can override
+              // Or, if computed style is not important priority
+              elem.style[privProp] = value;
+            }
+          }
+        },
       },
       computedStyle: {
         opacity: '0.9',
@@ -189,7 +251,7 @@ describe('FixedLayer', () => {
         get top() {
           if (elem.computedStyle.transition &&
               elem.style.transition !== '' &&
-              elem.style.transition !== 'none') {
+              elem.style.transition !== 'none !important') {
             return this._oldTop;
           }
           if (elem.style.bottom) {
@@ -214,8 +276,8 @@ describe('FixedLayer', () => {
         }
         return 0;
       },
-      getAttribute: name => {
-        return attrs[name];
+      hasAttribute: name => {
+        return !!attrs[name];
       },
       setAttribute: (name, value) => {
         attrs[name] = value;
@@ -245,12 +307,21 @@ describe('FixedLayer', () => {
       cloneNode() {
         return createElement(this.id);
       },
-    };
-    Object.defineProperty(elem, 'offsetTop', {
-      get: () => {
+      get offsetTop() {
         return parseFloat(elem.computedStyle.top);
       },
-    });
+      set innerHTML(html) {
+        if (html === '') {
+          this.firstElementChild = null;
+          return;
+        }
+        // Updating the placeholder means we have to update the tests.
+        expect(html.trim()).to.equal(
+            '<i-amphtml-fpa style="display: none"></i-amphtml-fpa>');
+        this.firstElementChild = createElement('i-amphtml-fpa');
+        this.firstElementChild.style.display = 'none';
+      },
+    };
     return elem;
   }
 
@@ -291,7 +362,8 @@ describe('FixedLayer', () => {
   }
 
 
-  describe('no-transfer', () => {
+  // TODO(jridgewell, #11827): Make this test work on Safari.
+  describe.configure().skipSafari().run('no-transfer', () => {
     let fixedLayer;
 
     beforeEach(() => {
@@ -300,7 +372,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 
@@ -313,7 +385,7 @@ describe('FixedLayer', () => {
             `${expected.id}: wrong position`);
         expect(JSON.stringify(actual.selectors))
             .to.equal(JSON.stringify(expected.selectors),
-            `${expected.id}: wrong selectors`);
+                `${expected.id}: wrong selectors`);
       }
 
       expect(fixedLayer.elements_).to.have.length(5);
@@ -497,6 +569,25 @@ describe('FixedLayer', () => {
       expect(state['F0'].fixed).to.be.false;
       expect(state['F1'].fixed).to.be.false;
       expect(state['F4'].sticky).to.be.true;
+    });
+
+    it('should disregard display:none element', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['display'] = 'none';
+      element5.computedStyle['position'] = 'sticky';
+      element5.offsetWidth = 10;
+      element5.offsetHeight = 10;
+      element5.computedStyle['display'] = 'none';
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.be.false;
+      expect(state['F1'].fixed).to.be.false;
+      expect(state['F4'].sticky).to.be.false;
     });
 
     it('should tolerate getComputedStyle = null', () => {
@@ -686,7 +777,7 @@ describe('FixedLayer', () => {
       expect(state['F0'].top).to.equal('0px');
 
       // Update to transient padding.
-      sandbox.stub(fixedLayer, 'update', () => {});
+      sandbox.stub(fixedLayer, 'update').callsFake(() => {});
       fixedLayer.updatePaddingTop(22, /* transient */ true);
       vsyncTasks[0].measure(state);
       expect(state['F0'].fixed).to.be.true;
@@ -746,11 +837,11 @@ describe('FixedLayer', () => {
 
       expect(state['F0'].fixed).to.be.true;
       expect(state['F0'].top).to.equal('0px');
-      expect(element1.style.transition).to.equal('none');
+      expect(element1.style.transition).to.equal('none !important');
 
       expect(state['F4'].sticky).to.be.true;
       expect(state['F4'].top).to.equal('0px');
-      expect(element5.style.transition).to.equal('none');
+      expect(element5.style.transition).to.equal('none !important');
 
       vsyncTasks[0].mutate({});
       expect(element1.style.transition).to.equal('');
@@ -916,12 +1007,12 @@ describe('FixedLayer', () => {
 
       fixedLayer.transformMutate('translateY(-10px)');
       expect(fe.element.style.transform).to.be.undefined;
-      expect(fe.element.style.transition).to.be.undefined;
+      expect(fe.element.style.transition).to.equal('');
 
       // Reset back.
       fixedLayer.transformMutate(null);
       expect(fe.element.style.transform).to.be.undefined;
-      expect(fe.element.style.transition).to.be.undefined;
+      expect(fe.element.style.transition).to.equal('');
     });
 
     it('should compound transform with anchored top', () => {
@@ -948,6 +1039,21 @@ describe('FixedLayer', () => {
       fixedLayer.transformMutate('translateY(-10px)');
       expect(fe.element.style.transform).to.equal('');
     });
+
+    it('should user error when inline styles may be overriden', () => {
+      toggleExperiment(ampdoc.win, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+
+      // Set both attribute and property since element1 is a fake element.
+      element1.setAttribute('style', 'bottom: 10px');
+      element1.style.bottom = '10px';
+
+      const userError = sandbox.stub(user(), 'error');
+      fixedLayer.setup();
+      // Expect error regarding inline styles.
+      expect(userError).calledWithMatch('FixedLayer',
+          /not supported yet for fixed or sticky elements/);
+    });
   });
 
   describe('with-transfer', () => {
@@ -959,7 +1065,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transfer_).to.be.true;
       expect(fixedLayer.transferLayer_).to.be.null;
     });
@@ -1210,6 +1316,21 @@ describe('FixedLayer', () => {
 
       expect(state['F0'].fixed).to.equal(true);
       expect(state['F0'].transferrable).to.equal(true);
+    });
+
+    it('should user error when inline styles may be overriden', () => {
+      toggleExperiment(ampdoc.win, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+
+      // Set both attribute and property since element1 is a fake element.
+      element1.setAttribute('style', 'bottom: 10px');
+      element1.style.bottom = '10px';
+
+      const userError = sandbox.stub(user(), 'error');
+      fixedLayer.setup();
+      // Expect error regarding inline styles.
+      expect(userError).calledWithMatch('FixedLayer',
+          /not supported yet for fixed or sticky elements/);
     });
   });
 });

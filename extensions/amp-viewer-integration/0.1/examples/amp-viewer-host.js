@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import '../../../../third_party/babel/custom-babel-helpers';
 import {
   APP,
-  Messaging,
   MessageType,
+  Messaging,
   WindowPortEmulator,
 } from '../messaging/messaging';
 import {listen} from '../../../../src/event-helper';
@@ -42,7 +41,7 @@ export class AmpViewerHost {
    * looking at.
    */
   constructor(win, ampIframe, frameOrigin, messageHandler, opt_logsId,
-      opt_isWebview, opt_isHandshakePoll) {
+    opt_isWebview, opt_isHandshakePoll) {
     /** @const {!Window} */
     this.win = win;
     /** @private {!HTMLIFrameElement} */
@@ -135,7 +134,7 @@ export class AmpViewerHost {
       state: this.visibilityState_,
       prerenderSize: this.prerenderSize,
     }, true);
-  };
+  }
 
   /**
    * @param {*} eventData
@@ -144,7 +143,7 @@ export class AmpViewerHost {
    */
   isChannelOpen_(eventData) {
     return eventData.app == APP && eventData.name == CHANNEL_OPEN_MSG;
-  };
+  }
 
   /**
    * @param {string} type
@@ -158,7 +157,7 @@ export class AmpViewerHost {
       return;
     }
     return this.messaging_.sendRequest(type, data, awaitResponse);
-  };
+  }
 
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);

@@ -15,37 +15,35 @@
  */
 'use strict';
 
-var gulp = require('gulp-help')(require('gulp'));
-var path = require('path');
-var srcGlobs = require('../config').presubmitGlobs;
-var util = require('gulp-util');
-var through2 = require('through2');
+const colors = require('ansi-colors');
+const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
+const path = require('path');
+const srcGlobs = require('../config').presubmitGlobs;
+const through2 = require('through2');
 
-var dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
+const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
-var es6polyfill = 'Not available because we do not currently' +
-    ' ship with a needed ES6 polyfill.';
-
-var requiresReviewPrivacy =
+const requiresReviewPrivacy =
     'Usage of this API requires dedicated review due to ' +
     'being privacy sensitive. Please file an issue asking for permission' +
     ' to use if you have not yet done so.';
 
-var privateServiceFactory = 'This service should only be installed in ' +
+const privateServiceFactory = 'This service should only be installed in ' +
     'the whitelisted files. Other modules should use a public function ' +
     'typically called serviceNameFor.';
 
-var shouldNeverBeUsed =
+const shouldNeverBeUsed =
     'Usage of this API is not allowed - only for internal purposes.';
 
-var backwardCompat = 'This method must not be called. It is only retained ' +
+const backwardCompat = 'This method must not be called. It is only retained ' +
     'for backward compatibility during rollout.';
 
-var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
+const realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
     'DCE\'d. Use explicitly like "getMode().localDev" instead.';
 
 // Terms that must not appear in our source files.
-var forbiddenTerms = {
+const forbiddenTerms = {
   'DO NOT SUBMIT': '',
   // TODO(dvoytenko, #8464): cleanup whitelist.
   '(^-amp-|\\W-amp-)': {
@@ -64,6 +62,7 @@ var forbiddenTerms = {
     message: 'Switch to new internal ID form',
     whitelist: [
       'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/create-golden-css/css/main.css',
       'css/amp.css',
     ],
   },
@@ -71,6 +70,11 @@ var forbiddenTerms = {
   'describes.*\\.only': '',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
+  'gulp-util': {
+    message: '`gulp-util` will be deprecated soon. See ' +
+        'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
+        'for a list of alternatives.',
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -86,15 +90,17 @@ var forbiddenTerms = {
         '  If this is cross domain, overwrite the method directly.',
   },
   'console\\.\\w+\\(': {
-    message: 'If you run against this, use console/*OK*/.log to ' +
+    message: 'If you run against this, use console/*OK*/.[log|error] to ' +
       'whitelist a legit case.',
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
-      'validator/nodejs/index.js',  // NodeJs only.
+      'build-system/check-package-manager.js',
+      'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
+      'gulpfile.js',
     ],
     checkInTestFolder: true,
   },
@@ -273,7 +279,10 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
+      'extensions/amp-next-page/0.1/next-page-service.js',
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
+      'src/service/video/docking.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -297,7 +306,8 @@ var forbiddenTerms = {
     message: 'Use parseUrl instead.',
     whitelist: [
       'src/url.js',
-      'src/service/document-click.js',
+      'src/service/navigation.js',
+      'src/service/url-impl.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -305,10 +315,12 @@ var forbiddenTerms = {
     message: 'Usages must be reviewed.',
     whitelist: [
       // viewer-impl.sendMessage
+      'src/error.js',
       'src/service/viewer-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
 
       // iframe-messaging-client.sendMessage
@@ -321,6 +333,7 @@ var forbiddenTerms = {
   '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
+      'src/service/xhr-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/service/storage-impl.js',
@@ -328,6 +341,8 @@ var forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
+      'src/impression.js',
     ],
   },
   // Privacy sensitive
@@ -337,8 +352,10 @@ var forbiddenTerms = {
       'src/ad-cid.js',
       'src/services.js',
       'src/service/cid-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-subscriptions/0.1/local-subscription-platform.js',
       'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
@@ -350,39 +367,11 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
-  'cookie\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'build-system/test-server.js',
-      'src/cookies.js',
-      'src/service/cid-impl.js',
-      'extensions/amp-analytics/0.1/vendors.js',
-      'testing/fake-dom.js',
-    ],
-  },
-  'getCookie\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/cid-api.js',
-      'src/cookies.js',
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
-  'setCookie\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/cid-api.js',
-      'src/cookies.js',
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'src/error.js',
+      'src/service/xhr-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
@@ -403,6 +392,7 @@ var forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   'localStorage': {
@@ -411,21 +401,20 @@ var forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/fake-dom.js',
+      'extensions/amp-access/0.1/amp-access-iframe.js',
+      'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
+      'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
     ],
   },
   'sessionStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-access/0.1/amp-access-iframe.js',
       'extensions/amp-accordion/0.1/amp-accordion.js',
     ],
   },
   'indexedDB': {
     message: requiresReviewPrivacy,
-    whitelist: [
-      // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq
-      'src/service-worker/core.js',
-      'src/service-worker/kill.js',
-    ],
   },
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
@@ -435,6 +424,7 @@ var forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-access-scroll/0.1/scroll-impl.js',
       'src/service/url-replacements-impl.js',
     ],
   },
@@ -476,7 +466,7 @@ var forbiddenTerms = {
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/event-helper-listen.js',
-      'dist.3p/current/integration.js',  // includes previous
+      'dist.3p/current/integration.js', // includes previous
     ],
   },
   'setTimeout.*throw': {
@@ -485,7 +475,7 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
-  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': { // eslint-disable-line max-len
     message: 'Logging message require explicitly `TAG`, or an all uppercase' +
         ' string as the first parameter',
   },
@@ -496,14 +486,15 @@ var forbiddenTerms = {
     ],
   },
   '\\.requireLayout\\(': {
-    message: 'requireLayout is restricted b/c it affects non-contained elements',
+    message: 'requireLayout is restricted b/c it affects non-contained elements', // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
+      'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
       'src/service/resources-impl.js',
     ],
   },
-  '\\.updatePriority\\(': {
-    message: 'updatePriority is a restricted API.',
+  '\\.updateLayoutPriority\\(': {
+    message: 'updateLayoutPriority is a restricted API.',
     whitelist: [
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'src/base-element.js',
@@ -524,8 +515,8 @@ var forbiddenTerms = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     whitelist: [
-      'src/log.js',  // Has actual implementation of assertElement.
-      'dist.3p/current/integration.js',  // Includes the previous.
+      'src/log.js', // Has actual implementation of assertElement.
+      'dist.3p/current/integration.js', // Includes the previous.
     ],
   },
   'startupChunk\\(': {
@@ -535,12 +526,6 @@ var forbiddenTerms = {
       'src/chunk.js',
       'src/inabox/amp-inabox.js',
       'src/runtime.js',
-    ],
-  },
-  'style\\.\\w+ = ': {
-    message: 'Use setStyle instead!',
-    whitelist: [
-      'testing/iframe.js',
     ],
   },
   'AMP_CONFIG': {
@@ -555,28 +540,27 @@ var forbiddenTerms = {
       'src/config.js',
       'src/experiments.js',
       'src/mode.js',
-      'src/service-worker/core.js',
-      'src/worker-error-reporting.js',
+      'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
+      'gulpfile.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
     message: 'SVG data images must use charset=utf-8: ' +
         '"data:image/svg+xml;charset=utf-8,..."',
   },
-  'installWorkerErrorReporting': {
-    message: 'Should only be used in worker entry points',
-    whitelist: [
-      'src/web-worker/web-worker.js',
-      'src/service-worker/shell.js',
-      'src/worker-error-reporting.js',
-    ],
-  },
   'new CustomEvent\\(': {
     message: 'Use createCustomEvent() helper instead.',
     whitelist: [
       'src/event-helper.js',
+    ],
+  },
+  'new FormData\\(': {
+    message: 'Use new FormDataWrapper() instead and call ' +
+        'formDataWrapper.getFormData() to get the native FormData object.',
+    whitelist: [
+      'src/form-data-wrapper.js',
     ],
   },
   '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
@@ -586,12 +570,25 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
+  '\\.defer\\(\\)': {
+    message: 'Promise.defer() is deprecated and should not be used.',
+  },
+  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': { // eslint-disable-line max-len
+    message: 'TAG is not an argument to assert(). Will cause false positives.',
+  },
+  'eslint no-unused-vars': {
+    message: 'Use a line-level "no-unused-vars" rule instead.',
+    whitelist: [
+      'viewer-api/swipe-api.js',
+      'extensions/amp-access/0.1/iframe-api/access-controller.js',
+    ],
+  },
 };
 
-var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
-    ' can thus not use most modern web APIs.';
+const ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded' +
+    ' and can thus not use most modern web APIs.';
 
-var forbidden3pTerms = {
+const forbidden3pTerms = {
   // We need to forbid promise usage because we don't have our own polyfill
   // available. This whitelisting of callNext is a major hack to allow one
   // usage in babel's external helpers that is in a code path that we do
@@ -599,7 +596,7 @@ var forbidden3pTerms = {
   '\\.then\\((?!callNext)': ThreePTermsMessage,
 };
 
-var bannedTermsHelpString = 'Please review viewport service for helper ' +
+const bannedTermsHelpString = 'Please review viewport service for helper ' +
     'methods or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
     'Most of the forbidden property/method access banned on the ' +
     '`forbiddenTermsSrcInclusive` object can be found in ' +
@@ -613,7 +610,7 @@ var bannedTermsHelpString = 'Please review viewport service for helper ' +
     'forbidden property/method or mark it with `object./*REVIEW*/property` ' +
     'if you are unsure and so that it stands out in code reviews.';
 
-var forbiddenTermsSrcInclusive = {
+const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
   '\\.outerHTML(?!_)': bannedTermsHelpString,
   '\\.offsetLeft(?!_)': bannedTermsHelpString,
@@ -685,21 +682,12 @@ var forbiddenTermsSrcInclusive = {
   },
   'Text(Encoder|Decoder)\\(': {
     message: 'TextEncoder/TextDecoder is not supported in all browsers.' +
-        'Please use UTF8 utilities from src/bytes.js',
+        ' Please use UTF8 utilities from src/bytes.js',
     whitelist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
       'src/utils/bytes.js',
     ],
-  },
-  // Super complicated regex that says "find any querySelector method call that
-  // is passed as a variable anything that is not a string, or a string that
-  // contains a space.
-  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {
-    message: 'querySelector is not scoped to the element, but globally and ' +
-    'filtered to just the elements inside the element. This leads to ' +
-    'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
-    '"div div"). Instead, use the scopedQuerySelector helper in dom.js',
   },
   'preloadExtension': {
     message: bannedTermsHelpString,
@@ -716,9 +704,10 @@ var forbiddenTermsSrcInclusive = {
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
-      'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
+      'extensions/amp-a4a/0.1/template-validator.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
+      'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
     ],
   },
   'loadElementClass': {
@@ -808,6 +797,7 @@ var forbiddenTermsSrcInclusive = {
       'validator/webui/serve-standalone.go',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
+      'gulpfile.js',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {
@@ -840,11 +830,12 @@ var forbiddenTermsSrcInclusive = {
       'validator/engine/validator.js',
     ],
   },
+  '\\.matches\\(': 'Please use matches() helper in src/dom.js',
 };
 
 // Terms that must appear in a source file.
-var requiredTerms = {
-  'Copyright 20(15|16|17) The AMP HTML Authors\\.':
+const requiredTerms = {
+  'Copyright 20(15|16|17|18) The AMP HTML Authors\\.':
       dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0':
       dedicatedCopyrightNoteSources,
@@ -859,7 +850,7 @@ var requiredTerms = {
  * @return {boolean}
  */
 function isInTestFolder(path) {
-  var dirs = path.split('/');
+  const dirs = path.split('/');
   return dirs.indexOf('test') >= 0;
 }
 
@@ -867,8 +858,8 @@ function stripComments(contents) {
   // Multi-line comments
   contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
     // Preserve the newlines
-    var newlines = [];
-    for (var i = 0; i < match.length; i++) {
+    const newlines = [];
+    for (let i = 0; i < match.length; i++) {
       if (match[i] === '\n') {
         newlines.push('\n');
       }
@@ -892,12 +883,11 @@ function stripComments(contents) {
  *   false otherwise
  */
 function matchTerms(file, terms) {
-  var contents = stripComments(file.contents.toString());
-  var relative = file.relative;
+  const contents = stripComments(file.contents.toString());
+  const {relative} = file;
   return Object.keys(terms).map(function(term) {
-    var fix;
-    var whitelist = terms[term].whitelist;
-    var checkInTestFolder = terms[term].checkInTestFolder;
+    let fix;
+    const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
     if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
@@ -909,12 +899,12 @@ function matchTerms(file, terms) {
     // original term to get the possible fix value. This is ok as the
     // presubmit doesn't have to be blazing fast and this is most likely
     // negligible.
-    var regex = new RegExp(term, 'gm');
-    var index = 0;
-    var line = 1;
-    var column = 0;
-    var match;
-    var hasTerm = false;
+    const regex = new RegExp(term, 'gm');
+    let index = 0;
+    let line = 1;
+    let column = 0;
+    let match;
+    let hasTerm = false;
 
     while ((match = regex.exec(contents))) {
       hasTerm = true;
@@ -927,9 +917,9 @@ function matchTerms(file, terms) {
         }
       }
 
-      util.log(util.colors.red('Found forbidden: "' + match[0] +
+      log(colors.red('Found forbidden: "' + match[0] +
           '" in ' + relative + ':' + line + ':' + column));
-      if (typeof terms[term] == 'string') {
+      if (typeof terms[term] === 'string') {
         fix = terms[term];
       } else {
         fix = terms[term].message;
@@ -937,9 +927,9 @@ function matchTerms(file, terms) {
 
       // log the possible fix information if provided for the term.
       if (fix) {
-        util.log(util.colors.blue(fix));
+        log(colors.blue(fix));
       }
-      util.log(util.colors.blue('=========='));
+      log(colors.blue('=========='));
     }
 
     return hasTerm;
@@ -958,25 +948,25 @@ function matchTerms(file, terms) {
  *   false otherwise
  */
 function hasAnyTerms(file) {
-  var pathname = file.path;
-  var basename = path.basename(pathname);
-  var hasTerms = false;
-  var hasSrcInclusiveTerms = false;
-  var has3pTerms = false;
+  const pathname = file.path;
+  const basename = path.basename(pathname);
+  let hasTerms = false;
+  let hasSrcInclusiveTerms = false;
+  let has3pTerms = false;
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
-  var isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename)
+  const isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename)
       || /_test\.js$/.test(basename);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  var is3pFile = /\/(3p|ads)\//.test(pathname) ||
+  const is3pFile = /\/(3p|ads)\//.test(pathname) ||
       basename == '3p.js' ||
       basename == 'style.js';
   // Yet another reason to move ads/google/a4a somewhere else
-  var isA4A = /\/a4a\//.test(pathname);
+  const isA4A = /\/a4a\//.test(pathname);
   if (is3pFile && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
@@ -993,18 +983,18 @@ function hasAnyTerms(file) {
  *  content, false otherwise
  */
 function isMissingTerms(file) {
-  var contents = file.contents.toString();
+  const contents = file.contents.toString();
   return Object.keys(requiredTerms).map(function(term) {
-    var filter = requiredTerms[term];
+    const filter = requiredTerms[term];
     if (!filter.test(file.path)) {
       return false;
     }
 
-    var matches = contents.match(new RegExp(term));
+    const matches = contents.match(new RegExp(term));
     if (!matches) {
-      util.log(util.colors.red('Did not find required: "' + term +
+      log(colors.red('Did not find required: "' + term +
           '" in ' + file.relative));
-      util.log(util.colors.blue('=========='));
+      log(colors.blue('=========='));
       return true;
     }
     return false;
@@ -1018,28 +1008,28 @@ function isMissingTerms(file) {
  * any forbidden terms and log any errors found.
  */
 function checkForbiddenAndRequiredTerms() {
-  var forbiddenFound = false;
-  var missingRequirements = false;
+  let forbiddenFound = false;
+  let missingRequirements = false;
   return gulp.src(srcGlobs)
-    .pipe(through2.obj(function(file, enc, cb) {
-      forbiddenFound = hasAnyTerms(file) || forbiddenFound;
-      missingRequirements = isMissingTerms(file) || missingRequirements;
-      cb();
-    }))
-    .on('end', function() {
-      if (forbiddenFound) {
-        util.log(util.colors.blue(
-            'Please remove these usages or consult with the AMP team.'));
-      }
-      if (missingRequirements) {
-        util.log(util.colors.blue(
-            'Adding these terms (e.g. by adding a required LICENSE ' +
+      .pipe(through2.obj(function(file, enc, cb) {
+        forbiddenFound = hasAnyTerms(file) || forbiddenFound;
+        missingRequirements = isMissingTerms(file) || missingRequirements;
+        cb();
+      }))
+      .on('end', function() {
+        if (forbiddenFound) {
+          log(colors.blue(
+              'Please remove these usages or consult with the AMP team.'));
+        }
+        if (missingRequirements) {
+          log(colors.blue(
+              'Adding these terms (e.g. by adding a required LICENSE ' +
             'to the file)'));
-      }
-      if (forbiddenFound || missingRequirements) {
-        process.exit(1);
-      }
-    });
+        }
+        if (forbiddenFound || missingRequirements) {
+          process.exit(1);
+        }
+      });
 }
 
 gulp.task('presubmit', 'Run validation against files to check for forbidden ' +

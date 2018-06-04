@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {loadScript, writeScript} from '../3p/3p';
 
 const DEFAULT_TIMEOUT = 500; // ms
 const EVENT_SUCCESS = 0;
@@ -106,5 +106,5 @@ function reportStats(siteID, slotID, dfpSlot, start, code) {
     xhttp.open('POST', url, true);
     xhttp.setRequestHeader('Content-Type', 'application/json');
     xhttp.send(stats);
-  } catch (e) {};
+  } catch (e) {}
 }

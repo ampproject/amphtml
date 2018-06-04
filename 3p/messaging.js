@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseJson} from '../src/json';
 import {getData} from '../src/event-helper';
+import {parseJson} from '../src/json';
 
 /**
  * Send messages to parent frame. These should not contain user data.
@@ -24,7 +24,7 @@ import {getData} from '../src/event-helper';
  */
 export function nonSensitiveDataPostMessage(type, opt_object) {
   if (window.parent == window) {
-    return;  // Nothing to do.
+    return; // Nothing to do.
   }
   const object = opt_object || /** @type {JsonObject} */ ({});
   object['type'] = type;
@@ -82,7 +82,7 @@ function startListening(win) {
     }
     // Parse JSON only once per message.
     const data = /** @type {!JsonObject} */ (
-        parseJson(/**@type {string} */ (getData(event)).substr(4)));
+      parseJson(/**@type {string} */ (getData(event)).substr(4)));
     if (win.context.sentinel && data['sentinel'] != win.context.sentinel) {
       return;
     }
@@ -95,7 +95,7 @@ function startListening(win) {
       if (listeners[i].type != data['type']) {
         continue;
       }
-      const cb = listeners[i].cb;
+      const {cb} = listeners[i];
       try {
         cb(data);
       } catch (e) {

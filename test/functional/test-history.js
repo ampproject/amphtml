@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   History,
@@ -22,10 +23,9 @@ import {
   installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
 import {Services} from '../../src/services';
-import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
-import {parseUrl} from '../../src/url';
-import * as sinon from 'sinon';
+import {listenOncePromise} from '../../src/event-helper';
+import {parseUrlDeprecated} from '../../src/url';
 
 
 describes.fakeWin('History', {
@@ -198,7 +198,7 @@ describes.sandboxed('History install', {}, () => {
         body: {},
         querySelector: () => null,
       },
-      location: parseUrl('https://cdn.ampproject.org/c/s/www.example.com/path'),
+      location: parseUrlDeprecated('https://cdn.ampproject.org/c/s/www.example.com/path'),
       addEventListener: () => null,
     };
     ampdoc = new AmpDocSingle(win);

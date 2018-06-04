@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {isObject} from '../../../src/types';
-import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
+import {isObject} from '../../../src/types';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
@@ -115,7 +115,7 @@ function validateConfig(config) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} group
  * @param {string=} opt_cidScope
- * @return {!Promise<!number>} a float number in the range of [0, 100)
+ * @return {!Promise<number>} a float number in the range of [0, 100)
  */
 function getBucketTicket(ampdoc, group, opt_cidScope) {
   if (!opt_cidScope) {
@@ -123,10 +123,10 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
   }
 
   const cidPromise = Services.cidForDoc(ampdoc).then(cidService =>
-      cidService.get({
-        scope: dev().assertString(opt_cidScope),
-        createCookieIfNotPresent: true,
-      }, Promise.resolve()));
+    cidService.get({
+      scope: dev().assertString(opt_cidScope),
+      createCookieIfNotPresent: true,
+    }, Promise.resolve()));
 
   return Promise.all([cidPromise, Services.cryptoFor(ampdoc.win)])
       .then(results => results[1].uniform(group + ':' + results[0]))

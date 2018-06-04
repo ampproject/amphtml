@@ -27,8 +27,8 @@ describe.configure().retryOnSaucelabs().run('Old Opacity Boilerplate', () => {
   beforeEach(() => {
     return createFixtureIframe(
         'test/fixtures/boilerplate-old-opacity.html', 1000).then(f => {
-          fixture = f;
-        });
+      fixture = f;
+    });
   });
 
   it('should show the body when opacity boilerplate is used', () => {
@@ -45,8 +45,8 @@ describe.configure().run('New Visibility Boilerplate', () => {
   beforeEach(() => {
     return createFixtureIframe(
         'test/fixtures/boilerplate-new-visibility.html', 10000).then(f => {
-          fixture = f;
-        });
+      fixture = f;
+    });
   });
 
   it('should show the body in boilerplate test', () => {
@@ -54,7 +54,7 @@ describe.configure().run('New Visibility Boilerplate', () => {
       expect(getStyle(
           fixture.win.document.body, 'visibility')).to.equal('visible');
       // Firefox spells out the values when assigning none.
-      const ffValue = '0s ease 0s normal none 1 running none';
+      const ffValue = '0s ease 0s 1 normal none running none';
       const animation = getStyle(fixture.win.document.body, 'animation');
       if (animation == ffValue) {
         expect(animation).to.equal(ffValue);

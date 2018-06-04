@@ -13,7 +13,7 @@ Here are some ways you can help make the AMP Project even more welcoming.  **The
 - Don't let people feel ignored.
   - Keep an eye out for issues/comments/PRs on GitHub or comments on Slack that aren't being responded to and either respond yourself or find an appropriate person to do so.  If you aren't sure who can help, ping [mrjoro](https://amphtml.slack.com/threads/team/mrjoro) on Slack.
   - If you can't immediately respond in detail to something in a PR/issue let the contributor know that with an estimate of when you'll be able to get to it (e.g. "I won't have time to get to this today, but plan on reviewing it on Friday").
-  - Pay particular attention to [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) since the people working on them are generally brand new to the community.
+  - Pay particular attention to [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) since the people working on them are generally brand new to the community.
 - Understand the motivations of contributors to AMP.
   - There are a lot of different reasons someone may be contributing to AMP.  Understanding the motivations of contributors you're working with can help you point them in the right direction.
   - Some of the many reasons people contribute to AMP:
@@ -25,10 +25,10 @@ Here are some ways you can help make the AMP Project even more welcoming.  **The
   - More experienced contributors may prefer the "[quick start](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md)" version of the getting started guide.
 - Help people find a project.
   - The AMP Project relies on the community for many different types of contributions--code, documentation, AMP Start templates, translations, etc.  Try to get a sense of what someone who doesn't have a specific project in mind would be interested in helping with and point them in the right direction.
-  - [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) are great starter projects.
-    - When someone starts working on a GFI we add the "GFI Claimed!" label to it, so the [GFIs not marked as "GFI Claimed!](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22Great%20First%20Issue%22%20-label%3A%22GFI%20Claimed!%22) are the open ones.
-    - Keep an eye out for small issues that would make great Great First Issues and [create Great First Issues](https://github.com/ampproject/amphtml/blob/master/contributing/creating-great-first-issues.md) for them.  Having a variety of GFIs always available for new contributors helps ensure new people will have a way to get started contributing.
-    - There may not yet be a Great First Issue that matches a new contributor's interests/expertise.  If that's the case reach out to the community (e.g. on Slack) to see if anyone has an idea of a project for them to work on.
+  - [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) are good starter projects.
+    - When someone starts working on a GFI we add the "GFI Claimed!" label to it, so the [GFIs not marked as "GFI Claimed!](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22good%20first%20issue%22%20-label%3A%22GFI%20Claimed!%22) are the open ones.
+    - Keep an eye out for small issues that would make good Good First Issues and [create Good First Issues](https://github.com/ampproject/amphtml/blob/master/contributing/creating-good-first-issues.md) for them.  Having a variety of GFIs always available for new contributors helps ensure new people will have a way to get started contributing.
+    - There may not yet be a Good First Issue that matches a new contributor's interests/expertise.  If that's the case reach out to the community (e.g. on Slack) to see if anyone has an idea of a project for them to work on.
   - If you aren't sure where to send somebody for a starter project let [mrjoro](https://amphtml.slack.com/threads/team/mrjoro) know.
 - Encourage contributors to sign up for Slack.
   - Slack provides the best forum for interacting with the community outside of individual GitHub issues/PRs.
@@ -38,7 +38,7 @@ Here are some ways you can help make the AMP Project even more welcoming.  **The
   - Having conversations about issues/PRs on the issue/PRs themselves is ideal since this provides a more permanent record that may help other contributors.  Many contributors are more comfotable asking questions on a less public platform, though, so having these conversations on Slack is fine.  (In these cases summarize any clarifications/designs/etc. in the issue/PR after the discussion if it makes sense.)
 - Encourage ongoing participation.
   - Make sure people who introduce a new component are added to the relevant OWNERS.yaml and let them know about our [OWNERS](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md) process.  We want contributors to have a sense of ownership over the things they contribute.
-  - Help people who finish a Great First Issue find a new project to tackle and encourage them to take it on.  If you don't already have a project in mind, gauge their interests and skill level and work with the rest of the community (or [mrjoro](https://amphtml.slack.com/threads/team/mrjoro)) to find a project suitable for them.
+  - Help people who finish a Good First Issue find a new project to tackle and encourage them to take it on.  If you don't already have a project in mind, gauge their interests and skill level and work with the rest of the community (or [mrjoro](https://amphtml.slack.com/threads/team/mrjoro)) to find a project suitable for them.
   - Some people may only be interested in making one-off fixes (e.g. adding support for their ad network) and that's fine.  Even in these cases it doesn't hurt to mention some other ideas for ways to help (e.g. maybe someone adding their ad network wants to make some other more general ads fixes) and let them know we'd love their help.
 - Let people know about [design reviews](design-reviews.md).
   - Design reviews provide an opportunity for the community to meet "face to face" (over video conference) and learn from each other.

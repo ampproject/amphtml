@@ -15,17 +15,18 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
-import {StandardActions} from '../../src/service/standard-actions-impl';
+import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {Services} from '../../src/services';
+import {StandardActions} from '../../src/service/standard-actions-impl';
+import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
+import {macroTask} from '../../testing/yield';
 import {setParentWindow} from '../../src/service';
-
+import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
   let mutateElementStub;
-  let deferMutateStub;
   let scrollStub;
   let ampdoc;
 
@@ -42,9 +43,7 @@ describes.sandboxed('StandardActions', {}, () => {
   }
 
   function stubMutate(methodName) {
-    return sandbox.stub(
-        standardActions.resources_,
-        methodName,
+    return sandbox.stub(standardActions.resources_, methodName).callsFake(
         (unusedElement, mutator) => mutator());
   }
 
@@ -68,8 +67,8 @@ describes.sandboxed('StandardActions', {}, () => {
   }
 
   function expectAmpElementToHaveBeenShown(element) {
-    expect(deferMutateStub).to.be.calledOnce;
-    expect(deferMutateStub.firstCall.args[0]).to.equal(element);
+    expect(mutateElementStub).to.be.calledOnce;
+    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
     expect(element.expand).to.be.calledOnce;
   }
 
@@ -82,7 +81,6 @@ describes.sandboxed('StandardActions', {}, () => {
     ampdoc = new AmpDocSingle(window);
     standardActions = new StandardActions(ampdoc);
     mutateElementStub = stubMutate('mutateElement');
-    deferMutateStub = stubMutate('deferMutate');
     scrollStub = sandbox.stub(
         standardActions.viewport_,
         'animateScrollIntoView');
@@ -92,14 +90,14 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"hide" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleHide(invocation);
       expectElementToHaveBeenHidden(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleHide(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
@@ -109,7 +107,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element (inline css)', () => {
       const element = createElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -117,7 +115,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -125,7 +123,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle AmpElement (inline css)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
@@ -136,7 +134,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show normal element when hidden (inline css)', () => {
       const element = createElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -144,14 +142,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show normal element when hidden (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
 
     it('should hide normal element when shown', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenHidden(element);
     });
@@ -159,14 +157,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show AmpElement when hidden (inline css)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
     it('should hide AmpElement when shown', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
@@ -175,14 +173,14 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"scrollTo" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleScrollTo(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleScrollTo(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
@@ -191,7 +189,7 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"focus" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       const focusStub = sandbox.stub(element, 'focus');
       standardActions.handleFocus(invocation);
       expect(focusStub).to.be.calledOnce;
@@ -199,7 +197,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
+      const invocation = {node: element, satisfiesTrust: () => true};
       const focusStub = sandbox.stub(element, 'focus');
       standardActions.handleFocus(invocation);
       expect(focusStub).to.be.calledOnce;
@@ -207,115 +205,157 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"AMP" global target', () => {
-    it('should implement navigateTo', () => {
-      const expandUrlStub = sandbox.stub(standardActions.urlReplacements_,
-          'expandUrlSync', url => url);
+    let win;
+    let invocation;
 
-      const win = {
-        location: 'http://foo.com',
-      };
-      const invocation = {
-        method: 'navigateTo',
-        args: {
-          url: 'http://bar.com',
-        },
-        target: {
+    beforeEach(() => {
+      win = {};
+      invocation = {
+        node: {
           ownerDocument: {
             defaultView: win,
           },
         },
+        satisfiesTrust: () => true,
       };
+    });
 
-      // Should check trust and fail.
-      invocation.satisfiesTrust = () => false;
-      standardActions.handleAmpTarget(invocation);
-      expect(win.location).to.equal('http://foo.com');
-      expect(expandUrlStub).to.not.be.called;
+    describe('navigateTo', () => {
+      let navigator;
 
-      // Should succeed.
-      invocation.satisfiesTrust = () => true;
-      standardActions.handleAmpTarget(invocation);
-      expect(win.location).to.equal('http://bar.com');
-      expect(expandUrlStub.calledOnce);
+      beforeEach(() => {
+        navigator = {navigateTo: sandbox.stub()};
+        sandbox.stub(Services, 'navigationForDoc').returns(navigator);
 
-      // Invalid protocols should fail.
-      invocation.args.url = /*eslint no-script-url: 0*/ 'javascript:alert(1)';
-      standardActions.handleAmpTarget(invocation);
-      expect(win.location).to.equal('http://bar.com');
-      expect(expandUrlStub.calledOnce);
+        // Fake ActionInvocation.
+        invocation.method = 'navigateTo';
+        invocation.args = {
+          url: 'http://bar.com',
+        };
+        invocation.caller = {tagName: 'DIV'};
+      });
+
+      it('should be implemented', () => {
+        // Should check trust and fail.
+        invocation.satisfiesTrust = () => false;
+        standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.not.called;
+
+        // Should succeed.
+        invocation.satisfiesTrust = () => true;
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo');
+        });
+      });
+
+      it('should pass if node does not have throwIfCannotNavigate()', () => {
+        invocation.caller.tagName = 'AMP-FOO';
+        invocation.caller.getImpl = () => Promise.resolve({});
+
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo');
+        });
+      });
+
+      it('should check throwIfCannotNavigate() for AMP elements', function*() {
+        const userError = sandbox.stub(user(), 'error');
+
+        invocation.caller.tagName = 'AMP-FOO';
+
+        // Should succeed if throwIfCannotNavigate() is not implemented.
+        invocation.caller.getImpl = () => Promise.resolve({});
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledOnce;
+        expect(navigator.navigateTo).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+
+        // Should succeed if throwIfCannotNavigate() returns null.
+        invocation.caller.getImpl = () => Promise.resolve({
+          throwIfCannotNavigate: () => null,
+        });
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledTwice;
+        expect(navigator.navigateTo.getCall(1)).to.be.calledWithExactly(
+            win, 'http://bar.com', 'AMP.navigateTo');
+
+        // Should fail if throwIfCannotNavigate() throws an error.
+        invocation.caller.getImpl = () => Promise.resolve({
+          throwIfCannotNavigate: () => { throw new Error('Fake error.'); },
+        });
+        yield standardActions.handleAmpTarget(invocation);
+        expect(navigator.navigateTo).to.be.calledTwice;
+        expect(userError).to.be.calledWith('STANDARD-ACTIONS',
+            'Fake error.');
+      });
     });
 
     it('should implement goBack', () => {
       installHistoryServiceForDoc(ampdoc);
       const history = Services.historyForDoc(ampdoc);
       const goBackStub = sandbox.stub(history, 'goBack');
-      const invocation = {method: 'goBack', satisfiesTrust: () => true};
+      invocation.method = 'goBack';
       standardActions.handleAmpTarget(invocation);
       expect(goBackStub).to.be.calledOnce;
     });
 
-    it('should implement setState() and pushState()', () => {
-      const setStateSpy = sandbox.spy();
-      const pushStateSpy = sandbox.spy();
+
+    it('should implement optoutOfCid', function*() {
+      const cid = cidServiceForDocForTesting(ampdoc);
+      const optoutStub = sandbox.stub(cid, 'optOut');
+      invocation.method = 'optoutOfCid';
+      standardActions.handleAmpTarget(invocation);
+      yield macroTask();
+      expect(optoutStub).to.be.calledOnce;
+    });
+
+
+    it('should implement setState()', () => {
+      const invokeSpy = sandbox.stub();
+      // Bind.invoke() doesn't resolve with a value,
+      // but add one here to check that the promise is chained.
+      invokeSpy.returns(Promise.resolve('set-state-complete'));
+
       window.services.bind = {
-        obj: {
-          setStateWithExpression: setStateSpy,
-          pushStateWithExpression: pushStateSpy,
-        },
+        obj: {invoke: invokeSpy},
       };
 
-      const args = {
-        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+      invocation.method = 'setState';
+      invocation.args = {
+        [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
-      const target = ampdoc;
-      const satisfiesTrust = () => true;
-      const setState = {method: 'setState', args, target, satisfiesTrust};
-      const pushState = {method: 'pushState', args, target, satisfiesTrust};
+      invocation.node = ampdoc;
 
-      standardActions.handleAmpTarget(setState, 0, []);
-      standardActions.handleAmpTarget(pushState, 0, []);
-
-      return Services.bindForDocOrNull(ampdoc).then(() => {
-        expect(setStateSpy).to.be.calledOnce;
-        expect(setStateSpy).to.be.calledWith('{foo: 123}');
-
-        expect(pushStateSpy).to.be.calledOnce;
-        expect(pushStateSpy).to.be.calledWith('{foo: 123}');
+      return standardActions.handleAmpTarget(invocation).then(result => {
+        expect(result).to.equal('set-state-complete');
+        expect(invokeSpy).to.be.calledOnce;
+        expect(invokeSpy).to.be.calledWith(invocation);
       });
     });
 
-    it('should not allow chained setState', () => {
-      const spy = sandbox.spy();
+    it('should implement pushState()', () => {
+      const invokeSpy = sandbox.stub();
+      // Bind.invoke() doesn't resolve with a value,
+      // but add one here to check that the promise is chained.
+      invokeSpy.returns(Promise.resolve('push-state-complete'));
+
       window.services.bind = {
-        obj: {
-          setStateWithExpression: spy,
-        },
+        obj: {invoke: invokeSpy},
       };
 
-      const firstSetState = {
-        method: 'setState',
-        args: {[OBJECT_STRING_ARGS_KEY]: '{foo: 123}'},
-        target: ampdoc,
-        satisfiesTrust: () => true,
+      invocation.method = 'pushState';
+      invocation.args = {
+        [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
-      const secondSetState = {
-        method: 'setState',
-        args: {[OBJECT_STRING_ARGS_KEY]: '{bar: 456}'},
-        target: ampdoc,
-        satisfiesTrust: () => true,
-      };
-      const actionInfos = [
-        {target: 'AMP', method: 'setState'},
-        {target: 'AMP', method: 'setState'},
-      ];
-      standardActions.handleAmpTarget(firstSetState, 0, actionInfos);
-      standardActions.handleAmpTarget(secondSetState, 1, actionInfos);
+      invocation.node = ampdoc;
 
-      return Services.bindForDocOrNull(ampdoc).then(() => {
-        // Only first setState call should be allowed.
-        expect(spy).to.be.calledOnce;
-        expect(spy).to.be.calledWith('{foo: 123}');
-        expect(spy).to.not.be.calledWith('{bar: 456}');
+      return standardActions.handleAmpTarget(invocation).then(result => {
+        expect(result).to.equal('push-state-complete');
+        expect(invokeSpy).to.be.calledOnce;
+        expect(invokeSpy).to.be.calledWith(invocation);
       });
     });
 
@@ -324,13 +364,11 @@ describes.sandboxed('StandardActions', {}, () => {
         print: () => {},
       };
       const printStub = sandbox.stub(windowApi, 'print');
-      const invocation = {
-        method: 'print',
-        satisfiesTrust: () => true,
-        target: {
-          ownerDocument: {
-            defaultView: windowApi,
-          },
+
+      invocation.method = 'print';
+      invocation.node = {
+        ownerDocument: {
+          defaultView: windowApi,
         },
       };
       standardActions.handleAmpTarget(invocation);
@@ -369,18 +407,23 @@ describes.sandboxed('StandardActions', {}, () => {
       // Global actions.
       expect(embedActions.addGlobalMethodHandler).to.have.callCount(5);
       expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
-      expect(embedActions.addGlobalMethodHandler.args[0][1]).to.be.function;
+      expect(
+          embedActions.addGlobalMethodHandler.args[0][1]).to.be.a('function');
       expect(embedActions.addGlobalMethodHandler.args[1][0]).to.equal('show');
-      expect(embedActions.addGlobalMethodHandler.args[1][1]).to.be.function;
+      expect(
+          embedActions.addGlobalMethodHandler.args[1][1]).to.be.a('function');
       expect(embedActions.addGlobalMethodHandler.args[2][0]).to
           .equal('toggleVisibility');
-      expect(embedActions.addGlobalMethodHandler.args[2][1]).to.be.function;
+      expect(
+          embedActions.addGlobalMethodHandler.args[2][1]).to.be.a('function');
       expect(embedActions.addGlobalMethodHandler.args[3][0]).to
           .equal('scrollTo');
-      expect(embedActions.addGlobalMethodHandler.args[3][1]).to.be.function;
+      expect(
+          embedActions.addGlobalMethodHandler.args[3][1]).to.be.a('function');
       expect(embedActions.addGlobalMethodHandler.args[4][0]).to
           .equal('focus');
-      expect(embedActions.addGlobalMethodHandler.args[4][1]).to.be.function;
+      expect(
+          embedActions.addGlobalMethodHandler.args[4][1]).to.be.a('function');
       embedActions.addGlobalMethodHandler.args[0][1]();
       expect(hideStub).to.be.calledOnce;
     });

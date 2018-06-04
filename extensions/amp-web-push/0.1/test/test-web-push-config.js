@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {TAG, CONFIG_TAG} from '../vars';
-import {WebPushConfigAttributes} from '../amp-web-push-config';
 import '../amp-web-push';
+import {CONFIG_TAG, TAG} from '../vars';
+import {WebPushConfigAttributes} from '../amp-web-push-config';
 
 
 describes.realWin('web-push-config', {

@@ -15,6 +15,8 @@
  */
 'use strict';
 
+/*eslint "max-len": 0*/
+
 /**
  * - type - Is assumed to be "forbidden" if not provided.
  * - filesMatching - Is assumed to be all files if not provided.
@@ -29,7 +31,7 @@
  *   whitelist: (string|!Array<string>|undefined),
  * }}
  */
-var RuleConfigDef;
+let RuleConfigDef;
 
 // It is often OK to add things to the whitelist, but make sure to highlight
 // this in review.
@@ -45,12 +47,21 @@ exports.rules = [
   },
   {
     filesMatching: '**/*.js',
+    mustNotDependOn: 'src/module.js',
+    whitelist: [
+      'extensions/amp-date-picker/0.1/**->src/module.js',
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
     whitelist: [
       'extensions/amp-crypto-polyfill/**/*.js->' +
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/' +
+          'amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->' +
           'third_party/timeagojs/timeago.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
@@ -61,6 +72,18 @@ exports.rules = [
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/timeagojs/timeago.js->' +
           'third_party/timeagojs/timeago-locales.js',
+      'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
+      'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
+      'extensions/amp-subscriptions/**/*.js->' +
+          'third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions/**/*.js->' +
+          'third_party/subscriptions-project/config.js',
+      'extensions/amp-subscriptions-google/**/*.js->' +
+          'third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions-google/**/*.js->' +
+          'third_party/subscriptions-project/config.js',
+      'extensions/amp-subscriptions-google/**/*.js->' +
+          'third_party/subscriptions-project/swg.js',
     ],
   },
   // Rules for 3p
@@ -81,9 +104,11 @@ exports.rules = [
       '3p/**->src/3p-frame-messaging.js',
       '3p/**->src/observable.js',
       '3p/**->src/amp-events.js',
+      '3p/**->src/consent-state.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/messaging.js->src/event-helper.js',
+      '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
     ],
   },
@@ -105,7 +130,9 @@ exports.rules = [
       'ads/**->src/types.js',
       'ads/**->src/string.js',
       'ads/**->src/style.js',
+      'ads/**->src/consent-state.js',
       'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
+      'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
@@ -121,6 +148,7 @@ exports.rules = [
       'ads/alp/handler.js->src/config.js',
       // Some ads need to depend on json.js
       'ads/**->src/json.js',
+      'ads/google/a4a/google-data-reporter.js->src/extension-analytics.js',
     ],
   },
   {
@@ -170,6 +198,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-brightcove/0.1/amp-brightcove.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
@@ -183,16 +213,51 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
           'src/service/video-manager-impl.js',
-      'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
-          'src/service/parallax-impl.js',
+      'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
           'src/service/extension-location.js',
+      'extensions/amp-analytics/0.1/iframe-transport.js->' +
+          'src/service/jank-meter.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
+          'src/service/position-observer/position-observer-worker.js',
+      'src/service/video/docking.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'src/service/video/docking.js->' +
+          'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
+      'extensions/amp-next-page/0.1/next-page-service.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-next-page/0.1/next-page-service.js->' +
+          'src/service/position-observer/position-observer-worker.js',
+      // TODO(calebcordry) remove this once experiment is launched
+      'extensions/amp-analytics/0.1/variables.js->' +
+          'src/service/url-replacements-impl.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
+          'src/service/notification-ui-manager.js',
+      'extensions/amp-consent/0.1/amp-consent.js->' +
+          'src/service/notification-ui-manager.js',
+      // For autoplay delegation.
+      // TODO(alanorozco, #13674): Use async service.
+      'extensions/amp-story/0.1/amp-story-page.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-story/1.0/amp-story-page.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-story/1.0/page-advancement.js->' +
+          'src/service/action-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->' +
+          'src/service/navigation.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->' +
+          'src/service/navigation.js',
     ],
   },
   {
@@ -243,9 +308,55 @@ exports.rules = [
     filesMatching: 'extensions/**/*-ad-network-*.js',
     mustNotDependOn: [
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
-      'extensions/amp-ad/0.1/concurrent-load.js',
       'src/3p-frame.js',
       'src/iframe-helper.js',
+    ],
+    whitelist: 'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->src/3p-frame.js',
+  },
+
+  {
+    mustNotDependOn: [
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+    ],
+  },
+
+  {
+    mustNotDependOn: [
+      /** DO NOT WHITELIST ANY FILES */
+      'ads/google/deprecated_doubleclick.js',
+      /** DO NOT WHITELIST ANY FILES */
+    ],
+    whitelist: [
+      'ads/google/doubleclick.js->ads/google/deprecated_doubleclick.js',
+      '3p/integration.js->ads/google/deprecated_doubleclick.js',
+    ],
+  },
+
+  // Delayed fetch for Doubleclick will be deprecated on March 29, 2018.
+  // Doubleclick.js will be deleted from the repository at that time.
+  // Please see https://github.com/ampproject/amphtml/issues/11834
+  // for more information.
+  // Do not add any additional files to this whitelist without express
+  // permission from @bradfrizzell, @keithwrightbos, or @robhazan.
+  {
+    mustNotDependOn: [
+      'ads/google/doubleclick.js',
+    ],
+    whitelist: [
+      /** DO NOT ADD TO WHITELIST **/
+      'ads/ix.js->ads/google/doubleclick.js',
+      'ads/imonomy.js->ads/google/doubleclick.js',
+      'ads/medianet.js->ads/google/doubleclick.js',
+      'ads/navegg.js->ads/google/doubleclick.js',
+      /** DO NOT ADD TO WHITELIST **/
+      'ads/openx.js->ads/google/doubleclick.js',
+      'ads/pulsepoint.js->ads/google/doubleclick.js',
+      'ads/rubicon.js->ads/google/doubleclick.js',
+      'ads/yieldbot.js->ads/google/doubleclick.js',
+      /** DO NOT ADD TO WHITELIST **/
+      'ads/criteo.js->ads/google/doubleclick.js',
+      /** DO NOT ADD TO WHITELIST **/
     ],
   },
 ];

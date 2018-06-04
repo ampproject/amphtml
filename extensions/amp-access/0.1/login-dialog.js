@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../../src/mode';
-import {getData, listen} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {openWindowDialog} from '../../../src/dom';
-import {parseUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
-import {urls} from '../../../src/config';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
+import {openWindowDialog} from '../../../src/dom';
+import {parseUrlDeprecated} from '../../../src/url';
+import {urls} from '../../../src/config';
 
 /** @const */
 const TAG = 'amp-access-login';
@@ -219,7 +219,7 @@ export class WebLoginDialog {
 
   /** @private */
   openInternal_() {
-    const screen = this.win.screen;
+    const {screen} = this.win;
     const w = Math.floor(Math.min(700, screen.width * 0.9));
     const h = Math.floor(Math.min(450, screen.height * 0.9));
     const x = Math.floor((screen.width - w) / 2);
@@ -266,7 +266,7 @@ export class WebLoginDialog {
    * @private
    */
   setupDialog_(returnUrl) {
-    const returnOrigin = parseUrl(returnUrl).origin;
+    const returnOrigin = parseUrlDeprecated(returnUrl).origin;
 
     this.heartbeatInterval_ = this.win.setInterval(() => {
       if (this.dialog_.closed) {

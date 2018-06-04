@@ -15,14 +15,12 @@
  */
 'use strict';
 
-var del = require('del');
-var gulp = require('gulp-help')(require('gulp'));
+const del = require('del');
+const gulp = require('gulp-help')(require('gulp'));
 
 
 /**
  * Clean up the build artifacts
- *
- * @param {function} done callback
  */
 function clean() {
   return del([

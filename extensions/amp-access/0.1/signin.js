@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 
 
 /** @const */
@@ -144,11 +144,11 @@ export class SignInProtocol {
           'getAccessTokenPassive', dict({
             'origin': this.pubOrigin_,
           })).then(resp => {
-            return /** @type {?string} */ (resp);
-          }).catch(reason => {
-            user().error(TAG, 'Failed to retrieve access token: ', reason);
-            return null;
-          });
+        return /** @type {?string} */ (resp);
+      }).catch(reason => {
+        user().error(TAG, 'Failed to retrieve access token: ', reason);
+        return null;
+      });
     }
     return this.accessTokenPromise_;
   }

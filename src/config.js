@@ -24,10 +24,10 @@
 const env = self.AMP_CONFIG || {};
 
 const thirdPartyFrameRegex = typeof env['thirdPartyFrameRegex'] == 'string' ?
-    new RegExp(env['thirdPartyFrameRegex']) : env['thirdPartyFrameRegex'];
+  new RegExp(env['thirdPartyFrameRegex']) : env['thirdPartyFrameRegex'];
 
 const cdnProxyRegex = typeof env['cdnProxyRegex'] == 'string' ?
-    new RegExp(env['cdnProxyRegex']) : env['cdnProxyRegex'];
+  new RegExp(env['cdnProxyRegex']) : env['cdnProxyRegex'];
 
 /** @type {!Object<string, string|boolean|RegExp>} */
 export const urls = {

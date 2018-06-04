@@ -1,3 +1,75 @@
 FAIL
-amp-brid-player/0.1/test/validator-amp-brid-player.html:48:2 The mandatory attribute 'data-player' is missing in tag 'amp-brid-player'. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]
-amp-brid-player/0.1/test/validator-amp-brid-player.html:55:2 The tag 'amp-brid-player' is missing a mandatory attribute - pick one of ['data-playlist', 'data-video']. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    Tests support for the amp-brid-player tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-brid-player" src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Example of a valid amp-brid-player. -->
+|    <amp-brid-player
+|        data-partner="264"
+|        data-player="4144"
+|        data-video="13663"
+|        layout="responsive"
+|        width="480" height="270">
+|    </amp-brid-player>
+|    <!-- Alternate valid example using a playlist. -->
+|    <amp-brid-player
+|        data-partner="264"
+|        data-player="4144"
+|        data-playlist="13663"
+|        layout="responsive"
+|        width="480" height="270">
+|    </amp-brid-player>
+|    <!-- Alternate valid example using a outstream. -->
+|    <amp-brid-player
+|        data-partner="6205"
+|        data-player="0"
+|        data-outstream="3828"
+|        layout="responsive"
+|        width="480" height="270">
+|    </amp-brid-player>
+|    <!-- Invalid example missing a player id. -->
+|    <amp-brid-player
+>>   ^~~~~~~~~
+amp-brid-player/0.1/test/validator-amp-brid-player.html:56:2 The mandatory attribute 'data-player' is missing in tag 'amp-brid-player'. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]
+|        data-partner="264"
+|        data-video="13663"
+|        layout="responsive"
+|        width="480" height="270">
+|    </amp-brid-player>
+|    <!-- Invalid example missing video, playlist and outstream. -->
+|    <amp-brid-player
+>>   ^~~~~~~~~
+amp-brid-player/0.1/test/validator-amp-brid-player.html:63:2 The tag 'amp-brid-player' is missing a mandatory attribute - pick one of ['data-outstream', 'data-playlist', 'data-video']. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]
+|        data-partner="264"
+|        data-player="4144"
+|        layout="responsive"
+|        width="480" height="270">
+|    </amp-brid-player>
+|  </body>
+|  </html>

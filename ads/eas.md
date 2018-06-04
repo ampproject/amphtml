@@ -16,35 +16,44 @@ limitations under the License.
 
 # CxenseDisplay
 
-## Supported parameters in the amp-ad tag
-
-- **data-eas-domain** - Required parameter, your ad server domain
-- **data-eas-[parameter]** - Any ad-request parameter, like 'cu'
-
 ## Example
 
-### Basic call that corresponds to https://eas4.emediate.eu/eas?cu=12345
+### Basic call
+
+Corresponds to `https://eas4.emediate.eu/eas?cu=12345`
 
 ```html
-  <amp-ad width=320 height=50
-      type="eas"
-      data-eas-domain="eas4.emediate.eu"
-      data-eas-cu="12345">
-  </amp-ad>
+<amp-ad width="320" height="50"
+    type="eas"
+    data-eas-domain="eas4.emediate.eu"
+    data-eas-cu="12345">
+</amp-ad>
 ```
 
 ### With targeting parameters
 
 ```html
-  <amp-ad width=320 height=50
-      type="eas"
-      data-eas-domain="eas4.emediate.eu"
-      data-eas-cu="12345"
-      data-eas-EASTsomename="somevalue"
-      data-eas-kw1="somekeyword">
-  </amp-ad>
+<amp-ad width="320" height="50"
+    type="eas"
+    data-eas-domain="eas4.emediate.eu"
+    data-eas-cu="12345"
+    data-eas-EASTsomename="somevalue"
+    data-eas-kw1="somekeyword">
+</amp-ad>
 ```
 
 ## Configuration
 
-For `data-eas-domain=<YourAdServerDomain>`, use your ad-server domain (e. g. eas3.emediate.se); If you're using a custom domain-name (like eas.somesite.com) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
+### Required parameters
+
+- `data-eas-domain`: Specify your ad-server domain (e.g., `eas3.emediate.se`); If you're using a custom domain-name (like, `eas.somesite.com`) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
+
+### Optional parameters
+
+- `data-eas-[parameter]`: Any ad-request parameter, like 'cu'.
+
+
+
+
+
+

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {getCorrelator} from './utils';
+import {CommonSignals} from '../../../src/common-signals';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {serializeQueryString} from '../../../src/url';
+import {getCorrelator} from './utils';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {Services} from '../../../src/services';
-import {CommonSignals} from '../../../src/common-signals';
+import {serializeQueryString} from '../../../src/url';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -131,12 +131,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   constructor(win, element, slotId) {
     super();
 
-    /** @private {!Window} @const */
-    this.win_ = win;
-
-    /** @private {!Element} @const */
-    this.element_ = element;
-
     /** @private {string} @const */
     this.namespace_ =
       element.getAttribute('data-a4a-upgrade-type') ? 'a4a' : 'amp';
@@ -146,9 +140,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
     /** @private {number} @const */
     this.correlator_ = getCorrelator(win, /* opt_cid */ undefined, element);
-
-    /** @private {string} @const */
-    this.slotName_ = this.namespace_ + '.' + this.slotId_;
 
     // Contortions to convince the type checker that we're type-safe.
     let initTime;
@@ -161,9 +152,10 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     /** @private {time} @const */
     this.initTime_ = initTime;
 
-    /** @const {!function():number} */
-    this.getDeltaTime = (win.performance && win.performance.now.bind(
-        win.performance)) || (() => {return Date.now() - this.initTime_;});
+    /** @const {function():number} */
+    this.getDeltaTime = (win.performance && win.performance.now) ?
+      win.performance.now.bind(win.performance) :
+      () => Date.now() - this.initTime_;
 
     /** (Not constant b/c this can be overridden for testing.) @private */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
@@ -206,7 +198,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
   /**
    * @param {string} name  Metric name to send.
-   * @returns {string}  URL to send metrics to.
+   * @return {string}  URL to send metrics to.
    * @private
    */
   buildPingAddress_(name) {
@@ -292,7 +284,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
           });
       // 50% vis w ini load
       vis.listenElement(element,
-                        {visiblePercentageMin: 50},
+          {visiblePercentageMin: 50},
           readyPromise, null,
           () => {
             this.sendPing('visHalfIniLoad');

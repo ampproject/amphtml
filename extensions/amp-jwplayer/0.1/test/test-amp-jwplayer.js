@@ -69,19 +69,19 @@ describes.realWin('amp-jwplayer', {
   });
 
   it('fails if no media is specified', () => {
-    return getjwplayer({
+    return allowConsoleError(() => { return getjwplayer({
       'data-player-id': 'sDZEo0ea',
     }).should.eventually.be.rejectedWith(
-        /Either the data-media-id or the data-playlist-id attributes must be/
-    );
+        /Either the data-media-id or the data-playlist-id attributes must be/);
+    });
   });
 
   it('fails if no player is specified', () => {
-    return getjwplayer({
+    return allowConsoleError(() => { return getjwplayer({
       'data-media-id': 'Wferorsv',
     }).should.eventually.be.rejectedWith(
-        /The data-player-id attribute is required for/
-    );
+        /The data-player-id attribute is required for/);
+    });
   });
 
   it('renders with a bad playlist', () => {
@@ -110,9 +110,22 @@ describes.realWin('amp-jwplayer', {
         expect(img.getAttribute('layout')).to.equal('fill');
         expect(img.hasAttribute('placeholder')).to.be.true;
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+        expect(img.getAttribute('alt')).to.equal('Loading video');
       });
     });
-
+    it('should propagate aria-label to placeholder', () => {
+      return getjwplayer({
+        'data-media-id': 'Wferorsv',
+        'data-player-id': 'sDZEo0ea',
+        'aria-label': 'interesting video',
+      }).then(jwp => {
+        const img = jwp.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('aria-label')).to.equal('interesting video');
+        expect(img.getAttribute('alt'))
+            .to.equal('Loading video - interesting video');
+      });
+    });
     it('should not create a placeholder for playlists', () => {
       return getjwplayer({
         'data-playlist-id': 'Wferorsv',

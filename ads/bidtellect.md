@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=320 height=200
+<amp-ad width="320" height="200"
     type="bidtellect"
     data-t="20bc0442-8vec-41f8-9892-04be6e6c3521"
     data-pid="815676411"
@@ -29,24 +29,24 @@ limitations under the License.
 
 ## Configuration
 
-Any questions, please [contact Bidtellect](mailto:technology@bidtellect.com).
+For details on the configuration semantics, contact [Bidtellect](mailto:technology@bidtellect.com).
 
-Required Parameters:
+### Required parameters
 
-- ```data-t```  - Parent publisher security token.
-- ```data-pid```  - The unique identifier for your placement.
-- ```data-sid```  - Unique identifier for the site.
+- `data-t`: Parent publisher security token.
+- `data-pid`: The unique identifier for your placement.
+- `data-sid`: Unique identifier for the site.
 
-Optional Parameters:
+### Optional Parameters:
 
-- ```data-sname```  - Name of site that corresponds to the Site ID.
-- ```data-pubid```  - Unique identifier for the publisher.
-- ```data-pubname```  - Name of publisher that corresponds to the Publisher ID.
-- ```data-renderid```  - Unique identifier of the placement widget.
-- ```data-bestrender```  - Allow us to provide the best size and cropping for the placement.
-- ```data-autoplay```  - Enables autoplay for video placements.
-- ```data-playbutton```  - Onscreen play button for video placements.
-- ```data-videotypeid```  - Define how will be rendered the video player.
-- ```data-videocloseicon```  - Enable close button on the video player.
-- ```data-targetid```  - Allows the placement to render inside a target HTML element.
-- ```data-bustframe```  - Allows the placement to bust out of nested iframes recursively.
+- `data-sname`: Name of site that corresponds to the Site ID.
+- `data-pubid`: Unique identifier for the publisher.
+- `data-pubname`: Name of publisher that corresponds to the Publisher ID.
+- `data-renderid`: Unique identifier of the placement widget.
+- `data-bestrender`: Provides the best size and cropping for the placement.
+- `data-autoplay`: Enables autoplay for video placements.
+- `data-playbutton`: Onscreen play button for video placements.
+- `data-videotypeid`: Defines how it will be rendered the video player.
+- `data-videocloseicon`: Enable close button on the video player.
+- `data-targetid`: Allows the placement to render inside a target HTML element.
+- `data-bustframe`: Allows the placement to bust out of nested iframes recursively.

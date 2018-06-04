@@ -14,27 +14,33 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
-import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {setStyles, toggle} from '../../../src/style';
+import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
-import {removeFragment, parseUrl} from '../../../src/url';
+import {dev} from '../../../src/log';
+import {removeFragment} from '../../../src/url';
+import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
-/** @const */
+/** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
 
-/** @const */
+/** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
 
-/** @const */
+/** @private @const {string} */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
+
+/**  @enum {string} */
+const SidebarEvents = {
+  OPEN: 'sidebarOpen',
+  CLOSE: 'sidebarClose',
+};
 
 export class AmpSidebar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -44,8 +50,8 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -62,9 +68,6 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {Array} */
     this.toolbars_ = [];
 
-    /** @private {boolean} */
-    this.isToolbarExperimentEnabled_ = isExperimentOn(this.win, TAG);
-
     const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
@@ -79,49 +82,44 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
 
-    /** @private {number|string|null} */
-    this.openOrCloseTimeOut_ = null;
-
     /** @const {function()} */
     this.boundOnAnimationEnd_ =
         debounce(this.win, this.onAnimationEnd_.bind(this), ANIMATION_TIMEOUT);
-  }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    /** @private {?Element} */
+    this.openerElement_ = null;
+
+    /** @private {number} */
+    this.initialScrollTop_ = 0;
   }
 
   /** @override */
   buildCallback() {
-    this.element.classList.add('i-amphtml-overlay');
+    const {element} = this;
 
-    this.side_ = this.element.getAttribute('side');
+    element.classList.add('i-amphtml-overlay');
+
+    this.side_ = element.getAttribute('side');
 
     this.viewport_ = this.getViewport();
 
-    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+    this.action_ = Services.actionServiceForDoc(element);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       this.side_ = isRTL(this.document_) ? 'right' : 'left';
-      this.element.setAttribute('side', this.side_);
+      element.setAttribute('side', this.side_);
     }
 
-    if (this.isToolbarExperimentEnabled_) {
-      const ampdoc = this.getAmpDoc();
-      // Get the toolbar attribute from the child navs.
-      const toolbarElements =
-        toArray(this.element.querySelectorAll('nav[toolbar]'));
+    // Get the toolbar attribute from the child navs.
+    const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
 
-      toolbarElements.forEach(toolbarElement => {
-        try {
-          this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
-            ampdoc));
-        } catch (e) {
-          this.user().error(TAG, 'Failed to instantiate toolbar', e);
-        }
-      });
-    }
+    toolbarElements.forEach(toolbarElement => {
+      try {
+        this.toolbars_.push(new Toolbar(toolbarElement, this));
+      } catch (e) {
+        this.user().error(TAG, 'Failed to instantiate toolbar', e);
+      }
+    });
 
     if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
@@ -130,14 +128,14 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       this.open_();
     } else {
-      this.element.setAttribute('aria-hidden', 'true');
+      element.setAttribute('aria-hidden', 'true');
     }
 
-    if (!this.element.hasAttribute('role')) {
-      this.element.setAttribute('role', 'menu');
+    if (!element.hasAttribute('role')) {
+      element.setAttribute('role', 'menu');
     }
     // Make sidebar programmatically focusable and focus on `open` for a11y.
-    this.element.tabIndex = -1;
+    element.tabIndex = -1;
 
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
@@ -147,7 +145,7 @@ export class AmpSidebar extends AMP.BaseElement {
     });
 
     // Replacement label for invisible close button set value in amp sidebar
-    const ariaLabel = this.element.getAttribute('data-close-button-aria-label')
+    const ariaLabel = element.getAttribute('data-close-button-aria-label')
     || 'Close the sidebar';
 
     // Invisible close button at the end of sidebar for screen-readers.
@@ -160,16 +158,16 @@ export class AmpSidebar extends AMP.BaseElement {
     screenReaderCloseButton.addEventListener('click', () => {
       this.close_();
     });
-    this.element.appendChild(screenReaderCloseButton);
+    element.appendChild(screenReaderCloseButton);
 
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
-    this.element.addEventListener('click', e => {
+    element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
-        const tgtLoc = parseUrl(target.href);
+        const tgtLoc = Services.urlForDoc(element).parse(target.href);
         const currentHref = this.getAmpDoc().win.location.href;
         // Important: Only close sidebar (and hence pop sidebar history entry)
         // when navigating locally, Chrome might cancel navigation request
@@ -186,23 +184,21 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     }, true);
 
-    this.element.addEventListener('transitionend', this.boundOnAnimationEnd_);
-    this.element.addEventListener('animationend', this.boundOnAnimationEnd_);
   }
 
   /** @override */
-  activate() {
-    this.open_();
+  activate(invocation) {
+    this.open_(invocation);
   }
 
   /** @override */
   onLayoutMeasure() {
-    if (this.isToolbarExperimentEnabled_) {
+    this.getAmpDoc().whenReady().then(() => {
       // Check our toolbars for changes
       this.toolbars_.forEach(toolbar => {
         toolbar.onLayoutChange(() => this.onToolbarOpen_());
       });
-    }
+    });
   }
 
   /**
@@ -215,7 +211,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Returns true if the sidebar is opened.
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   isOpen_() {
@@ -224,33 +220,37 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Toggles the open/close state of the sidebar.
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
-  toggle_() {
+  toggle_(opt_invocation) {
     if (this.isOpen_()) {
       this.close_();
     } else {
-      this.open_();
+      this.open_(opt_invocation);
     }
   }
 
   /**
    * Reveals the sidebar.
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
-  open_() {
+  open_(opt_invocation) {
     if (this.isOpen_()) {
       return;
     }
     this.viewport_.enterOverlayMode();
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       toggle(this.element, /* display */true);
+      this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+
       if (this.isIos_ && this.isSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
-      this.vsync_.mutate(() => {
+      this.mutateElement(() => {
         this.openMask_();
         this.element.setAttribute('open', '');
         this.boundOnAnimationEnd_();
@@ -260,6 +260,10 @@ export class AmpSidebar extends AMP.BaseElement {
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
+    if (opt_invocation) {
+      this.openerElement_ = opt_invocation.caller;
+      this.initialScrollTop_ = this.viewport_.getScrollTop();
+    }
   }
 
   /**
@@ -271,7 +275,11 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.leaveOverlayMode();
-    this.vsync_.mutate(() => {
+    const scrollDidNotChange =
+      (this.initialScrollTop_ == this.viewport_.getScrollTop());
+    const sidebarIsActive =
+        this.element.contains(this.document_.activeElement);
+    this.mutateElement(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.boundOnAnimationEnd_();
@@ -280,6 +288,9 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
       this.historyId_ = -1;
+    }
+    if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
+      tryFocus(this.openerElement_);
     }
   }
 
@@ -366,13 +377,24 @@ export class AmpSidebar extends AMP.BaseElement {
       this.scheduleLayout(children);
       this.scheduleResume(children);
       tryFocus(this.element);
+      this.triggerEvent_(SidebarEvents.OPEN);
     } else {
       // On close sidebar
-      this.vsync_.mutate(() => {
+      this.mutateElement(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
+        this.triggerEvent_(SidebarEvents.CLOSE);
       });
     }
+  }
+
+  /**
+   * @param {string} name
+   * @private
+   */
+  triggerEvent_(name) {
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }
 

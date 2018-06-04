@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 
@@ -23,12 +24,22 @@ import {user} from '../../../src/log';
  */
 const LOADING_ADS_WIN_ID_ = '3pla';
 
+/** @private {?Promise} resolves when no 3p throttle */
+let throttlePromise_ = null;
+/** @private {?Function} resolver for throttle promise */
+let throttlePromiseResolver_ = null;
+
 /**
  * @param {!Window} win
  * @return {boolean} Whether 3p is currently throttled.
  */
 export function is3pThrottled(win) {
   return !!win[LOADING_ADS_WIN_ID_];
+}
+
+/** @return {!Promise} resolves when no 3p throttle */
+export function waitFor3pThrottle() {
+  return throttlePromise_ || Promise.resolve();
 }
 
 /**
@@ -65,10 +76,21 @@ export function incrementLoadingAds(win, opt_loadingPromise) {
     win[LOADING_ADS_WIN_ID_] = 0;
   }
   win[LOADING_ADS_WIN_ID_]++;
+
+  if (!throttlePromise_) {
+    const deferred = new Deferred();
+    throttlePromise_ = deferred.promise;
+    throttlePromiseResolver_ = deferred.resolve;
+  }
+
   Services.timerFor(win)
       .timeoutPromise(1000, opt_loadingPromise)
       .catch(() => {})
       .then(() => {
-        win[LOADING_ADS_WIN_ID_]--;
+        if (!--win[LOADING_ADS_WIN_ID_]) {
+          throttlePromiseResolver_();
+          throttlePromise_ = null;
+          throttlePromiseResolver_ = null;
+        }
       });
 }
