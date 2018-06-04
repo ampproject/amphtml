@@ -580,7 +580,7 @@ describe('amp-a4a', () => {
       });
     });
 
-    describe('#renderViaCachedContentIframe', () => {
+    describe('#renderViaIframeGet', () => {
       beforeEach(() => {
         // Verify client cache iframe rendering.
         adResponse.headers[RENDERING_TYPE_HEADER] = 'client_cache';
@@ -1136,9 +1136,13 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         sandbox.stub(a4a, 'getAmpAdMetadata').callsFake(creative => {
-          const metaData = AmpA4A.prototype.getAmpAdMetadata(creative);
-          metaData.images = ['https://prefetch.me.com?a=b', 'http://do.not.prefetch.me.com?c=d',
-            'https://prefetch.metoo.com?e=f'];
+          const metaData = AmpA4A.prototype.getAmpAdMetadata.call(a4a,
+              creative);
+          metaData.images = [
+            'https://prefetch.me.com?a=b',
+            'http://do.not.prefetch.me.com?c=d',
+            'https://prefetch.metoo.com?e=f',
+          ];
           return metaData;
         });
         a4a.buildCallback();

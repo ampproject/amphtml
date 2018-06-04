@@ -36,6 +36,7 @@ import {
   getEnclosingContainerTypes,
   getIdentityToken,
   googleAdUrl,
+  isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
@@ -62,7 +63,9 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
+import {
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 
@@ -411,6 +414,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   initLifecycleReporter() {
     return googleLifecycleReporterFactory(this);
+  }
+
+  /** @override */
+  isXhrAllowed() {
+    return isCdnProxy(this.win) || getMode(this.win).localDev ||
+        getMode(this.win).test;
   }
 
   /** @override */

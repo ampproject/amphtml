@@ -18,8 +18,10 @@ import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
 import {PaginationButtons} from '../pagination-buttons';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
@@ -70,6 +72,9 @@ describes.realWin('amp-story', {
 
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization-v01', () => localizationService);
 
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
