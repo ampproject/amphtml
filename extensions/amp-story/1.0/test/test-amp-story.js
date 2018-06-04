@@ -74,7 +74,7 @@ describes.realWin('amp-story', {
     win.document.body.appendChild(element);
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization-v01', () => localizationService);
+    registerServiceBuilder(win, 'localization', () => localizationService);
 
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
