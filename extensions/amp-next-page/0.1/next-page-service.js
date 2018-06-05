@@ -25,7 +25,6 @@ import {
 } from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {parseUrlDeprecated} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -422,19 +421,31 @@ export class NextPageService {
    * Sets the specified document as active, updating the document title and URL.
    * @param {!DocumentRef} documentRef Reference to the document to set as
    *     active.
+   * @private
    */
   setActiveDocument_(documentRef) {
     const {amp} = documentRef;
     this.win_.document.title = amp.title || '';
-    if (this.win_.history.replaceState) {
-      const url = parseUrlDeprecated(documentRef.ampUrl);
-      this.win_.history.replaceState({}, amp.title, url.pathname);
-    }
-
     this.activeDocumentRef_ = documentRef;
+    this.setActiveDocumentInHistory_(documentRef);
 
     // TODO(peterjosling): Send request to viewer with title/URL
     // TODO(emarchiori): Consider updating position fixed elements.
+  }
+
+  /**
+   * @param {!DocumentRef} documentRef
+   * @private
+   */
+  setActiveDocumentInHistory_(documentRef) {
+    if (!this.win_.history || !this.win_.history.replaceState) {
+      return;
+    }
+
+    const urlService = Services.urlForDoc(dev().assertElement(this.element_));
+    const {title} = documentRef.amp;
+    const {pathname} = urlService.parse(documentRef.ampUrl);
+    this.win_.history.replaceState({}, title, pathname);
   }
 
   /**
