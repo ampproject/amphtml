@@ -199,8 +199,8 @@ function waitForExtensionIfPresent(win, extension) {
    * we don't wait around for an extension that does not exist.
    */
 
-  // If you can pass the extension name here you're already running JS
-  if (dom.childElementByAttr(win.document.head,
+  // We don't ned to assert that head is an element.
+  if (dom.childElementByAttr(/*OK*//** @type {!Element} */(win.document.head),
       `custom-element="${extension}"`)) {
     const extensions = getService(win, 'extensions');
     return /** @type {!Promise<?Object>} */ (
