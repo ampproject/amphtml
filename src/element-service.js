@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import * as dom from './dom';
 import {
   getAmpdoc,
@@ -25,7 +26,6 @@ import {
   getServicePromiseOrNullForDoc,
   getTopWindow,
 } from './service';
-import {stubbedElementNames} from './element-stub-data';
 import {toWin} from './types';
 import {user} from './log';
 
@@ -121,7 +121,7 @@ export function getElementServiceIfAvailableForDoc(
   }
 
   return ampdoc.whenBodyAvailable()
-      .then(() => waitForExtensionIfStubbed(ampdoc.win, extension))
+      .then(() => waitForExtensionIfPresent(ampdoc.win, extension))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
@@ -185,31 +185,28 @@ function assertService(service, id, extension) {
 }
 
 /**
- * Waits for an extension if a stub is present
+ * Waits for an extension if its script is present
  * @param {!Window} win
  * @param {string} extension
  * @return {!Promise}
  * @private
  */
-function waitForExtensionIfStubbed(win, extension) {
+function waitForExtensionIfPresent(win, extension) {
   /**
-   * If there is (or was) a stubbed extension wait for it to load before trying
-   * to get the service.  Prevents a race condition when everything but
-   * the extensions is in cache.  If there is no stub then it's either loaded,
+   * If there is an extension script wait for it to load before trying
+   * to get the service. Prevents a race condition when everything but
+   * the extensions is in cache. If there is no script then it's either
    * not present, or the service was defined by a test. In those cases
-   * we don't wait around for an extension that may not exist.
-   *
-   * IMPORTANT: Wait one microtask.  We do this because stubElementsForDoc()
-   * may be waiting on the body promise after us and we want to be sure the
-   * element is stubbed.
+   * we don't wait around for an extension that does not exist.
    */
-  return Promise.resolve().then(() => {
-    if (stubbedElementNames.includes(extension)) {
-      const extensions = getService(win, 'extensions');
-      return /** @type {!Promise<?Object>} */ (
-        extensions.waitForExtension(win, extension));
-    }
-  });
+
+  if (dom.scopedQuerySelector(/** @type {!Element} */(win.document.head),
+      'script[custom-element="' + extension + '"]')) {
+    const extensions = getService(win, 'extensions');
+    return /** @type {!Promise<?Object>} */ (
+      extensions.waitForExtension(win, extension));
+  }
+  return Promise.resolve();
 }
 
 /**
@@ -224,7 +221,7 @@ function waitForExtensionIfStubbed(win, extension) {
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
   return dom.waitForBodyPromise(win.document)
-      .then(() => waitForExtensionIfStubbed(win, extension))
+      .then(() => waitForExtensionIfPresent(win, extension))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
