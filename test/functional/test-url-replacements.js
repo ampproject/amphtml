@@ -433,8 +433,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace VARIANT', () => {
-    expectAsyncConsoleError(
-        'The value passed to VARIANT() is not a valid experiment name:x3');
     return expect(expandUrlAsync(
         '?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)',
         /*opt_bindings*/undefined, {withVariant: true}))
