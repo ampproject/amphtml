@@ -25,7 +25,7 @@ import {whenContentIniLoad} from '../friendly-iframe-embed';
  * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function registerIniLoadListener(ampdoc) {
-  const win = ampdoc.win;
+  const {win} = ampdoc;
   const root = ampdoc.getRootNode();
   whenContentIniLoad(ampdoc, win,
       Services.viewportForDoc(ampdoc).getLayoutRect(
