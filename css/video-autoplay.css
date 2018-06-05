@@ -13,18 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Animated equalizer icon for muted autoplaying videos.
- */
 i-amphtml-video-mask {
   z-index: 1;
 }
 
+
+/**
+ * Animated equalizer icon for muted autoplaying videos.
+ */
+
 [noaudio] .amp-video-eq {
+  /* Don't display icon for videos flagged as having no audio. */
   display: none !important;
 }
 
 .amp-video-eq {
+  /* Skip pointer events to catch click on parent. */
+  pointer-events: none !important;
   align-items: flex-end;
   bottom: 7px;
   display: flex;

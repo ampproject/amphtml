@@ -26,6 +26,9 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {
+  VideoServiceSignals,
+} from '../../../src/service/video-service-interface';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {isFiniteNumber} from '../../../src/types';
@@ -264,11 +267,22 @@ export class VideoEntry {
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    video.registerAction('play', () => video.play(/* isAuto */ false), trust);
-    video.registerAction('pause', () => video.pause(), trust);
-    video.registerAction('mute', () => video.mute(), trust);
-    video.registerAction('unmute', () => video.unmute(), trust);
-    video.registerAction('fullscreen', () => video.fullscreenEnter(), trust);
+    registerAction('play', () => video.play(/* isAuto */ false));
+    registerAction('pause', () => video.pause());
+    registerAction('mute', () => video.mute());
+    registerAction('unmute', () => video.unmute());
+    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    /**
+     * @param {string} action
+     * @param {function()} fn
+     */
+    function registerAction(action, fn) {
+      video.registerAction(action, () => {
+        video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+        fn();
+      }, trust);
+    }
   }
 
   /**
