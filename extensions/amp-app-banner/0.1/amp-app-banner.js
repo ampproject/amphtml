@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {once} from '../../../src/utils/function';
 import {openWindowDialog, removeElement} from '../../../src/dom';
 
 const TAG = 'amp-app-banner';
@@ -33,12 +32,6 @@ export class AbstractAppBanner extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /**
-     * @return {!../../../src/service/url-impl.Url}
-     * @protected
-     */
-    this.getUrlService = once(() => Services.urlForDoc(this.element));
 
     /** @protected {?Element} */
     this.openButton_ = null;
@@ -293,7 +286,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     const openUrl = config['app-argument'];
 
     if (openUrl) {
-      user().assert(this.getUrlService().isProtocolValid(openUrl),
+      user().assert(Services.urlForDoc(this.element).isProtocolValid(openUrl),
           'The url in app-argument has invalid protocol: %s', openUrl);
     }
 
@@ -347,11 +340,16 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         'link[rel=manifest],link[rel=origin-manifest]');
 
     const platform = Services.platformFor(win);
+    const url = Services.urlForDoc(element);
+
     // We want to fallback to browser builtin mechanism when possible.
     const isChromeAndroid = platform.isAndroid() && platform.isChrome();
-    const isProxyOrigin = this.getUrlService().isProxyOrigin(win.location);
-    this.canShowBuiltinBanner_ = !isProxyOrigin &&
-        !viewer.isEmbedded() && isChromeAndroid;
+    const isProxyOrigin = url.isProxyOrigin(win.location);
+
+    this.canShowBuiltinBanner_ =
+        !isProxyOrigin &&
+          !viewer.isEmbedded() &&
+          isChromeAndroid;
 
     if (this.canShowBuiltinBanner_) {
       user().info(TAG,
@@ -368,8 +366,8 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     }
 
     this.manifestHref_ = this.manifestLink_.getAttribute('href');
-    this.getUrlService()
-        .assertHttpsUrl(this.manifestHref_, element, 'manifest href');
+
+    url.assertHttpsUrl(this.manifestHref_, element, 'manifest href');
 
     this.openButton_ = user().assert(
         element.querySelector('button[open-button]'),
@@ -450,7 +448,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   getAndroidIntentForUrl_(appId) {
     const {element} = this;
     const {canonicalUrl} = Services.documentInfoForDoc(element);
-    const parsedUrl = this.getUrlService().parse(canonicalUrl);
+    const parsedUrl = Services.urlForDoc(element).parse(canonicalUrl);
     const cleanProtocol = parsedUrl.protocol.replace(':', '');
     const {host, pathname} = parsedUrl;
 
