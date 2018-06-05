@@ -355,7 +355,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 ##### landscape
 
-The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `url`, and an `image`. You can also optionally add a `category` field, which will add a subtitle on top of the title.
+The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
 
 ```json
 {
@@ -376,7 +376,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 ##### portrait
 
-The `portrait` component can be used to link to other stories. This component requires the following fields: `title`, `url`, and an `image`. You can also optionally add a `category` field, which will add a subtitle on top of the title.
+The `portrait` component can be used to link to other stories. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
 
 ```json
 {
