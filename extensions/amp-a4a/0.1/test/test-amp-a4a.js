@@ -636,9 +636,9 @@ describe('amp-a4a', () => {
     });
 
     describe('illegal render mode value', () => {
-      let devErrLogSpy;
+      let devErrLogStub;
       beforeEach(() => {
-        devErrLogSpy = sandbox.stub(dev(), 'error');
+        devErrLogStub = sandbox.stub(dev(), 'error');
         // If rendering type is unknown, should fall back to cached content
         // iframe and generate an error.
         adResponse.headers[RENDERING_TYPE_HEADER] = 'random illegal value';
@@ -649,8 +649,8 @@ describe('amp-a4a', () => {
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL);
           // Should have reported an error.
-          expect(devErrLogSpy).to.be.calledOnce;
-          expect(devErrLogSpy.getCall(0).args[1]).to.have.string(
+          expect(devErrLogStub).to.be.calledOnce;
+          expect(devErrLogStub.getCall(0).args[1]).to.have.string(
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
           expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',

@@ -427,9 +427,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
   }
 
-  /** @override */
-  buildCallback() {
-    super.buildCallback();
+  /** @private */
+  maybeDeprecationWarn_() {
     const warnDeprecation = feature => user().warn(
         TAG, `${feature} is no longer supported for DoubleClick.` +
           'Please refer to ' +
@@ -446,6 +445,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (useRemoteHtml) {
       warnDeprecation('remote.html');
     }
+  }
+
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+    this.maybeDeprecationWarn_();
     this.setPageLevelExperiments(
         extractUrlExperimentId(this.win, this.element));
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
