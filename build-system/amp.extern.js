@@ -411,7 +411,7 @@ SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
 
-AMP.RealTimeConfigManager = undefined;
+AMP.RealTimeConfigManager;
 
 /**
  * Actual filled values for this exists in
