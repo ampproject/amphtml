@@ -51,7 +51,7 @@ export class AmpNextPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
-    
+
     if (this.service_.isActive()) {
       return;
     }
@@ -79,8 +79,7 @@ export class AmpNextPage extends AMP.BaseElement {
     const url = urlService.parse(docInfo.url);
     const sourceOrigin = urlService.getSourceOrigin(url);
 
-    const config = 
-        assertConfig(urlService, configJson, url.origin, sourceOrigin);
+    const config = assertConfig(element, configJson, url.origin, sourceOrigin);
 
     if (urlService.isProxyOrigin(url)) {
       config.pages.forEach(rec => {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {isArray} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -36,7 +37,7 @@ export let AmpNextPageItem;
 
 /**
  * Checks whether the object conforms to the AmpNextPageConfig spec.
- * @param {!../../../src/service/url-impl.Url} urlService
+ * @param {!Element} context
  * @param {*} config The config to validate.
  * @param {string} origin The origin of the current document
  *     (document.location.origin). All recommendations must be for the same
@@ -46,10 +47,10 @@ export let AmpNextPageItem;
  *     pointing at {@code sourceOrigin} will be modified to point to the cache.
  * @return {!AmpNextPageConfig}
  */
-export function assertConfig(urlService, config, origin, sourceOrigin) {
+export function assertConfig(context, config, origin, sourceOrigin) {
   user().assert(config, 'amp-next-page config must be specified');
   user().assert(isArray(config.pages), 'pages must be an array');
-  assertRecos(urlService, config.pages, origin, sourceOrigin);
+  assertRecos(context, config.pages, origin, sourceOrigin);
 
   if ('hideSelectors' in config) {
     user().assert(isArray(config['hideSelectors']),
@@ -61,12 +62,13 @@ export function assertConfig(urlService, config, origin, sourceOrigin) {
 }
 
 /**
- * @param {!../../../src/service/url-impl.Url} urlService
+ * @param {!Element} context
+ * @param {!Array<*>} recos
  * @param {string} origin
- * @param {string} sourceOrigin
+ * @param {string=} sourceOrigin
  */
-function assertRecos(urlService, recos, origin, sourceOrigin) {
-  recos.forEach(reco => assertReco(urlService, reco, origin, sourceOrigin));
+function assertRecos(context, recos, origin, sourceOrigin) {
+  recos.forEach(reco => assertReco(context, reco, origin, sourceOrigin));
 }
 
 const BANNED_SELECTOR_PATTERNS = [
@@ -85,12 +87,13 @@ function assertSelectors(selectors) {
 }
 
 /**
- * @param {!../../../src/service/url-impl.Url} urlService
+ * @param {!Element} context
  * @param {*} reco
  * @param {string} origin
- * @param {string} sourceOrigin
+ * @param {string=} sourceOrigin
  */
-function assertReco(urlService, reco, origin, sourceOrigin) {
+function assertReco(context, reco, origin, sourceOrigin) {
+  const urlService = Services.urlForDoc(context);
   const url = urlService.parse(reco.ampUrl);
   user().assertString(reco.ampUrl, 'ampUrl must be a string');
   user().assert(url.origin === origin || url.origin === sourceOrigin,

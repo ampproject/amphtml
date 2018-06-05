@@ -442,8 +442,10 @@ export class NextPageService {
       return;
     }
 
-    const url = Services.urlForDoc(this.element_).parse(documentRef.ampUrl);
-    this.win_.history.replaceState({}, amp.title, url.pathname);
+    const urlService = Services.urlForDoc(dev().assertElement(this.element_));
+    const {title} = documentRef.amp;
+    const {pathname} = urlService.parse(documentRef.ampUrl);
+    this.win_.history.replaceState({}, title, pathname);
   }
 
   /**
