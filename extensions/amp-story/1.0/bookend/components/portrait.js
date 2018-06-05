@@ -88,7 +88,7 @@ export class PortraitComponent {
   }
 
   /** @override */
-  buildTemplate(portraitData, doc) {
+  buildElement(portraitData, doc) {
     const html = htmlFor(doc);
     const el =
         html`

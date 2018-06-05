@@ -88,7 +88,7 @@ export class LandscapeComponent {
   }
 
   /** @override */
-  buildTemplate(landscapeData, doc) {
+  buildElement(landscapeData, doc) {
     const html = htmlFor(doc);
     const el =
         html`

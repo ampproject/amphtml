@@ -76,12 +76,7 @@ export class CtaLinkComponent {
     return ctaLinks;
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} ctaLinksData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
+  /** @override */
   buildElement(ctaLinksData, doc) {
     const html = htmlFor(doc);
     const container =
@@ -97,6 +92,7 @@ export class CtaLinkComponent {
     ctaLinksData['links'].forEach(currentLink => {
       const el = linkSeed.cloneNode(/* deep */ true);
       addAttributesToElement(el, dict({'href': currentLink['url']}));
+
       if (currentLink['amphtml'] === true) {
         addAttributesToElement(el, dict({'rel': 'amphtml'}));
       }

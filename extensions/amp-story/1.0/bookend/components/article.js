@@ -82,7 +82,7 @@ export class ArticleComponent {
   }
 
   /** @override */
-  buildTemplate(articleData, doc) {
+  buildElement(articleData, doc) {
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const el =

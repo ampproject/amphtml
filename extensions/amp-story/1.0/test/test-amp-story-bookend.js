@@ -142,7 +142,6 @@ describes.realWin('amp-story-bookend', {
 
     // Force sync mutateElement.
     sandbox.stub(bookend, 'mutateElement').callsArg(0);
-    // TODO(enriqe): check if needed.
     sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
   });
 
@@ -455,6 +454,7 @@ describes.realWin('amp-story-bookend', {
       'components': [
         {
           'type': 'portrait',
+          'title': 'example title',
           'category': 'example category',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
@@ -487,12 +487,14 @@ describes.realWin('amp-story-bookend', {
       'components': [
         {
           'type': 'portrait',
+          'title': 'example title',
           'category': 'example category',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
         },
         {
           'type': 'portrait',
+          'title': 'example title',
           'category': 'example category',
           'url': 'http://example.com/article.html',
           'image': 'http://placehold.it/256x128',
