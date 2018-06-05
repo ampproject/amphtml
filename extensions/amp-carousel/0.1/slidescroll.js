@@ -405,18 +405,16 @@ export class AmpSlideScroll extends BaseSlides {
   customSnap_(currentScrollLeft, opt_forceDir) {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
-    let toScrollLeft = 0;
+    // Default behavior should be stays on current slide
     let diff = newIndex - this.slideIndex_;
     const hasPrev = this.hasPrev();
+    let toScrollLeft = hasPrev ? this.slideWidth_ : 0;
 
     if (diff == 0 && (opt_forceDir == 1 || opt_forceDir == -1)) {
       diff = opt_forceDir;
     }
 
-    if (diff == 0) {
-      // Snap and stay.
-      toScrollLeft = hasPrev ? this.slideWidth_ : 0;
-    } else if (diff == 1 ||
+    if (diff == 1 ||
         (diff != -1 && diff == -1 * (this.noOfSlides_ - 1))) {
       // Move fwd.
       toScrollLeft = hasPrev ? this.slideWidth_ * 2 : this.slideWidth_;
