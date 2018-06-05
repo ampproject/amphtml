@@ -19,7 +19,6 @@
  */
 
 import '../polyfills';
-import {CommonSignals} from '../common-signals';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {
@@ -28,7 +27,6 @@ import {
   installBuiltins,
   installRuntimeServices,
 } from '../runtime';
-import {createCustomEvent} from '../event-helper.js'
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
@@ -41,9 +39,9 @@ import {installStylesForDoc, makeBodyVisible} from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
+import {registerIniLoadListener} from './utils';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
-import {whenContentIniLoad} from '../friendly-iframe-embed'
 
 getMode(self).runtime = 'inabox';
 
@@ -93,19 +91,7 @@ startupChunk(self.document, function initial() {
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
       maybeTrackImpression(self);
-      // Fire custom ini-load event when loaded for ad tags consumption.  Will
-      // send custom event if friendly to parent and postMessage either way.
-      const root = ampdoc.getRootNode();
-      whenContentIniLoad(ampdoc, ampdoc.win,
-        Services.viewportForDoc(ampdoc).getLayoutRect(
-          root.documentElement || root.body || root))
-        .then(() => {
-          try {
-            self.parent.document.dispatchEvent(createCustomEvent(
-              self, 'amp-ini-load', /* detail */ null, {bubbles: true}));
-          } catch (unused_err) { /* will fail if not friendly */ }
-          self.parent.postMessage('amp-ini-load', '*');
-        })
+      registerIniLoadListener(ampdoc);
     });
     startupChunk(self.document, function builtins() {
       // Builtins.
