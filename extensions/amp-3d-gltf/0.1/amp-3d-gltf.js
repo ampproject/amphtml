@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Deferred} from '../../../src/utils/promise';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -96,7 +96,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         this.element);
 
     this.context_ = dict({
-      'src': src,
+      'src': resolveRelativeUrl(src, this.win.location),
       'renderer': {
         'alpha': getOption('alpha', bool, false),
         'antialias': getOption('antialiasing', bool, true),
