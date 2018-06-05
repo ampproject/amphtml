@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * The entry point for AMP inabox runtime (inabox-v0.js).
- */
-
 import {Services} from '../services';
 import {createCustomEvent} from '../event-helper.js';
 import {whenContentIniLoad} from '../friendly-iframe-embed';
