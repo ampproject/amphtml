@@ -91,7 +91,7 @@ tags: {  # <${name}>
   satisfies: "${name}"
   requires: "${name} extension .js script"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
+  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }
