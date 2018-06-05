@@ -283,6 +283,7 @@ const forbiddenTerms = {
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
       'src/service/video/docking.js',
+      'src/service/video/autoplay.js',
     ],
   },
   'initLogConstructor|setReportError': {

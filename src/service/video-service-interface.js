@@ -36,7 +36,7 @@ export class VideoServiceInterface {
   /**
    * Delegates autoplay.
    * @param {!AmpElement} unusedVideo
-   * @param {!../observable.Observable<boolean>=} opt_unusedObservable
+   * @param {?../observable.Observable<boolean>=} opt_unusedObservable
    *    If provided, video will be played or paused when this observable fires.
    */
   delegateAutoplay(unusedVideo, opt_unusedObservable) {}
