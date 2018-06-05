@@ -67,14 +67,13 @@ describes.realWin('amp-nexxtv-player', {
   });
 
   it('fails without mediaid', () => {
-    return getNexxtv(null, '761').should.eventually.be.rejectedWith(
-        /The data-mediaid attribute is required/);
+    expectAsyncConsoleError(/data-mediaid attribute is required/);
+    return getNexxtv(null, '761').should.eventually.be.rejected;
   });
 
   it('fails without client', () => {
-    return getNexxtv('71QQG852413DU7J', null)
-        .should.eventually.be.rejectedWith(
-            /The data-client attribute is required/);
+    expectAsyncConsoleError(/data-client attribute is required/);
+    return getNexxtv('71QQG852413DU7J', null).should.eventually.be.rejected;
   });
 
   it('should forward events from nexxtv-player to the amp element', () => {
