@@ -396,26 +396,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @param {string} urlExperimentId
+   * @param {?string} urlExperimentId
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
-    const warnDeprecation = feature => user().warn(
-        TAG, `${feature} is no longer supported for DoubleClick.` +
-          'Please refer to ' +
-          'https://github.com/ampproject/amphtml/issues/11834 ' +
-          'for more information');
-    const usdrd = 'useSameDomainRenderingUntilDeprecated';
-    const hasUSDRD = usdrd in this.element.dataset ||
-          (tryParseJson(this.element.getAttribute('json')) || {})[usdrd];
-    if (hasUSDRD) {
-      warnDeprecation(usdrd);
-    }
-    const useRemoteHtml =
-      !!this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
-    if (useRemoteHtml) {
-      warnDeprecation('remote.html');
-    }
     const experimentId = {
       // Delay Request
       '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
@@ -446,6 +430,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    const warnDeprecation = feature => user().warn(
+        TAG, `${feature} is no longer supported for DoubleClick.` +
+          'Please refer to ' +
+          'https://github.com/ampproject/amphtml/issues/11834 ' +
+          'for more information');
+    const usdrd = 'useSameDomainRenderingUntilDeprecated';
+    const hasUSDRD = usdrd in this.element.dataset ||
+          (tryParseJson(this.element.getAttribute('json')) || {})[usdrd];
+    if (hasUSDRD) {
+      warnDeprecation(usdrd);
+    }
+    const useRemoteHtml =
+      !!this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
+    if (useRemoteHtml) {
+      warnDeprecation('remote.html');
+    }
     this.setPageLevelExperiments(
         extractUrlExperimentId(this.win, this.element));
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
