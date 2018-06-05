@@ -67,11 +67,13 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {!AmpElement} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
- * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
+ * @param {!{
+ *   disallowCustom,
+ * }=} opt_options Options for the created iframe.
  * @return {!Element} The iframe.
  */
 export function getIframe(
-  parentWindow, parentElement, opt_type, opt_context, opt_disallowCustom) {
+  parentWindow, parentElement, opt_type, opt_context, {disallowCustom} = {}) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   dev().assert(
@@ -88,7 +90,7 @@ export function getIframe(
   count[attributes['type']] += 1;
 
   const baseUrl = getBootstrapBaseUrl(
-      parentWindow, undefined, opt_type, opt_disallowCustom);
+      parentWindow, undefined, opt_type, disallowCustom);
   const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
