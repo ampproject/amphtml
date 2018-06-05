@@ -20,7 +20,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {assertAbsoluteHttpOrHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {fullscreenEnter, fullscreenExit, isFullscreenElement, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
@@ -119,7 +119,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     let scriptPlayerInit = this.element.getAttribute('data-script-url');
     scriptPlayerInit =
         (scriptPlayerInit
-            && decodeURIComponent(scriptPlayerInit)
+            && tryDecodeUriComponent(scriptPlayerInit)
         )
         ||
         (this.kindIsProd_

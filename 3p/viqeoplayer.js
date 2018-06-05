@@ -19,6 +19,7 @@ import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
 import {setStyles} from '../src/style';
+import {tryDecodeUriComponent} from '../src/url';
 
 
 /**
@@ -48,7 +49,7 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
             source: 'ViqeoPlayer',
             action: targetEventName,
           });
-          parent.postMessage(message, '*');
+          parent./*OK*/postMessage(message, '*');
           if (extraHandler) {
             extraHandler();
           }
@@ -85,8 +86,9 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
 
 export function viqeoplayer(global) {
   const dataReceived = parseJson(global.name)['attributes']._context;
-  const scriptPlayerInit = decodeURIComponent(dataReceived['scriptPlayerInit']);
-  const previewUrl = decodeURIComponent(dataReceived['previewUrl']);
+  const scriptPlayerInit =
+      tryDecodeUriComponent(dataReceived['scriptPlayerInit']);
+  const previewUrl = tryDecodeUriComponent(dataReceived['previewUrl']);
   const videoId = dataReceived['videoId'];
   const profileId = dataReceived['profileId'];
 
