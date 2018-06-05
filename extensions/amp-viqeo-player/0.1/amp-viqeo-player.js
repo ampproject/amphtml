@@ -24,8 +24,9 @@ import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {fullscreenEnter, fullscreenExit, isFullscreenElement, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
+import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {setStyles} from '../../../src/style';
+import {rectIntersection} from '../../../src/layout-rect';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -45,9 +46,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {?string} */
-    this.videoIframeSrc_ = null;
-
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -65,6 +63,9 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.kindIsProd_ = true;
+
+    /** @private {?number} */
+    this.lastIntersectionRation_ = null;
   }
 
   /**
@@ -104,7 +105,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     this.kindIsProd_ = this.element.getAttribute('data-kind') !== 'stage';
 
-
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
@@ -116,98 +116,81 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-
-    const iframeStyle = this.element.getAttribute('data-iframe-style')
-        || 'position: absolute';
-    const iframeHeight = this.element.getAttribute('data-iframe-height')
-        || '100%';
-    const iframeWidth = this.element.getAttribute('data-iframe-width')
-        || '100%';
-
     let scriptPlayerInit = this.element.getAttribute('data-script-url');
     scriptPlayerInit =
         (scriptPlayerInit
-            && scriptPlayerInit.length && decodeURI(scriptPlayerInit)
+            && decodeURIComponent(scriptPlayerInit)
         )
         ||
         (this.kindIsProd_
           ? 'https://cdn.viqeo.tv/js/vq_player_init.js'
           : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1'
         );
+    // embed preview url
+    let previewUrl = this.element.getAttribute('data-player-url');
+    previewUrl =
+        (previewUrl
+            && previewUrl.length && decodeURI(previewUrl)
+        )
+        || (this.kindIsProd_ ? 'https://cdn.viqeo.tv/embed' : 'https://stage.embed.viqeo.tv');
 
-    const ampIframe = this.element.ownerDocument.createElement('iframe');
-    ampIframe.src = 'about:blank';
-    if (ampIframe.contentWindow) {
-      frameLoaded.call(this);
-    } else {
-      ampIframe.onload = frameLoaded.bind(this);
+    // Create preview iframe source path
+    previewUrl = assertAbsoluteHttpOrHttpsUrl(
+        `${previewUrl}/?vid=${this.videoId_}`);
+
+    const jsonParams = {
+      scriptPlayerInit: encodeURIComponent(scriptPlayerInit),
+      previewUrl: encodeURIComponent(previewUrl),
+      videoId: this.videoId_,
+      profileId: this.profileId_,
+    };
+
+    const iframe = getIframe(this.win, this.element, 'viqeoplayer', jsonParams);
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleViqeoMessages_.bind(this)
+    );
+
+    return this.mutateElement(() => {
+      this.element.appendChild(iframe);
+      this.iframe_ = iframe;
+      this.applyFillContent(iframe);
+      this.getViewport().onScroll(this.sendIntersectionRatio_.bind(this));
+    }).then(() => {
+      return this.playerReadyPromise_;
+    });
+  }
+
+  /**
+   * @param {!Event|{data: !JsonObject}} event
+   * @return {?JsonObject|string|undefined}
+   * @private
+   * */
+  handleViqeoMessages_(event) {
+    const eventData = getData(event);
+    if (!eventData || event.source !== this.iframe_.contentWindow ||
+        eventData['source'] !== 'ViqeoPlayer') {
+      return;
     }
 
-    this.element.appendChild(ampIframe);
-    this.iframe_ = ampIframe;
-
-    return this.loadPromise(ampIframe);
-
-    /** @this {AmpViqeoPlayer} */
-    function frameLoaded() {
-      const doc = ampIframe.contentWindow.document;
-      setStyles(doc.body, {
-        'marginLeft': 0,
-        'marginRight': 0,
-        'marginTop': 0,
-        'marginBottom': 0,
-      });
-
-      const scr = doc.createElement('script');
-      scr.async = true;
-      scr.src = scriptPlayerInit;
-      doc.head.appendChild(scr);
-
-      const mark = doc.createElement('div');
-
-      setStyles(mark, {
-        'position': 'relative',
-        'width': '100%',
-        'height': '0',
-        'paddingBottom': '100%',
-      });
-      mark.setAttribute('data-vnd', this.videoId_);
-      mark.setAttribute('data-profile', this.profileId_);
-      mark.classList.add('viqeo-embed');
-
-      const iframe = doc.createElement('iframe');
-
-      iframe.setAttribute('width', iframeWidth);
-      iframe.setAttribute('height', iframeHeight);
-      iframe.setAttribute('style', iframeStyle);
-      iframe.setAttribute('frameBorder', '0');
-      iframe.setAttribute('allowFullScreen', '');
-      iframe.src = this.getVideoIframeSrc_();
-
-      mark.appendChild(iframe);
-
-      const wrapper = doc.createElement('div');
-      wrapper.appendChild(mark);
-
-      doc.body.appendChild(wrapper);
-
-      const ampIframeWindow = ampIframe.contentWindow;
-
-      this.unlistenMessage_ = listen(
-          ampIframeWindow,
-          'message',
-          this.handleViqeoMessages_.bind(this)
-      );
-
-      if (!ampIframeWindow['VIQEO']) {
-        ampIframeWindow['onViqeoLoad'] = this.viqeoPlayerInitLoaded_.bind(this);
+    const action = eventData['action'];
+    if (action === 'ready') {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      this.playerReadyResolver_(this.iframe_);
+      this.sendIntersectionRatio_();
+    } else if (action === 'play') {
+      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+    } else if (action === 'pause') {
+      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+    } else if (action === 'volume') {
+      this.volume_ = parseFloat(eventData['value']);
+      if (this.volume_ === 0) {
+        this.element.dispatchCustomEvent(VideoEvents.MUTED);
       } else {
-        this.viqeoPlayerInitLoaded_(ampIframeWindow['VIQEO']);
+        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
       }
-
-      this.applyFillContent(ampIframe);
     }
-
   }
 
   /** @override */
@@ -224,60 +207,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
-  }
-
-  getVideoIframeSrc_() {
-    if (this.videoIframeSrc_) {
-      return this.videoIframeSrc_;
-    }
-
-    let viqeoPlayerUrl = this.element.getAttribute('data-player-url');
-    viqeoPlayerUrl =
-        (viqeoPlayerUrl
-            && viqeoPlayerUrl.length && decodeURI(viqeoPlayerUrl)
-        )
-        || (this.kindIsProd_ ? 'https://cdn.viqeo.tv/embed' : 'https://stage.embed.viqeo.tv');
-
-
-    // Create iframe source path
-    const src = viqeoPlayerUrl + '/?vid=' + this.videoId_;
-
-    this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
-
-    return this.videoIframeSrc_;
-  }
-
-  /**
-   * @param {!Event|{data: !JsonObject}} event
-   * @return {?JsonObject|string|undefined}
-   * @private
-   * */
-  handleViqeoMessages_(event) {
-    const eventData = /** @type {?string|undefined} */ (getData(event));
-    if (event.source !== this.win ||
-      typeof eventData !== 'string' ||
-      eventData.indexOf('ViqeoPlayer') !== 0) {
-      return;
-    }
-
-    const params = eventData.split('|');
-    if (params[1] === 'trigger') {
-      if (params[2] === 'ready') {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerReadyResolver_(this.iframe_);
-      } else if (params[2] === 'play') {
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
-      } else if (params[2] === 'pause') {
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-      }
-    } else if (params[1] === 'volume') {
-      this.volume_ = parseFloat(params[2]);
-      if (this.volume_ === 0) {
-        this.element.dispatchCustomEvent(VideoEvents.MUTED);
-      } else {
-        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
-      }
-    }
   }
 
   /** @override */
@@ -387,50 +316,48 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /**
    * Sends a command to the player
-   * @param {string} command
+   * @param {string|JsonObject} command
    * @private
-   * */
+   */
   sendCommand_(command) {
-    const player = this.viqeoPlayer_;
-    this.playerReadyPromise_.then(() => {
-      switch (command) {
-        case 'pause': player.pause(); break;
-        case 'play': player.play(); break;
-        case 'mute': player.setVolume(0); break;
-        case 'unmute': player.setVolume(1); break;
-      }
-    });
+    if (!this.iframe_) {
+      return;
+    }
+    const {contentWindow} = this.iframe_;
+    if (!contentWindow) {
+      return;
+    }
+
+    if (typeof command === 'string') {
+      command = /** @type {JsonObject} */ ({
+        action: command,
+      });
+    }
+    contentWindow./*OK*/postMessage(command, '*');
   }
 
   /**
-   * @param {Object} VIQEO
-   * @param  {function(Object)} VIQEO.getPlayers - returns viqeo player
-   * @param {function(function(Object), Object)} VIQEO.subscribeTracking - subscriber
+   * send to player intersection
+   * @this {AmpViqeoPlayer}
    * @private
    */
-  viqeoPlayerInitLoaded_(VIQEO) {
-    const ampIframeWindow = this.iframe_.contentWindow;
+  sendIntersectionRatio_() {
+    const elementRect = this.getIntersectionElementLayoutBox();
+    const viewPortRect = this.getViewport().getRect();
 
-    subscribe('added', 'ready', () => {
-      const players = VIQEO['getPlayers']({container: 'stdPlayer'});
-      this.viqeoPlayer_ = players && players[0];
-    });
-    subscribe('paused', 'pause');
-    subscribe('played', 'play');
-    subscribe('replayed', 'play');
+    const intersection = rectIntersection(elementRect, viewPortRect);
 
-    function subscribe(playerEventName, targetEventName, extraHandler = null) {
-      VIQEO['subscribeTracking'](
-          () => {
-            ampIframeWindow['postMessage'](
-                `ViqeoPlayer|trigger|${targetEventName}`, '*'
-            );
-            if (extraHandler) {
-              extraHandler();
-            }
-          },
-          {eventName: `Player:${playerEventName}`, container: 'stdPlayer'}
-      );
+    const intersectionRatio =
+        intersection ? (intersection.width * intersection.height) /
+        (elementRect.width * elementRect.height) : 0;
+
+    if (this.lastIntersectionRation_ !== intersectionRatio) {
+      this.lastIntersectionRation_ = intersectionRatio;
+      const command = /** @type {JsonObject} */ ({
+        action: 'intersection',
+        value: intersectionRatio,
+      });
+      this.sendCommand_(command);
     }
   }
 }

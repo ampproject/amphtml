@@ -65,6 +65,7 @@ import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
+import {viqeoplayer} from './viqeoplayer';
 
 import {_ping_} from '../ads/_ping_';
 
@@ -422,6 +423,7 @@ register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);
 register('videonow', videonow);
+register('viqeoplayer', viqeoplayer);
 register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
