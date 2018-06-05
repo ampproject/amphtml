@@ -87,9 +87,11 @@ export class PositionObserver {
     worker.update();
 
     return () => {
-      const i = this.workers_.indexOf(worker);
-      if (i >= 0) {
-        this.workers_.splice(i, 1);
+      for (let i = 0; i < this.workers_.length; i++) {
+        if (this.workers_[i] == worker) {
+          this.removeWorker_(i);
+          return;
+        }
       }
     };
   }
@@ -100,14 +102,22 @@ export class PositionObserver {
   unobserve(element) {
     for (let i = 0; i < this.workers_.length; i++) {
       if (this.workers_[i].element == element) {
-        this.workers_.splice(i, 1);
-        if (this.workers_.length == 0) {
-          this.stopCallback_();
-        }
+        this.removeWorker_(i);
         return;
       }
     }
     dev().error(TAG, 'cannot unobserve unobserved element');
+  }
+
+  /**
+   * @param {number} index
+   * @private
+   */
+  removeWorker_(index) {
+    this.workers_.splice(index, 1);
+    if (this.workers_.length == 0) {
+      this.stopCallback_();
+    }
   }
 
   /**
