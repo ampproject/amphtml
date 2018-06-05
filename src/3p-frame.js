@@ -69,11 +69,13 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {Object=} opt_context
  * @param {!{
  *   disallowCustom,
+ *   allowFullscreen,
  * }=} opt_options Options for the created iframe.
  * @return {!Element} The iframe.
  */
 export function getIframe(
-  parentWindow, parentElement, opt_type, opt_context, {disallowCustom} = {}) {
+  parentWindow, parentElement, opt_type, opt_context,
+  {disallowCustom, allowFullscreen} = {}) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   dev().assert(
@@ -116,6 +118,9 @@ export function getIframe(
   }
   if (attributes['title']) {
     iframe.title = attributes['title'];
+  }
+  if (allowFullscreen) {
+    iframe.setAttribute('allowfullscreen', 'true');
   }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
