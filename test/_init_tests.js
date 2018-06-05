@@ -372,7 +372,9 @@ function stubConsoleInfoLogWarn() {
 
 // Used to restore info, log, and warn level logging after each test.
 function restoreConsoleInfoLogWarn() {
-  consoleInfoLogWarnSandbox.restore();
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
 }
 
 beforeEach(function() {
