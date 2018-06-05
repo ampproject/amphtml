@@ -73,12 +73,12 @@ function getConfig() {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Chrome_latest',
-        'SL_Chrome_android',
+        'SL_Android_latest',
         'SL_Chrome_45',
+        'SL_Chrome_android',
+        'SL_Chrome_latest',
         'SL_Firefox_latest',
         'SL_Safari_latest',
-        'SL_Android_latest',
         // TODO(rsimha, #15510): Enable these.
         // 'SL_iOS_latest',
         // 'SL_Edge_latest',
@@ -158,8 +158,8 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
-    'local-changes':
-        'Running unit tests from files commited to the local branch.',
+    'local-changes': 'Running unit tests affected by the files changed in the' +
+        ' local branch.',
   };
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
@@ -347,6 +347,7 @@ function runTests() {
 
   if (argv.verbose || argv.v) {
     c.client.captureConsole = true;
+    c.client.verboseLogging = true;
   }
 
   if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
@@ -564,6 +565,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
-    'local-changes': '  Run unit tests from files changed in the local branch',
+    'local-changes': '  Run unit tests affected by the files changed in the ' +
+        'local branch',
   },
 });

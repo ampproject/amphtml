@@ -99,4 +99,15 @@ env => {
       expect(stub).to.be.calledWith(element, serviceId, 'action');
     });
   });
+
+  describe('getReaderId', () => {
+    it('should delegate call to getReaderId', () => {
+      const readerIdPromise = Promise.resolve();
+      const stub = sandbox.stub(subscriptionService, 'getReaderId')
+          .returns(readerIdPromise);
+      const promise = serviceAdapter.getReaderId('service1');
+      expect(stub).to.be.calledOnce.calledWith('service1');
+      expect(promise).to.equal(readerIdPromise);
+    });
+  });
 });

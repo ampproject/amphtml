@@ -233,7 +233,6 @@ export class AmpConsent extends AMP.BaseElement {
       this.element.classList.remove('amp-hidden');
       this.element.classList.add('amp-active');
       this.getViewport().addToFixedLayer(this.element);
-
       // Display the current instance
       this.currentDisplayInstance_ = instanceId;
       const uiElement = this.consentUI_[this.currentDisplayInstance_];
@@ -264,7 +263,10 @@ export class AmpConsent extends AMP.BaseElement {
         dev().error(TAG,
             `${this.currentDisplayInstance_} no consent ui to hide`);
       }
-      toggle(uiToHide, false);
+      // Cannot use #toggle() because Safari bug with version older than 10.3
+      // element.style['display] = 'none' cannot overwrite style set with
+      // !important.
+      setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
     });
     if (this.dialogResolver_[this.currentDisplayInstance_]) {
       this.dialogResolver_[this.currentDisplayInstance_]();
@@ -521,8 +523,12 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.consentConfig_ = consents;
     if (config['postPromptUI']) {
-      this.postPromptUI_ = this.getAmpDoc().getElementById(
-          config['postPromptUI']);
+      const postPromptUI = config['postPromptUI'];
+      this.postPromptUI_ = this.getAmpDoc().getElementById(postPromptUI);
+      if (!this.postPromptUI_) {
+        this.user().error(TAG, 'postPromptUI element with ' +
+          `id=${postPromptUI} not found`);
+      }
     }
     this.policyConfig_ = config['policy'] || this.policyConfig_;
   }
@@ -558,10 +564,16 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise}
    */
   initPromptUI_(instanceId) {
-
     const promptUI = this.consentConfig_[instanceId]['promptUI'];
-    const element = this.getAmpDoc().getElementById(promptUI);
-    this.consentUI_[instanceId] = element;
+    if (promptUI) {
+      let element = this.getAmpDoc().getElementById(promptUI);
+      if (!element || !this.element.contains(element)) {
+        element = null;
+        this.user().error(TAG, 'child element of <amp-consent> with ' +
+          `promptUI id ${promptUI} not found`);
+      }
+      this.consentUI_[instanceId] = element;
+    }
 
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceState(instanceId)
@@ -615,7 +627,11 @@ export class AmpConsent extends AMP.BaseElement {
           classList.remove('amp-active');
         }
         this.getViewport().removeFromFixedLayer(this.element);
-        toggle(dev().assertElement(this.postPromptUI_), false);
+        // Cannot use #toggle() because Safari bug with version older than 10.3
+        // element.style['display] = 'none' cannot overwrite style set with
+        // !important.
+        setImportantStyles(dev().assertElement(this.postPromptUI_),
+            {display: 'none'});
       });
     });
   }

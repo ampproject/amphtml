@@ -175,7 +175,8 @@ module.exports = {
     SL_Safari_latest: {
       base: 'SauceLabs',
       browserName: 'safari',
-      version: 'latest',
+      // TODO(amphtml): Use 'latest' when 11.1 failures are fixed (#15748).
+      version: '11.0',
     },
     SL_Edge_latest: {
       base: 'SauceLabs',
@@ -208,6 +209,7 @@ module.exports = {
     failOnConsoleError: !process.env.TRAVIS && !process.env.LOCAL_PR_CHECK,
     // TODO(rsimha, #14432): Set to false after all tests are fixed.
     captureConsole: true,
+    verboseLogging: false,
   },
 
   singleRun: true,
