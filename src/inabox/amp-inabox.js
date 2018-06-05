@@ -39,6 +39,7 @@ import {installStylesForDoc, makeBodyVisible} from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
+import {registerIniLoadListener} from './utils';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
@@ -90,6 +91,7 @@ startupChunk(self.document, function initial() {
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
       maybeTrackImpression(self);
+      registerIniLoadListener(ampdoc);
     });
     startupChunk(self.document, function builtins() {
       // Builtins.
