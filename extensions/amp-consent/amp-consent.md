@@ -196,8 +196,7 @@ AMP displays prompt UI on page load or by user interaction. The prompt UI is hid
 #### Prompt UI for Stories
 
 The `amp-story` extension provides a [default prompt UI](https://user-images.githubusercontent.com/1492044/40135514-8ab56d10-5913-11e8-95a2-72ac01ff31e0.png), that requires using a `<amp-story-consent>` component as the prompt UI. This component content requires a `title`, a `message`, and a list of `vendors`, and has to be specified in its own component configuration.
-
-Note: until the 2018/05/29, the lang of the document needs to be set to `en` for the UI to work: `<html lang="en">`.
+The decline button can be hidden by adding an optional `onlyAccept` boolean parameter.
 
 *Example*: Displays a prompt user interface on an AMP Story
 

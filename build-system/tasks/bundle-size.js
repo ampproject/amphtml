@@ -22,7 +22,7 @@ const log = require('fancy-log');
 const {getStdout} = require('../exec');
 
 const runtimeFile = './dist/v0.js';
-const maxSize = '77.2KB';
+const maxSize = '77.61KB';
 
 const {green, red, cyan, yellow} = colors;
 

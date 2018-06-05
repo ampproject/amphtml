@@ -37,15 +37,23 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
-import {isProxyOrigin} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 import {waitForBodyPromise} from '../../../src/dom';
 
+/**
+ * @enum {number}
+ */
+export const GEO_IN_GROUP = {
+  NOT_DEFINED: 1,
+  IN: 2,
+  NOT_IN: 3,
+};
 
 /** @const */
 const TAG = 'amp-geo';
@@ -86,6 +94,8 @@ export class AmpGeo extends AMP.BaseElement {
     this.country_ = 'unknown';
     /** @private {Array<string>} */
     this.matchedGroups_ = [];
+    /** @private {Array<string>} */
+    this.definedGroups_ = [];
     /** @Private {} */
   }
 
@@ -119,7 +129,8 @@ export class AmpGeo extends AMP.BaseElement {
     // First see if we've been pre-rendered with a country, if so set it
     const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
 
-    if (preRenderMatch && !isProxyOrigin(doc.location)) {
+    if (preRenderMatch &&
+        !Services.urlForDoc(doc).isProxyOrigin(doc.location)) {
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
     } else {
@@ -152,11 +163,13 @@ export class AmpGeo extends AMP.BaseElement {
     const ISOCountryGroups = /** @type {!Object<string, Array<string>>} */(
       config.ISOCountryGroups);
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
+
     if (ISOCountryGroups) {
       user().assert(
           isObject(ISOCountryGroups),
           `${errorPrefix} must be an object`);
-      Object.keys(ISOCountryGroups).forEach(group => {
+      this.definedGroups_ = Object.keys(ISOCountryGroups);
+      this.definedGroups_.forEach(group => {
         user().assert(
             /^[a-z]+[a-z0-9]*$/i.test(group) &&
             !/^amp/.test(group),
@@ -267,8 +280,49 @@ export class AmpGeo extends AMP.BaseElement {
           break;
       }
 
-      return {ISOCountry: self.country_, ISOCountryGroups: self.matchedGroups_};
+      return {
+        ISOCountry: self.country_,
+        matchedISOCountryGroups: self.matchedGroups_,
+        allISOCountryGroups: this.definedGroups_,
+        /* API */
+        isInCountryGroup: this.isInCountryGroup.bind(this),
+        /**
+         * Temp still return old interface to avoid version skew
+         * with consuming extensions.  This will go away don't use it!
+         * replace with matchedISOCountryGroups or use the isInCountryGroup
+         * API
+         */
+        ISOCountryGroups: self.matchedGroups_,
+      };
     });
+  }
+
+
+  /**
+   * isInCountryGroup API
+   * @param {string} targetGroup group or comma delimited list of groups
+   * @return {GEO_IN_GROUP}
+   * @public
+   */
+  isInCountryGroup(targetGroup) {
+    const targets = targetGroup.trim().split(/,\s*/);
+
+    // If any of the group are missing it's an error
+    if (targets.filter(group => {
+      return this.definedGroups_.indexOf(group) >= 0;
+    }).length !== targets.length) {
+      return GEO_IN_GROUP.NOT_DEFINED;
+    }
+
+    // If any of the groups match it's a match
+    if (targets.filter(group => {
+      return this.matchedGroups_.indexOf(group) >= 0;
+    }).length > 0) {
+      return GEO_IN_GROUP.IN;
+    }
+
+    // If we got here nothing matched
+    return GEO_IN_GROUP.NOT_IN;
   }
 }
 
