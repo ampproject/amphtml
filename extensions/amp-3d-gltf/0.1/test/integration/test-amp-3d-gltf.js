@@ -14,29 +14,12 @@
  * limitations under the License.
  */
 
-import {poll} from '../../../../../testing/iframe';
-
-describe('amp-3d-gltf', function() {
-  describes.integration('amp-3d-gltf iframe renders', {
-    body: '<amp-3d-gltf layout="fixed"' +
-                      ' width="200"' +
-                      ' height="200"' +
-                      ' src="/123"></amp-3d-gltf>',
-    extensions: ['amp-3d-gltf'],
-  }, () => {
-
-    it('iframe renders', () => {
-      const loadPromise = waitForAnimationLoad();
-      return loadPromise.then(iframeExists => {
-        expect(iframeExists).to.be.true;
-      });
-    });
-  });
+describes.integration('amp-3d-gltf', {
+  body: '<amp-3d-gltf layout="fixed"' +
+                    ' width="200"' +
+                    ' height="200"' +
+                    ' src="/123"></amp-3d-gltf>',
+  extensions: ['amp-3d-gltf'],
+}, () => {
+  // TODO(mixtur): Add tests.
 });
-
-function waitForAnimationLoad() {
-  return poll('wait for iframe to load', () => {
-    const iframe = document.getElementsByTagName('iframe')[0];
-    return iframe !== null;
-  });
-}
