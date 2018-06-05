@@ -554,7 +554,9 @@ export class AmpSlideScroll extends BaseSlides {
     const newSlideInView = this.slides_[newIndex];
 
     if (newSlideInView === undefined) {
-      const error = new Error('Attempting to access a non-existant slide');
+      const error = new Error(
+          `Attempting to access a non-existant slide ${newIndex}/${noOfSlides_}`
+      );
       error.args = {
         'index': newIndex,
         'noOfSlides': noOfSlides_,
