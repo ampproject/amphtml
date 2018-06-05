@@ -15,8 +15,11 @@
  */
 
 import {assertConfig} from '../config';
+import {parseUrlDeprecated} from '../../../../src/url';
 
 describe('amp-next-page config', () => {
+  let urlService = {parse: parseUrlDeprecated};
+
   describe('assertConfig', () => {
     const origin = 'https://example.com';
 
@@ -32,12 +35,14 @@ describe('amp-next-page config', () => {
           'footer',
         ],
       };
-      expect(() => assertConfig(config, origin, origin)).to.not.throw();
+      expect(() => assertConfig(urlService, config, origin, origin))
+          .to.not.throw();
     });
 
     it('allows a config with no pages', () => {
       const config = {pages: []};
-      expect(() => assertConfig(config, origin, origin)).to.not.throw();
+      expect(() => assertConfig(urlService, config, origin, origin))
+          .to.not.throw();
     });
 
     it('allows pages with relative URLs', () => {
@@ -48,7 +53,7 @@ describe('amp-next-page config', () => {
           title: 'Article 1',
         }],
       };
-      expect(() => assertConfig(config, document.location.origin))
+      expect(() => assertConfig(urlService, config, document.location.origin))
           .to.not.throw();
     });
 
@@ -68,7 +73,7 @@ describe('amp-next-page config', () => {
           },
         ],
       };
-      expect(() => assertConfig(config, cdnOrigin, origin)).to.not.throw();
+      expect(() => assertConfig(urlService, config, cdnOrigin, origin)).to.not.throw();
       expect(config.pages[1].ampUrl).to.equal(
           'https://example-com.cdn.ampproject.org/c/s/example.com/art2?x=1');
     });
@@ -85,7 +90,7 @@ describe('amp-next-page config', () => {
           },
         ],
       };
-      expect(() => assertConfig(config, cdnOrigin, insecureOrigin))
+      expect(() => assertConfig(urlService, config, cdnOrigin, insecureOrigin))
           .to.not.throw();
       expect(config.pages[0].ampUrl).to.equal(
           'https://example-com.cdn.ampproject.org/c/example.com/art2?x=1');
@@ -93,7 +98,7 @@ describe('amp-next-page config', () => {
 
     it('throws on null config', () => {
       allowConsoleError(() => {
-        expect(() => assertConfig(null, origin, origin))
+        expect(() => assertConfig(urlService, null, origin, origin))
             .to.throw('amp-next-page config must be specified');
       });
     });
@@ -101,7 +106,7 @@ describe('amp-next-page config', () => {
     it('throws on config with no "pages" key', () => {
       const config = {};
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw('pages must be an array');
       });
     });
@@ -109,7 +114,7 @@ describe('amp-next-page config', () => {
     it('throws on config with non-array "pages" key', () => {
       const config = {pages: {}};
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw('pages must be an array');
       });
     });
@@ -122,7 +127,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw('title must be a string');
       });
     });
@@ -136,7 +141,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw('title must be a string');
       });
     });
@@ -149,7 +154,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw('image must be a string');
       });
     });
@@ -163,7 +168,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw('image must be a string');
       });
     });
@@ -179,7 +184,7 @@ describe('amp-next-page config', () => {
         ],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw(
                 'pages must be from the same origin as the current document');
       });
@@ -196,7 +201,7 @@ describe('amp-next-page config', () => {
         ],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw(
                 'pages must be from the same origin as the current document');
       });
@@ -213,7 +218,7 @@ describe('amp-next-page config', () => {
         ],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw(
                 'pages must be from the same origin as the current document');
       });
@@ -225,7 +230,7 @@ describe('amp-next-page config', () => {
         hideSelectors: {},
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw('amp-next-page hideSelectors should be an array');
       });
     });
@@ -236,7 +241,7 @@ describe('amp-next-page config', () => {
         hideSelectors: ['a', 2],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin))
+        expect(() => assertConfig(urlService, config, origin, origin))
             .to.throw('amp-next-page hideSelector value 2 is not a string');
       });
     });
@@ -247,7 +252,7 @@ describe('amp-next-page config', () => {
         hideSelectors: ['   .i-amphtml-something'],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, origin, origin)).to.throw(
+        expect(() => assertConfig(urlService, config, origin, origin)).to.throw(
             'amp-next-page hideSelector \'   .i-amphtml-something\' ' +
             'not allowed');
       });

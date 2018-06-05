@@ -15,7 +15,6 @@
  */
 
 import {isArray} from '../../../src/types';
-import {parseUrlDeprecated} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /**
@@ -37,6 +36,7 @@ export let AmpNextPageItem;
 
 /**
  * Checks whether the object conforms to the AmpNextPageConfig spec.
+ * @param {!../../../src/service/url-impl.Url} urlService
  * @param {*} config The config to validate.
  * @param {string} origin The origin of the current document
  *     (document.location.origin). All recommendations must be for the same
@@ -46,10 +46,10 @@ export let AmpNextPageItem;
  *     pointing at {@code sourceOrigin} will be modified to point to the cache.
  * @return {!AmpNextPageConfig}
  */
-export function assertConfig(config, origin, sourceOrigin) {
+export function assertConfig(urlService, config, origin, sourceOrigin) {
   user().assert(config, 'amp-next-page config must be specified');
   user().assert(isArray(config.pages), 'pages must be an array');
-  assertRecos(config.pages, origin, sourceOrigin);
+  assertRecos(urlService, config.pages, origin, sourceOrigin);
 
   if ('hideSelectors' in config) {
     user().assert(isArray(config['hideSelectors']),
@@ -60,8 +60,13 @@ export function assertConfig(config, origin, sourceOrigin) {
   return /** @type {!AmpNextPageConfig} */ (config);
 }
 
-function assertRecos(recos, origin, sourceOrigin) {
-  recos.forEach(reco => assertReco(reco, origin, sourceOrigin));
+/**
+ * @param {!../../../src/service/url-impl.Url} urlService
+ * @param {string} origin
+ * @param {string} sourceOrigin
+ */
+function assertRecos(urlService, recos, origin, sourceOrigin) {
+  recos.forEach(reco => assertReco(urlService, reco, origin, sourceOrigin));
 }
 
 const BANNED_SELECTOR_PATTERNS = [
@@ -79,8 +84,14 @@ function assertSelectors(selectors) {
   });
 }
 
-function assertReco(reco, origin, sourceOrigin) {
-  const url = parseUrlDeprecated(reco.ampUrl);
+/**
+ * @param {!../../../src/service/url-impl.Url} urlService
+ * @param {*} reco
+ * @param {string} origin
+ * @param {string} sourceOrigin
+ */
+function assertReco(urlService, reco, origin, sourceOrigin) {
+  const url = urlService.parse(reco.ampUrl);
   user().assertString(reco.ampUrl, 'ampUrl must be a string');
   user().assert(url.origin === origin || url.origin === sourceOrigin,
       'pages must be from the same origin as the current document');
