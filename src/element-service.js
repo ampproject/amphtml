@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import * as dom from './dom';
 import {
   getAmpdoc,
