@@ -152,7 +152,7 @@ export function isReportingEnabled(ampElement) {
   const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
-  if (getMode().localDev) {
+  if (getMode(ampElement.win).localDev && !getMode(ampElement.win).test) {
     toggleExperiment(win, experimentName, true, true);
   }
   return (type == 'doubleclick' || type == 'adsense') &&

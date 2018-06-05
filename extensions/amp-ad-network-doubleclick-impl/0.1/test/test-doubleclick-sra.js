@@ -51,7 +51,7 @@ const config = {amp: true, allowExternalResources: true};
   calling setAttribute('src', 'foo') on the iframe, which will cause all these
   tests to fail.
 */
-describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
+describes.realWin('Doubleclick SRA', config , env => {
   let sandbox;
   let doc;
 
@@ -86,6 +86,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           {name: 'amp-ad-doubleclick-sra'}, 'meta', doc.head);
       const element = createAndAppendAdElement({'data-enable-refresh': 30});
       const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.buildCallback();
       expect(impl.useSra).to.be.true;
       impl.layoutCallback();
       expect(impl.refreshManager_).to.be.null;
@@ -144,7 +145,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           createElementWithAttributes(doc, 'amp-ad', config1);
         const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
         sandbox.stub(impl1, 'getPageLayoutBox').returns({top: 123, left: 456});
-        element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
+        impl1.experimentIds = [MANUAL_EXPERIMENT_ID];
         sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320')
             .returns('13579');
         impl1.populateAdUrlState();
