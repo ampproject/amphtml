@@ -544,7 +544,7 @@ describes.realWin('performance', {amp: true}, env => {
             expect(viewerSendMessageStub.withArgs(
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
 
-            expect(getPerformanceMarks()).to.deep.equal(
+            expect(getPerformanceMarks()).to.have.members(
                 ['ol', 'ofv', 'pc']);
           });
         });
