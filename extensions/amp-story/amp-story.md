@@ -355,7 +355,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 ##### landscape
 
-The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `category`, `url`, and an `image`.
+The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `url`, and an `image`. You can also optionally add a `category` field, which will add a subtitle on top of the title.
 
 ```json
 {
@@ -376,12 +376,13 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 ##### portrait
 
-The `portrait` component can be used to link to other stories. This component requires the following fields: `category`, `url`, and an `image`.
+The `portrait` component can be used to link to other stories. This component requires the following fields: `title`, `url`, and an `image`. You can also optionally add a `category` field, which will add a subtitle on top of the title.
 
 ```json
 {
   "type": "portrait",
   "category": "Science",
+  "title": "New discovery found",
   "url": "http://example.com/article.html",
   "image": "http://placehold.it/312x416"
 }
@@ -875,7 +876,7 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
     width="404" height="678">
   <noscript>
     <img width="404" height="678"
-         src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" /> 
+         src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" />
   </noscript>
 </amp-img>
 
