@@ -1,0 +1,10 @@
+.view-more .hide{
+    display: none;
+}
+.limit-height{
+    height:100px;
+    overflow: hidden;
+}
+.show{
+	height: auto;
+}
