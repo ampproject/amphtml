@@ -121,7 +121,7 @@ export function getElementServiceIfAvailableForDoc(
   }
 
   return ampdoc.whenBodyAvailable()
-      .then(() => waitForExtensionIfPresent(ampdoc.win, extension))
+      .then(() => waitForExtensionIfPresent(ampdoc, extension))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
@@ -186,12 +186,12 @@ function assertService(service, id, extension) {
 
 /**
  * Waits for an extension if its script is present
- * @param {!Window} win
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} extension
  * @return {!Promise}
  * @private
  */
-function waitForExtensionIfPresent(win, extension) {
+function waitForExtensionIfPresent(ampdoc, extension) {
   /**
    * If there is an extension script wait for it to load before trying
    * to get the service. Prevents a race condition when everything but
@@ -200,11 +200,11 @@ function waitForExtensionIfPresent(win, extension) {
    * we don't wait around for an extension that does not exist.
    */
 
-  if (dom.scopedQuerySelector(/** @type {!Element} */(win.document.head),
+  if (ampdoc.getHeadNode()./*OK*/querySelector(
       'script[custom-element="' + extension + '"]')) {
-    const extensions = getService(win, 'extensions');
+    const extensions = getService(ampdoc.win, 'extensions');
     return /** @type {!Promise<?Object>} */ (
-      extensions.waitForExtension(win, extension));
+      extensions.waitForExtension(ampdoc.win, extension));
   }
   return Promise.resolve();
 }
@@ -220,8 +220,9 @@ function waitForExtensionIfPresent(win, extension) {
  * @private
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
+  const ampdoc = getAmpdoc(win.document);
   return dom.waitForBodyPromise(win.document)
-      .then(() => waitForExtensionIfPresent(win, extension))
+      .then(() => waitForExtensionIfPresent(ampdoc, extension))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
