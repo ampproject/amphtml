@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from './services';
 import {VideoEvents} from './video-interface';
 import {dev} from './log';
 import {htmlFor} from './static-template';
@@ -69,7 +70,7 @@ export function createFrameFor(video, src) {
   const frame =
       htmlFor(element)`<iframe frameborder=0 allowfullscreen></iframe>`;
 
-  frame.src = src;
+  frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
 
   video.applyFillContent(frame);
   element.appendChild(frame);
