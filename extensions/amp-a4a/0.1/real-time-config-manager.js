@@ -80,9 +80,6 @@ export class RealTimeConfigManager {
     /** @private {!./amp-a4a.AmpA4A} */
     this.a4aElement_ = a4aElement;
 
-    /** @private {?Object} */
-    this.urlReplacements_ = null;
-
     /** @private {!Window} */
     this.win_ = this.a4aElement_.win;
 
