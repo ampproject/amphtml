@@ -30,7 +30,7 @@ tags: {  # <amp-3d-gltf>
   requires_extension: "amp-3d-gltf"
   attrs: {
     name: "alpha"
-    value_regex: "[+-]?(\\d*\\.)?\\d+"
+    value_regex: "false|true"
   }
   attrs: {
     name: "antialiasing"
