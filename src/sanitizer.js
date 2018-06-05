@@ -299,7 +299,7 @@ function uponSanitizeAttribute(node, data) {
   // See https://github.com/cure53/DOMPurify/wiki/Security-Goals-&-Threat-Model#security-goals
   // and https://github.com/cure53/DOMPurify/blob/master/src/purify.js#L527.
 
-  const tagName = node.nodeName.toLocaleLowerCase();
+  const tagName = node.nodeName.toLowerCase();
   const {attrName, allowedAttributes} = data;
   let {attrValue} = data;
 
@@ -357,7 +357,7 @@ function afterSanitizeAttributes(node) {
       const {name, value} = r.attribute;
       // Restore the `on` attribute which DOMPurify incorrectly flags as an
       // unknown protocol due to presence of the `:` character.
-      if (name.toLocaleLowerCase() === 'on') {
+      if (name.toLowerCase() === 'on') {
         node.setAttribute('on', value);
         return false; // Remove from array once processed.
       }
