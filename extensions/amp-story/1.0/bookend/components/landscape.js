@@ -15,11 +15,12 @@
  */
 
 import {BookendComponentInterface} from './bookend-component-interface';
+import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrlDeprecated} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
+import {userAssertValidProtocol} from '../../utils';
 
 /**
  * @typedef {{
@@ -48,45 +49,39 @@ let landscapeElsDef;
  * @implements {BookendComponentInterface}
  */
 export class LandscapeComponent {
-  /**
-   * @param {!../bookend-component.BookendComponentDef} landscapeJson
-   * @override
-   * */
-  assertValidity(landscapeJson) {
-    user().assert('category' in landscapeJson && 'image' in landscapeJson &&
-      'url' in landscapeJson && 'title' in landscapeJson, 'landscape ' +
-      'component must contain `title`, `category`, `image`, and `url` fields,' +
-      ' skipping invalid.');
 
-    user().assert(isProtocolValid(landscapeJson['url']), 'Unsupported ' +
-    `protocol for landscape URL ${landscapeJson['url']}`);
+  /** @override */
+  assertValidity(landscapeJson, element) {
 
-    user().assert(isProtocolValid(landscapeJson['image']), 'Unsupported ' +
-    `protocol for landscape image URL ${landscapeJson['image']}`);
+    const requiredFields = ['title', 'image', 'url'];
+    const hasAllRequiredFields =
+        !requiredFields.some(field => !(field in landscapeJson));
+    user().assert(
+        hasAllRequiredFields,
+        'Landscape component must contain ' +
+        requiredFields.map(field => '`' + field + '`').join(', ') +
+        ' fields, skipping invalid.');
+
+    userAssertValidProtocol(element, landscapeJson['url']);
+    userAssertValidProtocol(element, landscapeJson['image']);
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} landscapeJson
-   * @return {!LandscapeComponentDef}
-   * @override
-   * */
-  build(landscapeJson) {
+  /** @override */
+  build(landscapeJson, element) {
+    const url = landscapeJson['url'];
+    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+
     return {
+      url,
+      domainName,
       type: landscapeJson['type'],
       title: landscapeJson['title'],
       category: landscapeJson['category'],
-      url: landscapeJson['url'],
-      domainName: parseUrlDeprecated(landscapeJson['url']).hostname,
       image: landscapeJson['image'],
     };
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} landscapeData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
+  /** @override */
   buildTemplate(landscapeData, doc) {
     const html = htmlFor(doc);
     const el =

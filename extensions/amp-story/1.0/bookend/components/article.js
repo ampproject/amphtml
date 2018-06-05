@@ -15,11 +15,12 @@
  */
 
 import {BookendComponentInterface} from './bookend-component-interface';
+import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrlDeprecated} from '../../../../../src/url';
 import {user} from '../../../../../src/log';
+import {userAssertValidProtocol} from '../../utils';
 
 /**
  * @typedef {{
@@ -36,34 +37,37 @@ export let ArticleComponentDef;
  * @implements {BookendComponentInterface}
  */
 export class ArticleComponent {
-  /**
-   * @param {!../bookend-component.BookendComponentDef} articleJson
-   * @override
-   * */
-  assertValidity(articleJson) {
-    user().assert('title' in articleJson && 'url' in articleJson,
-        'Articles must contain `title` and `url` fields, skipping invalid.');
 
-    user().assert(isProtocolValid(articleJson['url']), 'Unsupported protocol ' +
-        `for article URL ${articleJson['url']}`);
+  /** @override */
+  assertValidity(articleJson, element) {
 
-    if (articleJson['image']) {
-      user().assert(isProtocolValid(articleJson['image']), 'Unsupported ' +
-        `protocol for article image URL ${articleJson['image']}`);
+    const requiredFields = ['title', 'url'];
+    const hasAllRequiredFields =
+        !requiredFields.some(field => !(field in articleJson));
+    user().assert(
+        hasAllRequiredFields,
+        'Small article component must contain ' +
+            requiredFields.map(field => '`' + field + '`').join(', ') +
+            ' fields, skipping invalid.');
+
+    userAssertValidProtocol(element, articleJson['url']);
+
+    const image = articleJson['image'];
+    if (image) {
+      userAssertValidProtocol(element, image);
     }
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} articleJson
-   * @return {!ArticleComponentDef}
-   * @override
-   * */
-  build(articleJson) {
+  /** @override */
+  build(articleJson, element) {
+    const url = articleJson['url'];
+    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+
     const article = {
+      url,
+      domainName,
       type: articleJson['type'],
       title: articleJson['title'],
-      url: articleJson['url'],
-      domainName: parseUrlDeprecated(articleJson['url']).hostname,
     };
 
     if (articleJson['image']) {
@@ -73,12 +77,7 @@ export class ArticleComponent {
     return /** @type {!ArticleComponentDef} */ (article);
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} articleData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
+  /** @override */
   buildTemplate(articleData, doc) {
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.

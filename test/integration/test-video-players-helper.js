@@ -281,7 +281,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    it('should trigger video-seconds-played when visible' +
+    it.skip('should trigger video-seconds-played when visible' +
         'and playing', () => {
       let video;
       let timer;

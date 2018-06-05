@@ -206,6 +206,13 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adunity: {
+    preconnect: [
+      'https://content.adunity.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
     preconnect: [
@@ -593,6 +600,7 @@ export const adConfig = {
       'https://tpc.googlesyndication.com',
     ],
     renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   medyanet: {
@@ -740,6 +748,10 @@ export const adConfig = {
   quoraad: {
     prefetch: 'https://a.quora.com/amp_ad.js',
     preconnect: 'https://ampad.quora.com',
+    renderStartImplemented: true,
+  },
+
+  realclick: {
     renderStartImplemented: true,
   },
 
@@ -964,7 +976,7 @@ export const adConfig = {
   },
 
   yieldmo: {
-    prefetch: 'https://static.yieldmo.com/ym.amp1.js',
+    prefetch: 'https://static.yieldmo.com/ym.1.js',
     preconnect: [
       'https://s.yieldmo.com',
       'https://ads.yieldmo.com',

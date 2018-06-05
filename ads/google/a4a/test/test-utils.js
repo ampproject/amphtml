@@ -24,12 +24,14 @@ import {
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
   extractAmpAnalyticsConfig,
+  extractHost,
   getAmpRuntimeTypeParameter,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
   getIdentityTokenRequestUrl,
   googleAdUrl,
+  groupAmpAdsByType,
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
@@ -755,5 +757,108 @@ describe('Google A4A utils', () => {
       expect(vars['viewerLastVisibleTime']).to.be.a('number');
       expect(vars['viewerLastVisibleTime']).not.to.equal(0);
     });
+  });
+
+  describe('#extractHost', () => {
+    [
+      {in: 'http://foo.com/sl?lj=fl', out: 'foo.com'},
+      {in: 'Http://bar.com?lj=fl', out: 'bar.com'},
+      {in: 'htTps://foo.com?lj=fl', out: 'foo.com'},
+      {in: 'http://bar.com', out: 'bar.com'},
+      {in: 'https://foo.com', out: 'foo.com'},
+      {in: 'https://foo.com:8080', out: 'foo.com'},
+      {in: 'https://bar.com:8080/lkjs?a=b', out: 'bar.com'},
+      {in: 'bar.com:8080/lkjs?a=b', out: 'bar.com'},
+      {in: 'bar.com:8080/', out: 'bar.com'},
+      {in: 'bar.com/sl?lj=fl', out: 'bar.com'},
+      {in: 'foo.com/sl/lj=fl?ls=f', out: 'foo.com'},
+      {in: 'bar.com?lj=fl', out: 'bar.com'},
+      {in: 'foo.com?lj=fl', out: 'foo.com'},
+      {in: 'hello.com', out: 'hello.com'},
+      {in: '', out: ''},
+    ].forEach(test =>
+      it(test.in, () => expect(extractHost(test.in)).to.equal(test.out)));
+  });
+});
+
+describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
+  let doc, win;
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  function createResource(config, tagName = 'amp-ad', parent = doc.body) {
+    const element = createElementWithAttributes(doc, tagName, config);
+    parent.appendChild(element);
+    element.getImpl = () => Promise.resolve({element});
+    return {element};
+  }
+
+  it('should find amp-ad of only given type', () => {
+    const resources = [createResource({type: 'doubleclick'}),
+      createResource({type: 'blah'}), createResource({}, 'amp-foo')];
+    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+        .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
+      expect(Object.keys(result).length).to.equal(1);
+      expect(result['foo']).to.be.ok;
+      expect(result['foo'].length).to.equal(1);
+      return result['foo'][0].then(baseElement =>
+        expect(baseElement.element.getAttribute('type'))
+            .to.equal('doubleclick'));
+    });
+  });
+
+  it('should find amp-ad within sticky container', () => {
+    const stickyResource = createResource({}, 'amp-sticky-ad');
+    const resources = [stickyResource, createResource({}, 'amp-foo')];
+    // Do not expect ampAdResource to be returned by getMeasuredResources
+    // as its owned by amp-sticky-ad.  It will locate associated element
+    // and block on whenUpgradedToCustomElement so override createdCallback
+    // to cause it to return immediately.
+    const ampAdResource =
+      createResource({type: 'doubleclick'}, 'amp-ad', stickyResource.element);
+    ampAdResource.element.createdCallback = true;
+    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+        .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(
+        result => {
+          expect(Object.keys(result).length).to.equal(1);
+          expect(result['foo']).to.be.ok;
+          expect(result['foo'].length).to.equal(1);
+          return result['foo'][0].then(baseElement =>
+            expect(baseElement.element.getAttribute('type'))
+                .to.equal('doubleclick'));
+        });
+  });
+
+  it('should find and group multiple, some in containers', () => {
+    const stickyResource = createResource({}, 'amp-sticky-ad');
+    const resources = [stickyResource, createResource({}, 'amp-foo'),
+      createResource({type: 'doubleclick', foo: 'bar'}),
+      createResource({type: 'doubleclick', foo: 'hello'})];
+    // Do not expect ampAdResource to be returned by getMeasuredResources
+    // as its owned by amp-sticky-ad.  It will locate associated element
+    // and block on whenUpgradedToCustomElement so override createdCallback
+    // to cause it to return immediately.
+    const ampAdResource = createResource({type: 'doubleclick', foo: 'bar'},
+        'amp-ad', stickyResource.element);
+    ampAdResource.element.createdCallback = true;
+    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+        .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    return groupAmpAdsByType(
+        win, 'doubleclick', element => element.getAttribute('foo')).then(
+        result => {
+          expect(Object.keys(result).length).to.equal(2);
+          expect(result['bar']).to.be.ok;
+          expect(result['bar'].length).to.equal(2);
+          expect(result['hello']).to.be.ok;
+          expect(result['hello'].length).to.equal(1);
+          return Promise.all(result['bar'].concat(result['hello'])).then(
+              baseElements => baseElements.forEach(baseElement =>
+                expect(baseElement.element.getAttribute('type'))
+                    .to.equal('doubleclick')));
+        });
   });
 });

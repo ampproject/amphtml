@@ -22,18 +22,18 @@ const log = require('fancy-log');
 const {getStdout} = require('../exec');
 
 const runtimeFile = './dist/v0.js';
-const maxSize = '77.2KB';
+const maxSize = '77.61KB';
 
 const {green, red, cyan, yellow} = colors;
 
 
 function checkBundleSize() {
   if (!fs.existsSync(runtimeFile)) {
-    log(green('Could not find'), cyan(runtimeFile) +
-        green('. Skipping bundlesize check.'));
-    log(green('To include this check, run'),
+    log(yellow('Could not find'), cyan(runtimeFile) +
+        yellow('. Skipping bundlesize check.'));
+    log(yellow('To include this check, run'),
         cyan('gulp dist --fortesting [--noextensions]'),
-        green('before'), cyan('gulp bundle-size') + yellow('.'));
+        yellow('before'), cyan('gulp bundle-size') + yellow('.'));
     return;
   }
 

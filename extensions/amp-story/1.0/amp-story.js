@@ -88,7 +88,6 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
@@ -468,11 +467,11 @@ export class AmpStory extends AMP.BaseElement {
 
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
-      const {deltaX} = gesture.data;
+      const {deltaX, deltaY} = gesture.data;
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
         return;
       }
-      if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
+      if (!this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
         return;
       }
       if (!this.storeService_
@@ -486,11 +485,14 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {number} deltaX
+   * @param {number} deltaY
    * @return {boolean}
    * @private
    */
-  isSwipeLargeEnoughForHint_(deltaX) {
-    return (Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
+  isSwipeLargeEnoughForHint_(deltaX, deltaY) {
+    const sideSwipe = Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX;
+    const upSwipe = (-1 * deltaY) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX;
+    return sideSwipe || upSwipe;
   }
 
   /** @private */
@@ -668,12 +670,15 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   isAmpStoryEnabled_() {
-    if (isExperimentOn(this.win, TAG) || getMode().test ||
-        this.win.location.protocol === 'file:') {
+    const {win} = this;
+    const {location} = win;
+
+    if (isExperimentOn(win, 'amp-story-v1') || getMode().test ||
+        location.protocol === 'file:') {
       return true;
     }
 
-    const origin = getSourceOrigin(this.win.location);
+    const origin = Services.urlForDoc(this.element).getSourceOrigin(location);
     return this.isOriginWhitelisted_(origin);
   }
 
@@ -695,8 +700,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isOriginWhitelisted_(origin) {
-    const hostName = parseUrlDeprecated(origin).hostname;
-    const domains = hostName.split('.');
+    const {hostname} = Services.urlForDoc(this.element).parse(origin);
+    const domains = hostname.split('.');
 
     // Check all permutations of the domain to see if any level of the domain is
     // whitelisted.  Taking the example of the whitelisted domain
@@ -739,7 +744,7 @@ export class AmpStory extends AMP.BaseElement {
         .getLocalizedString(
             LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
     experimentsLinkEl.addEventListener('click', () => {
-      toggleExperiment(this.win, 'amp-story', true);
+      toggleExperiment(this.win, 'amp-story-v1', true);
       errorIconEl.classList.remove('i-amphtml-story-experiment-icon-error');
       errorIconEl.classList.add('i-amphtml-story-experiment-icon-done');
       errorMsgEl.textContent = this.localizationService_.getLocalizedString(
@@ -855,7 +860,9 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_.updateActivePage(
         pageIndex,
         this.getPageCount(),
-        targetPage.element.id);
+        targetPage.element.id,
+        targetPage.getNextPageId() === null /* isFinalPage */
+    );
 
     const oldPage = this.activePage_;
 
@@ -1596,19 +1603,17 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Shows the audio icon if the story has any media elements or background
-   * audio.
+   * Shows the audio icon if the story has any media elements containing audio,
+   * or background audio at the story or page level.
    * @private
    */
   updateAudioIcon_() {
-    // TODO(#11857): Defer to any playing media element for whether any audio is
-    // being played.
-    const containsMediaElement = !!this.element.querySelector(
-        'amp-audio, amp-video, [background-audio]');
+    const containsMediaElementWithAudio = !!this.element.querySelector(
+        'amp-audio, amp-video:not([noaudio]), [background-audio]');
     const hasStoryAudio = this.element.hasAttribute('background-audio');
 
-    this.storeService_.dispatch(
-        Action.TOGGLE_HAS_AUDIO, containsMediaElement || hasStoryAudio);
+    this.storeService_.dispatch(Action.TOGGLE_HAS_AUDIO,
+        containsMediaElementWithAudio || hasStoryAudio);
   }
 
   /** @private */
