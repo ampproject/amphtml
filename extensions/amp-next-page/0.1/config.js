@@ -101,7 +101,7 @@ function assertReco(context, reco, origin, sourceOrigin) {
   user().assertString(reco.image, 'image must be a string');
   user().assertString(reco.title, 'title must be a string');
 
-  if (sourceOrigin) {
+  if (sourceOrigin !== origin) {
     reco.ampUrl = `${origin}/c/` +
         (url.protocol === 'https:' ? 's/' : '') +
         encodeURIComponent(url.host) +
