@@ -97,6 +97,7 @@ tags: {  # <amp-story>
     mandatory_min_num_child_tags: 1
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-CONSENT"
+    child_tag_name_oneof: "AMP-GEO"
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
@@ -305,6 +306,11 @@ tags: {  # <amp-story-bookend>
   tag_name: "AMP-STORY-BOOKEND"
   mandatory_ancestor: "AMP-STORY"
   mandatory_last_child: true
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
   attrs: {
     name: "src"
     value_url: {

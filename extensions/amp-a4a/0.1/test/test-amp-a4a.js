@@ -580,7 +580,7 @@ describe('amp-a4a', () => {
       });
     });
 
-    describe('#renderViaCachedContentIframe', () => {
+    describe('#renderViaIframeGet', () => {
       beforeEach(() => {
         // Verify client cache iframe rendering.
         adResponse.headers[RENDERING_TYPE_HEADER] = 'client_cache';
@@ -636,9 +636,9 @@ describe('amp-a4a', () => {
     });
 
     describe('illegal render mode value', () => {
-      let devErrLogSpy;
+      let devErrLogStub;
       beforeEach(() => {
-        devErrLogSpy = sandbox.spy(dev(), 'error');
+        devErrLogStub = sandbox.stub(dev(), 'error');
         // If rendering type is unknown, should fall back to cached content
         // iframe and generate an error.
         adResponse.headers[RENDERING_TYPE_HEADER] = 'random illegal value';
@@ -649,8 +649,8 @@ describe('amp-a4a', () => {
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL);
           // Should have reported an error.
-          expect(devErrLogSpy).to.be.calledOnce;
-          expect(devErrLogSpy.getCall(0).args[1]).to.have.string(
+          expect(devErrLogStub).to.be.calledOnce;
+          expect(devErrLogStub.getCall(0).args[1]).to.have.string(
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
           expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',
@@ -717,6 +717,7 @@ describe('amp-a4a', () => {
           headerVal => {
             it(`should not attach a NameFrame when header is ${headerVal}`,
                 () => {
+                  const devStub = sandbox.stub(dev(), 'error');
                   // Make sure there's no signature, so that we go down the 3p
                   // iframe path.
                   delete adResponse.headers['AMP-Fast-Fetch-Signature'];
@@ -726,6 +727,13 @@ describe('amp-a4a', () => {
                   adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
                   a4a.onLayoutMeasure();
                   return a4a.layoutCallback().then(() => {
+                    if (headerVal == 'some_random_thing') {
+                      expect(devStub.withArgs('AMP-A4A',
+                          `cross-origin render mode header ${headerVal}`))
+                          .to.be.calledOnce;
+                    } else {
+                      expect(devStub).to.not.be.called;
+                    }
                     const nameChild = a4aElement.querySelector(
                         'iframe[src^="nameframe"]');
                     expect(nameChild).to.not.be.ok;
@@ -809,11 +817,19 @@ describe('amp-a4a', () => {
           headerVal => {
             it(`should not attach a SafeFrame when header is ${headerVal}`,
                 () => {
+                  const devStub = sandbox.stub(dev(), 'error');
                   // If rendering type is anything but safeframe, we SHOULD NOT
                   // attach a SafeFrame.
                   adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
                   a4a.onLayoutMeasure();
                   return a4a.layoutCallback().then(() => {
+                    if (headerVal == 'some_random_thing') {
+                      expect(devStub.withArgs('AMP-A4A',
+                          `cross-origin render mode header ${headerVal}`))
+                          .to.be.calledOnce;
+                    } else {
+                      expect(devStub).to.not.be.called;
+                    }
                     const safeframeUrl = 'https://tpc.googlesyndication.com/safeframe/' +
                       DEFAULT_SAFEFRAME_VERSION + '/html/container.html';
                     const safeChild = a4aElement.querySelector(
@@ -1120,9 +1136,13 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         sandbox.stub(a4a, 'getAmpAdMetadata').callsFake(creative => {
-          const metaData = AmpA4A.prototype.getAmpAdMetadata(creative);
-          metaData.images = ['https://prefetch.me.com?a=b', 'http://do.not.prefetch.me.com?c=d',
-            'https://prefetch.metoo.com?e=f'];
+          const metaData = AmpA4A.prototype.getAmpAdMetadata.call(a4a,
+              creative);
+          metaData.images = [
+            'https://prefetch.me.com?a=b',
+            'http://do.not.prefetch.me.com?c=d',
+            'https://prefetch.metoo.com?e=f',
+          ];
           return metaData;
         });
         a4a.buildCallback();

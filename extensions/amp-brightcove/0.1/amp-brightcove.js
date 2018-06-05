@@ -135,10 +135,16 @@ class AmpBrightcove extends AMP.BaseElement {
    * @private
    * */
   sendCommand_(command, arg) {
-    this.iframe_.contentWindow. /*OK*/ postMessage(JSON.stringify(dict({
-      'command': command,
-      'args': arg,
-    })), 'https://players.brightcove.net');
+    this.playerReadyPromise_.then(() => {
+      // We still need to check this.iframe_ as the component may have
+      // been unlaid out by now.
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        this.iframe_.contentWindow. /*OK*/ postMessage(JSON.stringify(dict({
+          'command': command,
+          'args': arg,
+        })), 'https://players.brightcove.net');
+      }
+    });
   }
 
   /**
@@ -327,37 +333,27 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('play');
-    });
+    this.sendCommand_('play');
   }
 
   /** @override */
   pause() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('pause');
-    });
+    this.sendCommand_('pause');
   }
 
   /** @override */
   mute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('muted', true);
-    });
+    this.sendCommand_('muted', true);
   }
 
   /** @override */
   unmute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('muted', false);
-    });
+    this.sendCommand_('muted', false);
   }
 
   /** @override */
   showControls() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('controls', true);
-    });
+    this.sendCommand_('controls', true);
   }
 
   /** @override */

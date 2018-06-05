@@ -26,11 +26,21 @@ describes.fakeWin('inabox-host', {}, env => {
   });
 
   it('should process queue', () => {
-    const messages = [{}, {}, {}];
-    env.win['ampInaboxPendingMessages'] = messages;
+    const messages = [
+      {source: {postMessage: () => {}}},
+      {source: {postMessage: () => {}}},
+      {source: {postMessage: () => {}}},
+    ];
+    const invalidMessages = [
+      {},
+      {source: {}},
+    ];
+    env.win['ampInaboxPendingMessages'] = invalidMessages.concat(messages);
     new InaboxHost(env.win);
     expect(processMessageSpy.callCount).to.equal(3);
     messages.forEach(e => expect(processMessageSpy.withArgs(e)).to.be.called);
+    invalidMessages.forEach(
+        e => expect(processMessageSpy.withArgs(e)).to.not.be.called);
     // Calling push should have no effect
     expect(env.win['ampInaboxPendingMessages'].length).to.equal(0);
     env.win['ampInaboxPendingMessages'].push({});

@@ -28,10 +28,10 @@ import {endsWith} from '../../../src/string';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isSecureUrl, parseUrlDeprecated, removeFragment} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
+import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
 import {utf8Encode} from '../../../src/utils/bytes.js';
@@ -135,24 +135,27 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   assertSource_(src, containerSrc, sandbox = '') {
-    const url = parseUrlDeprecated(src);
+    const {element} = this;
+    const urlService = Services.urlForDoc(this.element);
+    const url = urlService.parse(src);
+    const {hostname, protocol, origin} = url;
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
     user().assert(
-        isSecureUrl(url) || url.protocol == 'data:',
+        urlService.isSecure(src) || protocol == 'data:',
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
-        this.element);
-    const containerUrl = parseUrlDeprecated(containerSrc);
+        element);
+    const containerUrl = urlService.parse(containerSrc);
     user().assert(
         !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
-        (url.origin != containerUrl.origin && url.protocol != 'data:'),
+        (origin != containerUrl.origin && protocol != 'data:'),
         'Origin of <amp-iframe> must not be equal to container %s' +
         'if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
-        this.element);
-    user().assert(!(endsWith(url.hostname, `.${urls.thirdPartyFrameHost}`) ||
-        endsWith(url.hostname, '.ampproject.org')),
+        element);
+    user().assert(!(endsWith(hostname, `.${urls.thirdPartyFrameHost}`) ||
+        endsWith(hostname, '.ampproject.org')),
     'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
     return src;
@@ -196,13 +199,13 @@ export class AmpIframe extends AMP.BaseElement {
     if (!src) {
       return;
     }
-    const url = parseUrlDeprecated(src);
+    const {protocol, hash} = Services.urlForDoc(this.element).parse(src);
     // data-URLs are not modified.
-    if (url.protocol == 'data:') {
+    if (protocol == 'data:') {
       return src;
     }
     // If fragment already exists, it's not modified.
-    if (url.hash && url.hash != '#') {
+    if (hash && hash != '#') {
       return src;
     }
     // Add `#amp=1` fragment.
@@ -597,9 +600,10 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
 
-    const src = this.element.getAttribute('src');
+    const {element} = this;
+    const src = element.getAttribute('src');
     if (src) {
-      this.targetOrigin_ = parseUrlDeprecated(src).origin;
+      this.targetOrigin_ = Services.urlForDoc(element).parse(src).origin;
     }
 
     // Register action (even if targetOrigin_ is not available so we can

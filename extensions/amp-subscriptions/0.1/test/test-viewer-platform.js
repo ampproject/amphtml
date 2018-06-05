@@ -55,6 +55,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         .callsFake(() => new PageConfig(currentProductId, true));
     sandbox.stub(serviceAdapter, 'getDialog')
         .callsFake(() => new Dialog(ampdoc));
+    sandbox.stub(serviceAdapter, 'getReaderId')
+        .callsFake(() => Promise.resolve('reader1'));
     viewerPlatform = new ViewerSubscriptionPlatform(
         ampdoc, serviceConfig, serviceAdapter, origin,
         new SubscriptionAnalytics(ampdoc.getRootNode()));

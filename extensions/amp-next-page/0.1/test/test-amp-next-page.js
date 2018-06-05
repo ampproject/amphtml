@@ -154,7 +154,7 @@ env => {
     const attachShadowDocSpy =
         sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
 
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+    sandbox.stub(viewport, 'getClientRectAsync').onFirstCall().callsFake(() => {
       // 1x viewport away
       return Promise.resolve(
           layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
@@ -192,7 +192,7 @@ env => {
     const attachShadowDocSpy =
       sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
 
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+    sandbox.stub(viewport, 'getClientRectAsync').onFirstCall().callsFake(() => {
       // 1x viewport away
       return Promise.resolve(
           layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));

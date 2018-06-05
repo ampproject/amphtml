@@ -17,7 +17,11 @@
 import {rethrowAsync, user} from '../../log';
 import {tryResolve} from '../../utils/promise';
 
-export const PARSER_IGNORE_FLAG = '`';
+/** @private @const {string} */
+const PARSER_IGNORE_FLAG = '`';
+
+/** @private @const {string} */
+const TAG = 'Expander';
 
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
@@ -34,13 +38,14 @@ export class Expander {
    * take the template url and return a promise of its evaluated value
    * @param {string} url url to be substituted
    * @param {!Object<string, *>=} opt_bindings additional one-off bindings
+   * @param {boolean=} opt_sync
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
-   * @return {!Promise<string>}
+   * @return {!Promise<string>|string}
    */
-  expand(url, opt_bindings, opt_whiteList) {
+  expand(url, opt_bindings, opt_sync, opt_whiteList) {
     if (!url.length) {
-      return Promise.resolve(url);
+      return opt_sync ? url : Promise.resolve(url);
     }
     const expr = this.variableSource_
         .getExpr(opt_bindings, /*opt_ignoreArgs */ true);
@@ -48,9 +53,9 @@ export class Expander {
     const matches = this.findMatches_(url, expr);
     // if no keywords move on
     if (!matches.length) {
-      return Promise.resolve(url);
+      return opt_sync ? url : Promise.resolve(url);
     }
-    return this.parseUrlRecursively_(url, matches, opt_bindings);
+    return this.parseUrlRecursively_(url, matches, opt_bindings, opt_sync);
   }
 
   /**
@@ -78,12 +83,13 @@ export class Expander {
 
   /**
    * @param {string} url
-   * @param {!Array<Object<string, string|number>>} matches array of objects representing
-   *  matching keywords
+   * @param {!Array<Object<string, string|number>>} matches array of objects
+   * representing matching keywords
    * @param {!Object<string, *>=} opt_bindings additional one-off bindings
-   * @return {!Promise<string>}
+   * @param {boolean=} opt_sync
+   * @return {!Promise<string>|string}
    */
-  parseUrlRecursively_(url, matches, opt_bindings) {
+  parseUrlRecursively_(url, matches, opt_bindings, opt_sync) {
     const stack = [];
     let urlIndex = 0;
     let matchIndex = 0;
@@ -102,11 +108,16 @@ export class Expander {
           // find out where this keyword is coming from
           if (opt_bindings && opt_bindings.hasOwnProperty(match.name)) {
             // the optional bindings
-            binding = opt_bindings[match.name];
+            binding = {
+              // This construction helps us save the match name and determine
+              // precedence of resolution choices in #expandBinding_ later.
+              name: match.name,
+              prioritized: opt_bindings[match.name],
+            };
           } else {
             // or the global source
             binding = this.variableSource_.get(match.name);
-            binding = binding.async || binding.sync;
+            binding.name = match.name;
           }
 
           urlIndex = match.stop + 1;
@@ -117,7 +128,8 @@ export class Expander {
             urlIndex++;
             numOfPendingCalls++;
             stack.push(binding);
-            if (builder.length) {
+            // trim space in between args
+            if (builder.trim().length) {
               results.push(builder);
             }
             results.push(evaluateNextLevel());
@@ -125,7 +137,8 @@ export class Expander {
             if (builder.length) {
               results.push(builder);
             }
-            results.push(this.evaluateBinding_(binding));
+            results.push(this.evaluateBinding_(binding,
+                /* opt_args */ undefined, opt_sync));
           }
 
           builder = '';
@@ -161,14 +174,17 @@ export class Expander {
           urlIndex++;
         }
 
-        else if (url[urlIndex] === ')' && !ignoringChars) {
+        // Invoke a function on every right parenthesis unless the stack is
+        // empty.
+        else if (numOfPendingCalls && url[urlIndex] === ')' && !ignoringChars) {
           urlIndex++;
           numOfPendingCalls--;
           const binding = stack.pop();
           const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
           results.push(nextArg);
           nextArgShouldBeRaw = false;
-          const value = this.evaluateBinding_(binding, results);
+          const value = this.evaluateBinding_(binding, /* opt_args */ results,
+              opt_sync);
           return value;
         }
 
@@ -182,6 +198,11 @@ export class Expander {
           results.push(builder);
         }
       }
+
+      if (opt_sync) {
+        return results.join('');
+      }
+
       return Promise.all(results)
           .then(promiseArray => promiseArray.join(''))
           .catch(e => {
@@ -193,13 +214,43 @@ export class Expander {
     return evaluateNextLevel();
   }
 
+
   /**
-   * resolves binding to value to be substituted
+   * Called when a binding is ready to be resolved. Looks to
+   * @param {Object<string, *>} bindingInfo An object containing the name of macro
+   * and value to be resolved.
+   * @param {Array=} opt_args Arguments passed to the macro.
+   * @param {*=} opt_sync Whether the binding should be resolved synchronously.
+   */
+  evaluateBinding_(bindingInfo, opt_args, opt_sync) {
+    let binding;
+    if (bindingInfo.prioritized) {
+      // If a binding is passed in through opt_bindings it always takes
+      // precedence.
+      binding = bindingInfo.prioritized;
+    } else if (opt_sync && bindingInfo.sync) {
+      // Use the sync resolution if avaliable when called synchronously.
+      binding = bindingInfo.sync;
+    } else if (opt_sync) {
+      // If there is no sync resolution we can not wait.
+      user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
+      binding = '';
+    } else {
+      // Prefer the async over the sync but it may not exist.
+      binding = bindingInfo.async || bindingInfo.sync;
+    }
+    return opt_sync ? this.evaluateBindingSync_(binding, opt_args) :
+      this.evaluateBindingAsync_(binding, opt_args);
+  }
+
+
+  /**
+   * resolves binding to value to be substituted asyncronously
    * @param {*} binding container for sync/async resolutions
    * @param {?Array=} opt_args arguments to be passed if binding is function
    * @return {!Promise<string>} resolved value
    */
-  evaluateBinding_(binding, opt_args) {
+  evaluateBindingAsync_(binding, opt_args) {
     let value;
     try {
       if (typeof binding === 'function') {
@@ -223,6 +274,31 @@ export class Expander {
       // interpolate as the empty string.
       rethrowAsync(e);
       return Promise.resolve('');
+    }
+  }
+
+  evaluateBindingSync_(binding, opt_args) {
+    try {
+      const value = typeof binding === 'function' ?
+        binding.apply(null, opt_args) : binding;
+
+      if (value && value.then) {
+        // if binding is passed in as opt_binding we try to resolve it and it
+        // may return a promise
+        user().error(TAG, 'ignoring async macro resolution');
+        return '';
+      }
+
+      if (value == null) {
+        return '';
+      }
+
+      return encodeURIComponent(value);
+    } catch (e) {
+      // Report error, but do not disrupt URL replacement. This will
+      // interpolate as the empty string.
+      rethrowAsync(e);
+      return '';
     }
   }
 }

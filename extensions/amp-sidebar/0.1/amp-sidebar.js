@@ -23,15 +23,17 @@ import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
-import {parseUrlDeprecated, removeFragment} from '../../../src/url';
+import {removeFragment} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
-/** @const */
+
+/** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
-/** @const */
+
+/** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
 
-/** @const */
+/** @private @const {string} */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
 
 /**  @enum {string} */
@@ -47,9 +49,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
-
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -96,33 +95,31 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.classList.add('i-amphtml-overlay');
+    const {element} = this;
 
-    this.side_ = this.element.getAttribute('side');
+    element.classList.add('i-amphtml-overlay');
+
+    this.side_ = element.getAttribute('side');
 
     this.viewport_ = this.getViewport();
 
-    this.action_ = Services.actionServiceForDoc(this.element);
+    this.action_ = Services.actionServiceForDoc(element);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       this.side_ = isRTL(this.document_) ? 'right' : 'left';
-      this.element.setAttribute('side', this.side_);
+      element.setAttribute('side', this.side_);
     }
 
-    const ampdoc = this.getAmpDoc();
     // Get the toolbar attribute from the child navs.
-    const toolbarElements =
-      toArray(this.element.querySelectorAll('nav[toolbar]'));
+    const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
 
     toolbarElements.forEach(toolbarElement => {
       try {
-        this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
-            ampdoc));
+        this.toolbars_.push(new Toolbar(toolbarElement, this));
       } catch (e) {
         this.user().error(TAG, 'Failed to instantiate toolbar', e);
       }
     });
-
 
     if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
@@ -131,14 +128,14 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       this.open_();
     } else {
-      this.element.setAttribute('aria-hidden', 'true');
+      element.setAttribute('aria-hidden', 'true');
     }
 
-    if (!this.element.hasAttribute('role')) {
-      this.element.setAttribute('role', 'menu');
+    if (!element.hasAttribute('role')) {
+      element.setAttribute('role', 'menu');
     }
     // Make sidebar programmatically focusable and focus on `open` for a11y.
-    this.element.tabIndex = -1;
+    element.tabIndex = -1;
 
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
@@ -148,7 +145,7 @@ export class AmpSidebar extends AMP.BaseElement {
     });
 
     // Replacement label for invisible close button set value in amp sidebar
-    const ariaLabel = this.element.getAttribute('data-close-button-aria-label')
+    const ariaLabel = element.getAttribute('data-close-button-aria-label')
     || 'Close the sidebar';
 
     // Invisible close button at the end of sidebar for screen-readers.
@@ -161,16 +158,16 @@ export class AmpSidebar extends AMP.BaseElement {
     screenReaderCloseButton.addEventListener('click', () => {
       this.close_();
     });
-    this.element.appendChild(screenReaderCloseButton);
+    element.appendChild(screenReaderCloseButton);
 
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
-    this.element.addEventListener('click', e => {
+    element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
-        const tgtLoc = parseUrlDeprecated(target.href);
+        const tgtLoc = Services.urlForDoc(element).parse(target.href);
         const currentHref = this.getAmpDoc().win.location.href;
         // Important: Only close sidebar (and hence pop sidebar history entry)
         // when navigating locally, Chrome might cancel navigation request
@@ -244,7 +241,7 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.enterOverlayMode();
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       toggle(this.element, /* display */true);
       this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
@@ -253,7 +250,7 @@ export class AmpSidebar extends AMP.BaseElement {
       }
       this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
-      this.vsync_.mutate(() => {
+      this.mutateElement(() => {
         this.openMask_();
         this.element.setAttribute('open', '');
         this.boundOnAnimationEnd_();
@@ -282,7 +279,7 @@ export class AmpSidebar extends AMP.BaseElement {
       (this.initialScrollTop_ == this.viewport_.getScrollTop());
     const sidebarIsActive =
         this.element.contains(this.document_.activeElement);
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.boundOnAnimationEnd_();
@@ -383,7 +380,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.triggerEvent_(SidebarEvents.OPEN);
     } else {
       // On close sidebar
-      this.vsync_.mutate(() => {
+      this.mutateElement(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
         this.triggerEvent_(SidebarEvents.CLOSE);
@@ -392,6 +389,7 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
+   * @param {string} name
    * @private
    */
   triggerEvent_(name) {
