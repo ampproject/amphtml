@@ -168,14 +168,11 @@ env => {
 
     const shadowRoot = shadowDoc.getRootNode();
 
-    expect(
-        shadowRoot.querySelector('header').classList.contains(
-            'i-amphtml-next-page-hidden'))
-        .to.be.true;
-    expect(
-        shadowRoot.querySelector('footer').classList.contains(
-            'i-amphtml-next-page-hidden'))
-        .to.be.true;
+    expect(shadowRoot.querySelector('header'))
+        .to.have.class('i-amphtml-next-page-hidden');
+
+    expect(shadowRoot.querySelector('footer'))
+        .to.have.class('i-amphtml-next-page-hidden');
   });
 
   it('removes amp-analytics tags from child documents', function* () {
