@@ -34,7 +34,7 @@ export function registerIniLoadListener(ampdoc) {
         win.dispatchEvent(createCustomEvent(
             win, 'amp-ini-load', /* detail */ null, {bubbles: true}));
         if (win.parent) {
-          win.parent.postMessage('amp-ini-load', '*');
+          win.parent./*OK*/postMessage('amp-ini-load', '*');
         }
       });
 }
