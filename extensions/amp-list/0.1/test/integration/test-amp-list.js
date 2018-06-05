@@ -24,21 +24,27 @@ const body =
       '</template>' +
     '</amp-list>';
 
-describes.integration('amp-list (integration)', {
-  body, extensions: ['amp-list', 'amp-mustache'],
-}, env => {
-  it('should render items', function*() {
-    const list = env.win.document.getElementById('list');
+describe('amp-list', function() {
+  const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
+  this.timeout(TIMEOUT);
 
-    let children;
-    yield poll('#list render', () => {
-      children = list.querySelectorAll('div.i-amphtml-replaced-content div');
-      return children.length > 0;
+  describes.integration('(integration)', {
+    body, extensions: ['amp-list', 'amp-mustache'],
+  }, env => {
+    it('should render items', function*() {
+      const list = env.win.document.getElementById('list');
+      expect(list).to.exist;
+
+      let children;
+      yield poll('#list render', () => {
+        children = list.querySelectorAll('div[role=list] > div');
+        return children.length > 0;
+      }, undefined, /* opt_timeout */ TIMEOUT);
+
+      expect(children.length).to.equal(3);
+      expect(children[0].textContent.trim()).to.equal('apple : 47 @ $0.33');
+      expect(children[1].textContent.trim()).to.equal('pear : 538 @ $0.54');
+      expect(children[2].textContent.trim()).to.equal('tomato : 0 @ $0.23');
     });
-
-    expect(children.length).to.equal(3);
-    expect(children[0].textContent.trim()).to.equal('apple : 47 @ $0.33');
-    expect(children[1].textContent.trim()).to.equal('pear : 538 @ $0.54');
-    expect(children[2].textContent.trim()).to.equal('tomato : 0 @ $0.23');
   });
 });
