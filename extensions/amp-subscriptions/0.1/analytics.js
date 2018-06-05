@@ -18,6 +18,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 export const SubscriptionAnalyticsEvents = {
   PLATFORM_ACTIVATED: 'subscriptions-platform-activated',
+  PAYWALL_ACTIVATED: 'subscriptions-paywall-activated',
   PLATFORM_REGISTERED: 'subscriptions-platform-registered',
   PLATFORM_REAUTHORIZED: 'subscriptions-platform-re-authorized',
   ACTION_DELEGATED: 'subscriptions-action-delegated',

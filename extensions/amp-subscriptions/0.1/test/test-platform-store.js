@@ -45,6 +45,44 @@ describes.realWin('Platform store', {}, () => {
     expect(platformStore.serviceIds_).to.be.equal(serviceIds);
   });
 
+  it('should resolve entitlement', () => {
+    // Request entitlement promise even before it's resolved.
+    const p = platformStore.getEntitlementPromiseFor('service2');
+
+    // Resolve once.
+    const ent = new Entitlement({
+      service: 'service2',
+      granted: false,
+    });
+    platformStore.resolveEntitlement('service2', ent);
+    expect(platformStore.getResolvedEntitlementFor('service2')).to.equal(ent);
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+
+    // Additional resolution doesn't change anything without reset.
+    platformStore.resolveEntitlement('service2', new Entitlement({
+      service: 'service2',
+      granted: true,
+    }));
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+    return expect(p).to.eventually.equal(ent);
+  });
+
+  it('should reset entitlement', () => {
+    // Request entitlement promise even before it's resolved.
+    const p = platformStore.getEntitlementPromiseFor('service2');
+
+    // Resolve once.
+    platformStore.resolveEntitlement('service2', new Entitlement({
+      service: 'service2',
+      granted: false,
+    }));
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+
+    // Reset: new entitlement promise.
+    platformStore.resetEntitlementFor('service2');
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.not.equal(p);
+  });
+
   it('should call onChange callbacks on every resolve', () => {
     const cb = sandbox.stub(platformStore.onEntitlementResolvedCallbacks_,
         'fire');

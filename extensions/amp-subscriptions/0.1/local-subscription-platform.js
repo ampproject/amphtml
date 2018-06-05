@@ -24,6 +24,7 @@ import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 
+
 /**
  * This implements the methods to interact with various subscription platforms.
  *
@@ -62,11 +63,10 @@ export class LocalSubscriptionPlatform {
         'Authorization Url'
     );
 
-    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
-    this.cid_ = Services.cidForDoc(ampdoc);
-
     /** @private {!UrlBuilder} */
-    this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
+    this.urlBuilder_ = new UrlBuilder(
+        this.ampdoc_,
+        this.serviceAdapter_.getReaderId('local'));
 
     /** @private {!./analytics.SubscriptionAnalytics} */
     this.subscriptionAnalytics_ = subscriptionAnalytics;
@@ -80,9 +80,6 @@ export class LocalSubscriptionPlatform {
         this.subscriptionAnalytics_,
         this.validateActionMap(this.serviceConfig_['actions'])
     );
-
-    /** @private {?Promise<string>} */
-    this.readerIdPromise_ = null;
 
     /** @private {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
@@ -112,23 +109,6 @@ export class LocalSubscriptionPlatform {
     user().assert(actionMap['subscribe'],
         'Action "subscribe" is not present in action map');
     return actionMap;
-  }
-
-  /**
-   * @return {!Promise<string>}
-   * @private
-   */
-  getReaderId_() {
-    if (!this.readerIdPromise_) {
-      const consent = Promise.resolve();
-      this.readerIdPromise_ = this.cid_.then(cid => {
-        return cid.get(
-            {scope: 'amp-access', createCookieIfNotPresent: true},
-            consent
-        );
-      });
-    }
-    return this.readerIdPromise_;
   }
 
   /**

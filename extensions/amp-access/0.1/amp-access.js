@@ -15,6 +15,7 @@
  */
 
 import {AccessSource, AccessType} from './amp-access-source';
+import {AccessVars} from './access-vars';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Services} from '../../../src/services';
@@ -43,6 +44,7 @@ const TEMPLATE_PROP = '__AMP_ACCESS__TEMPLATE';
 
 /**
  * AccessService implements the complete lifecycle of the AMP Access system.
+ * @implements {AccessVars}
  */
 export class AccessService {
   /**
@@ -134,13 +136,7 @@ export class AccessService {
         this.onDomUpdate_.bind(this));
   }
 
-  /**
-   * Returns the promise that will yield the access READER_ID.
-   *
-   * This is a restricted API.
-   *
-   * @return {?Promise<string>}
-   */
+  /** @override from AccessVars */
   getAccessReaderId() {
     if (!this.enabled_) {
       return null;
@@ -265,6 +261,7 @@ export class AccessService {
   /**
    * @return {!AccessService}
    * @private
+   * @restricted
    */
   start_() {
     if (!this.enabled_) {
@@ -378,17 +375,7 @@ export class AccessService {
         });
   }
 
-  /**
-   * Returns the promise that will yield the value of the specified field from
-   * the authorization response. This method will wait for the most recent
-   * authorization request to complete. It will return null values for failed
-   * requests with no fallback, but could be modified to block indefinitely.
-   *
-   * This is a restricted API.
-   *
-   * @param {string} field
-   * @return {?Promise<*|null>}
-   */
+  /** @override from AccessVars */
   getAuthdataField(field) {
     if (!this.enabled_) {
       return null;
@@ -717,3 +704,9 @@ AMP.extension(TAG, '0.1', function(AMP) {
     return new AccessService(ampdoc).start_();
   });
 });
+
+
+/** @package Visible for testing only. */
+export function getAccessVarsClassForTesting() {
+  return AccessVars;
+}

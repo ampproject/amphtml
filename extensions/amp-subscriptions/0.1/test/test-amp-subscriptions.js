@@ -22,6 +22,7 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
+import {Services} from '../../../../src/services';
 import {SubscriptionAnalyticsEvents} from '../analytics';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
@@ -173,6 +174,47 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
   });
 
+  describe('getReaderId', () => {
+    let cidGet;
+
+    beforeEach(() => {
+      return Services.cidForDoc(ampdoc).then(cid => {
+        cidGet = sandbox.stub(cid, 'get').callsFake(
+            () => Promise.resolve('cid1'));
+      });
+    });
+
+    it('should delegate to cid.get for local', () => {
+      return subscriptionService.getReaderId('local').then(value => {
+        expect(value).to.equal('cid1');
+        expect(cidGet).to.be.calledOnce.calledWith({
+          // Local service is default to "amp-access" scope.
+          scope: 'amp-access',
+          createCookieIfNotPresent: true,
+        });
+      });
+    });
+
+    it('should delegate to cid.get for non-local', () => {
+      return subscriptionService.getReaderId('service1').then(() => {
+        expect(cidGet).to.be.calledOnce.calledWith({
+          scope: 'amp-access-service1',
+          createCookieIfNotPresent: true,
+        });
+      });
+    });
+
+    it('should resolve reader ID only once', () => {
+      const local1 = subscriptionService.getReaderId('local');
+      const local2 = subscriptionService.getReaderId('local');
+      const service1 = subscriptionService.getReaderId('service');
+      const service2 = subscriptionService.getReaderId('service');
+      expect(local1).to.equal(local2);
+      expect(service1).to.equal(service2);
+      expect(local1).to.not.equal(service1);
+    });
+  });
+
   it('should discover page configuration', () => {
     return subscriptionService.initialize_().then(() => {
       expect(subscriptionService.pageConfig_).to.equal(pageConfig);
@@ -235,7 +277,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.serviceAdapter_ =
         new ServiceAdapter(subscriptionService);
       subscriptionService.pageConfig_ = pageConfig;
-      subscriptionService.platformStore_ = new PlatformStore('local');
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
       subscriptionService.initializeLocalPlatforms_(service);
       expect(subscriptionService.platformStore_.subscriptionPlatforms_['local'])
           .to.be.not.null;
@@ -250,7 +292,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
-        resolveRequiredPromises(subscriptionService);
+        resolveRequiredPromises(subscriptionService, /* subscriber */ true);
         const localPlatform =
             subscriptionService.platformStore_.getLocalPlatform();
         const selectPlatformStub =
@@ -266,15 +308,18 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
                 'serviceId': 'local',
               }
           );
+          expect(analyticsEventStub).to.not.be.calledWith(
+              SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED);
         });
       });
     });
+
     it('should call selectPlatform with preferViewerSupport config', () => {
       sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
-        resolveRequiredPromises(subscriptionService);
+        resolveRequiredPromises(subscriptionService, /* subscriber */ true);
         const selectPlatformStub =
           subscriptionService.platformStore_.selectPlatform;
         subscriptionService.platformConfig_['preferViewerSupport'] = false;
@@ -283,9 +328,39 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         });
       });
     });
-    function resolveRequiredPromises(subscriptionService) {
-      const entitlement = new Entitlement({source: 'local', raw: 'raw',
-        granted: true, grantReason: GrantReason.SUBSCRIBER});
+
+    it('should send paywall activation event', () => {
+      sandbox.stub(subscriptionService, 'fetchEntitlements_');
+      subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      return subscriptionService.initialize_().then(() => {
+        resolveRequiredPromises(subscriptionService, /* subscriber */ false);
+        const localPlatform =
+            subscriptionService.platformStore_.getLocalPlatform();
+        sandbox.stub(localPlatform, 'activate');
+        return subscriptionService.selectAndActivatePlatform_().then(() => {
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+              {
+                'serviceId': 'local',
+              }
+          );
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
+              {
+                'serviceId': 'local',
+              });
+        });
+      });
+    });
+
+    function resolveRequiredPromises(subscriptionService, subscriber) {
+      const entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: subscriber,
+        grantReason: subscriber ? GrantReason.SUBSCRIBER : null,
+      });
       const localPlatform =
         subscriptionService.platformStore_.getLocalPlatform();
       sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
@@ -388,6 +463,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
               'serviceId': 'local',
             }
         );
+      });
+    });
+
+    it('should reset entitlement on re-authorization', () => {
+      const entitlement = new Entitlement({source: 'local', raw: 'raw',
+        granted: true, grantReason: GrantReason.SUBSCRIBER});
+      sandbox.stub(platform, 'getEntitlements')
+          .callsFake(() => Promise.resolve(entitlement));
+      const resetStub = sandbox.stub(subscriptionService.platformStore_,
+          'resetEntitlementFor');
+      sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
+      return subscriptionService.reAuthorizePlatform(platform).then(() => {
+        expect(resetStub).to.be.calledOnce.calledWith('local');
       });
     });
   });
@@ -562,6 +650,52 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           subscriptionService.platformStore_, 'selectPlatformForLogin');
       subscriptionService.selectPlatformForLogin();
       expect(loginStub).to.be.called;
+    });
+  });
+
+  describe('AccessVars', () => {
+    let platformStore;
+    let entitlement;
+
+    beforeEach(() => {
+      platformStore = new PlatformStore(['local']);
+      subscriptionService.platformStore_ = platformStore;
+      entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+        dataObject: {
+          test: 'a1',
+        },
+      });
+    });
+
+    it('should return local reader ID', () => {
+      const stub = sandbox.stub(subscriptionService, 'getReaderId').callsFake(
+          () => Promise.resolve('reader1'));
+      return subscriptionService.getAccessReaderId().then(readerId => {
+        expect(readerId).to.equal('reader1');
+        expect(stub).to.be.calledOnce.calledWith('local');
+      });
+    });
+
+    it('should resolve authdata from local service', () => {
+      platformStore.resolveEntitlement('local', entitlement);
+      return expect(subscriptionService.getAuthdataField('data.test'))
+          .to.eventually.equal('a1');
+    });
+
+    it('should resolve authdata for a standard field', () => {
+      platformStore.resolveEntitlement('local', entitlement);
+      return expect(subscriptionService.getAuthdataField('grantReason'))
+          .to.eventually.equal('SUBSCRIBER');
+    });
+
+    it('should resolve authdata for an unknown value', () => {
+      platformStore.resolveEntitlement('local', entitlement);
+      return expect(subscriptionService.getAuthdataField('data.other'))
+          .to.eventually.be.undefined;
     });
   });
 });

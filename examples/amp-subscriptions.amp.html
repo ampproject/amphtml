@@ -9,6 +9,7 @@
   <script async custom-element="amp-subscriptions" src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
   <script async custom-element="amp-subscriptions-google" src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script type="application/ld+json">
   {
@@ -163,6 +164,41 @@
   </style>
 </head>
 <body>
+<amp-analytics type="googleanalytics" id="analytics2">
+<script type="application/json">
+{
+  "vars": {
+    "account": "UA-YYYY-Y"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview",
+      "vars": {
+        "title": "Example Pageview"
+      }
+    },
+    "authorizationReceived": {
+      "on": "subscriptions-entitlement-resolved",
+      "request": "event",
+      "vars": {
+        "eventCategory": "amp-subscriptions",
+        "eventAction": "subscriptions-entitlement-resolved",
+        "eventValue": "ACCESS_READER_ID/AUTHDATA(granted)/${serviceId}"
+      }
+    },
+    "pingbackSent": {
+      "on": "action-subscribe-started",
+      "request": "event",
+      "vars": {
+        "eventCategory": "amp-subscriptions",
+        "eventAction": "action-subscribe-started"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
 
   <header>
     <div class="brand-logo">

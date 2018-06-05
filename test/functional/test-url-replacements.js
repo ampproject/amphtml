@@ -1203,7 +1203,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         '&a=b&d=PROM&e=PAGE_LOAD_TIME');
   });
 
-  describe('access values', () => {
+  describe('access values via amp-access', () => {
 
     let accessService;
     let accessServiceMock;
@@ -1214,6 +1214,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
         getAuthdataField: () => {},
       };
       accessServiceMock = sandbox.mock(accessService);
+      sandbox.stub(Services, 'accessServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve(accessService);
+          });
     });
 
     afterEach(() => {
@@ -1221,21 +1225,84 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
 
     function expandUrlAsync(url, opt_disabled) {
+      if (opt_disabled) {
+        accessService = null;
+      }
       return createIframePromise().then(iframe => {
         iframe.doc.title = 'Pixel Test';
         const link = iframe.doc.createElement('link');
         link.setAttribute('href', 'https://pinterest.com/pin1');
         link.setAttribute('rel', 'canonical');
         iframe.doc.head.appendChild(link);
-
         const replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
-        replacements.getVariableSource().getAccessService_ = ampdoc => {
-          expect(ampdoc.isSingleDoc).to.be.a('function');
-          if (opt_disabled) {
-            return Promise.resolve(null);
-          }
-          return Promise.resolve(accessService);
-        };
+        return replacements.expandUrlAsync(url);
+      });
+    }
+
+    it('should replace ACCESS_READER_ID', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .returns(Promise.resolve('reader1'))
+          .once();
+      return expandUrlAsync('?a=ACCESS_READER_ID') .then(res => {
+        expect(res).to.match(/a=reader1/);
+        expect(userErrorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should replace AUTHDATA', () => {
+      accessServiceMock.expects('getAuthdataField')
+          .withExactArgs('field1')
+          .returns(Promise.resolve('value1'))
+          .once();
+      return expandUrlAsync('?a=AUTHDATA(field1)').then(res => {
+        expect(res).to.match(/a=value1/);
+        expect(userErrorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should report error if not available', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .never();
+      return expandUrlAsync('?a=ACCESS_READER_ID;', /* disabled */ true)
+          .then(res => {
+            expect(res).to.match(/a=;/);
+            expect(userErrorStub).to.be.calledOnce;
+          });
+    });
+  });
+
+  describe('access values via amp-subscriptions', () => {
+
+    let accessService;
+    let accessServiceMock;
+
+    beforeEach(() => {
+      accessService = {
+        getAccessReaderId: () => {},
+        getAuthdataField: () => {},
+      };
+      accessServiceMock = sandbox.mock(accessService);
+      sandbox.stub(Services, 'subscriptionsServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve(accessService);
+          });
+    });
+
+    afterEach(() => {
+      accessServiceMock.verify();
+    });
+
+    function expandUrlAsync(url, opt_disabled) {
+      if (opt_disabled) {
+        accessService = null;
+      }
+      return createIframePromise().then(iframe => {
+        iframe.doc.title = 'Pixel Test';
+        const link = iframe.doc.createElement('link');
+        link.setAttribute('href', 'https://pinterest.com/pin1');
+        link.setAttribute('rel', 'canonical');
+        iframe.doc.head.appendChild(link);
+        const replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
         return replacements.expandUrlAsync(url);
       });
     }
