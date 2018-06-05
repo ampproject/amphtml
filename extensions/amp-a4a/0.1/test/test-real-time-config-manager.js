@@ -28,7 +28,10 @@ import {
 import {Services} from '../../../../src/services';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {dev} from '../../../../src/log';
+import {
+  dev,
+  user,
+} from '../../../../src/log';
 import {isFiniteNumber} from '../../../../src/types';
 
 describes.realWin('real-time-config-manager', {amp: true}, env => {
@@ -334,6 +337,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
                 Object.keys(vendors)[0].toLowerCase(), undefined, true));
       }
       const calloutCount = 1;
+      sandbox.stub(user(), 'error').callsFake(() => {});
       return executeTest({
         vendors, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
@@ -533,22 +537,21 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
-    it('should return null if rtc-config not specified', () => {
-      validateRtcConfig_(element);
-      expect(rtc.rtcConfig_).to.be.null;
+    it('should return false if rtc-config not specified', () => {
+      expect(validateRtcConfig_(element)).to.be.false;
     });
 
     // Test various misconfigurations that are missing vendors or urls.
     [{'timeoutMillis': 500}, {'vendors': {}}, {'urls': []},
       {'vendors': {}, 'urls': []},
       {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
-      it('should return null for rtcConfig missing required values', () => {
+      it('should return false for rtcConfig missing required values', () => {
         setRtcConfig(rtcConfig);
         allowConsoleError(() => {
           dev().error('RTCTESTS', 'Error');
           validatedRtcConfig = validateRtcConfig_(element);
         });
-        expect(validatedRtcConfig).to.be.null;
+        expect(validatedRtcConfig).to.be.false;
       });
     });
 
@@ -556,7 +559,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const rtcConfig = '{"urls" : ["https://google.com"]';
       element.setAttribute('rtc-config', rtcConfig);
       validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.null;
+      expect(validatedRtcConfig).to.be.false;
     });
   });
 
@@ -626,12 +629,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
       expect(imageStub).to.be.calledOnce;
       expect(imageMock.src).to.equal(requestUrl);
-    });
-
-    it('should not send error message if insecure url', () => {
-      errorReportingUrl = 'http://www.IAmInsecure.biz';
-      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
-      expect(imageStub).to.not.be.called;
     });
   });
 });

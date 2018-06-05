@@ -1815,16 +1815,18 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState) {
-    user().assert(!!AMP.RealTimeConfigManager ||
-                  !this.element.getAttribute('rtc-config'),
-    'RTC not supported for ad network ' +
-                  `${this.element.getAttribute('type')}`);
-    try {
-      return new AMP.RealTimeConfigManager(this)
-          .maybeExecuteRealTimeConfig(
-              this.getCustomRealTimeConfigMacros_(), consentState);
-    } catch (err) {
-      user().error(TAG, 'Could not perform Real Time Config.', err);
+    if (!!AMP.RealTimeConfigManager) {
+      try {
+        return new AMP.RealTimeConfigManager(this)
+            .maybeExecuteRealTimeConfig(
+                this.getCustomRealTimeConfigMacros_(), consentState);
+      } catch (err) {
+        user().error(TAG, 'Could not perform Real Time Config.', err);
+      }
+    } else if (this.element.getAttribute('rtc-config')) {
+      user().error(TAG, 'RTC not supported for ad network ' +
+                   `${this.element.getAttribute('type')}`);
+
     }
   }
 

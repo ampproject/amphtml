@@ -2373,6 +2373,10 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
   });
 
   describe('#tryExecuteRealTimeConfig', () => {
+    beforeEach(() => {
+      AMP.RealTimeConfigManager = undefined;
+    });
+
     it('should not execute if RTC never imported', () => {
       expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
     });
