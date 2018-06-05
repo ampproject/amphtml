@@ -281,6 +281,7 @@ function warnForConsoleError() {
   expectedAsyncErrors = [];
   consoleErrorSandbox = sinon.sandbox.create();
   const originalConsoleError = console/*OK*/.error;
+  setReportError(() => {});
   consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
     const message = messages.join(' ');
     if (expectedAsyncErrors.includes(message)) {
@@ -342,6 +343,7 @@ function dontWarnForConsoleError() {
   consoleErrorSandbox = sinon.sandbox.create();
   consoleErrorStub =
       consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
+  setReportError(reportError);
 }
 
 // Used to restore error level logging after each test.
@@ -370,7 +372,9 @@ function stubConsoleInfoLogWarn() {
 
 // Used to restore info, log, and warn level logging after each test.
 function restoreConsoleInfoLogWarn() {
-  consoleInfoLogWarnSandbox.restore();
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
 }
 
 beforeEach(function() {

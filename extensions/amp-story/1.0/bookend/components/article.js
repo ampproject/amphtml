@@ -40,8 +40,15 @@ export class ArticleComponent {
 
   /** @override */
   assertValidity(articleJson, element) {
-    user().assert('title' in articleJson && 'url' in articleJson,
-        'Articles must contain `title` and `url` fields, skipping invalid.');
+
+    const requiredFields = ['title', 'url'];
+    const hasAllRequiredFields =
+        !requiredFields.some(field => !(field in articleJson));
+    user().assert(
+        hasAllRequiredFields,
+        'Small article component must contain ' +
+            requiredFields.map(field => '`' + field + '`').join(', ') +
+            ' fields, skipping invalid.');
 
     userAssertValidProtocol(element, articleJson['url']);
 

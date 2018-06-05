@@ -138,110 +138,197 @@ describes.realWin('Expander', {
       TRIM: str => str.trim(), // fn
       UPPERCASE: str => str.toUpperCase(),
       LOWERCASE: str => str.toLowerCase(),
-      CONCAT: (a, b) => a + b,
+      CONCAT: (a, b) => a + '-' + b,
       CAT_THREE: (a, b, c) => a + b + c,
+      ASYNC: Promise.resolve('hello'),
+      ASYNCFN: arg => Promise.resolve(arg),
     };
 
-    it('should handle empty urls', () =>
-      expect(expander.expand('', mockBindings)).to.eventually.equal('')
-    );
+    const sharedTestCases = [
+      {
+        description: 'should handle empty urls',
+        input: '',
+        output: '',
+      },
+      {
+        description: 'parses one function, one argument',
+        input: 'TRIM(aaaaa    )',
+        output: 'aaaaa',
+      },
+      {
+        description: 'parses nested function one level',
+        input: 'UPPERCASE(TRIM(aaaaa    ))',
+        output: 'AAAAA',
+      },
+      {
+        description: 'parses nested function two levels',
+        input: 'LOWERCASE(UPPERCASE(TRIM(aAaA    )))',
+        output: 'aaaa',
+      },
+      {
+        description: 'parses one function, two string arguments',
+        input: 'CONCAT(aaa,bbb)',
+        output: 'aaa-bbb',
+      },
+      {
+        description: 'parses one function, two string arguments with space',
+        input: 'CONCAT(aaa , bbb)',
+        output: 'aaa-bbb',
+      },
+      {
+        description: 'parses function with func then string as args',
+        input: 'CONCAT(UPPERCASE(aaa),bbb)',
+        output: 'AAA-bbb',
+      },
+      {
+        description: 'parses function with macro then string as args',
+        input: 'CONCAT(CANONICAL_URL,bbb)',
+        output: 'www.google.com-bbb',
+      },
+      {
+        description: 'parses function with string then func as args',
+        input: 'CONCAT(aaa,UPPERCASE(bbb))',
+        output: 'aaa-BBB',
+      },
+      {
+        description: 'parses function with two funcs as args',
+        input: 'CONCAT(LOWERCASE(AAA),UPPERCASE(bbb))',
+        output: 'aaa-BBB',
+      },
+      {
+        description: 'parses function with three funcs as args',
+        input: 'CAT_THREE(LOWERCASE(AAA),UPPERCASE(bbb),LOWERCASE(CCC))',
+        output: 'aaaBBBccc',
+      },
+      {
+        description: 'should treat unrecognized keywords as normal strings',
+        input: 'TRIM(FAKE(aaaaa))',
+        output: 'FAKE(aaaaa)',
+      },
+      {
+        description: 'ignores commas within backticks',
+        input: 'CONCAT(`he,llo`,UPPERCASE(world))',
+        output: 'he%2Cllo-WORLD',
+      },
+      {
+        description: 'ignores left parentheses within backticks',
+        input: 'CONCAT(hello, `wo((rld`)',
+        output: 'hello-wo((rld',
+      },
+      {
+        description: 'ignores right parentheses within backticks',
+        input: 'CONCAT(`hello)`,UPPERCASE(world))',
+        output: 'hello)-WORLD',
+      },
+      {
+        description: 'trims with the wrong number of parens',
+        input: 'TRIM(FAKE(aaa)',
+        output: 'FAKE(aaa',
+      },
+      {
+        description: 'passes undefined for omitted args',
+        input: 'CONCAT(foo)',
+        output: 'foo-undefined',
+      },
+    ];
 
-    it('parses one function, one argument', () =>
-      expect(expander.expand('TRIM(aaaaa    )', mockBindings))
-          .to.eventually.equal('aaaaa')
-    );
+    describe('called asyncronously', () => {
+      sharedTestCases.forEach(test => {
+        const {description, input, output} = test;
+        it(description, () =>
+          expect(expander.expand(input, mockBindings))
+              .to.eventually.equal(output)
+        );
+      });
 
-    it('parses nested function one level', () =>
-      expect(expander.expand('UPPERCASE(TRIM(aaaaa    ))', mockBindings))
-          .to.eventually.equal('AAAAA')
-    );
+      describe('unique cases', () => {
+        it('should handle real urls', () => {
+          const url = 'http://www.amp.google.com/?client=CLIENT_ID(__ga)&canon=CANONICAL_URL&random=RANDOM';
+          const expected = 'http://www.amp.google.com/?client=amp-GA12345&canon=www.google.com&random=123456';
+          return expect(expander.expand(url, mockBindings))
+              .to.eventually.equal(expected);
+        });
 
-    it('parses nested function two levels', () =>
-      expect(
-          expander.expand('LOWERCASE(UPPERCASE(TRIM(aAaA    )))', mockBindings))
-          .to.eventually.equal('aaaa')
-    );
+        it('throws on bad input with back ticks', () => {
+          const url = 'CONCAT(bad`hello`, world)';
+          allowConsoleError(() => { expect(() => {
+            expander.expand(url, mockBindings);
+          }).to.throw(/bad/); });
+        });
 
-    it('parses one function, two string arguments', () =>
-      expect(expander.expand('CONCAT(aaa,bbb)', mockBindings))
-          .to.eventually.equal('aaabbb')
-    );
-
-    it('parses one function, two string arguments with space', () =>
-      expect(expander.expand('CONCAT(aaa , bbb)', mockBindings))
-          .to.eventually.equal('aaabbb')
-    );
-
-    it('parses function with func then string as args', () =>
-      expect(expander.expand('CONCAT(UPPERCASE(aaa),bbb)', mockBindings))
-          .to.eventually.equal('AAAbbb')
-    );
-
-    it('parses function with macro then string as args', () =>
-      expect(expander.expand('CONCAT(CANONICAL_URL,bbb)', mockBindings))
-          .to.eventually.equal('www.google.combbb')
-    );
-
-    it('parses function with string then func as args', () =>
-      expect(expander.expand('CONCAT(aaa,UPPERCASE(bbb))', mockBindings))
-          .to.eventually.equal('aaaBBB')
-    );
-
-    it('parses function with two funcs as args', () => {
-      const url = 'CONCAT(LOWERCASE(AAA),UPPERCASE(bbb)';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal('aaaBBB');
+        it('should handle tokens with parenthesis next to each other', () => {
+          const url = 'http://www.google.com/?test=RANDOMCLIENT_ID(__ga)UPPERCASE(foo)';
+          const expected = 'http://www.google.com/?test=123456amp-GA12345FOO';
+          return expect(expander.expand(url, mockBindings))
+              .to.eventually.equal(expected);
+        });
+      });
     });
 
-    it('parses function with three funcs as args', () => {
-      const url = 'CAT_THREE(LOWERCASE(AAA),UPPERCASE(bbb),LOWERCASE(CCC))';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal('aaaBBBccc');
-    });
+    describe('called synchronously', () => {
+      sharedTestCases.forEach(test => {
+        const {description, input, output} = test;
+        it(description, () =>
+          expect(expander.expand(input, mockBindings, /*opt_sync*/ true))
+              .to.equal(output)
+        );
+      });
 
-    it('should handle real urls', () => {
-      const url = 'http://www.amp.google.com/?client=CLIENT_ID(__ga)&canon=CANONICAL_URL&random=RANDOM';
-      const expected = 'http://www.amp.google.com/?client=amp-GA12345&canon=www.google.com&random=123456';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal(expected);
-    });
+      describe('unique cases', () => {
+        it('throws on bad input with back ticks', () => {
+          const url = 'CONCAT(bad`hello`, world)';
+          allowConsoleError(() => { expect(() => {
+            expander.expand(url, mockBindings, /*opt_sync*/ true);
+          }).to.throw(/bad/); });
+        });
 
-    it('should treat unrecognized keywords as normal strings', () => {
-      return expect(expander.expand('TRIM(FAKE(aaaaa))', mockBindings))
-          .to.eventually.equal('');
-    });
+        // Console errors allowed for these tests because anytime an async
+        // function is called with the sync flag we user.error()
+        it('should resolve promise to empty string', () => {
+          const url = 'ASYNC';
+          const expected = '';
+          allowConsoleError(() => {
+            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+                .to.equal(expected);
+          });
+        });
 
-    it('ignores commas within backticks', () => {
-      const url = 'CONCAT(`he,llo`,UPPERCASE(world)';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal('he,lloWORLD');
-    });
+        it('should resolve asyncronous function to empty string', () => {
+          const url = 'ASYNCFN';
+          const expected = '';
+          allowConsoleError(() => {
+            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+                .to.equal(expected);
+          });
+        });
 
-    it('ignores left parentheses within backticks', () => {
-      const url = 'CONCAT(hello, `wo((rld`)';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal('hellowo((rld');
-    });
+        it('should resolve asyncronous function to empty string', () => {
+          const url = 'ASYNCFN(foo)';
+          const expected = '';
+          allowConsoleError(() => {
+            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+                .to.equal(expected);
+          });
+        });
 
-    it('ignores right parentheses within backticks', () => {
-      const url = 'CONCAT(`hello)`,UPPERCASE(world)';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal('hello)WORLD');
-    });
+        it('dismiss async in real urls', () => {
+          const url = 'http://www.google.com/?test=RANDOMASYNCFN(foo)UPPERCASE(foo)';
+          const expected = 'http://www.google.com/?test=123456FOO';
+          allowConsoleError(() => {
+            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+                .to.equal(expected);
+          });
+        });
 
-    it('throws on bad input with back ticks', () => {
-      const url = 'CONCAT(bad`hello`, world)';
-      allowConsoleError(() => { expect(() => {
-        expander.expand(url, mockBindings);
-      }).to.throw(/bad/); });
-    });
-
-    it('should handle tokens with parenthesis next to each other', () => {
-      const url = 'http://www.google.com/?test=RANDOMCLIENT_ID(__ga)UPPERCASE(foo)';
-      const expected = 'http://www.google.com/?test=123456amp-GA12345FOO';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal(expected);
+        it('dismiss async in nested calls', () => {
+          const url = 'CONCAT(foo, ASYNCFN(bar))UPPERCASE(foo)';
+          const expected = 'foo-FOO';
+          allowConsoleError(() => {
+            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+                .to.equal(expected);
+          });
+        });
+      });
     });
   });
 });
-
