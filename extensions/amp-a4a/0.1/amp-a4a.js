@@ -46,9 +46,6 @@ import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 import {tryResolve} from '../../../src/utils/promise';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
-import {
-  RealTimeConfigManager,
-} from '../../amp-a4a/0.1/real-time-config-manager';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -1818,29 +1815,17 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState) {
-    if (!this.isRtcSupported()) {
-      if (this.element.getAttribute('rtc-config')) {
-        user().error(TAG, 'RTC not supported for ad network ' +
-                     `${this.element.getAttribute('type')}`);
-      }
-    } else {
-      const rtcManager = new RealTimeConfigManager(this);
-      try {
-        return rtcManager.maybeExecuteRealTimeConfig(
-            this.getCustomRealTimeConfigMacros_(), consentState);
-      } catch (err) {
-        user().error(TAG, 'Could not perform Real Time Config.', err);
-      }
+    user().assert(!!AMP.RealTimeConfigManager ||
+                  !this.element.getAttribute('rtc-config'),
+    'RTC not supported for ad network ' +
+                  `${this.element.getAttribute('type')}`);
+    try {
+      return new AMP.RealTimeConfigManager(this)
+          .maybeExecuteRealTimeConfig(
+              this.getCustomRealTimeConfigMacros_(), consentState);
+    } catch (err) {
+      user().error(TAG, 'Could not perform Real Time Config.', err);
     }
-  }
-
-  /**
-   * To be overridden by network impl. If Real Time Config is supported
-   * by that Fast Fetch impl, should be overridden to return true.
-   * @return {boolean}
-   */
-  isRtcSupported() {
-    return false;
   }
 
   /**

@@ -20,6 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
@@ -680,11 +681,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.jsonTargeting_['categoryExclusions'] = Object.keys(exclusions);
     }
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
-  }
-
-  /** @override */
-  isRtcSupported() {
-    return true;
   }
 
   /** @override */

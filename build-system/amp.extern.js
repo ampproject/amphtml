@@ -411,7 +411,7 @@ SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
 
-AMP.maybeExecuteRealTimeConfig = false;
+AMP.RealTimeConfigManager = false;
 
 /**
  * Actual filled values for this exists in
