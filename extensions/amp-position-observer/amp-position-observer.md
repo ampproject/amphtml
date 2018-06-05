@@ -215,7 +215,7 @@ You can specify different values for top vs. bottom by providing two values (`<t
 
 #### once (optional)
 
-Only triggers the position-observer once. Once the first iteration of the animation associated with the position-observer has finished, the position-observer doesn't update the position anymore.
+Only triggers `enter` and `exit` events once. `scroll` event will also only do one iteration.
 
 ## Validation
 
