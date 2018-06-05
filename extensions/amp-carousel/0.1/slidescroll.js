@@ -22,6 +22,7 @@ import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getStyle, setStyle} from '../../../src/style';
+import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
 import {startsWith} from '../../../src/string';
@@ -404,7 +405,7 @@ export class AmpSlideScroll extends BaseSlides {
   customSnap_(currentScrollLeft, opt_forceDir) {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
-    let toScrollLeft;
+    let toScrollLeft = 0;
     let diff = newIndex - this.slideIndex_;
     const hasPrev = this.hasPrev();
 
@@ -472,7 +473,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    */
   updateOnScroll_(currentScrollLeft) {
-    if (currentScrollLeft == NaN || this.slideIndex_ == null) {
+    if (!isFiniteNumber(currentScrollLeft) || this.slideIndex_ === null) {
       return;
     }
     this.snappingInProgress_ = true;
