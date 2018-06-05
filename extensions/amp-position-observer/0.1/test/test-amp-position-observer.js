@@ -328,7 +328,7 @@ describes.sandboxed('amp-position-observer', {}, () => {
     });
 
     describe('attribute `once` specified', () => {
-      it.only('should not trigger functions is `once` is specified - ' +
+      it('should not trigger functions is `once` is specified - ' +
         'scroll from bottom to top', () => {
         init('0', '0', true);
         expect(enterSpy).not.to.be.called;
@@ -348,7 +348,7 @@ describes.sandboxed('amp-position-observer', {}, () => {
         expect(exitSpy).not.to.be.called;
       });
 
-      it.only('should not trigger functions is `once` is specified - ' +
+      it('should not trigger functions is `once` is specified - ' +
         'scroll from top to bottom', () => {
         init('0', '0', true);
         expect(enterSpy).not.to.be.called;
