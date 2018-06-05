@@ -47,3 +47,5 @@ Single page ad creatives must contain two meta tags: one to specify the [call-to
 ```
 
 See the above link for allowed call-to-action buttons. By design, these will be the only clickable elements of the creative unit. This means that while things like AMP carousels are allowed within a single page story ad, they will not be clickable.
+
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>
