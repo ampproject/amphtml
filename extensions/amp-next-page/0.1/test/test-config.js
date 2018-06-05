@@ -79,7 +79,8 @@ describe('amp-next-page config', () => {
           },
         ],
       };
-      expect(() => assertConfig(/*ctx*/ null, config, cdnOrigin, origin)).to.not.throw();
+      expect(() => assertConfig(/*ctx*/ null, config, cdnOrigin, origin))
+          .to.not.throw();
       expect(config.pages[1].ampUrl).to.equal(
           'https://example-com.cdn.ampproject.org/c/s/example.com/art2?x=1');
     });
@@ -96,8 +97,11 @@ describe('amp-next-page config', () => {
           },
         ],
       };
-      expect(() => assertConfig(/*ctx*/ null, config, cdnOrigin, insecureOrigin))
+
+      expect(() =>
+        assertConfig(/*ctx*/ null, config, cdnOrigin, insecureOrigin))
           .to.not.throw();
+
       expect(config.pages[0].ampUrl).to.equal(
           'https://example-com.cdn.ampproject.org/c/example.com/art2?x=1');
     });
@@ -258,9 +262,8 @@ describe('amp-next-page config', () => {
         hideSelectors: ['   .i-amphtml-something'],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin)).to.throw(
-            'amp-next-page hideSelector \'   .i-amphtml-something\' ' +
-            'not allowed');
+        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+            .to.throw(/amp-next-page hideSelector .+ not allowed/);
       });
     });
   });
