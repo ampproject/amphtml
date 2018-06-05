@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-drive-viewer';
+import {TAG} from '../amp-drive-viewer';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-drive-viewer', {
   amp: {
@@ -26,14 +27,13 @@ describes.realWin('amp-drive-viewer', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    toggleExperiment(win, TAG, true);
   });
 
-  function getDriveViewer(src, opt_responsive,
-    opt_beforeLayoutCallback, opt_captioned) {
+  function getDriveViewer(src, opt_responsive) {
     const element = doc.createElement('amp-drive-viewer');
     element.setAttribute('width', '100');
     element.setAttribute('height', '100');
-    element.setAttribute('alt', 'Testing');
     if (src) {
       element.setAttribute('src', src);
     }
@@ -62,11 +62,5 @@ describes.realWin('amp-drive-viewer', {
       expect(element.querySelector('iframe')).to.be.null;
       expect(impl.iframe_).to.be.null;
     });
-  });
-
-  it('requires src', () => {
-    const errorSrc = '';
-    const promise = getDriveViewer(errorSrc);
-    expect(promise).to.be.rejectedWith(/The src attribute is required/);
   });
 });

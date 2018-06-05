@@ -22,14 +22,17 @@
  * <amp-drive-viewer
  *   layout="fixed-height"
  *   src="https://www.example.com/my-document.pdf"
- *   height="1613">
+ *   height="600">
  * </amp-drive-viewer>
  * </code>
  */
 
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
+
+export const TAG = 'amp-drive-viewer';
 
 const ATTRIBUTES_TO_PROPAGATE = [
   'alt',
@@ -48,7 +51,11 @@ export class AmpDriveViewer extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
-  /** @override */
+  /**
+   * Prefetches and preconnects URLs related to the viewer.
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     this.preconnect.url('https://docs.google.com', opt_onLayout);
   }
@@ -65,7 +72,10 @@ export class AmpDriveViewer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(this.element.getAttribute('src'),
+    user().assert(
+        isExperimentOn(this.win, TAG), `Experiment ${TAG} is disabled`);
+    user().assert(
+        this.element.getAttribute('src'),
         'The src attribute is required for <amp-drive-viewer> %s',
         this.element);
   }
