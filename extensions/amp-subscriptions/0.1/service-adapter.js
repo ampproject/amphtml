@@ -34,6 +34,15 @@ export class ServiceAdapter {
   }
 
   /**
+   * Returns the reader ID for the specified service.
+   * @param {string} serviceId
+   * @return {!Promise<string>}
+   */
+  getReaderId(serviceId) {
+    return this.subscriptionService_.getReaderId(serviceId);
+  }
+
+  /**
    * Delegates actions to local platform.
    * @param {string} action
    * @return {!Promise<boolean>}
