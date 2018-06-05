@@ -42,7 +42,7 @@ export let LandscapeComponentDef;
  *   meta: !Element,
  * }}
  */
-let landscapeElsDef;
+let landscapeElementsDef;
 
 /**
  * Builder class for the landscape component.
@@ -116,7 +116,7 @@ export class LandscapeComponent {
       title,
       image,
       meta,
-    } = /** @type {!landscapeElsDef} */ (landscapeEls);
+    } = /** @type {!landscapeElementsDef} */ (landscapeEls);
 
     category.textContent = landscapeData.category;
     title.textContent = landscapeData.title;

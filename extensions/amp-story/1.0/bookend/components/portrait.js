@@ -42,7 +42,7 @@ export let PortraitComponentDef;
  *   meta: !Element,
  * }}
  */
-let portraitElsDef;
+let portraitElementsDef;
 
 /**
  * Builder class for the portrait component.
@@ -111,7 +111,7 @@ export class PortraitComponent {
     }
 
     const {category, title, image, meta} =
-      /** @type {!portraitElsDef} */ (htmlRefs(el));
+      /** @type {!portraitElementsDef} */ (htmlRefs(el));
 
     category.textContent = portraitData.category;
     title.textContent = portraitData.title;
