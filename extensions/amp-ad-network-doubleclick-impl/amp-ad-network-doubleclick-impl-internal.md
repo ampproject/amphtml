@@ -86,7 +86,7 @@ limitations under the License.
     <td>Beta</td>
   </tr>
   <tr>
-    <td><a href="story.md">Single Page Ads</a></td>
+    <td><a href="single-page-ad.md">Single Page Ads</a></td>
     <td>Ads that appear within an AMP story, the new ad format for visual storytelling.</td>
     <td>Beta</td>
   <tr>
