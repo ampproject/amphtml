@@ -36,6 +36,8 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'title',
 ];
 
+const GOOGLE_DOCS_EMBED_RE = /^https?:\/\/docs\.google\.com.+\/pub.*\??/;
+
 export class AmpDriveViewer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -73,17 +75,29 @@ export class AmpDriveViewer extends AMP.BaseElement {
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
 
-    iframe.setAttribute('allow-scripts', '');
-    iframe.setAttribute('allow-same-origin', '');
     iframe.setAttribute('frameborder', '0');
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
 
-    const src = encodeURIComponent(this.element.getAttribute('src'));
-    iframe.src = `https://docs.google.com/gview?url=${src}&embedded=true`;
+    iframe.src = this.getSrc_(this.element.getAttribute('src'));
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
+  }
+
+  /**
+   * Get the iframe source. Google Docs are special cased since they display
+   * using their own embed URL.
+   * @param {string} documentUrl
+   * @return {string} A URL to display a document using the Google Drive viewer.
+   */
+  getSrc_(documentUrl) {
+    if (documentUrl.match(GOOGLE_DOCS_EMBED_RE)) {
+      return documentUrl;
+    }
+
+    const src = encodeURIComponent(documentUrl);
+    return `https://docs.google.com/gview?url=${src}&embedded=true`;
   }
 
   /** @override */
