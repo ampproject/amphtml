@@ -303,7 +303,12 @@ function createElementRules_() {
       'disabled': null,
     },
     'image': {
-      'xlink:href': null,
+      'xlink:href': {
+        'allowedProtocols': {
+          'http': true,
+          'https': true,
+        },
+      }
     },
     'INPUT': {
       'accept': null,

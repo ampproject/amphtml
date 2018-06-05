@@ -238,6 +238,10 @@ describe('BindValidator', () => {
 
     it('should support svg image', () => {
       expect(val.canBind('image', 'xlink:href')).to.be.true;
+      expect(val.isResultValid(
+        'image',
+        'xlink:href',
+        /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
     });
   });
 });
