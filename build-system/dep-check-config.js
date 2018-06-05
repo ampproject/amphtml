@@ -110,6 +110,7 @@ exports.rules = [
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
+      '3p/viqeoplayer.js->src/event-helper.js',
     ],
   },
   {
