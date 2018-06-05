@@ -21,13 +21,7 @@ describes.fakeWin('#masterSelect', {}, env => {
     const win1 = masterSelection(env.win, 'adsense');
     expect(win1.name).to.equal('frame_google_network_master');
 
-    const win2 = masterSelection(env.win, 'doubleclick');
-    expect(win2.name).to.equal('frame_google_network_master');
-
-    const win3 = masterSelection(env.win, 'DoubleClick');
-    expect(win3.name).to.equal('frame_google_network_master');
-
-    const win4 = masterSelection(env.win, 'fake_network');
-    expect(win4.name).to.equal('frame_fake_network_master');
+    const win2 = masterSelection(env.win, 'fake_network');
+    expect(win2.name).to.equal('frame_fake_network_master');
   });
 });
