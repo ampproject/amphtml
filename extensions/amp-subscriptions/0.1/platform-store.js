@@ -44,6 +44,15 @@ export class PlatformStore {
     /** @private @const {!Object<string, !./entitlement.Entitlement>} */
     this.entitlements_ = {};
 
+    /**
+     * @private @const
+     * {!Object<string, !Deferred<!./entitlement.Entitlement>>}
+     */
+    this.entitlementDeferredMap_ = {};
+    expectedServiceIds.forEach(serviceId => {
+      this.entitlementDeferredMap_[serviceId] = new Deferred();
+    });
+
     /** @private @const {!Observable<!EntitlementChangeEventDef>} */
     this.onEntitlementResolvedCallbacks_ = new Observable();
 
@@ -163,6 +172,10 @@ export class PlatformStore {
       entitlement.service = serviceId;
     }
     this.entitlements_[serviceId] = entitlement;
+    const deferred = this.entitlementDeferredMap_[serviceId];
+    if (deferred) {
+      deferred.resolve(entitlement);
+    }
     // Remove this serviceId as a failed platform now
     if (this.failedPlatforms_.indexOf(serviceId) != -1) {
       this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
@@ -172,7 +185,7 @@ export class PlatformStore {
   }
 
   /**
-   * Returns entitlement for a platform
+   * Returns entitlement for a platform.
    * @param {string} serviceId
    * @return {!./entitlement.Entitlement} entitlement
    */
@@ -180,6 +193,26 @@ export class PlatformStore {
     dev().assert(this.entitlements_[serviceId],
         `Platform ${serviceId} has not yet resolved with entitlements`);
     return this.entitlements_[serviceId];
+  }
+
+  /**
+   * Returns entitlement for a platform once it's resolved.
+   * @param {string} serviceId
+   * @return {!Promise<!./entitlement.Entitlement>} entitlement
+   */
+  getEntitlementPromiseFor(serviceId) {
+    dev().assert(this.entitlementDeferredMap_[serviceId],
+        `Platform ${serviceId} is not declared`);
+    return this.entitlementDeferredMap_[serviceId].promise;
+  }
+
+  /**
+   * @param {string} serviceId
+   */
+  resetEntitlementFor(serviceId) {
+    dev().assert(this.entitlementDeferredMap_[serviceId],
+        `Platform ${serviceId} is not declared`);
+    this.entitlementDeferredMap_[serviceId] = new Deferred();
   }
 
   /**

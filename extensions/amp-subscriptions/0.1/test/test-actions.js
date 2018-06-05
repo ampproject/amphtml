@@ -75,10 +75,10 @@ describes.realWin('Actions', {amp: true}, env => {
 
   it('should open the action popup window synchronously', () => {
     analyticsMock.expects('event')
-        .withExactArgs('action-login-started')
+        .withExactArgs('subscriptions-action-login-started')
         .once();
     analyticsMock.expects('event')
-        .withExactArgs('action-login-success')
+        .withExactArgs('subscriptions-action-login-success')
         .once();
     return actions.build().then(() => {
       const promise = actions.execute('login');
@@ -114,10 +114,10 @@ describes.realWin('Actions', {amp: true}, env => {
 
   it('should accept success=no', () => {
     analyticsMock.expects('event')
-        .withExactArgs('action-login-started')
+        .withExactArgs('subscriptions-action-login-started')
         .once();
     analyticsMock.expects('event')
-        .withExactArgs('action-login-rejected')
+        .withExactArgs('subscriptions-action-login-rejected')
         .once();
     return actions.build().then(() => {
       const promise = actions.execute('login');
@@ -154,10 +154,10 @@ describes.realWin('Actions', {amp: true}, env => {
 
   it('should handle failures', () => {
     analyticsMock.expects('event')
-        .withExactArgs('action-login-started')
+        .withExactArgs('subscriptions-action-login-started')
         .once();
     analyticsMock.expects('event')
-        .withExactArgs('action-login-failed')
+        .withExactArgs('subscriptions-action-login-failed')
         .once();
     return actions.build().then(() => {
       const promise = actions.execute('login');

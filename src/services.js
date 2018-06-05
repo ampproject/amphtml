@@ -50,17 +50,6 @@ export class Services {
   }
 
   /**
-   * Returns a promise for the Subscriptions service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!Promise<!SubscriptionService>}
-   */
-  static subscriptionsServiceForDoc(nodeOrDoc) {
-    return (/** @type {!Promise<SubscriptionService>} */ (
-      getElementServiceForDoc(nodeOrDoc, 'subscriptions',
-          'amp-subscriptions')));
-  }
-
-  /**
    * Returns a promise for the Access service or a promise for null if the
    * service is not available on the current page.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
@@ -70,6 +59,28 @@ export class Services {
     return (/** @type {
         !Promise<?../extensions/amp-access/0.1/amp-access.AccessService>} */ (
         getElementServiceIfAvailableForDoc(nodeOrDoc, 'access', 'amp-access')));
+  }
+
+  /**
+   * Returns a promise for the Subscriptions service.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!SubscriptionService>}
+   */
+  static subscriptionsServiceForDoc(nodeOrDoc) {
+    return (/** @type {!Promise<!SubscriptionService>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'subscriptions',
+          'amp-subscriptions')));
+  }
+
+  /**
+   * Returns a promise for the Subscriptions service.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?SubscriptionService>}
+   */
+  static subscriptionsServiceForDocOrNull(nodeOrDoc) {
+    return (/** @type {!Promise<?SubscriptionService>} */ (
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'subscriptions',
+          'amp-subscriptions')));
   }
 
   /**
