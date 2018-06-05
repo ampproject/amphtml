@@ -521,7 +521,7 @@ export class AmpSlideScroll extends BaseSlides {
   /**
    * Makes the slide corresponding to the given index and the slides surrounding
    *     it available for display.
-   * @note Element must be laid out.
+   * Note: Element must be laid out.
    * @param {number} newIndex Index of the slide to be displayed.
    * @return {boolean} true if the slide changed, otherwise false.
    * @private
@@ -652,8 +652,8 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * Animate scrollLeft of the container.
-   * @param {number} fromScrollLeft.
-   * @param {number} toScrollLeft.
+   * @param {number} fromScrollLeft
+   * @param {number} toScrollLeft
    * @return {!Promise}
    * @private
    */
