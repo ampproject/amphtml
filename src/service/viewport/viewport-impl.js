@@ -518,14 +518,28 @@ export class Viewport {
         offset = 0;
         break;
     }
+    return this.animateScrollToTop(elementRect.top + offset, duration, curve);
+  }
+
+  /**
+   * Scrolls the viewport to top with animation.
+   *
+   * @param {number} top
+   * @param {number=} duration
+   * @param {string=} curve
+   * @return {!Promise}
+   */
+  animateScrollToTop(top,
+    duration = 500,
+    curve = 'ease-in') {
     let newScrollTop;
     let curScrollTop;
 
     if (this.useLayers_) {
-      newScrollTop = elementRect.top + offset;
+      newScrollTop = top;
       curScrollTop = 0;
     } else {
-      const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+      const calculatedScrollTop = top - this.paddingTop_;
       newScrollTop = Math.max(0, calculatedScrollTop);
       curScrollTop = this.getScrollTop();
     }
@@ -812,6 +826,7 @@ export class Viewport {
   /**
    * Updates touch zoom meta data. Returns `true` if any actual
    * changes have been done.
+   * @param {string} viewportMetaString
    * @return {boolean}
    */
   setViewportMetaString_(viewportMetaString) {
