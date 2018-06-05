@@ -43,6 +43,9 @@ import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
+import {
+  RealTimeConfigManager,
+} from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {Viewer} from '../../../../src/service/viewer-impl';
@@ -1052,8 +1055,11 @@ describe('amp-a4a', () => {
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const rtcResponse = Promise.resolve(
             [{response: 'a', rtcTime: 1, callout: 'https://a.com'}]);
-        AMP.maybeExecuteRealTimeConfig = sandbox.stub().returns(
+        const maybeExecuteRealTimeConfigStub = sandbox.stub().returns(
             rtcResponse);
+        AMP.RealTimeConfigManager = RealTimeConfigManager;
+        AMP.RealTimeConfigManager.prototype.maybeExecuteRealTimeConfig =
+            maybeExecuteRealTimeConfigStub;
         const tryExecuteRealTimeConfigSpy =
               sandbox.spy(a4a, 'tryExecuteRealTimeConfig_');
         const updateLayoutPriorityStub = sandbox.stub(
@@ -1071,9 +1077,9 @@ describe('amp-a4a', () => {
           expect(promiseResult.minifiedCreative).to.be.ok;
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
-          expect(AMP.maybeExecuteRealTimeConfig.calledOnce).to.be.true;
-          expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-              a4a, {}, null)).to.be.true;
+          expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
+          expect(maybeExecuteRealTimeConfigStub.calledWith(
+              {}, null)).to.be.true;
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(getAdUrlSpy.calledWith(null, rtcResponse)).to.be.true;
