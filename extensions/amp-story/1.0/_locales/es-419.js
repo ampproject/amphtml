@@ -25,7 +25,7 @@ export default {
     string: 'Aceptar',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Disminución',
+    string: 'Declinar',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
     string: 'Ok',
