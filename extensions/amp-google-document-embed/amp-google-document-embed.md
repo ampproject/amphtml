@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-drive-viewer"></a> `amp-drive-viewer`
+# <a name="amp-google-document-embed"></a> `amp-google-document-embed`
 
 <table>
   <tr>
@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-drive-viewer" src="https://cdn.ampproject.org/v0/amp-drive-viewer-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-google-document-embed" src="https://cdn.ampproject.org/v0/amp-google-document-embed-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -40,17 +40,17 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-drive-viewer` component displays document files like Word documents,
+The `amp-google-document-embed` component displays document files like Word documents,
 Excel spreadsheets, and PDFs.
 
 Example:
 ```html
-<amp-drive-viewer
+<amp-google-document-embed
     src="https://www.example.com/document.pdf"
     width="800"
     height="600"
     layout="responsive">
-</amp-drive-viewer>
+</amp-google-document-embed>
 ```
 
 ## Attributes
@@ -65,4 +65,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-drive-viewer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-drive-viewer/validator-amp-drive-viewer.protoascii) in the AMP validator specification.
+See [amp-google-document-embed rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-google-document-embed/validator-amp-google-document-embed.protoascii) in the AMP validator specification.

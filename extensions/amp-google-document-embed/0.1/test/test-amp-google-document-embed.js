@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {TAG} from '../amp-drive-viewer';
+import {TAG} from '../amp-google-document-embed';
 import {toggleExperiment} from '../../../../src/experiments';
 
-describes.realWin('amp-drive-viewer', {
+describes.realWin('amp-google-document-embed', {
   amp: {
-    extensions: ['amp-drive-viewer'],
+    extensions: ['amp-google-document-embed'],
   },
 }, env => {
   let win, doc;
@@ -31,7 +31,7 @@ describes.realWin('amp-drive-viewer', {
   });
 
   function getDriveViewer(src, opt_responsive) {
-    const element = doc.createElement('amp-drive-viewer');
+    const element = doc.createElement('amp-google-document-embed');
     element.setAttribute('width', '100');
     element.setAttribute('height', '100');
     if (src) {

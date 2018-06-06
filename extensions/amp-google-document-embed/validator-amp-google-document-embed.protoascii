@@ -14,9 +14,10 @@
 # limitations under the license.
 #
 
-tags: {  # <amp-drive-viewer>
+tags: {  # <amp-google-document-embed>
   html_format: AMP
-  tag_name: "AMP-DRIVE-VIEWER"
+  tag_name: "AMP-GOOGLE-DOCUMENT-EMBED"
+  attrs: { name: "alt" }
   attrs: {
     name: "src"
     mandatory: true
@@ -29,7 +30,7 @@ tags: {  # <amp-drive-viewer>
   }
   attrs: { name: "title" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-drive-viewer"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-google-document-embed"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

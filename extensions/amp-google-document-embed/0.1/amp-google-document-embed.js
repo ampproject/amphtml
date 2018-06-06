@@ -19,11 +19,11 @@
  *
  * Example:
  * <code>
- * <amp-drive-viewer
+ * <amp-google-document-embed
  *   layout="fixed-height"
  *   src="https://www.example.com/my-document.pdf"
  *   height="600">
- * </amp-drive-viewer>
+ * </amp-google-document-embed>
  * </code>
  */
 
@@ -33,10 +33,10 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
-export const TAG = 'amp-drive-viewer';
+export const TAG = 'amp-google-document-embed';
 
 const ATTRIBUTES_TO_PROPAGATE = [
-  'title',
+  'alt',
 ];
 
 const GOOGLE_DOCS_EMBED_RE = /^https?:\/\/docs\.google\.com.+\/pub.*\??/;
@@ -76,7 +76,7 @@ export class AmpDriveViewer extends AMP.BaseElement {
         isExperimentOn(this.win, TAG), `Experiment ${TAG} is disabled`);
     user().assert(
         this.element.getAttribute('src'),
-        'The src attribute is required for <amp-drive-viewer> %s',
+        'The src attribute is required for <amp-google-document-embed> %s',
         this.element);
   }
 
@@ -126,6 +126,6 @@ export class AmpDriveViewer extends AMP.BaseElement {
 }
 
 
-AMP.extension('amp-drive-viewer', '0.1', AMP => {
-  AMP.registerElement('amp-drive-viewer', AmpDriveViewer);
+AMP.extension('amp-google-document-embed', '0.1', AMP => {
+  AMP.registerElement('amp-google-document-embed', AmpDriveViewer);
 });
