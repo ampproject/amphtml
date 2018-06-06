@@ -59,7 +59,7 @@ describes.realWin('amp-youtube', {
       return yt.layoutCallback();
     }).then(() => {
       const ytIframe = yt.querySelector('iframe');
-      yt.implementation_.handleYoutubeMessages_({
+      yt.implementation_.handleYoutubeMessage_({
         origin: 'https://www.youtube.com',
         source: ytIframe.contentWindow,
         data: JSON.stringify({event: 'onReady'}),
@@ -296,7 +296,6 @@ describes.realWin('amp-youtube', {
           return 90;
         },
       });
-      imgPlaceholder.triggerLoad();
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -333,7 +332,7 @@ describes.realWin('amp-youtube', {
   });
 
   function sendFakeInfoDeliveryMessage(yt, iframe, info) {
-    yt.implementation_.handleYoutubeMessages_({
+    yt.implementation_.handleYoutubeMessage_({
       origin: 'https://www.youtube.com',
       source: iframe.contentWindow,
       data: JSON.stringify({
