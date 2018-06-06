@@ -168,7 +168,9 @@ describe('#line-delimited-response-handler', () => {
       sandbox.restore();
     });
 
-    it('should handle empty streamed response properly', () => {
+    // TODO(amphtml, #15748): Fails on Safari 11.1.0.
+    it.configure().skipSafari('should handle empty streamed ' +
+        'response properly', () => {
       slotData = [];
       setup();
       return executeAndVerifyResponse();
