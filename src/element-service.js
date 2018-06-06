@@ -29,6 +29,13 @@ import {toWin} from './types';
 import {user} from './log';
 
 /**
+ * Custome elements cached list
+ * @private
+ * @type {?Array<string>}
+ */
+let customElements_ = null;
+
+/**
  * Returns a promise for a service for the given id and window. Also expects an
  * element that has the actual implementation. The promise resolves when the
  * implementation loaded. Users should typically wrap this as a special purpose
@@ -184,6 +191,24 @@ function assertService(service, id, extension) {
 }
 
 /**
+ * Get and cache a list of all the extension JS files
+ * @param {Document} doc
+ * @return {!Array<string>}
+ * @private
+ */
+function getExtensions(doc) {
+  if (customElements_ !== null) {
+    return customElements_;
+  }
+  customElements_ = [];
+  const list = doc.head.querySelectorAll('script[custom-element]');
+  for (let i = 0; i < list.length; i++) {
+    customElements_.push(list[i].getAttribute('custom-element'));
+  }
+  return customElements_;
+}
+
+/**
  * Waits for an extension if its script is present
  * @param {Window} win
  * @param {string} extension
@@ -199,9 +224,7 @@ function waitForExtensionIfPresent(win, extension) {
    * we don't wait around for an extension that does not exist.
    */
 
-  // We don't ned to assert that head is an element.
-  if (dom.childElementByAttr(/*OK*//** @type {!Element} */(win.document.head),
-      `custom-element="${extension}"`)) {
+  if (getExtensions(win.document).includes(extension)) {
     const extensions = getService(win, 'extensions');
     return /** @type {!Promise<?Object>} */ (
       extensions.waitForExtension(win, extension));

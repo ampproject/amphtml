@@ -46,7 +46,7 @@ describe('getElementServiceIfAvailable()', () => {
     };
     doc.documentElement = {ownerDocument: doc};
     doc.getHeadNode = () => doc.head;
-    doc.head.querySelector = () => false;
+    doc.head.querySelectorAll = () => [];
 
 
     win = {
