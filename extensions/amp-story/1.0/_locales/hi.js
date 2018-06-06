@@ -21,6 +21,21 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+  [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
+    string: 'स्वीकार करना',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
+    string: 'अस्वीकार करना',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
+    string: 'ठीक है',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: 'मूल डोमेन पर देखें:',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'एएमपी परिणामों के बारे में अधिक जानकारी',
+  },
   [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
     string: 'सक्षम करें',
   },

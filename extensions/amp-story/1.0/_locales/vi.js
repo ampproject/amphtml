@@ -21,6 +21,21 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+  [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
+    string: 'Chấp nhận',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
+    string: 'Từ chối',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
+    string: 'Ok',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: 'Xem trên miền gốc',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'Thêm về kết quả AMP',
+  },
   [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
     string: 'Cho phép',
   },
