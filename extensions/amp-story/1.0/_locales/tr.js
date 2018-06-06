@@ -21,6 +21,21 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+  [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
+    string: 'Kabul ediyorum',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
+    string: 'Reddediyorum',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
+    string: 'Tamam',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: 'Orijinal alanda görüntüle:',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'AMP sonuçları hakkında daha fazla bilgi',
+  },
   [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
     string: 'Etkinleştir',
   },
