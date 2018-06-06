@@ -292,6 +292,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Navegg](../../ads/navegg.md)
 - [Nend](../../ads/nend.md)
 - [NETLETIX](../../ads/netletix.md)
+- [Noddus](../../ads/noddus.md)
 - [Nokta](../../ads/nokta.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
