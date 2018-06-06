@@ -436,7 +436,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   renderComponents_(components) {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
     const fragment = BookendComponent
-        .buildTemplates(components, this.win.document);
+        .buildElements(components, this.win.document);
     const container = dev().assertElement(
         BookendComponent.buildContainer(this.getInnerContainer_(),
             this.win.document));
