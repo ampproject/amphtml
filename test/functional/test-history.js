@@ -488,6 +488,7 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
             .to.equal(historyState.stackIndex);
         expect(history.unsupportedState_.title)
             .to.deep.equal(replaceTitle);
+        return history.pop(historyState.stackIndex);
       });
     });
   });
