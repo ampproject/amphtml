@@ -316,11 +316,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }]`);
     if (existingCarousel) {
       this.carousel_ = existingCarousel;
-      return this.carousel_.getImpl().then(impl => {
-        return this.mutateElement(() => {
-          this.toggleNavControls_(impl.noOfSlides_);
-          toggle(dev().assertElement(this.carousel_), true);
-        });
+      return this.mutateElement(() => {
+        const numSlides = this.elementsMetadata_[lightboxGroupId].length;
+        this.toggleNavControls_(numSlides);
+        toggle(dev().assertElement(this.carousel_), true);
       });
     } else {
       return this.buildCarousel_(lightboxGroupId);
