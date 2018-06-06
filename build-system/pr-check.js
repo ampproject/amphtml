@@ -312,13 +312,14 @@ const command = {
     }
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd + ' --headless');
-    if (process.env.TRAVIS) {
-      // A subset of unit tests on other browsers via sauce labs
-      cmd = cmd + ' --saucelabs_lite';
-      startSauceConnect();
-      timedExecOrDie(cmd);
-      stopSauceConnect();
-    }
+    // TODO(amphtml): Disabled until we have as many Sauce VMs as Travis VMs.
+    // if (process.env.TRAVIS) {
+    //   // A subset of unit tests on other browsers via sauce labs
+    //   cmd = cmd + ' --saucelabs_lite';
+    //   startSauceConnect();
+    //   timedExecOrDie(cmd);
+    //   stopSauceConnect();
+    // }
   },
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
