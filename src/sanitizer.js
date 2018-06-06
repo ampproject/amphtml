@@ -23,6 +23,7 @@ import {
   resolveRelativeUrl,
 } from './url';
 import {dict, map} from './utils/object';
+import {filterSplice} from './utils/array';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
@@ -264,6 +265,7 @@ function purifyHtml(dirty) {
   });
   DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
+  DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
   return DOMPurify.sanitize(dirty, config);
 }
 
@@ -297,7 +299,7 @@ function uponSanitizeAttribute(node, data) {
   // See https://github.com/cure53/DOMPurify/wiki/Security-Goals-&-Threat-Model#security-goals
   // and https://github.com/cure53/DOMPurify/blob/master/src/purify.js#L527.
 
-  const tagName = node.nodeName.toLocaleLowerCase();
+  const tagName = node.nodeName.toLowerCase();
   const {attrName, allowedAttributes} = data;
   let {attrValue} = data;
 
@@ -343,6 +345,25 @@ function uponSanitizeAttribute(node, data) {
 
   // Update attribute value.
   data.attrValue = attrValue;
+}
+
+/**
+ * @param {!Node} node
+ * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
+ */
+function afterSanitizeAttributes(node) {
+  filterSplice(this.removed, r => {
+    if (r.from === node && r.attribute) {
+      const {name, value} = r.attribute;
+      // Restore the `on` attribute which DOMPurify incorrectly flags as an
+      // unknown protocol due to presence of the `:` character.
+      if (name.toLowerCase() === 'on') {
+        node.setAttribute('on', value);
+        return false; // Remove from array once processed.
+      }
+    }
+    return true;
+  });
 }
 
 /**

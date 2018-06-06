@@ -216,8 +216,8 @@ function runSanitizerTests() {
     });
 
     it('should output "on" attribute', () => {
-      expect(sanitizeHtml('a<a on="tap">b</a>')).to.be.equal(
-          'a<a on="tap">b</a>');
+      expect(sanitizeHtml('a<a on="tap:AMP.print">b</a>')).to.be.equal(
+          'a<a on="tap:AMP.print">b</a>');
     });
 
     it('should output "data-, aria-, and role" attributes', () => {
