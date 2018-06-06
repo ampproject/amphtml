@@ -43,6 +43,9 @@ import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
+import {
+  RealTimeConfigManager,
+} from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {Viewer} from '../../../../src/service/viewer-impl';
@@ -1052,8 +1055,12 @@ describe('amp-a4a', () => {
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const rtcResponse = Promise.resolve(
             [{response: 'a', rtcTime: 1, callout: 'https://a.com'}]);
-        AMP.maybeExecuteRealTimeConfig = sandbox.stub().returns(
+        const maybeExecuteRealTimeConfigStub = sandbox.stub().returns(
             rtcResponse);
+        AMP.RealTimeConfigManager = RealTimeConfigManager;
+        sandbox.stub(AMP.RealTimeConfigManager.prototype,
+            'maybeExecuteRealTimeConfig').callsFake(
+            maybeExecuteRealTimeConfigStub);
         const tryExecuteRealTimeConfigSpy =
               sandbox.spy(a4a, 'tryExecuteRealTimeConfig_');
         const updateLayoutPriorityStub = sandbox.stub(
@@ -1071,9 +1078,9 @@ describe('amp-a4a', () => {
           expect(promiseResult.minifiedCreative).to.be.ok;
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
-          expect(AMP.maybeExecuteRealTimeConfig.calledOnce).to.be.true;
-          expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-              a4a, {}, null)).to.be.true;
+          expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
+          expect(maybeExecuteRealTimeConfigStub.calledWith(
+              {}, null)).to.be.true;
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(getAdUrlSpy.calledWith(null, rtcResponse)).to.be.true;
@@ -2366,18 +2373,12 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
     errorSpy = sandbox.spy(user(), 'error');
   });
 
-  beforeEach(() => {
-    AMP.maybeExecuteRealTimeConfig = undefined;
-    expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
-  });
-
-  afterEach(() => {
-    AMP.maybeExecuteRealTimeConfig = undefined;
-  });
-
   describe('#tryExecuteRealTimeConfig', () => {
+    beforeEach(() => {
+      AMP.RealTimeConfigManager = undefined;
+    });
+
     it('should not execute if RTC never imported', () => {
-      expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
       expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
     });
     it('should log user error if RTC Config set but RTC not supported', () => {
@@ -2389,23 +2390,6 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
       expect(errorSpy.calledWith(
           'amp-a4a',
           'RTC not supported for ad network doubleclick')).to.be.true;
-    });
-    it('should call maybeExecuteRealTimeConfig properly', () => {
-      const macros = {'SLOT_ID': 2};
-      AMP.maybeExecuteRealTimeConfig = sandbox.stub();
-      sandbox.stub(a4a, 'getCustomRealTimeConfigMacros_').returns(macros);
-      a4a.tryExecuteRealTimeConfig_(CONSENT_POLICY_STATE.UNKNOWN);
-      expect(AMP.maybeExecuteRealTimeConfig.called).to.be.true;
-      expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-          a4a, macros, CONSENT_POLICY_STATE.UNKNOWN)).to.be.true;
-    });
-    it('should catch error in maybeExecuteRealTimeConfig', () => {
-      const err = new Error('Test');
-      AMP.maybeExecuteRealTimeConfig = sandbox.stub().throws(err);
-      allowConsoleError(() => a4a.tryExecuteRealTimeConfig_());
-      expect(errorSpy.calledOnce).to.be.true;
-      expect(errorSpy.calledWith(
-          'amp-a4a', 'Could not perform Real Time Config.', err)).to.be.true;
     });
   });
 
