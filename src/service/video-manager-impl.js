@@ -541,12 +541,7 @@ class VideoEntry {
         this.video.pause();
       };
       // Update the media session
-      setMediaSession(
-          this.ampdoc_.win,
-          this.metadata_,
-          playHandler,
-          pauseHandler
-      );
+      setMediaSession(this.ampdoc_, this.metadata_, playHandler, pauseHandler);
     }
 
     this.actionSessionManager_.beginSession();
@@ -727,8 +722,8 @@ class VideoEntry {
     // Listen to pause, play and user interaction events.
     const {element} = video;
     const unlisteners = [
-      listen(mask, 'click', triggerUserInteracted),
-      listen(animation, 'click', triggerUserInteracted),
+      listen(mask, 'click', triggerUserInteracted.bind(this)),
+      listen(animation, 'click', triggerUserInteracted.bind(this)),
       listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
       listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
       listen(element, VideoEvents.AD_START, adStart.bind(this)),
@@ -736,7 +731,7 @@ class VideoEntry {
     ];
 
     video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
-        .then(onInteraction);
+        .then(onInteraction.bind(this));
 
     /**
      * @param {boolean} isPlaying
@@ -761,7 +756,6 @@ class VideoEntry {
       });
       removeElement(animation);
       removeElement(mask);
-      video.signals().signal(VideoServiceSignals.USER_INTERACTED);
     }
 
     function adStart() {

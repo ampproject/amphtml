@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as utils from '../utils';
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
 import {PaginationButtons} from '../pagination-buttons';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
@@ -69,6 +72,9 @@ describes.realWin('amp-story', {
 
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization-v01', () => localizationService);
 
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
@@ -358,6 +364,55 @@ describes.realWin('amp-story', {
         .then(() => {
           return expect(replaceStub).to.not.have.been.called;
         });
+  });
+
+
+  describe('desktop attributes', () => {
+    it('should add next page attribute', () => {
+      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
+          (el, attr) => el.element.setAttribute(attr, ''));
+
+      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
+      const page1 = pages[1];
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(page1.hasAttribute('i-amphtml-next-page')).to.be.true;
+          });
+    });
+
+    it('should add previous page attribute', () => {
+      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(story, 'maybePreloadBookend_').returns();
+      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
+          (el, attr) => el.element.setAttribute(attr, ''));
+
+      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
+      const page0 = pages[0];
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => story.switchTo_('page-1'))
+          .then(() => {
+            expect(page0.hasAttribute('i-amphtml-previous-page')).to.be.true;
+          });
+    });
+
+    it('should add previous visited attribute', () => {
+      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(story, 'maybePreloadBookend_').returns();
+      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
+          (el, attr) => el.element.setAttribute(attr, ''));
+
+      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
+      const page0 = pages[0];
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => story.switchTo_('page-1'))
+          .then(() => {
+            expect(page0.hasAttribute('i-amphtml-visited')).to.be.true;
+          });
+    });
   });
 
   describe('amp-story audio', () => {

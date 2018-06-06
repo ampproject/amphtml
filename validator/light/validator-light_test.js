@@ -72,21 +72,25 @@ function findHtmlFilesRelativeToTestdata() {
     if (path.basename(root) === 'extensions') {
       for (const extension of readdir(root)) {
         const extensionFolder = path.join(root, extension);
-        if (!isdir(extensionFolder)) {
-          // Skip if not a folder
+        if (!isdir(extensionFolder) || extension[0] === '.') {
+          // Skip if not a folder or if hidden folder
           continue;
         }
         // Get all versions
         for (const possibleVersion of readdir(extensionFolder)) {
           const testPath = path.join(extension, possibleVersion, 'test');
-          if (isdir(path.join(root, testPath))) {
+          // Skip if not a folder or if hidden folder
+          if (isdir(path.join(root, testPath)) && testPath[0] !== '.') {
             testSubdirs.push({root, subdir: testPath});
           }
         }
       }
     } else {
       for (const subdir of readdir(root)) {
-        testSubdirs.push({root, subdir});
+        // Skip if not a folder or if hidden folder
+        if (isdir(path.join(root, subdir)) && subdir[0] !== '.') {
+          testSubdirs.push({root, subdir});
+        }
       }
     }
   }

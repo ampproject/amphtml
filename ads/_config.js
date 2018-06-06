@@ -206,6 +206,13 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adunity: {
+    preconnect: [
+      'https://content.adunity.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
     preconnect: [
@@ -376,21 +383,6 @@ export const adConfig = {
   dotandads: {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
-  },
-
-  doubleclick: {
-    prefetch: [
-      'https://www.googletagservices.com/tag/js/gpt.js',
-      'https://securepubads.g.doubleclick.net/static/glade.js',
-    ],
-    preconnect: [
-      'https://partner.googleadservices.com',
-      'https://tpc.googlesyndication.com',
-    ],
-    clientIdScope: 'AMP_ECID_GOOGLE',
-    clientIdCookieName: '_ga',
-    renderStartImplemented: true,
-    masterFrameAccessibleType: 'google_network',
   },
 
   eadv: {
@@ -593,6 +585,7 @@ export const adConfig = {
       'https://tpc.googlesyndication.com',
     ],
     renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   medyanet: {
@@ -740,6 +733,10 @@ export const adConfig = {
   quoraad: {
     prefetch: 'https://a.quora.com/amp_ad.js',
     preconnect: 'https://ampad.quora.com',
+    renderStartImplemented: true,
+  },
+
+  realclick: {
     renderStartImplemented: true,
   },
 
@@ -964,7 +961,7 @@ export const adConfig = {
   },
 
   yieldmo: {
-    prefetch: 'https://static.yieldmo.com/ym.amp1.js',
+    prefetch: 'https://static.yieldmo.com/ym.1.js',
     preconnect: [
       'https://s.yieldmo.com',
       'https://ads.yieldmo.com',

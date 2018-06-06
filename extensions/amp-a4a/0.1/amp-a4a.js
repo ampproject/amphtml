@@ -17,7 +17,6 @@
 import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-  getConsentPolicyState,
 } from '../../../src/consent-state';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LayoutPriority} from '../../../src/layout';
@@ -25,7 +24,6 @@ import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
   assertHttpsUrl,
-  isSecureUrl,
   tryDecodeUriComponent,
 } from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
@@ -43,6 +41,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {getBinaryType} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {getConsentPolicyState} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 import {tryResolve} from '../../../src/utils/promise';
@@ -104,11 +103,15 @@ export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 /** @type {string} */
 export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
 
+/** @type {string} */
+export const IFRAME_GET = 'IFRAME-GET';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
   SAFEFRAME: 'safeframe',
   NAMEFRAME: 'nameframe',
+  IFRAME_GET: 'iframe_get',
 };
 
 /** @type {!Object} @private */
@@ -404,6 +407,7 @@ export class AmpA4A extends AMP.BaseElement {
      * be null before buildCallback() executes or if the impl does not provide
      * an analytice config.
      * @private {?Element}
+     * @visibleForTesting
      */
     this.a4aAnalyticsElement_ = null;
 
@@ -577,7 +581,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -698,6 +702,14 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           this.adUrl_ = adUrl;
           this.handleLifecycleStage_('urlBuilt');
+          // If we should skip the XHR, we will instead request and render
+          // by simply writing a frame into the page using
+          // renderViaIframeGet
+          if (!this.isXhrAllowed() && !!this.adUrl_) {
+            this.experimentalNonAmpCreativeRenderMethod_ =
+                XORIGIN_MODE.IFRAME_GET;
+            return Promise.reject(IFRAME_GET);
+          }
           return adUrl && this.sendXhrRequest(adUrl);
         })
         // The following block returns either the response (as a
@@ -828,13 +840,16 @@ export class AmpA4A extends AMP.BaseElement {
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
             this.preconnect.preload(font.href));
+
+          const urls = Services.urlForDoc(this.getAmpDoc());
           // Preload any AMP images.
           (creativeMetaDataDef.images || []).forEach(image =>
-            isSecureUrl(image) && this.preconnect.preload(image));
+            urls.isSecure(image) && this.preconnect.preload(image));
           return creativeMetaDataDef;
         })
         .catch(error => {
           switch (error.message || error) {
+            case IFRAME_GET:
             case NETWORK_FAILURE:
               return null;
             case INVALID_SPSA_RESPONSE:
@@ -958,8 +973,11 @@ export class AmpA4A extends AMP.BaseElement {
         return Services.timerFor(this.win).promise(1000).then(() => {
           this.isRelayoutNeededFlag = true;
           this.getResource().layoutCanceled();
-          Services.resourcesForDoc(this.getAmpDoc())
-              ./*OK*/requireLayout(this.element);
+          // Only Require relayout after page visible
+          Services.viewerForDoc(this.getAmpDoc()).whenNextVisible().then(() => {
+            Services.resourcesForDoc(this.getAmpDoc())
+                ./*OK*/requireLayout(this.element);
+          });
         });
       });
     });
@@ -1073,6 +1091,14 @@ export class AmpA4A extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Returns whether or not the ad request may be sent using XHR.
+   * @return {boolean}
+   */
+  isXhrAllowed() {
+    return true;
+  }
+
   /** @override **/
   attemptChangeSize(newHeight, newWidth) {
     // Store original size of slot in order to allow re-expansion on
@@ -1139,6 +1165,11 @@ export class AmpA4A extends AMP.BaseElement {
     if (!force && this.isRefreshing) {
       return;
     }
+    // Allow embed to release its resources.
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.destroy();
+      this.friendlyIframeEmbed_ = null;
+    }
     if (this.iframe && this.iframe.parentElement) {
       this.iframe.parentElement.removeChild(this.iframe);
       this.iframe = null;
@@ -1146,11 +1177,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
-    }
-    // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed_) {
-      this.friendlyIframeEmbed_.destroy();
-      this.friendlyIframeEmbed_ = null;
     }
   }
 
@@ -1359,7 +1385,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.creativeBody_ = null; // Free resources.
     } else if (this.adUrl_) {
       assertHttpsUrl(this.adUrl_, this.element);
-      renderPromise = this.renderViaCachedContentIframe_(this.adUrl_);
+      renderPromise = this.renderViaIframeGet_(this.adUrl_);
     } else {
       // Ad URL may not exist if buildAdUrl throws error or returns empty.
       // If error occurred, it would have already been reported but let's
@@ -1504,10 +1530,15 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Creates iframe whose src matches that of the ad URL.  The response should
+   * Creates iframe whose src matches that of the ad URL. For standard
+   * Fast Fetch running on the AMP cdn, an XHR request will typically have
+   * already been sent to the same adUrl, and the response should
    * have been cached causing the browser to render without callout.  However,
    * it is possible for cache miss to occur which can be detected server-side
    * by missing ORIGIN header.
+   *
+   * Additionally, this method is also used in certain cases to send the only
+   * request, i.e. the initial XHR is skipped.
    *
    * Note: As of 2016-10-18, the fill-from-cache assumption appears to fail on
    * Safari-on-iOS, which issues a fresh network request, even though the
@@ -1518,7 +1549,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise} awaiting ad completed insertion.
    * @private
    */
-  renderViaCachedContentIframe_(adUrl) {
+  renderViaIframeGet_(adUrl) {
     this.handleLifecycleStage_('renderCrossDomainStart', {
       'isAmpCreative': this.isVerifiedAmpCreative_,
       'releaseType': this.releaseType_,
@@ -1652,10 +1683,12 @@ export class AmpA4A extends AMP.BaseElement {
         if (!isArray(metaData.customStylesheets)) {
           throw new Error(errorMsg);
         }
+
+        const urls = Services.urlForDoc(this.getAmpDoc());
         metaData.customStylesheets.forEach(stylesheet => {
           if (!isObject(stylesheet) || !stylesheet['href'] ||
               typeof stylesheet['href'] !== 'string' ||
-              !isSecureUrl(stylesheet['href'])) {
+              !urls.isSecure(stylesheet['href'])) {
             throw new Error(errorMsg);
           }
         });
@@ -1700,7 +1733,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Receive collapse notifications and record lifecycle events for them.
    *
-   * @param unusedElement {!AmpElement}
+   * @param {!AmpElement} unusedElement
    * @override
    */
   collapsedCallback(unusedElement) {

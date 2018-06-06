@@ -62,6 +62,7 @@ const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
 // Each extension and version must be listed individually here.
+declareExtension('amp-3d-gltf', '0.1');
 declareExtension('amp-3q-player', '0.1');
 declareExtension('amp-access', '0.1', {hasCss: true});
 declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
@@ -151,6 +152,7 @@ declareExtension('amp-story', '0.1', {
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
+    'amp-story-info-dialog',
     'amp-story-share',
     'amp-story-share-menu',
     'amp-story-system-layer',
@@ -164,6 +166,7 @@ declareExtension('amp-story', '1.0', {
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
+    // TODO(newmuis): 'amp-story-info-dialog',
     'amp-story-share',
     'amp-story-share-menu',
     'amp-story-system-layer',
@@ -177,7 +180,8 @@ declareExtension('amp-position-observer', '0.1');
 declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions', '0.1', {hasCss: true});
-declareExtension('amp-subscriptions-google', '0.1');
+declareExtension('amp-subscriptions-google', '0.1', {hasCss: true});
+declareExtension('amp-pan-zoom', '0.1', {hasCss: true});
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -1357,7 +1361,6 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
         }
       });
 }
-
 
 /**
  * Build "Login Done" page.

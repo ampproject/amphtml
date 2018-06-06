@@ -28,7 +28,6 @@ import {
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
-import {parseUrlDeprecated} from '../../../src/url';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
@@ -41,6 +40,7 @@ const MAX_URL_LENGTH = 16384;
 const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME: '2',
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
+  AMP_AD_IFRAME_GET: '5',
 };
 
 /** @const {!Object} */
@@ -92,6 +92,9 @@ export let NameframeExperimentConfig;
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
+/** @const {Object} */
+const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+
 /**
  * Returns the value of navigation start using the performance API or 0 if not
  * supported by the browser.
@@ -116,11 +119,8 @@ function getNavStart(win) {
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  const googleCdnProxyRegex =
-        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return supportsNativeCrypto(win) && (
-    !!googleCdnProxyRegex.test(win.location.origin) ||
-        getMode(win).localDev || getMode(win).test);
+    !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test);
 }
 
 /**
@@ -152,7 +152,7 @@ export function isReportingEnabled(ampElement) {
   const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
-  if (getMode().localDev) {
+  if (getMode(ampElement.win).localDev && !getMode(ampElement.win).test) {
     toggleExperiment(win, experimentName, true, true);
   }
   return (type == 'doubleclick' || type == 'adsense') &&
@@ -200,6 +200,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // TODO(keithwrightbos): what about slots that become measured due to removal
   // of display none (e.g. user resizes viewport and media selector makes
   // visible).
+  const ampAdSelector =
+      r => r.element./*OK*/querySelector(`amp-ad[type=${type}]`);
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
       r => {
         const isAmpAdType = r.element.tagName == 'AMP-AD' &&
@@ -209,7 +211,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
         }
         const isAmpAdContainerElement =
           Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!r.element.querySelector(`amp-ad[type=${type}]`);
+          !!ampAdSelector(r);
         return isAmpAdContainerElement;
       })
       // Need to wait on any contained element resolution followed by build
@@ -221,8 +223,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
             }
             // Must be container element so need to wait for child amp-ad to
             // be upgraded.
-            return whenUpgradedToCustomElement(dev().assertElement(
-                resource.element.querySelector(`amp-ad[type=${type}]`)));
+            return whenUpgradedToCustomElement(
+                dev().assertElement(ampAdSelector(resource)));
           })))
       // Group by networkId.
       .then(elements => elements.reduce((result, element) => {
@@ -233,33 +235,35 @@ export function groupAmpAdsByType(win, type, groupFn) {
 }
 
 /**
- * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {! ../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {number} startTime
  * @return {!Promise<!Object<string,null|number|string>>}
  */
-export function googlePageParameters(win, nodeOrDoc, startTime) {
+export function googlePageParameters(a4a, startTime) {
+  const {win} = a4a;
+  const ampDoc = a4a.getAmpDoc();
   return Promise.all([
-    getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga'),
-    Services.viewerForDoc(nodeOrDoc).getReferrerUrl()])
+    getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
+    Services.viewerForDoc(ampDoc).getReferrerUrl()])
       .then(promiseResults => {
         const clientId = promiseResults[0];
-        const documentInfo = Services.documentInfoForDoc(nodeOrDoc);
+        const documentInfo = Services.documentInfoForDoc(ampDoc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
         const {screen} = win;
-        const viewport = Services.viewportForDoc(nodeOrDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
-        const visibilityState = Services.viewerForDoc(nodeOrDoc)
+        const visibilityState = Services.viewerForDoc(ampDoc)
             .getVisibilityState();
-        const art = getBinaryTypeNumericalCode(getBinaryType(win));
         return {
-          'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+          'is_amp': a4a.isXhrAllowed() ?
+            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
+            AmpAdImplementation.AMP_AD_IFRAME_GET,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
-          'c': getCorrelator(win, clientId, nodeOrDoc),
+          'c': getCorrelator(win, clientId, ampDoc),
           'ga_cid': win.gaGlobal.cid || null,
           'ga_hid': win.gaGlobal.hid || null,
           'dt': startTime,
@@ -274,7 +278,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'u_his': getHistoryLength(win),
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
-          'art': art == '0' ? null : art,
+          'art': getAmpRuntimeTypeParameter(win),
           'vis': visibilityStateCodes[visibilityState] || '0',
           'scr_x': viewport.getScrollLeft(),
           'scr_y': viewport.getScrollTop(),
@@ -304,7 +308,7 @@ export function googleAdUrl(
   a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
-  return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
+  return googlePageParameters(a4a, startTime)
       .then(pageLevelParameters => {
         Object.assign(parameters, blockLevelParameters, pageLevelParameters);
         return truncAndTimeUrl(baseUrl, parameters, startTime);
@@ -352,6 +356,15 @@ function getHistoryLength(win) {
 }
 
 /**
+ * @param {string} url
+ * @return {string} hostname portion of url
+ * @visibleForTesting
+ */
+export function extractHost(url) {
+  return (/^(?:https?:\/\/)?([^\/\?:]+)/i.exec(url) || [])[1] || url;
+}
+
+/**
  * @param {!Window} win
  * @return {?string}
  */
@@ -366,16 +379,16 @@ function topWindowUrlOrDomain(win) {
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
+      return extractHost(secondFromTop./*OK*/document.referrer);
     }
-    return parseUrlDeprecated(topOrigin).hostname;
+    return extractHost(topOrigin);
   } else {
     try {
       return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return parseUrlDeprecated(secondFromTop./*OK*/document.referrer).hostname;
+      return extractHost(secondFromTop./*OK*/document.referrer);
     } catch (e) {}
     return null;
   }
@@ -823,8 +836,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   }
   domain = domain || '.google.com';
   const canonical =
-    parseUrlDeprecated(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl)
-        .hostname;
+    extractHost(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl);
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 
@@ -834,9 +846,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
  * @return {boolean}
  */
 export function isCdnProxy(win) {
-  const googleCdnProxyRegex =
-    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-  return googleCdnProxyRegex.test(win.location.origin);
+  return CDN_PROXY_REGEXP.test(win.location.origin);
 }
 
 /**
@@ -889,4 +899,16 @@ function getBrowserCapabilitiesBitmap(win) {
     }
   }
   return browserCapabilities;
+}
+
+/**
+ * Returns an enum value representing the AMP binary type, or null if this is a
+ * canonical page.
+ * @param {!Window} win
+ * @return {?string} The binary type enum.
+ * @visibleForTesting
+ */
+export function getAmpRuntimeTypeParameter(win) {
+  const art = getBinaryTypeNumericalCode(getBinaryType(win));
+  return isCdnProxy(win) && art != '0' ? art : null;
 }
