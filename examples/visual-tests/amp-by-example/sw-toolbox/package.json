@@ -1,49 +1,32 @@
 {
   "_args": [
     [
-      {
-        "raw": "sw-toolbox@^3.5.1",
-        "scope": null,
-        "escapedName": "sw-toolbox",
-        "name": "sw-toolbox",
-        "rawSpec": "^3.5.1",
-        "spec": ">=3.5.1 <4.0.0",
-        "type": "range"
-      },
+      "sw-toolbox@3.6.0",
       "/usr/local/google/home/rsimha/src/amp-by-example"
     ]
   ],
-  "_from": "sw-toolbox@>=3.5.1 <4.0.0",
+  "_development": true,
+  "_from": "sw-toolbox@3.6.0",
   "_id": "sw-toolbox@3.6.0",
-  "_inCache": true,
+  "_inBundle": false,
+  "_integrity": "sha1-Jt8dHHA0hljk3qKIQxkUm3sxg7U=",
   "_location": "/sw-toolbox",
-  "_nodeVersion": "7.6.0",
-  "_npmOperationalInternal": {
-    "host": "packages-18-east.internal.npmjs.com",
-    "tmp": "tmp/sw-toolbox-3.6.0.tgz_1487877968220_0.07672298746183515"
-  },
-  "_npmUser": {
-    "name": "jeffposnick",
-    "email": "jeffy@google.com"
-  },
-  "_npmVersion": "4.1.2",
   "_phantomChildren": {},
   "_requested": {
-    "raw": "sw-toolbox@^3.5.1",
-    "scope": null,
-    "escapedName": "sw-toolbox",
+    "type": "version",
+    "registry": true,
+    "raw": "sw-toolbox@3.6.0",
     "name": "sw-toolbox",
-    "rawSpec": "^3.5.1",
-    "spec": ">=3.5.1 <4.0.0",
-    "type": "range"
+    "escapedName": "sw-toolbox",
+    "rawSpec": "3.6.0",
+    "saveSpec": null,
+    "fetchSpec": "3.6.0"
   },
   "_requiredBy": [
     "#DEV:/"
   ],
   "_resolved": "https://registry.npmjs.org/sw-toolbox/-/sw-toolbox-3.6.0.tgz",
-  "_shasum": "26df1d1c70348658e4dea2884319149b7b3183b5",
-  "_shrinkwrap": null,
-  "_spec": "sw-toolbox@^3.5.1",
+  "_spec": "3.6.0",
   "_where": "/usr/local/google/home/rsimha/src/amp-by-example",
   "bugs": {
     "url": "https://github.com/GoogleChrome/sw-toolbox/issues"
@@ -79,11 +62,6 @@
     "vinyl-source-stream": "^1.1.0",
     "which": "^1.2.4"
   },
-  "directories": {},
-  "dist": {
-    "shasum": "26df1d1c70348658e4dea2884319149b7b3183b5",
-    "tarball": "https://registry.npmjs.org/sw-toolbox/-/sw-toolbox-3.6.0.tgz"
-  },
   "files": [
     "lib/",
     "companion.js",
@@ -91,31 +69,10 @@
     "sw-toolbox.js.map",
     "index.d.ts"
   ],
-  "gitHead": "8065b424d3992037389bb585cebc84c2e0936f66",
   "homepage": "https://github.com/GoogleChrome/sw-toolbox#readme",
   "license": "Apache-2.0",
   "main": "lib/sw-toolbox.js",
-  "maintainers": [
-    {
-      "name": "addyosmani",
-      "email": "addyosmani@gmail.com"
-    },
-    {
-      "name": "gauntface",
-      "email": "matt@gauntface.co.uk"
-    },
-    {
-      "name": "jeffposnick",
-      "email": "jeffy@google.com"
-    },
-    {
-      "name": "wibblymat",
-      "email": "mat@wibbly.org.uk"
-    }
-  ],
   "name": "sw-toolbox",
-  "optionalDependencies": {},
-  "readme": "ERROR: No README data found!",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/GoogleChrome/sw-toolbox.git"

@@ -17,7 +17,7 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <!-- #### Setup -->
-  <!-- First we include `amp-bind` to track the page state and update the ``<amp-list>` data source. -->
+  <!-- First we include `amp-bind` to track the page state and update the `<amp-list>` data source. -->
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <!-- Next we include `amp-list` to request and display the dropdowns and their options. -->
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
@@ -59,7 +59,7 @@
   and it renders its template using the data in the `cities` array.
   -->
 <div>
-<amp-list width="auto" height="25" layout="fixed-height" src="https://ampbyexample.com/json/linked_dropdowns.json">
+<amp-list height="25" layout="fixed-height" src="https://ampbyexample.com/json/linked_dropdowns.json">
     <template type="amp-mustache">
       <label for="country">Country:</label>
       <select id="country" on="
@@ -75,7 +75,7 @@
       </select>
     </template>
 </amp-list>
-<amp-list width="auto" height="25" layout="fixed-height" [src]="cities || 'https://ampbyexample.com/json/linked_dropdowns.json'" src="https://ampbyexample.com/json/linked_dropdowns.json">
+<amp-list height="25" layout="fixed-height" [src]="cities || 'https://ampbyexample.com/json/linked_dropdowns.json'" src="https://ampbyexample.com/json/linked_dropdowns.json">
     <template type="amp-mustache">
       <label for="city">City:</label>
       <select [disabled]="!cities" disabled id="city">

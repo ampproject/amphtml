@@ -131,6 +131,8 @@ a.abe-primary {
 /* AMPSTART Tweaks **/
 .www-components-sec-nav {
   min-width: 200px;
+  margin-top: -4.5rem;
+  padding-top: 4.5rem;
 }
 .ampstart-card a:not(.ampstart-btn),
 .www-component-desc li a:not(.ampstart-btn),
