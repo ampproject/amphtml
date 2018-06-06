@@ -324,7 +324,7 @@ const EXPERIMENTS = [
   {
     id: 'amp-drive-viewer',
     name: 'Enables the experiment amp-drive-viewer component' +
-        'which is a wrapper around the Google Drive document viewer embed.',
+        ' which is a wrapper around the Google Drive document viewer embed.',
     spec: 'TODO',
     cleanupIssue: 'TODO',
   },
