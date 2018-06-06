@@ -107,7 +107,6 @@ export class Amp3dGltf extends AMP.BaseElement {
         'enableZoom': getOption('enableZoom', bool, true),
         'autoRotate': getOption('autoRotate', bool, false),
       },
-      'hostUrl': this.win.location.href,
     });
   }
 
