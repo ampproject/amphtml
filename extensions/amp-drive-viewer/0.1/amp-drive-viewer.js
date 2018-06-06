@@ -36,7 +36,7 @@ import {user} from '../../../src/log';
 export const TAG = 'amp-drive-viewer';
 
 const ATTRIBUTES_TO_PROPAGATE = [
-  'alt',
+  'title',
 ];
 
 const GOOGLE_DOCS_EMBED_RE = /^https?:\/\/docs\.google\.com.+\/pub.*\??/;
