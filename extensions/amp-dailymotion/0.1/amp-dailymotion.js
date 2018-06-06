@@ -92,12 +92,6 @@ class AmpDailymotion extends AMP.BaseElement {
     /** @private {boolean}  */
     this.muted_ = false;
 
-    /** @private {?boolean}  */
-    this.hasAutoplay_ = false;
-
-    /** @private {?Function} */
-    this.unlistenMessage_ = null;
-
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
