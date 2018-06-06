@@ -483,15 +483,16 @@ def PrintClassFor(descriptor, msg_desc, light, out):
                                       UnderscoreToCamelCase(field.name)))
     out.Line(' * @constructor')
     out.Line(' * @struct')
-    export_or_empty = ''
-    if not light and msg_desc.full_name in EXPORTED_CLASSES:
-      out.Line(' * @export')
-      export_or_empty = ' @export'
     out.Line(' */')
     arguments = ','.join(
         [UnderscoreToCamelCase(f.name) for f in constructor_arg_fields])
     out.Line('%s = function(%s) {' % (msg_desc.full_name, arguments))
     out.PushIndent(2)
+
+    export_or_empty = ''
+    export_class = not light and msg_desc.full_name in EXPORTED_CLASSES
+    if export_class:
+      export_or_empty = ' @export'
 
     for field in msg_desc.fields:
       # We generate ValidatorRules.directAttrLists, ValidatorRules.globalAttrs,
@@ -541,6 +542,10 @@ def PrintClassFor(descriptor, msg_desc, light, out):
     out.PopIndent()
     out.Line('};')
 
+    if export_class:
+      out.Line('goog.exportSymbol("%s", %s);' % (msg_desc.full_name,
+                                                 msg_desc.full_name))
+
 
 SKIP_ENUMS_FOR_LIGHT = [
     'amp.validator.ValidationError.Code',
@@ -568,7 +573,6 @@ def PrintEnumFor(enum_desc, light, out):
       out.Line(' * @enum {number}')
     else:
       out.Line(' * @enum {string}')
-      out.Line(' * @export')
     out.Line(' */')
     out.Line('%s = {' % enum_desc.full_name)
     out.PushIndent(2)
@@ -581,6 +585,10 @@ def PrintEnumFor(enum_desc, light, out):
         out.Line("%s: '%s'," % (v.name, v.name))
     out.PopIndent()
     out.Line('};')
+
+    if not light:
+      out.Line('goog.exportSymbol("%s", %s);' % (enum_desc.full_name,
+                                                 enum_desc.full_name))
     out.Line('/** @type {!Array<string>} */')
     out.Line('%s_NamesByIndex = ["%s"];' % (enum_desc.full_name,
                                             '","'.join(names)))
