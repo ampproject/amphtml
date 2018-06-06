@@ -15,7 +15,7 @@
  */
 
 import {Action, StateProperty} from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-info-dialog-0.1.css';
+import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
@@ -55,10 +55,10 @@ export class InfoDialog {
     this.isBuilt_ = false;
 
     /** @private @const {!./localization.LocalizationService} */
-    this.localizationService_ = Services.localizationServiceV01(this.win_);
+    this.localizationService_ = Services.localizationService(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreServiceV01(this.win_);
+    this.storeService_ = Services.storyStoreService(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;

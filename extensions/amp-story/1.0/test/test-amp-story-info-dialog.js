@@ -51,7 +51,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
       },
     });
 
-    sandbox.stub(Services, 'localizationServiceV01').returns({
+    sandbox.stub(Services, 'localizationService').returns({
       getLocalizedString: localizedStringId => `string(${localizedStringId})`,
     });
 
