@@ -58,7 +58,7 @@ limitations under the License.
   <tr>
     <td><a href="fluid.md">Fluid</a></td>
     <td>Fluid slots do not require a pre-specified size, but will instead fill up the width of their parent container and adjust their height accordingly.</td>
-    <td>Beta</td>
+    <td>Launched</td>
   </tr>
   <tr>
     <td><a href="doubleclick-rtc.md">Real Time Config</a></td>
