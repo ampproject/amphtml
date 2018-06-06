@@ -630,16 +630,13 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.runIntegrationTests(/* compiled */ false);
     }
-    // TODO(rsimha, #14851): Failing due to long proessing times.
-    // if (buildTargets.has('INTEGRATION_TEST') ||
-    //     buildTargets.has('RUNTIME') ||
-    //     buildTargets.has('VISUAL_DIFF') ||
-    //     buildTargets.has('BUILD_SYSTEM')) {
-    //   command.verifyVisualDiffTests();
-    // } else {
-    //   // Generates a blank Percy build to satisfy the required Github check.
-    //   command.runVisualDiffTests(/* opt_mode */ 'skip');
-    // }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF') ||
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.verifyVisualDiffTests();
+    }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
     }
