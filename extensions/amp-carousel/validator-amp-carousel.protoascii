@@ -68,6 +68,7 @@ tags: {  # <amp-carousel>
   }
 }
 tags: {  # <amp-carousel> lightbox
+  html_format: AMP
   tag_name: "AMP-CAROUSEL"
   spec_name: "AMP-CAROUSEL [lightbox]"
   requires_extension: "amp-carousel"

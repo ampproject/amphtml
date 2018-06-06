@@ -14,6 +14,8 @@
 # limitations under the license.
 #
 tags: {  # amp-audio
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-audio"
