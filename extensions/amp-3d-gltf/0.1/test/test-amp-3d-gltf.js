@@ -71,6 +71,13 @@ describes.realWin('amp-3d-gltf', {
         });
   };
 
+  it('renders iframe', () => {
+    return createElement()
+        .then(() => {
+          expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
+        });
+  });
+
   it('sends toggleAmpViewport(false) when exiting viewport', () => {
     return createElement()
         .then(amp3dGltf => {
