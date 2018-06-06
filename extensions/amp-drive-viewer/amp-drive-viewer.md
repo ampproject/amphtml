@@ -30,9 +30,10 @@ limitations under the License.
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-drive-viewer/">Annotated code example for amp-drive-viewer</a></td>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
   </tr>
+  <!-- TODO(cvializ): Make examples -->
 </table>
 
 [TOC]
