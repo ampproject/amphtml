@@ -34,6 +34,7 @@ const TAG = 'amp-story';
  *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
+ *    infodialogstate: boolean,
  *    hasaudiostate: boolean,
  *    landscapestate: boolean,
  *    mutedstate: boolean,
@@ -60,11 +61,13 @@ export const StateProperty = {
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
+  INFO_DIALOG_STATE: 'infodialogstate',
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   CURRENT_PAGE_ID: 'currentpageid',
+  CURRENT_PAGE_INDEX: 'currentpageindex',
 };
 
 
@@ -73,6 +76,7 @@ export const Action = {
   TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
+  TOGGLE_INFO_DIALOG: 'toggleinfodialog',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
@@ -106,6 +110,10 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_DESKTOP:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.DESKTOP_STATE]: !!data}));
+    // Shows or hides the info dialog.
+    case Action.TOGGLE_INFO_DIALOG:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.INFO_DIALOG_STATE]: !!data}));
     // Shows or hides the audio controls.
     case Action.TOGGLE_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
@@ -139,7 +147,10 @@ const actions = (state, action, data) => {
           {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
+          {}, state, {
+            [StateProperty.CURRENT_PAGE_ID]: data.id,
+            [StateProperty.CURRENT_PAGE_INDEX]: data.index,
+          }));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
@@ -233,12 +244,14 @@ export class AmpStoryStoreService {
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.CURRENT_PAGE_ID]: '',
+      [StateProperty.CURRENT_PAGE_INDEX]: 0,
     });
   }
 

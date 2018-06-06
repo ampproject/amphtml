@@ -51,6 +51,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
+import {InfoDialog} from './amp-story-info-dialog';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {
@@ -589,6 +590,12 @@ export class AmpStory extends AMP.BaseElement {
           if (!this.storeService_.get(StateProperty.DESKTOP_STATE)) {
             this.shareMenu_.build();
           }
+
+          const infoDialog = Services.viewerForDoc(this.element).isEmbedded() ?
+            new InfoDialog(this.win, this.element) : null;
+          if (infoDialog) {
+            infoDialog.build();
+          }
         });
 
     // Do not block the layout callback on the completion of these promises, as
@@ -837,10 +844,13 @@ export class AmpStory extends AMP.BaseElement {
    */
   // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
-    this.storeService_.dispatch(Action.CHANGE_PAGE, targetPageId);
-
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
+
+    this.storeService_.dispatch(Action.CHANGE_PAGE, {
+      id: targetPageId,
+      index: pageIndex,
+    });
 
     this.handlePreviewAttributes_(targetPage);
 
