@@ -40,12 +40,8 @@ describes.realWin('amp-viqeo-player', {
     doc.body.appendChild(viqeo);
     return viqeo.build().then(() => {
       return viqeo.layoutCallback();
-    }).then(() => viqeo);
+    });
   }
-
-  it('has all mandatory attributes', () => {
-    return getViqeo(184, 'b51b70cdbb06248f4438').should.eventually.fulfilled;
-  });
 
   it('requires data-videoid', () => {
     return getViqeo(184, '').should.eventually.be.rejectedWith(
