@@ -34,7 +34,6 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {once} from '../../../src/utils/function';
 import {toArray} from '../../../src/types';
 
 
@@ -88,12 +87,6 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
-
-    /**
-     * @return {!../../../src/service/url-impl.Url}
-     * @private
-     */
-    this.getUrlService_ = once(() => Services.urlForDoc(this.element));
   }
 
   /**
@@ -587,6 +580,14 @@ class AmpVideo extends AMP.BaseElement {
       ranges.push([played.start(i), played.end(i)]);
     }
     return ranges;
+  }
+
+  /**
+   * @return {!../../../src/service/url-impl.Url}
+   * @private
+   */
+  getUrlService_() {
+    return Services.urlForDoc(this.element);
   }
 }
 
