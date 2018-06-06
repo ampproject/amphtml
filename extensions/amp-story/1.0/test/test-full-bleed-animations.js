@@ -20,8 +20,10 @@
 
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
+import {LocalizationService} from '../localization';
 import {PRESETS} from '../animation-presets';
 import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-presets-utils';
+import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-full-bleed-animations', {
   amp: {
@@ -37,6 +39,10 @@ describes.realWin('amp-story-full-bleed-animations', {
     win = env.win;
     storyElem = win.document.createElement('amp-story');
     win.document.body.appendChild(storyElem);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
+
     AmpStory.isBrowserSupported = () => true;
     ampStory = new AmpStory(storyElem);
   });
