@@ -98,6 +98,8 @@ export function getAdContainer(element) {
  * Gets the resource ID of the amp-ad element containing the passed node.
  * If there is no containing amp-ad tag, then null will be returned.
  * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
+ * @param {!Element} node
+ * @param {!Window} topWin
  * @return {?string}
  */
 export function getAmpAdResourceId(node, topWin) {
