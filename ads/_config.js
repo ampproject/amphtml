@@ -653,6 +653,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  noddus: {
+    prefetch: 'https://noddus.com/amp_loader.js',
+    renderStartImplemented: true,
+  },
+
   nokta: {
     prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
     renderStartImplemented: true,
