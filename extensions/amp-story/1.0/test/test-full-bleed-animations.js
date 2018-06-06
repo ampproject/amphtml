@@ -39,10 +39,10 @@ describes.realWin('amp-story-full-bleed-animations', {
     win = env.win;
     storyElem = win.document.createElement('amp-story');
     win.document.body.appendChild(storyElem);
-    
+
     const localizationService = new LocalizationService(win);
     registerServiceBuilder(win, 'localization', () => localizationService);
-    
+
     AmpStory.isBrowserSupported = () => true;
     ampStory = new AmpStory(storyElem);
   });

@@ -385,21 +385,6 @@ export const adConfig = {
     preconnect: 'https://bal.ad.dotandad.com',
   },
 
-  doubleclick: {
-    prefetch: [
-      'https://www.googletagservices.com/tag/js/gpt.js',
-      'https://securepubads.g.doubleclick.net/static/glade.js',
-    ],
-    preconnect: [
-      'https://partner.googleadservices.com',
-      'https://tpc.googlesyndication.com',
-    ],
-    clientIdScope: 'AMP_ECID_GOOGLE',
-    clientIdCookieName: '_ga',
-    renderStartImplemented: true,
-    masterFrameAccessibleType: 'google_network',
-  },
-
   eadv: {
     renderStartImplemented: true,
     clientIdScope: 'AMP_ECID_EADV',
@@ -668,6 +653,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  noddus: {
+    prefetch: 'https://noddus.com/amp_loader.js',
+    renderStartImplemented: true,
+  },
+
   nokta: {
     prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
     renderStartImplemented: true,
@@ -930,6 +920,10 @@ export const adConfig = {
   },
 
   widespace: {},
+
+  wisteria: {
+    renderStartImplemented: true,
+  },
 
   wpmedia: {
     prefetch: 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js',

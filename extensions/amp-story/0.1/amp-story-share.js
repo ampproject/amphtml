@@ -315,12 +315,33 @@ export class ShareWidget {
     });
   }
 
+  parseProvidersToClassicApi(providers) {
+    const providersMap = {};
+
+    providers.forEach(currentProvider => {
+      if (isObject(currentProvider) &&
+          currentProvider['provider'] == 'facebook') {
+        providersMap['facebook'] = ({'app_id': currentProvider['app_id']});
+      } else if (isObject(currentProvider)) {
+        providersMap[currentProvider['provider']] = true;
+      } else {
+        providersMap[currentProvider] = true;
+      }
+    });
+
+    return providersMap;
+  }
+
   /**
    * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @private
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
+    if (Array.isArray(providers)) {
+      providers = this.parseProvidersToClassicApi(providers);
+    }
+
     Object.keys(providers).forEach(type => {
       if (type == 'system') {
         user().warn('AMP-STORY',
