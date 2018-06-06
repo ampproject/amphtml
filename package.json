@@ -20,7 +20,7 @@
     "lint": "gulp lint",
     "build": "gulp build",
     "dist": "gulp dist",
-    "heroku-postbuild": "npm run test-env-var && gulp clean && gulp build && gulp dist --fortesting",
+    "heroku-postbuild": "",
     "test-env-var": "if [ -z \"${AMP_TESTING_HOST}\" ]; then echo \"ERROR: Please set the 'AMP_TESTING_HOST' environment variable. If you are in heroku this can be set by executing 'heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com' on the command line.\"; exit 1; fi",
     "preinstall": "node build-system/check-package-manager.js"
   },
