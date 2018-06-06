@@ -336,6 +336,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
 - [Widespace](../../ads/widespace.md)
+- [Wisteria](../../ads/wisteria.md)
 - [WPMedia](../../ads/wpmedia.md)
 - [Xlift](../../ads/xlift.md)
 - [Yahoo](../../ads/yahoo.md)
