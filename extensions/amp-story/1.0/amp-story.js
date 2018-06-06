@@ -19,7 +19,7 @@
  *
  * Example:
  * <code>
- * <amp-story standalone bookend-config-src="bookend.json">
+ * <amp-story standalone>
  *   [...]
  * </amp-story>
  * </code>

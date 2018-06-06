@@ -126,19 +126,19 @@ export class BookendComponent {
   }
 
   /**
-   * Delegates components to their corresponding template builder.
+   * Delegates components to their corresponding element builder.
    * class.
    * @param {!Array<BookendComponentDef>} components
    * @param {!Document} doc
    * @return {!DocumentFragment}
    */
-  static buildTemplates(components, doc) {
+  static buildElements(components, doc) {
     const fragment = doc.createDocumentFragment();
     components.forEach(component => {
       const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
         fragment.appendChild(componentBuilderInstanceFor(type)
-            .buildTemplate(component, doc));
+            .buildElement(component, doc));
       }
     });
     return fragment;

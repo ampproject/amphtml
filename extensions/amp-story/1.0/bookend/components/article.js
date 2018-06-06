@@ -18,7 +18,7 @@ import {BookendComponentInterface} from './bookend-component-interface';
 import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {htmlFor} from '../../../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
 
@@ -74,20 +74,31 @@ export class ArticleComponent {
       article.image = articleJson['image'];
     }
 
+    if (articleJson['amphtml']) {
+      article.amphtml = articleJson['amphtml'];
+    }
+
     return /** @type {!ArticleComponentDef} */ (article);
   }
 
   /** @override */
-  buildTemplate(articleData, doc) {
+  buildElement(articleData, doc) {
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
-    const template =
+    const el =
         html`
         <a class="i-amphtml-story-bookend-article
           i-amphtml-story-bookend-component"
           target="_top">
+          <h2 class="i-amphtml-story-bookend-article-heading" ref="heading">
+          </h2>
+          <div class="i-amphtml-story-bookend-component-meta" ref="meta"></div>
         </a>`;
-    addAttributesToElement(template, dict({'href': articleData.url}));
+    addAttributesToElement(el, dict({'href': articleData.url}));
+
+    if (articleData['amphtml'] === true) {
+      addAttributesToElement(el, dict({'rel': 'amphtml'}));
+    }
 
     if (articleData.image) {
       const ampImg =
@@ -98,19 +109,15 @@ export class ArticleComponent {
           </amp-img>`;
 
       addAttributesToElement(ampImg, dict({'src': articleData.image}));
-      template.appendChild(ampImg);
+      el.appendChild(ampImg);
     }
 
-    const heading =
-      html`<h2 class="i-amphtml-story-bookend-article-heading"></h2>`;
+    const articleElements = htmlRefs(el);
+    const {heading, meta} = articleElements;
+
     heading.textContent = articleData.title;
-    template.appendChild(heading);
+    meta.textContent = articleData.domainName;
 
-    const articleMeta =
-      html`<div class="i-amphtml-story-bookend-component-meta"></div>`;
-    articleMeta.textContent = articleData.domainName;
-    template.appendChild(articleMeta);
-
-    return template;
+    return el;
   }
 }

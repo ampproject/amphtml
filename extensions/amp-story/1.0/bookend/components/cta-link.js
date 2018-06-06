@@ -68,19 +68,16 @@ export class CtaLinkComponent {
    * @override
    * */
   build(ctaLinksJson, unusedElement) {
-    return {
+    const ctaLinks = {
       type: ctaLinksJson['type'],
       links: ctaLinksJson['links'],
     };
+
+    return ctaLinks;
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} ctaLinksData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
-  buildTemplate(ctaLinksData, doc) {
+  /** @override */
+  buildElement(ctaLinksData, doc) {
     const html = htmlFor(doc);
     const container =
         html`<div class="i-amphtml-story-bookend-cta-link-wrapper
@@ -95,6 +92,10 @@ export class CtaLinkComponent {
     ctaLinksData['links'].forEach(currentLink => {
       const el = linkSeed.cloneNode(/* deep */ true);
       addAttributesToElement(el, dict({'href': currentLink['url']}));
+
+      if (currentLink['amphtml'] === true) {
+        addAttributesToElement(el, dict({'rel': 'amphtml'}));
+      }
 
       const refs = htmlRefs(el);
       refs['linkText'].textContent = currentLink['text'];
