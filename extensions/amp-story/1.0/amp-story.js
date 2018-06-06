@@ -40,7 +40,7 @@ import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryPage} from './amp-story-page';
+import {AmpStoryPage, PageState} from './amp-story-page';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
@@ -439,17 +439,21 @@ export class AmpStory extends AMP.BaseElement {
       this.onBookendStateUpdate_(isActive);
     });
 
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
+      this.onCurrentPageIdUpdate_(pageId);
+    });
+
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
+    });
+
+    this.storeService_.subscribe(StateProperty.PAUSED_STATE, isPaused => {
+      this.onPausedStateUpdate_(isPaused);
     });
 
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
-
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
-      this.onCurrentPageIdUpdate_(pageId);
-    });
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
@@ -579,7 +583,7 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => this.buildSystemLayer_())
         .then(() => {
           this.pages_.forEach(page => {
-            page.setActive(false);
+            page.setState(PageState.NOT_ACTIVE);
           });
         })
         .then(() => this.switchTo_(initialPageId))
@@ -886,12 +890,13 @@ export class AmpStory extends AMP.BaseElement {
       this.triggerActiveEventForPage_();
 
       if (oldPage) {
-        oldPage.setActive(false);
-        // indication that this should be offscreen to left in desktop view
+        oldPage.setState(PageState.NOT_ACTIVE);
+
+        // Indication that this should be offscreen to left in desktop view.
         setAttributeInMutate(oldPage, Attributes.VISITED);
       }
 
-      targetPage.setActive(true);
+      targetPage.setState(PageState.ACTIVE);
 
       // If first navigation.
       if (!oldPage) {
@@ -1121,6 +1126,16 @@ export class AmpStory extends AMP.BaseElement {
    */
   isDesktop_() {
     return this.desktopMedia_.matches && !this.platform_.isBot();
+  }
+
+  /**
+   * Reacts to paused state updates.
+   * @param {boolean} isPaused
+   * @private
+   */
+  onPausedStateUpdate_(isPaused) {
+    const pageState = isPaused ? PageState.PAUSED : PageState.ACTIVE;
+    this.activePage_.setState(pageState);
   }
 
   /**
