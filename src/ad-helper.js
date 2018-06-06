@@ -82,13 +82,13 @@ export function isAdPositionAllowed(element, win) {
  */
 export function getAdContainer(element) {
   if (element[AD_CONTAINER_PROP] === undefined) {
-    let el = element;
-    do {
-      el = el.parentElement;
+    let el = element.parentElement;
+    while (el && el.tagName != 'BODY') {
       if (CONTAINERS[el.tagName]) {
         return element[AD_CONTAINER_PROP] = el.tagName;
       }
-    } while (el && el.tagName != 'BODY');
+      el = el.parentElement;
+    }
     element[AD_CONTAINER_PROP] = null;
   }
   return element[AD_CONTAINER_PROP];
