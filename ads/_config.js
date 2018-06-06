@@ -921,6 +921,10 @@ export const adConfig = {
 
   widespace: {},
 
+  wisteria: {
+    renderStartImplemented: true,
+  },
+
   wpmedia: {
     prefetch: 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js',
     preconnect: [
