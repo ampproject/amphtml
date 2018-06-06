@@ -17,6 +17,11 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {
+  createFrameFor,
+  objOrParseJson,
+  redispatch,
+} from '../../../src/iframe-video';
 import {dev, user} from '../../../src/log';
 import {
   fullscreenEnter,
@@ -29,15 +34,12 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+
 
 const TAG = 'amp-3q-player';
 
 
-/**
- * @implements {../../../src/video-interface.VideoInterface}
- */
+/** @implements {../../../src/video-interface.VideoInterface} */
 class Amp3QPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -69,42 +71,37 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const {element: el} = this;
 
     this.dataId = user().assert(
-        this.element.getAttribute('data-id'),
+        el.getAttribute('data-id'),
         'The data-id attribute is required for <amp-3q-player> %s',
-        this.element);
+        el);
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
-    installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.element).register(this);
+    installVideoManagerForDoc(el);
+    Services.videoManagerForDoc(el).register(this);
   }
 
   /** @override */
   layoutCallback() {
+    const iframe = createFrameFor(this,
+        'https://playout.3qsdn.com/'
+          + encodeURIComponent(dev().assertString(this.dataId))
+          // Autoplay is handled by VideoManager
+          + '?autoplay=false&amp=true');
 
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
         this.win,
         'message',
-        this.sdnBridge_.bind(this)
-    );
+        this.sdnBridge_.bind(this));
 
-    this.applyFillContent(iframe, true);
-    iframe.src = 'https://playout.3qsdn.com/'
-        + encodeURIComponent(dev().assertString(this.dataId))
-        + '?autoplay=false&amp=true';
-    this.element.appendChild(iframe);
-
-    return this.loadPromise(this.iframe_).then(() =>
-      this.playerReadyPromise_);
+    return this.loadPromise(this.iframe_).then(() => this.playerReadyPromise_);
   }
 
   /** @override */
@@ -148,31 +145,24 @@ class Amp3QPlayer extends AMP.BaseElement {
       }
     }
 
-    const data = isObject(getData(event))
-      ? getData(event)
-      : tryParseJson(getData(event));
+    const data = objOrParseJson(getData(event));
     if (data === undefined) {
       return;
     }
 
-    switch (data['data']) {
-      case 'ready':
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerReadyResolver_();
-        break;
-      case 'playing':
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
-        break;
-      case 'paused':
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-        break;
-      case 'muted':
-        this.element.dispatchCustomEvent(VideoEvents.MUTED);
-        break;
-      case 'unmuted':
-        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
-        break;
+    const eventType = data['data'];
+
+    if (eventType == 'ready') {
+      this.playerReadyResolver_();
     }
+
+    redispatch(this.element, eventType, {
+      'ready': VideoEvents.LOAD,
+      'playing': VideoEvents.PLAYING,
+      'paused': VideoEvents.PAUSE,
+      'muted': VideoEvents.MUTED,
+      'unmuted': VideoEvents.UNMUTED,
+    });
   }
 
   sdnPostMessage_(message) {
