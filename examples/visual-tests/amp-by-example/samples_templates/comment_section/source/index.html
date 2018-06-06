@@ -40,6 +40,11 @@ This sample showcases how to build a comment section in AMP HTML using the [amp-
     .date {
       color: #a8a3ae;
     }
+    amp-list.comments {
+      min-width: 320px;
+      max-width: 600px;
+      width: 100%;
+    }
     .comment {
         background: #f2f2f2;
         margin: 0 16px 16px 0;
@@ -57,6 +62,14 @@ This sample showcases how to build a comment section in AMP HTML using the [amp-
       top: 50%;
       margin-top: -28px;
       margin-left: -30px;
+    }
+    span.placeholder {
+      display: inline-block;
+      height: 14px;
+      width: 150px;
+      background-color: #cccccc;
+      position: relative;
+      top: 3px;
     }
     </style>
 
@@ -84,7 +97,7 @@ This sample showcases how to build a comment section in AMP HTML using the [amp-
     <h2 class="p1">Comments</h2>
 
     <!-- Use `amp-list` to render existing comments to make sure that the latest comments appear if the page is loaded via AMP Cache.  -->
-      <amp-list class="mt1" width="auto" height="230" layout="fixed-height" src="/examples/visual-tests/amp-by-example/json/comments.json">
+      <amp-list class="comments mt1" width="auto" height="230" layout="fixed-height" src="/examples/visual-tests/amp-by-example/json/comments.json">
         <template type="amp-mustache">
           <div class="flex px1 pt1">
             <amp-img width="44" height="44" class="mr1 flex-none" alt="user" src="/examples/visual-tests/amp-by-example/img/ic_account_box_black_48dp_1x.png"></amp-img>
@@ -94,14 +107,23 @@ This sample showcases how to build a comment section in AMP HTML using the [amp-
             </div>
           </div>
         </template>
+        <div placeholder>
+            <div class="flex px1 pt1">
+                <amp-img width="44" height="44" class="mr1 flex-none" alt="user" src="/examples/visual-tests/amp-by-example/img/ic_account_box_black_48dp_1x.png"></amp-img>
+                <div class="ampstart-card p1 comment">
+                    <p><span class="placeholder"></span> <span class="placeholder"></span></p>
+                    <p><span class="placeholder"></span></p>
+                </div>
+              </div>
+          </div>
       </amp-list>
 
     <!-- In order to add comments users need to be logged in. We use `amp-access` to integrate login and to show and hide the login button depending on whether the user is logged in. `on="tap:amp-access.login-sign-in"` specifies which
     action should be taken when clicking on the login button: `login` defines the property inside the `amp-access` json configuration, while `sign-in` defines
     the endpoint. -->
     <span amp-access="NOT loggedIn" role="button" tabindex="0" amp-access-hide>
-          <h2 class="m1">Please login to comment</h2>
-          <button on="tap:amp-access.login-sign-in" class="ampstart-btn mx1 mt1 caps">Login</button>
+          <h3 class="m1">Please login to comment</h3>
+          <button on="tap:amp-access.login-sign-in" class="ampstart-btn m2 caps">Login</button>
     </span>
       <!-- Use amp-form to submit the comment. In this sample, only a single comment can be added as comments are not persisted in the backend.  -->
       <form class="px1 pt1 flex" amp-access="loggedIn" amp-access-hide method="post" action-xhr="/examples/visual-tests/amp-by-example/samples_templates/comment_section/submit-comment-xhr" target="_top">

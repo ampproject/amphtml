@@ -157,9 +157,11 @@
                  [class]="favorite ? 'heart-fill' : 'heart-border'"
                  value="" aria-label="Favorite Toggle"> 
         </template>
-        <input type="submit" disabled 
-               class="heart-loading"
-               value="" aria-label="favorite placeholder" placeholder> 
+        <div placeholder>
+          <input type="submit" disabled 
+                 class="heart-loading"
+                 value="" aria-label="favorite placeholder"> 
+        </div>
       </amp-list>
     </form>
 
