@@ -39,6 +39,9 @@ export let RelatedArticleDef;
  */
 export let RelatedArticleSetDef;
 
+/** New bookend components only supported in amp-story 1.0. */
+const NEW_COMPONENTS =
+['landscape', 'portrait', 'cta-link', 'heading', 'textbox'];
 
 /**
  * @param {!JsonObject} articleJson
@@ -90,4 +93,29 @@ export function relatedArticlesFromJson(opt_articleSetsResponse) {
 
       return /** @type {!RelatedArticleSetDef} */ (articleSet);
     }));
+}
+
+/**
+ * @param {!Array<!JsonObject>} bookendComponents
+ * @return {!Array<!RelatedArticleSetDef>}
+ */
+export function parseArticlesToClassicApi(bookendComponents) {
+  const articleSet = {};
+  articleSet.articles = [];
+
+  bookendComponents.forEach(component => {
+    if (component['type'] == 'small') {
+      articleSet.articles.push(buildArticleFromJson_(component));
+    } else if (NEW_COMPONENTS.includes(component['type'])) {
+      user().warn(TAG, component['type'] + ' is not supported in ' +
+      'amp-story-0.1, upgrade to v1.0 to use this feature.,');
+    } else {
+      user().warn(TAG, component['type'] + ' is not valid, ' +
+      'skipping invalid.');
+    }
+  });
+
+  const articles = [];
+  articles.push(articleSet);
+  return articles;
 }
