@@ -96,7 +96,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         this.element);
 
     this.context_ = dict({
-      'src': resolveRelativeUrl(src, this.win.location),
+      'src': resolveRelativeUrl(src, this.getAmpdoc().getUrl()),
       'renderer': {
         'alpha': getOption('alpha', bool, false),
         'antialias': getOption('antialiasing', bool, true),
