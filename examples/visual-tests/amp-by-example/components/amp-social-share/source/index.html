@@ -19,14 +19,13 @@
     Ensure you've configured your canonical URL.
   -->
   <link rel="canonical" href="https://ampbyexample.com/components/amp-social-share/">
-  <!--
-    Origin trial tokens for `ampbyexample.com` and `*.cdn.ampproject.org`. (Needed for `type=system`; [see below](#native-share-dialog-chrome-on-android-).)
-  -->
-  <meta http-equiv="origin-trial" data-feature="Web Share" data-expires="2017-04-04" content="Ajcrk411RcpUCQ3ovgC8le4e7Te/1kARZsW5Hd/OCnW6vIHTs5Kcq1PaABs7SzcrtfvT0TIlFh9Vdb5xWi9LiQsAAABSeyJvcmlnaW4iOiJodHRwczovL2FtcGJ5ZXhhbXBsZS5jb206NDQzIiwiZmVhdHVyZSI6IldlYlNoYXJlIiwiZXhwaXJ5IjoxNDkxMzM3MDEwfQ==">
-  <meta http-equiv="origin-trial" data-feature="Web Share" data-expires="04/11/17" content="ArP55PINkEOG8GxebgOUGlUeleT5iZV2J1a5OVsIX4kq+89ZHBVKzoXikg0AiPOVQbJijM3fE+myhu62DEeCRwcAAABneyJvcmlnaW4iOiJodHRwczovL2Nkbi5hbXBwcm9qZWN0Lm9yZzo0NDMiLCJmZWF0dXJlIjoiV2ViU2hhcmUiLCJleHBpcnkiOjE0OTE5Mzc4NDEsImlzU3ViZG9tYWluIjp0cnVlfQ==">
 
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <!-- ## Styling -->
+  <!-- Custom styling for `<amp-social-share>`. -->
+
   <style amp-custom>
     amp-social-share.custom-style {
       background-color: #008080;
@@ -34,6 +33,11 @@
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
+    }
+
+    amp-social-share.rounded {
+      border-radius: 50%;
+      background-size: 60%;
     }
   </style>
 </head>
@@ -54,6 +58,7 @@
     <amp-social-share type="tumblr"></amp-social-share>
     <amp-social-share type="twitter"></amp-social-share>
     <amp-social-share type="whatsapp"></amp-social-share>
+    <amp-social-share type="line"></amp-social-share>
   </div>
 
   <!-- ## Configuration -->
@@ -91,6 +96,21 @@
     class="custom-style">
   </amp-social-share>
 
+  <!-- For example, you can tweak the background size and border radius to acheive a rounded look. Reference the `.rounded` css class from the Styling section above for the effect below. -->
+
+  <div>
+    <amp-social-share class="rounded" type="email" width="36" height="36"></amp-social-share>
+    <amp-social-share class="rounded" type="facebook" data-param-app_id="254325784911610" width="36" height="36"></amp-social-share>
+    <amp-social-share class="rounded" type="gplus" width="36" height="36"></amp-social-share>
+    <amp-social-share class="rounded" type="linkedin" width="36" height="36"></amp-social-share>
+    <amp-social-share class="rounded" type="pinterest" data-param-media="https://ampbyexample.com/img/amp.jpg" width="36" height="36"></amp-social-share>
+    <amp-social-share class="rounded" type="tumblr" width="36" height="36"></amp-social-share>
+    <amp-social-share class="rounded" type="twitter" width="36" height="36"></amp-social-share>
+    <amp-social-share class="rounded" type="whatsapp" width="36" height="36"></amp-social-share>
+    <amp-social-share class="rounded" type="line" width="36" height="36"></amp-social-share>
+  </div>
+
+
   <!-- ## Sharing Media via Pinterest -->
   <!-- Use `data-param-media` to share media via Pinterest. -->
 
@@ -98,20 +118,15 @@
 
   <!-- #### Native Share Dialog (Chrome on Android) -->
   <!--
-  If a couple of conditions are satisfied, the `system` type will display a native share
-  UI. (That is, exactly the same UI that's available to native applications, reflecting
-  the user's sharing preferences, the applications they have installed, and so on.)
 
-  The conditions are:
+  The `system` type will display a native share UI if the user is viewing the
+  AMP document using Chrome on Android. (The only supported browser as of
+  February 2018.)
 
-    * The user must be viewing the AMP using Chrome on Android. (The only supported browser as of February 2017.)
-    * An appropriate token (origin-specific) must be embedded on the site to activate the feature. ([Apply for a token](https://goo.gl/GR5YLI); [more information about the process](https://developers.google.com/web/updates/2016/10/navigator-share).)
+  Here's what it looks like in Chrome on Android:
 
-  For this example, we've embedded the tokens via `<meta>` elements [in the document `<head>`](#setup).
-
-  Here's what it looks like if conditions are right:
-
-  <amp-img class="ampstart-card" alt="Animation showing native sharing sheet appearing" src="/examples/visual-tests/amp-by-example/img/system-share.gif" width="270" height="480"></amp-img>
+  <amp-img class="ampstart-card" alt="Animation showing native sharing sheet
+  appearing" src="/examples/visual-tests/amp-by-example/img/system-share.gif" width="270" height="480"></amp-img>
   -->
 
   <amp-social-share type="system"></amp-social-share>
