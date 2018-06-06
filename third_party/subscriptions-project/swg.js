@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.22.12 */
+ /** Version: 0.1.22.13 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -2225,7 +2225,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.12',
+    '_client': 'SwG 0.1.22.13',
   });
 }
 
@@ -4313,9 +4313,9 @@ class LinkSaveFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.SaveSubscriptionRequest} request
+   * @param {!../api/subscriptions.SaveSubscriptionRequestCallback} callback
    */
-  constructor(deps, request) {
+  constructor(deps, callback) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
@@ -4328,13 +4328,23 @@ class LinkSaveFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private {!../api/subscriptions.SaveSubscriptionRequest} */
-    this.request_ = request;
+    /** @private {!../api/subscriptions.SaveSubscriptionRequestCallback} */
+    this.callback_ = callback;
+
+    /** @private {?Promise<!../api/subscriptions.SaveSubscriptionRequest>} */
+    this.requestPromise_ = null;
 
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
   }
 
+  /**
+   * @return {?Promise<!../api/subscriptions.SaveSubscriptionRequest>}
+   * @package Visible for testing.
+   */
+  getRequestPromise() {
+    return this.requestPromise_;
+  }
   /**
    * Starts the save subscription
    * @return {!Promise}
@@ -4345,18 +4355,6 @@ class LinkSaveFlow {
       'isClosable': true,
     };
 
-    if (this.request_.token) {
-      if (!this.request_.authCode) {
-        iframeArgs['token'] = this.request_.token;
-      } else {
-        throw new Error('Both authCode and token are available');
-      }
-    } else if (this.request_.authCode) {
-      iframeArgs['authCode'] = this.request_.authCode;
-    } else {
-      throw new Error('Neither token or authCode is available');
-    }
-
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
@@ -4364,6 +4362,31 @@ class LinkSaveFlow {
       feArgs(iframeArgs),
       /* shouldFadeBody */ false
     );
+    this.activityIframeView_.onMessage(data => {
+      if (data['getLinkingInfo']) {
+        this.requestPromise_ = new Promise(resolve => {
+          resolve(this.callback_());
+        }).then(request => {
+          let saveRequest;
+          if (request && request.token) {
+            if (request.authCode) {
+              throw new Error('Both authCode and token are available');
+            } else {
+              saveRequest = {'token': request.token};
+            }
+          } else if (request && request.authCode) {
+            saveRequest = {'authCode': request.authCode};
+          } else {
+            throw new Error('Neither token or authCode is available');
+          }
+          this.activityIframeView_.message(saveRequest);
+        }).catch(reason => {
+          // The flow is complete.
+          this.dialogManager_.completeView(this.activityIframeView_);
+          throw reason;
+        });
+      }
+    });
     /** {!Promise<boolean>} */
     return this.dialogManager_.openView(this.activityIframeView_,
         /* hidden */ true).then(() => {
@@ -4903,7 +4926,6 @@ class ConfiguredRuntime {
     PayStartFlow.preconnect(preconnect);
 
     injectStyleSheet(this.win_.document, CSS);
-    this.buttonApi_.init();  // Injects swg-button stylesheet.
   }
 
   /** @override */
@@ -5024,9 +5046,9 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  saveSubscription(saveSubscriptionRequest) {
+  saveSubscription(saveSubscriptionRequestCallback) {
     return this.documentParsed_.then(() => {
-      return new LinkSaveFlow(this, saveSubscriptionRequest).start();
+      return new LinkSaveFlow(this, saveSubscriptionRequestCallback).start();
     });
   }
 
