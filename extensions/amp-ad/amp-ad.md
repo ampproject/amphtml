@@ -356,6 +356,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
+- [Epeex](../../ads/epeex.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Postquare](../../ads/postquare.md)
 - [PubExchange](../../ads/pubexchange.md)
