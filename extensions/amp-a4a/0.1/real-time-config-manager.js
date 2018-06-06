@@ -229,7 +229,7 @@ export class RealTimeConfigManager {
       const validVendorMacros = {};
       Object.keys(this.rtcConfig_.vendors[vendor]).forEach(macro => {
         if (!(vendorObject.macros && vendorObject.macros.includes(macro))) {
-          user().error(`Unknown macro: ${macro} for vendor: ${vendor}`);
+          user().error(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
         } else {
           const value = this.rtcConfig_.vendors[vendor][macro];
           validVendorMacros[macro] = isObject(value) || isArray(value) ?
