@@ -1,0 +1,50 @@
+{
+  "entryModules": [
+    "./test-stuff/a.js",
+    "./test-stuff/c.js"
+  ],
+  "depOf": {
+    "test-stuff/c.js": {
+      "test-stuff/c.js": true,
+      "test-stuff/b.js": true
+    },
+    "test-stuff/a.js": {
+      "test-stuff/a.js": true,
+      "test-stuff/b.js": true
+    }
+  },
+  "deps": {
+    "test-stuff/c.js": [
+      "test-stuff/b.js"
+    ],
+    "test-stuff/b.js": [],
+    "test-stuff/a.js": [
+      "test-stuff/b.js"
+    ]
+  },
+  "sorted": [
+    "test-stuff/b.js",
+    "test-stuff/c.js",
+    "test-stuff/a.js"
+  ],
+  "bundles": {
+    "test-stuff/c.js": {
+      "isBase": false,
+      "name": "test-stuff/c.js",
+      "modules": [
+        "test-stuff/b.js",
+        "test-stuff/c.js"
+      ]
+    },
+    "test-stuff/a.js": {
+      "isBase": false,
+      "name": "test-stuff/a.js",
+      "modules": [
+        "test-stuff/a.js"
+      ]
+    }
+  },
+  "packages": {},
+  "transformed": {},
+  "browserMask": {}
+}

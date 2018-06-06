@@ -100,6 +100,9 @@ window.AMP_TEST_IFRAME;
 window.AMP_TAG;
 window.AMP = {};
 
+/* @type {!Object} */
+window.ampExtendedElements = {};
+
 /** @constructor */
 function AmpConfigType() {}
 

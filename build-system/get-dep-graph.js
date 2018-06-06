@@ -174,20 +174,20 @@ exports.getBundleFlags = function(g) {
     flagsArray.push('--module', cmd);
     if (bundleKeys.length > 1) {
       if (isBase) {
-        flagsArray.push('--module_wrapper', name + ':' +
-            exports.baseBundleWrapper);
+        //flagsArray.push('--module_wrapper', name + ':' +
+            //exports.baseBundleWrapper);
       } else {
         if (isMain) {
-          flagsArray.push('--module_wrapper', name + ':' +
-              exports.mainBinaryWrapper);
+          //flagsArray.push('--module_wrapper', name + ':' +
+              //exports.mainBinaryWrapper);
         } else {
-          flagsArray.push('--module_wrapper', name + ':' +
-              exports.bundleWrapper);
+          //flagsArray.push('--module_wrapper', name + ':' +
+              //exports.bundleWrapper);
         }
       }
     } else {
-      flagsArray.push('--module_wrapper', name + ':' +
-            exports.defaultWrapper);
+      //flagsArray.push('--module_wrapper', name + ':' +
+            //exports.defaultWrapper);
     }
   });
   flagsArray.push('--js_module_root', './splittable-build/transformed/');

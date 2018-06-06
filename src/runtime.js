@@ -140,7 +140,6 @@ export function installBuiltins(global) {
  */
 function adoptShared(global, callback) {
 
-  debugger;
   // Tests can adopt the same window twice. sigh.
   if (global.AMP_TAG) {
     return Promise.resolve();
@@ -265,7 +264,6 @@ function adoptShared(global, callback) {
   // Handle high priority extensions now, and if necessary issue
   // requests for new extensions (used for experimental version
   // locking).
-  debugger;
   for (let i = 0; i < preregisteredExtensions.length; i++) {
     const fnOrStruct = preregisteredExtensions[i];
     if (maybeLoadCorrectVersion(global, fnOrStruct)) {
@@ -338,7 +336,6 @@ function adoptShared(global, callback) {
  * @return {!Promise}
  */
 export function adopt(global) {
-  debugger;
   return adoptShared(global, global => {
     const ampdocService = Services.ampdocServiceFor(global);
     const ampdoc = ampdocService.getAmpDoc();
