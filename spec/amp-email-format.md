@@ -21,7 +21,7 @@ AMP is a technology commonly known for developing super fast web pages on mobile
 There are [AMP components](https://www.ampproject.org/docs/reference/components) for everything from carousels, to responsive form elements, to retrieving fresh content from remote endpoints. The AMPHTML Email format provides a subset of AMP components that you can use in email messages. Recipients of AMP emails can view and interact with the AMP components directly in the email message.
 
 <div class="noshowtoc">
-      
+
 **Contents**
 
 * [FAQ](#faq)
@@ -33,7 +33,6 @@ There are [AMP components](https://www.ampproject.org/docs/reference/components)
   * [Media](#media)
 * [CSS requirements](#css-requirements)
    * [Specifying CSS in an AMP document](#specifying-css-in-an-amp-document)
-   * [Allowed CSS properties and selectors](#allowed-css-properties-and-selectors)
 * [Document dimensions](#document-dimensions)
 * [Validation tools](#validation-tools)
   * [Web-based validator](#web-based-validator)
@@ -122,11 +121,11 @@ Email providers will need to proxy all XHRs and use the responses to render the 
 
 ##### Are there any CSS restrictions?
 
-Yes.
+The AMP4EMAIL validator spec does not contain additional CSS restrictions beyond the [standard AMP CSS restrictions](https://www.ampproject.org/docs/design/responsive/style_pages). However, email clients may have their own CSS restrictions.
 
-For Gmail, the allowed list of CSS properties and values can be found at [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css). The [AMP Validator](https://github.com/ampproject/amphtml/tree/master/validator) currently enforces these restrictions which can by checked in [AMP by Example’s Playground](https://ampbyexample.com/playground/#runtime=amp4email).
+For example, in Gmail, the allowed list of CSS properties and values can be found at [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css).
 
-Other email clients may have their own CSS restrictions. We encourage clients that are considering implementing AMPHTML email to work with us to extend the spec.
+Once other email clients start implementing AMPHTML Email we'll provide more guidance on how email senders can easily write cross-client compatible emails.
 
 ##### Will the AMP `CLIENT_ID` be supported?
 
@@ -234,10 +233,6 @@ All CSS in any AMP document must be included in a `<style amp-custom>` tag withi
 {% call callout('Note', type='note') %}
 The entire `<style>` tag cannot exceed 50,000 bytes. The validator will check for this.
 {% endcall %}
-
-### Allowed CSS properties and selectors
-
-CSS allowed within email messages vary depending on the email provider. For  reference, the list of CSS properties and values allowed in Gmail can be found at [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css).
 
 ## Document dimensions
 
@@ -358,7 +353,7 @@ Embedding AMP within an email is simple, add a new MIME part with a content type
 
 <amp-img alt="AMPHTML Email MIME Parts Diagram"
     layout="responsive"
-    width="752" height="246" 
+    width="752" height="246"
     src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-email-mime-parts.png">
   <noscript>
     <img alt="AMPHTML Email MIME Parts Diagram" src="img/amp-email-mime-parts.png" />
