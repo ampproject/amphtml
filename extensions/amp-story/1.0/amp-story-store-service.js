@@ -38,6 +38,7 @@ const TAG = 'amp-story';
  *    hasaudiostate: boolean,
  *    landscapestate: boolean,
  *    mutedstate: boolean,
+ *    pausedstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
  *    currentpageid: string,
@@ -64,6 +65,7 @@ export const StateProperty = {
   INFO_DIALOG_STATE: 'infodialogstate',
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
+  PAUSED_STATE: 'pausedstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   CURRENT_PAGE_ID: 'currentpageid',
@@ -80,6 +82,7 @@ export const Action = {
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
+  TOGGLE_PAUSED: 'togglepaused',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
   CHANGE_PAGE: 'changepage',
@@ -125,6 +128,9 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.MUTED_STATE]: !!data}));
+    case Action.TOGGLE_PAUSED:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.PAUSED_STATE]: !!data}));
     case Action.TOGGLE_SUPPORTED_BROWSER:
       if (data) {
         dev().error(TAG, 'Cannot exit unsupported browser state.');
@@ -140,6 +146,7 @@ const actions = (state, action, data) => {
             [StateProperty.DESKTOP_STATE]: false,
             [StateProperty.HAS_AUDIO_STATE]: false,
             [StateProperty.MUTED_STATE]: true,
+            [StateProperty.PAUSED_STATE]: true,
             [StateProperty.SUPPORTED_BROWSER_STATE]: false,
           }));
     case Action.TOGGLE_SHARE_MENU:
@@ -248,6 +255,7 @@ export class AmpStoryStoreService {
       [StateProperty.HAS_AUDIO_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.PAUSED_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.CURRENT_PAGE_ID]: '',
