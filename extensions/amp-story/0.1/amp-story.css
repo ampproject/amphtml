@@ -86,6 +86,10 @@ amp-story[standalone] {
   box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5) !important;
   height: 100% !important;
   justify-self: center !important;
+  max-height: initial !important;
+  max-width: initial !important;
+  min-height: initial !important;
+  min-width: initial !important;
 }
 
 amp-story[standalone]:-webkit-full-screen {

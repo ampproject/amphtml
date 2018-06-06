@@ -210,7 +210,6 @@ describes.realWin('amp-video', {
       source.setAttribute('type', mediatype);
       sources.push(source);
     }
-    expectAsyncConsoleError(/start with/);
     return expect(getVideo({
       src: 'video.mp4',
       width: 160,

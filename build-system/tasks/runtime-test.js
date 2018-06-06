@@ -73,12 +73,12 @@ function getConfig() {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Chrome_latest',
-        'SL_Chrome_android',
+        'SL_Android_latest',
         'SL_Chrome_45',
+        'SL_Chrome_android',
+        'SL_Chrome_latest',
         'SL_Firefox_latest',
         'SL_Safari_latest',
-        'SL_Android_latest',
         // TODO(rsimha, #15510): Enable these.
         // 'SL_iOS_latest',
         // 'SL_Edge_latest',
