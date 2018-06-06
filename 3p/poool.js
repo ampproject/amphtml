@@ -95,7 +95,7 @@ export function poool(global, data, onIdentityAvailable) {
     // Update iframe dimensions when paywall is removed
     _poool('event', 'onRelease', function() {
       setTimeout(() => {
-        const size = container.getBoundingClientRect();
+        const size = container./*REVIEW*/getBoundingClientRect();
         global.context.requestResize(size.width, size.height);
       }, 1);
     });
@@ -129,7 +129,7 @@ export function poool(global, data, onIdentityAvailable) {
               'data': eventData,
             }));
 
-            global.parent.postMessage(message, '*');
+            global.parent./*REVIEW*/postMessage(message, '*');
           }
       );
     });

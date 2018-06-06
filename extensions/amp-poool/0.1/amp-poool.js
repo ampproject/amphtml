@@ -88,7 +88,7 @@ class AmpPoool extends AMP.BaseElement {
 
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
-      this.changeHeight(data['height']);
+      this./*REVIEW*/changeHeight(data['height']);
     }, /* opt_is3P */true);
 
     // Listen for everything else
