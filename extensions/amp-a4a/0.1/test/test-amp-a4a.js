@@ -1058,8 +1058,9 @@ describe('amp-a4a', () => {
         const maybeExecuteRealTimeConfigStub = sandbox.stub().returns(
             rtcResponse);
         AMP.RealTimeConfigManager = RealTimeConfigManager;
-        AMP.RealTimeConfigManager.prototype.maybeExecuteRealTimeConfig =
-            maybeExecuteRealTimeConfigStub;
+        sandbox.stub(AMP.RealTimeConfigManager.prototype,
+            'maybeExecuteRealTimeConfig').callsFake(
+            maybeExecuteRealTimeConfigStub);
         const tryExecuteRealTimeConfigSpy =
               sandbox.spy(a4a, 'tryExecuteRealTimeConfig_');
         const updateLayoutPriorityStub = sandbox.stub(
