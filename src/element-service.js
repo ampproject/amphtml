@@ -15,6 +15,7 @@
  */
 
 import * as dom from './dom';
+import {dev, user} from './log';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
@@ -26,7 +27,6 @@ import {
   getTopWindow,
 } from './service';
 import {toWin} from './types';
-import {user} from './log';
 
 /**
  * Custome elements cached list
@@ -197,6 +197,8 @@ function assertService(service, id, extension) {
  * @private
  */
 function getExtensions(doc) {
+  dev().assert(doc.body,
+      'getExtensions() must only be called after document body is available');
   if (customElements_ !== null) {
     return customElements_;
   }
