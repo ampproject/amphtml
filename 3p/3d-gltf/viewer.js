@@ -19,19 +19,6 @@
 import {setStyle} from '../../src/style';
 import AnimationLoop from './animation-loop';
 
-const resolveURL = (url, path) => {
-  // Invalid URL
-  if (typeof url !== 'string' || url === '') {return '';}
-  // Absolute URL http://,https://,//
-  if (/^(https?:)?\/\//i.test(url)) {return url;}
-  // Data URI
-  if (/^data:.*,.*$/i.test(url)) {return url;}
-  // Blob URL
-  if (/^blob:.*$/i.test(url)) {return url;}
-  // Relative URL
-  return path + url;
-};
-
 const CAMERA_DISTANCE_FACTOR = 1;
 const CAMERA_FAR_FACTOR = 50;
 const CAMERA_NEAR_FACTOR = .1;
@@ -198,20 +185,11 @@ export default class GltfViewer {
 
   /** @private */
   loadObject_() {
-    const baseUrl = THREE.LoaderUtils.extractUrlBase(
-        this.options_['hostUrl']);
-
-    const resolvedUrl = resolveURL(this.options_['src'], baseUrl);
-
-    if (resolvedUrl === '') {
-      return this.handlers_.onerror(new Error('invalid url'));
-    }
-
     const loader = new THREE.GLTFLoader();
     loader.crossOrigin = true;
 
     loader.load(
-        resolvedUrl,
+        this.options_['src'],
         /** @param {{scene: !THREE.Scene}} gltfData */
         gltfData => {
           this.setupCameraForObject_(gltfData.scene);
