@@ -27,11 +27,13 @@ import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {isProtocolValid} from '../../../src/url';
+import {parseArticlesToClassicApi, relatedArticlesFromJson} from './related-articles';
 import {parseUrlDeprecated} from '../../../src/url';
-import {relatedArticlesFromJson} from './related-articles';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
+const BOOKEND_VERSION_1 = 'v1.0';
+const BOOKEND_VERSION_KEY = 'bookend-version';
 
 /**
  * @typedef {{
@@ -387,11 +389,21 @@ export class Bookend {
             return null;
           }
 
-          this.config_ = {
-            shareProviders: response['share-providers'],
-            relatedArticles:
-                relatedArticlesFromJson(response['related-articles']),
-          };
+          if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_1) {
+            this.config_ = {
+              shareProviders:
+                this.shareWidget_.parseProvidersToClassicApi(
+                    response['share-providers']),
+              relatedArticles:
+                parseArticlesToClassicApi(response['components']),
+            };
+          } else {
+            this.config_ = {
+              shareProviders: response['share-providers'],
+              relatedArticles:
+                  relatedArticlesFromJson(response['related-articles']),
+            };
+          }
 
           // Allows the config to be fetched before the component is built, for
           // cases like getting the share providers on desktop.
@@ -478,7 +490,7 @@ export class Bookend {
   }
 
   /**
-   * @retun {boolean}
+   * @return {boolean}
    */
   isBuilt() {
     return this.isBuilt_;
