@@ -837,7 +837,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
       'awCommonParams':
           '${conversionId}/?' +
-           'cv=amp2&' +  // Increment when making changes.
+           'cv=amp3&' +  // Increment when making changes.
            'label=${conversionLabel}&' +
            'random=${random}&' +
            'url=${sourceUrl}&' +
