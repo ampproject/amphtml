@@ -17,19 +17,23 @@ import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {VideoUtils} from '../../../src/utils/video';
 import {addParamToUrl} from '../../../src/url';
+import {
+  createFrameFor,
+  isJsonOrObj,
+  mutedOrUnmutedEvent,
+  objOrParseJson,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
 import {once} from '../../../src/utils/function';
 import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
 
@@ -49,25 +53,6 @@ function getMethodName(prop, optType = null) {
   }
   return optType.toLowerCase() + prop.substr(0, 1).toUpperCase() +
     prop.substr(1);
-}
-
-
-/**
- * @param {string} url
- * @return {boolean}
- */
-export function isVimeoUrl(url) {
-  return (/^(https?:)?\/\/((player|www).)?vimeo.com(?=$|\/)/).test(url);
-}
-
-
-/**
- * @param {?} anything
- * @return {boolean}
- */
-function isJsonOrObj(anything) {
-  return anything && (
-    isObject(anything) || startsWith(/** @type {string} */ (anything), '{'));
 }
 
 
@@ -157,8 +142,6 @@ class AmpVimeo extends AMP.BaseElement {
 
     // See
     // https://developer.vimeo.com/player/embedding
-    const iframe =
-        htmlFor(element)`<iframe frameborder=0 allowfullscreen></iframe>`;
 
     let src = `https://player.vimeo.com/video/${encodeURIComponent(vidId)}`;
 
@@ -168,10 +151,7 @@ class AmpVimeo extends AMP.BaseElement {
       src = addParamToUrl(src, 'muted', '1');
     }
 
-    iframe.src = src;
-
-    this.applyFillContent(iframe);
-    element.appendChild(iframe);
+    const iframe = createFrameFor(this, src);
 
     this.iframe_ = iframe;
     this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
@@ -229,22 +209,17 @@ class AmpVimeo extends AMP.BaseElement {
    * @private
    */
   onMessage_(event) {
-    if (!isVimeoUrl(event.origin)) {
-      return;
-    }
-
-    if (event.source !== this.iframe_.contentWindow) {
+    if (!originMatches(event, this.iframe_,
+        /^(https?:)?\/\/((player|www).)?vimeo.com(?=$|\/)/)) {
       return;
     }
 
     const eventData = getData(event);
-
     if (!isJsonOrObj(eventData)) {
       return;
     }
 
-    const data = /** @type {?JsonObject} */ (
-      isObject(eventData) ? eventData : tryParseJson(eventData));
+    const data = objOrParseJson(eventData);
 
     if (data['event'] == 'ready' || data['method'] == 'ping') {
       this.onReadyOnce_();
@@ -253,9 +228,7 @@ class AmpVimeo extends AMP.BaseElement {
 
     const {element} = this;
 
-    const eventToDispatch = VIMEO_EVENTS[data['event']];
-    if (eventToDispatch) {
-      element.dispatchCustomEvent(eventToDispatch);
+    if (redispatch(element, data['event'], VIMEO_EVENTS)) {
       return;
     }
 
@@ -264,16 +237,13 @@ class AmpVimeo extends AMP.BaseElement {
       if (!volume) {
         return;
       }
-      if (volume <= 0) {
-        this.muted_ = true;
-        element.dispatchCustomEvent(VideoEvents.MUTED);
+      const muted = volume <= 0;
+      if (muted == this.muted_) {
         return;
       }
-      if (this.muted_) {
-        this.muted_ = false;
-        element.dispatchCustomEvent(VideoEvents.UNMUTED);
-        return;
-      }
+      this.muted_ = muted;
+      element.dispatchCustomEvent(mutedOrUnmutedEvent(muted));
+      return;
     }
   }
 

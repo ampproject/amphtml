@@ -40,7 +40,7 @@ import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryPage} from './amp-story-page';
+import {AmpStoryPage, PageState} from './amp-story-page';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
@@ -51,6 +51,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
+import {InfoDialog} from './amp-story-info-dialog';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {
@@ -438,17 +439,21 @@ export class AmpStory extends AMP.BaseElement {
       this.onBookendStateUpdate_(isActive);
     });
 
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
+      this.onCurrentPageIdUpdate_(pageId);
+    });
+
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
+    });
+
+    this.storeService_.subscribe(StateProperty.PAUSED_STATE, isPaused => {
+      this.onPausedStateUpdate_(isPaused);
     });
 
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
-
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
-      this.onCurrentPageIdUpdate_(pageId);
-    });
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
@@ -561,7 +566,16 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
       return Promise.resolve();
     }
+    return this.layoutStory_();
+  }
 
+  /**
+   * Renders the layout for the story
+   * @return {!Promise} A promise that is resolved when the story layout is
+   *       loaded
+   * @private
+   */
+  layoutStory_() {
     const firstPageEl = user().assertElement(
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
@@ -578,7 +592,7 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => this.buildSystemLayer_())
         .then(() => {
           this.pages_.forEach(page => {
-            page.setActive(false);
+            page.setState(PageState.NOT_ACTIVE);
           });
         })
         .then(() => this.switchTo_(initialPageId))
@@ -586,8 +600,15 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
           // button is visible.
+
           if (!this.storeService_.get(StateProperty.DESKTOP_STATE)) {
             this.shareMenu_.build();
+          }
+
+          const infoDialog = Services.viewerForDoc(this.element).isEmbedded() ?
+            new InfoDialog(this.win, this.element) : null;
+          if (infoDialog) {
+            infoDialog.build();
           }
         });
 
@@ -600,8 +621,6 @@ export class AmpStory extends AMP.BaseElement {
 
     return storyLayoutPromise;
   }
-
-
   /**
    * @param {number} timeoutMs The maximum amount of time to wait, in
    *     milliseconds.
@@ -837,10 +856,13 @@ export class AmpStory extends AMP.BaseElement {
    */
   // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
-    this.storeService_.dispatch(Action.CHANGE_PAGE, targetPageId);
-
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
+
+    this.storeService_.dispatch(Action.CHANGE_PAGE, {
+      id: targetPageId,
+      index: pageIndex,
+    });
 
     this.handlePreviewAttributes_(targetPage);
 
@@ -876,12 +898,13 @@ export class AmpStory extends AMP.BaseElement {
       this.triggerActiveEventForPage_();
 
       if (oldPage) {
-        oldPage.setActive(false);
-        // indication that this should be offscreen to left in desktop view
+        oldPage.setState(PageState.NOT_ACTIVE);
+
+        // Indication that this should be offscreen to left in desktop view.
         setAttributeInMutate(oldPage, Attributes.VISITED);
       }
 
-      targetPage.setActive(true);
+      targetPage.setState(PageState.ACTIVE);
 
       // If first navigation.
       if (!oldPage) {
@@ -1114,28 +1137,50 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Displays the unsupported browser UI: either the publisher provided UI, or
-   * fallbacks to a generic default.
+   * Reacts to paused state updates.
+   * @param {boolean} isPaused
+   * @private
+   */
+  onPausedStateUpdate_(isPaused) {
+    const pageState = isPaused ? PageState.PAUSED : PageState.ACTIVE;
+    this.activePage_.setState(pageState);
+  }
+
+  /**
+   * If browser is supported, displays the story. Otherwise, shows either the
+   * default unsupported browser layer or the publisher fallback (if provided).
    * @param {boolean} isBrowserSupported
    * @private
    */
   onSupportedBrowserStateUpdate_(isBrowserSupported) {
-    if (isBrowserSupported) {
-      dev().error(TAG, 'No handler to exit unsupported browser state.');
-    }
-
     const fallbackEl = this.getFallback();
+    if (isBrowserSupported) {
+      // Removes the default unsupported browser layer or throws an error
+      // if the publisher has provided their own fallback
+      if (fallbackEl) {
+        dev().error(TAG, 'No handler to exit unsupported browser state on ' +
+        'publisher provided fallback.');
+      } else {
+        this.layoutStory_().then(() => this.mutateElement(() => {
+          this.unsupportedBrowserLayer_.removeLayer();
+          this.element.classList.remove('i-amphtml-story-fallback');
+        }));
 
-    this.mutateElement(() => {
-      this.element.classList.add('i-amphtml-story-fallback');
-    });
-
-    // Displays the publisher provided fallback, or fallbacks to the default
-    // unsupported browser layer.
-    if (fallbackEl) {
-      this.toggleFallback(true);
+      }
     } else {
-      this.element.appendChild(this.unsupportedBrowserLayer_.build());
+      this.mutateElement(() => {
+        this.element.classList.add('i-amphtml-story-fallback');
+      });
+      // Displays the publisher provided fallback or fallbacks to the default
+      // unsupported browser layer.
+      if (fallbackEl) {
+        this.toggleFallback(true);
+      } else {
+        this.unsupportedBrowserLayer_.build();
+        this.mutateElement(() => {
+          this.element.appendChild(this.unsupportedBrowserLayer_.get());
+        });
+      }
     }
   }
 
@@ -1691,7 +1736,6 @@ export class AmpStory extends AMP.BaseElement {
     return true;
   }
 
-
   /**
    * Get next page object
    * @param {!./amp-story-page.AmpStoryPage} page
@@ -1705,7 +1749,6 @@ export class AmpStory extends AMP.BaseElement {
     return this.getPageById(nextPageId);
   }
 
-
   /**
    * @param {!Window} win
    * @return {boolean} true if the user's browser supports the features needed
@@ -1713,10 +1756,9 @@ export class AmpStory extends AMP.BaseElement {
    */
   static isBrowserSupported(win) {
     return Boolean(win.CSS && win.CSS.supports &&
-        win.CSS.supports('display', 'grid'));
+    win.CSS.supports('display', 'grid'));
   }
 }
-
 
 AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);

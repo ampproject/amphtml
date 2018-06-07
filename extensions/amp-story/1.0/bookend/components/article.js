@@ -109,7 +109,7 @@ export class ArticleComponent {
           </amp-img>`;
 
       addAttributesToElement(ampImg, dict({'src': articleData.image}));
-      el.appendChild(ampImg);
+      el.insertBefore(ampImg, el.firstChild);
     }
 
     const articleElements = htmlRefs(el);

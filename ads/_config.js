@@ -401,6 +401,8 @@ export const adConfig = {
 
   engageya: {},
 
+  epeex: {},
+
   eplanning: {
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
   },
@@ -411,6 +413,7 @@ export const adConfig = {
       'https://g.ezoic.net/ezoic/ampad.js',
     ],
     clientIdScope: 'AMP_ECID_EZOIC',
+    consentHandlingOverride: true,
   },
 
   f1e: {
@@ -920,6 +923,10 @@ export const adConfig = {
   },
 
   widespace: {},
+
+  wisteria: {
+    renderStartImplemented: true,
+  },
 
   wpmedia: {
     prefetch: 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js',

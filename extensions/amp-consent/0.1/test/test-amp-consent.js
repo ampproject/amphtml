@@ -328,10 +328,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('create predefined _if_responded policy', function* () {
+    it('create predefined _till_responded policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_['_if_responded']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_till_responded']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -345,10 +345,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('create predefined _if_accepted policy', function* () {
+    it('create predefined _till_accepted policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_till_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -404,7 +404,7 @@ describes.realWin('amp-consent', {
           'ABC': [],
         },
       });
-      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_till_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
