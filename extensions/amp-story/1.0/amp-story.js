@@ -1145,7 +1145,7 @@ export class AmpStory extends AMP.BaseElement {
     const pageState = isPaused ? PageState.PAUSED : PageState.ACTIVE;
     this.activePage_.setState(pageState);
   }
-  
+
   /**
    * If browser is supported, displays the story. Otherwise, shows either the
    * default unsupported browser layer or the publisher fallback (if provided).
