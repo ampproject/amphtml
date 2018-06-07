@@ -213,6 +213,10 @@ You can specify different values for top vs. bottom by providing two values (`<t
 - `viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom. Effectively only considering the middle 50% of the viewport.
 - `viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
 
+#### once (optional)
+
+Only triggers `enter` and `exit` events once. `scroll` event will also only do one iteration.
+
 ## Validation
 
 See [amp-position-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-position-observer/validator-amp-position-observer.protoascii) in the AMP validator specification.
