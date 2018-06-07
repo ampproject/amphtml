@@ -39,7 +39,7 @@ You __cannot__ use an `<amp-ad>` element to display a single page ad within a st
 
 ## Single Page Ad Creatives
 
-Single page ad creatives must contain two meta tags: one to specify the [call-to-action enum](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-ads.md#cta-enum), and one to specify the outlink URL. E.g.,
+Single page ad creatives must contain two meta tags: one to specify the [call-to-action enum](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-ads.md#cta-text-enum), and one to specify the outlink URL. E.g.,
 
 ```html
 <meta name="amp-cta-url" content="https://www.example-ads.com/landing?q=123">

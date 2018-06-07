@@ -45,7 +45,7 @@ The ad label and the call to action (CTA) buttons on the ads must be consistent 
 To provide a consistent user experience, the AMP story runtime is responsible for rendering
 the button of a CTA ad.
 
-### CTA Enum
+### CTA Text Enum
 The CTA button must be configured from a pre-defined set of choices.
   * EXPLORE: "Explore Now"
   * SHOP: "Shop Now"
@@ -54,6 +54,14 @@ The CTA button must be configured from a pre-defined set of choices.
 
 If you need support for a new CTA button, please open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 
+### CTA Landing Page Enum
+This enum can be used to indicate the type of landing page. In the future the AMP
+runtime may make special optimitizations (e.g. preloading) based on these values.
+ * `STORY` - Landing page is a sponsored story.
+ * `AMP` - Landing page is a valid AMP page.
+ * `NONAMP` - Any other type of web page.
+
+ Note: all pages will default to `NONAMP` if this enum is missing.
 
 ## Ad server support for AMP story ads
 
@@ -181,7 +189,7 @@ Each story can only have one `amp-story-auto-ads` element.
 See the general CTA documentation [here](#cta). The URL and button text is provided in the `var`
 object of the ad response.
 
-* `ctaType`: the CTA button type, of which the value is an [`enum`](#cta-enum)
+* `ctaType`: the CTA button type, of which the value is an [`enum`](#cta-text-enum)
 * `ctaUrl`: the landing page URL for the CTA button
 
 ### Tracking
