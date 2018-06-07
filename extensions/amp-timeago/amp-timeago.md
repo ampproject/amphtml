@@ -29,6 +29,10 @@ limitations under the License.
     <td width="40%"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fixed, fixed-height, responsive</td>
   </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-timeago/">amp-timeago example</a>.</td>
+  </tr>
 </table>
 
 [TOC]
