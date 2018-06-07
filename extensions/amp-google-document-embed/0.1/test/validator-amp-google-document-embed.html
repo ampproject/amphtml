@@ -31,9 +31,6 @@
   <!-- Valid: element with src and fixed layout -->
   <amp-google-document-embed src="https://www.example.com/document.pdf" width="800" height="600">
   </amp-google-document-embed>
-  <!-- Valid: element with http src -->
-  <amp-google-document-embed src="http://www.example.com/document.pdf" width="800" height="600">
-  </amp-google-document-embed>
   <!-- Valid: element with responsive layout -->
   <amp-google-document-embed src="https://www.example.com/document.pdf" width="800" height="600" layout="responsive">
   </amp-google-document-embed>
@@ -42,6 +39,9 @@
   </amp-google-document-embed>
   <!-- Invalid: element with empty src -->
   <amp-google-document-embed src="" width="800" height="600">
+  </amp-google-document-embed>
+  <!-- Inalid: element with http src -->
+  <amp-google-document-embed src="http://www.example.com/document.pdf" width="800" height="600">
   </amp-google-document-embed>
   <!-- Invalid: element with relative src -->
   <amp-google-document-embed src="document.pdf" width="800" height="600">

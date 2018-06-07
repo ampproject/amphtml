@@ -33,7 +33,6 @@ tags: {  # <amp-google-document-embed>
     mandatory: true
     value_url: {
       allowed_protocol: "https"
-      allowed_protocol: "http"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
