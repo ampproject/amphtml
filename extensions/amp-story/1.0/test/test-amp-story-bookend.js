@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryRequestService} from '../amp-story-request-service';
-import {AmpStoryStoreService} from '../amp-story-store-service';
 import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LandscapeComponent} from '../bookend/components/landscape';
@@ -846,5 +846,27 @@ describes.realWin('amp-story-bookend', {
           '`text` array and at least one element inside it, ' +
           'skipping invalid.');
     });
+  });
+
+  it('should have a button to re-prompt the consent if story has one', () => {
+    const consentId = 'CONSENT_ID';
+    bookend.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+
+    bookend.build();
+
+    const promptButtonEl =
+        bookend.getShadowRoot().querySelector(`[on="tap:${consentId}.prompt"]`);
+
+    expect(promptButtonEl).to.exist;
+  });
+
+  it('should not have a button to re-prompt the consent by default', () => {
+    bookend.build();
+
+    // No element with an "on" attribute ending with ".prompt".
+    const promptButtonEl =
+        bookend.getShadowRoot().querySelector('[on$=".prompt"]');
+
+    expect(promptButtonEl).to.be.null;
   });
 });

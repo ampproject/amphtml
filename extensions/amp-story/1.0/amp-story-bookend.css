@@ -86,6 +86,15 @@
   overflow: hidden !important;
 }
 
+.i-amphtml-story-bookend-consent {
+  margin: 0 32px !important;
+}
+
+.i-amphtml-story-bookend-consent .i-amphtml-story-bookend-heading {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 .i-amphtml-story-bookend-component-meta {
   font-weight: 400 !important;
   font-size: 14px !important;
@@ -137,7 +146,8 @@
 }
 
 .i-amphtml-story-bookend-article-heading,
-.i-amphtml-story-bookend-text {
+.i-amphtml-story-bookend-text,
+.i-amphtml-story-bookend-consent-button {
   font-weight: 400 !important;
   font-size: 16px !important;
   overflow: hidden !important;
@@ -257,10 +267,6 @@
   background-color: rgba(60, 60, 60, 0.5) !important;
   position: static !important; /* independent when no image is rendered */
   border-radius: 4px !important;
-}
-
-.i-amphtml-story-bookend-component-set > .i-amphtml-story-bookend-heading {
-  border-top: none !important;
 }
 
 .i-amphtml-story-bookend-component-set {
