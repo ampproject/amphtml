@@ -241,8 +241,7 @@ describes.realWin('amp-facebook', {
       setDefaultBootstrapBaseUrlForTesting(iframeSrc);
       return getAmpFacebook(fbPostHref).then(ampFB => {
         return new Promise((resolve, unusedReject) => {
-          const iframe = ampFB.firstChild;
-          const impl = ampFB.implementation_;
+          const {firstChild: iframe, implementation_: impl} = ampFB;
           impl.changeHeight = newHeight => {
             expect(newHeight).to.equal(666);
             resolve(ampFB);

@@ -50,11 +50,15 @@ export class TapRecognizer extends GestureRecognizer {
 
     /** @private {number} */
     this.lastY_ = 0;
+
+    /** @private {?EventTarget} */
+    this.target_ = null;
   }
 
   /** @override */
   onTouchStart(e) {
-    const touches = e.touches;
+    const {touches} = e;
+    this.target_ = e.target;
     if (touches && touches.length == 1) {
       this.startX_ = touches[0].clientX;
       this.startY_ = touches[0].clientY;
@@ -86,7 +90,11 @@ export class TapRecognizer extends GestureRecognizer {
 
   /** @override */
   acceptStart() {
-    this.signalEmit({clientX: this.lastX_, clientY: this.lastY_}, null);
+    this.signalEmit({
+      clientX: this.lastX_,
+      clientY: this.lastY_,
+      target: this.target_,
+    }, null);
     this.signalEnd();
   }
 }
@@ -139,7 +147,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
     if (this.tapCount_ > 1) {
       return false;
     }
-    const touches = e.touches;
+    const {touches} = e;
     if (touches && touches.length == 1) {
       this.startX_ = touches[0].clientX;
       this.startY_ = touches[0].clientY;
@@ -153,7 +161,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.touches;
+    const {touches} = e;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
@@ -217,7 +225,10 @@ export let SwipeDef;
  */
 class SwipeRecognizer extends GestureRecognizer {
   /**
+   * @param {string} type
    * @param {!./gesture.Gestures} manager
+   * @param {boolean} horiz
+   * @param {boolean} vert
    */
   constructor(type, manager, horiz, vert) {
     super(type, manager);
@@ -267,7 +278,7 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchStart(e) {
-    const touches = e.touches;
+    const {touches} = e;
     if (touches && touches.length == 1) {
       this.startTime_ = Date.now();
       this.startX_ = touches[0].clientX;
@@ -280,10 +291,9 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.touches;
+    const {touches} = e;
     if (touches && touches.length == 1) {
-      const x = touches[0].clientX;
-      const y = touches[0].clientY;
+      const {clientX: x, clientY: y} = touches[0] ;
       this.lastX_ = x;
       this.lastY_ = y;
       if (this.eventing_) {
@@ -502,7 +512,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
     if (this.eventing_) {
       return false;
     }
-    const touches = e.touches;
+    const {touches} = e;
     if (touches && touches.length == 1) {
       this.startX_ = touches[0].clientX;
       this.startY_ = touches[0].clientY;
@@ -514,7 +524,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.touches;
+    const {touches} = e;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
@@ -703,7 +713,7 @@ export class PinchRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchStart(e) {
-    const touches = e.touches;
+    const {touches} = e;
     // Pinch touches are not always simultaneous, continue to listen
     // for second touch.
     if (touches && touches.length == 1) {
@@ -722,7 +732,7 @@ export class PinchRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.touches;
+    const {touches} = e;
     // Pinch touches are not always simultaneous, continue to listen
     // for second touch.
     if (touches && touches.length == 1) {

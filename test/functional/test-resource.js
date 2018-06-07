@@ -42,6 +42,8 @@ describes.realWin('Resource', {amp: true}, env => {
 
     const viewer = Services.viewerForDoc(document);
     sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
+    sandbox.stub(Resources.prototype, 'rebuildDomWhenReady')
+        .callsFake(() => {});
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
@@ -112,6 +114,8 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 
   it('should blacklist on build failure', () => {
+    sandbox.stub(resource, 'maybeReportErrorOnBuildFailure')
+        .callsFake(() => {});
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build')
         .returns(Promise.reject(new Error('intentional'))).once();
@@ -148,6 +152,39 @@ describes.realWin('Resource', {amp: true}, env => {
     return resource.build().then(() => {
       expect(stub.calledOnce).to.be.true;
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    });
+  });
+
+  it('should track size changes on measure', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 11, top: 12, width: 111, height: 222})
+          .once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(sinon.match(data => {
+            return data.width == 111 && data.height == 222;
+          }), true)
+          .once();
+      resource.measure();
+    });
+  });
+
+  it('should track no size changes on measure', () => {
+    layoutRectLtwh(0, 0, 0, 0);
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 0, top: 0, width: 0, height: 0})
+          .once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(sinon.match(data => {
+            return data.width == 0 && data.height == 0;
+          }), false)
+          .once();
+      resource.measure();
     });
   });
 
@@ -193,7 +230,7 @@ describes.realWin('Resource', {amp: true}, env => {
       elementMock.expects('updateLayoutBox')
           .withExactArgs(sinon.match(data => {
             return data.width == 111 && data.height == 222;
-          }))
+          }), true)
           .once();
       resource.measure();
       expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
@@ -582,7 +619,7 @@ describes.realWin('Resource', {amp: true}, env => {
   it('should not record layout schedule time in startLayout', () => {
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    resource.startLayout();
+    allowConsoleError(() => resource.startLayout());
 
     expect(resource.element.layoutScheduleTime).to.be.undefined;
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
@@ -623,16 +660,22 @@ describes.realWin('Resource', {amp: true}, env => {
 
 
   describe('setInViewport', () => {
+    let resolveRenderOutsideViewportSpy;
+    beforeEach(() => resolveRenderOutsideViewportSpy =
+      sandbox.spy(resource, 'resolveRenderOutsideViewport_'));
+
     it('should call viewportCallback when not built', () => {
       resource.state_ = ResourceState.NOT_BUILT;
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
+      expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
     });
 
     it('should call viewportCallback when built', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
+      expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
     });
   });
 

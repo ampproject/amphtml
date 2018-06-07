@@ -15,7 +15,7 @@
  */
 
 import '../amp-brightcove';
-import {parseUrl} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url';
 
 
 describes.realWin('amp-brightcove', {
@@ -46,20 +46,21 @@ describes.realWin('amp-brightcove', {
 
   it('renders', () => {
     return getBrightcove({
-      'data-account': '906043040001',
+      'data-account': '1290862519001',
       'data-video-id': 'ref:ampdemo',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          'https://players.brightcove.net/906043040001/default_default/index.html?videoId=ref:ampdemo');
+          'https://players.brightcove.net/1290862519001' +
+          '/default_default/index.html?videoId=ref:ampdemo&playsinline=true');
     });
   });
 
   it('renders responsively', () => {
     return getBrightcove({
-      'data-account': '906043040001',
+      'data-account': '1290862519001',
       'data-video-id': 'ref:ampdemo',
     }, true).then(bc => {
       const iframe = bc.querySelector('iframe');
@@ -75,7 +76,7 @@ describes.realWin('amp-brightcove', {
 
   it('removes iframe after unlayoutCallback', () => {
     return getBrightcove({
-      'data-account': '906043040001',
+      'data-account': '1290862519001',
       'data-video-id': 'ref:ampdemo',
     }, true).then(bc => {
       const iframe = bc.querySelector('iframe');
@@ -89,25 +90,25 @@ describes.realWin('amp-brightcove', {
 
   it('should pass data-param-* attributes to the iframe src', () => {
     return getBrightcove({
-      'data-account': '906043040001',
+      'data-account': '1290862519001',
       'data-video-id': 'ref:ampdemo',
       'data-param-my-param': 'hello world',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
-      const params = parseUrl(iframe.src).search.split('&');
+      const params = parseUrlDeprecated(iframe.src).search.split('&');
       expect(params).to.contain('myParam=hello%20world');
     });
   });
 
   it('should propagate mutated attributes', () => {
     return getBrightcove({
-      'data-account': '906043040001',
+      'data-account': '1290862519001',
       'data-video-id': 'ref:ampdemo',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
 
-      expect(iframe.src).to.equal('https://players.brightcove.net/' +
-          '906043040001/default_default/index.html?videoId=ref:ampdemo');
+      expect(iframe.src).to.equal('https://players.brightcove.net/1290862519001' +
+          '/default_default/index.html?videoId=ref:ampdemo&playsinline=true');
 
       bc.setAttribute('data-account', '12345');
       bc.setAttribute('data-video-id', 'abcdef');
@@ -117,7 +118,7 @@ describes.realWin('amp-brightcove', {
       });
 
       expect(iframe.src).to.equal('https://players.brightcove.net/' +
-          '12345/default_default/index.html?videoId=abcdef');
+          '12345/default_default/index.html?videoId=abcdef&playsinline=true');
     });
   });
 });

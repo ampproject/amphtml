@@ -145,7 +145,7 @@ describe('validateKeyframesCss', () => {
           'tokenType': 'ERROR',
           'code':
               'CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME',
-          'params': ['style', 'amp-img']
+          'params': ['style', 'amp-img'],
         }],
         errors);
   });
@@ -168,7 +168,7 @@ describe('validateKeyframesCss', () => {
           'tokenType': 'ERROR',
           'code':
               'CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME',
-          'params': ['style', '100']
+          'params': ['style', '100'],
         }],
         errors);
   });
@@ -189,7 +189,7 @@ describe('validateKeyframesCss', () => {
           'tokenType': 'ERROR',
           'code':
               'CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME',
-          'params': ['style', 'a.underlined']
+          'params': ['style', 'a.underlined'],
         }],
         errors);
   });
@@ -210,7 +210,7 @@ describe('validateKeyframesCss', () => {
           'tokenType': 'ERROR',
           'code':
               'CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME',
-          'params': ['style', 'a']
+          'params': ['style', 'a'],
         }],
         errors);
   });
@@ -234,7 +234,7 @@ describe('validateKeyframesCss', () => {
           'col': 18,
           'tokenType': 'ERROR',
           'code': 'CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME',
-          'params': ['style']
+          'params': ['style'],
         }],
         errors);
   });

@@ -16,10 +16,6 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
-import {
-  CONSENT_POLICY_STATE,
-  getConsentPolicyState,
-} from './consent-state';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
@@ -36,15 +32,14 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {
-  getIntersectionChangeEntry,
-} from '../src/intersection-observer-polyfill';
+import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {toWin} from './types';
+import {tryResolve} from '../src/utils/promise';
 
 const TAG = 'CustomElement';
 
@@ -111,6 +106,7 @@ export function createCustomElementClass(win, name) {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
+     * @param {HTMLElement} self
      */
     constructor(self) {
       return super(self);
@@ -139,6 +135,7 @@ function createBaseCustomElementClass(win) {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
+     * @param {HTMLElement} self
      */
     constructor(self) {
       self = super(self);
@@ -479,19 +476,24 @@ function createBaseCustomElementClass(win) {
         return this.buildingPromise_;
       }
       return this.buildingPromise_ = new Promise((resolve, reject) => {
-        const policyId = this.implementation_.getConsentPolicy();
+        const policyId = this.getConsentPolicy_();
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
-          getConsentPolicyState(this.getAmpDoc(), policyId).then(state => {
-            if (state == CONSENT_POLICY_STATE.INSUFFICIENT ||
-                state == CONSENT_POLICY_STATE.UNKNOWN) {
-              // Need to change after support more policy state
-              reject(blockedByConsentError());
-            } else {
-              resolve(this.implementation_.buildCallback());
-            }
-          });
+          Services.consentPolicyServiceForDocOrNull(this.getAmpDoc())
+              .then(consentPolicy => {
+                if (!consentPolicy) {
+                  return true;
+                }
+                return consentPolicy.whenPolicyUnblock(
+                    /** @type {string} */ (policyId));
+              }).then(shouldUnblock => {
+                if (shouldUnblock == true) {
+                  resolve(this.implementation_.buildCallback());
+                } else {
+                  reject(blockedByConsentError());
+                }
+              });
         }
       }).then(() => {
         this.preconnect(/* onLayout */false);
@@ -556,9 +558,10 @@ function createBaseCustomElementClass(win) {
      * Updates the layout box of the element.
      * See {@link BaseElement.getLayoutWidth} for details.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
+     * @param {boolean=} opt_measurementsChanged
      * @this {!Element}
      */
-    updateLayoutBox(layoutBox) {
+    updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
@@ -566,6 +569,9 @@ function createBaseCustomElementClass(win) {
       if (this.isBuilt()) {
         try {
           this.implementation_.onLayoutMeasure();
+          if (opt_measurementsChanged) {
+            this.implementation_.onMeasureChanged();
+          }
         } catch (e) {
           reportError(e, this);
         }
@@ -618,7 +624,7 @@ function createBaseCustomElementClass(win) {
         this.mediaQuery_ = this.getAttribute('media') || null;
       }
       if (this.mediaQuery_) {
-        const defaultView = this.ownerDocument.defaultView;
+        const {defaultView} = this.ownerDocument;
         this.classList.toggle('i-amphtml-hidden-by-media-query',
             !defaultView.matchMedia(this.mediaQuery_).matches);
       }
@@ -1041,9 +1047,11 @@ function createBaseCustomElementClass(win) {
       if (this.perfOn_) {
         this.getLayoutDelayMeter_().startLayout();
       }
-      const promise = this.implementation_.layoutCallback();
+
+      const promise = tryResolve(() => this.implementation_.layoutCallback());
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
+
       return promise.then(() => {
         if (isLoadEvent) {
           this.signals_.signal(CommonSignals.LOAD_END);
@@ -1274,8 +1282,8 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when one or more attributes are mutated.
-     * @note Must be called inside a mutate context.
-     * @note Boolean attributes have a value of `true` and `false` when
+     * Note Must be called inside a mutate context.
+     * Note Boolean attributes have a value of `true` and `false` when
      *       present and missing, respectively.
      * @param {
      *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
@@ -1338,6 +1346,25 @@ function createBaseCustomElementClass(win) {
         rethrowAsync('Action execution failed:', e,
             invocation.node.tagName, invocation.method);
       }
+    }
+
+    /**
+     * Get the consent policy to follow.
+     * @return {?string}
+     */
+    getConsentPolicy_() {
+      const policyId = this.getAttribute('data-block-on-consent');
+      if (policyId === null) {
+        // data-block-on-consent attribute not set
+        return null;
+      }
+      if (policyId == '' || policyId == 'default') {
+        // data-block-on-consent value not set, up to individual element
+        // Note: data-block-on-consent and data-block-on-consent='default' is
+        // treated exactly the same
+        return this.implementation_.getConsentPolicy();
+      }
+      return policyId;
     }
 
     /**

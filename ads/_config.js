@@ -206,6 +206,13 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adunity: {
+    preconnect: [
+      'https://content.adunity.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
     preconnect: [
@@ -378,21 +385,6 @@ export const adConfig = {
     preconnect: 'https://bal.ad.dotandad.com',
   },
 
-  doubleclick: {
-    prefetch: [
-      'https://www.googletagservices.com/tag/js/gpt.js',
-      'https://securepubads.g.doubleclick.net/static/glade.js',
-    ],
-    preconnect: [
-      'https://partner.googleadservices.com',
-      'https://tpc.googlesyndication.com',
-    ],
-    clientIdScope: 'AMP_ECID_GOOGLE',
-    clientIdCookieName: '_ga',
-    renderStartImplemented: true,
-    masterFrameAccessibleType: 'google_network',
-  },
-
   eadv: {
     renderStartImplemented: true,
     clientIdScope: 'AMP_ECID_EADV',
@@ -409,6 +401,8 @@ export const adConfig = {
 
   engageya: {},
 
+  epeex: {},
+
   eplanning: {
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
   },
@@ -419,6 +413,7 @@ export const adConfig = {
       'https://g.ezoic.net/ezoic/ampad.js',
     ],
     clientIdScope: 'AMP_ECID_EZOIC',
+    consentHandlingOverride: true,
   },
 
   f1e: {
@@ -593,6 +588,7 @@ export const adConfig = {
       'https://tpc.googlesyndication.com',
     ],
     renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   medyanet: {
@@ -657,6 +653,11 @@ export const adConfig = {
     preconnect: [
       'https://call.netzathleten-media.de',
     ],
+    renderStartImplemented: true,
+  },
+
+  noddus: {
+    prefetch: 'https://noddus.com/amp_loader.js',
     renderStartImplemented: true,
   },
 
@@ -740,6 +741,10 @@ export const adConfig = {
   quoraad: {
     prefetch: 'https://a.quora.com/amp_ad.js',
     preconnect: 'https://ampad.quora.com',
+    renderStartImplemented: true,
+  },
+
+  realclick: {
     renderStartImplemented: true,
   },
 
@@ -863,6 +868,18 @@ export const adConfig = {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
   },
 
+  uzou: {
+    preconnect: [
+      'https://speee-ad.akamaized.net',
+    ],
+    renderStartImplemented: true,
+  },
+
+  unruly: {
+    prefetch: 'https://video.unrulymedia.com/amp-demo/native-loader.js',
+    renderStartImplemented: true,
+  },
+
   valuecommerce: {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [
@@ -906,6 +923,10 @@ export const adConfig = {
   },
 
   widespace: {},
+
+  wisteria: {
+    renderStartImplemented: true,
+  },
 
   wpmedia: {
     prefetch: 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js',
@@ -952,7 +973,7 @@ export const adConfig = {
   },
 
   yieldmo: {
-    prefetch: 'https://static.yieldmo.com/ym.amp1.js',
+    prefetch: 'https://static.yieldmo.com/ym.1.js',
     preconnect: [
       'https://s.yieldmo.com',
       'https://ads.yieldmo.com',

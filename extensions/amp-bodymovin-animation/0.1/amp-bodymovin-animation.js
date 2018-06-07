@@ -90,7 +90,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.registerAction('pause', () => { this.pause_(); }, ActionTrust.LOW);
     this.registerAction('stop', () => { this.stop_(); }, ActionTrust.LOW);
     this.registerAction('seekTo', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       if (args) {
         this.seekTo_(args);
       }

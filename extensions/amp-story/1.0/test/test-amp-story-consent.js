@@ -15,119 +15,166 @@
  */
 
 import {AmpStoryConsent} from '../amp-story-consent';
-import {Services} from '../../../../src/services';
+import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
+import {LocalizationService} from '../localization';
+import {computedStyle} from '../../../../src/style';
+import {registerServiceBuilder} from '../../../../src/service';
 
-describes.fakeWin('amp-story-consent', {amp: true}, env => {
+describes.realWin('amp-story-consent', {amp: true}, env => {
+  const CONSENT_ID = 'CONSENT_ID';
   let win;
-  let consentConfigEl;
   let defaultConfig;
-  let sandbox;
+  let getComputedStyleStub;
   let storyConsent;
+  let storyConsentConfigEl;
   let storyConsentEl;
 
   const setConfig = config => {
-    consentConfigEl.textContent = JSON.stringify(config);
+    storyConsentConfigEl.textContent = JSON.stringify(config);
   };
 
   beforeEach(() => {
     win = env.win;
-    sandbox = sinon.sandbox.create();
+    const storeService = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => storeService);
 
     defaultConfig = {
-      consents: {ABC: {}},
-      'story-consent': {
-        title: 'Foo title.',
-        message: 'Foo message about the consent.',
-        'vendors': ['Item 1', 'Item 2'],
-      },
+      title: 'Foo title.',
+      message: 'Foo message about the consent.',
+      vendors: ['Item 1', 'Item 2'],
+      onlyAccept: false,
     };
 
-    sandbox.stub(Services, 'localizationService').returns({
-      getLocalizedString: localizedStringId => `string(${localizedStringId})`,
-    });
+    const styles = {'background-color': 'rgb(0, 0, 0)'};
+    getComputedStyleStub =
+        sandbox.stub(win, 'getComputedStyle').returns(styles);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
 
     // Test DOM structure:
-    // <fake-amp-consent>
-    //   <script type="application/json">{JSON Config}</script>
-    //   <amp-story-consent></amp-story-consent>
-    // </fake-amp-consent>
-    const consentEl = win.document.createElement('fake-amp-consent');
+    // <amp-consent>
+    //   <amp-story-consent>
+    //     <script type="application/json">{JSON Config}</script>
+    //   </amp-story-consent>
+    // </amp-consent>
+    const consentEl = win.document.createElement('amp-consent');
+    consentEl.setAttribute('id', CONSENT_ID);
 
-    consentConfigEl = win.document.createElement('script');
-    consentConfigEl.setAttribute('type', 'application/json');
+    storyConsentConfigEl = win.document.createElement('script');
+    storyConsentConfigEl.setAttribute('type', 'application/json');
     setConfig(defaultConfig);
 
     storyConsentEl = win.document.createElement('amp-story-consent');
+    storyConsentEl.appendChild(storyConsentConfigEl);
 
-    consentEl.appendChild(consentConfigEl);
     consentEl.appendChild(storyConsentEl);
     win.document.body.appendChild(consentEl);
 
     storyConsent = new AmpStoryConsent(storyConsentEl);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should parse the config', () => {
     storyConsent.buildCallback();
-    expect(storyConsent.consentConfig_).to.deep.equal(defaultConfig);
+    expect(storyConsent.storyConsentConfig_)
+        .to.deep.equal(defaultConfig);
   });
 
   it('should require a story-consent title', () => {
-    delete defaultConfig['story-consent'].title;
+    delete defaultConfig.title;
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('story-consent requires a title');
+      }).to.throw('config requires a title');
     });
   });
 
   it('should require a story-consent message', () => {
-    delete defaultConfig['story-consent'].message;
+    delete defaultConfig.message;
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('story-consent requires a message');
+      }).to.throw('config requires a message');
     });
   });
 
   it('should require a story-consent vendors', () => {
-    delete defaultConfig['story-consent'].vendors;
+    delete defaultConfig.vendors;
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('story-consent requires an array of vendors');
+      }).to.throw('config requires an array of vendors');
     });
   });
 
   it('should require a story-consent vendors of type array', () => {
-    defaultConfig['story-consent'].vendors = 'foo';
+    defaultConfig.vendors = 'foo';
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('story-consent requires an array of vendors');
+      }).to.throw('config requires an array of vendors');
     });
   });
 
-  it('should whitelist the amp actions using the expected consent ID', () => {
+  it('should require onlyAccept to be a boolean', () => {
+    defaultConfig.onlyAccept = 'foo';
+    setConfig(defaultConfig);
+
+    allowConsoleError(() => {
+      expect(() => {
+        storyConsent.buildCallback();
+      }).to.throw('config requires "onlyAccept" to be a boolean');
+    });
+  });
+
+  it('should show the decline button by default', () => {
+    delete defaultConfig.onlyAccept;
+    setConfig(defaultConfig);
+
+    storyConsent.buildCallback();
+
+    const buttonEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-action-reject');
+
+    // For some reason the win object provided by the test environment does not
+    // return all the styles.
+    const styles = computedStyle(window, buttonEl);
+    expect(styles.display).to.equal('block');
+  });
+
+  it('should hide the decline button if onlyAccept is true', () => {
+    defaultConfig.onlyAccept = true;
+    setConfig(defaultConfig);
+
+    storyConsent.buildCallback();
+
+    const buttonEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-action-reject');
+
+    // For some reason the win object provided by the test environment does not
+    // return all the styles.
+    const styles = computedStyle(window, buttonEl);
+    expect(styles.display).to.equal('none');
+  });
+
+  it('should whitelist the <amp-consent> actions', () => {
     const addToWhitelistStub =
         sandbox.stub(storyConsent.actions_, 'addToWhitelist');
 
     storyConsent.buildCallback();
 
-    expect(addToWhitelistStub).to.have.been.calledTwice;
-    expect(addToWhitelistStub).to.have.been.calledWith('ABC.accept');
-    expect(addToWhitelistStub).to.have.been.calledWith('ABC.reject');
+    expect(addToWhitelistStub).to.have.callCount(3);
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.accept');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.prompt');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.reject');
   });
 
   it('should broadcast the amp actions', () => {
@@ -145,5 +192,43 @@ describes.fakeWin('amp-story-consent', {amp: true}, env => {
 
     expect(storyConsent.actions_.trigger).to.have.been.calledOnce;
     expect(storyConsent.actions_.trigger).to.have.been.calledWith(buttonEl);
+  });
+
+  it('should render an accept button with the proper amp action', () => {
+    storyConsent.buildCallback();
+
+    const buttonEl =
+        storyConsent.storyConsentEl_
+            .querySelector(`button[on="tap:${CONSENT_ID}.accept"]`);
+    expect(buttonEl).to.exist;
+  });
+
+  it('should set the consent ID in the store', () => {
+    storyConsent.buildCallback();
+
+    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
+        .to.equal(CONSENT_ID);
+  });
+
+  it('should set the font color to black if background is white', () => {
+    const styles = {'background-color': 'rgb(255, 255, 255)'};
+    getComputedStyleStub.returns(styles);
+    storyConsent.buildCallback();
+
+    const buttonEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-action-accept');
+    expect(buttonEl.getAttribute('style'))
+        .to.equal('color: rgb(0, 0, 0) !important;');
+  });
+
+  it('should set the font color to white if background is black', () => {
+    const styles = {'background-color': 'rgba(0, 0, 0, 1)'};
+    getComputedStyleStub.returns(styles);
+    storyConsent.buildCallback();
+
+    const buttonEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-action-accept');
+    expect(buttonEl.getAttribute('style'))
+        .to.equal('color: rgb(255, 255, 255) !important;');
   });
 });

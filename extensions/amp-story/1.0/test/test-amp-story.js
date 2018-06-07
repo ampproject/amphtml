@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as utils from '../utils';
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
 import {PaginationButtons} from '../pagination-buttons';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
@@ -66,8 +69,12 @@ describes.realWin('amp-story', {
 
   beforeEach(() => {
     win = env.win;
+
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
 
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
@@ -78,7 +85,6 @@ describes.realWin('amp-story', {
   });
 
   afterEach(() => {
-    sandbox.restore();
     element.remove();
   });
 
@@ -319,14 +325,16 @@ describes.realWin('amp-story', {
 
     return story.layoutCallback()
         .then(() => {
-          expect(dispatchStub)
-              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
+          expect(dispatchStub).to.have.been.calledWith(Action.CHANGE_PAGE, {
+            id: firstPageId,
+            index: 0,
+          });
         });
   });
 
   it('should update page id in browser history', () => {
     // Have to stub this because tests run in iframe and you can't write
-    // history from another domain (about:srcdoc)
+    // history from another domain (about:srcdoc).
     const replaceStub = sandbox.stub(win.history, 'replaceState');
     const firstPageId = 'page-zero';
     const pageCount = 2;
@@ -358,6 +366,212 @@ describes.realWin('amp-story', {
         .then(() => {
           return expect(replaceStub).to.not.have.been.called;
         });
+  });
+  describe('amp-story continue anyway', () => {
+
+    it('should not display layout', () => {
+      AmpStory.isBrowserSupported = () => false;
+      story = new AmpStory(element);
+      const dispatchStub = sandbox.stub(story.storeService_, 'dispatch');
+      createPages(story.element, 2, ['cover', 'page-4']);
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(dispatchStub).to.have.been.calledWith(
+                Action.TOGGLE_SUPPORTED_BROWSER, false
+            );
+          });
+    });
+
+    it('should display the story after clicking "continue" button', () => {
+
+      AmpStory.isBrowserSupported = () => false;
+      story = new AmpStory(element);
+      const dispatchStub = sandbox.stub(
+          story.unsupportedBrowserLayer_.storeService_, 'dispatch');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.buildCallback();
+      //story.layoutCallback();
+
+      //story.unsupportedBrowserLayer_.continueButton_.click();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.unsupportedBrowserLayer_.continueButton_.click();
+          })
+          .then(() => {
+            expect(dispatchStub).to.have.been.calledWith(
+                Action.TOGGLE_SUPPORTED_BROWSER, true
+            );
+          });
+    });
+  });
+
+
+  describe('desktop attributes', () => {
+    it('should add next page attribute', () => {
+      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
+          (el, attr) => el.element.setAttribute(attr, ''));
+
+      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
+      const page1 = pages[1];
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(page1.hasAttribute('i-amphtml-next-page')).to.be.true;
+          });
+    });
+
+    it('should add previous page attribute', () => {
+      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(story, 'maybePreloadBookend_').returns();
+      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
+          (el, attr) => el.element.setAttribute(attr, ''));
+
+      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
+      const page0 = pages[0];
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => story.switchTo_('page-1'))
+          .then(() => {
+            expect(page0.hasAttribute('i-amphtml-previous-page')).to.be.true;
+          });
+    });
+
+    it('should add previous visited attribute', () => {
+      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(story, 'maybePreloadBookend_').returns();
+      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
+          (el, attr) => el.element.setAttribute(attr, ''));
+
+      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
+      const page0 = pages[0];
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => story.switchTo_('page-1'))
+          .then(() => {
+            expect(page0.hasAttribute('i-amphtml-visited')).to.be.true;
+          });
+    });
+  });
+
+  describe('amp-story audio', () => {
+    it('should register and preload the background audio', () => {
+      sandbox.stub(win.history, 'replaceState');
+      const src = 'https://example.com/foo.mp3';
+      story.element.setAttribute('background-audio', src);
+      const registerStub = sandbox.stub(story.mediaPool_, 'register');
+      const preloadStub = sandbox.stub(story.mediaPool_, 'preload').resolves();
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.backgroundAudioEl_).to.exist;
+            expect(story.backgroundAudioEl_.src).to.equal(src);
+            expect(registerStub).to.have.been.calledOnce;
+            expect(preloadStub).to.have.been.calledOnce;
+          });
+    });
+
+    it('should bless the media on unmute', () => {
+      const blessAllStub =
+          sandbox.stub(story.mediaPool_, 'blessAll').resolves();
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+      story.buildCallback();
+
+      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+
+      expect(blessAllStub).to.have.been.calledOnce;
+    });
+
+    it('should pause the background audio on ad state if not muted', () => {
+      const backgroundAudioEl = win.document.createElement('audio');
+      backgroundAudioEl.setAttribute('id', 'foo');
+      story.backgroundAudioEl_ = backgroundAudioEl;
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+      story.buildCallback();
+
+      const pauseStub = sandbox.stub(story.mediaPool_, 'pause');
+
+      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+      story.storeService_.dispatch(Action.TOGGLE_AD, true);
+
+      expect(pauseStub).to.have.been.calledOnce;
+      expect(pauseStub).to.have.been.calledWith(backgroundAudioEl);
+    });
+
+    it('should play the background audio when hiding ad if not muted', () => {
+      const backgroundAudioEl = win.document.createElement('audio');
+      backgroundAudioEl.setAttribute('id', 'foo');
+      story.backgroundAudioEl_ = backgroundAudioEl;
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+      story.buildCallback();
+
+      // Displaying an ad and not muted.
+      story.storeService_.dispatch(Action.TOGGLE_AD, true);
+      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+
+      const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
+      const playStub = sandbox.stub(story.mediaPool_, 'play');
+
+      story.storeService_.dispatch(Action.TOGGLE_AD, false);
+
+      expect(unmuteStub).to.have.been.calledOnce;
+      expect(unmuteStub).to.have.been.calledWith(backgroundAudioEl);
+      expect(playStub).to.have.been.calledOnce;
+      expect(playStub).to.have.been.calledWith(backgroundAudioEl);
+    });
+
+    it('should not play the background audio when hiding ad if muted', () => {
+      const backgroundAudioEl = win.document.createElement('audio');
+      backgroundAudioEl.setAttribute('id', 'foo');
+      story.backgroundAudioEl_ = backgroundAudioEl;
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+      story.buildCallback();
+
+      story.storeService_.dispatch(Action.TOGGLE_AD, true);
+
+      const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
+      const playStub = sandbox.stub(story.mediaPool_, 'play');
+
+      story.storeService_.dispatch(Action.TOGGLE_AD, false);
+
+      expect(unmuteStub).not.to.have.been.called;
+      expect(playStub).not.to.have.been.called;
+    });
+
+    it('should mute the page and unmute the next page upon navigation', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+      story.buildCallback();
+
+      let coverMuteStub;
+      let firstPageUnmuteStub;
+
+      return story.layoutCallback()
+          .then(() => {
+            coverMuteStub =
+                sandbox.stub(story.getPageById('cover'), 'muteAllMedia');
+            firstPageUnmuteStub =
+                sandbox.stub(story.getPageById('page-1'), 'unmuteAllMedia');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(coverMuteStub).to.have.been.calledOnce;
+            expect(firstPageUnmuteStub).to.have.been.calledOnce;
+          });
+    });
   });
 
   describe('#getMaxMediaElementCounts', () => {
@@ -396,7 +610,6 @@ describes.realWin('amp-story', {
       };
       expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
     });
-
   });
 });
 

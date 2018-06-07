@@ -176,6 +176,8 @@ const INFO_TEMPLATE_AREA_CSS = 'i-amphtml-date-picker-info';
 
 const FULLSCREEN_CSS = 'i-amphtml-date-picker-fullscreen';
 
+const MIN_PICKER_YEAR = 1900;
+
 export class AmpDatePicker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -640,7 +642,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   getHiddenInputId_(form, type) {
-    const id = this.element.id;
+    const {id} = this.element;
     const name = DateFieldNameByType[type];
     if (!form) {
       return '';
@@ -759,8 +761,10 @@ export class AmpDatePicker extends AMP.BaseElement {
           (target === this.startDateField_ ? 'startDate' :
             (target === this.endDateField_ ? 'endDate' : '')));
     const moment = this.createMoment_(target.value);
-    const value = moment.isValid() ? moment : null;
-    this.setState_({[property]: value});
+    const isValid = (moment &&
+        moment.isValid() &&
+        moment.year() > MIN_PICKER_YEAR);
+    this.setState_({[property]: isValid ? moment : null});
   }
 
   /**
@@ -1308,6 +1312,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   /**
    * Render the template that corresponds to the date with its data.
    * @param {!moment} date
+   * @return {!Promise<string>}
    * @private
    */
   renderDayTemplate_(date) {

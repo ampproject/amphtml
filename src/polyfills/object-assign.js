@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const hasOwnProperty = Object.prototype.hasOwnProperty;
+const {hasOwnProperty} = Object.prototype;
 
 /**
  * Copies values of all enumerable own properties from one or more source

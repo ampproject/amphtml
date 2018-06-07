@@ -16,7 +16,8 @@
 
 import {poll} from '../../../../../testing/iframe';
 
-describe.configure().run('amp-lightbox-gallery', function() {
+describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
+  this.timeout(5000);
   const extensions = ['amp-lightbox-gallery'];
   const body = `
   <figure>
@@ -30,11 +31,9 @@ describe.configure().run('amp-lightbox-gallery', function() {
   </figcaption>
 </figure>
   `;
-  const experiments = ['amp-lightbox-gallery'];
   describes.integration('amp-lightbox-gallery opens', {
     body,
     extensions,
-    experiments,
   }, env => {
 
     let win;

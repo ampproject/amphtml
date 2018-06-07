@@ -33,12 +33,12 @@ tags: {  # <amp-pinterest>
   html_format: AMP
   tag_name: "AMP-PINTEREST"
   requires_extension: "amp-pinterest"
+  attrs: { name: "alt" }
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-do"
     mandatory: true
   }
-  attrs: { name: "alt" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-pinterest"
   amp_layout: {

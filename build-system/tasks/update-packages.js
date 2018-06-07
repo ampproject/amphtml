@@ -16,11 +16,10 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const exec = require('../exec').exec;
 const fs = require('fs-extra');
-const getStderr = require('../exec').getStderr;
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
+const {exec, getStderr} = require('../exec');
 
 const yarnExecutable = 'npx yarn';
 

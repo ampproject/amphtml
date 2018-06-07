@@ -245,6 +245,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 |  Variable Name | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
 | [AMP Version](#amp-version) | `AMP_VERSION` | `${ampVersion}` |
+| [AMP State](#amp-state) | `AMP_STATE` | `${ampState}` |
 | [Background State](#background-state) | `BACKGROUND_STATE` | `${backgroundState}` |
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
@@ -297,6 +298,19 @@ Provides the AMP document's URL. The URL contains the scheme, domain, port and f
   Makes a request to something like  `https://foo.com/pixel?ref=https%3A%2F%2Fexample.com%2F`.
 * **amp-analytics variable**: `${ampdocUrl}`
   * Example value: `http://example.com:8000/examples/analytics.amp.html`
+
+#### AMP State
+
+Pulls a value from the provided AMP state key.
+
+* **platform variable**: `AMP_STATE`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?bar=AMP_STATE(foo.bar)"</amp-pixel>
+  ```
+  If `foo.bar` exists in the AMP state, the corresponding value is inserted into the pixel src.
+* **amp-analytics variable**: `${ampState}`
+  * Example value: `${ampState(foo.bar)}`: If `foo.bar` is available, its associated value is returned; otherwise, null is returned.
 
 #### AMP Version
 

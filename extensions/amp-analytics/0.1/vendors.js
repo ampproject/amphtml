@@ -33,6 +33,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
       'ampGeo': 'AMP_GEO',
+      'ampState': 'AMP_STATE',
       'ampVersion': 'AMP_VERSION',
       'ancestorOrigin': 'ANCESTOR_ORIGIN',
       'authdata': 'AUTHDATA',
@@ -305,15 +306,15 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   'byside': {
     'vars': {
-	  'agentDomain': 'webcare',
+	  'webcareZone': 'webcare',
       'webcareId': '',
       'channel': '',
       'fid': '',
 	  'lang': 'pt',
     },
     'requests': {
-      'host': '//${agentDomain}.byside.com/',
-      'base': '${host}BWA${webcare_id}/amp/',
+      'host': '//${webcareZone}.byside.com/',
+      'base': '${host}BWA${webcareId}/amp/',
       'pageview': '${base}pixel.php',
 	  'event': '${base}signal.php?event_id=${eventId}' +
 	    '&event_label=${eventLabel}&fields=${fields}',
@@ -1556,6 +1557,37 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'content_author=${contentAuthor}&content_section=${contentSection}&' +
         'timezone_offset=${timezone}&tags=${tags}&amp_url=${ampdocUrl}&' +
         'screen=${screenWidth}x${screenHeight}${baseSuffix}',
+    },
+  },
+
+  'piStats': {
+    'requests': {
+      'host': 'https://events.pi-stats.com',
+      'basePrefix': '${host}/eventsamp/?' +
+          'e=PageLoad&' +
+          'pid=${property}&' +
+          'url=${ampdocUrl}&' +
+          'cnt=${cntId}&' +
+          'lang=${language}&' +
+          'ref=${documentReferrer}&' +
+          'id=${clientId(piStatsDEVICEID)}&' +
+          'ua=${userAgent}&' +
+          'ctype=web&' +
+          'blang=${browserLanguage}&' +
+          'v=2.0&' +
+          'dist=Javascript',
+      'pageview': '${basePrefix}&eventtype=pageview',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
 

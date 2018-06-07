@@ -24,6 +24,7 @@ import {
 import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
 import {getCookie} from '../../src/cookies';
+import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
@@ -381,6 +382,7 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should do simple JSON fetch', () => {
+        sandbox.stub(user(), 'assert');
         return xhr.fetchJson('http://localhost:31862/get?k=v1')
             .then(res => res.json())
             .then(res => {
@@ -465,7 +467,7 @@ describe.configure().skipSafari().run('XHR', function() {
         return xhr.fetchJson('http://localhost:31863/status/500').then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
-          const message = error.message;
+          const {message} = error;
           expect(message).to.contain('http://localhost:31863');
           expect(message).not.to.contain('status/500');
           expect(message).not.to.contain('CID');

@@ -91,7 +91,7 @@ tags: {  # <${name}>
   satisfies: "${name}"
   requires: "${name} extension .js script"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
+  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }
@@ -276,7 +276,7 @@ function makeExtension() {
     log(colors.red(
         'Error! Please pass in the "--name" flag with a value'));
   }
-  const name = argv.name;
+  const {name} = argv;
 
   fs.mkdirpSync(`extensions/${name}/0.1/test`);
   fs.writeFileSync(`extensions/${name}/${name}.md`,

@@ -30,7 +30,7 @@ import {
   addParamsToUrl,
   getSourceUrl,
   parseQueryString,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
@@ -115,13 +115,6 @@ export class GlobalVariableSource extends VariableSource {
   constructor(ampdoc) {
     super(ampdoc);
 
-    /**
-     * @private
-     * @const {function(!./ampdoc-impl.AmpDoc):
-     *     !Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
-     */
-    this.getAccessService_ = Services.accessServiceForDocOrNull;
-
     /** @private {?Promise<?Object<string, string>>} */
     this.variants_ = null;
 
@@ -186,7 +179,8 @@ export class GlobalVariableSource extends VariableSource {
             if (!referrer) {
               return null;
             }
-            const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
+            const referrerHostname = parseUrlDeprecated(getSourceUrl(referrer))
+                .hostname;
             const currentHostname =
                 WindowInterface.getHostname(this.ampdoc.win);
             return referrerHostname === currentHostname ? null : referrer;
@@ -208,13 +202,13 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the host of the URL for this AMP document.
     this.set('AMPDOC_HOST', () => {
-      const url = parseUrl(this.ampdoc.win.location.href);
+      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
       return url && url.host;
     });
 
     // Returns the hostname of the URL for this AMP document.
     this.set('AMPDOC_HOSTNAME', () => {
-      const url = parseUrl(this.ampdoc.win.location.href);
+      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
       return url && url.hostname;
     });
 
@@ -412,7 +406,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('VIEWPORT_WIDTH', viewportMethod(viewport, 'getWidth'));
 
 
-    const screen = this.ampdoc.win.screen;
+    const {screen} = this.ampdoc.win;
     // Returns screen.width.
     this.set('SCREEN_WIDTH', screenProperty(screen, 'width'));
 
@@ -579,6 +573,15 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('MAKE_BODY_VISIBLE', () => {
       return Services.performanceFor(this.ampdoc.win).getMakeBodyVisible();
     });
+
+    this.setAsync('AMP_STATE', key => {
+      return Services.bindForDocOrNull(this.ampdoc).then(bind => {
+        if (!bind) {
+          return '';
+        }
+        return bind.getStateValue(/** @type {string} */ (key));
+      });
+    });
   }
 
   /**
@@ -592,28 +595,35 @@ export class GlobalVariableSource extends VariableSource {
     return () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
       const value = docInfo[field];
-      return opt_urlProp ? parseUrl(value)[opt_urlProp] : value;
+      return opt_urlProp ? parseUrlDeprecated(value)[opt_urlProp] : value;
     };
   }
 
   /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!../../extensions/amp-access/0.1/amp-access.AccessService
-   *     ):(T|!Promise<T>)} getter
+   * @param {function(!../../extensions/amp-access/0.1/access-vars.AccessVars):(T|!Promise<T>)} getter
    * @param {string} expr
    * @return {T|null}
    * @template T
    * @private
    */
   getAccessValue_(getter, expr) {
-    return this.getAccessService_(this.ampdoc).then(accessService => {
-      if (!accessService) {
-        // Access service is not installed.
-        user().error(TAG, 'Access service is not installed to access: ', expr);
+    return Promise.all([
+      Services.accessServiceForDocOrNull(this.ampdoc),
+      Services.subscriptionsServiceForDocOrNull(this.ampdoc),
+    ]).then(services => {
+      const service = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (
+        services[0] || services[1]);
+      if (!service) {
+        // Access/subscriptions service is not installed.
+        user().error(
+            TAG,
+            'Access or subsciptions service is not installed to access: ',
+            expr);
         return null;
       }
-      return getter(accessService);
+      return getter(service);
     });
   }
 
@@ -629,7 +639,7 @@ export class GlobalVariableSource extends VariableSource {
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
     user().assert(typeof param == 'string', 'param should be a string');
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
       ? params[param] : defaultValue;
@@ -664,7 +674,7 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getGeo_(getter, expr) {
-    return Services.geoForOrNull(this.ampdoc.win)
+    return Services.geoForDocOrNull(this.ampdoc)
         .then(geo => {
           user().assert(geo,
               'To use variable %s, amp-geo should be configured',
@@ -739,7 +749,10 @@ export class GlobalVariableSource extends VariableSource {
  * @package For export
  */
 export class UrlReplacements {
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!VariableSource} variableSource
+   */
   constructor(ampdoc, variableSource) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
@@ -757,8 +770,7 @@ export class UrlReplacements {
    * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
-   * opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
    *     names that can be substituted.
@@ -787,8 +799,7 @@ export class UrlReplacements {
    * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=}
-   * opt_bindings
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
    *     names that can be substituted.
@@ -873,7 +884,7 @@ export class UrlReplacements {
 
   /**
    * Returns a replacement whitelist from elements' data-amp-replace attribute.
-   * @param {!Element} element.
+   * @param {!Element} element
    * @param {!Object<string, boolean>=} opt_supportedReplacement Optional supported
    * replacement that filters whitelist to a subset.
    * @return {!Object<string, boolean>|undefined}
@@ -897,13 +908,13 @@ export class UrlReplacements {
 
   /**
     * Returns whether variable substitution is allowed for given url.
-    * @param {!Location} url.
+    * @param {!Location} url
     * @return {boolean}
     */
   isAllowedOrigin_(url) {
     const docInfo = Services.documentInfoForDoc(this.ampdoc);
-    if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
-        url.origin == parseUrl(docInfo.sourceUrl).origin) {
+    if (url.origin == parseUrlDeprecated(docInfo.canonicalUrl).origin ||
+        url.origin == parseUrlDeprecated(docInfo.sourceUrl).origin) {
       return true;
     }
 
@@ -913,7 +924,7 @@ export class UrlReplacements {
     if (meta && meta.hasAttribute('content')) {
       const whitelist = meta.getAttribute('content').trim().split(/\s+/);
       for (let i = 0; i < whitelist.length; i++) {
-        if (url.origin == parseUrl(whitelist[i]).origin) {
+        if (url.origin == parseUrlDeprecated(whitelist[i]).origin) {
           return true;
         }
       }
@@ -949,7 +960,7 @@ export class UrlReplacements {
     // on subsequent replacements, so that each run gets a fresh value.
     let href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
-    const url = parseUrl(href);
+    const url = parseUrlDeprecated(href);
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
@@ -1013,10 +1024,10 @@ export class UrlReplacements {
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
         REPLACEMENT_EXP_NAME);
-    if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
-      // not supporting syncronous version (yet) or collect_vars with this new
-      // structure
-      return this.expander_./*OK*/expand(url, opt_bindings, opt_whiteList);
+    if (isV2ExperimentOn) {
+      // TODO(ccordy) support opt_collectVars && opt_whitelist
+      return this.expander_./*OK*/expand(url, opt_bindings, opt_sync,
+          opt_whiteList);
     }
 
     // existing parsing method
@@ -1143,8 +1154,10 @@ export class UrlReplacements {
    * @return {string}
    */
   ensureProtocolMatches_(url, replacement) {
-    const newProtocol = parseUrl(replacement, /* opt_nocache */ true).protocol;
-    const oldProtocol = parseUrl(url, /* opt_nocache */ true).protocol;
+    const newProtocol = parseUrlDeprecated(replacement, /* opt_nocache */ true)
+        .protocol;
+    const oldProtocol = parseUrlDeprecated(url, /* opt_nocache */ true)
+        .protocol;
     if (newProtocol != oldProtocol) {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
@@ -1189,7 +1202,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Window} embedWin
- * @param {*} varSource
+ * @param {!VariableSource} varSource
  */
 export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
@@ -1197,10 +1210,6 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
 }
 
 /**
- * @typedef {{
- *   incomingFragment: string,
- *   outgoingFragment: string,
- * }}
+ * @typedef {{incomingFragment: string, outgoingFragment: string}}
  */
-
 let ShareTrackingFragmentsDef;

@@ -123,7 +123,7 @@ describes.realWin('performance', {amp: true}, env => {
 
       expect(perf.events_.length).to.equal(0);
 
-      for (let i = 0; i < 50 ; i++) {
+      for (let i = 0; i < 50; i++) {
         perf.tick(`start${i}`);
       }
 
@@ -544,7 +544,7 @@ describes.realWin('performance', {amp: true}, env => {
             expect(viewerSendMessageStub.withArgs(
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
 
-            expect(getPerformanceMarks()).to.deep.equal(
+            expect(getPerformanceMarks()).to.have.members(
                 ['ol', 'ofv', 'pc']);
           });
         });

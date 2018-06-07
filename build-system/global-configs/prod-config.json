@@ -1,9 +1,9 @@
 {
   "allow-doc-opt-in": [
-    "amp-animation",
     "amp-date-picker",
-    "amp-ima-video",
+    "amp-next-page",
     "ampdoc-shell",
+    "disable-faster-amp-list",
     "inabox-rov",
     "inline-styles",
     "url-replacement-v2"
@@ -27,6 +27,7 @@
   "amp-auto-ads-adsense-holdout": 0.1,
   "slidescroll-disable-css-snap": 1,
   "version-locking": 1,
+  "as-use-attr-for-format": 0.01,
   "a4aFastFetchDoubleclickLaunched": 0,
   "a4aFastFetchAdSenseLaunched": 0,
   "a4a-new-signature-verifier": 1,
@@ -36,9 +37,13 @@
   "amp-animation": 1,
   "amp-live-list-sorting": 1,
   "amp-sidebar toolbar": 1,
+  "svg-in-mustache": 0,
+  "disable-faster-amp-list": 1,
   "a4a-safeframe-preloading-off": 0.01,
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
   "expUnconditionedCanonicalHoldback": 0.01,
-  "amp-consent": 1
+  "amp-consent": 1,
+  "amp-img-native-srcset": 0.7,
+  "amp-story-v1": 1
 }

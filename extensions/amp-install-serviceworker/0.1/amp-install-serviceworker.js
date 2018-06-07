@@ -15,18 +15,11 @@
  */
 
 import {Services} from '../../../src/services';
-import {
-  assertHttpsUrl,
-  getSourceOrigin,
-  isProxyOrigin,
-  isSecureUrl,
-  parseUrl,
-  removeFragment,
-} from '../../../src/url';
 import {closestByTag, removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {toggle} from '../../../src/style';
 
@@ -47,28 +40,30 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     /** @private {?string}  */
     this.iframeSrc_ = null;
 
-    /** @private {?UrlRewriter_}  */
+    /** @visibleForTesting {?UrlRewriter_}  */
     this.urlRewriter_ = null;
   }
 
   /** @override */
   buildCallback() {
-    const win = this.win;
+    const {win} = this;
     if (!('serviceWorker' in win.navigator)) {
       this.maybeInstallUrlRewrite_();
       return;
     }
+    const urlService = this.getUrlService_();
     const src = this.element.getAttribute('src');
-    assertHttpsUrl(src, this.element);
+    urlService.assertHttpsUrl(src, this.element);
 
-    if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
+    if (urlService.isProxyOrigin(src) ||
+        urlService.isProxyOrigin(win.location.href)) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
-        assertHttpsUrl(iframeSrc, this.element);
-        const origin = parseUrl(iframeSrc).origin;
+        urlService.assertHttpsUrl(iframeSrc, this.element);
+        const {origin} = urlService.parse(iframeSrc);
         const docInfo = Services.documentInfoForDoc(this.element);
-        const sourceUrl = parseUrl(docInfo.sourceUrl);
-        const canonicalUrl = parseUrl(docInfo.canonicalUrl);
+        const sourceUrl = urlService.parse(docInfo.sourceUrl);
+        const canonicalUrl = urlService.parse(docInfo.canonicalUrl);
         user().assert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
@@ -80,7 +75,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
           return this.insertIframe_();
         });
       }
-    } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
+    } else if (urlService.parse(win.location.href).origin ==
+      urlService.parse(src).origin) {
       this.whenLoadedAndVisiblePromise_().then(() => {
         return install(this.win, src);
       });
@@ -126,8 +122,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     const ampdoc = this.getAmpDoc();
-    const win = this.win;
-    const winUrl = parseUrl(win.location.href);
+    const {win} = this;
+    const urlService = this.getUrlService_();
+    const winUrl = urlService.parse(win.location.href);
 
     // Read the url-rewrite config.
     const urlMatch = this.element.getAttribute(
@@ -151,15 +148,16 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       throw user().createError(
           'Invalid "data-no-service-worker-fallback-url-match" expression', e);
     }
-    user().assert(getSourceOrigin(winUrl) == parseUrl(shellUrl).origin,
-        'Shell source origin "%s" must be the same as source origin "%s"',
-        shellUrl, winUrl.href);
+    user().assert(urlService.getSourceOrigin(winUrl) ==
+      urlService.parse(shellUrl).origin,
+    'Shell source origin "%s" must be the same as source origin "%s"',
+    shellUrl, winUrl.href);
 
     // Install URL rewriter.
     this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl);
 
     // Cache shell.
-    if (isSecureUrl(shellUrl)) {
+    if (urlService.isSecure(shellUrl)) {
       this.waitToPreloadShell_(shellUrl);
     }
   }
@@ -180,7 +178,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   preloadShell_(shellUrl) {
-    const win = this.win;
+    const {win} = this;
 
     // Preload the shell by via an iframe with `#preload` fragment.
     const iframe = win.document.createElement('iframe');
@@ -204,6 +202,14 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     // Start the preload.
     this.element.appendChild(iframe);
   }
+
+  /**
+   * @return {!../../../src/service/url-impl.Url}
+   * @private
+   */
+  getUrlService_() {
+    return Services.urlForDoc(this.element);
+  }
 }
 
 
@@ -221,13 +227,18 @@ class UrlRewriter_ {
   constructor(ampdoc, urlMatchExpr, shellUrl) {
     /** @const {!Window} */
     this.win = ampdoc.win;
+
     /** @const @private {!RegExp} */
     this.urlMatchExpr_ = urlMatchExpr;
+
     /** @const @private {string} */
     this.shellUrl_ = shellUrl;
 
+    /** @private @const {!../../../src/service/url-impl.Url} */
+    this.urlService_ = Services.urlForDoc(ampdoc);
+
     /** @const @private {!Location} */
-    this.shellLoc_ = parseUrl(shellUrl);
+    this.shellLoc_ = this.urlService_.parse(shellUrl);
 
     listen(ampdoc.getRootNode(), 'click', this.handle_.bind(this));
   }
@@ -247,7 +258,7 @@ class UrlRewriter_ {
     }
 
     // Check the URL matches the mask and doesn't match shell itself.
-    const tgtLoc = parseUrl(target.href);
+    const tgtLoc = this.urlService_.parse(target.href);
     if (tgtLoc.origin != this.shellLoc_.origin ||
             tgtLoc.pathname == this.shellLoc_.pathname ||
             !this.urlMatchExpr_.test(tgtLoc.href)) {
@@ -261,7 +272,7 @@ class UrlRewriter_ {
 
     // Only rewrite URLs to a different location to avoid breaking fragment
     // navigation.
-    const win = this.win;
+    const {win} = this;
     if (removeFragment(tgtLoc.href) == removeFragment(win.location.href)) {
       return;
     }

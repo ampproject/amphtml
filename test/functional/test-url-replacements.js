@@ -39,7 +39,7 @@ import {
   mockWindowInterface,
   stubServiceForDoc,
 } from '../../testing/test-helper';
-import {parseUrl} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {user} from '../../src/log';
@@ -332,10 +332,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should update SOURCE_URL after track impression', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://wrong.com');
+    win.location = parseUrlDeprecated('https://wrong.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return new Promise(resolve => {
-        win.location = parseUrl('https://example.com?gclid=123456');
+        win.location = parseUrlDeprecated('https://example.com?gclid=123456');
         resolve();
       });
     });
@@ -415,6 +415,21 @@ describes.sandboxed('UrlReplacements', {}, () => {
             expect(result).to.equal('?a=&b=cid-for-xyz&c=');
           });
     });
+  });
+
+  it('should replace AMP_STATE(key)', () => {
+    const win = getFakeWindow();
+    sandbox.stub(Services, 'bindForDocOrNull').returns(Promise.resolve({
+      getStateValue(key) {
+        expect(key).to.equal('foo.bar');
+        return Promise.resolve('baz');
+      },
+    }));
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandUrlAsync('?state=AMP_STATE(foo.bar)')
+        .then(res => {
+          expect(res).to.equal('?state=baz');
+        });
   });
 
   it('should replace VARIANT', () => {
@@ -1036,11 +1051,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace QUERY_PARAM with foo', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com?query_string_param1=wrong');
+    win.location = parseUrlDeprecated('https://example.com?query_string_param1=wrong');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return new Promise(resolve => {
         win.location =
-            parseUrl('https://example.com?query_string_param1=foo');
+            parseUrlDeprecated('https://example.com?query_string_param1=foo');
         resolve();
       });
     });
@@ -1053,7 +1068,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace QUERY_PARAM with ""', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com');
+    win.location = parseUrlDeprecated('https://example.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
@@ -1066,7 +1081,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace QUERY_PARAM with default_value', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com');
+    win.location = parseUrlDeprecated('https://example.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
@@ -1079,7 +1094,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should collect vars', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com?p1=foo');
+    win.location = parseUrlDeprecated('https://example.com?p1=foo');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
@@ -1188,7 +1203,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         '&a=b&d=PROM&e=PAGE_LOAD_TIME');
   });
 
-  describe('access values', () => {
+  describe('access values via amp-access', () => {
 
     let accessService;
     let accessServiceMock;
@@ -1199,6 +1214,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
         getAuthdataField: () => {},
       };
       accessServiceMock = sandbox.mock(accessService);
+      sandbox.stub(Services, 'accessServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve(accessService);
+          });
     });
 
     afterEach(() => {
@@ -1206,21 +1225,84 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
 
     function expandUrlAsync(url, opt_disabled) {
+      if (opt_disabled) {
+        accessService = null;
+      }
       return createIframePromise().then(iframe => {
         iframe.doc.title = 'Pixel Test';
         const link = iframe.doc.createElement('link');
         link.setAttribute('href', 'https://pinterest.com/pin1');
         link.setAttribute('rel', 'canonical');
         iframe.doc.head.appendChild(link);
-
         const replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
-        replacements.getVariableSource().getAccessService_ = ampdoc => {
-          expect(ampdoc.isSingleDoc).to.be.a('function');
-          if (opt_disabled) {
-            return Promise.resolve(null);
-          }
-          return Promise.resolve(accessService);
-        };
+        return replacements.expandUrlAsync(url);
+      });
+    }
+
+    it('should replace ACCESS_READER_ID', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .returns(Promise.resolve('reader1'))
+          .once();
+      return expandUrlAsync('?a=ACCESS_READER_ID') .then(res => {
+        expect(res).to.match(/a=reader1/);
+        expect(userErrorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should replace AUTHDATA', () => {
+      accessServiceMock.expects('getAuthdataField')
+          .withExactArgs('field1')
+          .returns(Promise.resolve('value1'))
+          .once();
+      return expandUrlAsync('?a=AUTHDATA(field1)').then(res => {
+        expect(res).to.match(/a=value1/);
+        expect(userErrorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should report error if not available', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .never();
+      return expandUrlAsync('?a=ACCESS_READER_ID;', /* disabled */ true)
+          .then(res => {
+            expect(res).to.match(/a=;/);
+            expect(userErrorStub).to.be.calledOnce;
+          });
+    });
+  });
+
+  describe('access values via amp-subscriptions', () => {
+
+    let accessService;
+    let accessServiceMock;
+
+    beforeEach(() => {
+      accessService = {
+        getAccessReaderId: () => {},
+        getAuthdataField: () => {},
+      };
+      accessServiceMock = sandbox.mock(accessService);
+      sandbox.stub(Services, 'subscriptionsServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve(accessService);
+          });
+    });
+
+    afterEach(() => {
+      accessServiceMock.verify();
+    });
+
+    function expandUrlAsync(url, opt_disabled) {
+      if (opt_disabled) {
+        accessService = null;
+      }
+      return createIframePromise().then(iframe => {
+        iframe.doc.title = 'Pixel Test';
+        const link = iframe.doc.createElement('link');
+        link.setAttribute('href', 'https://pinterest.com/pin1');
+        link.setAttribute('rel', 'canonical');
+        iframe.doc.head.appendChild(link);
+        const replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
         return replacements.expandUrlAsync(url);
       });
     }
@@ -1266,7 +1348,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a = document.createElement('a');
       win = getFakeWindow();
       win.location =
-          parseUrl('https://example.com/base?foo=bar&bar=abc&gclid=123');
+          parseUrlDeprecated('https://example.com/base?foo=bar&bar=abc&gclid=123');
       urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
     });
 

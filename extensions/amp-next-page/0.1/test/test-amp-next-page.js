@@ -19,6 +19,7 @@ import {Services} from '../../../../src/services';
 import {getService} from '../../../../src/service';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {macroTask} from '../../../../testing/yield';
+import {setStyle} from '../../../../src/style';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-next-page component', {
@@ -65,12 +66,14 @@ env => {
               ]
             }
           </script>`;
+    // Ensure element is off screen when it renders.
+    setStyle(element, 'marginTop', '10000px');
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
     element.getResources = () => win.services.resources.obj;
 
-    nextPage = new AmpNextPage(element);
     doc.body.appendChild(element);
+    nextPage = new AmpNextPage(element);
 
     // sourceUrl is set to about:srcdoc, which has no host.
     sandbox.stub(Services.documentInfoForDoc(element), 'sourceUrl').value('/');
@@ -97,9 +100,7 @@ env => {
     toggleExperiment(win, 'amp-next-page', false);
   });
 
-  // TODO (@peterjosling, #15234): This test is flaky on Headless Chrome on
-  // Travis because it does call fetchDocument.
-  it.skip('does not fetch the next document before 3 viewports away',
+  it('does not fetch the next document before 3 viewports away',
       function* () {
         xhrMock.expects('fetchDocument').never();
         sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
@@ -143,8 +144,7 @@ env => {
     yield macroTask();
   });
 
-  // TODO (@peterjosling, #15234): This flakes on Chrome.
-  it.skip('adds the hidden class to hideSelector elements', function* () {
+  it('adds the hidden class to hideSelector elements', function* () {
     const exampleDoc = createExampleDocument(doc);
     xhrMock.expects('fetchDocument')
         .returns(Promise.resolve(exampleDoc))
@@ -154,7 +154,7 @@ env => {
     const attachShadowDocSpy =
         sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
 
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+    sandbox.stub(viewport, 'getClientRectAsync').onFirstCall().callsFake(() => {
       // 1x viewport away
       return Promise.resolve(
           layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
@@ -168,17 +168,14 @@ env => {
 
     const shadowRoot = shadowDoc.getRootNode();
 
-    expect(
-        shadowRoot.querySelector('header').classList.contains(
-            'i-amphtml-next-page-hidden'))
-        .to.be.true;
-    expect(
-        shadowRoot.querySelector('footer').classList.contains(
-            'i-amphtml-next-page-hidden'))
-        .to.be.true;
+    expect(shadowRoot.querySelector('header'))
+        .to.have.class('i-amphtml-next-page-hidden');
+
+    expect(shadowRoot.querySelector('footer'))
+        .to.have.class('i-amphtml-next-page-hidden');
   });
 
-  it.skip('removes amp-analytics tags from child documents', function* () {
+  it('removes amp-analytics tags from child documents', function* () {
     const exampleDoc = createExampleDocument(doc);
     exampleDoc.body.innerHTML +=
         '<amp-analytics id="analytics1"></amp-analytics>';
@@ -192,7 +189,7 @@ env => {
     const attachShadowDocSpy =
       sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
 
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+    sandbox.stub(viewport, 'getClientRectAsync').onFirstCall().callsFake(() => {
       // 1x viewport away
       return Promise.resolve(
           layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));

@@ -14,29 +14,47 @@
  * limitations under the License.
  */
 
+import {Action} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {childElementByTag} from '../../../src/dom';
-import {closestByTag} from '../../../src/dom';
+import {
+  childElementByTag,
+  closestByTag,
+  isJsonScriptTag,
+} from '../../../src/dom';
+import {computedStyle, setImportantStyles} from '../../../src/style';
 import {createShadowRootWithStyle} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
+import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
 
-/** @private @const {string} */
+/** @const {string} */
 const TAG = 'amp-story-consent';
+
+/**
+ * Default optional config parameters.
+ * @const {!Object}
+ */
+const DEFAULT_OPTIONAL_PARAMETERS = {
+  onlyAccept: false,
+};
 
 // TODO(gmajoulet): switch to `htmlFor` static template helper.
 /**
  * Story consent template.
- * @private @const {function(!Object, string, ?string):!./simple-template.ElementDef}
+ * @param {!Object} config
+ * @param {string} consentId
+ * @param {?string} logoSrc
+ * @return {!./simple-template.ElementDef}
+ * @private @const
  */
 const getTemplate = (config, consentId, logoSrc) => ({
   tag: 'div',
@@ -106,7 +124,8 @@ const getTemplate = (config, consentId, logoSrc) => ({
               tag: 'button',
               attrs: dict({
                 'class': 'i-amphtml-story-consent-action ' +
-                    'i-amphtml-story-consent-action-reject',
+                    'i-amphtml-story-consent-action-reject' +
+                    (config.onlyAccept === true ? ' i-amphtml-hidden' : ''),
                 'on': `tap:${consentId}.reject`,
               }),
               children: [],
@@ -142,11 +161,14 @@ export class AmpStoryConsent extends AMP.BaseElement {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.element);
 
-    /** @private {?Object} */
-    this.consentConfig_ = null;
-
     /** @private {?Element} */
     this.scrollableEl_ = null;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win);
+
+    /** @private {?Object} */
+    this.storyConsentConfig_ = null;
 
     /** @private {?Element} */
     this.storyConsentEl_ = null;
@@ -157,6 +179,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
     this.assertAndParseConfig_();
 
     const storyEl = closestByTag(this.element, 'AMP-STORY');
+    const consentEl = closestByTag(this.element, 'AMP-CONSENT');
+    const consentId = consentEl.id;
+    this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
     if (!logoSrc) {
@@ -164,15 +190,22 @@ export class AmpStoryConsent extends AMP.BaseElement {
           TAG, 'Expected "publisher-logo-src" attribute on <amp-story>');
     }
 
-    const storyConsentConfig =
-        this.consentConfig_ && this.consentConfig_['story-consent'];
-    const consentId = Object.keys(this.consentConfig_.consents)[0];
-    this.storyConsentEl_ = renderAsElement(
-        this.win.document, getTemplate(storyConsentConfig, consentId, logoSrc));
-    createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
+    // Story consent config is set by the `assertAndParseConfig_` method.
+    if (this.storyConsentConfig_) {
+      this.storyConsentEl_ = renderAsElement(
+          this.win.document,
+          getTemplate(this.storyConsentConfig_, consentId, logoSrc));
+      createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
-    this.initializeListeners_();
-    this.addActionsToWhitelist_();
+      // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
+      this.actions_.addToWhitelist('AMP-CONSENT.accept');
+      this.actions_.addToWhitelist('AMP-CONSENT.prompt');
+      this.actions_.addToWhitelist('AMP-CONSENT.reject');
+
+      this.setAcceptButtonFontColor_();
+
+      this.initializeListeners_();
+    }
   }
 
   /** @override */
@@ -232,40 +265,52 @@ export class AmpStoryConsent extends AMP.BaseElement {
   }
 
   /**
-   * Allows the consent related actions.
-   * @private
-   */
-  addActionsToWhitelist_() {
-    dev().assert(this.consentConfig_, `${TAG}: Consent config must be parsed ` +
-        'before adding the actions to the whitelist.');
-
-    const consentIds = Object.keys(this.consentConfig_.consents);
-
-    consentIds.forEach(consentId => {
-      this.actions_.addToWhitelist(`${consentId}.accept`);
-      this.actions_.addToWhitelist(`${consentId}.reject`);
-    });
-  }
-
-  /**
    * Validates the story-consent config. `story-consent` is a new parameter
    * specific to stories, added on the `amp-consent` JSON config.
    * @private
    */
   assertAndParseConfig_() {
-    const parentEl = dev().assertElement(this.element.parentElement);
-    const script = childElementByTag(parentEl, 'script');
-    this.consentConfig_ = parseJson(script.textContent);
+    const storyConsentScript = childElementByTag(this.element, 'script');
 
-    const storyConsent = this.consentConfig_['story-consent'];
-
-    user().assert(storyConsent, `${TAG}: story-consent config is required`);
-    user().assertString(
-        storyConsent.title, `${TAG}: story-consent requires a title`);
-    user().assertString(
-        storyConsent.message, `${TAG}: story-consent requires a message`);
     user().assert(
-        storyConsent.vendors && isArray(storyConsent.vendors),
-        `${TAG}: story-consent requires an array of vendors`);
+        storyConsentScript && isJsonScriptTag(storyConsentScript),
+        `${TAG} config should be put in a <script> tag with ` +
+        'type="application/json"');
+
+    this.storyConsentConfig_ =
+        Object.assign(
+            {},
+            DEFAULT_OPTIONAL_PARAMETERS,
+            /** @type {Object} */ (parseJson(storyConsentScript.textContent)));
+
+    user().assertString(
+        this.storyConsentConfig_.title, `${TAG}: config requires a title`);
+    user().assertString(
+        this.storyConsentConfig_.message, `${TAG}: config requires a message`);
+    user().assert(
+        this.storyConsentConfig_.vendors &&
+            isArray(this.storyConsentConfig_.vendors),
+        `${TAG}: config requires an array of vendors`);
+    user().assertBoolean(
+        this.storyConsentConfig_.onlyAccept,
+        `${TAG}: config requires "onlyAccept" to be a boolean`);
+  }
+
+  /**
+   * Sets the accept button font color to either white or black, depending on
+   * the publisher custom background color.
+   * Must be called from the `buildCallback` or in another vsync mutate state.
+   * @private
+   */
+  setAcceptButtonFontColor_() {
+    const buttonEl =
+        dev().assertElement(this.storyConsentEl_
+            .querySelector('.i-amphtml-story-consent-action-accept'));
+    const styles = computedStyle(this.win, buttonEl);
+
+    const rgb = getRGBFromCssColorValue(styles['background-color']);
+    const color = getTextColorForRGB(rgb);
+
+    setImportantStyles(buttonEl, {color});
   }
 }

@@ -45,6 +45,44 @@ describes.realWin('Platform store', {}, () => {
     expect(platformStore.serviceIds_).to.be.equal(serviceIds);
   });
 
+  it('should resolve entitlement', () => {
+    // Request entitlement promise even before it's resolved.
+    const p = platformStore.getEntitlementPromiseFor('service2');
+
+    // Resolve once.
+    const ent = new Entitlement({
+      service: 'service2',
+      granted: false,
+    });
+    platformStore.resolveEntitlement('service2', ent);
+    expect(platformStore.getResolvedEntitlementFor('service2')).to.equal(ent);
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+
+    // Additional resolution doesn't change anything without reset.
+    platformStore.resolveEntitlement('service2', new Entitlement({
+      service: 'service2',
+      granted: true,
+    }));
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+    return expect(p).to.eventually.equal(ent);
+  });
+
+  it('should reset entitlement', () => {
+    // Request entitlement promise even before it's resolved.
+    const p = platformStore.getEntitlementPromiseFor('service2');
+
+    // Resolve once.
+    platformStore.resolveEntitlement('service2', new Entitlement({
+      service: 'service2',
+      granted: false,
+    }));
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+
+    // Reset: new entitlement promise.
+    platformStore.resetEntitlementFor('service2');
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.not.equal(p);
+  });
+
   it('should call onChange callbacks on every resolve', () => {
     const cb = sandbox.stub(platformStore.onEntitlementResolvedCallbacks_,
         'fire');
@@ -163,6 +201,7 @@ describes.realWin('Platform store', {}, () => {
       });
     });
   });
+
   describe('selectApplicablePlatform_', () => {
     let localPlatform;
     let anotherPlatform;
@@ -279,7 +318,6 @@ describes.realWin('Platform store', {}, () => {
     beforeEach(() => {
       errorSpy = sandbox.spy(user(), 'warn');
     });
-
     it('should report warning if all platforms fail and resolve '
         + 'local with fallbackEntitlement', () => {
       const platform = new SubscriptionPlatform();
@@ -431,5 +469,21 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('selectPlatformForLogin', () => {
+    it('should return the platform which ever supports viewer', () => {
+      const platform = new SubscriptionPlatform();
+      platform.getServiceId = () => 'service1';
+      platform.supportsCurrentViewer = () => true;
+      const localPlatform = new SubscriptionPlatform();
+      localPlatform.getServiceId = () => 'service2';
+      sandbox.stub(platformStore, 'getAvailablePlatforms')
+          .callsFake(() => [platform, localPlatform]);
+      sandbox.stub(platformStore, 'getLocalPlatform')
+          .callsFake(() => localPlatform);
+      const returnedPlatform = platformStore.selectPlatformForLogin();
+      expect(returnedPlatform.getServiceId()).to.be.equal(
+          platform.getServiceId());
+    });
+  });
 });
 

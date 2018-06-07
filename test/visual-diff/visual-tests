@@ -95,6 +95,14 @@
       "name": "AMP Layout"
     },
     {
+      "url": "examples/visual-tests/article-fade-in.amp.html",
+      "name": "fade-in & fade-in-scroll",
+      "loading_complete_css": [
+        ".overlay-container",
+        ".overflow-window"
+      ]
+    },
+    {
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
       "name": "Fonts 404",
       "forbidden_css": [
@@ -123,6 +131,18 @@
         ".list2"
       ]
     },
+    {
+      "url": "examples/visual-tests/amp-lightbox-gallery.html",
+      "name": "amp-lightbox-gallery - article",
+      "experiments": ["amp-lightbox-gallery"]
+    },
+    {
+      "url": "examples/visual-tests/video/rotate-to-fullscreen.html",
+      "name": "Video rotate-to-fullscreen"
+    },
+    /**
+      * AMP by Example pages go below this.
+      */
     {
       "url": "examples/visual-tests/amp-by-example/index.html",
       "name": "Amp By Example"
@@ -164,6 +184,10 @@
       "name": "amp-bind - Amp By Example"
     },
     {
+      "url": "examples/visual-tests/amp-by-example/components/amp-bodymovin-animation/index.html",
+      "name": "amp-bodymovin-animation - Amp By Example"
+    },
+    {
       "url": "examples/visual-tests/amp-by-example/components/amp-brid-player/index.html",
       "name": "amp-brid-player - Amp By Example"
     },
@@ -200,6 +224,18 @@
       "name": "amp-facebook - Amp By Example"
     },
     {
+      "url": "examples/visual-tests/amp-by-example/components/amp-facebook-comments/index.html",
+      "name": "amp-facebook-comments - Amp By Example"
+    },
+    {
+      "url": "examples/visual-tests/amp-by-example/components/amp-facebook-like/index.html",
+      "name": "amp-facebook-like - Amp By Example"
+    },
+    {
+      "url": "examples/visual-tests/amp-by-example/components/amp-facebook-page/index.html",
+      "name": "amp-facebook-page - Amp By Example"
+    },
+    {
       "url": "examples/visual-tests/amp-by-example/components/amp-fit-text/index.html",
       "name": "amp-fit-text - Amp By Example"
     },
@@ -212,12 +248,16 @@
       "name": "amp-form - Amp By Example"
     },
     {
+      "url": "examples/visual-tests/amp-by-example/components/amp-fx-collection/index.html",
+      "name": "amp-fx-collection - Amp By Example"
+    },
+    {
       "url": "examples/visual-tests/amp-by-example/components/amp-fx-flying-carpet/index.html",
       "name": "amp-fx-flying-carpet - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-by-example/components/amp-fx-parallax/index.html",
-      "name": "amp-fx-parallax - Amp By Example"
+      "url": "examples/visual-tests/amp-by-example/components/amp-geo/index.html",
+      "name": "amp-geo - Amp By Example"
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-gfycat/index.html",
@@ -272,6 +312,10 @@
       "name": "amp-lightbox - Amp By Example"
     },
     {
+      "url": "examples/visual-tests/amp-by-example/components/amp-lightbox-gallery/index.html",
+      "name": "amp-lightbox-gallery - Amp By Example"
+    },
+    {
       "url": "examples/visual-tests/amp-by-example/components/amp-list/index.html",
       "name": "amp-list - Amp By Example"
     },
@@ -298,6 +342,10 @@
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-reach-player/index.html",
       "name": "amp-reach-player - Amp By Example"
+    },
+    {
+      "url": "examples/visual-tests/amp-by-example/components/amp-reddit/index.html",
+      "name": "amp-reddit - Amp By Example"
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-selector/index.html",

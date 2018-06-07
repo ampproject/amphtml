@@ -286,6 +286,7 @@ animationHandler.play;
 animationHandler.pause;
 animationHandler.stop;
 animationHandler.goToAndStop;
+animationHandler.totalFrames;
 
 // Validator
 var amp;
@@ -410,7 +411,7 @@ SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
 
-AMP.maybeExecuteRealTimeConfig = false;
+AMP.RealTimeConfigManager;
 
 /**
  * Actual filled values for this exists in

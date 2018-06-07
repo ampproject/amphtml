@@ -41,7 +41,7 @@ limitations under the License.
 
 `amp-iframe` has several important differences from vanilla iframes that are designed to make it more secure and avoid AMP files that are dominated by a single iframe:
 
-- An `amp-iframe` may not appear close to the top of the document (except for iframes that use `placeholder` as described [below](#iframe-with-placeholder)). The iframe must be either 600 px away from the top or not within the first 75% of the viewport when scrolled to the top, whichever is smaller. 
+- An `amp-iframe` may not appear close to the top of the document (except for iframes that use `placeholder` as described [below](#iframe-with-placeholder)). The iframe must be either 600 px away from the top or not within the first 75% of the viewport when scrolled to the top, whichever is smaller.
 - By default, an amp-iframe is sandboxed (see [details](#sandbox)).
 - An `amp-iframe` must only request resources via HTTPS, from a data-URI, or via the `srcdoc` attribute.
 - An `amp-iframe` must not be in the same origin as the container unless they do not allow `allow-same-origin` in the `sandbox` attribute. See the ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) doc for further details on allowed origins for iframes.
@@ -57,7 +57,7 @@ limitations under the License.
 </amp-iframe>
 ```
 
-Renders as: 
+Renders as:
 
 <amp-iframe width="200" height="100"
     sandbox="allow-scripts allow-same-origin"
@@ -111,6 +111,33 @@ See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
+## Iframe with placeholder
+
+It is possible to have an `amp-iframe` appear at the top of a document when the `amp-iframe` has a `placeholder` element as shown in the example below.
+
+- The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder until the iframe is ready to be displayed.
+- Iframe readiness can be known by listening to `onload` of the iframe or an `embed-ready` `postMessage`, which would be sent by the iframe document, whichever comes first.
+
+*Example: Iframe with a placeholder*
+
+```html
+<amp-iframe width=300 height=300
+   layout="responsive"
+   sandbox="allow-scripts allow-same-origin"
+   src="https://foo.com/iframe">
+ <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
+</amp-iframe>
+```
+
+*Example: Iframe embed-ready request*
+
+```javascript
+window.parent.postMessage({
+  sentinel: 'amp',
+  type: 'embed-ready'
+}, '*');
+```
+
 ## Iframe resizing
 
 An `amp-iframe` must have static layout defined as is the case with any other AMP element. However,
@@ -118,8 +145,9 @@ it's possible to resize an `amp-iframe` at runtime. To do so:
 
 1. The `amp-iframe` must be defined with the `resizable` attribute.
 2. The `amp-iframe` must have an `overflow` child element.
-3. The iframe document must send an `embed-size` request as a window message.
-4. The `embed-size` request will be denied if the request height is less than a certain threshold (100px).
+3. The `amp-iframe` must set the `allow-same-origin` sandbox attribute.
+4. The iframe document must send an `embed-size` request as a window message.
+5. The `embed-size` request will be denied if the request height is less than a certain threshold (100px).
 
 Notice that `resizable` overrides the value of `scrolling` to `no`.
 
@@ -153,33 +181,6 @@ Here are some factors that affect how fast the resize will be executed:
 - Whether the resize is triggered by the user action.
 - Whether the resize is requested for a currently active iframe.
 - Whether the resize is requested for an iframe below the viewport or above the viewport.
-
-## Iframe with placeholder
-
-It is possible to have an `amp-iframe` appear at the top of a document when the `amp-iframe` has a `placeholder` element as shown in the example below.
-
-- The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder until the iframe is ready to be displayed.
-- Iframe readiness can be known by listening to `onload` of the iframe or an `embed-ready` `postMessage`, which would be sent by the iframe document, whichever comes first.
-
-*Example: Iframe with a placeholder*
-
-```html
-<amp-iframe width=300 height=300
-   layout="responsive"
-   sandbox="allow-scripts allow-same-origin"
-   src="https://foo.com/iframe">
- <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
-</amp-iframe>
-```
-
-*Example: Iframe embed-ready request*
-
-```javascript
-window.parent.postMessage({
-  sentinel: 'amp',
-  type: 'embed-ready'
-}, '*');
-```
 
 ## Iframe viewability
 

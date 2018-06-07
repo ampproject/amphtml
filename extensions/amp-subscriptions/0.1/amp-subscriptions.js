@@ -30,6 +30,7 @@ import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {getValueForExpr} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
@@ -40,6 +41,10 @@ const TAG = 'amp-subscriptions';
 /** @const */
 const SERVICE_TIMEOUT = 3000;
 
+
+/**
+ * @implements {../../amp-access/0.1/access-vars.AccessVars}
+ */
 export class SubscriptionService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -95,6 +100,12 @@ export class SubscriptionService {
 
     /** @private @const {boolean} */
     this.doesViewerProvideAuth_ = this.viewer_.hasCapability('auth');
+
+    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
+    this.cid_ = Services.cidForDoc(ampdoc);
+
+    /** @private {!Object<string, ?Promise<string>>} */
+    this.readerIdPromiseMap_ = {};
   }
 
   /**
@@ -153,8 +164,7 @@ export class SubscriptionService {
    * service.
    *
    * @param {string} serviceId
-   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform}
-   * subscriptionPlatformFactory
+   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
@@ -271,7 +281,7 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.platformStore_.getAllRegisteredPlatforms().forEach(
+      this.platformStore_.getAvailablePlatforms().forEach(
           subscriptionPlatform => {
             this.fetchEntitlements_(subscriptionPlatform);
           }
@@ -324,6 +334,28 @@ export class SubscriptionService {
   }
 
   /**
+   * @param {string} serviceId
+   * @return {!Promise<string>}
+   */
+  getReaderId(serviceId) {
+    let readerId = this.readerIdPromiseMap_[serviceId];
+    if (!readerId) {
+      const consent = Promise.resolve();
+      // Scope is kept "amp-access" by default to avoid unnecessary CID
+      // rotation.
+      const scope =
+          'amp-access' + (serviceId == 'local' ? '' : '-' + serviceId);
+      readerId = this.cid_.then(cid => {
+        return cid.get(
+            {scope, createCookieIfNotPresent: true},
+            consent);
+      });
+      this.readerIdPromiseMap_[serviceId] = readerId;
+    }
+    return readerId;
+  }
+
+  /**
    * Returns the singleton Dialog instance
    * @return {!Dialog}
    */
@@ -362,8 +394,12 @@ export class SubscriptionService {
       selectedPlatform.activate(selectedEntitlement);
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
-          selectedPlatform.getServiceId()
-      );
+          selectedPlatform.getServiceId());
+      if (!selectedEntitlement.granted) {
+        this.subscriptionAnalytics_.serviceEvent(
+            SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
+            selectedPlatform.getServiceId());
+      }
     });
   }
 
@@ -403,6 +439,8 @@ export class SubscriptionService {
    * @return {!Promise}
    */
   reAuthorizePlatform(subscriptionPlatform) {
+    this.platformStore_.resetEntitlementFor(
+        subscriptionPlatform.getServiceId());
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
@@ -455,6 +493,28 @@ export class SubscriptionService {
     this.platformStore_.onPlatformResolves(serviceId, platform => {
       dev().assert(platform, 'Platform is not registered');
       platform.decorateUI(element, action, options);
+    });
+  }
+
+  /**
+   * Evaluates platforms and select the one to be selected for login.
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   */
+  selectPlatformForLogin() {
+    return this.platformStore_.selectPlatformForLogin();
+  }
+
+  /** @override from AccessVars */
+  getAccessReaderId() {
+    return this.initialize_().then(() => this.getReaderId('local'));
+  }
+
+  /** @override from AccessVars */
+  getAuthdataField(field) {
+    return this.initialize_().then(() => {
+      return this.platformStore_.getEntitlementPromiseFor('local');
+    }).then(entitlement => {
+      return getValueForExpr(entitlement.json(), field);
     });
   }
 }

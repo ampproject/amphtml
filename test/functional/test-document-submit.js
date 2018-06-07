@@ -117,7 +117,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
           /Only XHR based \(via action-xhr attribute\) submissions/);
     });
     expect(preventDefaultSpy).to.have.been.called;
-    const callCount = preventDefaultSpy.callCount;
+    const {callCount} = preventDefaultSpy;
 
     evt.target.setAttribute('method', 'post');
     evt.target.setAttribute('action-xhr', 'https://example.com');

@@ -58,7 +58,7 @@ limitations under the License.
   <tr>
     <td><a href="fluid.md">Fluid</a></td>
     <td>Fluid slots do not require a pre-specified size, but will instead fill up the width of their parent container and adjust their height accordingly.</td>
-    <td>Beta</td>
+    <td>Launched</td>
   </tr>
   <tr>
     <td><a href="doubleclick-rtc.md">Real Time Config</a></td>
@@ -84,6 +84,15 @@ limitations under the License.
     <td><a href="sra.md">SRA: Single Request Architecture</a></td>
     <td>When enabled, all eligible slots on the page will be serviced by a single ad request.</td>
     <td>Beta</td>
+  </tr>
+  <tr>
+    <td><a href="single-page-ad.md">Single Page Ads</a></td>
+    <td>Ads that appear within an AMP story, the new ad format for visual storytelling.</td>
+    <td>Beta</td>
+  <tr>
+    <td><a href="amp-consent.md">AMP Consent Integration</a></td>
+    <td>Integration with AMP Consent extension.</td>
+    <td>Launched</td>
   </tr>
 </table>
 
@@ -135,7 +144,7 @@ See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/37219
   - `"<key_string>":"<value_string>"` or
   - `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
 
-Example with json attribute: 
+Example with json attribute:
 
 ```html
 <amp-ad width=320 height=50

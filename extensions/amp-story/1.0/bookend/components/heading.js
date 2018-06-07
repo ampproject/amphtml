@@ -26,9 +26,6 @@ import {user} from '../../../../../src/log';
  */
 export let HeadingComponentDef;
 
-/** @type {string} */
-export const TAG = 'amp-story-bookend';
-
 /**
  * Builder class for the heading component that sits on top of a given set of
  * components in the bookend.
@@ -40,8 +37,8 @@ export class HeadingComponent {
    * @override
    * */
   assertValidity(headingJson) {
-    user().assert('text' in headingJson, 'Heading component must contain' +
-      ' `text` field, skipping invalid.');
+    user().assert('text' in headingJson, 'Heading component must contain ' +
+      '`text` field, skipping invalid.');
   }
 
   /**
@@ -62,7 +59,7 @@ export class HeadingComponent {
    * @return {!Element}
    * @override
    * */
-  buildTemplate(headingData, doc) {
+  buildElement(headingData, doc) {
     const html = htmlFor(doc);
     const template = html`<h3 class="i-amphtml-story-bookend-heading"></h3>`;
 

@@ -30,7 +30,6 @@ import {
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
-import {installCacheServiceWorker} from '../service-worker/install';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
@@ -40,6 +39,7 @@ import {installStylesForDoc, makeBodyVisible} from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
+import {registerIniLoadListener} from './utils';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
@@ -91,6 +91,7 @@ startupChunk(self.document, function initial() {
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
       maybeTrackImpression(self);
+      registerIniLoadListener(ampdoc);
     });
     startupChunk(self.document, function builtins() {
       // Builtins.
@@ -107,7 +108,6 @@ startupChunk(self.document, function initial() {
       Navigation.installAnchorClickInterceptor(ampdoc, self);
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
-      installCacheServiceWorker(self);
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');

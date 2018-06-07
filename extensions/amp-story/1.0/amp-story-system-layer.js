@@ -44,6 +44,9 @@ const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 /** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
+/** @private @const {string} */
+const INFO_CLASS = 'i-amphtml-story-info-control';
+
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
@@ -54,6 +57,13 @@ const TEMPLATE = {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
       children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': INFO_CLASS + ' i-amphtml-story-button',
+          }),
+        },
         {
           tag: 'div',
           attrs: dict({
@@ -198,6 +208,11 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
+    if (Services.viewerForDoc(this.win_.document.documentElement)
+        .isEmbedded()) {
+      this.systemLayerEl_.classList.add('i-amphtml-embedded');
+    }
+
     return this.getRoot();
   }
 
@@ -228,6 +243,8 @@ export class SystemLayer {
         this.onUnmuteAudioClick_();
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_();
+      } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
+        this.onInfoClick_();
       }
     });
 
@@ -253,6 +270,10 @@ export class SystemLayer {
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
+      this.onPageIndexUpdate_(index);
     }, true /** callToInitialize */);
   }
 
@@ -348,6 +369,16 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to the active page index changing.
+   * @param {number} index
+   */
+  onPageIndexUpdate_(index) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle('first-page-active', index === 0);
+    });
+  }
+
+  /**
    * Handles click events on the mute button.
    * @private
    */
@@ -370,6 +401,15 @@ export class SystemLayer {
   onShareClick_() {
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
+  }
+
+  /**
+   * Handles click events on the info button and toggles the info dialog.
+   * @private
+   */
+  onInfoClick_() {
+    const isOpen = this.storeService_.get(StateProperty.INFO_DIALOG_STATE);
+    this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, !isOpen);
   }
 
   /**

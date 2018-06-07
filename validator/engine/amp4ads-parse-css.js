@@ -89,7 +89,7 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
       }
       this.errors.push(createParseErrorTokenAt(
           declaration, amp.validator.ValidationError.Code
-                           .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+              .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
           ['style', 'position', ident]));
     }
   }
@@ -112,10 +112,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
           }
           this.errors.push(createParseErrorTokenAt(
               decl, amp.validator.ValidationError.Code
-                        .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
+                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
               [
                 'style', 'transition', transitionedProperty,
-                '[\'opacity\', \'transform\']'
+                '[\'opacity\', \'transform\']',
               ]));
         }
       }
@@ -130,10 +130,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
         }
         this.errors.push(createParseErrorTokenAt(
             decl, amp.validator.ValidationError.Code
-                      .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
+                .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
             [
               'style', decl.name, this.inKeyframes.name,
-              '[\'animation-timing-function\', \'opacity\', \'transform\']'
+              '[\'animation-timing-function\', \'opacity\', \'transform\']',
             ]));
       }
     }

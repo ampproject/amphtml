@@ -19,7 +19,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle} from '../../../src/style';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
@@ -245,8 +245,8 @@ export class SafeframeHostApi {
     // Don't allow for referrer policy same-origin,
     // as Safeframe will always be a different origin.
     // Don't allow for no-referrer.
-    const canonicalUrl = Services.documentInfoForDoc(
-        this.baseInstance_.getAmpDoc()).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(
+        this.baseInstance_.getAmpDoc());
     const metaReferrer = this.win_.document.querySelector(
         "meta[name='referrer']");
     if (!metaReferrer) {
@@ -258,7 +258,7 @@ export class SafeframeHostApi {
       case 'no-referrer':
         return;
       case 'origin':
-        return parseUrl(canonicalUrl).origin;
+        return parseUrlDeprecated(canonicalUrl).origin;
     }
     return canonicalUrl;
   }
