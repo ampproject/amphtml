@@ -1521,7 +1521,7 @@ export function installLightboxManager(win) {
  * @param {!Window} win
  * @return {!Promise}
  */
-function installLightboxGallery(win) {
+export function installLightboxGallery(win) {
   const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
   // TODO (#12859): make this work for more than singleDoc mode
   return ampdoc.whenBodyAvailable().then(body => {
