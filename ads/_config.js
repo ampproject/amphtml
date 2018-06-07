@@ -401,6 +401,8 @@ export const adConfig = {
 
   engageya: {},
 
+  epeex: {},
+
   eplanning: {
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
   },

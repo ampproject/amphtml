@@ -106,6 +106,21 @@ describe('amp-next-page config', () => {
           'https://example-com.cdn.ampproject.org/c/example.com/art2?x=1');
     });
 
+    it('doesn\'t rewrite URLs if sourceOrigin and origin match', () => {
+      const config = {
+        pages: [
+          {
+            ampUrl: 'https://example.com/article',
+            image: 'https://example.com/image.png',
+            title: 'Article 1',
+          },
+        ],
+      };
+      expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+          .to.not.throw();
+      expect(config.pages[0].ampUrl).to.equal('https://example.com/article');
+    });
+
     it('throws on null config', () => {
       allowConsoleError(() => {
         expect(() => assertConfig(/*ctx*/ null, null, origin, origin))
