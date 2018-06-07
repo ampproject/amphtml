@@ -14,9 +14,20 @@
 # limitations under the license.
 #
 
+tags: {  # amp-google-document-embed
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-google-document-embed"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
 tags: {  # <amp-google-document-embed>
   html_format: AMP
   tag_name: "AMP-GOOGLE-DOCUMENT-EMBED"
+  requires_extension: "amp-google-document-embed"
   attrs: { name: "alt" }
   attrs: {
     name: "src"
