@@ -413,6 +413,7 @@ export const adConfig = {
       'https://g.ezoic.net/ezoic/ampad.js',
     ],
     clientIdScope: 'AMP_ECID_EZOIC',
+    consentHandlingOverride: true,
   },
 
   f1e: {
