@@ -40,6 +40,10 @@ tags: {  # <amp-position-observer>
   }
   attrs: { name: "target" }
   attrs: {
+    name: "once"
+    value: ""
+  }
+  attrs: {
     name: "viewport-margins"
     # Regex: ^(\d+$|\d+px$|\d+vh$)|((\d+|\d+px|\d+vh)\s{1}(\d+$|\d+px$|\d+vh$))
     # Values such as: "100", "100px", "100vh", "100 100px", "100vh 100", "100px 100vh", etc..
