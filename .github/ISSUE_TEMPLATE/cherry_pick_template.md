@@ -14,7 +14,7 @@ PR #<PR_NUMBER>
 Release Issue #<RELEASE_ISSUE_NUMBER>
 
 *Is this request for a cherry pick into a canary or a production release?*
-*(If you are requesting a cherry pick into a production release and the next canary has already been cut you may need to request a separate cherry pick to theh canary as well.)*
+*(If you are requesting a cherry pick into a production release you may need to file a separate cherry pick request for the current canary as well.  See the [cherry pick documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-picks).)*
 
 <CANARY_OR_PRODUCTION>
 

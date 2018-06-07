@@ -61,7 +61,7 @@ If you run into any issues or have any questions when requesting a cherry pick, 
 
 ## AMP Dev Channel
 
-The AMP Dev Channel is a way to opt a browser into using the canary release build of the AMP JS libraries.  This release **may be less stable** and it may contain features not yet available to all users.
+The AMP Dev Channel is a way to opt a browser into using the canary release build of the AMP JS libraries.  The Dev Channel **may be less stable** and it may contain features not yet available to all users.
 
 Opting into the Dev Channel is great to:
 
