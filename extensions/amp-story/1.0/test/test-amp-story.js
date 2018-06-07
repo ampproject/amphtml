@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
@@ -20,6 +22,7 @@ import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
+import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -382,8 +385,75 @@ describes.realWin('amp-story', {
           return expect(replaceStub).to.not.have.been.called;
         });
   });
-  describe('amp-story continue anyway', () => {
 
+  it('should not set active page to active upon navigation if paused', () => {
+    sandbox.stub(win.history, 'replaceState');
+    createPages(story.element, 2, ['cover', 'page-1']);
+
+    story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.getPageById('cover').state_)
+              .to.equal(PageState.NOT_ACTIVE);
+        });
+  });
+
+  describe('amp-story consent', () => {
+    it('should pause the story if there is a consent', () => {
+      sandbox.stub(win.history, 'replaceState');
+
+      const consentEl = win.document.createElement('amp-consent');
+      const storyConsentEl = win.document.createElement('amp-story-consent');
+      consentEl.appendChild(storyConsentEl);
+      element.appendChild(consentEl);
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      // Never resolving consent promise, emulating a user looking at the
+      // consent prompt.
+      const promise = new Promise(() => {});
+      sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            const coverPage = story.getPageById('cover');
+            expect(coverPage.state_).to.equal(PageState.NOT_ACTIVE);
+          });
+    });
+
+    it('should play the story after the consent is resolved', () => {
+      sandbox.stub(win.history, 'replaceState');
+
+      const consentEl = win.document.createElement('amp-consent');
+      const storyConsentEl = win.document.createElement('amp-story-consent');
+      consentEl.appendChild(storyConsentEl);
+      element.appendChild(consentEl);
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+
+      sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => resolver())
+          .then(() => {
+            const coverPage = story.getPageById('cover');
+            expect(coverPage.state_).to.equal(PageState.ACTIVE);
+          });
+    });
+  });
+
+  describe('amp-story continue anyway', () => {
     it('should not display layout', () => {
       AmpStory.isBrowserSupported = () => false;
       story = new AmpStory(element);
