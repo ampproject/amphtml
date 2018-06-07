@@ -35,6 +35,6 @@ checkboxes to track cherry picks into production.
 - [ ] Canary release pushed to 1%
 - [ ] Release build pushed to production
 
-See the [release documentation](https://github.com/mrjoro/amphtml/contributing/release-schedule.md) for more information on the release process.
+See the [release documentation](https://github.com/mrjoro/amphtml/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Dev Channel.
 
 If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new).  If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://github.com/mrjoro/amphtml/contributing/release-schedule.md#cherry-picks).
