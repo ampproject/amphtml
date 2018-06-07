@@ -322,15 +322,15 @@ export class Expander {
       let result;
 
       if (value && value.then) {
-        // if binding is passed in as opt_binding we try to resolve it and it
-        // may return a promise
+        // If binding is passed in as opt_binding we try to resolve it and it
+        // may return a promise.
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
       } else if (value == null) {
+        // Most likely a broken binding gets us here.
         result = '';
       } else {
-        // Normal case.
-        result = encodeURIComponent(value);
+        result = encodeURIComponent(/** @type {string} */ (value));
       }
 
       if (opt_collectVars) {
