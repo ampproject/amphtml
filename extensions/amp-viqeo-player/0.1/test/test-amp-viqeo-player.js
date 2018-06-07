@@ -33,7 +33,7 @@ describes.realWin('amp-viqeo-player', {
     viqeo.setAttribute('data-profileid', viqeoProfileId);
     viqeo.setAttribute('data-videoid', viqeoId);
     viqeo.setAttribute('width', 640);
-    viqeo.setAttribute('height', 360);
+    viqeo.setAttribute('height', 350);
     if (opt_params && opt_params.responsive) {
       viqeo.setAttribute('layout', 'responsive');
     }
