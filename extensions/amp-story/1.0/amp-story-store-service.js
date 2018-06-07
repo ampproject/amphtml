@@ -132,23 +132,8 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.PAUSED_STATE]: !!data}));
     case Action.TOGGLE_SUPPORTED_BROWSER:
-      if (data) {
-        dev().error(TAG, 'Cannot exit unsupported browser state.');
-      }
       return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-            [StateProperty.CAN_SHOW_BOOKEND]: false,
-            [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-            [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
-            [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
-            [StateProperty.BOOKEND_STATE]: false,
-            [StateProperty.DESKTOP_STATE]: false,
-            [StateProperty.HAS_AUDIO_STATE]: false,
-            [StateProperty.MUTED_STATE]: true,
-            [StateProperty.PAUSED_STATE]: true,
-            [StateProperty.SUPPORTED_BROWSER_STATE]: false,
-          }));
+          {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
