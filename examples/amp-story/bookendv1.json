@@ -15,19 +15,19 @@
       "type": "small",
       "title": "This is an example article",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/100x100"
+      "image": "http://placehold.it/500x600"
     },
     {
       "type": "small",
       "title": "This is an example article2",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/100x100"
+      "image": "http://placehold.it/256x128"
     },
     {
       "type": "small",
       "title": "This is an example article3",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/100x100"
+      "image": "http://placehold.it/256x128"
     },
     {
       "type": "heading",
@@ -37,33 +37,33 @@
       "type": "small",
       "title": "This is an example article",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/100x100"
+      "image": "http://placehold.it/256x128"
     },
     {
       "type": "portrait",
       "title": "Heading for portrait",
       "category": "This is an example portrait",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/312x416"
+      "image": "http://placehold.it/350x470"
     },
     {
       "type": "landscape",
       "title": "TRAPPIST-1 Planets May Still Be Wet Enough for Life",
       "url": "http://example.com/article.html",
       "category": "astronomy",
-      "image": "http://placehold.it/312x234"
+      "image": "http://placehold.it/360x760"
     },
     {
       "type": "small",
       "title": "This is an example article",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/100x100"
+      "image": "http://placehold.it/256x128"
     },
     {
       "type": "small",
       "title": "This is an example article",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/100x100"
+      "image": "http://placehold.it/256x128"
     },
     {
       "type": "cta-link",
