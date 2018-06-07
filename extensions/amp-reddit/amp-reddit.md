@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/reddit.amp.html">reddit.amp.html</a></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-reddit/">amp-reddit example</a>.</td>
   </tr>
 </table>
 
