@@ -28,18 +28,16 @@ tags: {  # <amp-google-document-embed>
   html_format: AMP
   tag_name: "AMP-GOOGLE-DOCUMENT-EMBED"
   requires_extension: "amp-google-document-embed"
-  attrs: { name: "alt" }
   attrs: {
     name: "src"
     mandatory: true
     value_url: {
       allowed_protocol: "https"
       allowed_protocol: "http"
-      allow_relative: true  # Will be set to false at a future date.
+      allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "title" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-google-document-embed"
   amp_layout: {

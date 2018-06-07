@@ -48,5 +48,10 @@ amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:41:2
 >>   ^~~~~~~~~
 amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:44:2 Missing URL for attribute 'src' in tag 'amp-google-document-embed'. (see https://www.ampproject.org/docs/reference/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
 |    </amp-google-document-embed>
+|    <!-- Invalid: element with relative src -->
+|    <amp-google-document-embed src="document.pdf" width="800" height="600">
+>>   ^~~~~~~~~
+amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:47:2 The relative URL 'document.pdf' for attribute 'src' in tag 'amp-google-document-embed' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
+|    </amp-google-document-embed>
 |  </body>
 |  </html>

@@ -36,7 +36,7 @@ import {user} from '../../../src/log';
 export const TAG = 'amp-google-document-embed';
 
 const ATTRIBUTES_TO_PROPAGATE = [
-  'alt',
+  'title',
 ];
 
 const GOOGLE_DOCS_EMBED_RE = /^https?:\/\/docs\.google\.com.+\/pub.*\??/;
@@ -62,7 +62,10 @@ export class AmpDriveViewer extends AMP.BaseElement {
 
   /** @override */
   renderOutsideViewport() {
-    return false;
+    // We are conservative about loading heavy embeds outside the viewport.
+    // This will still start loading before it becomes visible, but it
+    // won't typically load a large number of embeds.
+    return 0.75;
   }
 
   /** @override */
