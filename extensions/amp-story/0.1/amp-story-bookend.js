@@ -18,6 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-bookend-0.1.css';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
+import {LocalizedStringId} from './localization';
 import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
@@ -107,7 +108,8 @@ const buildPromptConsentTemplate = consentId => {
       {
         tag: 'h3',
         attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
-        unlocalizedString: 'Privacy settings',
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE,
       },
       {
         tag: 'h2',
@@ -117,7 +119,8 @@ const buildPromptConsentTemplate = consentId => {
           'role': 'button',
           'aria-label': 'Change data privacy settings',
         }),
-        unlocalizedString: 'Change data privacy settings',
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL,
       },
     ],
   });
