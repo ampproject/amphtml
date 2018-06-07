@@ -21,17 +21,23 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
+    string: 'Privacy settings',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
+    string: 'Change data privacy settings',
+  },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Accept',
-  },
-  [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
-    string: 'Continue Anyway',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
     string: 'Decline',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
     string: 'Ok',
+  },
+  [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
+    string: 'Continue Anyway',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
     string: 'View on original domain:',
