@@ -21,6 +21,12 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
+    string: 'Privacy settings',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
+    string: 'Change data privacy settings',
+  },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Accept',
   },
