@@ -44,6 +44,7 @@ Single page ad creatives must contain two meta tags: one to specify the [call-to
 ```html
 <meta name="amp-cta-url" content="https://www.example-ads.com/landing?q=123">
 <meta name="amp-cta-type" content="EXPLORE">
+<meta name="amp-cta-landing-page" content="NONAMP">
 ```
 
 See the above link for allowed call-to-action buttons. By design, these will be the only clickable elements of the creative unit. This means that while things like AMP carousels are allowed within a single page story ad, they will not be clickable.
