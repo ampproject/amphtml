@@ -15,6 +15,7 @@
  */
 
 import {AmpStoryConsent} from '../amp-story-consent';
+import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
 import {LocalizationService} from '../localization';
 import {computedStyle} from '../../../../src/style';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -34,6 +35,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
+    const storeService = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => storeService);
 
     defaultConfig = {
       title: 'Foo title.',
@@ -168,8 +171,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     storyConsent.buildCallback();
 
-    expect(addToWhitelistStub).to.have.been.calledTwice;
+    expect(addToWhitelistStub).to.have.callCount(3);
     expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.accept');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.prompt');
     expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.reject');
   });
 
@@ -197,6 +201,13 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
         storyConsent.storyConsentEl_
             .querySelector(`button[on="tap:${CONSENT_ID}.accept"]`);
     expect(buttonEl).to.exist;
+  });
+
+  it('should set the consent ID in the store', () => {
+    storyConsent.buildCallback();
+
+    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
+        .to.equal(CONSENT_ID);
   });
 
   it('should set the font color to black if background is white', () => {

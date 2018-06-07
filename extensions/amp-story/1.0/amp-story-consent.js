@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Action} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
@@ -163,6 +164,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
     /** @private {?Element} */
     this.scrollableEl_ = null;
 
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win);
+
     /** @private {?Object} */
     this.storyConsentConfig_ = null;
 
@@ -176,6 +180,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     const storyEl = closestByTag(this.element, 'AMP-STORY');
     const consentEl = closestByTag(this.element, 'AMP-CONSENT');
+    const consentId = consentEl.id;
+    this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
     if (!logoSrc) {
@@ -187,11 +194,12 @@ export class AmpStoryConsent extends AMP.BaseElement {
     if (this.storyConsentConfig_) {
       this.storyConsentEl_ = renderAsElement(
           this.win.document,
-          getTemplate(this.storyConsentConfig_, consentEl.id, logoSrc));
+          getTemplate(this.storyConsentConfig_, consentId, logoSrc));
       createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
       // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
       this.actions_.addToWhitelist('AMP-CONSENT.accept');
+      this.actions_.addToWhitelist('AMP-CONSENT.prompt');
       this.actions_.addToWhitelist('AMP-CONSENT.reject');
 
       this.setAcceptButtonFontColor_();
