@@ -576,7 +576,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
               },
             });
           });
-      sandbox.stub(element.implementation_, 'getConsentPolicy')
+      sandbox.stub(element, 'getConsentPolicy_')
           .callsFake(() => {
             return 'default';
           });
@@ -596,7 +596,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
               },
             });
           });
-      sandbox.stub(element.implementation_, 'getConsentPolicy')
+      sandbox.stub(element, 'getConsentPolicy_')
           .callsFake(() => {
             return 'default';
           });
@@ -605,6 +605,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
       container.appendChild(element);
       return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
           /BLOCK_BY_CONSENT/);
+    });
+
+    it('should respect user specified consent policy', () => {
+      const element = new ElementClass();
+      expect(element.getConsentPolicy_()).to.equal(null);
+      element.setAttribute('data-block-on-consent', '');
+      expect(element.getConsentPolicy_()).to.equal('default');
+      element.setAttribute('data-block-on-consent', '_none');
+      expect(element.getConsentPolicy_()).to.equal('_none');
     });
 
 
