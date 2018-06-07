@@ -4,25 +4,30 @@
 Note to onduty:
 
 Use comments on this issue to track anything else you think might be of
-interest to the community (e.g. alerting the community to the delays).
+interest to the community (e.g. alerting the community to delays).
 
-As each step is completed, check it off in this issue so the community can see
-the state of the current release at a glance.  Once you have filed this issue
-post a link to it in the #release Slack channel.
+Once you have filed this issue post a link to it in the #release Slack channel.
 
-When cherry picks are made add additional checkboxes at the stage the cherry
-pick was made, i.e.
+As each step is completed, check it off so the community can see the state of
+the current release at a glance.
+
+To document cherry picks that interrupt the default release process, add
+additional checkboxes at the stage the cherry pick was made, e.g. if the
+cherry pick is made after the initial canary release was at 1%, add these lines
+beneath the initial 1% checkbox and then check them as they occur:
   - [ ] Cherry pick release [<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>) pushed to Dev Channel
   - [ ] Cherry pick release pushed to 1%
 
 When the release is pushed to production:
-- add a link to the release build that was actually pushed to production in
-  the "pushed to production" checkbox
-- change the "(Canary)" in the issue title to "(Production)" and remove
+- update the "pushed to production" checkbox with a link to the release build
+  that was actually pushed to production
+- change "(Canary)" in the issue title to "(Production)" and remove
   "(Production)" from the title of the issue that was formerly in production
+  (so that it's immediately clear when looking at Type: Release issues what
+  is currently in canary and what is currently in production)
 
 After the release is pushed to production, continue to use this issue to track
-anything interesting about this release, including adding additional
+anything interesting about the release, including adding additional
 checkboxes to track cherry picks into production.
 -->
 - [x] Canary release [<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>) is cut
