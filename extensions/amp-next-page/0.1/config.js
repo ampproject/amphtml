@@ -42,9 +42,10 @@ export let AmpNextPageItem;
  * @param {string} origin The origin of the current document
  *     (document.location.origin). All recommendations must be for the same
  *     origin as the current document so the URL can be updated safely.
- * @param {string=} sourceOrigin The source origin for the current document, if
- *     the current document is being served from the cache. Any recommendations
- *     pointing at {@code sourceOrigin} will be modified to point to the cache.
+ * @param {string} sourceOrigin The source origin for the current document.
+ *     Will match the value of {@code origin} unless served from the cache.
+ *     Any recommendations pointing at {@code sourceOrigin} will be modified
+ *     to point to the cache.
  * @return {!AmpNextPageConfig}
  */
 export function assertConfig(context, config, origin, sourceOrigin) {
@@ -101,7 +102,7 @@ function assertReco(context, reco, origin, sourceOrigin) {
   user().assertString(reco.image, 'image must be a string');
   user().assertString(reco.title, 'title must be a string');
 
-  if (sourceOrigin) {
+  if (sourceOrigin !== origin) {
     reco.ampUrl = `${origin}/c/` +
         (url.protocol === 'https:' ? 's/' : '') +
         encodeURIComponent(url.host) +
