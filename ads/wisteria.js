@@ -30,5 +30,5 @@ export function wisteria(global, data) {
   //get canonical url
   const originalUrl = global.context.canonicalUrl;
   validateData(data, ['siteId', 'templateNumber']);
-  loadScript(global, 'https://stage-wisteria-js.excite.co.jp/wisteria.js?site_id=' + data['siteId'] + '&template_number=' + data['templateNumber'] + '&original_url=' + originalUrl);
+  loadScript(global, 'https://wisteria-js.excite.co.jp/wisteria.js?site_id=' + data['siteId'] + '&template_no=' + data['templateNumber'] + '&original_url=' + originalUrl);
 }
