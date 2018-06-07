@@ -3214,14 +3214,6 @@ tags {  # <form method=GET ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
-  attrs: {
-    name: "verify-xhr"
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
