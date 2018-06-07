@@ -476,7 +476,7 @@ function createBaseCustomElementClass(win) {
         return this.buildingPromise_;
       }
       return this.buildingPromise_ = new Promise((resolve, reject) => {
-        const policyId = this.implementation_.getConsentPolicy();
+        const policyId = this.getConsentPolicy_();
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
@@ -1346,6 +1346,25 @@ function createBaseCustomElementClass(win) {
         rethrowAsync('Action execution failed:', e,
             invocation.node.tagName, invocation.method);
       }
+    }
+
+    /**
+     * Get the consent policy to follow.
+     * @return {?string}
+     */
+    getConsentPolicy_() {
+      const policyId = this.getAttribute('data-block-on-consent');
+      if (policyId === null) {
+        // data-block-on-consent attribute not set
+        return null;
+      }
+      if (policyId == '' || policyId == 'default') {
+        // data-block-on-consent value not set, up to individual element
+        // Note: data-block-on-consent and data-block-on-consent='default' is
+        // treated exactly the same
+        return this.implementation_.getConsentPolicy();
+      }
+      return policyId;
     }
 
     /**

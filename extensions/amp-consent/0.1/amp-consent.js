@@ -435,9 +435,9 @@ export class AmpConsent extends AMP.BaseElement {
       'unblockOn': unblockOnAll,
     };
 
-    this.policyConfig_['_if_responded'] = predefinedNone;
+    this.policyConfig_['_till_responded'] = predefinedNone;
 
-    this.policyConfig_['_if_accepted'] = defaultPolicy;
+    this.policyConfig_['_till_accepted'] = defaultPolicy;
 
     this.policyConfig_['_auto_reject'] = rejectAllOnZero;
 
