@@ -70,6 +70,8 @@ Ad servers that would like to support advertising for AMP stories should open a 
 If you are a publisher, please reach out to your ad server regarding ad support for stories.
 
 ### Ad servers that are currently supported
+**Important** Ad servers are only supported in `amp-story` version `1.0`. For information
+on migrating from 0.1 => 1.0 please see the [migration docs](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story.md#migrating-from-01-to-10).
 * [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/single-page-ad.md)
 
 
