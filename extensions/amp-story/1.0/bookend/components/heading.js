@@ -59,7 +59,7 @@ export class HeadingComponent {
    * @return {!Element}
    * @override
    * */
-  buildTemplate(headingData, doc) {
+  buildElement(headingData, doc) {
     const html = htmlFor(doc);
     const template = html`<h3 class="i-amphtml-story-bookend-heading"></h3>`;
 

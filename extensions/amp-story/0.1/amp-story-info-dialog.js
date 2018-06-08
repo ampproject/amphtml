@@ -220,7 +220,6 @@ export class InfoDialog {
 
     return this.resources_.mutateElement(linkEl, () => {
       linkEl.setAttribute('href', pageUrl);
-      linkEl.setAttribute('rel', 'amphtml');
 
       // Add zero-width space character (\u200B) after "." and "/" characters
       // to help line-breaks occur more naturally.

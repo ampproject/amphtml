@@ -70,13 +70,16 @@ describe('3p integration.js', () => {
         const parent = {
           origin: 'abc',
         };
-        expect(() => {
-          validateParentOrigin({
-            location: {
-              ancestorOrigins: ['xyz'],
-            },
-          }, parent);
-        }).to.throw(/Parent origin mismatch/);
+
+        allowConsoleError(() => {
+          expect(() => {
+            validateParentOrigin({
+              location: {
+                ancestorOrigins: ['xyz'],
+              },
+            }, parent);
+          }).to.throw(/Parent origin mismatch/);
+        });
       });
 
   it('should parse JSON from fragment unencoded (most browsers)', () => {
@@ -185,9 +188,11 @@ describe('3p integration.js', () => {
         tagName: 'AMP-EMBED',
       },
     };
-    expect(() => {
-      draw3p(win, data);
-    }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
+    allowConsoleError(() => {
+      expect(() => {
+        draw3p(win, data);
+      }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
+    });
   });
 
   it('should allow all types on localhost', () => {

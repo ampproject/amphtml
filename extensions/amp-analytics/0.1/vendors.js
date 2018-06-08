@@ -1468,6 +1468,37 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'piStats': {
+    'requests': {
+      'host': 'https://events.pi-stats.com',
+      'basePrefix': '${host}/eventsamp/?' +
+          'e=PageLoad&' +
+          'pid=${property}&' +
+          'url=${ampdocUrl}&' +
+          'cnt=${cntId}&' +
+          'lang=${language}&' +
+          'ref=${documentReferrer}&' +
+          'id=${clientId(piStatsDEVICEID)}&' +
+          'ua=${userAgent}&' +
+          'ctype=web&' +
+          'blang=${browserLanguage}&' +
+          'v=2.0&' +
+          'dist=Javascript',
+      'pageview': '${basePrefix}&eventtype=pageview',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'quantcast': {
     'vars': {
       'labels': '',

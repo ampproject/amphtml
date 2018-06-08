@@ -232,7 +232,7 @@ describes.sandboxed('StandardActions', {}, () => {
         invocation.args = {
           url: 'http://bar.com',
         };
-        invocation.node.tagName = 'DIV';
+        invocation.caller = {tagName: 'DIV'};
       });
 
       it('should be implemented', () => {
@@ -251,8 +251,8 @@ describes.sandboxed('StandardActions', {}, () => {
       });
 
       it('should pass if node does not have throwIfCannotNavigate()', () => {
-        invocation.node.tagName = 'AMP-FOO';
-        invocation.node.getImpl = () => Promise.resolve({});
+        invocation.caller.tagName = 'AMP-FOO';
+        invocation.caller.getImpl = () => Promise.resolve({});
 
         return standardActions.handleAmpTarget(invocation).then(() => {
           expect(navigator.navigateTo).to.be.calledOnce;
@@ -264,17 +264,17 @@ describes.sandboxed('StandardActions', {}, () => {
       it('should check throwIfCannotNavigate() for AMP elements', function*() {
         const userError = sandbox.stub(user(), 'error');
 
-        invocation.node.tagName = 'AMP-FOO';
+        invocation.caller.tagName = 'AMP-FOO';
 
         // Should succeed if throwIfCannotNavigate() is not implemented.
-        invocation.node.getImpl = () => Promise.resolve({});
+        invocation.caller.getImpl = () => Promise.resolve({});
         yield standardActions.handleAmpTarget(invocation);
         expect(navigator.navigateTo).to.be.calledOnce;
         expect(navigator.navigateTo).to.be.calledWithExactly(
             win, 'http://bar.com', 'AMP.navigateTo');
 
         // Should succeed if throwIfCannotNavigate() returns null.
-        invocation.node.getImpl = () => Promise.resolve({
+        invocation.caller.getImpl = () => Promise.resolve({
           throwIfCannotNavigate: () => null,
         });
         yield standardActions.handleAmpTarget(invocation);
@@ -283,7 +283,7 @@ describes.sandboxed('StandardActions', {}, () => {
             win, 'http://bar.com', 'AMP.navigateTo');
 
         // Should fail if throwIfCannotNavigate() throws an error.
-        invocation.node.getImpl = () => Promise.resolve({
+        invocation.caller.getImpl = () => Promise.resolve({
           throwIfCannotNavigate: () => { throw new Error('Fake error.'); },
         });
         yield standardActions.handleAmpTarget(invocation);
