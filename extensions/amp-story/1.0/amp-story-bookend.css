@@ -90,6 +90,10 @@
   margin: 0 32px !important;
 }
 
+.i-amphtml-story-bookend-consent:last-child {
+  margin-bottom: 32px !important;
+}
+
 .i-amphtml-story-bookend-consent .i-amphtml-story-bookend-heading {
   margin-left: 0 !important;
   margin-right: 0 !important;
