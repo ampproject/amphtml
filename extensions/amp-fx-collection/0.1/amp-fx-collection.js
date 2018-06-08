@@ -40,9 +40,9 @@ const FxType = {
 };
 
 const restrictedFxTypes = {
-  'parallax' : ['fly-in-top', 'fly-in-bottom'],
-  'fly-in-top' : ['parallax', 'fly-in-bottom'],
-  'fly-in-bottom' : ['fly-in-top', 'parallax'],
+  'parallax': ['fly-in-top', 'fly-in-bottom'],
+  'fly-in-top': ['parallax', 'fly-in-bottom'],
+  'fly-in-bottom': ['fly-in-top', 'parallax'],
   'fly-in-right': ['fly-in-left'],
   'fly-in-left': ['fly-in-right'],
   'fade-in': ['fade-in-scroll'],
@@ -154,11 +154,11 @@ export class AmpFxCollection {
   }
 
   /**
-   * Returns the array of fx types this component after checking that no 
+   * Returns the array of fx types this component after checking that no
    * clashing fxTypes are present on the same element.
    * e.g. `amp-fx="parallax fade-in"
    *
-   * @param {!Array<!FxType>}
+   * @param {!Array<!FxType>} fxTypes
    * @return {!Array<!FxType>}
    */
   sanitizeFxTypes_(fxTypes) {
@@ -166,10 +166,10 @@ export class AmpFxCollection {
       const currentType = fxTypes[i];
       if (currentType in restrictedFxTypes) {
         for (let j = i + 1; j < fxTypes.length; j++) {
-          if (restrictedFxTypes[currentType].includes(fxTypes[j])) {
-            user().warn( 
-              '%s preset can\'t be combined with %s preset as the resulting ' +
-              'animation isn\'t valid.', currentType, fxTypes[j]);
+          if (restrictedFxTypes[currentType].indexOf(fxTypes[j]) !== -1) {
+            user().warn(TAG,
+                '%s preset can\'t be combined with %s preset as the ' +
+                'resulting animation isn\'t valid.', currentType, fxTypes[j]);
             fxTypes.splice(j, 1);
           }
         }
