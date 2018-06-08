@@ -199,6 +199,10 @@ function assertService(service, id, extension) {
  * @private
  */
 function getExtensions(head) {
+  // ampdoc.getHeadNode() can return null
+  if (!head) {
+    return [];
+  }
   if (customElements_ !== null) {
     return customElements_;
   }
