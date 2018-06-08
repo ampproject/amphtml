@@ -418,10 +418,21 @@ describes.realWin('amp-story', {
 
       story.buildCallback();
 
-      return story.layoutCallback()
+      const coverEl = element.querySelector('amp-story-page');
+      let setStateStub;
+
+      return coverEl.getImpl()
+          .then(cover => {
+            setStateStub = sandbox.stub(cover, 'setState');
+            return story.layoutCallback();
+          })
           .then(() => {
-            const coverPage = story.getPageById('cover');
-            expect(coverPage.state_).to.equal(PageState.NOT_ACTIVE);
+            // These assertions ensure we don't spam the page state. We want to
+            // avoid a situation where we set the page to active, then paused,
+            // which would spam the media pool with expensive operations.
+            expect(setStateStub).to.have.been.calledOnce;
+            expect(setStateStub.getCall(0))
+                .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
           });
     });
 
@@ -446,11 +457,25 @@ describes.realWin('amp-story', {
 
       story.buildCallback();
 
-      return story.layoutCallback()
+      const coverEl = element.querySelector('amp-story-page');
+      let setStateStub;
+
+      return coverEl.getImpl()
+          .then(cover => {
+            setStateStub = sandbox.stub(cover, 'setState');
+            return story.layoutCallback();
+          })
           .then(() => resolver()) // Resolving the consent.
           .then(() => {
-            const coverPage = story.getPageById('cover');
-            expect(coverPage.state_).to.equal(PageState.ACTIVE);
+            // These assertions ensure we don't spam the page state. We want to
+            // avoid a situation where we set the page to active, then paused,
+            // then back to active, which would spam the media pool with
+            // expensive operations.
+            expect(setStateStub).to.have.been.calledTwice;
+            expect(setStateStub.getCall(0))
+                .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
+            expect(setStateStub.getCall(1))
+                .to.have.been.calledWithExactly(PageState.ACTIVE);
           });
     });
 
@@ -470,10 +495,24 @@ describes.realWin('amp-story', {
 
       story.buildCallback();
 
-      return story.layoutCallback()
+      const coverEl = element.querySelector('amp-story-page');
+      let setStateStub;
+
+      return coverEl.getImpl()
+          .then(cover => {
+            setStateStub = sandbox.stub(cover, 'setState');
+            return story.layoutCallback();
+          })
           .then(() => {
-            const coverPage = story.getPageById('cover');
-            expect(coverPage.state_).to.equal(PageState.ACTIVE);
+            // These assertions ensure we don't spam the page state. We want to
+            // avoid a situation where we set the page to active, then paused,
+            // then back to active, which would spam the media pool with
+            // expensive operations.
+            expect(setStateStub).to.have.been.calledTwice;
+            expect(setStateStub.getCall(0))
+                .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
+            expect(setStateStub.getCall(1))
+                .to.have.been.calledWithExactly(PageState.ACTIVE);
           });
     });
   });

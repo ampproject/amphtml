@@ -618,7 +618,7 @@ export class AmpStory extends AMP.BaseElement {
     storyLayoutPromise.then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
         .then(() => this.markStoryAsLoaded_());
 
-    this.handleConsent_();
+    this.handleConsentExtension_();
 
     return storyLayoutPromise;
   }
@@ -653,10 +653,10 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * Handles story consent.
+   * Handles the story consent extension.
    * @private
    */
-  handleConsent_() {
+  handleConsentExtension_() {
     const consentEl = this.element.querySelector('amp-consent');
     if (!consentEl) {
       return;
