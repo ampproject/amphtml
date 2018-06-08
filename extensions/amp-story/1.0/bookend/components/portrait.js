@@ -42,7 +42,7 @@ export let PortraitComponentDef;
  *   meta: !Element,
  * }}
  */
-let portraitElsDef;
+let portraitElementsDef;
 
 /**
  * Builder class for the portrait component.
@@ -71,7 +71,7 @@ export class PortraitComponent {
     const url = portraitJson['url'];
     const {hostname: domainName} = Services.urlForDoc(element).parse(url);
 
-    return {
+    const portrait = {
       url,
       domainName,
       type: portraitJson['type'],
@@ -79,12 +79,18 @@ export class PortraitComponent {
       title: portraitJson['title'],
       image: portraitJson['image'],
     };
+
+    if (portraitJson['amphtml']) {
+      portrait.amphtml = portraitJson['amphtml'];
+    }
+
+    return portrait;
   }
 
   /** @override */
-  buildTemplate(portraitData, doc) {
+  buildElement(portraitData, doc) {
     const html = htmlFor(doc);
-    const template =
+    const el =
         html`
         <a class="i-amphtml-story-bookend-portrait
           i-amphtml-story-bookend-component"
@@ -98,16 +104,20 @@ export class PortraitComponent {
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    addAttributesToElement(template, dict({'href': portraitData.url}));
+    addAttributesToElement(el, dict({'href': portraitData.url}));
+
+    if (portraitData['amphtml'] === true) {
+      addAttributesToElement(el, dict({'rel': 'amphtml'}));
+    }
 
     const {category, title, image, meta} =
-      /** @type {!portraitElsDef} */ (htmlRefs(template));
+      /** @type {!portraitElementsDef} */ (htmlRefs(el));
 
     category.textContent = portraitData.category;
     title.textContent = portraitData.title;
     addAttributesToElement(image, dict({'src': portraitData.image}));
     meta.textContent = portraitData.domainName;
 
-    return template;
+    return el;
   }
 }

@@ -283,6 +283,7 @@ const forbiddenTerms = {
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
       'src/service/video/docking.js',
+      'src/service/video/autoplay.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -356,7 +357,7 @@ const forbiddenTerms = {
       'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
-      'extensions/amp-subscriptions/0.1/local-subscription-platform.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
@@ -425,7 +426,9 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-access/0.1/access-vars.js',
       'extensions/amp-access-scroll/0.1/scroll-impl.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'src/service/url-replacements-impl.js',
     ],
   },
@@ -434,6 +437,8 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-access/0.1/access-vars.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'src/service/url-replacements-impl.js',
     ],
   },

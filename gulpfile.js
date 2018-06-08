@@ -99,6 +99,7 @@ declareExtension('amp-compare-slider', '0.1');
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
+declareExtension('amp-google-document-embed', '0.1');
 declareExtension('amp-dynamic-css-classes', '0.1');
 declareExtension('amp-experiment', '0.1');
 declareExtension('amp-facebook', '0.1');
@@ -165,7 +166,7 @@ declareExtension('amp-story', '1.0', {
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
-    // TODO(newmuis): 'amp-story-info-dialog',
+    'amp-story-info-dialog',
     'amp-story-share',
     'amp-story-share-menu',
     'amp-story-system-layer',

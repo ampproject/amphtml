@@ -43,6 +43,9 @@ import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
+import {
+  RealTimeConfigManager,
+} from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {Viewer} from '../../../../src/service/viewer-impl';
@@ -636,9 +639,9 @@ describe('amp-a4a', () => {
     });
 
     describe('illegal render mode value', () => {
-      let devErrLogSpy;
+      let devErrLogStub;
       beforeEach(() => {
-        devErrLogSpy = sandbox.spy(dev(), 'error');
+        devErrLogStub = sandbox.stub(dev(), 'error');
         // If rendering type is unknown, should fall back to cached content
         // iframe and generate an error.
         adResponse.headers[RENDERING_TYPE_HEADER] = 'random illegal value';
@@ -649,8 +652,8 @@ describe('amp-a4a', () => {
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL);
           // Should have reported an error.
-          expect(devErrLogSpy).to.be.calledOnce;
-          expect(devErrLogSpy.getCall(0).args[1]).to.have.string(
+          expect(devErrLogStub).to.be.calledOnce;
+          expect(devErrLogStub.getCall(0).args[1]).to.have.string(
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
           expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',
@@ -717,6 +720,7 @@ describe('amp-a4a', () => {
           headerVal => {
             it(`should not attach a NameFrame when header is ${headerVal}`,
                 () => {
+                  const devStub = sandbox.stub(dev(), 'error');
                   // Make sure there's no signature, so that we go down the 3p
                   // iframe path.
                   delete adResponse.headers['AMP-Fast-Fetch-Signature'];
@@ -726,6 +730,13 @@ describe('amp-a4a', () => {
                   adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
                   a4a.onLayoutMeasure();
                   return a4a.layoutCallback().then(() => {
+                    if (headerVal == 'some_random_thing') {
+                      expect(devStub.withArgs('AMP-A4A',
+                          `cross-origin render mode header ${headerVal}`))
+                          .to.be.calledOnce;
+                    } else {
+                      expect(devStub).to.not.be.called;
+                    }
                     const nameChild = a4aElement.querySelector(
                         'iframe[src^="nameframe"]');
                     expect(nameChild).to.not.be.ok;
@@ -809,11 +820,19 @@ describe('amp-a4a', () => {
           headerVal => {
             it(`should not attach a SafeFrame when header is ${headerVal}`,
                 () => {
+                  const devStub = sandbox.stub(dev(), 'error');
                   // If rendering type is anything but safeframe, we SHOULD NOT
                   // attach a SafeFrame.
                   adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
                   a4a.onLayoutMeasure();
                   return a4a.layoutCallback().then(() => {
+                    if (headerVal == 'some_random_thing') {
+                      expect(devStub.withArgs('AMP-A4A',
+                          `cross-origin render mode header ${headerVal}`))
+                          .to.be.calledOnce;
+                    } else {
+                      expect(devStub).to.not.be.called;
+                    }
                     const safeframeUrl = 'https://tpc.googlesyndication.com/safeframe/' +
                       DEFAULT_SAFEFRAME_VERSION + '/html/container.html';
                     const safeChild = a4aElement.querySelector(
@@ -1036,8 +1055,12 @@ describe('amp-a4a', () => {
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const rtcResponse = Promise.resolve(
             [{response: 'a', rtcTime: 1, callout: 'https://a.com'}]);
-        AMP.maybeExecuteRealTimeConfig = sandbox.stub().returns(
+        const maybeExecuteRealTimeConfigStub = sandbox.stub().returns(
             rtcResponse);
+        AMP.RealTimeConfigManager = RealTimeConfigManager;
+        sandbox.stub(AMP.RealTimeConfigManager.prototype,
+            'maybeExecuteRealTimeConfig').callsFake(
+            maybeExecuteRealTimeConfigStub);
         const tryExecuteRealTimeConfigSpy =
               sandbox.spy(a4a, 'tryExecuteRealTimeConfig_');
         const updateLayoutPriorityStub = sandbox.stub(
@@ -1055,9 +1078,9 @@ describe('amp-a4a', () => {
           expect(promiseResult.minifiedCreative).to.be.ok;
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
-          expect(AMP.maybeExecuteRealTimeConfig.calledOnce).to.be.true;
-          expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-              a4a, {}, null)).to.be.true;
+          expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
+          expect(maybeExecuteRealTimeConfigStub.calledWith(
+              {}, null)).to.be.true;
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(getAdUrlSpy.calledWith(null, rtcResponse)).to.be.true;
@@ -2350,18 +2373,12 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
     errorSpy = sandbox.spy(user(), 'error');
   });
 
-  beforeEach(() => {
-    AMP.maybeExecuteRealTimeConfig = undefined;
-    expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
-  });
-
-  afterEach(() => {
-    AMP.maybeExecuteRealTimeConfig = undefined;
-  });
-
   describe('#tryExecuteRealTimeConfig', () => {
+    beforeEach(() => {
+      AMP.RealTimeConfigManager = undefined;
+    });
+
     it('should not execute if RTC never imported', () => {
-      expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
       expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
     });
     it('should log user error if RTC Config set but RTC not supported', () => {
@@ -2373,23 +2390,6 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
       expect(errorSpy.calledWith(
           'amp-a4a',
           'RTC not supported for ad network doubleclick')).to.be.true;
-    });
-    it('should call maybeExecuteRealTimeConfig properly', () => {
-      const macros = {'SLOT_ID': 2};
-      AMP.maybeExecuteRealTimeConfig = sandbox.stub();
-      sandbox.stub(a4a, 'getCustomRealTimeConfigMacros_').returns(macros);
-      a4a.tryExecuteRealTimeConfig_(CONSENT_POLICY_STATE.UNKNOWN);
-      expect(AMP.maybeExecuteRealTimeConfig.called).to.be.true;
-      expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-          a4a, macros, CONSENT_POLICY_STATE.UNKNOWN)).to.be.true;
-    });
-    it('should catch error in maybeExecuteRealTimeConfig', () => {
-      const err = new Error('Test');
-      AMP.maybeExecuteRealTimeConfig = sandbox.stub().throws(err);
-      allowConsoleError(() => a4a.tryExecuteRealTimeConfig_());
-      expect(errorSpy.calledOnce).to.be.true;
-      expect(errorSpy.calledWith(
-          'amp-a4a', 'Could not perform Real Time Config.', err)).to.be.true;
     });
   });
 

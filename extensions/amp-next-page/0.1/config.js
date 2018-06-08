@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {isArray} from '../../../src/types';
-import {parseUrlDeprecated} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /**
@@ -37,19 +37,21 @@ export let AmpNextPageItem;
 
 /**
  * Checks whether the object conforms to the AmpNextPageConfig spec.
+ * @param {!Element} context
  * @param {*} config The config to validate.
  * @param {string} origin The origin of the current document
  *     (document.location.origin). All recommendations must be for the same
  *     origin as the current document so the URL can be updated safely.
- * @param {string=} sourceOrigin The source origin for the current document, if
- *     the current document is being served from the cache. Any recommendations
- *     pointing at {@code sourceOrigin} will be modified to point to the cache.
+ * @param {string} sourceOrigin The source origin for the current document.
+ *     Will match the value of {@code origin} unless served from the cache.
+ *     Any recommendations pointing at {@code sourceOrigin} will be modified
+ *     to point to the cache.
  * @return {!AmpNextPageConfig}
  */
-export function assertConfig(config, origin, sourceOrigin) {
+export function assertConfig(context, config, origin, sourceOrigin) {
   user().assert(config, 'amp-next-page config must be specified');
   user().assert(isArray(config.pages), 'pages must be an array');
-  assertRecos(config.pages, origin, sourceOrigin);
+  assertRecos(context, config.pages, origin, sourceOrigin);
 
   if ('hideSelectors' in config) {
     user().assert(isArray(config['hideSelectors']),
@@ -60,8 +62,14 @@ export function assertConfig(config, origin, sourceOrigin) {
   return /** @type {!AmpNextPageConfig} */ (config);
 }
 
-function assertRecos(recos, origin, sourceOrigin) {
-  recos.forEach(reco => assertReco(reco, origin, sourceOrigin));
+/**
+ * @param {!Element} context
+ * @param {!Array<*>} recos
+ * @param {string} origin
+ * @param {string=} sourceOrigin
+ */
+function assertRecos(context, recos, origin, sourceOrigin) {
+  recos.forEach(reco => assertReco(context, reco, origin, sourceOrigin));
 }
 
 const BANNED_SELECTOR_PATTERNS = [
@@ -79,15 +87,22 @@ function assertSelectors(selectors) {
   });
 }
 
-function assertReco(reco, origin, sourceOrigin) {
-  const url = parseUrlDeprecated(reco.ampUrl);
+/**
+ * @param {!Element} context
+ * @param {*} reco
+ * @param {string} origin
+ * @param {string=} sourceOrigin
+ */
+function assertReco(context, reco, origin, sourceOrigin) {
+  const urlService = Services.urlForDoc(context);
+  const url = urlService.parse(reco.ampUrl);
   user().assertString(reco.ampUrl, 'ampUrl must be a string');
   user().assert(url.origin === origin || url.origin === sourceOrigin,
       'pages must be from the same origin as the current document');
   user().assertString(reco.image, 'image must be a string');
   user().assertString(reco.title, 'title must be a string');
 
-  if (sourceOrigin) {
+  if (sourceOrigin !== origin) {
     reco.ampUrl = `${origin}/c/` +
         (url.protocol === 'https:' ? 's/' : '') +
         encodeURIComponent(url.host) +
