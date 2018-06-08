@@ -29,13 +29,6 @@ import {toWin} from './types';
 import {user} from './log';
 
 /**
- * Custome elements cached list
- * @private
- * @type {?Array<string>}
- */
-let customElements_ = null;
-
-/**
  * Returns a promise for a service for the given id and window. Also expects an
  * element that has the actual implementation. The promise resolves when the
  * implementation loaded. Users should typically wrap this as a special purpose
@@ -129,7 +122,7 @@ export function getElementServiceIfAvailableForDoc(
   return ampdoc.whenBodyAvailable()
       .then(() => waitForExtensionIfPresent(
           ampdoc.win, extension,
-          getExtensions(ampdoc.getHeadNode())))
+          extensionScriptsInNode(ampdoc.getHeadNode())))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
@@ -193,25 +186,21 @@ function assertService(service, id, extension) {
 }
 
 /**
- * Get and cache a list of all the extension JS files
+ * Get list of all the extension JS files
  * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @return {!Array<string>}
- * @private
  */
-function getExtensions(head) {
+export function extensionScriptsInNode(head) {
   // ampdoc.getHeadNode() can return null
   if (!head) {
     return [];
   }
-  if (customElements_ !== null) {
-    return customElements_;
-  }
-  customElements_ = [];
+  const scripts = [];
   const list = head.querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
-    customElements_.push(list[i].getAttribute('custom-element'));
+    scripts.push(list[i].getAttribute('custom-element'));
   }
-  return customElements_;
+  return scripts;
 }
 
 /**
@@ -252,7 +241,7 @@ function waitForExtensionIfPresent(win, extension, customElements) {
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
   return dom.waitForBodyPromise(win.document)
       .then(() => waitForExtensionIfPresent(win, extension,
-          getExtensions(win.document.head)))
+          extensionScriptsInNode(win.document.head)))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).

@@ -16,6 +16,7 @@
 
 import {ElementStub, stubbedElements} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
+import {extensionScriptsInNode} from '../element-service';
 import {reportError} from '../error';
 import {user} from '../log';
 
@@ -95,12 +96,11 @@ function tryUpgradeElementNoInline(element, toClass) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function stubElementsForDoc(ampdoc) {
-  const list = ampdoc.getHeadNode().querySelectorAll('script[custom-element]');
-  for (let i = 0; i < list.length; i++) {
-    const name = list[i].getAttribute('custom-element');
+  const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
+  extensions.forEach(name => {
     ampdoc.declareExtension(name);
     stubElementIfNotKnown(ampdoc.win, name);
-  }
+  });
 }
 
 
