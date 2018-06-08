@@ -14,64 +14,66 @@
  * limitations under the License.
  */
 
-import { Layout } from '../../../src/layout';
-import { CSS } from '../../../build/amp-linkeddb-showmore-0.1.css';
+import {CSS} from '../../../build/amp-linkeddb-showmore-0.1.css';
+import {Layout} from '../../../src/layout';
 export class AmpLinkeddbShowmore extends AMP.BaseElement {
 
-  /** @override */
-  buildCallback() {
+    /** @override */
+    buildCallback() {
 
-  }
-
-  /** @override */
-  viewportCallback() {
-    var hasClass = (ele, cls) => {
-      if (!cls) {
-        return false;
-      }
-      return new RegExp(' ' + cls + ' ').test(' ' + ele.className + ' ');
-    };
-
-    var addClass = (ele, cls) => {
-      if (cls.replace(/\s*/g, ''));
-      !hasClass(ele, cls) && (ele.className = ele.className == '' ? cls : ele.className + ' ' + cls);
-    };
-
-    var removeClass = (ele, cls) => {
-      if (hasClass(ele, cls)) {
-        let newClass = ' ' + ele.className.replace(/[\t\r\n]/g, '') + ' ';
-        while (newClass.indexOf(' ' + cls + ' ') >= 0) {
-          newClass = newClass.replace(' ' + cls + ' ', ' ');
-        }
-        ele.className = newClass.replace(/^\s+|\s+$/g, '');
-      }
-    };
-    if (document.querySelector('.msg-text').clientHeight <= 95) {
-      addClass(document.querySelector('.view-more'), 'hide');
-    } else {
-      addClass(document.querySelector('.view-more-text'), 'limit-height');
     }
-    document.querySelector('.view-more').addEventListener('click', function () {
-      if (hasClass(document.querySelector('.view-more'), 'down')) {
-        removeClass(document.querySelector('.view-more'), 'down');
-        document.querySelector('.view-more').innerText = document
-          .querySelector('.view-more').getAttribute('data-up');
-        document.querySelector('.view-more-text')
-          .className = 'limit-height view-more-text show';
-      } else {
-        document.querySelector('.view-more').className = 'view-more down';
-        removeClass(document.querySelector('.view-more-text'), 'show');
-        document.querySelector('.view-more').innerText = document
-          .querySelector('.view-more').getAttribute('data-down');
-      }
-    });
-  }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
-  }
+    /** @override */
+    viewportCallback() {
+        let hasClass = (ele, cls) => {
+            if (!cls) {
+                return false;
+            }
+            return new RegExp(' ' + cls + ' ').test(' ' + ele.className + ' ');
+        };
+
+        let addClass = (ele, cls) => {
+            if (cls.replace(/\s*/g, '')) {
+                !hasClass(ele, cls) && (ele.className = ele
+                    .className == '' ? cls : ele.className + ' ' + cls);
+            }
+        };
+
+        let removeClass = (ele, cls) => {
+            if (hasClass(ele, cls)) {
+                let newClass = ' ' + ele.className.replace(/[\t\r\n]/g, '') + ' ';
+                while (newClass.indexOf(' ' + cls + ' ') >= 0) {
+                    newClass = newClass.replace(' ' + cls + ' ', ' ');
+                }
+                ele.className = newClass.replace(/^\s+|\s+$/g, '');
+            }
+        };
+        if (document.querySelector('.msg-text').clientHeight <= 95) {
+            addClass(document.querySelector('.view-more'), 'hide');
+        } else {
+            addClass(document.querySelector('.view-more-text'), 'limit-height');
+        }
+        document.querySelector('.view-more').addEventListener('click', function () {
+            if (hasClass(document.querySelector('.view-more'), 'down')) {
+                removeClass(document.querySelector('.view-more'), 'down');
+                document.querySelector('.view-more').innerText = document
+                    .querySelector('.view-more').getAttribute('data-up');
+                document.querySelector('.view-more-text')
+                    .className = 'limit-height view-more-text show';
+            } else {
+                document.querySelector('.view-more').className = 'view-more down';
+                removeClass(document.querySelector('.view-more-text'), 'show');
+                document.querySelector('.view-more').innerText = document
+                    .querySelector('.view-more').getAttribute('data-down');
+            }
+        });
+    }
+
+    /** @override */
+    isLayoutSupported(layout) {
+        return layout == Layout.RESPONSIVE;
+    }
 }
 AMP.extension('amp-linkeddb-showmore', '0.1', AMP => {
-  AMP.registerElement('amp-linkeddb-showmore', AmpLinkeddbShowmore, CSS);
+    AMP.registerElement('amp-linkeddb-showmore', AmpLinkeddbShowmore, CSS);
 });
