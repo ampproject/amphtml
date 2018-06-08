@@ -515,7 +515,8 @@ export class HistoryBindingNatural_ {
     return this.whenReady_(() => {
       const updatedState = this.mergeStateUpdate_(this.getState_(),
           opt_stateUpdate || {});
-      this.historyPushState_(updatedState);
+      this.historyPushState_(updatedState, /* title */ undefined,
+          updatedState.fragment ? ('#' + updatedState.fragment) : undefined);
       return tryResolve(() => this.mergeStateUpdate_(updatedState,
           {stackIndex: this.stackIndex_}));
     });
@@ -540,8 +541,8 @@ export class HistoryBindingNatural_ {
       const updatedState = this.mergeStateUpdate_(
           this.getState_(),
           opt_stateUpdate || {});
-      this.historyReplaceState_(updatedState, '',
-          '#' + (updatedState.fragment || ''));
+      this.historyReplaceState_(updatedState, /* title */ undefined,
+          updatedState.fragment ? ('#' + updatedState.fragment) : undefined);
       return tryResolve(() => this.mergeStateUpdate_(updatedState, {
         stackIndex: this.stackIndex_,
       }));
