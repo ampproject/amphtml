@@ -61,12 +61,6 @@ const DEFAULT_BUTTON_PADDING = 16;
  */
 const MIN_BUTTON_PADDING = 10;
 
-/**
- * Share providers tag.
- * @private @const {string}
- */
-const SHARE_PROVIDERS = 'share-providers';
-
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -307,6 +301,24 @@ export class ShareWidget {
   }
 
   /**
+   * Reads the share providers from the bookend JSON config.
+   * @param {!JsonObject} config
+   * @return {?Array<string|!JsonObject>} Providers config.
+   */
+  readProviders(config) {
+    const shareProvidersDeprecated = config['share-providers'];
+    const shareProviders = config['shareProviders'];
+    if (shareProvidersDeprecated) {
+      user().warn('amp-story-bookend config', '`share-providers` is ' +
+        'deprecated, please use `shareProviders`.');
+      return shareProvidersDeprecated;
+    } else if (shareProviders) {
+      return shareProviders;
+    }
+    return null;
+  }
+
+  /**
    * Loads and applies the share providers configured by the publisher.
    * @protected
    */
@@ -314,7 +326,7 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      const providers = config && config[SHARE_PROVIDERS];
+      const providers = config && this.readProviders(config);
       if (!providers) {
         return;
       }

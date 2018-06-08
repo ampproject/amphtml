@@ -48,7 +48,7 @@ const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 // TODO(#14591): Clean when bookend API v0.1 is deprecated.
 const BOOKEND_VERSION_1 = 'v1.0';
 const BOOKEND_VERSION_0 = 'v0.1';
-const BOOKEND_VERSION_KEY = 'bookend-version';
+const BOOKEND_VERSION_KEY = 'bookendVersion';
 
 /** @private @const {!../simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
@@ -320,6 +320,24 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
+   * Reads the bookend version from the bookend JSON config.
+   * @param {!JsonObject} config
+   * @return {?Array<string|!JsonObject>} Providers config.
+   */
+  readBookendVersion(config) {
+    const bookendVersionDeprecated = config['bookend-version'];
+    const bookendVersion = config[BOOKEND_VERSION_KEY];
+    if (bookendVersionDeprecated) {
+      user().warn('amp-story-bookend config', '`bookend-version` is ' +
+      'deprecated, please use `bookendVersion`');
+      return bookendVersionDeprecated;
+    } else if (bookendVersion) {
+      return bookendVersion;
+    }
+    return null;
+  }
+
+  /**
    * Retrieves the publisher bookend configuration.
    * @return {!Promise<?./bookend-component.BookendDataDef>}
    */
@@ -332,14 +350,14 @@ export class AmpStoryBookend extends AMP.BaseElement {
       if (!response) {
         return null;
       }
-      if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_1) {
+      if (this.readBookendVersion(response) === BOOKEND_VERSION_1) {
         const components = BookendComponent.buildFromJson(
             response['components'], this.element);
 
         this.config_ = /** @type {./bookend-component.BookendDataDef} */ ({
           [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
           'components': components,
-          'share-providers': response['share-providers'],
+          'shareProviders': this.shareWidget_.readProviders(response),
         });
       } else {
         // TODO(#14667): Write doc regarding amp-story bookend v1.0.
