@@ -303,7 +303,9 @@ function getTestsFor(srcFiles) {
  */
 function unitTestsToRun() {
   const filesChanged = gitDiffNameOnlyMaster();
-  const testsToRun = [];
+  // Adds a dummy always-passing test for avoiding spurious failure
+  // See comment in test/simple-test.js or #15935.
+  const testsToRun = ['test/simple-test.js'];
   const srcFiles = [];
   filesChanged.forEach(file => {
     if (isUnitTest(file)) {
