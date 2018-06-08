@@ -305,6 +305,7 @@ function unitTestsToRun() {
   const filesChanged = gitDiffNameOnlyMaster();
   const testsToRun = [];
   const srcFiles = [];
+  testsToRun.push('test/simple-test.js');
   filesChanged.forEach(file => {
     if (isUnitTest(file)) {
       testsToRun.push(file);
