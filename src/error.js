@@ -272,7 +272,9 @@ export function isBlockedByConsent(errorOrMessage) {
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (reportErrorToServer);
   win.addEventListener('unhandledrejection', event => {
-    if (event.reason && event.reason.message === CANCELLED) {
+    if (event.reason &&
+      (event.reason.message === CANCELLED ||
+      event.reason.message === BLOCK_BY_CONSENT)) {
       event.preventDefault();
       return;
     }
@@ -550,7 +552,7 @@ export function resetAccumulatedErrorMessagesForTesting() {
  * @visibleForTesting
  */
 export function detectJsEngineFromStack() {
-  /** @constructor */
+  /** @constructor */ // eslint-disable-line
   function Fn() {}
   Fn.prototype.t = function() {
     throw new Error('message');
