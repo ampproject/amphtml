@@ -216,8 +216,8 @@ function runSanitizerTests() {
     });
 
     it('should output "on" attribute', () => {
-      expect(sanitizeHtml('a<a on="tap">b</a>')).to.be.equal(
-          'a<a on="tap">b</a>');
+      expect(sanitizeHtml('a<a on="tap:AMP.print">b</a>')).to.be.equal(
+          'a<a on="tap:AMP.print">b</a>');
     });
 
     it('should output "data-, aria-, and role" attributes', () => {
@@ -248,6 +248,26 @@ function runSanitizerTests() {
       const expected = serialize(
           'a<a href="http://acme.com/" rel="amphtml" target="_top">b</a>');
       expectEqualNodeLists(actual, expected);
+    });
+
+    it('should output "layout" attribute', () => {
+      const img = '<amp-img layout="responsive"></amp-img>';
+      expect(sanitizeHtml(img)).to.equal(img);
+    });
+
+    it('should output "media" attribute', () => {
+      const img = '<amp-img media="(min-width: 650px)"></amp-img>';
+      expect(sanitizeHtml(img)).to.equal(img);
+    });
+
+    it('should output "sizes" attribute', () => {
+      const img = '<amp-img sizes="(min-width: 650px) 50vw, 100vw"></amp-img>';
+      expect(sanitizeHtml(img)).to.equal(img);
+    });
+
+    it('should output "heights" attribute', () => {
+      const img = '<amp-img heights="(min-width:500px) 200px, 80%"></amp-img>';
+      expect(sanitizeHtml(img)).to.equal(img);
     });
 
     it('should default target to _top with href', () => {

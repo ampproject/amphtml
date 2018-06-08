@@ -21,7 +21,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/introduction/hello_world/preview/embed/",
             "urlEmbed": "/introduction/hello_world/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": " How to publish AMPs",
@@ -35,7 +36,8 @@
               "hideCode": true,
               "disablePlayground": true,
               "hidePreview": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "AMP for E-Commerce Getting Started",
@@ -47,7 +49,8 @@
             "urlEmbed": "/introduction/amp_for_e-commerce_getting_started/embed/",
             "metadata": {
               "disablePlayground": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Internationalization",
@@ -61,7 +64,8 @@
               "hideCode": true,
               "disablePlayground": true,
               "hidePreview": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false
@@ -81,7 +85,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-access-laterpay/preview/embed/",
             "urlEmbed": "/components/amp-access-laterpay/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-access",
@@ -91,7 +96,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-access/preview/embed/",
             "urlEmbed": "/components/amp-access/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-accordion",
@@ -101,7 +107,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-accordion/preview/embed/",
             "urlEmbed": "/components/amp-accordion/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-ad",
@@ -111,7 +118,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-ad/preview/embed/",
             "urlEmbed": "/components/amp-ad/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-analytics",
@@ -121,7 +129,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-analytics/preview/embed/",
             "urlEmbed": "/components/amp-analytics/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-anim",
@@ -131,7 +140,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-anim/preview/embed/",
             "urlEmbed": "/components/amp-anim/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-app-banner",
@@ -144,7 +154,8 @@
             "metadata": {
               "comment": "Don't install serviceworker as canonical domain is different that serviceworker domain",
               "skipServiceWorker": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-audio",
@@ -154,7 +165,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-audio/preview/embed/",
             "urlEmbed": "/components/amp-audio/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-bind",
@@ -164,7 +176,21 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-bind/preview/embed/",
             "urlEmbed": "/components/amp-bind/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "amp-bodymovin-animation",
+            "name": "amp-bodymovin-animation",
+            "description": "Embed Bodymovin animations in your AMP HTML files.",
+            "url": "/components/amp-bodymovin-animation/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-bodymovin-animation/preview/embed/",
+            "urlEmbed": "/components/amp-bodymovin-animation/embed/",
+            "metadata": {
+              "skipValidation": "true"
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-brid-player",
@@ -174,7 +200,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-brid-player/preview/embed/",
             "urlEmbed": "/components/amp-brid-player/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-brightcove",
@@ -184,7 +211,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-brightcove/preview/embed/",
             "urlEmbed": "/components/amp-brightcove/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-call-tracking",
@@ -194,7 +222,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-call-tracking/preview/embed/",
             "urlEmbed": "/components/amp-call-tracking/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-carousel",
@@ -204,7 +233,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-carousel/preview/embed/",
             "urlEmbed": "/components/amp-carousel/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-dailymotion",
@@ -214,7 +244,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-dailymotion/preview/embed/",
             "urlEmbed": "/components/amp-dailymotion/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-date-picker",
@@ -232,7 +263,8 @@
             "experiments": [
               "amp-date-picker"
             ],
-            "experiment": true
+            "experiment": true,
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-dynamic-css-classes",
@@ -242,7 +274,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-dynamic-css-classes/preview/embed/",
             "urlEmbed": "/components/amp-dynamic-css-classes/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-experiment",
@@ -252,7 +285,41 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-experiment/preview/embed/",
             "urlEmbed": "/components/amp-experiment/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "amp-facebook-comments",
+            "name": "amp-facebook-comments",
+            "description": "The amp-facebook-comments component allows embedding Facebook comments into AMP files.",
+            "url": "/components/amp-facebook-comments/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-facebook-comments/preview/embed/",
+            "urlEmbed": "/components/amp-facebook-comments/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "amp-facebook-like",
+            "name": "amp-facebook-like",
+            "description": "The amp-facebook-like component allows embedding Facebook like button into AMP files.",
+            "url": "/components/amp-facebook-like/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-facebook-like/preview/embed/",
+            "urlEmbed": "/components/amp-facebook-like/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "amp-facebook-page",
+            "name": "amp-facebook-page",
+            "description": "The amp-facebook-page component allows embedding Facebook pages into AMP files.",
+            "url": "/components/amp-facebook-page/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-facebook-page/preview/embed/",
+            "urlEmbed": "/components/amp-facebook-page/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-facebook",
@@ -262,7 +329,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-facebook/preview/embed/",
             "urlEmbed": "/components/amp-facebook/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-fit-text",
@@ -272,7 +340,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-fit-text/preview/embed/",
             "urlEmbed": "/components/amp-fit-text/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-font",
@@ -282,7 +351,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-font/preview/embed/",
             "urlEmbed": "/components/amp-font/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-form",
@@ -293,15 +363,29 @@
             "urlPreviewEmbed": "/components/amp-form/preview/embed/",
             "urlEmbed": "/components/amp-form/embed/",
             "metadata": {
-              "preview": "default",
+              "preview": "default"
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "amp-fx-collection",
+            "name": "amp-fx-collection",
+            "description": "The amp-fx-collection extension   provides a collection of preset visual effects, such as parallax that can be easily enabled on any element   via amp-fx attribute.",
+            "url": "/components/amp-fx-collection/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-fx-collection/preview/embed/",
+            "urlEmbed": "/components/amp-fx-collection/embed/",
+            "metadata": {
+              "skipValidation": "true",
               "experiments": [
-                "amp-form-verifiers"
+                "amp-fx-fly-in"
               ]
             },
             "experiments": [
-              "amp-form-verifiers"
+              "amp-fx-fly-in"
             ],
-            "experiment": true
+            "experiment": true,
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-fx-flying-carpet",
@@ -311,26 +395,19 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-fx-flying-carpet/preview/embed/",
             "urlEmbed": "/components/amp-fx-flying-carpet/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
-            "title": "amp-fx-parallax",
-            "name": "amp-fx-parallax",
-            "description": "The amp-fx-parallax extension allows an element to move as if it is nearer or farther relative to the foreground of the page content.",
-            "url": "/components/amp-fx-parallax/",
-            "urlPreview": "/components/amp-fx-parallax/preview/",
-            "urlPreviewEmbed": "/components/amp-fx-parallax/preview/embed/",
-            "urlEmbed": "/components/amp-fx-parallax/embed/",
-            "metadata": {
-              "experiments": [
-                "amp-fx-parallax"
-              ],
-              "preview": "default"
-            },
-            "experiments": [
-              "amp-fx-parallax"
-            ],
-            "experiment": true
+            "title": "amp-geo",
+            "name": "amp-geo",
+            "description": "The amp-geo extension extension   makes it possible to vary small sections of content based on an approximation of the users' country-level location, similar to the level of an ISO Country Code.",
+            "url": "/components/amp-geo/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-geo/preview/embed/",
+            "urlEmbed": "/components/amp-geo/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-gfycat",
@@ -340,7 +417,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-gfycat/preview/embed/",
             "urlEmbed": "/components/amp-gfycat/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-gist",
@@ -350,7 +428,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-gist/preview/embed/",
             "urlEmbed": "/components/amp-gist/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-google-vrview-image",
@@ -369,7 +448,8 @@
             "experiments": [
               "amp-google-vrview-image"
             ],
-            "experiment": true
+            "experiment": true,
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-hulu",
@@ -379,7 +459,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-hulu/preview/embed/",
             "urlEmbed": "/components/amp-hulu/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-iframe",
@@ -389,7 +470,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-iframe/preview/embed/",
             "urlEmbed": "/components/amp-iframe/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-ima-video",
@@ -399,7 +481,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-ima-video/preview/embed/",
             "urlEmbed": "/components/amp-ima-video/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-image-lightbox",
@@ -409,7 +492,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-image-lightbox/preview/embed/",
             "urlEmbed": "/components/amp-image-lightbox/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-img",
@@ -419,7 +503,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-img/preview/embed/",
             "urlEmbed": "/components/amp-img/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-instagram",
@@ -429,7 +514,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-instagram/preview/embed/",
             "urlEmbed": "/components/amp-instagram/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-install-serviceworker",
@@ -441,7 +527,8 @@
             "urlEmbed": "/components/amp-install-serviceworker/embed/",
             "metadata": {
               "hidePreview": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-jwplayer",
@@ -451,7 +538,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-jwplayer/preview/embed/",
             "urlEmbed": "/components/amp-jwplayer/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-kaltura-player",
@@ -461,7 +549,28 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-kaltura-player/preview/embed/",
             "urlEmbed": "/components/amp-kaltura-player/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "amp-lightbox-gallery",
+            "name": "amp-lightbox-gallery",
+            "description": "The amp-lightbox-gallery component provides a \"lightbox” experience for AMP components (e.g., amp-img, amp-carousel).",
+            "url": "/components/amp-lightbox-gallery/",
+            "urlPreview": "/components/amp-lightbox-gallery/preview/",
+            "urlPreviewEmbed": "/components/amp-lightbox-gallery/preview/embed/",
+            "urlEmbed": "/components/amp-lightbox-gallery/embed/",
+            "metadata": {
+              "experiments": [
+                "amp-lightbox-gallery"
+              ],
+              "preview": "default"
+            },
+            "experiments": [
+              "amp-lightbox-gallery"
+            ],
+            "experiment": true,
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-lightbox",
@@ -471,7 +580,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-lightbox/preview/embed/",
             "urlEmbed": "/components/amp-lightbox/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-list",
@@ -481,7 +591,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-list/preview/embed/",
             "urlEmbed": "/components/amp-list/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-live-list",
@@ -491,7 +602,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-live-list/preview/embed/",
             "urlEmbed": "/components/amp-live-list/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-mustache",
@@ -501,7 +613,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-mustache/preview/embed/",
             "urlEmbed": "/components/amp-mustache/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-o2-player",
@@ -511,7 +624,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-o2-player/preview/embed/",
             "urlEmbed": "/components/amp-o2-player/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-pinterest",
@@ -521,7 +635,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-pinterest/preview/embed/",
             "urlEmbed": "/components/amp-pinterest/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-pixel",
@@ -533,7 +648,8 @@
             "urlEmbed": "/components/amp-pixel/embed/",
             "metadata": {
               "skipValidation": "true"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-reach-player",
@@ -543,7 +659,19 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-reach-player/preview/embed/",
             "urlEmbed": "/components/amp-reach-player/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "amp-reddit",
+            "name": "amp-reddit",
+            "description": "The amp-reddit component allows embedding both reddit posts and comments into AMP files.",
+            "url": "/components/amp-reddit/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-reddit/preview/embed/",
+            "urlEmbed": "/components/amp-reddit/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-selector",
@@ -553,7 +681,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-selector/preview/embed/",
             "urlEmbed": "/components/amp-selector/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-sidebar",
@@ -566,7 +695,8 @@
             "metadata": {
               "skipValidation": "true",
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-social-share",
@@ -576,7 +706,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-social-share/preview/embed/",
             "urlEmbed": "/components/amp-social-share/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-soundcloud",
@@ -586,7 +717,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-soundcloud/preview/embed/",
             "urlEmbed": "/components/amp-soundcloud/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-springboard-player",
@@ -596,7 +728,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-springboard-player/preview/embed/",
             "urlEmbed": "/components/amp-springboard-player/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-sticky-ad",
@@ -606,7 +739,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-sticky-ad/preview/embed/",
             "urlEmbed": "/components/amp-sticky-ad/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-timeago",
@@ -616,7 +750,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-timeago/preview/embed/",
             "urlEmbed": "/components/amp-timeago/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-twitter",
@@ -626,7 +761,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-twitter/preview/embed/",
             "urlEmbed": "/components/amp-twitter/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-user-notification",
@@ -636,7 +772,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-user-notification/preview/embed/",
             "urlEmbed": "/components/amp-user-notification/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-video",
@@ -646,7 +783,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-video/preview/embed/",
             "urlEmbed": "/components/amp-video/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-vimeo",
@@ -656,7 +794,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-vimeo/preview/embed/",
             "urlEmbed": "/components/amp-vimeo/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-vine",
@@ -666,7 +805,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-vine/preview/embed/",
             "urlEmbed": "/components/amp-vine/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "amp-youtube",
@@ -676,7 +816,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/components/amp-youtube/preview/embed/",
             "urlEmbed": "/components/amp-youtube/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false
@@ -689,16 +830,6 @@
         "targetDir": "advanced/index.html",
         "examples": [
           {
-            "title": "amp-user-notification with Server Endpoint",
-            "name": "amp-user-notification_with_Server_Endpoint",
-            "description": "Use amp-user-notification to display a dismissable notification to the user.",
-            "url": "/advanced/amp-user-notification_with_server_endpoint/",
-            "urlPreview": null,
-            "urlPreviewEmbed": "/advanced/amp-user-notification_with_server_endpoint/preview/embed/",
-            "urlEmbed": "/advanced/amp-user-notification_with_server_endpoint/embed/",
-            "metadata": {}
-          },
-          {
             "title": "Autosuggest",
             "name": "Autosuggest",
             "description": "This sample showcases how to implement an interactive autosuggest form field.",
@@ -709,7 +840,8 @@
             "metadata": {
               "preview": "default",
               "draft": false
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Click-to-play overlay for amp-video",
@@ -719,7 +851,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/advanced/click-to-play_overlay_for_amp-video/preview/embed/",
             "urlEmbed": "/advanced/click-to-play_overlay_for_amp-video/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "ComboBox",
@@ -731,7 +864,8 @@
             "urlEmbed": "/advanced/combobox/embed/",
             "metadata": {
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Custom Loading Indicators",
@@ -741,7 +875,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/advanced/custom_loading_indicators/preview/embed/",
             "urlEmbed": "/advanced/custom_loading_indicators/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Favorite Button",
@@ -751,19 +886,21 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/advanced/favorite_button/preview/embed/",
             "urlEmbed": "/advanced/favorite_button/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Geolocation with amp-list",
             "name": "Geolocation_with_amp-list",
-            "description": "While the AMP Caches don't offer support for geolocation, you can enable   geo-based features with geolocation logic on your backend and   amp-list.",
+            "description": "If you need more fine-grained geolocation support than provided by the amp-geo extension,   you can implement geo-based features with geolocation logic on your backend and   amp-list.",
             "url": "/advanced/geolocation_with_amp-list/",
             "urlPreview": "/advanced/geolocation_with_amp-list/preview/",
             "urlPreviewEmbed": "/advanced/geolocation_with_amp-list/preview/embed/",
             "urlEmbed": "/advanced/geolocation_with_amp-list/embed/",
             "metadata": {
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "How to support Images with unknown Dimensions?",
@@ -773,7 +910,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/advanced/how_to_support_images_with_unknown_dimensions/preview/embed/",
             "urlEmbed": "/advanced/how_to_support_images_with_unknown_dimensions/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Image Galleries with amp-carousel",
@@ -786,6 +924,7 @@
             "metadata": {
               "highlight": true
             },
+            "firstImage": "/favicons/android-chrome-256x256.png",
             "highlight": true
           },
           {
@@ -796,7 +935,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/advanced/integrating_videos_in_amp_an_overview/preview/embed/",
             "urlEmbed": "/advanced/integrating_videos_in_amp_an_overview/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Layout System",
@@ -806,7 +946,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/advanced/layout_system/preview/embed/",
             "urlEmbed": "/advanced/layout_system/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Linked Dropdowns",
@@ -818,7 +959,8 @@
             "urlEmbed": "/advanced/linked_dropdowns/embed/",
             "metadata": {
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Long List of amp-instagram Embeds",
@@ -830,7 +972,8 @@
             "urlEmbed": "/advanced/long_list_of_amp-instagram_embeds/embed/",
             "metadata": {
               "comment": "Hack: using `&nbsp;` to ensure that code and preview sections are visible on mobile. "
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Paged List",
@@ -842,7 +985,8 @@
             "urlEmbed": "/advanced/paged_list/embed/",
             "metadata": {
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Payments in AMP",
@@ -854,7 +998,8 @@
             "urlEmbed": "/advanced/payments_in_amp/embed/",
             "metadata": {
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Rich Media Notifications",
@@ -864,7 +1009,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/advanced/rich_media_notifications/preview/embed/",
             "urlEmbed": "/advanced/rich_media_notifications/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Show More Button",
@@ -877,7 +1023,8 @@
             "metadata": {
               "preview": "default",
               "default": "preview"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Star Rating",
@@ -889,7 +1036,8 @@
             "urlEmbed": "/advanced/star_rating/embed/",
             "metadata": {
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Tab Panels with amp-selector",
@@ -901,7 +1049,8 @@
             "urlEmbed": "/advanced/tab_panels_with_amp-selector/embed/",
             "metadata": {
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Using the AMP URL API",
@@ -916,7 +1065,8 @@
               "hidePreview": true,
               "disablePlayground": true,
               "skipValidation": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Using the Google AMP Cache",
@@ -930,7 +1080,8 @@
               "hideCode": true,
               "disablePlayground": true,
               "hidePreview": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Video Carousels with amp-carousel",
@@ -940,7 +1091,22 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/advanced/video_carousels_with_amp-carousel/preview/embed/",
             "urlEmbed": "/advanced/video_carousels_with_amp-carousel/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "Video rotate to fullscreen with hint",
+            "name": "Video_rotate_to_fullscreen_with_hint",
+            "description": "This is a sample template for implementing rotate-to-fullscreen with a user hint in AMP.",
+            "url": "/advanced/video_rotate_to_fullscreen_with_hint/",
+            "urlPreview": "/advanced/video_rotate_to_fullscreen_with_hint/preview/",
+            "urlPreviewEmbed": "/advanced/video_rotate_to_fullscreen_with_hint/preview/embed/",
+            "urlEmbed": "/advanced/video_rotate_to_fullscreen_with_hint/embed/",
+            "metadata": {
+              "preview": "default",
+              "default": "preview"
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false
@@ -952,6 +1118,17 @@
         "targetDir": "dynamic_amp/index.html",
         "examples": [
           {
+            "title": "Client-side filtering",
+            "name": "Client-side filtering",
+            "description": "This is a sample showing how to implement client-side filtering.",
+            "url": "/dynamic_amp/client-side filtering/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/dynamic_amp/client-side filtering/preview/embed/",
+            "urlEmbed": "/dynamic_amp/client-side filtering/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
             "title": "Dynamic Content After User-Interaction",
             "name": "Dynamic_Content_After_User-Interaction",
             "description": "This is a sample showing how to show dynamic content after an user interaction: the product availability will be shown based on product selection.",
@@ -959,7 +1136,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/dynamic_amp/dynamic_content_after_user-interaction/preview/embed/",
             "urlEmbed": "/dynamic_amp/dynamic_content_after_user-interaction/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "How to embed interactive elements on AMP pages?",
@@ -972,7 +1150,8 @@
             "metadata": {
               "highligh": true,
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Mixing Dynamic and Cached Data",
@@ -982,7 +1161,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/dynamic_amp/mixing_dynamic_and_cached_data/preview/embed/",
             "urlEmbed": "/dynamic_amp/mixing_dynamic_and_cached_data/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Multi Page Flow",
@@ -995,7 +1175,8 @@
             "metadata": {
               "preview": "default",
               "default": "preview"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false
@@ -1016,7 +1197,8 @@
             "urlEmbed": "/visual_effects/animated_snackbar/embed/",
             "metadata": {
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Basics of scrollbound effects",
@@ -1026,7 +1208,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/visual_effects/basics_of_scrollbound_effects/preview/embed/",
             "urlEmbed": "/visual_effects/basics_of_scrollbound_effects/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Scroll to top",
@@ -1036,7 +1219,8 @@
             "urlPreview": null,
             "urlPreviewEmbed": "/visual_effects/scroll_to_top/preview/embed/",
             "urlEmbed": "/visual_effects/scroll_to_top/embed/",
-            "metadata": {}
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false
@@ -1059,7 +1243,8 @@
             "metadata": {
               "preview": "default",
               "default": "preview"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Comment Section",
@@ -1072,7 +1257,30 @@
             "metadata": {
               "preview": "default",
               "default": "preview"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "Hotel",
+            "name": "Hotel",
+            "description": "This is a sample showing how to implement an hotel page.",
+            "url": "/samples_templates/hotel/",
+            "urlPreview": "/samples_templates/hotel/preview/",
+            "urlPreviewEmbed": "/samples_templates/hotel/preview/embed/",
+            "urlEmbed": "/samples_templates/hotel/embed/",
+            "metadata": {
+              "preview": "default",
+              "experiments": [
+                "amp-date-picker",
+                "amp-lightbox-gallery"
+              ]
+            },
+            "experiments": [
+              "amp-date-picker",
+              "amp-lightbox-gallery"
+            ],
+            "experiment": true,
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Housing",
@@ -1085,7 +1293,8 @@
             "metadata": {
               "default": "preview",
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Live Blog",
@@ -1099,7 +1308,8 @@
               "preview": "default",
               "default": "preview",
               "skipValidation": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "News Article",
@@ -1112,7 +1322,8 @@
             "metadata": {
               "default": "preview",
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Poll",
@@ -1124,7 +1335,8 @@
             "urlEmbed": "/samples_templates/poll/embed/",
             "metadata": {
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Product Browse Page",
@@ -1138,7 +1350,8 @@
               "preview": "default",
               "default": "preview",
               "skipValidation": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Product Page",
@@ -1152,7 +1365,8 @@
               "preview": "default",
               "default": "preview",
               "hideCode": true
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Recipe",
@@ -1165,7 +1379,62 @@
             "metadata": {
               "default": "preview",
               "preview": "default"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          }
+        ],
+        "selected": false
+      },
+      {
+        "description": "<p>Samples demonstrating how to ask users for consent.</p>\n",
+        "name": "User Consent",
+        "url": "/#user_consent",
+        "id": "user_consent",
+        "targetDir": "user_consent/index.html",
+        "examples": [
+          {
+            "title": " Basic User Consent Flow",
+            "name": "_Basic_User_Consent_Flow",
+            "description": "Users today want additional control over their online experience.",
+            "url": "/user_consent/basic_user_consent_flow/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/user_consent/basic_user_consent_flow/preview/embed/",
+            "urlEmbed": "/user_consent/basic_user_consent_flow/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "Advanced User Consent Flow",
+            "name": "Advanced_User_Consent_Flow",
+            "description": "Users today want additional control over their online experience.",
+            "url": "/user_consent/advanced_user_consent_flow/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/user_consent/advanced_user_consent_flow/preview/embed/",
+            "urlEmbed": "/user_consent/advanced_user_consent_flow/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "amp-user-notification with Server Endpoint",
+            "name": "amp-user-notification_with_Server_Endpoint",
+            "description": "Use amp-user-notification to display a dismissable notification to the user.",
+            "url": "/user_consent/amp-user-notification_with_server_endpoint/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/user_consent/amp-user-notification_with_server_endpoint/preview/embed/",
+            "urlEmbed": "/user_consent/amp-user-notification_with_server_endpoint/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "Geolocation-based Consent Flow",
+            "name": "Geolocation-based_Consent_Flow",
+            "description": "Sometimes is necessary to ask only users from specific countries for consent.",
+            "url": "/user_consent/geolocation-based_consent_flow/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/user_consent/geolocation-based_consent_flow/preview/embed/",
+            "urlEmbed": "/user_consent/geolocation-based_consent_flow/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false
@@ -1198,7 +1467,8 @@
             "metadata": {
               "preview": "a4a",
               "skipValidation": "true"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "AMPHTML ads vs non-AMP ads",
@@ -1212,7 +1482,8 @@
               "preview": "cache",
               "adSlot": "/30497360/amp_by_example/AMP_Banner_300x250",
               "skipValidation": "true"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false
@@ -1235,21 +1506,8 @@
               "preview": "a4a",
               "adSlot": "/30497360/amp_by_example/AMP_Banner_300x250",
               "skipValidation": "true"
-            }
-          },
-          {
-            "title": "Carousel Ad",
-            "name": "Carousel_Ad",
-            "description": "Sample AMPHTML ad using amp-carousel to display a slide-show style ad.",
-            "url": "/amp-ads/basic_ads/carousel_ad/",
-            "urlPreview": "https://ampbyexample-com.cdn.ampproject.org/c/s/ampbyexample.com/amp-ads/basic_ads/carousel_ad/preview/?exp=a4a:-1",
-            "urlPreviewEmbed": "/amp-ads/basic_ads/carousel_ad/preview/embed/",
-            "urlEmbed": "/amp-ads/basic_ads/carousel_ad/embed/",
-            "metadata": {
-              "preview": "a4a",
-              "adSlot": "/30497360/amp_by_example/AMP_Carousel_300x250",
-              "skipValidation": "true"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false
@@ -1261,20 +1519,92 @@
         "targetDir": "amp-ads/advanced_ads/index.html",
         "examples": [
           {
+            "title": "Carousel Ad",
+            "name": "Carousel_Ad",
+            "description": "Sample AMPHTML ad using amp-carousel to create an interactive ad.",
+            "url": "/amp-ads/advanced_ads/carousel_ad/",
+            "urlPreview": "/amp-ads/advanced_ads/carousel_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/advanced_ads/carousel_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/advanced_ads/carousel_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "hidePreview": true,
+              "skipValidation": "true",
+              "width": 350,
+              "height": 240,
+              "layout": "responsive"
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "Scrollbound Animation Ad",
+            "name": "Scrollbound_Animation_Ad",
+            "description": "Sample AMPHTML ad using amp-position-observer, and amp-animation to create an interactive ad.",
+            "url": "/amp-ads/advanced_ads/scrollbound_animation_ad/",
+            "urlPreview": "/amp-ads/advanced_ads/scrollbound_animation_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/advanced_ads/scrollbound_animation_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/advanced_ads/scrollbound_animation_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "hidePreview": true,
+              "skipValidation": "true",
+              "width": 350,
+              "height": 240,
+              "layout": "responsive"
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "Scrollbound Video Ad",
+            "name": "Scrollbound_Video_Ad",
+            "description": "Sample AMPHTML ad using amp-animation,   amp-video   amp-img   and amp-position-observer   to create an ad that animates based on scrolling.",
+            "url": "/amp-ads/advanced_ads/scrollbound_video_ad/",
+            "urlPreview": "/amp-ads/advanced_ads/scrollbound_video_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/advanced_ads/scrollbound_video_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/advanced_ads/scrollbound_video_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "hidePreview": true,
+              "skipValidation": "true",
+              "width": 350,
+              "height": 240,
+              "layout": "responsive"
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "Slides Ad",
+            "name": "Slides_Ad",
+            "description": "Sample AMPHTML ad using amp-carousel to create an interactive ad.",
+            "url": "/amp-ads/advanced_ads/slides_ad/",
+            "urlPreview": "/amp-ads/advanced_ads/slides_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/advanced_ads/slides_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/advanced_ads/slides_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "hidePreview": true,
+              "skipValidation": "true",
+              "width": 350,
+              "height": 240,
+              "layout": "responsive"
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
             "title": "Video Ad",
             "name": "Video_Ad",
-            "description": "Sample AMPHTML ad using amp-video to display a video ad with layers and playback control.",
+            "description": "Sample AMPHTML ad using amp-video, to display a video ad with layers and playback control.",
             "url": "/amp-ads/advanced_ads/video_ad/",
-            "urlPreview": "https://ampbyexample-com.cdn.ampproject.org/c/s/ampbyexample.com/amp-ads/advanced_ads/video_ad/preview/?exp=a4a:-1",
+            "urlPreview": "/amp-ads/advanced_ads/video_ad/preview/",
             "urlPreviewEmbed": "/amp-ads/advanced_ads/video_ad/preview/embed/",
             "urlEmbed": "/amp-ads/advanced_ads/video_ad/embed/",
             "metadata": {
               "preview": "a4a",
-              "adSlot": "/30497360/amp_by_example/AMP_Video_Ad_300x168",
               "skipValidation": "true",
               "width": 300,
               "height": 168
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false
@@ -1287,13 +1617,13 @@
         "targetDir": "amp-ads/experimental_ads/index.html",
         "examples": [
           {
-            "title": "Carousel Lightbox Ad",
-            "name": "Carousel_Lightbox_Ad",
-            "description": "Sample AMPHTML ad using amp-lightbox, and amp-carousel to create an interactive ad.",
-            "url": "/amp-ads/experimental_ads/carousel_lightbox_ad/",
-            "urlPreview": "/amp-ads/experimental_ads/carousel_lightbox_ad/preview/",
-            "urlPreviewEmbed": "/amp-ads/experimental_ads/carousel_lightbox_ad/preview/embed/",
-            "urlEmbed": "/amp-ads/experimental_ads/carousel_lightbox_ad/embed/",
+            "title": "Lightbox Ad",
+            "name": "Lightbox_Ad",
+            "description": "Sample AMPHTML ad using amp-lightbox.",
+            "url": "/amp-ads/experimental_ads/lightbox_ad/",
+            "urlPreview": "/amp-ads/experimental_ads/lightbox_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/experimental_ads/lightbox_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/experimental_ads/lightbox_ad/embed/",
             "metadata": {
               "preview": "a4a",
               "skipValidation": true,
@@ -1303,117 +1633,14 @@
               ],
               "width": 350,
               "height": 240,
-              "layout": "responsive"
-            },
-            "experiments": [
-              "amp-lightbox-a4a-proto"
-            ],
-            "experiment": true
-          },
-          {
-            "title": "Scrollbound Lightbox Ad",
-            "name": "Scrollbound_Lightbox_Ad",
-            "description": "Sample AMPHTML ad using amp-lightbox, and amp-animation to create an interactive ad.",
-            "url": "/amp-ads/experimental_ads/scrollbound_lightbox_ad/",
-            "urlPreview": "/amp-ads/experimental_ads/scrollbound_lightbox_ad/preview/",
-            "urlPreviewEmbed": "/amp-ads/experimental_ads/scrollbound_lightbox_ad/preview/embed/",
-            "urlEmbed": "/amp-ads/experimental_ads/scrollbound_lightbox_ad/embed/",
-            "metadata": {
-              "preview": "a4a",
-              "skipValidation": true,
-              "hidePreview": true,
-              "experiments": [
-                "amp-animation",
-                "amp-lightbox-a4a-proto"
-              ],
-              "width": 350,
-              "height": 240,
               "layout": "responsive",
               "scrollToReveal": true
             },
             "experiments": [
-              "amp-animation",
               "amp-lightbox-a4a-proto"
             ],
-            "experiment": true
-          },
-          {
-            "title": "Scrollbound Slides 360 Ad",
-            "name": "Scrollbound_Slides_360_Ad",
-            "description": "Sample AMPHTML ad using amp-animation,   amp-lightbox,   amp-google-vrview-image,   and amp-img   to create an ad that changes slides based on scrolling and displays a 360 image in a lightbox.",
-            "url": "/amp-ads/experimental_ads/scrollbound_slides_360_ad/",
-            "urlPreview": "/amp-ads/experimental_ads/scrollbound_slides_360_ad/preview/",
-            "urlPreviewEmbed": "/amp-ads/experimental_ads/scrollbound_slides_360_ad/preview/embed/",
-            "urlEmbed": "/amp-ads/experimental_ads/scrollbound_slides_360_ad/embed/",
-            "metadata": {
-              "preview": "a4a",
-              "skipValidation": true,
-              "hidePreview": true,
-              "experiments": [
-                "amp-animation",
-                "amp-google-vrview-image",
-                "amp-lightbox-a4a-proto"
-              ],
-              "width": 350,
-              "height": 250,
-              "layout": "responsive",
-              "scrollToReveal": true
-            },
-            "experiments": [
-              "amp-animation",
-              "amp-google-vrview-image",
-              "amp-lightbox-a4a-proto"
-            ],
-            "experiment": true
-          },
-          {
-            "title": "Scrollbound Video Ad",
-            "name": "Scrollbound_Video_Ad",
-            "description": "Sample AMPHTML ad using amp-animation,   amp-video and amp-img   to create an ad that animates based on scrolling.",
-            "url": "/amp-ads/experimental_ads/scrollbound_video_ad/",
-            "urlPreview": "/amp-ads/experimental_ads/scrollbound_video_ad/preview/",
-            "urlPreviewEmbed": "/amp-ads/experimental_ads/scrollbound_video_ad/preview/embed/",
-            "urlEmbed": "/amp-ads/experimental_ads/scrollbound_video_ad/embed/",
-            "metadata": {
-              "preview": "a4a",
-              "skipValidation": true,
-              "hidePreview": true,
-              "experiments": [
-                "amp-animation"
-              ],
-              "width": 350,
-              "height": 250,
-              "layout": "responsive",
-              "scrollToReveal": true
-            },
-            "experiments": [
-              "amp-animation"
-            ],
-            "experiment": true
-          },
-          {
-            "title": "Slides With Lightbox Ad",
-            "name": "Slides_With_Lightbox_Ad",
-            "description": "Sample AMPHTML ad using amp-lightbox, amp-carousel and amp-bind to create an interactive ad.",
-            "url": "/amp-ads/experimental_ads/slides_with_lightbox_ad/",
-            "urlPreview": "/amp-ads/experimental_ads/slides_with_lightbox_ad/preview/",
-            "urlPreviewEmbed": "/amp-ads/experimental_ads/slides_with_lightbox_ad/preview/embed/",
-            "urlEmbed": "/amp-ads/experimental_ads/slides_with_lightbox_ad/embed/",
-            "metadata": {
-              "preview": "a4a",
-              "skipValidation": true,
-              "hidePreview": true,
-              "experiments": [
-                "amp-lightbox-a4a-proto"
-              ],
-              "width": 350,
-              "height": 240,
-              "layout": "responsive"
-            },
-            "experiments": [
-              "amp-lightbox-a4a-proto"
-            ],
-            "experiment": true
+            "experiment": true,
+            "firstImage": "/favicons/android-chrome-256x256.png"
           },
           {
             "title": "Stack With Bind Ad",
@@ -1430,7 +1657,133 @@
               "width": 350,
               "height": 240,
               "layout": "responsive"
-            }
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          }
+        ],
+        "selected": false
+      }
+    ],
+    "selected": false
+  },
+  {
+    "path": "/stories",
+    "name": "AMPHTML stories",
+    "title": "AMPHTML stories by Example",
+    "desc": "Learn how to create visual stories with AMPHTML.",
+    "index": 2,
+    "categories": [
+      {
+        "description": "<p>The basic building block of AMP stories.</p>\n",
+        "name": "Introduction",
+        "url": "/stories#stories/introduction",
+        "id": "stories/introduction",
+        "targetDir": "stories/introduction/index.html",
+        "examples": [
+          {
+            "title": " AMP Story Hello World",
+            "name": "_AMP_Story_Hello_World",
+            "description": "Learn how to create your first AMP Story.",
+            "url": "/stories/introduction/amp_story_hello_world/",
+            "urlPreview": "/stories/introduction/amp_story_hello_world/preview/embed/",
+            "urlPreviewEmbed": "/stories/introduction/amp_story_hello_world/preview/embed/",
+            "urlEmbed": "/stories/introduction/amp_story_hello_world/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          }
+        ],
+        "selected": false
+      },
+      {
+        "description": "<p>Introducing stories in AMP how they work</p>\n",
+        "name": "Features",
+        "url": "/stories#stories/features",
+        "id": "stories/features",
+        "targetDir": "stories/features/index.html",
+        "examples": [
+          {
+            "title": "Animations",
+            "name": "Animations",
+            "description": "AMP Stories support animations out-of-the-box.",
+            "url": "/stories/features/animations/",
+            "urlPreview": "/stories/features/animations/preview/embed/",
+            "urlPreviewEmbed": "/stories/features/animations/preview/embed/",
+            "urlEmbed": "/stories/features/animations/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "Layouts",
+            "name": "Layouts",
+            "description": "The amp-story-grid-layer provides a few pre-defined layout templates.",
+            "url": "/stories/features/layouts/",
+            "urlPreview": "/stories/features/layouts/preview/embed/",
+            "urlPreviewEmbed": "/stories/features/layouts/preview/embed/",
+            "urlEmbed": "/stories/features/layouts/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          },
+          {
+            "title": "Media",
+            "name": "Media",
+            "description": "Stories support only a subset of the media types available in AMPHTML.",
+            "url": "/stories/features/media/",
+            "urlPreview": "/stories/features/media/preview/embed/",
+            "urlPreviewEmbed": "/stories/features/media/preview/embed/",
+            "urlEmbed": "/stories/features/media/embed/",
+            "metadata": {
+              "experiments": [
+                "amp-google-vrview-image"
+              ]
+            },
+            "experiments": [
+              "amp-google-vrview-image"
+            ],
+            "experiment": true,
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          }
+        ],
+        "selected": false
+      },
+      {
+        "description": "<p>Monetization strategies for AMP Stories.</p>\n",
+        "name": "Monetization",
+        "url": "/stories#stories/monetization",
+        "id": "stories/monetization",
+        "targetDir": "stories/monetization/index.html",
+        "examples": [
+          {
+            "title": "amp-story-auto-ads",
+            "name": "amp-story-auto-ads",
+            "description": "In an AMP story, you cannot put an amp-ad directly onto the page, instead, all   ads are fetched and displayed by the amp-story-auto-ads extension.",
+            "url": "/stories/monetization/amp-story-auto-ads/",
+            "urlPreview": "/stories/monetization/amp-story-auto-ads/preview/embed/",
+            "urlPreviewEmbed": "/stories/monetization/amp-story-auto-ads/preview/embed/",
+            "urlEmbed": "/stories/monetization/amp-story-auto-ads/embed/",
+            "metadata": {
+              "preview": "default"
+            },
+            "firstImage": "/favicons/android-chrome-256x256.png"
+          }
+        ],
+        "selected": false
+      },
+      {
+        "name": "Visual Effects",
+        "url": "/stories#stories/visual_effects",
+        "id": "stories/visual_effects",
+        "targetDir": "stories/visual_effects/index.html",
+        "examples": [
+          {
+            "title": "Ken Burns",
+            "name": "Ken_Burns",
+            "description": "Best known for his work on documentaries, Ken Burns developed a signature effect which consisted of a combination of panning and zooming over an image.",
+            "url": "/stories/visual_effects/ken_burns/",
+            "urlPreview": "/stories/visual_effects/ken_burns/preview/embed/",
+            "urlPreviewEmbed": "/stories/visual_effects/ken_burns/preview/embed/",
+            "urlEmbed": "/stories/visual_effects/ken_burns/embed/",
+            "metadata": {},
+            "firstImage": "/favicons/android-chrome-256x256.png"
           }
         ],
         "selected": false

@@ -16,10 +16,18 @@
 
 import {LruCache} from '../utils/lru-cache';
 import {
+  assertAbsoluteHttpOrHttpsUrl,
+  assertHttpsUrl,
+  getSourceOrigin,
+  isProtocolValid,
+  isProxyOrigin,
+  isSecureUrlDeprecated,
+  parseUrlWithA,
+} from '../url';
+import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {parseUrlWithA} from '../url';
 
 const SERVICE = 'url';
 
@@ -60,6 +68,69 @@ export class Url {
    */
   parse(url, opt_nocache) {
     return parseUrlWithA(this.anchor_, url, opt_nocache ? null : this.cache_);
+  }
+
+  /**
+   * Returns whether the URL has valid protocol.
+   * Deep link protocol is valid, but not javascript etc.
+   * @param {string|!Location} url
+   * @return {boolean}
+   */
+  isProtocolValid(url) {
+    return isProtocolValid(url);
+  }
+
+  /**
+   * Returns the source origin of an AMP document for documents served
+   * on a proxy origin or directly.
+   * @param {string|!Location} url URL of an AMP document.
+   * @return {string} The source origin of the URL.
+   */
+  getSourceOrigin(url) {
+    return getSourceOrigin(url);
+  }
+
+  /**
+   * Asserts that a given url is HTTPS or protocol relative. It's a user-level
+   * assert.
+   *
+   * Provides an exception for localhost.
+   *
+   * @param {?string|undefined} urlString
+   * @param {!Element|string} elementContext Element where the url was found.
+   * @param {string=} sourceName Used for error messages.
+   * @return {string}
+   */
+  assertHttpsUrl(urlString, elementContext, sourceName = 'source') {
+    return assertHttpsUrl(urlString, elementContext, sourceName);
+  }
+
+  /**
+   * Asserts that a given url is an absolute HTTP or HTTPS URL.
+   * @param {string} urlString
+   * @return {string}
+   */
+  assertAbsoluteHttpOrHttpsUrl(urlString) {
+    return assertAbsoluteHttpOrHttpsUrl(urlString);
+  }
+
+  /**
+   * Returns whether the URL has the origin of a proxy.
+   * @param {string|!Location} url URL of an AMP document.
+   * @return {boolean}
+   */
+  isProxyOrigin(url) {
+    return isProxyOrigin(url);
+  }
+
+  /*
+   * Returns `true` if the URL is secure: either HTTPS or localhost (for
+   * testing).
+   * @param {string} url
+   * @return {boolean}
+   */
+  isSecure(url) {
+    return isSecureUrlDeprecated(this.parse(url));
   }
 }
 

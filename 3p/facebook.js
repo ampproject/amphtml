@@ -88,6 +88,12 @@ function getPageContainer(global, data) {
   container.setAttribute('data-hide-cta', data.hideCta);
   container.setAttribute('data-small-header', data.smallHeader);
   container.setAttribute('data-adapt-container-width', true);
+
+  const c = global.document.getElementById('c');
+  // Note: The facebook embed  allows a maximum width of 500px.
+  // If the container's width exceeds that, the embed's width will
+  // be clipped to 500px.
+  container.setAttribute('data-width', c./*OK*/offsetWidth);
   return container;
 }
 

@@ -321,6 +321,20 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/15311',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15610',
   },
+  {
+    id: 'amp-google-document-embed',
+    name: 'Enables the experiment amp-google-document-embed component' +
+        ' which is a wrapper around the Google Drive document viewer embed.',
+    spec: 'TODO',
+    cleanupIssue: 'TODO',
+  },
+  {
+    id: 'amp-pan-zoom',
+    name: 'Enables zoom / pan manipulation of arbitrary elements' +
+      ' with amp-pan-zoom',
+    spec: 'https://github.com/ampproject/amphtml/issues/13602',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/15594',
+  },
 ];
 
 if (getMode().localDev) {

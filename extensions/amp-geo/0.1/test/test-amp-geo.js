@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpGeo} from '../amp-geo';
+import {AmpGeo, GEO_IN_GROUP} from '../amp-geo';
 import {Services} from '../../../../src/services';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
@@ -196,6 +196,56 @@ describes.realWin('amp-geo', {
         'amp-geo-group-nafta',
         'amp-geo-group-anz',
       ], false);
+    });
+  });
+
+  it('should return configured and matched groups in `geo` service', () => {
+    win.AMP_MODE.geoOverride = 'nz';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+      expect(geo.allISOCountryGroups)
+          .to.deep.equal(Object.keys(config.ISOCountryGroups));
+      expect(geo.matchedISOCountryGroups)
+          .to.deep.equal(['anz']);
+    });
+  });
+
+  it('isInCountryGroup works with multiple group targets', () => {
+    win.AMP_MODE.geoOverride = 'nz';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+
+      /* multi group case */
+      expect(geo.isInCountryGroup('nafta, anz'))
+          .to.equal(GEO_IN_GROUP.IN);
+      expect(geo.isInCountryGroup('nafta, unknown'))
+          .to.equal(GEO_IN_GROUP.NOT_IN);
+      expect(geo.isInCountryGroup('nafta, foobar'))
+          .to.equal(GEO_IN_GROUP.NOT_DEFINED);
+    });
+  });
+
+  it('isInCountryGroup works with single group targets', () => {
+    win.AMP_MODE.geoOverride = 'nz';
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+
+      /* single group case */
+      expect(geo.isInCountryGroup('anz'))
+          .to.equal(GEO_IN_GROUP.IN);
+      expect(geo.isInCountryGroup('nafta'))
+          .to.equal(GEO_IN_GROUP.NOT_IN);
+      expect(geo.isInCountryGroup('foobar'))
+          .to.equal(GEO_IN_GROUP.NOT_DEFINED);
     });
   });
 

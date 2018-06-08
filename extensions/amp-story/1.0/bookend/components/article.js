@@ -15,11 +15,12 @@
  */
 
 import {BookendComponentInterface} from './bookend-component-interface';
+import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {htmlFor} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrlDeprecated} from '../../../../../src/url';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
+import {userAssertValidProtocol} from '../../utils';
 
 /**
  * @typedef {{
@@ -36,59 +37,68 @@ export let ArticleComponentDef;
  * @implements {BookendComponentInterface}
  */
 export class ArticleComponent {
-  /**
-   * @param {!../bookend-component.BookendComponentDef} articleJson
-   * @override
-   * */
-  assertValidity(articleJson) {
-    user().assert('title' in articleJson && 'url' in articleJson,
-        'Articles must contain `title` and `url` fields, skipping invalid.');
 
-    user().assert(isProtocolValid(articleJson['url']), 'Unsupported protocol ' +
-        `for article URL ${articleJson['url']}`);
+  /** @override */
+  assertValidity(articleJson, element) {
 
-    if (articleJson['image']) {
-      user().assert(isProtocolValid(articleJson['image']), 'Unsupported ' +
-        `protocol for article image URL ${articleJson['image']}`);
+    const requiredFields = ['title', 'url'];
+    const hasAllRequiredFields =
+        !requiredFields.some(field => !(field in articleJson));
+    user().assert(
+        hasAllRequiredFields,
+        'Small article component must contain ' +
+            requiredFields.map(field => '`' + field + '`').join(', ') +
+            ' fields, skipping invalid.');
+
+    userAssertValidProtocol(element, articleJson['url']);
+
+    const image = articleJson['image'];
+    if (image) {
+      userAssertValidProtocol(element, image);
     }
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} articleJson
-   * @return {!ArticleComponentDef}
-   * @override
-   * */
-  build(articleJson) {
+  /** @override */
+  build(articleJson, element) {
+    const url = articleJson['url'];
+    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+
     const article = {
+      url,
+      domainName,
       type: articleJson['type'],
       title: articleJson['title'],
-      url: articleJson['url'],
-      domainName: parseUrlDeprecated(articleJson['url']).hostname,
     };
 
     if (articleJson['image']) {
       article.image = articleJson['image'];
     }
 
+    if (articleJson['amphtml']) {
+      article.amphtml = articleJson['amphtml'];
+    }
+
     return /** @type {!ArticleComponentDef} */ (article);
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} articleData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
-  buildTemplate(articleData, doc) {
+  /** @override */
+  buildElement(articleData, doc) {
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
-    const template =
+    const el =
         html`
         <a class="i-amphtml-story-bookend-article
           i-amphtml-story-bookend-component"
           target="_top">
+          <h2 class="i-amphtml-story-bookend-article-heading" ref="heading">
+          </h2>
+          <div class="i-amphtml-story-bookend-component-meta" ref="meta"></div>
         </a>`;
-    addAttributesToElement(template, dict({'href': articleData.url}));
+    addAttributesToElement(el, dict({'href': articleData.url}));
+
+    if (articleData['amphtml'] === true) {
+      addAttributesToElement(el, dict({'rel': 'amphtml'}));
+    }
 
     if (articleData.image) {
       const ampImg =
@@ -99,19 +109,15 @@ export class ArticleComponent {
           </amp-img>`;
 
       addAttributesToElement(ampImg, dict({'src': articleData.image}));
-      template.appendChild(ampImg);
+      el.insertBefore(ampImg, el.firstChild);
     }
 
-    const heading =
-      html`<h2 class="i-amphtml-story-bookend-article-heading"></h2>`;
+    const articleElements = htmlRefs(el);
+    const {heading, meta} = articleElements;
+
     heading.textContent = articleData.title;
-    template.appendChild(heading);
+    meta.textContent = articleData.domainName;
 
-    const articleMeta =
-      html`<div class="i-amphtml-story-bookend-component-meta"></div>`;
-    articleMeta.textContent = articleData.domainName;
-    template.appendChild(articleMeta);
-
-    return template;
+    return el;
   }
 }

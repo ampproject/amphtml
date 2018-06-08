@@ -176,6 +176,8 @@ const INFO_TEMPLATE_AREA_CSS = 'i-amphtml-date-picker-info';
 
 const FULLSCREEN_CSS = 'i-amphtml-date-picker-fullscreen';
 
+const MIN_PICKER_YEAR = 1900;
+
 export class AmpDatePicker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -759,8 +761,10 @@ export class AmpDatePicker extends AMP.BaseElement {
           (target === this.startDateField_ ? 'startDate' :
             (target === this.endDateField_ ? 'endDate' : '')));
     const moment = this.createMoment_(target.value);
-    const value = moment.isValid() ? moment : null;
-    this.setState_({[property]: value});
+    const isValid = (moment &&
+        moment.isValid() &&
+        moment.year() > MIN_PICKER_YEAR);
+    this.setState_({[property]: isValid ? moment : null});
   }
 
   /**

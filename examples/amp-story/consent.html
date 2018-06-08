@@ -57,7 +57,7 @@
       <amp-consent id='ABC' layout='nodisplay'>
         <script type="application/json">{
           "consents": {
-            "ABC": {
+            "DEF": {
               "checkConsentHref": "http://localhost:8000/get-consent-v1",
               "promptUI": "ui0"
             }
@@ -78,6 +78,9 @@
           <h1>You just accepted or rejected the consent!</h1>
         </amp-story-grid-layer>
       </amp-story-page>
+
+      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
+      </amp-story-bookend>
     </amp-story>
   </body>
 </html>

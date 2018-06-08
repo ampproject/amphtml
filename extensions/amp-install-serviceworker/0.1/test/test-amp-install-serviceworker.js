@@ -16,12 +16,30 @@
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {Services} from '../../../../src/services';
+import {
+  assertHttpsUrl,
+  getSourceOrigin,
+  isProxyOrigin,
+  isSecureUrlDeprecated,
+  parseUrlDeprecated,
+} from '../../../../src/url';
 import {loadPromise} from '../../../../src/event-helper';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
+
+
+function stubUrlService(sandbox) {
+  sandbox.stub(Services, 'urlForDoc').returns({
+    assertHttpsUrl,
+    getSourceOrigin,
+    isProxyOrigin,
+    isSecure: isSecureUrlDeprecated,
+    parse: parseUrlDeprecated,
+  });
+}
 
 
 describes.realWin('amp-install-serviceworker', {
@@ -45,6 +63,7 @@ describes.realWin('amp-install-serviceworker', {
     ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
     container = doc.createElement('div');
     env.win.document.body.appendChild(container);
+    stubUrlService(sandbox);
     maybeInstallUrlRewriteStub = sandbox.stub(
         AmpInstallServiceWorker.prototype,
         'maybeInstallUrlRewrite_');
@@ -124,7 +143,9 @@ describes.realWin('amp-install-serviceworker', {
         },
       },
     };
-    implementation.buildCallback();
+    allowConsoleError(() => {
+      implementation.buildCallback();
+    });
     expect(install.children).to.have.length(0);
   });
 
@@ -288,6 +309,7 @@ describes.fakeWin('url rewriter', {
     win = env.win;
     ampdoc = env.ampdoc;
     viewer = win.services.viewer.obj;
+    stubUrlService(sandbox);
     element = win.document.createElement('amp-install-serviceworker');
     element.setAttribute('src', 'https://example.com/sw.js');
     // This is a RegExp string.

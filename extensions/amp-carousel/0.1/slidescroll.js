@@ -22,6 +22,7 @@ import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getStyle, setStyle} from '../../../src/style';
+import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
 import {startsWith} from '../../../src/string';
@@ -404,18 +405,16 @@ export class AmpSlideScroll extends BaseSlides {
   customSnap_(currentScrollLeft, opt_forceDir) {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
-    let toScrollLeft;
+    // Default behavior should be stays on current slide
     let diff = newIndex - this.slideIndex_;
     const hasPrev = this.hasPrev();
+    let toScrollLeft = hasPrev ? this.slideWidth_ : 0;
 
     if (diff == 0 && (opt_forceDir == 1 || opt_forceDir == -1)) {
       diff = opt_forceDir;
     }
 
-    if (diff == 0) {
-      // Snap and stay.
-      toScrollLeft = hasPrev ? this.slideWidth_ : 0;
-    } else if (diff == 1 ||
+    if (diff == 1 ||
         (diff != -1 && diff == -1 * (this.noOfSlides_ - 1))) {
       // Move fwd.
       toScrollLeft = hasPrev ? this.slideWidth_ * 2 : this.slideWidth_;
@@ -472,6 +471,9 @@ export class AmpSlideScroll extends BaseSlides {
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    */
   updateOnScroll_(currentScrollLeft) {
+    if (!isFiniteNumber(currentScrollLeft) || this.slideIndex_ === null) {
+      return;
+    }
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
@@ -518,7 +520,7 @@ export class AmpSlideScroll extends BaseSlides {
   /**
    * Makes the slide corresponding to the given index and the slides surrounding
    *     it available for display.
-   * @note Element must be laid out.
+   * Note: Element must be laid out.
    * @param {number} newIndex Index of the slide to be displayed.
    * @return {boolean} true if the slide changed, otherwise false.
    * @private
@@ -551,11 +553,9 @@ export class AmpSlideScroll extends BaseSlides {
     const newSlideInView = this.slides_[newIndex];
 
     if (newSlideInView === undefined) {
-      const error = new Error('Attempting to access a non-existant slide');
-      error.args = {
-        'index': newIndex,
-        'noOfSlides': noOfSlides_,
-      };
+      const error = new Error(
+          `Attempting to access a non-existant slide ${newIndex}/${noOfSlides_}`
+      );
       dev().error(TAG, error);
       return false;
     }
@@ -649,8 +649,8 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * Animate scrollLeft of the container.
-   * @param {number} fromScrollLeft.
-   * @param {number} toScrollLeft.
+   * @param {number} fromScrollLeft
+   * @param {number} toScrollLeft
    * @return {!Promise}
    * @private
    */

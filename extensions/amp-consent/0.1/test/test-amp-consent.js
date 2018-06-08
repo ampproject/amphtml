@@ -328,10 +328,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('create predefined _if_responded policy', function* () {
+    it('create predefined _till_responded policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_['_if_responded']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_till_responded']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -345,10 +345,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('create predefined _if_accepted policy', function* () {
+    it('create predefined _till_accepted policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_till_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -404,7 +404,7 @@ describes.realWin('amp-consent', {
           'ABC': [],
         },
       });
-      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_till_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -419,6 +419,7 @@ describes.realWin('amp-consent', {
     let ampConsent;
     let updateConsentInstanceStateSpy;
     let consentElement;
+    let postPromptUI;
     beforeEach(() => {
       defaultConfig = {
         'consents': {
@@ -447,6 +448,9 @@ describes.realWin('amp-consent', {
       uiElement.setAttribute('id', '123');
       consentElement.appendChild(uiElement);
       consentElement.appendChild(scriptElement);
+      postPromptUI = document.createElement('div');
+      postPromptUI.setAttribute('id', 'test');
+      consentElement.appendChild(postPromptUI);
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
@@ -512,12 +516,7 @@ describes.realWin('amp-consent', {
     });
 
     describe('postPromptUI', () => {
-      let postPromptUI;
-
       beforeEach(() => {
-        postPromptUI = document.createElement('div');
-        postPromptUI.setAttribute('id', 'test');
-        consentElement.appendChild(postPromptUI);
         storageValue = {
           'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
           'amp-consent:DEF': CONSENT_ITEM_STATE.ACCEPTED,
