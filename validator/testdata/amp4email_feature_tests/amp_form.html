@@ -61,6 +61,10 @@
   <!-- Invalid: invalid attribute xhr-verify -->
   <form method="get" action-xhr="https://example.com/subscribe"
     xhr-verify="https://example.com/subscribe">
-  </form>  
+  </form>
+  <!-- Invalid: amp-bind usage for type in input -->
+  <form method="get" action-xhr="https://example.com/subscribe">
+    <input [type]="state.type" name="name">
+  </form>    
 </body>
 </html>

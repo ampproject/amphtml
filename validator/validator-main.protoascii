@@ -3251,7 +3251,6 @@ tags {  # <form method=POST ...>
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
 }
-
 tags {
   tag_name: "DIV"
   spec_name: "FORM > DIV [submitting]"
@@ -3360,7 +3359,6 @@ attr_lists: {
   attrs: { name: "[size]" }
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[step]" }
-  attrs: { name: "[type]" }
   attrs: { name: "[value]" }
   attrs: { name: "[width]" }
 }
@@ -3538,6 +3536,14 @@ tags: {
   attr_lists: "input-name-attr"
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+}
+tags: {
+  # amp-bind usage of type is not allowed in AMP4EMAIL
+  html_format: AMP4ADS
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "INPUT [[type]]"
+  attrs: {name: "[type]"}
 }
 # 4.10.6 The button element
 tags: {
@@ -4082,6 +4088,7 @@ tags: {  # <amp-img>
 tags: {  # <amp-layout>
   html_format: AMP
   html_format: AMP4ADS
+  html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "AMP-LAYOUT"
   attr_lists: "extended-amp-global"
