@@ -34,6 +34,7 @@ import {
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -45,6 +46,7 @@ const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
 
 export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
+export const EXTERNAL_CONSENT_FLOW = 'external-consent-flow';
 
 /**
  * @enum {string}
@@ -182,10 +184,22 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
 
-    this.element.addEventListener('amp-iframe:consent-message', e => {
-      const action = e.detail && e.detail.action;
-      this.handleAction_(action);
-    });
+    if (isExperimentOn(this.win, EXTERNAL_CONSENT_FLOW)) {
+      this.win.addEventListener('amp-iframe:consent-message', e => {
+        const {detail} = e;
+        const data = getData(detail);
+        if (!detail || !data) {
+          dev().error(TAG, 'consent-message event detail not found');
+          return;
+        }
+        const source = detail['source'];
+        if (!this.element.contains(source)) {
+          return;
+        }
+        const action = data['action'];
+        this.handleAction_(action);
+      });
+    }
 
     this.registerAction('prompt', invocation => {
       const {args} = invocation;

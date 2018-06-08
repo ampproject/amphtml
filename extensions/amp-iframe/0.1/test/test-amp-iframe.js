@@ -16,10 +16,10 @@
 
 import * as sinon from 'sinon';
 
+import * as error from '../../../../src/error';
 import {ActionTrust} from '../../../../src/action-constants';
 import {
   AmpIframe,
-  EXTERNAL_CONSENT_FLOW,
   isAdLike,
   setTrackingIframeCountForTesting,
   setTrackingIframeTimeoutForTesting,
@@ -34,7 +34,6 @@ import {
 import {poll} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
-import * as error from '../../../../src/error';
 
 /** @const {number} */
 const IFRAME_MESSAGE_TIMEOUT = 50;
@@ -249,19 +248,6 @@ describes.realWin('amp-iframe', {
       }, 599, 1000);
       yield whenUpgradedToCustomElement(ampIframe);
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
-    });
-
-    it('should render at the top if is consent flow', function* () {
-      const ampIframe = createAmpIframe(env, {
-        src: iframeSrc,
-        sandbox: 'allow-scripts',
-        width: 100,
-        height: 100,
-      }, 599, 1000);
-      ampIframe.implementation_.consentContainer_ =
-          document.createElement('div');
-      yield whenUpgradedToCustomElement(ampIframe);
-      return ampIframe.implementation_.layoutCallback();
     });
 
     it('should respect translations', function* () {
@@ -568,21 +554,6 @@ describes.realWin('amp-iframe', {
       yield timer.promise(100);
       expect(iframe.style.zIndex).to.equal('0');
       expect(activateIframeSpy_).to.have.callCount(2);
-    });
-
-    it('should propagate consent-response event data', function* () {
-      const container = doc.createElement('div');
-      const handler = sandbox.spy();
-      container.addEventListener('amp-iframe:consent-message', handler);
-      const ampIframe = createAmpIframe(env, {
-        src: clickableIframeSrc,
-        sandbox: 'allow-scripts allow-same-origin',
-        width: 480,
-        height: 360,
-      });
-      ampIframe.implementation_.consentContainer_ = container;
-      ampIframe.implementation_.propagateConsent_({});
-      expect(handler).to.be.calledOnce;
     });
 
     it('should detect non-tracking iframe', function* () {

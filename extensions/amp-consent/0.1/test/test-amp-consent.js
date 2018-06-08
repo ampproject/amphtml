@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import {ACTION_TYPE, AMP_CONSENT_EXPERIMENT, AmpConsent} from '../amp-consent';
+import {
+  ACTION_TYPE,
+  AMP_CONSENT_EXPERIMENT,
+  AmpConsent,
+  EXTERNAL_CONSENT_FLOW,
+} from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
 import {computedStyle} from '../../../../src/style';
+import {createCustomEvent} from '../../../../src/event-helper';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
-
 import {
   registerServiceBuilder,
   resetServiceForTesting,
@@ -46,6 +51,7 @@ describes.realWin('amp-consent', {
     win = env.win;
     toggleExperiment(win, AMP_CONSENT_EXPERIMENT, true);
     toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
+    toggleExperiment(win, EXTERNAL_CONSENT_FLOW, true);
 
     storageValue = {};
     jsonMockResponses = {
@@ -410,6 +416,57 @@ describes.realWin('amp-consent', {
           'DEF': undefined,
         },
       });
+    });
+  });
+
+  describe('external consent action', () => {
+    let defaultConfig;
+    let ampConsent;
+    let actionSpy;
+    beforeEach(() => {
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': '//response1',
+          },
+        },
+      };
+      const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('id', 'amp-consent');
+      consentElement.setAttribute('layout', 'nodisplay');
+      const scriptElement = doc.createElement('script');
+      scriptElement.setAttribute('type', 'application/json');
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      doc.body.appendChild(consentElement);
+      ampConsent = new AmpConsent(consentElement);
+      actionSpy = sandbox.stub(ampConsent, 'handleAction_');
+      ampConsent.enableInteractions_();
+    });
+
+    it('listen to external consent response msg', () => {
+      const element = doc.createElement('div');
+      ampConsent.element.appendChild(element);
+      win.dispatchEvent(createCustomEvent(win,
+          'amp-iframe:consent-message', {
+            'data': {
+              'action': 'accept',
+            },
+            'source': element,
+          }));
+      expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT);
+    });
+
+    it('ignore msg from incorrect source', () => {
+      const element = doc.createElement('div');
+      win.dispatchEvent(createCustomEvent(win,
+          'amp-iframe:consent-message', {
+            'data': {
+              'action': 'accept',
+            },
+            'source': element,
+          }));
+      expect(actionSpy).to.not.be.called;
     });
   });
 
