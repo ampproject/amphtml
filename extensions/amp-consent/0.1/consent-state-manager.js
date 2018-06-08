@@ -17,10 +17,12 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
 import {isEnumValue} from '../../../src/types';
 
 const TAG = 'CONSENT-STATE-MANAGER';
+const CID_SCOPE = 'AMP-CONSENT';
 
 /**
  * @enum {number}
@@ -57,13 +59,15 @@ export class ConsentStateManager {
   /**
    * Register and create a consent instance to manage state
    * @param {string} instanceId
+   * @param {!Object} config
    */
-  registerConsentInstance(instanceId) {
+  registerConsentInstance(instanceId, config) {
     if (this.instances_[instanceId]) {
       dev().error(TAG, `instance ${instanceId} already registered`);
       return;
     }
-    this.instances_[instanceId] = new ConsentInstance(this.ampdoc_, instanceId);
+    this.instances_[instanceId] = new ConsentInstance(
+        this.ampdoc_, instanceId, config);
     this.consentChangeObservables_[instanceId] = new Observable();
     if (this.consentReadyResolvers_[instanceId]) {
       this.consentReadyResolvers_[instanceId]();
@@ -164,7 +168,13 @@ export class ConsentStateManager {
  * @visibleForTesting
  */
 export class ConsentInstance {
-  constructor(ampdoc, id) {
+  constructor(ampdoc, id, config) {
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @private {string} */
+    this.id_ = id;
+
     /** @public {?Promise<Object>} */
     this.sharedDataPromise = null;
 
@@ -176,6 +186,12 @@ export class ConsentInstance {
 
     /** @private {string} */
     this.storageKey_ = 'amp-consent:' + id;
+
+    /** @private {?string} */
+    this.onUpdateHref_ = config['onUpdateHref'] || null;
+    if (this.onUpdateHref_) {
+      assertHttpsUrl(this.onUpdateHref_, 'AMP-CONSENT');
+    }
   }
 
   /**
@@ -216,6 +232,7 @@ export class ConsentInstance {
         return;
       }
       storage.set(this.storageKey_, value);
+      this.sendUpdateHrefRequest_(value);
     });
   }
 
@@ -247,6 +264,37 @@ export class ConsentInstance {
     }).catch(e => {
       dev().error(TAG, 'Failed to read storage', e);
       return CONSENT_ITEM_STATE.UNKNOWN;
+    });
+  }
+
+  /**
+   * send a POST request to the updateHref with userId with fixed scope
+   * and consentInstanceId
+   * @param {boolean} state
+   */
+  sendUpdateHrefRequest_(state) {
+    if (!this.onUpdateHref_) {
+      return;
+    }
+    const cidPromise = Services.cidForDoc(this.ampdoc_).then(cid => {
+      return cid.get({scope: CID_SCOPE, createCookieIfNotPresent: true},
+          Promise.resolve());
+    });
+    cidPromise.then(userId => {
+      const request = /** @type {!JsonObject} */ ({
+        'consentInstanceId': this.id_,
+        'ampUserId': userId,
+        'consentState': state,
+      });
+      const init = {
+        credentials: 'include',
+        method: 'POST',
+        body: request,
+        requireAmpResponseSourceOrigin: false,
+      };
+      Services.viewerForDoc(this.ampdoc_).whenFirstVisible().then(() => {
+        Services.xhrFor(this.ampdoc_.win).fetchJson(this.onUpdateHref_, init);
+      });
     });
   }
 }
