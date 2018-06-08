@@ -552,7 +552,7 @@ export function resetAccumulatedErrorMessagesForTesting() {
  * @visibleForTesting
  */
 export function detectJsEngineFromStack() {
-  /** @constructor */ // eslint-disable-line
+  /** @constructor */
   function Fn() {}
   Fn.prototype.t = function() {
     throw new Error('message');
