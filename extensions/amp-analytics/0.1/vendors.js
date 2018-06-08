@@ -812,7 +812,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'uaEvent':
           '${uaHost}/collect?${uaBasePrefix}&' +
            't=event&' +
-           'jid=&' +
+           'jid=' +
            '${uaBaseSuffix}',
       'uaTiming':
           '${uaHost}/collect?${uaBasePrefix}&' +
