@@ -55,7 +55,7 @@ let GlobDef;
 let GlobsDef;
 
 /**
- * @class @final @struct
+ * @constructor @final @struct
  * @param {!RuleConfigDef} config
  */
 function Rule(config) {
