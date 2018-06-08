@@ -136,7 +136,7 @@ The game is called <span class='football'></span>!
 
 ### Preset Country Groups
 
-In addtion to user specifed country group `amp-geo` support preset country lists. Currently the only available list is `preset-gdpr`.   See [`amp-geo-presets.js`](./0.1/amp-geopresets.js) for the countries defiend by presets.
+In addtion to user specifed country group `amp-geo` support preset country lists. Currently the only available list is `preset-gdpr`.   See [`amp-geo-presets.js`](./0.1/amp-geo-presets.js) for the countries defiend by presets.
 
 Additional countries may be included with the preset list as in the `myList` example below.
 
