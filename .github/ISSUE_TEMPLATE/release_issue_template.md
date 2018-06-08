@@ -3,13 +3,20 @@
 <!--
 Note to onduty:
 
-Use comments on this issue to track anything else you think might be of
-interest to the community (e.g. alerting the community to delays).
+This issue is used to track a single release of AMP from the canary cut to
+the 1% push to production, plus any cherry picks along the way.  Note that
+because the current onduty person handles pushing the build the previous onduty
+created to production a single issue will generally be updated by at least
+two onduty people.
 
 Once you have filed this issue post a link to it in the #release Slack channel.
 
 As each step is completed, check it off so the community can see the state of
 the current release at a glance.
+
+In addition to using the checkboxes to track the state of the release, use
+comments on this issue to track anything else you think might be of interest
+to the community regarding this release (e.g. to alert the community to delays).
 
 To document cherry picks that interrupt the default release process, add
 additional checkboxes at the stage the cherry pick was made, e.g. if the
@@ -18,7 +25,11 @@ beneath the initial 1% checkbox and then check them as they occur:
   - [ ] Cherry pick release [<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>) pushed to Dev Channel
   - [ ] Cherry pick release pushed to 1%
 
-When the release is pushed to production:
+If the cherry pick is made to the release in production, you may also need to
+add a checkbox like:
+  - [ ] Cherry pick release pushed to production
+
+When you push the release this issue is tracking to production:
 - update the "pushed to production" checkbox with a link to the release build
   that was actually pushed to production
 - change "(Canary)" in the issue title to "(Production)" and remove
