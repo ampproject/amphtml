@@ -58,5 +58,9 @@
   <form method="post" action-xhr="https://example.com/subscribe"
     xhr-verify="https://example.com/subscribe">
   </form>
+  <!-- Invalid: invalid attribute xhr-verify -->
+  <form method="get" action-xhr="https://example.com/subscribe"
+    xhr-verify="https://example.com/subscribe">
+  </form>  
 </body>
 </html>
