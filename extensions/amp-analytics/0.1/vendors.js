@@ -837,7 +837,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
       'awCommonParams':
           '${conversionId}/?' +
-           'cv=amp3&' +  // Increment when making changes.
+           'cv=amp3&' + // Increment when making changes.
            'label=${conversionLabel}&' +
            'random=${random}&' +
            'url=${sourceUrl}&' +
@@ -853,7 +853,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
            'tiba=${title}&' +
            'guid=ON&script=0',
       'awConversion': '${awConversionPrefix}${awCommonParams}',
-      'awRemarketing': '${awRemarketingPrefix}${awCommonParams}'
+      'awRemarketing': '${awRemarketingPrefix}${awCommonParams}',
     },
     'transport': {
       'beacon': false,
