@@ -25,18 +25,19 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
 
   /** @override */
   viewportCallback() {
-    hasClass = (ele, cls) => {
-      if (!cls) return false;
+    var hasClass = (ele, cls) => {
+      if (!cls) {
+        return false;
+      }
       return new RegExp(' ' + cls + ' ').test(' ' + ele.className + ' ');
     };
 
-    addClass = (ele, cls) => {
-      if (cls.replace('/\s*/g', '')) return;
-      !hasClass(ele, cls) && (ele.className = ele
-        .className == '' ? cls : ele.className + ' ' + cls);
+    var addClass = (ele, cls) => {
+      if (cls.replace(/\s*/g, ''));
+      !hasClass(ele, cls) && (ele.className = ele.className == '' ? cls : ele.className + ' ' + cls);
     };
 
-    removeClass = (ele, cls) => {
+    var removeClass = (ele, cls) => {
       if (hasClass(ele, cls)) {
         let newClass = ' ' + ele.className.replace(/[\t\r\n]/g, '') + ' ';
         while (newClass.indexOf(' ' + cls + ' ') >= 0) {
@@ -48,8 +49,7 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
     if (document.querySelector('.msg-text').clientHeight <= 95) {
       addClass(document.querySelector('.view-more'), 'hide');
     } else {
-      document.querySelector('.view-more-text')
-        .className = 'limit-height view-more-text';
+      addClass(document.querySelector('.view-more-text'), 'limit-height');
     }
     document.querySelector('.view-more').addEventListener('click', function () {
       if (hasClass(document.querySelector('.view-more'), 'down')) {
