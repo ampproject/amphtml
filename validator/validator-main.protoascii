@@ -3250,14 +3250,6 @@ tags {  # <form method=POST ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
-  attrs: {
-    name: "verify-xhr"
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
 }
 
 tags {

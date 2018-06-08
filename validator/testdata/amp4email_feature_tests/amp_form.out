@@ -63,5 +63,11 @@ amp4email_feature_tests/amp_form.html:54:4 The attribute 'type' in tag 'input' i
 >>     ^~~~~~~~~
 amp4email_feature_tests/amp_form.html:55:4 The attribute 'type' in tag 'input' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
+|    <!-- Invalid: invalid attribute xhr-verify -->
+|    <form method="post" action-xhr="https://example.com/subscribe"
+>>   ^~~~~~~~~
+amp4email_feature_tests/amp_form.html:58:2 The attribute 'xhr-verify' may not appear in tag 'FORM [method=POST] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+|      xhr-verify="https://example.com/subscribe">
+|    </form>
 |  </body>
 |  </html>
