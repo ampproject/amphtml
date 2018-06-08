@@ -328,7 +328,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     }
     this.preconnect.url('https://play.google.com', opt_onLayout);
     if (this.manifestHref_) {
-      this.preconnect.preload(this.manifestHref_);
+      this.preconnect.preload(this.manifestHref_, 'fetch');
     }
   }
 

@@ -766,7 +766,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (this.experimentalNonAmpCreativeRenderMethod_ ==
               XORIGIN_MODE.NAMEFRAME) {
             this.preconnect.preload(
-                getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+                getDefaultBootstrapBaseUrl(this.win, 'nameframe'), 'document');
           }
           const browserSupportsSandbox = this.win.HTMLIFrameElement &&
               'sandbox' in this.win.HTMLIFrameElement.prototype;
@@ -777,7 +777,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
             this.safeframeVersion = safeframeVersionHeader;
-            this.preconnect.preload(this.getSafeframePath());
+            this.preconnect.preload(this.getSafeframePath(), 'document');
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
@@ -858,12 +858,12 @@ export class AmpA4A extends AMP.BaseElement {
               extensionId => extensions.preloadExtension(extensionId));
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
-            this.preconnect.preload(font.href));
+            this.preconnect.preload(font.href, 'font'));
 
           const urls = Services.urlForDoc(this.getAmpDoc());
           // Preload any AMP images.
           (creativeMetaDataDef.images || []).forEach(image =>
-            urls.isSecure(image) && this.preconnect.preload(image));
+            urls.isSecure(image) && this.preconnect.preload(image, 'image'));
           return creativeMetaDataDef;
         })
         .catch(error => {

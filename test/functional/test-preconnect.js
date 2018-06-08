@@ -28,6 +28,7 @@ describe('preconnect', () => {
   let preconnect;
   let preloadSupported;
   let preconnectSupported;
+  let isIos;
   let isSafari;
   let visible;
 
@@ -49,6 +50,7 @@ describe('preconnect', () => {
 
       const platform = {
         isSafari: () => !!isSafari,
+        isIos: () => !!isIos,
       };
       iframe.win.services['platform'] = {obj: platform};
 
@@ -67,6 +69,7 @@ describe('preconnect', () => {
 
   beforeEach(() => {
     visible = Promise.resolve();
+    isIos = undefined;
     isSafari = undefined;
     // Default mock to not support preload/preconnect - override in cases
     // to test for preload/preconnect support.
@@ -268,9 +271,9 @@ describe('preconnect', () => {
     // default regardless of support or not.
     return getPreconnectIframe(/* detectFeatures */ true).then(iframe => {
       preconnect.preload('https://a.prefetch.com/foo/bar', 'script');
-      preconnect.preload('https://a.prefetch.com/foo/bar');
+      preconnect.preload('https://a.prefetch.com/foo/bar', 'fetch');
       preconnect.preload('https://a.prefetch.com/other', 'style');
-      preconnect.preload(javascriptUrlPrefix + ':alert()');
+      preconnect.preload(javascriptUrlPrefix + ':alert()', 'fetch');
       const fetches = iframe.doc.querySelectorAll(
           'link[rel=preload]');
       expect(fetches).to.have.length(0);
@@ -289,13 +292,12 @@ describe('preconnect', () => {
     });
   });
 
-  it('should preload', () => {
+  it('should only create one preload link per URL', () => {
     preloadSupported = true;
     return getPreconnectIframe().then(iframe => {
       preconnect.preload('https://a.prefetch.com/foo/bar', 'script');
-      preconnect.preload('https://a.prefetch.com/foo/bar');
+      preconnect.preload('https://a.prefetch.com/foo/bar', 'fetch');
       preconnect.preload('https://a.prefetch.com/other', 'style');
-      preconnect.preload(javascriptUrlPrefix + ':alert()');
       return visible.then(() => {
         // Also preconnects.
         expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
@@ -313,11 +315,91 @@ describe('preconnect', () => {
         expect(preloads[0].href).to.equal('https://a.prefetch.com/foo/bar');
         expect(preloads[1].href).to.equal('https://a.prefetch.com/other');
         const {as} = preloads[0];
-        expect(as == '' || as == 'fetch').to.be.ok;
+        expect(as).to.be.oneOf(['fetch', '']);
         preloads[0].as = 'not-valid';
         if (preloads[0].as != 'not-valid') {
-          expect(as == '' || as == 'fetch').to.be.ok;
+          expect(as).to.be.oneOf(['fetch', '']);
         }
+      });
+    });
+  });
+
+  it('should only create safe preloads', () => {
+    preloadSupported = true;
+    return getPreconnectIframe().then(iframe => {
+      preconnect.preload(javascriptUrlPrefix + ':alert()', 'fetch');
+      return visible.then(() => {
+        // Also preconnects.
+        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
+            .to.have.length(0);
+        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
+            .to.have.length(0);
+        // Actual preload
+        expect(iframe.doc.querySelectorAll('link[rel=preload]'))
+            .to.have.length(0);
+      });
+    });
+  });
+
+  it('should skip preload for unsupported types in Safari', () => {
+    preloadSupported = true;
+    isSafari = true;
+    return getPreconnectIframe().then(iframe => {
+      preconnect.preload('https://a.prefetch.com/foo/bar', 'document');
+      preconnect.preload('https://a.prefetch.com/other', 'script');
+      return visible.then(() => {
+        // Should still preconnect.
+        expect(iframe.doc.querySelector('link[rel=dns-prefetch]').href)
+            .to.equal('https://a.prefetch.com/');
+        expect(iframe.doc.querySelector('link[rel=preconnect]').href)
+            .to.equal('https://a.prefetch.com/');
+        // Actual preload
+        const preloads = iframe.doc.querySelectorAll(
+            'link[rel=preload]');
+        expect(preloads).to.have.length(0);
+      });
+    });
+  });
+
+  it('should skip preload for unsupported types for non-Safari iOS', () => {
+    preloadSupported = true;
+    isIos = true;
+    return getPreconnectIframe().then(iframe => {
+      preconnect.preload('https://a.prefetch.com/foo/bar', 'document');
+      preconnect.preload('https://a.prefetch.com/other', 'script');
+      return visible.then(() => {
+        // Should still preconnect.
+        expect(iframe.doc.querySelector('link[rel=dns-prefetch]').href)
+            .to.equal('https://a.prefetch.com/');
+        expect(iframe.doc.querySelector('link[rel=preconnect]').href)
+            .to.equal('https://a.prefetch.com/');
+        // Actual preload
+        const preloads = iframe.doc.querySelectorAll(
+            'link[rel=preload]');
+        expect(preloads).to.have.length(0);
+      });
+    });
+  });
+
+  it('should preload unsupported types for non-Safari', () => {
+    preloadSupported = true;
+    return getPreconnectIframe().then(iframe => {
+      preconnect.preload('https://a.prefetch.com/foo/bar', 'document');
+      preconnect.preload('https://a.prefetch.com/other', 'script');
+      return visible.then(() => {
+        // Also preconnects.
+        expect(iframe.doc.querySelector('link[rel=dns-prefetch]').href)
+            .to.equal('https://a.prefetch.com/');
+        expect(iframe.doc.querySelector('link[rel=preconnect]').href)
+            .to.equal('https://a.prefetch.com/');
+        // Actual preload
+        const preloads = iframe.doc.querySelectorAll(
+            'link[rel=preload]');
+        expect(preloads).to.have.length(2);
+        expect(preloads[0].href).to.equal('https://a.prefetch.com/foo/bar');
+        expect(preloads[0].as).to.be.oneOf(['fetch', '']);
+        expect(preloads[1].href).to.equal('https://a.prefetch.com/other');
+        expect(preloads[1].as).to.be.oneOf(['fetch', '']);
       });
     });
   });

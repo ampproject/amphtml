@@ -347,11 +347,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * because browser support for that is better.
    *
    * @param {string} url
-   * @param {string=} opt_preloadAs
+   * @param {string} preloadAs
    * @visibleForTesting
    */
-  preload(url, opt_preloadAs) {
-    this.preconnect.preload(url, opt_preloadAs);
+  preload(url, preloadAs) {
+    this.preconnect.preload(url, preloadAs);
   }
 
   /**

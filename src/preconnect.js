@@ -199,9 +199,10 @@ class PreconnectService {
    *
    * @param {!./service/viewer-impl.Viewer} viewer
    * @param {string} url
-   * @param {string=} opt_preloadAs
+   * @param {string} preloadAs
    */
-  preload(viewer, url, opt_preloadAs) {
+  preload(viewer, url, preloadAs) {
+    dev().assert(preloadAs, 'Must pass a non-empty value for preloadAs.');
     if (!this.isInterestingUrl_(url)) {
       return;
     }
@@ -213,35 +214,60 @@ class PreconnectService {
     if (!this.features_.preload) {
       return;
     }
-    if (opt_preloadAs == 'document' && this.platform_.isSafari()) {
-      // Preloading documents currently does not work in Safari,
-      // because it
-      // - does not support preloading iframes
-      // - and uses a different cache for iframes (when loaded without
-      //   as attribute).
+    // For Safari, do not request a resource if it is not a type that we can
+    // set the "as" attribute for. Safari caches by url+type, so we need to use
+    // the correct type and cannot fall back to "fetch".
+    const isSafari = this.platform_.isIos() || this.platform_.isSafari();
+    if (this.isUnsupportedPreloadAs_(preloadAs) && isSafari) {
       return;
     }
     viewer.whenFirstVisible().then(() => {
-      this.performPreload_(url);
+      this.performPreload_(url, preloadAs);
     });
   }
 
-  performPreload_(url) {
+  /**
+   * Determines if we can use the `as` attribute for a given type. Two types
+   * are not supported currently, including for Chrome:
+   * 1. "document": The value is not yet supported and is dropped in both
+   *    Chrome and Safari.
+   *    https://bugs.chromium.org/p/chromium/issues/detail?id=593267
+   * 2. "script": It is blocked due to CSP.
+   *
+   * @param {string} preloadAs
+   * @private
+   */
+  isUnsupportedPreloadAs_(preloadAs) {
+    return preloadAs == 'document' || preloadAs == 'script';
+  }
+
+  /**
+   * Gets the value to use for `<link rel="preload" as="...">` based on a
+   * prefered type for the resource. If the type is not one we can set the `as`
+   * attribute for, this returns "fetch".
+   * @param {string} preloadAs The prefered type of the resource to preload as.
+   * @return {string} The type to use for the `as` property.
+   * @private
+   */
+  getPreloadAsValue_(preloadAs) {
+    if (this.isUnsupportedPreloadAs_(preloadAs)) {
+      return this.features_.onlyValidAs ? 'fetch' : '';
+    }
+
+    return preloadAs;
+  }
+
+  /**
+   * Performs a preload using `<link rel="preload">`.
+   * @param {string} url
+   * @param {string} preloadAs
+   * @private
+   */
+  performPreload_(url, preloadAs) {
     const preload = htmlFor(this.document_)`
         <link rel="preload" referrerpolicy="origin" />`;
     preload.setAttribute('href', url);
-    // Do not set 'as' attribute to correct value for now, for 2 reasons
-    // - document value is not yet supported and dropped
-    // - script is blocked due to CSP.
-    // Due to spec change we now have to also preload with the "as"
-    // being set to `fetch` when it would previously would be empty.
-    // See https://github.com/w3c/preload/issues/80
-    // for details.
-    if (this.features_.onlyValidAs) {
-      preload.as = 'fetch';
-    } else {
-      preload.as = '';
-    }
+    preload.as = this.getPreloadAsValue_(preloadAs);
     this.head_.appendChild(preload);
     // As opposed to preconnect we do not clean this tag up, because there is
     // no expectation as to it having an immediate effect.
@@ -362,10 +388,10 @@ export class Preconnect {
    * because browser support for that is better.
    *
    * @param {string} url
-   * @param {string=} opt_preloadAs
+   * @param {string} preloadAs
    */
-  preload(url, opt_preloadAs) {
-    this.preconnectService_.preload(this.getViewer_(), url, opt_preloadAs);
+  preload(url, preloadAs) {
+    this.preconnectService_.preload(this.getViewer_(), url, preloadAs);
   }
 }
 
