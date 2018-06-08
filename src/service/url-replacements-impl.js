@@ -1026,8 +1026,8 @@ export class UrlReplacements {
         REPLACEMENT_EXP_NAME);
     if (isV2ExperimentOn) {
       // TODO(ccordy) support opt_collectVars && opt_whitelist
-      return this.expander_./*OK*/expand(url, opt_bindings, opt_sync,
-          opt_whiteList);
+      return this.expander_./*OK*/expand(url, opt_bindings, opt_collectVars,
+          opt_sync, opt_whiteList);
     }
 
     // existing parsing method
