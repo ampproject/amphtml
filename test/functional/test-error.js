@@ -18,6 +18,7 @@ import * as analytics from '../../src/analytics';
 import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {
+  blockedByConsentError,
   cancellation,
   detectJsEngineFromStack,
   detectNonAmpJs,
@@ -86,6 +87,14 @@ describes.fakeWin('installErrorReporting', {}, env => {
 
   it('should ignore cancellation', () => {
     rejectedPromiseEvent.reason = rejectedPromiseError = cancellation();
+    win.eventListeners.fire(rejectedPromiseEvent);
+    expect(rejectedPromiseError.reported).to.be.not.be.ok;
+    expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
+  });
+
+  it('should ignore blockByConsent', () => {
+    rejectedPromiseEvent.reason = rejectedPromiseError =
+        blockedByConsentError();
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseError.reported).to.be.not.be.ok;
     expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
