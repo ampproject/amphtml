@@ -1221,7 +1221,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       allowed_declarations: "voice-family"
       allowed_declarations: "width"
       allowed_declarations: "word-spacing"
-      allowed_declarations: "writing-mode"      
+      allowed_declarations: "writing-mode" 
     }
     blacklisted_cdata_regex: {
       regex: "<!--"
