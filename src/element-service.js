@@ -15,7 +15,6 @@
  */
 
 import * as dom from './dom';
-import {dev, user} from './log';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
@@ -27,6 +26,7 @@ import {
   getTopWindow,
 } from './service';
 import {toWin} from './types';
+import {user} from './log';
 
 /**
  * Custome elements cached list
@@ -127,7 +127,9 @@ export function getElementServiceIfAvailableForDoc(
   }
 
   return ampdoc.whenBodyAvailable()
-      .then(() => waitForExtensionIfPresent(ampdoc.win, extension))
+      .then(() => waitForExtensionIfPresent(
+          ampdoc.win, extension,
+          getExtensions(ampdoc.getHeadNode())))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
@@ -192,18 +194,16 @@ function assertService(service, id, extension) {
 
 /**
  * Get and cache a list of all the extension JS files
- * @param {Document} doc
+ * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @return {!Array<string>}
  * @private
  */
-function getExtensions(doc) {
-  dev().assert(doc.body,
-      'getExtensions() must only be called after document body is available');
+function getExtensions(head) {
   if (customElements_ !== null) {
     return customElements_;
   }
   customElements_ = [];
-  const list = doc.head.querySelectorAll('script[custom-element]');
+  const list = head.querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     customElements_.push(list[i].getAttribute('custom-element'));
   }
@@ -212,12 +212,13 @@ function getExtensions(doc) {
 
 /**
  * Waits for an extension if its script is present
- * @param {Window} win
+ * @param {!Window} win
  * @param {string} extension
+ * @param {!Array<string>} customElements
  * @return {!Promise}
  * @private
  */
-function waitForExtensionIfPresent(win, extension) {
+function waitForExtensionIfPresent(win, extension, customElements) {
   /**
    * If there is an extension script wait for it to load before trying
    * to get the service. Prevents a race condition when everything but
@@ -226,7 +227,7 @@ function waitForExtensionIfPresent(win, extension) {
    * we don't wait around for an extension that does not exist.
    */
 
-  if (getExtensions(win.document).includes(extension)) {
+  if (customElements.includes(extension)) {
     const extensions = getService(win, 'extensions');
     return /** @type {!Promise<?Object>} */ (
       extensions.waitForExtension(win, extension));
@@ -246,7 +247,8 @@ function waitForExtensionIfPresent(win, extension) {
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
   return dom.waitForBodyPromise(win.document)
-      .then(() => waitForExtensionIfPresent(win, extension))
+      .then(() => waitForExtensionIfPresent(win, extension,
+          getExtensions(win.document.head)))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
