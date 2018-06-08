@@ -28,12 +28,13 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
     hasClass = (ele, cls) => {
       if (!cls) return false;
       return new RegExp(' ' + cls + ' ').test(' ' + ele.className + ' ');
-    }
+    };
 
-    addClass = (ele, cls) => {  
+    addClass = (ele, cls) => {
       if (cls.replace('/\s*/g', '')) return;
-      !hasClass(ele, cls) && (ele.className = ele.className == '' ? cls : ele.className + ' ' + cls);
-    }
+      !hasClass(ele, cls) && (ele.className = ele
+        .className == '' ? cls : ele.className + ' ' + cls);
+    };
 
     removeClass = (ele, cls) => {
       if (hasClass(ele, cls)) {
@@ -43,21 +44,25 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
         }
         ele.className = newClass.replace(/^\s+|\s+$/g, '');
       }
-    }
-    if (document.querySelector('.msg-text').offsetHeight <= 95) {
+    };
+    if (document.querySelector('.msg-text').clientHeight <= 95) {
       addClass(document.querySelector('.view-more'), 'hide');
     } else {
-      document.querySelector('.view-more-text').className = 'limit-height view-more-text';
-    } 
+      document.querySelector('.view-more-text')
+        .className = 'limit-height view-more-text';
+    }
     document.querySelector('.view-more').addEventListener('click', function () {
       if (hasClass(document.querySelector('.view-more'), 'down')) {
         removeClass(document.querySelector('.view-more'), 'down');
-        document.querySelector('.view-more').innerHTML = document.querySelector('.view-more').getAttribute('data-up');
-        document.querySelector('.view-more-text').className = 'limit-height view-more-text show';
+        document.querySelector('.view-more').innerText = document
+          .querySelector('.view-more').getAttribute('data-up');
+        document.querySelector('.view-more-text')
+          .className = 'limit-height view-more-text show';
       } else {
         document.querySelector('.view-more').className = 'view-more down';
-        removeClass(document.querySelector('.view-more-text'),'show');
-        document.querySelector('.view-more').innerHTML = document.querySelector('.view-more').getAttribute('data-down');
+        removeClass(document.querySelector('.view-more-text'), 'show');
+        document.querySelector('.view-more').innerText = document
+          .querySelector('.view-more').getAttribute('data-down');
       }
     });
   }
