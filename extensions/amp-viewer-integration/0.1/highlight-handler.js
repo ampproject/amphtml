@@ -66,7 +66,7 @@ let HighlightInfoDef;
  * to the certain position before animation to control the speed of animation.
  * @type {number}
  */
-const SCROLL_ANIMATION_HIGHT_LIMIT = 1000;
+const SCROLL_ANIMATION_HEIGHT_LIMIT = 1000;
 
 /**
  * Returns highlight param in the URL hash.
@@ -177,9 +177,9 @@ export class HighlightHandler {
     if (visibility == 'visible') {
       this.centerHighlightedNodes_();
     } else {
-      if (scrollTop > SCROLL_ANIMATION_HIGHT_LIMIT) {
+      if (scrollTop > SCROLL_ANIMATION_HEIGHT_LIMIT) {
         Services.viewportForDoc(this.ampdoc_).setScrollTop(
-            scrollTop - SCROLL_ANIMATION_HIGHT_LIMIT);
+            scrollTop - SCROLL_ANIMATION_HEIGHT_LIMIT);
       }
       let called = false;
       this.viewer_.onVisibilityChanged(() => {
