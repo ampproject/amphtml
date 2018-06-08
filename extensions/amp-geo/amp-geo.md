@@ -136,15 +136,15 @@ The game is called <span class='football'></span>!
 
 ### Preset Country Groups
 
-In addtion to user specifed country group `amp-geo` support preset country lists. Currently the only available list is `preset-gdpr`.   See [`amp-geo-presets.js`](./0.1/amp-geo-presets.js) for the countries defiend by presets.
-
-Additional countries may be included with the preset list as in the `myList` example below.
-
  **GOOGLE AND THE AMP PROJECT ARE PROVIDING THIS INFORMATION AS A COURTESY BUT
  DO NOT GUARANTEE THE ACCURACY OR COMPLETENESS OF ANY INFORMATION CONTAINED
  HEREIN. THIS INFORMATION IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
  IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.**
+
+In addition to user specifed country group `amp-geo` supports preset country lists. See [`amp-geo-presets.js`](./0.1/amp-geo-presets.js) for the available preset lists.
+
+Additional countries may be included with the preset list as in the `myList` example below.
 
 ```html
 <amp-geo layout="nodisplay">
