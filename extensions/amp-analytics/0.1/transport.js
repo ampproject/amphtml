@@ -32,16 +32,17 @@ const TAG_ = 'amp-analytics.Transport';
  * @param {!Window} win
  * @param {string} request
  * @param {!Object<string, string>} transportOptions
+ * @param {string} body
  */
-export function sendRequest(win, request, transportOptions) {
+export function sendRequest(win, request, transportOptions, body) {
   assertHttpsUrl(request, 'amp-analytics request');
   checkCorsUrl(request);
   if (transportOptions['beacon'] &&
-      Transport.sendRequestUsingBeacon(win, request)) {
+    Transport.sendRequestUsingBeacon(win, request, body)) {
     return;
   }
   if (transportOptions['xhrpost'] &&
-      Transport.sendRequestUsingXhr(win, request)) {
+    Transport.sendRequestUsingXhr(win, request, body)) {
     return;
   }
   const image = transportOptions['image'];
@@ -82,12 +83,13 @@ export class Transport {
    * @param {!Window} win
    * @param {string} request
    * @return {boolean} True if this browser supports navigator.sendBeacon.
+   * @param {string} body
    */
-  static sendRequestUsingBeacon(win, request) {
+  static sendRequestUsingBeacon(win, request, body) {
     if (!win.navigator.sendBeacon) {
       return false;
     }
-    const result = win.navigator.sendBeacon(request, '');
+    const result = win.navigator.sendBeacon(request, body);
     if (result) {
       dev().fine(TAG_, 'Sent beacon request', request);
     }
@@ -98,8 +100,9 @@ export class Transport {
    * @param {!Window} win
    * @param {string} request
    * @return {boolean} True if this browser supports cross-domain XHR.
+   * @param {string} body
    */
-  static sendRequestUsingXhr(win, request) {
+  static sendRequestUsingXhr(win, request, body) {
     if (!win.XMLHttpRequest) {
       return false;
     }
@@ -120,7 +123,7 @@ export class Transport {
       }
     };
 
-    xhr.send('');
+    xhr.send(body);
     return true;
   }
 }

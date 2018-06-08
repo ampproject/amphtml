@@ -883,9 +883,10 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * @param {string} request The full request string to send.
    * @param {!JsonObject} trigger
+   * @param {string} body The full request body to send as a stringified json.
    * @private
    */
-  sendRequest_(request, trigger) {
+  sendRequest_(request, trigger, body) {
     if (!request) {
       const TAG = this.getName_();
       this.user().error(TAG, 'Request not sent. Contents empty.');
@@ -901,7 +902,10 @@ export class AmpAnalytics extends AMP.BaseElement {
           'iframe transport was inadvertently deleted');
       this.iframeTransport_.sendRequest(request);
     } else {
-      sendRequest(this.win, request, this.config_['transport'] || {});
+      sendRequest(this.win,
+          request,
+          this.config_['transport'] || {},
+          body);
     }
   }
 

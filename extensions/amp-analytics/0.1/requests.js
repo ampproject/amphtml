@@ -39,7 +39,7 @@ export class RequestHandler {
    * @param {!Element} ampAnalyticsElement
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
-   * @param {function(string, !JsonObject)} handler
+   * @param {function(string, !JsonObject, string)} handler
    * @param {boolean} isSandbox
    */
   constructor(ampAnalyticsElement, request, preconnect, handler, isSandbox) {
@@ -49,6 +49,9 @@ export class RequestHandler {
 
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
+
+    /** @private {string} */
+    this.requestBody_ = JSON.stringify(request['body']) || '';
 
     /** @private {Array<number>|number|undefined} */
     this.batchInterval_ = request['batchInterval']; //unit is sec
@@ -84,6 +87,12 @@ export class RequestHandler {
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
 
+    /** @private {?Promise<string>} */
+    this.requestBodyPromise_ = null;
+
+    /** @private {?Promise<string>} */
+    this.requestBodyTemplatePromise_ = null;
+
     /** @private {!Array<!Promise<string>>}*/
     this.extraUrlParamsPromise_ = [];
 
@@ -93,7 +102,7 @@ export class RequestHandler {
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
 
-    /** @private {function(string, !JsonObject)} */
+    /** @private {function(string, !JsonObject, string)} */
     this.handler_ = handler;
 
     /** @const @private {!Object|undefined} */
@@ -148,11 +157,23 @@ export class RequestHandler {
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
       this.baseUrlTemplatePromise_ =
-          this.variableService_.expandTemplate(this.baseUrl, expansionOption);
+        this.variableService_.expandTemplate(this.baseUrl,
+            expansionOption);
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
         return this.urlReplacementService_.expandUrlAsync(
             baseUrl, bindings, this.whiteList_);
       });
+    }
+
+    if (!this.requestBodyPromise_) {
+      this.requestBodyTemplatePromise_ =
+        this.variableService_.expandTemplate(
+            this.requestBody_, expansionOption);
+      this.requestBodyPromise_ =
+        this.requestBodyTemplatePromise_.then(requestBody => {
+          return this.urlReplacementService_.expandUrlAsync(
+              requestBody, bindings, this.whiteList_);
+        });
     }
 
     const extraUrlParamsPromise = this.expandExtraUrlParams_(
@@ -239,14 +260,17 @@ export class RequestHandler {
         let requestUrlPromise;
         if (this.batchingPlugin_) {
           requestUrlPromise =
-              this.constructBatchSegments_(baseUrl, batchSegmentsPromise);
+            this.constructBatchSegments_(baseUrl,
+                batchSegmentsPromise);
         } else {
           requestUrlPromise =
-              this.constructExtraUrlParamStrs_(baseUrl, extraUrlParamsPromise);
+            this.constructExtraUrlParamStrs_(baseUrl,
+                extraUrlParamsPromise);
         }
-        requestUrlPromise.then(requestUrl => {
-          this.handler_(requestUrl, lastTrigger);
-        });
+        Promise.all([requestUrlPromise, this.requestBodyPromise_])
+            .then(data => {
+              this.handler_(data[0], lastTrigger, data[1]);
+            });
       });
     });
   }
