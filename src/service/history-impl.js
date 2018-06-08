@@ -851,8 +851,10 @@ export class HistoryBindingVirtual_ {
     }, opt_stateUpdate || {}));
     return this.viewer_.sendMessageAwaitResponse('pushHistory', message)
         .then(response => {
-          this.updateHistoryState_(/** @type {!HistoryStateDef} */ (response));
-          return response;
+          const updatedState =
+              /** @type {!HistoryStateDef} */ (response || message);
+          this.updateHistoryState_(updatedState);
+          return updatedState;
         });
   }
 
@@ -864,8 +866,10 @@ export class HistoryBindingVirtual_ {
     const message = dict({'stackIndex': this.stackIndex_});
     return this.viewer_.sendMessageAwaitResponse('popHistory', message)
         .then(response => {
-          this.updateHistoryState_(/** @type {!HistoryStateDef} */ (response));
-          return response;
+          const updatedState =
+              /** @type {!HistoryStateDef} */ (response || message);
+          this.updateHistoryState_(updatedState);
+          return updatedState;
         });
   }
 
@@ -877,8 +881,10 @@ export class HistoryBindingVirtual_ {
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
         'replaceHistory', message, /* cancelUnsent */true))
         .then(response => {
-          this.updateHistoryState_(response);
-          return response;
+          const updatedState =
+              /** @type {!HistoryStateDef} */ (response || message);
+          this.updateHistoryState_(updatedState);
+          return updatedState;
         });
   }
 
