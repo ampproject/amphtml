@@ -854,8 +854,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
            'guid=ON&script=0',
       'awConversion': '${awConversionPrefix}${awCommonParams}',
       'awRemarketing': '${awRemarketingPrefix}${awCommonParams}',
-      'flBase':
-           'https://ad.doubleclick.net/activity;src=${flSrc};type=${flType};cat=${flCat}'
+      'flBase': 'https://ad.doubleclick.net/activity;src=${flSrc};type=${flType};cat=${flCat}',
     },
     'transport': {
       'beacon': false,
