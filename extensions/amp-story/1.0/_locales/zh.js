@@ -27,9 +27,6 @@ export default {
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
     string: '拒绝',
   },
-  [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
-    string: 'Ok',
-  },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
     string: '在原始网域上查看',
   },
