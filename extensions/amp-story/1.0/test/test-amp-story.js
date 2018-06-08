@@ -386,7 +386,7 @@ describes.realWin('amp-story', {
         });
   });
 
-  it('should not set active page to active upon navigation if paused', () => {
+  it('should not set first page to active when rendering paused story', () => {
     sandbox.stub(win.history, 'replaceState');
     createPages(story.element, 2, ['cover', 'page-1']);
 
@@ -435,6 +435,8 @@ describes.realWin('amp-story', {
 
       createPages(story.element, 2, ['cover', 'page-1']);
 
+      // In a real scenario, promise is resolved when the user accepted or
+      // rejected the consent.
       let resolver;
       const promise = new Promise(resolve => {
         resolver = resolve;
@@ -445,7 +447,30 @@ describes.realWin('amp-story', {
       story.buildCallback();
 
       return story.layoutCallback()
-          .then(() => resolver())
+          .then(() => resolver()) // Resolving the consent.
+          .then(() => {
+            const coverPage = story.getPageById('cover');
+            expect(coverPage.state_).to.equal(PageState.ACTIVE);
+          });
+    });
+
+    it('should play the story if the consent was already resolved', () => {
+      sandbox.stub(win.history, 'replaceState');
+
+      const consentEl = win.document.createElement('amp-consent');
+      const storyConsentEl = win.document.createElement('amp-story-consent');
+      consentEl.appendChild(storyConsentEl);
+      element.appendChild(consentEl);
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      // Returns an already resolved promised: the user already accepted or
+      // rejected the consent in a previous session.
+      sandbox.stub(consent, 'getConsentPolicyState').resolves();
+
+      story.buildCallback();
+
+      return story.layoutCallback()
           .then(() => {
             const coverPage = story.getPageById('cover');
             expect(coverPage.state_).to.equal(PageState.ACTIVE);
