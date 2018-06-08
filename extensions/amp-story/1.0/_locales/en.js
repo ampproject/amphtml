@@ -41,11 +41,6 @@ export default {
     description: 'Label for a button that allows the user to disconsent to ' +
         'providing their cookie access.',
   },
-  [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
-    string: 'Ok',
-    description: 'Label for a button that allows the user to dismiss the ' +
-        'cookie consent dialog.',
-  },
   [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
     string: 'Continue Anyway',
     description: 'Button label to allow the user to continue even if they ' +
