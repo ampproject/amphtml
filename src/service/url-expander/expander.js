@@ -34,29 +34,34 @@ export class Expander {
     this.variableSource_ = variableSource;
   }
 
+
   /**
    * take the template url and return a promise of its evaluated value
    * @param {string} url url to be substituted
    * @param {!Object<string, *>=} opt_bindings additional one-off bindings
-   * @param {boolean=} opt_sync
+   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
+   *   variable resolutions.
+   * @param {boolean=} opt_sync If the method should resolve syncronously.
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
-   *     that can be substituted.
+   *   that can be substituted.
    * @return {!Promise<string>|string}
    */
-  expand(url, opt_bindings, opt_sync, opt_whiteList) {
+  expand(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     if (!url.length) {
       return opt_sync ? url : Promise.resolve(url);
     }
     const expr = this.variableSource_
-        .getExpr(opt_bindings, /*opt_ignoreArgs */ true);
+        .getExpr(opt_bindings, /*opt_ignoreArgs */ true, opt_whiteList);
 
     const matches = this.findMatches_(url, expr);
     // if no keywords move on
     if (!matches.length) {
       return opt_sync ? url : Promise.resolve(url);
     }
-    return this.parseUrlRecursively_(url, matches, opt_bindings, opt_sync);
+    return this.parseUrlRecursively_(url, matches, opt_bindings,
+        opt_collectVars, opt_sync);
   }
+
 
   /**
    * Structures the regex matching into the desired format
@@ -81,15 +86,18 @@ export class Expander {
     return matches;
   }
 
+
   /**
    * @param {string} url
-   * @param {!Array<Object<string, string|number>>} matches array of objects
-   * representing matching keywords
-   * @param {!Object<string, *>=} opt_bindings additional one-off bindings
+   * @param {!Array<Object<string, string|number>>} matches Array of objects
+   *   representing matching keywords.
+   * @param {!Object<string, *>=} opt_bindings Additional one-off bindings.
+   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
+   *   variable resolutions.
    * @param {boolean=} opt_sync
    * @return {!Promise<string>|string}
    */
-  parseUrlRecursively_(url, matches, opt_bindings, opt_sync) {
+  parseUrlRecursively_(url, matches, opt_bindings, opt_collectVars, opt_sync) {
     const stack = [];
     let urlIndex = 0;
     let matchIndex = 0;
@@ -138,7 +146,7 @@ export class Expander {
               results.push(builder);
             }
             results.push(this.evaluateBinding_(binding,
-                /* opt_args */ undefined, opt_sync));
+                /* opt_args */ undefined, opt_collectVars, opt_sync));
           }
 
           builder = '';
@@ -184,7 +192,7 @@ export class Expander {
           results.push(nextArg);
           nextArgShouldBeRaw = false;
           const value = this.evaluateBinding_(binding, /* opt_args */ results,
-              opt_sync);
+              opt_collectVars, opt_sync);
           return value;
         }
 
@@ -216,13 +224,17 @@ export class Expander {
 
 
   /**
-   * Called when a binding is ready to be resolved. Looks to
+   * Called when a binding is ready to be resolved. Determines which version of
+   * binding to use and if syncronous or asyncronous version should be called.
    * @param {Object<string, *>} bindingInfo An object containing the name of macro
-   * and value to be resolved.
+   *   and value to be resolved.
    * @param {Array=} opt_args Arguments passed to the macro.
+   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
+   *   variable resolutions.
    * @param {*=} opt_sync Whether the binding should be resolved synchronously.
    */
-  evaluateBinding_(bindingInfo, opt_args, opt_sync) {
+  evaluateBinding_(bindingInfo, opt_args, opt_collectVars, opt_sync) {
+    const {name} = bindingInfo;
     let binding;
     if (bindingInfo.prioritized) {
       // If a binding is passed in through opt_bindings it always takes
@@ -239,18 +251,22 @@ export class Expander {
       // Prefer the async over the sync but it may not exist.
       binding = bindingInfo.async || bindingInfo.sync;
     }
-    return opt_sync ? this.evaluateBindingSync_(binding, opt_args) :
-      this.evaluateBindingAsync_(binding, opt_args);
+    return opt_sync ?
+      this.evaluateBindingSync_(binding, name, opt_args, opt_collectVars) :
+      this.evaluateBindingAsync_(binding, name, opt_args, opt_collectVars);
   }
 
 
   /**
-   * resolves binding to value to be substituted asyncronously
-   * @param {*} binding container for sync/async resolutions
-   * @param {?Array=} opt_args arguments to be passed if binding is function
-   * @return {!Promise<string>} resolved value
+   * Resolves binding to value to be substituted asyncronously.
+   * @param {*} binding Container for sync/async resolutions.
+   * @param {string} name
+   * @param {?Array=} opt_args Arguments to be passed if binding is function.
+   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
+   *   variable resolutions.
+   * @return {!Promise<string>} Resolved value.
    */
-  evaluateBindingAsync_(binding, opt_args) {
+  evaluateBindingAsync_(binding, name, opt_args, opt_collectVars) {
     let value;
     try {
       if (typeof binding === 'function') {
@@ -263,41 +279,72 @@ export class Expander {
       } else {
         value = Promise.resolve(binding);
       }
-      return value.then(val => val == null ? '' : encodeURIComponent(val))
-          .catch(e => {
-            rethrowAsync(e);
-            return '';
-          });
+      return value.then(val => {
+        const result = val == null ? '' : encodeURIComponent(val);
+        if (opt_collectVars) {
+          opt_collectVars[name] = result;
+        }
+        return result;
+      }).catch(e => {
+        rethrowAsync(e);
+        if (opt_collectVars) {
+          opt_collectVars[name] = '';
+        }
+        return Promise.resolve('');
+      });
 
     } catch (e) {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
+      if (opt_collectVars) {
+        opt_collectVars[name] = '';
+      }
       return Promise.resolve('');
     }
   }
 
-  evaluateBindingSync_(binding, opt_args) {
+
+  /**
+   * Resolves binding to value to be substituted asyncronously.
+   * @param {*} binding Container for sync/async resolutions.
+   * @param {string} name
+   * @param {?Array=} opt_args Arguments to be passed if binding is function.
+   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
+   *   variable resolutions.
+   * @return {string} Resolved value.
+   */
+  evaluateBindingSync_(binding, name, opt_args, opt_collectVars) {
     try {
       const value = typeof binding === 'function' ?
         binding.apply(null, opt_args) : binding;
 
+      let result;
+
       if (value && value.then) {
-        // if binding is passed in as opt_binding we try to resolve it and it
-        // may return a promise
+        // If binding is passed in as opt_binding we try to resolve it and it
+        // may return a promise.
         user().error(TAG, 'ignoring async macro resolution');
-        return '';
+        result = '';
+      } else if (value == null) {
+        // Most likely a broken binding gets us here.
+        result = '';
+      } else {
+        result = encodeURIComponent(/** @type {string} */ (value));
       }
 
-      if (value == null) {
-        return '';
+      if (opt_collectVars) {
+        opt_collectVars[name] = result;
       }
 
-      return encodeURIComponent(value);
+      return result;
     } catch (e) {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
+      if (opt_collectVars) {
+        opt_collectVars[name] = '';
+      }
       return '';
     }
   }

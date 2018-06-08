@@ -17,6 +17,7 @@
 import {Expander} from '../../../src/service/url-expander/expander';
 import {GlobalVariableSource} from '../../../src/service/url-replacements-impl';
 import {createElementWithAttributes} from '../../../src/dom';
+import {macroTask} from '../../../testing/yield';
 
 describes.realWin('Expander', {
   amp: {
@@ -142,6 +143,7 @@ describes.realWin('Expander', {
       CAT_THREE: (a, b, c) => a + b + c,
       ASYNC: Promise.resolve('hello'),
       ASYNCFN: arg => Promise.resolve(arg),
+      BROKEN: () => undefined,
     };
 
     const sharedTestCases = [
@@ -269,7 +271,8 @@ describes.realWin('Expander', {
       sharedTestCases.forEach(test => {
         const {description, input, output} = test;
         it(description, () =>
-          expect(expander.expand(input, mockBindings, /*opt_sync*/ true))
+          expect(expander.expand(input, mockBindings,
+              /* opt_collectVars */ undefined, /* opt_sync */ true))
               .to.equal(output)
         );
       });
@@ -278,7 +281,8 @@ describes.realWin('Expander', {
         it('throws on bad input with back ticks', () => {
           const url = 'CONCAT(bad`hello`, world)';
           allowConsoleError(() => { expect(() => {
-            expander.expand(url, mockBindings, /*opt_sync*/ true);
+            expander.expand(url, mockBindings, /* opt_collectVars */ undefined,
+                /* opt_sync */ true);
           }).to.throw(/bad/); });
         });
 
@@ -288,7 +292,8 @@ describes.realWin('Expander', {
           const url = 'ASYNC';
           const expected = '';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+            expect(expander.expand(url, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true))
                 .to.equal(expected);
           });
         });
@@ -297,7 +302,8 @@ describes.realWin('Expander', {
           const url = 'ASYNCFN';
           const expected = '';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+            expect(expander.expand(url, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true))
                 .to.equal(expected);
           });
         });
@@ -306,7 +312,8 @@ describes.realWin('Expander', {
           const url = 'ASYNCFN(foo)';
           const expected = '';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+            expect(expander.expand(url, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true))
                 .to.equal(expected);
           });
         });
@@ -315,7 +322,8 @@ describes.realWin('Expander', {
           const url = 'http://www.google.com/?test=RANDOMASYNCFN(foo)UPPERCASE(foo)';
           const expected = 'http://www.google.com/?test=123456FOO';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+            expect(expander.expand(url, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true))
                 .to.equal(expected);
           });
         });
@@ -324,10 +332,101 @@ describes.realWin('Expander', {
           const url = 'CONCAT(foo, ASYNCFN(bar))UPPERCASE(foo)';
           const expected = 'foo-FOO';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings, /*opt_sync*/ true))
+            expect(expander.expand(url, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true))
                 .to.equal(expected);
           });
         });
+      });
+    });
+
+    describe('collectVars', () => {
+      const tests = [
+        {
+          description: 'sibling macros',
+          input: 'UPPERCASE(aaaa)LOWERCASE(BBB)',
+          output: {
+            UPPERCASE: 'AAAA',
+            LOWERCASE: 'bbb',
+          },
+        },
+        {
+          description: 'nested macros',
+          input: 'LOWERCASE(UPPERCASE(TRIM(aAaA    )))',
+          output: {
+            TRIM: 'aAaA',
+            UPPERCASE: 'AAAA',
+            LOWERCASE: 'aaaa',
+          },
+        },
+        {
+          description: 'macros that resolve undefined should be empty string',
+          input: 'UPPERCASE(foo)BROKEN',
+          output: {
+            UPPERCASE: 'FOO',
+            BROKEN: '',
+          },
+        },
+      ];
+
+      describe('called asyncronously', () => {
+        tests.forEach(test => {
+          const {description, input, output} = test;
+          it(description, function*() {
+            const vars = {};
+            expander.expand(input, mockBindings, /* opt_collectVars */ vars);
+            yield macroTask();
+            expect(vars).to.deep.equal(output);
+          });
+        });
+
+        it('should handle async functions', function*() {
+          const vars = {};
+          const input = 'CLIENT_ID(__ga)UPPERCASE(foo)';
+          expander.expand(input, mockBindings, /* opt_collectVars */ vars);
+          yield macroTask();
+          expect(vars).to.deep.equal({
+            CLIENT_ID: 'amp-GA12345',
+            UPPERCASE: 'FOO',
+          });
+        });
+      });
+
+      describe('called syncronously', () => {
+        tests.forEach(test => {
+          const {description, input, output} = test;
+          it(description, () => {
+            const vars = {};
+            expander.expand(input, mockBindings, /* opt_collectVars */ vars,
+                /* opt_sync */ true);
+            expect(vars).to.deep.equal(output);
+          });
+        });
+
+        it('should return empty string for async functions', () => {
+          const vars = {};
+          const input = 'CLIENT_ID(__ga)UPPERCASE(foo)';
+          allowConsoleError(() => {
+            expander.expand(input, mockBindings, /* opt_collectVars */ vars,
+                /* opt_sync */ true);
+          });
+          expect(vars).to.deep.equal({
+            CLIENT_ID: '',
+            UPPERCASE: 'FOO',
+          });
+        });
+      });
+    });
+
+    describe('opt_whiteList', () => {
+      it('should only resolve values in the whitelist', () => {
+        const url = 'UPPERCASE(foo)RANDOMLOWERCASE(BAR)';
+        const whitelist = {RANDOM: true};
+        return expect(expander.expand(url, mockBindings,
+            /* opt_collectVars */ undefined,
+            /* opt_sync */ false,
+            /* opt_whiteList */ whitelist
+        )).to.eventually.equal('UPPERCASE(foo)123456LOWERCASE(BAR)');
       });
     });
   });

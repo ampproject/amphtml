@@ -512,7 +512,9 @@ describes.sandboxed('Navigation', {}, () => {
         const newUrl = /*eslint no-script-url: 0*/ 'javascript:alert(1)';
 
         expect(win.location.href).to.equal('https://www.pub.com/');
-        handler.navigateTo(win, newUrl);
+        allowConsoleError(() => {
+          handler.navigateTo(win, newUrl);
+        });
         // No navigation so window location should be unchanged.
         expect(win.location.href).to.equal('https://www.pub.com/');
       });
@@ -694,4 +696,3 @@ describes.realWin('anchor-click-interceptor', {amp: true}, env => {
     expect(a.href).to.equal('http://example.com/?x=23&y=45');
   });
 });
-
