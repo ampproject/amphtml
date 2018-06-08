@@ -212,7 +212,7 @@ export class AmpGeo extends AMP.BaseElement {
         return;
       }
       return country.toLowerCase();
-    }).concat(presetCountries);
+    }).concat(presetCountries.map(c => c.toLowerCase()));
 
     return countryGroup.includes(this.country_);
   }

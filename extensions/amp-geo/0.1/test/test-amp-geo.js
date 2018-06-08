@@ -66,6 +66,7 @@ describes.realWin('amp-geo', {
     doc = win.document;
     ampdoc = env.ampdoc;
     el = doc.createElement('amp-geo');
+    el.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(el);
     el.ampdoc_ = ampdoc;
     const vsync = vsyncForTesting(win);
