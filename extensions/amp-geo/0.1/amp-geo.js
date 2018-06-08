@@ -38,7 +38,16 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
+
+/**
+ * GOOGLE AND THE AMP PROJECT ARE PROVIDING THIS INFORMATION AS A COURTESY BUT
+ * DO NOT GUARANTEE THE ACCURACY OR COMPLETENESS OF ANY INFORMATION CONTAINED
+ * HEREIN. THIS INFORMATION IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
 import {ampGeoPresets} from './amp-geo-presets';
+
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
