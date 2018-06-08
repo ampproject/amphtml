@@ -328,10 +328,9 @@ function warnForConsoleError() {
       originalConsoleError(errorMessage + separator + helpMessage);
     }
   });
-  this.expectAsyncConsoleError = function(message) {
-    if (!expectedAsyncErrors.includes(message)) {
-      expectedAsyncErrors.push(message);
-    }
+  this.expectAsyncConsoleError = function(message, repeat = 1) {
+    expectedAsyncErrors.push.apply(
+        expectedAsyncErrors, Array(repeat).fill(message));
   };
   this.allowConsoleError = function(func) {
     dontWarnForConsoleError();
