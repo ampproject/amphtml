@@ -353,7 +353,7 @@ export function isProxyOrigin(url) {
  * @param {string|!Location} url URL of an AMP document.
  * @return {boolean}
  */
-export function isAdFromProxyOrigin(url) {
+export function isAlpProxyOrigin(url) {
   if (typeof url == 'string') {
     url = parseUrlDeprecated(url);
   }

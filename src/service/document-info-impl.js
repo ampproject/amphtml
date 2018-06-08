@@ -18,7 +18,7 @@ import {Services} from '../services';
 import {
   getSourceOrigin,
   getSourceUrl,
-  isAdFromProxyOrigin,
+  isAlpProxyOrigin,
   parseQueryString,
   parseUrlDeprecated,
 } from '../url';
@@ -79,7 +79,7 @@ export class DocInfo {
     }
     const ampdoc = this.ampdoc_;
     const url = ampdoc.getUrl();
-    const sourceUrl = getSourceUrl(url);
+    let sourceUrl = getSourceUrl(url);
     const rootNode = ampdoc.getRootNode();
     let canonicalUrl = rootNode && rootNode.AMP
         && rootNode.AMP.canonicalUrl;
@@ -106,6 +106,7 @@ export class DocInfo {
               getReplaceUrlFromParameter(ampdoc) ||
               Services.viewerForDoc(ampdoc).getReplaceUrl();
         }
+        // TODO: investigate whether the source URL can be safely cached.
         return replaceUrl || getSourceUrl(ampdoc.getUrl());
       },
       canonicalUrl,
@@ -224,5 +225,5 @@ function getReplaceUrlFromParameter(ampdoc) {
  */
 function allowReplaceUrl(ampdoc) {
   return ampdoc.isSingleDoc() &&
-    isAdFromProxyOrigin(ampdoc.win.location.href);
+    isAlpProxyOrigin(ampdoc.win.location.href);
 }
