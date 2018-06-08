@@ -31,6 +31,10 @@ tags: {  # <amp-vimeo>
   tag_name: "AMP-VIMEO"
   requires_extension: "amp-vimeo"
   attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
     name: "data-videoid"
     mandatory: true
     value_regex: "[0-9]+"
