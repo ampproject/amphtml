@@ -35,7 +35,7 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
     const addClass = (ele, cls) => {
       if (cls.replace(/\s*/g, '')) {
         !hasClass(ele, cls) && (ele.className = ele
-          .className == '' ? cls : ele.className + ' ' + cls);
+            .className == '' ? cls : ele.className + ' ' + cls);
       }
     };
 
@@ -53,18 +53,18 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
     } else {
       addClass(document.querySelector('.view-more-text'), 'limit-height');
     }
-    document.querySelector('.view-more').addEventListener('click', function () {
+    document.querySelector('.view-more').addEventListener('click', function() {
       if (hasClass(document.querySelector('.view-more'), 'down')) {
         removeClass(document.querySelector('.view-more'), 'down');
         document.querySelector('.view-more').innerText = document
-          .querySelector('.view-more').getAttribute('data-up');
+            .querySelector('.view-more').getAttribute('data-up');
         document.querySelector('.view-more-text')
-          .className = 'limit-height view-more-text show';
+            .className = 'limit-height view-more-text show';
       } else {
         document.querySelector('.view-more').className = 'view-more down';
         removeClass(document.querySelector('.view-more-text'), 'show');
         document.querySelector('.view-more').innerText = document
-          .querySelector('.view-more').getAttribute('data-down');
+            .querySelector('.view-more').getAttribute('data-down');
       }
     });
   }
