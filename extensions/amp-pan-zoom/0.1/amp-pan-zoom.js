@@ -426,6 +426,14 @@ export class AmpPanZoom extends AMP.BaseElement {
       transform: translate(this.posX_, this.posY_) +
           ' ' + scale(this.scale_),
     });
+    const transformEndEvent =
+    createCustomEvent(this.win, `${TAG}.transformEnd`, {
+      scale: this.scale_,
+      x: this.posX_,
+      y: this.posY_,
+    });
+    this.action_.trigger(this.element, 'transformEnd', transformEndEvent,
+        ActionTrust.HIGH);
   }
 
   /**
@@ -544,14 +552,6 @@ export class AmpPanZoom extends AMP.BaseElement {
       } else {
         this.registerPanningGesture_();
       }
-
-      // TODO: fire a zoom end event
-      const zoomEndEvent =
-      createCustomEvent(this.win, `${TAG}.zoomEnd`, {
-        scale: this.scale_,
-      });
-      this.action_.trigger(this.element, 'zoomEnd', zoomEndEvent,
-          ActionTrust.HIGH);
     });
   }
 
