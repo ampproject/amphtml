@@ -9,6 +9,12 @@ because the current onduty person handles pushing the build the previous onduty
 created to production a single issue will generally be updated by at least
 two onduty people.
 
+When creating the issue replace <RELEASE_NUMBER> with the initial canary
+release number and remove the backticks (`).  If you create
+a cherry pick a new release number is created.  At each stage of the release
+make sure to edit the checklist item to accurately reflect which release is
+being used.
+
 Once you have filed this issue post a link to it in the #release Slack channel.
 
 As each step is completed, check it off so the community can see the state of
@@ -23,11 +29,11 @@ additional checkboxes at the stage the cherry pick was made, e.g. if the
 cherry pick is made after the initial canary release was at 1%, add these lines
 beneath the initial 1% checkbox and then check them as they occur:
   - [ ] Cherry pick release [<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>) pushed to Dev Channel
-  - [ ] Cherry pick release pushed to 1%
+  - [ ] Cherry pick release <RELEASE_NUMBER> pushed to 1%
 
 If the cherry pick is made to the release in production, you may also need to
 add a checkbox like:
-  - [ ] Cherry pick release pushed to production
+  - [ ] Cherry pick release <RELEASE_NUMBER> pushed to production
 
 When you push the release this issue is tracking to production:
 - update the "pushed to production" checkbox with a link to the release build
@@ -41,11 +47,11 @@ After the release is pushed to production, continue to use this issue to track
 anything interesting about the release, including adding additional
 checkboxes to track cherry picks into production.
 -->
-- [x] Canary release [<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>) is cut
-- [ ] Canary release pushed to Dev Channel
-- [ ] Canary release pushed to 1%
-- [ ] Release build pushed to production
+- [x] Canary release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut
+- [ ] Canary release <RELEASE_NUMBER> pushed to Dev Channel
+- [ ] Canary release <RELEASE_NUMBER> pushed to 1%
+- [ ] Release build <RELEASE_NUMBER> pushed to production
 
-See the [release documentation](https://github.com/mrjoro/amphtml/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Dev Channel.
+See the [release documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Dev Channel.
 
-If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new).  If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://github.com/mrjoro/amphtml/contributing/release-schedule.md#cherry-picks).
+If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new).  If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-picks).
