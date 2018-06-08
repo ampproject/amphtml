@@ -165,7 +165,7 @@ declareExtension('amp-story', '1.0', {
     'amp-story-hint',
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
-    // TODO(newmuis): 'amp-story-info-dialog',
+    'amp-story-info-dialog',
     'amp-story-share',
     'amp-story-share-menu',
     'amp-story-system-layer',
@@ -180,6 +180,7 @@ declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions-google', '0.1', {hasCss: true});
+declareExtension('amp-pan-zoom', '0.1', {hasCss: true});
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.

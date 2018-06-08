@@ -482,7 +482,7 @@ By default, the continue buttons is disabled. Only when the step is completed (i
    We sync the entered email address between the two steps using an amp-state variable `email`:
 
    ```html
-      <input type="text" value="" name="email" 
+      <input type="email" value="" name="email" 
                on="input-debounced: AMP.setState({ email: event.value })" ...>
         ...
       <button class="back" [text]="email" ...></button>
@@ -495,7 +495,7 @@ By default, the continue buttons is disabled. Only when the step is completed (i
              [class]="slidingStepperPage > 0 ? 'page previous' : 'page active'"> 
       <h3>Sign in</h3>
       <div class="ampstart-input inline-block relative m0 p0 mb3 mt3">
-        <input type="text" value="" name="email" autocomplete="email" id="id1" class="block border-none p0 m0" placeholder="Enter your Email"
+        <input type="email" value="" name="email" autocomplete="email" id="id1" class="block border-none p0 m0" placeholder="Enter your Email"
                     on="input-debounced: AMP.setState({ email: event.value })">
         <label for="ip1" class="absolute top-0 right-0 bottom-0 left-0" aria-hidden="true">
           Enter your Email
