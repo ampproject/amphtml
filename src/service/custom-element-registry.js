@@ -78,6 +78,8 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * This method should not be inlined to prevent TryCatch deoptimization.
  * NoInline keyword at the end of function name also prevents Closure compiler
  * from inlining the function.
+ * @param {Element} element
+ * @param {function(new:../base-element.BaseElement, !Element)} toClass
  * @private
  */
 function tryUpgradeElementNoInline(element, toClass) {
