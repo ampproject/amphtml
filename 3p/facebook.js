@@ -93,7 +93,7 @@ function getPageContainer(global, data) {
   // Note: The facebook embed  allows a maximum width of 500px.
   // If the container's width exceeds that, the embed's width will
   // be clipped to 500px.
-  container.setAttribute('data-width', c.offsetWidth);
+  container.setAttribute('data-width', c./*OK*/offsetWidth);
   return container;
 }
 
