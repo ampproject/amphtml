@@ -98,6 +98,7 @@ export const naturalDimensions_ = {
 export const LOADING_ELEMENTS_ = {
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
+  'AMP-GOOGLE-DOCUMENT-EMBED': true,
   'AMP-EMBED': true,
   'AMP-FACEBOOK': true,
   'AMP-FACEBOOK-COMMENTS': true,
@@ -291,7 +292,7 @@ export function getNaturalDimensions(element) {
  * Whether the loading can be shown for the specified elemeent. This set has
  * to be externalized since the element's implementation may not be
  * downloaded yet.
- * @param {!Element} element.
+ * @param {!Element} element
  * @return {boolean}
  */
 export function isLoadingAllowed(element) {
