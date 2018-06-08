@@ -131,6 +131,18 @@ export class AmpPanZoom extends AMP.BaseElement {
     );
     this.content_ = children[0];
     this.content_.classList.add('i-amphtml-pan-zoom-child');
+
+    this.registerAction('transform', invocation => {
+      const {args} = invocation;
+      if (args) {
+        const scale = args.scale || 1;
+        const x = args.x || 0;
+        const y = args.y || 0;
+        const deltaX = x - this.posX_;
+        const deltaY = y - this.posY_;
+        this.onZoom_(scale, deltaX, deltaY, true);
+      }
+    }, ActionTrust.LOW);
   }
 
   /** @override */
