@@ -518,28 +518,14 @@ export class Viewport {
         offset = 0;
         break;
     }
-    return this.animateScrollToTop(elementRect.top + offset, duration, curve);
-  }
-
-  /**
-   * Scrolls the viewport to top with animation.
-   *
-   * @param {number} top
-   * @param {number=} duration
-   * @param {string=} curve
-   * @return {!Promise}
-   */
-  animateScrollToTop(top,
-    duration = 500,
-    curve = 'ease-in') {
     let newScrollTop;
     let curScrollTop;
 
     if (this.useLayers_) {
-      newScrollTop = top;
+      newScrollTop = elementRect.top + offset;
       curScrollTop = 0;
     } else {
-      const calculatedScrollTop = top - this.paddingTop_;
+      const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
       newScrollTop = Math.max(0, calculatedScrollTop);
       curScrollTop = this.getScrollTop();
     }

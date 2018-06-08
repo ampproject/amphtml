@@ -20,7 +20,7 @@ import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
-import {resetStyles} from '../../../src/style';
+import {resetStyles, setStyles} from '../../../src/style';
 
 /**
  * The message name sent by viewers to dismiss highlights.
@@ -175,7 +175,7 @@ export class HighlightHandler {
 
     const visibility = this.viewer_.getVisibilityState();
     if (visibility == 'visible') {
-      this.centerHighlightedNodes_();
+      this.animateScrollToTop_(scrollTop);
     } else {
       if (scrollTop > SCROLL_ANIMATION_HEIGHT_LIMIT) {
         Services.viewportForDoc(this.ampdoc_).setScrollTop(
@@ -187,7 +187,7 @@ export class HighlightHandler {
         if (called || this.viewer_.getVisibilityState() != 'visible') {
           return;
         }
-        this.centerHighlightedNodes_();
+        this.animateScrollToTop_(this.calcTopToCenterHighlightedNodes_());
         called = true;
       });
     }
@@ -224,15 +224,27 @@ export class HighlightHandler {
   }
 
   /**
+   * @param {number} top
    * @private
    */
-  centerHighlightedNodes_() {
-    const top = this.calcTopToCenterHighlightedNodes_();
-    this.sendHighlightState_('auto_scroll');
-    const viewport = Services.viewportForDoc(this.ampdoc_);
-    viewport.animateScrollToTop(top, 500).then(() => {
-      this.sendHighlightState_('shown');
+  animateScrollToTop_(top) {
+    const sentinel = this.ampdoc_.win.document.createElement('div');
+    setStyles(sentinel, {
+      'position': 'absolute',
+      'top': Math.floor(top) + 'px',
+      'bottom': '0',
+      'left': '0',
+      'right': '0',
+      'pointer-events': 'none',
     });
+    const body = this.ampdoc_.getBody();
+    body.appendChild(sentinel);
+    this.sendHighlightState_('auto_scroll');
+    Services.viewportForDoc(this.ampdoc_)
+        .animateScrollIntoView(sentinel).then(() => {
+          this.sendHighlightState_('shown');
+          body.removeChild(sentinel);
+        });
   }
 
   /**

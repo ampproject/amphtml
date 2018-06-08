@@ -102,7 +102,7 @@ describes.realWin('HighlightHandler', {
   it('initialize with visibility=visible', () => {
     const {ampdoc} = env;
     const scrollStub = sandbox.stub(
-        Services.viewportForDoc(ampdoc), 'animateScrollToTop');
+        Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
     scrollStub.returns(Promise.reject());
     const sendMsgStub = sandbox.stub(
         Services.viewerForDoc(ampdoc), 'sendMessage');
@@ -111,8 +111,8 @@ describes.realWin('HighlightHandler', {
         ampdoc,{sentences: ['amp', 'highlight']});
 
     expect(scrollStub).to.be.calledOnce;
-    expect(scrollStub.firstCall.args.length).to.equal(2);
-    expect(scrollStub.firstCall.args[1]).to.equal(500);
+    expect(scrollStub.firstCall.args.length).to.equal(1);
+    expect(scrollStub.firstCall.args[0].style.pointerEvents).to.equal('none');
 
     // For some reason, expect(args).to.deep.equal does not work.
     expect(sendMsgStub.callCount).to.equal(2);
