@@ -803,7 +803,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
       expect(replaceStateSpy).to.be.calledTwice;
       expect(replaceStateSpy.lastCall.args).to
           .jsonEqual([{'AMP.History': 1, fragment: 'bar', data: {}}
-            , '', '#bar']);
+            , null, '#bar']);
     });
   });
 
@@ -818,7 +818,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
       expect(replaceStateSpy).to.be.calledTwice;
       expect(replaceStateSpy.lastCall.args).to
           .jsonEqual([{'AMP.History': 1, fragment: 'bar', data: {}}
-            , '', '#bar']);
+            , null, '#bar']);
     });
   });
 
