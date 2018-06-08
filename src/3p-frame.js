@@ -257,6 +257,7 @@ function getAdsLocalhost(win) {
  * Sub domain on which the 3p iframe will be hosted.
  * Because we only calculate the URL once per page, this function is only
  * called once and hence all frames on a page use the same URL.
+ * @param {!Window} win
  * @return {string}
  * @visibleForTesting
  */
