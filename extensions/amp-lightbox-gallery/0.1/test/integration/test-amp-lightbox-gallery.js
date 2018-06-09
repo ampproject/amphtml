@@ -17,7 +17,7 @@
 import {poll} from '../../../../../testing/iframe';
 
 describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
-  this.timeout(5000);
+  this.timeout(10000);
   const extensions = ['amp-lightbox-gallery'];
   const body = `
   <figure>
