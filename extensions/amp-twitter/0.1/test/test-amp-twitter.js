@@ -50,6 +50,7 @@ describes.realWin('amp-twitter', {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
+      expect(iframe.getAttribute('allowfullscreen')).to.equal('true');
     });
   });
 

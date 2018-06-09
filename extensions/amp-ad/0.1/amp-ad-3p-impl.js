@@ -364,7 +364,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.emitLifecycleEvent('adRequestStart');
       const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
           this.element, this.type_, opt_context,
-          this.config.remoteHTMLDisabled);
+          {disallowCustom: this.config.remoteHTMLDisabled});
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
           this);
       return this.xOriginIframeHandler_.init(iframe);
