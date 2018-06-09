@@ -58,7 +58,8 @@ class AmpReddit extends AMP.BaseElement {
         'The data-embedtype attribute is required for <amp-reddit> %s',
         this.element);
 
-    const iframe = getIframe(this.win, this.element, 'reddit');
+    const iframe = getIframe(this.win, this.element, 'reddit', null,
+        {allowFullscreen: true});
     this.applyFillContent(iframe);
     listenFor(iframe, 'embed-size', data => {
       this./*OK*/changeHeight(data['height']);
