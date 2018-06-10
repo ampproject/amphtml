@@ -231,6 +231,34 @@ In the below example, the element is translated along the Y axis across `20%` of
 
 This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the element has crossed that percentage of the viewport. The default value is `5%`.
 
+## Combining presets
+
+Developers can also combine `amp-fx` presets together to create combined animations. 
+
+
+In the below example, the element is both translated along the Y axis and has it's opacity changed from `0` to `1` over a duration of `1000ms`.
+
+```html
+  <div amp-fx="fade-in fly-in-bottom" data-duration="1000ms">
+    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+  </div>
+```
+
+However, there are some presets which don't combine together to create great results. In such cases, we accept the first preset listed and ignore the clashing preset and warn in the console. 
+
+In the below example, the element is being translated along the Y axis by two clashing presets `parallax` and `fly-in-bottom`. In this case we only allow the `parallax` animation and ignore the `fly-in-bottom` preset. 
+
+```html
+  <div amp-fx="parallax fly-in-bottom" data-parallax-factor="1.5">
+    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+  </div>
+```
+
+Below is a list of group of presets, AMP advises you don't combine:
+1. `parallax`, `fly-in-top`, `fly-in-bottom`,
+2. `fly-in-left`, `fly-in-right`,
+3. `fade-in`, `fade-in-scroll`.
+
 ## Validation
 
 See [amp-fx-collection rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-collection/validator-amp-fx-collection.protoascii) in the AMP validator specification.
