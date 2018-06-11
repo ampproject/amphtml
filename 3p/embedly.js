@@ -59,7 +59,7 @@ export const CardOptions = {
  *
  * @param {!Window} global
  * @param {function(!Object)} callback
- * @VisibleForTesting
+ * @visibleForTesting
  */
 function getEmbedly(global, callback) {
   loadScript(global, EMBEDLY_SDK_URL, function() {
