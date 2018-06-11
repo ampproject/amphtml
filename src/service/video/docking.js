@@ -859,6 +859,11 @@ export class VideoDocking {
         dev().assertNumber(opt_step) :
         this.calculateStep_(video.element);
 
+    // Component background is now visible, so hide the poster for the Android
+    // workaround so authors can style the component container as they like.
+    // (see `AmpVideo#createPosterForAndroidBug_`).
+    this.removePosterForAndroidBug_(video.element);
+
     const {x, y, scale} = this.getDims_(video, posX, posY, step);
 
     video.hideControls();
@@ -1503,5 +1508,17 @@ export class VideoDocking {
    */
   hideControlsOnTimeout_(time = CONTROLS_TIMEOUT) {
     this.getHideControlsTimeout_().trigger(time);
+  }
+
+  /**
+   * @param {!Element} parent
+   * @private
+   */
+  removePosterForAndroidBug_(parent) {
+    const el = parent.querySelector('i-amphtml-android-poster-bug');
+    if (!el) {
+      return;
+    }
+    parent.removeChild(el);
   }
 }

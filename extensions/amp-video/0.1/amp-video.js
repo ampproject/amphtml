@@ -29,13 +29,14 @@ import {
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
+import {setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
-
 
 const TAG = 'amp-video';
 
@@ -61,6 +62,17 @@ const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'preload'];
 /** @private {!Array<string>} */
 const ATTRS_TO_PROPAGATE =
     ATTRS_TO_PROPAGATE_ON_BUILD.concat(ATTRS_TO_PROPAGATE_ON_LAYOUT);
+
+
+function createPosterImage(ctx, src) {
+  const el = htmlFor(ctx)`<i-amphtml-poster></i-amphtml-poster>`;
+  setStyles(el, {
+    'display': 'block',
+    'background-image': `url(${src})`,
+    'background-size': 'cover',
+  });
+  return el;
+}
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -183,6 +195,8 @@ class AmpVideo extends AMP.BaseElement {
         /* opt_removeMissingAttrs */ true);
     this.installEventHandlers_();
     this.applyFillContent(this.video_, true);
+
+    this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
 
     // Gather metadata
@@ -489,6 +503,27 @@ class AmpVideo extends AMP.BaseElement {
         // the success or failure of the play()'s returned promise.
       });
     }
+  }
+
+  /**
+   * Android will show a blank frame between the poster and the first frame in
+   * some cases. In these cases, the video element is transparent. By setting
+   * a poster layer underneath, the poster is still shown while the first frame
+   * buffers, so no FOUC.
+   * @private
+   */
+  createPosterForAndroidBug_() {
+    if (!Services.platformFor(this.win).isAndroid()) {
+      return;
+    }
+    const {element} = this;
+    if (element.querySelector('i-amphtml-poster')) {
+      return;
+    }
+    const poster = createPosterImage(element, element.getAttribute('poster'));
+    poster.classList.add('i-amphtml-android-poster-bug');
+    this.applyFillContent(poster);
+    element.appendChild(poster);
   }
 
   /**
