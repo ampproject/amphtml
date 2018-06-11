@@ -14,48 +14,22 @@
 # limitations under the license.
 #
 
-tags: {  # amp-embedly-card
+tags: {  # embedly-card
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-embedly-card extension .js script"
-  satisfies: "amp-embedly-card extension .js script"
-  requires: "amp-embedly-card"
-  mandatory_parent: "HEAD"
-  unique: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-embedly-card"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-embedly-card"
-    dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\.ampproject\.org/v0/amp-embedly-card-(latest|0\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-embedly-card"
+  attr_lists: "common-extension-attrs"
 }
+
 tags: {  # <amp-embedly-card>
   html_format: AMP
   tag_name: "AMP-EMBEDLY-CARD"
   satisfies: "amp-embedly-card"
-  requires: "amp-embedly-card extension .js script"
+  requires_extension: "amp-embedly-card"
   attrs: {
     name: "data-url"
     mandatory: true
@@ -70,14 +44,11 @@ tags: {  # <amp-embedly-card>
 tags: {  # <amp-embedly-key>
   html_format: AMP
   tag_name: "AMP-EMBEDLY-KEY"
-  satisfies: "amp-embedly-key"
-  requires: "amp-embedly-card extension .js script"
+  requires_extension: "amp-embedly-card"
   attrs: {
     name: "value"
     mandatory: true
   }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-embedly-card"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
