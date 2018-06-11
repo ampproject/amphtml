@@ -42,7 +42,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
-import {parseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 import {waitForBodyPromise} from '../../../src/dom';
 
@@ -111,10 +111,14 @@ export class AmpGeo extends AMP.BaseElement {
       `${TAG} can only have one <script type="application/json"> child`);
     }
 
+    const config = children.length ?
+      tryParseJson(
+          children[0].textContent,
+          e => user().error(TAG,'Unable to parse JSON', e)
+      ) : {};
+
     /** @type {!Promise<!Object<string, (string|Array<string>)>>} */
-    const geo = this.addToBody_(
-        children.length ?
-          parseJson(children[0].textContent) : {});
+    const geo = this.addToBody_(config || {});
 
     /* resolve the service promise singleton we stashed earlier */
     geoDeferred.resolve(geo);
