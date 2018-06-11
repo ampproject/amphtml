@@ -176,7 +176,8 @@ describe('#line-delimited-response-handler', () => {
       return executeAndVerifyResponse();
     });
 
-    it('should handle no fill response properly', () => {
+    // TODO(lannka, #15748): Fails on Safari 11.1.0.
+    it.configure().skipSafari('should handle no fill response properly', () => {
       slotData = [{headers: {}, creative: ''}];
       setup();
       return executeAndVerifyResponse();
