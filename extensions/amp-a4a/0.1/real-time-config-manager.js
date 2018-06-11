@@ -182,31 +182,26 @@ export class RealTimeConfigManager {
   /**
    * Returns whether a given callout object is valid to send an RTC request
    * to, for the given consentState.
-   * @param {Object|string} callout
+   * @param {Object|string} calloutConfig
    * @return {boolean}
+   * @visibleForTesting
    */
-  isValidCalloutForConsentState(callout) {
-    if (!isObject(callout) || !callout['sendRegardlessOfConsentState']) {
+  isValidCalloutForConsentState(calloutConfig) {
+    if (!isObject(calloutConfig) ||
+        !calloutConfig['sendRegardlessOfConsentState']) {
       return false;
     }
 
-    const sendRegardlessOfConsentState =
-          callout['sendRegardlessOfConsentState'];
-    if (sendRegardlessOfConsentState == true) {
-      return true;
+    switch (typeof calloutConfig.sendRegardlessOfConsentState) {
+      case 'boolean':
+        return calloutConfig.sendRegardlessOfConsentState;
+      case 'Array':
+        return calloutConfig.sendRegardlessOfConsentState.includes(
+            this.consentState_);
+      default:
+        user().warn(TAG, 'WHAT?! ...');
+        return false;
     }
-
-    if (isArray(sendRegardlessOfConsentState)) {
-      for (const i in sendRegardlessOfConsentState) {
-        const configConsentState = CONSENT_POLICY_STATE[
-            sendRegardlessOfConsentState[i]];
-        if (configConsentState == this.consentState_) {
-          return true;
-        }
-      }
-    }
-
-    return false;
   }
 
   /**
@@ -225,19 +220,12 @@ export class RealTimeConfigManager {
    */
   modifyRtcConfigForConsentStateSettings() {
     if (!(this.consentState_ == CONSENT_POLICY_STATE.INSUFFICIENT ||
-          this.consentState_ == CONSENT_POLICY_STATE.UNKNOWN) ||
-        this.rtcConfig_.sendRegardlessOfConsentState == true) {
+          this.consentState_ == CONSENT_POLICY_STATE.UNKNOWN)) {
       return;
     }
 
-    if (isArray(this.rtcConfig_.sendRegardlessOfConsentState)) {
-      for (const i in this.rtcConfig_.sendRegardlessOfConsentState) {
-        const configConsentState = CONSENT_POLICY_STATE[
-            this.rtcConfig_.sendRegardlessOfConsentState[i]];
-        if (configConsentState == this.consentState_) {
-          return;
-        }
-      }
+    if (this.isValidCalloutForConsentState(this.rtcConfig_)) {
+      return;
     }
 
     const urls = [];
@@ -313,7 +301,6 @@ export class RealTimeConfigManager {
       // or it can be an object with sub-objects, one of which can be
       // 'macros'. This is for backwards compatability.
       const vendorMacros =
-            this.rtcConfig_.vendors[vendor]['macros'] &&
             isObject(this.rtcConfig_.vendors[vendor]['macros']) ?
               this.rtcConfig_.vendors[vendor]['macros'] :
               this.rtcConfig_.vendors[vendor];
