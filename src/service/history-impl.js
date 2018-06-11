@@ -316,10 +316,10 @@ class HistoryBindingInterface {
    * Pushes a new state onto the history stack, optionally specifying the state
    * object associated with the current state.
    * Returns a promise that yields the new state.
-   * @param {!HistoryStateUpdateDef=} opt_stateUpdate
+   * @param {!HistoryStateUpdateDef=} unusedStateUpdate
    * @return {!Promise<!HistoryStateDef>}
    */
-  push(opt_stateUpdate) {}
+  push(unusedStateUpdate = {}) {}
 
   /**
    * Pops a previously pushed state from the history stack. All history
@@ -334,10 +334,10 @@ class HistoryBindingInterface {
    * Replaces the current state, optionally specifying updates to the state
    * object to be associated with the replacement.
    * Returns a promise that yields the new state.
-   * @param {!HistoryStateUpdateDef=} opt_stateUpdate
+   * @param {!HistoryStateUpdateDef=} unusedStateUpdate
    * @return {!Promise<!HistoryStateDef>}
    */
-  replace(opt_stateUpdate) {}
+  replace(unusedStateUpdate = {}) {}
 
   /**
    * Retrieves the current state, containing the current fragment, title,
@@ -511,14 +511,14 @@ export class HistoryBindingNatural_ {
   }
 
   /** @override */
-  push(opt_stateUpdate) {
+  push(stateUpdate = {}) {
     return this.whenReady_(() => {
-      const updatedState = this.mergeStateUpdate_(this.getState_(),
-          opt_stateUpdate || {});
-      this.historyPushState_(updatedState, /* title */ undefined,
-          updatedState.fragment ? ('#' + updatedState.fragment) : undefined);
-      return tryResolve(() => this.mergeStateUpdate_(updatedState,
-          {stackIndex: this.stackIndex_}));
+      const newState = this.mergeStateUpdate_(this.getState_(), stateUpdate);
+      this.historyPushState_(newState, /* title */ undefined,
+          newState.fragment ? ('#' + newState.fragment) : undefined);
+      return tryResolve(() =>
+        this.mergeStateUpdate_(newState, {stackIndex: this.stackIndex_})
+      );
     });
   }
 
@@ -536,16 +536,14 @@ export class HistoryBindingNatural_ {
   }
 
   /** @override */
-  replace(opt_stateUpdate) {
+  replace(stateUpdate = {}) {
     return this.whenReady_(() => {
-      const updatedState = this.mergeStateUpdate_(
-          this.getState_(),
-          opt_stateUpdate || {});
-      this.historyReplaceState_(updatedState, /* title */ undefined,
-          updatedState.fragment ? ('#' + updatedState.fragment) : undefined);
-      return tryResolve(() => this.mergeStateUpdate_(updatedState, {
-        stackIndex: this.stackIndex_,
-      }));
+      const newState = this.mergeStateUpdate_(this.getState_(), stateUpdate);
+      this.historyReplaceState_(newState, /* title */ undefined,
+          newState.fragment ? ('#' + newState.fragment) : undefined);
+      return tryResolve(() =>
+        this.mergeStateUpdate_(newState, {stackIndex: this.stackIndex_})
+      );
     });
   }
 
@@ -845,14 +843,13 @@ export class HistoryBindingVirtual_ {
   }
 
   /** @override */
-  push(opt_stateUpdate) {
-    const message = /** @type {!JsonObject} */ (Object.assign({
-      'stackIndex': this.stackIndex_ + 1,
-    }, opt_stateUpdate || {}));
+  push(stateUpdate = {}) {
+    const message = /** @type {!JsonObject} */ (
+      Object.assign({'stackIndex': this.stackIndex_ + 1}, stateUpdate));
     return this.viewer_.sendMessageAwaitResponse('pushHistory', message)
         .then(response => {
           const updatedState =
-              /** @type {!HistoryStateDef} */ (response || message);
+            /** @type {!HistoryStateDef} */ (response || message);
           this.updateHistoryState_(updatedState);
           return updatedState;
         });
@@ -867,22 +864,21 @@ export class HistoryBindingVirtual_ {
     return this.viewer_.sendMessageAwaitResponse('popHistory', message)
         .then(response => {
           const updatedState =
-              /** @type {!HistoryStateDef} */ (response || message);
+            /** @type {!HistoryStateDef} */ (response || message);
           this.updateHistoryState_(updatedState);
           return updatedState;
         });
   }
 
   /** @override */
-  replace(opt_stateUpdate) {
-    const message = /** @type {!JsonObject} */ (Object.assign({
-      'stackIndex': this.stackIndex_,
-    }, opt_stateUpdate || {}));
+  replace(stateUpdate = {}) {
+    const message = /** @type {!JsonObject} */ (
+      Object.assign({'stackIndex': this.stackIndex_}, stateUpdate));
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
         'replaceHistory', message, /* cancelUnsent */true))
         .then(response => {
           const updatedState =
-              /** @type {!HistoryStateDef} */ (response || message);
+            /** @type {!HistoryStateDef} */ (response || message);
           this.updateHistoryState_(updatedState);
           return updatedState;
         });
