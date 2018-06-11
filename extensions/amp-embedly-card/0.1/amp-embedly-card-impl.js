@@ -47,7 +47,7 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {string} */
+    /** @private {?string} */
     this.apiKey_ = null;
   }
 
