@@ -66,6 +66,7 @@ const URL_PROPERTIES = {
   'src': true,
   'srcset': true,
   'href': true,
+  'xlink:href': true,
 };
 
 /**
@@ -302,7 +303,7 @@ function createElementRules_() {
     'FIELDSET': {
       'disabled': null,
     },
-    'image': {
+    'IMAGE': {
       'xlink:href': {
         'allowedProtocols': {
           'http': true,
