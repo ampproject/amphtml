@@ -22,7 +22,6 @@ tags: {  # amp-embedly-card
   requires: "amp-embedly-card"
   mandatory_parent: "HEAD"
   unique: true
-  extension_unused_unless_tag_present: "amp-embedly-card"
   attrs: {
     name: "async"
     mandatory: true
@@ -32,7 +31,7 @@ tags: {  # amp-embedly-card
     name: "custom-element"
     mandatory: true
     value: "amp-embedly-card"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "nonce" }
   attrs: {
