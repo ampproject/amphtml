@@ -282,7 +282,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (isEnumValue(AnalyticsEventType, eventType) &&
               !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)) {
             this.user().error(TAG, eventType +
-                'is not supported for amp-analytics in scope');
+                ' is not supported for amp-analytics in scope');
             continue;
           }
         }
