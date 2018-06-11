@@ -15,10 +15,10 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {getEmbedlyServiceForDoc} from './embedly-service';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
+import {TAG as KEY_TAG} from './amp-embedly-key';
 import {user} from '../../../src/log';
 
 /**
@@ -28,10 +28,11 @@ import {user} from '../../../src/log';
 export const TAG = 'amp-embedly-card';
 
 /**
- * Attribute name used to set api key.
+ * Attribute name used to set api key with name
+ * expected by embedly.
  * @const {string}
  */
-export const API_KEY_ATTR_NAME = 'data-card-key';
+const API_KEY_ATTR_NAME = 'data-card-key';
 
 /**
  * Implementation of the amp-embedly-card component.
@@ -45,6 +46,9 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {string} */
+    this.apiKey_ = null;
   }
 
   /** @override */
@@ -54,31 +58,34 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
         `The data-url attribute is required for <${TAG}> %s`,
         this.element
     );
+
+    const ampEmbedlyKeyElement = document.querySelector(KEY_TAG);
+    if (ampEmbedlyKeyElement) {
+      this.apiKey_ = ampEmbedlyKeyElement.getAttribute('value');
+    }
   }
 
   /** @override */
   layoutCallback() {
-    return getEmbedlyServiceForDoc(this.element).then(service => {
-      // Add optional paid api key attribute if provided
-      // to remove embedly branding.
-      if (service.key) {
-        this.element.setAttribute(API_KEY_ATTR_NAME, service.key);
-      }
+    // Add optional paid api key attribute if provided
+    // to remove embedly branding.
+    if (this.apiKey_) {
+      this.element.setAttribute(API_KEY_ATTR_NAME, this.apiKey_);
+    }
 
-      const iframe = getIframe(this.win, this.element, 'embedly');
+    const iframe = getIframe(this.win, this.element, 'embedly');
 
-      const opt_is3P = true;
-      listenFor(iframe, 'embed-size', data => {
-        this./*OK*/changeHeight(data['height']);
-      }, opt_is3P);
+    const opt_is3P = true;
+    listenFor(iframe, 'embed-size', data => {
+      this./*OK*/changeHeight(data['height']);
+    }, opt_is3P);
 
-      this.applyFillContent(iframe);
-      this.getVsync().mutate(() => this.element.appendChild(iframe));
+    this.applyFillContent(iframe);
+    this.getVsync().mutate(() => this.element.appendChild(iframe));
 
-      this.iframe_ = iframe;
+    this.iframe_ = iframe;
 
-      return iframe;
-    }).then(iframe => this.loadPromise(iframe));
+    return this.loadPromise(iframe);
   }
 
   /** @override */

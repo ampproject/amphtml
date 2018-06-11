@@ -16,10 +16,8 @@
 
 import {AmpEmbedlyCard, TAG} from './amp-embedly-card-impl';
 import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
-import {EmbedlyService, SERVICE_NAME} from './embedly-service';
 
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc(SERVICE_NAME, EmbedlyService);
   AMP.registerElement(TAG, AmpEmbedlyCard);
   AMP.registerElement(KEY_TAG, AmpEmbedlyKey);
 });

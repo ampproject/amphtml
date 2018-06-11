@@ -15,7 +15,6 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {getEmbedlyServiceForDoc} from './embedly-service';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -37,14 +36,11 @@ export class AmpEmbedlyKey extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const apiKey = user().assert(
+    user().assert(
         this.element.getAttribute('value'),
         `The value attribute is required for <${TAG}> %s`,
         this.element
     );
-
-    return getEmbedlyServiceForDoc(this.element)
-        .then(service => service.key = apiKey);
   }
 
   /** @override */
