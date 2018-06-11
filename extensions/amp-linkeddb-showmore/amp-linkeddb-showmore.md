@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Hide too long articles, click the button to display more content.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>By adding the class 'limit-height' setting element's height, too long is hidden.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>

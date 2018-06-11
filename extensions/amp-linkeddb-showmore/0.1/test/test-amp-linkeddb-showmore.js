@@ -29,10 +29,11 @@ describes.realWin('amp-linkeddb-showmore', {
     win = env.win;
     element = win.document.createElement('amp-linkeddb-showmore');
     win.document.body.appendChild(element);
+    LinkeddbShowmore = new AmpLinkeddbShowmore(element)
   });
 
   it('amp-linkeddb-showmore', () => {
-    element.build();
-    expect(true);
+    element.viewport();
+    expect(element.querySelector('.view-more-text').textContent).to.be.true;
   });
 });
