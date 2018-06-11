@@ -17,8 +17,8 @@ A new release of AMP is pushed to all AMP pages every week on Tuesday.  **Once a
 We try to stick to this schedule as closely as possible, though complications may cause delays.  You can track the latest status about any release in the ["Type: Release" GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) and the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 
 - Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): a new canary release build is created from the [latest master build that passes all of our tests](https://travis-ci.org/ampproject/amphtml/branches) and is pushed to users of AMP who opted into the [AMP Dev Channel](#amp-dev-channel)
-- Thursday:  we check error rates and bug reports for Dev Channel users and if everything looks fine, we push the canary to 1% of AMP pages
-- Friday-Monday: we continue to monitor error rates and bug reports for Dev Channel users and the 1% of pages with the canary build
+- Wednesday:  we check bug reports for Dev Channel users and if everything looks fine, we push the canary to 1% of AMP pages
+- Thursday-Monday: we continue to monitor error rates and bug reports for Dev Channel users and the 1% of pages with the canary build
 - Tuesday (about a week after the canary release build was cut): the canary is fully pushed to production (i.e. all AMP pages will now use this build)
 
 ## Determining if your change is in production
