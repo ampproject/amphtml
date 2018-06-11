@@ -65,20 +65,6 @@ const ATTRS_TO_PROPAGATE =
 
 
 /**
- * @param {!Element} ctx
- * @param {string} src
- */
-function createPosterImage(ctx, src) {
-  const el = htmlFor(ctx)`<i-amphtml-poster></i-amphtml-poster>`;
-  setStyles(el, {
-    'display': 'block',
-    'background-image': `url(${src})`,
-    'background-size': 'cover',
-  });
-  return el;
-}
-
-/**
  * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpVideo extends AMP.BaseElement {
@@ -524,7 +510,13 @@ class AmpVideo extends AMP.BaseElement {
     if (element.querySelector('i-amphtml-poster')) {
       return;
     }
-    const poster = createPosterImage(element, element.getAttribute('poster'));
+    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
+    const src = element.getAttribute('poster');
+    setStyles(poster, {
+      'display': 'block',
+      'background-image': `url(${src})`,
+      'background-size': 'cover',
+    });
     poster.classList.add('i-amphtml-android-poster-bug');
     this.applyFillContent(poster);
     element.appendChild(poster);
