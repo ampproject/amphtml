@@ -42,9 +42,9 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
       win.AMP_MODE.localDev = true;
     });
 
-    it('should open and close correctly', done => {
+    it('should open and close correctly', () => {
       const lightbox = win.document.getElementById('amp-lightbox-gallery');
-      openLightbox(win.document).then(() => {
+      return openLightbox(win.document).then(() => {
         expect(lightbox.style.display).to.not.equal('none');
         const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
         expect(carouselQuery.length).to.equal(1);
@@ -63,12 +63,11 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
         return lightboxClose;
       }).then(() => {
         expect(lightbox.style.display).to.equal('none');
-        done();
       });
     });
 
-    it('should show close button only for one lightboxed item', done => {
-      openLightbox(win.document).then(() => {
+    it('should show close button only for one lightboxed item', () => {
+      return openLightbox(win.document).then(() => {
         const controlsContainerQuery =
           win.document.getElementsByClassName('i-amphtml-lbg-controls');
         expect(controlsContainerQuery.length).to.equal(1);
@@ -93,11 +92,10 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
         const nextButton = getButton(win.document, 'i-amphtml-lbg-button-next');
         expect(nextButton.getAttribute('aria-label')).to.equal('Next');
         expect(win.getComputedStyle(nextButton).display).to.equal('none');
-        done();
       });
     });
 
-    it('should display text description', done => {
+    it('should display text description', () => {
       openLightbox(win.document).then(() => {
         const descBoxQuery =
           win.document.getElementsByClassName('i-amphtml-lbg-desc-box');
@@ -113,7 +111,6 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
         expect(descriptionText.classList.contains('i-amphtml-lbg-desc-text'))
             .to.be.true;
         expect(descriptionText.textContent).to.equal('This is a figcaption.');
-        done();
       });
     });
   });
@@ -137,7 +134,6 @@ function openLightbox(document) {
 
 function getButton(document, className) {
   const buttonQuery = document.getElementsByClassName(className);
-  expect(buttonQuery.length).to.equal(1);
   const button = buttonQuery[0];
   return button;
 }
