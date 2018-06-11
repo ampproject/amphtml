@@ -168,7 +168,7 @@ describe('#line-delimited-response-handler', () => {
       sandbox.restore();
     });
 
-    // TODO(amphtml, #15748): Fails on Safari 11.1.0.
+    // TODO(lannka, #15748): Fails on Safari 11.1.0.
     it.configure().skipSafari('should handle empty streamed ' +
         'response properly', () => {
       slotData = [];

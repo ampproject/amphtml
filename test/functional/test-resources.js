@@ -2820,7 +2820,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
     });
   });
 
-  // TODO(amphtml, #15748): Fails on Safari 11.1.0.
+  // TODO(jridgewell, #15748): Fails on Safari 11.1.0.
   it.configure().skipSafari('should not schedule pass when immediate ' +
       'build fails', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
