@@ -64,6 +64,10 @@ const ATTRS_TO_PROPAGATE =
     ATTRS_TO_PROPAGATE_ON_BUILD.concat(ATTRS_TO_PROPAGATE_ON_LAYOUT);
 
 
+/**
+ * @param {!Element} ctx
+ * @param {string} src
+ */
 function createPosterImage(ctx, src) {
   const el = htmlFor(ctx)`<i-amphtml-poster></i-amphtml-poster>`;
   setStyles(el, {
