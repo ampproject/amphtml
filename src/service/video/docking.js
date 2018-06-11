@@ -1515,7 +1515,7 @@ export class VideoDocking {
    * @private
    */
   removePosterForAndroidBug_(parent) {
-    const el = parent.querySelector('i-amphtml-android-poster-bug');
+    const el = parent.querySelector('.i-amphtml-android-poster-bug');
     if (!el) {
       return;
     }
