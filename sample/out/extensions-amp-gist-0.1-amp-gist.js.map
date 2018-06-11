@@ -1,8 +1,0 @@
-{
-"version":3,
-"file":"/./sample/out/extensions-amp-gist-0.1-amp-gist.js",
-"lineCount":4,
-"mappings":"A,gGAqCEA,QAHWC,oDAGA,CAACC,kDAAD,CAAU,CACnB,kDAAA,CAAA,GAAA,YAAA,KAAA,CAAA,IAAA,CAAMA,kDAAN,CAAA,EAAA,IAGA,mDAAAC,UAAA,CAAe,IAJI,OAAA,mDAAA,CAHhBC,mBAAA,CAAA,mDAAA,CAAA,GAAA,YAAA,CAcL;mDAAA,UAAA,mBAAA,CAAAC,QAAkB,CAACC,yBAAD,CAAe,CAC/B,IAAAC,WAAAC,IAAA,CAAoB,0BAApB,CAAgDF,yBAAhD,CAD+B,CAKjC,oDAAA,UAAA,kBAAA,CAAAG,QAAiB,CAACC,mBAAD,CAAS,CACxB,MCrBYC,cDqBZ,EAAOD,mBADiB,CAK1B;mDAAA,UAAA,eAAA,CAAAE,QAAc,EAAG,CAAA,IAAA,2BAAA,IAAA,CAETC,oBEYMC,iCFZG,CAAU,IAAAC,IAAV,CAAoB,IAAAb,QAApB,CAAkC,QAAlC,CACf,KAAAc,iBAAA,CAAsBH,mBAAtB,CG4LYI,uCH1LZ,CAAUJ,mBAAV,CAAkB,YAAlB,CAAgC,QAAA,CAAAK,mBAAA,CAAQ,CACtC,0BAAAC,aAAA,CAAwBD,mBAAA,OAAxB,CADsC,CAAxC,CAEiB,CAAA,CAFjB,CAIA,KAAAhB,QAAAkB,YAAA,CAAyBP,mBAAzB,CACA,KAAAV,UAAA,CAAeU,mBACf;MAAO,KAAAQ,YAAA,CAAiBR,mBAAjB,CAXQ,CAcjB,oDAAA,UAAA,iBAAA,CAAAS,QAAgB,EAAG,CACb,IAAAnB,UAAJ,GI2CYoB,gCJ1CV,CAAc,IAAApB,UAAd,CACA,CAAA,IAAAA,UAAA,CAAe,IAFjB,CAIA,OAAO,CAAA,CALU,CAUY,UAAA,CAAAqB,gBAAA,CAAO,CACtCA,gBAAAC,gBAAA,CAAoB,UAApB,CAAgCxB,mDAAhC,CADsC,CAAP,CAAjC,CAAiC,IAAA,IAAjC;",
-"sources":["/extensions/amp-gist/0.1/amp-gist.js","/src/layout.js","/src/3p-frame.js","/src/iframe-helper.js","/src/dom.js"],
-"names":["constructor","AmpGist","element","iframe_","$jscomp.inherits","preconnectCallback","opt_onLayout","preconnect","url","isLayoutSupported","layout","FIXED_HEIGHT","layoutCallback","iframe","getIframe","win","applyFillContent","listenFor","data","changeHeight","appendChild","loadPromise","unlayoutCallback","removeElement","AMP","registerElement"]
-}

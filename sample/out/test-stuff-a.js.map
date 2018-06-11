@@ -1,8 +1,0 @@
-{
-"version":3,
-"file":"/./sample/out/test-stuff-a.js",
-"lineCount":1,
-"mappings":"A,4EAEAA,OAAAC,IAAA,CAAY,wBAAZ,CCDSC,IAAAC,OAAA,EDCT,CCDyB,MDCzB;",
-"sources":["/test-stuff/a.js","/test-stuff/dep.js"],
-"names":["console","log","Math","random"]
-}

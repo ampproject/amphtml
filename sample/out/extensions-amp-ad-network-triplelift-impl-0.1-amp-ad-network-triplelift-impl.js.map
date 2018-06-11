@@ -1,8 +1,0 @@
-{
-"version":3,
-"file":"/./sample/out/extensions-amp-ad-network-triplelift-impl-0.1-amp-ad-network-triplelift-impl.js",
-"lineCount":3,
-"mappings":"A,4IAwCO,QAAMA,mHAAN,CAAA,qBAAA,CAAA,CAAA,MAAA,iDAAA,MAAA,CAAA,IAAA,CAAA,SAAA,CAAA,EAAA,IAAA,CAAAC,mBAAA,CAAA,kHAAA,CAAA,gDAAA,CAGL;kHAAA,UAAA,eAAA,CAAAC,QAAc,EAAG,CACf,MAAO,KAAAC,eAAA,EADQ,CAKjB,mHAAA,UAAA,uBAAA,CAAAC,QAAsB,EAAG,CACvB,MAAO,CAAC,YAAD,CADgB,CAKzB;kHAAA,UAAA,SAAA,CAAAC,QAAQ,EAAG,CACT,MAAO,KAAAC,QAAAC,aAAA,CAA0B,KAA1B,CAAAC,QAAA,CA9BkBC,kBA8BlB,CAtBsBC,gCAsBtB,CADE,CAO0C,UAAA,CAAAC,gBAAA,CAAO,CAC5DA,gBAAAC,gBAAA,CAAoB,gCAApB,CACIZ,kHADJ,CAD4D,CAAP,CAAvD,CAAuD,IAAA,IAAvD;",
-"sources":["/extensions/amp-ad-network-triplelift-impl/0.1/amp-ad-network-triplelift-impl.js"],
-"names":["AmpAdNetworkTripleliftImpl","$jscomp.inherits","isValidElement","isAmpAdElement","getSigningServiceNames","getAdUrl","element","getAttribute","replace","TRIPLELIFT_BASE_URL_","TRIPLELIFT_BASE_A4A_URL_","AMP","registerElement"]
-}

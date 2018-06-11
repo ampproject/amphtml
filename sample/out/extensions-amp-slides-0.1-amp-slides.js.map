@@ -1,8 +1,0 @@
-{
-"version":3,
-"file":"/./sample/out/extensions-amp-slides-0.1-amp-slides.js",
-"lineCount":2,
-"mappings":"A,oGA0BEA,QAFIC,0DAEO,CAACC,kDAAD,CAAU,CACnB,kDAAA,CAAA,GAAA,YAAA,KAAA,CAAA,IAAA,CAAMA,kDAAN,CAAA,EAAA,ICuiBYC,wBDtiBZ,EAAAC,MAAA,CARQC,YAQR,CACI,iFADJ,CAFmB,OAAA,mDAAA;AAFvBC,mBAAA,CAAA,yDAAA,CAAA,GAAA,YAAA,CAW0B,UAAA,CAAAC,gBAAA,CAAO,CAC/BA,gBAAAC,gBAAA,CAhBUH,YAgBV,CAAyBJ,yDAAzB,CAD+B,CAAP,CAA1B,CAA0B,IAAA,IAA1B;",
-"sources":["/extensions/amp-slides/0.1/amp-slides.js","/src/log.js"],
-"names":["constructor","AmpSlides","element","user","error","TAG","$jscomp.inherits","AMP","registerElement"]
-}

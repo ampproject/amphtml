@@ -1,8 +1,0 @@
-{
-"version":3,
-"file":"",
-"lineCount":1,
-"mappings":"AAEAA,OAAAC,IAAA,CAAY,wBAAZ,CCFqBC,ODErB,C,CEAAF,OAAAC,IAAA,CAAY,wBAAZ,CDFqBC,OCErB;",
-"sources":["test-stuff/a.js","test-stuff/b.js","test-stuff/c.js"],
-"names":["console","log","stuff"]
-}

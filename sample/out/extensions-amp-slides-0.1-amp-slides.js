@@ -1,4 +1,0 @@
-(self.AMP=self.AMP||[]).push({n:"extensions-amp-slides-0.1-amp-slides.js", v:"erwin", f:(function(){function $AmpSlides$$module$extensions$amp_slides$0_1$amp_slides$$($$jscomp$super$this$jscomp$73_element$jscomp$408$$){$$jscomp$super$this$jscomp$73_element$jscomp$408$$=AMP.BaseElement.call(this,$$jscomp$super$this$jscomp$73_element$jscomp$408$$)||this;$user$$module$src$log$$().error("amp-slides",'No longer available. Use `amp-carousel` with `type="slides"` for an alternative');return $$jscomp$super$this$jscomp$73_element$jscomp$408$$}
-$$jscomp$inherits$$($AmpSlides$$module$extensions$amp_slides$0_1$amp_slides$$,AMP.BaseElement);(function($AMP$jscomp$80$$){$AMP$jscomp$80$$.registerElement("amp-slides",$AmpSlides$$module$extensions$amp_slides$0_1$amp_slides$$)})(self.AMP);})});
-//# sourceMappingURL=extensions-amp-slides-0.1-amp-slides.js.map
-

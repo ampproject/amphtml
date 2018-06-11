@@ -1,8 +1,0 @@
-{
-"version":3,
-"file":"/./sample/out/extensions-amp-reach-player-0.1-amp-reach-player.js",
-"lineCount":5,
-"mappings":"A,gHAqBEA,QAHIC,2EAGO,CAACC,kDAAD,CAAU,CACnB,kDAAA,CAAA,GAAA,YAAA,KAAA,CAAA,IAAA,CAAMA,kDAAN,CAAA,EAAA,IAGA,mDAAAC,UAAA,CAAe,IAJI,OAAA,mDAAA,CAHvBC,mBAAA,CAAA,0EAAA,CAAA,GAAA,YAAA,CAcE;0EAAA,UAAA,mBAAA,CAAAC,QAAkB,CAACC,yBAAD,CAAe,CAC/B,IAAAC,WAAAC,IAAA,CAAoB,wCAApB,CAA8DF,yBAA9D,CAD+B,CAKjC,2EAAA,UAAA,kBAAA,CAAAG,QAAiB,CAACC,mBAAD,CAAS,CACxB,MC4GYC,0CD5GL,CAAoBD,mBAApB,CADiB,CAK1B;0EAAA,UAAA,eAAA,CAAAE,QAAc,EAAG,CACf,IAAMC,WAAW,IAAAX,QAAAY,aAAA,CAA0B,eAA1B,CAAXD,EAAyD,SAA/D,CACME,oBAAS,IAAAb,QAAAc,cAAAC,cAAA,CAAyC,QAAzC,CAEfF,oBAAAG,aAAA,CAAoB,aAApB,CAAmC,IAAnC,CACAH,oBAAAG,aAAA,CAAoB,WAApB,CAAiC,IAAjC,CACAH,oBAAAG,aAAA,CAAoB,iBAApB,CAAuC,MAAvC,CACAH,oBAAAI,IAAA,CAAa,6EAAb;AAA6FC,kBAAA,CAAmBP,UAAnB,CAC7F,KAAAQ,iBAAA,CAAsBN,mBAAtB,CACA,KAAAb,QAAAoB,YAAA,CAAyBP,mBAAzB,CACA,KAAAZ,UAAA,CAAeY,mBACf,OAAO,KAAAQ,YAAA,CAAiBR,mBAAjB,CAXQ,CAejB,2EAAA,UAAA,cAAA,CAAAS,QAAa,EAAG,CACV,IAAArB,UAAJ,EAAoB,IAAAA,UAAAsB,cAApB,EACE,IAAAtB,UAAAsB,cAAAC,YAAA,CACI,OADJ,CAEI,wCAFJ,CAFY,CAWuB;SAAA,CAAAC,gBAAA,CAAO,CAC9CA,gBAAAC,gBAAA,CAAoB,kBAApB,CAAwC3B,0EAAxC,CAD8C,CAAP,CAAzC,CAAyC,IAAA,IAAzC;",
-"sources":["/extensions/amp-reach-player/0.1/amp-reach-player.js","/src/layout.js"],
-"names":["constructor","AmpReachPlayer","element","iframe_","$jscomp.inherits","preconnectCallback","opt_onLayout","preconnect","url","isLayoutSupported","layout","isLayoutSizeDefined","layoutCallback","embedId","getAttribute","iframe","ownerDocument","createElement","setAttribute","src","encodeURIComponent","applyFillContent","appendChild","loadPromise","pauseCallback","contentWindow","postMessage","AMP","registerElement"]
-}
