@@ -29,7 +29,7 @@ describes.realWin('amp-linkeddb-showmore', {
     win = env.win;
     element = win.document.createElement('amp-linkeddb-showmore');
     win.document.body.appendChild(element);
-    LinkeddbShowmore = new AmpLinkeddbShowmore(element)
+    let LinkeddbShowmore = new AmpLinkeddbShowmore(element);
   });
 
   it('amp-linkeddb-showmore', () => {
