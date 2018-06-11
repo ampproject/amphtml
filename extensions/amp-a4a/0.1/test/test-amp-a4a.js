@@ -28,7 +28,9 @@ import * as sinon from 'sinon';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 import {
   AmpA4A,
+  CREATIVE_SIZE_HEADER,
   DEFAULT_SAFEFRAME_VERSION,
+  EXPERIMENT_FEATURE_HEADER_NAME,
   IFRAME_SANDBOXING_FLAGS,
   INVALID_SPSA_RESPONSE,
   RENDERING_TYPE_HEADER,
@@ -55,6 +57,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {is3pThrottled} from '../../../amp-ad/0.1/concurrent-load';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {
   resetScheduledElementForTesting,
@@ -1128,6 +1131,36 @@ describe('amp-a4a', () => {
                   'releaseType': '0',
                 });
           });
+        });
+      });
+    });
+    it('should update priority for non AMP if in experiment', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+        delete adResponse.headers[AMP_SIGNATURE_HEADER];
+        adResponse.headers[EXPERIMENT_FEATURE_HEADER_NAME] =
+            'pref_neutral_enabled=1,';
+        adResponse.headers[CREATIVE_SIZE_HEADER] = '123x456';
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
+        const element = createA4aElement(fixture.doc);
+        element.setAttribute('type', 'adsense');
+        const a4a = new MockA4AImpl(element);
+        const updateLayoutPriorityStub = sandbox.stub(
+            a4a, 'updateLayoutPriority');
+        const renderNonAmpCreativeSpy =
+          sandbox.spy(a4a, 'renderNonAmpCreative');
+        sandbox.stub(a4a, 'maybeValidateAmpCreative').returns(
+            Promise.resolve());
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          expect(renderNonAmpCreativeSpy.calledOnce,
+              'renderNonAmpCreative_ called exactly once').to.be.true;
+          expect(updateLayoutPriorityStub.args[0][0]).to.equal(
+              LayoutPriority.CONTENT);
+          expect(is3pThrottled(a4a.win)).to.be.false;
         });
       });
     });
@@ -2397,5 +2430,27 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
     it('should return empty object', () => {
       expect(a4a.getCustomRealTimeConfigMacros_()).to.deep.equal({});
     });
+  });
+
+  describe('#inNonAmpPreferenceExp', () => {
+    [
+      {},
+      {type: 'doubleclick', prefVal: true, expected: true},
+      {type: 'adsense', prefVal: true, expected: true},
+      {type: 'adsense', prefVal: 'true', expected: true},
+      {type: 'doubleclick', prefVal: false},
+      {type: 'adsense', prefVal: false},
+      {type: 'doubleclick'},
+      {type: 'doubleclick', prefVal: ''},
+      {type: 'otherNetwork', prefVal: true},
+    ].forEach(test =>
+      it(JSON.stringify(test), () => {
+        const {type, prefVal, expected} = test;
+        if (type) {
+          a4a.element.setAttribute('type', type);
+        }
+        a4a.postAdResponseExperimentFeatures['pref_neutral_enabled'] = prefVal;
+        expect(a4a.inNonAmpPreferenceExp()).to.equal(!!expected);
+      }));
   });
 });
