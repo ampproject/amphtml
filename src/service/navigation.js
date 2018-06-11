@@ -31,11 +31,6 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {
-  isProtocolValid,
-  parseUrlDeprecated,
-  parseUrlWithA,
-} from '../url';
 import {toWin} from '../types';
 
 const TAG = 'navigation';
@@ -108,11 +103,6 @@ export class Navigation {
     /** @private @const {boolean} */
     this.isInABox_ = getMode(this.ampdoc.win).runtime == 'inabox';
 
-    /**
-     * Used for URL resolution in embeds.
-     * @private {?HTMLAnchorElement}
-     */
-    this.embedA_ = null;
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -170,7 +160,8 @@ export class Navigation {
    * @param {string=} opt_requestedBy
    */
   navigateTo(win, url, opt_requestedBy) {
-    if (!isProtocolValid(url)) {
+    const urlService = Services.urlForDoc(this.ampdoc);
+    if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
       return;
     }
@@ -245,7 +236,7 @@ export class Navigation {
   handleClick_(target, e) {
     this.expandVarsForAnchor_(target);
 
-    const location = this.parseUrlDeprecated_(target.href);
+    const location = this.parseUrl_(target.href);
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
@@ -355,8 +346,10 @@ export class Navigation {
    * @private
    */
   handleNavClick_(e, target, tgtLoc) {
-    /** @const {!Location} */
-    const curLoc = this.parseUrlDeprecated_('');
+    const baseHref = getMode().test && !this.isEmbed_
+      ? this.ampdoc.win.location.href
+      : '';
+    const curLoc = this.parseUrl_(baseHref);
     const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
     const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
 
@@ -440,17 +433,8 @@ export class Navigation {
    * @return {!Location}
    * @private
    */
-  parseUrlDeprecated_(url) {
-    if (this.isEmbed_) {
-      let a = this.embedA_;
-      if (!a) {
-        const embedDoc = (this.rootNode_.ownerDocument || this.rootNode_);
-        a = /** @type {!HTMLAnchorElement} */ (embedDoc.createElement('a'));
-        this.embedA_ = a;
-      }
-      return parseUrlWithA(a, url);
-    }
-    return parseUrlDeprecated(url || this.ampdoc.win.location.href);
+  parseUrl_(url) {
+    return Services.urlForDoc(this.rootNode_).parse(url);
   }
 }
 
