@@ -320,7 +320,8 @@ function warnForConsoleError() {
             'error> });\'\n' +
         '    ⤷ If the error is expected (and asynchronous), use the ' +
             'following pattern at the top of the test:\n' +
-        '        \'expectAsyncConsoleError(<string or regex>);' + terminator;
+        '        \'expectAsyncConsoleError(<string or regex>[, number of' +
+        ' times the error message repeats]);' + terminator;
     // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
     if (failOnConsoleError) {
       throw new Error(errorMessage + separator + helpMessage);
