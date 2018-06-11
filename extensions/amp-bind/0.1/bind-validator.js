@@ -308,7 +308,7 @@ function createElementRules_() {
           'http': true,
           'https': true,
         },
-      }
+      },
     },
     'INPUT': {
       'accept': null,
