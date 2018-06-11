@@ -100,6 +100,9 @@ export class RealTimeConfigManager {
 
     /** @private !../../../src/service/ampdoc-impl.AmpDoc */
     this.ampDoc_ = this.a4aElement_.getAmpDoc();
+
+    /** @private {?CONSENT_POLICY_STATE} */
+    this.consentState_ = null;
   }
 
   /**
@@ -166,8 +169,9 @@ export class RealTimeConfigManager {
     if (!this.validateRtcConfig_(this.a4aElement_.element)) {
       return;
     }
-    this.modifyRtcConfigForConsentStateSettings(consentState);
-    customMacros = this.assignMacros(customMacros, consentState);
+    this.consentState_ = consentState;
+    this.modifyRtcConfigForConsentStateSettings();
+    customMacros = this.assignMacros(customMacros);
     this.rtcStartTime_ = Date.now();
     this.handleRtcForCustomUrls(customMacros);
     this.handleRtcForVendorUrls(customMacros);
@@ -178,10 +182,9 @@ export class RealTimeConfigManager {
   /**
    * Returns whether a given callout object is valid to send an RTC request
    * to, for the given consentState.
-   * @param {?CONSENT_POLICY_STATE} consentState
    * @param {Object|string} callout
    */
-  isValidCalloutForConsentState(consentState, callout) {
+  isValidCalloutForConsentState(callout) {
     if (!isObject(callout) || !callout['sendRegardlessOfConsentState']) {
       return false;
     }
@@ -196,7 +199,7 @@ export class RealTimeConfigManager {
       for (const i in sendRegardlessOfConsentState) {
         const configConsentState = CONSENT_POLICY_STATE[
             sendRegardlessOfConsentState[i]];
-        if (configConsentState == consentState) {
+        if (configConsentState == this.consentState_) {
           return true;
         }
       }
@@ -218,11 +221,10 @@ export class RealTimeConfigManager {
    * and the consentState is CONSENT_POLICY_STATE.UNKNOWN,
    * then this method call would clear the callouts to vendorB, and to the first
    * custom URL.
-   * @param {?CONSENT_POLICY_STATE} consentState
    */
-  modifyRtcConfigForConsentStateSettings(consentState) {
-    if (!(consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-          consentState == CONSENT_POLICY_STATE.UNKNOWN) ||
+  modifyRtcConfigForConsentStateSettings() {
+    if (!(this.consentState_ == CONSENT_POLICY_STATE.INSUFFICIENT ||
+          this.consentState_ == CONSENT_POLICY_STATE.UNKNOWN) ||
         this.rtcConfig_.sendRegardlessOfConsentState == true) {
       return;
     }
@@ -231,7 +233,7 @@ export class RealTimeConfigManager {
       for (const i in this.rtcConfig_.sendRegardlessOfConsentState) {
         const configConsentState = CONSENT_POLICY_STATE[
             this.rtcConfig_.sendRegardlessOfConsentState[i]];
-        if (configConsentState == consentState) {
+        if (configConsentState == this.consentState_) {
           return;
         }
       }
@@ -239,8 +241,7 @@ export class RealTimeConfigManager {
 
     const urls = [];
     for (let i = 0; i < this.rtcConfig_.urls.length; i++) {
-      if (this.isValidCalloutForConsentState(
-          consentState, this.rtcConfig_.urls[i])) {
+      if (this.isValidCalloutForConsentState(this.rtcConfig_.urls[i])) {
         urls.push(this.rtcConfig_.urls[i]);
       }
     }
@@ -248,7 +249,7 @@ export class RealTimeConfigManager {
 
     Object.keys(this.rtcConfig_.vendors || {}).forEach(vendor => {
       if (!this.isValidCalloutForConsentState(
-          consentState, this.rtcConfig_.vendors[vendor])) {
+          this.rtcConfig_.vendors[vendor])) {
         delete this.rtcConfig_.vendors[vendor];
       }
     });
@@ -259,11 +260,10 @@ export class RealTimeConfigManager {
    * Assigns constant macros that should exist for all RTC to object of custom
    * per-network macros.
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
-   * @param {?CONSENT_POLICY_STATE} consentState
    */
-  assignMacros(macros, consentState) {
+  assignMacros(macros) {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
-    macros['CONSENT_STATE'] = () => consentState;
+    macros['CONSENT_STATE'] = () => this.consentState_;
     return macros;
   }
 
