@@ -89,6 +89,10 @@ describes.realWin('amp-analytics', {
       '"request" attributes are required for data to be collected.';
   const remoteConfigError = '[amp-analytics] Remote configs are not allowed ' +
       'to specify transport iframe';
+  const invalidThresholdForSamplingError =
+      '[AmpAnalytics <unknown id>] Invalid threshold for sampling.';
+  const clickTrackerNotSupportedError = '[AmpAnalytics <unknown id>] click ' +
+      'is not supported for amp-analytics in scope';
 
   beforeEach(() => {
     win = env.win;
@@ -1331,6 +1335,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('works when sampleSpec is incomplete', () => {
+      expectAsyncConsoleError(invalidThresholdForSamplingError);
       const incompleteConfig = {
         'requests': {
           'pageview1': '/test1=${requestCount}',
@@ -1351,6 +1356,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('works for invalid threadhold (Infinity)', () => {
+      expectAsyncConsoleError(invalidThresholdForSamplingError);
       const analytics = getAnalyticsTag(getConfig(Infinity));
 
       return waitForSendRequest(analytics).then(() => {
@@ -1359,6 +1365,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('works for invalid threadhold (NaN)', () => {
+      expectAsyncConsoleError(invalidThresholdForSamplingError);
       const analytics = getAnalyticsTag(getConfig(NaN));
 
       return waitForSendRequest(analytics).then(() => {
@@ -1367,6 +1374,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('works for invalid threadhold (-1)', () => {
+      expectAsyncConsoleError(invalidThresholdForSamplingError);
       const analytics = getAnalyticsTag(getConfig(-1));
 
       return waitForSendRequest(analytics).then(() => {
@@ -1728,6 +1736,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('should not add listener when eventType is not whitelist', function() {
+      expectAsyncConsoleError(clickTrackerNotSupportedError);
       // Right now we only whitelist VISIBLE & HIDDEN
       const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
       const addStub = sandbox.stub(tracker, 'add');
