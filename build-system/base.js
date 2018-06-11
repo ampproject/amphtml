@@ -15,8 +15,8 @@
  */
 
 /** @const {!Object}  */
-const process = {};
-
-process.env = {};
-
-process.env.NODE_ENV = 'production';
+const process = {
+  env: {
+    'NODE_ENV': 'production',
+  },
+};
