@@ -31,6 +31,7 @@
 
 export const ampGeoPresets = {
   'preset-gdpr': [
+    /** BEGIN Machine Generated: GDPR */
     'AT', // Austria
     'BE', // Belgium
     'BG', // Bulgaria
@@ -83,5 +84,6 @@ export const ampGeoPresets = {
     'VA', // Vatican City
     'WF', // Wallis & Futuna Islands
     'EZ', // Eurozone'
+    /** END Machine Generated */
   ],
 };
