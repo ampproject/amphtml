@@ -42,6 +42,7 @@ import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
 import {once} from '../../utils/function';
 import {px, resetStyles, setImportantStyles, translate} from '../../style';
+import {removeElement} from '../../dom';
 
 
 /** @private @const {number} */
@@ -1519,6 +1520,6 @@ export class VideoDocking {
     if (!el) {
       return;
     }
-    parent.removeChild(el);
+    removeElement(el);
   }
 }
