@@ -18,10 +18,10 @@ import {Action, StateProperty} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
+import {DEPRECATED_SHARE_PROVIDERS_KEY, SHARE_PROVIDERS_KEY, ScrollableShareWidget} from '../amp-story-share';
 import {EventType, dispatch} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../localization';
-import {ScrollableShareWidget} from '../amp-story-share';
 import {Services} from '../../../../src/services';
 import {closest} from '../../../../src/dom';
 import {createShadowRootWithStyle} from '../utils';
@@ -48,7 +48,18 @@ const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 // TODO(#14591): Clean when bookend API v0.1 is deprecated.
 const BOOKEND_VERSION_1 = 'v1.0';
 const BOOKEND_VERSION_0 = 'v0.1';
+
+/**
+ * Key for omponents in bookend config.
+ * @private @const {string}
+ */
 const BOOKEND_VERSION_KEY = 'bookendVersion';
+
+/**
+ * Deprecated key for components in bookend config.
+ * @private @const {string}
+ */
+const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
 
 /** @private @const {!../simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
@@ -322,19 +333,18 @@ export class AmpStoryBookend extends AMP.BaseElement {
   /**
    * Reads the bookend version from the bookend JSON config.
    * @param {!JsonObject} config
-   * @return {?Array<string|!JsonObject>} Providers config.
+   * @return {?string}
+   * @private
    */
-  readBookendVersion(config) {
-    const bookendVersionDeprecated = config['bookend-version'];
-    const bookendVersion = config[BOOKEND_VERSION_KEY];
-    if (bookendVersionDeprecated) {
-      user().warn('amp-story-bookend config', '`bookend-version` is ' +
-      'deprecated, please use `bookendVersion`');
-      return bookendVersionDeprecated;
-    } else if (bookendVersion) {
-      return bookendVersion;
+  readBookendVersion_(config) {
+    if (config[DEPRECATED_BOOKEND_VERSION_KEY]) {
+      user().warn('AMP-STORY-BOOKEND', '`bookend-version` and ' +
+      '`share-providers` keys in the bookend config are deprecated, please ' +
+      '`bookendVersion` and `shareProviders` keys');
     }
-    return null;
+
+    return config[DEPRECATED_BOOKEND_VERSION_KEY] ||
+      config[BOOKEND_VERSION_KEY] || null;
   }
 
   /**
@@ -350,14 +360,15 @@ export class AmpStoryBookend extends AMP.BaseElement {
       if (!response) {
         return null;
       }
-      if (this.readBookendVersion(response) === BOOKEND_VERSION_1) {
+      if (this.readBookendVersion_(response) === BOOKEND_VERSION_1) {
         const components = BookendComponent.buildFromJson(
             response['components'], this.element);
 
         this.config_ = /** @type {./bookend-component.BookendDataDef} */ ({
           [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
           'components': components,
-          'shareProviders': this.shareWidget_.readProviders(response),
+          'shareProviders': response[SHARE_PROVIDERS_KEY] ||
+            response[DEPRECATED_SHARE_PROVIDERS_KEY],
         });
       } else {
         // TODO(#14667): Write doc regarding amp-story bookend v1.0.
