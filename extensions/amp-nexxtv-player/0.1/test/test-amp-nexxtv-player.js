@@ -66,7 +66,7 @@ describes.realWin('amp-nexxtv-player', {
     });
   });
 
-  it('fails without mediaid', () => {
+  it.skip('fails without mediaid', () => {
     expectAsyncConsoleError(/data-mediaid attribute is required/);
     return getNexxtv(null, '761').should.eventually.be.rejected;
   });
