@@ -208,9 +208,9 @@ export class HighlightHandler {
     let minTop = Number.MAX_VALUE;
     let maxBottom = 0;
     for (let i = 0; i < nodes.length; i++) {
-      const rect = viewport.getLayoutRect(nodes[i]);
-      minTop = Math.min(minTop, rect.top);
-      maxBottom = Math.max(maxBottom, rect.bottom);
+      const {top, bottom} = viewport.getLayoutRect(nodes[i]);
+      minTop = Math.min(minTop, top);
+      maxBottom = Math.max(maxBottom, bottom);
     }
     if (minTop >= maxBottom) {
       return 0;
