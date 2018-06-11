@@ -15,6 +15,57 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-embedly-card layout="responsive" width="150" height="80"></amp-embedly-card>
+  <!-- Valid: amp-embedly-key value and layout -->
+  <amp-embedly-key value="1d5c48f7edc34c54bdae4c37b681ea2b" layout="nodisplay"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key missing value -->
+  <amp-embedly-key layout="nodisplay"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - responsive -->
+  <amp-embedly-key layout="responsive"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - fill -->
+  <amp-embedly-key layout="fill"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - fixed -->
+  <amp-embedly-key layout="fixed"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - fixed-height -->
+  <amp-embedly-key layout="fixed-height"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - flex-item -->
+  <amp-embedly-key layout="flex-item"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-card missing width -->
+  <amp-embedly-card
+          data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+          layout="responsive"
+          x-width="150"
+          height="80"
+  ></amp-embedly-card>
+
+  <!-- Invalid: amp-embedly-card missing height -->
+  <amp-embedly-card
+          data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+          layout="responsive"
+          width="150"
+          x-height="80"
+  ></amp-embedly-card>
+
+  <!-- Valid: amp-embedly-card correct attributes -->
+  <amp-embedly-card
+          data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+          layout="responsive"
+          width="100"
+          height="50"
+  ></amp-embedly-card>
+
+  <!-- Invalid: amp-embedly-card invalid layout -->
+  <amp-embedly-card
+          data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+          layout="nodisplay"
+          width="100"
+          height="50"
+  ></amp-embedly-card>
 </body>
 </html>
