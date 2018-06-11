@@ -400,8 +400,8 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
           window.history.length - 1);
       expect(history.unsupportedState_.title).to.deep.equal(title);
       expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated)
-          .to.be.calledWithMatch({stackIndex: window.history.length - 1, title});
+      expect(onStateUpdated).to.be.calledWithMatch(
+          {stackIndex: window.history.length - 1, title});
     });
   });
 
