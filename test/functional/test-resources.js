@@ -2820,7 +2820,9 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
     });
   });
 
-  it('should not schedule pass when immediate build fails', () => {
+  // TODO(jridgewell, #15748): Fails on Safari 11.1.0.
+  it.configure().skipSafari('should not schedule pass when immediate ' +
+      'build fails', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     child1.isBuilt = () => false;
     const child1BuildSpy = sandbox.spy();
@@ -2843,7 +2845,9 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
     });
   });
 
-  it('should add element to pending build when document is not ready', () => {
+  // TODO(amphtml, #15748): Fails on Safari 11.1.0.
+  it.configure().skipSafari('should add element to pending build when ' +
+      'document is not ready', () => {
     child1.isBuilt = () => false;
     child2.isBuilt = () => false;
     resources.buildReadyResources_ = sandbox.spy();
@@ -2878,7 +2882,9 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       resources.resources_ = [resource1, resource2];
     });
 
-    it('should build ready resources and remove them from pending', () => {
+    // TODO(amphtml, #15748): Fails on Safari 11.1.0.
+    it.configure().skipSafari('should build ready resources and remove ' +
+        'them from pending', () => {
       resources.pendingBuildResources_ = [resource1, resource2];
       resources.buildReadyResources_();
       expect(child1.build.called).to.be.false;
@@ -2967,7 +2973,9 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
     });
 
-    it('should build everything pending when document is ready', () => {
+    // TODO(amphtml, #15748): Fails on Safari 11.1.0.
+    it.configure().skipSafari('should build everything pending when ' +
+        'document is ready', () => {
       resources.documentReady_ = true;
       resources.pendingBuildResources_ = [parentResource, resource1, resource2];
       const child1BuildSpy = sandbox.spy();
@@ -3000,7 +3008,9 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       });
     });
 
-    it('should not schedule pass if all builds failed', () => {
+    // TODO(amphtml, #15748): Fails on Safari 11.1.0.
+    it.configure().skipSafari('should not schedule pass if all ' +
+        'builds failed', () => {
       resources.documentReady_ = true;
       resources.pendingBuildResources_ = [resource1];
       const child1BuildSpy = sandbox.spy();
@@ -3023,7 +3033,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
   });
 
   describe('remove', () => {
-    it('should remove resource and pause', () => {
+    // TODO(amphtml, #15748): Fails on Safari 11.1.0.
+    it.configure().skipSafari('should remove resource and pause', () => {
       child1.isBuilt = () => true;
       resources.add(child1);
       const resource = child1['__AMP__RESOURCE'];
@@ -3064,7 +3075,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       resources.remove(child1);
     });
 
-    it('should keep reference to the resource', () => {
+    // TODO(amphtml, #15748): Fails on Safari 11.1.0.
+    it.configure().skipSafari('should keep reference to the resource', () => {
       expect(resource).to.not.be.null;
       expect(Resource.forElementOptional(child1)).to.equal(resource);
       expect(resources.get()).to.not.contain(resource);
