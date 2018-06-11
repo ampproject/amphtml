@@ -249,10 +249,9 @@ exports.rules = [
       'extensions/amp-consent/0.1/amp-consent.js->' +
           'src/service/notification-ui-manager.js',
       // For autoplay delegation.
-      // TODO(alanorozco, #13674): Use async service.
-      'extensions/amp-story/0.1/amp-story-page.js->' +
-          'src/service/video-manager-impl.js',
       'extensions/amp-story/1.0/amp-story-page.js->' +
+          'src/service/video-service-sync-impl.js',
+      'extensions/amp-story/0.1/amp-story-page.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-story/1.0/page-advancement.js->' +
           'src/service/action-impl.js',
