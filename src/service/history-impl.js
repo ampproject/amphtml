@@ -842,12 +842,16 @@ export class HistoryBindingVirtual_ {
     this.onStateUpdated_ = callback;
   }
 
-  /** @override */
+  /**
+   * Note: Not all viewers support `pushHistory` responses yet.
+   * @override
+   */
   push(stateUpdate = {}) {
     const message = /** @type {!JsonObject} */ (
       Object.assign({'stackIndex': this.stackIndex_ + 1}, stateUpdate));
     return this.viewer_.sendMessageAwaitResponse('pushHistory', message)
         .then(response => {
+          // Return the message if responses aren't supported.
           const newState = /** @type {!HistoryStateDef} */ (
             response || message
           );
@@ -856,7 +860,10 @@ export class HistoryBindingVirtual_ {
         });
   }
 
-  /** @override */
+  /**
+   * Note: Not all viewers support `popHistory` responses yet.
+   * @override
+   */
   pop(stackIndex) {
     if (stackIndex > this.stackIndex_) {
       return this.get();
@@ -864,15 +871,19 @@ export class HistoryBindingVirtual_ {
     const message = dict({'stackIndex': this.stackIndex_});
     return this.viewer_.sendMessageAwaitResponse('popHistory', message)
         .then(response => {
+          // Note: Return the new stackIndex if responses aren't supported.
           const newState = /** @type {!HistoryStateDef} */ (
-            response || dict({'stackIndex': this.stackIndex_ = 1})
+            response || dict({'stackIndex': this.stackIndex_ - 1})
           );
           this.updateHistoryState_(newState);
           return newState;
         });
   }
 
-  /** @override */
+  /**
+   * Note: Not all viewers support `replace()` yet.
+   * @override
+   */
   replace(stateUpdate = {}) {
     const message = /** @type {!JsonObject} */ (
       Object.assign({'stackIndex': this.stackIndex_}, stateUpdate)
@@ -885,7 +896,10 @@ export class HistoryBindingVirtual_ {
     });
   }
 
-  /** @override */
+  /**
+   * Note: Not all viewers support `get()` yet.
+   * @override
+   */
   get() {
     return this.viewer_.sendMessageAwaitResponse('getHistory', undefined,
         /* cancelUnsent */ true).then(response => {

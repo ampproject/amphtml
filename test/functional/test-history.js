@@ -400,10 +400,8 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
           window.history.length - 1);
       expect(history.unsupportedState_.title).to.deep.equal(title);
       expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(
-          window.history.length - 1);
-      expect(onStateUpdated.getCall(0).args[0].title).to.deep.equal(
-          title);
+      expect(onStateUpdated)
+          .to.be.calledWithMatch({stackIndex: window.history.length - 1, title});
     });
   });
 
@@ -411,14 +409,13 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
     const title = 'title';
     return history.push({title}).then(historyState => {
       expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(
-          window.history.length - 1);
-      expect(onStateUpdated.getCall(0).args[0].title).to.deep.equal(
-          title);
-      const histPromise = listenOncePromise(window, 'popstate').then(() => {
-        clock.tick(100);
-      });
+      expect(onStateUpdated).to.be.calledWithMatch(
+          {stackIndex: window.history.length - 1, title});
+
+      const histPromise = listenOncePromise(window, 'popstate')
+          .then(() => clock.tick(100));
       const popPromise = history.pop(historyState.stackIndex);
+
       return histPromise.then(unusedHist => {
         return popPromise.then(pop => {
           expect(pop.stackIndex).to.equal(window.history.length - 2);
@@ -434,44 +431,39 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
   });
 
   it('should restore previous state after pop and notify', () => {
-    const firstTitle = 'firstTitle';
-    const secondTitle = 'secondTitle';
-    return history.push({title: firstTitle}).then(firstHistoryState => {
-      return history.push({title: secondTitle})
-          .then(secondHistoryState => {
-            expect(onStateUpdated).to.have.callCount(2);
-            const histPromise = listenOncePromise(window, 'popstate')
-                .then(() => {
-                  clock.tick(100);
-                });
-            const popPromise = history.pop(secondHistoryState.stackIndex);
-            return histPromise.then(unusedHist => {
-              return popPromise.then(pop => {
-                expect(pop.stackIndex).to.equal(firstHistoryState.stackIndex);
-                expect(history.stackIndex_).to.equal(
-                    firstHistoryState.stackIndex);
-                expect(history.unsupportedState_['AMP.History']).to.equal(
-                    firstHistoryState.stackIndex);
-                expect(onStateUpdated).to.have.callCount(3);
-                expect(onStateUpdated.getCall(2).args[0].stackIndex).to.equal(
-                    firstHistoryState.stackIndex);
-                expect(onStateUpdated.getCall(2).args[0].title)
-                    .to.deep.equal(firstTitle);
-              });
-            });
+    return history.push({title: 'foo'}).then(first => {
+      return history.push({title: 'bar'}).then(second => {
+        expect(onStateUpdated).to.have.callCount(2);
+
+        const histPromise = listenOncePromise(window, 'popstate')
+            .then(() => clock.tick(100));
+        const popPromise = history.pop(second.stackIndex);
+
+        return histPromise.then(unusedHist => {
+          return popPromise.then(pop => {
+            expect(pop.stackIndex).to.equal(first.stackIndex);
+            expect(history.stackIndex_).to.equal(first.stackIndex);
+            expect(history.unsupportedState_['AMP.History']).to.equal(
+                first.stackIndex);
+
+            expect(onStateUpdated).to.have.callCount(3);
+            expect(onStateUpdated.lastCall).to.be.calledWithMatch(
+                {stackIndex: first.stackIndex, title: 'foo'});
           });
+        });
+      });
     });
   });
 
   it('should get current state', () => {
     const title = 'title';
     return history.push({title}).then(historyState => {
-      expect(history.unsupportedState_['AMP.History'])
-          .to.equal(historyState.stackIndex);
-      expect(history.unsupportedState_.title).to.deep.equal(title);
+      expect(history.unsupportedState_).to.deep.include(
+          {'AMP.History': historyState.stackIndex, title});
+
       return history.get().then(current => {
-        expect(current['AMP.History']).to.equal(historyState.stackIndex);
-        expect(current.title).to.deep.equal(title);
+        expect(current).to.deep.include(
+            {'AMP.History': historyState.stackIndex, title});
       });
     });
   });
@@ -480,14 +472,17 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
     const pushTitle = 'pushTitle';
     const replaceTitle = 'replaceTitle';
     return history.push({title: pushTitle}).then(historyState => {
-      expect(history.unsupportedState_['AMP.History'])
-          .to.equal(historyState.stackIndex);
-      expect(history.unsupportedState_.title).to.deep.equal(pushTitle);
+      expect(history.unsupportedState_).to.deep.include({
+        'AMP.History': historyState.stackIndex,
+        title: pushTitle,
+      });
+
       return history.replace({title: replaceTitle}).then(() => {
-        expect(history.unsupportedState_['AMP.History'])
-            .to.equal(historyState.stackIndex);
-        expect(history.unsupportedState_.title)
-            .to.deep.equal(replaceTitle);
+        expect(history.unsupportedState_).to.deep.include({
+          'AMP.History': historyState.stackIndex,
+          title: replaceTitle,
+        });
+
         return history.pop(historyState.stackIndex);
       });
     });
@@ -567,57 +562,78 @@ describe('HistoryBindingVirtual', () => {
     expect(viewer.onMessage.firstCall.args[0]).to.not.equal(undefined);
   });
 
-  it('should push new state to viewer and notify', () => {
-    const title = 'title';
-    viewer.sendMessageAwaitResponse
-        .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve({stackIndex: 1, title}));
-    return history.push({title}).then(historyState => {
-      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
-          .to.equal('pushHistory');
-      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
-          .to.equal(1);
-      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].title)
-          .to.deep.equal(title);
-      expect(historyState.stackIndex).to.equal(1);
-      expect(history.stackIndex_).to.equal(1);
-      expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(1);
-      expect(onStateUpdated.getCall(0).args[0].title)
-          .to.deep.equal(title);
+  describe('pushHistory', () => {
+    // Some viewers don't support `pushHistory` responses yet.
+    it('viewer does not support responses', () => {
+      return history.push().then(historyState => {
+        expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+        expect(viewer.sendMessageAwaitResponse).to.be.calledWith(
+            'pushHistory', sinon.match({stackIndex: 1}));
+
+        expect(historyState.stackIndex).to.equal(1);
+        expect(history.stackIndex_).to.equal(1);
+
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(1);
+      });
+    });
+
+    it('viewer supports responses', () => {
+      const title = 'title';
+      viewer.sendMessageAwaitResponse
+          .withArgs('pushHistory', {stackIndex: 1, title})
+          .returns(Promise.resolve({stackIndex: 1, title}));
+
+      return history.push({title}).then(historyState => {
+        expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+        expect(viewer.sendMessageAwaitResponse).to.be.calledWith(
+            'pushHistory', sinon.match({stackIndex: 1, title}));
+
+        expect(historyState.stackIndex).to.equal(1);
+        expect(history.stackIndex_).to.equal(1);
+
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
+      });
     });
   });
 
-  it('should pop a state from the window.history and notify', () => {
-    const title = 'title';
-    viewer.sendMessageAwaitResponse
-        .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve({stackIndex: 1, title}));
-    viewer.sendMessageAwaitResponse
-        .withArgs('popHistory', {stackIndex: 1})
-        .returns(Promise.resolve({stackIndex: 0, title}));
-    return history.push({title}).then(historyState => {
-      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
-          .to.equal('pushHistory');
-      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
-          .to.equal(1);
-      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].title)
-          .to.deep.equal(title);
-      expect(historyState.stackIndex).to.equal(1);
-      expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(1);
-      expect(onStateUpdated.getCall(0).args[0].title)
-          .to.deep.equal(title);
-      return history.pop(historyState.stackIndex).then(historyState => {
-        expect(historyState.stackIndex).to.equal(0);
-        expect(historyState.title).to.equal(title);
-        expect(history.stackIndex_).to.equal(0);
-        expect(onStateUpdated).to.have.callCount(2);
-        expect(onStateUpdated.getCall(1).args[0].stackIndex).to.equal(0);
-        expect(onStateUpdated.getCall(0).args[0].title).to.deep.equal(
-            title);
+  describe('popHistory', () => {
+    // Some viewers don't support `popHistory` responses yet.
+    it('viewer does not support responses', () => {
+      return history.push().then(historyState => {
+        return history.pop(historyState.stackIndex).then(historyState => {
+          expect(historyState.stackIndex).to.equal(0);
+          expect(history.stackIndex_).to.equal(0);
+
+          expect(onStateUpdated).to.be.calledTwice;
+          expect(onStateUpdated.lastCall)
+              .to.be.calledWithMatch({stackIndex: 0});
+        });
+      });
+    });
+
+    it('viewer supports responses', () => {
+      const title = 'title';
+      viewer.sendMessageAwaitResponse
+          .withArgs('pushHistory', {stackIndex: 1, title})
+          .returns(Promise.resolve({stackIndex: 1, title}));
+      viewer.sendMessageAwaitResponse
+          .withArgs('popHistory', {stackIndex: 1})
+          .returns(Promise.resolve({stackIndex: 0, title}));
+
+      return history.push({title}).then(historyState => {
+        return history.pop(historyState.stackIndex).then(historyState => {
+          expect(historyState.stackIndex).to.equal(0);
+          expect(historyState.title).to.equal(title);
+          expect(history.stackIndex_).to.equal(0);
+
+          expect(onStateUpdated).to.have.callCount(2);
+          expect(onStateUpdated.firstCall)
+              .to.be.calledWithMatch({stackIndex: 1, title});
+          expect(onStateUpdated.secondCall)
+              .to.be.calledWithMatch({stackIndex: 0, title});
+        });
       });
     });
   });
@@ -665,24 +681,19 @@ describe('HistoryBindingVirtual', () => {
         .returns(Promise.resolve({stackIndex: 1, title}));
     return history.push({title}).then(historyState => {
       expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
-          .to.equal('pushHistory');
-      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
-          .to.equal(1);
-      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].title)
-          .to.deep.equal(title);
+      expect(viewer.sendMessageAwaitResponse).to.be.calledWith(
+          'pushHistory', sinon.match({stackIndex: 1, title}));
       expect(historyState).to.deep.equal({stackIndex: 1, title});
       expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(1);
-      expect(onStateUpdated.getCall(0).args[0].title)
-          .to.deep.equal(title);
+      expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
+
       viewer.onMessage.firstCall.args[1]({stackIndex: 0, title});
       clock.tick(1);
+
       expect(history.stackIndex_).to.equal(0);
       expect(onStateUpdated).to.have.callCount(2);
-      expect(onStateUpdated.getCall(1).args[0].stackIndex).to.equal(0);
-      expect(onStateUpdated.getCall(0).args[0].title)
-          .to.deep.equal(title);
+      expect(onStateUpdated.firstCall).to.be.calledWith({stackIndex: 1, title});
+      expect(onStateUpdated.lastCall).to.be.calledWith({stackIndex: 0, title});
     });
   });
 });
