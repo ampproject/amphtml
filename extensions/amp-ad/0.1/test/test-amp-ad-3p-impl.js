@@ -464,7 +464,7 @@ describes.realWin('amp-ad-3p-impl', {
         constructImpl({
           width: '100vw',
           height: '280',
-          'data-auto-format': 'corerspv',
+          'data-auto-format': 'mcrspv',
           'data-full-width': '',
         });
         const attemptChangeSizeSpy =

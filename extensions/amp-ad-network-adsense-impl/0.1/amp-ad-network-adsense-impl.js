@@ -144,7 +144,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * attribute was not set.
      * @private {?string}
      */
-    this.autoFormat_ = null;
+    this.autoFormat_ = this.element.getAttribute('data-auto-format');
 
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
@@ -161,15 +161,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @private
    */
   isResponsive_() {
-    return this.autoFormat_ == 'rspv';
+    return AmpAdNetworkAdsenseImpl.isAutoResponsive_(this.autoFormat_) || AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_);
   }
 
   /**
-   * @return {boolean}
+   * @return {number}
    * @private
    */
-  isCoreResponsive_() {
-    return this.autoFormat_ == 'corerspv';
+  getRafmtParam_() {
+    return AmpAdNetworkAdsenseImpl.isAutoResponsive_(this.autoFormat_) ? 13 : (AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_) ? 15 : null);
   }
 
   /** @override */
@@ -181,7 +181,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
      * that it has been verified.
      */
-    if (this.isResponsive_() || this.isCoreResponsive_()) {
+    if (this.isResponsive_()) {
       if (!this.element.hasAttribute('data-full-width')) {
         user().warn(TAG,
             'Responsive AdSense ad units require the attribute ' +
@@ -220,8 +220,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
-    this.autoFormat_ =
-        this.element.getAttribute('data-auto-format') || '';
 
     if (this.isResponsive_()) {
       // Attempt to resize to the correct height. The width should already be
@@ -230,13 +228,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const viewportSize = this.getViewport().getSize();
       return this.attemptChangeSize(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              viewportSize),
-          viewportSize.width).catch(() => {});
-    } else if (this.isCoreResponsive_()) {
-      const viewportSize = this.getViewport().getSize();
-      return this.attemptChangeSize(
-          AmpAdNetworkAdsenseImpl.getCoreResponsiveHeightForContext_(
-              viewportSize),
+              this.autoFormat_, viewportSize),
           viewportSize.width).catch(() => {});
     }
   }
@@ -276,7 +268,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         !../../../src/experiments.ExperimentInfo>} */ ({});
     experimentInfoMap[adsenseFormatExpName] = {
       isTrafficEligible: () => !this.isResponsive_() &&
-        !this.isCoreResponsive_() &&
         !isNaN(width) && width > 0 &&
         !isNaN(height) && height > 0,
       branches: ['21062003', '21062004'],
@@ -333,8 +324,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
-      'rafmt': this.isResponsive_() ?
-          13 : (this.isCoreResponsive_() ? 15 : null),
+      'rafmt': this.getRafmtParam_(),
       'pfx': pfx ? '1' : '0',
       // Matched content specific fields.
       'crui': this.element.getAttribute('data-matched-content-ui-type'),
@@ -556,29 +546,41 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /**
-   * Calculates the appropriate height for a full-width responsive ad of the
-   * given width.
-   * @param {!{width: number, height: number}} viewportSize
-   * @return {number}
+   * @param {string} autoFormat
+   * @return {boolean}
    * @private
    */
-  static getResponsiveHeightForContext_(viewportSize) {
-    const minHeight = 100;
-    const maxHeight = Math.min(300, viewportSize.height);
-    // We aim for a 6:5 aspect ratio.
-    const idealHeight = Math.round(viewportSize.width / 1.2);
-    return clamp(idealHeight, minHeight, maxHeight);
+  static isAutoResponsive_(autoFormat) {
+    return autoFormat === 'rspv';
   }
 
   /**
-   * Calculates the appropriate height for a full-width responsive core ad of
-   * the give width.
+   * @param {string} autoFormat
+   * @return {boolean}
+   * @private
+   */
+  static isMCResponsive_(autoFormat) {
+    return autoFormat === 'mcrspv';
+  }
+
+  /**
+   * Calculates the appropriate height for a full-width responsive ad of the
+   * given width.
+   * @param {string} autoFormat
    * @param {!{width: number, height: number}} viewportSize
    * @return {number}
    * @private
    */
-  static getCoreResponsiveHeightForContext_(viewportSize) {
-    return Math.floor(viewportSize.width * 3.4 + 112);
+  static getResponsiveHeightForContext_(autoFormat, viewportSize) {
+    if (AmpAdNetworkAdsenseImpl.isAutoResponsive_(autoFormat)) {
+      const minHeight = 100;
+      const maxHeight = Math.min(300, viewportSize.height);
+      // We aim for a 6:5 aspect ratio.
+      const idealHeight = Math.round(viewportSize.width / 1.2);
+      return clamp(idealHeight, minHeight, maxHeight);
+    } else if (AmpAdNetworkAdsenseImpl.isMCResponsive_(autoFormat)) {
+      return Math.floor(viewportSize.width * 3.4 + 112);
+    }
   }
 }
 

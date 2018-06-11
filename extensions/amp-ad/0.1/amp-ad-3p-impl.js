@@ -191,7 +191,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @return {boolean}
    * @private
    */
-  isResponsive_() {
+  isAutoResponsive_() {
     return this.element.getAttribute('data-auto-format') == 'rspv';
   }
 
@@ -199,8 +199,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @return {boolean}
    * @private
    */
-  isCoreResponsive_() {
-    return this.element.getAttribute('data-auto-format') == 'corerspv';
+  isMCResponsive_() {
+    return this.element.getAttribute('data-auto-format') == 'mcrspv';
   }
 
   /** @override */
@@ -237,7 +237,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!hasFullWidth) {
       return false;
     }
-    if (!this.isResponsive_() && !this.isCoreResponsive_()) {
+    if (!this.isAutoResponsive_() && !this.isMCResponsive_()) {
       return false;
     }
     user().assert(this.element.getAttribute('width') == '100vw',
@@ -457,9 +457,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const viewportSize = this.getViewport().getSize();
     const ratio = this.config.fullWidthHeightRatio;
     const {width} = viewportSize;
-    const height = this.isCoreResponsive_() ?
-      AmpAd3PImpl.getCoreResponsiveHeightForContext_(viewportSize) :
-      AmpAd3PImpl.getResponsiveHeightForContext_(viewportSize, ratio);
+    const height = this.isMCResponsive_() ?
+      AmpAd3PImpl.getMCResponsiveHeightForContext_(viewportSize) :
+      AmpAd3PImpl.getAutoResponsiveHeightForContext_(viewportSize, ratio);
     // Attempt to resize to the correct height. The width should already be
     // 100vw, but is fixed here so that future resizes of the viewport don't
     // affect it.
@@ -482,7 +482,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @return {number}
    * @private
    */
-  static getResponsiveHeightForContext_(viewportSize, ratio) {
+  static getAutoResponsiveHeightForContext_(viewportSize, ratio) {
     const maxHeight = Math.min(MAX_FULL_WIDTH_HEIGHT, viewportSize.height);
     const idealHeight = Math.round(viewportSize.width / ratio);
     return clamp(idealHeight, MIN_FULL_WIDTH_HEIGHT, maxHeight);
@@ -495,7 +495,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @return {number}
    * @private
    */
-  static getCoreResponsiveHeightForContext_(viewportSize) {
+  static getMCResponsiveHeightForContext_(viewportSize) {
     return Math.floor(viewportSize.width * 3.4 + 112);
   }
 }

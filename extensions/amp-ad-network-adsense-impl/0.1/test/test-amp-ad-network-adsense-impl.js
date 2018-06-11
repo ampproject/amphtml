@@ -61,7 +61,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
   let impl;
   let element;
   let isResponsiveStub;
-  let isCoreResponsiveStub;
 
   beforeEach(() => {
     win = env.win;
@@ -86,7 +85,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
     impl = new AmpAdNetworkAdsenseImpl(element);
     impl.win['goog_identity_prom'] = Promise.resolve({});
     isResponsiveStub = sandbox.stub(impl, 'isResponsive_');
-    isCoreResponsiveStub = sandbox.stub(impl, 'isCoreResponsive_');
   });
 
   /**
@@ -139,33 +137,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('should NOT be valid (responsive with missing data-full-width)', () => {
       isResponsiveStub.callsFake(() => true);
-      element.setAttribute('height', '320');
-      element.setAttribute('width', '100vw');
-      expect(impl.isValidElement()).to.be.false;
-    });
-    it('should be valid (core responsive)', () => {
-      isCoreResponsiveStub.callsFake(() => true);
-      element.setAttribute('data-full-width', 'true');
-      element.setAttribute('height', '320');
-      element.setAttribute('width', '100vw');
-      expect(impl.isValidElement()).to.be.true;
-    });
-    it('should NOT be valid (core responsive with wrong height)', () => {
-      isCoreResponsiveStub.callsFake(() => true);
-      element.setAttribute('data-full-width', 'true');
-      element.setAttribute('height', '666');
-      element.setAttribute('width', '100vw');
-      expect(impl.isValidElement()).to.be.false;
-    });
-    it('should NOT be valid (core responsive with wrong width)', () => {
-      isCoreResponsiveStub.callsFake(() => true);
-      element.setAttribute('data-full-width', 'true');
-      element.setAttribute('height', '320');
-      element.setAttribute('width', '666');
-      expect(impl.isValidElement()).to.be.false;
-    });
-    it('should NOT be valid (corerspv without data-full-width)', () => {
-      isCoreResponsiveStub.callsFake(() => true);
       element.setAttribute('height', '320');
       element.setAttribute('width', '100vw');
       expect(impl.isValidElement()).to.be.false;
@@ -592,7 +563,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
       it('sets rafmt for core responsive', () => {
         element.setAttribute('data-ad-slot', 'some_slot');
-        element.setAttribute('data-auto-format', 'corerspv');
+        element.setAttribute('data-auto-format', 'mcrspv');
         return impl.getAdUrl().then(url => {
           expect(url).to.match(/(\?|&)ramft=15(&|$)/);
         });
@@ -872,7 +843,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       constructImpl({
         width: '100vw',
         height: '100',
-        'data-auto-format': 'corerspv',
+        'data-auto-format': 'mcrspv',
       });
 
       const callback = impl.buildCallback();
@@ -991,21 +962,21 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should request 100px height for very small viewports', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              {width: 100, height: 667}))
+              'rspv', {width: 100, height: 667}))
           .to.be.equal(100);
     });
 
     it('should request 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              {width: 320, height: 568}))
+              'rspv', {width: 320, height: 568}))
           .to.be.equal(267);
     });
 
     it('should request 300px height for wide viewports', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              {width: 500, height: 667}))
+              'rspv', {width: 500, height: 667}))
           .to.be.equal(300);
     });
   });
@@ -1013,15 +984,15 @@ describes.realWin('amp-ad-network-adsense-impl', {
   describe('#getCoreResponsiveHeightForContext', () => {
     it('get Core responsive height for iPhone 6', () => {
       expect(
-          AmpAdNetworkAdsenseImpl.getCoreResponsiveHeightForContext_(
-              {width: 375, height: 320}))
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              'mcrspv', {width: 375, height: 320}))
           .to.be.equal(1387);
     });
 
     it('get Core responsive height for iPhone 5', () => {
       expect(
-          AmpAdNetworkAdsenseImpl.getCoreResponsiveHeightForContext_(
-              {width: 320, height: 320}))
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              'mcrspv', {width: 320, height: 320}))
           .to.be.equal(1200);
     });
   });
