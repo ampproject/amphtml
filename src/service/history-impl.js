@@ -316,10 +316,10 @@ class HistoryBindingInterface {
    * Pushes a new state onto the history stack, optionally specifying the state
    * object associated with the current state.
    * Returns a promise that yields the new state.
-   * @param {!HistoryStateUpdateDef=} unusedStateUpdate
+   * @param {!HistoryStateUpdateDef=} opt_stateUpdate
    * @return {!Promise<!HistoryStateDef>}
    */
-  push(unusedStateUpdate = {}) {}
+  push(opt_stateUpdate) {}
 
   /**
    * Pops a previously pushed state from the history stack. All history
@@ -334,10 +334,10 @@ class HistoryBindingInterface {
    * Replaces the current state, optionally specifying updates to the state
    * object to be associated with the replacement.
    * Returns a promise that yields the new state.
-   * @param {!HistoryStateUpdateDef=} unusedStateUpdate
+   * @param {!HistoryStateUpdateDef=} opt_stateUpdate
    * @return {!Promise<!HistoryStateDef>}
    */
-  replace(unusedStateUpdate = {}) {}
+  replace(opt_stateUpdate) {}
 
   /**
    * Retrieves the current state, containing the current fragment, title,
@@ -511,9 +511,10 @@ export class HistoryBindingNatural_ {
   }
 
   /** @override */
-  push(stateUpdate = {}) {
+  push(opt_stateUpdate) {
     return this.whenReady_(() => {
-      const newState = this.mergeStateUpdate_(this.getState_(), stateUpdate);
+      const newState = this.mergeStateUpdate_(
+          this.getState_(), opt_stateUpdate || {});
       this.historyPushState_(newState, /* title */ undefined,
           newState.fragment ? ('#' + newState.fragment) : undefined);
       return tryResolve(() =>
@@ -536,9 +537,10 @@ export class HistoryBindingNatural_ {
   }
 
   /** @override */
-  replace(stateUpdate = {}) {
+  replace(opt_stateUpdate = {}) {
     return this.whenReady_(() => {
-      const newState = this.mergeStateUpdate_(this.getState_(), stateUpdate);
+      const newState = this.mergeStateUpdate_(
+          this.getState_(), opt_stateUpdate || {});
       this.historyReplaceState_(newState, /* title */ undefined,
           newState.fragment ? ('#' + newState.fragment) : undefined);
       return tryResolve(() =>
@@ -846,9 +848,10 @@ export class HistoryBindingVirtual_ {
    * Note: Not all viewers support `pushHistory` responses yet.
    * @override
    */
-  push(stateUpdate = {}) {
+  push(opt_stateUpdate) {
     const message = /** @type {!JsonObject} */ (
-      Object.assign({'stackIndex': this.stackIndex_ + 1}, stateUpdate));
+      Object.assign({'stackIndex': this.stackIndex_ + 1}, opt_stateUpdate || {})
+    );
     return this.viewer_.sendMessageAwaitResponse('pushHistory', message)
         .then(response => {
           // Return the message if responses aren't supported.
@@ -884,9 +887,9 @@ export class HistoryBindingVirtual_ {
    * Note: Not all viewers support `replace()` yet.
    * @override
    */
-  replace(stateUpdate = {}) {
+  replace(opt_stateUpdate) {
     const message = /** @type {!JsonObject} */ (
-      Object.assign({'stackIndex': this.stackIndex_}, stateUpdate)
+      Object.assign({'stackIndex': this.stackIndex_}, opt_stateUpdate || {})
     );
     return this.viewer_.sendMessageAwaitResponse('replaceHistory', message,
         /* cancelUnsent */ true).then(response => {
