@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-var ClosureCompiler = require('google-closure-compiler').compiler;
-var Promise = require('bluebird');
-var babel = require('babelify');
-var browserify = require('browserify');
-var through = require('through2');
-var devnull = require('dev-null');
-var relativePath = require('path').relative;
-var path = require('path');
-var fs = require('fs');
-var mkpath = require('mkpath');
-var findPackageJsonPath = require('find-root');
+const babel = require('babelify');
+const browserify = require('browserify');
+const ClosureCompiler = require('google-closure-compiler').compiler;
+const devnull = require('dev-null');
+const fs = require('fs');
+const mkpath = require('mkpath');
+const path = require('path');
+const Promise = require('bluebird');
+const relativePath = require('path').relative;
+const through = require('through2');
 const TopologicalSort = require('topological-sort');
 
 // Override to local closure compiler JAR
@@ -55,14 +54,15 @@ exports.splittable = function(config) {
                   stdErr));
         }
       });
-    })
+    });
   });
 };
 
 
 exports.getFlags = function(config) {
+  /* eslint "google-camelcase/google-camelcase": 0 */
   // Reasonable defaults.
-  var flags = {
+  const flags = {
     compilation_level: 'ADVANCED',
     process_common_js_modules: true,
     rewrite_polyfills: true,
@@ -89,13 +89,13 @@ exports.getFlags = function(config) {
   };
 
   // Turn object into deterministically sorted array.
-  var flagsArray = [];
+  const flagsArray = [];
   Object.keys(flags).sort().forEach(function(flag) {
-    var val = flags[flag];
+    const val = flags[flag];
     if (val instanceof Array) {
       val.forEach(function(item) {
         flagsArray.push('--' + flag, item);
-      })
+      });
     } else {
       if (val != null) {
         flagsArray.push('--' + flag, val);
@@ -112,24 +112,24 @@ exports.getFlags = function(config) {
 };
 
 exports.getBundleFlags = function(g) {
-  var flagsArray = [];
+  const flagsArray = [];
 
   // Write all the packages (directories with a package.json) as --js
   // inputs to the flags. Closure compiler reads the packages to resolve
   // non-relative module names.
-  var packageCount = 0;
-  Object.keys(g.packages).sort().forEach(function(package) {
-    flagsArray.push('--js', package);
+  let packageCount = 0;
+  Object.keys(g.packages).sort().forEach(function(pkg) {
+    flagsArray.push('--js', pkg);
     packageCount++;
   });
   // Build up the weird flag structure that closure compiler calls
   // modules and we call bundles.
-  var bundleKeys = Object.keys(g.bundles);
-  bundleKeys.sort().forEach(function(name) {
-    var isBase = name == '_base';
-    var isMain = name == 'src/amp.js';
-    var extraModules = 0;
-    var bundle = g.bundles[name];
+  const bundleKeys = Object.keys(g.bundles);
+  bundleKeys.sort().forEach(function(originalName) {
+    const isBase = originalName == '_base';
+    const isMain = originalName == 'src/amp.js';
+    let extraModules = 0;
+    const bundle = g.bundles[originalName];
     if (isBase || bundleKeys.length == 1) {
       flagsArray.push('--js', relativePath(process.cwd(),
           require.resolve('./base.js')));
@@ -153,11 +153,11 @@ exports.getBundleFlags = function(g) {
       packageCount = 0;
     }
     // Replace directory separator with - in bundle filename
-    var name = bundle.name
+    const name = bundle.name
         .replace(/\.js$/g, '')
         .replace(/[\/\\]/g, '-');
     // And now build --module $name:$numberOfJsFiles:$bundleDeps
-    var cmd = name + ':' + (bundle.modules.length + extraModules);
+    let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend on _base.
     if (!isBase && g.bundles._base) {
       cmd += ':_base';
@@ -165,22 +165,18 @@ exports.getBundleFlags = function(g) {
     flagsArray.push('--module', cmd);
     if (bundleKeys.length > 1) {
       if (isBase) {
-        console.log('a', name);
         flagsArray.push('--module_wrapper', name + ':' +
             exports.baseBundleWrapper);
       } else {
         if (isMain) {
-        //console.log('b', name);
           flagsArray.push('--module_wrapper', name + ':' +
               exports.mainBinaryWrapper);
         } else {
-        console.log('c', name);
           flagsArray.push('--module_wrapper', name + ':' +
               exports.bundleWrapper);
         }
       }
     } else {
-        console.log('d', name);
       flagsArray.push('--module_wrapper', name + ':' +
             exports.defaultWrapper);
     }
@@ -190,24 +186,18 @@ exports.getBundleFlags = function(g) {
   flagsArray.push('--js_module_root', './');
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return flagsArray;
-}
+};
 
-/**
- * Produces a graph based on the dependencies of the entry modules.
- * @param {!Array<string>} entryModules
- * @return {!Promise<{bundles: !Object}>} A Promise for bundle definitions.
- * @visibleForTesting
- */
 exports.getGraph = function(entryModules, config) {
-  var resolve;
-  var reject;
-  var promise = new Promise(function(res, rej) {
+  let resolve;
+  let reject;
+  const promise = new Promise(function(res, rej) {
     resolve = res;
     reject = rej;
   });
-  var topo = new TopologicalSort({});
-  var graph = {
-    entryModules: entryModules,
+  const topo = new TopologicalSort({});
+  const graph = {
+    entryModules,
     // Lookup whether a module is a dep of a given entry module
     depOf: {},
     // Map of module id to its deps array.
@@ -231,19 +221,19 @@ exports.getGraph = function(entryModules, config) {
   config.babel = config.babel || {};
 
   // Use browserify with babel to learn about deps.
-  var b = browserify(entryModules, {
+  const b = browserify(entryModules, {
     debug: true,
     deps: true,
     detectGlobals: false,
   })
   // The second stage are transforms that closure compiler supports
   // directly and which we don't want to apply during deps finding.
-  .transform(babel, {
-    babelrc: false,
-    plugins: [
-      require.resolve("babel-plugin-transform-es2015-modules-commonjs"),
-    ]
-  });
+      .transform(babel, {
+        babelrc: false,
+        plugins: [
+          require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
+        ],
+      });
 
   b.on('package', function(pkg) {
     if (!pkg.browser) {
@@ -261,9 +251,9 @@ exports.getGraph = function(entryModules, config) {
             'package.json#browser:' + entry +
             ' [' + pkg.__dirname + '.package.json]');
       }
-      var filename =
+      let filename =
           'splittable-build/browser/node_modules/' + entry;
-      var maskedPkg = 'splittable-build/browser/node_modules/' +
+      const maskedPkg = 'splittable-build/browser/node_modules/' +
           entry.split('/')[0] + '/package.json';
       if (!/\//.test(entry)) {
         filename += '/index';
@@ -288,39 +278,40 @@ exports.getGraph = function(entryModules, config) {
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
   // will not be stable.
-  var depEntries = [];
+  const depEntries = [];
   b.pipeline.get('deps').push(through.obj(function(row, enc, next) {
-    row.source = null;  // Release memory
+    row.source = null; // Release memory
     depEntries.push(row);
     next();
   }));
 
   b.bundle().on('end', function() {
-    var edges = {};
+    const edges = {};
     depEntries.sort(function(a, b) {
       return a.id < b.id;
     }).forEach(function(row) {
-      var id = unifyPath(exports.maybeAddDotJs(
+      const id = unifyPath(exports.maybeAddDotJs(
           relativePath(process.cwd(), row.id)));
       topo.addNode(id, id);
-      var deps = edges[id] = Object.keys(row.deps).sort().map(function(dep) {
-        var depId = row.deps[dep];
-        var relPathtoDep = unifyPath(relativePath(process.cwd(), row.deps[dep]));
+      const deps = edges[id] = Object.keys(row.deps).sort().map(function(dep) {
+        //const depId = row.deps[dep];
+        const relPathtoDep = unifyPath(relativePath(process.cwd(),
+            row.deps[dep]));
 
         // TODO(erwimm): don't parse package.json, breaks closure right now.
         // Non relative module path. Find the package.json.
         //if (!/^\./.test(dep)) {
-          //var packageJson = findPackageJson(depId);
-          //if (packageJson) {
-            //graph.packages[packageJson] = true;
-          //}
+        //var packageJson = findPackageJson(depId);
+        //if (packageJson) {
+        //graph.packages[packageJson] = true;
+        //}
         //}
         return relPathtoDep;
       });
       graph.deps[id] = deps;
       if (row.entry) {
         graph.depOf[id] = {};
-        graph.depOf[id][id] = true;  // Self edge.
+        graph.depOf[id][id] = true; // Self edge.
         deps.forEach(function(dep) {
           graph.depOf[id][dep] = true;
         });
@@ -329,7 +320,7 @@ exports.getGraph = function(entryModules, config) {
     Object.keys(edges).sort().forEach(function(id) {
       edges[id].forEach(function(dep) {
         topo.addEdge(id, dep);
-      })
+      });
     });
     graph.sorted = Array.from(topo.sort().keys()).reverse();
 
@@ -340,7 +331,7 @@ exports.getGraph = function(entryModules, config) {
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
   return promise;
-}
+};
 
 function setupBundles(graph) {
   // For each module, mark them as to whether any of the entry
@@ -357,16 +348,16 @@ function setupBundles(graph) {
 
   // Create the bundles.
   graph.sorted.forEach(function(id) {
-    var inBundleCount = 0;
+    let inBundleCount = 0;
     // The bundle a module should go into.
-    var dest;
+    let dest;
     // Count in how many bundles a modules wants to be.
     Object.keys(graph.depOf).sort().forEach(function(entry) {
       if (graph.depOf[entry][id]) {
         inBundleCount++;
         dest = entry;
       }
-    })
+    });
     console.assert(inBundleCount >= 1,
         'Should be in at least 1 bundle', id, 'Bundle count',
         inBundleCount, graph.depOf);
@@ -390,7 +381,7 @@ function setupBundles(graph) {
   }
 }
 
-var knownExtensions = {
+const knownExtensions = {
   js: true,
   es: true,
   es6: true,
@@ -398,47 +389,19 @@ var knownExtensions = {
 };
 
 exports.maybeAddDotJs = function(id) {
-  var extensionMatch = id.match(/\.([a-zA-Z0-9]+)$/);
-  var extension = extensionMatch ? extensionMatch[1].toLowerCase() : null;
+  const extensionMatch = id.match(/\.([a-zA-Z0-9]+)$/);
+  const extension = extensionMatch ? extensionMatch[1].toLowerCase() : null;
   if (!knownExtensions[extension]) {
-    id += '.js'
+    id += '.js';
   }
   return id;
-}
-
-function bundleTrailModule(name) {
-  if (!fs.existsSync('./splittable-build')) {
-    fs.mkdirSync('./splittable-build');
-  }
-  var tmp = require('tmp').fileSync({
-    template: './splittable-build/tmp-XXXXXX.js'
-  });
-
-  var js = '// Generated code to get module ' + name + '\n' +
-      '(self["_S"]=self["_S"]||[])["//' + name + '"]=' +
-      'require("' + relativePath(path.dirname(tmp.name), name) + '")\n';
-  fs.writeFileSync(tmp.name, js, 'utf8');
-  return relativePath(process.cwd(), tmp.name);
-}
+};
 
 function unifyPath(id) {
   return id.split(path.sep).join('/');
 }
 
-/**
- * Given a module path, return the path to the relevant package.json or
- * null. Returns null if the module is not inside a node_modules directory.
- * @return {?string}
- */
-function findPackageJson(modulePath) {
-  if (modulePath.split(path.sep).indexOf('node_modules') == -1) {
-    return null;
-  }
-  return relativePath(process.cwd(),
-      findPackageJsonPath(modulePath) + '/package.json');
-}
-
-let externs = [
+const externs = [
   'build-system/amp.extern.js',
   //'third_party/closure-compiler/externs/intersection_observer.js',
   'third_party/closure-compiler/externs/performance_observer.js',
@@ -449,7 +412,7 @@ let externs = [
   'third_party/react-externs/externs.js',
 ];
 
-var systemImport =
+const systemImport =
     // Polyfill and/or monkey patch System.import.
     '(self.System=self.System||{}).import=function(n){' +
     // Always end names in .js
@@ -476,7 +439,7 @@ var systemImport =
     '})' +
     ')};\n';
 
-var nodeEmulation = 'self.global=self;';
+const nodeEmulation = 'self.global=self;';
 
 exports.mainBinaryWrapper = 'try{(function(){%s})()}catch(e){' +
   'setTimeout(function(){' +
@@ -510,152 +473,122 @@ exports.bundleWrapper = '(self.AMP=self.AMP||[]).push({n:"%basename%", ' +
     'v:"$internalRuntimeVersion$", f:(function(){%s})});\n' +
     '//# sourceMappingURL=%basename%.map\n';
 
-function bundleTrailModule(name) {
-  if (!fs.existsSync('./splittable-build')) {
-    fs.mkdirSync('./splittable-build');
-  }
-  var tmp = require('tmp').fileSync({
-    template: './splittable-build/tmp-XXXXXX.js'
-  });
-
-  var js = '// Generated code to get module ' + name + '\n' +
-      '(self["_S"]=self["_S"]||[])["//' + name + '"]=' +
-      'require("' + relativePath(path.dirname(tmp.name), name) + '")\n';
-  fs.writeFileSync(tmp.name, js, 'utf8');
-  return relativePath(process.cwd(), tmp.name);
-}
-
 const all = [
-'./src/amp.js',
-'./extensions/amp-3d-gltf/0.1/amp-3d-gltf.js',
-'./extensions/amp-3q-player/0.1/amp-3q-player.js',
-'./extensions/amp-a4a/0.1/amp-a4a.js',
-'./extensions/amp-access-laterpay/0.1/amp-access-laterpay.js',
-'./extensions/amp-access-scroll/0.1/amp-access-scroll.js',
-'./extensions/amp-access/0.1/amp-access.js',
-'./extensions/amp-accordion/0.1/amp-accordion.js',
-'./extensions/amp-ad-exit/0.1/amp-ad-exit.js',
-'./extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-'./extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js',
-'./extensions/amp-ad-network-cloudflare-impl/0.1/amp-ad-network-cloudflare-impl.js',
-'./extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
-'./extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js',
-'./extensions/amp-ad-network-gmossp-impl/0.1/amp-ad-network-gmossp-impl.js',
-'./extensions/amp-ad-network-triplelift-impl/0.1/amp-ad-network-triplelift-impl.js',
-'./extensions/amp-ad/0.1/amp-ad.js',
-'./extensions/amp-addthis/0.1/amp-addthis.js',
-'./extensions/amp-analytics/0.1/amp-analytics.js',
-'./extensions/amp-anim/0.1/amp-anim.js',
-'./extensions/amp-animation/0.1/amp-animation.js',
-'./extensions/amp-apester-media/0.1/amp-apester-media.js',
-'./extensions/amp-app-banner/0.1/amp-app-banner.js',
-'./extensions/amp-audio/0.1/amp-audio.js',
-'./extensions/amp-auto-ads/0.1/amp-auto-ads.js',
-'./extensions/amp-beopinion/0.1/amp-beopinion.js',
-'./extensions/amp-bind/0.1/amp-bind.js',
-'./extensions/amp-bodymovin-animation/0.1/amp-bodymovin-animation.js',
-'./extensions/amp-brid-player/0.1/amp-brid-player.js',
-'./extensions/amp-brightcove/0.1/amp-brightcove.js',
-'./extensions/amp-byside-content/0.1/amp-byside-content.js',
-'./extensions/amp-call-tracking/0.1/amp-call-tracking.js',
-'./extensions/amp-carousel/0.1/amp-carousel.js',
-'./extensions/amp-compare-slider/0.1/amp-compare-slider.js',
-'./extensions/amp-consent/0.1/amp-consent.js',
-'./extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill.js',
-'./extensions/amp-dailymotion/0.1/amp-dailymotion.js',
-//'./extensions/amp-date-picker/0.1/amp-date-picker.js',
-'./extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
-'./extensions/amp-experiment/0.1/amp-experiment.js',
-'./extensions/amp-facebook-comments/0.1/amp-facebook-comments.js',
-'./extensions/amp-facebook-like/0.1/amp-facebook-like.js',
-'./extensions/amp-facebook-page/0.1/amp-facebook-page.js',
-'./extensions/amp-facebook/0.1/amp-facebook.js',
-'./extensions/amp-fit-text/0.1/amp-fit-text.js',
-'./extensions/amp-font/0.1/amp-font.js',
-'./extensions/amp-form/0.1/amp-form.js',
-'./extensions/amp-fx-collection/0.1/amp-fx-collection.js',
-'./extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
-'./extensions/amp-geo/0.1/amp-geo.js',
-'./extensions/amp-gfycat/0.1/amp-gfycat.js',
-'./extensions/amp-gist/0.1/amp-gist.js',
-'./extensions/amp-google-vrview-image/0.1/amp-google-vrview-image.js',
-'./extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
-'./extensions/amp-hulu/0.1/amp-hulu.js',
-'./extensions/amp-iframe/0.1/amp-iframe.js',
-'./extensions/amp-ima-video/0.1/amp-ima-video.js',
-'./extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
-'./extensions/amp-image-viewer/0.1/amp-image-viewer.js',
-'./extensions/amp-imgur/0.1/amp-imgur.js',
-'./extensions/amp-instagram/0.1/amp-instagram.js',
-'./extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
-'./extensions/amp-izlesene/0.1/amp-izlesene.js',
-'./extensions/amp-jwplayer/0.1/amp-jwplayer.js',
-'./extensions/amp-kaltura-player/0.1/amp-kaltura-player.js',
-'./extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
-'./extensions/amp-lightbox/0.1/amp-lightbox.js',
-'./extensions/amp-list/0.1/amp-list.js',
-'./extensions/amp-live-list/0.1/amp-live-list.js',
-'./extensions/amp-mathml/0.1/amp-mathml.js',
-'./extensions/amp-mustache/0.1/amp-mustache.js',
-'./extensions/amp-next-page/0.1/amp-next-page.js',
-'./extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js',
-'./extensions/amp-o2-player/0.1/amp-o2-player.js',
-'./extensions/amp-ooyala-player/0.1/amp-ooyala-player.js',
-'./extensions/amp-pinterest/0.1/amp-pinterest.js',
-'./extensions/amp-playbuzz/0.1/amp-playbuzz.js',
-'./extensions/amp-position-observer/0.1/amp-position-observer.js',
-'./extensions/amp-reach-player/0.1/amp-reach-player.js',
-'./extensions/amp-reddit/0.1/amp-reddit.js',
-'./extensions/amp-riddle-quiz/0.1/amp-riddle-quiz.js',
-'./extensions/amp-selector/0.1/amp-selector.js',
-'./extensions/amp-share-tracking/0.1/amp-share-tracking.js',
-'./extensions/amp-sidebar/0.1/amp-sidebar.js',
-'./extensions/amp-slides/0.1/amp-slides.js',
-'./extensions/amp-social-share/0.1/amp-social-share.js',
-'./extensions/amp-soundcloud/0.1/amp-soundcloud.js',
-'./extensions/amp-springboard-player/0.1/amp-springboard-player.js',
-'./extensions/amp-sticky-ad/1.0/amp-sticky-ad.js',
-'./extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js',
-'./extensions/amp-story/0.1/amp-story.js',
-//'./extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
-//'./extensions/amp-subscriptions/0.1/amp-subscriptions.js',
-'./extensions/amp-timeago/0.1/amp-timeago.js',
-'./extensions/amp-twitter/0.1/amp-twitter.js',
-'./extensions/amp-user-notification/0.1/amp-user-notification.js',
-'./extensions/amp-video-service/0.1/amp-video-service.js',
-'./extensions/amp-video/0.1/amp-video.js',
-'./extensions/amp-viewer-integration/0.1/amp-viewer-integration.js',
-'./extensions/amp-vimeo/0.1/amp-vimeo.js',
-'./extensions/amp-vine/0.1/amp-vine.js',
-'./extensions/amp-viz-vega/0.1/amp-viz-vega.js',
-'./extensions/amp-vk/0.1/amp-vk.js',
-'./extensions/amp-web-push/0.1/amp-web-push.js',
-'./extensions/amp-wistia-player/0.1/amp-wistia-player.js',
-'./extensions/amp-youtube/0.1/amp-youtube.js',
+  './src/amp.js',
+  './extensions/amp-3d-gltf/0.1/amp-3d-gltf.js',
+  './extensions/amp-3q-player/0.1/amp-3q-player.js',
+  './extensions/amp-a4a/0.1/amp-a4a.js',
+  './extensions/amp-access-laterpay/0.1/amp-access-laterpay.js',
+  './extensions/amp-access-scroll/0.1/amp-access-scroll.js',
+  './extensions/amp-access/0.1/amp-access.js',
+  './extensions/amp-accordion/0.1/amp-accordion.js',
+  './extensions/amp-ad-exit/0.1/amp-ad-exit.js',
+  './extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+  './extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js',
+  './extensions/amp-ad-network-cloudflare-impl/0.1/' +
+      'amp-ad-network-cloudflare-impl.js',
+  './extensions/amp-ad-network-doubleclick-impl/0.1/' +
+      'amp-ad-network-doubleclick-impl.js',
+  './extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js',
+  './extensions/amp-ad-network-gmossp-impl/0.1/amp-ad-network-gmossp-impl.js',
+  './extensions/amp-ad-network-triplelift-impl/0.1/' +
+      'amp-ad-network-triplelift-impl.js',
+  './extensions/amp-ad/0.1/amp-ad.js',
+  './extensions/amp-addthis/0.1/amp-addthis.js',
+  './extensions/amp-analytics/0.1/amp-analytics.js',
+  './extensions/amp-anim/0.1/amp-anim.js',
+  './extensions/amp-animation/0.1/amp-animation.js',
+  './extensions/amp-apester-media/0.1/amp-apester-media.js',
+  './extensions/amp-app-banner/0.1/amp-app-banner.js',
+  './extensions/amp-audio/0.1/amp-audio.js',
+  './extensions/amp-auto-ads/0.1/amp-auto-ads.js',
+  './extensions/amp-beopinion/0.1/amp-beopinion.js',
+  './extensions/amp-bind/0.1/amp-bind.js',
+  './extensions/amp-bodymovin-animation/0.1/amp-bodymovin-animation.js',
+  './extensions/amp-brid-player/0.1/amp-brid-player.js',
+  './extensions/amp-brightcove/0.1/amp-brightcove.js',
+  './extensions/amp-byside-content/0.1/amp-byside-content.js',
+  './extensions/amp-call-tracking/0.1/amp-call-tracking.js',
+  './extensions/amp-carousel/0.1/amp-carousel.js',
+  './extensions/amp-compare-slider/0.1/amp-compare-slider.js',
+  './extensions/amp-consent/0.1/amp-consent.js',
+  './extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill.js',
+  './extensions/amp-dailymotion/0.1/amp-dailymotion.js',
+  //'./extensions/amp-date-picker/0.1/amp-date-picker.js',
+  './extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
+  './extensions/amp-experiment/0.1/amp-experiment.js',
+  './extensions/amp-facebook-comments/0.1/amp-facebook-comments.js',
+  './extensions/amp-facebook-like/0.1/amp-facebook-like.js',
+  './extensions/amp-facebook-page/0.1/amp-facebook-page.js',
+  './extensions/amp-facebook/0.1/amp-facebook.js',
+  './extensions/amp-fit-text/0.1/amp-fit-text.js',
+  './extensions/amp-font/0.1/amp-font.js',
+  './extensions/amp-form/0.1/amp-form.js',
+  './extensions/amp-fx-collection/0.1/amp-fx-collection.js',
+  './extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+  './extensions/amp-geo/0.1/amp-geo.js',
+  './extensions/amp-gfycat/0.1/amp-gfycat.js',
+  './extensions/amp-gist/0.1/amp-gist.js',
+  './extensions/amp-google-vrview-image/0.1/amp-google-vrview-image.js',
+  './extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
+  './extensions/amp-hulu/0.1/amp-hulu.js',
+  './extensions/amp-iframe/0.1/amp-iframe.js',
+  './extensions/amp-ima-video/0.1/amp-ima-video.js',
+  './extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
+  './extensions/amp-image-viewer/0.1/amp-image-viewer.js',
+  './extensions/amp-imgur/0.1/amp-imgur.js',
+  './extensions/amp-instagram/0.1/amp-instagram.js',
+  './extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
+  './extensions/amp-izlesene/0.1/amp-izlesene.js',
+  './extensions/amp-jwplayer/0.1/amp-jwplayer.js',
+  './extensions/amp-kaltura-player/0.1/amp-kaltura-player.js',
+  './extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
+  './extensions/amp-lightbox/0.1/amp-lightbox.js',
+  './extensions/amp-list/0.1/amp-list.js',
+  './extensions/amp-live-list/0.1/amp-live-list.js',
+  './extensions/amp-mathml/0.1/amp-mathml.js',
+  './extensions/amp-mustache/0.1/amp-mustache.js',
+  './extensions/amp-next-page/0.1/amp-next-page.js',
+  './extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js',
+  './extensions/amp-o2-player/0.1/amp-o2-player.js',
+  './extensions/amp-ooyala-player/0.1/amp-ooyala-player.js',
+  './extensions/amp-pinterest/0.1/amp-pinterest.js',
+  './extensions/amp-playbuzz/0.1/amp-playbuzz.js',
+  './extensions/amp-position-observer/0.1/amp-position-observer.js',
+  './extensions/amp-reach-player/0.1/amp-reach-player.js',
+  './extensions/amp-reddit/0.1/amp-reddit.js',
+  './extensions/amp-riddle-quiz/0.1/amp-riddle-quiz.js',
+  './extensions/amp-selector/0.1/amp-selector.js',
+  './extensions/amp-share-tracking/0.1/amp-share-tracking.js',
+  './extensions/amp-sidebar/0.1/amp-sidebar.js',
+  './extensions/amp-slides/0.1/amp-slides.js',
+  './extensions/amp-social-share/0.1/amp-social-share.js',
+  './extensions/amp-soundcloud/0.1/amp-soundcloud.js',
+  './extensions/amp-springboard-player/0.1/amp-springboard-player.js',
+  './extensions/amp-sticky-ad/1.0/amp-sticky-ad.js',
+  './extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js',
+  './extensions/amp-story/0.1/amp-story.js',
+  //'./extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
+  //'./extensions/amp-subscriptions/0.1/amp-subscriptions.js',
+  './extensions/amp-timeago/0.1/amp-timeago.js',
+  './extensions/amp-twitter/0.1/amp-twitter.js',
+  './extensions/amp-user-notification/0.1/amp-user-notification.js',
+  './extensions/amp-video-service/0.1/amp-video-service.js',
+  './extensions/amp-video/0.1/amp-video.js',
+  './extensions/amp-viewer-integration/0.1/amp-viewer-integration.js',
+  './extensions/amp-vimeo/0.1/amp-vimeo.js',
+  './extensions/amp-vine/0.1/amp-vine.js',
+  './extensions/amp-viz-vega/0.1/amp-viz-vega.js',
+  './extensions/amp-vk/0.1/amp-vk.js',
+  './extensions/amp-web-push/0.1/amp-web-push.js',
+  './extensions/amp-wistia-player/0.1/amp-wistia-player.js',
+  './extensions/amp-youtube/0.1/amp-youtube.js',
 ];
-
-const small = [
-'./src/amp.js',
-'./extensions/amp-audio/0.1/amp-audio.js',
-//'./extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
-//'./extensions/amp-subscriptions/0.1/amp-subscriptions.js',
-//'./extensions/amp-user-notification/0.1/amp-user-notification.js',
-//'./extensions/amp-audio-2/0.1/amp-audio-2.js',
-//'./extensions/amp-live-list/0.1/amp-live-list.js',
-//'./extensions/amp-ad/0.1/amp-ad.js',
-];
-
-const test = [
-  './test-stuff/a.js',
-  './test-stuff/b.js',
-]
-
-
 
 exports.getFlags({
   modules: all,
-  writeTo: './sample/out/',
-  externs: externs,
+  writeTo: './out/',
+  externs,
 }).then(function(flagsArray) {
   return new Promise(function(resolve, reject) {
     //console.log(flagsArray);
@@ -671,7 +604,7 @@ exports.getFlags({
                 stdErr));
       }
     });
-  })
+  });
 });
 
 
@@ -688,17 +621,6 @@ function patchRegisterElement() {
     file = fs.readFileSync(
         'node_modules/document-register-element/build/' +
         'document-register-element.node.js').toString();
-    if (argv.fortesting) {
-      // Need to switch global to self since closure doesn't wrap the module
-      // like CommonJS
-      file = file.replace('installCustomElements(global);',
-          'installCustomElements(self);');
-    } else {
-      // Get rid of the side effect the module has so we can tree shake it
-      // better and control installation, unless --fortesting flag
-      // is passed since we also treat `--fortesting` mode as "dev".
-      file = file.replace('installCustomElements(global);', '');
-    }
     // Closure Compiler does not generate a `default` property even though
     // to interop CommonJS and ES6 modules. This is the same issue typescript
     // ran into here https://github.com/Microsoft/TypeScript/issues/2719

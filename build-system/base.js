@@ -15,7 +15,7 @@
  */
 
 /** @const {!Object}  */
-var process = {};
+const process = {};
 
 process.env = {};
 
