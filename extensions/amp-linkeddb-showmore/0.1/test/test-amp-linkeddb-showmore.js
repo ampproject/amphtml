@@ -19,7 +19,7 @@ import {AmpLinkeddbShowmore} from '../amp-linkeddb-showmore';
 describes.realWin('amp-linkeddb-showmore', {
   amp: {
     extensions: ['amp-linkeddb-showmore'],
-  }
+  },
 }, env => {
 
   let win;
