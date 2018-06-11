@@ -180,6 +180,59 @@ describe('Viewer', () => {
         '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
+  it('should not duplicate ampshare when merging', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com/#test=1&ampshare=old';
+    windowApi.location.hash = '#origin=g.com&test=1&ampshare=old';
+    windowApi.location.search = '?amp_gsa=1';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
+  it('should remove multiple ampshares when merging', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 
+        'http://www.example.com/#test=1&ampshare=a&ampshare=b&ampshare=c';
+    windowApi.location.hash =
+        '#origin=g.com&test=1&ampshare=a&ampshare=b&ampshare=c';
+    windowApi.location.search = '?amp_gsa=1';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
+  it('should remove extra ampshare even when it\'s first', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com/#ampshare=old&test=1';
+    windowApi.location.hash = '#ampshare=old&origin=g.com&test=1';
+    windowApi.location.search = '?amp_gsa=1';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
+  it('should remove extra ampshare even when it\'s sandwiched', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href =
+        'http://www.example.com/#note=ok&ampshare=old&test=1';
+    windowApi.location.hash =
+        '#note=ok&ampshare=old&origin=g.com&test=1';
+    windowApi.location.search = '?amp_gsa=1';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.getParam('note')).to.equal('ok');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#note=ok&test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
   it('should clear fragment when click param is present', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#click=abc';

@@ -54,6 +54,14 @@ const TRIM_ORIGIN_PATTERN_ =
   /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
+ * Pattern for removing any old "ampshare" parameters from a fragment.
+ * @const
+ * @private {!RegExp}
+ */
+const AMPSHARE_PATTERN =
+  /(^|&)ampshare[^&]*/g;
+
+/**
  * These domains are trusted with more sensitive viewer operations such as
  * propagating the referrer. If you believe your domain should be here,
  * file the issue on GitHub to discuss. The process will be similar
@@ -560,11 +568,18 @@ export class Viewer {
     const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc);
     const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
     if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
-      const oldFragment = getFragment(this.win.location.href);
+      // Remove the leading hash and remove any ampshare params.
+      let oldFragment = getFragment(this.win.location.href)
+          .substr(1)
+          .replace(AMPSHARE_PATTERN, '');
       const newFragment = 'ampshare=' + encodeURIComponent(canonicalUrl);
+      // The regular expression can leave behind an ampersand.
+      if (oldFragment[0] == '&') {
+        oldFragment = oldFragment.substr(1);
+      }
       // Attempt to merge the fragments, if an old fragment was present.
       this.win.history.replaceState({}, '',
-          oldFragment ? `${oldFragment}&${newFragment}` : `#${newFragment}`);
+          oldFragment ? `#${oldFragment}&${newFragment}` : `#${newFragment}`);
     }
   }
 
