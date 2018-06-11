@@ -183,7 +183,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (videos.length < 1) {
       return;
     }
-    toArray(videos).forEach(el => VideoServiceSync.delegateAutoplay(el));
+    toArray(videos).forEach(el => {
+      VideoServiceSync.delegateAutoplay(/** @type {!AmpElement} */ (el));
+    });
   }
 
 

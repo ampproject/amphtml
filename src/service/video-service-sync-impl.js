@@ -130,7 +130,7 @@ export class VideoServiceSync {
   }
 
   /**
-   * @param {!AmpElement|!BaseElement} video
+   * @param {!AmpElement|!../base-element.BaseElement} video
    */
   static delegateAutoplay(video) {
     video.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);

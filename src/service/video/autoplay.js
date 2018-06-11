@@ -227,7 +227,7 @@ export class AutoplayEntry {
     /** @private {boolean} */
     this.isVisible_ = false;
 
-    /** @private {!UnlistenDef} */
+    /** @private {!UnlistenDef|null} */
     this.unlistener_ = this.observeOn_(positionObserver);
 
     // Only muted videos are allowed to autoplay
