@@ -48,6 +48,8 @@ tags: {  # <amp-story>
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
+    deprecation: "AMP-STORY-BOOKEND"
+    deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-story#migrating-from-0.1-to-1.0"
   }
   attrs: {
     name: "poster-landscape-src"
@@ -109,7 +111,7 @@ tags: {  # <amp-story> without metadata (deprecated)
   tag_name: "AMP-STORY"
   spec_name: "AMP-STORY (beta)"
   deprecation: "AMP-STORY"
-  deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-story#announcements"
+  deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-story#migrating-from-0.1-to-1.0"
   requires_extension: "amp-story"
   mandatory_parent: "BODY"
   requires: "amp-story-page"

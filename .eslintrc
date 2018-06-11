@@ -39,7 +39,8 @@
     "jsdoc": {
       "tagNamePreference": {
         "returns": "return",
-        "constant": "const"
+        "constant": "const",
+        "class": "constructor"
       },
       "additionalTagNames": {
         "customTags": [
