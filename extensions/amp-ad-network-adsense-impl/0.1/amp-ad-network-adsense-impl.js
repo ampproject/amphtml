@@ -161,7 +161,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @private
    */
   isResponsive_() {
-    return AmpAdNetworkAdsenseImpl.isAutoResponsive_(this.autoFormat_) || AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_);
+    return AmpAdNetworkAdsenseImpl.isAutoResponsive_(this.autoFormat_) ||
+        AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_);
   }
 
   /**
@@ -169,7 +170,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @private
    */
   getRafmtParam_() {
-    return AmpAdNetworkAdsenseImpl.isAutoResponsive_(this.autoFormat_) ? 13 : (AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_) ? 15 : null);
+    return AmpAdNetworkAdsenseImpl.isAutoResponsive_(this.autoFormat_) ?
+        13 : (AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_) ?
+            15 : null);
   }
 
   /** @override */
