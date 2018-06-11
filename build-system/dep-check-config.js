@@ -254,6 +254,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-story/1.0/amp-story-page.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-story/1.0/media-pool.js->' +
+          'src/service/video-service-interface.js',
       'extensions/amp-story/1.0/page-advancement.js->' +
           'src/service/action-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->' +
