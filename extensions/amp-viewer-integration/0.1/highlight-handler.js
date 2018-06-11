@@ -15,17 +15,25 @@
  */
 
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
-import {resetStyles} from '../../../src/style';
+import {resetStyles, setStyles} from '../../../src/style';
 
 /**
  * The message name sent by viewers to dismiss highlights.
  * @type {string}
  */
 const HIGHLIGHT_DISMISS = 'highlightDismiss';
+
+/**
+ * The message name sent by AMP doc to notify the change of the state of text
+ * highlighting.
+ * @type {string}
+ */
+const HIGHLIGHT_STATE = 'highlightState';
 
 /**
  * The length limit of highlight param to avoid parsing
@@ -51,6 +59,14 @@ const NUM_ALL_CHARS_LIMIT = 1500;
  * @typedef {{sentences: !Array<string>}}
  */
 let HighlightInfoDef;
+
+/**
+ * The upper bound of the height of scrolling-down animation to highlighted
+ * texts. If the height for animation exceeds this limit, we scroll the viewport
+ * to the certain position before animation to control the speed of animation.
+ * @type {number}
+ */
+const SCROLL_ANIMATION_HEIGHT_LIMIT = 1000;
 
 /**
  * Returns highlight param in the URL hash.
@@ -96,8 +112,10 @@ export class HighlightHandler {
    * @param {!HighlightInfoDef} highlightInfo The highlighting info in JSON.
    */
   constructor(ampdoc, highlightInfo) {
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
@@ -106,44 +124,127 @@ export class HighlightHandler {
   }
 
   /**
+   * @param {string} state
+   * @param {JsonObject=} opt_params
+   * @private
+   */
+  sendHighlightState_(state, opt_params) {
+    const params = dict({'state': state});
+    for (const key in opt_params) {
+      params[key] = opt_params[key];
+    }
+    this.viewer_.sendMessage(HIGHLIGHT_STATE, params);
+  }
+
+  /**
    * @param {!HighlightInfoDef} highlightInfo
-    * @private
-    */
-  initHighlight_(highlightInfo) {
-    const ampdoc = this.ampdoc_;
-    const {win} = ampdoc;
-    const sens = findSentences(win, ampdoc.getBody(), highlightInfo.sentences);
+   * @private
+   */
+  findHighlightedNodes_(highlightInfo) {
+    const {win} = this.ampdoc_;
+    const sens = findSentences(
+        win, this.ampdoc_.getBody(), highlightInfo.sentences);
     if (!sens) {
       return;
     }
-    const spans = markTextRangeList(win, sens);
-    if (spans.length <= 0) {
+    const nodes = markTextRangeList(win, sens);
+    if (!nodes || nodes.length == 0) {
       return;
     }
-    for (let i = 0; i < spans.length; i++) {
-      const n = spans[i];
+    this.highlightedNodes_ = nodes;
+  }
+
+  /**
+   * @param {!HighlightInfoDef} highlightInfo
+   * @private
+   */
+  initHighlight_(highlightInfo) {
+    this.findHighlightedNodes_(highlightInfo);
+    if (!this.highlightedNodes_) {
+      this.sendHighlightState_('not_found');
+      return;
+    }
+    const scrollTop = this.calcTopToCenterHighlightedNodes_();
+    this.sendHighlightState_('found', dict({'scroll': scrollTop}));
+
+    for (let i = 0; i < this.highlightedNodes_.length; i++) {
+      const n = this.highlightedNodes_[i];
       n['style']['backgroundColor'] = '#ff0';
       n['style']['color'] = '#333';
     }
-    this.highlightedNodes_ = spans;
-    const viewer = Services.viewerForDoc(ampdoc);
-    const visibility = viewer.getVisibilityState();
+
+    const visibility = this.viewer_.getVisibilityState();
     if (visibility == 'visible') {
-      Services.viewportForDoc(ampdoc).animateScrollIntoView(spans[0], 500);
+      this.animateScrollToTop_(scrollTop);
     } else {
+      if (scrollTop > SCROLL_ANIMATION_HEIGHT_LIMIT) {
+        Services.viewportForDoc(this.ampdoc_).setScrollTop(
+            scrollTop - SCROLL_ANIMATION_HEIGHT_LIMIT);
+      }
       let called = false;
-      viewer.onVisibilityChanged(() => {
+      this.viewer_.onVisibilityChanged(() => {
         // TODO(yunabe): Unregister the handler.
-        if (called || viewer.getVisibilityState() != 'visible') {
+        if (called || this.viewer_.getVisibilityState() != 'visible') {
           return;
         }
-        Services.viewportForDoc(ampdoc).animateScrollIntoView(spans[0], 500);
-        viewer.sendMessage('highlightShown', null);
+        this.animateScrollToTop_(this.calcTopToCenterHighlightedNodes_());
         called = true;
       });
     }
+    listenOnce(this.ampdoc_.getBody(), 'click',
+        this.dismissHighlight_.bind(this));
+  }
 
-    listenOnce(ampdoc.getBody(), 'click', this.dismissHighlight_.bind(this));
+  /**
+   * @return {number}
+   * @private
+   */
+  calcTopToCenterHighlightedNodes_() {
+    const nodes = this.highlightedNodes_;
+    if (!nodes) {
+      return 0;
+    }
+    const viewport = Services.viewportForDoc(this.ampdoc_);
+    let minTop = Number.MAX_VALUE;
+    let maxBottom = 0;
+    for (let i = 0; i < nodes.length; i++) {
+      const {top, bottom} = viewport.getLayoutRect(nodes[i]);
+      minTop = Math.min(minTop, top);
+      maxBottom = Math.max(maxBottom, bottom);
+    }
+    if (minTop >= maxBottom) {
+      return 0;
+    }
+    const height = viewport.getHeight() - viewport.getPaddingTop();
+    if (maxBottom - minTop > height) {
+      return minTop;
+    }
+    const pos = (maxBottom + minTop - height) / 2;
+    return pos > 0 ? pos : 0;
+  }
+
+  /**
+   * @param {number} top
+   * @private
+   */
+  animateScrollToTop_(top) {
+    const sentinel = this.ampdoc_.win.document.createElement('div');
+    setStyles(sentinel, {
+      'position': 'absolute',
+      'top': Math.floor(top) + 'px',
+      'bottom': '0',
+      'left': '0',
+      'right': '0',
+      'pointer-events': 'none',
+    });
+    const body = this.ampdoc_.getBody();
+    body.appendChild(sentinel);
+    this.sendHighlightState_('auto_scroll');
+    Services.viewportForDoc(this.ampdoc_)
+        .animateScrollIntoView(sentinel).then(() => {
+          this.sendHighlightState_('shown');
+          body.removeChild(sentinel);
+        });
   }
 
   /**
@@ -151,7 +252,7 @@ export class HighlightHandler {
    */
   setupMessaging(messaging) {
     messaging.registerHandler(
-        HIGHLIGHT_DISMISS, this.handleDismissHighlight_.bind(this));
+        HIGHLIGHT_DISMISS, this.dismissHighlight_.bind(this));
   }
 
   /**
@@ -164,12 +265,5 @@ export class HighlightHandler {
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       resetStyles(this.highlightedNodes_[i], ['backgroundColor', 'color']);
     }
-  }
-
-  /**
-   * @private
-   */
-  handleDismissHighlight_() {
-    this.dismissHighlight_();
   }
 }
