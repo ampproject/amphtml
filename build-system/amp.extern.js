@@ -446,6 +446,10 @@ AMP.require;
  */
 var TransitionDef;
 
+/**
+ * See src/consent-state.js for more information.
+ * @enum {number}
+ */
 const CONSENT_POLICY_STATE = {
   SUFFICIENT: 1,
   INSUFFICIENT: 2,

@@ -183,6 +183,7 @@ export class RealTimeConfigManager {
    * Returns whether a given callout object is valid to send an RTC request
    * to, for the given consentState.
    * @param {Object|string} callout
+   * @return {boolean}
    */
   isValidCalloutForConsentState(callout) {
     if (!isObject(callout) || !callout['sendRegardlessOfConsentState']) {
