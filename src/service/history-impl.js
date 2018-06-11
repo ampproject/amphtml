@@ -848,10 +848,11 @@ export class HistoryBindingVirtual_ {
       Object.assign({'stackIndex': this.stackIndex_ + 1}, stateUpdate));
     return this.viewer_.sendMessageAwaitResponse('pushHistory', message)
         .then(response => {
-          const updatedState =
-            /** @type {!HistoryStateDef} */ (response || message);
-          this.updateHistoryState_(updatedState);
-          return updatedState;
+          const newState = /** @type {!HistoryStateDef} */ (
+            response || message
+          );
+          this.updateHistoryState_(newState);
+          return newState;
         });
   }
 
@@ -863,39 +864,38 @@ export class HistoryBindingVirtual_ {
     const message = dict({'stackIndex': this.stackIndex_});
     return this.viewer_.sendMessageAwaitResponse('popHistory', message)
         .then(response => {
-          const updatedState =
-            /** @type {!HistoryStateDef} */ (response || message);
-          this.updateHistoryState_(updatedState);
-          return updatedState;
+          const newState = /** @type {!HistoryStateDef} */ (
+            response || dict({'stackIndex': this.stackIndex_ = 1})
+          );
+          this.updateHistoryState_(newState);
+          return newState;
         });
   }
 
   /** @override */
   replace(stateUpdate = {}) {
     const message = /** @type {!JsonObject} */ (
-      Object.assign({'stackIndex': this.stackIndex_}, stateUpdate));
-    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'replaceHistory', message, /* cancelUnsent */true))
-        .then(response => {
-          const updatedState =
-            /** @type {!HistoryStateDef} */ (response || message);
-          this.updateHistoryState_(updatedState);
-          return updatedState;
-        });
+      Object.assign({'stackIndex': this.stackIndex_}, stateUpdate)
+    );
+    return this.viewer_.sendMessageAwaitResponse('replaceHistory', message,
+        /* cancelUnsent */ true).then(response => {
+      const newState = /** @type {!HistoryStateDef} */ (response || message);
+      this.updateHistoryState_(newState);
+      return newState;
+    });
   }
 
   /** @override */
   get() {
     return this.viewer_.sendMessageAwaitResponse('getHistory', undefined,
-        /* cancelUnsent */true)
-        .then(response => {
-          return {
-            fragment: response['fragment'],
-            stackIndex: response['stackIndex'],
-            data: response['data'],
-            title: response['title'],
-          };
-        });
+        /* cancelUnsent */ true).then(response => {
+      return {
+        fragment: response['fragment'],
+        stackIndex: response['stackIndex'],
+        data: response['data'],
+        title: response['title'],
+      };
+    });
   }
 
   /**
