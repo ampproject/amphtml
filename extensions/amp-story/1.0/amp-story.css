@@ -526,6 +526,12 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   display: none !important;
 }
 
+amp-story .amp-video-eq {
+  /* Align with spinner */
+  right: 12px !important;
+  bottom: 12px !important;
+}
+
 /* Default loading spinner */
 
 .i-amphtml-story-spinner {
