@@ -723,7 +723,7 @@ export class AmpA4A extends AMP.BaseElement {
           // arrayBuffer is null, force collapse.
           if (!fetchResponse || !fetchResponse.arrayBuffer ||
               fetchResponse.headers.has('amp-ff-empty-creative')) {
-            this.forceCollapse();
+            this.attemptCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
           if (fetchResponse.headers && fetchResponse.headers.has(
