@@ -600,6 +600,97 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     });
   });
 
+  describe('modifyRtcConfigForConsentStateSettings', () => {
+
+    beforeEach(() => {
+      rtc.rtcConfig_ = {
+        'vendors': {
+          'vendorA': {'SLOT_ID': '1', 'PAGE_ID': '1'},
+          'vendorB': {'SLOT_ID': '1'},
+          'vendorC': {'PAGE_ID': '1'},
+        },
+        'urls': [
+          'https://www.rtc.com/example1',
+          'https://www.other-rtc.com/example2',
+        ],
+        'timeoutMillis': 500};
+    });
+
+    it('should not modify rtcConfig if consent state is valid', () => {
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      rtc.modifyRtcConfigForConsentStateSettings(
+          CONSENT_POLICY_STATE.SUFFICIENT);
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should clear all callouts if global setting mismatched', () => {
+      rtc.rtcConfig_.sendRegardlessOfConsentState = ['INSUFFICIENT'];
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.vendors = {};
+      expectedRtcConfig.urls = [];
+
+      rtc.modifyRtcConfigForConsentStateSettings(CONSENT_POLICY_STATE.UNKNOWN);
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should clear just invalid custom URLs', () => {
+      rtc.rtcConfig_.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+        'vendorB': {'sendRegardlessOfConsentState': ['INSUFFICIENT', 'UNKNOWN'],
+          'macros': {'SLOT_ID': '1'}},
+        'vendorC': {'sendRegardlessOfConsentState': ['UNKNOWN'],
+          'macros': {'SLOT_ID': '1'}},
+      };
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.urls = [];
+      rtc.modifyRtcConfigForConsentStateSettings(CONSENT_POLICY_STATE.UNKNOWN);
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should clear just invalid vendor callouts', () => {
+      rtc.rtcConfig_.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+        {'sendRegardlessOfConsentState': ['INSUFFICIENT', 'UNKNOWN'],
+          'url': 'https://www.other-rtc.com/example2'},
+      ];
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.vendors = {};
+      rtc.modifyRtcConfigForConsentStateSettings(
+          CONSENT_POLICY_STATE.INSUFFICIENT);
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should not clear callouts if per-callout setting valid', () => {
+      rtc.rtcConfig_.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+        'vendorB': {'sendRegardlessOfConsentState': ['UNKNOWN'],
+          'macros': {'SLOT_ID': '1'}},
+        'vendorC': {'SLOT_ID': '1'},
+      };
+      rtc.rtcConfig_.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+        'https://www.other-rtc.com/example2',
+      ];
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+      };
+      expectedRtcConfig.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+      ];
+      rtc.modifyRtcConfigForConsentStateSettings(
+          CONSENT_POLICY_STATE.INSUFFICIENT);
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+  });
+
   describe('sendErrorMessage', () => {
     let imageStub, requestUrl, ampDoc;
     let errorType, errorReportingUrl;

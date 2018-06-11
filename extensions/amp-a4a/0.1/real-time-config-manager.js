@@ -37,10 +37,13 @@ const ERROR_REPORTING_ENABLED = getMode(window).localDev ||
 
 /** @typedef {{
     urls: (undefined|Array<string>|
-      Array<{url:string, errorReportingUrl:string}>),
+      Array<{url:string, errorReportingUrl:string,
+        sendRegardlessOfConsentState:(undefined|boolean|Array<string>)}>),
     vendors: (undefined|Object),
     timeoutMillis: number,
-    errorReportingUrl: (undefined|string)}} */
+    errorReportingUrl: (undefined|string),
+    sendRegardlessOfConsentState: (undefined|boolean|Array<string>)
+}} */
 let RtcConfigDef;
 
 /**
@@ -160,29 +163,107 @@ export class RealTimeConfigManager {
    * @visibleForTesting
    */
   maybeExecuteRealTimeConfig(customMacros, consentState) {
-    // TODO(keithwrightbos) - allow pub to override such that some callouts are
-    // still allowed.
-    if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentState == CONSENT_POLICY_STATE.UNKNOWN) {
-      return;
-    }
     if (!this.validateRtcConfig_(this.a4aElement_.element)) {
       return;
     }
-    customMacros = this.assignMacros(customMacros);
+    this.modifyRtcConfigForConsentStateSettings(consentState);
+    customMacros = this.assignMacros(customMacros, consentState);
     this.rtcStartTime_ = Date.now();
     this.handleRtcForCustomUrls(customMacros);
     this.handleRtcForVendorUrls(customMacros);
-    return Promise.all(this.promiseArray_);
+    return this.promiseArray_.length ? Promise.all(this.promiseArray_) :
+      null;
+  }
+
+  /**
+   * Returns whether a given callout object is valid to send an RTC request
+   * to, for the given consentState.
+   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {Object|string} callout
+   */
+  isValidCalloutForConsentState(consentState, callout) {
+    if (!isObject(callout) || !callout['sendRegardlessOfConsentState']) {
+      return false;
+    }
+
+    const sendRegardlessOfConsentState =
+          callout['sendRegardlessOfConsentState'];
+    if (sendRegardlessOfConsentState == true) {
+      return true;
+    }
+
+    if (isArray(sendRegardlessOfConsentState)) {
+      for (const i in sendRegardlessOfConsentState) {
+        const configConsentState = CONSENT_POLICY_STATE[
+            sendRegardlessOfConsentState[i]];
+        if (configConsentState == consentState) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Goes through the RTC config, and for any URL that we should not callout
+   * as per the current consent state, deletes it from the RTC config.
+   * For example, if the RTC config looked like:
+   *    {vendors: {vendorA: {'sendRegardlessOfConsentState': true}
+   *               vendorB: {'macros': {'SLOT_ID': 1}}},
+   *     urls: ['https://www.rtc.example/example',
+   *            {url: 'https://www.rtcSite2.example/example',
+   *             sendRegardlessOfConsentState: ['UNKNOWN']}]
+   *    }
+   * and the consentState is CONSENT_POLICY_STATE.UNKNOWN,
+   * then this method call would clear the callouts to vendorB, and to the first
+   * custom URL.
+   * @param {?CONSENT_POLICY_STATE} consentState
+   */
+  modifyRtcConfigForConsentStateSettings(consentState) {
+    if (!(consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+          consentState == CONSENT_POLICY_STATE.UNKNOWN) ||
+        this.rtcConfig_.sendRegardlessOfConsentState == true) {
+      return;
+    }
+
+    if (isArray(this.rtcConfig_.sendRegardlessOfConsentState)) {
+      for (const i in this.rtcConfig_.sendRegardlessOfConsentState) {
+        const configConsentState = CONSENT_POLICY_STATE[
+            this.rtcConfig_.sendRegardlessOfConsentState[i]];
+        if (configConsentState == consentState) {
+          return;
+        }
+      }
+    }
+
+    const urls = [];
+    for (let i = 0; i < this.rtcConfig_.urls.length; i++) {
+      if (this.isValidCalloutForConsentState(
+          consentState, this.rtcConfig_.urls[i])) {
+        urls.push(this.rtcConfig_.urls[i]);
+      }
+    }
+    this.rtcConfig_.urls = urls;
+
+    Object.keys(this.rtcConfig_.vendors || {}).forEach(vendor => {
+      if (!this.isValidCalloutForConsentState(
+          consentState, this.rtcConfig_.vendors[vendor])) {
+        delete this.rtcConfig_.vendors[vendor];
+      }
+    });
+
   }
 
   /**
    * Assigns constant macros that should exist for all RTC to object of custom
    * per-network macros.
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
+   * @param {?CONSENT_POLICY_STATE} consentState
    */
-  assignMacros(macros) {
+  assignMacros(macros, consentState) {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
+    macros['CONSENT_STATE'] = () => consentState;
     return macros;
   }
 
@@ -226,12 +307,21 @@ export class RealTimeConfigManager {
             this.buildErrorResponse_(
                 RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor, errorReportingUrl));
       }
+      // There are two valid configurations of the vendor object.
+      // It can either be an object of macros mapping string to string,
+      // or it can be an object with sub-objects, one of which can be
+      // 'macros'. This is for backwards compatability.
+      const vendorMacros =
+            this.rtcConfig_.vendors[vendor]['macros'] &&
+            isObject(this.rtcConfig_.vendors[vendor]['macros']) ?
+              this.rtcConfig_.vendors[vendor]['macros'] :
+              this.rtcConfig_.vendors[vendor];
       const validVendorMacros = {};
-      Object.keys(this.rtcConfig_.vendors[vendor]).forEach(macro => {
+      Object.keys(vendorMacros).forEach(macro => {
         if (!(vendorObject.macros && vendorObject.macros.includes(macro))) {
           user().error(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
         } else {
-          const value = this.rtcConfig_.vendors[vendor][macro];
+          const value = vendorMacros[macro];
           validVendorMacros[macro] = isObject(value) || isArray(value) ?
             JSON.stringify(value) : value;
         }
