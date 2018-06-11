@@ -1,3 +1,3 @@
-(self._S=self._S||[]).push((function(){(self.AMP=self.AMP||[]).push(function(){console.log("hello");(self._S=self._S||[])["//test-stuff/a.js"]={};})}));
+(self.AMP=self.AMP||[]).push({n:"test-stuff-a.js", v:"erwin", f:(function(){console.log("logging stuff from a: ",Math.random()+"rand");})});
 //# sourceMappingURL=test-stuff-a.js.map
 

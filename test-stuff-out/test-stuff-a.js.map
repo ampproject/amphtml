@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"./test-stuff-out/test-stuff-a.js",
+"lineCount":1,
+"mappings":"AAEAA,OAAAC,IAAA,CAAY,wBAAZ,CCFaC,CDEyB,EAAtC;",
+"sources":["test-stuff/a.js","test-stuff/dep.js"],
+"names":["console","log","stuff"]
+}

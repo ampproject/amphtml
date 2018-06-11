@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"/./sample/out/extensions-amp-compare-slider-0.1-amp-compare-slider.js",
+"lineCount":3,
+"mappings":"A,oHAqBEA,QAHWC,iFAGA,CAACC,kDAAD,CAAU,CACnB,kDAAA,CAAA,GAAA,YAAA,KAAA,CAAA,IAAA,CAAMA,kDAAN,CAAA,EAAA,IAGA,mDAAAC,aAAA,CAAkB,IAJC,OAAA,mDAAA;AAHhBC,mBAAA,CAAA,gFAAA,CAAA,GAAA,YAAA,CAWL,iFAAA,UAAA,cAAA,CAAAC,QAAa,EAAG,CACd,IAAAF,aAAA,CAAkB,IAAAG,IAAAC,SAAAC,cAAA,CAAgC,KAAhC,CAClB,KAAAN,QAAAO,YAAA,CAAyB,IAAAN,aAAzB,CACA,KAAAO,iBAAA,CAAsB,IAAAP,aAAtB,CAA6D,CAAA,CAA7D,CAHc,CAOhB;gFAAA,UAAA,kBAAA,CAAAQ,QAAiB,CAACC,mBAAD,CAAS,CACxB,MCHUC,YDGV,EAAOD,mBADiB,CAMe,UAAA,CAAAE,gBAAA,CAAO,CAChDA,gBAAAC,gBAAA,CAAoB,oBAApB,CAA0Cd,gFAA1C,CADgD,CAAP,CAA3C,CAA2C,IAAA,IAA3C;",
+"sources":["/extensions/amp-compare-slider/0.1/amp-compare-slider.js","/src/layout.js"],
+"names":["constructor","AmpCompareSlider","element","container_","$jscomp.inherits","buildCallback","win","document","createElement","appendChild","applyFillContent","isLayoutSupported","layout","RESPONSIVE","AMP","registerElement"]
+}

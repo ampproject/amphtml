@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"./test-stuff-out/test-stuff-c.js",
+"lineCount":1,
+"mappings":"AAEAA,OAAAC,IAAA,CAAY,wBAAZ,CCFqBC,QAAQ,EAAG,CAC9BF,OAAAC,IAAA,CAAY,MAAZ,CACA,OAAOE,KAAAC,OAAA,EAAP,CAAuB,EAFO,CDEM,EAAtC;",
+"sources":["test-stuff/c.js","test-stuff/dep-2.js"],
+"names":["console","log","stuff$$module$test_stuff$dep_2","Math","random"]
+}

@@ -1,3 +1,3 @@
-import {stuff} from './b';
+import {stuff} from './dep';
 
-console.log(stuff);
+console.log('logging stuff from a: ', stuff());

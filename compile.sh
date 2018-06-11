@@ -2,7 +2,6 @@ java -jar /Users/erwinm/dev/amphtml/build-system/runner/dist/runner.jar \
   --apply_input_source_maps true \
   --compilation_level ADVANCED \
   --create_source_map %outname%.map \
-  --define PSEUDO_NAMES=true \
   --externs /Users/erwinm/dev/amphtml/build-system/splittable.extern.js \
   --jscomp_off accessControls \
   --jscomp_off globalThis \
@@ -12,17 +11,18 @@ java -jar /Users/erwinm/dev/amphtml/build-system/runner/dist/runner.jar \
   --jscomp_off uselessCode \
   --language_in ES6 \
   --language_out ES5 \
-  --module_output_path_prefix ./sample/out/ \
+  --module_output_path_prefix ./test-stuff-out/ \
   --parse_inline_source_maps true \
   --process_common_js_modules true \
   --rewrite_polyfills true \
-  --js test-stuff/b.js \
+  --js test-stuff/dep.js \
+  --module base:1 \
+  --js test-stuff/dep-2.js \
+  --module base-2:1:base \
   --js test-stuff/a.js \
-  --module test-stuff-a:2 \
+  --module test-stuff-a:1:base \
   --js test-stuff/b.js \
+  --module test-stuff-b:1:base \
   --js test-stuff/c.js \
-  --module test-stuff-c:2 \
-  --js_module_root ./splittable-build/transformed/ \
-  --js_module_root ./splittable-build/browser/ \
-  --js_module_root ./build/patched-module/ \
+  --module test-stuff-c:1:base-2 \
   --js_module_root ./

@@ -2,7 +2,7 @@
 "version":3,
 "file":"/./sample/out/test-stuff-a.js",
 "lineCount":1,
-"mappings":"A,+EAEAA,OAAAC,IAAA,CCFqBC,ODErB,C,CEDA,CAACC,IAAA,GAAD,CAAYA,IAAA,GAAZ,EAAwB,EAAxB,EAA4B,mBAA5B,CAAA,CFDCC;",
-"sources":["/test-stuff/a.js","/test-stuff/b.js","/splittable-build/tmp-Dy7mlV.js"],
-"names":["console","log","stuff","self","module$test_stuff$a"]
+"mappings":"A,4EAEAA,OAAAC,IAAA,CAAY,wBAAZ,CCDSC,IAAAC,OAAA,EDCT,CCDyB,MDCzB;",
+"sources":["/test-stuff/a.js","/test-stuff/dep.js"],
+"names":["console","log","Math","random"]
 }

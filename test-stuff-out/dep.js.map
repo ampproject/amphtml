@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"./test-stuff-out/dep.js",
+"lineCount":1,
+"mappings":"AAAqBA,QAAA,EAAQ,EAAG,CAC9BC,OAAAC,IAAA,CAAY,eAAZ,CACA,OAAOC,KAAAC,OAAA,EAAP,CAAuB,MAFO,CAKNC,SAAQ,EAAG,CACnCJ,OAAAC,IAAA,CAAY,aAAZ,CADmC,CAAXG,CAI1B;",
+"sources":["test-stuff/dep.js"],
+"names":["stuff$$module$test_stuff$dep","console","log","Math","random","otherStuff$$module$test_stuff$dep"]
+}

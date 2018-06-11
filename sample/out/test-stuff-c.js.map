@@ -1,8 +1,0 @@
-{
-"version":3,
-"file":"/./sample/out/test-stuff-c.js",
-"lineCount":1,
-"mappings":"A,+EACA,CAACA,IAAA,GAAD,CAAYA,IAAA,GAAZ,EAAwB,EAAxB,EAA4B,mBAA5B,CAAA,CCDCC;",
-"sources":["/splittable-build/tmp-QdgAZ3.js","/test-stuff/c.js"],
-"names":["self","module$test_stuff$c"]
-}

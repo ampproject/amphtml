@@ -118,14 +118,22 @@
   <script src="/sample/out/_base.js"></script>
   <script src="/sample/out/src-amp.js"></script>
   <script custom-element="amp-audio" src="/sample/out/extensions-amp-audio-0.1-amp-audio.js"></script>
+  <script custom-element="amp-image-lightbox" src="/sample/out/extensions-amp-image-lightbox-0.1-amp-image-lightbox.js"></script>
 </head>
 <body>
   <h1>amp #0</h1>
-  <amp-audio width="500" controls>
+  <amp-audio controls>
     <source src="/examples/av/audio.mp3" type="audio/mpeg">
     Your browser does not support the audio tag.
   </amp-audio>
+  <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=300 height=200></amp-img>
 
-      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fill></amp-img>
+    <amp-image-lightbox id="imagelightbox1" layout="nodisplay"></amp-image-lightbox>
+    <amp-img id="img0"
+        srcset="
+            https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg 2004w,
+            https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg 1002w"
+        width=527 height=193 layout="responsive"
+        on="tap:imagelightbox1" role="button" tabindex="0"></amp-img>
 </body>
 </html>

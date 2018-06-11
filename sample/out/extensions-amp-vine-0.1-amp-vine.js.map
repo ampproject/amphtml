@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"/./sample/out/extensions-amp-vine-0.1-amp-vine.js",
+"lineCount":4,
+"mappings":"A,gGAuBEA,QAHIC,oDAGO,CAACC,kDAAD,CAAU,CACnB,kDAAA,CAAA,GAAA,YAAA,KAAA,CAAA,IAAA,CAAMA,kDAAN,CAAA,EAAA,IAEA,mDAAAC,UAAA,CAAe,IAHI,OAAA,mDAAA,CAHvBC,mBAAA,CAAA,mDAAA,CAAA,GAAA,YAAA,CAaE;mDAAA,UAAA,mBAAA,CAAAC,QAAkB,CAACC,qBAAD,CAAW,CAE3B,IAAAC,WAAAC,IAAA,CAAoB,iBAApB,CAAuCF,qBAAvC,CAEA,KAAAC,WAAAC,IAAA,CAAoB,uBAApB,CAA6CF,qBAA7C,CAJ2B,CAQ7B,oDAAA,UAAA,kBAAA,CAAAG,QAAiB,CAACC,mBAAD,CAAS,CACxB,MCwGYC,0CDxGL,CAAoBD,mBAApB,CADiB,CAK1B;mDAAA,UAAA,eAAA,CAAAE,QAAc,EAAG,CACf,IAAMC,UEmhBMC,uBFnhBG,EAAAC,uCAAA,CAAc,IAAAb,QAAAc,aAAA,CAA0B,aAA1B,CAAd,CACX,yDADW,CAEX,IAAAd,QAFW,CAAf,CAIMe,oBAAS,IAAAf,QAAAgB,cAAAC,cAAA,CAAyC,QAAzC,CACfF,oBAAAG,aAAA,CAAoB,aAApB,CAAmC,GAAnC,CACAH,oBAAAI,IAAA,CAAa,oBAAb,CACEC,kBAAA,CAAmBT,SAAnB,CADF,CAC+B,eAE/B,KAAAU,iBAAA,CAAsBN,mBAAtB,CACA;IAAAf,QAAAsB,YAAA,CAAyBP,mBAAzB,CAEA,KAAAd,UAAA,CAAec,mBAEf,OAAO,KAAAQ,YAAA,CAAiBR,mBAAjB,CAfQ,CAmBjB,oDAAA,UAAA,cAAA,CAAAS,QAAa,EAAG,CACV,IAAAvB,UAAJ,EAAoB,IAAAA,UAAAwB,cAApB,EACE,IAAAxB,UAAAwB,cAAAC,YAAA,CAA6C,OAA7C,CAAsD,GAAtD,CAFY,CAQe,UAAA,CAAAC,gBAAA,CAAO,CACtCA,gBAAAC,gBAAA,CAAoB,UAApB,CAAgC7B,mDAAhC,CADsC,CAAP,CAAjC,CAAiC,IAAA,IAAjC;",
+"sources":["/extensions/amp-vine/0.1/amp-vine.js","/src/layout.js","/src/log.js"],
+"names":["constructor","AmpVine","element","iframe_","$jscomp.inherits","preconnectCallback","onLayout","preconnect","url","isLayoutSupported","layout","isLayoutSizeDefined","layoutCallback","vineid","user","assert","getAttribute","iframe","ownerDocument","createElement","setAttribute","src","encodeURIComponent","applyFillContent","appendChild","loadPromise","pauseCallback","contentWindow","postMessage","AMP","registerElement"]
+}
