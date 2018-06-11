@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {TAG as KEY_TAG} from './amp-embedly-key';
 import {Layout} from '../../../src/layout';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {TAG as KEY_TAG} from './amp-embedly-key';
 import {user} from '../../../src/log';
 
 /**
