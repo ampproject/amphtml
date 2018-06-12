@@ -542,12 +542,10 @@ function createBaseCustomElementClass(win) {
         Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
           const TAG = this.tagName;
           if (!this.ownerDocument) {
-            dev().error(TAG, 'preconnectCallback called on element without ' +
-                'owner docuent');
+            dev().error(TAG, 'preconnect without ownerDocument');
             return;
           } else if (!this.ownerDocument.defaultView) {
-            dev().error(TAG, 'preconnectCallback called on element without ' +
-                'default view');
+            dev().error(TAG, 'preconnect without defaultView');
             return;
           }
           this.implementation_.preconnectCallback(onLayout);
