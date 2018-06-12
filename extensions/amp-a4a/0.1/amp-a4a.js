@@ -476,7 +476,8 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   renderOutsideViewport() {
     // Ensure non-verified AMP creatives are throttled.
-    if (!this.isVerifiedAmpCreative_ && is3pThrottled(this.win)) {
+    if (!this.isVerifiedAmpCreative_ && is3pThrottled(this.win) &&
+        !this.inNonAmpPreferenceExp()) {
       this.handleLifecycleStage_('throttled3p');
       return false;
     }
@@ -594,6 +595,18 @@ export class AmpA4A extends AMP.BaseElement {
    */
   hasAdPromise() {
     return !!this.adPromise_;
+  }
+
+  /**
+   * Should only be called after XHR response headers have been processed and
+   * postAdResponseExperimentFeatures is populated.
+   * @return {boolean} whether in experiment giving non-AMP creatives same
+   *    benefits as AMP (increased priority, no throttle)
+   * @visibleForTesting
+   */
+  inNonAmpPreferenceExp() {
+    return !!this.postAdResponseExperimentFeatures['pref_neutral_enabled'] &&
+      ['adsense', 'doubleclick'].includes(this.element.getAttribute('type'));
   }
 
   /**
@@ -828,8 +841,14 @@ export class AmpA4A extends AMP.BaseElement {
           let creativeMetaDataDef;
           if (!creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))) {
+            if (this.inNonAmpPreferenceExp()) {
+              // Experiment to give non-AMP creatives same benefits as AMP so
+              // update priority.
+              this.updateLayoutPriority(LayoutPriority.CONTENT);
+            }
             return null;
           }
+
           // Update priority.
           this.updateLayoutPriority(LayoutPriority.CONTENT);
           // Load any extensions; do not wait on their promises as this
@@ -1393,7 +1412,7 @@ export class AmpA4A extends AMP.BaseElement {
       user().warn(TAG, this.element.getAttribute('type'),
           'No creative or URL available -- A4A can\'t render any ad');
     }
-    if (!throttleApplied) {
+    if (!throttleApplied && !this.inNonAmpPreferenceExp()) {
       incrementLoadingAds(this.win, renderPromise);
     }
     return renderPromise.then(
@@ -1815,16 +1834,18 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState) {
-    if (!!AMP.maybeExecuteRealTimeConfig) {
+    if (!!AMP.RealTimeConfigManager) {
       try {
-        return AMP.maybeExecuteRealTimeConfig(
-            this, this.getCustomRealTimeConfigMacros_(), consentState);
+        return new AMP.RealTimeConfigManager(this)
+            .maybeExecuteRealTimeConfig(
+                this.getCustomRealTimeConfigMacros_(), consentState);
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }
     } else if (this.element.getAttribute('rtc-config')) {
       user().error(TAG, 'RTC not supported for ad network ' +
                    `${this.element.getAttribute('type')}`);
+
     }
   }
 

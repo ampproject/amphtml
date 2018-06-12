@@ -284,14 +284,28 @@ function warnForConsoleError() {
   setReportError(() => {});
   consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
     const message = messages.join(' ');
+
+    // Match equal strings.
     if (expectedAsyncErrors.includes(message)) {
       expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);
       return;
-    } else {
-      // We're throwing an error. Clean up other expected errors since they will
-      // never appear.
-      expectedAsyncErrors = [];
     }
+
+    // Match regex.
+    for (let i = 0; i < expectedAsyncErrors.length; i++) {
+      const expectedError = expectedAsyncErrors[i];
+      if (typeof expectedError != 'string') {
+        if (expectedError.test(message)) {
+          expectedAsyncErrors.splice(i, 1);
+          return;
+        }
+      }
+    }
+
+    // We're throwing an error. Clean up other expected errors since they will
+    // never appear.
+    expectedAsyncErrors = [];
+
     const errorMessage = message.split('\n', 1)[0]; // First line.
     const {failOnConsoleError} = window.__karma__.config;
     const terminator = failOnConsoleError ? '\'' : '';
@@ -306,7 +320,8 @@ function warnForConsoleError() {
             'error> });\'\n' +
         '    ⤷ If the error is expected (and asynchronous), use the ' +
             'following pattern at the top of the test:\n' +
-        '        \'expectAsyncConsoleError(<error text>);' + terminator;
+        '        \'expectAsyncConsoleError(<string or regex>[, number of' +
+        ' times the error message repeats]);' + terminator;
     // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
     if (failOnConsoleError) {
       throw new Error(errorMessage + separator + helpMessage);
@@ -314,10 +329,9 @@ function warnForConsoleError() {
       originalConsoleError(errorMessage + separator + helpMessage);
     }
   });
-  this.expectAsyncConsoleError = function(message) {
-    if (!expectedAsyncErrors.includes(message)) {
-      expectedAsyncErrors.push(message);
-    }
+  this.expectAsyncConsoleError = function(message, repeat = 1) {
+    expectedAsyncErrors.push.apply(
+        expectedAsyncErrors, Array(repeat).fill(message));
   };
   this.allowConsoleError = function(func) {
     dontWarnForConsoleError();

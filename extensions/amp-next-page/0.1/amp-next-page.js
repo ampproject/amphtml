@@ -25,7 +25,6 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {getService} from '../../../src/service';
-import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -52,15 +51,18 @@ export class AmpNextPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
+
     if (this.service_.isActive()) {
       return;
     }
 
-    this.element.classList.add('i-amphtml-next-page');
+    const {element} = this;
+
+    element.classList.add('i-amphtml-next-page');
 
     // TODO(peterjosling): Read config from another source.
 
-    const scriptElements = childElementsByTag(this.element, 'SCRIPT');
+    const scriptElements = childElementsByTag(element, 'SCRIPT');
     user().assert(scriptElements.length == 1,
         `${TAG} should contain only one <script> child.`);
     const scriptElement = scriptElements[0];
@@ -71,18 +73,21 @@ export class AmpNextPage extends AMP.BaseElement {
       user().error(TAG, 'failed to parse config', error);
     });
 
-    const docInfo = Services.documentInfoForDoc(this.element);
-    const url = parseUrlDeprecated(docInfo.url);
-    const sourceOrigin = getSourceOrigin(url);
-    const config = assertConfig(configJson, url.origin, sourceOrigin);
+    const docInfo = Services.documentInfoForDoc(element);
+    const urlService = Services.urlForDoc(element);
 
-    if (isProxyOrigin(url)) {
+    const url = urlService.parse(docInfo.url);
+    const sourceOrigin = urlService.getSourceOrigin(url);
+
+    const config = assertConfig(element, configJson, url.origin, sourceOrigin);
+
+    if (urlService.isProxyOrigin(url)) {
       config.pages.forEach(rec => {
         rec.ampUrl = rec.ampUrl.replace(sourceOrigin, url.origin);
       });
     }
 
-    const separatorElements = childElementsByAttr(this.element, 'separator');
+    const separatorElements = childElementsByAttr(element, 'separator');
     user().assert(separatorElements.length <= 1,
         `${TAG} should contain at most one <div separator> child`);
 
@@ -91,7 +96,7 @@ export class AmpNextPage extends AMP.BaseElement {
       separator = separatorElements[0];
     }
 
-    this.service_.register(this.element, config, separator);
+    this.service_.register(element, config, separator);
     this.service_.setAppendPageHandler(element => this.appendPage_(element));
   }
 

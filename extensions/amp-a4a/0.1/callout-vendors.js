@@ -40,6 +40,7 @@ export const RTC_VENDORS = {
   medianet: {
     url: 'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
     macros: ['CID'],
+    errorReportingUrl: 'https://qsearch-a.akamaihd.net/log?logid=kfk&evtid=projectevents&project=amprtc_error&error=ERROR_TYPE&rd=HREF',
     disableKeyAppend: true,
   },
   prebidappnexus: {
@@ -77,8 +78,8 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
   },
   aps: {
-    url: 'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&amp=1&u=HREF&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%7D%5D&pj=PARAMS&gdpre=GDPRE&gdprc=GDPRC',
-    macros: ['PUB_ID', 'PARAMS', 'GDPRE', 'GDPRC'],
+    url: 'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&amp=1&u=HREF&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%7D%5D&pj=PARAMS',
+    macros: ['PUB_ID', 'PARAMS'],
     disableKeyAppend: true,
   },
 };
