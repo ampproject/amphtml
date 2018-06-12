@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 import '../amp-date-countdown';
-import {Services} from '../../../../src/services';
+//import {Services} from '../../../../src/services';
 
 describes.realWin('amp-date-countdown', {
   amp: {
-    runtimeOn: true,
+    // runtimeOn: true,
     extensions: ['amp-date-countdown'],
   },
 }, env => {
 
   let win;
-  let sandbox;
+  // let sandbox;
 
   // Viewer-related vars.
-  let viewer;
-  let whenFirstVisiblePromise;
-  let whenFirstVisiblePromiseResolve;
+  // let viewer;
+  // let whenFirstVisiblePromise;
+  //let whenFirstVisiblePromiseResolve;
 
   let element;
   let impl;
@@ -38,23 +38,23 @@ describes.realWin('amp-date-countdown', {
   const twoDaysBeforeEndDate = new Date(endDate - 86400000 * 2); //substract 2 days
 
   beforeEach(() => {
-    ({win, sandbox} = env);
-    viewer = Services.viewerForDoc(win.document);
+    ({win/*, sandbox*/} = env);
+    // viewer = Services.viewerForDoc(win.document);
 
-    whenFirstVisiblePromise = new Promise(resolve => {
-      whenFirstVisiblePromiseResolve = resolve;
-    });
-    sandbox.stub(viewer, 'whenFirstVisible')
-        .callsFake(() => whenFirstVisiblePromise);
+    // whenFirstVisiblePromise = new Promise(resolve => {
+    //   whenFirstVisiblePromiseResolve = resolve;
+    // });
+    // sandbox.stub(viewer, 'whenFirstVisible')
+    //     .callsFake(() => whenFirstVisiblePromise);
 
     element = win.document.createElement('amp-date-countdown');
     win.document.body.appendChild(element);
     //element.build();
     impl = element.implementation_;
 
-    sandbox.stub(impl, 'buildCallback');
-    sandbox.spy(impl, 'getYDHMSFromMs_');
-    sandbox.spy(impl, 'getLocaleWord_');
+    // sandbox.stub(impl, 'buildCallback');
+    // sandbox.spy(impl, 'getYDHMSFromMs_');
+    // sandbox.spy(impl, 'getLocaleWord_');
   });
 
   it('should display timeleft in the format ' +
