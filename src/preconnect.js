@@ -30,6 +30,20 @@ import {toWin} from './types';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
+const VALID_AS_VALUES = [
+  'audio',
+  'document',
+  'embed',
+  'fetch',
+  'font',
+  'image',
+  'object',
+  'script',
+  'style',
+  'track',
+  'worker',
+  'video',
+];
 
 
 /**
@@ -202,7 +216,9 @@ class PreconnectService {
    * @param {string} preloadAs
    */
   preload(viewer, url, preloadAs) {
-    dev().assert(preloadAs, 'Must pass a non-empty value for preloadAs.');
+    dev().assert(
+        VALID_AS_VALUES.includes(preloadAs),
+        `preloadAs must be one of [${VALID_AS_VALUES}].`);
     if (!this.isInterestingUrl_(url)) {
       return;
     }
