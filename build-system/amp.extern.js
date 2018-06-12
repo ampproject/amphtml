@@ -445,14 +445,3 @@ AMP.require;
  * @typedef {function(number, boolean):?|function(number):?}
  */
 var TransitionDef;
-
-/**
- * See src/consent-state.js for more information.
- * @enum {number}
- */
-const CONSENT_POLICY_STATE = {
-  SUFFICIENT: 1,
-  INSUFFICIENT: 2,
-  UNKNOWN_NOT_REQUIRED: 3,
-  UNKNOWN: 4,
-}

@@ -196,10 +196,17 @@ export class RealTimeConfigManager {
       case 'boolean':
         return calloutConfig.sendRegardlessOfConsentState;
       case 'Array':
-        return calloutConfig.sendRegardlessOfConsentState.includes(
-            this.consentState_);
+        for (let i = 0; i < calloutConfig.sendRegardlessOfConsentState.length;
+          i++) {
+          if (this.consentState_ == CONSENT_POLICY_STATE[
+              calloutConfig.sendRegardlessOfConsentState[i]]) {
+            return true;
+          }
+        }
+        return false;
       default:
-        user().warn(TAG, 'WHAT?! ...');
+        user().warn(
+            TAG, 'Invalid value for sendRegardlessOfConsentState');
         return false;
     }
   }
