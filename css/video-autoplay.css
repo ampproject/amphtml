@@ -22,9 +22,14 @@ i-amphtml-video-mask {
  * Animated equalizer icon for muted autoplaying videos.
  */
 
-[noaudio] .amp-video-eq {
+.amp-video-eq {
   /* Don't display icon for videos flagged as having no audio. */
-  display: none !important;
+  display: none;
+}
+
+[controls] .amp-video-eq,
+amp-story .amp-video-eq {
+  display: block;
 }
 
 .amp-video-eq {

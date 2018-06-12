@@ -698,6 +698,8 @@ class VideoEntry {
 
   /**
    * Installs autoplay animation and interaction mask when interactive.
+   * The animated icon is appended always, but only displayed by CSS when
+   * `controls` is set. See `video-autoplay.css`.
    * @private
    */
   installAutoplayArtifacts_() {
