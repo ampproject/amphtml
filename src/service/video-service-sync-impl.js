@@ -98,7 +98,7 @@ export class VideoServiceSync {
   }
 
   /** @override */
-  register(video, unusedFromV1manageAutoplay = true) {
+  register(video) {
     this.asyncImpl_.then(impl =>
       impl.register(video));
 
@@ -115,16 +115,11 @@ export class VideoServiceSync {
     if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
       return;
     }
-    const signals = video.signals();
-    const autoplayDelegated = VideoServiceSignals.AUTOPLAY_DELEGATED;
-
-    if (signals.get(autoplayDelegated)) {
-      return;
-    }
 
     this.getAutoplay_().register(video);
 
-    signals.whenSignal(autoplayDelegated).then(() => {
+    const autoplayDelegated = VideoServiceSignals.AUTOPLAY_DELEGATED;
+    video.signals().whenSignal(autoplayDelegated).then(() => {
       this.getAutoplay_().delegate(video.element);
     });
   }

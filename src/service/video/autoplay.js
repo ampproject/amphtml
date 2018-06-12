@@ -24,7 +24,8 @@ import {VideoUtils} from '../../utils/video';
 import {dev} from '../../log';
 import {getMode} from '../../mode';
 import {getServiceForDoc} from '../../service';
-import {htmlFor, htmlRefs} from '../../static-template';
+import {htmlFor} from '../../static-template';
+import {installAutoplayStylesForDoc} from './install-autoplay-styles';
 import {
   installPositionObserverServiceForDoc,
 } from '../position-observer/position-observer-impl';
@@ -84,7 +85,7 @@ const renderInteractionOverlay = renderOrClone((win, doc) => {
  */
 const renderIcon = renderOrClone((win, doc) => {
   const icon =
-      htmlFor(doc)`<i-amphtml-video-icon class="amp-video-eq" ref="icon">
+      htmlFor(doc)`<i-amphtml-video-icon class="amp-video-eq">
         <div class="amp-video-eq-col">
           <div class="amp-video-eq-filler"></div>
           <div class="amp-video-eq-filler"></div>
@@ -126,7 +127,7 @@ export class Autoplay {
 
     /**
      * @return {!../position-observer/position-observer-impl.PositionObserver}
-     * @private
+     * @restricted
      */
     this.getPositionObserver_ = once(() => this.installPositionObserver_());
 
@@ -144,6 +145,8 @@ export class Autoplay {
       const isLite = getMode(win).lite;
       return VideoUtils.isAutoplaySupported(win, /* isLiteMode */ isLite);
     });
+
+    installAutoplayStylesForDoc(this.ampdoc_);
   }
 
   /** @private */
@@ -175,8 +178,7 @@ export class Autoplay {
         }
         return null;
       }
-      const entry =
-        new AutoplayEntry(this.ampdoc_, this.getPositionObserver_(), video);
+      const entry = AutoplayEntry.create(this, video);
       this.entries_.push(entry);
       return entry;
     });
@@ -242,6 +244,15 @@ export class AutoplayEntry {
     video.hideControls();
 
     this.attachArtifacts_();
+  }
+
+  /**
+   * @param {!Autoplay} manager
+   * @param {!../video-interface.VideoOrBaseElementDef} video
+   */
+  static create(manager, video) {
+    return new AutoplayEntry(
+        manager.ampdoc_, manager.getPositionObserver_(), video);
   }
 
   /**
