@@ -47,6 +47,7 @@
     }],
     "no-useless-concat": 1,
     "no-var": 1,
-    "prefer-const": 1
+    "prefer-const": 1,
+    "require-jsdoc": 0
   }
 }
