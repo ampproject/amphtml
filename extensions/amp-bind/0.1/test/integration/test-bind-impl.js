@@ -104,10 +104,10 @@ function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
  */
 function waitForEvent(env, name) {
   return new Promise(resolve => {
-    function callback() {
+    const callback = () => {
       resolve();
       env.win.removeEventListener(name, callback);
-    }
+    };
     env.win.addEventListener(name, callback);
   });
 }

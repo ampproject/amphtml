@@ -49,6 +49,9 @@ describes.fakeWin('amp-share-tracking', {
     toggleExperiment(win, 'amp-share-tracking', false);
   });
 
+  /**
+   * @param {string=} optVendorUrl
+   */
   function getAmpShareTracking(optVendorUrl) {
     const element = win.document.createElement('amp-share-tracking');
     if (optVendorUrl) {

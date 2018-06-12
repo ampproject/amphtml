@@ -26,7 +26,10 @@ const maxSize = '77.99KB';
 
 const {green, red, cyan, yellow} = colors;
 
-
+/**
+ * Checks gzipped size of existing v0.js (amp.js) against `maxSize`.
+ * Does _not_ rebuild: run `gulp dist --fortesting --noextensions` first.
+ */
 function checkBundleSize() {
   if (!fs.existsSync(runtimeFile)) {
     log(yellow('Could not find'), cyan(runtimeFile) +

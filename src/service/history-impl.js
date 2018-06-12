@@ -49,7 +49,9 @@ let HistoryStateDef;
 }} */
 let HistoryStateUpdateDef;
 
-
+/**
+ * Wraps the browser's History API for viewer support and necessary polyfills.
+ */
 export class History {
 
   /**
