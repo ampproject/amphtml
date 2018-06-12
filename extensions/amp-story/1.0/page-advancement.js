@@ -162,7 +162,7 @@ export class AdvancementConfig {
    */
   static forPage(page) {
     const rootEl = page.element;
-    const win = rootEl.ownerDocument.defaultView;
+    const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
     const supportedAdvancementModes = [

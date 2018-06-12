@@ -77,8 +77,8 @@ const AMPPROJECT_DOCS = 'https://www.ampproject.org/docs';
 
 
 /**
- * @param  {!HTMLMediaElement} el
- * @return {!Promise<Image=>}
+ * @param {!HTMLMediaElement} el
+ * @return {!Promise<Image>}
  */
 function getPosterFromVideo(el) {
   return new Promise((resolve, reject) => {

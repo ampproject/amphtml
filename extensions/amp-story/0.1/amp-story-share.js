@@ -315,8 +315,8 @@ export class ShareWidget {
   }
 
   /**
-   * @param {!Array<!JsonObject>} providers
-   * @return {!Object<string, (!JsonObject|boolean)>} providers
+   * @param {!Array<!JsonObject|string>} providers
+   * @return {!Object<string, !JsonObject>} providers
    */
   parseProvidersToClassicApi(providers) {
     const providersMap = {};
