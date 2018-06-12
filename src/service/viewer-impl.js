@@ -184,7 +184,11 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
-    /** @const @private {!Object<string, string>} */
+    /**
+     * Subset of this.params_ that only contains parameters in the URL hash,
+     * e.g. "#foo=bar".
+     * @const @private {!Object<string, string>}
+     */
     this.hashParams_ = {};
 
     /** @private {?Promise} */
@@ -431,7 +435,6 @@ export class Viewer {
     // (see impression.js).
     if (this.params_['click']) {
       const newUrl = removeFragment(this.win.location.href);
-      delete this.hashParams_['click'];
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
         // This is currently used by mode.js to infer development mode.
@@ -439,6 +442,7 @@ export class Viewer {
           this.win.location.originalHash = this.win.location.hash;
         }
         this.win.history.replaceState({}, '', newUrl);
+        delete this.hashParams_['click'];
         dev().fine(TAG_, 'replace fragment:' + this.win.location.href);
       }
     }
