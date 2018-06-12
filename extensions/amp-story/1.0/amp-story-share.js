@@ -318,8 +318,8 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      const providers = config && config[SHARE_PROVIDERS_KEY] ||
-        config[DEPRECATED_SHARE_PROVIDERS_KEY];
+      const providers = config && (config[SHARE_PROVIDERS_KEY] ||
+        config[DEPRECATED_SHARE_PROVIDERS_KEY]);
       if (!providers) {
         return;
       }
