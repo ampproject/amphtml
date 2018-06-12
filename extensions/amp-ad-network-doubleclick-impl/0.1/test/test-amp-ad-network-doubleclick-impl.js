@@ -1330,7 +1330,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           });
           impl = new AmpAdNetworkDoubleclickImpl(element);
           sandbox.stub(impl, 'getResource').returns(
-              {whenWithinRenderOutsideViewport: () => Promise.resolve()});
+              {whenWithinViewport: () => Promise.resolve()});
         });
 
         it('should use experiment value', () => {
