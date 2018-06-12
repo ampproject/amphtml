@@ -144,10 +144,17 @@ export class Bind {
     this.overridableKeys_ = [];
 
     /**
-     * Upper limit on number of bindings for performance.
+     * Upper limit on total number of bindings.
+     *
+     * The initial value is set to 1000 which, based on ~2ms expression parse
+     * time, caps "time to interactive" at ~2s after page load.
+     *
+     * User interactions can add new bindings (e.g. infinite scroll), so this
+     * can increase over time to a final limit of 2000 bindings.
+     *
      * @private {number}
      */
-    this.maxNumberOfBindings_ = 1000; // Based on ~2ms to parse an expression.
+    this.maxNumberOfBindings_ = 1000;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -261,7 +268,11 @@ export class Bind {
 
     const expression = args[RAW_OBJECT_ARGS_KEY];
     if (expression) {
-      // Signal on first mutation.
+      // Increment bindings limit by 500 on each invocation to a max of 2000.
+      this.maxNumberOfBindings_ = Math.min(2000,
+          Math.max(1000, this.maxNumberOfBindings_ + 500));
+
+      // Signal first mutation (subsequent signals are harmless).
       this.signals_.signal('FIRST_MUTATE');
 
       const scope = dict();
