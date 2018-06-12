@@ -618,8 +618,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     it('should not modify rtcConfig if consent state is valid', () => {
       const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
-      rtc.modifyRtcConfigForConsentStateSettings(
-          CONSENT_POLICY_STATE.SUFFICIENT);
+      rtc.consentState_ = CONSENT_POLICY_STATE.SUFFICIENT;
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
@@ -628,8 +628,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
       expectedRtcConfig.vendors = {};
       expectedRtcConfig.urls = [];
-
-      rtc.modifyRtcConfigForConsentStateSettings(CONSENT_POLICY_STATE.UNKNOWN);
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
@@ -644,7 +644,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       };
       const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
       expectedRtcConfig.urls = [];
-      rtc.modifyRtcConfigForConsentStateSettings(CONSENT_POLICY_STATE.UNKNOWN);
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
@@ -657,8 +658,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       ];
       const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
       expectedRtcConfig.vendors = {};
-      rtc.modifyRtcConfigForConsentStateSettings(
-          CONSENT_POLICY_STATE.INSUFFICIENT);
+      rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
@@ -684,8 +685,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         {'sendRegardlessOfConsentState': true,
           'url': 'https://www.rtc.com/example1'},
       ];
-      rtc.modifyRtcConfigForConsentStateSettings(
-          CONSENT_POLICY_STATE.INSUFFICIENT);
+      rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 

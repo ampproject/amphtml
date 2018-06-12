@@ -187,28 +187,26 @@ export class RealTimeConfigManager {
    * @visibleForTesting
    */
   isValidCalloutForConsentState(calloutConfig) {
-    if (!isObject(calloutConfig) ||
-        !calloutConfig['sendRegardlessOfConsentState']) {
+    const {sendRegardlessOfConsentState} = calloutConfig;
+    if (!isObject(calloutConfig) || !sendRegardlessOfConsentState) {
       return false;
     }
 
-    switch (typeof calloutConfig.sendRegardlessOfConsentState) {
-      case 'boolean':
-        return calloutConfig.sendRegardlessOfConsentState;
-      case 'Array':
-        for (let i = 0; i < calloutConfig.sendRegardlessOfConsentState.length;
-          i++) {
-          if (this.consentState_ == CONSENT_POLICY_STATE[
-              calloutConfig.sendRegardlessOfConsentState[i]]) {
-            return true;
-          }
-        }
-        return false;
-      default:
-        user().warn(
-            TAG, 'Invalid value for sendRegardlessOfConsentState');
-        return false;
+    if (typeof sendRegardlessOfConsentState == 'boolean') {
+      return sendRegardlessOfConsentState;
     }
+
+    if (isArray(sendRegardlessOfConsentState)) {
+      for (let i = 0; i < sendRegardlessOfConsentState.length; i++) {
+        if (this.consentState_ ==
+            CONSENT_POLICY_STATE[sendRegardlessOfConsentState[i]]) {
+          return true;
+        }
+      }
+      return false;
+    }
+    user().warn(TAG, 'Invalid value for sendRegardlessOfConsentState');
+    return false;
   }
 
   /**
