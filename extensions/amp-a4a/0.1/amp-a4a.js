@@ -691,8 +691,7 @@ export class AmpA4A extends AMP.BaseElement {
           const delay = this.delayAdRequestEnabled();
           if (this.delayAdRequestEnabled()) {
             return this.getResource().whenWithinViewport(
-                typeof delay == 'number' ? delay :
-                  this.renderOutsideViewport());
+                isNaN(delay) : this.renderOutsideViewport() : delay);
           }
         })
         // Possibly block on amp-consent.

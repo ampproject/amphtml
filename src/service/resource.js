@@ -651,7 +651,7 @@ export class Resource {
   }
 
   /**
-   * @param {number|boolean} viewport
+   * @param {number|boolean} viewport derived from renderOutsideViewport.
    * @return {!Promise} resolves when underlying element is built and within the
    *    viewport range given.
    */
