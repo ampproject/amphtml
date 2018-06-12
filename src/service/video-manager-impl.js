@@ -767,11 +767,11 @@ class VideoEntry {
       element.appendChild(mask);
     });
 
-    unlisteners.concat([
+    [
       listen(mask, 'click', () => userInteractedWith(video)),
       listen(element, VideoEvents.AD_START, () => setMaskDisplay('none')),
       listen(element, VideoEvents.AD_END, () => setMaskDisplay('block')),
-    ]);
+    ].forEach(unlistener => unlisteners.push(unlistener));
   }
 
   /**

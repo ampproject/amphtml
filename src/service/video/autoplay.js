@@ -302,7 +302,7 @@ export class AutoplayEntry {
       return;
     }
 
-    const icon = renderIcon(this.this.ampdoc_.win, this.element_);
+    const icon = renderIcon(this.ampdoc_.win, this.element_);
 
     video.mutateElement(() => {
       this.element_.appendChild(icon);
