@@ -111,6 +111,10 @@ export function createCustomElementClass(win, name) {
     constructor(self) {
       return super(self);
     }
+    /**
+     * The name of the custom element.
+     * @return {string}
+     */
     elementName() {
       return name;
     }
@@ -416,7 +420,7 @@ function createBaseCustomElementClass(win) {
       this.getResources().upgraded(this);
     }
 
-    /* @private */
+    /** @private */
     assertLayout_() {
       if (this.layout_ != Layout.NODISPLAY &&
           !this.implementation_.isLayoutSupported(this.layout_)) {
