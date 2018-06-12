@@ -88,7 +88,10 @@ export function setPreconnectFeaturesForTesting(features) {
   preconnectFeatures = features;
 }
 
-
+/**
+ * Provides methods for preconnecting/preloading resources, ensuring that there
+ * is only one preconnect and preload request per resource.
+ */
 class PreconnectService {
 
   /**
@@ -234,7 +237,7 @@ class PreconnectService {
     // set the "as" attribute for. Safari caches by url+type, so we need to use
     // the correct type and cannot fall back to "fetch".
     const isSafari = this.platform_.isIos() || this.platform_.isSafari();
-    if (this.isUnsupportedPreloadAs_(preloadAs) && isSafari) {
+    if (isSafari && !this.isSupportedPreloadAs_(preloadAs)) {
       return;
     }
     viewer.whenFirstVisible().then(() => {
@@ -253,8 +256,8 @@ class PreconnectService {
    * @param {string} preloadAs
    * @private
    */
-  isUnsupportedPreloadAs_(preloadAs) {
-    return preloadAs == 'document' || preloadAs == 'script';
+  isSupportedPreloadAs_(preloadAs) {
+    return preloadAs !== 'document' && preloadAs !== 'script';
   }
 
   /**
@@ -266,11 +269,11 @@ class PreconnectService {
    * @private
    */
   getPreloadAsValue_(preloadAs) {
-    if (this.isUnsupportedPreloadAs_(preloadAs)) {
-      return this.features_.onlyValidAs ? 'fetch' : '';
+    if (this.isSupportedPreloadAs_(preloadAs)) {
+      return preloadAs;
     }
 
-    return preloadAs;
+    return this.features_.onlyValidAs ? 'fetch' : '';
   }
 
   /**
@@ -359,7 +362,14 @@ class PreconnectService {
   }
 }
 
-
+/**
+ * Provides helper methods for preconnecting and preloading resources. These
+ * methods are useful to call from a `preconnectCallback`, reducing the overall
+ * latency of rendering a component.
+ *
+ * For example, if you are loading an iframe, you can preload a script that it
+ * will contain, removing a round trip if the resource is not already cached.
+ */
 export class Preconnect {
   /**
    * @param {!PreconnectService} preconnectService
