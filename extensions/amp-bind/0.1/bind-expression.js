@@ -407,8 +407,6 @@ export class BindExpression {
         const variable = value;
         if (Object.prototype.hasOwnProperty.call(scope, variable)) {
           return scope[variable];
-        } else {
-          user().warn(TAG, `${variable} is not defined; returning null.`);
         }
         return null;
 
