@@ -15,7 +15,7 @@
       "type": "small",
       "title": "This is an example article",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/256x128"
+      "image": "http://placehold.it/500x600"
     },
     {
       "type": "small",
@@ -44,14 +44,14 @@
       "title": "Heading for portrait",
       "category": "This is an example portrait",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/312x416"
+      "image": "http://placehold.it/350x470"
     },
     {
       "type": "landscape",
       "title": "TRAPPIST-1 Planets May Still Be Wet Enough for Life",
       "url": "http://example.com/article.html",
       "category": "astronomy",
-      "image": "http://placehold.it/256x128"
+      "image": "http://placehold.it/360x760"
     },
     {
       "type": "small",
