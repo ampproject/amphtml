@@ -147,8 +147,8 @@ describes.realWin('amp-story-bookend', {
 
   it('should build the users json', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -219,10 +219,10 @@ describes.realWin('amp-story-bookend', {
     });
   });
 
-  it('should build the users json with share-providers alternative', () => {
+  it('should build the users json with share providers alternative', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         {'provider': 'whatsapp'},
@@ -297,8 +297,8 @@ describes.realWin('amp-story-bookend', {
   it('should add amp-to-amp linking to individual cta links when ' +
       'specified in the JSON config', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -333,8 +333,8 @@ describes.realWin('amp-story-bookend', {
   it('should not add amp-to-amp linking to cta links when not ' +
       'specified in the JSON config', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -374,8 +374,8 @@ describes.realWin('amp-story-bookend', {
   it('should add amp-to-amp linking to small articles when specified ' +
       'in the JSON config', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -407,8 +407,8 @@ describes.realWin('amp-story-bookend', {
   it('should not add amp-to-amp linking to small articles when not ' +
       'specified in the JSON config', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -445,8 +445,8 @@ describes.realWin('amp-story-bookend', {
   it('should add amp-to-amp linking to portrait articles when specified ' +
       'in the JSON config', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -478,8 +478,8 @@ describes.realWin('amp-story-bookend', {
   it('should not add amp-to-amp linking to portrait articles when not ' +
       'specified in the JSON config', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -518,8 +518,8 @@ describes.realWin('amp-story-bookend', {
   it('should add amp-to-amp linking to landscape articles when ' +
       'specified in the JSON config', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -551,8 +551,8 @@ describes.realWin('amp-story-bookend', {
   it('should not add amp-to-amp linking to landscape articles when not' +
       ' specified in the JSON config', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -590,8 +590,8 @@ describes.realWin('amp-story-bookend', {
 
   it('should build the users share providers', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         {'provider': 'twitter', 'text': 'This is custom share text that I' +
@@ -625,7 +625,7 @@ describes.realWin('amp-story-bookend', {
 
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(config => {
-      config['share-providers'].forEach((currProvider, index) => {
+      config['shareProviders'].forEach((currProvider, index) => {
         return expect(currProvider).to.deep
             .equal(expectedShareProviders[index]);
       });
@@ -634,8 +634,8 @@ describes.realWin('amp-story-bookend', {
 
   it('should ignore empty share providers', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [],
+      'bookendVersion': 'v1.0',
+      'shareProviders': [],
       'components': [
         {
           'type': 'heading',
@@ -655,14 +655,14 @@ describes.realWin('amp-story-bookend', {
 
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(config => {
-      return expect(config['share-providers']).to.deep.equal([]);
+      return expect(config['shareProviders']).to.deep.equal([]);
     });
   });
 
   it('should warn when trying to use system sharing', () => {
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': ['system'],
+      'bookendVersion': 'v1.0',
+      'shareProviders': ['system'],
       'components': [
         {
           'type': 'heading',
@@ -694,8 +694,8 @@ describes.realWin('amp-story-bookend', {
   it('should reject invalid user json for article', () => {
     const articleComponent = new ArticleComponent();
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -723,8 +723,8 @@ describes.realWin('amp-story-bookend', {
   it('should reject invalid user json for portrait article', () => {
     const portraitComponant = new PortraitComponent();
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -749,8 +749,8 @@ describes.realWin('amp-story-bookend', {
   it('should reject invalid user json for the cta links component', () => {
     const ctaLinkComponent = new CtaLinkComponent();
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -782,8 +782,8 @@ describes.realWin('amp-story-bookend', {
   it('should reject invalid user json for a landscape component', () => {
     const landscapeComponent = new LandscapeComponent();
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
         'whatsapp',
@@ -817,8 +817,8 @@ describes.realWin('amp-story-bookend', {
   it('should reject invalid user json for a textbox component', () => {
     const textBoxComponent = new TextBoxComponent();
     const userJson = {
-      'bookend-version': 'v1.0',
-      'share-providers': [
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
         'email',
         {'provider': 'facebook', 'app-id': '254325784911610'},
         'whatsapp',
