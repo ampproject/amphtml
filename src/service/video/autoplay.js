@@ -72,17 +72,24 @@ function renderOrClone(renderFn) {
  * @return {!Element}
  */
 const renderInteractionOverlay = renderOrClone((win, doc) => {
-  const el = htmlFor(doc)`<i-amphtml-video-mask class="i-amphtml-fill-content">
-    <i-amphtml-video-icon class="amp-video-eq" ref="icon">
-      <div class="amp-video-eq-col">
-        <div class="amp-video-eq-filler"></div>
-        <div class="amp-video-eq-filler"></div>
-      </div>
-    </i-amphtml-video-icon>
-  </i-amphtml-video-mask>`;
+  return htmlFor(doc)`<i-amphtml-video-mask class="i-amphtml-fill-content">
+    </i-amphtml-video-mask>`;
+});
 
-  // Not using `htmlRefs` in this context as that is a destructive operation.
-  const icon = dev().assertElement(el.firstElementChild);
+
+/**
+ * @param {!Window} win
+ * @param {!Node} doc
+ * @return {!Element}
+ */
+const renderIcon = renderOrClone((win, doc) => {
+  const icon =
+      htmlFor(doc)`<i-amphtml-video-icon class="amp-video-eq" ref="icon">
+        <div class="amp-video-eq-col">
+          <div class="amp-video-eq-filler"></div>
+          <div class="amp-video-eq-filler"></div>
+        </div>
+      </i-amphtml-video-icon>`;
 
   // Copy equalizer column 4x and annotate filler positions for animation.
   const firstCol = dev().assertElement(icon.firstElementChild);
@@ -104,7 +111,7 @@ const renderInteractionOverlay = renderOrClone((win, doc) => {
     icon.setAttribute('unpausable', '');
   }
 
-  return el;
+  return icon;
 });
 
 
@@ -235,7 +242,7 @@ export class AutoplayEntry {
     video.mute();
     video.hideControls();
 
-    this.attachInteractionOverlay_();
+    this.attachArtifacts_();
   }
 
   /**
@@ -286,7 +293,7 @@ export class AutoplayEntry {
 
   /** @private */
   // TODO(alanorozco): AD_START, AD_END
-  attachInteractionOverlay_() {
+  attachArtifacts_() {
     const {video} = this;
     const signals = video.signals();
     const userInteracted = VideoServiceSignals.USER_INTERACTED;
@@ -295,11 +302,13 @@ export class AutoplayEntry {
       return;
     }
 
-    const overlay = renderInteractionOverlay(this.ampdoc_.win, this.element_);
-    const {icon} = /** @type {{icon: !Element}} */ (htmlRefs(overlay));
+    const icon = renderIcon(this.this.ampdoc_.win, this.element_);
+
+    video.mutateElement(() => {
+      this.element_.appendChild(icon);
+    });
 
     const {element} = video;
-
     const playOrPauseIconAnim = this.playOrPauseIconAnim_.bind(this, icon);
 
     const unlisteners = [
@@ -307,12 +316,18 @@ export class AutoplayEntry {
       listen(element, VideoEvents.PAUSE, () => playOrPauseIconAnim(false)),
     ];
 
-    listenOnce(overlay, 'click', () => signals.signal(userInteracted));
-
     signals.whenSignal(userInteracted).then(() => {
       unlisteners.forEach(unlisten => unlisten());
       this.onInteraction_();
     });
+
+    if (!this.video.isInteractive()) {
+      return;
+    }
+
+    const overlay = renderInteractionOverlay(this.ampdoc_.win, this.element_);
+
+    listenOnce(overlay, 'click', () => signals.signal(userInteracted));
 
     video.mutateElement(() => {
       this.element_.appendChild(overlay);
