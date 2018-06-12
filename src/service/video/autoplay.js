@@ -248,7 +248,7 @@ export class AutoplayEntry {
 
   /**
    * @param {!Autoplay} manager
-   * @param {!../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
    */
   static create(manager, video) {
     return new AutoplayEntry(
