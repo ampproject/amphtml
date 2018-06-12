@@ -916,6 +916,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           () => Promise.resolve(VerificationStatus.OK));
     }
 
+    /**
+     * @param {{width: number, height: number}} size
+     * @param {boolean} isAmpCreative
+     */
     function mockSendXhrRequest(size, isAmpCreative) {
       return {
         arrayBuffer: () => Promise.resolve(utf8Encode(
@@ -1206,6 +1210,10 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       describe('centering', () => {
         const size = {width: '300px', height: '150px'};
 
+        /**
+         * @param {!Element} iframe
+         * @param {{width: number, height: number}} expectedSize
+         */
         function verifyCss(iframe, expectedSize) {
           expect(iframe).to.be.ok;
           const style = env.win.getComputedStyle(iframe);

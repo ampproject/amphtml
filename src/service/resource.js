@@ -385,6 +385,7 @@ export class Resource {
         requestedMargins);
   }
 
+  /** reset pending change sizes */
   resetPendingChangeSize() {
     this.pendingChangeSize_ = undefined;
   }
@@ -454,6 +455,7 @@ export class Resource {
     this.element.updateLayoutBox(box, sizeChanges);
   }
 
+  /** Use resources for measurement */
   measureViaResources_() {
     const viewport = this.resources_.getViewport();
     const box = this.resources_.getViewport().getLayoutRect(this.element);
@@ -487,6 +489,7 @@ export class Resource {
     }
   }
 
+  /** Use layers for measurement */
   measureViaLayers_() {
     const {element} = this;
     const layers = element.getLayers();

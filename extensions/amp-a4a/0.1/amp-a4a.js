@@ -251,6 +251,7 @@ export function protectFunctionWrapper(
   };
 }
 
+/** Abstract class for AMP Ad Fast Fetch enabled networks */
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
   // TODO: Handle creatives that do not fill.
