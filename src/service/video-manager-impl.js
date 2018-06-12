@@ -1277,8 +1277,8 @@ function analyticsEvent(entry, eventType, opt_vars) {
 
 
 /** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
-// TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
 export function installVideoManagerForDoc(nodeOrDoc) {
+  // TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
   // TODO(alanorozco, #13674): Rename to `video-service`
   registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', ampdoc => {
     const {win} = ampdoc;

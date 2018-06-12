@@ -302,8 +302,8 @@ export class AutoplayEntry {
   }
 
   /** @private */
-  // TODO(alanorozco): AD_START, AD_END
   attachArtifacts_() {
+    // TODO(alanorozco): AD_START, AD_END
     const {video} = this;
     const signals = video.signals();
     const userInteracted = VideoServiceSignals.USER_INTERACTED;

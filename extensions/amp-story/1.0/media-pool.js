@@ -103,6 +103,10 @@ let nextInstanceId = 0;
 let elId = 0;
 
 
+/**
+ * 🍹 MediaPool
+ * Keeps a pool of N media elements to be shared across components.
+ */
 export class MediaPool {
   /**
    * @param {!Window} win The window object.

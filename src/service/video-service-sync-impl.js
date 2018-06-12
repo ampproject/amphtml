@@ -87,9 +87,9 @@ export class VideoServiceSync {
    * @return {!Promise<!VideoServiceDef>}
    * @visibleForTesting
    */
-  // Not exposed in ../services.js since we don't want other modules to
-  // instantiate or access the service.
   static videoServiceFor(win, nodeOrDoc) {
+    // Not exposed in ../services.js since we don't want other modules to
+    // instantiate or access the service.
     const extensions = Services.extensionsFor(win);
     const ampdoc = getAmpdoc(nodeOrDoc);
     return extensions.installExtensionForDoc(ampdoc, EXTENSION)
