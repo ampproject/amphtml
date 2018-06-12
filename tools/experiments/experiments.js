@@ -235,6 +235,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
   },
   {
+    id: 'disable-amp-story-desktop',
+    name: 'Disables responsive desktop experience for the amp-story component',
+    spec: 'https://github.com/ampproject/amphtml/issues/11714',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
+  },
+  {
     id: 'amp-date-picker',
     name: 'Enables the amp-date-picker extension',
     spec: 'https://github.com/ampproject/amphtml/issues/6469',
@@ -320,6 +326,13 @@ const EXPERIMENTS = [
        'bindings on rendered children before first setState() mutation.',
     spec: 'https://github.com/ampproject/amphtml/issues/15311',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15610',
+  },
+  {
+    id: 'amp-google-document-embed',
+    name: 'Enables the experiment amp-google-document-embed component' +
+        ' which is a wrapper around the Google Drive document viewer embed.',
+    spec: 'TODO',
+    cleanupIssue: 'TODO',
   },
   {
     id: 'amp-pan-zoom',
