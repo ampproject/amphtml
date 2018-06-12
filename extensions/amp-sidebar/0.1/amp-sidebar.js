@@ -196,17 +196,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.getAmpDoc().whenReady().then(() => {
       // Check our toolbars for changes
       this.toolbars_.forEach(toolbar => {
-        toolbar.onLayoutChange(() => this.onToolbarOpen_());
+        toolbar.onLayoutChange();
       });
     });
-  }
-
-  /**
-   * Function called whenever a tollbar is opened.
-   * @private
-   */
-  onToolbarOpen_() {
-    this.close_();
   }
 
   /**

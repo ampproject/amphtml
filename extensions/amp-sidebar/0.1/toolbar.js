@@ -54,16 +54,15 @@ export class Toolbar {
 
   /**
    * Function called to check if we should show or hide the toolbar
-   * @param {!Function} onShowCallback - function called if toolbar is shown on check
    */
-  onLayoutChange(onShowCallback) {
+  onLayoutChange() {
     // Get if we match the current toolbar media
     const matchesMedia = this.ampdoc_.win
         .matchMedia(this.toolbarMedia_).matches;
 
     // Remove and add the toolbar dynamically
     if (matchesMedia) {
-      this.attemptShow_().then(onShowCallback);
+      this.attemptShow_();
     } else {
       this.hideToolbar_();
     }
