@@ -24,16 +24,16 @@ describes.realWin('amp-linkeddb-showmore', {
 
   let win;
   let element;
+  let LinkeddbShowmore = new AmpLinkeddbShowmore(element);
 
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-linkeddb-showmore');
     win.document.body.appendChild(element);
-    const LinkeddbShowmore = new AmpLinkeddbShowmore(element);
   });
 
   it('amp-linkeddb-showmore', () => {
-    LinkeddbShowmore.viewport();
+    LinkeddbShowmore.viewportCallback();
     expect(element.querySelector('.view-more-text').textContent).to.be.true;
   });
 });

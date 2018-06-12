@@ -35,7 +35,7 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
     const addClass = (ele, cls) => {
       if (cls.replace(/\s*/g, '')) {
         !hasClass(ele, cls) && (ele.className = ele
-          .className == '' ? cls : ele.className + ' ' + cls);
+            .className == '' ? cls : ele.className + ' ' + cls);
       }
     };
 
@@ -48,18 +48,8 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
         ele.className = newClass.replace(/^\s+|\s+$/g, '');
       }
     };
-    const oAbc = document.querySelector('.msg-text');
-    if (oAbc.currentStyle) {
-      //IE、Opera
-      //alert("我支持currentStyle");
-      alert(oAbc.currentStyle.width);
-    } else {
-      //FF、chrome、safari
-      //alert("我不支持currentStyle");
-      alert(getComputedStyle(oAbc, false).width);
-    }
     if (parseInt(window.getComputedStyle(document.querySelector('.msg-text'))
-        .height, null) <= 95) {
+        .height, 10) <= 95) {
       addClass(document.querySelector('.view-more'), 'hide');
     } else {
       addClass(document.querySelector('.view-more-text'), 'limit-height');
