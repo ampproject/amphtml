@@ -33,13 +33,12 @@ limitations under the License.
 
 ## Behavior
 
-Provides you with responsive and shareable embeds to drive the reach of your websites, 
-blog posts, and articles. from any URL using <a href="http://docs.embed.ly/docs/cards">Embedly cards</a>.
+The `amp-embedly-card` component provides you with responsive and shareable embeds to drive the reach of your websites, 
+blog posts, and articles from any URL using <a href="http://docs.embed.ly/docs/cards">Embedly cards</a>.
 
-Cards are the easiest way to leverage Embedly. For any media, Cards provide a responsive
-embed with built-in embed analytics.
+Cards are the easiest way to leverage Embedly. For any media, cards provide a responsive embed with built-in embed analytics.
 
-Example: Embedding multiple resources.
+*Example: Embedding multiple resources*
 
 If you have a paid plan, use the `amp-embedly-key` component to set your api key. 
 You just need one per document that includes one or multiple `amp-embedly-card` components:
@@ -51,44 +50,43 @@ You just need one per document that includes one or multiple `amp-embedly-card` 
 </amp-embedly-key>
 ```
 
-Setting a key through the `amp-embedly-key` component is optional. If you are a paid user 
-this will remove Embedly's branding from the cards.
+Setting a key through the `amp-embedly-key` component is optional. If you are a paid user, this removes Embedly's branding from the cards.
 
 This tag must only be included once.
 
 Then use the `amp-embedly-card` for the embed content:
 
 ```html
- <amp-embedly-card
+<amp-embedly-card
     data-url="https://twitter.com/AMPhtml/status/986750295077040128"
     layout="responsive"
     width="150"
     height="80"
     data-card-theme="dark"
-    data-card-controls="0"
-  ></amp-embedly-card>
+    data-card-controls="0">
+</amp-embedly-card>
 
-  <amp-embedly-card
+<amp-embedly-card
     data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
     layout="responsive"
     width="100"
-    height="50"
-  ></amp-embedly-card>
+    height="50">
+</amp-embedly-card>
 ```
 
 ## Attributes
 
 ##### data-url (required)
   
-The URL used to retrieve embedding information. 
+The URL to retrieve embedding information. 
 
 ##### data-card-via
 
-Specifies the via content in the card. It's a great way to do attribution.
+Specifies the via content in the card. This is a a great way to do attribution.
 
 ##### data-card-chrome
 
-Chrome of 0 will remove the left hand colored border.
+Removes the left-hand colored border if the value is set to `0`.
 
 ##### data-card-theme
 
@@ -96,19 +94,19 @@ For dark backgrounds it's better to specify the dark theme.
 
 ##### data-card-image
 
-Specify which image to use in article cards.
+Specifies which image to use in article cards.
 
 ##### data-card-controls
 	
-Enable Share Icons. Default: "1"
+Enables share icons. The default value is `1`.
 
 ##### data-card-align
 
-Align the card, Default: "center"
+Aligns the card. The default value is `"center"`.
 
 ##### data-card-recommend
 
-Disable Embedly Recommendations on video and rich cards. Default: 1
+Disables Embedly recommendations on video and rich cards. The default value is `1`.
   
 ##### common attributes
 
