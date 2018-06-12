@@ -41,7 +41,7 @@ Cards are the easiest way to leverage Embedly. For any media, cards provide a re
 *Example: Embedding multiple resources*
 
 If you have a paid plan, use the `amp-embedly-key` component to set your api key. 
-You just need one per document that includes one or multiple `amp-embedly-card` components:
+You just need one per AMP page.
 
 ```html
 <amp-embedly-key
@@ -52,9 +52,7 @@ You just need one per document that includes one or multiple `amp-embedly-card` 
 
 Setting a key through the `amp-embedly-key` component is optional. If you are a paid user, this removes Embedly's branding from the cards.
 
-This tag must only be included once.
-
-Then use the `amp-embedly-card` for the embed content:
+Within your AMP page, you can include one or multiple `amp-embedly-card` components:
 
 ```html
 <amp-embedly-card
