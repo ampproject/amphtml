@@ -12,6 +12,8 @@
   <!-- ## Setup -->
   <!-- Import the `amp-list` component ... -->
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <!-- ... and the `amp-mustache` component in the header -->
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <link rel="canonical" href="https://ampbyexample.com/components/amp-list/">
@@ -25,73 +27,57 @@
     width: 160px;
     margin-left: auto;
   }
+  .click-me {
+    padding: 16px;
+    cursor: pointer;
+    background-color: red;
+    color: white;
+  }
+  .list-wrapper {
+    position: relative;
+    width: auto;
+    height: 100px;
+  }
+  #list1 > div[role=list] {
+    position: static;
+    height: auto;
+    min-height:1px;
+  }
   </style>
 </head>
 <body>
 
-  <div on="tap:list1.refresh,list2.refresh,list3.refresh,list4.refresh,list5.refresh">
-    Refresh All Lists
+  <button class="click-me" on="tap: form-filter.submit">
+    Refresh List One
+  </button>
+  <div class="list-wrapper">
+    <amp-list id="list1" layout="fill"
+    src="https://jsonplaceholder.typicode.com/albums" [src]="myState" items="." noloading reset-on-refresh>
+      <div placeholder>
+        Loading...
+      </div>
+      <template type="amp-mustache" id="amp-template-id">
+        <div><a href="{{url}}">{{title}}</a></div>
+      </template>
+    </amp-list>
   </div>
 
-  <!-- ## Using a nested template -->
-  <!--
-  The `amp-list` content is provided by a JSON CORS endpoint, which is defined by the `src`
-  attribute. The URL's protocol must be HTTPS. The response must be a JSON object containing
-  an array property `items`, for example:
-  ```json
-  {
-    "items": [
-      {
-        "title": "amp-carousel",
-        "url": "https://ampbyexample.com/components/amp-carousel"
-      },
-      ...
-    ]
-  }
-  ```
-  The list content is rendered via an [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache). The template can be specified either by id, or by using a nested element.
-  -->
-  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
-    <template type="amp-mustache" id="amp-template-id">
-      <div><a href="{{url}}">{{title}}</a></div>
-    </template>
-  </amp-list>
+  <form id="form-filter" method="GET" target="_top"
+    action="https://jsonplaceholder.typicode.com/albums"
+    action-xhr="https://jsonplaceholder.typicode.com/albums"
+    on="submit: AMP.setState({
+      myState2: 'Leon is Good Boy'
+    }), list1.refresh">
+  </form>
 
-  <!-- ## Using an existing template -->
-  <!--
-    The template can also be specified using an ID of an existing
-    `template` element. This example references the template from the
-    previous sample.
-  -->
-  <amp-list id="list2" width="auto" height="100" layout="fixed-height"  src="list.example.json"
-      template="amp-template-id" class="m1">
-  </amp-list>
-
-  <!-- ## Limiting List Length -->
-  <!--
- Use the `max-items` attribute to limit the number of list elements displayed
-  -->
-  <amp-list id="list3" width="auto" height="100" layout="fixed-height"  src="list.example.json" max-items="3"
-      template="amp-template-id" class="m1" reset-on-refresh>
-  </amp-list>
-
-   <!-- ## Single Entry list -->
-  <!--
- If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
-  -->
-  <amp-list id="list4" width="auto" height="100" layout="fixed-height"  src="list-single.example.json" single-item items="."
-  template="amp-template-id" class="m1">
-</amp-list>
-
-  <!-- ## Handling List Overflow -->
-  <!--
- If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
-  -->
-  <amp-list id="list5" width="auto" height="48" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" reset-on-refresh>
-    <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
-      Show more
-    </div>
-  </amp-list>
+<amp-state id="myState" src="https://jsonplaceholder.typicode.com/albums">
+<script type="application/json">
+</script>
+</amp-state>
+<amp-state id="myState2" src="https://jsonplaceholder.typicode.com/albums">
+  <script type="application/json">
+  </script>
+</amp-state>
 
 
 
