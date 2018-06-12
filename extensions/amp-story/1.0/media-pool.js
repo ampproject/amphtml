@@ -121,7 +121,7 @@ export class MediaPool {
     this.timer_ = Services.timerFor(win);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(win);
+    this.vsync_ = Services./*OK*/vsyncFor(win);
 
     /**
      * The function used to retrieve the distance between an element and the
