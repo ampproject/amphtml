@@ -688,9 +688,9 @@ export class AmpA4A extends AMP.BaseElement {
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
           // meeting the definition as opposed to waiting on the promise.
-          if (this.delayAdRequestEnabled() &&
-              !this.getResource().renderOutsideViewport()) {
-            return this.getResource().whenWithinRenderOutsideViewport();
+          if (this.delayAdRequestEnabled()) {
+            return this.getResource().whenWithinViewport(
+              this.renderOutsideViewport());
           }
         })
         // Possibly block on amp-consent.

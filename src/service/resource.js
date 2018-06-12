@@ -182,8 +182,8 @@ export class Resource {
     /** @private {?Promise} */
     this.renderOutsideViewportPromise_ = null;
 
-    /** @private {?Function} */
-    this.renderOutsideViewportResolve_ = null;
+    /** @private {!Object<number, !Deferred>} */
+    this.withViewportDeferreds_ = {};
 
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
@@ -654,32 +654,31 @@ export class Resource {
   }
 
   /**
+   * @param {number|boolean} viewports
    * @return {!Promise} resolves when underlying element is built and within the
-   *    range specified by implementation's renderOutsideViewport
+   *    viewport range given.
    */
-  whenWithinRenderOutsideViewport() {
-    if (!this.isLayoutPending()) {
+  whenWithinViewport(viewports) {
+    user().assert(TAG, viewports !== false);
+    if (!this.isLayoutPending() || this.hasOwner() || viewports === true ||
+        this.withinViewportMultiplier(viewport)) {
       return Promise.resolve();
     }
-    if (this.renderOutsideViewportPromise_) {
-      return this.renderOutsideViewportPromise_;
-    }
-    const deferred = new Deferred();
-    this.renderOutsideViewportResolve_ = deferred.resolve;
-    return this.renderOutsideViewportPromise_ = deferred.promise;
+    this.withViewportDeferreds_[viewports] =
+        this.withViewportDeferreds_[viewports] || new Deferred();
+    return this.withViewportDeferreds_[viewports].promise;
   }
 
   /**
-   * @private resolves render outside viewport promise if one was created via
-   *    whenWithinRenderOutsideViewport.
+   * @private resolves promises populated via whenWithinViewport.
    */
-  resolveRenderOutsideViewport_() {
-    if (!this.renderOutsideViewportResolve_) {
-      return;
-    }
-    this.renderOutsideViewportResolve_();
-    this.renderOutsideViewportPromise_ = null;
-    this.renderOutsideViewportResolve_ = null;
+  resolveWithinViewports_() {
+    this.withViewportDeferreds_.entries((viewport, deferred) => {
+      if (this.hasOwner() || this.withinViewportMultiplier(viewport)) {
+        deferred.resolve();
+        delete this.withViewportDeferreds_[viewport];
+      }
+    });
   }
 
   /**
@@ -767,15 +766,9 @@ export class Resource {
     // prerender this resource, so that it can avoid expensive elements wayyy
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
-    if (this.hasOwner()) {
-      this.resolveRenderOutsideViewport_();
-      return true;
-    }
-    if (this.withinViewportMultiplier(this.element.renderOutsideViewport())) {
-      this.resolveRenderOutsideViewport_();
-      return true;
-    }
-    return false;
+    this.resolveWithinViewports_();
+    return this.hasOwner() ||
+        this.withinViewportMultiplier(this.element.renderOutsideViewport());
   }
 
   /**
@@ -911,7 +904,7 @@ export class Resource {
   isInViewport() {
     const isInViewport = this.element.isInViewport();
     if (isInViewport) {
-      this.resolveRenderOutsideViewport_();
+      this.resolveWithinViewports_();
     }
     return isInViewport;
   }
