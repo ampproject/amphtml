@@ -29,7 +29,7 @@ i-amphtml-video-mask {
 
 [controls] .amp-video-eq,
 amp-story .amp-video-eq {
-  display: block;
+  display: flex;
 }
 
 .amp-video-eq {
@@ -37,7 +37,6 @@ amp-story .amp-video-eq {
   pointer-events: none !important;
   align-items: flex-end;
   bottom: 7px;
-  display: flex;
   height: 12px;
   opacity: 0.8;
   overflow: hidden;
