@@ -28,9 +28,9 @@ export const TAG = 'amp-story-bookend';
 
 /**
  * @typedef {{
- *   bookend-version: string,
+ *   bookendVersion: string,
  *   components: !Array<!BookendComponentDef>,
- *   share-providers: !Array<(!JsonObject|string|undefined)>,
+ *   shareProviders: !Array<(!JsonObject|string|undefined)>,
  * }}
  */
 export let BookendDataDef;
