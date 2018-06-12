@@ -183,13 +183,14 @@ export class RealTimeConfigManager {
    * Returns whether a given callout object is valid to send an RTC request
    * to, for the given consentState.
    * @param {Object|string} calloutConfig
+   * @param {boolean=} optIsGloballyValid
    * @return {boolean}
    * @visibleForTesting
    */
-  isValidCalloutForConsentState(calloutConfig) {
+  isValidCalloutForConsentState(calloutConfig, optIsGloballyValid) {
     const {sendRegardlessOfConsentState} = calloutConfig;
     if (!isObject(calloutConfig) || !sendRegardlessOfConsentState) {
-      return false;
+      return !!optIsGloballyValid;
     }
 
     if (typeof sendRegardlessOfConsentState == 'boolean') {
@@ -201,12 +202,16 @@ export class RealTimeConfigManager {
         if (this.consentState_ ==
             CONSENT_POLICY_STATE[sendRegardlessOfConsentState[i]]) {
           return true;
+        } else if (!CONSENT_POLICY_STATE[sendRegardlessOfConsentState[i]]) {
+          dev().warn(TAG, 'Invalid RTC consent state given: ' +
+                     `${sendRegardlessOfConsentState[i]}`);
         }
       }
       return false;
     }
-    user().warn(TAG, 'Invalid value for sendRegardlessOfConsentState');
-    return false;
+    user().warn(TAG, 'Invalid value for sendRegardlessOfConsentState:' +
+                `${sendRegardlessOfConsentState}`);
+    return !!optIsGloballyValid;
   }
 
   /**
@@ -229,21 +234,13 @@ export class RealTimeConfigManager {
       return;
     }
 
-    if (this.isValidCalloutForConsentState(this.rtcConfig_)) {
-      return;
-    }
-
-    const urls = [];
-    for (let i = 0; i < this.rtcConfig_.urls.length; i++) {
-      if (this.isValidCalloutForConsentState(this.rtcConfig_.urls[i])) {
-        urls.push(this.rtcConfig_.urls[i]);
-      }
-    }
-    this.rtcConfig_.urls = urls;
+    const isGloballyValid = this.isValidCalloutForConsentState(this.rtcConfig_);
+    this.rtcConfig_.urls = this.rtcConfig_.urls.filter(
+        url => this.isValidCalloutForConsentState(url, isGloballyValid));
 
     Object.keys(this.rtcConfig_.vendors || {}).forEach(vendor => {
       if (!this.isValidCalloutForConsentState(
-          this.rtcConfig_.vendors[vendor])) {
+          this.rtcConfig_.vendors[vendor], isGloballyValid)) {
         delete this.rtcConfig_.vendors[vendor];
       }
     });

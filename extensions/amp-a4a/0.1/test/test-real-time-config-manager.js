@@ -690,6 +690,35 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
+    it('should handle mix of global and individual consent settings', () => {
+      rtc.rtcConfig_.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+        'vendorB': {'sendRegardlessOfConsentState': ['UNKNOWN'],
+          'macros': {'SLOT_ID': '1'}},
+        'vendorC': {'SLOT_ID': '1'},
+      };
+      rtc.rtcConfig_.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+        'https://www.other-rtc.com/example2',
+      ];
+      rtc.rtcConfig_.sendRegardlessOfConsentState = ['INSUFFICIENT'];
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+        'vendorC': {'SLOT_ID': '1'},
+      };
+      expectedRtcConfig.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+        'https://www.other-rtc.com/example2'];
+      rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
   });
 
   describe('sendErrorMessage', () => {
