@@ -1564,34 +1564,21 @@ describe('amp-a4a', () => {
           const a4aElement = createA4aElement(doc);
           a4a = new MockA4AImpl(a4aElement);
           getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-          sandbox.stub(a4a, 'delayAdRequestEnabled').returns(true);
-        });
-      });
-      it('should not delay request when in viewport', () => {
-        getResourceStub.returns(
-            {
-              getUpgradeDelayMs: () => 1,
-              renderOutsideViewport: () => true,
-              whenWithinRenderOutsideViewport: () => {
-                throw new Error('failure!');
-              },
-            });
-        a4a.buildCallback();
-        a4a.onLayoutMeasure();
-        expect(a4a.adPromise_).to.be.instanceof(Promise);
-        return a4a.adPromise_.then(() => {
-          expect(getAdUrlSpy).to.be.calledOnce;
         });
       });
       it('should delay request until within renderOutsideViewport',() => {
-        let whenWithinRenderOutsideViewportResolve;
+        sandbox.stub(a4a, 'delayAdRequestEnabled').returns(true);
+        let whenWithinViewportResolve;
         getResourceStub.returns(
             {
               getUpgradeDelayMs: () => 1,
-              renderOutsideViewport: () => false,
-              whenWithinRenderOutsideViewport: () => new Promise(resolve => {
-                whenWithinRenderOutsideViewportResolve = resolve;
-              }),
+              renderOutsideViewport: () => 3,
+              whenWithinViewport: viewport => {
+                expect(viewport).to.equal(3);
+                return new Promise(resolve => {
+                  whenWithinViewportResolve = resolve;
+                });
+              },
             });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
@@ -1599,7 +1586,33 @@ describe('amp-a4a', () => {
         // Delay to all getAdUrl to potentially execute.
         return Services.timerFor(a4a.win).promise(1).then(() => {
           expect(getAdUrlSpy).to.not.be.called;
-          whenWithinRenderOutsideViewportResolve();
+          whenWithinViewportResolve();
+          return a4a.adPromise_.then(() => {
+            expect(getAdUrlSpy).to.be.calledOnce;
+          });
+        });
+      });
+      it('should delay request until numeric value',() => {
+        sandbox.stub(a4a, 'delayAdRequestEnabled').returns(6);
+        let whenWithinViewportResolve;
+        getResourceStub.returns(
+            {
+              getUpgradeDelayMs: () => 1,
+              renderOutsideViewport: () => 3,
+              whenWithinViewport: viewport => {
+                expect(viewport).to.equal(6);
+                return new Promise(resolve => {
+                  whenWithinViewportResolve = resolve;
+                });
+              },
+            });
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        // Delay to all getAdUrl to potentially execute.
+        return Services.timerFor(a4a.win).promise(1).then(() => {
+          expect(getAdUrlSpy).to.not.be.called;
+          whenWithinViewportResolve();
           return a4a.adPromise_.then(() => {
             expect(getAdUrlSpy).to.be.calledOnce;
           });

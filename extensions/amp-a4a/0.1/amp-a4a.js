@@ -507,8 +507,8 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @return {boolean} whether ad request should be delayed until
-   *    renderOutsideViewport is met.
+   * @return {boolean|number} whether ad request should be delayed until
+   *    renderOutsideViewport is met or if number, the amount of viewports.
    */
   delayAdRequestEnabled() {
     return false;
@@ -688,9 +688,11 @@ export class AmpA4A extends AMP.BaseElement {
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
           // meeting the definition as opposed to waiting on the promise.
+          const delay = this.delayAdRequestEnabled();
           if (this.delayAdRequestEnabled()) {
             return this.getResource().whenWithinViewport(
-              this.renderOutsideViewport());
+                typeof delay == 'number' ? delay :
+                  this.renderOutsideViewport());
           }
         })
         // Possibly block on amp-consent.

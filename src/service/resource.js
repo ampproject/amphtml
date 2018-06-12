@@ -179,9 +179,6 @@ export class Resource {
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
 
-    /** @private {?Promise} */
-    this.renderOutsideViewportPromise_ = null;
-
     /** @private {!Object<number, !Deferred>} */
     this.withViewportDeferreds_ = {};
 
@@ -654,29 +651,28 @@ export class Resource {
   }
 
   /**
-   * @param {number|boolean} viewports
+   * @param {number|boolean} viewport
    * @return {!Promise} resolves when underlying element is built and within the
    *    viewport range given.
    */
-  whenWithinViewport(viewports) {
-    user().assert(TAG, viewports !== false);
-    if (!this.isLayoutPending() || this.hasOwner() || viewports === true ||
+  whenWithinViewport(viewport) {
+    dev().assert(viewport !== false);
+    if (!this.isLayoutPending() || this.hasOwner() || viewport === true ||
         this.withinViewportMultiplier(viewport)) {
       return Promise.resolve();
     }
-    this.withViewportDeferreds_[viewports] =
-        this.withViewportDeferreds_[viewports] || new Deferred();
-    return this.withViewportDeferreds_[viewports].promise;
+    const viewportNum = /** @type{number} */(viewport);
+    this.withViewportDeferreds_[viewportNum] =
+        this.withViewportDeferreds_[viewportNum] || new Deferred();
+    return this.withViewportDeferreds_[viewportNum].promise;
   }
 
-  /**
-   * @private resolves promises populated via whenWithinViewport.
-   */
+  /** @private resolves promises populated via whenWithinViewport. */
   resolveWithinViewports_() {
-    this.withViewportDeferreds_.entries((viewport, deferred) => {
+    Object.keys(this.withViewportDeferreds_).forEach(viewport => {
       if (this.hasOwner() || this.withinViewportMultiplier(viewport)) {
-        deferred.resolve();
-        delete this.withViewportDeferreds_[viewport];
+        this.withViewportDeferreds_[/** @type{number} */(viewport)].resolve();
+        delete this.withViewportDeferreds_[/** @type{number} */(viewport)];
       }
     });
   }
