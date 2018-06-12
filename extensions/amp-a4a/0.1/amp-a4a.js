@@ -858,7 +858,7 @@ export class AmpA4A extends AMP.BaseElement {
               extensionId => extensions.preloadExtension(extensionId));
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
-            this.preconnect.preload(font.href, 'font'));
+            this.preconnect.preload(font.href, 'style'));
 
           const urls = Services.urlForDoc(this.getAmpDoc());
           // Preload any AMP images.

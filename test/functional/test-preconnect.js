@@ -324,6 +324,22 @@ describe('preconnect', () => {
     });
   });
 
+  it('should use crossOrigin for fonts', () => {
+    preloadSupported = true;
+    return getPreconnectIframe().then(iframe => {
+      preconnect.preload('https://a.prefetch.com/foo/bar', 'font');
+      return visible.then(() => {
+        // Actual preload
+        const preloads = iframe.doc.querySelectorAll(
+            'link[rel=preload]');
+        expect(preloads).to.have.length(1);
+        expect(preloads[0].href).to.equal('https://a.prefetch.com/foo/bar');
+        expect(preloads[0].as).to.equal('font');
+        expect(preloads[0].crossOrigin).to.equal('anonymous');
+      });
+    });
+  });
+
   it('should only create safe preloads', () => {
     preloadSupported = true;
     return getPreconnectIframe().then(iframe => {

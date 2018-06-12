@@ -284,6 +284,10 @@ class PreconnectService {
         <link rel="preload" referrerpolicy="origin" />`;
     preload.setAttribute('href', url);
     preload.as = this.getPreloadAsValue_(preloadAs);
+    // Fonts must be loaded using CORS, even for the same domain.
+    if (preloadAs == 'font') {
+      preload.crossOrigin = 'anonymous';
+    }
     this.head_.appendChild(preload);
     // As opposed to preconnect we do not clean this tag up, because there is
     // no expectation as to it having an immediate effect.
