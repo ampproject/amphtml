@@ -661,7 +661,7 @@ export class Resource {
         this.withinViewportMultiplier(viewport)) {
       return Promise.resolve();
     }
-    const viewportNum = /** @type{number} */(viewport);
+    const viewportNum = dev().assertNumber(viewport);
     this.withViewportDeferreds_[viewportNum] =
         this.withViewportDeferreds_[viewportNum] || new Deferred();
     return this.withViewportDeferreds_[viewportNum].promise;
@@ -670,9 +670,10 @@ export class Resource {
   /** @private resolves promises populated via whenWithinViewport. */
   resolveWithinViewports_() {
     Object.keys(this.withViewportDeferreds_).forEach(viewport => {
-      if (this.hasOwner() || this.withinViewportMultiplier(viewport)) {
-        this.withViewportDeferreds_[/** @type{number} */(viewport)].resolve();
-        delete this.withViewportDeferreds_[/** @type{number} */(viewport)];
+      const viewportNum = dev().assertNumber(viewport);
+      if (this.hasOwner() || this.withinViewportMultiplier(viewportNum)) {
+        this.withViewportDeferreds_[viewportNum].resolve();
+        delete this.withViewportDeferreds_[viewportNum];
       }
     });
   }
