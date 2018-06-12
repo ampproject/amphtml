@@ -540,6 +540,16 @@ function createBaseCustomElementClass(win) {
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
         Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
+          const TAG = this.tagName;
+          if (!this.ownerDocument) {
+            dev().error(TAG, 'preconnectCallback called on element without ' +
+                'owner docuent');
+            return;
+          } else if (!this.ownerDocument.defaultView) {
+            dev().error(TAG, 'preconnectCallback called on element without ' +
+                'default view');
+            return;
+          }
           this.implementation_.preconnectCallback(onLayout);
         }, 1);
       }
