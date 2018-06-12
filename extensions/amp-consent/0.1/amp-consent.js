@@ -282,8 +282,10 @@ export class AmpConsent extends AMP.BaseElement {
    */
   handleAction_(action) {
     if (!this.currentDisplayInstance_) {
-      dev().error(TAG, 'No consent ui is displaying, ' +
+      if (Math.random() < 0.01) {
+        dev().error(TAG, 'No consent ui is displaying, ' +
           `consent id ${this.currentDisplayInstance_}`);
+      }
       return;
     }
 
