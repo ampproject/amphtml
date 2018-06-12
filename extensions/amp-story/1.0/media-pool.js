@@ -171,7 +171,7 @@ export class MediaPool {
     this.blessed_ = false;
 
     /** @private {?Array<!AmpElement>} */
-    this.ampElements_ = null;
+    this.ampElementsToBless_ = null;
 
     /** @const {!Object<string, (function(): !HTMLMediaElement)>} */
     this.mediaFactory_ = {
@@ -641,7 +641,7 @@ export class MediaPool {
 
     const parent = domMediaEl.parentNode;
     if (parent.signals) {
-      this.trackAmpElementForBlessing_(parent);
+      this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
     }
 
     if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
@@ -672,9 +672,9 @@ export class MediaPool {
    * @param {!AmpElement} element
    * @private
    */
-  trackAmpElementForBlessing_(element) {
-    this.ampElements_ = this.ampElements_ || [];
-    this.ampElements_.push(element);
+  trackAmpElementToBless_(element) {
+    this.ampElementsToBless_ = this.ampElementsToBless_ || [];
+    this.ampElementsToBless_.push(element);
   }
 
 
@@ -811,9 +811,11 @@ export class MediaPool {
 
     const blessPromises = [];
 
-    (this.ampElements_ || []).forEach(ampEl => {
+    (this.ampElementsToBless_ || []).forEach(ampEl => {
       ampEl.signals().signal(VideoServiceSignals.USER_INTERACTED);
     });
+
+    this.ampElementsToBless_ = null; // GC
 
     this.forEachMediaElement_(mediaEl => {
       blessPromises.push(this.bless_(mediaEl));
