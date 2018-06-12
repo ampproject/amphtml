@@ -46,6 +46,9 @@ const PROTECTED_ELEMENTS = map({
  * invoked.
  */
 export class AdvancementConfig {
+  /**
+   * @public
+   */
   constructor() {
     /** @private @const {!Array<function(number)>} */
     this.progressListeners_ = [];
@@ -453,6 +456,10 @@ class TimeBasedAdvancement extends AdvancementConfig {
  * guaranteed.
  */
 class MediaBasedAdvancement extends AdvancementConfig {
+  /**
+   * @param {!Window} win
+   * @param {!Element} element
+   */
   constructor(win, element) {
     super();
 
