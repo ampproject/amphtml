@@ -662,7 +662,7 @@ describes.realWin('Resource', {amp: true}, env => {
   describe('setInViewport', () => {
     let resolveWithinViewportSpy;
     beforeEach(() => resolveWithinViewportSpy =
-      sandbox.spy(resource, 'resolveWithinViewports_'));
+      sandbox.spy(resource, 'resolveDeferredsWhenWithinViewports_'));
 
     it('should call viewportCallback when not built', () => {
       resource.state_ = ResourceState.NOT_BUILT;
@@ -988,7 +988,7 @@ describe('Resource renderOutsideViewport', () => {
     renderOutsideViewport = sandbox.stub(element, 'renderOutsideViewport');
     sandbox.stub(viewport, 'getRect').returns(layoutRectLtwh(0, 0, 100, 100));
     resolveWithinViewportSpy =
-      sandbox.spy(resource, 'resolveWithinViewports_');
+      sandbox.spy(resource, 'resolveDeferredsWhenWithinViewports_');
   });
 
   afterEach(() => {
@@ -2018,8 +2018,8 @@ describe('Resource renderOutsideViewport', () => {
       expect(resource.whenWithinViewport(3)).to.equal(promise);
       expect(Object.keys(resource.withViewportDeferreds_)).to.jsonEqual(['3']);
       // Call again should do nothing.
-      resource.resolveWithinViewports_();
-      resource.resolveWithinViewports_();
+      resource.resolveDeferredsWhenWithinViewports_();
+      resource.resolveDeferredsWhenWithinViewports_();
       expect(Object.keys(resource.withViewportDeferreds_)).to.jsonEqual([]);
       expect(Object.keys(resource.withViewportDeferreds_)).to.jsonEqual([]);
       return promise;

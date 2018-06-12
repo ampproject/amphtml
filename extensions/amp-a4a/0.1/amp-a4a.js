@@ -689,7 +689,7 @@ export class AmpA4A extends AMP.BaseElement {
           // resolve if already within viewport thus the check for already
           // meeting the definition as opposed to waiting on the promise.
           const delay = this.delayAdRequestEnabled();
-          if (this.delayAdRequestEnabled()) {
+          if (delay) {
             return this.getResource().whenWithinViewport(
                 isNaN(delay) ? this.renderOutsideViewport() : delay);
           }

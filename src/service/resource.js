@@ -668,7 +668,7 @@ export class Resource {
   }
 
   /** @private resolves promises populated via whenWithinViewport. */
-  resolveWithinViewports_() {
+  resolveDeferredsWhenWithinViewports_() {
     Object.keys(this.withViewportDeferreds_).forEach(viewport => {
       const viewportNum = parseInt(viewport, 10);
       if (this.hasOwner() || this.withinViewportMultiplier(viewportNum)) {
@@ -763,7 +763,7 @@ export class Resource {
     // prerender this resource, so that it can avoid expensive elements wayyy
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
-    this.resolveWithinViewports_();
+    this.resolveDeferredsWhenWithinViewports_();
     return this.hasOwner() ||
         this.withinViewportMultiplier(this.element.renderOutsideViewport());
   }
@@ -901,7 +901,7 @@ export class Resource {
   isInViewport() {
     const isInViewport = this.element.isInViewport();
     if (isInViewport) {
-      this.resolveWithinViewports_();
+      this.resolveDeferredsWhenWithinViewports_();
     }
     return isInViewport;
   }
