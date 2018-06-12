@@ -177,14 +177,13 @@ export class Autoplay {
 
   /**
    * @param {!Element} element
-   * @param {!../../observable.Observable<boolean>} observable
    */
-  delegate(element, observable) {
+  delegate(element) {
     const entry = this.getEntryFor_(element);
     if (!entry) {
       return;
     }
-    entry.delegateTo(observable);
+    entry.delegate();
   }
 
   /**
@@ -228,7 +227,7 @@ export class AutoplayEntry {
     /** @private {boolean} */
     this.isVisible_ = false;
 
-    /** @private {!UnlistenDef} */
+    /** @private {!UnlistenDef|null} */
     this.unlistener_ = this.observeOn_(positionObserver);
 
     // Only muted videos are allowed to autoplay
@@ -253,15 +252,15 @@ export class AutoplayEntry {
   }
 
   /**
-   * @param {!../../observable.Observable<boolean>} playbackObservable
+   * Delegates autoplay so that it's triggered by a different module.
    * @public
    */
-  delegateTo(playbackObservable) {
+  delegate() {
     if (this.unlistener_) {
       this.unlistener_();
     }
-    this.unlistener_ =
-        playbackObservable.add(isPlaying => this.trigger_(isPlaying));
+    this.video.pause();
+    this.unlistener_ = null;
   }
 
   /** @private */
