@@ -28,6 +28,7 @@ import {
   parseQueryString,
   parseUrlDeprecated,
   removeFragment,
+  serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
@@ -52,14 +53,6 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  */
 const TRIM_ORIGIN_PATTERN_ =
   /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
-
-/**
- * Pattern for removing any old "ampshare" parameters from a fragment.
- * @const
- * @private {!RegExp}
- */
-const AMPSHARE_PATTERN =
-  /(^|&)ampshare[^&]*/g;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -191,6 +184,9 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
+    /** @const @private {!Object<string, string>} */
+    this.hashParams_ = {};
+
     /** @private {?Promise} */
     this.nextVisiblePromise_ = null;
 
@@ -233,7 +229,8 @@ export class Viewer {
         parseParams_(this.win.name.substring(SENTINEL_.length), this.params_);
       }
       if (this.win.location.hash) {
-        parseParams_(this.win.location.hash, this.params_);
+        parseParams_(this.win.location.hash, this.hashParams_);
+        Object.assign(this.params_, this.hashParams_);
       }
     }
 
@@ -434,9 +431,10 @@ export class Viewer {
     // (see impression.js).
     if (this.params_['click']) {
       const newUrl = removeFragment(this.win.location.href);
+      delete this.hashParams_['click'];
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
-        // This is currently used my mode.js to infer development mode.
+        // This is currently used by mode.js to infer development mode.
         if (!this.win.location.originalHash) {
           this.win.location.originalHash = this.win.location.hash;
         }
@@ -568,18 +566,9 @@ export class Viewer {
     const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc);
     const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
     if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
-      // Remove the leading hash and remove any ampshare params.
-      let oldFragment = getFragment(this.win.location.href)
-          .substr(1)
-          .replace(AMPSHARE_PATTERN, '');
-      const newFragment = 'ampshare=' + encodeURIComponent(canonicalUrl);
-      // The regular expression can leave behind an ampersand.
-      if (oldFragment[0] == '&') {
-        oldFragment = oldFragment.substr(1);
-      }
-      // Attempt to merge the fragments, if an old fragment was present.
+      this.hashParams_['ampshare'] = canonicalUrl;
       this.win.history.replaceState({}, '',
-          oldFragment ? `#${oldFragment}&${newFragment}` : `#${newFragment}`);
+          '#' + serializeQueryString(this.hashParams_));
     }
   }
 

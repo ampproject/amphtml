@@ -160,7 +160,7 @@ describe('Viewer', () => {
   it('should set ampshare fragment within custom tab', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/';
-    windowApi.location.hash = '#origin=g.com';
+    windowApi.location.hash = '';
     windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.isCctEmbedded()).to.be.true;
@@ -171,7 +171,7 @@ describe('Viewer', () => {
   it('should merge fragments within custom tab', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#test=1';
-    windowApi.location.hash = '#origin=g.com&test=1';
+    windowApi.location.hash = '#test=1';
     windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
@@ -183,7 +183,7 @@ describe('Viewer', () => {
   it('should not duplicate ampshare when merging', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#test=1&ampshare=old';
-    windowApi.location.hash = '#origin=g.com&test=1&ampshare=old';
+    windowApi.location.hash = '#test=1&ampshare=old';
     windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
@@ -197,7 +197,7 @@ describe('Viewer', () => {
     windowApi.location.href = 
         'http://www.example.com/#test=1&ampshare=a&ampshare=b&ampshare=c';
     windowApi.location.hash =
-        '#origin=g.com&test=1&ampshare=a&ampshare=b&ampshare=c';
+        '#test=1&ampshare=a&ampshare=b&ampshare=c';
     windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
@@ -209,13 +209,13 @@ describe('Viewer', () => {
   it('should remove extra ampshare even when it\'s first', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#ampshare=old&test=1';
-    windowApi.location.hash = '#ampshare=old&origin=g.com&test=1';
+    windowApi.location.hash = '#ampshare=old&test=1';
     windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+        '#ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
   });
 
   it('should remove extra ampshare even when it\'s sandwiched', () => {
@@ -223,14 +223,14 @@ describe('Viewer', () => {
     windowApi.location.href =
         'http://www.example.com/#note=ok&ampshare=old&test=1';
     windowApi.location.hash =
-        '#note=ok&ampshare=old&origin=g.com&test=1';
+        '#note=ok&ampshare=old&test=1';
     windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.getParam('note')).to.equal('ok');
     expect(viewer.isCctEmbedded()).to.be.true;
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#note=ok&test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+        '#note=ok&ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
   });
 
   it('should clear fragment when click param is present', () => {
