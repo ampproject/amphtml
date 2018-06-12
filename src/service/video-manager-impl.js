@@ -202,14 +202,6 @@ export class VideoManager {
     element.classList.add('i-amphtml-video-interface');
   }
 
-  /** @override */
-  delegateAutoplay(videoElement, opt_unusedObservable) {
-    videoElement.signals().whenSignal(VideoEvents.REGISTERED).then(() => {
-      const entry = this.getEntryForElement_(videoElement);
-      entry.delegateAutoplay();
-    });
-  }
-
   /**
    * Register common actions such as play, pause, etc... on the video element
    * so they can be called using AMP Actions.
@@ -466,15 +458,20 @@ class VideoEntry {
       const actions = Services.actionServiceForDoc(this.ampdoc_);
       actions.trigger(this.video.element, firstPlay, event, trust);
     });
+
+    this.listenForAutoplayDelegation_();
   }
 
-  /** Delegates autoplay to a different module. */
-  delegateAutoplay() {
-    this.allowAutoplay_ = false;
+  /** Listens for signals to delegate autoplay to a different module. */
+  listenForAutoplayDelegation_() {
+    const signals = this.video.signals();
+    signals.whenSignal(VideoServiceSignals.AUTOPLAY_DELEGATED).then(() => {
+      this.allowAutoplay_ = false;
 
-    if (this.isPlaying_) {
-      this.video.pause();
-    }
+      if (this.isPlaying_) {
+        this.video.pause();
+      }
+    });
   }
 
   /** @return {boolean} */

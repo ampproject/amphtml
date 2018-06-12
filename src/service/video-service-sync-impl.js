@@ -18,6 +18,7 @@ import {Autoplay, AutoplayEvents} from './video/autoplay';
 import {Deferred} from '../utils/promise';
 import {PlayingStates, VideoAttributes, VideoEvents} from '../video-interface';
 import {Services} from '../services';
+import {VideoServiceSignals} from './video-service-interface';
 import {dev} from '../log';
 import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
@@ -114,18 +115,25 @@ export class VideoServiceSync {
     if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
       return;
     }
-    this.getAutoplay_().register(video);
-  }
+    const signals = video.signals();
+    const autoplayDelegated = VideoServiceSignals.AUTOPLAY_DELEGATED;
 
-  /** @override */
-  delegateAutoplay(video, optObservable = null) {
-    // TODO(alanorozco): Make observable required once implementation of
-    // `VideoService` finalizes.
-    if (optObservable == null) {
-      dev().assert(false, 'Autoplay delegation requires an observable.');
+    if (signals.get(autoplayDelegated)) {
       return;
     }
-    this.getAutoplay_().delegate(video, optObservable);
+
+    this.getAutoplay_().register(video);
+
+    signals.whenSignal(autoplayDelegated).then(() => {
+      this.getAutoplay_().delegate(video.element);
+    });
+  }
+
+  /**
+   * @param {!AmpElement|!../base-element.BaseElement} video
+   */
+  static delegateAutoplay(video) {
+    video.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
   }
 
   /** @override */
