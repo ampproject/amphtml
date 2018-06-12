@@ -17,6 +17,9 @@
 import {toggle} from '../../../src/style';
 import {user} from '../../../src/log';
 
+/**
+ * Class representing toolbar behavior in sidebar
+ */
 export class Toolbar {
   /**
   * @param {!Element} element

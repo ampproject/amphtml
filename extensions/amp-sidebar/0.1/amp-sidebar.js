@@ -42,6 +42,9 @@ const SidebarEvents = {
   CLOSE: 'sidebarClose',
 };
 
+/**
+ * @extends {AMP.BaseElement}
+ */
 export class AmpSidebar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
