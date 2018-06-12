@@ -54,6 +54,8 @@ You just need one per document that includes one or multiple `amp-embedly-card` 
 Setting a key through the `amp-embedly-key` component is optional. If you are a paid user 
 this will remove Embedly's branding from the cards.
 
+This tag must only be included once.
+
 Then use the `amp-embedly-card` for the embed content:
 
 ```html

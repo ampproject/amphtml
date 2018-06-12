@@ -28,11 +28,14 @@ tags: {  # embedly-card
 tags: {  # <amp-embedly-card>
   html_format: AMP
   tag_name: "AMP-EMBEDLY-CARD"
-  satisfies: "amp-embedly-card"
   requires_extension: "amp-embedly-card"
   attrs: {
     name: "data-url"
     mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: false
+    }
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-embedly-card"
@@ -45,6 +48,7 @@ tags: {  # <amp-embedly-key>
   html_format: AMP
   tag_name: "AMP-EMBEDLY-KEY"
   requires_extension: "amp-embedly-card"
+  unique: true
   attrs: {
     name: "value"
     mandatory: true
