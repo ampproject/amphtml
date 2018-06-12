@@ -69,27 +69,37 @@ describe('amp-analytics.VariableService', function() {
     });
 
     it('expands nested vars', () => {
-      return variables.expandTemplate('${1}', new ExpansionOptions(vars))
-          .then(actual =>
-            expect(actual).to.equal('123%24%7B4%7D')
-          );
+      return allowConsoleError(() => {
+        return variables.expandTemplate('${1}', new ExpansionOptions(vars))
+            .then(actual =>
+              expect(actual).to.equal('123%24%7B4%7D')
+            );
+      });
     });
 
     it('expands nested vars (no encode)', () => {
-      return variables.expandTemplate('${1}',
-          new ExpansionOptions(vars, undefined, true))
-          .then(actual =>
-            expect(actual).to.equal('123${4}')
-          );
+      return allowConsoleError(() => {
+        return variables.expandTemplate('${1}',
+            new ExpansionOptions(vars, undefined, true))
+            .then(actual =>
+              expect(actual).to.equal('123${4}')
+            );
+      });
     });
 
     it('expands nested vars without double encoding', () => {
-      return expect(variables.expandTemplate('${a}',
-          new ExpansionOptions(vars))).to.eventually.equal(
-          'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
+      return allowConsoleError(() => {
+        return expect(variables.expandTemplate('${a}',
+            new ExpansionOptions(vars))).to.eventually.equal(
+            'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
+      });
     });
 
     it('limits the recursion to n', () => {
+      expectAsyncConsoleError(
+          '[Analytics.Variables] Maximum depth reached while expanding ' +
+          'variables. Please ensure that the variables are not recursive.', 2);
+
       return variables.expandTemplate('${1}', new ExpansionOptions(vars, 3))
           .then(actual =>
             expect(actual).to.equal('1234%24%7B1%7D'))

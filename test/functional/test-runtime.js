@@ -1033,7 +1033,9 @@ describes.realWin('runtime multidoc', {
       scriptEl.setAttribute('data-id', 'unknown1');
       scriptEl.setAttribute('src', 'https://cdn.ampproject.org/other.js');
       importDoc.head.appendChild(scriptEl);
-      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      allowConsoleError(() => {
+        win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      });
       expect(getShadowRoot(hostElement)
           .querySelector('script[data-id="unknown1"]')).to.not.exist;
       expect(win.document.querySelector('script[data-id="unknown1"]'))
@@ -1114,7 +1116,9 @@ describes.realWin('runtime multidoc', {
       const scriptEl2 = win.document.createElement('script');
       scriptEl2.setAttribute('data-id', 'test1');
       importDoc.head.appendChild(scriptEl2);
-      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      allowConsoleError(() => {
+        win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      });
       expect(getShadowRoot(hostElement)
           .querySelector('script[data-id="test1"]')).to.not.exist;
     });
@@ -1369,6 +1373,10 @@ describes.realWin('runtime multidoc', {
     });
 
     it('should ignore unknown script', () => {
+      expectAsyncConsoleError(
+          '[runtime] - unknown script:  [object HTMLScriptElement] ' +
+          'https://cdn.ampproject.org/other.js');
+
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       extensionsMock.expects('preloadExtension').never();
@@ -1435,6 +1443,10 @@ describes.realWin('runtime multidoc', {
     });
 
     it('should ignore inline script if javascript', () => {
+      expectAsyncConsoleError(
+          '[runtime] - unallowed inline javascript:  ' +
+          '[object HTMLScriptElement]', 2);
+
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       writer.write(
