@@ -279,7 +279,6 @@ export class AutoplayEntry {
   delegate() {
     this.disableTriggerByVisibility_();
     this.video.pause();
-    this.unlistener_ = null;
   }
 
   /** @private */
