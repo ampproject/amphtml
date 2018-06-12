@@ -55,6 +55,9 @@ const ELIGIBLE_TAGS = {
 const SUPPORT_VALIDATION_MSG = `${TAG} should
   have its target element as the one and only child`;
 
+/**
+ * @extends {AMP.BaseElement}
+ */
 export class AmpPanZoom extends AMP.BaseElement {
   // TODO (#15685): refactor this to share code with amp-image-viewer
 
@@ -134,14 +137,15 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     this.registerAction('transform', invocation => {
       const {args} = invocation;
-      if (args) {
-        const scale = args.scale || 1;
-        const x = args.x || 0;
-        const y = args.y || 0;
-        const deltaX = x - this.posX_;
-        const deltaY = y - this.posY_;
-        this.onZoom_(scale, deltaX, deltaY, true);
+      if (!args) {
+        return;
       }
+      const scale = args['scale'] || 1;
+      const x = args['x'] || 0;
+      const y = args['y'] || 0;
+      const deltaX = x - this.posX_;
+      const deltaY = y - this.posY_;
+      this.onZoom_(scale, deltaX, deltaY, true);
     }, ActionTrust.LOW);
   }
 
@@ -434,15 +438,25 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   updatePanZoom_() {
-    setStyles(dev().assertElement(this.content_), {
-      transform: translate(this.posX_, this.posY_) +
-          ' ' + scale(this.scale_),
+    const {scale_: s, posX_: x, posY_: y, content_: content} = this;
+    setStyles(dev().assertElement(content), {
+      transform: translate(x, y) + ' ' + scale(s),
     });
+    this.triggerTransformEnd_(s, x, y);
+  }
+
+  /**
+   * @param {number} scale
+   * @param {number} x
+   * @param {number} y
+   * @private
+   */
+  triggerTransformEnd_(scale, x, y) {
     const transformEndEvent =
     createCustomEvent(this.win, `${TAG}.transformEnd`, {
-      scale: this.scale_,
-      x: this.posX_,
-      y: this.posY_,
+      scale,
+      x,
+      y,
     });
     this.action_.trigger(this.element, 'transformEnd', transformEndEvent,
         ActionTrust.HIGH);
