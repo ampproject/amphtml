@@ -137,7 +137,7 @@ describe('amp-a4a', () => {
   /**
    * @param {!Document} doc
    * @param {Rect=} opt_rect
-   * @param {Element=} opt_rect
+   * @param {Element=} opt_body
    */
   function createA4aElement(doc, opt_rect, opt_body) {
     const element = createElementWithAttributes(doc, 'amp-a4a', {
