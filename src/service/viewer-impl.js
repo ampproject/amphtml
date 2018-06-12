@@ -22,7 +22,6 @@ import {dev, duplicateErrorIfNecessary} from '../log';
 import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
-  getFragment,
   getSourceOrigin,
   isProxyOrigin,
   parseQueryString,
@@ -304,6 +303,9 @@ export class Viewer {
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
+    const messagingDeferred = new Deferred();
+    this.messagingReadyResolver_ = messagingDeferred.resolve;
+
     /**
      * This promise will resolve when communications channel has been
      * established or timeout in 20 seconds. The timeout is needed to avoid
@@ -314,9 +316,7 @@ export class Viewer {
     this.messagingReadyPromise_ = this.isEmbedded_ ?
       Services.timerFor(this.win).timeoutPromise(
           20000,
-          new Promise(resolve => {
-            this.messagingReadyResolver_ = resolve;
-          })).catch(reason => {
+          messagingDeferred.promise).catch(reason => {
         throw getChannelError(/** @type {!Error|string|undefined} */ (
           reason));
       }) : null;
@@ -1189,6 +1189,7 @@ function getChannelError(opt_reason) {
 
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.
+ * @param {!Viewer} viewer
  * @param {!VisibilityState} state
  * @restricted
  */
