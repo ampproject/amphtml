@@ -62,11 +62,16 @@ const DEFAULT_BUTTON_PADDING = 16;
 const MIN_BUTTON_PADDING = 10;
 
 /**
- * Share providers tag.
+ * Key for share providers in bookend config.
  * @private @const {string}
  */
-const SHARE_PROVIDERS = 'share-providers';
+export const SHARE_PROVIDERS_KEY = 'shareProviders';
 
+/**
+ * Deprecated key for share providers in bookend config.
+ * @private @const {string}
+ */
+export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -314,7 +319,8 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      const providers = config && config[SHARE_PROVIDERS];
+      const providers = config && config[SHARE_PROVIDERS_KEY] ||
+        config[DEPRECATED_SHARE_PROVIDERS_KEY];
       if (!providers) {
         return;
       }
