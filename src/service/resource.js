@@ -670,7 +670,7 @@ export class Resource {
   /** @private resolves promises populated via whenWithinViewport. */
   resolveWithinViewports_() {
     Object.keys(this.withViewportDeferreds_).forEach(viewport => {
-      const viewportNum = dev().assertNumber(viewport);
+      const viewportNum = parseInt(viewport, 10);
       if (this.hasOwner() || this.withinViewportMultiplier(viewportNum)) {
         this.withViewportDeferreds_[viewportNum].resolve();
         delete this.withViewportDeferreds_[viewportNum];

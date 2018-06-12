@@ -2006,8 +2006,6 @@ describe('Resource renderOutsideViewport', () => {
 
   describe('whenWithinViewport', () => {
     it('should resolve correctly', () => {
-      const promise = resource.whenWithinViewport(3);
-      // Multiple calls should return the same promise.
       sandbox.stub(resource, 'withinViewportMultiplier')
           .onCall(0).returns(false)
           .onCall(1).returns(false)
@@ -2015,6 +2013,8 @@ describe('Resource renderOutsideViewport', () => {
           .onCall(3).callsFake(() => {
             throw new Error('should not call!');
           });
+      const promise = resource.whenWithinViewport(3);
+      // Multiple calls should return the same promise.
       expect(resource.whenWithinViewport(3)).to.equal(promise);
       expect(Object.keys(resource.withViewportDeferreds_)).to.jsonEqual(['3']);
       // Call again should do nothing.
