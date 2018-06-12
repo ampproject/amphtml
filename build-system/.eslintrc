@@ -6,5 +6,8 @@
     "require": false,
     "process": false,
     "exports": false
+  },
+  "rules": {
+    "require-jsdoc": 0
   }
 }

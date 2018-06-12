@@ -166,5 +166,13 @@
     "space-infix-ops": 2,
     "space-unary-ops": [1, { "words": true, "nonwords": false }],
     "wrap-iife": [2, "any"]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.js", "extensions/**/test/**/*.js"],
+      "rules": {
+        "require-jsdoc": 0
+      }
+    }
+  ]
 }
