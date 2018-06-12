@@ -23,8 +23,7 @@ export const TAG = 'amp-embedly-key';
 /**
  * Implementation of the amp-embedly-key component.
  *
- * Gets api key from user input and sets it in the service
- * to be used by other embedly components.
+ * Gets api key from user input to be used by other embedly components.
  *
  * See {@link ../amp-embedly-card.md} for the spec.
  */
