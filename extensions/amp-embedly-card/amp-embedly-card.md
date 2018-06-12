@@ -114,9 +114,5 @@ Disable Embedly Recommendations on video and rich cards. Default: 1
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
-##### data-href (required)
-
-The URL of the Facebook post/video. For example, `https://www.facebook.com/zuck/posts/10102593740125791`.
-
 ## Validation
 See [amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii) in the AMP validator specification.
