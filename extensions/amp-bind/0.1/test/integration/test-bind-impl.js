@@ -104,10 +104,10 @@ function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
  */
 function waitForEvent(env, name) {
   return new Promise(resolve => {
-    function callback() {
+    const callback = () => {
       resolve();
       env.win.removeEventListener(name, callback);
-    }
+    };
     env.win.addEventListener(name, callback);
   });
 }
@@ -572,6 +572,19 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(element.textContent).to.equal('2');
       });
     });
+
+    it('should replace history state in setStateWithExpression()', () => {
+      const replaceHistorySpy =
+          env.sandbox.spy(bind.historyForTesting(), 'replace');
+      const promise = onBindReadyAndSetStateWithExpression(
+          env, bind, '{"onePlusOne": one + one}', {one: 1});
+      return promise.then(() => {
+        expect(replaceHistorySpy).calledOnce;
+        expect(replaceHistorySpy.firstCall.args[0].data['amp-bind'])
+            .to.deep.equal({onePlusOne: 2});
+      });
+    });
+
 
     it('should support pushStateWithExpression()', () => {
       const pushHistorySpy =
