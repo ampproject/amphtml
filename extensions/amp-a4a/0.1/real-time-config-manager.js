@@ -175,8 +175,7 @@ export class RealTimeConfigManager {
     this.rtcStartTime_ = Date.now();
     this.handleRtcForCustomUrls(customMacros);
     this.handleRtcForVendorUrls(customMacros);
-    return this.promiseArray_.length ? Promise.all(this.promiseArray_) :
-      null;
+    return Promise.all(this.promiseArray_);
   }
 
   /**

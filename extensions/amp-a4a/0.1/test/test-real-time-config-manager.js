@@ -472,8 +472,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
               expect(fetchJsonStub).to.be.calledOnce);
           case CONSENT_POLICY_STATE.UNKNOWN:
           case CONSENT_POLICY_STATE.INSUFFICIENT:
-            expect(rtcResult).to.not.be.ok;
-            expect(fetchJsonStub).to.not.be.called;
+            return rtcResult.then(result => {
+              expect(result).to.deep.equal([]);
+              expect(fetchJsonStub).to.not.be.called;
+            });
             break;
           default:
             throw new Error(`unknown consent state ${consentState}`);
