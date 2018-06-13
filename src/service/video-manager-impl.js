@@ -51,7 +51,7 @@ import {map} from '../utils/object';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
-import {setStyles} from '../style';
+import {setStyle} from '../style';
 import {startsWith} from '../string';
 
 
@@ -689,83 +689,86 @@ class VideoEntry {
       // Only muted videos are allowed to autoplay
       this.video.mute();
 
-      if (this.video.isInteractive()) {
-        this.autoplayInteractiveVideoBuilt_();
-      }
+      this.installAutoplayArtifacts_();
     });
   }
 
   /**
-   * Called by autoplayVideoBuilt_ when an interactive autoplay video is built.
-   * It handles hiding controls, installing autoplay animation and handling
-   * user interaction by unmuting and showing controls.
+   * Installs autoplay animation and interaction mask when interactive.
+   * The animated icon is appended always, but only displayed by CSS when
+   * `controls` is set. See `video-autoplay.css`.
    * @private
    */
-  autoplayInteractiveVideoBuilt_() {
+  installAutoplayArtifacts_() {
     const {video} = this;
+    const {element} = this.video;
 
-    // Hide the controls.
-    video.hideControls();
+    if (element.hasAttribute(VideoAttributes.NO_AUDIO) ||
+        element.signals().get(VideoServiceSignals.USER_INTERACTED)) {
+      return;
+    }
 
-    // Create autoplay animation and the mask to detect user interaction.
     const animation = this.createAutoplayAnimation_();
-    const mask = this.createAutoplayMask_();
-    video.mutateElement(() => {
-      const {element} = this.video;
-      element.appendChild(animation);
-      element.appendChild(mask);
-    });
 
-    // Listen to pause, play and user interaction events.
-    const {element} = video;
-    const unlisteners = [
-      listen(mask, 'click', triggerUserInteracted.bind(this)),
-      listen(animation, 'click', triggerUserInteracted.bind(this)),
-      listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
-      listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
-      listen(element, VideoEvents.AD_START, adStart.bind(this)),
-      listen(element, VideoEvents.AD_END, adEnd.bind(this)),
-    ];
-
-    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
-        .then(onInteraction.bind(this));
-
-    /**
-     * @param {boolean} isPlaying
-     */
-    function toggleAnimation(isPlaying) {
+    /** @param {boolean} isPlaying */
+    const toggleAnimation = isPlaying => {
       video.mutateElement(() => {
         animation.classList.toggle('amp-video-eq-play', isPlaying);
       });
-    }
+    };
 
-    function triggerUserInteracted() {
-      userInteractedWith(video);
-    }
+    video.mutateElement(() => {
+      element.appendChild(animation);
+    });
 
-    function onInteraction() {
+    const unlisteners = [
+      listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
+      listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
+    ];
+
+    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED).then(() => {
       const {video} = this;
+      const {element} = video;
       this.firstPlayEventOrNoop_();
       video.showControls();
       video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();
       });
-      removeElement(animation);
-      removeElement(mask);
+      const animation = element.querySelector('i-amphtml-video-eq');
+      const mask = element.querySelector('i-amphtml-video-mask');
+      if (animation) {
+        removeElement(animation);
+      }
+      if (mask) {
+        removeElement(mask);
+      }
+    });
+
+    if (!this.video.isInteractive()) {
+      return;
     }
 
-    function adStart() {
-      setStyles(mask, {
-        'display': 'none',
-      });
-    }
+    const mask = this.createAutoplayMask_();
 
-    function adEnd() {
-      setStyles(mask, {
-        'display': 'block',
+    /** @param {string} display */
+    const setMaskDisplay = display => {
+      video.mutateElement(() => {
+        setStyle(mask, 'display', display);
       });
-    }
+    };
+
+    video.hideControls();
+
+    video.mutateElement(() => {
+      element.appendChild(mask);
+    });
+
+    [
+      listen(mask, 'click', () => userInteractedWith(video)),
+      listen(element, VideoEvents.AD_START, () => setMaskDisplay('none')),
+      listen(element, VideoEvents.AD_END, () => setMaskDisplay('block')),
+    ].forEach(unlistener => unlisteners.push(unlistener));
   }
 
   /**
@@ -1274,8 +1277,8 @@ function analyticsEvent(entry, eventType, opt_vars) {
 
 
 /** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
-// TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
 export function installVideoManagerForDoc(nodeOrDoc) {
+  // TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
   // TODO(alanorozco, #13674): Rename to `video-service`
   registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', ampdoc => {
     const {win} = ampdoc;

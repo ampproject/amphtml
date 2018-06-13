@@ -20,11 +20,26 @@ i-amphtml-video-mask {
 
 /**
  * Animated equalizer icon for muted autoplaying videos.
+ *
+ * The equalizer icon is shown in the following scenarios:
+ *  1. when the `controls` attribute is set OR
+ *  2. the video is inside an `<amp-story>` element.
+ *
+ * Neither applies if the video is tagged with the `noaudio` attribute, in which
+ * case the icon is never displayed.
  */
 
+.amp-video-eq {
+  display: none;
+}
+
+[controls] .amp-video-eq,
+amp-story .amp-video-eq {
+  display: flex;
+}
+
 [noaudio] .amp-video-eq {
-  /* Don't display icon for videos flagged as having no audio. */
-  display: none !important;
+  display: none;
 }
 
 .amp-video-eq {
@@ -32,7 +47,6 @@ i-amphtml-video-mask {
   pointer-events: none !important;
   align-items: flex-end;
   bottom: 7px;
-  display: flex;
   height: 12px;
   opacity: 0.8;
   overflow: hidden;
