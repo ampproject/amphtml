@@ -60,6 +60,9 @@ const AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE = {
 };
 
 
+/**
+ * Share menu UI.
+ */
 export class ShareMenu {
   /**
    * @param {!Window} win

@@ -39,7 +39,7 @@ const BOOKEND_VERSION_KEY = 'bookend-version';
 
 /**
  * @typedef {{
- *   shareProviders: (!JsonObject|undefined),
+ *   shareProviders: (!JsonObject|!Object<string, !JsonObject>),
  *   relatedArticles: !Array<!./related-articles.RelatedArticleSetDef>
  * }}
  */

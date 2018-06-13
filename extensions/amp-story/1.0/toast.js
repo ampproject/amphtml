@@ -28,6 +28,10 @@ const TOAST_CLASSNAME = 'i-amphtml-story-toast';
 const TOAST_VISIBLE_TIME_MS = 2600;
 
 
+/**
+ * UI notifications service, displaying a message to the user for a limited
+ * amount of time.
+ */
 export class Toast {
   /**
    * @param {!Window} win

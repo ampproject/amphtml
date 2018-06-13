@@ -39,6 +39,9 @@ export const TapNavigationDirection = {
  * invoked.
  */
 export class AdvancementConfig {
+  /**
+   * @public
+   */
   constructor() {
     /** @private @const {!Array<function(number)>} */
     this.progressListeners_ = [];
@@ -159,7 +162,7 @@ export class AdvancementConfig {
    */
   static forPage(page) {
     const rootEl = page.element;
-    const win = rootEl.ownerDocument.defaultView;
+    const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
     const supportedAdvancementModes = [
@@ -419,6 +422,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
    * auto-advance string (from the 'auto-advance-after' attribute on the page).
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
+   * @param {!Window} win
    * @return {?AdvancementConfig} An AdvancementConfig, if time-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
@@ -450,6 +454,10 @@ class TimeBasedAdvancement extends AdvancementConfig {
  * guaranteed.
  */
 class MediaBasedAdvancement extends AdvancementConfig {
+  /**
+   * @param {!Window} win
+   * @param {!Element} element
+   */
   constructor(win, element) {
     super();
 
@@ -580,6 +588,8 @@ class MediaBasedAdvancement extends AdvancementConfig {
    * auto-advance string (from the 'auto-advance-after' attribute on the page).
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
+   * @param {!Window} win
+   * @param {!Element} rootEl
    * @return {?AdvancementConfig} An AdvancementConfig, if media-element-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.

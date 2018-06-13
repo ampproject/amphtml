@@ -166,6 +166,9 @@ const actions = (state, action, data) => {
 };
 
 
+/**
+ * Store service.
+ */
 export class AmpStoryStoreService {
   /**
    * @param {!Window} win

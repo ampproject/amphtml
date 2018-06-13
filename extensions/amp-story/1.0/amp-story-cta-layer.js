@@ -41,6 +41,9 @@ import {user} from '../../../src/log';
  */
 const TAG = 'amp-story-cta-layer';
 
+/**
+ * Call to action button layer template.
+ */
 export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
 
   /** @override */

@@ -39,6 +39,11 @@ describes.realWin('amp-story', {
   let element;
   let story;
 
+  /**
+   * @param {!Element} container
+   * @param {boolean=} opt_active
+   * @return {!Element}
+   */
   function appendEmptyPage(container, opt_active) {
     const page = document.createElement('amp-story-page');
     page.id = '-empty-page';
@@ -49,6 +54,12 @@ describes.realWin('amp-story', {
     return page;
   }
 
+  /**
+   * @param {!Element} container
+   * @param {number} count
+   * @param {Array<string>=} opt_ids
+   * @return {!Array<!Element>}
+   */
   function createPages(container, count, opt_ids) {
     return Array(count).fill(undefined).map((unused, i) => {
       const page = win.document.createElement('amp-story-page');
@@ -58,6 +69,10 @@ describes.realWin('amp-story', {
     });
   }
 
+  /**
+   * @param {string} eventType
+   * @return {!Event}
+   */
   function createEvent(eventType) {
     const eventObj = document.createEventObject ?
       document.createEventObject() : document.createEvent('Events');

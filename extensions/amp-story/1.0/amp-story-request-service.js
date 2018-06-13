@@ -23,7 +23,14 @@ import {user} from '../../../src/log';
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
 
+/**
+ * Service to send XHRs.
+ */
 export class AmpStoryRequestService {
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyElement
+   */
   constructor(win, storyElement) {
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;

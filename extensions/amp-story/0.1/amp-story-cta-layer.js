@@ -31,6 +31,9 @@
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 
+/**
+ * Call to action button layer template.
+ */
 export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
 
   /** @override */
