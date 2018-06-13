@@ -528,11 +528,15 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 
 /* Default loading spinner */
 
+amp-story .amp-video-eq,
+.i-amphtml-story-spinner {
+  right: 12px !important;
+  bottom: 12px !important;
+}
+
 .i-amphtml-story-spinner {
   display: inline-block !important;
   position: absolute !important;
-  top: calc(100% - 36px) !important;
-  right: 12px !important;
   width: 24px !important;
   height: 24px !important;
   z-index: 10 !important;
