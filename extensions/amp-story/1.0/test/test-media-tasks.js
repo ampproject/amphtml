@@ -118,16 +118,28 @@ describes.realWin('media-tasks', {}, () => {
   });
 
   describe('UpdateSourcesTask', () => {
+    /**
+     * @param {number} index
+     * @return {string}
+     */
     function getFakeVideoUrl(index) {
       return `http://example.com/video${index}.mp4`;
     }
 
+    /**
+     * @param {number} index
+     * @return {!Element}
+     */
     function getFakeSource(index) {
       const source = document.createElement('source');
       source.src = getFakeVideoUrl(index);
       return source;
     }
 
+    /**
+     * @param {!Array<number>} indices
+     * @return {!Array<!Element>}
+     */
     function getFakeSources(indices) {
       return indices.map(index => getFakeSource(index));
     }

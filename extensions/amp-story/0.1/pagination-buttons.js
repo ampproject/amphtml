@@ -91,6 +91,9 @@ function setClassOnHover(hoverEl, targetEl, className) {
 }
 
 
+/**
+ * Desktop navigation buttons.
+ */
 class PaginationButton {
   /**
    * @param {!Document} doc

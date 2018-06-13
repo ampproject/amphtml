@@ -92,6 +92,9 @@ const DESKTOP_SIZE_WARNING_TEMPLATE = {
 
 
 
+/**
+ * Viewport warning layer UI.
+ */
 export class ViewportWarningLayer {
   /**
    * @param {!Window} win

@@ -144,8 +144,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /*
-   * @return {?./animation.AnimationManager}
+  /**
    * @private
    */
   maybeCreateAnimationManager_() {

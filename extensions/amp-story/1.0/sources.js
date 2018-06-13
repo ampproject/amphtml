@@ -19,6 +19,9 @@ import {removeElement} from '../../../src/dom';
 
 
 
+/**
+ * Class handling HTMLMediaElements sources.
+ */
 export class Sources {
   /**
    * @param {?string=} opt_srcAttr The 'src' attribute of the media element.

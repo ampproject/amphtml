@@ -170,6 +170,9 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
 }
 
 
+/**
+ * Localization service.
+ */
 export class LocalizationService {
   /**
    * @param {!Window} win

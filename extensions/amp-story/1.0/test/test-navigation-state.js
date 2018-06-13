@@ -23,10 +23,6 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
   let hasBookend = false;
   let storeService;
 
-  function createObserver() {
-    return sandbox.spy();
-  }
-
   beforeEach(() => {
     storeService = new AmpStoryStoreService(env.win);
     registerServiceBuilder(env.win, 'story-store', () => storeService);
@@ -37,7 +33,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
   });
 
   it('should dispatch active page changes to all observers', () => {
-    const observers = Array(5).fill(undefined).map(createObserver);
+    const observers = Array(5).fill(undefined).map(() => sandbox.spy());
 
     observers.forEach(observer => navigationState.observe(observer));
 
