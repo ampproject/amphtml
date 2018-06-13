@@ -50,6 +50,7 @@ const ELIGIBLE_TAGS = {
   'svg': true,
   'DIV': true,
   'AMP-IMG': true,
+  'AMP-LAYOUT': true,
 };
 
 const SUPPORT_VALIDATION_MSG = `${TAG} should
@@ -153,7 +154,6 @@ export class AmpPanZoom extends AMP.BaseElement {
         children[0].tagName + ` is not supported by ${TAG}`
     );
     this.content_ = children[0];
-    this.content_.classList.add('i-amphtml-pan-zoom-child');
 
     if (this.element.hasAttribute('max-scale')) {
       this.maxScale_ = parseInt(
@@ -196,6 +196,7 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.content_.classList.add('i-amphtml-pan-zoom-child');
     return this.resetContentDimensions_()
         .then(() => this.setupGestures_());
   }
@@ -225,7 +226,9 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED ||
-        layout == Layout.FILL || layout == Layout.RESPONSIVE;
+        layout == Layout.FIXED_HEIGHT ||
+        layout == Layout.FILL ||
+        layout == Layout.RESPONSIVE;
   }
 
   /** @override */
