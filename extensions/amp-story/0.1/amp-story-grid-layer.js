@@ -73,6 +73,9 @@ export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
   'thirds': 'i-amphtml-story-grid-template-thirds',
 };
 
+/**
+ * Grid layer template templating system.
+ */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @param {!AmpElement} element */
   constructor(element) {
