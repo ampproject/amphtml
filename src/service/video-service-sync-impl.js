@@ -87,9 +87,9 @@ export class VideoServiceSync {
    * @return {!Promise<!VideoServiceDef>}
    * @visibleForTesting
    */
-  // Not exposed in ../services.js since we don't want other modules to
-  // instantiate or access the service.
   static videoServiceFor(win, nodeOrDoc) {
+    // Not exposed in ../services.js since we don't want other modules to
+    // instantiate or access the service.
     const extensions = Services.extensionsFor(win);
     const ampdoc = getAmpdoc(nodeOrDoc);
     return extensions.installExtensionForDoc(ampdoc, EXTENSION)
@@ -98,7 +98,7 @@ export class VideoServiceSync {
   }
 
   /** @override */
-  register(video, unusedFromV1manageAutoplay = true) {
+  register(video) {
     this.asyncImpl_.then(impl =>
       impl.register(video));
 
@@ -115,16 +115,11 @@ export class VideoServiceSync {
     if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
       return;
     }
-    const signals = video.signals();
-    const autoplayDelegated = VideoServiceSignals.AUTOPLAY_DELEGATED;
-
-    if (signals.get(autoplayDelegated)) {
-      return;
-    }
 
     this.getAutoplay_().register(video);
 
-    signals.whenSignal(autoplayDelegated).then(() => {
+    const autoplayDelegated = VideoServiceSignals.AUTOPLAY_DELEGATED;
+    video.signals().whenSignal(autoplayDelegated).then(() => {
       this.getAutoplay_().delegate(video.element);
     });
   }

@@ -61,7 +61,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
 
   function expectToContainInteractionOverlay(element) {
     const overlay = element.querySelector('i-amphtml-video-mask');
-    const icon = overlay.querySelector('i-amphtml-video-icon');
+    const icon = element.querySelector('i-amphtml-video-icon');
 
     expect(overlay).to.not.be.null;
     expect(icon).to.not.be.null;
