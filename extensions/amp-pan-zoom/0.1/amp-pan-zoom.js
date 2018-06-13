@@ -89,26 +89,46 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     /** @private */
     this.scale_ = 1;
+
     /** @private */
     this.startScale_ = 1;
+
     /** @private */
     this.minScale_ = 1;
+
     /** @private */
     this.maxScale_ = DEFAULT_MAX_SCALE;
+
+    /** @private */
+    this.initialX_ = 0;
+
+    /** @private */
+    this.initialY_ = 0;
+
+    /** @private */
+    this.initialScale_ = 1;
+
     /** @private */
     this.startX_ = 0;
+
     /** @private */
     this.startY_ = 0;
+
     /** @private */
     this.posX_ = 0;
+
     /** @private */
     this.posY_ = 0;
+
     /** @private */
     this.minX_ = 0;
+
     /** @private */
     this.minY_ = 0;
+
     /** @private */
     this.maxX_ = 0;
+
     /** @private */
     this.maxY_ = 0;
 
@@ -134,6 +154,26 @@ export class AmpPanZoom extends AMP.BaseElement {
     );
     this.content_ = children[0];
     this.content_.classList.add('i-amphtml-pan-zoom-child');
+
+    if (this.element.hasAttribute('max-scale')) {
+      this.maxScale_ = parseInt(
+          this.element.getAttribute('max-scale'), 10);
+    }
+
+    if (this.element.hasAttribute('initial-scale')) {
+      this.initialScale_ = parseInt(
+          this.element.getAttribute('initial-scale'), 10);
+    }
+
+    if (this.element.hasAttribute('initial-x')) {
+      this.initialX_ = parseInt(
+          this.element.getAttribute('initial-x'), 10);
+    }
+
+    if (this.element.hasAttribute('initial-y')) {
+      this.initialY_ = parseInt(
+          this.element.getAttribute('initial-y'), 10);
+    }
 
     this.registerAction('transform', invocation => {
       const {args} = invocation;
@@ -184,7 +224,8 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED || layout == Layout.FILL;
+    return layout == Layout.FIXED ||
+        layout == Layout.FILL || layout == Layout.RESPONSIVE;
   }
 
   /** @override */
@@ -240,12 +281,12 @@ export class AmpPanZoom extends AMP.BaseElement {
         elementBoxRatio / sourceAspectRatio,
         sourceAspectRatio / elementBoxRatio
     );
-    this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
+    this.maxScale_ = Math.max(this.maxScale_, maxScale);
 
     // Reset zoom and pan.
-    this.startScale_ = this.scale_ = 1;
-    this.startX_ = this.posX_ = 0;
-    this.startY_ = this.posY_ = 0;
+    this.startScale_ = this.scale_ = this.initialScale_;
+    this.startX_ = this.posX_ = this.initialX_;
+    this.startY_ = this.posY_ = this.initialY_;
     this.updatePanZoomBounds_(this.scale_);
   }
 
