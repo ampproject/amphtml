@@ -190,7 +190,8 @@ The AMP story HTML format follows the [same markup requirements as a valid AMP H
 | RULE | DESCRIPTION |
 | ---- | --- |
 | The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP story. |
-| Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-1.0.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
+| Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-1.0.js" custom-element="amp-story"></script>` tag as the third child of the `<head>` tag. | Includes and loads the amp-story JS library. |
+| Contain a `<link rel="canonical" href="$STORY_URL">` tag inside the `<head>`. | The link points to the story itself, identifying the story as the canonical document. |
 
 ## Story: `amp-story`
 
