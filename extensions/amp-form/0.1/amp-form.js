@@ -295,6 +295,7 @@ export class AmpForm {
    * Triggers 'amp-form-submit' event in 'amp-analytics' and
    * generates variables for form fields to be accessible in analytics
    *
+   * @param {string} eventType
    * @private
    */
   triggerFormSubmitInAnalytics_(eventType) {

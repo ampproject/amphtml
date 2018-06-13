@@ -1814,7 +1814,7 @@ describes.repeated('', {
       });
     });
 
-    it('should trigger amp-form-submit-success analytics event with form data', () => {
+    it('should trigger submit-success analytics event with form data', () => {
       return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         form.id = 'registration';
@@ -1863,7 +1863,7 @@ describes.repeated('', {
       });
     });
 
-    it('should trigger amp-form-submit-error analytics event with form data', () => {
+    it('should trigger submit-error analytics event with form data', () => {
       return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         form.id = 'registration';
