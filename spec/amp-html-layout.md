@@ -106,7 +106,7 @@ Supported values for the `layout` attribute:
     </tr>
     <tr>
       <td><code>fill</code></td>
-      <td>The element takes the space available to it&mdash;both width and height. In other words, the layout and size of a <code>fill</code> element matches its parent. For an element to fill its parent container, specify the "fill" layout, and ensure the parent container specifies `position:relative` or `position:absolute`. </td>
+      <td>The element takes the space available to it&mdash;both width and height. In other words, the layout and size of a <code>fill</code> element matches its parent. For an element to fill its parent container, specify the "fill" layout, and ensure the parent container specifies <code>position:relative</code> or <code>position:absolute</code>. </td>
     </tr>
     <tr>
       <td><code>fixed</code></td>
