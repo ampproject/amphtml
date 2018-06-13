@@ -531,6 +531,12 @@ function compileCss(watch, opt_compileAll) {
     });
   }
 
+  /**
+   * @param  {!Object} css
+   * @param  {string} originalCssFilename
+   * @param  {string} jsFilename
+   * @param  {string} cssFilename
+   */
   function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
     return toPromise(gulp.src(`css/${originalCssFilename}`)
         .pipe($$.file(jsFilename, 'export const cssText = ' +
@@ -655,6 +661,11 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
  * @param {!Object} options
  */
 function buildExtensionCss(path, name, version, options) {
+
+  /**
+   * @param  {string} name
+   * @param  {!Object} css
+   */
   function writeCssBinaries(name, css) {
     const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
     const jsName = `build/${name}.js`;
@@ -1162,6 +1173,10 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(gulp.dest.bind(gulp), destDir);
 
   const destFilename = options.toName || srcFilename;
+
+  /**
+   * @param  {!Function} failOnError
+   */
   function rebundle(failOnError) {
     const startTime = Date.now();
     return toPromise(
@@ -1322,6 +1337,12 @@ function buildWebPushPublisherFilesVersion(version, options) {
   return Promise.all(promises);
 }
 
+/**
+ * @param  {string} version
+ * @param  {string} fileName
+ * @param  {boolean} watch
+ * @param  {!Object} options
+ */
 function buildWebPushPublisherFile(version, fileName, watch, options) {
   const basePath = `extensions/amp-web-push/${version}/`;
   const tempBuildDir = `build/all/amp-web-push-${version}/`;
@@ -1538,6 +1559,9 @@ function checkMinVersion() {
   }
 }
 
+/**
+ * @param  {string} path
+ */
 function mkdirSync(path) {
   try {
     fs.mkdirSync(path);
@@ -1548,6 +1572,9 @@ function mkdirSync(path) {
   }
 }
 
+/**
+ * @param  {!Object} readable
+ */
 function toPromise(readable) {
   return new Promise(function(resolve, reject) {
     readable.on('error', reject).on('end', resolve);
