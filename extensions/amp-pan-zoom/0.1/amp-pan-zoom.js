@@ -146,7 +146,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       const deltaX = x - this.posX_;
       const deltaY = y - this.posY_;
       this.onZoom_(scale, deltaX, deltaY, true);
-    }, ActionTrust.LOW);
+    });
   }
 
   /** @override */
