@@ -358,7 +358,7 @@ function setupBundles(graph) {
         dest = entry;
       }
     });
-    console.assert(inBundleCount >= 1,
+    console/*OK*/.assert(inBundleCount >= 1,
         'Should be in at least 1 bundle', id, 'Bundle count',
         inBundleCount, graph.depOf);
     // If a module is in more than 1 bundle, it must go into _base.
