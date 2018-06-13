@@ -48,8 +48,9 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
         ele.className = newClass.replace(/^\s+|\s+$/g, '');
       }
     };
-    if (parseInt(window.getComputedStyle(document.querySelector('.msg-text'))
-        .height, 10) <= 95) {
+    // parseInt(window.getComputedStyle(document.querySelector('.msg-text'))
+    //     .height, 10)
+    if (document.querySelector('.msg-text').clientHeight <= 95) {
       addClass(document.querySelector('.view-more'), 'hide');
     } else {
       addClass(document.querySelector('.view-more-text'), 'limit-height');

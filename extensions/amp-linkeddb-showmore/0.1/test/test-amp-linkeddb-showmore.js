@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpLinkeddbShowmore} from '../amp-linkeddb-showmore';
+import {} from '../amp-linkeddb-showmore';
 
 describes.realWin('amp-linkeddb-showmore', {
   amp: {
@@ -24,13 +24,11 @@ describes.realWin('amp-linkeddb-showmore', {
 
   let win;
   let element;
-  let LinkeddbShowmore;
-  
+
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-linkeddb-showmore');
     win.document.body.appendChild(element);
-    LinkeddbShowmore = new AmpLinkeddbShowmore(element);
   });
 
   it('amp-linkeddb-showmore', () => {
