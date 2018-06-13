@@ -42,8 +42,8 @@ import {installPixel} from '../../builtins/amp-pixel';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
 import {map} from '../utils/object';
 import {toWin} from '../types';
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+//import installCustomElements from
+  //'document-register-element/build/document-register-element.node';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
@@ -646,7 +646,7 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin, 'auto');
+  //installCustomElements(childWin, 'auto');
 }
 
 

@@ -72,6 +72,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     CompilerOptions options = super.createOptions();
     options.setCollapseProperties(true);
+
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
         assignmentReplacements, prodAssignmentReplacements);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
@@ -90,8 +91,10 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     // Property renaming. Relies on AmpCodingConvention to be safe.
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
         PropertyRenamingPolicy.ALL_UNQUOTED);
-    options.setDisambiguatePrivateProperties(true);
-    options.setGeneratePseudoNames(pseudo_names);
+    //options.setDisambiguatePrivateProperties(true);
+    options.setGeneratePseudoNames(true);
+    //options.setCrossModuleCodeMotion(false);
+    //options.setCrossModuleMethodMotion(false);
     return options;
   }
 
@@ -124,6 +127,8 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         runner.pseudo_names = true;
       }
     }
+    runner.pseudo_names = true;
+
 
     if (runner.shouldRunCompiler()) {
       runner.run();

@@ -22,11 +22,11 @@ import {
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
-import {install as installPromise} from './polyfills/promise';
+//import {install as installPromise} from './polyfills/promise';
 // Importing the document-register-element module has the side effect
 // of installing the custom elements polyfill if necessary.
 import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+  '../build/patched-module/document-register-element/build/document-register-element.node';
 
 /**
   Only install in closure binary and not in babel/browserify binary, since in
@@ -38,9 +38,10 @@ import installCustomElements from
 if (!getMode().localDev) {
   installCustomElements(self, 'auto');
 }
+console.log('hello world');
 installDOMTokenListToggle(self);
 installMathSign(self);
 installObjectAssign(self);
-installPromise(self);
+//installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);

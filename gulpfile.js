@@ -381,39 +381,39 @@ function polyfillsForTests() {
 function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   opt_checkTypes) {
   const promises = [
-    compileJs('./3p/', 'integration.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-          minifiedName: 'f.js',
-          checkTypes: opt_checkTypes,
-          watch,
-          minify: shouldMinify,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          externs: ['ads/ads.extern.js'],
-          include3pDirectories: true,
-          includePolyfills: true,
-        }),
-    compileJs('./3p/', 'ampcontext-lib.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-          minifiedName: 'ampcontext-v0.js',
-          checkTypes: opt_checkTypes,
-          watch,
-          minify: shouldMinify,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          externs: ['ads/ads.extern.js'],
-          include3pDirectories: true,
-          includePolyfills: false,
-        }),
-    compileJs('./3p/', 'iframe-transport-client-lib.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-          minifiedName: 'iframe-transport-client-v0.js',
-          checkTypes: opt_checkTypes,
-          watch,
-          minify: shouldMinify,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          externs: ['ads/ads.extern.js'],
-          include3pDirectories: true,
-          includePolyfills: false,
-        }),
+    //compileJs('./3p/', 'integration.js',
+        //'./dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+          //minifiedName: 'f.js',
+          //checkTypes: opt_checkTypes,
+          //watch,
+          //minify: shouldMinify,
+          //preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          //externs: ['ads/ads.extern.js'],
+          //include3pDirectories: true,
+          //includePolyfills: true,
+        //}),
+    //compileJs('./3p/', 'ampcontext-lib.js',
+        //'./dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+          //minifiedName: 'ampcontext-v0.js',
+          //checkTypes: opt_checkTypes,
+          //watch,
+          //minify: shouldMinify,
+          //preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          //externs: ['ads/ads.extern.js'],
+          //include3pDirectories: true,
+          //includePolyfills: false,
+        //}),
+    //compileJs('./3p/', 'iframe-transport-client-lib.js',
+        //'./dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+          //minifiedName: 'iframe-transport-client-v0.js',
+          //checkTypes: opt_checkTypes,
+          //watch,
+          //minify: shouldMinify,
+          //preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          //externs: ['ads/ads.extern.js'],
+          //include3pDirectories: true,
+          //includePolyfills: false,
+        //}),
     compileJs('./src/', 'amp.js', './dist', {
       minifiedName: 'v0.js',
       includePolyfills: true,
@@ -431,59 +431,61 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           's.animation="none";' +
           's.WebkitAnimation="none;"},1000);throw e};',
     }),
-    compileJs('./extensions/amp-viewer-integration/0.1/examples/',
-        'amp-viewer-host.js', './dist/v0/examples', {
-          toName: 'amp-viewer-host.max.js',
-          minifiedName: 'amp-viewer-host.js',
-          incudePolyfills: true,
-          watch,
-          extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-          compilationLevel: 'WHITESPACE_ONLY',
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          minify: false,
-        }),
+    //compileJs('./extensions/amp-viewer-integration/0.1/examples/',
+        //'amp-viewer-host.js', './dist/v0/examples', {
+          //toName: 'amp-viewer-host.max.js',
+          //minifiedName: 'amp-viewer-host.js',
+          //incudePolyfills: true,
+          //watch,
+          //extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
+          //compilationLevel: 'WHITESPACE_ONLY',
+          //preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          //minify: false,
+        //}),
   ];
 
   // We don't rerun type check for the shadow entry point for now.
   if (!opt_checkTypes) {
     if (!watch || argv.with_shadow) {
-      promises.push(
-          compileJs('./src/', 'amp-shadow.js', './dist', {
-            minifiedName: 'shadow-v0.js',
-            includePolyfills: true,
-            checkTypes: opt_checkTypes,
-            watch,
-            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-            minify: shouldMinify,
-          })
-      );
+      //promises.push(
+          //compileJs('./src/', 'amp-shadow.js', './dist', {
+            //minifiedName: 'shadow-v0.js',
+            //includePolyfills: true,
+            //checkTypes: opt_checkTypes,
+            //watch,
+            //preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            //minify: shouldMinify,
+          //})
+      //);
     }
 
     if (!watch || argv.with_inabox) {
-      promises.push(
-          // Entry point for inabox runtime.
-          compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-            toName: 'amp-inabox.js',
-            minifiedName: 'amp4ads-v0.js',
-            includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-            checkTypes: opt_checkTypes,
-            watch,
-            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-            minify: shouldMinify,
-          }),
+      //promises.push(
+          //// Entry point for inabox runtime.
+          //compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+            //toName: 'amp-inabox.js',
+            //minifiedName: 'amp4ads-v0.js',
+            //includePolyfills: true,
+            //extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+            //checkTypes: opt_checkTypes,
+            //watch,
+            //preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            //minify: shouldMinify,
+            //wrapper: '<%= contents %>',
+          //}),
 
-          // inabox-host
-          compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-            toName: 'amp-inabox-host.js',
-            minifiedName: 'amp4ads-host-v0.js',
-            includePolyfills: false,
-            checkTypes: opt_checkTypes,
-            watch,
-            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-            minify: shouldMinify,
-          })
-      );
+          //// inabox-host
+          //compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+            //toName: 'amp-inabox-host.js',
+            //minifiedName: 'amp4ads-host-v0.js',
+            //includePolyfills: false,
+            //checkTypes: opt_checkTypes,
+            //watch,
+            //preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            //minify: shouldMinify,
+            //wrapper: '<%= contents %>',
+          //})
+      //);
     }
 
     promises.push(
@@ -865,23 +867,24 @@ function dist() {
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
       .then(() => {
         return Promise.all([
-          compile(false, true, true),
+          //compile(false, true, true),
           // NOTE: When adding a line here,
           // consider whether you need to include polyfills
           // and whether you need to init logging (initLogConstructor).
-          buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildExaminer({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildWebWorker({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          //buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          //buildExaminer({
+            //minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          //buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          //buildWebWorker({
+            //minify: true, watch: false, preventRemoveAndMakeDir: true}),
           buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
-          buildExperiments({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildLoginDone({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildWebPushPublisherFiles({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          copyCss(),
+          //buildExperiments({
+            //minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          //buildLoginDone({
+            //minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          //buildWebPushPublisherFiles({
+            //minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          //copyCss(),
         ]);
       }).then(() => {
         if (process.env.TRAVIS) {
@@ -889,15 +892,16 @@ function dist() {
           console.log('\n');
         }
       }).then(() => {
-        copyAliasExtensions();
+        //copyAliasExtensions();
       }).then(() => {
-        if (argv.fortesting) {
-          return enableLocalTesting(minifiedRuntimeTarget);
-        }
-      }).then(() => {
-        if (argv.fortesting) {
-          return enableLocalTesting(minified3pTarget);
-        }
+        //if (argv.fortesting) {
+          //return enableLocalTesting(minifiedRuntimeTarget);
+        //}
+      //})
+    //.then(() => {
+        //if (argv.fortesting) {
+          //return enableLocalTesting(minified3pTarget);
+        //}
       }).then(() => exitCtrlcHandler(handlerProcess));
 }
 

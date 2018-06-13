@@ -34,7 +34,7 @@ const TAG = 'amp-audio';
 /**
  * Visible for testing only.
  */
-export class AmpAudio extends AMP.BaseElement {
+export class AmpAudio extends self.AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {

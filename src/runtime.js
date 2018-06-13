@@ -148,7 +148,7 @@ function adoptShared(global, callback) {
   // If there is already a global AMP object we assume it is an array
   // of functions
   /** @const {!Array<function(!Object)|ExtensionPayload>} */
-  const preregisteredExtensions = global.AMP || [];
+  const preregisteredExtensions = /** @type {?AMP} */ (global.AMP) || [];
 
   installExtensionsService(global);
   /** @const {!./service/extensions-impl.Extensions} */

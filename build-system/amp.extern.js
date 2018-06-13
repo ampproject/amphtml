@@ -100,6 +100,9 @@ window.AMP_TEST_IFRAME;
 window.AMP_TAG;
 window.AMP = {};
 
+/* @type {!Object} */
+window.ampExtendedElements = {};
+
 /** @constructor */
 function AmpConfigType() {}
 
@@ -207,7 +210,7 @@ ReactDatesConstants.HORIZONTAL_ORIENTATION;
 
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
-IntersectionObserverEntry.prototype.rootBounds;
+//IntersectionObserverEntry.prototype.rootBounds;
 
 // TODO (remove after we update closure compiler externs)
 window.PerformancePaintTiming;
