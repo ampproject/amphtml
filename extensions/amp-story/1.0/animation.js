@@ -48,8 +48,8 @@ const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 /**
  * @param {!Element} element
  * @return {boolean}
+ * TODO(alanorozco): maybe memoize?
  */
-// TODO(alanorozco): maybe memoize?
 export function hasAnimations(element) {
   return !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR);
 }
@@ -540,6 +540,9 @@ export class AnimationManager {
 
 /** Bus for animation sequencing. */
 class AnimationSequence {
+  /**
+   * @public
+   */
   constructor() {
     /** @private @const {!Object<string, !Promise>} */
     this.subscriptionPromises_ = map();
