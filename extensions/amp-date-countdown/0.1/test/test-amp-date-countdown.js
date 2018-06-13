@@ -35,7 +35,7 @@ describes.realWin('amp-date-countdown', {
   let impl;
   const ISOEndDate = '2020-06-01T00:00:00+08:00';
   const endDate = new Date(ISOEndDate);
-  const twoDaysBeforeEndDate = new Date(endDate - 86400000 * 2); //substract 2 days
+  const twoDaysBeforeEndDate = new Date(endDate - (86400000 * 2)); //substract 2 days
 
   beforeEach(() => {
     ({win/*, sandbox*/} = env);
