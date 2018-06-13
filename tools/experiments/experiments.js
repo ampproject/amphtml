@@ -55,7 +55,7 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'README.md#amp-dev-channel',
+        'contributing/release-schedule.md#amp-dev-channel',
   },
   {
     id: 'alp',
