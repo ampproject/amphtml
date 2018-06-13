@@ -57,8 +57,7 @@ function generateFunctionWhitelist() {
    * @param {...?} items
    * @return {!Array}
    */
-  /*eslint "no-unused-vars": 0*/
-  function splice(array, start, deleteCount, items) {
+  function splice(array, start, deleteCount, items) { // eslint-disable-line no-unused-vars
     if (!isArray(array)) {
       throw new Error(`splice: ${array} is not an array.`);
     }
@@ -407,8 +406,6 @@ export class BindExpression {
         const variable = value;
         if (Object.prototype.hasOwnProperty.call(scope, variable)) {
           return scope[variable];
-        } else {
-          user().warn(TAG, `${variable} is not defined; returning null.`);
         }
         return null;
 
