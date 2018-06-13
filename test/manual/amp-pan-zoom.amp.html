@@ -61,6 +61,14 @@
       fill: red;
     }
 
+    #square {
+      height: 300px;
+      width: 300px;
+      background-color: green;
+      border: 20px red solid;
+      box-sizing: border-box;
+    }
+
     amp-pan-zoom {
       border: #000 2px solid;
     }
@@ -81,8 +89,16 @@
       </script>
     </amp-state>
 <article>
-  <h1>AMP Pan-Zoom Basic Test</h1>
-  <p>Double tap or pinch to zoom in and out. This tests layout responsive and set state</p>
+  <h1>AMP Pan Zoom</h1>
+  <h2>AMP Pan Zoom Basic Example</h2>
+  <amp-pan-zoom layout="responsive" width="300" height="400">
+      <amp-img id="img0"
+        src="/examples/img/sample.jpg"
+        width="641" height="481" layout="fixed"></amp-img>
+  </amp-pan-zoom>
+
+  <h2>AMP Pan-Zoom Advanced Example</h2>
+  <p>Double tap or pinch to zoom in and out.</p>
   <p [text]="'Current scale: ' + scale">Current scale: 1</p>
       <amp-pan-zoom layout="responsive" height="3" width="4" max-scale="5" initial-scale="2" initial-x="150" initial-y="100" on="transformEnd:AMP.setState({scale: event.scale})">
       <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">

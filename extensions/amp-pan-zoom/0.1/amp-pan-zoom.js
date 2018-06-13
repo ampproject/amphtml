@@ -226,9 +226,9 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED ||
-        layout == Layout.FIXED_HEIGHT ||
-        layout == Layout.FILL ||
-        layout == Layout.RESPONSIVE;
+      layout == Layout.FIXED_HEIGHT ||
+      layout == Layout.FILL ||
+      layout == Layout.RESPONSIVE;
   }
 
   /** @override */
