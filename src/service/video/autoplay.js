@@ -22,13 +22,14 @@ import {VideoEvents} from '../../video-interface';
 import {VideoServiceSignals} from '../video-service-interface';
 import {VideoUtils} from '../../utils/video';
 import {dev} from '../../log';
+import {getData, listen, listenOnce} from '../../event-helper';
 import {getMode} from '../../mode';
 import {getServiceForDoc} from '../../service';
 import {htmlFor, htmlRefs} from '../../static-template';
 import {
   installPositionObserverServiceForDoc,
 } from '../position-observer/position-observer-impl';
-import {listen, listenOnce} from '../../event-helper';
+import {isFiniteNumber} from '../../types';
 import {once} from '../../utils/function';
 import {removeElement} from '../../dom';
 
@@ -227,8 +228,11 @@ export class AutoplayEntry {
     /** @private {boolean} */
     this.isVisible_ = false;
 
-    /** @private {!UnlistenDef|null} */
-    this.unlistener_ = this.observeOn_(positionObserver);
+    /** @private {?Array<!UnlistenDef>} */
+    this.visibilityUnlisteners_ = [
+      this.observeOn_(positionObserver),
+      this.listenToVisibilityChange_(),
+    ];
 
     // Only muted videos are allowed to autoplay
     video.mute();
@@ -241,7 +245,7 @@ export class AutoplayEntry {
    * @param {
    *   !../position-observer/position-observer-impl.PositionObserver
    * } positionObserver
-   * @return {!UnlistenDef} [description]
+   * @return {!UnlistenDef}
    * @private
    */
   observeOn_(positionObserver) {
@@ -252,21 +256,40 @@ export class AutoplayEntry {
   }
 
   /**
+   * @return {!UnlistenDef}
+   * @private
+   */
+  listenToVisibilityChange_() {
+    return listen(this.element_, VideoEvents.VISIBILITY, e => {
+      const data = getData(e);
+      const enforcedByEvent = data && data['visible'];
+      if (enforcedByEvent && !this.isVisible_) {
+        this.isVisible_ = enforcedByEvent;
+        this.trigger_(/* isPlaying */ enforcedByEvent);
+        return;
+      }
+      this.triggerByVisibility_();
+    });
+  }
+
+  /**
    * Delegates autoplay so that it's triggered by a different module.
    * @public
    */
   delegate() {
-    if (this.unlistener_) {
-      this.unlistener_();
-    }
+    this.disableTriggerByVisibility_();
     this.video.pause();
-    this.unlistener_ = null;
   }
 
   /** @private */
   onPositionChange_() {
-    const {intersectionRatio} = this.element_.getIntersectionChangeEntry();
-    const isVisible = intersectionRatio >= MIN_RATIO;
+    this.triggerByVisibility_();
+  }
+
+  /** @private */
+  triggerByVisibility_() {
+    const ratio = this.element_.getIntersectionChangeEntry().intersectionRatio;
+    const isVisible = (!isFiniteNumber(ratio) ? 0 : ratio) >= MIN_RATIO;
     if (this.isVisible_ == isVisible) {
       return;
     }
@@ -284,8 +307,8 @@ export class AutoplayEntry {
   }
 
   /** @private */
-  // TODO(alanorozco): AD_START, AD_END
   attachInteractionOverlay_() {
+    // TODO(alanorozco): AD_START, AD_END
     const {video} = this;
     const signals = video.signals();
     const userInteracted = VideoServiceSignals.USER_INTERACTED;
@@ -321,6 +344,7 @@ export class AutoplayEntry {
   /** @private */
   onInteraction_() {
     const mask = this.element_.querySelector('i-amphtml-video-mask');
+    this.disableTriggerByVisibility_();
     if (mask) {
       removeElement(mask);
     }
@@ -328,6 +352,15 @@ export class AutoplayEntry {
       this.video.showControls();
     }
     this.video.unmute();
+  }
+
+  /** @private */
+  disableTriggerByVisibility_() {
+    if (!this.visibilityUnlisteners_) {
+      return;
+    }
+    this.visibilityUnlisteners_.forEach(unlistener => unlistener());
+    this.visibilityUnlisteners_ = null; // GC
   }
 
   /**

@@ -29,6 +29,8 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
   let signals;
   let ampdoc;
 
+  const positionObserverMock = {observe: () => noop};
+
   beforeEach(() => {
     sandbox.stub(Services, 'platformFor').returns({
       isIos: () => false,
@@ -98,7 +100,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
           .withArgs('user-interacted')
           .returns(whenUserInteracts);
 
-      new AutoplayEntry(ampdoc, {observe: noop}, video);
+      new AutoplayEntry(ampdoc, positionObserverMock, video);
 
       triggerUserInteraction();
 
@@ -113,7 +115,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
   describe('#onPositionChange_', () => {
 
     it('does not trigger if not visible', () => {
-      const entry = new AutoplayEntry(ampdoc, {observe: noop}, video);
+      const entry = new AutoplayEntry(ampdoc, positionObserverMock, video);
 
       video.element.getIntersectionChangeEntry = () => ({
         intersectionRatio: 0.749,
@@ -130,7 +132,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
     });
 
     it('triggers once when visible', () => {
-      const entry = new AutoplayEntry(ampdoc, {observe: noop}, video);
+      const entry = new AutoplayEntry(ampdoc, positionObserverMock, video);
 
       video.element.getIntersectionChangeEntry = () => ({
         intersectionRatio: 0.75,
@@ -147,7 +149,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
     });
 
     it('triggers once when becoming invisible', () => {
-      const entry = new AutoplayEntry(ampdoc, {observe: noop}, video);
+      const entry = new AutoplayEntry(ampdoc, positionObserverMock, video);
 
       video.element.getIntersectionChangeEntry = () => ({
         intersectionRatio: 0.75,
@@ -177,14 +179,14 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
 
   describe('#trigger_', () => {
     it('triggers autoplay', () => {
-      const entry = new AutoplayEntry(ampdoc, {observe: noop}, video);
+      const entry = new AutoplayEntry(ampdoc, positionObserverMock, video);
       const whenAutoPlaying = listenOncePromise(video.element, 'amp:autoplay');
       entry.trigger_(true);
       return whenAutoPlaying;
     });
 
     it('triggers autopause', () => {
-      const entry = new AutoplayEntry(ampdoc, {observe: noop}, video);
+      const entry = new AutoplayEntry(ampdoc, positionObserverMock, video);
       const whenAutoPaused = listenOncePromise(video.element, 'amp:autopause');
       entry.trigger_(false);
       return whenAutoPaused;
