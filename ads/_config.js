@@ -252,6 +252,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'adyoulike': {
+    consentHandlingOverride: true,
+    prefetch: 'https://pixels.omnitagjs.com/amp.js',
+  },
+
   'adzerk': {},
 
   'affiliateb': {
