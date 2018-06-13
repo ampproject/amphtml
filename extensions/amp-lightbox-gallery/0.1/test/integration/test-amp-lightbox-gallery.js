@@ -31,7 +31,7 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
   </figcaption>
 </figure>
   `;
-  describes.integration('amp-lightbox-gallery opens', {
+  describes.integration('amp-lightbox-gallery with one image', {
     body,
     extensions,
   }, env => {
@@ -44,18 +44,7 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
 
     it('should open and close correctly', () => {
       const lightbox = win.document.getElementById('amp-lightbox-gallery');
-      expect(lightbox.style.display).to.equal('none');
-      const ampImage = win.document.getElementById('img0');
-      const imageLoadedPromise = waitForImageToLoad(ampImage);
-      return imageLoadedPromise.then(() => {
-        const ampImage = win.document.getElementById('img0');
-        // Simulate a click on the img inside the amp-img, because this is
-        // what people tend to actually click on.
-        const openerImage = ampImage.querySelector('img[amp-img-id="img0"]');
-        const openedPromise = waitForLightboxOpen(lightbox);
-        openerImage.click();
-        return openedPromise;
-      }).then(() => {
+      return openLightbox(win.document).then(() => {
         expect(lightbox.style.display).to.not.equal('none');
         const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
         expect(carouselQuery.length).to.equal(1);
@@ -76,8 +65,78 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
         expect(lightbox.style.display).to.equal('none');
       });
     });
+
+    it('should show close button only for one lightboxed item', () => {
+      return openLightbox(win.document).then(() => {
+        const controlsContainerQuery =
+          win.document.getElementsByClassName('i-amphtml-lbg-controls');
+        expect(controlsContainerQuery.length).to.equal(1);
+        const controlsContainer = controlsContainerQuery[0];
+        expect(controlsContainer.classList
+            .contains('i-amphtml-lbg-single')).to.be.true;
+
+        const closeButton = getButton(win.document,
+            'i-amphtml-lbg-button-close');
+        expect(closeButton.getAttribute('aria-label')).to.equal('Close');
+        expect(win.getComputedStyle(closeButton).display).to.equal('block');
+
+        const galleryButton = getButton(win.document,
+            'i-amphtml-lbg-button-gallery');
+        expect(galleryButton.getAttribute('aria-label')).to.equal('Gallery');
+        expect(win.getComputedStyle(galleryButton).display).to.equal('none');
+
+        const prevButton = getButton(win.document, 'i-amphtml-lbg-button-prev');
+        expect(prevButton.getAttribute('aria-label')).to.equal('Prev');
+        expect(win.getComputedStyle(prevButton).display).to.equal('none');
+
+        const nextButton = getButton(win.document, 'i-amphtml-lbg-button-next');
+        expect(nextButton.getAttribute('aria-label')).to.equal('Next');
+        expect(win.getComputedStyle(nextButton).display).to.equal('none');
+      });
+    });
+
+    it('should display text description', () => {
+      openLightbox(win.document).then(() => {
+        const descBoxQuery =
+          win.document.getElementsByClassName('i-amphtml-lbg-desc-box');
+        expect(descBoxQuery.length).to.equal(1);
+        const descBox = descBoxQuery[0];
+        expect(descBox.classList.contains('i-amphtml-lbg-standard')).to.be.true;
+        expect(descBox.children.length).to.equal(2);
+        const descriptionMask = descBox.children[0];
+        expect(descriptionMask.classList.contains('i-amphtml-lbg-desc-mask'))
+            .to.be.true;
+
+        const descriptionText = descBox.children[1];
+        expect(descriptionText.classList.contains('i-amphtml-lbg-desc-text'))
+            .to.be.true;
+        expect(descriptionText.textContent).to.equal('This is a figcaption.');
+      });
+    });
   });
 });
+
+function openLightbox(document) {
+  const lightbox = document.getElementById('amp-lightbox-gallery');
+  expect(lightbox.style.display).to.equal('none');
+  const ampImage = document.getElementById('img0');
+  const imageLoadedPromise = waitForImageToLoad(ampImage);
+  return imageLoadedPromise.then(() => {
+    const ampImage = document.getElementById('img0');
+    // Simulate a click on the img inside the amp-img, because this is
+    // what people tend to actually click on.
+    const openerImage = ampImage.querySelector('img[amp-img-id="img0"]');
+    const openedPromise = waitForLightboxOpen(lightbox);
+    openerImage.click();
+    return openedPromise;
+  });
+}
+
+function getButton(document, className) {
+  const buttonQuery = document.getElementsByClassName(className);
+  const button = buttonQuery[0];
+  return button;
+}
 
 function waitForLightboxOpen(lightbox) {
   return poll('wait for amp-lightbox-gallery to open', () => {
