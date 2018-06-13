@@ -24,7 +24,7 @@ describes.realWin('amp-linkeddb-showmore', {
 
   let win;
   let element;
-  let LinkeddbShowmore = new AmpLinkeddbShowmore(element);
+  const LinkeddbShowmore = new AmpLinkeddbShowmore(element);
 
   beforeEach(() => {
     win = env.win;
