@@ -85,8 +85,8 @@ export class NavigationState {
    * @param {number} pageIndex
    * @param {number} totalPages
    * @param {string=} pageId
+   * TODO(alanorozco): pass whether change was automatic or on user action.
    */
-  // TODO(alanorozco): pass whether change was automatic or on user action
   updateActivePage(pageIndex, totalPages, pageId) {
     const changeValue = {
       pageIndex,
