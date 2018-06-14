@@ -413,6 +413,21 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should update values first, then attributes', () => {
+      const {sandbox} = env;
+      const spy = sandbox.spy();
+      const element = createElement(env, container, '[value]="foo"', 'input');
+      sandbox.stub(element, 'value').set(spy);
+      sandbox.stub(element, 'setAttribute').callsFake(spy);
+      return onBindReadyAndSetState(env, bind, {'foo': '2'}).then(() => {
+        // Note: This tests a workaround for a browser bug. There is nothing
+        // about the element itself we can verify. Only the order of operations
+        // matters.
+        expect(spy.firstCall).to.be.calledWithExactly('2');
+        expect(spy.secondCall).to.be.calledWithExactly('value', '2');
+      });
+    });
+
     it('should support binding to Node.textContent', () => {
       const element = createElement(
           env, container, '[text]="\'a\' + \'b\' + \'c\'"');
