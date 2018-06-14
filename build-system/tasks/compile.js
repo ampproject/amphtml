@@ -290,6 +290,11 @@ function compile(entryModuleFilenames, outputDir,
         // respective top level polyfills.js files.
         rewrite_polyfills: false,
         externs,
+        js_module_root: [
+          'node_modules/',
+          'build/patched-module/',
+          'build/fake-module/',
+        ],
         entry_point: entryModuleFilenames,
         module_resolution: 'NODE',
         // This strips all files from the input set that aren't explicitly
