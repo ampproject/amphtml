@@ -225,7 +225,7 @@ export class AmpDoc {
   /**
    * DO NOT CALL. Retained for backward compat during rollout.
    * @return {!Window}
-   * @deprecated. Use `ampdoc.win` instead.
+   * @deprecated Use `ampdoc.win` instead.
    */
   getWin() {
     return this.win;
@@ -538,6 +538,9 @@ export class AmpDocShadow extends AmpDoc {
  * @package @visibleForTesting
  */
 export class AmpDocShell extends AmpDocShadow {
+  // TODO(choumx): win.document is not a ShadowRoot, which is required by the
+  // super constructor.
+  // eslint-disable-next-line require-jsdoc
   constructor(win) {
     super(win, win.location.href, win.document);
   }
