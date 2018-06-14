@@ -252,7 +252,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isCctEmbedded_ = !this.isIframed_ && queryParams['amp_gsa'] === '1' &&
-        (queryParams['amp_js_v'] || '').startsWith('a');
+        startsWith(queryParams['amp_js_v'] || '', 'a');
 
     /**
      * Whether the AMP document is embedded in a webview.
