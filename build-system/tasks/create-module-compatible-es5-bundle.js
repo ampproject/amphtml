@@ -29,7 +29,7 @@ const gulpReplace = require('gulp-replace');
  */
 exports.createModuleCompatibleES5Bundle = function(src) {
   return gulp.src('dist/' + src)
-      .pipe(gulpRename(src.substring(0, src.indexOf('.js')) + '-module.js'))
+      .pipe(gulpRename(src.replace(/\.js$/, '-module.js')))
       .pipe(gulpReplace(/global\?global:[a-z]*}\(this\)/, function(string) {
         return `global?global:${string.match(/global\?global\:([a-z]*)\}\(this\)/)[1]}}(self)`;
       }))

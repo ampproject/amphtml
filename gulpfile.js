@@ -532,7 +532,7 @@ function compileCss(watch, opt_compileAll) {
   }
 
   /**
-   * Writes CSS
+   * Writes CSS to build folder
    *
    * @param {string} css
    * @param {string} originalCssFilename
