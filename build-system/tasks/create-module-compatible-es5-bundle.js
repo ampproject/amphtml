@@ -20,20 +20,17 @@ const gulpRename = require('gulp-rename');
 const gulpReplace = require('gulp-replace');
 /* Copy source to source-nomodule.js and
  * make it compatible with `<script type=module`.
- * The regex replacement is ClosureCompiler specific, and will not be required
- * for an ES6 bundle.
  *
  * Finds and replaces regex changing `this` -> `self` in the snippet
  * inserted by closure compiler from
  * https://github.com/google/closure-compiler/blob/36f332788d54803c3c1afe06a9d84bf4b9f4945b/src/com/google/javascript/jscomp/js/util/global.js#L44
+ *
  *
  * Changes `global?global:VARNAME}(this)` to `global?global:VARNAME}(self)`
  */
 exports.createModuleCompatibleES5Bundle = function(src) {
   return gulp.src('dist/' + src)
       .pipe(gulpRename(src.replace(/\.js$/, '-module.js')))
-      .pipe(gulpReplace(/global\?global:[a-z]*}\(this\)/, function(string) {
-        return `global?global:${string.match(/global\?global\:([a-z]*)\}\(this\)/)[1]}}(self)`;
-      }))
+      .pipe(gulpReplace(/(global\?global:\w*})\(this\)/, '$1(self)'))
       .pipe(gulp.dest('dist'));
 };
