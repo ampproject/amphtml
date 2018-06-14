@@ -31,6 +31,7 @@ ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
 patchRegisterElement();
 patchWebAnimations();
+patchDompurify();
 
 exports.splittable = function(config) {
 
@@ -646,4 +647,12 @@ function patchWebAnimations() {
       file + '\n' +
       '}\n';
   fs.writeFileSync(patchedName, file);
+}
+
+function patchDompurify() {
+  // Copies web-animations-js into a new file that has an export.
+  const name = 'node_modules/dompurify/package.json';
+  let file = fs.readFileSync(name).toString()
+      .replace('"browser": "dist/purify.js",', '');
+  fs.writeFileSync(name, file);
 }
