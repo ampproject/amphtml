@@ -118,7 +118,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const docHeight = viewport.getScrollHeight();
     // Hmm, can the page height change and affect us?
     const minTop = viewportHeight * 0.75;
-    const maxTop = docHeight - viewportHeight * 0.95;
+    const maxTop = docHeight - (viewportHeight * 0.95);
     user().assert(
         layoutBox.top >= minTop,
         '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
@@ -183,11 +183,18 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * @private
    */
   visibileChildren_(nodes) {
-    return nodes.filter(node =>
-      isElement(node) ||
-        node.nodeType === /* Text */ 3 &&
+    return nodes.filter(node => {
+      if (isElement(node)) {
+        return true;
+      }
+
+      if (node.nodeType === /* Text */ 3) {
         // Is there a non-whitespace character?
-        /\S/.test(node.textContent));
+        return /\S/.test(node.textContent);
+      }
+
+      return false;
+    });
   }
 }
 

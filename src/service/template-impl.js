@@ -132,9 +132,6 @@ export class Templates {
      * @private @const {!Object<string, function(!TemplateClassDef)>}
      */
     this.templateClassResolvers_ = {};
-
-    /** @type {!Object<string, boolean>|undefined} */
-    this.declaredTemplates_ = undefined;
   }
 
   /**
@@ -304,7 +301,7 @@ export class Templates {
    * through the registerTemplate method on the AMP runtime.
    * @param {string} type
    * @param {!TemplateClassDef} templateClass
-   * @private
+   * @restricted
    */
   registerTemplate_(type, templateClass) {
     if (!this.templateClassMap_[type]) {
