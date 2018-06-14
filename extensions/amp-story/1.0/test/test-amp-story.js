@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
@@ -20,6 +22,7 @@ import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
+import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -382,8 +385,139 @@ describes.realWin('amp-story', {
           return expect(replaceStub).to.not.have.been.called;
         });
   });
-  describe('amp-story continue anyway', () => {
 
+  it('should not set first page to active when rendering paused story', () => {
+    sandbox.stub(win.history, 'replaceState');
+    createPages(story.element, 2, ['cover', 'page-1']);
+
+    story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.getPageById('cover').state_)
+              .to.equal(PageState.NOT_ACTIVE);
+        });
+  });
+
+  describe('amp-story consent', () => {
+    it('should pause the story if there is a consent', () => {
+      sandbox.stub(win.history, 'replaceState');
+
+      const consentEl = win.document.createElement('amp-consent');
+      const storyConsentEl = win.document.createElement('amp-story-consent');
+      consentEl.appendChild(storyConsentEl);
+      element.appendChild(consentEl);
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      // Never resolving consent promise, emulating a user looking at the
+      // consent prompt.
+      const promise = new Promise(() => {});
+      sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
+
+      story.buildCallback();
+
+      const coverEl = element.querySelector('amp-story-page');
+      let setStateStub;
+
+      return coverEl.getImpl()
+          .then(cover => {
+            setStateStub = sandbox.stub(cover, 'setState');
+            return story.layoutCallback();
+          })
+          .then(() => {
+            // These assertions ensure we don't spam the page state. We want to
+            // avoid a situation where we set the page to active, then paused,
+            // which would spam the media pool with expensive operations.
+            expect(setStateStub).to.have.been.calledOnce;
+            expect(setStateStub.getCall(0))
+                .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
+          });
+    });
+
+    it('should play the story after the consent is resolved', () => {
+      sandbox.stub(win.history, 'replaceState');
+
+      const consentEl = win.document.createElement('amp-consent');
+      const storyConsentEl = win.document.createElement('amp-story-consent');
+      consentEl.appendChild(storyConsentEl);
+      element.appendChild(consentEl);
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      // In a real scenario, promise is resolved when the user accepted or
+      // rejected the consent.
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+
+      sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
+
+      story.buildCallback();
+
+      const coverEl = element.querySelector('amp-story-page');
+      let setStateStub;
+
+      return coverEl.getImpl()
+          .then(cover => {
+            setStateStub = sandbox.stub(cover, 'setState');
+            return story.layoutCallback();
+          })
+          .then(() => resolver()) // Resolving the consent.
+          .then(() => {
+            // These assertions ensure we don't spam the page state. We want to
+            // avoid a situation where we set the page to active, then paused,
+            // then back to active, which would spam the media pool with
+            // expensive operations.
+            expect(setStateStub).to.have.been.calledTwice;
+            expect(setStateStub.getCall(0))
+                .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
+            expect(setStateStub.getCall(1))
+                .to.have.been.calledWithExactly(PageState.ACTIVE);
+          });
+    });
+
+    it('should play the story if the consent was already resolved', () => {
+      sandbox.stub(win.history, 'replaceState');
+
+      const consentEl = win.document.createElement('amp-consent');
+      const storyConsentEl = win.document.createElement('amp-story-consent');
+      consentEl.appendChild(storyConsentEl);
+      element.appendChild(consentEl);
+
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      // Returns an already resolved promised: the user already accepted or
+      // rejected the consent in a previous session.
+      sandbox.stub(consent, 'getConsentPolicyState').resolves();
+
+      story.buildCallback();
+
+      const coverEl = element.querySelector('amp-story-page');
+      let setStateStub;
+
+      return coverEl.getImpl()
+          .then(cover => {
+            setStateStub = sandbox.stub(cover, 'setState');
+            return story.layoutCallback();
+          })
+          .then(() => {
+            // These assertions ensure we don't spam the page state. We want to
+            // avoid a situation where we set the page to active, then paused,
+            // then back to active, which would spam the media pool with
+            // expensive operations.
+            expect(setStateStub).to.have.been.calledTwice;
+            expect(setStateStub.getCall(0))
+                .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
+            expect(setStateStub.getCall(1))
+                .to.have.been.calledWithExactly(PageState.ACTIVE);
+          });
+    });
+  });
+
+  describe('amp-story continue anyway', () => {
     it('should not display layout', () => {
       AmpStory.isBrowserSupported = () => false;
       story = new AmpStory(element);
