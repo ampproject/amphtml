@@ -16,14 +16,10 @@
 
 import {computedStyle} from '../../../../src/style';
 import {dev, user} from '../../../../src/log';
-import {isExperimentOn} from '../../../../src/experiments';
 import {setStyles} from '../../../../src/style';
 
 export const Presets = {
   'parallax': {
-    isFxTypeSupported(unusedWin) {
-      return true;
-    },
     userAsserts(element) {
       const factorValue = user().assert(
           element.getAttribute('data-parallax-factor'),
@@ -68,9 +64,6 @@ export const Presets = {
     },
   },
   'fly-in-bottom': {
-    isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fly-in');
-    },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -125,9 +118,6 @@ export const Presets = {
     },
   },
   'fly-in-left': {
-    isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fly-in');
-    },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -181,9 +171,6 @@ export const Presets = {
     },
   },
   'fly-in-right': {
-    isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fly-in');
-    },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -237,9 +224,6 @@ export const Presets = {
     },
   },
   'fly-in-top': {
-    isFxTypeSupported(win) {
-      return isExperimentOn(win, 'amp-fx-fly-in');
-    },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -294,9 +278,6 @@ export const Presets = {
     },
   },
   'fade-in': {
-    isFxTypeSupported(unusedWin) {
-      return true;
-    },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -335,9 +316,6 @@ export const Presets = {
     },
   },
   'fade-in-scroll': {
-    isFxTypeSupported(unusedWin) {
-      return true;
-    },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       const marginEnd = parseFloat(element.getAttribute('data-margin-end'));
