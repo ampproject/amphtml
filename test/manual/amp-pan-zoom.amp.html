@@ -85,7 +85,7 @@
   <p>Double tap or pinch to zoom in and out.</p>
   <p [text]="'Current scale: ' + scale">Current scale: 1</p>
   <amp-layout layout="responsive" width="4" height="3">
-      <amp-pan-zoom layout="fill" on="zoomEnd:AMP.setState({scale: event.scale})">
+      <amp-pan-zoom layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
       <svg class="seatmap" viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
 
           <rect class="area-half" x="5" y="5" />
