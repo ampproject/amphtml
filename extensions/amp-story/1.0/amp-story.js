@@ -88,6 +88,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
+import {getConsentPolicyState} from '../../../src/consent';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
@@ -617,7 +618,7 @@ export class AmpStory extends AMP.BaseElement {
     storyLayoutPromise.then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
         .then(() => this.markStoryAsLoaded_());
 
-    this.validateConsent_();
+    this.handleConsentExtension_();
 
     return storyLayoutPromise;
   }
@@ -650,16 +651,48 @@ export class AmpStory extends AMP.BaseElement {
     });
   }
 
+
   /**
-   * Ensures publishers using amp-consent use amp-story-consent.
+   * Handles the story consent extension.
    * @private
    */
-  validateConsent_() {
+  handleConsentExtension_() {
     const consentEl = this.element.querySelector('amp-consent');
     if (!consentEl) {
       return;
     }
 
+    this.pauseStoryUntilConsentIsResolved_();
+    this.validateConsent_(consentEl);
+  }
+
+
+  /**
+   * Pauses the story until the consent is resolved (accepted or rejected).
+   * @private
+   */
+  pauseStoryUntilConsentIsResolved_() {
+    const policyId = this.getConsentPolicy() || 'default';
+    const consentPromise = getConsentPolicyState(this.getAmpDoc(), policyId);
+
+    if (!consentPromise) {
+      return;
+    }
+
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+
+    consentPromise.then(() => {
+      this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    });
+  }
+
+
+  /**
+   * Ensures publishers using amp-consent use amp-story-consent.
+   * @param {!Element} consentEl
+   * @private
+   */
+  validateConsent_(consentEl) {
     if (!childElementByTag(consentEl, 'amp-story-consent')) {
       dev().error(TAG, 'amp-consent must have an amp-story-consent child');
     }
@@ -903,7 +936,12 @@ export class AmpStory extends AMP.BaseElement {
         setAttributeInMutate(oldPage, Attributes.VISITED);
       }
 
-      targetPage.setState(PageState.ACTIVE);
+      // Starts playing the page, if the story is not paused.
+      // Note: navigation is prevented when the story is paused, this test
+      // covers the case where the story is rendered paused (eg: consent).
+      if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
+        targetPage.setState(PageState.ACTIVE);
+      }
 
       // If first navigation.
       if (!oldPage) {
@@ -1142,6 +1180,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onPausedStateUpdate_(isPaused) {
+    if (!this.activePage_) {
+      return;
+    }
+
     const pageState = isPaused ? PageState.PAUSED : PageState.ACTIVE;
     this.activePage_.setState(pageState);
   }
