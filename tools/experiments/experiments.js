@@ -320,13 +320,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15360',
   },
   {
-    id: 'amp-fx-fly-in',
-    name: 'Enables amp-fx="fly-in-{bottom,top,left,right}" - ' +
-      'scroll triggered timed fly in animations',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
-  },
-  {
     id: 'disable-faster-amp-list',
     name: 'Disables new default behavior where <amp-list> will not evaluate ' +
        'bindings on rendered children before first setState() mutation.',
