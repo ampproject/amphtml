@@ -161,7 +161,11 @@ exports.getBundleFlags = function(g) {
     let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend on _base.
     if (!isBase && g.bundles._base) {
-      cmd += ':_base';
+      if (videos.includes(bundle.name)) {
+        cmd += ':_base_videos';
+      } else {
+        cmd += ':_base';
+      }
     }
     flagsArray.push('--module', cmd);
     if (bundleKeys.length > 1) {
@@ -214,6 +218,10 @@ exports.getGraph = function(entryModules, config) {
         // The modules in the bundle.
         modules: [],
       },
+      _base_videos: {
+        name: '_base_videos',
+        modules: [],
+      }
     },
     packages: {},
     browserMask: {},
@@ -329,10 +337,36 @@ exports.getGraph = function(entryModules, config) {
 
     resolve(graph);
 
+    buildUpCommon(graph);
+
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
   return promise;
 };
+
+function buildUpCommon(graph) {
+  // This means there is only 1 module output
+  if (!graph.bundles._base) {
+    return;
+  }
+  let baseModules = graph.bundles._base.modules;
+  let videosModules = graph.bundles._base_videos.modules;
+  let mainModuleDeps = graph.depOf['src/amp.js'];
+  graph.bundles._base.modules = baseModules.filter(x => {
+    const usedInMain = !!mainModuleDeps[x];
+    const usedInVideos = inAnyBundle(x, videos.map(x => graph.depOf[x]));
+    const shouldGoToVideoBundle = !usedInMain && usedInVideos;
+    if (shouldGoToVideoBundle && videosModules.indexOf(x) === -1) {
+      videosModules.push(x);
+    }
+    return !shouldGoToVideoBundle;
+  });
+}
+
+function inAnyBundle(name, dependencyList) {
+  console.log(dependencyList);
+  return dependencyList.some(deps => name in deps);
+}
 
 function setupBundles(graph) {
   // For each module, mark them as to whether any of the entry
@@ -474,15 +508,14 @@ exports.bundleWrapper = '(self.AMP=self.AMP||[]).push({n:"%basename%", ' +
     'v:"$internalRuntimeVersion$", f:(function(){%s})});\n' +
     '//# sourceMappingURL=%basename%.map\n';
 
-const all = [
-  './src/amp.js',
-  './extensions/amp-3d-gltf/0.1/amp-3d-gltf.js',
-  './extensions/amp-3q-player/0.1/amp-3q-player.js',
-  './extensions/amp-a4a/0.1/amp-a4a.js',
-  './extensions/amp-access-laterpay/0.1/amp-access-laterpay.js',
-  './extensions/amp-access-scroll/0.1/amp-access-scroll.js',
-  './extensions/amp-access/0.1/amp-access.js',
+
+const common = [
+  './extensions/amp-ad/0.1/amp-ad.js',
   './extensions/amp-accordion/0.1/amp-accordion.js',
+  './extensions/amp-carousel/0.1/amp-carousel.js',
+];
+
+const ads = [
   './extensions/amp-ad-exit/0.1/amp-ad-exit.js',
   './extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
   './extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js',
@@ -494,7 +527,32 @@ const all = [
   './extensions/amp-ad-network-gmossp-impl/0.1/amp-ad-network-gmossp-impl.js',
   './extensions/amp-ad-network-triplelift-impl/0.1/' +
       'amp-ad-network-triplelift-impl.js',
-  './extensions/amp-ad/0.1/amp-ad.js',
+];
+
+const videos = [
+  'extensions/amp-ima-video/0.1/amp-ima-video.js',
+  'extensions/amp-video-service/0.1/amp-video-service.js',
+  'extensions/amp-video/0.1/amp-video.js',
+  'extensions/amp-3q-player/0.1/amp-3q-player.js',
+  'extensions/amp-brid-player/0.1/amp-brid-player.js',
+  'extensions/amp-jwplayer/0.1/amp-jwplayer.js',
+  'extensions/amp-kaltura-player/0.1/amp-kaltura-player.js',
+  'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js',
+  'extensions/amp-o2-player/0.1/amp-o2-player.js',
+  'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js',
+  'extensions/amp-reach-player/0.1/amp-reach-player.js',
+  'extensions/amp-springboard-player/0.1/amp-springboard-player.js',
+  'extensions/amp-wistia-player/0.1/amp-wistia-player.js',
+  'extensions/amp-youtube/0.1/amp-youtube.js',
+];
+
+const all = [
+  //'./src/amp.js',
+  './extensions/amp-3d-gltf/0.1/amp-3d-gltf.js',
+  './extensions/amp-a4a/0.1/amp-a4a.js',
+  './extensions/amp-access-laterpay/0.1/amp-access-laterpay.js',
+  './extensions/amp-access-scroll/0.1/amp-access-scroll.js',
+  './extensions/amp-access/0.1/amp-access.js',
   './extensions/amp-addthis/0.1/amp-addthis.js',
   './extensions/amp-analytics/0.1/amp-analytics.js',
   './extensions/amp-anim/0.1/amp-anim.js',
@@ -506,11 +564,9 @@ const all = [
   './extensions/amp-beopinion/0.1/amp-beopinion.js',
   './extensions/amp-bind/0.1/amp-bind.js',
   './extensions/amp-bodymovin-animation/0.1/amp-bodymovin-animation.js',
-  './extensions/amp-brid-player/0.1/amp-brid-player.js',
   './extensions/amp-brightcove/0.1/amp-brightcove.js',
   './extensions/amp-byside-content/0.1/amp-byside-content.js',
   './extensions/amp-call-tracking/0.1/amp-call-tracking.js',
-  './extensions/amp-carousel/0.1/amp-carousel.js',
   './extensions/amp-compare-slider/0.1/amp-compare-slider.js',
   './extensions/amp-consent/0.1/amp-consent.js',
   './extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill.js',
@@ -534,15 +590,12 @@ const all = [
   './extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
   './extensions/amp-hulu/0.1/amp-hulu.js',
   './extensions/amp-iframe/0.1/amp-iframe.js',
-  './extensions/amp-ima-video/0.1/amp-ima-video.js',
   './extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
   './extensions/amp-image-viewer/0.1/amp-image-viewer.js',
   './extensions/amp-imgur/0.1/amp-imgur.js',
   './extensions/amp-instagram/0.1/amp-instagram.js',
   './extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
   './extensions/amp-izlesene/0.1/amp-izlesene.js',
-  './extensions/amp-jwplayer/0.1/amp-jwplayer.js',
-  './extensions/amp-kaltura-player/0.1/amp-kaltura-player.js',
   './extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
   './extensions/amp-lightbox/0.1/amp-lightbox.js',
   './extensions/amp-list/0.1/amp-list.js',
@@ -550,13 +603,9 @@ const all = [
   './extensions/amp-mathml/0.1/amp-mathml.js',
   './extensions/amp-mustache/0.1/amp-mustache.js',
   './extensions/amp-next-page/0.1/amp-next-page.js',
-  './extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js',
-  './extensions/amp-o2-player/0.1/amp-o2-player.js',
-  './extensions/amp-ooyala-player/0.1/amp-ooyala-player.js',
   './extensions/amp-pinterest/0.1/amp-pinterest.js',
   './extensions/amp-playbuzz/0.1/amp-playbuzz.js',
   './extensions/amp-position-observer/0.1/amp-position-observer.js',
-  './extensions/amp-reach-player/0.1/amp-reach-player.js',
   './extensions/amp-reddit/0.1/amp-reddit.js',
   './extensions/amp-riddle-quiz/0.1/amp-riddle-quiz.js',
   './extensions/amp-selector/0.1/amp-selector.js',
@@ -565,7 +614,6 @@ const all = [
   './extensions/amp-slides/0.1/amp-slides.js',
   './extensions/amp-social-share/0.1/amp-social-share.js',
   './extensions/amp-soundcloud/0.1/amp-soundcloud.js',
-  './extensions/amp-springboard-player/0.1/amp-springboard-player.js',
   './extensions/amp-sticky-ad/1.0/amp-sticky-ad.js',
   './extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js',
   './extensions/amp-story/0.1/amp-story.js',
@@ -574,23 +622,24 @@ const all = [
   './extensions/amp-timeago/0.1/amp-timeago.js',
   './extensions/amp-twitter/0.1/amp-twitter.js',
   './extensions/amp-user-notification/0.1/amp-user-notification.js',
-  './extensions/amp-video-service/0.1/amp-video-service.js',
-  './extensions/amp-video/0.1/amp-video.js',
   './extensions/amp-viewer-integration/0.1/amp-viewer-integration.js',
   './extensions/amp-vimeo/0.1/amp-vimeo.js',
   './extensions/amp-vine/0.1/amp-vine.js',
   './extensions/amp-viz-vega/0.1/amp-viz-vega.js',
   './extensions/amp-vk/0.1/amp-vk.js',
   './extensions/amp-web-push/0.1/amp-web-push.js',
-  './extensions/amp-wistia-player/0.1/amp-wistia-player.js',
-  './extensions/amp-youtube/0.1/amp-youtube.js',
 ];
 
 exports.getFlags({
-  modules: all,
+  modules: ['./src/amp.js'].concat(all, ads, videos, common),
   writeTo: './out/',
   externs,
-}).then(function(flagsArray) {
+})
+.then(compile);
+
+
+
+function compile(flagsArray) {
   return new Promise(function(resolve, reject) {
     //console.log(flagsArray);
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
@@ -606,7 +655,7 @@ exports.getFlags({
       }
     });
   });
-});
+}
 
 
 function patchRegisterElement() {
