@@ -41,8 +41,7 @@ const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
 const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 const {transpileTs} = require('./build-system/typescript');
-const gulpRename = require('gulp-rename');
-const gulpReplace = require('gulp-replace');
+const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
 
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
@@ -897,29 +896,9 @@ function dist() {
           return enableLocalTesting(minifiedRuntimeTarget);
         }
       }).then(() => {
-        /* Copy v0.js to v0-nomodule.js and fix and
-         * make it compatible with `<script type=module`.
-         * The regex replacement is Closurecompiler specific, and will be removed
-         * when we start spitting out actual ES6 code from closure compiler
-         */
-        return gulp.src(minifiedRuntimeTarget)
-            .pipe(gulpRename('v0-module.js'))
-            .pipe(gulpReplace(/global\?global:[a-z]*}\(this\)/, function(string) {
-              return `global?global:${string.match(/global\?global\:([a-z]*)\}\(this\)/)[1]}}(self)`;
-            }))
-            .pipe(gulp.dest('dist'));
+        return createModuleCompatibleES5Bundle('v0.js');
       }).then(() => {
-        /* Copy v0.js to amp4ads-v0.js and fix and
-         * make it compatible with `<script type=module`.
-         * The regex replacement is Closurecompiler specific, and will be removed
-         * when we start spitting out actual ES6 code from closure compiler
-         */
-        return gulp.src('dist/amp4ads-v0.js')
-            .pipe(gulpRename('dist/amp4ads-v0-module.js'))
-            .pipe(gulpReplace(/global\?global:[a-z]*}\(this\)/, function(string) {
-              return `global?global:${string.match(/global\?global\:([a-z]*)\}\(this\)/)[1]}}(self)`;
-            }))
-            .pipe(gulp.dest('dist'));
+        return createModuleCompatibleES5Bundle('amp4ads-v0.js');
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
