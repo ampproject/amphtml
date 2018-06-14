@@ -163,6 +163,12 @@ exports.getBundleFlags = function(g) {
     if (!isBase && g.bundles._base) {
       if (videos.includes(bundle.name)) {
         cmd += ':_base_videos';
+      } else if (ads.includes(bundle.name)) {
+        cmd += ':_base_ads';
+      } else if (common.includes(bundle.name)) {
+        cmd += ':_base_common';
+      } else if (all.includes(bundle.name)) {
+        cmd += ':_base_all';
       } else {
         cmd += ':_base';
       }
@@ -220,6 +226,18 @@ exports.getGraph = function(entryModules, config) {
       },
       _base_videos: {
         name: '_base_videos',
+        modules: [],
+      },
+      _base_common: {
+        name: '_base_common',
+        modules: [],
+      },
+      _base_ads: {
+        name: '_base_ads',
+        modules: [],
+      },
+      _base_all: {
+        name: '_base_all',
         modules: [],
       }
     },
@@ -337,7 +355,7 @@ exports.getGraph = function(entryModules, config) {
 
     resolve(graph);
 
-    buildUpCommon(graph);
+    //buildUpCommon(graph);
 
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
@@ -352,15 +370,15 @@ function buildUpCommon(graph) {
   let baseModules = graph.bundles._base.modules;
   let videosModules = graph.bundles._base_videos.modules;
   let mainModuleDeps = graph.depOf['src/amp.js'];
-  graph.bundles._base.modules = baseModules.filter(x => {
-    const usedInMain = !!mainModuleDeps[x];
-    const usedInVideos = inAnyBundle(x, videos.map(x => graph.depOf[x]));
-    const shouldGoToVideoBundle = !usedInMain && usedInVideos;
-    if (shouldGoToVideoBundle && videosModules.indexOf(x) === -1) {
-      videosModules.push(x);
-    }
-    return !shouldGoToVideoBundle;
-  });
+  //graph.bundles._base.modules = baseModules.filter(x => {
+    //const usedInMain = !!mainModuleDeps[x];
+    //const usedInVideos = inAnyBundle(x, videos.map(x => graph.depOf[x]));
+    //const shouldGoToVideoBundle = !usedInMain && usedInVideos;
+    //if (shouldGoToVideoBundle && videosModules.indexOf(x) === -1) {
+      //videosModules.push(x);
+    //}
+    //return !shouldGoToVideoBundle;
+  //});
 }
 
 function inAnyBundle(name, dependencyList) {
@@ -510,22 +528,22 @@ exports.bundleWrapper = '(self.AMP=self.AMP||[]).push({n:"%basename%", ' +
 
 
 const common = [
-  './extensions/amp-ad/0.1/amp-ad.js',
-  './extensions/amp-accordion/0.1/amp-accordion.js',
-  './extensions/amp-carousel/0.1/amp-carousel.js',
+  'extensions/amp-ad/0.1/amp-ad.js',
+  'extensions/amp-accordion/0.1/amp-accordion.js',
+  'extensions/amp-carousel/0.1/amp-carousel.js',
 ];
 
 const ads = [
-  './extensions/amp-ad-exit/0.1/amp-ad-exit.js',
-  './extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-  './extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js',
-  './extensions/amp-ad-network-cloudflare-impl/0.1/' +
+  'extensions/amp-ad-exit/0.1/amp-ad-exit.js',
+  'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+  'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js',
+  'extensions/amp-ad-network-cloudflare-impl/0.1/' +
       'amp-ad-network-cloudflare-impl.js',
-  './extensions/amp-ad-network-doubleclick-impl/0.1/' +
+  'extensions/amp-ad-network-doubleclick-impl/0.1/' +
       'amp-ad-network-doubleclick-impl.js',
-  './extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js',
-  './extensions/amp-ad-network-gmossp-impl/0.1/amp-ad-network-gmossp-impl.js',
-  './extensions/amp-ad-network-triplelift-impl/0.1/' +
+  'extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js',
+  'extensions/amp-ad-network-gmossp-impl/0.1/amp-ad-network-gmossp-impl.js',
+  'extensions/amp-ad-network-triplelift-impl/0.1/' +
       'amp-ad-network-triplelift-impl.js',
 ];
 
