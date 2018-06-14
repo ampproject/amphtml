@@ -155,25 +155,10 @@ export class AmpPanZoom extends AMP.BaseElement {
     );
     this.content_ = children[0];
 
-    if (this.element.hasAttribute('max-scale')) {
-      this.maxScale_ = parseInt(
-          this.element.getAttribute('max-scale'), 10);
-    }
-
-    if (this.element.hasAttribute('initial-scale')) {
-      this.initialScale_ = parseInt(
-          this.element.getAttribute('initial-scale'), 10);
-    }
-
-    if (this.element.hasAttribute('initial-x')) {
-      this.initialX_ = parseInt(
-          this.element.getAttribute('initial-x'), 10);
-    }
-
-    if (this.element.hasAttribute('initial-y')) {
-      this.initialY_ = parseInt(
-          this.element.getAttribute('initial-y'), 10);
-    }
+    this.maxScale_ = this.getNumberAttributeOr_('max-scale', DEFAULT_MAX_SCALE);
+    this.initialScale_ = this.getNumberAttributeOr_('initial-scale', 1);
+    this.initialX_ = this.getNumberAttributeOr_('initial-x', 0);
+    this.initialY_ = this.getNumberAttributeOr_('initial-y', 0);
 
     this.registerAction('transform', invocation => {
       const {args} = invocation;
@@ -244,6 +229,22 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   elementIsSupported_(element) {
     return ELIGIBLE_TAGS[element.tagName];
+  }
+
+  /**
+   * Tries to retrieve a number attribute, returns a default value
+   * if unsuccessful.
+   * @param {string} attribute
+   * @param {number} defaultValue
+   * @return {number}
+   * @private
+   */
+  getNumberAttributeOr_(attribute, defaultValue) {
+    const {element} = this;
+    if (!element.hasAttribute(attribute)) {
+      return defaultValue;
+    }
+    return parseInt(element.getAttribute(attribute), 10);
   }
 
   /**
