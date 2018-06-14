@@ -58,6 +58,9 @@ const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 /** @private @const Matches amp_gsa parameters in query string. */
 const AMP_GSA_PARAMS_REGEX = /[?&]amp_gsa[^&]*/;
 
+/** @private @const Matches amp_r parameters in query string. */
+const AMP_R_PARAMS_REGEX = /[?&]amp_r[^&]*/;
+
 /** @private @const Matches usqp parameters from goog experiment in query string. */
 const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
 
@@ -362,7 +365,7 @@ export function isAlpProxyOrigin(url) {
   }
   const path = url.pathname.split('/');
   const prefix = path[1];
-  return prefix == 'a' || prefix == 'ad';
+  return prefix == 'a';
 }
 
 /**
@@ -394,6 +397,23 @@ export function isProtocolValid(url) {
 }
 
 /**
+ * Returns a URL without AMP JS parameters.
+ * @param {string} url
+ * @return {string}
+ */
+export function removeAmpJsParamsFromUrl(url) {
+  const mainAndFragment = url.split('#', 2);
+  const mainAndQuery = mainAndFragment[0].split('?', 2);
+  // No query string.
+  if (!mainAndQuery[1]) {
+    return url;
+  }
+  let newUrl = mainAndQuery[0] + removeAmpJsParams(`?${mainAndQuery[1]}`);
+  newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
+  return newUrl;
+}
+
+/**
  * Removes parameters that start with amp js parameter pattern and returns the
  * new search string.
  * @param {string} urlSearch
@@ -406,6 +426,7 @@ function removeAmpJsParams(urlSearch) {
   const search = urlSearch
       .replace(AMP_JS_PARAMS_REGEX, '')
       .replace(AMP_GSA_PARAMS_REGEX, '')
+      .replace(AMP_R_PARAMS_REGEX, '')
       .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
       .replace(/^[?&]/, ''); // Removes first ? or &.
   return search ? '?' + search : '';

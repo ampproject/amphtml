@@ -31,6 +31,7 @@ import {
   getSourceUrl,
   parseQueryString,
   parseUrlDeprecated,
+  removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
@@ -197,7 +198,10 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the URL for this AMP document.
     this.set('AMPDOC_URL', () => {
-      return removeFragment(this.ampdoc.win.location.href);
+      return removeFragment(
+        removeAmpJsParamsFromUrl(
+            mergeReplaceParamsIntoUrl_(
+              this.ampdoc.win.location.href)));
     });
 
     // Returns the host of the URL for this AMP document.
@@ -215,11 +219,15 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the Source URL for this AMP document.
     this.setBoth('SOURCE_URL', () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      return removeFragment(docInfo.sourceUrl);
+      return removeFragment(
+        removeAmpJsParamsFromUrl(
+          mergeReplaceParamsIntoUrl_(docInfo.sourceUrl)));
     }, () => {
       return getTrackImpressionPromise().then(() => {
         const docInfo = Services.documentInfoForDoc(this.ampdoc);
-        return removeFragment(docInfo.sourceUrl);
+        return removeFragment(
+            removeAmpJsParamsFromUrl(
+                mergeReplaceParamsIntoUrl_(docInfo.sourceUrl)));
       });
     });
 
@@ -585,6 +593,25 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
+   * Merges any replacement parameters into a given URL's query string,
+   * preferring values set in the original query string.
+   * @param {string} orig The original URL
+   * @return {string} The resulting URL
+   */
+  mergeReplaceParamsIntoUrl_(orig) {
+    const docInfo = Services.documentInfoForDoc(this.ampdoc);
+    const url = parseUrlDeprecated(orig);
+    const params = parseQueryString(url.search);
+    return addParamsToUrl(orig,
+      Object.keys(docInfo.replaceParams)
+        .filter(key => !(key in params))
+        .reduce((safe, key) => {
+          safe[key] = docInfo.replaceParams[key]
+          return safe;
+        }, {}));
+  }
+
+  /**
    * Resolves the value via one of document info's urls.
    * @param {string} field A field on the docInfo
    * @param {string=} opt_urlProp A subproperty of the field
@@ -639,10 +666,15 @@ export class GlobalVariableSource extends VariableSource {
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
     user().assert(typeof param == 'string', 'param should be a string');
-    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(
+        removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
+    const replaceParams = Services.documentInfoForDoc(this.ampdoc).replaceParams;
     return (typeof params[param] !== 'undefined')
-      ? params[param] : defaultValue;
+      ? params[param]
+      : ((typeof replaceParams[param] !== 'undefined')
+        ? replaceParams[param]
+        : defaultValue);
   }
 
   /**

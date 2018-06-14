@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
@@ -22,17 +21,14 @@ import {dev, duplicateErrorIfNecessary} from '../log';
 import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
-  getFragment,
   getSourceOrigin,
-  isProxyOrigin,
   parseQueryString,
-  parseUrlDeprecated,
+  parseUrl,
   removeFragment,
 } from '../url';
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
-import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -44,14 +40,6 @@ const SENTINEL_ = '__AMP__';
  * @private {number}
  */
 const VIEWER_ORIGIN_TIMEOUT_ = 1000;
-
-/**
- * Prefixes to remove when trimming a hostname for comparison.
- * @const
- * @private {!RegExp}
- */
-const TRIM_ORIGIN_PATTERN_ =
-  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -183,6 +171,9 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
+    /** @private {?function()} */
+    this.whenFirstVisibleResolve_ = null;
+
     /** @private {?Promise} */
     this.nextVisiblePromise_ = null;
 
@@ -204,17 +195,15 @@ export class Viewer {
     /** @private {?Function} */
     this.trustedViewerResolver_ = null;
 
-    const deferred = new Deferred();
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
      * `this.onVisibilityChange_()`.
      * @private @const {!Promise}
      */
-    this.whenFirstVisiblePromise_ = deferred.promise;
-
-    /** @private {?function()} */
-    this.whenFirstVisibleResolve_ = deferred.resolve;
+    this.whenFirstVisiblePromise_ = new Promise(resolve => {
+      this.whenFirstVisibleResolve_ = resolve;
+    });
 
     // Params can be passed either directly in multi-doc environment or via
     // iframe hash/name with hash taking precedence.
@@ -252,7 +241,6 @@ export class Viewer {
     this.isWebviewEmbedded_ = !this.isIframed_ &&
         this.params_['webview'] == '1';
 
-
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe, or
      * a web view, or a shadow doc in PWA.
@@ -274,20 +262,6 @@ export class Viewer {
             || (this.win.location.search.indexOf('amp_js_v') != -1))
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
-
-    /**
-     * Whether the AMP document is embedded in a Chrome Custom Tab.
-     * @private @const {boolean}
-     */
-    this.isCctEmbedded_ = !this.isIframed_ &&
-        parseQueryString(this.win.location.search)['amp_gsa'] === '1';
-
-    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
-    /**
-     * Whether the AMP document was served by a proxy.
-     * @private @const {boolean}
-     */
-    this.isProxyOrigin_ = isProxyOrigin(url);
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -343,9 +317,10 @@ export class Viewer {
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
     } else {
       // Wait for comms channel to confirm the origin.
-      const deferred = new Deferred();
-      trustedViewerPromise = deferred.promise;
-      this.trustedViewerResolver_ = deferred.resolve;
+      trustedViewerResolved = undefined;
+      trustedViewerPromise = new Promise(resolve => {
+        this.trustedViewerResolver_ = resolve;
+      });
     }
 
     /** @const @private {!Promise<boolean>} */
@@ -422,12 +397,6 @@ export class Viewer {
       }
     });
 
-    /**
-     * The replace URL obtained from the viewer via messaging.
-     * @private {?string}
-     */
-    this.replaceUrl_ = null;
-
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
     if (this.params_['click']) {
@@ -447,10 +416,6 @@ export class Viewer {
     // instance is constructed, the document is already `visible`.
     this.recheckVisibilityState_();
     this.onVisibilityChange_();
-
-    // This fragment may get cleared by impression tracking. If so, it will be
-    // restored afterward.
-    this.maybeUpdateFragmentForCct();
   }
 
   /**
@@ -532,64 +497,6 @@ export class Viewer {
    */
   isWebviewEmbedded() {
     return this.isWebviewEmbedded_;
-  }
-
-  /**
-   * Whether the document is embedded in a Chrome Custom Tab.
-   * @return {boolean}
-   */
-  isCctEmbedded() {
-    return this.isCctEmbedded_;
-  }
-
-  /**
-   * Whether the document was served by a proxy.
-   * @return {boolean}
-   */
-  isProxyOrigin() {
-    return this.isProxyOrigin_;
-  }
-
-  /**
-   * Update the URL fragment with data needed to support custom tabs. This will
-   * not clear query string parameters, but will clear the fragment.
-   */
-  maybeUpdateFragmentForCct() {
-    if (!this.isCctEmbedded_) {
-      return;
-    }
-    // CCT only works with versions of Chrome that support the history API.
-    if (!this.win.history.replaceState) {
-      return;
-    }
-    const sourceOrigin = getSourceOrigin(this.win.location.href);
-    const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc);
-    const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
-    if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
-      const oldFragment = getFragment(this.win.location.href);
-      const newFragment = 'ampshare=' + encodeURIComponent(canonicalUrl);
-      // Attempt to merge the fragments, if an old fragment was present.
-      this.win.history.replaceState({}, '',
-          oldFragment ? `${oldFragment}&${newFragment}` : `#${newFragment}`);
-    }
-  }
-
-  /**
-   * Compares URLs to determine if they match once common subdomains are
-   * removed. Everything else must match.
-   * @param {string} first Origin to compare.
-   * @param {string} second Origin to compare.
-   * @return {boolean} Whether the origins match without subdomains.
-   * @private
-   */
-  hasRoughlySameOrigin_(first, second) {
-    const trimOrigin = origin => {
-      if (origin.split('.').length > 2) {
-        return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
-      }
-      return origin;
-    };
-    return trimOrigin(first) == trimOrigin(second);
   }
 
   /**
@@ -723,9 +630,9 @@ export class Viewer {
       return this.nextVisiblePromise_;
     }
 
-    const deferred = new Deferred();
-    this.nextVisibleResolve_ = deferred.resolve;
-    return this.nextVisiblePromise_ = deferred.promise;
+    return this.nextVisiblePromise_ = new Promise(resolve => {
+      this.nextVisibleResolve_ = resolve;
+    });
   }
 
   /**
@@ -787,14 +694,6 @@ export class Viewer {
   }
 
   /**
-   * Returns the replace URL as set by viewer messaging, if present.
-   * @return {?string}
-   */
-  getReplaceUrl() {
-    return this.replaceUrl_;
-  }
-
-  /**
    * Possibly return the messaging origin if set. This would be the origin
    * of the parent viewer.
    * @return {?string}
@@ -809,7 +708,7 @@ export class Viewer {
    * @private
    */
   isTrustedReferrer_(referrer) {
-    const url = parseUrlDeprecated(referrer);
+    const url = parseUrl(referrer);
     if (url.protocol != 'https:') {
       return false;
     }
@@ -878,7 +777,7 @@ export class Viewer {
       return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
     }
     /** @const {!Location} */
-    const url = parseUrlDeprecated(urlString);
+    const url = parseUrl(urlString);
     if (url.protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
@@ -1054,7 +953,7 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-        tryResolve(() => this.messageDeliverer_(
+        Promise.resolve(this.messageDeliverer_(
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
             awaitResponse)));
@@ -1083,9 +982,10 @@ export class Viewer {
       message.data = data;
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
-      const deferred = new Deferred();
-      const {promise: responsePromise, resolve: responseResolver} = deferred;
-
+      let responseResolver;
+      const responsePromise = new Promise(r => {
+        responseResolver = r;
+      });
       message = {
         eventType,
         data,
@@ -1133,32 +1033,33 @@ export class Viewer {
   }
 
   /**
-  * Sets the replace URL explicitly when obtained by querying the viewer. This
-  * is being deprecated and will only be used when the replace URL parameter
-  * isn't provided.
-  * @param {?string} newUrl
-  */
+   * Replace the document url with the viewer provided new replaceUrl.
+   * @param {?string} newUrl
+   */
   replaceUrl(newUrl) {
-    if (!newUrl) {
+    if (!newUrl ||
+        !this.ampdoc.isSingleDoc() ||
+        !this.win.history.replaceState) {
       return;
     }
 
     try {
-      // The origin and source origin must match. Note that this does not
-      // rewrite the window location.
-      const url = parseUrlDeprecated(this.win.location.href);
-      const replaceUrl = parseUrlDeprecated(
+      // The origin and source origin must match.
+      const url = parseUrl(this.win.location.href);
+      const replaceUrl = parseUrl(
           removeFragment(newUrl) + this.win.location.hash);
       if (url.origin == replaceUrl.origin &&
           getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
-        this.replaceUrl_ = replaceUrl.href;
-        dev().fine(TAG_, 'replace url:' + this.replaceUrl_);
+        this.win.history.replaceState({}, '', replaceUrl.href);
+        this.win.location.originalHref = url.href;
+        dev().fine(TAG_, 'replace url:' + replaceUrl.href);
       }
     } catch (e) {
       dev().error(TAG_, 'replaceUrl failed', e);
     }
   }
 }
+
 
 /**
  * Parses the viewer parameters as a string.
