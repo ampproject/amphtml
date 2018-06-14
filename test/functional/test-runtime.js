@@ -1514,10 +1514,20 @@ describes.realWin('runtime multidoc', {
   });
 
 
-  describe('messaging', () => {
+  describes.repeated('messaging', {
+    'document.contains is the browser implementation': false,
+    'document.contains is a stubbed implementation': true,
+  }, (name, isStubbedDocumentContains) => {
     let doc1, doc2, doc3;
 
     beforeEach(() => {
+      if (isStubbedDocumentContains) {
+        // Some browsers implement document.contains wrong, and it returns
+        // `false` even when this is incorrect. Repeat these tests with the
+        // faulty implementation.
+        sandbox.stub(win.document, 'contains').returns(false);
+      }
+
       doc1 = attach('https://example.org/doc1');
       doc2 = attach('https://example.org/doc2');
       doc3 = attach('https://example.org/doc3');

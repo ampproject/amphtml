@@ -20,7 +20,7 @@ import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {childElementsByTag} from './dom';
+import {childElementsByTag, isConnectedNode} from './dom';
 import {
   createShadowDomWriter,
   createShadowRoot,
@@ -826,7 +826,7 @@ export class MultidocManager {
   purgeShadowRoots_() {
     this.shadowRoots_.forEach(shadowRoot => {
       // The shadow root has been disconnected. Force it closed.
-      if (!this.win.document.contains(shadowRoot.host)) {
+      if (!shadowRoot.host || !isConnectedNode(shadowRoot.host)) {
         user().warn(TAG, 'Shadow doc wasn\'t previously closed');
         this.removeShadowRoot_(shadowRoot);
         this.closeShadowRootAsync_(shadowRoot);
