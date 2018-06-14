@@ -25,7 +25,6 @@ import {
   getServicePromiseOrNullForDoc,
   getTopWindow,
 } from './service';
-import {stubbedElementNames} from './element-stub-data';
 import {toWin} from './types';
 import {user} from './log';
 
@@ -121,7 +120,9 @@ export function getElementServiceIfAvailableForDoc(
   }
 
   return ampdoc.whenBodyAvailable()
-      .then(() => waitForExtensionIfStubbed(ampdoc.win, extension))
+      .then(() => waitForExtensionIfPresent(
+          ampdoc.win, extension,
+          ampdoc.getHeadNode()))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
@@ -185,31 +186,49 @@ function assertService(service, id, extension) {
 }
 
 /**
- * Waits for an extension if a stub is present
+ * Get list of all the extension JS files
+ * @param {HTMLHeadElement|Element|ShadowRoot} head
+ * @return {!Array<string>}
+ */
+export function extensionScriptsInNode(head) {
+  // ampdoc.getHeadNode() can return null
+  if (!head) {
+    return [];
+  }
+  const scripts = [];
+  const list = head.querySelectorAll('script[custom-element]');
+  for (let i = 0; i < list.length; i++) {
+    scripts.push(list[i].getAttribute('custom-element'));
+  }
+  return scripts;
+}
+
+/**
+ * Waits for an extension if its script is present
  * @param {!Window} win
  * @param {string} extension
+ * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @return {!Promise}
  * @private
  */
-function waitForExtensionIfStubbed(win, extension) {
+function waitForExtensionIfPresent(win, extension, head) {
   /**
-   * If there is (or was) a stubbed extension wait for it to load before trying
-   * to get the service.  Prevents a race condition when everything but
-   * the extensions is in cache.  If there is no stub then it's either loaded,
+   * If there is an extension script wait for it to load before trying
+   * to get the service. Prevents a race condition when everything but
+   * the extensions is in cache. If there is no script then it's either
    * not present, or the service was defined by a test. In those cases
-   * we don't wait around for an extension that may not exist.
-   *
-   * IMPORTANT: Wait one microtask.  We do this because stubElementsForDoc()
-   * may be waiting on the body promise after us and we want to be sure the
-   * element is stubbed.
+   * we don't wait around for an extension that does not exist.
    */
-  return Promise.resolve().then(() => {
-    if (stubbedElementNames.includes(extension)) {
-      const extensions = getService(win, 'extensions');
-      return /** @type {!Promise<?Object>} */ (
-        extensions.waitForExtension(win, extension));
-    }
-  });
+
+  // TODO(jpettitt) investigate registerExtension to short circuit
+  // the dom call in extensionScriptsInNode()
+  if (!extensionScriptsInNode(head).includes(extension)) {
+    return Promise.resolve();
+  }
+
+  const extensions = getService(win, 'extensions');
+  return /** @type {!Promise<?Object>} */ (
+    extensions.waitForExtension(win, extension));
 }
 
 /**
@@ -224,7 +243,7 @@ function waitForExtensionIfStubbed(win, extension) {
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
   return dom.waitForBodyPromise(win.document)
-      .then(() => waitForExtensionIfStubbed(win, extension))
+      .then(() => waitForExtensionIfPresent(win, extension, win.document.head))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
