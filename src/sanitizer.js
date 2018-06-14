@@ -246,18 +246,14 @@ const PURIFY_CONFIG = {
  * @return {string}
  */
 export function sanitizeHtml(html) {
-  if (isExperimentOn(self, 'svg-in-mustache')) {
-    return purifyHtml(html);
-  } else {
-    return sanitizeWithCaja(html);
-  }
+  return sanitizeWithCaja(html);
 }
 
 /**
  * @param {string} dirty
  * @return {string}
  */
-function purifyHtml(dirty) {
+export function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
     'ADD_ATTR': WHITELISTED_ATTRS,
     'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
@@ -376,11 +372,11 @@ function sanitizeWithCaja(html) {
   const output = [];
   let ignore = 0;
 
-  function emit(content) {
+  const emit = content => {
     if (ignore == 0) {
       output.push(content);
     }
-  }
+  };
 
   // Caja doesn't support SVG.
   const cajaBlacklistedTags = Object.assign({'svg': true}, BLACKLISTED_TAGS);
@@ -510,23 +506,30 @@ function sanitizeWithCaja(html) {
 }
 
 /**
+ * Uses DOMPurify to sanitize HTML with stricter policy for unescaped templates
+ * e.g. triple mustache.
+ *
+ * @param {string} html
+ * @return {string}
+ */
+export function purifyTagsForTripleMustache(html) {
+  return DOMPurify.sanitize(html, {
+    'ALLOWED_TAGS': TRIPLE_MUSTACHE_WHITELISTED_TAGS,
+  });
+}
+
+/**
  * Sanitizes user provided HTML to mustache templates, used in amp-mustache.
+ *
  * WARNING: This method should not be used elsewhere as we do not strip out
  * the style attribute in this method for the inline-style experiment.
  * We do so in sanitizeHtml which occurs after this initial sanitizing.
  *
- * @private
  * @param {string} html
  * @return {string}
  */
 export function sanitizeTagsForTripleMustache(html) {
-  if (isExperimentOn(self, 'svg-in-mustache')) {
-    return DOMPurify.sanitize(html, {
-      'ALLOWED_TAGS': TRIPLE_MUSTACHE_WHITELISTED_TAGS,
-    });
-  } else {
-    return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
-  }
+  return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
 }
 
 /**
