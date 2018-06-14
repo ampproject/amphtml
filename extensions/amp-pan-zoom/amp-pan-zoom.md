@@ -33,7 +33,7 @@ limitations under the License.
   </tr>
     <tr>
     <td width="40%"><strong>Supported Layouts</strong></td>
-    <td>Fixed, Fill</td>
+    <td>Fixed, Fixed Height, Fill, Responsive</td>
   </tr>
 </table>
 
@@ -51,5 +51,17 @@ limitations under the License.
   </amp-layout>
 ```
 
-## Events
-It exposes the `zoomEnd` action, which contains the single value, `scale`. This value contains the current scale of the child content being zoomed.
+## Attributes
+##### max-scale (optional)
+This attribute determines the max allowed zoom scale of the content being zoomed. The default value for this is 3.
+
+##### initial-scale (optional)
+This attribute allows developers to specify a beginning zoom scale at initialization. The default initial scale is 1.
+
+##### initial-x, initial-y (optional)
+These two attributes allow developers to specify beginning `x` and `y` translations at initialization. These both default to 0.
+
+## Events and Actions
+The `<amp-pan-zoom>` component triggers the `transformEnd` event whenever the pan or zoom animation is complete. This event will emit the parameters `scale`, `x`, and `y`. `scale` contains the current scale of the child content being zoomed. `x` and `y` respectively contain the `x` and `y` translation of the child content in pixels.
+
+We also have the `transform` action, which takes `scale`, `x`, `y` as paramters and sets the CSS transform property of the child content.
