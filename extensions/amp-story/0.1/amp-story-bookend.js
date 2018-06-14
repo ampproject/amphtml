@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-bookend-0.1.css';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
+import {LocalizedStringId} from './localization';
 import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
@@ -37,7 +39,7 @@ const BOOKEND_VERSION_KEY = 'bookend-version';
 
 /**
  * @typedef {{
- *   shareProviders: (!JsonObject|undefined),
+ *   shareProviders: (!JsonObject|!Object<string, !JsonObject>),
  *   relatedArticles: !Array<!./related-articles.RelatedArticleSetDef>
  * }}
  */
@@ -92,6 +94,37 @@ const REPLAY_ICON_TEMPLATE = {
 
 /** @type {string} */
 const TAG = 'amp-story';
+
+
+/**
+ * @param {?string} consentId
+ * @return {!./simple-template.ElementDef}
+ */
+const buildPromptConsentTemplate = consentId => {
+  return /** @type {!./simple-template.ElementDef} */ ({
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-bookend-consent'}),
+    children: [
+      {
+        tag: 'h3',
+        attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE,
+      },
+      {
+        tag: 'h2',
+        attrs: dict({
+          'class': 'i-amphtml-story-bookend-consent-button',
+          'on': `tap:${consentId}.prompt`,
+          'role': 'button',
+          'aria-label': 'Change data privacy settings',
+        }),
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL,
+      },
+    ],
+  });
+};
 
 
 /**
@@ -275,6 +308,17 @@ export class Bookend {
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
     innerContainer.appendChild(this.shareWidget_.build(ampdoc));
+
+    const consentId = this.storeService_.get(StateProperty.CONSENT_ID);
+
+    if (consentId) {
+      const promptConsentEl =
+          renderAsElement(
+              this.win_.document,
+              buildPromptConsentTemplate(String(consentId)));
+      innerContainer.appendChild(promptConsentEl);
+    }
+
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
@@ -287,7 +331,7 @@ export class Bookend {
    */
   initializeListeners_() {
     this.getShadowRoot()
-        .addEventListener('click', event => this.maybeClose_(event));
+        .addEventListener('click', event => this.onClick_(event));
     this.replayButton_.addEventListener(
         'click', event => this.onReplayButtonClick_(event));
 
@@ -420,14 +464,25 @@ export class Bookend {
   }
 
   /**
-   * Closes bookend if tapping outside usable area.
+   * Handles click events on the bookend:
+   *   - Closes bookend if tapping outside usable area
+   *   - Forwards AMP actions
    * @param {!Event} event
    * @private
    */
-  maybeClose_(event) {
-    if (this.elementOutsideUsableArea_(dev().assertElement(event.target))) {
+  onClick_(event) {
+    const target = dev().assertElement(event.target);
+
+    if (this.elementOutsideUsableArea_(target)) {
       event.stopPropagation();
       this.close_();
+      return;
+    }
+
+    if (target.hasAttribute('on')) {
+      const ampdoc = getAmpdoc(this.parentEl_);
+      const actionService = Services.actionServiceForDoc(ampdoc);
+      actionService.trigger(target, 'tap', event, ActionTrust.HIGH);
     }
   }
 

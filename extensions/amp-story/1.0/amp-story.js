@@ -854,7 +854,6 @@ export class AmpStory extends AMP.BaseElement {
    * @param {string} targetPageId
    * @return {!Promise}
    */
-  // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
@@ -1133,7 +1132,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return this.desktopMedia_.matches && !this.platform_.isBot();
+    return this.desktopMedia_.matches && !this.platform_.isBot() &&
+        !isExperimentOn(this.win, 'disable-amp-story-desktop');
   }
 
   /**

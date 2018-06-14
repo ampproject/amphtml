@@ -247,7 +247,6 @@ export class ShareWidget {
   }
 
   /** @private */
-  // TODO(alanorozco): i18n for toast.
   copyUrlToClipboard_() {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
@@ -315,6 +314,10 @@ export class ShareWidget {
     });
   }
 
+  /**
+   * @param {!Array<!JsonObject|string>} providers
+   * @return {!Object<string, !JsonObject>} providers
+   */
   parseProvidersToClassicApi(providers) {
     const providersMap = {};
 
@@ -335,8 +338,8 @@ export class ShareWidget {
   /**
    * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @private
+   * TODO(alanorozco): Set story metadata in share config.
    */
-  // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
     if (Array.isArray(providers)) {
       providers = this.parseProvidersToClassicApi(providers);
