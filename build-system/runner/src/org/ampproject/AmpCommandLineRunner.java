@@ -91,7 +91,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
         PropertyRenamingPolicy.ALL_UNQUOTED);
     options.setDisambiguatePrivateProperties(true);
-    options.setGeneratePseudoNames(pseudo_names);
+    //options.setGeneratePseudoNames(true);
     return options;
   }
 
