@@ -49,6 +49,9 @@ const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
 };
 
 
+/**
+ * Unsupported browser layer UI.
+ */
 export class UnsupportedBrowserLayer {
   /**
    * @param {!Window} win

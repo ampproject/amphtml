@@ -30,6 +30,9 @@ import {
 } from './media-tasks';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
+import {
+  VideoServiceSignals,
+} from '../../../src/service/video-service-interface';
 import {ampMediaElementFor} from './utils';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
@@ -100,6 +103,10 @@ let nextInstanceId = 0;
 let elId = 0;
 
 
+/**
+ * 🍹 MediaPool
+ * Keeps a pool of N media elements to be shared across components.
+ */
 export class MediaPool {
   /**
    * @param {!Window} win The window object.
@@ -118,7 +125,7 @@ export class MediaPool {
     this.timer_ = Services.timerFor(win);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(win);
+    this.vsync_ = Services./*OK*/vsyncFor(win);
 
     /**
      * The function used to retrieve the distance between an element and the
@@ -166,6 +173,9 @@ export class MediaPool {
      * @private {boolean}
      */
     this.blessed_ = false;
+
+    /** @private {?Array<!AmpElement>} */
+    this.ampElementsToBless_ = null;
 
     /** @const {!Object<string, (function(): !HTMLMediaElement)>} */
     this.mediaFactory_ = {
@@ -632,6 +642,12 @@ export class MediaPool {
    */
   register(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
+
+    const parent = domMediaEl.parentNode;
+    if (parent.signals) {
+      this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
+    }
+
     if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
       // This media element originated from the media pool.
       return Promise.resolve();
@@ -654,6 +670,15 @@ export class MediaPool {
     domMediaEl.pause();
 
     return Promise.resolve();
+  }
+
+  /**
+   * @param {!AmpElement} element
+   * @private
+   */
+  trackAmpElementToBless_(element) {
+    this.ampElementsToBless_ = this.ampElementsToBless_ || [];
+    this.ampElementsToBless_.push(element);
   }
 
 
@@ -789,6 +814,13 @@ export class MediaPool {
     }
 
     const blessPromises = [];
+
+    (this.ampElementsToBless_ || []).forEach(ampEl => {
+      ampEl.signals().signal(VideoServiceSignals.USER_INTERACTED);
+    });
+
+    this.ampElementsToBless_ = null; // GC
+
     this.forEachMediaElement_(mediaEl => {
       blessPromises.push(this.bless_(mediaEl));
     });
