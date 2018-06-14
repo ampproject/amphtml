@@ -52,6 +52,22 @@ describes.realWin('Creates the relevant fx presets correctly', {
     ampFx = createAmpFx('fade-in-scroll');
     expect(ampFx).to.not.be.null;
     expect(ampFx.getFxProvider_()).to.not.be.null;
+
+    ampFx = createAmpFx('fly-in-bottom');
+    expect(ampFx).to.not.be.null;
+    expect(ampFx.getFxProvider_()).to.not.be.null;
+
+    ampFx = createAmpFx('fly-in-top');
+    expect(ampFx).to.not.be.null;
+    expect(ampFx.getFxProvider_()).to.not.be.null;
+
+    ampFx = createAmpFx('fly-in-left');
+    expect(ampFx).to.not.be.null;
+    expect(ampFx.getFxProvider_()).to.not.be.null;
+
+    ampFx = createAmpFx('fly-in-right');
+    expect(ampFx).to.not.be.null;
+    expect(ampFx.getFxProvider_()).to.not.be.null;
   });
 
 });
