@@ -18,7 +18,7 @@ import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
-import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/sanitizer';
+import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
 
 // Configure sanitizer for output of "triple-mustache";a set of allowed tags
 // to be unescaped.
