@@ -25,6 +25,7 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {uniqueId} from './utils';
 
 /** @const */
 const MIN_INTERVAL = 3;
@@ -103,6 +104,8 @@ const Vars = {
   AD_DISCARDED: 'discardTime',
   // Index of the ad generating the trigger.
   AD_INDEX: 'adIndex',
+  // Id that should be unique for every ad.
+  AD_UNIQUE_ID: 'adUniqueId',
   // Position in the parent story. Number of page before ad + 1. Does not count
   // previously inserted ad pages.
   POSITION: 'position',
@@ -350,7 +353,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // is used to check if a page id is an ad later.
     this.adPageIds_[pageId] = id;
     // Also create a new object to keep track of any future analytics data.
-    this.analyticsData_[id] = {};
+    this.analyticsData_[id] = {
+      [Vars.AD_INDEX]: id,
+      [Vars.AD_UNIQUE_ID]: uniqueId(),
+    };
 
     const attributes = dict({
       'id': pageId,
@@ -441,6 +447,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       user().warn(TAG, 'CTA url is not valid. Ad was discarded');
       return false;
     }
+
+    // Click listener so that we can fire `story-ad-click` analytics trigger at
+    // the appropriate time.
+    const adIndex = this.adPagesCreated_;
+    a.addEventListener('click', () => {
+      const vars = {
+        [Vars.AD_INDEX]: adIndex,
+        [Vars.AD_CLICKED]: Date.now(),
+      };
+      this.analyticsEvent_(Events.AD_CLICKED, vars);
+    });
 
     const ctaLayer = this.win.document.createElement('amp-story-cta-layer');
     ctaLayer.appendChild(a);
