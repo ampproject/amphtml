@@ -481,6 +481,11 @@ Only binding to the following components and attributes are allowed:
     <td>Enables or disables the fieldset.</td>
   </tr>
   <tr>
+    <td><code>&lt;image&gt;</code></td>
+    <td><code>[xlink:href]</code><br>
+    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image">image attributes</a>.</td>
+  </tr>
+  <tr>
     <td><code>&lt;input&gt;</code></td>
     <td><code>[accept]</code><br><code>[accessKey]</code><br><code>[autocomplete]</code><br><code>[checked]</code><br><code>[disabled]</code><br><code>[height]</code><br><code>[inputmode]</code><br><code>[max]</code><br><code>[maxlength]</code><br><code>[min]</code><br><code>[minlength]</code><br><code>[multiple]</code><br><code>[pattern]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[selectiondirection]</code><br><code>[size]</code><br><code>[spellcheck]</code><br><code>[step]</code><br><code>[type]</code><br><code>[value]</code><br><code>[width]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes">input attributes</a>.</td>
