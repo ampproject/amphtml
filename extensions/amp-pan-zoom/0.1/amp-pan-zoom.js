@@ -55,6 +55,9 @@ const ELIGIBLE_TAGS = {
 const SUPPORT_VALIDATION_MSG = `${TAG} should
   have its target element as the one and only child`;
 
+/**
+ * @extends {AMP.BaseElement}
+ */
 export class AmpPanZoom extends AMP.BaseElement {
   // TODO (#15685): refactor this to share code with amp-image-viewer
 
@@ -131,6 +134,19 @@ export class AmpPanZoom extends AMP.BaseElement {
     );
     this.content_ = children[0];
     this.content_.classList.add('i-amphtml-pan-zoom-child');
+
+    this.registerAction('transform', invocation => {
+      const {args} = invocation;
+      if (!args) {
+        return;
+      }
+      const scale = args['scale'] || 1;
+      const x = args['x'] || 0;
+      const y = args['y'] || 0;
+      const deltaX = x - this.posX_;
+      const deltaY = y - this.posY_;
+      this.onZoom_(scale, deltaX, deltaY, true);
+    });
   }
 
   /** @override */
@@ -283,8 +299,8 @@ export class AmpPanZoom extends AMP.BaseElement {
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-      const deltaX = this.elementBox_.width / 2 - e.data.clientX;
-      const deltaY = this.elementBox_.height / 2 - e.data.clientY;
+      const deltaX = (this.elementBox_.width / 2) - e.data.clientX;
+      const deltaY = (this.elementBox_.height / 2) - e.data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true)
           .then(() => this.onZoomRelease_());
     });
@@ -403,8 +419,8 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   updatePanZoomBounds_(scale) {
-    const dh = this.elementBox_.height - this.contentBox_.height * scale;
-    const dw = this.elementBox_.width - this.contentBox_.width * scale;
+    const dh = this.elementBox_.height - (this.contentBox_.height * scale);
+    const dw = this.elementBox_.width - (this.contentBox_.width * scale);
 
     const minY = dh >= 0 ? 0 : dh / 2;
     const maxY = dh >= 0 ? 0 : -minY;
@@ -422,10 +438,28 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   updatePanZoom_() {
-    setStyles(dev().assertElement(this.content_), {
-      transform: translate(this.posX_, this.posY_) +
-          ' ' + scale(this.scale_),
+    const {scale_: s, posX_: x, posY_: y, content_: content} = this;
+    setStyles(dev().assertElement(content), {
+      transform: translate(x, y) + ' ' + scale(s),
     });
+    this.triggerTransformEnd_(s, x, y);
+  }
+
+  /**
+   * @param {number} scale
+   * @param {number} x
+   * @param {number} y
+   * @private
+   */
+  triggerTransformEnd_(scale, x, y) {
+    const transformEndEvent =
+    createCustomEvent(this.win, `${TAG}.transformEnd`, {
+      scale,
+      x,
+      y,
+    });
+    this.action_.trigger(this.element, 'transformEnd', transformEndEvent,
+        ActionTrust.HIGH);
   }
 
   /**
@@ -498,10 +532,10 @@ export class AmpPanZoom extends AMP.BaseElement {
     if (dir == 0) {
       return;
     }
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const newScale = this.startScale_ * (1 + dir * dist / 100);
-    const deltaCenterX = this.elementBox_.width / 2 - centerClientX;
-    const deltaCenterY = this.elementBox_.height / 2 - centerClientY;
+    const dist = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+    const newScale = this.startScale_ * (1 + (dir * dist / 100));
+    const deltaCenterX = (this.elementBox_.width / 2) - centerClientX;
+    const deltaCenterY = (this.elementBox_.height / 2) - centerClientY;
     deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
     deltaY = Math.min(deltaCenterY, deltaCenterY * (dist / 100));
     this.onZoom_(newScale, deltaX, deltaY, /*animate*/ false);
@@ -524,8 +558,8 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     this.updatePanZoomBounds_(newScale);
 
-    const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
-    const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
+    const newPosX = this.boundX_(this.startX_ + (deltaX * newScale), false);
+    const newPosY = this.boundY_(this.startY_ + (deltaY * newScale), false);
     return /** @type {!Promise|undefined} */ (
       this.set_(newScale, newPosX, newPosY, animate));
   }
@@ -544,14 +578,6 @@ export class AmpPanZoom extends AMP.BaseElement {
       } else {
         this.registerPanningGesture_();
       }
-
-      // TODO: fire a zoom end event
-      const zoomEndEvent =
-      createCustomEvent(this.win, `${TAG}.zoomEnd`, {
-        scale: this.scale_,
-      });
-      this.action_.trigger(this.element, 'zoomEnd', zoomEndEvent,
-          ActionTrust.HIGH);
     });
   }
 
@@ -568,7 +594,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     const ds = newScale - this.scale_;
     const dx = newPosX - this.posX_;
     const dy = newPosY - this.posY_;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = Math.sqrt((dx * dx) + (dy * dy));
 
     const dur = animate ?
       Math.min(1, Math.max(
