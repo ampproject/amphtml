@@ -20,11 +20,6 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
-  }
-
-  /** @override */
-  viewportCallback() {
     const hasClass = (ele, cls) => {
       if (!cls) {
         return false;
