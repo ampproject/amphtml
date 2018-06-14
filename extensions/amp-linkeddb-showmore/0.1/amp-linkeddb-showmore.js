@@ -60,10 +60,9 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
         removeClass(document.querySelector('.view-more'), 'down');
         document.querySelector('.view-more').textContent = document
             .querySelector('.view-more').getAttribute('data-up');
-        document.querySelector('.view-more-text')
-            .className = 'limit-height view-more-text show';
+        addClass(document.querySelector('.view-more-text'), 'show');
       } else {
-        document.querySelector('.view-more').className = 'view-more down';
+        addClass(document.querySelector('.view-more'), 'down');
         removeClass(document.querySelector('.view-more-text'), 'show');
         document.querySelector('.view-more').textContent = document
             .querySelector('.view-more').getAttribute('data-down');

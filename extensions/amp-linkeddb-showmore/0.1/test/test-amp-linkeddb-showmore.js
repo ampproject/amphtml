@@ -32,7 +32,7 @@ describes.realWin('amp-linkeddb-showmore', {
   });
 
   it('amp-linkeddb-showmore', () => {
-    element.viewport();
+    element.build();
     expect(element.querySelector('.view-more-text').textContent).to.be.true;
   });
 });
