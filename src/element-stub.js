@@ -20,7 +20,9 @@ import {dev} from './log';
 /** @type {!Array} */
 export const stubbedElements = [];
 
+
 export class ElementStub extends BaseElement {
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
     stubbedElements.push(this);

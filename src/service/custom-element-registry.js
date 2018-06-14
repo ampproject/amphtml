@@ -193,5 +193,5 @@ export function resetScheduledElementForTesting(win, elementName) {
  */
 export function getElementClassForTesting(win, elementName) {
   const knownElements = win.ampExtendedElements;
-  return knownElements && knownElements[elementName] || null;
+  return (knownElements && knownElements[elementName]) || null;
 }
