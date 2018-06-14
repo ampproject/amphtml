@@ -23,6 +23,7 @@ import {
 } from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
+import {isExperimentOn} from '../experiments';
 import {waitForBodyPromise} from '../dom';
 
 /** @const {string} */
@@ -103,7 +104,8 @@ export class AmpDocService {
     }
 
     // Multiple documents and AmpDocShell requested
-    if (opt_node === this.win.document) {
+    if (isExperimentOn(this.win, 'ampdoc-shell') &&
+        opt_node === this.win.document) {
       if (this.shellShadowDoc_) {
         return this.shellShadowDoc_;
       } else {
