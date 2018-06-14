@@ -81,8 +81,8 @@ function targetDimensionsFor(sizer) {
 function scaleTransform(factor, width, height, matrix) {
   // TODO(alanorozco, #12934): Translate values are not correctly calculated if
   // `scale`, `skew` or `rotate` have been user-defined.
-  const translateX = width * factor / 2 - width / 2;
-  const translateY = height * factor / 2 - height / 2;
+  const translateX = ((width * factor) / 2) - (width / 2);
+  const translateY = ((height * factor) / 2) - (height / 2);
   return [
     matrix[0] * factor,
     matrix[1],
