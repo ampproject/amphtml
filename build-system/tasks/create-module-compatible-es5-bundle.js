@@ -24,6 +24,7 @@ const gulpReplace = require('gulp-replace');
  * Finds and replaces regex changing `this` -> `self` in the snippet
  * inserted by closure compiler from
  * https://github.com/google/closure-compiler/blob/36f332788d54803c3c1afe06a9d84bf4b9f4945b/src/com/google/javascript/jscomp/js/util/global.js#L44
+ * Read more here: http://exploringjs.com/es6/ch_modules.html#_browsers-scripts-versus-modules
  *
  *
  * Changes `global?global:VARNAME}(this)` to `global?global:VARNAME}(self)`
