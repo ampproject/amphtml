@@ -173,9 +173,9 @@ let pageScalingService = null;
 /**
  * Service for scaling pages dynamically so their layers will be sized within a
  * certain pixel range independent of visual dimensions.
+ * TODO(alanorozco): Make this part of the runtime layout system to prevent
+ *   FOUC-like jump and allow for SSR.
  */
-// TODO(alanorozco): Make this part of the runtime layout system to prevent
-// FOUC-like jump and allow for SSR.
 export class PageScalingService {
   /**
    * @param {!Window} win
