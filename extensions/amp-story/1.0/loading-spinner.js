@@ -62,6 +62,9 @@ const SPINNER = {
   ],
 };
 
+/**
+ * Loading spinner UI element.
+ */
 export class LoadingSpinner {
   /**
    * @param {!Document} doc
@@ -77,6 +80,9 @@ export class LoadingSpinner {
     this.isActive_ = false;
   }
 
+  /**
+   * @return {!Element}
+   */
   build() {
     if (this.root_) {
       return this.root_;
