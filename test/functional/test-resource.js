@@ -897,7 +897,7 @@ describe('Resource idleRenderOutsideViewport', () => {
   let resources;
   let resource;
   let idleRenderOutsideViewport;
-  let withinViewportMultiplier;
+  let withinViewportMultipliers;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -927,23 +927,23 @@ describe('Resource idleRenderOutsideViewport', () => {
     };
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
-    withinViewportMultiplier =
-        sandbox.stub(resource, 'withinViewportMultiplier');
+    withinViewportMultipliers =
+        sandbox.stub(resource, 'withinViewportMultipliers');
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  it('should return true if withinViewportMultiplier', () => {
+  it('should return true if withinViewportMultipliers', () => {
     idleRenderOutsideViewport.returns(5);
-    withinViewportMultiplier.withArgs(5).returns(true);
+    withinViewportMultipliers.withArgs([5]).returns([true]);
     expect(resource.idleRenderOutsideViewport()).to.equal(true);
   });
 
   it('should return false for false element idleRenderOutsideViewport', () => {
     idleRenderOutsideViewport.returns(false);
-    withinViewportMultiplier.withArgs(false).returns(false);
+    withinViewportMultipliers.withArgs([false]).returns([false]);
     expect(resource.idleRenderOutsideViewport()).to.equal(false);
   });
 });
@@ -2006,10 +2006,10 @@ describe('Resource renderOutsideViewport', () => {
 
   describe('whenWithinViewport', () => {
     it('should resolve correctly', () => {
-      sandbox.stub(resource, 'withinViewportMultiplier')
-          .onCall(0).returns(false)
-          .onCall(1).returns(false)
-          .onCall(2).returns(true)
+      sandbox.stub(resource, 'withinViewportMultipliers')
+          .onCall(0).returns([false])
+          .onCall(1).returns([false])
+          .onCall(2).returns([true])
           .onCall(3).callsFake(() => {
             throw new Error('should not call!');
           });

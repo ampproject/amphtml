@@ -660,44 +660,54 @@ export class Resource {
    */
   whenWithinViewport(viewport) {
     dev().assert(viewport !== false);
-    if (!this.isLayoutPending() || this.hasOwner() || viewport === true ||
-        this.withinViewportMultiplier(viewport)) {
+    // Resolve is already laid out or viewport is true.
+    if (!this.isLayoutPending() || viewport === true) {
       return Promise.resolve();
     }
+    // See if pre-existing promise.
     const viewportNum = dev().assertNumber(viewport);
-    this.withViewportDeferreds_[viewportNum] =
-        this.withViewportDeferreds_[viewportNum] || new Deferred();
+    if (this.withViewportDeferreds_[viewportNum]) {
+      return this.withViewportDeferreds_[viewportNum].promise;
+    }
+    // See if already within viewport multiplier.
+    if (this.withinViewportMultipliers([viewport])[0]) {
+      return Promise.resolve();
+    }
+    // return promise that will trigger when within viewport multiple.
+    this.withViewportDeferreds_[viewportNum] = new Deferred();
     return this.withViewportDeferreds_[viewportNum].promise;
   }
 
   /** @private resolves promises populated via whenWithinViewport. */
   resolveDeferredsWhenWithinViewports_() {
-    Object.keys(this.withViewportDeferreds_).forEach(viewport => {
-      const viewportNum = parseInt(viewport, 10);
-      if (this.hasOwner() || this.withinViewportMultiplier(viewportNum)) {
-        this.withViewportDeferreds_[viewportNum].resolve();
-        delete this.withViewportDeferreds_[viewportNum];
+    const viewports = Object.keys(this.withViewportDeferreds_)
+        .map(viewport => parseInt(viewport, 10));
+    this.withinViewportMultipliers(viewports).forEach((within, idx) => {
+      if (within) {
+        this.withViewportDeferreds_[viewports[idx]].resolve();
+        delete this.withViewportDeferreds_[viewports[idx]];
       }
     });
   }
 
   /**
-   * @param {number|boolean} multiplier
-   * @return {boolean} whether resource is within provider multiplier of
-   *    viewports from current visible viewport.
+   * @param {!Array<boolean|number>} multipliers
+   * @return {!Array<boolean>} array matching input array of whether resource is
+   *    within provider multipliers of viewport from current visible viewport.
    * @visibleForTesting
    */
-  withinViewportMultiplier(multiplier) {
-    // Boolean interface controls explicit result.
-    if (multiplier === true || multiplier === false) {
-      return multiplier;
+  withinViewportMultipliers(multipliers) {
+    // Do not bother determining viewport location if all multipliers are
+    // booleans.
+    if (!multipliers.filter(multi => typeof multi !== 'boolean').length) {
+      return multipliers;
     }
-    multiplier = Math.max(multiplier, 0);
-
+    // TODO! DO NOT MERGE! Is this correct?
     if (this.useLayers_) {
       const {element} = this;
-      return element.getLayers().iterateAncestry(element,
+      const ancestry = element.getLayers().iterateAncestry(element,
           this.layersDistanceRatio_);
+      return multipliers.map(multiplier => ancestry < multiplier);
     }
 
     // Numeric interface, element is allowed to render outside viewport when it
@@ -710,8 +720,9 @@ export class Resource {
 
     if (viewportBox.right < layoutBox.left ||
         viewportBox.left > layoutBox.right) {
-      // If outside of viewport's x-axis, element is not in viewport.
-      return false;
+      // If outside of viewport's x-axis, element is not in viewport so return
+      // false for all but boolean true.
+      return multipliers.map(multiplier => multiplier === true);
     }
 
     if (viewportBox.bottom < layoutBox.top) {
@@ -731,10 +742,12 @@ export class Resource {
         scrollPenalty = 2;
       }
     } else {
-      // Element is in viewport
-      return true;
+      // Element is in viewport so return true for all but boolean false.
+      return multipliers.map(multiplier => multiplier !== false);
     }
-    return distance < viewportBox.height * multiplier / scrollPenalty;
+    return multipliers.map(multiplier =>
+      typeof multiplier === 'boolean' ? multiplier : distance <
+        viewportBox.height * Math.max(multiplier, 0) / scrollPenalty);
   }
 
   /**
@@ -767,8 +780,8 @@ export class Resource {
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
     this.resolveDeferredsWhenWithinViewports_();
-    return this.hasOwner() ||
-        this.withinViewportMultiplier(this.element.renderOutsideViewport());
+    return this.hasOwner() || this.withinViewportMultipliers(
+        [this.element.renderOutsideViewport()])[0];
   }
 
   /**
@@ -777,8 +790,8 @@ export class Resource {
    * @return {boolean}
    */
   idleRenderOutsideViewport() {
-    return this.withinViewportMultiplier(
-        this.element.idleRenderOutsideViewport());
+    return this.withinViewportMultipliers(
+        [this.element.idleRenderOutsideViewport()])[0];
   }
 
   /**
