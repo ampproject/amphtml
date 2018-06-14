@@ -122,7 +122,7 @@ export function getElementServiceIfAvailableForDoc(
   return ampdoc.whenBodyAvailable()
       .then(() => waitForExtensionIfPresent(
           ampdoc.win, extension,
-          extensionScriptsInNode(ampdoc.getHeadNode())))
+          ampdoc.getHeadNode()))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
@@ -207,11 +207,11 @@ export function extensionScriptsInNode(head) {
  * Waits for an extension if its script is present
  * @param {!Window} win
  * @param {string} extension
- * @param {!Array<string>} customElements
+ * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @return {!Promise}
  * @private
  */
-function waitForExtensionIfPresent(win, extension, customElements) {
+function waitForExtensionIfPresent(win, extension, head) {
   /**
    * If there is an extension script wait for it to load before trying
    * to get the service. Prevents a race condition when everything but
@@ -219,13 +219,14 @@ function waitForExtensionIfPresent(win, extension, customElements) {
    * not present, or the service was defined by a test. In those cases
    * we don't wait around for an extension that does not exist.
    */
-
-  if (customElements.includes(extension)) {
-    const extensions = getService(win, 'extensions');
-    return /** @type {!Promise<?Object>} */ (
-      extensions.waitForExtension(win, extension));
+  if (isElementScheduled(win, extension) ||
+      !extensionScriptsInNode(head).includes(extension)) {
+    return Promise.resolve();
   }
-  return Promise.resolve();
+
+  const extensions = getService(win, 'extensions');
+  return /** @type {!Promise<?Object>} */ (
+    extensions.waitForExtension(win, extension));
 }
 
 /**
@@ -240,8 +241,7 @@ function waitForExtensionIfPresent(win, extension, customElements) {
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
   return dom.waitForBodyPromise(win.document)
-      .then(() => waitForExtensionIfPresent(win, extension,
-          extensionScriptsInNode(win.document.head)))
+      .then(() => waitForExtensionIfPresent(win, extension, win.document.head))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
