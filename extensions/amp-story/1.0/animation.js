@@ -241,8 +241,8 @@ class AnimationRunner {
   /** @return {boolean} */
   hasStarted() {
     return this.isActivityScheduled_(PlaybackActivity.START) ||
-        !!this.runner_ && dev().assert(this.runner_)
-            .getPlayState() == WebAnimationPlayState.RUNNING;
+        (!!this.runner_ && dev().assert(this.runner_)
+            .getPlayState() == WebAnimationPlayState.RUNNING);
   }
 
   /** Force-finishes all animations. */
