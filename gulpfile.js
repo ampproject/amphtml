@@ -37,6 +37,7 @@ const watchify = require('watchify');
 const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global/index.js');
 const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
+const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
 const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
@@ -530,6 +531,15 @@ function compileCss(watch, opt_compileAll) {
     });
   }
 
+  /**
+   * Writes CSS to build folder
+   *
+   * @param {string} css
+   * @param {string} originalCssFilename
+   * @param {string} jsFilename
+   * @param {string} cssFilename
+   * @return {Promise}
+   */
   function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
     return toPromise(gulp.src(`css/${originalCssFilename}`)
         .pipe($$.file(jsFilename, 'export const cssText = ' +
@@ -654,6 +664,12 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
  * @param {!Object} options
  */
 function buildExtensionCss(path, name, version, options) {
+  /**
+   * Writes CSS binaries
+   *
+   * @param {string} name
+   * @param {string} css
+   */
   function writeCssBinaries(name, css) {
     const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
     const jsName = `build/${name}.js`;
@@ -894,6 +910,10 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minifiedRuntimeTarget);
         }
+      }).then(() => {
+        return createModuleCompatibleES5Bundle('v0.js');
+      }).then(() => {
+        return createModuleCompatibleES5Bundle('amp4ads-v0.js');
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
@@ -1161,6 +1181,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(gulp.dest.bind(gulp), destDir);
 
   const destFilename = options.toName || srcFilename;
+  /**
+   * Rebundle-javascript
+   *
+   * @param {boolean} failOnError
+   * @return {Promise}
+   */
   function rebundle(failOnError) {
     const startTime = Date.now();
     return toPromise(
@@ -1321,6 +1347,15 @@ function buildWebPushPublisherFilesVersion(version, options) {
   return Promise.all(promises);
 }
 
+/**
+ * Build WebPushPublisher file
+ *
+ * @param {*} version
+ * @param {string} fileName
+ * @param {string} watch
+ * @param {Object} options
+ * @return {Promise}
+ */
 function buildWebPushPublisherFile(version, fileName, watch, options) {
   const basePath = `extensions/amp-web-push/${version}/`;
   const tempBuildDir = `build/all/amp-web-push-${version}/`;
@@ -1537,6 +1572,11 @@ function checkMinVersion() {
   }
 }
 
+/**
+ *Creates directory in sync manner
+ *
+ * @param {string} path
+ */
 function mkdirSync(path) {
   try {
     fs.mkdirSync(path);
@@ -1547,6 +1587,12 @@ function mkdirSync(path) {
   }
 }
 
+/**
+ * Returns a promise for readable
+ *
+ * @param {*} readable
+ * @return {Promise}
+ */
 function toPromise(readable) {
   return new Promise(function(resolve, reject) {
     readable.on('error', reject).on('end', resolve);
