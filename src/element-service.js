@@ -219,7 +219,7 @@ function waitForExtensionIfPresent(win, extension, head) {
    * not present, or the service was defined by a test. In those cases
    * we don't wait around for an extension that does not exist.
    */
-  if (isElementScheduled(win, extension) ||
+  if (!isElementScheduled(win, extension) ||
       !extensionScriptsInNode(head).includes(extension)) {
     return Promise.resolve();
   }
