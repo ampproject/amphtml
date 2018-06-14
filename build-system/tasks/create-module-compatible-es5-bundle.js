@@ -34,4 +34,4 @@ exports.createModuleCompatibleES5Bundle = function(src) {
         return `global?global:${string.match(/global\?global\:([a-z]*)\}\(this\)/)[1]}}(self)`;
       }))
       .pipe(gulp.dest('dist'));
-}
+};
