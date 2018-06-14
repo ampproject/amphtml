@@ -26,6 +26,8 @@ const gulpReplace = require('gulp-replace');
  * Finds and replaces regex changing `this` -> `self` in the snippet
  * inserted by closure compiler from
  * https://github.com/google/closure-compiler/blob/36f332788d54803c3c1afe06a9d84bf4b9f4945b/src/com/google/javascript/jscomp/js/util/global.js#L44
+ *
+ * Changes `global?global:VARNAME}(this)` to `global?global:VARNAME}(self)`
  */
 exports.createModuleCompatibleES5Bundle = function(src) {
   return gulp.src('dist/' + src)
