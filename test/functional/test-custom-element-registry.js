@@ -63,6 +63,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
     // Pre-download elements are created as ElementStub.
     const element1 = doc.createElement('amp-element1');
+    element1.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(element1);
     expect(element1.implementation_).to.be.instanceOf(ElementStub);
 
