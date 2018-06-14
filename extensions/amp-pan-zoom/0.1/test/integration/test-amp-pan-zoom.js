@@ -20,7 +20,7 @@ describe.configure().ifNewChrome().run('amp-pan-zoom', function() {
   const extensions = ['amp-pan-zoom'];
   const experiments = ['amp-pan-zoom'];
   const body = `
-  <amp-pan-zoom id="amp-pan-zoom" layout="fixed" width="300" height="240">
+  <amp-pan-zoom id="amp-pan-zoom" layout="fixed" width="300" height="241">
     <amp-img id="img0"
       src="/examples/img/sample.jpg"
       width="641" height="481" layout="fixed"></amp-img>
