@@ -18,6 +18,7 @@ import {Deferred} from '../utils/promise';
 import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
+import {isElement} from '../dom';
 
 
 /**
@@ -94,7 +95,7 @@ export class BaseTemplate {
         }
       } else if (n.nodeType == /* COMMENT */ 8) {
         // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
+      } else if (isElement(n)) {
         if (!singleElement) {
           singleElement = dev().assertElement(n);
         } else {

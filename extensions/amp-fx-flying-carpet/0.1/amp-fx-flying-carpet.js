@@ -18,6 +18,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {isElement} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 
@@ -182,18 +183,11 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * @private
    */
   visibileChildren_(nodes) {
-    return nodes.filter(node => {
-      if (node.nodeType === /* Element */ 1) {
-        return true;
-      }
-
-      if (node.nodeType === /* Text */ 3) {
+    return nodes.filter(node =>
+      isElement(node) ||
+        node.nodeType === /* Text */ 3 &&
         // Is there a non-whitespace character?
-        return /\S/.test(node.textContent);
-      }
-
-      return false;
-    });
+        /\S/.test(node.textContent));
   }
 }
 
