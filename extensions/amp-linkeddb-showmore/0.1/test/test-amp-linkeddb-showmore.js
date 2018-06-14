@@ -33,6 +33,7 @@ describes.realWin('amp-linkeddb-showmore', {
 
   it('amp-linkeddb-showmore', () => {
     element.build();
-    expect(element.querySelector('.view-more-text').textContent).to.be.true;
+    const empty = element.querySelector('.view-more-text');
+    expect(empty).to.be.null;
   });
 });

@@ -48,13 +48,8 @@ export class AmpLinkeddbShowmore extends AMP.BaseElement {
         ele.className = newClass.replace(/^\s+|\s+$/g, '');
       }
     };
-    // parseInt(window.getComputedStyle(document.querySelector('.msg-text'))
-    //     .height, 10)
-    if (document.querySelector('.msg-text').clientHeight <= 95) {
-      addClass(document.querySelector('.view-more'), 'hide');
-    } else {
-      addClass(document.querySelector('.view-more-text'), 'limit-height');
-    }
+
+    addClass(document.querySelector('.view-more-text'), 'limit-height');
     document.querySelector('.view-more').addEventListener('click', function() {
       if (hasClass(document.querySelector('.view-more'), 'down')) {
         removeClass(document.querySelector('.view-more'), 'down');
