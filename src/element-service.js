@@ -219,6 +219,9 @@ function waitForExtensionIfPresent(win, extension, head) {
    * not present, or the service was defined by a test. In those cases
    * we don't wait around for an extension that does not exist.
    */
+
+  // TODO(jpettitt) investigate registerExtension to short circuit
+  // the dom call in extensionScriptsInNode()
   if (!extensionScriptsInNode(head).includes(extension)) {
     return Promise.resolve();
   }
