@@ -32,6 +32,7 @@ import {
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {startsWith} from '../string';
 import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
