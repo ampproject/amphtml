@@ -897,7 +897,7 @@ describe('Resource idleRenderOutsideViewport', () => {
   let resources;
   let resource;
   let idleRenderOutsideViewport;
-  let withinViewportMultipliers;
+  let isWithinViewportRatio;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -927,23 +927,23 @@ describe('Resource idleRenderOutsideViewport', () => {
     };
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
-    withinViewportMultipliers =
-        sandbox.stub(resource, 'withinViewportMultipliers');
+    isWithinViewportRatio =
+        sandbox.stub(resource, 'isWithinViewportRatio');
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  it('should return true if withinViewportMultipliers', () => {
+  it('should return true if isWithinViewportRatio', () => {
     idleRenderOutsideViewport.returns(5);
-    withinViewportMultipliers.withArgs([5]).returns([true]);
+    isWithinViewportRatio.withArgs(5).returns(true);
     expect(resource.idleRenderOutsideViewport()).to.equal(true);
   });
 
   it('should return false for false element idleRenderOutsideViewport', () => {
     idleRenderOutsideViewport.returns(false);
-    withinViewportMultipliers.withArgs([false]).returns([false]);
+    isWithinViewportRatio.withArgs(false).returns(false);
     expect(resource.idleRenderOutsideViewport()).to.equal(false);
   });
 });
@@ -2006,10 +2006,10 @@ describe('Resource renderOutsideViewport', () => {
 
   describe('whenWithinViewport', () => {
     it('should resolve correctly', () => {
-      sandbox.stub(resource, 'withinViewportMultipliers')
-          .onCall(0).returns([false])
-          .onCall(1).returns([false])
-          .onCall(2).returns([true])
+      sandbox.stub(resource, 'isWithinViewportRatio').withArgs(3)
+          .onCall(0).returns(false)
+          .onCall(1).returns(false)
+          .onCall(2).returns(true)
           .onCall(3).callsFake(() => {
             throw new Error('should not call!');
           });
@@ -2020,8 +2020,7 @@ describe('Resource renderOutsideViewport', () => {
       // Call again should do nothing.
       resource.resolveDeferredsWhenWithinViewports_();
       resource.resolveDeferredsWhenWithinViewports_();
-      expect(Object.keys(resource.withViewportDeferreds_)).to.jsonEqual([]);
-      expect(Object.keys(resource.withViewportDeferreds_)).to.jsonEqual([]);
+      expect(resource.withViewportDeferreds_).to.not.be.ok;
       return promise;
     });
 

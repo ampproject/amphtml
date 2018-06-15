@@ -76,11 +76,11 @@ export const ResourceState = {
 
 
 /** @typedef {{
-    distance: number,
+  distance: (boolean|number),
     viewportHeight: (number|undefined),
     scrollPenalty: (number|undefined),
   }} */
-let ViewportRatio;
+let ViewportRatioDef;
 
 /**
  * A Resource binding for an AmpElement.
@@ -698,8 +698,8 @@ export class Resource {
     keys.forEach(viewport => {
       const viewportInt = dev().assertNumber(parseInt(viewport, 10));
       if (this.isWithinViewportRatio(viewportInt, viewportRatio)) {
-        this.withViewportDeferreds_[viewports[idx]].resolve();
-        delete this.withViewportDeferreds_[viewports[idx]];
+        this.withViewportDeferreds_[viewportInt].resolve();
+        delete this.withViewportDeferreds_[viewportInt];
         removed++;
       }
     });
@@ -708,13 +708,13 @@ export class Resource {
     }
   }
 
-  /** @return {!ViewportRatio} */
+  /** @return {!ViewportRatioDef} */
   getDistanceViewportRatio() {
     if (this.useLayers_) {
       const {element} = this;
       return {
         distance: element.getLayers().iterateAncestry(element,
-          this.layersDistanceRatio_),
+            this.layersDistanceRatio_),
       };
     }
 
@@ -751,23 +751,24 @@ export class Resource {
       }
     } else {
       // Element is in viewport so return true for all but boolean false.
-      return {distance: true}
+      return {distance: true};
     }
     return {distance, scrollPenalty, viewportHeight: viewportBox.height};
   }
 
   /**
    * @param {number|boolean} multiplier
-   * @param {ViewportRatio=} opt_viewportRatio
-   * @param {boolean}
+   * @param {ViewportRatioDef=} opt_viewportRatio
+   * @return {boolean} whether multiplier given is within viewport ratio
+   * @visibleForTesting
    */
   isWithinViewportRatio(multiplier, opt_viewportRatio) {
     if (typeof multiplier === 'boolean') {
       return multiplier;
     }
-    const {distance, scrollPenalty, viewportHeight, ancestry} =
+    const {distance, scrollPenalty, viewportHeight} =
       opt_viewportRatio || this.getDistanceViewportRatio();
-    if (this.useLayers_)
+    if (this.useLayers_) {
       return distance < multiplier;
     }
     if (typeof distance == 'boolean') {
@@ -807,7 +808,7 @@ export class Resource {
     // doing.
     this.resolveDeferredsWhenWithinViewports_();
     return this.hasOwner() || this.isWithinViewportRatio(
-      this.element.renderOutsideViewport());
+        this.element.renderOutsideViewport());
   }
 
   /**
