@@ -26,7 +26,6 @@ import {fullscreenEnter, fullscreenExit, isFullscreenElement, removeElement} fro
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {rectIntersection} from '../../../src/layout-rect';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -42,6 +41,9 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     /** @private {?string} */
     this.profileId_ = null;
+
+    /** @private {?string} */
+    this.markTagParams_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -63,9 +65,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.kindIsProd_ = true;
-
-    /** @private {?number} */
-    this.lastIntersectionRation_ = null;
   }
 
   /**
@@ -102,6 +101,8 @@ class AmpViqeoPlayer extends AMP.BaseElement {
         this.element.getAttribute('data-profileid'),
         'The data-profileid attribute is required for <amp-viqeo-player> %s',
         this.element);
+
+    this.markTagParams_ = this.element.getAttribute('data-tag-settings');
 
     this.kindIsProd_ = this.element.getAttribute('data-kind') !== 'stage';
 
@@ -143,6 +144,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       previewUrl: encodeURIComponent(previewUrl),
       videoId: this.videoId_,
       profileId: this.profileId_,
+      markTagParams: this.markTagParams_,
     };
 
     const iframe = getIframe(this.win, this.element, 'viqeoplayer', jsonParams);
@@ -156,7 +158,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       this.element.appendChild(iframe);
       this.iframe_ = iframe;
       this.applyFillContent(iframe);
-      this.getViewport().onScroll(this.sendIntersectionRatio_.bind(this));
     }).then(() => {
       return this.playerReadyPromise_;
     });
@@ -178,7 +179,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     if (action === 'ready') {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
       this.playerReadyResolver_(this.iframe_);
-      this.sendIntersectionRatio_();
     } else if (action === 'play') {
       this.element.dispatchCustomEvent(VideoEvents.PLAYING);
     } else if (action === 'pause') {
@@ -334,31 +334,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       });
     }
     contentWindow./*OK*/postMessage(command, '*');
-  }
-
-  /**
-   * send to player intersection
-   * @this {AmpViqeoPlayer}
-   * @private
-   */
-  sendIntersectionRatio_() {
-    const elementRect = this.getIntersectionElementLayoutBox();
-    const viewPortRect = this.getViewport().getRect();
-
-    const intersection = rectIntersection(elementRect, viewPortRect);
-
-    const intersectionRatio =
-        intersection ? (intersection.width * intersection.height) /
-        (elementRect.width * elementRect.height) : 0;
-
-    if (this.lastIntersectionRation_ !== intersectionRatio) {
-      this.lastIntersectionRation_ = intersectionRatio;
-      const command = /** @type {JsonObject} */ ({
-        action: 'intersection',
-        value: intersectionRatio,
-      });
-      this.sendCommand_(command);
-    }
   }
 }
 

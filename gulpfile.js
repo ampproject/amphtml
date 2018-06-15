@@ -1547,7 +1547,6 @@ function mkdirSync(path) {
 }
 
 function toPromise(readable) {
-  // eslint-disable-next-line amphtml-internal/resolve-inside-promise-resolver
   return new Promise(function(resolve, reject) {
     readable.on('error', reject).on('end', resolve);
   });

@@ -74,12 +74,6 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
       viqeoPlayerInstance.setVolume(0);
     } else if (action === 'unmute') {
       viqeoPlayerInstance.setVolume(0);
-    } else if (action === 'intersection') {
-      // dev().info(`parseMessage()
-      //     viqeoPlayerInstance.setIntersectionRatio(${value})`);
-      const value = eventData['value'];
-      viqeoPlayerInstance.setIntersectionRatio
-        && viqeoPlayerInstance.setIntersectionRatio(value);
     }
   }
 }
@@ -91,16 +85,18 @@ export function viqeoplayer(global) {
   const previewUrl = tryDecodeUriComponent(dataReceived['previewUrl']);
   const videoId = dataReceived['videoId'];
   const profileId = dataReceived['profileId'];
-
+  const markTagsAdvancedParams = parseToObject(dataReceived['markTagParams']);
   const doc = global.document;
   const mark = doc.createElement('div');
 
-  setStyles(mark, {
-    'position': 'relative',
-    'width': '100%',
-    'height': '0',
-    'paddingBottom': '100%',
-  });
+  const markTagsStyle = Object.assign({
+    position: 'relative',
+    width: '100%',
+    height: '0',
+    paddingBottom: '100%',
+  }, markTagsAdvancedParams);
+
+  setStyles(mark, markTagsStyle);
 
   mark.setAttribute('data-vnd', videoId);
   mark.setAttribute('data-profile', profileId);
@@ -128,3 +124,13 @@ export function viqeoplayer(global) {
   });
 }
 
+function parseToObject(str) {
+  const res = {};
+  str && str.split(';').forEach(item => {
+    const data = item.split(':');
+    if (data.length > 1) {
+      res[data[0]] = data[1];
+    }
+  });
+  return res;
+}
