@@ -202,6 +202,7 @@ declareExtension('amp-viewer-integration', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-video', '0.1');
+declareExtension('amp-video-iframe', '0.1');
 declareExtension('amp-video-service', '0.1', {
   // `amp-video-service` provides analytics and autoplay for all videos. We need
   // those to be available asap. This service replaces a runtime-level provider,

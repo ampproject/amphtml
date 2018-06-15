@@ -238,8 +238,8 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * Allows listening for message from the iframe. Returns an unlisten
  * function to remove the listener.
  *
- * @param {!Element} iframe.
- * @param {string} typeOfMessage.
+ * @param {!Element} iframe
+ * @param {string} typeOfMessage
  * @param {?function(!JsonObject, !Window, string)} callback Called when a
  *     message of this type arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
@@ -460,4 +460,50 @@ export class SubscriptionApi {
     this.unlisten_();
     this.clientWindows_.length = 0;
   }
+}
+
+
+/**
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {boolean}
+ */
+export function looksLikeTrackingIframe(rect) {
+  // This heuristic is subject to change.
+  return rect.width <= 10 || rect.height <= 10;
+}
+
+
+// Most common ad sizes
+// Array of [width, height] pairs.
+const adSizes = [
+  [300, 250],
+  [320, 50],
+  [300, 50],
+  [320, 100],
+];
+
+/**
+ * Guess whether this element might be an ad.
+ * @param {!Element} element An amp-iframe element.
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isAdLike(element) {
+  const box = element.getLayoutBox();
+  const {height, width} = box;
+  for (let i = 0; i < adSizes.length; i++) {
+    const refWidth = adSizes[i][0];
+    const refHeight = adSizes[i][1];
+    if (refHeight > height) {
+      continue;
+    }
+    if (refWidth > width) {
+      continue;
+    }
+    // Fuzzy matching to account for padding.
+    if (height - refHeight <= 20 && width - refWidth <= 20) {
+      return true;
+    }
+  }
+  return false;
 }
