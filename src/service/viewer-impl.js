@@ -572,7 +572,8 @@ export class Viewer {
     if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
       this.hashParams_['ampshare'] = canonicalUrl;
       this.win.history.replaceState({}, '',
-          '#' + serializeQueryString(this.hashParams_));
+          '#' + serializeQueryString(
+              /** @type {!JsonObject} */ (this.hashParams_)));
     }
   }
 
