@@ -161,14 +161,16 @@ exports.getBundleFlags = function(g) {
     let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend on _base.
     if (!isBase && g.bundles._base) {
-      if (videos.includes(bundle.name)) {
-        cmd += ':_base_videos';
-      } else if (ads.includes(bundle.name)) {
-        cmd += ':_base_ads';
-      } else if (common.includes(bundle.name)) {
-        cmd += ':_base_common';
-      } else if (all.includes(bundle.name)) {
-        cmd += ':_base_all';
+      //if (videos.includes(bundle.name)) {
+        //cmd += ':_base_videos,_base';
+      //} else if (ads.includes(bundle.name)) {
+        //cmd += ':_base_ads,_base';
+      //} else if (common.includes(bundle.name)) {
+        //cmd += ':_base_common,_base';
+      //} else if (all.includes(bundle.name)) {
+        //cmd += ':_base_all,_base';
+      if (/extensions/.test(name)) {
+        cmd += ':_base_ext';
       } else {
         cmd += ':_base';
       }
@@ -221,6 +223,12 @@ exports.getGraph = function(entryModules, config) {
       _base: {
         isBase: true,
         name: '_base',
+        // The modules in the bundle.
+        modules: [],
+      },
+      _base_ext: {
+        isBase: true,
+        name: '_base_ext',
         // The modules in the bundle.
         modules: [],
       },
@@ -374,15 +382,15 @@ function buildUpCommon(graph) {
   let baseModules = graph.bundles._base.modules;
   let videosModules = graph.bundles._base_videos.modules;
   let mainModuleDeps = graph.depOf['src/amp.js'];
-  //graph.bundles._base.modules = baseModules.filter(x => {
-    //const usedInMain = !!mainModuleDeps[x];
-    //const usedInVideos = inAnyBundle(x, videos.map(x => graph.depOf[x]));
-    //const shouldGoToVideoBundle = !usedInMain && usedInVideos;
-    //if (shouldGoToVideoBundle && videosModules.indexOf(x) === -1) {
-      //videosModules.push(x);
-    //}
-    //return !shouldGoToVideoBundle;
-  //});
+  graph.bundles._base.modules = baseModules.filter(x => {
+    const usedInMain = !!mainModuleDeps[x];
+    const usedInVideos = inAnyBundle(x, videos.map(x => graph.depOf[x]));
+    const shouldGoToVideoBundle = !usedInMain && usedInVideos;
+    if (shouldGoToVideoBundle && videosModules.indexOf(x) === -1) {
+      videosModules.push(x);
+    }
+    return !shouldGoToVideoBundle;
+  });
 }
 
 function inAnyBundle(name, dependencyList) {
