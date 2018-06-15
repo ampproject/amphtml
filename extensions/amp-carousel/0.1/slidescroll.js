@@ -467,6 +467,45 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * A format string for the button label. Should be a string, containing two
+   * placeholders of "%s", where the index and total count will go.
+   * @return {string}
+   * @private
+   */
+  getButtonSuffixFormat_() {
+    return this.element.getAttribute('data-button-count-format') ||
+        '(%s of %s)';
+  }
+
+  /**
+   * @param {number} buttonIndex The index that the button will take the user
+   *    to.
+   * @return {string} The formatted suffix for the button label.
+   */
+  getButtonLabelSuffix_(buttonIndex) {
+    return ' ' + this.getButtonSuffixFormat_().replace('%s', buttonIndex + 1)
+        .replace('%s', this.noOfSlides_);
+  }
+
+  /**
+   * @override
+   */
+  getPrevButtonLabel() {
+    const prevIndex = this.getPrevIndex_(this.slideIndex_);
+    const index = prevIndex == null ? 0 : prevIndex;
+    return super.getPrevButtonLabel() + this.getButtonLabelSuffix_(index);
+  }
+
+  /**
+   * @override
+   */
+  getNextButtonLabel() {
+    const nextIndex = this.getNextIndex_(this.slideIndex_);
+    const index = nextIndex == null ? this.noOfSlides_ - 1 : nextIndex;
+    return super.getNextButtonLabel() + this.getButtonLabelSuffix_(index);
+  }
+
+  /**
    * Updates to the right state of the new index on scroll.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    */
@@ -518,6 +557,28 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * @param {number} currentIndex
+   * @return {?number} The previous index that would be navigated to, or null
+   *    if at the start and not looping.
+   * @private
+   */
+  getPrevIndex_(currentIndex) {
+    return (currentIndex - 1 >= 0) ? currentIndex - 1 :
+      (this.shouldLoop) ? this.noOfSlides_ - 1 : null;
+  }
+
+  /**
+   * @param {number} currentIndex
+   * @return {?number} The next index that would be navigated to, or null if at
+   *    the end and not looping.
+   * @private
+   */
+  getNextIndex_(currentIndex) {
+    return (currentIndex + 1 < this.noOfSlides_) ? currentIndex + 1 :
+      (this.shouldLoop) ? 0 : null;
+  }
+
+  /**
    * Makes the slide corresponding to the given index and the slides surrounding
    *     it available for display.
    * Note: Element must be laid out.
@@ -533,10 +594,8 @@ export class AmpSlideScroll extends BaseSlides {
         this.slideIndex_ == newIndex) {
       return false;
     }
-    const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
-      (this.shouldLoop) ? noOfSlides_ - 1 : null;
-    const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
-      (this.shouldLoop) ? 0 : null;
+    const prevIndex = this.getPrevIndex_(newIndex);
+    const nextIndex = this.getNextIndex_(newIndex);
 
     const showIndexArr = [];
     if (prevIndex != null) {
@@ -581,6 +640,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+    this.updateButtonLabels();
     return true;
   }
 

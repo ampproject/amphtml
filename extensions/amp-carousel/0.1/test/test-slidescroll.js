@@ -1068,4 +1068,46 @@ describes.realWin('SlideScroll', {
       });
     });
   });
+
+  describe('button labels', () => {
+    function getNextLabel(el) {
+      return el.querySelector('.amp-carousel-button-next')
+          .getAttribute('aria-label');
+    }
+
+    function getPrevLabel(el) {
+      return el.querySelector('.amp-carousel-button-prev')
+          .getAttribute('aria-label');
+    }
+
+    describe('when not looping', () => {
+      it('should have the correct values on the first index', function* () {
+        const el = yield getAmpSlideScroll(false, 3);
+        expect(getPrevLabel(el)).to.equal('Previous item in carousel (1 of 3)');
+        expect(getNextLabel(el)).to.equal('Next item in carousel (2 of 3)');
+      });
+
+      it('should have the correct values on the last index', function* () {
+        const el = yield getAmpSlideScroll(false, 3);
+        el.implementation_.showSlide_(2);
+        expect(getPrevLabel(el)).to.equal('Previous item in carousel (2 of 3)');
+        expect(getNextLabel(el)).to.equal('Next item in carousel (3 of 3)');
+      });
+    });
+
+    describe('when looping', () => {
+      it('should have the correct values on the first index', function* () {
+        const el = yield getAmpSlideScroll(true, 3);
+        expect(getPrevLabel(el)).to.equal('Previous item in carousel (3 of 3)');
+        expect(getNextLabel(el)).to.equal('Next item in carousel (2 of 3)');
+      });
+
+      it('should have the correct values on the last index', function* () {
+        const el = yield getAmpSlideScroll(true, 3);
+        el.implementation_.showSlide_(2);
+        expect(getPrevLabel(el)).to.equal('Previous item in carousel (2 of 3)');
+        expect(getNextLabel(el)).to.equal('Next item in carousel (1 of 3)');
+      });
+    });
+  });
 });

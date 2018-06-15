@@ -60,24 +60,20 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /**
    * Handles element specific viewport based events.
-   * @param {boolean} unusedInViewport.
+   * @param {boolean} unusedInViewport
    * @protected
    */
   onViewportCallback(unusedInViewport) {}
 
 
+  /**
+   * Builds the next and previous buttons.
+   */
   buildButtons() {
     this.prevButton_ = this.element.ownerDocument.createElement('div');
     this.prevButton_.classList.add('amp-carousel-button');
     this.prevButton_.classList.add('amp-carousel-button-prev');
     this.prevButton_.setAttribute('role', 'button');
-    if (this.element.hasAttribute('data-previous-button-aria-label')) {
-      this.prevButton_.setAttribute('aria-label',
-          this.element.getAttribute('data-previous-button-aria-label'));
-    } else {
-      this.prevButton_.setAttribute('aria-label',
-          'Previous item in carousel');
-    }
     this.prevButton_.setAttribute('tabindex', 0);
     this.prevButton_.onkeydown = event => {
       if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
@@ -96,13 +92,6 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.classList.add('amp-carousel-button');
     this.nextButton_.classList.add('amp-carousel-button-next');
     this.nextButton_.setAttribute('role', 'button');
-    if (this.element.hasAttribute('data-next-button-aria-label')) {
-      this.nextButton_.setAttribute('aria-label',
-          this.element.getAttribute('data-next-button-aria-label'));
-    } else {
-      this.nextButton_.setAttribute('aria-label',
-          'Next item in carousel');
-    }
     this.nextButton_.setAttribute('tabindex', 0);
     this.nextButton_.onkeydown = event => {
       if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
@@ -116,6 +105,8 @@ export class BaseCarousel extends AMP.BaseElement {
       this.interactionNext();
     };
     this.element.appendChild(this.nextButton_);
+
+    this.updateButtonLabels();
   }
 
   /** @override */
@@ -194,6 +185,36 @@ export class BaseCarousel extends AMP.BaseElement {
         });
       }, 4000);
     });
+  }
+
+  /**
+   * Updates the aria-labels for the next/previous buttons. This should be
+   * called by subclasses if they want to update the button labels. The
+   * `getNextButtonLabel` and `getPrevButtonLabel` should be overwritten to
+   * provide the label values.
+   * @protected
+   */
+  updateButtonLabels() {
+    this.nextButton_.setAttribute('aria-label', this.getNextButtonLabel());
+    this.prevButton_.setAttribute('aria-label', this.getPrevButtonLabel());
+  }
+
+  /**
+   * @return {string} The aria-label to use for the next button.
+   * @protected
+   */
+  getNextButtonLabel() {
+    return this.element.getAttribute('data-next-button-aria-label')
+        || 'Next item in carousel';
+  }
+
+  /**
+   * @return {string} The aria-label to use for the pevious button.
+   * @protected
+   */
+  getPrevButtonLabel() {
+    return this.element.getAttribute('data-prev-button-aria-label')
+        || 'Previous item in carousel';
   }
 
   /** @override */
