@@ -74,6 +74,7 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
+  escapeCssSelectorIdent,
   isRTL,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -137,6 +138,12 @@ const Attributes = {
   NEXT: 'i-amphtml-next-page', // shown in right pane
   VISITED: 'i-amphtml-visited', // stacked offscreen to left
 };
+
+/**
+ * The string used to identify a story that is standalone within a document.
+ * @const {string}
+ */
+const STANDALONE_STORY_ID = 'standalone';
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
@@ -311,7 +318,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (this.element.hasAttribute(Attributes.STANDALONE)) {
+    if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
     }
 
@@ -323,6 +330,7 @@ export class AmpStory extends AMP.BaseElement {
     const pageEl = this.element.querySelector('amp-story-page');
     pageEl && pageEl.setAttribute('active', '');
 
+    this.initializeStyles_();
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
@@ -354,6 +362,46 @@ export class AmpStory extends AMP.BaseElement {
     }, html);
   }
 
+
+  /** @private */
+  initializeStyles_() {
+    const storyId = this.getId();
+    const storyIdClassName = `i-amphtml-story-id-${storyId}`;
+    const pageEls = this.element.querySelectorAll('amp-story-page') || [];
+    const isStandalone = this.isStandalone_();
+    let styleEl;
+
+    if (isStandalone) {
+      styleEl = document.querySelector('style[amp-custom]');
+    } else {
+      styleEl = document.querySelector(
+          `style[amp-story="${escapeCssSelectorIdent(storyId)}"]`);
+    }
+
+    if (!styleEl) {
+      return;
+    }
+
+    this.mutateElement(() => {
+      styleEl.setAttribute('amp-story', storyId);
+      this.rewriteStyles_(styleEl, storyIdClassName);
+      Array.prototype.forEach.call(pageEls, pageEl => {
+        pageEl.classList.add(storyIdClassName);
+      });
+    });
+  }
+
+
+  /**
+   * @param {!Element} styleEl
+   * @param {string} storyIdClassName
+   * @private
+   */
+  rewriteStyles_(styleEl, storyIdClassName) {
+    styleEl.textContent = styleEl.textContent
+        .replace(/^\s*(.*?)\s*\{$/gim, `.${storyIdClassName} $1,\n$1 .${storyIdClassName} {`)
+        .replace(/^\s*\*\s*(.*?)\s*\{/gim, '$1 {');
+  }
 
   /**
    * Builds the system layer DOM.  This is dependent on the pages_ array having
@@ -1077,6 +1125,14 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} true if this is a standalone story (i.e. this story is
+   *     the only content of the document).
+   */
+  isStandalone_() {
+    return this.element.hasAttribute(Attributes.STANDALONE);
+  }
+
+  /**
    * Reacts to paused state updates.
    * @param {boolean} isPaused
    * @private
@@ -1529,6 +1585,13 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   getElement() {
     return this.element;
+  }
+
+  /**
+   * @return {string}
+   */
+  getId() {
+    return this.element.id || STANDALONE_STORY_ID;
   }
 
   /**
