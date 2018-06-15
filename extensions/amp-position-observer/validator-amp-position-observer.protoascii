@@ -38,11 +38,11 @@ tags: {  # <amp-position-observer>
     # Values such as: "0", "0.1" , "1", "0 1", "0 0.5", "0.5 1", "1 1", etc...
     value_regex: "^([0]*?\\.\\d*$|1$|0$)|([0]*?\\.\\d*|1|0)\\s{1}([0]*?\\.\\d*$|1$|0$)"
   }
-  attrs: { name: "target" }
   attrs: {
     name: "once"
     value: ""
   }
+  attrs: { name: "target" }
   attrs: {
     name: "viewport-margins"
     # Regex: ^(\d+$|\d+px$|\d+vh$)|((\d+|\d+px|\d+vh)\s{1}(\d+$|\d+px$|\d+vh$))
