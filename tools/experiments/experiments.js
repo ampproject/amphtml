@@ -55,7 +55,7 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'README.md#amp-dev-channel',
+        'contributing/release-schedule.md#amp-dev-channel',
   },
   {
     id: 'alp',
@@ -318,13 +318,6 @@ const EXPERIMENTS = [
     name: 'Enables SVG support in amp-mustache templates',
     spec: 'https://github.com/ampproject/amphtml/issues/15123',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15360',
-  },
-  {
-    id: 'amp-fx-fly-in',
-    name: 'Enables amp-fx="fly-in-{bottom,top,left,right}" - ' +
-      'scroll triggered timed fly in animations',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
   {
     id: 'disable-faster-amp-list',
