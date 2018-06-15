@@ -22,13 +22,15 @@ import {VideoEvents} from '../../video-interface';
 import {VideoServiceSignals} from '../video-service-interface';
 import {VideoUtils} from '../../utils/video';
 import {dev} from '../../log';
+import {getData, listen, listenOnce} from '../../event-helper';
 import {getMode} from '../../mode';
 import {getServiceForDoc} from '../../service';
-import {htmlFor, htmlRefs} from '../../static-template';
+import {htmlFor} from '../../static-template';
+import {installAutoplayStylesForDoc} from './install-autoplay-styles';
 import {
   installPositionObserverServiceForDoc,
 } from '../position-observer/position-observer-impl';
-import {listen, listenOnce} from '../../event-helper';
+import {isFiniteNumber} from '../../types';
 import {once} from '../../utils/function';
 import {removeElement} from '../../dom';
 
@@ -72,17 +74,24 @@ function renderOrClone(renderFn) {
  * @return {!Element}
  */
 const renderInteractionOverlay = renderOrClone((win, doc) => {
-  const el = htmlFor(doc)`<i-amphtml-video-mask class="i-amphtml-fill-content">
-    <i-amphtml-video-icon class="amp-video-eq" ref="icon">
-      <div class="amp-video-eq-col">
-        <div class="amp-video-eq-filler"></div>
-        <div class="amp-video-eq-filler"></div>
-      </div>
-    </i-amphtml-video-icon>
-  </i-amphtml-video-mask>`;
+  return htmlFor(doc)`<i-amphtml-video-mask class="i-amphtml-fill-content">
+    </i-amphtml-video-mask>`;
+});
 
-  // Not using `htmlRefs` in this context as that is a destructive operation.
-  const icon = dev().assertElement(el.firstElementChild);
+
+/**
+ * @param {!Window} win
+ * @param {!Node} doc
+ * @return {!Element}
+ */
+const renderIcon = renderOrClone((win, doc) => {
+  const icon =
+      htmlFor(doc)`<i-amphtml-video-icon class="amp-video-eq">
+        <div class="amp-video-eq-col">
+          <div class="amp-video-eq-filler"></div>
+          <div class="amp-video-eq-filler"></div>
+        </div>
+      </i-amphtml-video-icon>`;
 
   // Copy equalizer column 4x and annotate filler positions for animation.
   const firstCol = dev().assertElement(icon.firstElementChild);
@@ -104,7 +113,7 @@ const renderInteractionOverlay = renderOrClone((win, doc) => {
     icon.setAttribute('unpausable', '');
   }
 
-  return el;
+  return icon;
 });
 
 
@@ -119,7 +128,7 @@ export class Autoplay {
 
     /**
      * @return {!../position-observer/position-observer-impl.PositionObserver}
-     * @private
+     * @restricted
      */
     this.getPositionObserver_ = once(() => this.installPositionObserver_());
 
@@ -137,6 +146,8 @@ export class Autoplay {
       const isLite = getMode(win).lite;
       return VideoUtils.isAutoplaySupported(win, /* isLiteMode */ isLite);
     });
+
+    installAutoplayStylesForDoc(this.ampdoc_);
   }
 
   /** @private */
@@ -168,8 +179,7 @@ export class Autoplay {
         }
         return null;
       }
-      const entry =
-        new AutoplayEntry(this.ampdoc_, this.getPositionObserver_(), video);
+      const entry = AutoplayEntry.create(this, video);
       this.entries_.push(entry);
       return entry;
     });
@@ -177,14 +187,13 @@ export class Autoplay {
 
   /**
    * @param {!Element} element
-   * @param {!../../observable.Observable<boolean>} observable
    */
-  delegate(element, observable) {
+  delegate(element) {
     const entry = this.getEntryFor_(element);
     if (!entry) {
       return;
     }
-    entry.delegateTo(observable);
+    entry.delegate();
   }
 
   /**
@@ -228,21 +237,33 @@ export class AutoplayEntry {
     /** @private {boolean} */
     this.isVisible_ = false;
 
-    /** @private {!UnlistenDef} */
-    this.unlistener_ = this.observeOn_(positionObserver);
+    /** @private {?Array<!UnlistenDef>} */
+    this.visibilityUnlisteners_ = [
+      this.observeOn_(positionObserver),
+      this.listenToVisibilityChange_(),
+    ];
 
     // Only muted videos are allowed to autoplay
     video.mute();
     video.hideControls();
 
-    this.attachInteractionOverlay_();
+    this.attachArtifacts_();
+  }
+
+  /**
+   * @param {!Autoplay} manager
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   */
+  static create(manager, video) {
+    return new AutoplayEntry(
+        manager.ampdoc_, manager.getPositionObserver_(), video);
   }
 
   /**
    * @param {
    *   !../position-observer/position-observer-impl.PositionObserver
    * } positionObserver
-   * @return {!UnlistenDef} [description]
+   * @return {!UnlistenDef}
    * @private
    */
   observeOn_(positionObserver) {
@@ -253,21 +274,40 @@ export class AutoplayEntry {
   }
 
   /**
-   * @param {!../../observable.Observable<boolean>} playbackObservable
+   * @return {!UnlistenDef}
+   * @private
+   */
+  listenToVisibilityChange_() {
+    return listen(this.element_, VideoEvents.VISIBILITY, e => {
+      const data = getData(e);
+      const enforcedByEvent = data && data['visible'];
+      if (enforcedByEvent && !this.isVisible_) {
+        this.isVisible_ = enforcedByEvent;
+        this.trigger_(/* isPlaying */ enforcedByEvent);
+        return;
+      }
+      this.triggerByVisibility_();
+    });
+  }
+
+  /**
+   * Delegates autoplay so that it's triggered by a different module.
    * @public
    */
-  delegateTo(playbackObservable) {
-    if (this.unlistener_) {
-      this.unlistener_();
-    }
-    this.unlistener_ =
-        playbackObservable.add(isPlaying => this.trigger_(isPlaying));
+  delegate() {
+    this.disableTriggerByVisibility_();
+    this.video.pause();
   }
 
   /** @private */
   onPositionChange_() {
-    const {intersectionRatio} = this.element_.getIntersectionChangeEntry();
-    const isVisible = intersectionRatio >= MIN_RATIO;
+    this.triggerByVisibility_();
+  }
+
+  /** @private */
+  triggerByVisibility_() {
+    const ratio = this.element_.getIntersectionChangeEntry().intersectionRatio;
+    const isVisible = (!isFiniteNumber(ratio) ? 0 : ratio) >= MIN_RATIO;
     if (this.isVisible_ == isVisible) {
       return;
     }
@@ -285,8 +325,8 @@ export class AutoplayEntry {
   }
 
   /** @private */
-  // TODO(alanorozco): AD_START, AD_END
-  attachInteractionOverlay_() {
+  attachArtifacts_() {
+    // TODO(alanorozco): AD_START, AD_END
     const {video} = this;
     const signals = video.signals();
     const userInteracted = VideoServiceSignals.USER_INTERACTED;
@@ -295,11 +335,13 @@ export class AutoplayEntry {
       return;
     }
 
-    const overlay = renderInteractionOverlay(this.ampdoc_.win, this.element_);
-    const {icon} = /** @type {{icon: !Element}} */ (htmlRefs(overlay));
+    const icon = renderIcon(this.ampdoc_.win, this.element_);
+
+    video.mutateElement(() => {
+      this.element_.appendChild(icon);
+    });
 
     const {element} = video;
-
     const playOrPauseIconAnim = this.playOrPauseIconAnim_.bind(this, icon);
 
     const unlisteners = [
@@ -307,12 +349,18 @@ export class AutoplayEntry {
       listen(element, VideoEvents.PAUSE, () => playOrPauseIconAnim(false)),
     ];
 
-    listenOnce(overlay, 'click', () => signals.signal(userInteracted));
-
     signals.whenSignal(userInteracted).then(() => {
       unlisteners.forEach(unlisten => unlisten());
       this.onInteraction_();
     });
+
+    if (!this.video.isInteractive()) {
+      return;
+    }
+
+    const overlay = renderInteractionOverlay(this.ampdoc_.win, this.element_);
+
+    listenOnce(overlay, 'click', () => signals.signal(userInteracted));
 
     video.mutateElement(() => {
       this.element_.appendChild(overlay);
@@ -322,6 +370,7 @@ export class AutoplayEntry {
   /** @private */
   onInteraction_() {
     const mask = this.element_.querySelector('i-amphtml-video-mask');
+    this.disableTriggerByVisibility_();
     if (mask) {
       removeElement(mask);
     }
@@ -329,6 +378,15 @@ export class AutoplayEntry {
       this.video.showControls();
     }
     this.video.unmute();
+  }
+
+  /** @private */
+  disableTriggerByVisibility_() {
+    if (!this.visibilityUnlisteners_) {
+      return;
+    }
+    this.visibilityUnlisteners_.forEach(unlistener => unlistener());
+    this.visibilityUnlisteners_ = null; // GC
   }
 
   /**

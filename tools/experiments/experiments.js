@@ -55,7 +55,7 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'README.md#amp-dev-channel',
+        'contributing/release-schedule.md#amp-dev-channel',
   },
   {
     id: 'alp',
@@ -235,6 +235,18 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
   },
   {
+    id: 'disable-amp-story-desktop',
+    name: 'Disables responsive desktop experience for the amp-story component',
+    spec: 'https://github.com/ampproject/amphtml/issues/11714',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
+  },
+  {
+    id: 'amp-story-responsive-units',
+    name: 'Scale pages in amp-story by rewriting responsive units',
+    spec: 'https://github.com/ampproject/amphtml/issues/15955',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
+  },
+  {
     id: 'amp-date-picker',
     name: 'Enables the amp-date-picker extension',
     spec: 'https://github.com/ampproject/amphtml/issues/6469',
@@ -306,13 +318,6 @@ const EXPERIMENTS = [
     name: 'Enables SVG support in amp-mustache templates',
     spec: 'https://github.com/ampproject/amphtml/issues/15123',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15360',
-  },
-  {
-    id: 'amp-fx-fly-in',
-    name: 'Enables amp-fx="fly-in-{bottom,top,left,right}" - ' +
-      'scroll triggered timed fly in animations',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
   {
     id: 'disable-faster-amp-list',
