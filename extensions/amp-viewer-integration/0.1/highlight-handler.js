@@ -54,12 +54,7 @@ const NUM_SENTENCES_LIMIT = 15;
  */
 const NUM_ALL_CHARS_LIMIT = 1500;
 
-/**
- * TextRange represents a text range.
- * If doNothing is true, checks whether highlighted texts are found but do not
- * show highlighted texts to users.
- * @typedef {{sentences: !Array<string>, skipRendering: boolean}}
- */
+/** @typedef {{sentences: !Array<string>, skipRendering: boolean}} */
 let HighlightInfoDef;
 
 /**
