@@ -33,7 +33,7 @@
   "svg-in-mustache": 0,
   "disable-faster-amp-list": 1,
   "amp-consent": 1,
-  "amp-img-native-srcset": 0.7,
+  "amp-img-native-srcset": 1,
   "amp-story-v1": 1,
   "expAdsenseUnconditionedCanonical": 0.01,
   "expAdsenseCanonical": 0.01
