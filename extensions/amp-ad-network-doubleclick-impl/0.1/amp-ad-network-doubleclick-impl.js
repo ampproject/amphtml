@@ -1034,8 +1034,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
     if ((this.isFluidRequest_ && width && height) ||
-        (width != pWidth || height != pHeight) &&
-        (width <= pWidth && height <= pHeight)) {
+        ((width != pWidth || height != pHeight) &&
+         (width <= pWidth && height <= pHeight))) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
