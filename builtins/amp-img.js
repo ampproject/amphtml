@@ -208,17 +208,17 @@ export class AmpImg extends BaseElement {
    * @private
    */
   guaranteeSrcForSrcsetUnsupportedBrowsers_() {
-    if (this.img_.hasAttribute('src') || 'srcset' in this.img_ == true) {
-      return;
-    }
-    const srcset = this.element.getAttribute('srcset');
-    const matches = /\S+/.exec(srcset);
-    if (matches == null) {
-      return;
-    }
-    const srcseturl = matches[0];
-    if (srcseturl) {
-      this.img_.setAttribute('src', srcseturl[0]);
+    // The <img> tag does not have a src and does not support srcset
+    if (!this.img_.hasAttribute('src') && 'srcset' in this.img_ == false) {
+      const srcset = this.element.getAttribute('srcset');
+      const matches = /\S+/.exec(srcset);
+      if (matches == null) {
+        return;
+      }
+      const srcseturl = matches[0];
+      if (srcseturl) {
+        this.img_.setAttribute('src', srcseturl[0]);
+      }
     }
   }
 
