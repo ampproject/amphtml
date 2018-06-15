@@ -264,6 +264,9 @@ function compile(entryModuleFilenames, outputDir,
           '3p/**/*.js',
           'ads/**/*.js');
     }
+    if (checkTypes) {
+      srcs.push('!extensions/amp-viewer-integration/0.1/test/**/*.js');
+    }
 
     let externs = baseExterns;
     if (options.externs) {
@@ -290,11 +293,6 @@ function compile(entryModuleFilenames, outputDir,
         // respective top level polyfills.js files.
         rewrite_polyfills: false,
         externs,
-        js_module_root: [
-          'node_modules/',
-          'build/patched-module/',
-          'build/fake-module/',
-        ],
         entry_point: entryModuleFilenames,
         module_resolution: 'NODE',
         // This strips all files from the input set that aren't explicitly
