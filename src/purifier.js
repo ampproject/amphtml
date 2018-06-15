@@ -64,6 +64,7 @@ export const BLACKLISTED_TAGS = {
  * @const {!Array<string>}
  */
 export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
+  'html', 'head', 'body',
   'a',
   'b',
   'br',
@@ -214,7 +215,9 @@ export function purifyHtml(dirty) {
   DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-  return DOMPurify.sanitize(dirty, config);
+  const purified = DOMPurify.sanitize(dirty, config);
+  DOMPurify.removeAllHooks();
+  return purified;
 }
 
 /**
@@ -322,9 +325,12 @@ function afterSanitizeAttributes(node) {
  * @return {string}
  */
 export function purifyTagsForTripleMustache(html) {
-  return DOMPurify.sanitize(html, {
+  const fragment = DOMPurify.sanitize(html, {
     'ALLOWED_TAGS': TRIPLE_MUSTACHE_WHITELISTED_TAGS,
+    'WHOLE_DOCUMENT': true,
+    'RETURN_DOM_FRAGMENT': true,
   });
+  return fragment.innerHTML;
 }
 
 /**
