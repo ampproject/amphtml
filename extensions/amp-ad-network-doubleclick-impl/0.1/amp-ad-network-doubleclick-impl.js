@@ -400,6 +400,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
+    if (!isCdnProxy(this.win)) {
+      this.experimentIds.push('21060933');
+    }
     const experimentId = {
       // Delay Request
       '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
@@ -453,7 +456,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.maybeDeprecationWarn_();
     this.setPageLevelExperiments(
         extractUrlExperimentId(this.win, this.element));
-    this.setCanonicalExperiment();
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search)) ||
         !!this.win.document.querySelector(
@@ -465,15 +467,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');
-  }
-
-  /**
-   * Adds the canonical fast experiment ID to the expId array.
-   */
-  setCanonicalExperiment() {
-    if (!isCdnProxy(this.win)) {
-      this.experimentIds.push('21060933');
-    }
   }
 
   /** @override */
