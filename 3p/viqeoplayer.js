@@ -40,16 +40,15 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   subscribe('paused', 'pause');
   subscribe('played', 'play');
   subscribe('replayed', 'play');
+  subscribeTracking({
+    Mute: 'mute',
+    Unmute: 'unmute',
+  });
 
   function subscribe(playerEventName, targetEventName, extraHandler = null) {
-    const {parent} = global;
     VIQEO['subscribeTracking'](
         () => {
-          const message = /** @type {JsonObject} */({
-            source: 'ViqeoPlayer',
-            action: targetEventName,
-          });
-          parent./*OK*/postMessage(message, '*');
+          sendMessage(targetEventName);
           if (extraHandler) {
             extraHandler();
           }
@@ -57,6 +56,24 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
         {eventName: `Player:${playerEventName}`, container: 'stdPlayer'}
     );
   }
+
+  function subscribeTracking(eventsDescription) {
+    VIQEO['subscribeTracking'](params => {
+      const name = params && params.trackingParams &&
+          params.trackingParams.name;
+      const targetEventName = eventsDescription[name];
+      sendMessage(targetEventName);
+    }, 'Player:userAction');
+  }
+
+  const sendMessage = eventName => {
+    const {parent} = global;
+    const message = /** @type {JsonObject} */({
+      source: 'ViqeoPlayer',
+      action: eventName,
+    });
+    parent./*OK*/postMessage(message, '*');
+  };
 
   function parseMessage(event) {
     const eventData = getData(event);
