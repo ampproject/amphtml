@@ -124,8 +124,8 @@ class AmpViqeoPlayer extends AMP.BaseElement {
         )
         ||
         (this.kindIsProd_
-          ? 'https://cdn.viqeo.tv/js/vq_player_init.js'
-          : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1'
+          ? 'https://cdn.viqeo.tv/js/vq_player_init.js?amp=true'
+          : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1&amp=true'
         );
     // embed preview url
     let previewUrl = this.element.getAttribute('data-player-url');
@@ -137,7 +137,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     // Create preview iframe source path
     previewUrl = assertAbsoluteHttpOrHttpsUrl(
-        `${previewUrl}/?vid=${this.videoId_}`);
+        `${previewUrl}/?vid=${this.videoId_}&amp=true`);
 
     const jsonParams = {
       scriptPlayerInit: encodeURIComponent(scriptPlayerInit),
@@ -170,7 +170,8 @@ class AmpViqeoPlayer extends AMP.BaseElement {
    * */
   handleViqeoMessages_(event) {
     const eventData = getData(event);
-    if (!eventData || event.source !== this.iframe_.contentWindow ||
+    if (!eventData ||
+        event.source !== (this.iframe_ && this.iframe_.contentWindow) ||
         eventData['source'] !== 'ViqeoPlayer') {
       return;
     }
@@ -183,6 +184,10 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       this.element.dispatchCustomEvent(VideoEvents.PLAYING);
     } else if (action === 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+    } else if (action === 'mute') {
+      this.element.dispatchCustomEvent(VideoEvents.MUTED);
+    } else if (action === 'unmute') {
+      this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
     } else if (action === 'volume') {
       this.volume_ = parseFloat(eventData['value']);
       if (this.volume_ === 0) {
