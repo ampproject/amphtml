@@ -59,7 +59,7 @@ Specifies a max zoom scale, otherwise set to 3.
 Specifies a default zoom scale, otherwise set to 1.
 
 ##### initial-x, initial-y (optional)
-Specifies default translation coordinates, otherwise both set to 0.
+Specifies default translation coordinates, otherwise both set to 0. Expected to be a whole number.
 
 ## Events and Actions
 The `<amp-pan-zoom>` component triggers the `transformEnd` event whenever the pan or zoom animation is complete. This event will emit the parameters `scale`, `x`, and `y`. `scale` contains the current scale of the child content being zoomed. `x` and `y` respectively contain the `x` and `y` translation of the child content in pixels.
