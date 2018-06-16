@@ -626,7 +626,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'user': '${base}/uparam/${basePrefix}' +
         'euk${userParamKey}=${userParamVal}',
       'contextflag': '${base}/cflag2/${basePrefix}' +
-        'ecf0k=${cflagKey}&ecf0v=${cflagVal}'
+        'ecf0k=${cflagKey}&ecf0v=${cflagVal}',
     },
     'transport': {
       'beacon': false,
