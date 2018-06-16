@@ -7312,28 +7312,28 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-markdown-link-check@3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.5.0.tgz#a7e4663bdcc9fc094e43a8bca3df2009d1fb1bc5"
+markdown-link-check@3.5.3:
+  version "3.5.3"
+  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.5.3.tgz#bbb6a2f7619dfde537b78e3e52af1c4bebf496f6"
   dependencies:
     async "^2.6.1"
     chalk "^2.4.1"
     commander "^2.15.1"
     link-check "^4.4.1"
     lodash "^4.17.10"
-    markdown-link-extractor "^1.1.1"
+    markdown-link-extractor "^1.1.2"
     progress "^2.0.0"
     request "^2.87.0"
 
-markdown-link-extractor@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/markdown-link-extractor/-/markdown-link-extractor-1.1.1.tgz#30802e25c8fa292fedeb7b2b0286c8d980926e71"
+markdown-link-extractor@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/markdown-link-extractor/-/markdown-link-extractor-1.1.2.tgz#5d8e940e1cac39734ad4e0defb1fce4d4da9c7e4"
   dependencies:
-    marked "^0.3.9"
+    marked "^0.4.0"
 
-marked@^0.3.9:
-  version "0.3.12"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.12.tgz#7cf25ff2252632f3fe2406bde258e94eee927519"
+marked@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-0.4.0.tgz#9ad2c2a7a1791f10a852e0112f77b571dce10c66"
 
 matcher@^1.0.0:
   version "1.0.0"
