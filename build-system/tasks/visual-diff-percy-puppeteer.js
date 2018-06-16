@@ -17,11 +17,14 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp-help')(require('gulp'));
-const {execOrDie} = require('../exec');
 const {gitBranchName, gitCommitterEmail} = require('../git');
 
-const { FileSystemAssetLoader, Percy } = require('@percy/puppeteer');
 const puppeteer = require('puppeteer');
+const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
+
+const fs = require('fs');
+const JSON5 = require('json5');
+const path = require('path');
 
 /**
  * Disambiguates branch names by decorating them with the commit author name.
@@ -37,15 +40,72 @@ function setPercyBranch() {
   }
 }
 
+async function verifyCssElements(page, forbidden_css, loading_incomplete_css, loading_complete_css) {
+  // Wait for loader dot to be hidden
+  await page.waitForSelector('.i-amphtml-loader-dot', {
+    hidden: true,
+    timeout: 5000,
+  });
+
+  if (forbidden_css) {
+    for (let css of forbidden_css) {
+      if (await page.$(css) !== null) {
+        console.log('Found forbidden selector:', css);
+      }
+    }
+  }
+
+  if (loading_incomplete_css) {
+    for (let css of loading_incomplete_css) {
+      console.log('Waiting for invisibility of', css);
+      await page.waitForSelector(css, {
+        hidden: true,
+        timeout: 5000,
+      });
+    }
+  }
+
+  if (loading_complete_css) {
+    for (let css of loading_complete_css) {
+      console.log('Waiting for visibility of', css);
+      await page.waitForSelector(css, {
+        visible: true,
+        timeout: 5000,
+      });
+    }
+  }
+}
+
+async function generateSnapshots(percy, page, webpages) {
+  for (let webpage of webpages) {
+    const {url, name, forbidden_css, loading_incomplete_css, loading_complete_css} = webpage;
+
+    console.log('Navigating to page', 'http://localhost:8000/' + url);
+    await page.goto('http://localhost:8000/' + url);
+
+    await verifyCssElements(page, forbidden_css, loading_incomplete_css, loading_complete_css);
+    await percy.snapshot(name, page);
+  }
+}
+
 async function visualDiff() {
   setPercyBranch();
 
+  // Load and parse the config. Use JSON5 due to JSON comments in file.
+  const visualTestsConfig = JSON5.parse(
+      fs.readFileSync(
+          path.resolve(__dirname, '../../test/visual-diff/visual-tests'),
+          'utf8'
+      )
+  );
+
   // Create a Percy client
+  const buildDir = '../../' + visualTestsConfig.assets_dir;
   const percy = new Percy({
     loaders: [
       new FileSystemAssetLoader({
-        buildDir: './examples/visual-tests',
-        mountPath: '',
+        buildDir: path.resolve(__dirname, buildDir),
+        mountPath: visualTestsConfig.assets_base_url,
       }),
     ],
   });
@@ -53,22 +113,12 @@ async function visualDiff() {
   // Start a Percy build
   await percy.startBuild();
 
-  // Launch the browser and visit example.com
+  // Launch the browser
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  await page.goto('http://localhost:8000/examples/visual-tests/amp-by-example/components/amp-vine/index.html');
-  await percy.snapshot('Snapshot of amp-vine', page);
-
-  await page.goto('http://localhost:8000/examples/visual-tests/article-access.amp/article-access.amp.html');
-  await page.waitForSelector('.login-section', {
-    visible: true,
-    timeout: 5000,
-  });
-  await percy.snapshot('AMP Article Access', page);
-
-  await page.goto('http://localhost:8000/examples/visual-tests/amp-by-example/components/amp-access-laterpay/index.html');
-  await percy.snapshot('amp-access-laterpay - Amp By Example', page);
+  // Take the snapshots
+  await generateSnapshots(percy, page, visualTestsConfig.webpages);
 
   // Tell Percy we're finished taking snapshots
   await percy.finalizeBuild();
