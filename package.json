@@ -115,7 +115,7 @@
     "json-stable-stringify": "1.0.1",
     "karma": "2.0.3",
     "karma-babel-preprocessor": "7.0.0",
-    "karma-browserify": "5.2.0",
+    "karma-browserify": "5.3.0",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "2.2.0",
     "karma-coverage": "1.1.2",
