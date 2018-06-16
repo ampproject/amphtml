@@ -400,6 +400,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
+    if (!isCdnProxy(this.win)) {
+      this.experimentIds.push('21060933');
+    }
     const experimentId = {
       // Delay Request
       '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
@@ -1031,8 +1034,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
     if ((this.isFluidRequest_ && width && height) ||
-        (width != pWidth || height != pHeight) &&
-        (width <= pWidth && height <= pHeight)) {
+        ((width != pWidth || height != pHeight) &&
+         (width <= pWidth && height <= pHeight))) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
