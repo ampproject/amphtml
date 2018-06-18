@@ -428,6 +428,14 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should update properties for empty strings', function* () {
+      const element = createElement(env, container, '[value]="foo"', 'input');
+      yield onBindReadyAndSetState(env, bind, {'foo': 'bar'});
+      expect(element.value).to.equal('bar');
+      yield onBindReadyAndSetState(env, bind, {'foo': ''});
+      expect(element.value).to.equal('');
+    });
+
     it('should support binding to Node.textContent', () => {
       const element = createElement(
           env, container, '[text]="\'a\' + \'b\' + \'c\'"');
