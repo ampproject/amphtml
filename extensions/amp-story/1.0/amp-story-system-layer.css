@@ -24,14 +24,20 @@
   left: 0 !important;
   right: 0 !important;
   height: 56px !important; /* 6px progress bar + 48px icons + 2px margin */
+  opacity: 1 !important;
   z-index: 100000 !important;
   box-sizing: border-box !important;
-  transition: opacity 0.3s !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   pointer-events: none !important;
 }
 
 .i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
   opacity: 0.3 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+[desktop].i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
+  opacity: 0 !important;
 }
 
 .i-amphtml-story-system-layer-buttons {
