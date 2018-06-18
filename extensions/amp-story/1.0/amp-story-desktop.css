@@ -142,7 +142,7 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] amp-story-page[i-amphtml-visited] {
-  transform: scale(0.9) translateX(calc((-50vw - 100%) * 1.1)) translateY(0%) !important;
+  transform: scale(0.9) translateX(-200vw) translateY(0%) !important;
 }
 
 [desktop] amp-story-page[i-amphtml-previous-page],
@@ -188,7 +188,7 @@ dragons here. */
 }
 
 [dir=rtl] [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(0.9) translateX(calc((-50vw - 100%) * 1.1)) translateY(0%) !important;
+  transform: scale(0.9) translateX(-200vw) translateY(0%) !important;
 }
 
 [desktop] > amp-story-page,
