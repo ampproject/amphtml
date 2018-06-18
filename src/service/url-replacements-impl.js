@@ -599,10 +599,12 @@ export class GlobalVariableSource extends VariableSource {
    * @return {string} The resulting URL
    */
   mergeReplaceParamsIntoUrl_(orig) {
-    const {extraParams} = Services.documentInfoForDoc(this.ampdoc);
+    const {extraParams} =
+        /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
     const url = parseUrlDeprecated(orig);
     const params = parseQueryString(url.search);
-    return addParamsToUrl(orig, Object.assign({}, extraParams, params));
+    return addParamsToUrl(orig,
+        /** @type {!JsonObject} **/ (Object.assign({}, extraParams, params)));
   }
 
   /**
@@ -663,11 +665,12 @@ export class GlobalVariableSource extends VariableSource {
     const url = parseUrlDeprecated(
         removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
+    const key = /** @type {string} */(param);
     const {extraParams} = Services.documentInfoForDoc(this.ampdoc);
-    return (typeof params[param] !== 'undefined')
-      ? params[param]
-      : ((typeof extraParams[param] !== 'undefined')
-        ? extraParams[param]
+    return (typeof params[key] !== 'undefined')
+      ? params[key]
+      : ((typeof extraParams[key] !== 'undefined')
+        ? extraParams[key]
         : defaultValue);
   }
 
