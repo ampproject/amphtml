@@ -17,12 +17,11 @@
 import * as sinon from 'sinon';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
-  DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
   getAmpAdTemplateHelper,
 } from '../template-validator';
-import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {TemplateRenderer} from '../template-renderer';
+import {ValidatorResult} from '../amp-ad-type-defs';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
@@ -95,15 +94,18 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
 
   afterEach(() => sandbox.restore());
 
-  it('should have AMP validator result', () => { debugger;
+  it('should have AMP validator result', () => {
     return validatorPromise.then(validatorOutput => {
 
       // Sanity check. This behavior is tested in teest-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       return renderer.render(context, containerElement, validatorOutput)
-          .then(() => {
-            expect(false).to.be.ok;
+          .then(() => { debugger;
+            const iframe = containerElement.querySelector('iframe');
+            expect(iframe).to.be.ok;
+            expect(iframe.contentWindow.document.body.innerHTML)
+                .to.equal('');
           });
     });
   });
