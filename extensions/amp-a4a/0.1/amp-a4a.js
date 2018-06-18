@@ -251,6 +251,7 @@ export function protectFunctionWrapper(
   };
 }
 
+/** Abstract class for AMP Ad Fast Fetch enabled networks */
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
   // TODO: Handle creatives that do not fill.
@@ -507,8 +508,8 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @return {boolean} whether ad request should be delayed until
-   *    renderOutsideViewport is met.
+   * @return {boolean|number} whether ad request should be delayed until
+   *    renderOutsideViewport is met or if number, the amount of viewports.
    */
   delayAdRequestEnabled() {
     return false;
@@ -688,9 +689,11 @@ export class AmpA4A extends AMP.BaseElement {
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
           // meeting the definition as opposed to waiting on the promise.
-          if (this.delayAdRequestEnabled() &&
-              !this.getResource().renderOutsideViewport()) {
-            return this.getResource().whenWithinRenderOutsideViewport();
+          const delay = this.delayAdRequestEnabled();
+          if (delay) {
+            return this.getResource().whenWithinViewport(
+                typeof delay == 'number' ? delay :
+                  this.renderOutsideViewport());
           }
         })
         // Possibly block on amp-consent.
