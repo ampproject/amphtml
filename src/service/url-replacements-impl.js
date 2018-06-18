@@ -199,9 +199,9 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the URL for this AMP document.
     this.set('AMPDOC_URL', () => {
       return removeFragment(
-        removeAmpJsParamsFromUrl(
-            mergeReplaceParamsIntoUrl_(
-              this.ampdoc.win.location.href)));
+          removeAmpJsParamsFromUrl(
+              this.mergeReplaceParamsIntoUrl_(
+                  this.ampdoc.win.location.href)));
     });
 
     // Returns the host of the URL for this AMP document.
@@ -220,14 +220,14 @@ export class GlobalVariableSource extends VariableSource {
     this.setBoth('SOURCE_URL', () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
       return removeFragment(
-        removeAmpJsParamsFromUrl(
-          mergeReplaceParamsIntoUrl_(docInfo.sourceUrl)));
+          removeAmpJsParamsFromUrl(
+              this.mergeReplaceParamsIntoUrl_(docInfo.sourceUrl)));
     }, () => {
       return getTrackImpressionPromise().then(() => {
         const docInfo = Services.documentInfoForDoc(this.ampdoc);
         return removeFragment(
             removeAmpJsParamsFromUrl(
-                mergeReplaceParamsIntoUrl_(docInfo.sourceUrl)));
+                this.mergeReplaceParamsIntoUrl_(docInfo.sourceUrl)));
       });
     });
 
@@ -599,16 +599,10 @@ export class GlobalVariableSource extends VariableSource {
    * @return {string} The resulting URL
    */
   mergeReplaceParamsIntoUrl_(orig) {
-    const docInfo = Services.documentInfoForDoc(this.ampdoc);
+    const {extraParams} = Services.documentInfoForDoc(this.ampdoc);
     const url = parseUrlDeprecated(orig);
     const params = parseQueryString(url.search);
-    return addParamsToUrl(orig,
-      Object.keys(docInfo.replaceParams)
-        .filter(key => !(key in params))
-        .reduce((safe, key) => {
-          safe[key] = docInfo.replaceParams[key]
-          return safe;
-        }, {}));
+    return addParamsToUrl(orig, Object.assign({}, extraParams, params));
   }
 
   /**
@@ -669,11 +663,11 @@ export class GlobalVariableSource extends VariableSource {
     const url = parseUrlDeprecated(
         removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
-    const replaceParams = Services.documentInfoForDoc(this.ampdoc).replaceParams;
+    const {extraParams} = Services.documentInfoForDoc(this.ampdoc);
     return (typeof params[param] !== 'undefined')
       ? params[param]
-      : ((typeof replaceParams[param] !== 'undefined')
-        ? replaceParams[param]
+      : ((typeof extraParams[param] !== 'undefined')
+        ? extraParams[param]
         : defaultValue);
   }
 

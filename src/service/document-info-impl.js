@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
 import {
-  getSourceOrigin,
+  getProxyServingType,
   getSourceUrl,
-  isAlpProxyOrigin,
   parseQueryString,
   parseUrlDeprecated,
 } from '../url';
@@ -40,8 +38,8 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
  *     - metaTags: A map object of meta tag's name (key) and corresponding
  *       contents (value).
- *     - replaceParams: A map object of replacement query string parameter
- *       names (key) to corresponding values, used for custom analytics.
+ *     - extraParams: A map object of extra query string parameter names (key)
+ *       to corresponding values, used for custom analytics.
  *
  * @typedef {{
  *   sourceUrl: string,
@@ -49,7 +47,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   pageViewId: string,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
- *   replaceParams: !Object<string, string|!Array<string>>
+ *   extraParams: !Object<string, string|!Array<string>>
  * }}
  */
 export let DocumentInfoDef;
@@ -81,7 +79,7 @@ export class DocInfo {
     }
     const ampdoc = this.ampdoc_;
     const url = ampdoc.getUrl();
-    let sourceUrl = getSourceUrl(url);
+    const sourceUrl = getSourceUrl(url);
     const rootNode = ampdoc.getRootNode();
     let canonicalUrl = rootNode && rootNode.AMP
         && rootNode.AMP.canonicalUrl;
@@ -94,7 +92,7 @@ export class DocInfo {
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
-    const replaceParams = getReplaceParams(ampdoc);
+    const extraParams = getExtraParams(ampdoc);
 
     return this.info_ = {
       /** @return {string} */
@@ -105,7 +103,7 @@ export class DocInfo {
       pageViewId,
       linkRels,
       metaTags,
-      replaceParams,
+      extraParams,
     };
   }
 }
@@ -195,18 +193,18 @@ function getMetaTags(doc) {
 }
 
 /**
- * Attempts to retrieve replacement parameters from the "amp_r" query
- * parameter, returning an empty result if invalid.
+ * Attempts to retrieve extra parameters from the "amp_r" query param,
+ * returning an empty result if invalid.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!JsonObject<string, string|!Array<string>>}
  */
-function getReplaceParams(ampdoc) {
-  // The replace parameter is only supported for ads.
+function getExtraParams(ampdoc) {
+  // The "amp_r" parameter is only supported for ads.
   if (!ampdoc.isSingleDoc() ||
-      !isAlpProxyOrigin(ampdoc.win.location.href)) {
+      getProxyServingType(ampdoc.win.location.href) != 'a') {
     return /** @type {!JsonObject} */ (Object.create(null));
   }
   const url = parseUrlDeprecated(ampdoc.win.location.href);
-  const replaceRaw = parseQueryString(url.search)['amp_r'];
-  return parseQueryString(replaceRaw);
+  const extraRaw = parseQueryString(url.search)['amp_r'];
+  return parseQueryString(extraRaw);
 }

@@ -354,18 +354,17 @@ export function isProxyOrigin(url) {
 /**
  * Returns whether the URL corresponds to an advertisement with a proxy origin.
  * @param {string|!Location} url URL of an AMP document.
- * @return {boolean}
+ * @return {?string}
  */
-export function isAlpProxyOrigin(url) {
+export function getProxyServingType(url) {
   if (typeof url == 'string') {
     url = parseUrlDeprecated(url);
   }
   if (!isProxyOrigin(url)) {
-    return false;
+    return null;
   }
   const path = url.pathname.split('/');
-  const prefix = path[1];
-  return prefix == 'a';
+  return path[1];
 }
 
 /**
@@ -408,7 +407,8 @@ export function removeAmpJsParamsFromUrl(url) {
   if (!mainAndQuery[1]) {
     return url;
   }
-  let newUrl = mainAndQuery[0] + removeAmpJsParams(`?${mainAndQuery[1]}`);
+  const filteredSearch = removeAmpJsParamsFromSearch(`?${mainAndQuery[1]}`);
+  let newUrl = mainAndQuery[0] + filteredSearch;
   newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
   return newUrl;
 }
@@ -419,7 +419,7 @@ export function removeAmpJsParamsFromUrl(url) {
  * @param {string} urlSearch
  * @return {string}
  */
-function removeAmpJsParams(urlSearch) {
+function removeAmpJsParamsFromSearch(urlSearch) {
   if (!urlSearch || urlSearch == '?') {
     return '';
   }
@@ -463,8 +463,8 @@ export function getSourceUrl(url) {
   // Sanity test that what we found looks like a domain.
   user().assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
-  return origin + path.join('/') + removeAmpJsParams(url.search) +
-      (url.hash || '');
+  return origin + path.join('/') +
+      removeAmpJsParamsFromSearch(url.search) + (url.hash || '');
 }
 
 /**
