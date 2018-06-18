@@ -408,6 +408,9 @@ export class RequestHandler {
     this.refreshBatchInterval_();
   }
 
+  /**
+   * Handle reportWindow
+   */
   initReportWindow_() {
     if (this.reportWindow_) {
       this.reportWindowTimeoutId_ = this.win.setTimeout(() => {

@@ -168,8 +168,8 @@ describes.realWin('amp-analytics', {
         const start = Date.now();
         const interval = setInterval(() => {
           const time = Date.now();
-          if (sendRequestSpy.callCount > callCount ||
-                  opt_max && (time - start) > opt_max) {
+          if ((sendRequestSpy.callCount > callCount) ||
+                  (opt_max && (time - start) > opt_max)) {
             clearInterval(interval);
             resolve();
           }
