@@ -41,7 +41,13 @@ function patchWebAnimations() {
   // Wrap the contents inside the install function.
   file = 'exports.installWebAnimations = function(window) {\n' +
       'var document = window.document;\n' +
-      file + '\n' +
+      file.replace(/requestAnimationFrame/g, function(a, b) {
+        if (file.charAt(b - 1) == '.') {
+          return a;
+        }
+        return 'window.' + a;
+      }) +
+      '\n' +
       '}\n';
   fs.writeFileSync(patchedName, file);
   if (!process.env.TRAVIS) {
