@@ -144,7 +144,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * attribute was not set.
      * @private {?string}
      */
-    this.autoFormat_ = this.element.getAttribute('data-auto-format');
+    this.autoFormat_ = null;
 
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
@@ -223,6 +223,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
+    this.autoFormat_ =
+        this.element.getAttribute('data-auto-format') || '';
 
     if (this.isResponsive_()) {
       // Attempt to resize to the correct height. The width should already be

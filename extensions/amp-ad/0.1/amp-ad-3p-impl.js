@@ -489,8 +489,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * Calculates the appropriate height for a full-width responsive core ad of
-   * the given width.
+   * Calculates the appropriate height for a full-width responsive matched
+   * content of the given width.
    * @param {!{width: number, height: number}} viewportSize
    * @return {number}
    * @private

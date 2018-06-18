@@ -460,7 +460,7 @@ describes.realWin('amp-ad-3p-impl', {
         expect(attemptChangeSizeSpy).to.be.calledOnce;
       });
 
-      it('should schedule a resize for core responsive', () => {
+      it('should schedule a resize for matched content responsive', () => {
         constructImpl({
           width: '100vw',
           height: '280',

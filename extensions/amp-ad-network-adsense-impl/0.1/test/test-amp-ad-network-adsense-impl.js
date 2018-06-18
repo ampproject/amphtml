@@ -561,7 +561,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           expect(url).to.match(/(\?|&)ramft=13(&|$)/);
         });
       });
-      it('sets rafmt for core responsive', () => {
+      it('sets rafmt for matched content responsive', () => {
         element.setAttribute('data-ad-slot', 'some_slot');
         element.setAttribute('data-auto-format', 'mcrspv');
         return impl.getAdUrl().then(url => {
@@ -839,7 +839,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
       });
     });
-    it('should schedule a resize for core responsive', () => {
+    it('should schedule a resize for matched content responsive', () => {
       constructImpl({
         width: '100vw',
         height: '100',
@@ -981,15 +981,15 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
   });
 
-  describe('#getCoreResponsiveHeightForContext', () => {
-    it('get Core responsive height for iPhone 6', () => {
+  describe('#getMCResponsiveHeightForContext_', () => {
+    it('get matched content responsive height for iPhone 6', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               'mcrspv', {width: 375, height: 320}))
           .to.be.equal(1387);
     });
 
-    it('get Core responsive height for iPhone 5', () => {
+    it('get matched content responsive height for iPhone 5', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               'mcrspv', {width: 320, height: 320}))
