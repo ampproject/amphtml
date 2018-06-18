@@ -216,9 +216,7 @@ export class AmpImg extends BaseElement {
         return;
       }
       const srcseturl = matches[0];
-      if (srcseturl) {
-        this.img_.setAttribute('src', srcseturl);
-      }
+      this.img_.setAttribute('src', srcseturl);
     }
   }
 
