@@ -16,22 +16,11 @@
 
 import * as sinon from 'sinon';
 import {
-  AMP_TEMPLATED_CREATIVE_HEADER_NAME,
-<<<<<<< HEAD
   TemplateValidator,
   getAmpAdTemplateHelper,
 } from '../template-validator';
-import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {TemplateRenderer} from '../template-renderer';
 import {ValidatorResult} from '../amp-ad-type-defs';
-=======
-  DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME,
-  TemplateValidator,
-  getAmpAdTemplateHelper,
-} from '../template-validator';
-import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
-import {TemplateRenderer} from '../template-renderer';
->>>>>>> init
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
@@ -105,6 +94,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
   afterEach(() => sandbox.restore());
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   it('should append iframe child with correct template values', () => {
     env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
     return validatorPromise.then(validatorOutput => {
@@ -112,6 +102,9 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       // Sanity check. This behavior is tested in test-template-validator.js.
 =======
   it('should have AMP validator result', () => { debugger;
+=======
+  it('should have AMP validator result', () => {
+>>>>>>> Tests + more.
     return validatorPromise.then(validatorOutput => {
 
       // Sanity check. This behavior is tested in teest-template-validator.js.
@@ -182,11 +175,19 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       return renderer.render(context, containerElement, validatorOutput)
+<<<<<<< HEAD
           .then(() => {
             expect(insertAnalyticsSpy).to.be.calledOnce;
 =======
             expect(false).to.be.ok;
 >>>>>>> init
+=======
+          .then(() => { debugger;
+            const iframe = containerElement.querySelector('iframe');
+            expect(iframe).to.be.ok;
+            expect(iframe.contentWindow.document.body.innerHTML)
+                .to.equal('');
+>>>>>>> Tests + more.
           });
     });
   });
