@@ -198,7 +198,6 @@ describe('refresh', () => {
 
     it('should invoke callback with intersection ratio 1', () => {
       observerWrapper.observe(mockA4a.element);
-      mockA4a.element.viewportCallback(true);
       return callbackPromise.then(entries => {
         expect(entries).to.be.ok;
         expect(entries[0]).to.be.ok;
@@ -220,7 +219,6 @@ describe('refresh', () => {
         }),
       };
       observerWrapper.observe(mockA4a.element);
-      mockA4a.element.viewportCallback(true);
       return callbackPromise.then(entries => {
         expect(entries).to.be.ok;
         expect(entries[0]).to.be.ok;
@@ -243,7 +241,6 @@ describe('refresh', () => {
         }),
       };
       observerWrapper.observe(mockA4a.element);
-      mockA4a.element.viewportCallback(false);
       return Services.timerFor(window).promise(500).then(() => {
         expect(callbackSpy).to.not.be.called;
       });
