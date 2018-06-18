@@ -903,7 +903,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should return 12 if in experiment', () => {
       forceExperimentBranch(
-        impl.win, RENDER_IDLE_DELAY_REQUEST_EXP, '21062232');
+          impl.win, RENDER_IDLE_DELAY_REQUEST_EXP, '21062232');
       expect(impl.delayAdRequestEnabled()).to.equal(12);
     });
   });

@@ -456,11 +456,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         [RENDER_IDLE_DELAY_REQUEST_EXP]: {
           isTrafficEligible: () => !this.useSra &&
             this.getIdleRenderEnabled_() !== false,
-          branches: Object.values(RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES),
+          branches: Object.keys(RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES).map(
+              key => RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES[key]),
         },
       });
-    Object.values(randomlySelectUnsetExperiments(this.win, experimentInfoMap))
-        .forEach(expId => expId && this.experimentIds.push(expId));
+    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    console.log('random eids', JSON.stringify(setExps));
+    Object.keys(setExps).forEach(expName =>
+      setExps[expName] && this.experimentIds.push(setExps[expName]));
   }
 
   /** @private */

@@ -225,7 +225,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   delayAdRequestEnabled() {
     return DELAY_REQUEST_EXP_BRANCHES[
-        getExperimentBranch(this.win, DELAY_REQUEST_EXP)] || true;
+        getExperimentBranch(this.win, DELAY_REQUEST_EXP) || ''] || true;
   }
 
   /** @override */
@@ -273,8 +273,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           branches: Object.keys(DELAY_REQUEST_EXP_BRANCHES),
         },
       });
-    Object.values(randomlySelectUnsetExperiments(this.win, experimentInfoMap))
-        .forEach(expId => addExperimentIdToElement(expId, this.element));
+    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    Object.keys(setExps).forEach(expName =>
+      addExperimentIdToElement(setExps[expName], this.element));
   }
 
   /** @override */
