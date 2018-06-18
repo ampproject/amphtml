@@ -86,6 +86,10 @@ amp-story[standalone] {
   box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5) !important;
   height: 100% !important;
   justify-self: center !important;
+  max-height: initial !important;
+  max-width: initial !important;
+  min-height: initial !important;
+  min-width: initial !important;
 }
 
 amp-story[standalone]:-webkit-full-screen {
@@ -112,8 +116,17 @@ amp-story[standalone]:fullscreen {
   max-width: none !important;
 }
 
+amp-story .amp-video-eq {
+  height: 14px !important;;
+  width: 14px !important;
+}
+
 amp-story .amp-video-eq .amp-video-eq-col {
-  margin-right: 1px !important;
+  margin-right: 2px !important;
+}
+
+amp-story .amp-video-eq .amp-video-eq-col:last-child {
+  margin-right: 0 !important;
 }
 
 amp-story .amp-video-eq:not(.amp-video-eq-play) {
@@ -524,11 +537,15 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 
 /* Default loading spinner */
 
+amp-story .amp-video-eq,
+.i-amphtml-story-spinner {
+  right: 12px !important;
+  bottom: 12px !important;
+}
+
 .i-amphtml-story-spinner {
   display: inline-block !important;
   position: absolute !important;
-  top: calc(100% - 36px) !important;
-  right: 12px !important;
   width: 24px !important;
   height: 24px !important;
   z-index: 10 !important;

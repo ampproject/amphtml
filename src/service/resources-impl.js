@@ -198,7 +198,7 @@ export class Resources {
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
+    this.vsync_ = Services./*OK*/vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -267,6 +267,11 @@ export class Resources {
 
     this.schedulePass();
 
+    this.rebuildDomWhenReady();
+  }
+
+  /** @visibleForTesting */
+  rebuildDomWhenReady() {
     // Ensure that we attempt to rebuild things when DOM is ready.
     this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;

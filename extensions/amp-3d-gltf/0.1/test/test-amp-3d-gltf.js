@@ -71,6 +71,15 @@ describes.realWin('amp-3d-gltf', {
         });
   };
 
+  // TODO (#16080): this test keeps timing out for some reason.
+  // Unskip when we figure out root cause.
+  it.skip('renders iframe', () => {
+    return createElement()
+        .then(() => {
+          expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
+        });
+  });
+
   it('sends toggleAmpViewport(false) when exiting viewport', () => {
     return createElement()
         .then(amp3dGltf => {

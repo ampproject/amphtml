@@ -15,11 +15,13 @@
  */
 
 import {Action, StateProperty} from '../amp-story-store-service';
+import {ActionTrust} from '../../../../src/action-constants';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
+import {DEPRECATED_SHARE_PROVIDERS_KEY, SHARE_PROVIDERS_KEY, ScrollableShareWidget} from '../amp-story-share';
 import {EventType, dispatch} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
-import {ScrollableShareWidget} from '../amp-story-share';
+import {LocalizedStringId} from '../localization';
 import {Services} from '../../../../src/services';
 import {closest} from '../../../../src/dom';
 import {createShadowRootWithStyle} from '../utils';
@@ -28,7 +30,6 @@ import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
 import {isArray} from '../../../../src/types';
-import {isProtocolValid, parseUrlDeprecated} from '../../../../src/url';
 import {renderAsElement} from '../simple-template';
 import {throttle} from '../../../../src/utils/rate-limit';
 
@@ -38,10 +39,8 @@ import {throttle} from '../../../../src/utils/rate-limit';
  */
 const FULLBLEED_THRESHOLD = 88;
 
-
 /** @private @const {string} */
 const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
-
 
 /** @private @const {string} */
 const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
@@ -49,7 +48,18 @@ const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 // TODO(#14591): Clean when bookend API v0.1 is deprecated.
 const BOOKEND_VERSION_1 = 'v1.0';
 const BOOKEND_VERSION_0 = 'v0.1';
-const BOOKEND_VERSION_KEY = 'bookend-version';
+
+/**
+ * Key for omponents in bookend config.
+ * @private @const {string}
+ */
+const BOOKEND_VERSION_KEY = 'bookendVersion';
+
+/**
+ * Deprecated key for components in bookend config.
+ * @private @const {string}
+ */
+const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
 
 /** @private @const {!../simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
@@ -80,27 +90,25 @@ const REPLAY_ICON_TEMPLATE = {
   attrs: dict({'class': 'i-amphtml-story-bookend-replay-icon'}),
 };
 
-
 /** @type {string} */
 const TAG = 'amp-story';
 
 /**
- * @param {!Document} doc
  * @param {string} title
  * @param {string} domainName
- * @param {string=} opt_imageUrl
+ * @param {string=} imageUrl
  * @return {!../simple-template.ElementDef}
  */
-function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
+const buildReplayButtonTemplate = (title, domainName, imageUrl = undefined) => {
   return /** @type {!../simple-template.ElementDef} */ ({
     tag: 'div',
     attrs: dict({'class': 'i-amphtml-story-bookend-replay'}),
     children: [
-      !opt_imageUrl ? REPLAY_ICON_TEMPLATE : {
+      !imageUrl ? REPLAY_ICON_TEMPLATE : {
         tag: 'div',
         attrs: dict({
           'class': 'i-amphtml-story-bookend-replay-image',
-          'style': `background-image: url(${opt_imageUrl}) !important`,
+          'style': `background-image: url(${imageUrl}) !important`,
         }),
         children: [REPLAY_ICON_TEMPLATE],
       },
@@ -116,7 +124,38 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
       },
     ],
   });
-}
+};
+
+/**
+ * @param {?string} consentId
+ * @return {!../simple-template.ElementDef}
+ */
+const buildPromptConsentTemplate = consentId => {
+  return /** @type {!../simple-template.ElementDef} */ ({
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-bookend-consent'}),
+    children: [
+      {
+        tag: 'h3',
+        attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE,
+      },
+      {
+        tag: 'h2',
+        attrs: dict({
+          'class': 'i-amphtml-story-bookend-consent-button',
+          'on': `tap:${consentId}.prompt`,
+          'role': 'button',
+          'aria-label': 'Change data privacy settings',
+        }),
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL,
+      },
+    ],
+  });
+};
+
 
 /**
  * Bookend component for <amp-story>.
@@ -155,20 +194,16 @@ export class AmpStoryBookend extends AMP.BaseElement {
      */
     this.bookendEl_ = null;
 
+    const {win} = this;
+
     /** @private @const {!../amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = Services.storyRequestService(this.win);
+    this.requestService_ = Services.storyRequestService(win);
 
     /** @private {!ScrollableShareWidget} */
-    this.shareWidget_ = ScrollableShareWidget.create(this.win);
+    this.shareWidget_ = ScrollableShareWidget.create(win);
 
     /** @private @const {!../amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win);
-
-    /** @private @const {!../../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
-
-    /** @private @const {!../../../../src/service/resources-impl.Resources} */
-    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
+    this.storeService_ = Services.storyStoreService(win);
   }
 
   /**
@@ -192,9 +227,19 @@ export class AmpStoryBookend extends AMP.BaseElement {
     innerContainer.appendChild(this.replayButton_);
     innerContainer.appendChild(
         this.shareWidget_.build(getAmpdoc(this.win.document)));
+
+    const consentId = this.storeService_.get(StateProperty.CONSENT_ID);
+
+    if (consentId) {
+      const promptConsentEl =
+          renderAsElement(
+              this.win.document, buildPromptConsentTemplate(String(consentId)));
+      innerContainer.appendChild(promptConsentEl);
+    }
+
     this.initializeListeners_();
 
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       this.element.parentElement.appendChild(this.getRoot());
     });
   }
@@ -204,9 +249,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.getShadowRoot()
-        .addEventListener('click', event => this.maybeClose_(event));
-    this.replayButton_.addEventListener(
-        'click', event => this.onReplayButtonClick_(event));
+        .addEventListener('click', event => this.onClick_(event));
+    this.replayButton_
+        .addEventListener('click', event => this.onReplayButtonClick_(event));
 
     this.getOverflowContainer_().addEventListener('scroll',
         // minInterval is high since this is a step function that does not
@@ -270,7 +315,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
    * @private
    */
   onCanShowSharingUisUpdate_(canShowSharingUis) {
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       this.getShadowRoot()
           .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
     });
@@ -286,6 +331,23 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
+   * Reads the bookend version from the bookend JSON config.
+   * @param {!JsonObject} config
+   * @return {?string}
+   * @private
+   */
+  readBookendVersion_(config) {
+    if (config[DEPRECATED_BOOKEND_VERSION_KEY]) {
+      user().warn('AMP-STORY-BOOKEND', '`bookend-version` and ' +
+      '`share-providers` keys in the bookend config are deprecated, please ' +
+      '`bookendVersion` and `shareProviders` keys');
+    }
+
+    return config[DEPRECATED_BOOKEND_VERSION_KEY] ||
+      config[BOOKEND_VERSION_KEY] || null;
+  }
+
+  /**
    * Retrieves the publisher bookend configuration.
    * @return {!Promise<?./bookend-component.BookendDataDef>}
    */
@@ -294,29 +356,30 @@ export class AmpStoryBookend extends AMP.BaseElement {
       return Promise.resolve(this.config_);
     }
 
-    return this.requestService_.loadBookendConfig()
-        .then(response => {
-          if (!response) {
-            return null;
-          }
-          if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_1) {
-            this.config_ = /** @type {./bookend-component.BookendDataDef} */ ({
-              [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
-              'components': BookendComponent
-                  .buildFromJson(response['components']),
-              'share-providers': response['share-providers'],
-            });
-          } else {
-            // TODO(#14667): Write doc regarding amp-story bookend v1.0.
-            dev().warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
-            `-bookend is deprecated. Use ${BOOKEND_VERSION_1} instead.`);
-          }
-          return this.config_;
-        })
-        .catch(e => {
-          user().error(TAG, 'Error fetching bookend configuration', e.message);
-          return null;
+    return this.requestService_.loadBookendConfig().then(response => {
+      if (!response) {
+        return null;
+      }
+      if (this.readBookendVersion_(response) === BOOKEND_VERSION_1) {
+        const components = BookendComponent.buildFromJson(
+            response['components'], this.element);
+
+        this.config_ = /** @type {./bookend-component.BookendDataDef} */ ({
+          [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
+          'components': components,
+          'shareProviders': response[SHARE_PROVIDERS_KEY] ||
+            response[DEPRECATED_SHARE_PROVIDERS_KEY],
         });
+      } else {
+        // TODO(#14667): Write doc regarding amp-story bookend v1.0.
+        dev().warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
+        `-bookend is deprecated. Use ${BOOKEND_VERSION_1} instead.`);
+      }
+      return this.config_;
+    }).catch(e => {
+      user().error(TAG, 'Error fetching bookend configuration', e.message);
+      return null;
+    });
   }
 
   /**
@@ -339,19 +402,30 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * Closes bookend if tapping outside usable area.
+   * Handles click events on the bookend:
+   *   - Closes bookend if tapping outside usable area
+   *   - Forwards AMP actions
    * @param {!Event} event
    * @private
    */
-  maybeClose_(event) {
-    if (this.elementOutsideUsableArea_(dev().assertElement(event.target))) {
+  onClick_(event) {
+    const target = dev().assertElement(event.target);
+
+    if (this.elementOutsideUsableArea_(target)) {
       event.stopPropagation();
       this.close_();
+      return;
+    }
+
+    if (target.hasAttribute('on')) {
+      const actionService = Services.actionServiceForDoc(this.element);
+      actionService.trigger(target, 'tap', event, ActionTrust.HIGH);
     }
   }
 
   /**
    * Closes the bookend.
+   * @private
    */
   close_() {
     this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
@@ -360,6 +434,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   /**
    * @param {!Element} el
    * @return {boolean}
+   * @private
    */
   elementOutsideUsableArea_(el) {
     return !closest(el, el => el == this.getInnerContainer_());
@@ -373,16 +448,14 @@ export class AmpStoryBookend extends AMP.BaseElement {
     if (!this.isActive_()) {
       return;
     }
-    this.vsync_.run({
-      measure: state => {
-        state.shouldBeFullBleed =
-            this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
-      },
-      mutate: state => {
-        this.getShadowRoot().classList.toggle(
-            FULLBLEED_CLASSNAME, state.shouldBeFullBleed);
-      },
-    }, {});
+    let shouldBeFullBleed = false;
+    this.measureMutateElement(() => {
+      shouldBeFullBleed =
+          this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
+    }, () => {
+      this.getShadowRoot().classList.toggle(
+          FULLBLEED_CLASSNAME, shouldBeFullBleed);
+    });
   }
 
   /**
@@ -390,7 +463,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
    * @private
    */
   toggle_(show) {
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       this.getShadowRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
     });
   }
@@ -401,7 +474,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
    * @private
    */
   toggleDesktopAttribute_(isDesktop) {
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       isDesktop ?
         this.getShadowRoot().setAttribute('desktop', '') :
         this.getShadowRoot().removeAttribute('desktop');
@@ -442,12 +515,11 @@ export class AmpStoryBookend extends AMP.BaseElement {
   renderComponents_(components) {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
     const fragment = BookendComponent
-        .buildTemplates(components, this.win.document);
+        .buildElements(components, this.win.document);
     const container = dev().assertElement(
         BookendComponent.buildContainer(this.getInnerContainer_(),
             this.win.document));
-    this.resources_.mutateElement(container,
-        () => container.appendChild(fragment));
+    this.mutateElement(() => container.appendChild(fragment));
   }
 
   /** @return {!Element} */
@@ -491,21 +563,24 @@ export class AmpStoryBookend extends AMP.BaseElement {
   getStoryMetadata_() {
     const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
 
-    const metadata = {
-      title: jsonLd && jsonLd['headline'] ?
+    const urlService = Services.urlForDoc(this.getAmpDoc());
+    const {canonicalUrl} = Services.documentInfoForDoc(this.getAmpDoc());
+    const {hostname: domainName} = urlService.parse(canonicalUrl);
+
+    const title =
+      jsonLd && jsonLd['headline'] ?
         jsonLd['headline'] :
         user().assertElement(
             this.win.document.head.querySelector('title'),
-            'Please set <title> or structured data (JSON-LD).').textContent,
+            'Please set <title> or structured data (JSON-LD).').textContent;
 
-      domainName: parseUrlDeprecated(
-          Services.documentInfoForDoc(this.getAmpDoc()).canonicalUrl).hostname,
-    };
+    const metadata = {domainName, title};
+    const image = jsonLd && isArray(jsonLd['image']) ? jsonLd['image'] : null;
 
-    if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
-      user().assert(isProtocolValid(jsonLd['image']),
-          `Unsupported protocol for story image URL ${jsonLd['image']}`);
-      metadata.imageUrl = jsonLd['image'][0];
+    if (image != null && image.length >= 0) {
+      user().assert(urlService.isProtocolValid(image[0]),
+          `Unsupported protocol for story image URL ${image[0]}`);
+      metadata.imageUrl = image[0];
     }
 
     return metadata;
@@ -518,7 +593,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
   buildReplayButton_() {
     const metadata = this.getStoryMetadata_();
     return renderAsElement(this.win.document, buildReplayButtonTemplate(
-        this.win.document,
         metadata.title,
         metadata.domainName,
         metadata.imageUrl));

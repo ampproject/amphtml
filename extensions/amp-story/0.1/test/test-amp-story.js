@@ -18,7 +18,9 @@ import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../localization';
 import {PaginationButtons} from '../pagination-buttons';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
@@ -36,6 +38,11 @@ describes.realWin('amp-story', {
   let element;
   let story;
 
+  /**
+   * @param {!Element} container
+   * @param {boolean=} opt_active
+   * @return {!Element}
+   */
   function appendEmptyPage(container, opt_active) {
     const page = document.createElement('amp-story-page');
     page.id = '-empty-page';
@@ -46,6 +53,12 @@ describes.realWin('amp-story', {
     return page;
   }
 
+  /**
+   * @param {!Element} container
+   * @param {number} count
+   * @param {Array<string>=} opt_ids
+   * @return {!Array<!Element>}
+   */
   function createPages(container, count, opt_ids) {
     return Array(count).fill(undefined).map((unused, i) => {
       const page = win.document.createElement('amp-story-page');
@@ -56,6 +69,10 @@ describes.realWin('amp-story', {
     });
   }
 
+  /**
+   * @param {string} eventType
+   * @return {!Event}
+   */
   function createEvent(eventType) {
     const eventObj = document.createEventObject ?
       document.createEventObject() : document.createEvent('Events');
@@ -69,6 +86,9 @@ describes.realWin('amp-story', {
     win = env.win;
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization-v01', () => localizationService);
 
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
@@ -330,8 +350,10 @@ describes.realWin('amp-story', {
 
     return story.layoutCallback()
         .then(() => {
-          expect(dispatchStub)
-              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
+          expect(dispatchStub).to.have.been.calledWith(Action.CHANGE_PAGE, {
+            id: firstPageId,
+            index: 0,
+          });
         });
   });
 

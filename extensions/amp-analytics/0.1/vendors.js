@@ -306,15 +306,15 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   'byside': {
     'vars': {
-	  'agentDomain': 'webcare',
+	  'webcareZone': 'webcare',
       'webcareId': '',
       'channel': '',
       'fid': '',
 	  'lang': 'pt',
     },
     'requests': {
-      'host': '//${agentDomain}.byside.com/',
-      'base': '${host}BWA${webcare_id}/amp/',
+      'host': '//${webcareZone}.byside.com/',
+      'base': '${host}BWA${webcareId}/amp/',
       'pageview': '${base}pixel.php',
 	  'event': '${base}signal.php?event_id=${eventId}' +
 	    '&event_label=${eventLabel}&fields=${fields}',
@@ -762,6 +762,99 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'hl=${googleConversionLanguage}',
       'conversion': '${conversion_prefix}${common_params}&${conversion_params}',
       'remarketing': '${remarketing_prefix}${common_params}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'gtag': {
+    'configRewriter': {
+      'url': 'https://www.googletagmanager.com/gtag/amp',
+    },
+    'vars': {
+      'eventValue': '0',
+      'documentLocation': 'SOURCE_URL',
+      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
+      'dataSource': 'AMP',
+      'anonymizeIP': 'aip',
+      'errorParam': '${errorName}-${errorMessage}',
+    },
+    'requests': {
+      'uaHost': 'https://www.google-analytics.com',
+      'uaBasePrefix':
+          'v=1&' +
+           '_v=a1&' +
+           'ds=${dataSource}&' +
+           '${anonymizeIP}&' +
+           '_s=${requestCount}&' +
+           'dt=${title}&' +
+           'sr=${screenWidth}x${screenHeight}&' +
+           'cid=${clientId}&' +
+           'tid=${trackingId}&' +
+           'dl=${documentLocation}&' +
+           'dr=${externalReferrer}&' +
+           'sd=${screenColorDepth}&' +
+           'ul=${browserLanguage}&' +
+           'de=${documentCharset}',
+      'uaBaseSuffix':
+          '&a=${pageViewId}&' +
+           'z=${random}',
+      'uaPageview':
+          '${uaHost}/r/collect?${uaBasePrefix}&' +
+           't=pageview&' +
+           'jid=${random}&' +
+           'gjid=${random}&' +
+           '_r=1' +
+           '${uaBaseSuffix}',
+      'uaEvent':
+          '${uaHost}/collect?${uaBasePrefix}&' +
+           't=event&' +
+           'jid=' +
+           '${uaBaseSuffix}',
+      'uaTiming':
+          '${uaHost}/collect?${uaBasePrefix}&' +
+           'jid=&' +
+           'plt=${pageLoadTime}&' +
+           'dns=${domainLookupTime}&' +
+           'tcp=${tcpConnectTime}&' +
+           'rrt=${redirectTime}&' +
+           'srt=${serverResponseTime}&' +
+           'pdt=${pageDownloadTime}&' +
+           'clt=${contentLoadTime}&' +
+           'dit=${domInteractiveTime}' +
+           '${uaBaseSuffix}',
+      'uaError':
+          '${uaHost}/collect?${uaBasePrefix}&' +
+           't=exception&' +
+           'exd=${errorParam}' +
+           '${uaBaseSuffix}',
+      'awConversionPrefix':
+          'https://www.googleadservices.com/pagead/conversion/',
+      'awRemarketingPrefix':
+          'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
+      'awCommonParams':
+          '${conversionId}/?' +
+           'cv=amp3&' + // Increment when making changes.
+           'label=${conversionLabel}&' +
+           'random=${random}&' +
+           'url=${sourceUrl}&' +
+           'ref=${documentReferrer}&' +
+           'fst=${pageViewId}&' +
+           'num=${counter(googleadwords)}&' +
+           'fmt=3&' +
+           'async=1&' +
+           'u_h=${screenHeight}&u_w=${screenWidth}&' +
+           'u_ah=${availableScreenHeight}&u_aw=${availableScreenWidth}&' +
+           'u_cd=${screenColorDepth}&' +
+           'u_tz=${timezone}&' +
+           'tiba=${title}&' +
+           'guid=ON&script=0',
+      'awConversion': '${awConversionPrefix}${awCommonParams}',
+      'awRemarketing': '${awRemarketingPrefix}${awCommonParams}',
+      'flBase': 'https://ad.doubleclick.net/activity;src=${flSrc};type=${flType};cat=${flCat}',
     },
     'transport': {
       'beacon': false,
@@ -1465,6 +1558,37 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'content_author=${contentAuthor}&content_section=${contentSection}&' +
         'timezone_offset=${timezone}&tags=${tags}&amp_url=${ampdocUrl}&' +
         'screen=${screenWidth}x${screenHeight}${baseSuffix}',
+    },
+  },
+
+  'piStats': {
+    'requests': {
+      'host': 'https://events.pi-stats.com',
+      'basePrefix': '${host}/eventsamp/?' +
+          'e=PageLoad&' +
+          'pid=${property}&' +
+          'url=${ampdocUrl}&' +
+          'cnt=${cntId}&' +
+          'lang=${language}&' +
+          'ref=${documentReferrer}&' +
+          'id=${clientId(piStatsDEVICEID)}&' +
+          'ua=${userAgent}&' +
+          'ctype=web&' +
+          'blang=${browserLanguage}&' +
+          'v=2.0&' +
+          'dist=Javascript',
+      'pageview': '${basePrefix}&eventtype=pageview',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
 

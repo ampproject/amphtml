@@ -20,7 +20,8 @@ const path = require('path');
 module.exports = function(context) {
   return {
     MemberExpression: function(node) {
-      const filename = path.basename(context.getFilename());
+      const filePath = context.getFilename();
+      const filename = path.basename(filePath);
       // Ignore specific js files.
       if (/^(keyframes-extractor|fixed-layer|style)\.js/
           .test(filename)) {
@@ -28,6 +29,10 @@ module.exports = function(context) {
       }
       // Ignore tests.
       if (/^(test-(\w|-)+|(\w|-)+-testing)\.js$/.test(filename)) {
+        return;
+      }
+      // Ignore files in testing/ folder.
+      if (/\/testing\//.test(filePath)) {
         return;
       }
       if (node.computed) {

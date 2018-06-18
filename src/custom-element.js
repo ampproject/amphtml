@@ -111,6 +111,10 @@ export function createCustomElementClass(win, name) {
     constructor(self) {
       return super(self);
     }
+    /**
+     * The name of the custom element.
+     * @return {string}
+     */
     elementName() {
       return name;
     }
@@ -416,7 +420,7 @@ function createBaseCustomElementClass(win) {
       this.getResources().upgraded(this);
     }
 
-    /* @private */
+    /** @private */
     assertLayout_() {
       if (this.layout_ != Layout.NODISPLAY &&
           !this.implementation_.isLayoutSupported(this.layout_)) {
@@ -476,7 +480,7 @@ function createBaseCustomElementClass(win) {
         return this.buildingPromise_;
       }
       return this.buildingPromise_ = new Promise((resolve, reject) => {
-        const policyId = this.implementation_.getConsentPolicy();
+        const policyId = this.getConsentPolicy_();
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
@@ -540,6 +544,14 @@ function createBaseCustomElementClass(win) {
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
         Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
+          const TAG = this.tagName;
+          if (!this.ownerDocument) {
+            dev().error(TAG, 'preconnect without ownerDocument');
+            return;
+          } else if (!this.ownerDocument.defaultView) {
+            dev().error(TAG, 'preconnect without defaultView');
+            return;
+          }
           this.implementation_.preconnectCallback(onLayout);
         }, 1);
       }
@@ -1346,6 +1358,25 @@ function createBaseCustomElementClass(win) {
         rethrowAsync('Action execution failed:', e,
             invocation.node.tagName, invocation.method);
       }
+    }
+
+    /**
+     * Get the consent policy to follow.
+     * @return {?string}
+     */
+    getConsentPolicy_() {
+      const policyId = this.getAttribute('data-block-on-consent');
+      if (policyId === null) {
+        // data-block-on-consent attribute not set
+        return null;
+      }
+      if (policyId == '' || policyId == 'default') {
+        // data-block-on-consent value not set, up to individual element
+        // Note: data-block-on-consent and data-block-on-consent='default' is
+        // treated exactly the same
+        return this.implementation_.getConsentPolicy();
+      }
+      return policyId;
     }
 
     /**
