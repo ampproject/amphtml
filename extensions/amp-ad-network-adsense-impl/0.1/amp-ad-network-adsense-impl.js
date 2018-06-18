@@ -57,15 +57,16 @@ import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 
@@ -86,6 +87,21 @@ const sharedState = new AdsenseSharedState();
 export function resetSharedState() {
   sharedState.reset();
 }
+
+/** @type {!Object<number: number>} @visibleForTesting */
+export const DELAY_REQUEST_EXP_BRANCHES = {
+  21062224: true, // control
+  21062225: 3,
+  21062226: 4,
+  21062227: 6,
+  21062228: 12,
+};
+
+/** @type {string} */
+const DELAY_REQUEST_EXP = 'adsense-delay-request';
+
+/** @type {string} */
+const FORMAT_EXP = 'as-use-attr-for-format';
 
 /** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
@@ -122,9 +138,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
-
-    /** @private {number|boolean} */
-    this.delayRequest_ = true;
 
     /**
      * amp-analytics element generated based on this.ampAnalyticsConfig_
@@ -206,12 +219,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return this.delayRequest_;
+    return DELAY_REQUEST_EXP_BRANCHES[
+      getExperimentBranch(this.win, DELAY_REQUEST_EXP)] || true;
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.divertExperiments();
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
@@ -237,36 +252,24 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return null;
   }
 
-  const DELAY_REQUEST_EXP = {
-    21062224: true, // control
-    21062225: 3,
-    21062226: 4,
-    21062227: 6,
-    21062228: 12,
-  };
-
   /** @visibleForTesting */
   divertExperiments() {
-    const adsenseFormatExpName = 'as-use-attr-for-format';
     const experimentInfoMap =
         /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({});
-    experimentInfoMap[adsenseFormatExpName] = {
-      isTrafficEligible: () => !this.isResponsive_() &&
-        !isNaN(width) && width > 0 &&
-        !isNaN(height) && height > 0,
-      branches: ['21062003', '21062004'],
-    };
-    const adsenseDelayRequestExpName = 'adsense-delay-request';
-    experimentInfoMap[adsenseDelayRequestExpName] = {
-      isTrafficEligible: () => true,
-      branches: Object.keys(DELAY_REQUEST_EXP),
-    };
-    const selectedExp =
-        randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    Object.values(selectedExp).forEach(expId =>
-        addExperimentIdToElement(expId, this.element));
-    return selectedExp;
+        !../../../src/experiments.ExperimentInfo>} */ ({
+        [FORMAT_EXP]: {
+          isTrafficEligible: () => !this.isResponsive_() &&
+            Number(this.element.getAttribute('width')) > 0 &&
+            Number(this.element.getAttribute('height')) > 0,
+          branches: ['21062003', '21062004'],
+        },
+        [DELAY_REQUEST_EXP]: {
+          isTrafficEligible: () => true,
+          branches: Object.keys(DELAY_REQUEST_EXP_BRANCHES),
+        }
+      });
+    Object.values(randomlySelectUnsetExperiments(this.win, experimentInfoMap))
+        .forEach(expId => addExperimentIdToElement(expId, this.element));
   }
 
   /** @override */
@@ -291,11 +294,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
 
-    const selectedExp = this.divertExperiments();
-    this.delayRequest_ = 
-        delayRequestExp[selectedExp[adsenseDelayRequestExpName]] ||
-        this.delayRequest_;
-    this.size_ = selectedExp[adsenseFormatExpName] == '21062004'
+    this.size_ = getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
       ? {width, height}
       : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
