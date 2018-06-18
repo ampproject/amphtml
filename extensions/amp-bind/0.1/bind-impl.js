@@ -175,6 +175,9 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
     this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
+    /** @const @private {!../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
+
     const bodyPromise = (opt_win)
       ? waitForBodyPromise(opt_win.document)
           .then(() => dev().assertElement(opt_win.document.body))
@@ -187,7 +190,9 @@ export class Bind {
     this.initializePromise_ =
         this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
           const head = (opt_win) ? opt_win.document.head : ampdoc.getHeadNode();
-          return this.initialize_(body, head && elementByTag(head, 'title'));
+          const title = head && elementByTag(head, 'title');
+          const fixedLayer = this.viewport_.getFixedLayerContainer();
+          return this.initialize_(body, fixedLayer, title);
         });
 
     /** @private {Promise} */
@@ -407,24 +412,23 @@ export class Bind {
   }
 
   /**
-   * Scans the ampdoc for bindings and creates the expression evaluator.
-   * @param {!Node} rootNode
-   * @param {?Node} titleNode
+   * Scans the root node (and array of optional nodes) for bindings.
+   * @param {!Node} root
+   * @param {!Array<?Node>} nodes
    * @return {!Promise}
    * @private
    */
-  initialize_(rootNode, titleNode) {
+  initialize_(root, ...nodes) {
     dev().fine(TAG, 'Scanning DOM for bindings and macros...');
-    const nodes = [rootNode];
-    if (titleNode) {
-      nodes.push(titleNode);
-    }
+    const nodesToScan = [root].concat(nodes);
     let promise = Promise.all([
       this.addMacros_(),
-      this.addBindingsForNodes_(nodes)]
+      this.addBindingsForNodes_(nodesToScan)]
     ).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
-      rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
+      nodesToScan.forEach(node => {
+        node.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
+      });
     });
     if (getMode().development) {
       // Check default values against initial expression results.
@@ -542,13 +546,17 @@ export class Bind {
    *
    * Returns a promise that resolves after bindings have been added.
    *
-   * @param {!Array<!Node>} nodes
+   * @param {!Array<?Node>} nodes
    * @return {!Promise<number>}
    * @private
    */
   addBindingsForNodes_(nodes) {
     // For each node, scan it for bindings and store them.
     const scanPromises = nodes.map(node => {
+      if (!node) {
+        return;
+      }
+
       // Limit number of total bindings (unless in local manual testing).
       const limit = (getMode().localDev && !getMode().test)
         ? Number.POSITIVE_INFINITY

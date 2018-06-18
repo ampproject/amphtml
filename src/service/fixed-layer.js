@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../amp-events';
 import {Services} from '../services';
 import {
   computedStyle,
@@ -22,6 +23,7 @@ import {
   setStyle,
   setStyles,
 } from '../style';
+import {createCustomEvent} from '../event-helper';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {htmlFor} from '../static-template';
@@ -223,6 +225,7 @@ export class FixedLayer {
             this.returnFromTransferLayer_(fe);
           }
         }
+        this.dispatchUpdateEvent_();
       });
     }
   }
@@ -375,7 +378,7 @@ export class FixedLayer {
       },
       mutate: state => {
         if (hasTransferables && this.transfer_) {
-          const transferLayer = this.getTransferLayer_();
+          const transferLayer = this.getTransferLayer();
           if (transferLayer.className != this.ampdoc.getBody().className) {
             transferLayer.className = this.ampdoc.getBody().className;
           }
@@ -650,7 +653,7 @@ export class FixedLayer {
         `calc(${10000 + index} + ${state.zIndex || 0})`);
 
     element.parentElement.replaceChild(fe.placeholder, element);
-    this.getTransferLayer_().appendChild(element);
+    this.getTransferLayer().appendChild(element);
 
     // Test if the element still matches one of the `fixed` selectors. If not
     // return it back to BODY.
@@ -663,6 +666,8 @@ export class FixedLayer {
           fe.element);
       this.returnFromTransferLayer_(fe);
     }
+
+    this.dispatchUpdateEvent_();
   }
 
   /**
@@ -707,7 +712,7 @@ export class FixedLayer {
   /**
    * @return {?Element}
    */
-  getTransferLayer_() {
+  getTransferLayer() {
     // This mode is only allowed for a single-doc case.
     if (!this.transfer_ || this.transferLayer_) {
       return this.transferLayer_;
@@ -769,6 +774,13 @@ export class FixedLayer {
         this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
       }
     }
+  }
+
+  /** Dispatches AmpEvents.DOM_UPDATE from transfer layer. */
+  dispatchUpdateEvent_() {
+    const event = createCustomEvent(this.ampdoc.win,
+        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
+    this.getTransferLayer().dispatchEvent(event);
   }
 }
 

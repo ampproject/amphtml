@@ -810,6 +810,14 @@ export class Viewport {
   }
 
   /**
+   * Returns the container element for the fixed layer.
+   * @return {!Element}
+   */
+  getFixedLayerContainer() {
+    return this.fixedLayer_.getTransferLayer();
+  }
+
+  /**
    * Updates touch zoom meta data. Returns `true` if any actual
    * changes have been done.
    * @param {string} viewportMetaString
