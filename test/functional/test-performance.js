@@ -34,6 +34,10 @@ describes.realWin('performance', {amp: true}, env => {
     ampdoc = env.ampdoc;
     clock = lolex.install({
       target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
+    // Bind performance with the clock's implementation so that
+    // we can use date.now to manipulate it's value.
+    // See https://www.npmjs.com/package/lolex 
+    win.performance.now = clock.performance.now;
     installPerformanceService(env.win);
     perf = Services.performanceFor(env.win);
   });
@@ -109,6 +113,7 @@ describes.realWin('performance', {amp: true}, env => {
     it('should add default optional relative start time on the ' +
        'queued tick event', () => {
       clock.tick(150);
+      const now = clock.performance.now();
       perf.tick('start0');
 
       expect(perf.events_[0]).to.be.jsonEqual({

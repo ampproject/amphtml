@@ -165,6 +165,9 @@ export class Performance {
     });
   }
 
+  /**
+   * Fired on document ready.
+   */
   onload_() {
     this.tick('ol');
     this.tickLegacyFirstPaintTime_();
@@ -172,7 +175,7 @@ export class Performance {
   }
 
   /**
-   * Reports first pain and first contentful paint timings.
+   * Reports first paint and first contentful paint timings.
    * See https://github.com/WICG/paint-timing
    */
   registerPaintTimingObserver_() {
@@ -303,7 +306,8 @@ export class Performance {
    *     this directly.
    */
   tick(label, opt_delta) {
-    const value = (opt_delta == undefined) ? this.win.performance.now() : undefined;
+    const value = (opt_delta == undefined)
+      ? this.win.performance.now() : undefined;
 
     const data = dict({
       'label': label,
