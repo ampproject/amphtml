@@ -64,7 +64,6 @@ export const BLACKLISTED_TAGS = {
  * @const {!Array<string>}
  */
 export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
-  'html', 'head', 'body',
   'a',
   'b',
   'br',
@@ -212,109 +211,125 @@ export function purifyHtml(dirty) {
     'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
   });
+
+  // Reference to DOMPurify's `allowedAttributes` whitelist.
+  let allowedAttributes;
+  // List of tag-specific attributes added to `allowedAttributes`
+  const tagSpecificAttrs = [];
+
+  /**
+   * @param {!Node} node
+   * @param {{tagName: string, allowedTags: !Object<string, boolean>}} data
+   */
+  const uponSanitizeElement = function(node, data) {
+    const {tagName, allowedTags} = data;
+    // Allow all AMP elements (constrained by AMP Validator since tag
+    // calculation is not possible).
+    if (startsWith(tagName, 'amp-')) {
+      allowedTags[tagName] = true;
+    }
+
+    if (tagName == 'a') {
+      if (node.hasAttribute('href') && !node.hasAttribute('target')) {
+        node.setAttribute('target', '_top');
+      }
+    }
+  }
+
+  /**
+   * @param {!Node} node
+   * @param {{attrName: string, attrValue: string, allowedAttributes: !Object<string, boolean>}} data
+   */
+  const uponSanitizeAttribute = function(node, data) {
+    // Beware of DOM Clobbering risk when using properties or functions on `node`.
+    // DOMPurify checks a few of these for its internal usage (e.g. `nodeName`),
+    // but not others that may be used in custom hooks.
+    // See https://github.com/cure53/DOMPurify/wiki/Security-Goals-&-Threat-Model#security-goals
+    // and https://github.com/cure53/DOMPurify/blob/master/src/purify.js#L527.
+
+    const tagName = node.nodeName.toLowerCase();
+    const {attrName} = data;
+    let {attrValue} = data;
+    allowedAttributes = data.allowedAttributes;
+
+    // `<A>` has special target rules:
+    // - Default target is "_top";
+    // - Allowed targets are "_blank", "_top";
+    // - All other targets are rewritted to "_top".
+    if (tagName == 'a' && attrName == 'target') {
+      const lowercaseValue = attrValue.toLowerCase();
+      if (!WHITELISTED_TARGETS.includes(lowercaseValue)) {
+        attrValue = '_top';
+      } else {
+        // Always use lowercase values for `target` attr.
+        attrValue = lowercaseValue;
+      }
+    }
+
+    // Allow if attribute is in tag-specific whitelist.
+    const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tagName];
+    if (attrsByTags && attrsByTags.includes(attrName)) {
+      allowedAttributes[attrName] = true;
+      tagSpecificAttrs.push(attrName);
+    }
+
+    // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
+    // This is because DOMPurify eagerly removes attributes and re-adds them
+    // after sanitization, which fails because `[]` are not valid attr chars.
+    const isBinding = attrName[0] == '[' && attrName[attrName.length - 1] == ']';
+    if (isBinding) {
+      const property = attrName.substring(1, attrName.length - 1);
+      node.setAttribute(`data-amp-bind-${property}`, attrValue);
+    }
+
+    if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
+      if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
+        attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
+      }
+    } else {
+      user().error(TAG, `Removing "${attrName}" attribute with invalid `
+          + `value in <${tagName} ${attrName}="${attrValue}">.`);
+      data.keepAttr = false;
+    }
+
+    // Update attribute value.
+    data.attrValue = attrValue;
+  }
+
+  /**
+   * @param {!Node} node
+   * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
+   */
+  const afterSanitizeAttributes = function(node) {
+    // DOMPurify doesn't have a tag-specific attribute whitelist API and
+    // `allowedAttributes` has a per-invocation scope, so we need to remove
+    // tag-specific attributes from `allowedAttributes` after sanitizing
+    // each element.
+    tagSpecificAttrs.forEach(attr => {
+      delete allowedAttributes[attr];
+    });
+    tagSpecificAttrs.length = 0;
+
+    filterSplice(this.removed, r => {
+      if (r.from === node && r.attribute) {
+        const {name, value} = r.attribute;
+        // Restore the `on` attribute which DOMPurify incorrectly flags as an
+        // unknown protocol due to presence of the `:` character.
+        if (name.toLowerCase() === 'on') {
+          node.setAttribute('on', value);
+          return false; // Remove from array once processed.
+        }
+      }
+      return true;
+    });
+  }
+
   DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
   const purified = DOMPurify.sanitize(dirty, config);
   DOMPurify.removeAllHooks();
   return purified;
-}
-
-/**
- * @param {!Node} node
- * @param {{tagName: string, allowedTags: !Object<string, boolean>}} data
- */
-function uponSanitizeElement(node, data) {
-  const {tagName, allowedTags} = data;
-  // Allow all AMP elements (constrained by AMP Validator since tag
-  // calculation is not possible).
-  if (startsWith(tagName, 'amp-')) {
-    allowedTags[tagName] = true;
-  }
-
-  if (tagName == 'a') {
-    if (node.hasAttribute('href') && !node.hasAttribute('target')) {
-      node.setAttribute('target', '_top');
-    }
-  }
-}
-
-/**
- * @param {!Node} node
- * @param {{attrName: string, attrValue: string, allowedAttributes: !Object<string, boolean>}} data
- */
-function uponSanitizeAttribute(node, data) {
-  // Beware of DOM Clobbering risk when using properties or functions on `node`.
-  // DOMPurify checks a few of these for its internal usage (e.g. `nodeName`),
-  // but not others that may be used in custom hooks.
-  // See https://github.com/cure53/DOMPurify/wiki/Security-Goals-&-Threat-Model#security-goals
-  // and https://github.com/cure53/DOMPurify/blob/master/src/purify.js#L527.
-
-  const tagName = node.nodeName.toLowerCase();
-  const {attrName, allowedAttributes} = data;
-  let {attrValue} = data;
-
-  // `<A>` has special target rules:
-  // - Default target is "_top";
-  // - Allowed targets are "_blank", "_top";
-  // - All other targets are rewritted to "_top".
-  if (tagName == 'a' && attrName == 'target') {
-    const lowercaseValue = attrValue.toLowerCase();
-    if (!WHITELISTED_TARGETS.includes(lowercaseValue)) {
-      attrValue = '_top';
-    } else {
-      // Always use lowercase values for `target` attr.
-      attrValue = lowercaseValue;
-    }
-  }
-
-  // Allow if attribute is in tag-specific whitelist.
-  // `allowedAttributes` is scoped to the node being sanitized.
-  const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tagName];
-  if (attrsByTags && attrsByTags.includes(attrName)) {
-    allowedAttributes[attrName] = true;
-  }
-
-  // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
-  // This is because DOMPurify eagerly removes attributes and re-adds them
-  // after sanitization, which fails because `[]` are not valid attr chars.
-  const isBinding = attrName[0] == '[' && attrName[attrName.length - 1] == ']';
-  if (isBinding) {
-    const property = attrName.substring(1, attrName.length - 1);
-    node.setAttribute(`data-amp-bind-${property}`, attrValue);
-  }
-
-  if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
-    if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
-      attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
-    }
-  } else {
-    user().error(TAG, `Removing "${attrName}" attribute with invalid `
-        + `value in <${tagName} ${attrName}="${attrValue}">.`);
-    data.keepAttr = false;
-  }
-
-  // Update attribute value.
-  data.attrValue = attrValue;
-}
-
-/**
- * @param {!Node} node
- * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
- */
-function afterSanitizeAttributes(node) {
-  filterSplice(this.removed, r => {
-    if (r.from === node && r.attribute) {
-      const {name, value} = r.attribute;
-      // Restore the `on` attribute which DOMPurify incorrectly flags as an
-      // unknown protocol due to presence of the `:` character.
-      if (name.toLowerCase() === 'on') {
-        node.setAttribute('on', value);
-        return false; // Remove from array once processed.
-      }
-    }
-    return true;
-  });
 }
 
 /**
@@ -325,12 +340,44 @@ function afterSanitizeAttributes(node) {
  * @return {string}
  */
 export function purifyTagsForTripleMustache(html) {
+  // Reference to DOMPurify's `allowedTags` whitelist.
+  let allowedTags;
+
+  DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+    const {tagName} = data;
+    allowedTags = data.allowedTags;
+    if (tagName === 'template') {
+      const type = node.getAttribute('type');
+      if (type && type.toLowerCase() === 'amp-mustache') {
+        allowedTags['template'] = true;
+      }
+    }
+  });
+  DOMPurify.addHook('afterSanitizeElements', unusedNode => {
+    // DOMPurify doesn't have an required-attribute tag whitelist API and
+    // `allowedTags` has a per-invocation scope, so we need to remove
+    // required-attribute tags after sanitizing each element.
+    allowedTags['template'] = false;
+  });
   const fragment = DOMPurify.sanitize(html, {
     'ALLOWED_TAGS': TRIPLE_MUSTACHE_WHITELISTED_TAGS,
-    'WHOLE_DOCUMENT': true,
+    'FORCE_BODY': true,
     'RETURN_DOM_FRAGMENT': true,
   });
-  return fragment.innerHTML;
+  DOMPurify.removeAllHooks();
+  let purified = '';
+  for (let i = 0; i < fragment.childNodes.length; i++) {
+    const child = fragment.childNodes[i];
+    switch (child.nodeType) {
+      case Node.TEXT_NODE:
+        purified += child.textContent;
+        break;
+      case Node.ELEMENT_NODE:
+        purified += child.outerHTML;
+        break;
+    }
+  }
+  return purified;
 }
 
 /**

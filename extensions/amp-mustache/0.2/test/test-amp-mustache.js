@@ -248,8 +248,7 @@ describe('amp-mustache template', () => {
     });
   });
 
-  describe.only('Nested templates', () => {
-
+  describe('Nested templates', () => {
     it('should not sanitize nested amp-mustache templates', () => {
       const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
@@ -331,13 +330,11 @@ describe('amp-mustache template', () => {
       const nestedTemplateElement = outerResult.querySelector('template');
       const nestedTemplate = new AmpMustache(nestedTemplateElement);
       nestedTemplate.compileCallback();
-      allowConsoleError(() => {
-        const nestedResult = nestedTemplate.render({
-          value: 'Nested',
-        });
-        expect(nestedResult./*OK*/innerHTML).to.equal(
-            '<div>nested</div>: Nested');
+      const nestedResult = nestedTemplate.render({
+        value: 'Nested',
       });
+      expect(nestedResult./*OK*/innerHTML).to.equal(
+          '<div>nested</div>: Nested');
     });
 
     it('should not allow users to pass data having key that starts with ' +
@@ -370,6 +367,19 @@ describe('amp-mustache template', () => {
       expect(result./*OK*/innerHTML).to.equal('123');
     });
 
+    // Need to test this since DOMPurify doesn't have an required-attribute tag
+    // whitelist API. Instead, we hack around it with custom hooks.
+    it('should not allow unsupported templates after a supported one', () => {
+      const html =
+          '1<template type="amp-mustache">2</template>3<template>4</template>5';
+      const templateElement = document.createElement('template');
+      templateElement./*OK*/innerHTML = '{{{html}}}';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({html});
+      expect(result./*OK*/innerHTML).to.equal(
+          '1<template type="amp-mustache">2</template>35');
+    });
   });
 
   describe('triple-mustache', () => {

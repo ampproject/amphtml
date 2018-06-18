@@ -326,8 +326,17 @@ function runSanitizerTests() {
     });
 
     it('should allow form::action-xhr', () => {
-      expect(purifyHtml('<form action-xhr="https://foo.com/bar"></form>'))
-          .to.equal('<form action-xhr="https://foo.com/bar"></form>');
+      expect(purifyHtml('<form action-xhr="https://foo.com"></form>'))
+          .to.equal('<form action-xhr="https://foo.com"></form>');
+    });
+
+    // Need to test this since DOMPurify doesn't offer a API for tag-specific
+    // attribute whitelists. Instead, we hack around it with custom hooks.
+    it('should not allow unsupported attributes after a valid one', () => {
+      const html = '<form action-xhr="https://foo.com"></form>' +
+            '<p action-xhr="https://foo.com"></p>';
+      expect(purifyHtml(html))
+          .to.equal('<form action-xhr="https://foo.com"></form><p></p>');
     });
   });
 
