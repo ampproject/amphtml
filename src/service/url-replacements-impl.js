@@ -23,7 +23,7 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
-import {Expander} from './url-expander/expander';
+import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
 import {
@@ -49,10 +49,6 @@ const VARIANT_DELIMITER = '.';
 const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
-
-/** A whitelist for replacements whose values should not be %-encoded. */
-/** @private @const {Object<string, boolean>} */
-const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
 
 /** @const {string} */
 export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
