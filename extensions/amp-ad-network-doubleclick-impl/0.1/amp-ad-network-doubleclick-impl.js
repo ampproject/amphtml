@@ -83,6 +83,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isCancellation} from '../../../src/error';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -394,7 +395,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource().whenWithinRenderOutsideViewport().then(
+    this.getResource().whenWithinViewport(this.renderOutsideViewport()).then(
         () => this.isIdleRender_ = false);
     return vpRange;
   }
@@ -421,6 +422,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
+    if (!isCdnProxy(this.win) && !isExperimentOn(
+        this.win, 'expDfpInvOrigDeprecated')) {
+      this.experimentIds.push('21060933');
+    }
     const experimentId = {
       // SRA
       '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
@@ -1062,8 +1067,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
     if ((this.isFluidRequest_ && width && height) ||
-        (width != pWidth || height != pHeight) &&
-        (width <= pWidth && height <= pHeight)) {
+        ((width != pWidth || height != pHeight) &&
+         (width <= pWidth && height <= pHeight))) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }

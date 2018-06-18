@@ -919,6 +919,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           () => Promise.resolve(VerificationStatus.OK));
     }
 
+    /**
+     * @param {{width: number, height: number}} size
+     * @param {boolean} isAmpCreative
+     */
     function mockSendXhrRequest(size, isAmpCreative) {
       return {
         arrayBuffer: () => Promise.resolve(utf8Encode(
@@ -1186,6 +1190,13 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
 
       beforeEach(() => {
         doc = env.win.document;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        doc.body.appendChild(element);
+        impl = new AmpAdNetworkDoubleclickImpl(element);
       });
 
       describe('#onNetworkFailure', () => {
@@ -1209,6 +1220,10 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       describe('centering', () => {
         const size = {width: '300px', height: '150px'};
 
+        /**
+         * @param {!Element} iframe
+         * @param {{width: number, height: number}} expectedSize
+         */
         function verifyCss(iframe, expectedSize) {
           expect(iframe).to.be.ok;
           const style = env.win.getComputedStyle(iframe);
@@ -1333,7 +1348,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           });
           impl = new AmpAdNetworkDoubleclickImpl(element);
           sandbox.stub(impl, 'getResource').returns(
-              {whenWithinRenderOutsideViewport: () => Promise.resolve()});
+              {whenWithinViewport: () => Promise.resolve()});
         });
 
         it('should use experiment value', () => {
@@ -1427,5 +1442,23 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should return null', () => expect(
             AmpAdNetworkDoubleclickImpl.prototype.getConsentPolicy())
             .to.be.null);
+      });
+
+      describe('#setPageLevelExperiments', () => {
+
+        afterEach(() => {
+          toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
+        });
+
+        it('should set invalid origin fix experiment if on canonical', () => {
+          impl.setPageLevelExperiments('');
+          expect(impl.experimentIds.includes('21060933')).to.be.true;
+        });
+
+        it('should not set invalid origin fix if exp on', () => {
+          toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
+          impl.setPageLevelExperiments('');
+          expect(impl.experimentIds.includes('21060933')).to.be.true;
+        });
       });
     });
