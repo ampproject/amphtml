@@ -130,8 +130,8 @@ describe('amp-mustache template', () => {
         value: 'myid',
         invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
       });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a data-my-id="myid" data-my-attr="javascript:alert();">abc</a>');
+      expect(result./*OK*/innerHTML).to.equal('value = ' +
+          '<a data-my-id="myid" data-my-attr="javascript:alert();">abc</a>');
     });
   });
 
