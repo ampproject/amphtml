@@ -248,6 +248,7 @@ function compile(entryModuleFilenames, outputDir,
       // TODO(erwinm, glevitzky): remove this once type issues are fixed
       // and when this is actually used.
       '!extensions/amp-a4a/0.1/friendly-frame-renderer.js',
+      '!extensions/amp-a4a/0.1/name-frame-renderer.js',
     ];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
