@@ -212,7 +212,7 @@ describe('amp-img', () => {
     });
   });
 
-  // The following tests are relevant to the amp-img-native-srcset experiment
+  // This test is relevant to the amp-img-native-srcset experiment
   it('should propagate srcset and sizes', () => {
     toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
@@ -230,21 +230,6 @@ describe('amp-img', () => {
           .equal('(max-width: 320px) 640px, 100vw');
     });
   });
-
-  it.configure().ifIe()
-      .run('should ensure images have a src if srcset is not supported', () => {
-        toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
-        return getImg({
-          srcset: SRCSET_STRING,
-          width: 320,
-          height: 240,
-        }).then(ampImg => {
-          expect(isExperimentOn(iframe.win, 'amp-img-native-srcset'))
-              .to.equal(true);
-          const img = ampImg.querySelector('img');
-          expect(img.getAttribute('src')).to.equal('/examples/img/hero@1x.jpg');
-        });
-      });
 
   describe('#fallback on initial load', () => {
     let el;
