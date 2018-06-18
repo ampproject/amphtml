@@ -128,6 +128,10 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   reporter.setPingParameters(pingParameters);
 }
 
+/**
+ * @param {!AMP.BaseElement} ampElement
+ * @private
+ */
 function setupPageLoadMetricsReporter_(ampElement) {
   const {win} = ampElement;
   const correlator = getCorrelator(win);
