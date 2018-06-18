@@ -694,17 +694,12 @@ export class Resource {
     }
     const viewportRatio = this.getDistanceViewportRatio();
     const keys = Object.keys(this.withViewportDeferreds_);
-    let removed = 0;
-    keys.forEach(viewport => {
-      const viewportInt = dev().assertNumber(parseInt(viewport, 10));
+    for (let i = 0; i < keys.length; i++) {
+      const viewportInt = dev().assertNumber(parseInt(keys[i], 10));
       if (this.isWithinViewportRatio(viewportInt, viewportRatio)) {
         this.withViewportDeferreds_[viewportInt].resolve();
         delete this.withViewportDeferreds_[viewportInt];
-        removed++;
       }
-    });
-    if (removed == keys.length) {
-      this.withViewportDeferreds_ = null;
     }
   }
 
@@ -769,7 +764,7 @@ export class Resource {
     const {distance, scrollPenalty, viewportHeight} =
       opt_viewportRatio || this.getDistanceViewportRatio();
     if (this.useLayers_) {
-      return distance < multiplier;
+      return dev().assertNumber(distance) < multiplier;
     }
     if (typeof distance == 'boolean') {
       return distance;
