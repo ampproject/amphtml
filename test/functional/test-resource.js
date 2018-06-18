@@ -2020,7 +2020,6 @@ describe('Resource renderOutsideViewport', () => {
       // Call again should do nothing.
       resource.resolveDeferredsWhenWithinViewports_();
       resource.resolveDeferredsWhenWithinViewports_();
-      expect(resource.withViewportDeferreds_).to.not.be.ok;
       return promise;
     });
 
