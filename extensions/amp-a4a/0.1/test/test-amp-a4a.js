@@ -110,6 +110,10 @@ describe('amp-a4a', () => {
     resetScheduledElementForTesting(window, 'amp-a4a');
   });
 
+  /**
+   * Sets up testing by loading iframe within which test runs.
+   * @param {FixtureInterface} fixture
+   */
   function setupForAdTesting(fixture) {
     expect(fetchMock).to.be.null;
     fetchMock = new FetchMock(fixture.win);
@@ -130,7 +134,12 @@ describe('amp-a4a', () => {
     doc.head.appendChild(ampStyle);
   }
 
-  function createA4aElement(doc, opt_rect, body) {
+  /**
+   * @param {!Document} doc
+   * @param {Rect=} opt_rect
+   * @param {Element=} opt_body
+   */
+  function createA4aElement(doc, opt_rect, opt_body) {
     const element = createElementWithAttributes(doc, 'amp-a4a', {
       'width': opt_rect ? String(opt_rect.width) : '200',
       'height': opt_rect ? String(opt_rect.height) : '50',
@@ -153,11 +162,14 @@ describe('amp-a4a', () => {
     element.renderStarted = () => {
       signals.signal('render-start');
     };
-    body = body || doc.body;
-    body.appendChild(element);
+    (opt_body || doc.body).appendChild(element);
     return element;
   }
 
+  /**
+   * @param {Object=} opt_additionalInfo
+   * @return {string}
+   */
   function buildCreativeString(opt_additionalInfo) {
     const baseTestDoc = testFragments.minimalDocOneStyle;
     const offsets = Object.assign({}, opt_additionalInfo || {});
@@ -172,7 +184,10 @@ describe('amp-a4a', () => {
         baseTestDoc.slice(splicePoint);
   }
 
-  // Checks that element is an amp-ad that is rendered via A4A.
+  /**
+   * Checks that element is an amp-ad that is rendered via A4A.
+   * @param {!Element} element
+   */
   function verifyA4ARender(element) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -186,7 +201,12 @@ describe('amp-a4a', () => {
     expect(friendlyChild).to.be.visible;
   }
 
-  // Checks that element is an amp-ad that is rendered via SafeFrame.
+  /**
+   * Checks that element is an amp-ad that is rendered via SafeFrame.
+   * @param {!Element} element
+   * @param {string} sfVersion
+   * @param {boolean} shouldSandbox
+   */
   function verifySafeFrameRender(element, sfVersion, shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
@@ -214,13 +234,18 @@ describe('amp-a4a', () => {
     verifyContext(data._context);
   }
 
+  /** @param {!Object} context */
   function verifyContext(context) {
     expect(context).to.be.ok;
     expect(context.sentinel).to.be.ok;
     expect(context.sentinel).to.match(/((\d+)-\d+)/);
   }
 
-  // Checks that element is an amp-ad that is rendered via nameframe.
+  /**
+   * Checks that element is an amp-ad that is rendered via nameframe.
+   * @param {!Element} element
+   * @param {boolean} shouldSandbox
+   */
   function verifyNameFrameRender(element, shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
@@ -240,6 +265,11 @@ describe('amp-a4a', () => {
     }
   }
 
+  /**
+   * @param {!Element} element
+   * @param {string} srcUrl
+   * @param {boolean} shouldSandbox
+   */
   function verifyCachedContentIframeRender(element, srcUrl,
     shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
@@ -260,6 +290,7 @@ describe('amp-a4a', () => {
     }
   }
 
+  /** @param {string} nameData */
   function verifyNameData(nameData) {
     let attributes;
     expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
@@ -267,6 +298,10 @@ describe('amp-a4a', () => {
     verifyContext(attributes._context);
   }
 
+  /**
+   * @param {!AmpA4A} a4a
+   * @param {!Function} triggerAnalyticsEventSpy
+   */
   function verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy) {
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
         a4a.element, 'ad-request-start', {'time': sinon.match.number});
@@ -1239,6 +1274,11 @@ describe('amp-a4a', () => {
         expect(a4a.adPromise_).to.be.ok;
       });
     });
+
+    /**
+     * @param {boolean} isValidCreative
+     * @param {boolean} opt_failAmpRender
+     */
     function executeLayoutCallbackTest(isValidCreative, opt_failAmpRender) {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1564,34 +1604,21 @@ describe('amp-a4a', () => {
           const a4aElement = createA4aElement(doc);
           a4a = new MockA4AImpl(a4aElement);
           getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-          sandbox.stub(a4a, 'delayAdRequestEnabled').returns(true);
-        });
-      });
-      it('should not delay request when in viewport', () => {
-        getResourceStub.returns(
-            {
-              getUpgradeDelayMs: () => 1,
-              renderOutsideViewport: () => true,
-              whenWithinRenderOutsideViewport: () => {
-                throw new Error('failure!');
-              },
-            });
-        a4a.buildCallback();
-        a4a.onLayoutMeasure();
-        expect(a4a.adPromise_).to.be.instanceof(Promise);
-        return a4a.adPromise_.then(() => {
-          expect(getAdUrlSpy).to.be.calledOnce;
         });
       });
       it('should delay request until within renderOutsideViewport',() => {
-        let whenWithinRenderOutsideViewportResolve;
+        sandbox.stub(a4a, 'delayAdRequestEnabled').returns(true);
+        let whenWithinViewportResolve;
         getResourceStub.returns(
             {
               getUpgradeDelayMs: () => 1,
-              renderOutsideViewport: () => false,
-              whenWithinRenderOutsideViewport: () => new Promise(resolve => {
-                whenWithinRenderOutsideViewportResolve = resolve;
-              }),
+              renderOutsideViewport: () => 3,
+              whenWithinViewport: viewport => {
+                expect(viewport).to.equal(3);
+                return new Promise(resolve => {
+                  whenWithinViewportResolve = resolve;
+                });
+              },
             });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
@@ -1599,7 +1626,33 @@ describe('amp-a4a', () => {
         // Delay to all getAdUrl to potentially execute.
         return Services.timerFor(a4a.win).promise(1).then(() => {
           expect(getAdUrlSpy).to.not.be.called;
-          whenWithinRenderOutsideViewportResolve();
+          whenWithinViewportResolve();
+          return a4a.adPromise_.then(() => {
+            expect(getAdUrlSpy).to.be.calledOnce;
+          });
+        });
+      });
+      it('should delay request until numeric value',() => {
+        sandbox.stub(a4a, 'delayAdRequestEnabled').returns(6);
+        let whenWithinViewportResolve;
+        getResourceStub.returns(
+            {
+              getUpgradeDelayMs: () => 1,
+              renderOutsideViewport: () => 3,
+              whenWithinViewport: viewport => {
+                expect(viewport).to.equal(6);
+                return new Promise(resolve => {
+                  whenWithinViewportResolve = resolve;
+                });
+              },
+            });
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        // Delay to all getAdUrl to potentially execute.
+        return Services.timerFor(a4a.win).promise(1).then(() => {
+          expect(getAdUrlSpy).to.not.be.called;
+          whenWithinViewportResolve();
           return a4a.adPromise_.then(() => {
             expect(getAdUrlSpy).to.be.calledOnce;
           });
