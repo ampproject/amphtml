@@ -159,7 +159,7 @@ let refreshManagerIdCounter = 0;
  * @param {function():boolean=} opt_predicate
  * @return {?RefreshManager}
  */
-export function getRefreshManager(a4a, opt_predicate) { debugger;
+export function getRefreshManager(a4a, opt_predicate) {
   const refreshInterval =
       getPublisherSpecifiedRefreshInterval(a4a.element, a4a.win);
   if (!refreshInterval || (opt_predicate && !opt_predicate())) {
@@ -241,7 +241,7 @@ export class RefreshManager {
    *
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
-  ioCallback_(entries) { debugger;
+  ioCallback_(entries) {
     entries.forEach(entry => {
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
       dev().assert(refreshManagerId);
@@ -288,7 +288,7 @@ export class RefreshManager {
    * Initiates the refresh cycle by initiating the visibility manager on the
    * element.
    */
-  initiateRefreshCycle() { debugger;
+  initiateRefreshCycle() {
     switch (this.state_) {
       case RefreshLifecycleState.INITIAL:
         this.getIntersectionObserverWithThreshold_(
@@ -308,7 +308,7 @@ export class RefreshManager {
    * @return {!Promise<boolean>} A promise that resolves to true when the
    *    refresh timer elapses successfully.
    */
-  startRefreshTimer_() { debugger;
+  startRefreshTimer_() {
     return new Promise(resolve => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
         this.state_ = RefreshLifecycleState.INITIAL;

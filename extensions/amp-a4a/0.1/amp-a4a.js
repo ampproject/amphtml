@@ -971,7 +971,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise} A promise that resolves when all asynchronous portions of
    *   the refresh function complete. This is particularly handy for testing.
    */
-  refresh(refreshEndCallback) { debugger;
+  refresh(refreshEndCallback) {
     dev().assert(!this.isRefreshing);
     this.isRefreshing = true;
     this.tearDownSlot();
