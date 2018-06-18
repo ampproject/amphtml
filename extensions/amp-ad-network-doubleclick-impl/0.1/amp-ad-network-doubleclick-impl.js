@@ -374,7 +374,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource().whenWithinRenderOutsideViewport().then(
+    this.getResource().whenWithinViewport(this.renderOutsideViewport()).then(
         () => this.isIdleRender_ = false);
     return vpRange;
   }
