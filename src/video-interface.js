@@ -208,6 +208,12 @@ export const VideoAttributes = {
    * and http://caniuse.com/#feat=fullscreen
    */
   ROTATE_TO_FULLSCREEN: 'rotate-to-fullscreen',
+  /**
+   * noaudio
+   *
+   * If set and autoplay, the equalizer icon will not be displayed.
+   */
+  NO_AUDIO: 'noaudio',
 };
 
 
