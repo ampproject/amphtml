@@ -151,6 +151,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
   }
 
+  /** @override */
   renderOutsideViewport() {
     if (is3pThrottled(this.win)) {
       return false;
