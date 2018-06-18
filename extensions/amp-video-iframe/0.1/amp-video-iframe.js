@@ -111,7 +111,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.iframe_ = createFrameFor(this, this.getSrc_(),
-        /* sandbox */ 'allow-scripts');
+        /* sandbox */ 'allow-scripts allow-same-origin');
     this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
     return this.createReadyPromise_().then(() => {
       this.onReady_();
