@@ -111,7 +111,7 @@ export function googleLifecycleReporterFactory(baseInstance) {
  * Sets reportable variables from ad response headers.
  *
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} headers
- * @param {!./performance.GoogleAdLifecycleReporter} reporter
+ * @param {!./performance.BaseLifecycleReporter} reporter
  */
 export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   // This is duplicated from the amp-a4a.js implementation.  It needs to be
