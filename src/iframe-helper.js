@@ -456,6 +456,7 @@ export class SubscriptionApi {
         this.is3p_);
   }
 
+  /** @public */
   destroy() {
     this.unlisten_();
     this.clientWindows_.length = 0;
