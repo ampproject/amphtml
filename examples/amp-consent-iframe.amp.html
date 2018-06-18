@@ -293,6 +293,15 @@
         </div>
       </div>
 
+      <amp-iframe id='1234' width=300 height=50
+          on:"message:myConsentId.accept"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          layout="responsive"
+          frameborder="0"
+          src="http://ads.localhost:8000/test/manual/diy-consent.html">
+          <placeholder></placeholder>
+      </amp-iframe>
+
       <amp-consent id='ABC' layout='nodisplay'>
       <script type="application/json">{
         "consents": {
@@ -305,7 +314,7 @@
       }</script>
       <div id="ui1">
         Can I load the image??
-        <amp-iframe width=300 height=50
+        <amp-iframe id='5678' width=300 height=50
           on:"message:myConsentId.accept"
           sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
           layout="responsive"

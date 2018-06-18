@@ -31,6 +31,7 @@ import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
   isJsonScriptTag,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
@@ -60,6 +61,7 @@ export const ACTION_TYPE = {
 
 
 export class AmpConsent extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -106,6 +108,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
   }
 
+  /** @override */
   getConsentPolicy() {
     // amp-consent should not be blocked by itself
     return null;
@@ -123,6 +126,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.scheduleDisplay_(consentId);
   }
 
+  /** @override */
   buildCallback() {
     if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
       return;
@@ -184,23 +188,6 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
 
-    if (isExperimentOn(this.win, EXTERNAL_CONSENT_FLOW)) {
-      this.win.addEventListener('amp-iframe:consent-message', e => {
-        const {detail} = e;
-        const data = getData(detail);
-        if (!detail || !data) {
-          dev().error(TAG, 'consent-message event detail not found');
-          return;
-        }
-        const source = detail['source'];
-        if (!this.element.contains(source)) {
-          return;
-        }
-        const action = data['action'];
-        this.handleAction_(action);
-      });
-    }
-
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
       let consentId = args && args['consent'];
@@ -208,6 +195,48 @@ export class AmpConsent extends AMP.BaseElement {
         consentId = Object.keys(this.consentConfig_)[0];
       }
       this.handlePostPrompt_(consentId || '');
+    });
+  }
+
+  /**
+   * Listen to external consent flow iframe's response
+   */
+  enableExternalInteractions_() {
+    if (!isExperimentOn(this.win, EXTERNAL_CONSENT_FLOW)) {
+      return;
+    }
+
+    this.win.addEventListener('message', event => {
+      if (!this.currentDisplayInstance_) {
+        return;
+      }
+
+      const data = getData(event);
+
+      if (!data || data['type'] != 'consent-response') {
+        return;
+      }
+
+      if (!data['action'] || !data['consentId']) {
+        user().error(TAG, 'consent-response message missing required info');
+        return;
+      }
+
+      if (data['consentId'] != this.currentDisplayInstance_) {
+        user().error(TAG,
+            `fail to set consent state with ${data['consentId']}`);
+        return;
+      }
+
+      const iframes = scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
+
+      for (let i = 0; i < iframes.length; i++) {
+        if (iframes[i].contentWindow === event.source) {
+          const action = data['action'];
+          this.handleAction_(action);
+          return;
+        }
+      }
     });
   }
 

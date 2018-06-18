@@ -28,7 +28,8 @@ document.querySelector('#a').onclick = function () {
 		parent.postMessage({
       sentinel: 'amp',
       type: 'consent-response',
-      action: 'accept'
+      action: 'accept',
+      consentId: 'myConsentId'
     }, '*');
   };
 document.querySelector('#r').onclick = function () {
@@ -36,7 +37,8 @@ document.querySelector('#r').onclick = function () {
 		parent.postMessage({
       sentinel: 'amp',
       type: 'consent-response',
-      action: 'reject'
+      action: 'reject',
+      consentId: 'myConsentId'
     }, '*');
   };
 
@@ -45,7 +47,8 @@ document.querySelector('#d').onclick = function () {
 		parent.postMessage({
       sentinel: 'amp',
       type: 'consent-response',
-      action: 'dismiss'
+      action: 'dismiss',
+      consentId: 'myConsentId'
     }, '*');
 	};
 </script>

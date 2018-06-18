@@ -402,16 +402,6 @@ export class AmpIframe extends AMP.BaseElement {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
-    listenFor(iframe, 'consent-response', data => {
-      const consentEvent = createCustomEvent(this.win,
-          'amp-iframe:consent-message',
-          {
-            data,
-            'source': this.element,
-          });
-      this.win.dispatchEvent(consentEvent);
-    });
-
     this.container_.appendChild(iframe);
 
     return this.loadPromise(iframe).then(() => {
@@ -766,10 +756,6 @@ export function isAdLike(element) {
  */
 export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
-}
-
-export function setTrackingIframeCountForTesting() {
-  trackingIframeCount = 0;
 }
 
 AMP.extension(TAG_, '0.1', AMP => {
