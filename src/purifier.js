@@ -234,14 +234,14 @@ export function purifyHtml(dirty) {
         node.setAttribute('target', '_top');
       }
     }
-  }
+  };
 
   /**
    * @param {!Node} node
    * @param {{attrName: string, attrValue: string, allowedAttributes: !Object<string, boolean>}} data
    */
   const uponSanitizeAttribute = function(node, data) {
-    // Beware of DOM Clobbering risk when using properties or functions on `node`.
+    // Beware of DOM Clobbering when using properties or functions on `node`.
     // DOMPurify checks a few of these for its internal usage (e.g. `nodeName`),
     // but not others that may be used in custom hooks.
     // See https://github.com/cure53/DOMPurify/wiki/Security-Goals-&-Threat-Model#security-goals
@@ -276,7 +276,8 @@ export function purifyHtml(dirty) {
     // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
     // after sanitization, which fails because `[]` are not valid attr chars.
-    const isBinding = attrName[0] == '[' && attrName[attrName.length - 1] == ']';
+    const isBinding = attrName[0] == '['
+        && attrName[attrName.length - 1] == ']';
     if (isBinding) {
       const property = attrName.substring(1, attrName.length - 1);
       node.setAttribute(`data-amp-bind-${property}`, attrValue);
@@ -294,7 +295,7 @@ export function purifyHtml(dirty) {
 
     // Update attribute value.
     data.attrValue = attrValue;
-  }
+  };
 
   /**
    * @param {!Node} node
@@ -322,7 +323,7 @@ export function purifyHtml(dirty) {
       }
       return true;
     });
-  }
+  };
 
   DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
@@ -359,6 +360,10 @@ export function purifyTagsForTripleMustache(html) {
     // required-attribute tags after sanitizing each element.
     allowedTags['template'] = false;
   });
+  // <template> elements are parsed by the browser as document fragments are
+  // reparented to the head. So to support nested templates, we need
+  // RETURN_DOM_FRAGMENT to keep the <template> and FORCE_BODY to prevent
+  // reparenting. See https://github.com/cure53/DOMPurify/issues/285#issuecomment-397810671
   const fragment = DOMPurify.sanitize(html, {
     'ALLOWED_TAGS': TRIPLE_MUSTACHE_WHITELISTED_TAGS,
     'FORCE_BODY': true,
@@ -373,7 +378,7 @@ export function purifyTagsForTripleMustache(html) {
         purified += child.textContent;
         break;
       case Node.ELEMENT_NODE:
-        purified += child.outerHTML;
+        purified += child./*OK*/outerHTML;
         break;
     }
   }
