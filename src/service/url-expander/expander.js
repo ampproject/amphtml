@@ -23,6 +23,10 @@ const PARSER_IGNORE_FLAG = '`';
 /** @private @const {string} */
 const TAG = 'Expander';
 
+/** A whitelist for replacements whose values should not be %-encoded. */
+/** @const {Object<string, boolean>} */
+export const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
+
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
 
@@ -280,7 +284,14 @@ export class Expander {
         value = Promise.resolve(binding);
       }
       return value.then(val => {
-        const result = val == null ? '' : encodeURIComponent(val);
+        let result;
+
+        if (val == null) {
+          result = '';
+        } else {
+          result = NOENCODE_WHITELIST[name] ? val : encodeURIComponent(val);
+        }
+
         if (opt_collectVars) {
           opt_collectVars[name] = result;
         }
@@ -326,11 +337,13 @@ export class Expander {
         // may return a promise.
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
-      } else if (value == null) {
+      } else if (typeof value === 'string' || typeof value === 'number') {
+        // Normal case.
+        result = NOENCODE_WHITELIST[name] ? value.toString() :
+          encodeURIComponent(/** @type {string} */ (value));
+      } else {
         // Most likely a broken binding gets us here.
         result = '';
-      } else {
-        result = encodeURIComponent(/** @type {string} */ (value));
       }
 
       if (opt_collectVars) {
