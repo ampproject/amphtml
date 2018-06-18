@@ -162,4 +162,40 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(false);
   });
+
+  it('should pause the story when displaying the share menu', () => {
+    const pausedListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    expect(pausedListenerSpy).to.have.been.calledOnce;
+    expect(pausedListenerSpy).to.have.been.calledWith(true);
+  });
+
+  it('should unpause the story when hiding the share menu', () => {
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+
+    const pausedListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, false);
+    expect(pausedListenerSpy).to.have.been.calledOnce;
+    expect(pausedListenerSpy).to.have.been.calledWith(false);
+  });
+
+  it('should pause the story when displaying the info dialog', () => {
+    const pausedListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+    expect(pausedListenerSpy).to.have.been.calledOnce;
+    expect(pausedListenerSpy).to.have.been.calledWith(true);
+  });
+
+  it('should unpause the story when hiding the info dialog', () => {
+    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+
+    const pausedListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, false);
+    expect(pausedListenerSpy).to.have.been.calledOnce;
+    expect(pausedListenerSpy).to.have.been.calledWith(false);
+  });
 });
