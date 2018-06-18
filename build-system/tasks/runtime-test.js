@@ -95,6 +95,10 @@ function getConfig() {
   return karmaDefault;
 }
 
+/**
+ * Returns an array of ad types.
+ * @return {!Array<string>}
+ */
 function getAdTypes() {
   const namingExceptions = {
     // We recommend 3P ad networks use the same string for filename and type.
@@ -127,8 +131,10 @@ function getAdTypes() {
   return adTypes;
 }
 
-// Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
-// by refreshing the wd cache so that Karma can launch without an error.
+/**
+ * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
+ * by refreshing the wd cache so that Karma can launch without an error.
+ */
 function refreshKarmaWdCache() {
   exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
 }
