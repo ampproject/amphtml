@@ -65,13 +65,11 @@ export class RefreshIntersectionObserverWrapper {
     if (!this.viewportCallbacks_[refreshId]) {
       const viewportCallback = element.viewportCallback.bind(element);
       this.viewportCallbacks_[refreshId] = viewportCallback;
-      element.viewportCallback = (inViewport, propogateSignal = true) => {
+      element.viewportCallback = (inViewport) => {
         if (this.updateObserver_) {
           this.intersectionObserver_.tick(this.viewport_.getRect());
         }
-        if (propogateSignal) {
-          viewportCallback(inViewport);
-        }
+        viewportCallback(inViewport);
       };
     }
 
