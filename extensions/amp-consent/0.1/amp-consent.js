@@ -196,6 +196,8 @@ export class AmpConsent extends AMP.BaseElement {
       }
       this.handlePostPrompt_(consentId || '');
     });
+
+    this.enableExternalInteractions_();
   }
 
   /**

@@ -24,7 +24,6 @@ import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
 import {computedStyle} from '../../../../src/style';
-import {createCustomEvent} from '../../../../src/event-helper';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -423,6 +422,9 @@ describes.realWin('amp-consent', {
     let defaultConfig;
     let ampConsent;
     let actionSpy;
+    let event;
+    let ampIframe;
+    let iframe;
     beforeEach(() => {
       defaultConfig = {
         'consents': {
@@ -442,31 +444,47 @@ describes.realWin('amp-consent', {
       ampConsent = new AmpConsent(consentElement);
       actionSpy = sandbox.stub(ampConsent, 'handleAction_');
       ampConsent.enableInteractions_();
+      ampIframe = document.createElement('amp-iframe');
+      iframe = doc.createElement('iframe');
+      ampIframe.appendChild(iframe);
+      ampConsent.element.appendChild(ampIframe);
+      ampConsent.currentDisplayInstance_ = 'ABC';
+      event = new Event('message');
     });
 
     it('listen to external consent response msg', () => {
-      const element = doc.createElement('div');
-      ampConsent.element.appendChild(element);
-      win.dispatchEvent(createCustomEvent(win,
-          'amp-iframe:consent-message', {
-            'data': {
-              'action': 'accept',
-            },
-            'source': element,
-          }));
+      event.data = {
+        'type': 'consent-response',
+        'consentId': 'ABC',
+        'action': 'accept',
+      };
+      event.source = iframe.contentWindow;
+      win.dispatchEvent(event);
       expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT);
     });
 
     it('ignore msg from incorrect source', () => {
-      const element = doc.createElement('div');
-      win.dispatchEvent(createCustomEvent(win,
-          'amp-iframe:consent-message', {
-            'data': {
-              'action': 'accept',
-            },
-            'source': element,
-          }));
+      event.data = {
+        'type': 'consent-response',
+        'consentId': 'ABC',
+        'action': 'accept',
+      };
+      event.source = null;
+      win.dispatchEvent(event);
       expect(actionSpy).to.not.be.called;
+    });
+
+    it('ignore msg with incorrect instanceId', () => {
+      event.data = {
+        'type': 'consent-response',
+        'consentId': 'DEF',
+        'action': 'accept',
+      };
+      event.source = iframe.contentWindow;
+      allowConsoleError(() => {
+        win.dispatchEvent(event);
+        expect(actionSpy).to.not.be.called;
+      });
     });
   });
 
