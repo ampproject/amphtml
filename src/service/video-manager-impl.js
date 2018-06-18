@@ -1236,7 +1236,7 @@ export class AutoFullscreenManager {
  * @return {number}
  */
 function centerDist(viewport, rect) {
-  const centerY = rect.top + rect.height / 2;
+  const centerY = rect.top + (rect.height / 2);
   const centerViewport = viewport.getSize().height / 2;
   return Math.abs(centerY - centerViewport);
 }
