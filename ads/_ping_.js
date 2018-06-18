@@ -28,7 +28,7 @@ export function _ping_(global, data) {
   // for testing only. see #10628
   global.networkIntegrationDataParamForTesting = data;
 
-  validateData(data, []);
+  validateData(data, ['url']);
   user().assert(!data['error'], 'Fake user error!');
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
