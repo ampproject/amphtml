@@ -75,9 +75,6 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @private
      */
     this.boundOnMessage_ = e => this.onMessage_(e);
-
-    /** @private {!UnlistenDef|null} */
-    this.unlistenFrame_ = null;
   }
 
   /** @override */
