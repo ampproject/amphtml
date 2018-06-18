@@ -246,13 +246,17 @@ export class Viewer {
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
-    const queryParams = parseQueryString(this.win.location.search);
+    let isCctEmbedded = false;
+    if (!this.isIframed_) {
+      const queryParams = parseQueryString(this.win.location.search);
+      isCctEmbedded = queryParams['amp_gsa'] === '1' &&
+          startsWith(queryParams['amp_js_v'] || '', 'a');
+    }
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
      * @private @const {boolean}
      */
-    this.isCctEmbedded_ = !this.isIframed_ && queryParams['amp_gsa'] === '1' &&
-        startsWith(queryParams['amp_js_v'] || '', 'a');
+    this.isCctEmbedded_ = isCctEmbedded;
 
     /**
      * Whether the AMP document is embedded in a webview.
