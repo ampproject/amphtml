@@ -926,6 +926,8 @@ describes.realWin('SlideScroll', {
 
     it('should update slide when `slide` attribute is mutated', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
+        expectAsyncConsoleError(/Invalid \[slide\] value:/, 1);
+
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
 
@@ -963,6 +965,8 @@ describes.realWin('SlideScroll', {
 
     it('should goToSlide on action', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
+        expectAsyncConsoleError(/Invalid \[slide\] value:/, 4);
+
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
         const satisfiesTrust = () => true;

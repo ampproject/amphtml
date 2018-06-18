@@ -504,7 +504,7 @@ export class AmpSlideScroll extends BaseSlides {
     const index = parseInt(value, 10);
 
     if (!isFinite(index) || index < 0 || index >= this.noOfSlides_) {
-      this.user().error(TAG, 'Invalid [slide] value: %s', value);
+      this.user().error(TAG, 'Invalid [slide] value: ', value);
       return;
     }
 
