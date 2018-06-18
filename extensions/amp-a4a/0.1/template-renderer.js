@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {FriendlyFrameRenderer} from './friendly-frame-renderer';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getAmpAdTemplateHelper} from './template-validator';
-import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {utf8Decode} from '../../../src/utils/bytes';
 
 /**
  * Render AMP creative into FriendlyFrame via templatization.
