@@ -88,17 +88,22 @@ export function resetSharedState() {
   sharedState.reset();
 }
 
-/** @type {!Object<number: number>} @visibleForTesting */
+/**
+ * Mapping of experiment id to viewport offsets by which ad request should
+ * be delayed.
+ * @type {!Object<string, number>}
+ * @visibleForTesting
+ */
 export const DELAY_REQUEST_EXP_BRANCHES = {
-  21062224: true, // control
-  21062225: 3,
-  21062226: 4,
-  21062227: 6,
-  21062228: 12,
+  '21062224': true, // control, delay by renderOutsideViewport
+  '21062225': 3,
+  '21062226': 4,
+  '21062227': 6,
+  '21062228': 12,
 };
 
-/** @type {string} */
-const DELAY_REQUEST_EXP = 'adsense-delay-request';
+/** @type {string} @visibleForTesting */
+export const DELAY_REQUEST_EXP = 'adsense-delay-request';
 
 /** @type {string} */
 const FORMAT_EXP = 'as-use-attr-for-format';
@@ -220,7 +225,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   delayAdRequestEnabled() {
     return DELAY_REQUEST_EXP_BRANCHES[
-      getExperimentBranch(this.win, DELAY_REQUEST_EXP)] || true;
+        getExperimentBranch(this.win, DELAY_REQUEST_EXP)] || true;
   }
 
   /** @override */
@@ -266,7 +271,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         [DELAY_REQUEST_EXP]: {
           isTrafficEligible: () => true,
           branches: Object.keys(DELAY_REQUEST_EXP_BRANCHES),
-        }
+        },
       });
     Object.values(randomlySelectUnsetExperiments(this.win, experimentInfoMap))
         .forEach(expId => addExperimentIdToElement(expId, this.element));

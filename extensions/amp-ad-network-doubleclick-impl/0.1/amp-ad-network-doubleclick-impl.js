@@ -114,8 +114,8 @@ const DOUBLECLICK_EXPERIMENT_FEATURE = {
   SRA: '117152667',
 };
 
-/** @type {string} */
-const RENDER_IDLE_DELAY_REQUEST_EXP = 'doubleclick-delay-request';
+/** @type {string} @visibleForTesting */
+export const RENDER_IDLE_DELAY_REQUEST_EXP = 'doubleclick-delay-request';
 
 /** @enum {number} @visibleForTesting */
 export const RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES = {
@@ -374,7 +374,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return false;
     }
     const expVal = this.postAdResponseExperimentFeatures['render-idle-vp'];
-    let vpRange = parseInt(expVal, 10);
+    const vpRange = parseInt(expVal, 10);
     if (expVal && isNaN(vpRange)) {
       // holdback branch sends non-numeric value.
       return false;
@@ -385,6 +385,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   idleRenderOutsideViewport() {
     const vpRange = this.getIdleRenderEnabled_();
+    if (vpRange === false) {
+      return vpRange;
+    }
     this.isIdleRender_ = true;
     // NOTE(keithwrightbos): handle race condition where previous
     // idleRenderOutsideViewport marked slot as idle render despite never
@@ -410,7 +413,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   delayAdRequestEnabled() {
     return getExperimentBranch(this.win, RENDER_IDLE_DELAY_REQUEST_EXP) ==
-        RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES.EXPERIMENT;
+        RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES.EXPERIMENT ? 12 : false;
   }
 
   /**
@@ -449,10 +452,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           isTrafficEligible: () => !this.useSra &&
             this.getIdleRenderEnabled_() !== false,
           branches: Object.values(RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES),
-        }
+        },
       });
     Object.values(randomlySelectUnsetExperiments(this.win, experimentInfoMap))
-        .forEach(expId => addExperimentIdToElement(expId, this.element));
+        .forEach(expId => expId && this.experimentIds.push(expId));
   }
 
   /** @private */
