@@ -26,6 +26,8 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
+  DELAY_REQUEST_EXP,
+  DELAY_REQUEST_EXP_BRANCHES,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
@@ -42,6 +44,7 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -479,6 +482,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('has correct format when as-use-attr-for-format is on', () => {
       forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+      impl.divertExperiments();
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
       return impl.getAdUrl().then(url =>
@@ -488,11 +492,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('has experiment eid in adsense frmt exp and width/height numeric',
         () => {
           forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+          impl.divertExperiments();
           return impl.getAdUrl().then(
               url => expect(url).to.match(/eid=[^&]*21062004/));
         });
     it('has control eid in adsense frmt exp and width/height numeric', () => {
       forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
+      impl.divertExperiments();
       return impl.getAdUrl().then(
           url => expect(url).to.match(/eid=[^&]*21062003/));
     });
@@ -500,6 +506,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
           AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+      impl.divertExperiments();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
             `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.CONTROL}`));
@@ -961,9 +968,24 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    it('should return true', () => {
-      expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
-          .to.be.true;
+    it('should return true', () =>
+      expect(impl.delayAdRequestEnabled()).to.be.true);
+
+    it('should set experiment when diverted', () => {
+      toggleExperiment(impl.win, DELAY_REQUEST_EXP, true);
+      impl.divertExperiments();
+      let inExp;
+      Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(exp =>
+        inExp = inExp || isInExperiment(impl.element, exp));
+      expect(inExp).to.be.true;
+    });
+    Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(expId => {
+      it(`should return ${DELAY_REQUEST_EXP_BRANCHES[expId]} for ${expId}`,
+          () => {
+            forceExperimentBranch(impl.win, DELAY_REQUEST_EXP, expId);
+            expect(impl.delayAdRequestEnabled()).to.equal(
+                DELAY_REQUEST_EXP_BRANCHES[expId]);
+          });
     });
   });
 
