@@ -138,6 +138,7 @@ describe('FixedLayer', () => {
         return (!!elem.parentElement);
       },
       defaultView: {
+        CustomEvent: window.CustomEvent,
         getComputedStyle: elem => {
           return elem.computedStyle;
         },
@@ -223,7 +224,6 @@ describe('FixedLayer', () => {
         set transition(v) {
           elem.style.setProperty('transition', v);
         },
-
         setProperty(prop, value, priority) {
           const privProp = '_' + prop;
 
@@ -320,6 +320,8 @@ describe('FixedLayer', () => {
             '<i-amphtml-fpa style="display: none"></i-amphtml-fpa>');
         this.firstElementChild = createElement('i-amphtml-fpa');
         this.firstElementChild.style.display = 'none';
+      },
+      dispatchEvent(unusedEvent) {
       },
     };
     return elem;

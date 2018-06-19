@@ -778,9 +778,12 @@ export class FixedLayer {
 
   /** Dispatches AmpEvents.DOM_UPDATE from transfer layer. */
   dispatchUpdateEvent_() {
-    const event = createCustomEvent(this.ampdoc.win,
-        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
-    this.getTransferLayer().dispatchEvent(event);
+    const transferLayer = this.getTransferLayer();
+    if (transferLayer) {
+      const event = createCustomEvent(this.ampdoc.win,
+          AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
+      transferLayer.dispatchEvent(event);
+    }
   }
 }
 
