@@ -483,8 +483,10 @@ export class AmpSlideScroll extends BaseSlides {
    * @return {string} The formatted suffix for the button title.
    */
   getButtonTitleSuffix_(buttonIndex) {
-    return ' ' + this.getButtonSuffixFormat_().replace('%s', buttonIndex + 1)
-        .replace('%s', this.noOfSlides_);
+    const index = String(buttonIndex + 1);
+    const count = String(this.noOfSlides_);
+    return ' ' + this.getButtonSuffixFormat_().replace('%s', index)
+        .replace('%s', count);
   }
 
   /**
@@ -557,7 +559,7 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
-   * @param {number} currentIndex
+   * @param {?number} currentIndex
    * @return {?number} The previous index that would be navigated to, or null
    *    if at the start and not looping.
    * @private
@@ -568,7 +570,7 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
-   * @param {number} currentIndex
+   * @param {?number} currentIndex
    * @return {?number} The next index that would be navigated to, or null if at
    *    the end and not looping.
    * @private
