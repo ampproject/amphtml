@@ -226,6 +226,11 @@ class PreconnectService {
     });
   }
 
+  /**
+   * Performs a preload using `<link rel="preload">`.
+   * @param {string} url
+   * @private
+   */
   performPreload_(url) {
     const preload = htmlFor(this.document_)`
         <link rel="preload" referrerpolicy="origin" />`;
