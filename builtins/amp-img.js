@@ -208,13 +208,15 @@ export class AmpImg extends BaseElement {
    * @private
    */
   guaranteeSrcForSrcsetUnsupportedBrowsers_() {
+    // The <img> tag does not have a src and does not support srcset
     if (!this.img_.hasAttribute('src') && 'srcset' in this.img_ == false) {
       const srcset = this.element.getAttribute('srcset');
-
-      const srcseturl = /\S+/.match(srcset);
-      if (srcseturl) {
-        this.img_.setAttribute('src', srcseturl[0]);
+      const matches = /\S+/.exec(srcset);
+      if (matches == null) {
+        return;
       }
+      const srcseturl = matches[0];
+      this.img_.setAttribute('src', srcseturl);
     }
   }
 
@@ -252,6 +254,10 @@ export class AmpImg extends BaseElement {
     });
   }
 
+  /**
+   * If the image fails to load, show a placeholder instead.
+   * @private
+   */
   onImgLoadingError_() {
     this.getVsync().mutate(() => {
       this.img_.classList.add('i-amphtml-ghost');
