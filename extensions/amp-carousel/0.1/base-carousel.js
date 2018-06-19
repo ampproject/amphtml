@@ -65,48 +65,43 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   onViewportCallback(unusedInViewport) {}
 
+  /**
+   * Builds a carousel button for next/prev.
+   * @param {string} className
+   * @param {function()} onInteraction
+   */
+  buildButton(className, onInteraction) {
+    const button = this.element.ownerDocument.createElement('div');
+    button.tabIndex = 0;
+    button.classList.add('amp-carousel-button');
+    button.classList.add(className);
+    button.setAttribute('role', 'button');
+    button.onkeydown = event => {
+      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
+        if (!event.defaultPrevented) {
+          event.preventDefault();
+          onInteraction();
+        }
+      }
+    };
+    button.onclick = onInteraction;
+
+    return button;
+  }
 
   /**
    * Builds the next and previous buttons.
    */
   buildButtons() {
-    this.prevButton_ = this.element.ownerDocument.createElement('div');
-    this.prevButton_.classList.add('amp-carousel-button');
-    this.prevButton_.classList.add('amp-carousel-button-prev');
-    this.prevButton_.setAttribute('role', 'button');
-    this.prevButton_.setAttribute('tabindex', 0);
-    this.prevButton_.onkeydown = event => {
-      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
-        if (!event.defaultPrevented) {
-          event.preventDefault();
-          this.interactionPrev();
-        }
-      }
-    };
-    this.prevButton_.onclick = () => {
+    this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
       this.interactionPrev();
-    };
+    });
     this.element.appendChild(this.prevButton_);
 
-    this.nextButton_ = this.element.ownerDocument.createElement('div');
-    this.nextButton_.classList.add('amp-carousel-button');
-    this.nextButton_.classList.add('amp-carousel-button-next');
-    this.nextButton_.setAttribute('role', 'button');
-    this.nextButton_.setAttribute('tabindex', 0);
-    this.nextButton_.onkeydown = event => {
-      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
-        if (!event.defaultPrevented) {
-          event.preventDefault();
-          this.interactionNext();
-        }
-      }
-    };
-    this.nextButton_.onclick = () => {
+    this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
-    };
+    });
     this.element.appendChild(this.nextButton_);
-
-    this.updateButtonTitles();
   }
 
   /** @override */
