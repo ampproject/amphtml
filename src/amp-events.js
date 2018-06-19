@@ -15,17 +15,20 @@
  */
 
 /**
-* Enum used to specify custom Amp Events
-*
-* @enum {string}
-*/
+ * Common AMP events.
+ * @enum {number}
+ */
 export const AmpEvents = {
-  VISIBILITY_CHANGE: 'amp:visibilitychange',
-  DOM_UPDATE: 'amp:dom-update',
-  BUILT: 'amp:built',
-  ATTACHED: 'amp:attached',
-  STUBBED: 'amp:stubbed',
-  LOAD_START: 'amp:load:start',
-  LOAD_END: 'amp:load:end',
-  ERROR: 'amp:error',
+  // Values start at 801 for easier code searchability and to avoid conflation
+  // with HTTP status codes.
+  DOM_UPDATE: 801,
+  // The following codes are only used for testing.
+  // TODO(choumx): Move these to a separate enum so they can be DCE'd.
+  BUILT: 901,
+  ATTACHED: 902,
+  STUBBED: 903,
+  LOAD_START: 904,
+  LOAD_END: 905,
+  ERROR: 906,
+  VISIBILITY_CHANGE: 907,
 };
