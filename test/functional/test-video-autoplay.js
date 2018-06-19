@@ -118,7 +118,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
       const entry = new AutoplayEntry(ampdoc, positionObserverMock, video);
 
       video.element.getIntersectionChangeEntry = () => ({
-        intersectionRatio: 0.749,
+        intersectionRatio: 0.49,
       });
 
       const trigger = sandbox.stub(entry, 'trigger_');
@@ -135,7 +135,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
       const entry = new AutoplayEntry(ampdoc, positionObserverMock, video);
 
       video.element.getIntersectionChangeEntry = () => ({
-        intersectionRatio: 0.75,
+        intersectionRatio: 0.5,
       });
 
       const trigger = sandbox.stub(entry, 'trigger_');
@@ -152,7 +152,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
       const entry = new AutoplayEntry(ampdoc, positionObserverMock, video);
 
       video.element.getIntersectionChangeEntry = () => ({
-        intersectionRatio: 0.75,
+        intersectionRatio: 0.5,
       });
 
       const trigger = sandbox.stub(entry, 'trigger_');
@@ -165,7 +165,7 @@ describes.sandboxed('Video - AutoplayEntry', {}, () => {
       expect(trigger.withArgs(true)).to.have.been.calledOnce;
 
       video.element.getIntersectionChangeEntry = () => ({
-        intersectionRatio: 0.749,
+        intersectionRatio: 0.49,
       });
 
       entry.onPositionChange_();
