@@ -257,9 +257,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return null;
   }
 
-  /** 
+  /**
    * Selects into experiments based on url fragment and/or page level diversion.
-   * @visibleForTesting 
+   * @visibleForTesting
    */
   divertExperiments() {
     const experimentInfoMap =
