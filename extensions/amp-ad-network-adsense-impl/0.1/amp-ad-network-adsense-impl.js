@@ -97,10 +97,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super(element);
 
     /**
-     * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+     * @type {?../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
      */
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
+    this.lifecycleReporter_ = null;
 
     /**
      * A unique identifier for this slot.
@@ -212,6 +211,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.lifecycleReporter_ = this.initLifecycleReporter();
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
@@ -384,7 +384,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   extractSize(responseHeaders) {
-    setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
+    if (this.lifecycleReporter_) {
+      setGoogleLifecycleVarsFromHeaders(
+          responseHeaders, this.lifecycleReporter_);
+    }
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
@@ -426,6 +429,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   emitLifecycleEvent(eventName, opt_extraVariables) {
+    if (!this.lifecycleReporter_) {
+      dev().warn(TAG, 'lifecycleReporter not yet populated in emit call');
+      return;
+    }
     if (opt_extraVariables) {
       this.lifecycleReporter_.setPingParameters(opt_extraVariables);
     }
@@ -474,6 +481,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
 
+    dev().assert(!!this.lifecycleReporter_);
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
     setStyles(dev().assertElement(this.iframe), {

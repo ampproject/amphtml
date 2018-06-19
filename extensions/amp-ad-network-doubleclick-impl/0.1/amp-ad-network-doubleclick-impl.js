@@ -79,6 +79,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isCancellation} from '../../../src/error';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -110,6 +111,7 @@ const DOUBLECLICK_EXPERIMENT_FEATURE = {
   DELAYED_REQUEST: '21060729',
   SRA_CONTROL: '117152666',
   SRA: '117152667',
+  SRA_NO_RECOVER: '21062235',
 };
 
 /**
@@ -140,6 +142,38 @@ let windowLocationQueryParameters;
  */
 let LayoutRectOrDimsDef;
 
+/**
+ * @param {!Array<AmpAdNetworkDoubleclickImpl>} instances
+ * @return {?Object<string,string>}
+ * @visibleForTesting
+ */
+export function combineInventoryUnits(instances) {
+  const uniqueIuNames = {};
+  let uniqueIuNamesCount = 0;
+  const prevIusEncoded = [];
+  instances.forEach(instance => {
+    const iu = dev().assert(instance.element.getAttribute('data-slot'));
+    const componentNames = (iu || '').split('/');
+    const encodedNames = [];
+    for (let i = 0; i < componentNames.length; i++) {
+      if (componentNames[i] == '') {
+        continue;
+      }
+      let index = uniqueIuNames[componentNames[i]];
+      if (index == undefined) {
+        uniqueIuNames[componentNames[i]] = (index = uniqueIuNamesCount++);
+      }
+      encodedNames.push(index);
+    }
+    prevIusEncoded.push(encodedNames.join('/'));
+  });
+  return {
+    'iu_parts': Object.keys(uniqueIuNames).sort((a, b) =>
+      uniqueIuNames[a] - uniqueIuNames[b]).join(),
+    'enc_prev_ius': prevIusEncoded.join(),
+  };
+}
+
 /* eslint-disable jsdoc/require-param */
 /**
  * Array of functions used to combine block level request parameters for SRA
@@ -147,31 +181,7 @@ let LayoutRectOrDimsDef;
  * @private @const {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>>}
  */
 const BLOCK_SRA_COMBINERS_ = [
-  instances => {
-    const uniqueIuNames = {};
-    let uniqueIuNamesCount = 0;
-    const prevIusEncoded = [];
-    instances.forEach(instance => {
-      const iu = dev().assert(instance.element.getAttribute('data-slot'));
-      const componentNames = (iu || '').split('/');
-      const encodedNames = [];
-      for (let i = 0; i < componentNames.length; i++) {
-        if (componentNames[i] == '') {
-          continue;
-        }
-        let index = uniqueIuNames[componentNames[i]];
-        if (index == undefined) {
-          uniqueIuNames[componentNames[i]] = (index = uniqueIuNamesCount++);
-        }
-        encodedNames.push(index);
-      }
-      prevIusEncoded.push(encodedNames.join('/'));
-    });
-    return {
-      'iu_parts': Object.keys(uniqueIuNames).join(),
-      'enc_prev_ius': prevIusEncoded.join(),
-    };
-  },
+  combineInventoryUnits,
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate cookie opt out.
   instances => getFirstInstanceValue_(instances, instance => {
@@ -199,12 +209,12 @@ const BLOCK_SRA_COMBINERS_ = [
   instances => {
     const scps = [];
     instances.forEach(instance => {
-      if (!instance.jsonTargeting_) {
-        return;
+      if (instance.jsonTargeting_ && instance.jsonTargeting_['targeting'] &&
+        instance.jsonTargeting_['categoryExclusions']) {
+        scps.push(serializeTargeting_(
+            instance.jsonTargeting_['targeting'] || null,
+            instance.jsonTargeting_['categoryExclusions'] || null));
       }
-      scps.push(serializeTargeting_(
-          instance.jsonTargeting_['targeting'] || null,
-          instance.jsonTargeting_['categoryExclusions'] || null));
     });
     return scps.length ? {'prev_scp': scps.join('|')} : null;
   },
@@ -258,10 +268,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /**
      * @type
-     * {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+     * {?../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
      */
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
+    this.lifecycleReporter_ = null;
 
     /**
      * Config to generate amp-analytics element for active view reporting.
@@ -352,6 +361,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
+
+    /** @protected {!Deferred<string>} */
+    this.getAdUrlDeferred = new Deferred();
   }
 
   /** @override */
@@ -373,7 +385,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource().whenWithinRenderOutsideViewport().then(
+    this.getResource().whenWithinViewport(this.renderOutsideViewport()).then(
         () => this.isIdleRender_ = false);
     return vpRange;
   }
@@ -400,6 +412,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
+    if (!isCdnProxy(this.win) && !isExperimentOn(
+        this.win, 'expDfpInvOrigDeprecated')) {
+      this.experimentIds.push('21060933');
+    }
     const experimentId = {
       // Delay Request
       '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
@@ -407,12 +423,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // SRA
       '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
       '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
+      '9': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER,
     }[urlExperimentId];
     switch (experimentId) {
       case undefined:
         break;
       case DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL:
       case DOUBLECLICK_EXPERIMENT_FEATURE.SRA:
+      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER:
         // For SRA experiments, do not include pages that are using refresh.
         if (this.win.document./*OK*/querySelector(
             'meta[name=amp-ad-enable-refresh], ' +
@@ -450,6 +468,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.lifecycleReporter_ = this.initLifecycleReporter();
     this.maybeDeprecationWarn_();
     this.setPageLevelExperiments(
         extractUrlExperimentId(this.win, this.element));
@@ -457,7 +476,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win.location.search)) ||
         !!this.win.document.querySelector(
             'meta[name=amp-ad-doubleclick-sra]') ||
-        this.experimentIds.includes(DOUBLECLICK_EXPERIMENT_FEATURE.SRA);
+        !!this.experimentIds.filter(exp =>
+          exp == DOUBLECLICK_EXPERIMENT_FEATURE.SRA ||
+          exp == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER).length;
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
@@ -606,19 +627,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           // On error/timeout, proceed.
           return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
         });
-    const urlPromise = Promise.all([opt_rtcResponsesPromise, identityPromise])
+    Promise.all([opt_rtcResponsesPromise, identityPromise])
         .then(results => {
           this.verifyStillCurrent();
           const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
-          return googleAdUrl(
+          googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), this.buildIdentityParams_(),
                   this.getPageParameters(consentState), rtcParams),
-              this.experimentIds);
+              this.experimentIds)
+              .then(adUrl => this.getAdUrlDeferred.resolve(adUrl));
         });
-    this.troubleshootData_.adUrl = urlPromise;
-    return urlPromise;
+    this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
+    return this.getAdUrlDeferred.promise;
   }
 
   /**
@@ -770,7 +792,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   extractSize(responseHeaders) {
-    setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
+    if (this.lifecycleReporter_) {
+      setGoogleLifecycleVarsFromHeaders(
+          responseHeaders, this.lifecycleReporter_);
+    }
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.troubleshootData_.creativeId =
@@ -819,6 +844,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   emitLifecycleEvent(eventName, opt_extraVariables) {
+    if (!this.lifecycleReporter_) {
+      dev().warn(TAG, 'lifecycleReporter not yet populated in emit call');
+      return;
+    }
     if (opt_extraVariables) {
       this.lifecycleReporter_.setPingParameters(opt_extraVariables);
     }
@@ -849,6 +878,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraDeferred = new Deferred();
     this.qqid_ = null;
     this.consentState = null;
+    this.getAdUrlDeferred = new Deferred();
   }
 
   /** @override */
@@ -959,6 +989,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isRelayoutNeededFlag = false;
     }
 
+    dev().assert(!!this.lifecycleReporter_);
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
     // Force size of frame to match creative or, if creative size is unknown,
@@ -1031,8 +1062,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
     if ((this.isFluidRequest_ && width && height) ||
-        (width != pWidth || height != pHeight) &&
-        (width <= pWidth && height <= pHeight)) {
+        ((width != pWidth || height != pHeight) &&
+         (width <= pWidth && height <= pHeight))) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
@@ -1142,7 +1173,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 return;
               }
               // Construct and send SRA request.
-              // Chunk hanlder called with metadata and creative for each slot
+              // Chunk handler called with metadata and creative for each slot
               // in order of URLs given.  Construct promise for each slot
               // such that its resolver will be called.
               const sraRequestAdUrlResolvers =
@@ -1224,7 +1255,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       typeInstances.forEach(instance =>
                         instance.sraDeferred.reject(error));
                     } else if (!!this.win.document.querySelector(
-                        'meta[name=amp-ad-doubleclick-sra]')) {
+                        'meta[name=amp-ad-doubleclick-sra]') ||
+                        this.experimentIds.includes(
+                            DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER)) {
                       assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                       this.warnOnError('SRA request failure', error);
                       // Publisher explicitly wants SRA so do not attempt to
@@ -1385,7 +1418,9 @@ function constructSRARequest_(a4a, instances) {
   // TODO(bradfrizzell): Need to add support for RTC.
   dev().assert(instances && instances.length);
   const startTime = Date.now();
-  return googlePageParameters(a4a, startTime)
+  return Promise.all(
+      instances.map(instance => instance.getAdUrlDeferred.promise))
+      .then(() => googlePageParameters(a4a, startTime))
       .then(googPageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
