@@ -65,6 +65,10 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -107,11 +111,18 @@ const RTC_SUCCESS = '2';
 
 /** @const @enum{string} */
 const DOUBLECLICK_EXPERIMENT_FEATURE = {
-  DELAYED_REQUEST_CONTROL: '21060728',
-  DELAYED_REQUEST: '21060729',
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
+};
+
+/** @type {string} @visibleForTesting */
+export const RENDER_IDLE_DELAY_REQUEST_EXP = 'doubleclick-delay-request';
+
+/** @enum {number} @visibleForTesting */
+export const RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES = {
+  CONTROL: 21062231, // control
+  EXPERIMENT: 21062232,
 };
 
 /**
@@ -366,19 +377,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.getAdUrlDeferred = new Deferred();
   }
 
-  /** @override */
-  idleRenderOutsideViewport() {
+  /**
+   * @return {number|boolean} render on idle configuration with false
+   *    indicating disabled.
+   * @private
+   */
+  getIdleRenderEnabled_() {
+    if (this.isIdleRender_) {
+      return this.isIdleRender_;
+    }
     // Disable if publisher has indicated a non-default loading strategy.
     if (this.element.getAttribute('data-loading-strategy')) {
       return false;
     }
     const expVal = this.postAdResponseExperimentFeatures['render-idle-vp'];
-    let vpRange = parseInt(expVal, 10);
+    const vpRange = parseInt(expVal, 10);
     if (expVal && isNaN(vpRange)) {
       // holdback branch sends non-numeric value.
       return false;
     }
-    vpRange = vpRange || 12;
+    return vpRange || 12;
+  }
+
+  /** @override */
+  idleRenderOutsideViewport() {
+    const vpRange = this.getIdleRenderEnabled_();
+    if (vpRange === false) {
+      return vpRange;
+    }
     this.isIdleRender_ = true;
     // NOTE(keithwrightbos): handle race condition where previous
     // idleRenderOutsideViewport marked slot as idle render despite never
@@ -403,8 +429,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return this.experimentIds.includes(
-        DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+    return getExperimentBranch(this.win, RENDER_IDLE_DELAY_REQUEST_EXP) ==
+        RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES.EXPERIMENT ? 12 : false;
   }
 
   /**
@@ -417,9 +443,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.experimentIds.push('21060933');
     }
     const experimentId = {
-      // Delay Request
-      '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
-      '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
       // SRA
       '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
       '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
@@ -435,7 +458,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         if (this.win.document./*OK*/querySelector(
             'meta[name=amp-ad-enable-refresh], ' +
             'amp-ad[type=doubleclick][data-enable-refresh]')) {
-          return;
+          break;
         }
       default:
         dev().info(
@@ -443,6 +466,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             `url experiment selection ${urlExperimentId}: ${experimentId}.`);
         this.experimentIds.push(experimentId);
     }
+    const experimentInfoMap =
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({
+        // If SRA is not enabled and using renderOnIdle, allow for delay
+        // request experiment.
+        [RENDER_IDLE_DELAY_REQUEST_EXP]: {
+          isTrafficEligible: () => !this.useSra &&
+            this.getIdleRenderEnabled_() !== false,
+          branches: Object.keys(RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES).map(
+              key => RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES[key]),
+        },
+      });
+    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    Object.keys(setExps).forEach(expName =>
+      setExps[expName] && this.experimentIds.push(setExps[expName]));
   }
 
   /** @private */
