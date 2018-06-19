@@ -175,7 +175,7 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
     this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
-    /** @const @private {!../../../src/service/viewport-impl.Viewport} */
+    /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     const bodyPromise = (opt_win)
@@ -414,7 +414,7 @@ export class Bind {
   /**
    * Scans the root node (and array of optional nodes) for bindings.
    * @param {!Node} root
-   * @param {!Array<?Node>} nodes
+   * @param {...?Node} nodes
    * @return {!Promise}
    * @private
    */

@@ -811,7 +811,7 @@ export class Viewport {
 
   /**
    * Returns the container element for the fixed layer.
-   * @return {!Element}
+   * @return {?Element}
    */
   getFixedLayerContainer() {
     return this.fixedLayer_.getTransferLayer();
