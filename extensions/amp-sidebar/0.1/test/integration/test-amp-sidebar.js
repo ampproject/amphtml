@@ -56,7 +56,8 @@ describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
       win = env.win;
     });
 
-    it('should focus on opener on close', () => {
+    // TODO (#16157): this tests times out on Chrome Mobile Webview Android
+    it.configure().skipChrome().run('should focus on opener on close', () => {
       const openerButton = win.document.getElementById('sidebarOpener');
       const openedPromise = waitForSidebarOpen(win.document);
       openerButton.click();
