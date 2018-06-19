@@ -42,30 +42,35 @@
    *   // Name used to identify snapshots of webpage on Percy.
    *   "name": "Foo test",
    *
-   *   // CSS elements that must never appear on the webpage.
+   *   // [optional] CSS elements that must never appear on the webpage.
    *   "forbidden_css": [
    *     ".invalid-css-class",
    *     ".another-invalid-css-class"
    *   ],
    *
-   *   // CSS elements that may initially appear on the page, but must
+   *   // [optional] CSS elements that may initially appear on the page, but must
    *   // eventually disappear.
    *   "loading_incomplete_css": [
    *     ".loading-in-progress-css-class",
    *     ".another-loading-in-progress-css-class"
    *   ],
    *
-   *   // CSS elements that must eventually appear on the page.
+   *   // [optional] CSS elements that must eventually appear on the page.
    *   "loading_complete_css": [
    *     ".loading-complete-css-class",
    *     ".another-loading-complete-css-class"
    *   ],
    *
-   *   // Experiments that must be enabled via cookies.
+   *   // [optional] Experiments that must be enabled via cookies.
    *   "experiments": [
    *     "amp-feature-one",
    *     "amp-feature-two"
-   *   ]
+   *   ],
+   *
+   *   // [optional] Add this key and set to true to skip this test. You should
+   *   // also add an explanation and a link to an example of a previous
+   *   // snapshot on Percy that demonstrate the flakiness of this test.
+   *   "flaky": true
    * },
    */
     {
