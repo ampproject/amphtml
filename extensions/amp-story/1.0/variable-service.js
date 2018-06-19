@@ -36,6 +36,9 @@ const Variable = {
  * Used for URL replacement service. See usage in src/url-replacements-impl.
  */
 export class AmpStoryVariableService {
+  /**
+   * @public
+   */
   constructor() {
     /** @private {!StoryVariableDef} */
     this.variables_ = {

@@ -104,10 +104,10 @@ function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
  */
 function waitForEvent(env, name) {
   return new Promise(resolve => {
-    function callback() {
+    const callback = () => {
       resolve();
       env.win.removeEventListener(name, callback);
-    }
+    };
     env.win.addEventListener(name, callback);
   });
 }
@@ -413,6 +413,29 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should update values first, then attributes', () => {
+      const {sandbox} = env;
+      const spy = sandbox.spy();
+      const element = createElement(env, container, '[value]="foo"', 'input');
+      sandbox.stub(element, 'value').set(spy);
+      sandbox.stub(element, 'setAttribute').callsFake(spy);
+      return onBindReadyAndSetState(env, bind, {'foo': '2'}).then(() => {
+        // Note: This tests a workaround for a browser bug. There is nothing
+        // about the element itself we can verify. Only the order of operations
+        // matters.
+        expect(spy.firstCall).to.be.calledWithExactly('2');
+        expect(spy.secondCall).to.be.calledWithExactly('value', '2');
+      });
+    });
+
+    it('should update properties for empty strings', function* () {
+      const element = createElement(env, container, '[value]="foo"', 'input');
+      yield onBindReadyAndSetState(env, bind, {'foo': 'bar'});
+      expect(element.value).to.equal('bar');
+      yield onBindReadyAndSetState(env, bind, {'foo': ''});
+      expect(element.value).to.equal('');
+    });
+
     it('should support binding to Node.textContent', () => {
       const element = createElement(
           env, container, '[text]="\'a\' + \'b\' + \'c\'"');
@@ -572,6 +595,19 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(element.textContent).to.equal('2');
       });
     });
+
+    it('should replace history state in setStateWithExpression()', () => {
+      const replaceHistorySpy =
+          env.sandbox.spy(bind.historyForTesting(), 'replace');
+      const promise = onBindReadyAndSetStateWithExpression(
+          env, bind, '{"onePlusOne": one + one}', {one: 1});
+      return promise.then(() => {
+        expect(replaceHistorySpy).calledOnce;
+        expect(replaceHistorySpy.firstCall.args[0].data['amp-bind'])
+            .to.deep.equal({onePlusOne: 2});
+      });
+    });
+
 
     it('should support pushStateWithExpression()', () => {
       const pushHistorySpy =

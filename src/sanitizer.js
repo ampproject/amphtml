@@ -376,6 +376,9 @@ function sanitizeWithCaja(html) {
   const output = [];
   let ignore = 0;
 
+  /**
+   * @param {string} content
+   */
   function emit(content) {
     if (ignore == 0) {
       output.push(content);
@@ -597,10 +600,11 @@ export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
  * @param {string} attrName
  * @param {string} attrValue
  * @param {!Location=} opt_location
+ * @param {boolean=} opt_updateProperty
  * @return {string}
  */
 export function rewriteAttributesForElement(
-  element, attrName, attrValue, opt_location)
+  element, attrName, attrValue, opt_location, opt_updateProperty)
 {
   const tag = element.tagName.toLowerCase();
   const attr = attrName.toLowerCase();
@@ -624,6 +628,11 @@ export function rewriteAttributesForElement(
       // Restore the original value of `target` or default to `_top`.
       element.setAttribute('target', element[ORIGINAL_TARGET_VALUE] || '_top');
     }
+  }
+  if (opt_updateProperty) {
+    // Must be done first for <input> elements to correctly update the UI for
+    // the first change on Safari and Chrome.
+    element[attr] = rewrittenValue;
   }
   element.setAttribute(attr, rewrittenValue);
   return rewrittenValue;
