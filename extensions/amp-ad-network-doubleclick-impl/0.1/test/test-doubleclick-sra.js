@@ -24,6 +24,7 @@ import {
 import {
   AmpAdNetworkDoubleclickImpl,
   TFCD,
+  combineInventoryUnits,
   constructSRABlockParameters,
   getNetworkId,
   resetSraStateForTesting,
@@ -479,4 +480,23 @@ describes.realWin('Doubleclick SRA', config , env => {
           {networkId: 8901, instances: 3, invalidInstances: 1}]));
   });
 
+  describe('#combineInventoryUnits', () => {
+    it('should sort by index correctly for iu_parts', () => {
+      const instances = [];
+      for (let i = 0; i < 2; i++) {
+        instances.push({
+          element: {
+            getAttribute: name => {
+              expect(name).to.equal('data-slot');
+              return '/1234/foo.com/news/world/2018/06/17/article';
+            },
+          },
+        });
+      }
+      expect(combineInventoryUnits(instances)).to.jsonEqual({
+        'iu_parts': '1234,foo.com,news,world,2018,06,17,article',
+        'enc_prev_ius': '0/1/2/3/4/5/6/7,0/1/2/3/4/5/6/7',
+      });
+    });
+  });
 });
