@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  AmpMustache,
-} from '../amp-mustache';
+import {AmpMustache} from '../amp-mustache';
 
-describe('amp-mustache template', () => {
-
+describe('amp-mustache 0.2', () => {
   it('should render', () => {
     const templateElement = document.createElement('template');
     templateElement.content.textContent = 'value = {{value}}';

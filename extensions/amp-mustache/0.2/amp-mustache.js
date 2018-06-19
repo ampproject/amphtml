@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
-
-// Configure sanitizer for output of "triple-mustache";a set of allowed tags
-// to be unescaped.
-setUnescapedSanitizier(purifyTagsForTripleMustache);
-
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -33,6 +30,16 @@ setUnescapedSanitizier(purifyTagsForTripleMustache);
  * @extends {BaseTemplate$$module$src$service$template_impl}
  */
 export class AmpMustache extends AMP.BaseTemplate {
+  /**
+   * @param {!Element} element
+   * @param {!Window} win
+   */
+  constructor(element, win) {
+    super(element, win);
+
+    // Unescaped templating (triple mustache) has a special, strict sanitizer.
+    setUnescapedSanitizier(purifyTagsForTripleMustache);
+  }
 
   /** @override */
   compileCallback() {
@@ -87,5 +94,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   }
 }
 
-
+if (getMode().test) {
+  Services.templatesFor(window).unregisterTemplateForType('amp-mustache');
+}
 AMP.registerTemplate('amp-mustache', AmpMustache);
