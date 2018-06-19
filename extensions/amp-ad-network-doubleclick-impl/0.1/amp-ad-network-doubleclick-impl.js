@@ -366,6 +366,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.consentState = null;
   }
 
+  /**
+   * @return {number|boolean} render on idle configuration with false
+   *    indicating disabled.
+   * @private
+   */
   getIdleRenderEnabled_() {
     if (this.isIdleRender_) {
       return this.isIdleRender_;
