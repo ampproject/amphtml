@@ -268,10 +268,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /**
      * @type
-     * {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+     * {?../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
      */
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
+    this.lifecycleReporter_ = null;
 
     /**
      * Config to generate amp-analytics element for active view reporting.
@@ -469,6 +468,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.lifecycleReporter_ = this.initLifecycleReporter();
     this.maybeDeprecationWarn_();
     this.setPageLevelExperiments(
         extractUrlExperimentId(this.win, this.element));
@@ -792,7 +792,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   extractSize(responseHeaders) {
-    setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
+    if (this.lifecycleReporter_) {
+      setGoogleLifecycleVarsFromHeaders(
+          responseHeaders, this.lifecycleReporter_);
+    }
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.troubleshootData_.creativeId =
@@ -841,6 +844,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   emitLifecycleEvent(eventName, opt_extraVariables) {
+    if (!this.lifecycleReporter_) {
+      dev().warn(TAG, 'lifecycleReporter not yet populated in emit call');
+      return;
+    }
     if (opt_extraVariables) {
       this.lifecycleReporter_.setPingParameters(opt_extraVariables);
     }
@@ -982,6 +989,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isRelayoutNeededFlag = false;
     }
 
+    dev().assert(!!this.lifecycleReporter_);
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
     // Force size of frame to match creative or, if creative size is unknown,
