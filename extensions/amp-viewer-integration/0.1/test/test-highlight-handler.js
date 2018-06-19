@@ -29,6 +29,17 @@ describes.fakeWin('getHighlightParam', {
         '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D';
     expect(getHighlightParam(env.ampdoc)).to.deep.equal({
       sentences: ['amp', 'highlight'],
+      skipRendering: false,
+    });
+  });
+
+  it('do nothing flag', () => {
+    // URL encoded '{"s":["amp","highlight"], "n": 1}'
+    env.win.location = 'page.html#highlight=' +
+      '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%2C%20%22n%22%3A%201%7D';
+    expect(getHighlightParam(env.ampdoc)).to.deep.equal({
+      sentences: ['amp', 'highlight'],
+      skipRendering: true,
     });
   });
 
@@ -142,6 +153,30 @@ describes.realWin('HighlightHandler', {
     expect(root.innerHTML).to.equal(
         '<div>text in <span style="">amp</span> doc</div><div>' +
           '<span style="">highlight</span>ed text</div>');
+  });
+
+  it('initialize with skipRendering', () => {
+    const {ampdoc} = env;
+    const scrollStub = sandbox.stub(
+        Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
+    scrollStub.returns(Promise.reject());
+    const sendMsgStub = sandbox.stub(
+        Services.viewerForDoc(ampdoc), 'sendMessage');
+
+    new HighlightHandler(ampdoc,
+        {sentences: ['amp', 'highlight'], skipRendering: true});
+
+    expect(scrollStub).not.to.be.called;
+
+    // For some reason, expect(args).to.deep.equal does not work.
+    expect(sendMsgStub.callCount).to.equal(1);
+    expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+    expect(sendMsgStub.firstCall.args[1]).to.deep.equal(
+        {state: 'found', scroll: 0});
+
+    expect(root.innerHTML).to.equal(
+        '<div>text in <span>amp</span> doc</div><div><span>highlight</span>' +
+        'ed text</div>');
   });
 
   it('calcTopToCenterHighlightedNodes_ center elements', () => {
