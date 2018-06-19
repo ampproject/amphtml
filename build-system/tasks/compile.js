@@ -249,6 +249,7 @@ function compile(entryModuleFilenames, outputDir,
       // and when this is actually used.
       '!extensions/amp-a4a/0.1/friendly-frame-renderer.js',
       '!extensions/amp-a4a/0.1/name-frame-renderer.js',
+      '!extensions/amp-viewer-integration/0.1/examples/**/*.js',
     ];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
