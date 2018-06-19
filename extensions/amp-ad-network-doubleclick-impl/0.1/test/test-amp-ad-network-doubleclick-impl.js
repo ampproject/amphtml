@@ -629,10 +629,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       // Reset counter for purpose of this test.
       delete env.win['ampAdGoogleIfiCounter'];
       new AmpAd(element).upgradeCallback();
+      sandbox.stub(AmpA4A.prototype, 'tearDownSlot').callsFake(() => {});
       return impl.getAdUrl().then(url1 => {
         expect(url1).to.match(/ifi=1/);
+        impl.tearDownSlot();
         return impl.getAdUrl().then(url2 => {
           expect(url2).to.match(/ifi=2/);
+          impl.tearDownSlot();
           return impl.getAdUrl().then(url3 => {
             expect(url3).to.match(/ifi=3/);
           });
