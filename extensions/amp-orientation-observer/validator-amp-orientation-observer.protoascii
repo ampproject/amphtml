@@ -24,6 +24,9 @@ tags: {  # amp-orientation-observer
     allowed_versions: "0.1"
     allowed_versions: "latest"
   }
+  attrs: { name: "alpha-range" }
+  attrs: { name: "beta-range" }
+  attrs: { name: "gamma-range" }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-orientation-observer>

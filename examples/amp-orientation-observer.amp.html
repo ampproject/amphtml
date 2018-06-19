@@ -79,7 +79,8 @@
 
     <div id="clock-scene-1" class="clock-scene">
       <amp-orientation-observer
-        on="alpha:clockAnim1.seekTo(angle=event.angle)"
+        beta-range="0 180"
+        on="beta:clockAnim1.seekTo(percent=event.percent)"
         layout="nodisplay">
       </amp-orientation-observer>
 
