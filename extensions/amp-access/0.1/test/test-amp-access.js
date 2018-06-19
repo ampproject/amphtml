@@ -26,7 +26,7 @@ import {installPerformanceService} from
 import {toggleExperiment} from '../../../../src/experiments';
 
 
-describes.fakeWin('AccessService', {
+describes.realWin('AccessService', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -158,7 +158,6 @@ describes.fakeWin('AccessService', {
     });
     const service = new AccessService(ampdoc);
     expect(service.pubOrigin_).to.exist;
-    expect(service.pubOrigin_).to.match(/^http.*/);
   });
 
   it('should find and register vendor', () => {
@@ -242,7 +241,7 @@ describes.fakeWin('AccessService', {
 });
 
 
-describes.fakeWin('AccessService authorization', {
+describes.realWin('AccessService authorization', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -527,7 +526,7 @@ describes.fakeWin('AccessService authorization', {
 });
 
 
-describes.fakeWin('AccessService applyAuthorizationToElement_', {
+describes.realWin('AccessService applyAuthorizationToElement_', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -672,7 +671,7 @@ describes.fakeWin('AccessService applyAuthorizationToElement_', {
 });
 
 
-describes.fakeWin('AccessService pingback', {
+describes.realWin('AccessService pingback', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -988,7 +987,7 @@ describes.fakeWin('AccessService pingback', {
 });
 
 
-describes.fakeWin('AccessService login', {
+describes.realWin('AccessService login', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -1363,7 +1362,7 @@ describes.fakeWin('AccessService login', {
 });
 
 
-describes.fakeWin('AccessService analytics', {
+describes.realWin('AccessService analytics', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -1474,7 +1473,7 @@ describes.fakeWin('AccessService analytics', {
 });
 
 
-describes.fakeWin('AccessService multiple sources', {
+describes.realWin('AccessService multiple sources', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
