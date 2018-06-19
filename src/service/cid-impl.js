@@ -251,12 +251,6 @@ export class Cid {
     });
   }
 
-  /**
-   * @param {!Promise} persistenceConsent
-   * @param {string} scope
-   * @param {string} url
-   * @return {!Promise<?string>}
-   */
   scopeBaseCid_(persistenceConsent, scope, url) {
     return getBaseCid(this, persistenceConsent)
         .then(baseCid => {
@@ -602,7 +596,7 @@ function shouldUpdateStoredTime(storedCidInfo) {
  * @param {!Window} win
  * @return {!Uint8Array|string} Entropy.
  */
-export function getEntropy(win) {
+function getEntropy(win) {
   // Use win.crypto.getRandomValues to get 128 bits of random value
   const uint8array = getCryptoRandomBytesArray(win, 16); // 128 bit
   if (uint8array) {

@@ -22,7 +22,7 @@ import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
-import {getEntropy} from '../../../src/service/cid-impl';
+import {getUniqueId} from './utils';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -353,13 +353,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // is used to check if a page id is an ad later.
     this.adPageIds_[pageId] = id;
 
-    const entropy = getEntropy(this.win);
-    const uniqueId = entropy.join('');
-
     // Also create a new object to keep track of any future analytics data.
     this.analyticsData_[id] = {
       [Vars.AD_INDEX]: id,
-      [Vars.AD_UNIQUE_ID]: uniqueId,
+      [Vars.AD_UNIQUE_ID]: getUniqueId(this.win),
     };
 
     const attributes = dict({
