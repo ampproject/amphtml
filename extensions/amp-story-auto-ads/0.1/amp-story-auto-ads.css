@@ -27,16 +27,13 @@
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.16) !important;
   color: #4285F4 !important;
   font-family: 'Roboto', sans-serif !important;
-  font-size: 0px !important;
   font-weight: bold !important;
   height: 36px !important;
   left: 50% !important;
   letter-spacing: 0.2px !important;
   line-height: 36px;
   margin-left: -60px !important;
-  opacity: 0 !important;
   position: absolute !important;
-  transform: scale(0) !important;
   text-align: center;
   text-decoration: none !important;
   width: 120px !important;
