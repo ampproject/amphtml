@@ -212,8 +212,7 @@ describe('amp-img', () => {
     });
   });
 
-  // The following tests are relevant to the amp-img-native-srcset experiment
-
+  // This test is relevant to the amp-img-native-srcset experiment
   it('should propagate srcset and sizes', () => {
     toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
