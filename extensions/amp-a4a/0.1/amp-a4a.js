@@ -702,8 +702,11 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           const consentPolicyId = super.getConsentPolicy();
           return consentPolicyId ?
-            getConsentPolicyState(this.getAmpDoc(), consentPolicyId) :
-            Promise.resolve(null);
+            getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+                .catch(err => {
+                  user().error(TAG, 'Error determining consent state', err);
+                  return CONSENT_POLICY_STATE.UNKNOWN;
+                }) : Promise.resolve(null);
         })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
