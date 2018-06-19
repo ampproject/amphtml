@@ -1308,11 +1308,11 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isActive) {
       this.systemLayer_.hideDeveloperLog();
-      this.activePage_.pauseCallback();
+      this.activePage_.setState(PageState.PAUSED);
     }
 
     if (!isActive) {
-      this.activePage_.resumeCallback();
+      this.activePage_.setState(PageState.ACTIVE);
     }
   }
 
