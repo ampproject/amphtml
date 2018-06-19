@@ -321,8 +321,7 @@ describe('FixedLayer', () => {
         this.firstElementChild = createElement('i-amphtml-fpa');
         this.firstElementChild.style.display = 'none';
       },
-      dispatchEvent(unusedEvent) {
-      },
+      dispatchEvent: sandbox.stub(),
     };
     return elem;
   }

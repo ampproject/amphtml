@@ -27,7 +27,6 @@ import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {filterSplice} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
@@ -35,6 +34,7 @@ import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
@@ -175,9 +175,6 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
     this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
-    /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = Services.viewportForDoc(this.ampdoc);
-
     const bodyPromise = (opt_win)
       ? waitForBodyPromise(opt_win.document)
           .then(() => dev().assertElement(opt_win.document.body))
@@ -187,12 +184,10 @@ export class Bind {
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ =
-        this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
-          const head = (opt_win) ? opt_win.document.head : ampdoc.getHeadNode();
-          const title = head && elementByTag(head, 'title');
-          const fixedLayer = this.viewport_.getFixedLayerContainer();
-          return this.initialize_(body, fixedLayer, title);
+    this.initializePromise_ = this.viewer_.whenFirstVisible()
+        .then(() => bodyPromise)
+        .then(unusedBody => {
+          return this.initialize_(ampdoc.getRootNode());
         });
 
     /** @private {Promise} */
@@ -414,21 +409,17 @@ export class Bind {
   /**
    * Scans the root node (and array of optional nodes) for bindings.
    * @param {!Node} root
-   * @param {...?Node} nodes
    * @return {!Promise}
    * @private
    */
-  initialize_(root, ...nodes) {
+  initialize_(root) {
     dev().fine(TAG, 'Scanning DOM for bindings and macros...');
-    const nodesToScan = [root].concat(nodes);
     let promise = Promise.all([
       this.addMacros_(),
-      this.addBindingsForNodes_(nodesToScan)]
+      this.addBindingsForNodes_([root])]
     ).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
-      nodesToScan.forEach(node => {
-        node.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
-      });
+      root.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
     });
     if (getMode().development) {
       // Check default values against initial expression results.
@@ -546,17 +537,13 @@ export class Bind {
    *
    * Returns a promise that resolves after bindings have been added.
    *
-   * @param {!Array<?Node>} nodes
+   * @param {!Array<!Node>} nodes
    * @return {!Promise<number>}
    * @private
    */
   addBindingsForNodes_(nodes) {
     // For each node, scan it for bindings and store them.
     const scanPromises = nodes.map(node => {
-      if (!node) {
-        return;
-      }
-
       // Limit number of total bindings (unless in local manual testing).
       const limit = (getMode().localDev && !getMode().test)
         ? Number.POSITIVE_INFINITY
@@ -681,7 +668,9 @@ export class Bind {
     /** @type {!Object<string, !Array<!Element>>} */
     const expressionToElements = map();
 
-    const doc = dev().assert(node.ownerDocument, 'ownerDocument is null.');
+
+    const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
+      ? node : node.ownerDocument, 'ownerDocument is null.');
     // Third and fourth params of `createTreeWalker` are not optional on IE11.
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
         /* entityReferenceExpansion */ false);
@@ -695,6 +684,11 @@ export class Bind {
       const node = walker.currentNode;
       if (!node) {
         return true;
+      }
+      // If `node` is a Document, it will be scanned first (despite
+      // NodeFilter.SHOW_ELEMENT). Skip it.
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return !walker.nextNode();
       }
       const element = dev().assertElement(node);
       const {tagName} = element;

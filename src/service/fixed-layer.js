@@ -378,7 +378,7 @@ export class FixedLayer {
       },
       mutate: state => {
         if (hasTransferables && this.transfer_) {
-          const transferLayer = this.getTransferLayer();
+          const transferLayer = this.getTransferLayer_();
           if (transferLayer.className != this.ampdoc.getBody().className) {
             transferLayer.className = this.ampdoc.getBody().className;
           }
@@ -653,7 +653,7 @@ export class FixedLayer {
         `calc(${10000 + index} + ${state.zIndex || 0})`);
 
     element.parentElement.replaceChild(fe.placeholder, element);
-    this.getTransferLayer().appendChild(element);
+    this.getTransferLayer_().appendChild(element);
 
     // Test if the element still matches one of the `fixed` selectors. If not
     // return it back to BODY.
@@ -712,7 +712,7 @@ export class FixedLayer {
   /**
    * @return {?Element}
    */
-  getTransferLayer() {
+  getTransferLayer_() {
     // This mode is only allowed for a single-doc case.
     if (!this.transfer_ || this.transferLayer_) {
       return this.transferLayer_;
@@ -778,7 +778,7 @@ export class FixedLayer {
 
   /** Dispatches AmpEvents.DOM_UPDATE from transfer layer. */
   dispatchUpdateEvent_() {
-    const transferLayer = this.getTransferLayer();
+    const transferLayer = this.getTransferLayer_();
     if (transferLayer) {
       const event = createCustomEvent(this.ampdoc.win,
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
