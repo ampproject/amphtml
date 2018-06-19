@@ -69,7 +69,7 @@ describes.realWin('amp-story-auto-ads', {
   });
 
   describe('analytics triggers', () => {
-    it('should fire upon insertion', () => {
+    it('should fire "story-ad-insert" upon insertion', () => {
       autoAds.uniquePagesCount_ = 10;
       sandbox.stub(autoAds, 'startNextPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* placed */ 1);
@@ -80,7 +80,7 @@ describes.realWin('amp-story-auto-ads', {
           {'insertTime': sinon.match.number});
     });
 
-    it('should fire upon discarded ad', () => {
+    it('should fire "story-ad-discard" upon discarded ad', () => {
       autoAds.uniquePagesCount_ = 10;
       sandbox.stub(autoAds, 'startNextPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* discard */ 2);
@@ -91,7 +91,7 @@ describes.realWin('amp-story-auto-ads', {
           {'discardTime': sinon.match.number});
     });
 
-    it('should fire upon ad load', function* () {
+    it('should fire "story-ad-load" upon ad load', function* () {
       const signals = {whenSignal: () => Promise.resolve()};
       const fakeImpl = {signals: () => signals};
       const ad = win.document.createElement('amp-ad');
@@ -108,7 +108,7 @@ describes.realWin('amp-story-auto-ads', {
           {'loadTime': sinon.match.number});
     });
 
-    it('should fire upon ad request', () => {
+    it('should fire "story-ad-request" upon ad request', () => {
       autoAds.ampStory_ = {
         element: storyElement,
         addPage: NOOP,
@@ -124,6 +124,44 @@ describes.realWin('amp-story-auto-ads', {
       expect(analyticsStub).to.have.been.calledWithMatch('story-ad-request',
           {'requestTime': sinon.match.number});
     });
+
+    it('should fire "story-ad-view" upon ad visible', () => {
+      autoAds.ampStory_ = {
+        element: storyElement,
+        addPage: NOOP,
+      };
+
+      const page = win.document.createElement('amp-story-page');
+      sandbox.stub(autoAds, 'createAdPage_').returns(page);
+      page.getImpl = () => Promise.resolve();
+
+      const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
+      autoAds.adPageIds_ = {'ad-page-1': 1};
+      autoAds.handleActivePageChange_(1, 'ad-page-1');
+
+      expect(analyticsStub).to.be.called;
+      expect(analyticsStub).to.have.been.calledWithMatch('story-ad-view',
+          {'viewTime': sinon.match.number});
+    });
+
+    it('should fire "story-ad-exit" upon ad exit', () => {
+      autoAds.ampStory_ = {
+        element: storyElement,
+        addPage: NOOP,
+      };
+
+      const page = win.document.createElement('amp-story-page');
+      sandbox.stub(autoAds, 'createAdPage_').returns(page);
+      page.getImpl = () => Promise.resolve();
+
+      const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
+      autoAds.idOfAdShowing_ = 'ad-page-1';
+      autoAds.handleActivePageChange_(1, 'page-3');
+
+      expect(analyticsStub).to.be.called;
+      expect(analyticsStub).to.have.been.calledWithMatch('story-ad-exit',
+          {'exitTime': sinon.match.number});
+    });
   });
 
   describe('analyticsEvent_', () => {
@@ -131,30 +169,42 @@ describes.realWin('amp-story-auto-ads', {
 
     beforeEach(() => {
       triggerStub = sandbox.stub(analytics, 'triggerAnalyticsEvent');
+      autoAds.analyticsData_ = {1: {}};
     });
 
     it('should trigger the appropriate event', () => {
       const vars = {
-        adIndex: 0,
+        adIndex: 1,
         foo: 1,
       };
+
       autoAds.analyticsEvent_('my-event', vars);
       expect(triggerStub).calledWith(sinon.match.any, 'my-event',
           sinon.match(vars));
     });
 
     it('should aggregate data from previous events', () => {
-      autoAds.analyticsEvent_('event-1', {foo: 1});
-      autoAds.analyticsEvent_('event-2', {bar: 2});
-      autoAds.analyticsEvent_('event-3', {baz: 3});
+      autoAds.analyticsEvent_('event-1', {adIndex: 1, foo: 1});
+      autoAds.analyticsEvent_('event-2', {adIndex: 1, bar: 2});
+      autoAds.analyticsEvent_('event-3', {adIndex: 1, baz: 3});
       expect(triggerStub).calledThrice;
       expect(triggerStub).calledWith(sinon.match.any, 'event-3',
           sinon.match({
-            adIndex: 0,
+            adIndex: 1,
             foo: 1,
             bar: 2,
             baz: 3,
           }));
+    });
+  });
+
+  describe('analyticsEventWithCurrentAd_', () => {
+    it('should add the current ad index and call #analyticsEvent_', () => {
+      const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
+      autoAds.analyticsEventWithCurrentAd_('cool-event', {foo: 1});
+      expect(analyticsStub).to.be.called;
+      expect(analyticsStub).to.have.been.calledWithMatch('cool-event',
+          {foo: 1});
     });
   });
 });
