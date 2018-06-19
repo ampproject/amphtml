@@ -22,6 +22,8 @@
  */
 export const CONSENT_POLICY_STATE = {
   // Enum value has external dependency. Please do not change existing value.
+  // If new values are added, please notify the AMP for Ads team to assure
+  // correct Real Time Config behavior is maintained for Fast Fetch.
   SUFFICIENT: 1,
   INSUFFICIENT: 2,
   UNKNOWN_NOT_REQUIRED: 3,
