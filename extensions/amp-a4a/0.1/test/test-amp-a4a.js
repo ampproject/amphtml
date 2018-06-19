@@ -2097,6 +2097,23 @@ describe('amp-a4a', () => {
               .calledOnce;
         });
       });
+
+      it('should return UNKNOWN if consent exception', () => {
+        expectAsyncConsoleError(/Error determining consent state.*consent err/);
+        sandbox.stub(AMP.BaseElement.prototype, 'getConsentPolicy')
+            .returns('default');
+        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
+            .returns(Promise.resolve({
+              whenPolicyResolved: () => {throw new Error('consent err!');},
+            }));
+        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.UNKNOWN))
+              .calledOnce;
+        });
+      });
     });
 
     describe('protectFunctionWrapper', () => {
