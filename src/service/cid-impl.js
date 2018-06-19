@@ -596,7 +596,7 @@ function shouldUpdateStoredTime(storedCidInfo) {
  * @param {!Window} win
  * @return {!Uint8Array|string} Entropy.
  */
-function getEntropy(win) {
+export function getEntropy(win) {
   // Use win.crypto.getRandomValues to get 128 bits of random value
   const uint8array = getCryptoRandomBytesArray(win, 16); // 128 bit
   if (uint8array) {

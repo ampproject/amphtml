@@ -22,10 +22,10 @@ import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
+import {getEntropy} from '../../../src/service/cid-impl';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {uniqueId} from './utils';
 
 /** @const */
 const MIN_INTERVAL = 3;
@@ -155,7 +155,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {Object<string, *>} */
     this.analyticsData_ = {};
 
-    /** @private {Object<string, number} */
+    /** @private {Object<string, number>} */
     this.adPageIds_ = {};
 
     /** @private {number|null} */
@@ -227,7 +227,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   isAutomaticAdInsertionAllowed_() {
-    return this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
+    return !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
   }
 
 
@@ -352,10 +352,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // Keep track of ids created so far and a mapping to their index. This
     // is used to check if a page id is an ad later.
     this.adPageIds_[pageId] = id;
+
+    const entropy = getEntropy(this.win);
+    const uniqueId = entropy.join('');
+
     // Also create a new object to keep track of any future analytics data.
     this.analyticsData_[id] = {
       [Vars.AD_INDEX]: id,
-      [Vars.AD_UNIQUE_ID]: uniqueId(),
+      [Vars.AD_UNIQUE_ID]: uniqueId,
     };
 
     const attributes = dict({
@@ -623,7 +627,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Call an analytics event with the last created Ad.
    * @param {string} eventType
-   * @param {!Object<string, string>=} vars A map of vars and their values.
+   * @param {!Object<string, string>} vars A map of vars and their values.
    * @private
    */
   analyticsEventWithCurrentAd_(eventType, vars) {
@@ -635,11 +639,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Construct an analytics event and trigger it.
    * @param {string} eventType
-   * @param {!Object<string, string>=} vars A map of vars and their values.
+   * @param {!Object<string, string>} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    const {adIndex} = vars;
+    const adIndex = vars['adIndex'];
     this.analyticsData_[adIndex] = Object.assign(this.analyticsData_[adIndex],
         vars);
 
