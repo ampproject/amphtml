@@ -15,7 +15,7 @@
  */
 
 import '../amp-twitter';
-import {cleanupTweetId_} from '../../../../3p/twitter';
+import {cleanupMomentId_, cleanupTweetId_} from '../../../../3p/twitter';
 import {twitter} from '../../../../3p/twitter';
 
 describes.realWin('amp-twitter', {
@@ -54,13 +54,28 @@ describes.realWin('amp-twitter', {
     });
   });
 
-  it('adds tweet element correctly', () => {
+  it('adds tweet element correctly for a tweet', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
     doc.body.appendChild(div);
 
     twitter(win, {
       tweetid: tweetId,
+      width: 111,
+      height: 222,
+    });
+    const tweet = doc.body.querySelector('#tweet');
+    expect(tweet).not.to.be.undefined;
+  });
+
+  it('adds tweet element correctly for a moment', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    twitter(win, {
+      momentid: tweetId,
+      limit: 5,
       width: 111,
       height: 222,
     });
@@ -140,4 +155,20 @@ describes.realWin('amp-twitter', {
     });
   });
 
+  describe('cleanupMomentId_', () => {
+    const momentId = '1009149991452135424';
+
+    it('does not affect valid moment ids', () => {
+      expect(cleanupMomentId_(momentId)).to.equal(momentId);
+    });
+
+    it('cleans up bad moment full Url', () => {
+      const bad = `https://twitter.com/i/moments/${momentId}` +
+          '?ref_src=twsrc%5Etfw&ref_url=http%3A%2F%2Fads.localhost%3A8000%2F' +
+          'dist.3p%2Fcurrent%2Fframe.max.html';
+
+      expect(cleanupMomentId_(bad)).to.equal(momentId);
+    });
+
+  });
 });

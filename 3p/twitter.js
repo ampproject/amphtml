@@ -63,27 +63,39 @@ export function twitter(global, data) {
     delete data.width;
     delete data.height;
 
-    let twitterWidgetSandbox;
+    if (data.tweetid) {
+      twttr.widgets.createTweet(cleanupTweetId_(data.tweetid), tweet, data)
+          ./*OK*/then(el => tweetCreated(twttr, el));
+    } else if (data.momentid) {
+      twttr.widgets.createMoment(cleanupMomentId_(data.momentid), tweet, data)
+          ./*OK*/then(el => tweetCreated(twttr, el));
+    }
+  });
+
+  /**
+   * Handles a tweet or moment being created, resizing as necessary.
+   * @param {!Object} twttr
+   * @param {?Element} el
+   */
+  function tweetCreated(twttr, el) {
+    if (!el) {
+      global.context.noContentAvailable();
+      return;
+    }
+
+    resize(el);
     twttr.events.bind('resize', event => {
       // To be safe, make sure the resize event was triggered for the widget we
       // created below.
-      if (twitterWidgetSandbox === event.target) {
-        resize(twitterWidgetSandbox);
+      if (el === event.target) {
+        resize(el);
       }
     });
+  }
 
-    const tweetId = cleanupTweetId_(data.tweetid);
-    twttr.widgets.createTweet(tweetId, tweet, data)./*OK*/then(el => {
-      if (el) {
-        // Not a deleted tweet
-        twitterWidgetSandbox = el;
-        resize(twitterWidgetSandbox);
-      } else {
-        global.context.noContentAvailable();
-      }
-    });
-  });
-
+  /**
+   * @param {!Element} container
+   */
   function resize(container) {
     const height = container./*OK*/offsetHeight;
     // 0 height is always wrong and we should get another resize request
@@ -95,6 +107,31 @@ export function twitter(global, data) {
         container./*OK*/offsetWidth,
         height + /* margins */ 20);
   }
+}
+
+/**
+ * @param {*} momentid
+ * @visibleForTesting
+ */
+export function cleanupMomentId_(momentid) {
+  // 1)
+  // Handle malformed ids such as
+  // https://twitter.com/i/moments/
+  momentid = momentid.toLowerCase();
+  let match = momentid.match(/https:\/\/twitter.com\/[^\/]+\/moments\/(\d+)/);
+  if (match) {
+    return match[1];
+  }
+
+  // 2)
+  // Handle malformed ids such as
+  // 1009149991452135424?ref_src
+  match = momentid.match(/^(\d+)\?ref.*/);
+  if (match) {
+    return match[1];
+  }
+
+  return momentid;
 }
 
 /**

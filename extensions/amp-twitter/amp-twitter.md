@@ -93,13 +93,16 @@ Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/resp
 
 ## Attributes
 
-##### data-tweetid (required)
+##### data-tweetid / data-momentid (required)
 
-The ID of the Tweet. In a URL like https://twitter.com/joemccann/status/640300967154597888,  `640300967154597888` is the tweetID.
+The ID of the Tweet or Moment.
+In a URL like https://twitter.com/joemccann/status/640300967154597888,  `640300967154597888` is the tweet id.
+In a URL like https://twitter.com/i/moments/1009149991452135424, `1009149991452135424` is the moment id.
 
 ##### data-* (optional)
 
-You can specify options for the Tweet appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards. For details on the available options, see [Twitter's docs](https://dev.twitter.com/web/javascript/creating-widgets#create-tweet).
+You can specify options for the Tweet appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards.
+For details on the available options, see Twitter's docs [for tweets](https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference) and [for moments](https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0). 
 
 <div>
 <amp-iframe height="202"
