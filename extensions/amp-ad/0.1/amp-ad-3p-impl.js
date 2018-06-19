@@ -123,8 +123,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Promise} */
     this.layoutPromise_ = null;
 
-    /** @type {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
-    this.lifecycleReporter = googleLifecycleReporterFactory(this);
+    /** @type {?../../../ads/google/a4a/performance.BaseLifecycleReporter} */
+    this.lifecycleReporter = null;
 
     /** @private {string|undefined} */
     this.type_ = undefined;
@@ -151,6 +151,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
   }
 
+  /** @override */
   renderOutsideViewport() {
     if (is3pThrottled(this.win)) {
       return false;
@@ -189,6 +190,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.lifecycleReporter = googleLifecycleReporterFactory(this);
     this.type_ = this.element.getAttribute('type');
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
     dev().info(TAG_3P_IMPL, `upgradeDelay ${this.type_}: ${upgradeDelayMs}`);
@@ -422,6 +424,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    *   variables to make available for substitution on the event notification.
    */
   emitLifecycleEvent(eventName, opt_extraVariables) {
+    if (!this.lifecycleReporter) {
+      dev().warn(TAG_3P_IMPL, 'lifecycleReporter not yet populated in emit.');
+      return;
+    }
     if (opt_extraVariables) {
       this.lifecycleReporter.setPingParameters(opt_extraVariables);
     }
