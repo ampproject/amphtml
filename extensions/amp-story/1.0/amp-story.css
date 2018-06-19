@@ -179,12 +179,18 @@ amp-story:not([desktop]) >
   transform: translateY(300%) !important;
 }
 
-.i-amphtml-story-bookend-active:not([desktop]) >
+amp-story:not([desktop]) >
     amp-story-page.i-amphtml-layout-container[active] {
-  transform: translateY(0) scale(1.2) !important;
-  filter: blur(15px) !important;
+  transition: filter 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
+.i-amphtml-story-bookend-active:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[active] {
+  filter: blur(3px) !important;
+  transition: filter 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+/* TODO(gmajoulet): move the overlay to the bookend styles. */
 .i-amphtml-story-bookend-active > amp-story-page[active]::after {
   content: '' !important;
   display: block !important;
@@ -193,8 +199,19 @@ amp-story:not([desktop]) >
   bottom: 0 !important;
   right: 0 !important;
   position: absolute !important;
-  background: rgba(117, 117, 117, 0.3) !important;
+  background: #000 !important;
   z-index: 2 !important;
+  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+}
+
+@keyframes i-amphtml-bookend-overlay-opacity {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
 }
 
 /**
