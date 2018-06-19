@@ -169,7 +169,7 @@ export function combineInventoryUnits(instances) {
   });
   return {
     'iu_parts': Object.keys(uniqueIuNames).sort((a, b) =>
-      uniqueIuNames[a] - uniqueIuNames[b] > 0).join(),
+      uniqueIuNames[a] - uniqueIuNames[b]).join(),
     'enc_prev_ius': prevIusEncoded.join(),
   };
 }
