@@ -377,10 +377,6 @@ end
 def snapshot_webpages(page, webpages, config)
   webpages.reject { |webpage| webpage['flaky'] }.each do |webpage|
     url = webpage['url']
-    if url.include? 'examples/visual-tests/amp-by-example/' and
-        !ARGV.include? '--master'
-      next
-    end
     name = "#{webpage['name']} (#{config})"
     forbidden_css = webpage['forbidden_css']
     loading_incomplete_css = webpage['loading_incomplete_css']
