@@ -441,6 +441,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const a = this.win.document.createElement('a');
     a.className = 'i-amphtml-story-ad-link';
     a.setAttribute('target', '_blank');
+    a.setAttribute('style', 'opacity:0; font-size:0; transform:scale(0)');
     a.href = ctaUrl;
     a.textContent = ctaText;
 
