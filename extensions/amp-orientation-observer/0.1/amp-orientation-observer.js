@@ -15,27 +15,14 @@
  */
 
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
+import {throttle} from '../../../src/utils/rate-limit';
 import {user} from '../../../src/log';
-
 
 const TAG = 'amp-orientation-observer';
 
-/**
- * @typedef {{
- *   absolute: !number,
- *   alpha: !number,
- *   beta: !number,
- *   gamma: !number,
- * }}
- */
-let DeviceOrientationDef;
-
 /** @const */
 const MIN_EVENT_INTERVAL_IN_MS = 100;
-
-/** @const */
-const DeviceOrientationEvents = ['alpha', 'beta', 'gamma', 'landscape', 'portrait'];
-
 
 export class AmpOrientationObserver extends AMP.BaseElement {
 
@@ -70,6 +57,8 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     /** @private {number} */
     this.gammaValue_ = 0;
 
+    console.log(`${TAG}.${name} created`);
+
   }
 
   /** @override */
@@ -80,6 +69,8 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
     const viewer = Services.viewerForDoc(this.ampdoc_);
     viewer.whenFirstVisible().then(this.init_.bind(this));
+
+    console.log(`${TAG}.${name} buildCallback`);
   }
 
   /**
@@ -93,14 +84,16 @@ export class AmpOrientationObserver extends AMP.BaseElement {
 
     if (!this.deviceOrientationObservable_) {
       this.deviceOrientationObservable_ = new Observable();
-      const listener = throttle(this.win_, event => {
+      const listener = throttle(this.ampdoc_.win, event => {
         this.deviceOrientationObservable_.fire(event);
       }, MIN_EVENT_INTERVAL_IN_MS);
       this.win.addEventListener('deviceorientation', listener, true);
     }
     return this.deviceOrientationObservable_.add(() => {
-      callback(this.deviceOrientationHandler_(event));
+      this.deviceOrientationHandler_(event);
     });
+
+    console.log(`${TAG}.${name} init`);
   }
 
   /**
@@ -126,11 +119,14 @@ export class AmpOrientationObserver extends AMP.BaseElement {
 
   /**
    * @param element {!Event}
-   * @return {!DeviceOrientationDef}
    * @private
    */
   deviceOrientationHandler_(event) {
-    console.log(event);
+    if (event instanceof DeviceOrientationEvent) {
+      this.alphaPosition_ = event.alpha;
+      this.betaPosition_ = event.beta;
+      this.gammaPosition_ = event.gamma;
+    }
   }
 
   /**
@@ -144,7 +140,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       (this.alphaPosition_ - this.alphaRange_[0]) :
       this.alphaPosition_;
     const event = createCustomEvent(this.win, `${TAG}.${name}`, {
-      angle: this.alphaPosition_,
+      angle: parseFloat(this.alphaPosition_).toFixed(2),
       percent: percentValue / (this.alphaRange_[1] - this.alphaRange_[0])
     });
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
@@ -161,7 +157,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       (this.betaPosition_ - this.betaRange_[0]) :
       this.betaPosition_;
     const event = createCustomEvent(this.win, `${TAG}.${name}`, {
-      angle: this.betaPosition_,
+      angle: parseFloat(this.betaPosition_).toFixed(2),
       percent: percentValue / (this.betaRange_[1] - this.betaRange_[0])
     });
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
@@ -178,7 +174,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       (this.gammaPosition_ - this.gammaRange_[0]) :
       this.gammaPosition_;
     const event = createCustomEvent(this.win, `${TAG}.${name}`, {
-      angle: this.gammaPosition_,
+      angle: parseFloat(this.gammaPosition_).toFixed(2),
       percent: percentValue / (this.gammaRange_[1] - this.gammaRange_[0])
     });
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
@@ -195,6 +191,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     return /Firefox/i.test(ua);
   }
 
+}
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpVisibilityObserver);
+  AMP.registerElement(TAG, AmpOrientationObserver);
 });
