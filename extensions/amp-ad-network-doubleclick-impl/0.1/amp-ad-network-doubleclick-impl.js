@@ -466,7 +466,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         },
       });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    console.log('random eids', JSON.stringify(setExps));
     Object.keys(setExps).forEach(expName =>
       setExps[expName] && this.experimentIds.push(setExps[expName]));
   }
