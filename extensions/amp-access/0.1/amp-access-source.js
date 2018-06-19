@@ -353,9 +353,10 @@ export class AccessSource {
   /**
    * Returns the promise that resolves when authorization call has completed.
    * Note that this promise never fails.
+   * @param {boolean=} opt_disableFallback
    * @return {!Promise}
    */
-  runAuthorization() {
+  runAuthorization(opt_disableFallback) {
     if (!this.adapter_.isAuthorizationEnabled()) {
       dev().fine(TAG, 'Ignore authorization for type=', this.type_);
       this.firstAuthorizationResolver_();
