@@ -125,6 +125,7 @@ declareExtension('amp-instagram', '0.1', {hasCss: true});
 declareExtension('amp-install-serviceworker', '0.1');
 declareExtension('amp-izlesene', '0.1');
 declareExtension('amp-jwplayer', '0.1');
+declareExtension('amp-linkeddb-showmore', '0.1', {hasCss: true});
 declareExtension('amp-lightbox', '0.1', {hasCss: true});
 declareExtension('amp-lightbox-gallery', '0.1', {hasCss: true});
 declareExtension('amp-list', '0.1');
