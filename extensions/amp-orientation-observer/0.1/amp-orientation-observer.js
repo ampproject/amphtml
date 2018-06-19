@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
-
-/** @const */
-const MIN_EVENT_INTERVAL_IN_MS = 100;
 
 export class AmpOrientationObserver extends AMP.BaseElement {
 
@@ -71,8 +68,8 @@ export class AmpOrientationObserver extends AMP.BaseElement {
   init_() {
     this.parseAttributes_();
 
-    user().assert(this.win.DeviceOrientationEvent, 
-      'The current browser doesn\'t support the ' +
+    user().assert(this.win.DeviceOrientationEvent,
+        'The current browser doesn\'t support the ' +
       '`window.DeviceOrientationEvent`');
     this.win.addEventListener('deviceorientation', event => {
       this.deviceOrientationHandler_(event);
@@ -88,20 +85,20 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     const gammaRange = this.element.getAttribute('gamma-range');
     if (alphaRange) {
       const range = alphaRange.trim().split(' ');
-      this.alphaRange_ = [parseInt(range[0]), parseInt(range[1])];
+      this.alphaRange_ = [parseInt(range[0], 2), parseInt(range[1], 2)];
     }
     if (betaRange) {
       const range = betaRange.trim().split(' ');
-      this.betaRange_ = [parseInt(range[0]), parseInt(range[1])];
+      this.betaRange_ = [parseInt(range[0], 2), parseInt(range[1], 2)];
     }
     if (gammaRange) {
       const range = gammaRange.trim().split(' ');
-      this.gammaRange_ = [parseInt(range[0]), parseInt(range[1])];
+      this.gammaRange_ = [parseInt(range[0], 2), parseInt(range[1], 2)];
     }
   }
 
   /**
-   * @param element {!Event}
+   * @param event {!Event}
    * @private
    */
   deviceOrientationHandler_(event) {
@@ -133,7 +130,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       this.alphaValue_;
     const event = createCustomEvent(this.win, `${TAG}.${name}`, {
       angle: this.alphaValue_,
-      percent: percentValue / (this.alphaRange_[1] - this.alphaRange_[0])
+      percent: percentValue / (this.alphaRange_[1] - this.alphaRange_[0]),
     });
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
@@ -150,7 +147,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       this.betaValue_;
     const eventValue = {
       angle: this.betaValue_,
-      percent: percentValue / (this.betaRange_[1] - this.betaRange_[0])
+      percent: percentValue / (this.betaRange_[1] - this.betaRange_[0]),
     };
     const event = createCustomEvent(this.win, `${TAG}.${name}`, eventValue);
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
@@ -168,22 +165,10 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       this.gammaValue_;
     const event = createCustomEvent(this.win, `${TAG}.${name}`, {
       angle: this.gammaValue_,
-      percent: percentValue / (this.gammaRange_[1] - this.gammaRange_[0])
+      percent: percentValue / (this.gammaRange_[1] - this.gammaRange_[0]),
     });
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
-
-  /**
-   * Whether the current browser is Firefox.
-   * Firefox does not handle the angles the same way, so on some axes the
-   * direction is reversed.
-   * @param ua {string}
-   * @return {boolean}
-   */
-  isFirefox(ua) {
-    return /Firefox/i.test(ua);
-  }
-
 }
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpOrientationObserver);
