@@ -43,6 +43,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
       message: 'Foo message about the consent.',
       vendors: ['Item 1', 'Item 2'],
       onlyAccept: false,
+      externalLinkTitle: null,
+      externalLink: null,
     };
 
     const styles = {'background-color': 'rgb(0, 0, 0)'};
@@ -163,6 +165,64 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     // return all the styles.
     const styles = computedStyle(window, buttonEl);
     expect(styles.display).to.equal('none');
+  });
+
+  it('should hide the external link by default', () => {
+    storyConsent.buildCallback();
+
+    const linkEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-external-link');
+
+    const styles = computedStyle(window, linkEl);
+    expect(styles.display).to.equal('none');
+  });
+
+  it('should require an external link title if a URL is provided', () => {
+    defaultConfig.externalLink = 'https://example.com';
+    setConfig(defaultConfig);
+
+    allowConsoleError(() => {
+      expect(() => {
+        storyConsent.buildCallback();
+      }).to.throw('config requires "externalLinkTitle" to be a string');
+    });
+  });
+
+  it('should require an external URL if a title is provided', () => {
+    defaultConfig.externalLinkTitle = 'Privacy settings';
+    setConfig(defaultConfig);
+
+    allowConsoleError(() => {
+      expect(() => {
+        storyConsent.buildCallback();
+      }).to.throw('config requires "externalLink" to be an absolute URL');
+    });
+  });
+
+  it('should validate an external absolute URL', () => {
+    defaultConfig.externalLinkTitle = 'Privacy settings';
+    defaultConfig.externalLink = '/foo.html';
+    setConfig(defaultConfig);
+
+    allowConsoleError(() => {
+      expect(() => {
+        storyConsent.buildCallback();
+      }).to.throw('URL must start with "http://" or "https://"');
+    });
+  });
+
+  it('should show the external link', () => {
+    defaultConfig.externalLinkTitle = 'Privacy settings';
+    defaultConfig.externalLink = 'https://example.com';
+    setConfig(defaultConfig);
+
+    storyConsent.buildCallback();
+
+    const linkEl = storyConsent.storyConsentEl_
+        .querySelector('.i-amphtml-story-consent-external-link');
+
+    const styles = computedStyle(window, linkEl);
+    expect(styles.display).not.to.equal('none');
   });
 
   it('should whitelist the <amp-consent> actions', () => {
