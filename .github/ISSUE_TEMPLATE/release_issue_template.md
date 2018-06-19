@@ -3,55 +3,36 @@
 <!--
 Note to onduty:
 
-This issue is used to track a single release of AMP from the canary cut to
-the 1% push to production, plus any cherry picks along the way.  Note that
-because the current onduty person handles pushing the build the previous onduty
-created to production a single issue will generally be updated by at least
-two onduty people.
+Use this issue to track a release from the initial canary release build through
+production.  The community uses this issue to keep track of what is going on
+with the release so please keep this issue up to date:
 
-When creating the issue replace <RELEASE_NUMBER> with the initial canary
-release number and remove the backticks (`).  If you create
-a cherry pick a new release number is created.  At each stage of the release
-make sure to edit the checklist item to accurately reflect which release is
-being used.
-
-Once you have filed this issue post a link to it in the #release Slack channel.
-
-As each step is completed, check it off so the community can see the state of
-the current release at a glance.
-
-In addition to using the checkboxes to track the state of the release, use
-comments on this issue to track anything else you think might be of interest
-to the community regarding this release (e.g. to alert the community to delays).
-
-To document cherry picks that interrupt the default release process, add
-additional "release checkboxes" at the stage the cherry pick was made, e.g. if the
-cherry pick is made after the initial canary release was at 1%, add these lines
-beneath the initial 1% checkbox and then check them as they occur:
-  - [ ] Release [<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>) with cherry picks and pushed to Dev Channel
-  - [ ] Release <RELEASE_NUMBER> with cherry picks pushed to 1%
-
-If the cherry pick is made to the release in production, you may also need to
-add a checkbox like:
-  - [ ] Release <RELEASE_NUMBER> with cherry picks pushed to production
-
-When you push the release this issue is tracking to production:
-- update the "pushed to production" checkbox with a link to the release build
-  that was actually pushed to production
-- change "(Canary)" in the issue title to "(Production)" and remove
-  "(Production)" from the title of the issue that was formerly in production
-  (so that it's immediately clear when looking at Type: Release issues what
-  is currently in canary and what is currently in production)
-
-After the release is pushed to production, continue to use this issue to track
-anything interesting about the release, including adding additional
-checkboxes to track cherry picks into production.
+- Check the checkboxes as you reach each stage of the release.
+- If you need to perform cherry picks, add new checkboxes here (by editing this
+  issue),  making sure to use the release number for the new build.  Link the
+  release number to the GitHub tag page the first time a given release number
+  appears in the checkboxes.
+- Add any updates that may be of interest to the community (such as delays) as
+  comments on this issue, including after the release is pushed to production.
+- Keep the title of the issue updated to reflect whether this issue is tracking
+  the Canary or the build in Production.
+  
+Note: remove the backticks (``) from the link.
 -->
+
 - [x] Release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut as a new canary release
 - [ ] Release <RELEASE_NUMBER> pushed to Dev Channel
 - [ ] Release <RELEASE_NUMBER> pushed to 1%
 - [ ] Release <RELEASE_NUMBER> pushed to production
 
+<!--
+
+If you perform cherry picks, add/update the checkboxes above as needed e.g.
+
+- [ ] Release `[<CHERRY_PICK_RELEASE_NUMBER>](...)` created with cherry picks.
+- [ ] Release <CHERRY_PICK_RELEASE_NUMBER> pushed to Dev Channel
+-->
+
 See the [release documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Dev Channel.
 
-If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new).  If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-picks).
+If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new).  If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://bit.ly/amp-cherry-pick).
