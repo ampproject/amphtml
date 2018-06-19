@@ -142,6 +142,10 @@ export class FakeWindow {
         }
       },
     });
+    // Polyfill performance.now() method as it would normally not be available
+    // in a non document environment. Used for tests using fakeWin that rely on
+    // the performance-impl service.
+    this.performance = {now: () => Date.now()};
 
     // Create element to enhance test elements.
     const nativeDocumentCreate = this.document.createElement;

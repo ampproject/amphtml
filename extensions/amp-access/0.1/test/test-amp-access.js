@@ -510,9 +510,7 @@ describes.fakeWin('AccessService applyAuthorizationToElement_', {
     win = env.win;
     ampdoc = env.ampdoc;
     document = win.document;
-    // Polyfill performance.now() method as it is not available in fakeWin
-    // environment.
-    win.performance = {now: () => Date.now()};
+
     cidServiceForDocForTesting(ampdoc);
     installPerformanceService(win);
 
