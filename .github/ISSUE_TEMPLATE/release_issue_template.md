@@ -25,15 +25,15 @@ comments on this issue to track anything else you think might be of interest
 to the community regarding this release (e.g. to alert the community to delays).
 
 To document cherry picks that interrupt the default release process, add
-additional checkboxes at the stage the cherry pick was made, e.g. if the
+additional "release checkboxes" at the stage the cherry pick was made, e.g. if the
 cherry pick is made after the initial canary release was at 1%, add these lines
 beneath the initial 1% checkbox and then check them as they occur:
-  - [ ] Cherry pick release [<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>) pushed to Dev Channel
-  - [ ] Cherry pick release <RELEASE_NUMBER> pushed to 1%
+  - [ ] Release [<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>) with cherry picks and pushed to Dev Channel
+  - [ ] Release <RELEASE_NUMBER> with cherry picks pushed to 1%
 
 If the cherry pick is made to the release in production, you may also need to
 add a checkbox like:
-  - [ ] Cherry pick release <RELEASE_NUMBER> pushed to production
+  - [ ] Release <RELEASE_NUMBER> with cherry picks pushed to production
 
 When you push the release this issue is tracking to production:
 - update the "pushed to production" checkbox with a link to the release build
@@ -47,10 +47,10 @@ After the release is pushed to production, continue to use this issue to track
 anything interesting about the release, including adding additional
 checkboxes to track cherry picks into production.
 -->
-- [x] Canary release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut
-- [ ] Canary release <RELEASE_NUMBER> pushed to Dev Channel
-- [ ] Canary release <RELEASE_NUMBER> pushed to 1%
-- [ ] Release build <RELEASE_NUMBER> pushed to production
+- [x] Release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut as a new canary release
+- [ ] Release <RELEASE_NUMBER> pushed to Dev Channel
+- [ ] Release <RELEASE_NUMBER> pushed to 1%
+- [ ] Release <RELEASE_NUMBER> pushed to production
 
 See the [release documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Dev Channel.
 
