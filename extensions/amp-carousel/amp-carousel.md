@@ -103,6 +103,10 @@ Sets the aria-label for the `amp-carousel-button-next`. If no value is given, th
 
 Sets the aria-label for the `amp-carousel-button-prev`. If no value is given, the aria-label defaults to 'Previous item in carousel'.
 
+##### data-button-count-format (optional)
+
+A format string that looks like `(%s of %s)`, used as a suffix to the aria-label for `amp-carousel-button-next`/`amp-carousel-button-prev`. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to '(%s of %s)'.
+
 #####  autoplay (optional)
 
 Advances the slide to the next slide without user interaction.
