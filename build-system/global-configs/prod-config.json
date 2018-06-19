@@ -36,5 +36,7 @@
   "amp-img-native-srcset": 1,
   "amp-story-v1": 1,
   "expAdsenseUnconditionedCanonical": 0.01,
-  "expAdsenseCanonical": 0.01
+  "expAdsenseCanonical": 0.01,
+  "adsense-delay-request": 0.01,
+  "doubleclick-delay-request":0.01
 }
