@@ -106,7 +106,7 @@ export class BaseCarousel extends AMP.BaseElement {
     };
     this.element.appendChild(this.nextButton_);
 
-    this.updateButtonLabels();
+    this.updateButtonTitles();
   }
 
   /** @override */
@@ -188,31 +188,31 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Updates the aria-labels for the next/previous buttons. This should be
-   * called by subclasses if they want to update the button labels. The
-   * `getNextButtonLabel` and `getPrevButtonLabel` should be overwritten to
-   * provide the label values.
+   * Updates the titles for the next/previous buttons. This should be called
+   * by subclasses if they want to update the button labels. The
+   * `getNextButtonTitle` and `getPrevButtonTitle` should be overwritten to
+   * provide the title values.
    * @protected
    */
-  updateButtonLabels() {
-    this.nextButton_.setAttribute('aria-label', this.getNextButtonLabel());
-    this.prevButton_.setAttribute('aria-label', this.getPrevButtonLabel());
+  updateButtonTitles() {
+    this.nextButton_.title = this.getNextButtonTitle();
+    this.prevButton_.title = this.getPrevButtonTitle();
   }
 
   /**
-   * @return {string} The aria-label to use for the next button.
+   * @return {string} The title to use for the next button.
    * @protected
    */
-  getNextButtonLabel() {
+  getNextButtonTitle() {
     return this.element.getAttribute('data-next-button-aria-label')
         || 'Next item in carousel';
   }
 
   /**
-   * @return {string} The aria-label to use for the pevious button.
+   * @return {string} The title to use for the pevious button.
    * @protected
    */
-  getPrevButtonLabel() {
+  getPrevButtonTitle() {
     return this.element.getAttribute('data-prev-button-aria-label')
         || 'Previous item in carousel';
   }

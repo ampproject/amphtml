@@ -480,9 +480,9 @@ export class AmpSlideScroll extends BaseSlides {
   /**
    * @param {number} buttonIndex The index that the button will take the user
    *    to.
-   * @return {string} The formatted suffix for the button label.
+   * @return {string} The formatted suffix for the button title.
    */
-  getButtonLabelSuffix_(buttonIndex) {
+  getButtonTitleSuffix_(buttonIndex) {
     return ' ' + this.getButtonSuffixFormat_().replace('%s', buttonIndex + 1)
         .replace('%s', this.noOfSlides_);
   }
@@ -490,19 +490,19 @@ export class AmpSlideScroll extends BaseSlides {
   /**
    * @override
    */
-  getPrevButtonLabel() {
+  getPrevButtonTitle() {
     const prevIndex = this.getPrevIndex_(this.slideIndex_);
     const index = prevIndex == null ? 0 : prevIndex;
-    return super.getPrevButtonLabel() + this.getButtonLabelSuffix_(index);
+    return super.getPrevButtonTitle() + this.getButtonTitleSuffix_(index);
   }
 
   /**
    * @override
    */
-  getNextButtonLabel() {
+  getNextButtonTitle() {
     const nextIndex = this.getNextIndex_(this.slideIndex_);
     const index = nextIndex == null ? this.noOfSlides_ - 1 : nextIndex;
-    return super.getNextButtonLabel() + this.getButtonLabelSuffix_(index);
+    return super.getNextButtonTitle() + this.getButtonTitleSuffix_(index);
   }
 
   /**
@@ -640,7 +640,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
-    this.updateButtonLabels();
+    this.updateButtonTitles();
     return true;
   }
 
