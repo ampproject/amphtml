@@ -721,6 +721,15 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
+    it('should always clear RTC for a new consent state', () => {
+      rtc.consentState_ = 'FAKE_NEW_CONSENT_STATE';
+      rtc.modifyRtcConfigForConsentStateSettings();
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.urls = [];
+      expectedRtcConfig.vendors = {};
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
   });
 
   describe('sendErrorMessage', () => {
