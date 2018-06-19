@@ -26,7 +26,7 @@ import {installPerformanceService} from
 import {toggleExperiment} from '../../../../src/experiments';
 
 
-describes.fakeWin('AccessService', {
+describes.realWin('AccessService', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
