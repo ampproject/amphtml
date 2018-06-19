@@ -28,6 +28,9 @@ export class AmpYotpo extends AMP.BaseElement {
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {Array<Function>} */
+    this.unlisteners_ = [];
   }
 
   /**
@@ -49,9 +52,10 @@ export class AmpYotpo extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'yotpo');
     this.applyFillContent(iframe);
 
-    listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data['height']);
+    const unlisten = listenFor(iframe, 'embed-size', data => {
+      this.attemptChangeHeight(data['height']).catch(() => {/* do nothing */ });
     }, /* opt_is3P */true);
+    this.unlisteners_.push(unlisten);
 
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
@@ -70,6 +74,9 @@ export class AmpYotpo extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
+
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
