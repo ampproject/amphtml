@@ -18,6 +18,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {isElement} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 
@@ -117,7 +118,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const docHeight = viewport.getScrollHeight();
     // Hmm, can the page height change and affect us?
     const minTop = viewportHeight * 0.75;
-    const maxTop = docHeight - viewportHeight * 0.95;
+    const maxTop = docHeight - (viewportHeight * 0.95);
     user().assert(
         layoutBox.top >= minTop,
         '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
@@ -183,7 +184,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    */
   visibileChildren_(nodes) {
     return nodes.filter(node => {
-      if (node.nodeType === /* Element */ 1) {
+      if (isElement(node)) {
         return true;
       }
 

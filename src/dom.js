@@ -760,7 +760,7 @@ export function escapeHtml(text) {
 
 /**
  * @param {string} c
- * @return string
+ * @return {string}
  */
 function escapeHtmlChar(c) {
   return HTML_ESCAPE_CHARS[c];
@@ -915,4 +915,13 @@ export function isFullscreenElement(element) {
  */
 export function isEnabled(element) {
   return !(element.disabled || matches(element, ':disabled'));
+}
+
+
+/**
+ * @param {!Object} whatever
+ * @return {boolean}
+ */
+export function isElement(whatever) {
+  return whatever.nodeType == /* ELEMENT */ 1;
 }
