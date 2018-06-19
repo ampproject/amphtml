@@ -227,6 +227,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.getA4aAnalyticsConfig = () => {};
+      impl.buildCallback();
       sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
     });
