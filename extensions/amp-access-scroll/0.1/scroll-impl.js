@@ -25,12 +25,21 @@ const TAG = 'amp-access-scroll-elt';
 
 /** @const {!JsonObject} */
 const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
-  'authorization': 'https://connect.scroll.com/amp/access?' +
-                   'rid=READER_ID&o=SOURCE_URL&' +
-                   'cid=CLIENT_ID(cid-fallback-cookie)',
-  'pingback': 'https://connect.scroll.com/amp/pingback?' +
-              'rid=READER_ID&o=SOURCE_URL&cid=CLIENT_ID(cid-fallback-cookie)&' +
-              'd=AUTHDATA(scroll)&v=AUTHDATA(visitId)',
+  'authorization': 'https://connect.scroll.com/amp/access'
+                   + '?rid=READER_ID'
+                   + '&cid=CLIENT_ID(scroll1)'
+                   + '&c=CANONICAL_URL'
+                   + '&o=AMPDOC_URL'
+                   + '&x=QUERY_PARAM(scrollx)',
+  'pingback': 'https://connect.scroll.com/amp/pingback'
+              + '?rid=READER_ID'
+              + '&cid=CLIENT_ID(scroll1)'
+              + '&c=CANONICAL_URL'
+              + '&o=AMPDOC_URL'
+              + '&r=DOCUMENT_REFERRER'
+              + '&x=QUERY_PARAM(scrollx)'
+              + '&d=AUTHDATA(scroll)'
+              + '&v=AUTHDATA(visitId)',
   'namespace': 'scroll',
 });
 
@@ -38,10 +47,14 @@ const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'scroll': 'https://connect.scroll.com/amp/analytics'
               + '?rid=ACCESS_READER_ID'
-              + '&cid=CLIENT_ID(cid-fallback-cookie)'
-              + '&o=SOURCE_URL&c=CANONICAL_URL'
+              + '&cid=CLIENT_ID(scroll1)'
+              + '&c=CANONICAL_URL'
+              + '&o=AMPDOC_URL'
+              + '&r=DOCUMENT_REFERRER'
+              + '&x=QUERY_PARAM(scrollx)'
               + '&d=AUTHDATA(scroll.scroll)'
               + '&v=AUTHDATA(scroll.visitId)'
+              + '&h=SOURCE_HOSTNAME'
               + '&s=${totalEngagedTime}',
   },
   'triggers': {
@@ -85,6 +98,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
     this.accessSource_ = accessSource;
   }
 
+  /** @override */
   authorize() {
     return super.authorize()
         .then(response => {
@@ -112,7 +126,7 @@ class ScrollElement {
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
+    this.ampdoc_ = ampdoc;
 
     /** @const {!Element} */
     this.wrapper_ = document.createElement('div');
@@ -156,9 +170,12 @@ class ScrollElement {
           this.iframe_.onload = () => {
             this.wrapper_.removeChild(this.placeholder_);
           };
+          const docInfo = Services.documentInfoForDoc(this.ampdoc_);
           this.iframe_.setAttribute('src',
-              'https://connect.scroll.com/amp/scrollbar?readerId=' +
-              encodeURIComponent(readerId));
+              'https://connect.scroll.com/amp/scrollbar'
+                + '?rid=' + encodeURIComponent(readerId)
+                + '&o=' + encodeURIComponent(this.ampdoc_.getUrl())
+                + '&c=' + encodeURIComponent(docInfo.canonicalUrl));
         });
   }
 }
