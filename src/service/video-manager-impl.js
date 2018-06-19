@@ -63,7 +63,7 @@ const TAG = 'video-manager';
  * @const {number} Percentage of the video that should be in viewport before it
  * is considered visible.
  */
-const VISIBILITY_PERCENT = 75;
+const VISIBILITY_RATIO = 0.5;
 
 /**
  * @private {number} The minimum number of milliseconds to wait between each
@@ -238,7 +238,7 @@ export class VideoManager {
    * in the viewport.
    *
    * Visibility of a video is defined by being in the viewport AND having
-   * {@link VISIBILITY_PERCENT} of the video element visible.
+   * {@link VISIBILITY_RATIO} of the video element visible.
    *
    * @param {VideoEntry} entry
    * @private
@@ -862,21 +862,18 @@ class VideoEntry {
   updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
-    this.video.measureMutateElement(() => {
-      if (opt_forceVisible == true) {
-        this.isVisible_ = true;
-      } else {
-        // Calculate what percentage of the video is in viewport.
-        const change = this.video.element.getIntersectionChangeEntry();
-        const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
-          : change.intersectionRatio * 100;
-        this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
-      }
-    }, () => {
-      if (this.isVisible_ != wasVisible) {
-        this.videoVisibilityChanged_();
-      }
-    });
+    if (opt_forceVisible) {
+      this.isVisible_ = true;
+    } else {
+      const {element} = this.video;
+      const ratio = element.getIntersectionChangeEntry().intersectionRatio;
+      this.isVisible_ =
+          (!isFiniteNumber(ratio) ? 0 : ratio) >= VISIBILITY_RATIO;
+    }
+
+    if (this.isVisible_ != wasVisible) {
+      this.videoVisibilityChanged_();
+    }
   }
 
   /**
@@ -1177,7 +1174,7 @@ export class AutoFullscreenManager {
 
     if (selected) {
       const {intersectionRatio} = selected.element.getIntersectionChangeEntry();
-      if (intersectionRatio >= VISIBILITY_PERCENT / 100) {
+      if (intersectionRatio >= VISIBILITY_RATIO) {
         this.currentlyCentered_ = selected;
       }
     }
@@ -1239,7 +1236,7 @@ export class AutoFullscreenManager {
  * @return {number}
  */
 function centerDist(viewport, rect) {
-  const centerY = rect.top + rect.height / 2;
+  const centerY = rect.top + (rect.height / 2);
   const centerViewport = viewport.getSize().height / 2;
   return Math.abs(centerY - centerViewport);
 }
