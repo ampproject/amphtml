@@ -1147,6 +1147,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         ],
       })
       .once('transform', () => {
+        if (options.latestName) {
+          const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
+          fs.copySync(
+              path.join(destDir, options.toName),
+              path.join(destDir, latestMaxName));
+        }
         endBuildStep('Transformed', srcFilename, startTime);
       });
   if (options.watch) {
