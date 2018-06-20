@@ -290,7 +290,7 @@ export class ConsentInstance {
         credentials: 'include',
         method: 'POST',
         body: request,
-        requireAmpResponseSourceOrigin: false,
+        ampCors: false,
       };
       Services.viewerForDoc(this.ampdoc_).whenFirstVisible().then(() => {
         Services.xhrFor(this.ampdoc_.win).fetchJson(
