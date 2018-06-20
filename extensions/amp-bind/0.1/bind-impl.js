@@ -38,7 +38,7 @@ import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/sanitizer';
+import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-bind';
