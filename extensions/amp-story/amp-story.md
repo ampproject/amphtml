@@ -295,8 +295,8 @@ Next, you must create a JSON file where you can customize the bookend. The overa
 
 ```text
 {
-  "bookend-version": "v1.0",
-  "share-providers": [
+  "bookendVersion": "v1.0",
+  "shareProviders": [
     ...
   ],
   "components": [
@@ -448,7 +448,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 #### Social sharing
 
-The configuration for social sharing is defined in the `share-providers` field of the response object, and it's optional.
+The configuration for social sharing is defined in the `shareProviders` field of the response object, and it's optional.
 
 This field should contain a string, where each string respresents a share provider's name (e.g. `twitter`).
 
@@ -466,8 +466,8 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ```text
 {
   // You must specify version v1.0.
-  "bookend-version": "v1.0",
-  "share-providers": [
+  "bookendVersion": "v1.0",
+  "shareProviders": [
     "email",
     "tumblr",
     {
