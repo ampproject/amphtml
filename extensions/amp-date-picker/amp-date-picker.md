@@ -541,6 +541,15 @@ e.g. `on="tap: date-picker.setDate(date=state.value)"`
 
 Read more about [AMP Actions and Events](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
 
+##### clear
+
+The `clear` action clears the date value or values from the single date picker
+or date range picker with the specified `id`, e.g. `date-picker`.
+
+```html
+<button on="tap: date-picker.clear">Clear</button>
+```
+
 ##### setDate
 
 The `setDate` action assigns the value of the `date` argument to
@@ -563,15 +572,61 @@ the date range picker with the specified `id`, e.g. `date-picker`.
 </button>
 ```
 
-##### clear
+##### today
 
-The `clear` action clears the date value or values from the single date picker
-or date range picker with the specified `id`, e.g. `date-picker`.
+The `today` action assigns the value of the current day,
+plus an `offset` argument, to the single date picker with the specified `id`,
+e.g. `date-picker`. The `offset` argument value can be any integer.
 
 ```html
-<button on="tap: date-picker.clear">Clear</button>
+<button on="tap: date-picker.today">Today</button>
+<button on="tap: date-picker.today(offset=1)">Tomorrow</button>
+<button on="tap: date-picker.today(offset=-1)">Yesterday</button>
 ```
 
+##### startToday
+
+The `startToday` action assigns the value of the current day,
+plus an `offset` argument, to the date range picker with the specified `id`,
+e.g. `date-picker`. The `offset` argument value can be any integer.
+
+```html
+<button on="tap: date-picker.startToday">Today</button>
+<button on="tap: date-picker.startToday(offset=1)">Tomorrow</button>
+<button on="tap: date-picker.startToday(offset=-1)">Yesterday</button>
+```
+
+The `startToday` action can be combined with the `endToday` action
+to select ranges with an offset.
+
+```html
+<button
+  on="tap:date-picker.startToday(offset=7), date-picker.endToday(offset=14)">
+  Next week
+</button>
+```
+
+##### endToday
+
+The `endToday` action assigns the value of the current day,
+plus an `offset` argument, to the date range picker with the specified `id`,
+e.g. `date-picker`. The `offset` argument value can be any integer.
+
+```html
+<button on="tap: date-picker.endToday">Today</button>
+<button on="tap: date-picker.endToday(offset=1)">Tomorrow</button>
+<button on="tap: date-picker.endToday(offset=-1)">Yesterday</button>
+```
+
+The `endToday` action can be combined with the `startToday` action
+to select ranges with an offset.
+
+```html
+<button
+  on="tap:date-picker.startToday(offset=7), date-picker.endToday(offset=14)">
+  Next week
+</button>
+```
 
 ## Templates
 
