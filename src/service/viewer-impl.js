@@ -267,7 +267,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isEmbedded_ = !!(
-      this.isIframed_ && !this.win.AMP_TEST_IFRAME
+      (this.isIframed_ && !this.win.AMP_TEST_IFRAME
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
         // There appears to be a bug under investigation where the
@@ -279,7 +279,7 @@ export class Viewer {
         && (this.params_['origin']
             || this.params_['visibilityState']
             // Parent asked for viewer JS. We must be embedded.
-            || (this.win.location.search.indexOf('amp_js_v') != -1))
+            || (this.win.location.search.indexOf('amp_js_v') != -1)))
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
