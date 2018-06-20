@@ -201,7 +201,7 @@ You can configure your analytics to send these events as in the example below.
 ```
 
 The `amp-form-submit` event fires when a form request is initiated.
-The `amp-form-submit-success` event fires when a successful response is received, that is when the response has a status of `2XX`. Any other status trigger the `amp-form-submit-error` event.
+The `amp-form-submit-success` event fires when a successful response is received, that is when the response has a status of `2XX`. Any other status triggers the `amp-form-submit-error` event.
 
 All three events generate a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
 
