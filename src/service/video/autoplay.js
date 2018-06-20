@@ -69,29 +69,29 @@ function renderOrClone(renderFn) {
 
 
 /**
- * @param {!Window} win
- * @param {!Node} doc
+ * @param {!Window} unusedWin
+ * @param {!Element|!Document} elOrDoc
  * @return {!Element}
  */
-const renderInteractionOverlay = renderOrClone((win, doc) => {
-  return htmlFor(doc)`<i-amphtml-video-mask class="i-amphtml-fill-content">
+export function renderInteractionOverlay(unusedWin, elOrDoc) {
+  const html = htmlFor(elOrDoc);
+  return html`<i-amphtml-video-mask class="i-amphtml-fill-content" role=button>
     </i-amphtml-video-mask>`;
-});
+}
 
 
 /**
  * @param {!Window} win
- * @param {!Node} doc
+ * @param {!Element|!Document} elOrDoc
  * @return {!Element}
  */
-const renderIcon = renderOrClone((win, doc) => {
-  const icon =
-      htmlFor(doc)`<i-amphtml-video-icon class="amp-video-eq">
-        <div class="amp-video-eq-col">
-          <div class="amp-video-eq-filler"></div>
-          <div class="amp-video-eq-filler"></div>
-        </div>
-      </i-amphtml-video-icon>`;
+export function renderIcon(win, elOrDoc) {
+  const icon = htmlFor(elOrDoc)`<i-amphtml-video-icon class="amp-video-eq">
+    <div class="amp-video-eq-col">
+      <div class="amp-video-eq-filler"></div>
+      <div class="amp-video-eq-filler"></div>
+    </div>
+  </i-amphtml-video-icon>`;
 
   // Copy equalizer column 4x and annotate filler positions for animation.
   const firstCol = dev().assertElement(icon.firstElementChild);
@@ -114,7 +114,23 @@ const renderIcon = renderOrClone((win, doc) => {
   }
 
   return icon;
-});
+}
+
+
+/**
+ * @param {!Window} unusedWin
+ * @param {!Element|!Document} elOrDoc
+ * @return {!Element}
+ */
+const renderOrCloneInteractionOverlay = renderOrClone(renderInteractionOverlay);
+
+
+/**
+ * @param {!Window} unusedWin
+ * @param {!Element|!Document} elOrDoc
+ * @return {!Element}
+ */
+const renderOrCloneIcon = renderOrClone(renderIcon);
 
 
 /** Manages autoplay video. */
@@ -335,7 +351,9 @@ export class AutoplayEntry {
       return;
     }
 
-    const icon = renderIcon(this.ampdoc_.win, this.element_);
+    const {win} = this.ampdoc_;
+
+    const icon = renderOrCloneIcon(win, this.element_);
 
     video.mutateElement(() => {
       this.element_.appendChild(icon);
@@ -358,7 +376,7 @@ export class AutoplayEntry {
       return;
     }
 
-    const overlay = renderInteractionOverlay(this.ampdoc_.win, this.element_);
+    const overlay = renderOrCloneInteractionOverlay(win, this.element_);
 
     listenOnce(overlay, 'click', () => signals.signal(userInteracted));
 
