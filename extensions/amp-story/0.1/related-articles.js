@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
-import {isProtocolValid} from '../../../src/url';
+import {getSourceOrigin, isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 
 const TAG = 'amp-story';
@@ -46,11 +45,9 @@ const NEW_COMPONENTS =
 
 /**
  * @param {!JsonObject} articleJson
- * @param {!Element} element
- * @param {!Location} location
  * @return {?RelatedArticleDef}
  */
-function buildArticleFromJson_(articleJson, element, location) {
+function buildArticleFromJson_(articleJson) {
   if (!articleJson['title'] || !articleJson['url']) {
     user().error(TAG,
         'Articles must contain `title` and `url` fields, skipping invalid.');
@@ -61,12 +58,18 @@ function buildArticleFromJson_(articleJson, element, location) {
       `Unsupported protocol for article URL ${articleJson['url']}`);
   dev().assert(articleJson['url']);
 
-  const url = Services.urlForDoc(element);
-  const {host} = url.parse(url.getSourceOrigin(location));
+  let domain;
+  try {
+    domain = getSourceOrigin(articleJson['url']);
+  }
+  catch (err) {
+    domain = parseUrlDeprecated(articleJson['url']).hostname;
+  }
+
   const article = {
     title: dev().assert(articleJson['title']),
     url: articleJson['url'],
-    domainName: host,
+    domainName: domain,
   };
 
   if (articleJson['image']) {
@@ -80,22 +83,17 @@ function buildArticleFromJson_(articleJson, element, location) {
 
 
 /**
- * @param {!Element} element
- * @param {!Location} location
  * @param {!JsonObject=} opt_articleSetsResponse
  * @return {!Array<!RelatedArticleSetDef>}
  */
-export function relatedArticlesFromJson(element, location,
-  opt_articleSetsResponse) {
+export function relatedArticlesFromJson(opt_articleSetsResponse) {
   return /** @type {!Array<!RelatedArticleSetDef>} */ (
     Object.keys(opt_articleSetsResponse || {}).map(headingKey => {
       const articleSet = {
         articles:
-              opt_articleSetsResponse[headingKey].map(
-                  function(article) {
-                    return buildArticleFromJson_(article, element, location);
-                  }
-              ).filter(valid => !!valid),
+              opt_articleSetsResponse[headingKey]
+                  .map(buildArticleFromJson_)
+                  .filter(valid => !!valid),
       };
 
       if (headingKey.trim().length) {
@@ -108,19 +106,15 @@ export function relatedArticlesFromJson(element, location,
 
 /**
  * @param {!Array<!JsonObject>} bookendComponents
- * @param {!Element} element
- * @param {!Location} location
  * @return {!Array<!RelatedArticleSetDef>}
  */
-export function parseArticlesToClassicApi(bookendComponents, element,
-  location) {
+export function parseArticlesToClassicApi(bookendComponents) {
   const articleSet = {};
   articleSet.articles = [];
 
   bookendComponents.forEach(component => {
     if (component['type'] == 'small') {
-      articleSet.articles.push(buildArticleFromJson_(component, element,
-          location));
+      articleSet.articles.push(buildArticleFromJson_(component));
     } else if (NEW_COMPONENTS.includes(component['type'])) {
       user().warn(TAG, component['type'] + ' is not supported in ' +
       'amp-story-0.1, upgrade to v1.0 to use this feature.');

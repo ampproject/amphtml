@@ -466,19 +466,13 @@ export class Bookend {
                     response[SHARE_PROVIDERS_KEY] ||
                     response[DEPRECATED_SHARE_PROVIDERS_KEY]),
               relatedArticles:
-                parseArticlesToClassicApi(
-                    response['components'],
-                    this.parentEl_,
-                    this.win_.location),
+                parseArticlesToClassicApi(response['components']),
             };
           } else {
             this.config_ = {
               shareProviders: response['share-providers'],
               relatedArticles:
-                  relatedArticlesFromJson(
-                      this.parentEl_,
-                      this.win_.location,
-                      response['related-articles']),
+                  relatedArticlesFromJson(response['related-articles']),
             };
           }
 
