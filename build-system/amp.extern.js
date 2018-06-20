@@ -482,3 +482,4 @@ var TransitionDef;
 
 /** @type {string|undefined} */
 Navigator.prototype.userLanguage;
+
