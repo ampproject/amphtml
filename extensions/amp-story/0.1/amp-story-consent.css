@@ -124,6 +124,36 @@
   overflow: hidden !important;
 }
 
+.i-amphtml-story-consent-external-link {
+  position: relative !important;
+  display: inline-block !important;
+  margin: 24px 0 !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  text-decoration: none !important;
+}
+
+.i-amphtml-story-consent-external-link:hover {
+  text-decoration: underline !important;
+}
+
+.i-amphtml-story-consent-external-link::after {
+  content: "" !important;
+  position: absolute !important;
+  display: block !important;
+  height: 16px !important;
+  width: 16px !important;
+  top: 3px !important;
+  right: -20px !important;
+  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="rgba(0, 0, 0, 0.87)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')
+      center center no-repeat !important;
+}
+
+.i-amphtml-story-consent-external-link.i-amphtml-hidden {
+  display: none !important;
+}
+
 /** Consent actions. */
 
 .i-amphtml-story-consent-actions {
