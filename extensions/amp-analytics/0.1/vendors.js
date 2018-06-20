@@ -1986,27 +1986,41 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'custom': 'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
     },
   },
-'catchpoint': {
-    'requests': {
-      'endpoint': 'http://r.3gl.net/hawklogserver/r.p',
-      'pageview': 'http://r.3gl.net/hawklogserver/r.p' +
-        '&licenseKey=${licenseKey}' +
-        '&ampUrl=${ampdocUrl}' +
-        '&DNS=' +
-          '${navTiming(domainLookupEnd)-navTiming(domainLookupStart)}' +
-        '&Connect=${navTiming(connectStart)-navTiming(connectEnd)}',
+  
+ 'catchpoint': {
+	
+    'requests': {	
+      'endpoint': 'https://r.3gl.net/hawklogserver/r.p', 
+      'pageview': 'https://r.3gl.net/hawklogserver/r.p' +
+		'?'+	'data={"v":2,"y":"load","ui":${UserID},"si":${SessionID},"pi":092934,"di":${AccountID},"pc":1,"dn":${dns},"fc":7,"wt":${wait},"Id":${load},"de":${domInteractive},"dl":${domLoaded},"dc":${docComplete},"rp":1338,"cl":${contentLoad},"dc":${docComplete},"rp":${response},"cl":${contentLoad},"rd":0,"jsc":0,"dh":1200,"dw":1920,"el":193,"rf":"${canonicalUrl}","cv":${isConversion},"rv":${revenue},"ri":${revenue_items}}'
     },
-    'vars': {
-      'beacon': 'real_user_AMP',
-      'appId': [],
-      'licenseKey': '',
+	
+	'vars': {
+	  'dns': '${navTiming(domainLookupEnd,domainLookupStart)}',
+	  'contentLoad': '${navTiming(responseStart,domComplete)}',
+	  'docComplete': '${navTiming(navigationStart,loadEventStart)}',
+	  'domInteractive': '${navTiming(requestStart,domInteractive)}',
+	  'domLoaded': '${navTiming(requestStart,domContentLoadedEventEnd)}',
+	  'connect': '${navTiming(connectStart,connectEnd)}',
+	  'load': '${navTiming(responseStart,responseEnd)}',
+	  'response': '${navTiming(navigationStart,responseEnd)}',
+	  'wait': '${navTiming(requestStart,responseStart)}',
+	  'ssl': '${navTiming(secureConnectionStart,connectEnd)}',
+	  'revenue_items': '',
+	  'revenue': '',
+	  'isConversion': '',
+	  'SessionID': '',
+	  'UserID': '',
     },
+    
     'triggers': {
       'trackPageview': {
-        'on': 'ini-load',
+        'on': 'visible',
         'request': 'pageview',
       },
-  },
+},
+},
+
   'ibeatanalytics': {
     'requests': {
       'host': 'https://ibeat.indiatimes.com',
