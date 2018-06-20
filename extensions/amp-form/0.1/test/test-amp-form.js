@@ -1814,6 +1814,105 @@ describes.repeated('', {
       });
     });
 
+    it('should trigger submit-success analytics event with form data', () => {
+      return getAmpForm(getForm()).then(ampForm => {
+        const form = ampForm.form_;
+        form.id = 'registration';
+
+        const emailInput = createElement('input');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('value', 'j@hnmiller.com');
+        form.appendChild(emailInput);
+
+        const unnamedInput = createElement('input');
+        unnamedInput.setAttribute('type', 'text');
+        unnamedInput.setAttribute('value', 'unnamed');
+        form.appendChild(unnamedInput);
+
+        let fetchResolver;
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(new Promise(resolve => {
+          fetchResolver = resolve;
+        }));
+        sandbox.stub(ampForm, 'analyticsEvent_');
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: form,
+          preventDefault: sandbox.spy(),
+        };
+        ampForm.handleSubmitEvent_(event);
+        expect(ampForm.state_).to.equal('submitting');
+        fetchResolver({json: () => Promise.resolve()});
+
+        const expectedFormData = {
+          'formId': 'registration',
+          'formFields[name]': 'John Miller',
+          'formFields[email]': 'j@hnmiller.com',
+        };
+
+        return ampForm.xhrSubmitPromiseForTesting().then(() => {
+          expect(ampForm.state_).to.equal('submit-success');
+          expect(ampForm.analyticsEvent_).to.be.calledWith(
+              'amp-form-submit-success',
+              expectedFormData
+          );
+        }, () => {
+          assert.fail('Submit should have succeeded.');
+        });
+
+      });
+    });
+
+    it('should trigger submit-error analytics event with form data', () => {
+      return getAmpForm(getForm()).then(ampForm => {
+        const form = ampForm.form_;
+        form.id = 'registration';
+
+        const emailInput = createElement('input');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('value', 'j@hnmiller.com');
+        form.appendChild(emailInput);
+
+        const unnamedInput = createElement('input');
+        unnamedInput.setAttribute('type', 'text');
+        unnamedInput.setAttribute('value', 'unnamed');
+        form.appendChild(unnamedInput);
+
+        let fetchRejecter;
+        sandbox.stub(ampForm.xhr_, 'fetch')
+            .returns(new Promise((unusedResolve, reject) => {
+              fetchRejecter = reject;
+            }));
+        sandbox.stub(ampForm, 'analyticsEvent_');
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: form,
+          preventDefault: sandbox.spy(),
+        };
+        ampForm.handleSubmitEvent_(event);
+        expect(ampForm.state_).to.equal('submitting');
+        fetchRejecter();
+
+        const expectedFormData = {
+          'formId': 'registration',
+          'formFields[name]': 'John Miller',
+          'formFields[email]': 'j@hnmiller.com',
+        };
+
+        return ampForm.xhrSubmitPromiseForTesting().then(() => {
+          assert.fail('Submit should have failed.');
+        }, () => {
+          expect(ampForm.state_).to.equal('submit-error');
+          expect(ampForm.analyticsEvent_).to.be.calledWith(
+              'amp-form-submit-error',
+              expectedFormData
+          );
+        });
+
+      });
+    });
+
     it('should trigger amp-form-submit after variables substitution', () => {
       return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
