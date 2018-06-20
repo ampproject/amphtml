@@ -39,8 +39,9 @@ export const CONSENT_ITEM_STATE = {
 };
 
 export class ConsentStateManager {
+  /** @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc*/
   constructor(ampdoc) {
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private {!Object<string, ConsentInstance>} */
@@ -168,6 +169,12 @@ export class ConsentStateManager {
  * @visibleForTesting
  */
 export class ConsentInstance {
+  /**
+   *
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} id
+   * @param {!Object} config
+   */
   constructor(ampdoc, id, config) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
