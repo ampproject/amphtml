@@ -351,7 +351,9 @@ export class AutoplayEntry {
       return;
     }
 
-    const icon = renderOrCloneIcon(this.ampdoc_.win, this.element_);
+    const {win} = this.ampdoc_;
+
+    const icon = renderOrCloneIcon(win, this.element_);
 
     video.mutateElement(() => {
       this.element_.appendChild(icon);
@@ -374,7 +376,7 @@ export class AutoplayEntry {
       return;
     }
 
-    const overlay = renderOrCloneInteractionOverlay(this.element_);
+    const overlay = renderOrCloneInteractionOverlay(win, this.element_);
 
     listenOnce(overlay, 'click', () => signals.signal(userInteracted));
 
