@@ -59,7 +59,7 @@ If you run into any issues or have any questions when requesting a cherry pick, 
 - If the TL/designate approves the cherry pick, the person currently handling releases (onduty) will work with you to ensure the cherry pick is made.
 - **Once the cherry pick is made you are responsible for verifying that the cherry pick you requested fixes the reported issue and that it does not cause other issues.**
 
-**If you are requesting a cherry pick to fix an issue in production** it is likely you will *also* need a cherry pick into the canary release build.  If this is needed file the cherry pick request for the production release build first and once it is approved file a separate cherry pick request for the canary release build.
+**If you are requesting a cherry pick to fix an issue in production** it is very likely you will *also* need a cherry pick into the canary release since otherwise the problem your cherry pick addresses would reappear as soon as the canary release is pushed to production.  Work with the onduty person to determine if you need a cherry pick to both and make sure your cherry pick request issue reflects what you determine.
 
 
 ## AMP Dev Channel
