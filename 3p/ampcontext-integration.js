@@ -71,7 +71,8 @@ export class IntegrationAmpContext extends AbstractAmpContext {
         || this.embedType_ === 'twitter'
         || this.embedType_ === 'github'
         || this.embedType_ === 'mathml'
-        || this.embedType_ === 'reddit');
+        || this.embedType_ === 'reddit'
+        || this.embedType_ === 'yotpo');
   }
 
   /** @return {!Window} */
