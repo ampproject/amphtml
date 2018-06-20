@@ -54,21 +54,21 @@ function buildArticleFromJson_(articleJson) {
     return null;
   }
 
-  user().assert(isProtocolValid(articleJson['url']),
-      `Unsupported protocol for article URL ${articleJson['url']}`);
-  dev().assert(articleJson['url']);
+  const articleUrl = dev().assert(articleJson['url']);
+  user().assert(isProtocolValid(articleUrl),
+      `Unsupported protocol for article URL ${articleUrl}`);
 
   let domain;
   try {
-    domain = getSourceOrigin(articleJson['url']);
-  }
-  catch (err) {
-    domain = parseUrlDeprecated(articleJson['url']).hostname;
+    domain = getSourceOrigin(articleUrl);
+  } catch (e) {
+    // Unknown path prefix in url.
+    domain = parseUrlDeprecated(articleUrl).hostname;
   }
 
   const article = {
     title: dev().assert(articleJson['title']),
-    url: articleJson['url'],
+    url: articleUrl,
     domainName: domain,
   };
 
