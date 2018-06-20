@@ -455,7 +455,6 @@ describes.realWin('amp-consent', {
     it('listen to external consent response msg', () => {
       event.data = {
         'type': 'consent-response',
-        'consentId': 'ABC',
         'action': 'accept',
       };
       event.source = iframe.contentWindow;
@@ -466,25 +465,11 @@ describes.realWin('amp-consent', {
     it('ignore msg from incorrect source', () => {
       event.data = {
         'type': 'consent-response',
-        'consentId': 'ABC',
         'action': 'accept',
       };
       event.source = null;
       win.dispatchEvent(event);
       expect(actionSpy).to.not.be.called;
-    });
-
-    it('ignore msg with incorrect instanceId', () => {
-      event.data = {
-        'type': 'consent-response',
-        'consentId': 'DEF',
-        'action': 'accept',
-      };
-      event.source = iframe.contentWindow;
-      allowConsoleError(() => {
-        win.dispatchEvent(event);
-        expect(actionSpy).to.not.be.called;
-      });
     });
   });
 

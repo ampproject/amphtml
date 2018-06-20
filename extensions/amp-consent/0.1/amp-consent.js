@@ -219,14 +219,8 @@ export class AmpConsent extends AMP.BaseElement {
         return;
       }
 
-      if (!data['action'] || !data['consentId']) {
+      if (!data['action']) {
         user().error(TAG, 'consent-response message missing required info');
-        return;
-      }
-
-      if (data['consentId'] != this.currentDisplayInstance_) {
-        user().error(TAG,
-            `fail to set consent state with ${data['consentId']}`);
         return;
       }
 

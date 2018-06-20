@@ -26,29 +26,23 @@ if (hashMatch) {
 document.querySelector('#a').onclick = function () {
 		// parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
 		parent.postMessage({
-      sentinel: 'amp',
       type: 'consent-response',
-      action: 'accept',
-      consentId: 'myConsentId'
+      action: 'accept'
     }, '*');
   };
 document.querySelector('#r').onclick = function () {
 		// parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
 		parent.postMessage({
-      sentinel: 'amp',
       type: 'consent-response',
-      action: 'reject',
-      consentId: 'myConsentId'
+      action: 'reject'
     }, '*');
   };
 
 document.querySelector('#d').onclick = function () {
 		// parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
 		parent.postMessage({
-      sentinel: 'amp',
       type: 'consent-response',
-      action: 'dismiss',
-      consentId: 'myConsentId'
+      action: 'dismiss'
     }, '*');
 	};
 </script>
