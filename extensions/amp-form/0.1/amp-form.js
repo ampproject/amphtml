@@ -713,6 +713,7 @@ export class AmpForm {
   }
 
   /**
+   * Renders a template based on the form state and its presence in the form.
    * @param {!JsonObject} data
    * @private
    */
