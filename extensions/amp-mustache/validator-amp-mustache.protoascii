@@ -24,11 +24,13 @@ tags: {  # amp-mustache
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-mustache"
-    is_custom_template: true
     allowed_versions: "0.1"
+    allowed_versions: "0.2"
     allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
+    deprecated_versions: "0.1"
+    is_custom_template: true
+    requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
 }
@@ -40,9 +42,11 @@ tags: {  # amp-mustache
   spec_name: "SCRIPT[custom-element=amp-mustache] (AMP4ADS/AMP4EMAIL)"
   extension_spec: {
     name: "amp-mustache"
-    is_custom_template: true
     allowed_versions: "0.1"
+    allowed_versions: "0.2"
     allowed_versions: "latest"
+    deprecated_versions: "0.1"
+    is_custom_template: true
   }
   attr_lists: "common-extension-attrs"
 }
