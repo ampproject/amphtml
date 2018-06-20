@@ -81,12 +81,12 @@ export function renderInteractionOverlay(nodeOrDoc) {
 
 /**
  * @param {!Window} win
- * @param {!Node} doc
+ * @param {!Node} nodeOrDoc
  * @return {!Element}
  */
-export function renderIcon(win, doc) {
+export function renderIcon(win, nodeOrDoc) {
   const icon =
-      htmlFor(doc)`<i-amphtml-video-icon class="amp-video-eq">
+      htmlFor(nodeOrDoc)`<i-amphtml-video-icon class="amp-video-eq">
         <div class="amp-video-eq-col">
           <div class="amp-video-eq-filler"></div>
           <div class="amp-video-eq-filler"></div>
@@ -126,7 +126,7 @@ const renderOrCloneInteractionOverlay = renderOrClone(renderInteractionOverlay);
 
 /**
  * @param {!Window} win
- * @param {!Node} doc
+ * @param {!Node} nodeOrDoc
  * @return {!Element}
  */
 const renderOrCloneIcon = renderOrClone(renderIcon);
