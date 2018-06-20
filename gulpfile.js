@@ -100,6 +100,7 @@ declareExtension('amp-compare-slider', '0.1');
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
+declareExtension('amp-date-countdown', '0.1');
 declareExtension('amp-google-document-embed', '0.1');
 declareExtension('amp-dynamic-css-classes', '0.1');
 declareExtension('amp-experiment', '0.1');
@@ -212,6 +213,7 @@ declareExtension('amp-video-service', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-vk', '0.1');
+declareExtension('amp-yotpo', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
