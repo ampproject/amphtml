@@ -131,7 +131,7 @@ declareExtension('amp-lightbox-gallery', '0.1', {hasCss: true});
 declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
-declareExtension('amp-mustache', '0.1');
+declareExtension('amp-mustache', ['0.1', '0.2']);
 declareExtension('amp-next-page', '0.1', {hasCss: true});
 declareExtension('amp-nexxtv-player', '0.1');
 declareExtension('amp-o2-player', '0.1');
@@ -146,21 +146,7 @@ declareExtension('amp-sidebar', '0.1', {hasCss: true});
 declareExtension('amp-soundcloud', '0.1');
 declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
-declareExtension('amp-story', '0.1', {
-  hasCss: true,
-  cssBinaries: [
-    'amp-story-bookend',
-    'amp-story-consent',
-    'amp-story-hint',
-    'amp-story-unsupported-browser-layer',
-    'amp-story-viewport-warning-layer',
-    'amp-story-info-dialog',
-    'amp-story-share',
-    'amp-story-share-menu',
-    'amp-story-system-layer',
-  ],
-});
-declareExtension('amp-story', '1.0', {
+declareExtension('amp-story', ['0.1', '1.0'], {
   hasCss: true,
   cssBinaries: [
     'amp-story-bookend',
@@ -269,14 +255,16 @@ const ExtensionOption = {}; // eslint-disable-line no-unused-vars
 
 /**
  * @param {string} name
- * @param {string} version E.g. 0.1
+ * @param {string|!Array<string>} version E.g. 0.1
  * @param {!ExtensionOption} options extension options object.
  */
 function declareExtension(name, version, options) {
   const defaultOptions = {hasCss: false};
-  const extensionKey = `${name}-${version}`;
-  extensions[extensionKey] = Object.assign(
-      {name, version}, defaultOptions, options);
+  const versions = Array.isArray(version) ? version : [version];
+  versions.forEach(v => {
+    extensions[`${name}-${v}`] =
+        Object.assign({name, version: v}, defaultOptions, options);
+  });
 }
 
 /**

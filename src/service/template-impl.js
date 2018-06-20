@@ -17,8 +17,8 @@
 import {Deferred} from '../utils/promise';
 import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
+import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
-
 
 /**
  * @fileoverview
@@ -131,9 +131,6 @@ export class Templates {
      * @private @const {!Object<string, function(!TemplateClassDef)>}
      */
     this.templateClassResolvers_ = {};
-
-    /** @type {!Object<string, boolean>|undefined} */
-    this.declaredTemplates_ = undefined;
   }
 
   /**
@@ -304,6 +301,7 @@ export class Templates {
    * @param {string} type
    * @param {!TemplateClassDef} templateClass
    * @private
+   * @restricted
    */
   registerTemplate_(type, templateClass) {
     if (!this.templateClassMap_[type]) {
@@ -317,6 +315,17 @@ export class Templates {
   }
 
   /**
+   * For testing only.
+   * @param {string} type
+   * @visibleForTesting
+   */
+  unregisterTemplate(type) {
+    dev().assert(getMode().test, 'Should only be used in test mode.');
+    delete this.templateClassMap_[type];
+    delete this.templateClassResolvers_[type];
+  }
+
+  /**
    * @param {!BaseTemplate} impl
    * @param {!JsonObject} data
    * @private
@@ -325,7 +334,6 @@ export class Templates {
     return impl.render(data);
   }
 }
-
 
 /**
  * @param {!Window} win

@@ -41,8 +41,18 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
+      // DEPRECATED! Do not extend this whitelist. Use src/purifier.js instead.
+      // Contact @choumx for questions.
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
-      'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/purifier.js',
+    whitelist: [
+      'src/sanitizer.js->src/purifier.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
+      'extensions/amp-bind/0.1/bind-impl.js->src/purifier.js',
     ],
   },
   {
@@ -58,7 +68,7 @@ exports.rules = [
     whitelist: [
       'extensions/amp-crypto-polyfill/**/*.js->' +
           'third_party/closure-library/sha384-generated.js',
-      'extensions/amp-mustache/0.1/amp-mustache.js->' +
+      'extensions/amp-mustache/**/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/' +
           'amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
