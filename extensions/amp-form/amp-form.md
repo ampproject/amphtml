@@ -220,7 +220,7 @@ When the `amp-form-submit` event fires, it generates the following variables con
 
 Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **direct child element of form** and include a `<template></template>` tag inside it, or a `template="id_of_other_template"` attribute, to render the response in it.
 
-Using the `submitting` marker attribute, publishers can also include a template to display a message when the form is submitting. The template will have access to the form's input fields for any display purposes. Please see the full form example below for sample usage.
+Using the `submitting` special marker attribute, publishers can also include a template to display a message when the form is submitting. The template for this attribute will have access to the form's input fields for any display purposes. Please see the full form example below for sample usage.
 
 For submit-success and submit-error, the response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
 
