@@ -1308,11 +1308,11 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isActive) {
       this.systemLayer_.hideDeveloperLog();
-      this.activePage_.pauseCallback();
+      this.activePage_.setState(PageState.PAUSED);
     }
 
     if (!isActive) {
-      this.activePage_.resumeCallback();
+      this.activePage_.setState(PageState.ACTIVE);
     }
   }
 
@@ -1524,9 +1524,8 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @param {string} id The ID of the page whose index should be retrieved.
    * @return {number} The index of the page.
-   * @private
    */
-  getPageIndexById_(id) {
+  getPageIndexById(id) {
     const pageIndex = findIndex(this.pages_, page => page.element.id === id);
 
     if (pageIndex < 0) {
@@ -1544,7 +1543,7 @@ export class AmpStory extends AMP.BaseElement {
    *     specified ID.
    */
   getPageById(id) {
-    const pageIndex = this.getPageIndexById_(id);
+    const pageIndex = this.getPageIndexById(id);
     return dev().assert(this.pages_[pageIndex],
         `Page at index ${pageIndex} exists, but is missing from the array.`);
   }
