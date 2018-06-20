@@ -26,7 +26,7 @@ export function yandex(global, data) {
   validateData(
       data,
       ['blockId'],
-      ['data', 'htmlAccessAllowed', 'onRender', 'onError']
+      ['data', 'onRender', 'onError']
   );
 
   addToQueue(global, data);

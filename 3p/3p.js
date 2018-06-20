@@ -276,6 +276,7 @@ function validateAllowedFields(data, allowedFields) {
     ampSlotIndex: true,
     adHolderText: true,
     loadingStrategy: true,
+    htmlAccessAllowed: true,
   };
 
   for (const field in data) {
