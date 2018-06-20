@@ -40,6 +40,7 @@ export let PortraitComponentDef;
  *   title: !Element,
  *   image: !Element,
  *   meta: !Element,
+ *   domainName: string
  * }}
  */
 let portraitElementsDef;
