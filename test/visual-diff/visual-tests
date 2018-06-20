@@ -360,6 +360,9 @@
       "name": "amp-lightbox-gallery - Amp By Example"
     },
     {
+      "flaky": true,
+      // Loading indicator sometimes takes longer to disappear
+      // e.g., https://percy.io/ampproject/amphtml/builds/805535/view/45418485/1400?mode=diff&browser=firefox&snapshot=45418485
       "url": "examples/visual-tests/amp-by-example/components/amp-list/index.html",
       "name": "amp-list - Amp By Example"
     },
