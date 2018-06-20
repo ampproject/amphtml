@@ -10,7 +10,7 @@
       <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
       <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
       <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-      <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+      <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
       <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
       <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 
@@ -186,19 +186,19 @@
     </style>
   </head>
   <body>
-    
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+
+
+
+
+
+
+
+
+
+
+
+
+
         <div class="pt1 m1"
     [class]="checkoutSuccess ? 'hide' : 'pt1 m1'">
     <h1>Checkout</h1>
@@ -218,9 +218,9 @@
     <span class="inline-block ml1">...or continue as guest</span>
   </div>
 
-      
 
-      
+
+
         <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'"
     class="checkout-section">
     <h3 class="">Review Order</h3>
@@ -274,9 +274,9 @@
     </amp-list>
   </section>
 
-      
 
-      
+
+
         <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'"
     class="checkout-section">
     <h3> Add a promotional code </h3>
@@ -297,10 +297,10 @@
     </form>
   </section>
 
-      
 
 
-      
+
+
         <form id="checkout-form"
     method="post"
     action-xhr="/checkout/apply-code"
@@ -308,7 +308,7 @@
     target="_top">
 
 
-      
+
           <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'"
       class="checkout-section"
       amp-access="NOT loggedIn">
@@ -326,9 +326,9 @@
         autocomplete="email">
     </section>
 
-      
 
-      
+
+
           <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'"
       class="checkout-section"
       amp-access="loggedIn"
@@ -423,7 +423,7 @@
         on="change:shippingAddress.toggleVisibility">
     </section>
 
-      
+
 
           <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'"
       class="checkout-section"
@@ -465,7 +465,7 @@
         on="change:shippingAddress.toggleVisibility">
     </section>
 
-      
+
 
           <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'"
       class="checkout-section"
@@ -503,9 +503,9 @@
         autocomplete="billing country">
     </section>
 
-      
 
-      
+
+
           <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'"
       class="checkout-section"
       amp-access="loggedIn"
@@ -584,7 +584,7 @@
       </section>
     </section>
 
-      
+
 
           <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'"
       class="checkout-section"
@@ -614,9 +614,9 @@
         autocomplete="cc-exp">
     </section>
 
-      
 
-      
+
+
           <div [class]="checkoutSuccess ? 'hide' : 'm2'"
       class="m2">
       <input id="pay-now-button"
@@ -633,11 +633,11 @@
     <h3>Checkout success!</h3>
   </section>
 
-      
 
-      
 
-      
+
+
+
     <amp-analytics type="googleanalytics" id="analytics">
       <script type="application/json">
         {

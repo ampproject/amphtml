@@ -1,7 +1,7 @@
 <!--
   ## Introduction
 
-  This sample demonstrastes a classic dropdown combo, with a text field which filters the dropdown elements 
+  This sample demonstrastes a classic dropdown combo, with a text field which filters the dropdown elements
   according to the user's input. The options are rendered via amp-list.
 -->
 <!doctype html>
@@ -21,7 +21,7 @@
   <!-- The amp-list component is used to generate the dropdown list options.-->
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
   <!-- The amp-mustache is used to generate the dropdown list options' template.-->
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 
   <style amp-custom>
@@ -58,7 +58,7 @@
             width: 100%;
             background-color: #fafafa;
         }
-    
+
         .autosuggest-box > [role=list]{
             overflow-y: scroll;
         }
@@ -84,7 +84,7 @@
         }
 
         amp-selector .select-option.no-outline.no-outline[option] {
-            outline: none;  
+            outline: none;
         }
         .select-option:focus {
             box-shadow: inset rgb(94, 158, 215) 0px 0px 45px;
@@ -131,11 +131,11 @@
 
   <!-- ## Basic Usage -->
   <!--
-  This example includes two inputs. One is the input in which the user writes the text and the other is a hidden input, 
+  This example includes two inputs. One is the input in which the user writes the text and the other is a hidden input,
   where the id value of the selected option is stored and could be submitted in a form.
 
   The option attribute of the amp-selector's options, contain the id of the element, as well as its title, seperated by a comma.
-  This is done so that both values can be accessed using the 'event.targetOption' property. 
+  This is done so that both values can be accessed using the 'event.targetOption' property.
   -->
   <div class="dropdown-wrap">
     <label for="products-dropdown">Select your favorite food or beverage. Start typing to filter the results.</label>
@@ -165,7 +165,7 @@
                </amp-selector>
           </template>
         </amp-list>
-      
+
     </div>
   </div>
   <p class="p1">

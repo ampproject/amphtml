@@ -17,7 +17,7 @@ This is a sample showing how to implement the "show more" design pattern. "Show 
   <!-- We use `amp-form` for making the call to get extra products after an user interaction -->
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <!-- We use `amp-mustache` for rendering the `amp-list` content -->
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 
   <link rel="canonical" href="https://ampbyexample.com/advanced/show_more_button/">
   <title>Load more button</title>
@@ -47,10 +47,10 @@ This is a sample showing how to implement the "show more" design pattern. "Show 
 
 
   <!-- We bind the `src` attribute of the `amp-list` to the `amp-state` object containing the products
-      from that component as a `src`. We also dynamically change the height of the amp-list based on 
+      from that component as a `src`. We also dynamically change the height of the amp-list based on
       the number of items (each item has a height of `24px`). -->
-  <amp-list src="/examples/visual-tests/amp-by-example/json/related_products.json" 
-            [src]="productsState.items" 
+  <amp-list src="/examples/visual-tests/amp-by-example/json/related_products.json"
+            [src]="productsState.items"
             width="320"
             height="144"
             [height]="productsState.items.length * 24"
@@ -68,7 +68,7 @@ This is a sample showing how to implement the "show more" design pattern. "Show 
             action-xhr="/examples/visual-tests/amp-by-example/json/more_related_products_page"
             target="_top"
             on="submit-success: AMP.setState({
-              productsState: { 
+              productsState: {
                 items: productsState.items.concat(event.response.items)
               },
               product: {
@@ -77,7 +77,7 @@ This is a sample showing how to implement the "show more" design pattern. "Show 
               }
             });">
         <input type="hidden" name="moreItemsPageIndex" value="0" [value]="product.moreItemsPageIndex">
-        <input type="submit" 
+        <input type="submit"
                value="Show more"
                class="ampstart-btn caps m1 show"
                [class] = "(product.hasMorePages == false ? 'hide' : 'ampstart-btn caps m1 mb3 show')">
