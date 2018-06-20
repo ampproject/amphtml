@@ -1764,7 +1764,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'commpar': 'AMP=1&RM=${random}' +
                  '&USER=${account}' +
                  '&PAG=${page}' +
-                 '&HR=${canonicalUrl}' +
+                 '&HR=${sourceUrl}' +
                  '&REFER=${documentReferrer}' +
                  '&RES=${screenWidth}X${screenHeight}' +
                  '&COLOR=${screenColorDepth}' +
