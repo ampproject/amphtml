@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../amp-events';
 import {Services} from '../services';
 import {
   computedStyle,
@@ -23,7 +22,6 @@ import {
   setStyle,
   setStyles,
 } from '../style';
-import {createCustomEvent} from '../event-helper';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {htmlFor} from '../static-template';
@@ -225,7 +223,6 @@ export class FixedLayer {
             this.returnFromTransferLayer_(fe);
           }
         }
-        this.dispatchUpdateEvent_();
       });
     }
   }
@@ -666,8 +663,6 @@ export class FixedLayer {
           fe.element);
       this.returnFromTransferLayer_(fe);
     }
-
-    this.dispatchUpdateEvent_();
   }
 
   /**
@@ -773,16 +768,6 @@ export class FixedLayer {
       } else if (rule.type == /* CSSSupportsRule */ 12) {
         this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
       }
-    }
-  }
-
-  /** Dispatches AmpEvents.DOM_UPDATE from transfer layer. */
-  dispatchUpdateEvent_() {
-    const transferLayer = this.getTransferLayer_();
-    if (transferLayer) {
-      const event = createCustomEvent(this.ampdoc.win,
-          AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
-      transferLayer.dispatchEvent(event);
     }
   }
 }
