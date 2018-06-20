@@ -18,7 +18,7 @@ import {Services} from '../../../../../src/services';
 
 export class ScrollMonitor {
   /**
-   *Creates an instance of ScrollMonitor.
+   * Creates an instance of ScrollMonitor.
    */
   constructor() {
     this.viewport_ = null;
