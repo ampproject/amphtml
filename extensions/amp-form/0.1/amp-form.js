@@ -444,6 +444,8 @@ export class AmpForm {
               this.form_, 'submit', /* event */ null, trust);
           // After variable substitution
           const values = this.getFormAsObject_();
+          // At the form submitting state, we want to display any template
+          // messages with the submitting attribute.
           this.renderTemplate_(values);
         })
         .then(() => this.doActionXhr_())
@@ -712,6 +714,7 @@ export class AmpForm {
   }
 
   /**
+   * Renders a template based on the form state and its presence in the form.
    * @param {!JsonObject} data
    * @private
    */
