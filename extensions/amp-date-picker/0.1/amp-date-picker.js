@@ -476,12 +476,18 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
 
     this.registerAction('setDate',
-        invocation => this.handleSetDate_(invocation.args['date']));
+        invocation => this.handleSetDateFromString_(invocation.args['date']));
     this.registerAction('setDates',
-        invocation => this.handleSetDates_(
+        invocation => this.handleSetDatesFromString_(
             invocation.args['startDate'],
             invocation.args['endDate']));
     this.registerAction('clear', () => this.handleClear_());
+    this.registerAction('today',
+        this.todayAction_.bind(this, d => this.handleSetDate_(d)));
+    this.registerAction('startToday',
+        this.todayAction_.bind(this, d => this.handleSetDates_(d, null)));
+    this.registerAction('endToday',
+        this.todayAction_.bind(this, d => this.handleSetDates_(null, d)));
 
     return this.mutateElement(() => {
       // NOTE(cvializ): There is no standard date format for just the first
@@ -500,14 +506,76 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Set the date via AMP action
+   * Trigger an action that consumes the current day plus an offset
+   * @param {function(!moment)} cb
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  todayAction_(cb, invocation) {
+    const moment = this.moment_();
+    const offset = invocation.args && invocation.args['offset'];
+    if (offset) {
+      moment.add(offset, 'days');
+    }
+    cb(moment);
+  }
+
+  /**
+   * Set the date via a string.
    * @param {string} date
    */
-  handleSetDate_(date) {
+  handleSetDateFromString_(date) {
     const momentDate = this.createMoment_(date);
-    this.setState_({date: momentDate});
-    this.updateDateField_(this.dateField_, momentDate);
-    this.triggerEvent_(DatePickerEvent.SELECT, this.getSelectData_(momentDate));
+    return this.handleSetDate_(momentDate);
+  }
+
+  /**
+   * Set the date via a moment object.
+   * @param {moment} date
+   */
+  handleSetDate_(date) {
+    this.setState_({date});
+    this.updateDateField_(this.dateField_, date);
+    this.element.setAttribute('date', this.getFormattedDate_(date));
+    this.triggerEvent_(DatePickerEvent.SELECT, this.getSelectData_(date));
+  }
+
+  /**
+   *
+   * @param {?string} startDate
+   * @param {?string} endDate
+   */
+  handleSetDatesFromString_(startDate, endDate) {
+    const momentStart = startDate ? this.createMoment_(startDate) : null;
+    const momentEnd = endDate ? this.createMoment_(endDate) : null;
+    this.handleSetDates_(momentStart, momentEnd);
+  }
+
+  /**
+   * Set one, both, or neither date via AMP action.
+   * @param {?moment} startDate
+   * @param {?moment} endDate
+   */
+  handleSetDates_(startDate, endDate) {
+    const state = {};
+
+    if (startDate) {
+      state.startDate = startDate;
+      this.element.setAttribute(
+          'start-date', this.getFormattedDate_(startDate));
+      this.updateDateField_(this.startDateField_, startDate);
+    }
+    if (endDate) {
+      state.endDate = endDate;
+      this.element.setAttribute('end-date', this.getFormattedDate_(endDate));
+      this.updateDateField_(this.endDateField_, endDate);
+    }
+
+    // TODO(cvializ): check if valid date, blocked, outside range, etc
+    this.setState_(state);
+    if (startDate && endDate) {
+      const selectData = this.getSelectData_(startDate, endDate);
+      this.triggerEvent_(DatePickerEvent.SELECT, selectData);
+    }
   }
 
   /**
@@ -525,34 +593,6 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Set one, both, or neither date via AMP action.
-   * @param {?string} startDate
-   * @param {?string} endDate
-   */
-  handleSetDates_(startDate, endDate) {
-    const state = {};
-    let momentStart, momentEnd;
-
-    if (startDate) {
-      momentStart = this.createMoment_(startDate);
-      state.startDate = momentStart;
-      this.updateDateField_(this.startDateField_, momentStart);
-    }
-    if (endDate) {
-      momentEnd = this.createMoment_(endDate);
-      this.updateDateField_(this.endDateField_, momentEnd);
-      state.endDate = momentEnd;
-    }
-
-    // TODO(cvializ): check if valid date, blocked, outside range, etc
-    this.setState_(state);
-    if (momentStart && momentEnd) {
-      const selectData = this.getSelectData_(momentStart, momentEnd);
-      this.triggerEvent_(DatePickerEvent.SELECT, selectData);
-    }
-  }
-
-  /**
    * Clear the values from the input fields and
    * trigger events with the empty values.
    */
@@ -561,6 +601,9 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.clearDateField_(this.dateField_);
     this.clearDateField_(this.startDateField_);
     this.clearDateField_(this.endDateField_);
+    this.element.removeAttribute('date');
+    this.element.removeAttribute('start-date');
+    this.element.removeAttribute('end-date');
     this.triggerEvent_(DatePickerEvent.SELECT, null);
 
     this.setState_({focusedInput: this.ReactDatesConstants_.START_DATE});
@@ -703,7 +746,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   handleClick_(e) {
     const target = dev().assertElement(e.target);
     const clickWasInDatePicker = (
-      this.element.contains(target) || this.isDateField_(target)
+      this.container_.contains(target) || this.isDateField_(target)
     );
 
     if (!clickWasInDatePicker) {
@@ -891,18 +934,11 @@ export class AmpDatePicker extends AMP.BaseElement {
       const endDate = shouldSetEndDate ? json['endDate'] : null;
 
       if (date) {
-        this.handleSetDate_(date);
+        this.handleSetDateFromString_(date);
       }
-
       if (startDate || endDate) {
-        this.handleSetDates_(startDate, endDate);
+        this.handleSetDatesFromString_(startDate, endDate);
       }
-
-      this.setState_({
-        date: this.createMoment_(date),
-        startDate: this.createMoment_(startDate),
-        endDate: this.createMoment_(endDate),
-      });
     });
   }
 
@@ -1054,7 +1090,9 @@ export class AmpDatePicker extends AMP.BaseElement {
       isFocused: this.mode_ == DatePickerMode.STATIC || !isFinalSelection,
     });
     this.updateDateField_(this.startDateField_, startDate);
+    this.element.setAttribute('start-date', this.getFormattedDate_(startDate));
     this.updateDateField_(this.endDateField_, endDate);
+    this.element.setAttribute('end-date', this.getFormattedDate_(endDate));
 
     if (isFinalSelection &&
         startDate &&
@@ -1072,6 +1110,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.triggerEvent_(DatePickerEvent.SELECT, this.getSelectData_(date));
     this.setState_({date});
     this.updateDateField_(this.dateField_, date);
+    this.element.setAttribute('date', this.getFormattedDate_(date));
 
     if (!this.props_.keepOpenOnDateSelect) {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);

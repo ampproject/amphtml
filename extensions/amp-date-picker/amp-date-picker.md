@@ -215,7 +215,7 @@ and the user can select a date range with a starting date and ending date.
 
 ## Attributes
 
-##### mode 
+##### mode
 
 Specifies how the date picker is rendered. Allowed values are:
 
@@ -223,14 +223,14 @@ Specifies how the date picker is rendered. Allowed values are:
 - **`overlay`**: The date picker calendar view is not rendered until the user interacts
 with required input field(s) nested in the `<amp-date-picker>`.
 
-##### type 
+##### type
 
 Specifies the selection type for the date picker. Allowed values are:
 
 - **`single`** (default): The user can select a single date.
 - **`range`**: The user can select a date range.
 
-##### input-selector 
+##### input-selector
 
 A query selector for a single date picker's input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
@@ -253,7 +253,7 @@ an initial date dynamically.
 </amp-date-picker>
 ```
 
-##### start-input-selector 
+##### start-input-selector
 
 A query selector for a date range picker's start date input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
@@ -277,7 +277,7 @@ an initial end date dynamically.
 </amp-date-picker>
 ```
 
-##### end-input-selector 
+##### end-input-selector
 
 A query selector for a date range picker's end date input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
@@ -301,27 +301,27 @@ an initial end date dynamically.
 </amp-date-picker>
 ```
 
-##### min 
+##### min
 
 The earliest date that the user may select.
 If no `min` attribute is present, the current date will be the minimum date.
 
-##### max 
+##### max
 
 The latest date that the user may select.
 If no `max` attribute is present, the date picker will have no maximum date.
 
-#####  month-format 
+#####  month-format
 
 The format to use for displaying the month in the calendar view.
 The default format is: `"MMMM YYYY"`.
 
-##### format 
+##### format
 
 The format to use for displaying and parsing the date in the input boxes.
 The default format is `"YYYY-MM-DD"`.
 
-##### week-day-format 
+##### week-day-format
 
 The format to use for displaying the day of the week in the calendar view.
 If no `week-day-format` is present, the weekdays display as the first character of the weekday.
@@ -338,37 +338,37 @@ If no `week-day-format` is present, the weekdays display as the first character 
 </amp-date-picker>
 ```
 
-##### locale 
+##### locale
 
 The locale to use for rendering the calendar view. The default locale is `"en"`.
 
-##### number-of-months 
+##### number-of-months
 
 The number of months to display at one time in the calendar view. The default is `"1"`.
 
-##### first-day-of-week 
+##### first-day-of-week
 
 The day to specify as the first day of the week (0-6). The default value is `"0"` (Sunday).
 
-##### blocked 
+##### blocked
 
 A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to prevent the user from selecting on the calendar.
 
-##### highlighted 
+##### highlighted
 
 A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention.
 Default styling is a blue dot on the date.
 
-##### day-size 
+##### day-size
 
 The size in `px` of the date cells in the calendar view table. The default is `39`.
 
-##### allow-blocked-ranges 
+##### allow-blocked-ranges
 
 If present, this attribute prevents the user from selecting a range with a blocked date.
 By default, this attribute is not present.
 
-##### src 
+##### src
 
 If present, `amp-date-picker` requests JSON data to populate certain attributes dynamically, as well as matching lists of dates to template `id`s for rendering days in the calendar.
 
@@ -472,7 +472,7 @@ that do not have an explicitly specified template.
 </amp-date-picker>
 ```
 
-##### fullscreen 
+##### fullscreen
 
 Renders the picker to fill the space available to it, like in a fullscreen lightbox.
 This works best with `layout="fill"`.
@@ -503,11 +503,11 @@ This works best with `layout="fill"`.
   </noscript>
 </amp-img>
 
-##### open-after-select 
+##### open-after-select
 
 If present, keeps the date picker overlay open after the user selects a date or dates. By default, this attribute is not present.
 
-##### open-after-clear 
+##### open-after-clear
 
 If present, keeps the date picker open after the user clears the date or dates. By default, this attribute is not present.
 
@@ -541,6 +541,15 @@ e.g. `on="tap: date-picker.setDate(date=state.value)"`
 
 Read more about [AMP Actions and Events](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
 
+##### clear
+
+The `clear` action clears the date value or values from the single date picker
+or date range picker with the specified `id`, e.g. `date-picker`.
+
+```html
+<button on="tap: date-picker.clear">Clear</button>
+```
+
 ##### setDate
 
 The `setDate` action assigns the value of the `date` argument to
@@ -563,15 +572,61 @@ the date range picker with the specified `id`, e.g. `date-picker`.
 </button>
 ```
 
-##### clear
+##### today
 
-The `clear` action clears the date value or values from the single date picker
-or date range picker with the specified `id`, e.g. `date-picker`.
+The `today` action assigns the value of the current day,
+plus an `offset` argument, to the single date picker with the specified `id`,
+e.g. `date-picker`. The `offset` argument value can be any integer.
 
 ```html
-<button on="tap: date-picker.clear">Clear</button>
+<button on="tap: date-picker.today">Today</button>
+<button on="tap: date-picker.today(offset=1)">Tomorrow</button>
+<button on="tap: date-picker.today(offset=-1)">Yesterday</button>
 ```
 
+##### startToday
+
+The `startToday` action assigns the value of the current day,
+plus an `offset` argument, to the date range picker with the specified `id`,
+e.g. `date-picker`. The `offset` argument value can be any integer.
+
+```html
+<button on="tap: date-picker.startToday">Today</button>
+<button on="tap: date-picker.startToday(offset=1)">Tomorrow</button>
+<button on="tap: date-picker.startToday(offset=-1)">Yesterday</button>
+```
+
+The `startToday` action can be combined with the `endToday` action
+to select ranges with an offset.
+
+```html
+<button
+  on="tap:date-picker.startToday(offset=7), date-picker.endToday(offset=14)">
+  Next week
+</button>
+```
+
+##### endToday
+
+The `endToday` action assigns the value of the current day,
+plus an `offset` argument, to the date range picker with the specified `id`,
+e.g. `date-picker`. The `offset` argument value can be any integer.
+
+```html
+<button on="tap: date-picker.endToday">Today</button>
+<button on="tap: date-picker.endToday(offset=1)">Tomorrow</button>
+<button on="tap: date-picker.endToday(offset=-1)">Yesterday</button>
+```
+
+The `endToday` action can be combined with the `startToday` action
+to select ranges with an offset.
+
+```html
+<button
+  on="tap:date-picker.startToday(offset=7), date-picker.endToday(offset=14)">
+  Next week
+</button>
+```
 
 ## Templates
 

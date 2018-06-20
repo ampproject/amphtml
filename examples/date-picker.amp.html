@@ -209,6 +209,21 @@
   ></amp-date-picker>
 </amp-lightbox>
 
+<h2>Actions</h2>
+<h3>Today</h3>
+<button on="tap: tsp.today">Today</button>
+<button on="tap: tsp.today(offset=1)">Tomorrow</button>
+<button on="tap: tsp.clear">Clear</button>
+<amp-date-picker id="tsp" layout="fixed-height" height="360"></amp-date-picker>
+
+<h3>Start and End Today</h3>
+<button on="tap: trp.startToday">Start Today</button>
+<button on="tap: trp.endToday(offset=1)">End Tomorrow</button>
+<button on="tap: trp.startToday,trp.endToday(offset=7)">Select one week</button>
+<button on="tap: trp.startToday(offset=7),trp.endToday(offset=14)">Select next week</button>
+<button on="tap: trp.clear">Clear</button>
+<amp-date-picker id="trp" type="range" layout="fixed-height" height="360"></amp-date-picker>
+
 <div class="spacer"></div>
 </body>
 </html>
