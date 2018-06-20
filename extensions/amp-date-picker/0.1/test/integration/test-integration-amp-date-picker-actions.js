@@ -19,7 +19,8 @@ import {poll} from '../../../../../testing/iframe';
 import {toggleExperiment} from '../../../../../src/experiments';
 
 const config = describe.configure().ifNewChrome();
-config.run('amp-date-picker', function() {
+config.skip('amp-date-picker', function() {
+  this.skip(); // TODO(cvializ): unskip
   this.timeout(10000);
 
   const extensions = ['amp-date-picker'];
