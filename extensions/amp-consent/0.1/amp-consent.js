@@ -306,9 +306,11 @@ export class AmpConsent extends AMP.BaseElement {
       // !important.
       setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
     });
-    if (this.dialogResolver_[this.currentDisplayInstance_]) {
-      this.dialogResolver_[this.currentDisplayInstance_]();
-      this.dialogResolver_[this.currentDisplayInstance_] = null;
+    const displayInstance = /** @type {string} */ (
+        this.currentDisplayInstance_);
+    if (this.dialogResolver_[displayInstance]) {
+      this.dialogResolver_[displayInstance]();
+      this.dialogResolver_[displayInstance] = null;
     }
     this.consentUIPendingMap_[this.currentDisplayInstance_] = false;
     this.currentDisplayInstance_ = null;

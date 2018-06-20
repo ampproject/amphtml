@@ -1264,7 +1264,7 @@ export class AmpA4A extends AMP.BaseElement {
           // whether to retry with an iframe after an ad request failure or just
           // give up and render the fallback content (or collapse the ad slot).
           const networkFailureHandlerResult =
-              this.onNetworkFailure(error, this.adUrl_);
+              this.onNetworkFailure(error, /** @type {string} */ (this.adUrl_));
           dev().assert(!!networkFailureHandlerResult);
           if (networkFailureHandlerResult.frameGetDisabled) {
             // Reset adUrl to null which will cause layoutCallback to not
@@ -1764,7 +1764,7 @@ export class AmpA4A extends AMP.BaseElement {
 /**
  * Attachs query string portion of ad url to error.
  * @param {!Error} error
- * @param {string} adUrl
+ * @param {?string} adUrl
  */
 export function assignAdUrlToError(error, adUrl) {
   if (!adUrl || (error.args && error.args['au'])) {

@@ -252,6 +252,7 @@ function compile(entryModuleFilenames, outputDir,
       '!extensions/amp-a4a/0.1/friendly-frame-renderer.js',
       '!extensions/amp-a4a/0.1/name-frame-renderer.js',
       '!extensions/amp-viewer-integration/0.1/examples/**/*.js',
+      '!third_party/react-externs/externs.js',
     ];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
@@ -317,6 +318,7 @@ function compile(entryModuleFilenames, outputDir,
         define,
         hide_warnings_for: hideWarningsFor,
         jscomp_error: [],
+        jscomp_off: ['strictMissingProperties'],
       },
     };
 
@@ -331,6 +333,7 @@ function compile(entryModuleFilenames, outputDir,
           'const',
           'constantProperty',
           'globalThis');
+      // TODO(erwinm): remove this when we've typed everything properly
       compilerOptions.compilerFlags.conformance_configs =
           'build-system/conformance-config.textproto';
     }

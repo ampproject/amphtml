@@ -104,6 +104,12 @@ window.AMP_TAG;
 window.AMP = {};
 window.AMP._ = {};
 
+/**
+ * Registers a new custom element.
+ * @param {function(!Object)|ExtensionPayload} fnOrStruct
+ */
+window.AMP.push = function() {};
+
 /** @constructor */
 function AmpConfigType() {}
 
