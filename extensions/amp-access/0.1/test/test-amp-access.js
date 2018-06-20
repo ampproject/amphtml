@@ -38,9 +38,7 @@ describes.fakeWin('AccessService', {
     win = env.win;
     ampdoc = env.ampdoc;
     document = win.document;
-    // Polyfill performance.now() method as it is not available in fakeWin
-    // environment.
-    win.performance = {now: () => Date.now()};
+
     cidServiceForDocForTesting(ampdoc);
     installPerformanceService(win);
 
@@ -261,9 +259,7 @@ describes.fakeWin('AccessService authorization', {
     document = win.document;
     clock = sandbox.useFakeTimers();
     clock.tick(0);
-    // Polyfill performance.now() method as it is not available in fakeWin
-    // environment.
-    win.performance = {now: () => Date.now()};
+
     cidServiceForDocForTesting(ampdoc);
     installPerformanceService(win);
 
@@ -659,9 +655,7 @@ describes.fakeWin('AccessService pingback', {
     ampdoc = env.ampdoc;
     document = win.document;
     clock = sandbox.useFakeTimers();
-    // Polyfill performance.now() method as it is not available in fakeWin
-    // environment.
-    win.performance = {now: () => Date.now()};
+
     cidServiceForDocForTesting(ampdoc);
     installPerformanceService(win);
 
@@ -976,9 +970,7 @@ describes.fakeWin('AccessService login', {
     ampdoc = env.ampdoc;
     document = win.document;
     clock = sandbox.useFakeTimers();
-    // Polyfill performance.now() method as it is not available in fakeWin
-    // environment.
-    win.performance = {now: () => Date.now()};
+
     cidServiceForDocForTesting(ampdoc);
     installPerformanceService(win);
 
@@ -1348,9 +1340,7 @@ describes.fakeWin('AccessService analytics', {
     win = env.win;
     ampdoc = env.ampdoc;
     document = win.document;
-    // Polyfill performance.now() method as it is not available in fakeWin
-    // environment.
-    win.performance = {now: () => Date.now()};
+
     cidServiceForDocForTesting(ampdoc);
     installPerformanceService(win);
 
@@ -1468,9 +1458,7 @@ describes.fakeWin('AccessService multiple sources', {
     document = win.document;
     clock = sandbox.useFakeTimers();
     clock.tick(0);
-    // Polyfill performance.now() method as it is not available in fakeWin
-    // environment.
-    win.performance = {now: () => Date.now()};
+
     cidServiceForDocForTesting(ampdoc);
     installPerformanceService(win);
 
