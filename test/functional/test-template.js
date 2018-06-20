@@ -88,7 +88,6 @@ describes.fakeWin('Template', {}, env => {
   });
 
   it('should block render until template registered', () => {
-    templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
     const scriptElement = doc.createElement('script');
     scriptElement.setAttribute('custom-template',
@@ -106,7 +105,6 @@ describes.fakeWin('Template', {}, env => {
   });
 
   it('should unblock render when template registered', () => {
-    templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
     const scriptElement = doc.createElement('script');
     scriptElement.setAttribute('custom-template',
@@ -121,7 +119,6 @@ describes.fakeWin('Template', {}, env => {
   });
 
   it('should unblock render for parallel templates', () => {
-    templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
     const scriptElement = doc.createElement('script');
     scriptElement.setAttribute('custom-template',
