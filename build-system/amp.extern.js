@@ -479,3 +479,6 @@ AMP.require;
  * @typedef {function(number, boolean):?|function(number):?}
  */
 var TransitionDef;
+
+/** @type {string|undefined} */
+Navigator.prototype.userLanguage;

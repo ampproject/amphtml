@@ -202,6 +202,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-subscriptions/**/*.js',
       // Needed to access UserNotificationManager from other extensions
       'extensions/amp-user-notification/**/*.js',
+      // Needed to access amp-geo from other extensions
+      'extensions/amp-geo/**/*.js',
       // Needed for VideoService
       'extensions/amp-video-service/**/*.js',
       // Needed to access ConsentPolicyManager from other extensions
@@ -270,7 +272,8 @@ function compile(entryModuleFilenames, outputDir,
           'ads/**/*.js');
     }
     if (checkTypes) {
-      srcs.push('!extensions/amp-viewer-integration/0.1/test/**/*.js');
+      srcs.push('!extensions/amp-viewer-integration/0.1/test/**/*.js',
+          '!extensions/amp-a4a/0.1/test/utils.js');
     }
 
     let externs = baseExterns;
