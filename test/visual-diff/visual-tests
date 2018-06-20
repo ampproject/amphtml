@@ -42,30 +42,35 @@
    *   // Name used to identify snapshots of webpage on Percy.
    *   "name": "Foo test",
    *
-   *   // CSS elements that must never appear on the webpage.
+   *   // [optional] CSS elements that must never appear on the webpage.
    *   "forbidden_css": [
    *     ".invalid-css-class",
    *     ".another-invalid-css-class"
    *   ],
    *
-   *   // CSS elements that may initially appear on the page, but must
+   *   // [optional] CSS elements that may initially appear on the page, but must
    *   // eventually disappear.
    *   "loading_incomplete_css": [
    *     ".loading-in-progress-css-class",
    *     ".another-loading-in-progress-css-class"
    *   ],
    *
-   *   // CSS elements that must eventually appear on the page.
+   *   // [optional] CSS elements that must eventually appear on the page.
    *   "loading_complete_css": [
    *     ".loading-complete-css-class",
    *     ".another-loading-complete-css-class"
    *   ],
    *
-   *   // Experiments that must be enabled via cookies.
+   *   // [optional] Experiments that must be enabled via cookies.
    *   "experiments": [
    *     "amp-feature-one",
    *     "amp-feature-two"
-   *   ]
+   *   ],
+   *
+   *   // [optional] Add this key and set to true to skip this test. You should
+   *   // also add an explanation and a link to an example of a previous
+   *   // snapshot on Percy that demonstrate the flakiness of this test.
+   *   "flaky": true
    * },
    */
     {
@@ -148,6 +153,9 @@
       "name": "Amp By Example"
     },
     {
+      "flaky": true,
+      // An <amp-access> block sometimes doesn't become visible on time
+      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44814614/1400?mode=diff&browser=firefox&snapshot=44814614
       "url": "examples/visual-tests/amp-by-example/components/amp-access/index.html",
       "name": "amp-access - Amp By Example"
     },
@@ -160,6 +168,9 @@
       "name": "amp-accordion - Amp By Example"
     },
     {
+      "flaky": true,
+      // Loading progress bar sometimes takes longer to disappear
+      // e.g., https://percy.io/ampproject/danielrozenberg/builds/801880/view/45150930/1400?mode=diff&browser=firefox&snapshot=45150930
       "url": "examples/visual-tests/amp-by-example/components/amp-ad/index.html",
       "name": "amp-ad - Amp By Example"
     },
@@ -168,6 +179,9 @@
       "name": "amp-analytics - Amp By Example"
     },
     {
+      "flaky": true,
+      // Loading indicator sometimes takes longer to disappear
+      // e.g., https://percy.io/ampproject/danielrozenberg/builds/801880/view/45150955/1400?mode=diff&browser=firefox&snapshot=45150955
       "url": "examples/visual-tests/amp-by-example/components/amp-anim/index.html",
       "name": "amp-anim - Amp By Example"
     },
@@ -176,10 +190,16 @@
       "name": "amp-app-banner - Amp By Example"
     },
     {
+      "flaky": true,
+      // Browser audio controls occasionally appear
+      // e.g., https://percy.io/ampproject/danielrozenberg/builds/801993/view/45159419/1400?mode=diff&browser=firefox&snapshot=45159419
       "url": "examples/visual-tests/amp-by-example/components/amp-audio/index.html",
       "name": "amp-audio - Amp By Example"
     },
     {
+      "flaky": true,
+      // Uses <amp-vimeo> as an example, which occasionally throttles Percy, resulting in a different placeholder image
+      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44814688/1400?mode=diff&browser=firefox&snapshot=44814688
       "url": "examples/visual-tests/amp-by-example/components/amp-bind/index.html",
       "name": "amp-bind - Amp By Example"
     },
@@ -188,6 +208,9 @@
       "name": "amp-bodymovin-animation - Amp By Example"
     },
     {
+      "flaky": true,
+      // Embedded video sometimes takes longer to load, resulting in either a video placeholder or the provider's logo
+      // e.g., https://percy.io/ampproject/danielrozenberg/builds/801880/view/45150404/1400?mode=diff&browser=firefox&snapshot=45150404
       "url": "examples/visual-tests/amp-by-example/components/amp-brid-player/index.html",
       "name": "amp-brid-player - Amp By Example"
     },
@@ -204,6 +227,9 @@
       "name": "amp-carousel - Amp By Example"
     },
     {
+      "flaky": true,
+      // Embedded Daily Motion video is occasionally "Gone" (presumably HTTP status 410?)
+      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44814111/411?mode=diff&browser=firefox&snapshot=44814111
       "url": "examples/visual-tests/amp-by-example/components/amp-dailymotion/index.html",
       "name": "amp-dailymotion - Amp By Example"
     },
@@ -216,10 +242,16 @@
       "name": "amp-dynamic-css-classes - Amp By Example"
     },
     {
+      "flaky": true,
+      // The experiment deliberately changes the color of a button by random chance with each execution
+      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44814744/1400?mode=diff&browser=firefox&snapshot=44814744
       "url": "examples/visual-tests/amp-by-example/components/amp-experiment/index.html",
       "name": "amp-experiment - Amp By Example"
     },
     {
+      "flaky": true,
+      // Height of Facebook iframe changes between each run
+      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44814776/1400?mode=diff&browser=firefox&snapshot=44814776
       "url": "examples/visual-tests/amp-by-example/components/amp-facebook/index.html",
       "name": "amp-facebook - Amp By Example"
     },
@@ -260,6 +292,9 @@
       "name": "amp-geo - Amp By Example"
     },
     {
+      "flaky": true,
+      // Embedded gfycat is occasionally overlayed with a 403 Error page
+      // https://percy.io/ampproject/amphtml/builds/797668/view/44814208/1400?mode=diff&browser=firefox&snapshot=44814208
       "url": "examples/visual-tests/amp-by-example/components/amp-gfycat/index.html",
       "name": "amp-gfycat - Amp By Example"
     },
@@ -276,6 +311,9 @@
       "name": "amp-hulu - Amp By Example"
     },
     {
+      "flaky": true,
+      // Uses <amp-vimeo> as an example, which occasionally throttles Percy, resulting in a different placeholder image
+      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44814236/411?mode=diff&browser=firefox&snapshot=44814236
       "url": "examples/visual-tests/amp-by-example/components/amp-iframe/index.html",
       "name": "amp-iframe - Amp By Example"
     },
@@ -376,6 +414,9 @@
       "name": "amp-timeago - Amp By Example"
     },
     {
+      "flaky": true,
+      // Flakiness reason: Height of Twitter iframe changes between each run
+      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44814441/1400?mode=diff&browser=firefox&snapshot=44814441
       "url": "examples/visual-tests/amp-by-example/components/amp-twitter/index.html",
       "name": "amp-twitter - Amp By Example"
     },
@@ -388,10 +429,16 @@
       "name": "amp-video - Amp By Example"
     },
     {
+      "flaky": true,
+      // Vimeo occasionally throttles Percy, in a different placeholder image
+      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44815088/1400?mode=diff&browser=firefox&snapshot=44815088
       "url": "examples/visual-tests/amp-by-example/components/amp-vimeo/index.html",
       "name": "amp-vimeo - Amp By Example"
     },
     {
+      "flaky": true,
+      // The Vine embed has an animated logo
+      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44814491/1400?mode=diff&browser=firefox&snapshot=44814491
       "url": "examples/visual-tests/amp-by-example/components/amp-vine/index.html",
       "name": "amp-vine - Amp By Example"
     },
