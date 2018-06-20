@@ -257,13 +257,13 @@
   },
   "shinystat": {
     "base": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi",
-    "commpar": "AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2",
+    "commpar": "AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2",
     "pagepar": "&VIE=_viewer_&PLT=_page_load_time_",
     "eventpar": "&SSXL=1",
     "linkpar": "&LINK=$outboundLink",
-    "pageview": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&VIE=_viewer_&PLT=_page_load_time_",
-    "event": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&SSXL=1",
-    "link": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&LINK=$outboundLink"
+    "pageview": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&VIE=_viewer_&PLT=_page_load_time_",
+    "event": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&SSXL=1",
+    "link": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&LINK=$outboundLink"
   },
   "snowplow": {
     "aaVersion": "amp-0.2",
