@@ -223,7 +223,9 @@ When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error
 
 Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **direct child element of form** and include a `<template></template>` tag inside it, or a `template="id_of_other_template"` attribute, to render the response in it.
 
-The response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
+Using the `submitting` special marker attribute, publishers can also include a template to display a message when the form is submitting. The template for this attribute will have access to the form's input fields for any display purposes. Please see the full form example below for how to use the `submitting` attribute.
+
+For submit-success and submit-error, the response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
 
 **Success Response**
 ```json
@@ -244,13 +246,21 @@ The response is expected to be a valid JSON Object. For example, if the publishe
 
 Both success and error responses should have a `Content-Type: application/json` header. `submit-success` will render for all responses that has a status of `2XX`, all other statuses will render `submit-error`.
 
-Publishers can render these in a inlined template inside their forms as follows.
+Publishers can render these responses in a inlined template inside their forms as follows:
+
+*Note*: This form uses the `submitting` attribute to display a message to the user when the form is submitting. 
 
 ```html
 <form ...>
   <fieldset>
+    <input type="text" name="firstName" />
     ...
   </fieldset>
+  <div submitting>
+    <template type="amp-mustache">
+      Form submitting... Thank you for waiting {{firstName}}.
+    </template>
+  </div>
   <div submit-success>
     <template type="amp-mustache">
       Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
@@ -265,7 +275,7 @@ Publishers can render these in a inlined template inside their forms as follows.
 </form>
 ```
 
-  Publishers can render the responses in a referenced template defined earlier in the document by using the template's id as the value of the `template` attribute, set on the elements with the `submit-success` and `submit-error` attributes.
+Publishers can render the responses in a referenced template defined earlier in the document by using the template's id as the value of the `template` attribute, set on the elements with the `submit-success` and `submit-error` attributes.
 
 ```html
 <template type="amp-mustache" id="submit_success_template">
