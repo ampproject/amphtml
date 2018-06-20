@@ -54,7 +54,7 @@ export function convertEasingKeyword(keyword) {
 /**
  * Returns absolute number for a given percentage
  *
- * @param {*} val
+ * @param {string} val
  * @return {?number}
  */
 export function resolvePercentageToNumber(val) {
