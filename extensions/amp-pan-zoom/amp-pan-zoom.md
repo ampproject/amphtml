@@ -29,7 +29,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js">&lt;/script></code></td>
   </tr>
     <tr>
     <td width="40%"><strong>Supported Layouts</strong></td>
