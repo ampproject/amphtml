@@ -31,10 +31,13 @@ import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
   isJsonScriptTag,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setImportantStyles, toggle} from '../../../src/style';
@@ -44,19 +47,21 @@ const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
 
 export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
+export const EXTERNAL_CONSENT_FLOW = 'external-consent-flow';
 
 /**
- * @enum {number}
+ * @enum {string}
  * @visibleForTesting
  */
 export const ACTION_TYPE = {
-  ACCEPT: 0,
-  REJECT: 1,
-  DISMISS: 2,
+  ACCEPT: 'accept',
+  REJECT: 'reject',
+  DISMISS: 'dismiss',
 };
 
 
 export class AmpConsent extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -103,6 +108,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
   }
 
+  /** @override */
   getConsentPolicy() {
     // amp-consent should not be blocked by itself
     return null;
@@ -120,6 +126,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.scheduleDisplay_(consentId);
   }
 
+  /** @override */
   buildCallback() {
     if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
       return;
@@ -180,6 +187,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
+
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
       let consentId = args && args['consent'];
@@ -187,6 +195,44 @@ export class AmpConsent extends AMP.BaseElement {
         consentId = Object.keys(this.consentConfig_)[0];
       }
       this.handlePostPrompt_(consentId || '');
+    });
+
+    this.enableExternalInteractions_();
+  }
+
+  /**
+   * Listen to external consent flow iframe's response
+   */
+  enableExternalInteractions_() {
+    if (!isExperimentOn(this.win, EXTERNAL_CONSENT_FLOW)) {
+      return;
+    }
+
+    this.win.addEventListener('message', event => {
+      if (!this.currentDisplayInstance_) {
+        return;
+      }
+
+      const data = getData(event);
+
+      if (!data || data['type'] != 'consent-response') {
+        return;
+      }
+
+      if (!data['action']) {
+        user().error(TAG, 'consent-response message missing required info');
+        return;
+      }
+
+      const iframes = scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
+
+      for (let i = 0; i < iframes.length; i++) {
+        if (iframes[i].contentWindow === event.source) {
+          const action = data['action'];
+          this.handleAction_(action);
+          return;
+        }
+      }
     });
   }
 
@@ -278,9 +324,14 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Handler User action
-   * @param {ACTION_TYPE} action
+   * @param {string} action
    */
   handleAction_(action) {
+    if (!isEnumValue(ACTION_TYPE, action)) {
+      // Unrecognized action
+      return;
+    }
+
     if (!this.currentDisplayInstance_) {
       dev().error(TAG, 'No consent ui is displaying, ' +
           `consent id ${this.currentDisplayInstance_}`);
