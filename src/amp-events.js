@@ -16,19 +16,18 @@
 
 /**
  * Common AMP events.
- * @enum {number}
+ * @enum {string}
  */
 export const AmpEvents = {
-  // Values start at 801 for easier code searchability and to avoid conflation
-  // with HTTP status codes.
-  DOM_UPDATE: 801,
+  // Use short, unique strings to reduce bundle size impact.
+  BUILT: 'e1',
+  DOM_UPDATE: 'e2',
   // The following codes are only used for testing.
   // TODO(choumx): Move these to a separate enum so they can be DCE'd.
-  BUILT: 901,
-  ATTACHED: 902,
-  STUBBED: 903,
-  LOAD_START: 904,
-  LOAD_END: 905,
-  ERROR: 906,
-  VISIBILITY_CHANGE: 907,
+  ATTACHED: 'e3',
+  STUBBED: 'e4',
+  LOAD_START: 'e5',
+  LOAD_END: 'e6',
+  ERROR: 'e7',
+  VISIBILITY_CHANGE: 'e8',
 };
