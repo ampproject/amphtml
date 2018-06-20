@@ -45,8 +45,7 @@ const TAG = 'amp-story-consent';
  * @const {!Object}
  */
 const DEFAULT_OPTIONAL_PARAMETERS = {
-  externalLinkTitle: null,
-  externalLink: null,
+  externalLink: {},
   onlyAccept: false,
 };
 
@@ -119,14 +118,15 @@ const getTemplate = (config, consentId, logoSrc) => ({
                   tag: 'a',
                   attrs: dict({
                     'class': 'i-amphtml-story-consent-external-link ' +
-                        (!(config.externalLink && config.externalLinkTitle) ?
-                        'i-amphtml-hidden' : ''),
-                    'href': config.externalLink,
+                        (!(config.externalLink.title &&
+                            config.externalLink.href) ?
+                          'i-amphtml-hidden' : ''),
+                    'href': config.externalLink.href,
                     'target': '_top',
-                    'title': config.externalLinkTitle,
+                    'title': config.externalLink.title,
                   }),
                   children: [],
-                  unlocalizedString: config.externalLinkTitle,
+                  unlocalizedString: config.externalLink.title,
                 },
               ],
             },
@@ -313,15 +313,15 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     // Runs the validation if any of the title or link are provided, since
     // both have to be provided for the external link to be displayed.
-    if (this.storyConsentConfig_.externalLinkTitle ||
-        this.storyConsentConfig_.externalLink) {
+    if (this.storyConsentConfig_.externalLink.href ||
+        this.storyConsentConfig_.externalLink.title) {
       user().assertString(
-          this.storyConsentConfig_.externalLinkTitle,
-          `${TAG}: config requires "externalLinkTitle" to be a string`);
+          this.storyConsentConfig_.externalLink.title,
+          `${TAG}: config requires "externalLink.title" to be a string`);
       user().assertString(
-          this.storyConsentConfig_.externalLink,
-          `${TAG}: config requires "externalLink" to be an absolute URL`);
-      assertAbsoluteHttpOrHttpsUrl(this.storyConsentConfig_.externalLink);
+          this.storyConsentConfig_.externalLink.href,
+          `${TAG}: config requires "externalLink.href" to be an absolute URL`);
+      assertAbsoluteHttpOrHttpsUrl(this.storyConsentConfig_.externalLink.href);
     }
   }
 

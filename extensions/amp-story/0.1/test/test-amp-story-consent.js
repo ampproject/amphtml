@@ -43,8 +43,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
       message: 'Foo message about the consent.',
       vendors: ['Item 1', 'Item 2'],
       onlyAccept: false,
-      externalLinkTitle: null,
-      externalLink: null,
+      externalLink: {},
     };
 
     const styles = {'background-color': 'rgb(0, 0, 0)'};
@@ -178,30 +177,30 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   });
 
   it('should require an external link title if a URL is provided', () => {
-    defaultConfig.externalLink = 'https://example.com';
+    defaultConfig.externalLink.href = 'https://example.com';
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('config requires "externalLinkTitle" to be a string');
+      }).to.throw('config requires "externalLink.title" to be a string');
     });
   });
 
   it('should require an external URL if a title is provided', () => {
-    defaultConfig.externalLinkTitle = 'Privacy settings';
+    defaultConfig.externalLink.title = 'Privacy settings';
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('config requires "externalLink" to be an absolute URL');
+      }).to.throw('config requires "externalLink.href" to be an absolute URL');
     });
   });
 
   it('should validate an external absolute URL', () => {
-    defaultConfig.externalLinkTitle = 'Privacy settings';
-    defaultConfig.externalLink = '/foo.html';
+    defaultConfig.externalLink.title = 'Privacy settings';
+    defaultConfig.externalLink.href = '/foo.html';
     setConfig(defaultConfig);
 
     allowConsoleError(() => {
@@ -212,8 +211,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   });
 
   it('should show the external link', () => {
-    defaultConfig.externalLinkTitle = 'Privacy settings';
-    defaultConfig.externalLink = 'https://example.com';
+    defaultConfig.externalLink.title = 'Privacy settings';
+    defaultConfig.externalLink.href = 'https://example.com';
     setConfig(defaultConfig);
 
     storyConsent.buildCallback();
