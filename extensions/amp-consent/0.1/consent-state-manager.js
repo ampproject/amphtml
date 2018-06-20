@@ -169,7 +169,7 @@ export class ConsentStateManager {
  */
 export class ConsentInstance {
   constructor(ampdoc, id, config) {
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private {string} */
@@ -293,7 +293,8 @@ export class ConsentInstance {
         requireAmpResponseSourceOrigin: false,
       };
       Services.viewerForDoc(this.ampdoc_).whenFirstVisible().then(() => {
-        Services.xhrFor(this.ampdoc_.win).fetchJson(this.onUpdateHref_, init);
+        Services.xhrFor(this.ampdoc_.win).fetchJson(
+            /** @type {string} */ (this.onUpdateHref_), init);
       });
     });
   }
