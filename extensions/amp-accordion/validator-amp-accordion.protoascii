@@ -30,6 +30,7 @@ tags: {  # <amp-accordion>
   attrs: { name: "animate" value: "" }
   attrs: { name: "disable-session-states" value: "" }
   attrs: { name: "expand-single-section" value: "" }
+  attr_lists: "extended-amp-global"
   child_tags: {
     child_tag_name_oneof: "SECTION"
   }
