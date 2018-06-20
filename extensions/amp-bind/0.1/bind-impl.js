@@ -38,7 +38,7 @@ import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/sanitizer';
+import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-bind';
@@ -144,10 +144,17 @@ export class Bind {
     this.overridableKeys_ = [];
 
     /**
-     * Upper limit on number of bindings for performance.
+     * Upper limit on total number of bindings.
+     *
+     * The initial value is set to 1000 which, based on ~2ms expression parse
+     * time, caps "time to interactive" at ~2s after page load.
+     *
+     * User interactions can add new bindings (e.g. infinite scroll), so this
+     * can increase over time to a final limit of 2000 bindings.
+     *
      * @private {number}
      */
-    this.maxNumberOfBindings_ = 1000; // Based on ~2ms to parse an expression.
+    this.maxNumberOfBindings_ = 1000;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -261,7 +268,11 @@ export class Bind {
 
     const expression = args[RAW_OBJECT_ARGS_KEY];
     if (expression) {
-      // Signal on first mutation.
+      // Increment bindings limit by 500 on each invocation to a max of 2000.
+      this.maxNumberOfBindings_ = Math.min(2000,
+          Math.max(1000, this.maxNumberOfBindings_ + 500));
+
+      // Signal first mutation (subsequent signals are harmless).
       this.signals_.signal('FIRST_MUTATE');
 
       const scope = dict();
@@ -294,7 +305,15 @@ export class Bind {
    */
   setStateWithExpression(expression, scope) {
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
-        .then(result => this.setState(result));
+        .then(result => this.setState(result))
+        .then(() => {
+          this.history_.replace({
+            data: {
+              'amp-bind': this.state_,
+            },
+            title: this.localWin_.document.title,
+          });
+        });
     return this.setStatePromise_;
   }
 
@@ -319,9 +338,15 @@ export class Bind {
       });
 
       const onPop = () => this.setState(oldState);
-      this.history_.push(onPop);
-
-      return this.setState(result);
+      return this.setState(result)
+          .then(() => {
+            this.history_.push(onPop, {
+              data: {
+                'amp-bind': this.state_,
+              },
+              title: this.localWin_.document.title,
+            });
+          });
     });
   }
 
@@ -1079,14 +1104,8 @@ export class Bind {
             mutated = true;
           }
         } else if (newValue !== oldValue) {
-          const rewrittenValue =
-              this.rewriteAttributes_(element, property, String(newValue));
-          if (rewrittenValue) { // Rewriting can fail due to e.g. invalid URL.
-            if (updateProperty) {
-              element[property] = rewrittenValue;
-            }
-            mutated = true;
-          }
+          mutated = this.rewriteAttributes_(
+              element, property, String(newValue), updateProperty);
         }
 
         if (mutated) {
@@ -1099,26 +1118,29 @@ export class Bind {
 
   /**
    * Performs CDN rewrites for the given mutation and updates the element.
-   * Returns the rewrite of `value` on success. Otherwise, returns undefined.
    * @see amp-cache-modifications.md#url-rewrites
    * @param {!Element} element
-   * @param {string} property
+   * @param {string} attrName
    * @param {string} value
-   * @return {string|undefined}
+   * @param {boolean} updateProperty If the property with the same name should
+   *    be updated as well.
+   * @return {boolean} Whether or not the rewrite was successful.
    * @private
    */
-  rewriteAttributes_(element, property, value) {
+  rewriteAttributes_(element, attrName, value, updateProperty) {
     // Rewrite attributes if necessary. Not done in worker since it relies on
     // `url#parseUrl` which uses <a>. Worker has URL API but not on IE11.
-    let rewrittenValue;
     try {
-      rewrittenValue = rewriteAttributesForElement(element, property, value);
+      rewriteAttributesForElement(
+          element, attrName, value, /* opt_location */ undefined,
+          updateProperty);
+      return true;
     } catch (e) {
       const error = user().createError(`${TAG}: "${value}" is not a ` +
-          `valid result for [${property}]`, e);
+          `valid result for [${attrName}]`, e);
       reportError(error, element);
     }
-    return rewrittenValue;
+    return false;
   }
 
   /**

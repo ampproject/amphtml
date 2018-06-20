@@ -332,7 +332,8 @@ class PreconnectService {
     // Unfortunately there is no reliable way to feature detect whether
     // preconnect is supported, so we do this only in Safari, which is
     // the most important browser without support for it.
-    if (this.features_.preconnect || !this.platform_.isSafari()) {
+    if (this.features_.preconnect ||
+        !(this.platform_.isSafari() || this.platform_.isIos())) {
       return;
     }
 
