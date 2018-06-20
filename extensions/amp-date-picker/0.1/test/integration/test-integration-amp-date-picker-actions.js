@@ -107,7 +107,7 @@ config.run('amp-date-picker', function() {
 
   const startTodayButtonBody = `
     <button id="today" on="tap:picker.startToday">Today</button>
-    <button id="tomorrow" on="tap:picker.startToday(offset=1)">Today</button>
+    <button id="tomorrow" on="tap:picker.startToday(offset=1)">Tomorrow</button>
     <button id="yesterday" on="tap:picker.startToday(offset=-1)">
       Yesterday
     </button>
@@ -173,8 +173,10 @@ config.run('amp-date-picker', function() {
 
   const endTodayButtonBody = `
     <button id="today" on="tap:picker.endToday">Today</button>
-    <button id="tomorrow" on="tap:picker.endToday(offset=1)">Today</button>
+    <button id="tomorrow" on="tap:picker.endToday(offset=1)">Tomorrow</button>
     <button id="yesterday" on="tap:picker.endToday(offset=-1)">
+      Yesterday
+    </button>
   `;
 
   describes.integration('picker.endToday', {
