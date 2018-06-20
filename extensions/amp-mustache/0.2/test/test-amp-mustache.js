@@ -16,7 +16,7 @@
 
 import {AmpMustache} from '../amp-mustache';
 
-describe('amp-mustache 0.1', () => {
+describe('amp-mustache 0.2', () => {
   it('should render', () => {
     const templateElement = document.createElement('template');
     templateElement.content.textContent = 'value = {{value}}';
@@ -41,13 +41,11 @@ describe('amp-mustache 0.1', () => {
         'value = <a href="{{value}}">abc</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    allowConsoleError(() => {
-      const result = template.render({
-        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-      });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a target="_top">abc</a>');
+    const result = template.render({
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <a target="_top">abc</a>');
   });
 
   it('should sanitize templated tag names', () => {
@@ -72,13 +70,11 @@ describe('amp-mustache 0.1', () => {
           'value = <a {{value}}="javascript:alert(0)">abc</a>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
-      allowConsoleError(() => {
-        const result = template.render({
-          value: 'href',
-        });
-        expect(result).to.not.equal('<a href="javascript:alert(0)">abc</a>');
-        expect(result.firstElementChild.getAttribute('href')).to.be.null;
+      const result = template.render({
+        value: 'href',
       });
+      expect(result).to.not.equal('<a href="javascript:alert(0)">abc</a>');
+      expect(result.firstElementChild.getAttribute('href')).to.be.null;
     });
 
     it('should sanitize templated bind attribute names', () => {
@@ -87,15 +83,13 @@ describe('amp-mustache 0.1', () => {
           'value = <p [{{value}}]="javascript:alert()">ALERT</p>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
-      allowConsoleError(() => {
-        const result = template.render({
-          value: 'onclick',
-        });
-        expect(result).to.not
-            .equal('<p [onclick]="javascript:alert()">ALERT</p>');
-        expect(result.firstElementChild.getAttribute('[onclick]')).to.be.null;
-        expect(result.firstElementChild.getAttribute('onclick')).to.be.null;
+      const result = template.render({
+        value: 'onclick',
       });
+      expect(result).to.not
+          .equal('<p [onclick]="javascript:alert()">ALERT</p>');
+      expect(result.firstElementChild.getAttribute('[onclick]')).to.be.null;
+      expect(result.firstElementChild.getAttribute('onclick')).to.be.null;
     });
 
     it('should parse data-&style=value output correctly', () => {
@@ -104,13 +98,11 @@ describe('amp-mustache 0.1', () => {
           ' data-&style="color:red;">abc</a>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
-      allowConsoleError(() => {
-        const result = template.render({
-          value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-        });
-        expect(result./*OK*/innerHTML).to.equal(
-            'value = <a data-="" target="_top">abc</a>');
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
       });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <a target="_top">abc</a>');
     });
 
     it('should parse data-&attr=value output correctly', () => {
@@ -122,8 +114,7 @@ describe('amp-mustache 0.1', () => {
       const result = template.render({
         value: 'https://google.com/',
       });
-      expect(result./*OK*/innerHTML).to.equal('value = <a data-=""' +
-          ' href="https://google.com/" target="_top">abc</a>');
+      expect(result./*OK*/innerHTML).to.equal('value = <a>abc</a>');
     });
 
     it('should allow for data-attr=value to output correctly', () => {
@@ -132,14 +123,12 @@ describe('amp-mustache 0.1', () => {
           '<a data-my-attr="{{invalidValue}}" data-my-id="{{value}}">abc</a>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
-      allowConsoleError(() => {
-        const result = template.render({
-          value: 'myid',
-          invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
-        });
-        expect(result./*OK*/innerHTML).to.equal(
-            'value = <a data-my-id="myid">abc</a>');
+      const result = template.render({
+        value: 'myid',
+        invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
       });
+      expect(result./*OK*/innerHTML).to.equal('value = ' +
+          '<a data-my-id="myid" data-my-attr="javascript:alert();">abc</a>');
     });
   });
 
@@ -147,17 +136,15 @@ describe('amp-mustache 0.1', () => {
     it('should allow rendering inputs', () => {
       const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
-          '<input value="{{value}}" type="text" onchange="{{invalidValue}}">';
+          '<input value="{{value}}" onchange="{{invalidValue}}">';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
-      allowConsoleError(() => {
-        const result = template.render({
-          value: 'myid',
-          invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
-        });
-        expect(result./*OK*/innerHTML).to.equal(
-            'value = <input value="myid" type="text">');
+      const result = template.render({
+        value: 'myid',
+        invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
       });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
     });
 
     it('should allow rendering textarea', () => {
@@ -202,14 +189,14 @@ describe('amp-mustache 0.1', () => {
         type: 'file',
       });
       expect(fileResult./*OK*/innerHTML).to.equal(
-          'value = <input value="myid" type="file">');
+          'value = <input type="file" value="myid">');
 
       const passwordResult = template.render({
         value: 'myid',
         type: 'password',
       });
       expect(passwordResult./*OK*/innerHTML).to.equal(
-          'value = <input value="myid" type="password">');
+          'value = <input type="password" value="myid">');
     });
 
     it('should allow text input type rendering', () => {
@@ -223,7 +210,7 @@ describe('amp-mustache 0.1', () => {
         type: 'text',
       });
       expect(result./*OK*/innerHTML).to.equal(
-          'value = <input value="myid" type="text">');
+          'value = <input type="text" value="myid">');
     });
 
     it('should sanitize form-related attrs properly', () => {
@@ -259,7 +246,6 @@ describe('amp-mustache 0.1', () => {
   });
 
   describe('Nested templates', () => {
-
     it('should not sanitize nested amp-mustache templates', () => {
       const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
@@ -341,13 +327,11 @@ describe('amp-mustache 0.1', () => {
       const nestedTemplateElement = outerResult.querySelector('template');
       const nestedTemplate = new AmpMustache(nestedTemplateElement);
       nestedTemplate.compileCallback();
-      allowConsoleError(() => {
-        const nestedResult = nestedTemplate.render({
-          value: 'Nested',
-        });
-        expect(nestedResult./*OK*/innerHTML).to.equal(
-            '<div>nested</div>: Nested');
+      const nestedResult = nestedTemplate.render({
+        value: 'Nested',
       });
+      expect(nestedResult./*OK*/innerHTML).to.equal(
+          '<div>nested</div>: Nested');
     });
 
     it('should not allow users to pass data having key that starts with ' +
@@ -380,6 +364,19 @@ describe('amp-mustache 0.1', () => {
       expect(result./*OK*/innerHTML).to.equal('123');
     });
 
+    // Need to test this since DOMPurify doesn't have an required-attribute tag
+    // whitelist API. Instead, we hack around it with custom hooks.
+    it('should not allow unsupported templates after a supported one', () => {
+      const html =
+          '1<template type="amp-mustache">2</template>3<template>4</template>5';
+      const templateElement = document.createElement('template');
+      templateElement./*OK*/innerHTML = '{{{html}}}';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({html});
+      expect(result./*OK*/innerHTML).to.equal(
+          '1<template type="amp-mustache">2</template>35');
+    });
   });
 
   describe('triple-mustache', () => {
@@ -426,7 +423,7 @@ describe('amp-mustache 0.1', () => {
           + '<caption>caption</caption>'
           + '<thead><tr><th colspan="2">header</th></tr></thead>'
           + '<tbody><tr><td>'
-          + '<a href="http://www.google.com/" target="_top">google</a>'
+          + '<a target="_top" href="http://www.google.com/">google</a>'
           + '</td></tr></tbody>'
           + '<tfoot><tr>'
           + '<td colspan="2"><span>footer</span></td>'
@@ -440,14 +437,12 @@ describe('amp-mustache 0.1', () => {
       templateElement.content.textContent = 'value = {{{value}}}';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
-      allowConsoleError(() => {
-        const result = template.render({
-          value: '<a href="javascript:alert(\'XSS\')">test</a>'
-              + '<img src="x" onerror="alert(\'XSS\')" />',
-        });
-        expect(result./*OK*/innerHTML).to.equal(
-            'value = <a target="_top">test</a>');
+      const result = template.render({
+        value: '<a href="javascript:alert(\'XSS\')">test</a>'
+            + '<img src="x" onerror="alert(\'XSS\')" />',
       });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <a>test</a>');
     });
   });
 
