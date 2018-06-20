@@ -131,9 +131,6 @@ export class Templates {
      * @private @const {!Object<string, function(!TemplateClassDef)>}
      */
     this.templateClassResolvers_ = {};
-
-    /** @type {!Object<string, boolean>|undefined} */
-    this.declaredTemplates_ = undefined;
   }
 
   /**

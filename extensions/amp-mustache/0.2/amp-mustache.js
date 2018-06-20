@@ -94,7 +94,13 @@ export class AmpMustache extends AMP.BaseTemplate {
   }
 }
 
+// First, unregister template with same type to avoid "Duplicate template type"
+// error due to multiple versions of amp-mustache in the same unit test run.
+// This is due to transpilation of test code to ES5 which uses require() and,
+// unlike import, causes side effects (AMP.registerTemplate) to be run.
+// For unit tests, it doesn't actually matter which version of amp-mustache is
+// registered. Integration tests should only have one script version included.
 if (getMode().test) {
-  Services.templatesFor(window).unregisterTemplateForType('amp-mustache');
+  Services.templatesFor(window).unregisterTemplate('amp-mustache');
 }
 AMP.registerTemplate('amp-mustache', AmpMustache);
