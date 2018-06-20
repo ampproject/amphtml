@@ -69,14 +69,14 @@ function renderOrClone(renderFn) {
 
 
 /**
- * @param {!Window} win
- * @param {!Node} doc
+ * @param {!Node} nodeOrDoc
  * @return {!Element}
  */
-const renderInteractionOverlay = renderOrClone((win, doc) => {
-  return htmlFor(doc)`<i-amphtml-video-mask class="i-amphtml-fill-content">
+export function renderInteractionOverlay(nodeOrDoc) {
+  const html = htmlFor(nodeOrDoc);
+  return html`<i-amphtml-video-mask class="i-amphtml-fill-content" role=button>
     </i-amphtml-video-mask>`;
-});
+}
 
 
 /**
@@ -84,7 +84,7 @@ const renderInteractionOverlay = renderOrClone((win, doc) => {
  * @param {!Node} doc
  * @return {!Element}
  */
-const renderIcon = renderOrClone((win, doc) => {
+export function renderIcon(win, doc) {
   const icon =
       htmlFor(doc)`<i-amphtml-video-icon class="amp-video-eq">
         <div class="amp-video-eq-col">
@@ -114,7 +114,22 @@ const renderIcon = renderOrClone((win, doc) => {
   }
 
   return icon;
-});
+}
+
+
+/**
+ * @param {!Node} nodeOrDoc
+ * @return {!Element}
+ */
+const renderOrCloneInteractionOverlay = renderOrClone(renderInteractionOverlay);
+
+
+/**
+ * @param {!Window} win
+ * @param {!Node} doc
+ * @return {!Element}
+ */
+const renderOrCloneIcon = renderOrClone(renderIcon);
 
 
 /** Manages autoplay video. */
@@ -335,7 +350,7 @@ export class AutoplayEntry {
       return;
     }
 
-    const icon = renderIcon(this.ampdoc_.win, this.element_);
+    const icon = renderOrCloneIcon(this.ampdoc_.win, this.element_);
 
     video.mutateElement(() => {
       this.element_.appendChild(icon);
@@ -358,7 +373,7 @@ export class AutoplayEntry {
       return;
     }
 
-    const overlay = renderInteractionOverlay(this.ampdoc_.win, this.element_);
+    const overlay = renderOrCloneInteractionOverlay(this.element_);
 
     listenOnce(overlay, 'click', () => signals.signal(userInteracted));
 
