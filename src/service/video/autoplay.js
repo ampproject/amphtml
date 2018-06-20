@@ -69,11 +69,12 @@ function renderOrClone(renderFn) {
 
 
 /**
- * @param {!Node} nodeOrDoc
+ * @param {!Window} unusedWin
+ * @param {!Element|!Document} elOrDoc
  * @return {!Element}
  */
-export function renderInteractionOverlay(nodeOrDoc) {
-  const html = htmlFor(nodeOrDoc);
+export function renderInteractionOverlay(unusedWin, elOrDoc) {
+  const html = htmlFor(elOrDoc);
   return html`<i-amphtml-video-mask class="i-amphtml-fill-content" role=button>
     </i-amphtml-video-mask>`;
 }
@@ -81,17 +82,16 @@ export function renderInteractionOverlay(nodeOrDoc) {
 
 /**
  * @param {!Window} win
- * @param {!Node} nodeOrDoc
+ * @param {!Element|!Document} elOrDoc
  * @return {!Element}
  */
-export function renderIcon(win, nodeOrDoc) {
-  const icon =
-      htmlFor(nodeOrDoc)`<i-amphtml-video-icon class="amp-video-eq">
-        <div class="amp-video-eq-col">
-          <div class="amp-video-eq-filler"></div>
-          <div class="amp-video-eq-filler"></div>
-        </div>
-      </i-amphtml-video-icon>`;
+export function renderIcon(win, elOrDoc) {
+  const icon = htmlFor(elOrDoc)`<i-amphtml-video-icon class="amp-video-eq">
+    <div class="amp-video-eq-col">
+      <div class="amp-video-eq-filler"></div>
+      <div class="amp-video-eq-filler"></div>
+    </div>
+  </i-amphtml-video-icon>`;
 
   // Copy equalizer column 4x and annotate filler positions for animation.
   const firstCol = dev().assertElement(icon.firstElementChild);
@@ -118,15 +118,16 @@ export function renderIcon(win, nodeOrDoc) {
 
 
 /**
- * @param {!Node} nodeOrDoc
+ * @param {!Window} unusedWin
+ * @param {!Element|!Document} elOrDoc
  * @return {!Element}
  */
 const renderOrCloneInteractionOverlay = renderOrClone(renderInteractionOverlay);
 
 
 /**
- * @param {!Window} win
- * @param {!Node} nodeOrDoc
+ * @param {!Window} unusedWin
+ * @param {!Element|!Document} elOrDoc
  * @return {!Element}
  */
 const renderOrCloneIcon = renderOrClone(renderIcon);

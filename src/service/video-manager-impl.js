@@ -702,14 +702,14 @@ class VideoEntry {
    */
   installAutoplayArtifacts_() {
     const {video} = this;
-    const {element} = this.video;
+    const {element, win} = this.video;
 
     if (element.hasAttribute(VideoAttributes.NO_AUDIO) ||
         element.signals().get(VideoServiceSignals.USER_INTERACTED)) {
       return;
     }
 
-    const animation = renderIcon(video.win, element);
+    const animation = renderIcon(win, element);
 
     /** @param {boolean} isPlaying */
     const toggleAnimation = isPlaying => {
@@ -750,7 +750,7 @@ class VideoEntry {
       return;
     }
 
-    const mask = renderInteractionOverlay(element);
+    const mask = renderInteractionOverlay(win, element);
 
     /** @param {string} display */
     const setMaskDisplay = display => {
