@@ -10,7 +10,7 @@
     <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
     <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
     <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
     <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
@@ -721,7 +721,7 @@
             <div class="abe-code-preview ampstart-card">
               <h3 class="abe-code p1 caps h4">Example</h3>
               <div class="abe-preview fit">
-
+                  
 
               </div>
               <div class="abe-code fit">
@@ -864,7 +864,7 @@
             <div class="abe-code-preview ampstart-card">
               <h3 class="abe-code p1 caps h4">Example</h3>
               <div class="abe-preview fit">
-
+                
   <button class="ampstart-btn caps m1 mb3"
     on="tap:watch-video-lightbox">
     Show Video
@@ -1369,7 +1369,7 @@ Learn more <a href="/examples/visual-tests/amp-by-example/components/amp-image-l
   Pressing the <code>ADD TO CART</code> button adds the product to a shopping cart page using the properties you have selected. Notice that the button URL contains the query <code>clientId={{ClientId}}</code>.
   If an item is successfully added to the shopping cart, we redirect the user to the shopping cart page.
   The redirect target is configured via a header in the server&#39;s form response (<a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#redirecting-after-a-submission">redirecting after submission</a>):</p><pre><code>access-control-expose-headers:AMP-Access-Control-Allow-Source-Origin,AMP-Redirect-To
-amp-redirect-to:http://ampbyexample.com/shopping_cart/?clientid=amp-123456789
+amp-redirect-to:http://ampbyexample.com/shopping_cart/?clientid=amp-123456789 
 </code></pre>
         </section>
       <section class="www-component-desc">
@@ -1378,7 +1378,7 @@ amp-redirect-to:http://ampbyexample.com/shopping_cart/?clientid=amp-123456789
             <div class="abe-code-preview ampstart-card">
               <h3 class="abe-code p1 caps h4">Example</h3>
               <div class="abe-preview fit">
-
+                
   <form id="order"
     method="POST"
     action-xhr="/examples/visual-tests/amp-by-example/samples_templates/product_page/add_to_cart"

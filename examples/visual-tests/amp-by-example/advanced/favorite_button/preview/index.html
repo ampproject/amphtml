@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 
@@ -165,7 +165,7 @@
     </style>
   </head>
   <body>
-
+    
       <div id="abe-preview-header" class="ampstart-headerbar fixed flex justify-start items-center top-0 left-0 right-0 pl2 pr4">
         <a href=".." class="caps text-decoration-none">
           <i class="align-middle inline-block mr1"><svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
@@ -177,26 +177,26 @@
       </div>
     <div id="abe-preview">
       <div class="ampstart-card m1">
-
-
-
-
-
-
-
-
+      
+      
+      
+      
+      
+      
+      
+      
 
         <amp-state id="favorite"
     credentials="include"
     src="/favorite">
   </amp-state>
 
-
+      
 
         <form method="post"
     action-xhr="/favorite"
     target="_top"
-    on="submit:AMP.setState({favorite: !favorite}),favorite-failed-message.hide;
+    on="submit:AMP.setState({favorite: !favorite}),favorite-failed-message.hide; 
           submit-error:AMP.setState({favorite: !favorite}),favorite-failed-message.show">
     <amp-list width="56"
       height="56"
@@ -220,7 +220,7 @@
     </amp-list>
   </form>
 
-
+      
 
         <div id="favorite-failed-message"
     hidden>Error: Could not favorite.
@@ -229,7 +229,7 @@
       role="button">CLOSE</div>
   </div>
 
-
+      
 
 
         <amp-state id="favoriteWithCount"
@@ -246,7 +246,7 @@
             value: !favoriteWithCount.value,
             count: favoriteWithCount.count + (favoriteWithCount.value ? -1 : 1),
           }
-          }),favorite-failed-message.hide;
+          }),favorite-failed-message.hide; 
             submit-error:AMP.setState({
             favoriteWithCount: previousFavoriteWithCount
           }),favorite-failed-message.show">
@@ -280,7 +280,7 @@
     </amp-list>
   </form>
 
-
+      
       </div>
     </div>
     <amp-analytics type="googleanalytics" id="analytics">

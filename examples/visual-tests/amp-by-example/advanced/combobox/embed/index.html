@@ -11,7 +11,7 @@
   <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 
 
@@ -117,7 +117,7 @@
             width: 100%;
             background-color: #fafafa;
         }
-
+    
         .autosuggest-box > [role=list]{
             overflow-y: scroll;
         }
@@ -143,7 +143,7 @@
         }
 
         amp-selector .select-option.no-outline.no-outline[option] {
-            outline: none;
+            outline: none;  
         }
         .select-option:focus {
             box-shadow: inset rgb(94, 158, 215) 0px 0px 45px;
@@ -188,7 +188,7 @@
    </style>
   </head>
   <body>
-
+  
 
   <main class="flex pl2 mt1">
     <aside class="www-components-sec-nav col-3 xs-hide sm-hide relative">
@@ -216,7 +216,7 @@
     <article class="www-components flex-auto col-9">
 
       <section class="www-component-desc">
-          <h2 id="introduction" class="www-heading pb4 mb2 relative h3">Introduction</h2><p class="mb2 px1">  This sample demonstrastes a classic dropdown combo, with a text field which filters the dropdown elements
+          <h2 id="introduction" class="www-heading pb4 mb2 relative h3">Introduction</h2><p class="mb2 px1">  This sample demonstrastes a classic dropdown combo, with a text field which filters the dropdown elements 
   according to the user&#39;s input. The options are rendered via amp-list.</p>
           <div class="abe-code-container">
             <div class="abe-code-preview ampstart-card">
@@ -272,7 +272,7 @@
           <div class="abe-code-container">
             <div class="abe-code-preview ampstart-card">
               <div class="abe-code fit">
-                <pre class="hljs html p0 m0"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">async</span> <span class="hljs-attr">custom-template</span>=<span class="hljs-string">"amp-mustache"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.ampproject.org/v0/amp-mustache-latest.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></pre>
+                <pre class="hljs html p0 m0"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">async</span> <span class="hljs-attr">custom-template</span>=<span class="hljs-string">"amp-mustache"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.ampproject.org/v0/amp-mustache-0.1.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></pre>
               </div>
             </div>
           </div>
@@ -281,7 +281,7 @@
           <h2 id="basic-usage" class="www-heading pb4 mb2 relative h3">Basic Usage</h2>
         </section>
       <section class="www-component-desc">
-          <p class="mb2 px1">This example includes two inputs. One is the input in which the user writes the text and the other is a hidden input,
+          <p class="mb2 px1">This example includes two inputs. One is the input in which the user writes the text and the other is a hidden input, 
 where the id value of the selected option is stored and could be submitted in a form.</p><p class="mb2 px1">The option attribute of the amp-selector&#39;s options, contain the id of the element, as well as its title, seperated by a comma.
 This is done so that both values can be accessed using the &#39;event.targetOption&#39; property. </p>
           <div class="abe-code-container">

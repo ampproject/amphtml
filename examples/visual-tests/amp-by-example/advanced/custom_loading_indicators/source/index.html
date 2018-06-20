@@ -15,16 +15,16 @@
   <!-- ## Setup -->
   <!-- Import the `amp-list` and `amp-mustache` components in the header -->
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <!--
     ## CSS for the custom loading indicator
   -->
-  <!--
+  <!-- 
     The loading indicator consists of three `div`s all within a `div.i-amphtml-loader`, which lastly is placed in a `div.i-amphtml-loading-container`.
 
-    We'll set up a 3D spinner instead (inspired by http://tobiasahlin.com/spinkit/) for any loading indicators in elements with the class `custom-loader`. First we hide the dots, then we style their outer div with a CSS animation that resembles a square spinning in space. Since [`i-amp...` classes are not meant to be customized](https://www.ampproject.org/docs/reference/spec#class-and-tag-names), we'll target the `.amp-active` class that the runtime adds to the loader during its display.
+    We'll set up a 3D spinner instead (inspired by http://tobiasahlin.com/spinkit/) for any loading indicators in elements with the class `custom-loader`. First we hide the dots, then we style their outer div with a CSS animation that resembles a square spinning in space. Since [`i-amp...` classes are not meant to be customized](https://www.ampproject.org/docs/reference/spec#class-and-tag-names), we'll target the `.amp-active` class that the runtime adds to the loader during its display. 
   -->
   <style amp-custom>
     amp-list, amp-iframe {
@@ -69,10 +69,10 @@
   The `slow-json` endpoint returns a basic JSON response, with a configurable delay (10 seconds), in order to see the loading indicator.
   Our custom loading indicator has a class of `custom-loader`.
 -->
-<amp-list class="custom-loader"
-          width="auto"
-          height="250"
-          layout="fixed-height"
+<amp-list class="custom-loader" 
+          width="auto" 
+          height="250" 
+          layout="fixed-height" 
           src="https://ampbyexample.com/samples_templates/slow-json/?delay=10000">
           <template type="amp-mustache">
             <div>

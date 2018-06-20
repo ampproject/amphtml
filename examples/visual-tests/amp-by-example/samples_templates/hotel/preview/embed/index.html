@@ -5,7 +5,7 @@
   <title>Hotel</title>
 <script async src="https://cdn.ampproject.org/v0.js"></script>
 <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
 <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 <script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
@@ -102,17 +102,17 @@
     </style>
   </head>
   <body>
-
-
-
-
-
-
-
-
-
-
-
+    
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
         <h1 class="m1">
     <amp-fit-text width="300"
       height="45"
@@ -124,7 +124,7 @@
   <p class="m1">The fastest hotel in town</p>
   <h2 class="m1">When do you want to travel?</h2>
 
-
+      
         <form method="GET"
     action="https://amp-by-example-live.glitch.me/rooms"
     action-xhr="https://amp-by-example-live.glitch.me/rooms"
@@ -151,9 +151,9 @@
     <button class="ampstart-btn caps m1">Check Availability</button>
   </form>
 
+      
 
-
-
+      
         <label class="ml1">Show only pet friendly rooms:
     <input type="checkbox"
       class="m1"
@@ -162,21 +162,21 @@
       })">
   </label>
 
-
+      
 
         <amp-bind-macro id="filteredRooms"
     expression="rooms.filter(room => showPetFriendlyOnly ? room.petFriendly : true)">
   </amp-bind-macro>
 
+      
 
-
-
+      
         <amp-state id="rooms"
     src="https://amp-by-example-live.glitch.me/rooms"></amp-state>
 
+      
 
-
-
+      
         <amp-list class="rooms"
     layout="fixed-height"
     height="800"
@@ -196,13 +196,13 @@
     </template>
   </amp-list>
 
-
+      
         <p hidden
     [hidden]="filteredRooms().length > 0">Sorry, no rooms available</p>
 
+      
 
-
-
+      
     <amp-analytics type="googleanalytics" id="analytics">
       <script type="application/json">
         {

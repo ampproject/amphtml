@@ -4,9 +4,9 @@
   This sample demonstrates how you can implement a simple checkout page in AMP. The sample assumes that all payment processing is done server-side. The covered use cases are:
 
   * How to dynamically render shopping card data.
-  * How to support user login with stored addresses and credit cards.
+  * How to support user login with stored addresses and credit cards. 
   * How to let users auto-fill their contact, address and credit card details.
-  * How to handle promo/discount codes.
+  * How to handle promo/discount codes. 
   -->
   <!-- -->
   <!doctype html>
@@ -18,8 +18,8 @@
       <script async src="https://cdn.ampproject.org/v0.js"></script>
 
       <!-- ## Setup -->
-      <!-- We use quite a few components:
-
+      <!-- We use quite a few components: 
+        
         `amp-form` for collecting and submitting user input. -->
       <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
       <!-- `amp-access` for user login. -->
@@ -29,7 +29,7 @@
       <!-- `amp-list` for rendering personalized content, such as the shopping cart. -->
       <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
       <!-- `amp-mustache` for rendering templates in combination with `amp-list`. -->
-      <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+      <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
       <!-- `amp-bind` for dynamically updating the page based on user input. -->
       <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
       <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -145,7 +145,7 @@
 
       <!--  `amp-access` enables us to show either a Login or Logout button depending on whether the user is already logged-in, e.g. elements marked with `amp-access="NOT loggedIn"` will only show for non-logged-in users. The button's on tap actions, e.g. `on="tap:amp-access.login-sign-in"`, specifies which action should be taken when clicking on the button: `login` defines the property inside the `amp-access` json configuration, while `sign-in` defines the endpoint. -->
       <div class="my2" [class]="checkoutSuccess ? 'hide' : 'my2'" >
-        <button amp-access="NOT loggedIn" on="tap:amp-access.login-sign-in" class="ampstart-btn ampstart-btn-secondary ml1 caps">Login</button>
+        <button amp-access="NOT loggedIn" on="tap:amp-access.login-sign-in" class="ampstart-btn ampstart-btn-secondary ml1 caps">Login</button> 
         <button amp-access="loggedIn" tabindex="0" on="tap:amp-access.login-sign-out" class="ampstart-btn ml1 caps" amp-access-hide>Logout</button>
         <span class="inline-block ml1">...or continue as guest</span>
       </div>
@@ -196,15 +196,15 @@
         </section>
 
         <!-- ## Promo/Discount Code -->
-        <!-- This section makes it possible to enter promo or discount codes. It's a simple `amp-form` that posts the
-          code to an XHR endpoint. If the form has been successfully submitted, we refresh the shopping carts
+        <!-- This section makes it possible to enter promo or discount codes. It's a simple `amp-form` that posts the 
+          code to an XHR endpoint. If the form has been successfully submitted, we refresh the shopping carts 
           contents by updating the `shoppingCart` object with an updated src URL. We append a random value to invalidate any caches and force
           the refresh. -->
           <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section">
             <h3> Add a promotional code </h3>
             <form  method="post"
                    action-xhr="/checkout/apply-code"
-                   on="submit-success:AMP.setState({shoppingCart: {src: '/checkout/shopping-cart?clientId=CLIENT_ID(cart)&' + random()}})"
+                   on="submit-success:AMP.setState({shoppingCart: {src: '/checkout/shopping-cart?clientId=CLIENT_ID(cart)&' + random()}})" 
                    target="_top">
               <input name="clientId"
                      type="hidden"
@@ -216,8 +216,8 @@
           </section>
 
 
-          <!-- ## The Checkout Form -->
-        <!-- This is the actual checkout form. Form submission takes place via XHR. Once the form has been successfully submitted, we set the
+          <!-- ## The Checkout Form --> 
+        <!-- This is the actual checkout form. Form submission takes place via XHR. Once the form has been successfully submitted, we set the 
         `checkoutSuccess` variable to `true`. This enables us to hide the forms once the checkout is done. Another option would have be to [redirect](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form#redirecting-after-a-submission) to a new page on successful checkout. -->
           <form  id="checkout-form"
                  method="post"
@@ -235,10 +235,10 @@
               <input type="email" name="email" id="frmEmailA" placeholder="name@example.com" autocomplete="email">
             </section>
 
-            <!-- ## Shipping & Billing Address -->
-            <!-- Logged in users (`amp-access="loggedIn"`) can select an existing address which are pulled in using another amp-list. This section is initially hidden via the `amp-access-hide` attribute.
+            <!-- ## Shipping & Billing Address --> 
+            <!-- Logged in users (`amp-access="loggedIn"`) can select an existing address which are pulled in using another amp-list. This section is initially hidden via the `amp-access-hide` attribute. 
 
-            We provide a third option for users to enter a new address. The radio button's [change action](https://www.ampproject.org/docs/reference/amp-actions-and-events) triggers the visibilityof the address form `on="change:manualShippingAddress.toggleVisibility"`.
+            We provide a third option for users to enter a new address. The radio button's [change action](https://www.ampproject.org/docs/reference/amp-actions-and-events) triggers the visibilityof the address form `on="change:manualShippingAddress.toggleVisibility"`.  
             -->
             <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section" amp-access="loggedIn" amp-access-hide>
               <h3 class="">Select Shipping Address</h3>

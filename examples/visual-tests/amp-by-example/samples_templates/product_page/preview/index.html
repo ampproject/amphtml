@@ -9,7 +9,7 @@
     <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
     <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
     <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
     <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
@@ -578,17 +578,17 @@
       </div>
     <div id="abe-preview">
       <div class="ampstart-card m1">
+      
+      
+      
+      
+      
 
+      
+        
 
-
-
-
-
-
-
-
-
-
+      
+      
         <div class="header">
     <a id="sample-menu"
       on="tap:drawermenu.toggle">
@@ -610,11 +610,11 @@
     </form>
   </div>
 
-
+      
   <h2 class="m1">Apple</h2>
 
 
-
+      
         <div class="m1">
     <amp-social-share type="twitter"
       width="30"
@@ -634,19 +634,19 @@
       height="22"></amp-social-share>
   </div>
 
-
+      
   <p id="product-description"
     class="m1">Lorem ipsum dolor sit amet, ut sed non vel mattis. Et nulla suscipit ante ligula nisl in. Ut venenatis et mauris, mauris porta vulputate tellus mauris integer facilisis.</p>
 
-
-
-
+      
+      
+      
   <button class="ampstart-btn caps m1 mb3"
     on="tap:watch-video-lightbox">
     Show Video
   </button>
 
-
+      
   <amp-lightbox id="watch-video-lightbox"
     layout="nodisplay">
     <div class="amp-youtube-container">
@@ -665,7 +665,7 @@
     </div>
   </amp-lightbox>
 
-
+      
         <div class="product-gallery">
     <ul [hidden]="product.selectedColor != 'green'">
       <li>
@@ -732,7 +732,7 @@
     </ul>
   </div>
 
-
+      
         <div class="product-gallery">
 
     <amp-carousel id="green-apple-carousel"
@@ -810,7 +810,7 @@
       </amp-img>
     </amp-carousel>
 
-
+      
           <amp-image-lightbox id="gallery-lightbox"
       layout="nodisplay">
       <div on="tap:gallery-lightbox.close"
@@ -825,10 +825,10 @@
       </div>
     </amp-image-lightbox>
 
-
+      
   </div>
 
-
+      
         <amp-state id="product">
     <script type="application/json">
       {
@@ -867,19 +867,19 @@
     </script>
   </amp-state>
 
+      
 
-
-
+      
         <p class="price-description">Price:
     <span [text]="product[product.selectedColor].sizes[product.selectedSize]">$5.99</span>
   </p>
 
+      
 
+      
+      
 
-
-
-
-
+      
   <form id="order"
     method="POST"
     action-xhr="/examples/visual-tests/amp-by-example/samples_templates/product_page/add_to_cart"
@@ -979,9 +979,9 @@
     </div>
   </form>
 
+      
 
-
-
+      
         <amp-selector role="tablist"
     layout="container"
     class="ampTabContainer ampstart-headerbar-nav"
@@ -1006,9 +1006,9 @@
       class="tabContent p1 p">Size may vary. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
   </amp-selector>
 
+      
 
-
-
+      
         <div class="items-center flex">
     <h2 id="related-products"
       class="m1 inline-block">Related products
@@ -1082,7 +1082,7 @@
       [hidden]="!product.hasMorePages">
   </form>
 
-
+      
         <amp-analytics type="googleanalytics">
     <script type="application/json">
       {
@@ -1102,7 +1102,7 @@
     </script>
   </amp-analytics>
 
-
+      
       </div>
     </div>
     <amp-analytics type="googleanalytics" id="analytics">
