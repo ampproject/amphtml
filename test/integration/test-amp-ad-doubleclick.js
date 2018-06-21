@@ -125,8 +125,10 @@ describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
     }).then(() => {
       expect(iframe.contentWindow.context.hidden).to.be.false;
       return new Promise(resolve => {
-        iframe.contentWindow.addEventListener(
-            AmpEvents.VISIBILITY_CHANGE, resolve);
+        // Listening to the "amp:visibilitychange" string literal because it's
+        // part of the public API.
+        // https://github.com/ampproject/amphtml/blob/master/ads/README.md#page-visibility
+        iframe.contentWindow.addEventListener('amp:visibilitychange', resolve);
         fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
           state: 'hidden',
         });
