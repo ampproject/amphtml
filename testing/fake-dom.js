@@ -190,7 +190,7 @@ export class FakeWindow {
       return window.setTimeout.apply(window, arguments);
     };
 
-    /** polyfill clearnTimeout. */
+    /** polyfill clearTimeout. */
     this.clearTimeout = function() {
       return window.clearTimeout.apply(window, arguments);
     };
@@ -269,6 +269,7 @@ class EventListeners {
     };
   }
 
+  /** Create empty instance. */
   constructor() {
     /** @const {!Array<!EventListener>} */
     this.listeners = [];
