@@ -62,7 +62,7 @@ Indicates where to display the form response after submitting the form. The valu
 
 ##### action
 
-Specifies a server endpoint to handle the form input. The value must be an `https` URL and must not be a link to a CDN.
+Specifies a server endpoint to handle the form input. The value must be an `https` URL (absolute or relative) and must not be a link to a CDN.
 
 This attribute is required for `method=GET`. For `method=POST`, the `action` attribute is invalid, use `action-xhr` instead.
 
