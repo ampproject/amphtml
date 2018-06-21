@@ -118,12 +118,14 @@ export class FxElement {
 
     /** @private {number} */
     this.marginStart_ = element.hasAttribute('data-margin-start') ?
-      resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
+      /** @type {number} */
+      (resolvePercentageToNumber(element.getAttribute('data-margin-start'))) :
       defaultMarginValues(this.fxType_)['start'];
 
     /** @private {number} */
     this.marginEnd_ = element.hasAttribute('data-margin-end') ?
-      resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
+      /** @type {number} */
+      (resolvePercentageToNumber(element.getAttribute('data-margin-end'))) :
       defaultMarginValues(this.fxType_)['end'];
 
     /** @private {string} */

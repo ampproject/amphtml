@@ -17,6 +17,9 @@
 import {listen} from '../../../../../src/event-helper';
 
 export class ClickMonitor {
+  /**
+   * Creates an instance of ClickMonitor.
+   */
   constructor() {
     this.iframeClickMap_ = {};
     this.pageClicks_ = 0;
@@ -24,6 +27,11 @@ export class ClickMonitor {
     this.win_ = null;
   }
 
+  /**
+   * Adds event listener to ampdoc
+   *
+   * @param {!../../../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+   */
   startForDoc(ampDoc) {
     this.win_ = ampDoc.win;
     this.lastSelection_ = this.win_.document.activeElement;
@@ -32,6 +40,9 @@ export class ClickMonitor {
     listen(this.win_, 'click', this.onPageClick_.bind(this));
   }
 
+  /**
+   * Checks for the last elected element
+   */
   checkSelection_() {
     const {activeElement} = this.win_.document;
 
@@ -48,11 +59,21 @@ export class ClickMonitor {
     this.lastSelection_ = activeElement;
   }
 
+  /**
+   * Listener for clicks on window,
+   * Set the last selected element.
+   *
+   */
   onPageClick_() {
     this.pageClicks_++;
     this.lastSelection_ = this.win_.document.activeElement;
   }
 
+  /**
+   * Increases a click count for the iframe
+   *
+   * @param {Element} activeElement
+   */
   incrementFrameClick_(activeElement) {
     const trimSrc = activeElement.src.split('://').pop();
 
@@ -63,10 +84,20 @@ export class ClickMonitor {
     }
   }
 
+  /**
+   * Returns the number of page clicks
+   *
+   * @return {number}
+   */
   getPageClicks() {
     return this.pageClicks_;
   }
 
+  /**
+   * Returns array of clicked iframes
+   *
+   * @return {string}
+   */
   getIframeClickString() {
     return Object.keys(this.iframeClickMap_).map(key => {
       return `${key}|${this.iframeClickMap_[key]}`;
