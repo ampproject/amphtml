@@ -98,6 +98,7 @@ export class AmpViewerHost {
     this.log('awaitHandshake_');
     let unlisten = null;
     const target = this.ampIframe_.contentWindow;
+
     const listener = function(event) {
       if (event.origin == targetOrigin &&
               this.isChannelOpen_(event.data) &&
@@ -159,6 +160,10 @@ export class AmpViewerHost {
     return this.messaging_.sendRequest(type, data, awaitResponse);
   }
 
+  /**
+   * Logs viewer arguments.
+   *
+   */
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
     var_args.unshift('[ViewerHost ' + this.logsId + ']');
