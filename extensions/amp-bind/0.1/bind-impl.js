@@ -175,19 +175,23 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
     this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
-    const bodyPromise = (opt_win)
-      ? waitForBodyPromise(opt_win.document)
-          .then(() => dev().assertElement(opt_win.document.body))
-      : ampdoc.whenBodyAvailable();
-
     /**
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
     this.initializePromise_ = this.viewer_.whenFirstVisible()
-        .then(() => bodyPromise)
-        .then(unusedBody => {
-          return this.initialize_(ampdoc.getRootNode());
+        .then(() => {
+          if (opt_win) {
+            // In FIE, scan the document node of the iframe window.
+            const {document} = opt_win;
+            return waitForBodyPromise(document).then(() => document);
+          } else {
+            // Otherwise, scan the root node of the ampdoc.
+            return ampdoc.whenBodyAvailable().then(() => ampdoc.getRootNode());
+          }
+        })
+        .then(root => {
+          return this.initialize_(root);
         });
 
     /** @private {Promise} */
