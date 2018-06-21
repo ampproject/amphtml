@@ -1147,12 +1147,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         ],
       })
       .once('transform', () => {
-        if (options.latestName) {
-          const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
-          fs.copySync(
-              path.join(destDir, options.toName),
-              path.join(destDir, latestMaxName));
-        }
         endBuildStep('Transformed', srcFilename, startTime);
       });
   if (options.watch) {
@@ -1206,6 +1200,16 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             .on('end', function() {
               appendToCompiledFile(srcFilename,
                   path.join(destDir, destFilename));
+
+              if (options.latestName) {
+                // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
+                const latestMaxName =
+                    options.latestName.split('.js')[0] + '.max.js';
+                // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
+                fs.copySync(
+                    path.join(destDir, options.toName),
+                    path.join(destDir, latestMaxName));
+              }
             }))
         .then(() => {
           endBuildStep('Compiled', srcFilename, startTime);
