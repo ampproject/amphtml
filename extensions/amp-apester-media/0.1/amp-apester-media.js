@@ -242,7 +242,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @param {string} src
    * @return {!Element}
    */
-
   constructIframe_(src) {
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
