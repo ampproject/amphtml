@@ -15,7 +15,7 @@
  */
 
 import '../amp-twitter';
-import {cleanupMomentId_, cleanupTweetId_} from '../../../../3p/twitter';
+import {cleanupTweetId_} from '../../../../3p/twitter';
 import {twitter} from '../../../../3p/twitter';
 
 describes.realWin('amp-twitter', {
@@ -153,22 +153,5 @@ describes.realWin('amp-twitter', {
 
       expect(cleanupTweetId_(bad)).to.equal(tweetId);
     });
-  });
-
-  describe('cleanupMomentId_', () => {
-    const momentId = '1009149991452135424';
-
-    it('does not affect valid moment ids', () => {
-      expect(cleanupMomentId_(momentId)).to.equal(momentId);
-    });
-
-    it('cleans up bad moment full Url', () => {
-      const bad = `https://twitter.com/i/moments/${momentId}` +
-          '?ref_src=twsrc%5Etfw&ref_url=http%3A%2F%2Fads.localhost%3A8000%2F' +
-          'dist.3p%2Fcurrent%2Fframe.max.html';
-
-      expect(cleanupMomentId_(bad)).to.equal(momentId);
-    });
-
   });
 });

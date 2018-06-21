@@ -67,7 +67,7 @@ export function twitter(global, data) {
       twttr.widgets.createTweet(cleanupTweetId_(data.tweetid), tweet, data)
           ./*OK*/then(el => tweetCreated(twttr, el));
     } else if (data.momentid) {
-      twttr.widgets.createMoment(cleanupMomentId_(data.momentid), tweet, data)
+      twttr.widgets.createMoment(data.momentid, tweet, data)
           ./*OK*/then(el => tweetCreated(twttr, el));
     }
   });
@@ -107,31 +107,6 @@ export function twitter(global, data) {
         container./*OK*/offsetWidth,
         height + /* margins */ 20);
   }
-}
-
-/**
- * @param {*} momentid
- * @visibleForTesting
- */
-export function cleanupMomentId_(momentid) {
-  // 1)
-  // Handle malformed ids such as
-  // https://twitter.com/i/moments/
-  momentid = momentid.toLowerCase();
-  let match = momentid.match(/https:\/\/twitter.com\/[^\/]+\/moments\/(\d+)/);
-  if (match) {
-    return match[1];
-  }
-
-  // 2)
-  // Handle malformed ids such as
-  // 1009149991452135424?ref_src
-  match = momentid.match(/^(\d+)\?ref.*/);
-  if (match) {
-    return match[1];
-  }
-
-  return momentid;
 }
 
 /**
