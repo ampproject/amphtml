@@ -38,8 +38,10 @@ function getFacebookSdk(global, cb, locale) {
 }
 
 /**
- * Create DOM element for the Facebook embedded content plugin.
- * Reference: https://developers.facebook.com/docs/plugins/embedded-posts
+ * Create DOM element for the Facebook embedded content plugin for videos or
+ * posts.
+ * @see https://developers.facebook.com/docs/plugins/embedded-posts
+ * @see https://developers.facebook.com/docs/plugins/embedded-video-player
  * @param {!Window} global
  * @param {!Object} data The element data
  * @return {!Element} div
@@ -69,6 +71,38 @@ function getPostContainer(global, data) {
   container.className = 'fb-' + embedAs;
   container.setAttribute('data-href', data.href);
   return container;
+}
+
+/**
+ * Create DOM element for the Facebook embedded content plugin for comments or
+ * comment replies.
+ * @see https://developers.facebook.com/docs/plugins/embedded-comments
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getCommentContainer(global, data) {
+  const c = global.document.getElementById('c');
+  const container = global.document.createElement('div');
+  container.setAttribute('data-include-parent', data.includeParent || 'false');
+  container.setAttribute('data-width', c./*OK*/offsetWidth);
+  container.setAttribute('data-href', data.href);
+  container.className = 'fb-comment-embed';
+  return container;
+}
+
+/**
+ * Create DOM element for the Facebook embedded content plugin.
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getEmbedContainer(global, data) {
+  if (data.embedType == 'comment') {
+    return getCommentContainer(global, data);
+  }
+
+  return getPostContainer(global, data);
 }
 
 /**
@@ -152,7 +186,7 @@ export function facebook(global, data) {
   } else if (extension === 'AMP-FACEBOOK-COMMENTS') {
     container = getCommentsContainer(global, data);
   } else /*AMP-FACEBOOK */ {
-    container = getPostContainer(global, data);
+    container = getEmbedContainer(global, data);
   }
 
   global.document.getElementById('c').appendChild(container);
