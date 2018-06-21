@@ -6,17 +6,27 @@ The document living inside your document must include a small library:
 <script src="https://cdn.ampproject.org/v0/amp-video-iframe-integration.js" defer>
 ```
 
-Once this library is loaded, it will execute the global callback
-`ampVideoIframeIntegrationReady()`. You must implement this callback to
-integrate. Inside, you should instantiate an `AmpVideoIframeIntegration` object
+Once this library is loaded, it will trigger an `amp-videoIntegrationReady`
+event. Once triggered, you should instantiate an `AmpVideoIframeIntegration` object
 for the video inside the page. This object gives you all the necessary tools to
 integrate.
 
 ```js
-window.ampVideoIframeIntegrationReady = function() {
+
+function onAmpIntegrationReady() {
   var myIntegration = new AmpVideoIntegration();
-  // Your integration code goes here
+  // etc.
 }
+
+// Since this library is defer-loaded, it might have already triggered the
+// event. In that case, call `ready` function immediately. Otherwise, listen to
+// the event.
+if (window.AmpVideoIntegration) {
+  onAmpIntegrationReady();
+} else {
+  window.addEventListener('amp-videoIntegrationReady', onAmpIntegrationReady);
+}
+
 ```
 
 ## Simple integrations
@@ -25,7 +35,7 @@ If you're using a common video framework like Video.js or JwPlayer, you can
 simply call `listenTo` for a basic integration:
 
 ```js
-window.ampVideoIframeIntegrationReady = function() {
+function onAmpIntegrationReady() {
   var myIntegration = new AmpVideoIntegration();
   var myVideo = document.querySelector('#my-video');
 
@@ -34,7 +44,7 @@ window.ampVideoIframeIntegrationReady = function() {
 
   // ...or for JwPlayer:
   myIntegration.listenTo('jwplayer', myVideo);
-};
+}
 ```
 
 ## Custom integrations
