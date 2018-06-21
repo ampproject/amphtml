@@ -20,7 +20,7 @@ import {getMode} from '../../../src/mode';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
-import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../../src/sanitizer';
+import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -38,40 +38,56 @@ export class AmpMustache extends AMP.BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizier(sanitizeTagsForTripleMustache);
+    setUnescapedSanitizier(purifyTagsForTripleMustache);
   }
 
   /** @override */
   compileCallback() {
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
-    let index = 0;
-    const content = templateContentClone(this.element);
-    iterateCursor(content.querySelectorAll('template'), nestedTemplate => {
-      const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
-      this.nestedTemplates_[nestedTemplateKey] = nestedTemplate./*OK*/outerHTML;
 
-      const nestedTemplateAsVariable = this.element.ownerDocument
-          .createTextNode(`{{{${nestedTemplateKey}}}}`);
-      nestedTemplate.parentNode.replaceChild(nestedTemplateAsVariable,
-          nestedTemplate);
-      index++;
-    });
+    const content = templateContentClone(this.element);
+    this.processNestedTemplates_(content);
     const container = this.element.ownerDocument.createElement('div');
     container.appendChild(content);
+
     /** @private @const {string} */
     this.template_ = container./*OK*/innerHTML;
     mustacheParse(this.template_);
   }
 
+  /**
+   * Stores and replaces nested templates with custom triple-mustache pointers.
+   *
+   * This prevents the outer-most template from replacing variables in nested
+   * templates. Note that this constrains nested template markup to the more
+   * restrictive sanitization rules of triple-mustache.
+   *
+   * @param {!DocumentFragment} content
+   */
+  processNestedTemplates_(content) {
+    const templates = content.querySelectorAll('template');
+    iterateCursor(templates, (template, index) => {
+      const key = `__AMP_NESTED_TEMPLATE_${index}`;
+
+      // Store the nested template markup, keyed by index.
+      this.nestedTemplates_[key] = template./*OK*/outerHTML;
+
+      // Replace the markup with a pointer.
+      const pointer = this.element.ownerDocument.createTextNode(`{{{${key}}}}`);
+      template.parentNode.replaceChild(pointer, template);
+    });
+  }
+
   /** @override */
   render(data) {
     let mustacheData = data;
+    // Also render any nested templates.
     if (typeof data === 'object') {
       mustacheData = Object.assign({}, data, this.nestedTemplates_);
     }
     const html = mustacheRender(this.template_, mustacheData);
-    const sanitized = sanitizeHtml(html);
+    const sanitized = purifyHtml(html);
     const root = this.win.document.createElement('div');
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
