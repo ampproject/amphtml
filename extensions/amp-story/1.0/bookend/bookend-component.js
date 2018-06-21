@@ -21,8 +21,8 @@ import {HeadingComponent, HeadingComponentDef} from './components/heading';
 import {LandscapeComponent, LandscapeComponentDef} from './components/landscape';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
 import {TextBoxComponent, TextBoxComponentDef} from './components/text-box';
+import {dev} from '../../../../src/log';
 import {htmlFor} from '../../../../src/static-template';
-import {user} from '../../../../src/log';
 
 /** @type {string} */
 export const TAG = 'amp-story-bookend';
@@ -117,8 +117,11 @@ export class BookendComponent {
   static buildFromJson(components, el) {
     return components.reduce((builtComponents, component) => {
       const componentBuilder = componentBuilderInstanceFor(component.type);
-      user().assert(componentBuilder, 'Component type `' + component.type +
-      '` is not supported.');
+      if (!componentBuilder) {
+        dev().error('Component type `' + component.type +
+        '` is not supported. Skipping invalid.');
+        return builtComponents;
+      }
       componentBuilder.assertValidity(component, el);
       builtComponents.push(componentBuilder.build(component, el));
       return builtComponents;
