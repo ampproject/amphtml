@@ -19,15 +19,14 @@
  * @enum {string}
  */
 export const AmpEvents = {
-  // Use short, unique strings to reduce bundle size impact.
-  BUILT: 'e1',
-  DOM_UPDATE: 'e2',
+  BUILT: 'amp:built',
+  DOM_UPDATE: 'amp:dom-update',
+  VISIBILITY_CHANGE: 'amp:visibilitychange', // https://github.com/ampproject/amphtml/blob/master/ads/README.md#page-visibility
   // The following codes are only used for testing.
   // TODO(choumx): Move these to a separate enum so they can be DCE'd.
-  ATTACHED: 'e3',
-  STUBBED: 'e4',
-  LOAD_START: 'e5',
-  LOAD_END: 'e6',
-  ERROR: 'e7',
-  VISIBILITY_CHANGE: 'e8',
+  ATTACHED: 'amp:attached',
+  STUBBED: 'amp:stubbed',
+  LOAD_START: 'amp:load:start',
+  LOAD_END: 'amp:load:end',
+  ERROR: 'amp:error',
 };
