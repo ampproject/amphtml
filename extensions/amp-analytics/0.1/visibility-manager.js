@@ -556,7 +556,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * Gets the intersection element.
    *
    * @param {!Element} element
-   * @return {?Object}
+   * @return {?JsonObject}
    */
   getElementIntersectionRect(element) {
     if (this.getElementVisibility(element) <= 0) {
@@ -740,9 +740,7 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
 
   /**
    * Returns intersecting element.
-   *
-   * @param {*} element
-   * @return {!Element}
+   * @override
    */
   getElementIntersectionRect(element) {
     if (this.getRootVisibility() == 0) {
