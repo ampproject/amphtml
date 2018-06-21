@@ -1,0 +1,148 @@
+# Integration
+
+The document living inside your document must include a small library:
+
+```js
+<script src="https://cdn.ampproject.org/v0/amp-video-iframe-integration.js" defer>
+```
+
+Once this library is loaded, it will execute the global callback
+`ampVideoIframeIntegrationReady()`. You must implement this callback to
+integrate. Inside, you should instantiate an `AmpVideoIframeIntegration` object
+for the video inside the page. This object gives you all the necessary tools to
+integrate.
+
+```js
+window.ampVideoIframeIntegrationReady = function() {
+  var myIntegration = new AmpVideoIntegration();
+  // Your integration code goes here
+}
+```
+
+## Simple integrations
+
+If you're using a common video framework like Video.js or JwPlayer, you can
+simply call `listenTo` for a basic integration:
+
+```js
+window.ampVideoIframeIntegrationReady = function() {
+  var myIntegration = new AmpVideoIntegration();
+  var myVideo = document.querySelector('#my-video)
+
+  // For video.js:
+  myIntegration.listenTo('videojs', myVideo);
+
+  // ...or for JwPlayer:
+  myIntegration.listenTo('jwplayer', myVideo);
+};
+```
+
+## Custom integrations
+
+It's possible to have more fine-grained control over how the video interacts
+with the host document by using the `method` and `postEvent` methods.
+
+### `method(name, callback)`
+
+Implements a method that calls playback functions on the video. For example:
+
+```js
+myIntegration.method('play', function() {
+  myVideo.play();
+});
+```
+
+These are methods that should be implemented:
+
+- `play`
+- `pause`
+- `mute`
+- `unmute`
+- `showcontrols`
+- `hidecontrols`
+
+You can choose to only implement this interface partially, with a few caveats:
+
+- `mute` and `unmute` are required for autoplay.
+
+- `showcontrols` and `hidecontrols` are required for the best possible UX. For
+  example, when minimizing the video to the corner, a custom controls overlay is
+  shown. If you don't provide methods to hide and show controls, two sets of
+  controls could be displayed at the same time, which is a poor user experience.
+
+### `postEvent(name)`
+
+Posts a playback event to the frame. For example:
+
+```js
+myVideoElement.addEventListener('pause', function() {
+  myIntegration.postEvent('pause');
+});
+```
+
+The valid events are as follows.
+
+<table>
+  <thead>
+    <tr>
+      <td>Event</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canplay</code></tr></td>
+      <td>
+        Triggered when your player is ready. This event must be posted before
+        the player can become interactive.
+      </td>
+    </tr>
+    <tr>
+      <td><code>playing</code></tr></td>
+      <td>
+        Triggered when your player has started playing a video after load or
+        pause.
+      </td>
+    </tr>
+    <tr>
+      <td><code>pause</code></tr></td>
+      <td>
+        Triggered when your video has been paused.
+      </td>
+    </tr>
+    <tr>
+      <td><code>ended</code></tr></td>
+      <td>
+        Triggered when your video has ended playback. Note that you must also
+        post a <code>pause</code> event alongside the <code>ended</code> event.
+      </td>
+    </tr>
+    <tr>
+      <td><code>muted</code></tr></td>
+      <td>
+        Triggered when your video has been muted.
+      </td>
+    </tr>
+    <tr>
+      <td><code>unmuted</code></tr></td>
+      <td>
+        Triggered when your video has been unmuted.
+      </td>
+    </tr>
+    <tr>
+      <td><code>ad_start</code></tr></td>
+      <td>
+        Triggered when a pre/mid/post-roll ad is playing. This hides the
+        autoplay shim displayed on the video.
+      </td>
+    </tr>
+    <tr>
+      <td><code>ad_end</code></tr></td>
+      <td>
+        Triggered when a pre/mid/post-roll ad has ended. This re-displays the
+        autoplay shim if the user has not yet interacted with the video.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
