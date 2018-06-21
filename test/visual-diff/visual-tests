@@ -336,6 +336,9 @@
       "name": "amp-img - Amp By Example"
     },
     {
+      "flaky": true,
+      // Height change
+      // e.g., https://percy.io/ampproject/amphtml/builds/808487/view/45649729/1400?mode=diff&browser=firefox&snapshot=45649729
       "url": "examples/visual-tests/amp-by-example/components/amp-instagram/index.html",
       "name": "amp-instagram - Amp By Example"
     },
