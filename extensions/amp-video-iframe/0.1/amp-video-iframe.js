@@ -85,9 +85,6 @@ class AmpVideoIframe extends AMP.BaseElement {
     this.readyRejecter_ = null;
 
     /** @private {boolean} */
-    this.embedReady_ = false;
-
-    /** @private {boolean} */
     this.canPlay_ = false;
 
     /**
@@ -166,7 +163,6 @@ class AmpVideoIframe extends AMP.BaseElement {
     if (this.unlistenFrame_) {
       this.unlistenFrame_();
       this.unlistenFrame_ = null;
-      this.embedReady_ = false;
       this.canPlay_ = false;
     }
   }
@@ -208,18 +204,16 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
     const eventReceived = data['event'];
+    const isCanPlayEvent = eventReceived == 'canplay';
 
-    this.embedReady_ = this.embedReady_ || eventReceived == 'embed-ready';
-    this.canPlay_ = this.canPlay_ || eventReceived == 'canplay';
+    this.canPlay_ = this.canPlay_ || isCanPlayEvent;
 
-    if (eventReceived == 'canplay' || eventReceived == 'embed-ready') {
-      if (this.embedReady_ && this.canPlay_) {
-        dev().assert(this.readyResolver_).call();
-      }
+    if (isCanPlayEvent) {
+      dev().assert(this.readyResolver_).call();
       return;
     }
 
-    if (eventReceived == 'error' && (!this.embedReady_ || !this.canPlay_)) {
+    if (eventReceived == 'error' && !this.canPlay_) {
       dev().assert(this.readyRejecter_).call();
       return;
     }
