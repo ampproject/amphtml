@@ -27,7 +27,7 @@ simply call `listenTo` for a basic integration:
 ```js
 window.ampVideoIframeIntegrationReady = function() {
   var myIntegration = new AmpVideoIntegration();
-  var myVideo = document.querySelector('#my-video)
+  var myVideo = document.querySelector('#my-video');
 
   // For video.js:
   myIntegration.listenTo('videojs', myVideo);
@@ -91,53 +91,53 @@ The valid events are as follows.
   </thead>
   <tbody>
     <tr>
-      <td><code>canplay</code></tr></td>
+      <td><code>canplay</code></td>
       <td>
         Triggered when your player is ready. This event must be posted before
         the player can become interactive.
       </td>
     </tr>
     <tr>
-      <td><code>playing</code></tr></td>
+      <td><code>playing</code></td>
       <td>
         Triggered when your player has started playing a video after load or
         pause.
       </td>
     </tr>
     <tr>
-      <td><code>pause</code></tr></td>
+      <td><code>pause</code></td>
       <td>
         Triggered when your video has been paused.
       </td>
     </tr>
     <tr>
-      <td><code>ended</code></tr></td>
+      <td><code>ended</code></td>
       <td>
         Triggered when your video has ended playback. Note that you must also
         post a <code>pause</code> event alongside the <code>ended</code> event.
       </td>
     </tr>
     <tr>
-      <td><code>muted</code></tr></td>
+      <td><code>muted</code></td>
       <td>
         Triggered when your video has been muted.
       </td>
     </tr>
     <tr>
-      <td><code>unmuted</code></tr></td>
+      <td><code>unmuted</code></td>
       <td>
         Triggered when your video has been unmuted.
       </td>
     </tr>
     <tr>
-      <td><code>ad_start</code></tr></td>
+      <td><code>ad_start</code></td>
       <td>
         Triggered when a pre/mid/post-roll ad is playing. This hides the
         autoplay shim displayed on the video.
       </td>
     </tr>
     <tr>
-      <td><code>ad_end</code></tr></td>
+      <td><code>ad_end</code></td>
       <td>
         Triggered when a pre/mid/post-roll ad has ended. This re-displays the
         autoplay shim if the user has not yet interacted with the video.
