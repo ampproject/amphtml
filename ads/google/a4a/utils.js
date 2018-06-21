@@ -104,8 +104,8 @@ const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/
  * @return {number}
  */
 function getNavStart(win) {
-  return win['performance'] && win['performance']['timing'] &&
-      win['performance']['timing']['navigationStart'] || 0;
+  return (win['performance'] && win['performance']['timing'] &&
+      win['performance']['timing']['navigationStart']) || 0;
 }
 
 /**

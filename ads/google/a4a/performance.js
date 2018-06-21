@@ -43,6 +43,9 @@ import {serializeQueryString} from '../../../src/url';
  * A NOOP base class for the LifecycleReporter
  */
 export class BaseLifecycleReporter {
+  /**
+   * Creates a new BaseLifecycleReporter.
+   */
   constructor() {
     /**
      * @type {!JsonObject}
@@ -246,7 +249,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * Separate function so that it can be stubbed out for testing.
    *
    * @param {string} url Address to ping.
-   * @visibleForTesting
+   * @private
    */
   emitPing_(url) {
     new Image().src = url;
