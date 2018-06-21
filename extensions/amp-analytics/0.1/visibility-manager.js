@@ -552,6 +552,12 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     return trackedElement && trackedElement.intersectionRatio || 0;
   }
 
+  /**
+   * Gets the intersection element.
+   *
+   * @param {!Element} element
+   * @return {?Object}
+   */
   getElementIntersectionRect(element) {
     if (this.getElementVisibility(element) <= 0) {
       return null;
@@ -732,6 +738,12 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     return this.parent.getElementVisibility(element);
   }
 
+  /**
+   * Returns intersecting element.
+   *
+   * @param {*} element
+   * @return {!Element}
+   */
   getElementIntersectionRect(element) {
     if (this.getRootVisibility() == 0) {
       return null;

@@ -1,4 +1,4 @@
-/**
+ /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -242,6 +242,7 @@ export class LaterpayVendor {
   }
 
   /**
+   * @param {string} name
    * @return {!Element}
    * @private
    */
@@ -532,7 +533,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @return{!Promise}
+   * @return {!Promise}
    */
   pingback() {
     return Promise.resolve();
