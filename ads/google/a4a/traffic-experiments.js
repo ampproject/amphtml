@@ -36,6 +36,7 @@ import {
 } from '../../../src/experiments';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
@@ -214,7 +215,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '6': sfgTreatmentId,
   };
   const arg = extractUrlExperimentId(win, element);
-  if (argMapping.hasOwnProperty(arg)) {
+  if (hasOwn(argMapping, arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
     return true;
   } else {

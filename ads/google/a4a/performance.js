@@ -18,7 +18,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getCorrelator} from './utils';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {serializeQueryString} from '../../../src/url';
@@ -93,7 +93,7 @@ export class BaseLifecycleReporter {
    */
   setPingParameters(parametersToValues) {
     for (const variable in parametersToValues) {
-      if (parametersToValues.hasOwnProperty(variable)) {
+      if (hasOwn(parametersToValues, variable)) {
         this.setPingParameter(variable, parametersToValues[variable]);
       }
     }
