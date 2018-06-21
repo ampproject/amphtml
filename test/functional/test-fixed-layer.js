@@ -223,7 +223,6 @@ describe('FixedLayer', () => {
         set transition(v) {
           elem.style.setProperty('transition', v);
         },
-
         setProperty(prop, value, priority) {
           const privProp = '_' + prop;
 

@@ -512,7 +512,7 @@ export class Viewport {
         offset = -this.getHeight() + elementRect.height;
         break;
       case 'center':
-        offset = -this.getHeight() / 2 + elementRect.height / 2;
+        offset = (-this.getHeight() / 2) + (elementRect.height / 2);
         break;
       default:
         offset = 0;
@@ -566,14 +566,15 @@ export class Viewport {
 
   /**
    * Registers the handler for ViewportResizedEventDef events.
+   *
+   * Note that there is a known bug in Webkit that causes window.innerWidth
+   * and window.innerHeight values to be incorrect after resize. A temporary
+   * fix is to add a 500 ms delay before computing these values.
+   * Link: https://bugs.webkit.org/show_bug.cgi?id=170595
+   *
    * @param {function(!ViewportResizedEventDef)} handler
    * @return {!UnlistenDef}
    */
-
-  // Note that there is a known bug in Webkit that causes window.innerWidth
-  // and window.innerHeight values to be incorrect after resize. A temporary
-  // fix is to add a 500 ms delay before computing these values.
-  // Link: https://bugs.webkit.org/show_bug.cgi?id=170595
   onResize(handler) {
     return this.resizeObservable_.add(handler);
   }
@@ -675,7 +676,7 @@ export class Viewport {
         (dev().assertElement(iframeOptional)));
   }
 
-  /*
+  /**
    * Instruct the viewport to enter overlay mode.
    */
   enterOverlayMode() {
@@ -683,7 +684,7 @@ export class Viewport {
     this.disableScroll();
   }
 
-  /*
+  /**
    * Instruct the viewport to leave overlay mode.
    */
   leaveOverlayMode() {
@@ -691,7 +692,7 @@ export class Viewport {
     this.restoreOriginalTouchZoom();
   }
 
-  /*
+  /**
    * Disable the scrolling by setting overflow: hidden.
    * Should only be used for temporarily disabling scroll.
    */
@@ -701,7 +702,7 @@ export class Viewport {
     });
   }
 
-  /*
+  /**
    * Reset the scrolling by removing overflow: hidden.
    */
   resetScroll() {
