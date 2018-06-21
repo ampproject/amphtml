@@ -39,10 +39,10 @@ import {removeElement} from '../../../src/dom';
 const TAG = 'amp-video-iframe';
 
 /** @private @const */
-const sandbox = 'allow-scripts allow-same-origin';
+const SANDBOX = 'allow-scripts allow-same-origin';
 
 /** @private @const */
-const allowedEvents = [
+const ALLOWED_EVENTS = [
   'registered',
   'load',
   'playing',
@@ -127,7 +127,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.iframe_ = createFrameFor(this, this.getSrc_(), sandbox);
+    this.iframe_ = createFrameFor(this, this.getSrc_(), SANDBOX);
     this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
     return this.createReadyPromise_().then(() => this.onReady_());
   }
@@ -224,7 +224,7 @@ class AmpVideoIframe extends AMP.BaseElement {
       return;
     }
 
-    if (allowedEvents.indexOf(eventReceived) > -1) {
+    if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
       this.element.dispatchCustomEvent(eventReceived);
       return;
     }
