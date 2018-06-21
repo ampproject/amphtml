@@ -41,7 +41,7 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
   /**
    * Handles message.
    *
-   * @param {QEvent} event
+   * @param {!Event} event
    * @return {void}
    */
   handleMessage_(event) {
