@@ -183,7 +183,11 @@ export class AmpPanZoom extends AMP.BaseElement {
   layoutCallback() {
     this.content_.classList.add('i-amphtml-pan-zoom-child');
     return this.resetContentDimensions_()
-        .then(() => this.setupGestures_());
+        .then(() => {
+          if (!this.gestures_) {
+            this.setupGestures_();
+          }
+        });
   }
 
   /** @override */
@@ -343,9 +347,20 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
+
+      const {clientX, clientY} = e.data;
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-      const deltaX = (this.elementBox_.width / 2) - e.data.clientX;
-      const deltaY = (this.elementBox_.height / 2) - e.data.clientY;
+
+      // clientX and clientY returns values relative to top of viewport
+      // hence we have to substract the relative viewport offset to get
+      // values relative to the content dimensions.
+      const offsetX = (this.elementBox_.left -
+        this.getViewport().getScrollLeft()) - clientX;
+      const deltaX = (this.elementBox_.height / 2) + offsetX;
+      const offsetY = (this.elementBox_.top -
+        this.getViewport().getScrollTop()) - clientY;
+      const deltaY = (this.elementBox_.height / 2) + offsetY;
+
       this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true)
           .then(() => this.onZoomRelease_());
     });
@@ -359,6 +374,8 @@ export class AmpPanZoom extends AMP.BaseElement {
         dir,
         last,
       } = e.data;
+
+      // TODO: fix viewport offset bug
       this.onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir);
       if (last) {
         this.onZoomRelease_();
@@ -469,6 +486,7 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     const minY = dh >= 0 ? 0 : dh / 2;
     const maxY = dh >= 0 ? 0 : -minY;
+
     const minX = dw >= 0 ? 0 : dw / 2;
     const maxX = dw >= 0 ? 0 : -minX;
 
@@ -484,9 +502,11 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   updatePanZoom_() {
     const {scale_: s, posX_: x, posY_: y, content_: content} = this;
-    setStyles(dev().assertElement(content), {
-      transform: translate(x, y) + ' ' + scale(s),
-    });
+    this.mutateElement(() => {
+      setStyles(dev().assertElement(content), {
+        transform: translate(x, y) + ' ' + scale(s),
+      });
+    }, content);
     this.triggerTransformEnd_(s, x, y);
   }
 
