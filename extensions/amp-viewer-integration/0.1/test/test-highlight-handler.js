@@ -29,6 +29,17 @@ describes.fakeWin('getHighlightParam', {
         '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D';
     expect(getHighlightParam(env.ampdoc)).to.deep.equal({
       sentences: ['amp', 'highlight'],
+      skipRendering: false,
+    });
+  });
+
+  it('do nothing flag', () => {
+    // URL encoded '{"s":["amp","highlight"], "n": 1}'
+    env.win.location = 'page.html#highlight=' +
+      '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%2C%20%22n%22%3A%201%7D';
+    expect(getHighlightParam(env.ampdoc)).to.deep.equal({
+      sentences: ['amp', 'highlight'],
+      skipRendering: true,
     });
   });
 
@@ -86,10 +97,10 @@ describes.realWin('HighlightHandler', {
     ampdoc: 'single',
   },
 }, env => {
-
-  it('initialize with visibility=visible', () => {
+  let root = null;
+  beforeEach(() => {
     const {document} = env.win;
-    const root = document.createElement('div');
+    root = document.createElement('div');
     document.body.appendChild(root);
     const div0 = document.createElement('div');
     div0.textContent = 'text in amp doc';
@@ -97,17 +108,31 @@ describes.realWin('HighlightHandler', {
     const div1 = document.createElement('div');
     div1.textContent = 'highlighted text';
     root.appendChild(div1);
+  });
 
+  it('initialize with visibility=visible', () => {
     const {ampdoc} = env;
     const scrollStub = sandbox.stub(
         Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
+    scrollStub.returns(Promise.reject());
+    const sendMsgStub = sandbox.stub(
+        Services.viewerForDoc(ampdoc), 'sendMessage');
+
     const handler = new HighlightHandler(
         ampdoc,{sentences: ['amp', 'highlight']});
 
     expect(scrollStub).to.be.calledOnce;
-    expect(scrollStub.firstCall.args.length).to.equal(2);
-    expect(scrollStub.firstCall.args[0].textContent).to.equal('amp');
-    expect(scrollStub.firstCall.args[1]).to.equal(500);
+    expect(scrollStub.firstCall.args.length).to.equal(1);
+    expect(scrollStub.firstCall.args[0].style.pointerEvents).to.equal('none');
+
+    // For some reason, expect(args).to.deep.equal does not work.
+    expect(sendMsgStub.callCount).to.equal(2);
+    expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+    expect(sendMsgStub.firstCall.args[1]).to.deep.equal(
+        {state: 'found', scroll: 0});
+    expect(sendMsgStub.secondCall.args[1]).to.deep.equal(
+        {state: 'auto_scroll'});
+
     expect(root.innerHTML).to.equal(
         '<div>text in <span style="background-color: rgb(255, 255, 0); ' +
           'color: rgb(51, 51, 51);">amp</span> doc</div><div>' +
@@ -128,5 +153,55 @@ describes.realWin('HighlightHandler', {
     expect(root.innerHTML).to.equal(
         '<div>text in <span style="">amp</span> doc</div><div>' +
           '<span style="">highlight</span>ed text</div>');
+  });
+
+  it('initialize with skipRendering', () => {
+    const {ampdoc} = env;
+    const scrollStub = sandbox.stub(
+        Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
+    scrollStub.returns(Promise.reject());
+    const sendMsgStub = sandbox.stub(
+        Services.viewerForDoc(ampdoc), 'sendMessage');
+
+    new HighlightHandler(ampdoc,
+        {sentences: ['amp', 'highlight'], skipRendering: true});
+
+    expect(scrollStub).not.to.be.called;
+
+    // For some reason, expect(args).to.deep.equal does not work.
+    expect(sendMsgStub.callCount).to.equal(1);
+    expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+    expect(sendMsgStub.firstCall.args[1]).to.deep.equal(
+        {state: 'found', scroll: 0});
+
+    expect(root.innerHTML).to.equal(
+        '<div>text in <span>amp</span> doc</div><div><span>highlight</span>' +
+        'ed text</div>');
+  });
+
+  it('calcTopToCenterHighlightedNodes_ center elements', () => {
+    const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
+    expect(handler.highlightedNodes_).not.to.be.null;
+
+    const viewport = Services.viewportForDoc(env.ampdoc);
+    sandbox.stub(viewport, 'getLayoutRect').returns({top: 500, bottom: 550});
+    sandbox.stub(viewport, 'getHeight').returns(300);
+    sandbox.stub(viewport, 'getPaddingTop').returns(50);
+
+    // 525px (The center of the element) - 0.5 * 250px (window height) = 400px.
+    expect(handler.calcTopToCenterHighlightedNodes_()).to.equal(400);
+  });
+
+  it('calcTopToCenterHighlightedNodes_ too tall element', () => {
+    const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
+    expect(handler.highlightedNodes_).not.to.be.null;
+
+    const viewport = Services.viewportForDoc(env.ampdoc);
+    sandbox.stub(viewport, 'getLayoutRect').returns({top: 500, bottom: 1000});
+    sandbox.stub(viewport, 'getHeight').returns(300);
+    sandbox.stub(viewport, 'getPaddingTop').returns(50);
+
+    // Scroll to the top of the element because it's too tall.
+    expect(handler.calcTopToCenterHighlightedNodes_()).to.equal(500);
   });
 });

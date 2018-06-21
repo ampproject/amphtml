@@ -41,8 +41,18 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
+      // DEPRECATED! Do not extend this whitelist. Use src/purifier.js instead.
+      // Contact @choumx for questions.
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
-      'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/purifier.js',
+    whitelist: [
+      'src/sanitizer.js->src/purifier.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
+      'extensions/amp-bind/0.1/bind-impl.js->src/purifier.js',
     ],
   },
   {
@@ -58,7 +68,7 @@ exports.rules = [
     whitelist: [
       'extensions/amp-crypto-polyfill/**/*.js->' +
           'third_party/closure-library/sha384-generated.js',
-      'extensions/amp-mustache/0.1/amp-mustache.js->' +
+      'extensions/amp-mustache/**/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/' +
           'amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
@@ -250,12 +260,14 @@ exports.rules = [
           'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
           'src/service/notification-ui-manager.js',
-      // For autoplay delegation.
-      // TODO(alanorozco, #13674): Use async service.
+      // For autoplay delegation:
       'extensions/amp-story/0.1/amp-story-page.js->' +
-          'src/service/video-manager-impl.js',
+          'src/service/video-service-sync-impl.js',
       'extensions/amp-story/1.0/amp-story-page.js->' +
-          'src/service/video-manager-impl.js',
+          'src/service/video-service-sync-impl.js',
+      // Accessing USER_INTERACTED constant:
+      'extensions/amp-story/1.0/media-pool.js->' +
+          'src/service/video-service-interface.js',
       'extensions/amp-story/1.0/page-advancement.js->' +
           'src/service/action-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->' +

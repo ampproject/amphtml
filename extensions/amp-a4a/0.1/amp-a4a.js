@@ -251,6 +251,7 @@ export function protectFunctionWrapper(
   };
 }
 
+/** Abstract class for AMP Ad Fast Fetch enabled networks */
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
   // TODO: Handle creatives that do not fill.
@@ -476,7 +477,8 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   renderOutsideViewport() {
     // Ensure non-verified AMP creatives are throttled.
-    if (!this.isVerifiedAmpCreative_ && is3pThrottled(this.win)) {
+    if (!this.isVerifiedAmpCreative_ && is3pThrottled(this.win) &&
+        !this.inNonAmpPreferenceExp()) {
       this.handleLifecycleStage_('throttled3p');
       return false;
     }
@@ -506,8 +508,8 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @return {boolean} whether ad request should be delayed until
-   *    renderOutsideViewport is met.
+   * @return {boolean|number} whether ad request should be delayed until
+   *    renderOutsideViewport is met or if number, the amount of viewports.
    */
   delayAdRequestEnabled() {
     return false;
@@ -597,6 +599,18 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Should only be called after XHR response headers have been processed and
+   * postAdResponseExperimentFeatures is populated.
+   * @return {boolean} whether in experiment giving non-AMP creatives same
+   *    benefits as AMP (increased priority, no throttle)
+   * @visibleForTesting
+   */
+  inNonAmpPreferenceExp() {
+    return !!this.postAdResponseExperimentFeatures['pref_neutral_enabled'] &&
+      ['adsense', 'doubleclick'].includes(this.element.getAttribute('type'));
+  }
+
+  /**
    * @return {boolean} whether environment/element should initialize ad request
    *    promise chain.
    * @private
@@ -675,9 +689,11 @@ export class AmpA4A extends AMP.BaseElement {
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
           // meeting the definition as opposed to waiting on the promise.
-          if (this.delayAdRequestEnabled() &&
-              !this.getResource().renderOutsideViewport()) {
-            return this.getResource().whenWithinRenderOutsideViewport();
+          const delay = this.delayAdRequestEnabled();
+          if (delay) {
+            return this.getResource().whenWithinViewport(
+                typeof delay == 'number' ? delay :
+                  this.renderOutsideViewport());
           }
         })
         // Possibly block on amp-consent.
@@ -686,8 +702,11 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           const consentPolicyId = super.getConsentPolicy();
           return consentPolicyId ?
-            getConsentPolicyState(this.getAmpDoc(), consentPolicyId) :
-            Promise.resolve(null);
+            getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+                .catch(err => {
+                  user().error(TAG, 'Error determining consent state', err);
+                  return CONSENT_POLICY_STATE.UNKNOWN;
+                }) : Promise.resolve(null);
         })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
@@ -828,8 +847,14 @@ export class AmpA4A extends AMP.BaseElement {
           let creativeMetaDataDef;
           if (!creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))) {
+            if (this.inNonAmpPreferenceExp()) {
+              // Experiment to give non-AMP creatives same benefits as AMP so
+              // update priority.
+              this.updateLayoutPriority(LayoutPriority.CONTENT);
+            }
             return null;
           }
+
           // Update priority.
           this.updateLayoutPriority(LayoutPriority.CONTENT);
           // Load any extensions; do not wait on their promises as this
@@ -1393,7 +1418,7 @@ export class AmpA4A extends AMP.BaseElement {
       user().warn(TAG, this.element.getAttribute('type'),
           'No creative or URL available -- A4A can\'t render any ad');
     }
-    if (!throttleApplied) {
+    if (!throttleApplied && !this.inNonAmpPreferenceExp()) {
       incrementLoadingAds(this.win, renderPromise);
     }
     return renderPromise.then(

@@ -41,6 +41,7 @@ const TAG = 'amp-story';
  *    pausedstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
+ *    consentid: ?string,
  *    currentpageid: string,
  * }}
  */
@@ -68,6 +69,9 @@ export const StateProperty = {
   PAUSED_STATE: 'pausedstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
+
+  // App data.
+  CONSENT_ID: 'consentid',
   CURRENT_PAGE_ID: 'currentpageid',
   CURRENT_PAGE_INDEX: 'currentpageindex',
 };
@@ -75,6 +79,8 @@ export const StateProperty = {
 
 /** @private @const @enum {string} */
 export const Action = {
+  CHANGE_PAGE: 'setcurrentpageid',
+  SET_CONSENT_ID: 'setconsentid',
   TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
@@ -85,7 +91,6 @@ export const Action = {
   TOGGLE_PAUSED: 'togglepaused',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
-  CHANGE_PAGE: 'changepage',
 };
 
 
@@ -116,7 +121,10 @@ const actions = (state, action, data) => {
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.INFO_DIALOG_STATE]: !!data}));
+          {}, state, {
+            [StateProperty.INFO_DIALOG_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     // Shows or hides the audio controls.
     case Action.TOGGLE_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
@@ -136,7 +144,13 @@ const actions = (state, action, data) => {
           {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
+          {}, state, {
+            [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.SHARE_MENU_STATE]: !!data,
+          }));
+    case Action.SET_CONSENT_ID:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.CONSENT_ID]: data}));
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
@@ -150,6 +164,9 @@ const actions = (state, action, data) => {
 };
 
 
+/**
+ * Store service.
+ */
 export class AmpStoryStoreService {
   /**
    * @param {!Window} win
@@ -243,6 +260,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
+      [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
     });
