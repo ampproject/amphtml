@@ -284,6 +284,9 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   handleOneTimeRequest_(requestType, getter) {
+    if (!this.iframe) {
+      return;
+    }
     this.unlisteners_.push(listenFor(this.iframe, requestType,
         (info, source, origin) => {
           if (!this.iframe) {

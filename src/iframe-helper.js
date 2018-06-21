@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
-import {parseUrlDeprecated} from './url';
+import {toWin} from './types';
 import {tryParseJson} from './json';
 
 /**
@@ -82,7 +83,7 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
  */
 function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
-  const {origin} = parseUrlDeprecated(iframe.src);
+  const {origin} = Services.urlForDoc(iframe).parse(iframe.src);
   const sentinel = getSentinel_(iframe, opt_is3P);
   const listenSentinel = getListenForSentinel(parentWin, sentinel, true);
 
@@ -238,8 +239,8 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * Allows listening for message from the iframe. Returns an unlisten
  * function to remove the listener.
  *
- * @param {!Element} iframe.
- * @param {string} typeOfMessage.
+ * @param {!Element} iframe
+ * @param {string} typeOfMessage
  * @param {?function(!JsonObject, !Window, string)} callback Called when a
  *     message of this type arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
@@ -253,7 +254,7 @@ export function listenFor(
   dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
   dev().assert(callback);
-  const parentWin = iframe.ownerDocument.defaultView;
+  const parentWin = toWin(iframe.ownerDocument.defaultView);
 
   registerGlobalListenerIfNeeded(parentWin);
 
@@ -456,6 +457,7 @@ export class SubscriptionApi {
         this.is3p_);
   }
 
+  /** @public */
   destroy() {
     this.unlisten_();
     this.clientWindows_.length = 0;

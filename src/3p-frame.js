@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseUrlDeprecated} from './url';
+import {Services} from './services';
 import {dev, user} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
@@ -91,15 +91,18 @@ export function getIframe(
   }
   count[attributes['type']] += 1;
 
+  const urlService = Services.urlForDoc(parentElement);
+
   const baseUrl = getBootstrapBaseUrl(
       parentWindow, undefined, opt_type, disallowCustom);
-  const host = parseUrlDeprecated(baseUrl).hostname;
+
+  const {hostname} = urlService.parse(baseUrl);
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
   // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
   const name = JSON.stringify(dict({
-    'host': host,
+    'host': hostname,
     'type': attributes['type'],
     // https://github.com/ampproject/amphtml/pull/2955
     'count': count[attributes['type']],
@@ -107,7 +110,7 @@ export function getIframe(
   }));
 
   iframe.src = baseUrl;
-  iframe.ampLocation = parseUrlDeprecated(baseUrl);
+  iframe.ampLocation = urlService.parse(baseUrl);
   iframe.name = name;
   // Add the check before assigning to prevent IE throw Invalid argument error
   if (attributes['width']) {
@@ -213,10 +216,16 @@ export function getBootstrapBaseUrl(
       getDefaultBootstrapBaseUrl(parentWindow);
 }
 
+/**
+ * @param {string} url
+ */
 export function setDefaultBootstrapBaseUrlForTesting(url) {
   overrideBootstrapBaseUrl = url;
 }
 
+/**
+ * @param {!Window} win
+ */
 export function resetBootstrapBaseUrlForTesting(win) {
   win.bootstrapBaseUrl = undefined;
   win.defaultBootstrapSubDomain = undefined;
@@ -245,6 +254,10 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
       `${srcFileBasename}.html`;
 }
 
+/**
+ * @param {!Window} win
+ * @return {string}
+ */
 function getAdsLocalhost(win) {
   let adsUrl = urls.thirdParty; // local dev with a non-localhost server
   if (adsUrl.indexOf('ampproject.net') > -1) {
@@ -304,16 +317,17 @@ function getCustomBootstrapBaseUrl(
     user().error(TAG, `3p iframe url disabled for ${opt_type || 'unknown'}`);
     return null;
   }
-  const url = assertHttpsUrl(meta.getAttribute('content'), meta);
+  const urlService = Services.urlForDoc(meta);
+  const url = urlService.assertHttpsUrl(meta.getAttribute('content'), meta);
   user().assert(url.indexOf('?') == -1,
       '3p iframe url must not include query string %s in element %s.',
       url, meta);
   // This is not a security primitive, we just don't want this to happen in
   // practice. People could still redirect to the same origin, but they cannot
   // redirect to the proxy origin which is the important one.
-  const parsed = parseUrlDeprecated(url);
+  const parsed = urlService.parse(url);
   user().assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
-      parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
+      parsed.origin != urlService.parse(parentWindow.location.href).origin,
   '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
