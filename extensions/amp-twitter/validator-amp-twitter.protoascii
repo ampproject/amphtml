@@ -31,9 +31,45 @@ tags: {  # <amp-twitter>
   tag_name: "AMP-TWITTER"
   requires_extension: "amp-twitter"
   attrs: {
-    name: "data-tweetid"
-    mandatory: true
+    name: "data-cards"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
   }
+  attrs: {
+    name: "data-conversation"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-limit"
+    trigger: {
+      also_requires_attr: "data-momentid"
+    }
+  }
+  attrs: {
+    name: "data-link-color"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-momentid"
+    mandatory_oneof: "['data-tweetid', 'data-momentid']"
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-theme"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-tweetid"
+    mandatory_oneof: "['data-tweetid', 'data-momentid']"
+  }
+  # All
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

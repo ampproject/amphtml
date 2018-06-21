@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 |  
@@ -62,6 +62,13 @@ PASS
 |        data-cards="hidden">
 |    </amp-twitter>
 |  
+|    <h2>Moment</h2>
+|    <amp-twitter width=486 height=1312
+|        layout="responsive"
+|        data-momentid="1009149991452135424"
+|        data-limit="2">
+|    </amp-twitter>
+|  
 |    <h2>Intentionally non-existing-tweet</h2>
 |    <amp-twitter width=390 height=330
 |        layout="responsive"
@@ -70,5 +77,37 @@ PASS
 |        <blockquote placeholder class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">A new approach to web performance.<br><br>Today we are starting the AMP Project to make mobile web content fast again.<a href="https://t.co/b091YOzo5s">https://t.co/b091YOzo5s</a></p>&mdash; Malte Ubl (@cramforce) <a href="https://twitter.com/cramforce/status/651762967147483136">October 7, 2015</a></blockquote>
 |    </amp-twitter>
 |  
+|    <h2>Missing tweetid/momentid</h2>
+|    <amp-twitter width=486 height=1312
+>>   ^~~~~~~~~
+amp-twitter/0.1/test/validator-amp-twitter.html:80:2 The tag 'amp-twitter' is missing a mandatory attribute - pick one of ['data-tweetid', 'data-momentid']. (see https://www.ampproject.org/docs/reference/components/amp-twitter) [AMP_TAG_PROBLEM]
+|        layout="responsive">
+|    </amp-twitter>
+|  
+|    <h2>Non-number momentid</h2>  
+|    <amp-twitter width=486 height=1312
+>>   ^~~~~~~~~
+amp-twitter/0.1/test/validator-amp-twitter.html:85:2 The attribute 'data-momentid' in tag 'amp-twitter' is set to the invalid value 'https://twitter.com/i/moments/1009149991452135424'. (see https://www.ampproject.org/docs/reference/components/amp-twitter) [DISALLOWED_HTML]
+|        layout="responsive"
+|        data-momentid="https://twitter.com/i/moments/1009149991452135424">
+|    </amp-twitter>
+|  
+|    <h2>Using cards with momentid</h2>
+|    <amp-twitter width=486 height=1312
+>>   ^~~~~~~~~
+amp-twitter/0.1/test/validator-amp-twitter.html:91:2 The attribute 'data-tweetid' in tag 'amp-twitter' is missing or incorrect, but required by attribute 'data-cards'. (see https://www.ampproject.org/docs/reference/components/amp-twitter) [DISALLOWED_HTML]
+|        layout="responsive"
+|        data-momentid="1009149991452135424"
+|        data-cards="hidden">
+|    </amp-twitter>
+|  
+|    <h2>Using limit with tweetid</h2>  
+|    <amp-twitter width=486 height=1312
+>>   ^~~~~~~~~
+amp-twitter/0.1/test/validator-amp-twitter.html:98:2 The attribute 'data-momentid' in tag 'amp-twitter' is missing or incorrect, but required by attribute 'data-limit'. (see https://www.ampproject.org/docs/reference/components/amp-twitter) [DISALLOWED_HTML]
+|        layout="responsive"
+|        data-tweetid="585110598171631616"
+|        data-limit="42">
+|    </amp-twitter>
 |  </body>
 |  </html>
