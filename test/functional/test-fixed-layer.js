@@ -138,7 +138,6 @@ describe('FixedLayer', () => {
         return (!!elem.parentElement);
       },
       defaultView: {
-        CustomEvent: window.CustomEvent,
         getComputedStyle: elem => {
           return elem.computedStyle;
         },
@@ -321,7 +320,6 @@ describe('FixedLayer', () => {
         this.firstElementChild = createElement('i-amphtml-fpa');
         this.firstElementChild.style.display = 'none';
       },
-      dispatchEvent: sandbox.stub(),
     };
     return elem;
   }
