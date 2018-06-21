@@ -25,7 +25,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {getConsentPolicyState} from '../../../src/consent-state';
+import {getConsentPolicyState} from '../../../src/consent';
 import {
   getData,
   listen,
@@ -169,9 +169,7 @@ class AmpImaVideo extends AMP.BaseElement {
     return consentPromise.then(initialConsentState => {
       const {element, win} = this;
       const iframe = getIframe(win, element, 'ima-video',
-          {initialConsentState});
-
-      iframe.setAttribute('allowfullscreen', 'true');
+          {initialConsentState}, {allowFullscreen: true});
 
       this.applyFillContent(iframe);
 

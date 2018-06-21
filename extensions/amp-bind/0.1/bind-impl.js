@@ -23,6 +23,7 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
+import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
@@ -37,7 +38,7 @@ import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/sanitizer';
+import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-bind';
@@ -143,10 +144,17 @@ export class Bind {
     this.overridableKeys_ = [];
 
     /**
-     * Upper limit on number of bindings for performance.
+     * Upper limit on total number of bindings.
+     *
+     * The initial value is set to 1000 which, based on ~2ms expression parse
+     * time, caps "time to interactive" at ~2s after page load.
+     *
+     * User interactions can add new bindings (e.g. infinite scroll), so this
+     * can increase over time to a final limit of 2000 bindings.
+     *
      * @private {number}
      */
-    this.maxNumberOfBindings_ = 2000; // Based on ~1ms to parse an expression.
+    this.maxNumberOfBindings_ = 1000;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -185,6 +193,9 @@ export class Bind {
     /** @private {Promise} */
     this.setStatePromise_ = null;
 
+    /** @private @const {!../../../src/utils/signals.Signals} */
+    this.signals_ = new Signals();
+
     // Expose for debugging in the console.
     AMP.printState = this.printState_.bind(this);
   }
@@ -193,6 +204,13 @@ export class Bind {
   adoptEmbedWindow(embedWin) {
     installServiceInEmbedScope(
         embedWin, 'bind', new Bind(this.ampdoc, embedWin));
+  }
+
+  /**
+   * @return {!../../../src/utils/signals.Signals}
+   */
+  signals() {
+    return this.signals_;
   }
 
   /**
@@ -250,6 +268,13 @@ export class Bind {
 
     const expression = args[RAW_OBJECT_ARGS_KEY];
     if (expression) {
+      // Increment bindings limit by 500 on each invocation to a max of 2000.
+      this.maxNumberOfBindings_ = Math.min(2000,
+          Math.max(1000, this.maxNumberOfBindings_ + 500));
+
+      // Signal first mutation (subsequent signals are harmless).
+      this.signals_.signal('FIRST_MUTATE');
+
       const scope = dict();
       if (event && event.detail) {
         scope['event'] = event.detail;
@@ -280,7 +305,15 @@ export class Bind {
    */
   setStateWithExpression(expression, scope) {
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
-        .then(result => this.setState(result));
+        .then(result => this.setState(result))
+        .then(() => {
+          this.history_.replace({
+            data: {
+              'amp-bind': this.state_,
+            },
+            title: this.localWin_.document.title,
+          });
+        });
     return this.setStatePromise_;
   }
 
@@ -305,9 +338,15 @@ export class Bind {
       });
 
       const onPop = () => this.setState(oldState);
-      this.history_.push(onPop);
-
-      return this.setState(result);
+      return this.setState(result)
+          .then(() => {
+            this.history_.push(onPop, {
+              data: {
+                'amp-bind': this.state_,
+              },
+              title: this.localWin_.document.title,
+            });
+          });
     });
   }
 
@@ -325,14 +364,28 @@ export class Bind {
    * @return {!Promise}
    */
   scanAndApply(added, removed, timeout = 2000) {
+    const beforeFirstMutate = !this.signals_.get('FIRST_MUTATE');
+
     const promise = this.removeBindingsForNodes_(removed)
         .then(() => this.addBindingsForNodes_(added))
         .then(numberOfBindingsAdded => {
           // Don't reevaluate/apply if there are no bindings.
-          if (numberOfBindingsAdded > 0) {
-            return this.evaluate_().then(results =>
-              this.applyElements_(results, added));
+          if (numberOfBindingsAdded == 0) {
+            return;
           }
+          return this.evaluate_().then(results => {
+            // Before first mutate, verify `added` elements and throw expected
+            // error to measure the impact of "faster-amp-list" breaking change.
+            if (beforeFirstMutate) {
+              const mismatches = this.verify_(results, added, /* warn */ false);
+              if (mismatches.length) {
+                // Cap size of mismatch string to 30 chars.
+                user().expectedError(TAG, 'Pre-gesture mismatch: '
+                    + String(mismatches).substr(0, 30));
+              }
+            }
+            return this.applyElements_(results, added);
+          });
         });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
@@ -502,12 +555,6 @@ export class Bind {
         : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
-        // Measuring impact of possibly reducing the binding limit (#11434).
-        const numberOfBindings = this.numberOfBindings();
-        if (numberOfBindings > 1000) {
-          dev().expectedError(TAG, `Over 1000 bindings (${numberOfBindings}).`);
-        }
-
         const {
           boundElements, bindings, expressionToElements, limitExceeded,
         } = results;
@@ -516,7 +563,7 @@ export class Bind {
         Object.assign(this.expressionToElements_, expressionToElements);
 
         if (limitExceeded) {
-          user().error(TAG, 'Maximum number of bindings reached ' +
+          dev().expectedError(TAG, 'Maximum number of bindings reached ' +
               `(${this.maxNumberOfBindings_}). Additional elements with ` +
               'bindings will be ignored.');
         }
@@ -798,21 +845,71 @@ export class Bind {
   }
 
   /**
-   * Verifies expression results against current DOM state.
+   * Verifies expression results vs. current DOM state and returns an
+   * array of bindings with mismatches (if any).
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {?Array<!Element>=} elements If provided, only verifies bindings
+   *     contained within the given elements. Otherwise, verifies all bindings.
+   * @param {boolean=} warn If true, emits a user warning for verification
+   *     mismatches. Otherwise, does not emit a warning.
+   * @return {!Array<string>}
    * @private
    */
-  verify_(results) {
+  verify_(results, elements = null, warn = true) {
+    // Collate strings containing details of verification mismatches to return.
+    const mismatches = {};
+
     this.boundElements_.forEach(boundElement => {
       const {element, boundProperties} = boundElement;
 
-      boundProperties.forEach(binding => {
-        const newValue = results[binding.expressionString];
-        if (newValue !== undefined) {
-          this.verifyBinding_(binding, element, newValue);
+      // If provided, filter elements that are _not_ children of `opt_elements`.
+      if (elements && !this.elementsContains_(elements, element)) {
+        return;
+      }
+
+      boundProperties.forEach(boundProperty => {
+        const newValue = results[boundProperty.expressionString];
+        if (newValue === undefined) {
+          return;
+        }
+        const mismatch = this.verifyBinding_(boundProperty, element, newValue);
+        if (!mismatch) {
+          return;
+        }
+        const {tagName} = element;
+        const {property, expressionString} = boundProperty;
+        const {expected, actual} = mismatch;
+
+        // Only store unique mismatches (dupes possible when rendering an array
+        // of data to a template).
+        mismatches[`${tagName}[${property}]${expected}:${actual}`] = true;
+
+        if (warn) {
+          user().warn(TAG, `Default value (${actual}) does not match first `
+            + `result (${expected}) for <${tagName} [${property}]="`
+            + `${expressionString}">. We recommend writing expressions with `
+            + 'matching default values, but this can be safely ignored if '
+            + 'intentional.');
         }
       });
     });
+    return Object.keys(mismatches);
+  }
+
+  /**
+   * Returns true if `el` is contained within any element in `elements`.
+   * @param {!Array<!Element>} elements
+   * @param {!Element} el
+   * @return {boolean}
+   * @private
+   */
+  elementsContains_(elements, el) {
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i].contains(el)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -1007,14 +1104,8 @@ export class Bind {
             mutated = true;
           }
         } else if (newValue !== oldValue) {
-          const rewrittenValue =
-              this.rewriteAttributes_(element, property, String(newValue));
-          if (rewrittenValue) { // Rewriting can fail due to e.g. invalid URL.
-            if (updateProperty) {
-              element[property] = rewrittenValue;
-            }
-            mutated = true;
-          }
+          mutated = this.rewriteAttributes_(
+              element, property, String(newValue), updateProperty);
         }
 
         if (mutated) {
@@ -1027,45 +1118,49 @@ export class Bind {
 
   /**
    * Performs CDN rewrites for the given mutation and updates the element.
-   * Returns the rewrite of `value` on success. Otherwise, returns undefined.
    * @see amp-cache-modifications.md#url-rewrites
    * @param {!Element} element
-   * @param {string} property
+   * @param {string} attrName
    * @param {string} value
-   * @return {string|undefined}
+   * @param {boolean} updateProperty If the property with the same name should
+   *    be updated as well.
+   * @return {boolean} Whether or not the rewrite was successful.
    * @private
    */
-  rewriteAttributes_(element, property, value) {
+  rewriteAttributes_(element, attrName, value, updateProperty) {
     // Rewrite attributes if necessary. Not done in worker since it relies on
     // `url#parseUrl` which uses <a>. Worker has URL API but not on IE11.
-    let rewrittenValue;
     try {
-      rewrittenValue = rewriteAttributesForElement(element, property, value);
+      rewriteAttributesForElement(
+          element, attrName, value, /* opt_location */ undefined,
+          updateProperty);
+      return true;
     } catch (e) {
       const error = user().createError(`${TAG}: "${value}" is not a ` +
-          `valid result for [${property}]`, e);
+          `valid result for [${attrName}]`, e);
       reportError(error, element);
     }
-    return rewrittenValue;
+    return false;
   }
 
   /**
-   * If current bound element state equals `expectedValue`, returns true.
-   * Otherwise, returns false.
+   * If current state of `element` matches `expectedValue`, returns null.
+   * Otherwise, returns a tuple containing the expected and actual values.
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
    * @param {./bind-expression.BindExpressionResultDef} expectedValue
+   * @return {?{expected: *, actual: *}}
    * @private
    */
   verifyBinding_(boundProperty, element, expectedValue) {
-    const {property, expressionString} = boundProperty;
+    const {property} = boundProperty;
     const {tagName} = element;
 
     // Don't show a warning for bind-only attributes,
     // like 'slide' on amp-carousel.
     const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[tagName];
     if (bindOnlyAttrs && bindOnlyAttrs.includes(property)) {
-      return;
+      return null;
     }
 
     let initialValue;
@@ -1106,8 +1201,7 @@ export class Bind {
         break;
 
       default:
-        const attribute = element.getAttribute(property);
-        initialValue = attribute;
+        initialValue = element.getAttribute(property);
         // Boolean attributes return values of either '' or null.
         if (expectedValue === true) {
           match = (initialValue === '');
@@ -1119,13 +1213,7 @@ export class Bind {
         break;
     }
 
-    if (!match) {
-      user().warn(TAG,
-          `Default value for <${tagName} [${property}]="${expressionString}"> `
-          + `does not match first result (${expectedValue}). We recommend `
-          + 'writing expressions with matching default values, but this can be '
-          + 'safely ignored if intentional.');
-    }
+    return match ? null : {expected: expectedValue, actual: initialValue};
   }
 
   /**

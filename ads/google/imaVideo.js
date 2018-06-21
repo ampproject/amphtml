@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
 import {isObject} from '../../src/types';
@@ -427,11 +428,17 @@ export function imaVideo(global, data) {
 
   consentState = global.context.initialConsentState;
 
-  // Set-up code that can't run until the IMA lib loads.
-  loadScript(
-      /** @type {!Window} */ (global),
-      'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
-      () => onImaLoadSuccess(global, data), onImaLoadFail);
+  if (consentState == 4) { // UNKNOWN
+    // On unknown consent state, do not load IMA. Treat this the same as if IMA
+    // failed to load.
+    onImaLoadFail();
+  } else {
+    // Set-up code that can't run until the IMA lib loads.
+    loadScript(
+        /** @type {!Window} */ (global),
+        'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
+        () => onImaLoadSuccess(global, data), onImaLoadFail);
+  }
 }
 
 function onImaLoadSuccess(global, data) {
@@ -571,11 +578,11 @@ function onBigPlayTouchMove() {
 export function requestAds() {
   adsRequested = true;
   adRequestFailed = false;
-  if (consentState == 4) { // UNKNOWN
+  if (consentState == CONSENT_POLICY_STATE.UNKNOWN) {
     // We're unaware of the user's consent state - do not request ads.
     imaLoadAllowed = false;
     return;
-  } else if (consentState == 2) { // INSUFFICIENT
+  } else if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT) {
     // User has provided consent state but has not consented to personalized
     // ads.
     adsRequest.adTagUrl += '&npa=1';

@@ -16,10 +16,6 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
-import {
-  CONSENT_POLICY_STATE,
-  getConsentPolicyState,
-} from './consent-state';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
@@ -36,9 +32,7 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {
-  getIntersectionChangeEntry,
-} from '../src/intersection-observer-polyfill';
+import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
@@ -117,6 +111,10 @@ export function createCustomElementClass(win, name) {
     constructor(self) {
       return super(self);
     }
+    /**
+     * The name of the custom element.
+     * @return {string}
+     */
     elementName() {
       return name;
     }
@@ -422,7 +420,7 @@ function createBaseCustomElementClass(win) {
       this.getResources().upgraded(this);
     }
 
-    /* @private */
+    /** @private */
     assertLayout_() {
       if (this.layout_ != Layout.NODISPLAY &&
           !this.implementation_.isLayoutSupported(this.layout_)) {
@@ -482,19 +480,24 @@ function createBaseCustomElementClass(win) {
         return this.buildingPromise_;
       }
       return this.buildingPromise_ = new Promise((resolve, reject) => {
-        const policyId = this.implementation_.getConsentPolicy();
+        const policyId = this.getConsentPolicy_();
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
-          getConsentPolicyState(this.getAmpDoc(), policyId).then(state => {
-            if (state == CONSENT_POLICY_STATE.INSUFFICIENT ||
-                state == CONSENT_POLICY_STATE.UNKNOWN) {
-              // Need to change after support more policy state
-              reject(blockedByConsentError());
-            } else {
-              resolve(this.implementation_.buildCallback());
-            }
-          });
+          Services.consentPolicyServiceForDocOrNull(this.getAmpDoc())
+              .then(consentPolicy => {
+                if (!consentPolicy) {
+                  return true;
+                }
+                return consentPolicy.whenPolicyUnblock(
+                    /** @type {string} */ (policyId));
+              }).then(shouldUnblock => {
+                if (shouldUnblock == true) {
+                  resolve(this.implementation_.buildCallback());
+                } else {
+                  reject(blockedByConsentError());
+                }
+              });
         }
       }).then(() => {
         this.preconnect(/* onLayout */false);
@@ -541,6 +544,14 @@ function createBaseCustomElementClass(win) {
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
         Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
+          const TAG = this.tagName;
+          if (!this.ownerDocument) {
+            dev().error(TAG, 'preconnect without ownerDocument');
+            return;
+          } else if (!this.ownerDocument.defaultView) {
+            dev().error(TAG, 'preconnect without defaultView');
+            return;
+          }
           this.implementation_.preconnectCallback(onLayout);
         }, 1);
       }
@@ -559,9 +570,10 @@ function createBaseCustomElementClass(win) {
      * Updates the layout box of the element.
      * See {@link BaseElement.getLayoutWidth} for details.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
+     * @param {boolean=} opt_measurementsChanged
      * @this {!Element}
      */
-    updateLayoutBox(layoutBox) {
+    updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
@@ -569,6 +581,9 @@ function createBaseCustomElementClass(win) {
       if (this.isBuilt()) {
         try {
           this.implementation_.onLayoutMeasure();
+          if (opt_measurementsChanged) {
+            this.implementation_.onMeasureChanged();
+          }
         } catch (e) {
           reportError(e, this);
         }
@@ -1343,6 +1358,25 @@ function createBaseCustomElementClass(win) {
         rethrowAsync('Action execution failed:', e,
             invocation.node.tagName, invocation.method);
       }
+    }
+
+    /**
+     * Get the consent policy to follow.
+     * @return {?string}
+     */
+    getConsentPolicy_() {
+      const policyId = this.getAttribute('data-block-on-consent');
+      if (policyId === null) {
+        // data-block-on-consent attribute not set
+        return null;
+      }
+      if (policyId == '' || policyId == 'default') {
+        // data-block-on-consent value not set, up to individual element
+        // Note: data-block-on-consent and data-block-on-consent='default' is
+        // treated exactly the same
+        return this.implementation_.getConsentPolicy();
+      }
+      return policyId;
     }
 
     /**

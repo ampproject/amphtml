@@ -59,7 +59,8 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'twitter');
+    const iframe = getIframe(this.win, this.element, 'twitter', null,
+        {allowFullscreen: true});
     this.applyFillContent(iframe);
     listenFor(iframe, 'embed-size', data => {
       // We only get the message if and when there is a tweet to display,
@@ -68,11 +69,21 @@ class AmpTwitter extends AMP.BaseElement {
       this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
     listenFor(iframe, 'no-content', () => {
-      if (this.getFallback()) {
+      const fallback = this.getFallback();
+      if (fallback) {
+        // If there is no content, but a fallback is provided.
         this.togglePlaceholder(false);
         this.toggleFallback(true);
+        this./*OK*/changeHeight(fallback./*OK*/offsetHeight);
+      } else {
+        // Else keep placeholder displayed since there's no fallback.
+        const placeholder = this.getPlaceholder();
+        if (placeholder) {
+          // Only happens if there is no content to render
+          // (e.g. tweet was deleted) and there is no fallback.
+          this./*OK*/changeHeight(placeholder./*OK*/offsetHeight);
+        }
       }
-      // else keep placeholder displayed since there's no fallback
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;

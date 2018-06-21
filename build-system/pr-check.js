@@ -312,14 +312,13 @@ const command = {
     }
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd + ' --headless');
-    // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
-    // if (process.env.TRAVIS) {
-    //   // A subset of unit tests on other browsers via sauce labs
-    //   cmd = cmd + ' --saucelabs_lite';
-    //   startSauceConnect();
-    //   timedExecOrDie(cmd);
-    //   stopSauceConnect();
-    // }
+    if (process.env.TRAVIS) {
+      // A subset of unit tests on other browsers via sauce labs
+      cmd = cmd + ' --saucelabs_lite';
+      startSauceConnect();
+      timedExecOrDie(cmd);
+      stopSauceConnect();
+    }
   },
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
@@ -565,8 +564,8 @@ function main() {
   const files = filesInPr();
   const buildTargets = determineBuildTargets(files);
 
-  // Exit early if flag-config files are mixed with non-flag-config files.
-  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size !== 1) {
+  // Exit early if flag-config files are mixed with runtime files.
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Looks like your PR contains',
         colors.cyan('{prod|canary}-config.json'),
@@ -594,13 +593,15 @@ function main() {
       command.testDocumentLinks();
     }
     if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('INTEGRATION_TEST')) {
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildCss();
       command.runJsonCheck();
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
-      if (buildTargets.has('RUNTIME')) {
+      if (buildTargets.has('RUNTIME') ||
+          buildTargets.has('BUILD_SYSTEM')) {
         // Before running all tests, run tests modified by the PR. (Fail early.)
         command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
@@ -611,7 +612,9 @@ function main() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF')) {
+        buildTargets.has('VISUAL_DIFF') ||
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
       command.buildRuntimeMinified(/* extensions */ false);
@@ -623,18 +626,17 @@ function main() {
     }
     command.runPresubmitTests();
     if (buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('RUNTIME')) {
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
       command.runIntegrationTests(/* compiled */ false);
     }
-    // TODO(rsimha, #14851): Failing due to long proessing times.
-    // if (buildTargets.has('INTEGRATION_TEST') ||
-    //     buildTargets.has('RUNTIME') ||
-    //     buildTargets.has('VISUAL_DIFF')) {
-    //   command.verifyVisualDiffTests();
-    // } else {
-    //   // Generates a blank Percy build to satisfy the required Github check.
-    //   command.runVisualDiffTests(/* opt_mode */ 'skip');
-    // }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF') ||
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.verifyVisualDiffTests();
+    }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
     }

@@ -17,7 +17,6 @@
 import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-  getConsentPolicyState,
 } from '../../../src/consent-state';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LayoutPriority} from '../../../src/layout';
@@ -25,7 +24,6 @@ import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
   assertHttpsUrl,
-  isSecureUrl,
   tryDecodeUriComponent,
 } from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
@@ -43,6 +41,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {getBinaryType} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {getConsentPolicyState} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 import {tryResolve} from '../../../src/utils/promise';
@@ -104,11 +103,15 @@ export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 /** @type {string} */
 export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
 
+/** @type {string} */
+export const IFRAME_GET = 'IFRAME-GET';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
   SAFEFRAME: 'safeframe',
   NAMEFRAME: 'nameframe',
+  IFRAME_GET: 'iframe_get',
 };
 
 /** @type {!Object} @private */
@@ -248,6 +251,7 @@ export function protectFunctionWrapper(
   };
 }
 
+/** Abstract class for AMP Ad Fast Fetch enabled networks */
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
   // TODO: Handle creatives that do not fill.
@@ -404,6 +408,7 @@ export class AmpA4A extends AMP.BaseElement {
      * be null before buildCallback() executes or if the impl does not provide
      * an analytice config.
      * @private {?Element}
+     * @visibleForTesting
      */
     this.a4aAnalyticsElement_ = null;
 
@@ -472,7 +477,8 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   renderOutsideViewport() {
     // Ensure non-verified AMP creatives are throttled.
-    if (!this.isVerifiedAmpCreative_ && is3pThrottled(this.win)) {
+    if (!this.isVerifiedAmpCreative_ && is3pThrottled(this.win) &&
+        !this.inNonAmpPreferenceExp()) {
       this.handleLifecycleStage_('throttled3p');
       return false;
     }
@@ -502,8 +508,8 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @return {boolean} whether ad request should be delayed until
-   *    renderOutsideViewport is met.
+   * @return {boolean|number} whether ad request should be delayed until
+   *    renderOutsideViewport is met or if number, the amount of viewports.
    */
   delayAdRequestEnabled() {
     return false;
@@ -577,7 +583,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibileForTesting
+   * @visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -590,6 +596,18 @@ export class AmpA4A extends AMP.BaseElement {
    */
   hasAdPromise() {
     return !!this.adPromise_;
+  }
+
+  /**
+   * Should only be called after XHR response headers have been processed and
+   * postAdResponseExperimentFeatures is populated.
+   * @return {boolean} whether in experiment giving non-AMP creatives same
+   *    benefits as AMP (increased priority, no throttle)
+   * @visibleForTesting
+   */
+  inNonAmpPreferenceExp() {
+    return !!this.postAdResponseExperimentFeatures['pref_neutral_enabled'] &&
+      ['adsense', 'doubleclick'].includes(this.element.getAttribute('type'));
   }
 
   /**
@@ -671,9 +689,11 @@ export class AmpA4A extends AMP.BaseElement {
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
           // meeting the definition as opposed to waiting on the promise.
-          if (this.delayAdRequestEnabled() &&
-              !this.getResource().renderOutsideViewport()) {
-            return this.getResource().whenWithinRenderOutsideViewport();
+          const delay = this.delayAdRequestEnabled();
+          if (delay) {
+            return this.getResource().whenWithinViewport(
+                typeof delay == 'number' ? delay :
+                  this.renderOutsideViewport());
           }
         })
         // Possibly block on amp-consent.
@@ -682,8 +702,11 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           const consentPolicyId = super.getConsentPolicy();
           return consentPolicyId ?
-            getConsentPolicyState(this.getAmpDoc(), consentPolicyId) :
-            Promise.resolve(null);
+            getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+                .catch(err => {
+                  user().error(TAG, 'Error determining consent state', err);
+                  return CONSENT_POLICY_STATE.UNKNOWN;
+                }) : Promise.resolve(null);
         })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
@@ -698,6 +721,14 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           this.adUrl_ = adUrl;
           this.handleLifecycleStage_('urlBuilt');
+          // If we should skip the XHR, we will instead request and render
+          // by simply writing a frame into the page using
+          // renderViaIframeGet
+          if (!this.isXhrAllowed() && !!this.adUrl_) {
+            this.experimentalNonAmpCreativeRenderMethod_ =
+                XORIGIN_MODE.IFRAME_GET;
+            return Promise.reject(IFRAME_GET);
+          }
           return adUrl && this.sendXhrRequest(adUrl);
         })
         // The following block returns either the response (as a
@@ -816,8 +847,14 @@ export class AmpA4A extends AMP.BaseElement {
           let creativeMetaDataDef;
           if (!creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))) {
+            if (this.inNonAmpPreferenceExp()) {
+              // Experiment to give non-AMP creatives same benefits as AMP so
+              // update priority.
+              this.updateLayoutPriority(LayoutPriority.CONTENT);
+            }
             return null;
           }
+
           // Update priority.
           this.updateLayoutPriority(LayoutPriority.CONTENT);
           // Load any extensions; do not wait on their promises as this
@@ -828,13 +865,16 @@ export class AmpA4A extends AMP.BaseElement {
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
             this.preconnect.preload(font.href));
+
+          const urls = Services.urlForDoc(this.getAmpDoc());
           // Preload any AMP images.
           (creativeMetaDataDef.images || []).forEach(image =>
-            isSecureUrl(image) && this.preconnect.preload(image));
+            urls.isSecure(image) && this.preconnect.preload(image));
           return creativeMetaDataDef;
         })
         .catch(error => {
           switch (error.message || error) {
+            case IFRAME_GET:
             case NETWORK_FAILURE:
               return null;
             case INVALID_SPSA_RESPONSE:
@@ -958,8 +998,11 @@ export class AmpA4A extends AMP.BaseElement {
         return Services.timerFor(this.win).promise(1000).then(() => {
           this.isRelayoutNeededFlag = true;
           this.getResource().layoutCanceled();
-          Services.resourcesForDoc(this.getAmpDoc())
-              ./*OK*/requireLayout(this.element);
+          // Only Require relayout after page visible
+          Services.viewerForDoc(this.getAmpDoc()).whenNextVisible().then(() => {
+            Services.resourcesForDoc(this.getAmpDoc())
+                ./*OK*/requireLayout(this.element);
+          });
         });
       });
     });
@@ -1073,6 +1116,14 @@ export class AmpA4A extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Returns whether or not the ad request may be sent using XHR.
+   * @return {boolean}
+   */
+  isXhrAllowed() {
+    return true;
+  }
+
   /** @override **/
   attemptChangeSize(newHeight, newWidth) {
     // Store original size of slot in order to allow re-expansion on
@@ -1139,6 +1190,11 @@ export class AmpA4A extends AMP.BaseElement {
     if (!force && this.isRefreshing) {
       return;
     }
+    // Allow embed to release its resources.
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.destroy();
+      this.friendlyIframeEmbed_ = null;
+    }
     if (this.iframe && this.iframe.parentElement) {
       this.iframe.parentElement.removeChild(this.iframe);
       this.iframe = null;
@@ -1146,11 +1202,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
-    }
-    // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed_) {
-      this.friendlyIframeEmbed_.destroy();
-      this.friendlyIframeEmbed_ = null;
     }
   }
 
@@ -1359,7 +1410,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.creativeBody_ = null; // Free resources.
     } else if (this.adUrl_) {
       assertHttpsUrl(this.adUrl_, this.element);
-      renderPromise = this.renderViaCachedContentIframe_(this.adUrl_);
+      renderPromise = this.renderViaIframeGet_(this.adUrl_);
     } else {
       // Ad URL may not exist if buildAdUrl throws error or returns empty.
       // If error occurred, it would have already been reported but let's
@@ -1367,7 +1418,7 @@ export class AmpA4A extends AMP.BaseElement {
       user().warn(TAG, this.element.getAttribute('type'),
           'No creative or URL available -- A4A can\'t render any ad');
     }
-    if (!throttleApplied) {
+    if (!throttleApplied && !this.inNonAmpPreferenceExp()) {
       incrementLoadingAds(this.win, renderPromise);
     }
     return renderPromise.then(
@@ -1504,10 +1555,15 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Creates iframe whose src matches that of the ad URL.  The response should
+   * Creates iframe whose src matches that of the ad URL. For standard
+   * Fast Fetch running on the AMP cdn, an XHR request will typically have
+   * already been sent to the same adUrl, and the response should
    * have been cached causing the browser to render without callout.  However,
    * it is possible for cache miss to occur which can be detected server-side
    * by missing ORIGIN header.
+   *
+   * Additionally, this method is also used in certain cases to send the only
+   * request, i.e. the initial XHR is skipped.
    *
    * Note: As of 2016-10-18, the fill-from-cache assumption appears to fail on
    * Safari-on-iOS, which issues a fresh network request, even though the
@@ -1518,7 +1574,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise} awaiting ad completed insertion.
    * @private
    */
-  renderViaCachedContentIframe_(adUrl) {
+  renderViaIframeGet_(adUrl) {
     this.handleLifecycleStage_('renderCrossDomainStart', {
       'isAmpCreative': this.isVerifiedAmpCreative_,
       'releaseType': this.releaseType_,
@@ -1652,10 +1708,12 @@ export class AmpA4A extends AMP.BaseElement {
         if (!isArray(metaData.customStylesheets)) {
           throw new Error(errorMsg);
         }
+
+        const urls = Services.urlForDoc(this.getAmpDoc());
         metaData.customStylesheets.forEach(stylesheet => {
           if (!isObject(stylesheet) || !stylesheet['href'] ||
               typeof stylesheet['href'] !== 'string' ||
-              !isSecureUrl(stylesheet['href'])) {
+              !urls.isSecure(stylesheet['href'])) {
             throw new Error(errorMsg);
           }
         });
@@ -1700,7 +1758,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Receive collapse notifications and record lifecycle events for them.
    *
-   * @param unusedElement {!AmpElement}
+   * @param {!AmpElement} unusedElement
    * @override
    */
   collapsedCallback(unusedElement) {
@@ -1782,16 +1840,18 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState) {
-    if (!!AMP.maybeExecuteRealTimeConfig) {
+    if (!!AMP.RealTimeConfigManager) {
       try {
-        return AMP.maybeExecuteRealTimeConfig(
-            this, this.getCustomRealTimeConfigMacros_(), consentState);
+        return new AMP.RealTimeConfigManager(this)
+            .maybeExecuteRealTimeConfig(
+                this.getCustomRealTimeConfigMacros_(), consentState);
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }
     } else if (this.element.getAttribute('rtc-config')) {
       user().error(TAG, 'RTC not supported for ad network ' +
                    `${this.element.getAttribute('type')}`);
+
     }
   }
 

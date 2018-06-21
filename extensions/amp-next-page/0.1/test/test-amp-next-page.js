@@ -154,7 +154,7 @@ env => {
     const attachShadowDocSpy =
         sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
 
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+    sandbox.stub(viewport, 'getClientRectAsync').onFirstCall().callsFake(() => {
       // 1x viewport away
       return Promise.resolve(
           layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
@@ -168,14 +168,11 @@ env => {
 
     const shadowRoot = shadowDoc.getRootNode();
 
-    expect(
-        shadowRoot.querySelector('header').classList.contains(
-            'i-amphtml-next-page-hidden'))
-        .to.be.true;
-    expect(
-        shadowRoot.querySelector('footer').classList.contains(
-            'i-amphtml-next-page-hidden'))
-        .to.be.true;
+    expect(shadowRoot.querySelector('header'))
+        .to.have.class('i-amphtml-next-page-hidden');
+
+    expect(shadowRoot.querySelector('footer'))
+        .to.have.class('i-amphtml-next-page-hidden');
   });
 
   it('removes amp-analytics tags from child documents', function* () {
@@ -192,7 +189,7 @@ env => {
     const attachShadowDocSpy =
       sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
 
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+    sandbox.stub(viewport, 'getClientRectAsync').onFirstCall().callsFake(() => {
       // 1x viewport away
       return Promise.resolve(
           layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));

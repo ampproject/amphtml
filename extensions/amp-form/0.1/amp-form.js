@@ -27,9 +27,6 @@ import {FormEvents} from './form-events';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
-  assertAbsoluteHttpOrHttpsUrl,
-  assertHttpsUrl,
-  isProxyOrigin,
 } from '../../../src/url';
 import {Services} from '../../../src/services';
 import {
@@ -209,8 +206,9 @@ export class AmpForm {
   getXhrUrl_(attribute) {
     const url = this.form_.getAttribute(attribute);
     if (url) {
-      assertHttpsUrl(url, this.form_, attribute);
-      user().assert(!isProxyOrigin(url),
+      const urlService = Services.urlForDoc(this.form_);
+      urlService.assertHttpsUrl(url, this.form_, attribute);
+      user().assert(!urlService.isProxyOrigin(url),
           `form ${attribute} should not be on AMP CDN: %s`,
           this.form_);
     }
@@ -297,9 +295,10 @@ export class AmpForm {
    * Triggers 'amp-form-submit' event in 'amp-analytics' and
    * generates variables for form fields to be accessible in analytics
    *
+   * @param {string} eventType
    * @private
    */
-  triggerFormSubmitInAnalytics_() {
+  triggerFormSubmitInAnalytics_(eventType) {
     const formDataForAnalytics = {};
     const formObject = this.getFormAsObject_();
 
@@ -311,7 +310,7 @@ export class AmpForm {
     }
     formDataForAnalytics['formId'] = this.form_.id;
 
-    this.analyticsEvent_('amp-form-submit', formDataForAnalytics);
+    this.analyticsEvent_(eventType, formDataForAnalytics);
   }
 
   /**
@@ -440,11 +439,13 @@ export class AmpForm {
 
     const p = this.doVarSubs_(varSubsFields)
         .then(() => {
-          this.triggerFormSubmitInAnalytics_();
+          this.triggerFormSubmitInAnalytics_('amp-form-submit');
           this.actions_.trigger(
               this.form_, 'submit', /* event */ null, trust);
           // After variable substitution
           const values = this.getFormAsObject_();
+          // At the form submitting state, we want to display any template
+          // messages with the submitting attribute.
           this.renderTemplate_(values);
         })
         .then(() => this.doActionXhr_())
@@ -538,7 +539,7 @@ export class AmpForm {
   handleXhrSubmitSuccess_(response) {
     return response.json().then(json => {
       this.triggerAction_(/* success */ true, json);
-      this.analyticsEvent_('amp-form-submit-success');
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.setState_(FormState_.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
@@ -561,7 +562,7 @@ export class AmpForm {
     }
     return promise.then(responseJson => {
       this.triggerAction_(/* success */ false, responseJson);
-      this.analyticsEvent_('amp-form-submit-error');
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.setState_(FormState_.SUBMIT_ERROR);
       this.renderTemplate_(responseJson || {});
       this.maybeHandleRedirect_(error.response);
@@ -589,7 +590,7 @@ export class AmpForm {
     for (let i = 0; i < varSubsFields.length; i++) {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
     }
-    this.triggerFormSubmitInAnalytics_();
+    this.triggerFormSubmitInAnalytics_('amp-form-submit');
   }
 
   /**
@@ -637,8 +638,9 @@ export class AmpForm {
           'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
           'not supported, use target=_top instead. %s', this.form_);
       try {
-        assertAbsoluteHttpOrHttpsUrl(redirectTo);
-        assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
+        const urlService = Services.urlForDoc(this.form_);
+        urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
+        urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
         user().assert(false, 'The `AMP-Redirect-To` header value must be an ' +
             'absolute URL starting with https://. Found %s', redirectTo);
@@ -712,6 +714,7 @@ export class AmpForm {
   }
 
   /**
+   * Renders a template based on the form state and its presence in the form.
    * @param {!JsonObject} data
    * @private
    */

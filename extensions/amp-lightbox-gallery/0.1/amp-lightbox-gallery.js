@@ -317,6 +317,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (existingCarousel) {
       this.carousel_ = existingCarousel;
       return this.mutateElement(() => {
+        const numSlides = this.elementsMetadata_[lightboxGroupId].length;
+        this.toggleNavControls_(numSlides);
         toggle(dev().assertElement(this.carousel_), true);
       });
     } else {
@@ -347,8 +349,21 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.buildCarouselSlides_(list);
       return this.mutateElement(() => {
         this.carouselContainer_.appendChild(this.carousel_);
+        this.toggleNavControls_(list.length);
       });
     });
+  }
+
+  /**
+   * @param {number} noOfChildren
+   * @private
+   */
+  toggleNavControls_(noOfChildren) {
+    if (noOfChildren > 1) {
+      this.controlsContainer_.classList.remove('i-amphtml-lbg-single');
+    } else {
+      this.controlsContainer_.classList.add('i-amphtml-lbg-single');
+    }
   }
 
   /**
@@ -1506,7 +1521,7 @@ export function installLightboxManager(win) {
  * @param {!Window} win
  * @return {!Promise}
  */
-function installLightboxGallery(win) {
+export function installLightboxGallery(win) {
   const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
   // TODO (#12859): make this work for more than singleDoc mode
   return ampdoc.whenBodyAvailable().then(body => {

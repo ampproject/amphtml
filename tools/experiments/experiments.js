@@ -55,7 +55,7 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'README.md#amp-dev-channel',
+        'contributing/release-schedule.md#amp-dev-channel',
   },
   {
     id: 'alp',
@@ -218,8 +218,14 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-story',
-    name: 'Visual storytelling in AMP',
+    name: 'Visual storytelling in AMP (v0.1)',
     spec: 'https://github.com/ampproject/amphtml/issues/11329',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
+  },
+  {
+    id: 'amp-story-v1',
+    name: 'Visual storytelling in AMP (v1.0)',
+    spec: 'https://github.com/ampproject/amphtml/issues/14357',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
   {
@@ -227,6 +233,18 @@ const EXPERIMENTS = [
     name: 'Scale pages dynamically in amp-story by default',
     spec: 'https://github.com/ampproject/amphtml/issues/12902',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
+  },
+  {
+    id: 'disable-amp-story-desktop',
+    name: 'Disables responsive desktop experience for the amp-story component',
+    spec: 'https://github.com/ampproject/amphtml/issues/11714',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
+  },
+  {
+    id: 'amp-story-responsive-units',
+    name: 'Scale pages in amp-story by rewriting responsive units',
+    spec: 'https://github.com/ampproject/amphtml/issues/15955',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
     id: 'amp-date-picker',
@@ -302,11 +320,25 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15360',
   },
   {
-    id: 'amp-fx-fly-in',
-    name: 'Enables amp-fx="fly-in-{bottom,top,left,right}" - ' +
-      'scroll triggered timed fly in animations',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+    id: 'disable-faster-amp-list',
+    name: 'Disables new default behavior where <amp-list> will not evaluate ' +
+       'bindings on rendered children before first setState() mutation.',
+    spec: 'https://github.com/ampproject/amphtml/issues/15311',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15610',
+  },
+  {
+    id: 'amp-google-document-embed',
+    name: 'Enables the experiment amp-google-document-embed component' +
+        ' which is a wrapper around the Google Drive document viewer embed.',
+    spec: 'TODO',
+    cleanupIssue: 'TODO',
+  },
+  {
+    id: 'amp-pan-zoom',
+    name: 'Enables zoom / pan manipulation of arbitrary elements' +
+      ' with amp-pan-zoom',
+    spec: 'https://github.com/ampproject/amphtml/issues/13602',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/15594',
   },
 ];
 

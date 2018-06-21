@@ -63,10 +63,10 @@ describes.realWin('amp-analytics', {
   let jsonRequestConfigs = {};
 
   const jsonMockResponses = {
-    'invalidConfig': '{"transport": {"iframe": "fake.com"}}',
-    'config1': '{"vars": {"title": "remote"}}',
+    '//invalidConfig': '{"transport": {"iframe": "fake.com"}}',
+    '//config1': '{"vars": {"title": "remote"}}',
     'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
-    'config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
+    '//config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
     'https://rewriter.com': '{"vars": {"title": "rewritten"}}',
   };
   const configRewriterUrl = 'https://rewriter.com';
@@ -75,6 +75,24 @@ describes.realWin('amp-analytics', {
     'requests': {'foo': 'https://example.com/bar'},
     'triggers': [{'on': 'visible', 'request': 'foo'}],
   };
+
+  const noTriggersError = '[AmpAnalytics <unknown id>] No triggers were ' +
+      'found in the config. No analytics data will be sent.';
+  const noRequestStringsError = '[AmpAnalytics <unknown id>] No request ' +
+      'strings defined. Analytics data will not be sent from this page.';
+  const oneScriptChildError = '[AmpAnalytics <unknown id>] The tag should ' +
+      'contain only one <script> child.';
+  const configParseError = '[AmpAnalytics <unknown id>] Analytics config ' +
+      'could not be parsed. Is it in a valid JSON format? TypeError: Cannot ' +
+      'read property \'toUpperCase\' of null';
+  const onAndRequestAttributesError = '[AmpAnalytics <unknown id>] "on" and ' +
+      '"request" attributes are required for data to be collected.';
+  const remoteConfigError = '[amp-analytics] Remote configs are not allowed ' +
+      'to specify transport iframe';
+  const invalidThresholdForSamplingError =
+      '[AmpAnalytics <unknown id>] Invalid threshold for sampling.';
+  const clickTrackerNotSupportedError = '[AmpAnalytics <unknown id>] click ' +
+      'is not supported for amp-analytics in scope';
 
   beforeEach(() => {
     win = env.win;
@@ -115,6 +133,7 @@ describes.realWin('amp-analytics', {
       uidService = manager;
     });
   });
+
 
   function getAnalyticsTag(config, attrs) {
     config = JSON.stringify(config);
@@ -193,6 +212,12 @@ describes.realWin('amp-analytics', {
       }
       actualResults[vendor] = {};
       describe('analytics vendor: ' + vendor, function() {
+        beforeEach(() => {
+          if (!config.triggers) {
+            expectAsyncConsoleError(noTriggersError);
+          }
+        });
+
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', function* () {
@@ -287,7 +312,7 @@ describes.realWin('amp-analytics', {
               },
             },
             'requests': {
-              'sample_visibility_request': 'fake-request',
+              'sample_visibility_request': '//fake-request',
             },
           },
         }
@@ -310,7 +335,7 @@ describes.realWin('amp-analytics', {
         {
           'foo': {
             'transport': {
-              'iframe': 'https://www.google.com',
+              'iframe': 'http://example.com',
             },
             'triggers': {
               'sample_visibility_trigger': {
@@ -319,7 +344,7 @@ describes.realWin('amp-analytics', {
               },
             },
             'requests': {
-              'sample_visibility_request': 'fake-request',
+              'sample_visibility_request': '//fake-request',
             },
           },
         }
@@ -343,6 +368,8 @@ describes.realWin('amp-analytics', {
   });
 
   it('does not send a hit when config is not in a script tag', function() {
+    expectAsyncConsoleError(noTriggersError);
+    expectAsyncConsoleError(noRequestStringsError);
     const config = JSON.stringify(trivialConfig);
     const el = doc.createElement('amp-analytics');
     el.textContent = config;
@@ -383,6 +410,9 @@ describes.realWin('amp-analytics', {
   });
 
   it('does not send a hit when multiple child tags exist', function() {
+    expectAsyncConsoleError(oneScriptChildError);
+    expectAsyncConsoleError(noRequestStringsError);
+    expectAsyncConsoleError(noTriggersError);
     const analytics = getAnalyticsTag(trivialConfig);
     const script2 = document.createElement('script');
     script2.setAttribute('type', 'application/json');
@@ -394,6 +424,9 @@ describes.realWin('amp-analytics', {
 
   it('does not send a hit when script tag does not have a type attribute',
       function() {
+        expectAsyncConsoleError(configParseError);
+        expectAsyncConsoleError(noRequestStringsError);
+        expectAsyncConsoleError(noTriggersError);
         const el = doc.createElement('amp-analytics');
         const script = doc.createElement('script');
         script.textContent = JSON.stringify(trivialConfig);
@@ -411,6 +444,7 @@ describes.realWin('amp-analytics', {
       });
 
   it('does not send a hit when request is not provided', function() {
+    expectAsyncConsoleError(onAndRequestAttributesError);
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible'}],
@@ -422,6 +456,7 @@ describes.realWin('amp-analytics', {
   });
 
   it('does not send a hit when request type is not defined', function() {
+    expectAsyncConsoleError(noRequestStringsError);
     const analytics = getAnalyticsTag({
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
@@ -651,7 +686,7 @@ describes.realWin('amp-analytics', {
         'requests': {'foo': 'https://example.com/${title}'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {
-        'config': 'config-rv2',
+        'config': '//config-rv2',
       });
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
@@ -1166,7 +1201,7 @@ describes.realWin('amp-analytics', {
       'requests': {'foo': 'https://example.com/${title}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'config1',
+      'config': '//config1',
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
@@ -1174,12 +1209,13 @@ describes.realWin('amp-analytics', {
   });
 
   it('ignore transport iframe from remote config', () => {
+    expectAsyncConsoleError(remoteConfigError);
     const analytics = getAnalyticsTag({
       'vars': {'title': 'local'},
       'requests': {'foo': 'https://example.com/${title}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'invalidConfig',
+      'config': '//invalidConfig',
     });
     return waitForSendRequest(analytics).then(() => {
       expect(analytics.config_['transport']['iframe']).to.be.undefined;
@@ -1193,7 +1229,7 @@ describes.realWin('amp-analytics', {
       'requests': {'foo': 'https://example.com/${title}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'config1',
+      'config': '//config1',
       'data-credentials': 'include',
     });
     return waitForSendRequest(analytics).then(() => {
@@ -1299,6 +1335,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('works when sampleSpec is incomplete', () => {
+      expectAsyncConsoleError(invalidThresholdForSamplingError);
       const incompleteConfig = {
         'requests': {
           'pageview1': '/test1=${requestCount}',
@@ -1319,6 +1356,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('works for invalid threadhold (Infinity)', () => {
+      expectAsyncConsoleError(invalidThresholdForSamplingError);
       const analytics = getAnalyticsTag(getConfig(Infinity));
 
       return waitForSendRequest(analytics).then(() => {
@@ -1327,6 +1365,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('works for invalid threadhold (NaN)', () => {
+      expectAsyncConsoleError(invalidThresholdForSamplingError);
       const analytics = getAnalyticsTag(getConfig(NaN));
 
       return waitForSendRequest(analytics).then(() => {
@@ -1335,6 +1374,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('works for invalid threadhold (-1)', () => {
+      expectAsyncConsoleError(invalidThresholdForSamplingError);
       const analytics = getAnalyticsTag(getConfig(-1));
 
       return waitForSendRequest(analytics).then(() => {
@@ -1687,7 +1727,7 @@ describes.realWin('amp-analytics', {
         'requests': {'foo': 'https://example.com/${title}'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {
-        'config': 'config1',
+        'config': '//config1',
         'sandbox': 'true',
       }, true);
       return waitForSendRequest(analytics).then(() => {
@@ -1696,6 +1736,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('should not add listener when eventType is not whitelist', function() {
+      expectAsyncConsoleError(clickTrackerNotSupportedError);
       // Right now we only whitelist VISIBLE & HIDDEN
       const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
       const addStub = sandbox.stub(tracker, 'add');
@@ -2068,7 +2109,7 @@ describes.realWin('amp-analytics', {
       };
 
       const analytics = getAnalyticsTag(inlineConfig,
-          {'type': 'rewrite', 'config': 'config-rv2'});
+          {'type': 'rewrite', 'config': '//config-rv2'});
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {
@@ -2097,7 +2138,7 @@ describes.realWin('amp-analytics', {
       };
 
       const analytics = getAnalyticsTag(inlineConfig,
-          {'type': 'rewrite', 'config': 'config-rv2'});
+          {'type': 'rewrite', 'config': '//config-rv2'});
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {
@@ -2140,7 +2181,7 @@ describes.realWin('amp-analytics', {
       };
 
       const analytics = getAnalyticsTag(inlineConfig,
-          {'type': 'rewrite', 'config': 'config-rv2'});
+          {'type': 'rewrite', 'config': '//config-rv2'});
       analytics.predefinedConfig_ = {
         'rewrite': {
           'configRewriter': {

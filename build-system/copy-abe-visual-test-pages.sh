@@ -27,7 +27,6 @@ RUN() {
   $* || { echo $(RED "ERROR:") "Command" $(CYAN $1) "failed"  ; exit 1; }
 }
 
-#SCRIPT=${BASH_SOURCE[0]}
 SCRIPT=`realpath $0`
 BUILD_SYSTEM_DIR=$(dirname "$SCRIPT")
 AMPHTML_DIR=$(dirname "$BUILD_SYSTEM_DIR")
@@ -38,6 +37,7 @@ ABE_TESTS_DIR="$AMPHTML_DIR/$ABE_TESTS_PATH"
 ABE_TESTS_JSON_FILE="$AMPHTML_DIR/test/visual-diff/visual-tests.js"
 ABE_COMPONENTS_DIR="$ABE_TESTS_DIR/components"
 ABE_CLONE_PATH="git@github.com:ampproject/amp-by-example.git"
+
 
 echo $(YELLOW "-----------------------------------------------------------------------------------------------------------------")
 echo $(GREEN "Running") $(CYAN $SCRIPT)

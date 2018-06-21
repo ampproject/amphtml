@@ -23,7 +23,7 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
-import {Expander} from './url-expander/expander';
+import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
 import {
@@ -49,10 +49,6 @@ const VARIANT_DELIMITER = '.';
 const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
-
-/** A whitelist for replacements whose values should not be %-encoded. */
-/** @private @const {Object<string, boolean>} */
-const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
 
 /** @const {string} */
 export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
@@ -114,12 +110,6 @@ export class GlobalVariableSource extends VariableSource {
    */
   constructor(ampdoc) {
     super(ampdoc);
-
-    /**
-     * @private
-     * @const {function(!./ampdoc-impl.AmpDoc):!Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
-     */
-    this.getAccessService_ = Services.accessServiceForDocOrNull;
 
     /** @private {?Promise<?Object<string, string>>} */
     this.variants_ = null;
@@ -608,20 +598,28 @@ export class GlobalVariableSource extends VariableSource {
   /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!../../extensions/amp-access/0.1/amp-access.AccessService):(T|!Promise<T>)} getter
+   * @param {function(!../../extensions/amp-access/0.1/access-vars.AccessVars):(T|!Promise<T>)} getter
    * @param {string} expr
    * @return {T|null}
    * @template T
    * @private
    */
   getAccessValue_(getter, expr) {
-    return this.getAccessService_(this.ampdoc).then(accessService => {
-      if (!accessService) {
-        // Access service is not installed.
-        user().error(TAG, 'Access service is not installed to access: ', expr);
+    return Promise.all([
+      Services.accessServiceForDocOrNull(this.ampdoc),
+      Services.subscriptionsServiceForDocOrNull(this.ampdoc),
+    ]).then(services => {
+      const service = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (
+        services[0] || services[1]);
+      if (!service) {
+        // Access/subscriptions service is not installed.
+        user().error(
+            TAG,
+            'Access or subsciptions service is not installed to access: ',
+            expr);
         return null;
       }
-      return getter(accessService);
+      return getter(service);
     });
   }
 
@@ -672,7 +670,7 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getGeo_(getter, expr) {
-    return Services.geoForOrNull(this.ampdoc.win)
+    return Services.geoForDocOrNull(this.ampdoc)
         .then(geo => {
           user().assert(geo,
               'To use variable %s, amp-geo should be configured',
@@ -1022,10 +1020,10 @@ export class UrlReplacements {
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
         REPLACEMENT_EXP_NAME);
-    if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
-      // not supporting syncronous version (yet) or collect_vars with this new
-      // structure
-      return this.expander_./*OK*/expand(url, opt_bindings, opt_whiteList);
+    if (isV2ExperimentOn) {
+      // TODO(ccordy) support opt_collectVars && opt_whitelist
+      return this.expander_./*OK*/expand(url, opt_bindings, opt_collectVars,
+          opt_sync, opt_whiteList);
     }
 
     // existing parsing method

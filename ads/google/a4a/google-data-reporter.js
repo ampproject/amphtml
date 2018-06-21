@@ -19,9 +19,6 @@ import {
 } from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
 import {
-  DOUBLECLICK_A4A_EXPERIMENT_NAME,
-} from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
-import {
   EXPERIMENT_ATTRIBUTE,
   QQID_HEADER,
   getCorrelator,
@@ -65,8 +62,8 @@ export function getLifecycleReporter(ampElement, slotId) {
   const {win} = ampElement;
   randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
   if (isReportingEnabled(ampElement) &&
-      (!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
-       !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
+      (ampElement.element.getAttribute('type') != 'adsense' ||
+      !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
     setupPageLoadMetricsReporter_(ampElement);
     return new GoogleAdLifecycleReporter(
         win, ampElement.element, Number(slotId));
@@ -114,7 +111,7 @@ export function googleLifecycleReporterFactory(baseInstance) {
  * Sets reportable variables from ad response headers.
  *
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} headers
- * @param {!./performance.GoogleAdLifecycleReporter} reporter
+ * @param {!./performance.BaseLifecycleReporter} reporter
  */
 export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   // This is duplicated from the amp-a4a.js implementation.  It needs to be
@@ -131,6 +128,10 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   reporter.setPingParameters(pingParameters);
 }
 
+/**
+ * @param {!AMP.BaseElement} ampElement
+ * @private
+ */
 function setupPageLoadMetricsReporter_(ampElement) {
   const {win} = ampElement;
   const correlator = getCorrelator(win);

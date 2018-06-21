@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../../../src/services';
-import {parseUrlDeprecated} from '../../../src/url';
 
 
 /**
@@ -25,10 +24,11 @@ import {parseUrlDeprecated} from '../../../src/url';
  */
 function referrerDomain(ampdoc) {
   const referrer = Services.viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
-  if (referrer) {
-    return parseUrlDeprecated(referrer).hostname;
+  if (!referrer) {
+    return '';
   }
-  return '';
+  const {hostname} = Services.urlForDoc(ampdoc).parse(referrer);
+  return hostname;
 }
 
 /**

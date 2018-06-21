@@ -30,11 +30,10 @@ const TAG = 'amp-bind';
 export let BindExpressionResultDef;
 
 /**
- * Default maximum number of nodes in an expression AST.
- * Double size of a "typical" expression in examples/bind/performance.amp.html.
+ * Maximum number of nodes in an expression AST.
  * @const @private {number}
  */
-const DEFAULT_MAX_AST_SIZE = 50;
+const MAX_AST_SIZE = 100;
 
 /** @const @private {string} */
 const BUILT_IN_FUNCTIONS = 'built-in-functions';
@@ -58,8 +57,7 @@ function generateFunctionWhitelist() {
    * @param {...?} items
    * @return {!Array}
    */
-  /*eslint "no-unused-vars": 0*/
-  function splice(array, start, deleteCount, items) {
+  function splice(array, start, deleteCount, items) { // eslint-disable-line no-unused-vars
     if (!isArray(array)) {
       throw new Error(`splice: ${array} is not an array.`);
     }
@@ -210,7 +208,7 @@ export class BindExpression {
     this.expressionSize = this.numberOfNodesInAst_(this.ast_);
 
     // Check if this expression string is too large (for performance).
-    const maxSize = opt_maxAstSize || DEFAULT_MAX_AST_SIZE;
+    const maxSize = opt_maxAstSize || MAX_AST_SIZE;
     const skipConstraint = getMode().localDev && !getMode().test;
     if (this.expressionSize > maxSize && !skipConstraint) {
       throw new Error(`Expression size (${this.expressionSize}) exceeds max ` +
@@ -384,25 +382,20 @@ export class BindExpression {
         const member = this.eval_(args[1], scope);
 
         if (target === null || member === null) {
-          this.memberAccessWarning_(target, member);
           return null;
         }
         const targetType = typeof target;
         if (targetType !== 'string' && targetType !== 'object') {
-          this.memberAccessWarning_(target, member);
           return null;
         }
         const memberType = typeof member;
         if (memberType !== 'string' && memberType !== 'number') {
-          this.memberAccessWarning_(target, member);
           return null;
         }
         // Ignore Closure's type constraint for `hasOwnProperty`.
         if (Object.prototype.hasOwnProperty.call(
             /** @type {Object} */ (target), member)) {
           return target[member];
-        } else {
-          this.memberAccessWarning_(target, member);
         }
         return null;
 
@@ -413,8 +406,6 @@ export class BindExpression {
         const variable = value;
         if (Object.prototype.hasOwnProperty.call(scope, variable)) {
           return scope[variable];
-        } else {
-          user().warn(TAG, `${variable} is not defined; returning null.`);
         }
         return null;
 
@@ -525,18 +516,6 @@ export class BindExpression {
       default:
         throw new Error(`Unexpected AstNodeType: ${type}.`);
     }
-  }
-
-  /**
-   * @param {*} target
-   * @param {*} member
-   * @private
-   */
-  memberAccessWarning_(target, member) {
-    // Cast valid, because we don't care for the logging.
-    const stringified = JSON.stringify(/** @type {!JsonObject} */ (member));
-    user().warn(TAG, `Cannot read property ${stringified} of ` +
-        `${stringified}; returning null.`);
   }
 
   /**

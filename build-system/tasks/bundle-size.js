@@ -16,17 +16,30 @@
 'use strict';
 
 const colors = require('ansi-colors');
+const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const {getStdout} = require('../exec');
 
 const runtimeFile = './dist/v0.js';
-const maxSize = '77.00KB';
+const maxSize = '78.08KB';
 
 const {green, red, cyan, yellow} = colors;
 
-
+/**
+ * Checks gzipped size of existing v0.js (amp.js) against `maxSize`.
+ * Does _not_ rebuild: run `gulp dist --fortesting --noextensions` first.
+ */
 function checkBundleSize() {
+  if (!fs.existsSync(runtimeFile)) {
+    log(yellow('Could not find'), cyan(runtimeFile) +
+        yellow('. Skipping bundlesize check.'));
+    log(yellow('To include this check, run'),
+        cyan('gulp dist --fortesting [--noextensions]'),
+        yellow('before'), cyan('gulp bundle-size') + yellow('.'));
+    return;
+  }
+
   const cmd = `npx bundlesize -f "${runtimeFile}" -s "${maxSize}"`;
   log('Running ' + cyan(cmd) + '...');
   const output = getStdout(cmd);
@@ -35,11 +48,6 @@ function checkBundleSize() {
   const error = output.match(/ERROR .*/);
   if (error && error.length > 0) {
     log(yellow(error[0]));
-    if (!process.env.TRAVIS) {
-      log(yellow('You must run'),
-          cyan('gulp dist --fortesting [--noextensions]'),
-          yellow('before running'), cyan('gulp bundle-size') + yellow('.'));
-    }
   } else if (fail && fail.length > 0) {
     log(red(fail[0]));
     log(red('ERROR:'), cyan('bundlesize'), red('found that'),

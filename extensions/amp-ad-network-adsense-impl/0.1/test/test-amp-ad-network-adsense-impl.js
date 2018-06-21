@@ -26,9 +26,10 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
+  DELAY_REQUEST_EXP,
+  DELAY_REQUEST_EXP_BRANCHES,
   resetSharedState,
-} from '../amp-ad-network-adsense-impl';
-import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
+} from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
@@ -43,6 +44,7 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -226,7 +228,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'height': '50',
         'type': 'adsense',
       });
+      doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.getA4aAnalyticsConfig = () => {};
+      impl.buildCallback();
       sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
     });
@@ -392,9 +397,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when !height && !width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -403,10 +408,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when !height && width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         width: '300',
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -415,10 +420,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       verifyCss(impl.iframe);
     });
     it('centers iframe in slot when height && !width', () => {
-      createImplTag({
+      allowConsoleError(() => createImplTag({
         height: '150',
         layout: 'fixed',
-      });
+      }));
       // Need to call upgradeCallback on AmpAd element to ensure upgrade
       // attribute is set such that CSS is applies.
       new AmpAd(element).upgradeCallback();
@@ -477,6 +482,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('has correct format when as-use-attr-for-format is on', () => {
       forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+      impl.divertExperiments();
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
       return impl.getAdUrl().then(url =>
@@ -486,11 +492,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('has experiment eid in adsense frmt exp and width/height numeric',
         () => {
           forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+          impl.divertExperiments();
           return impl.getAdUrl().then(
               url => expect(url).to.match(/eid=[^&]*21062004/));
         });
     it('has control eid in adsense frmt exp and width/height numeric', () => {
       forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
+      impl.divertExperiments();
       return impl.getAdUrl().then(
           url => expect(url).to.match(/eid=[^&]*21062003/));
     });
@@ -498,6 +506,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
           AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+      impl.divertExperiments();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
             `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.CONTROL}`));
@@ -559,6 +568,16 @@ describes.realWin('amp-ad-network-adsense-impl', {
         element.setAttribute('data-auto-format', 'rspv');
         return impl.getAdUrl().then(url => {
           expect(url).to.match(/(\?|&)ramft=13(&|$)/);
+        });
+      });
+      it('sets matched content specific fields', () => {
+        element.setAttribute('data-matched-content-ui-type', 'ui');
+        element.setAttribute('data-matched-content-rows-num', 'rows');
+        element.setAttribute('data-matched-content-columns-num', 'cols');
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/(\?|&)crui=ui(&|$)/);
+          expect(url).to.match(/(\?|&)cr_row=rows(&|$)/);
+          expect(url).to.match(/(\?|&)cr_col=cols(&|$)/);
         });
       });
     });
@@ -649,26 +668,22 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
       return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
         expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        expect(url).not.to.match(/(\?|&)consent=(&|$)/);
       });
     });
 
-    it('should include npa=1, consent=false if insufficient consent', () =>
+    it('should include npa=1 if insufficient consent', () =>
       impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then(url => {
         expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        expect(url).to.match(/(\?|&)consent=false(&|$)/);
       }));
 
-    it('should include consent=true and not npa, if sufficient consent', () =>
+    it('should not include not npa, if sufficient consent', () =>
       impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then(url => {
         expect(url).to.not.match(/(\?|&)npa=(&|$)/);
-        expect(url).to.match(/(\?|&)consent=true(&|$)/);
       }));
 
-    it('should not include consent or npa, if not required consent', () =>
+    it('should not include npa, if not required consent', () =>
       impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
         expect(url).to.not.match(/(\?|&)npa=(&|$)/);
-        expect(url).to.not.match(/(\?|&)consent=(&|$)/);
       }));
   });
 
@@ -865,8 +880,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
       // Stub out vsync tasks to run immediately.
       impl.getVsync().run = (vsyncTaskSpec, vsyncState) => {
-        vsyncTaskSpec.measure(vsyncState);
-        vsyncTaskSpec.mutate(vsyncState);
+        if (vsyncTaskSpec.measure) {
+          vsyncTaskSpec.measure(vsyncState);
+        }
+        if (vsyncTaskSpec.mutate) {
+          vsyncTaskSpec.mutate(vsyncState);
+        }
       };
 
       // Fix the viewport to a consistent size to that the test doesn't depend
@@ -919,7 +938,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         // Right margin is 9px from containerContainer and 25px from container.
         // TODO(charliereams): In the test harness it is also offset by 15px due
         // to strange scrollbar behaviour. Figure out how to disable this.
-        expect(element.style.marginRight).to.be.equal('-49px');
+        expect(element.style.marginRight).to.be.equal('-124px');
         expect(element.style.marginLeft).to.be.equal('');
       });
     });
@@ -949,9 +968,24 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    it('should return true', () => {
-      expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
-          .to.be.true;
+    it('should return true', () =>
+      expect(impl.delayAdRequestEnabled()).to.be.true);
+
+    it('should set experiment when diverted', () => {
+      toggleExperiment(impl.win, DELAY_REQUEST_EXP, true);
+      impl.divertExperiments();
+      let inExp;
+      Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(exp =>
+        inExp = inExp || isInExperiment(impl.element, exp));
+      expect(inExp).to.be.true;
+    });
+    Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(expId => {
+      it(`should return ${DELAY_REQUEST_EXP_BRANCHES[expId]} for ${expId}`,
+          () => {
+            forceExperimentBranch(impl.win, DELAY_REQUEST_EXP, expId);
+            expect(impl.delayAdRequestEnabled()).to.equal(
+                DELAY_REQUEST_EXP_BRANCHES[expId]);
+          });
     });
   });
 
@@ -968,5 +1002,23 @@ describes.realWin('amp-ad-network-adsense-impl', {
   describe('#getConsentPolicy', () => {
     it('should return null', () =>
       expect(AmpAdNetworkAdsenseImpl.prototype.getConsentPolicy()).to.be.null);
+  });
+
+  describe('#isXhrAllowed', () => {
+    beforeEach(() => {
+      impl.win = {
+        location: {},
+      };
+    });
+
+    it('should return false on a canonical page', () => {
+      impl.win.location.origin = 'https://www.somesite.com';
+      expect(impl.isXhrAllowed()).to.be.false;
+    });
+
+    it('should return true on a non-canonical page', () => {
+      impl.win.location.origin = 'https://www-somesite.cdn.ampproject.org';
+      expect(impl.isXhrAllowed()).to.be.true;
+    });
   });
 });

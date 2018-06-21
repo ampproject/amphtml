@@ -15,6 +15,7 @@
  */
 
 import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {
   ConsentPolicyManager,
@@ -30,10 +31,13 @@ import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
   isJsonScriptTag,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setImportantStyles, toggle} from '../../../src/style';
@@ -43,19 +47,21 @@ const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
 
 export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
+export const EXTERNAL_CONSENT_FLOW = 'external-consent-flow';
 
 /**
- * @enum {number}
+ * @enum {string}
  * @visibleForTesting
  */
 export const ACTION_TYPE = {
-  ACCEPT: 0,
-  REJECT: 1,
-  DISMISS: 2,
+  ACCEPT: 'accept',
+  REJECT: 'reject',
+  DISMISS: 'dismiss',
 };
 
 
 export class AmpConsent extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -102,6 +108,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
   }
 
+  /** @override */
   getConsentPolicy() {
     // amp-consent should not be blocked by itself
     return null;
@@ -119,6 +126,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.scheduleDisplay_(consentId);
   }
 
+  /** @override */
   buildCallback() {
     if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
       return;
@@ -179,6 +187,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
+
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
       let consentId = args && args['consent'];
@@ -187,6 +196,44 @@ export class AmpConsent extends AMP.BaseElement {
       }
       this.handlePostPrompt_(consentId || '');
     });
+
+    this.enableExternalInteractions_();
+  }
+
+  /**
+   * Listen to external consent flow iframe's response
+   */
+  enableExternalInteractions_() {
+    if (!isExperimentOn(this.win, EXTERNAL_CONSENT_FLOW)) {
+      return;
+    }
+
+    this.win.addEventListener('message', event => {
+      if (!this.currentDisplayInstance_) {
+        return;
+      }
+
+      const data = getData(event);
+
+      if (!data || data['type'] != 'consent-response') {
+        return;
+      }
+
+      if (!data['action']) {
+        user().error(TAG, 'consent-response message missing required info');
+        return;
+      }
+
+      const iframes = scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
+
+      for (let i = 0; i < iframes.length; i++) {
+        if (iframes[i].contentWindow === event.source) {
+          const action = data['action'];
+          this.handleAction_(action);
+          return;
+        }
+      }
+    });
   }
 
   /**
@@ -194,8 +241,9 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} instanceId
    */
   scheduleDisplay_(instanceId) {
-    dev().assert(this.notificationUiManager_,
-        'notification ui manager not found');
+    if (!this.notificationUiManager_) {
+      dev().error(TAG, 'notification ui manager not found');
+    }
 
     if (this.consentUIPendingMap_[instanceId]) {
       // Already pending to be shown. Do nothing.
@@ -217,8 +265,11 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise}
    */
   show_(instanceId) {
-    dev().assert(!this.currentDisplayInstance_,
-        'Other consent instance on display');
+    if (this.currentDisplayInstance_) {
+      dev().error(TAG,
+          `other consent instance on display ${this.currentDisplayInstance_}`);
+    }
+
     this.vsync_.mutate(() => {
       if (!this.uiInit_) {
         this.uiInit_ = true;
@@ -228,7 +279,6 @@ export class AmpConsent extends AMP.BaseElement {
       this.element.classList.remove('amp-hidden');
       this.element.classList.add('amp-active');
       this.getViewport().addToFixedLayer(this.element);
-
       // Display the current instance
       this.currentDisplayInstance_ = instanceId;
       const uiElement = this.consentUI_[this.currentDisplayInstance_];
@@ -255,8 +305,14 @@ export class AmpConsent extends AMP.BaseElement {
       this.element.classList.remove('amp-active');
       // Need to remove from fixed layer and add it back to update element's top
       this.getViewport().removeFromFixedLayer(this.element);
-      dev().assert(uiToHide, 'no consent UI to hide');
-      toggle(uiToHide, false);
+      if (!uiToHide) {
+        dev().error(TAG,
+            `${this.currentDisplayInstance_} no consent ui to hide`);
+      }
+      // Cannot use #toggle() because Safari bug with version older than 10.3
+      // element.style['display] = 'none' cannot overwrite style set with
+      // !important.
+      setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
     });
     if (this.dialogResolver_[this.currentDisplayInstance_]) {
       this.dialogResolver_[this.currentDisplayInstance_]();
@@ -268,15 +324,28 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Handler User action
-   * @param {ACTION_TYPE} action
+   * @param {string} action
    */
   handleAction_(action) {
-    dev().assert(this.currentDisplayInstance_, 'No consent is displaying');
-    dev().assert(this.consentStateManager_, 'No consent state manager');
+    if (!isEnumValue(ACTION_TYPE, action)) {
+      // Unrecognized action
+      return;
+    }
+
+    if (!this.currentDisplayInstance_) {
+      dev().error(TAG, 'No consent ui is displaying, ' +
+          `consent id ${this.currentDisplayInstance_}`);
+      return;
+    }
+
+    if (!this.consentStateManager_) {
+      dev().error(TAG, 'No consent state manager');
+      return;
+    }
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.GRANTED);
+          this.currentDisplayInstance_, CONSENT_ITEM_STATE.ACCEPTED);
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
@@ -372,7 +441,7 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise<boolean>}
    */
   isConsentRequiredGeo_(geoGroup) {
-    return Services.geoForOrNull(this.win).then(geo => {
+    return Services.geoForDocOrNull(this.element).then(geo => {
       user().assert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
       return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
@@ -383,9 +452,6 @@ export class AmpConsent extends AMP.BaseElement {
    * Generate default consent policy if not defined
    */
   generateDefaultPolicy_() {
-    if (this.policyConfig_ && this.policyConfig_['default']) {
-      return;
-    }
     // Generate default policy
     const instanceKeys = Object.keys(this.consentConfig_);
     const defaultWaitForItems = {};
@@ -396,6 +462,40 @@ export class AmpConsent extends AMP.BaseElement {
     const defaultPolicy = {
       'waitFor': defaultWaitForItems,
     };
+
+    // TODO(@zhouyx): unblockOn is internal now.
+    const unblockOnAll = [
+      CONSENT_POLICY_STATE.UNKNOWN,
+      CONSENT_POLICY_STATE.SUFFICIENT,
+      CONSENT_POLICY_STATE.INSUFFICIENT,
+      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+    ];
+
+    const predefinedNone = {
+      'waitFor': defaultWaitForItems,
+      // Experimental config, do not expose
+      'unblockOn': unblockOnAll,
+    };
+
+    const rejectAllOnZero = {
+      'waitFor': defaultWaitForItems,
+      'timeout': {
+        'seconds': 0,
+        'fallbackAction': 'reject',
+      },
+      'unblockOn': unblockOnAll,
+    };
+
+    this.policyConfig_['_till_responded'] = predefinedNone;
+
+    this.policyConfig_['_till_accepted'] = defaultPolicy;
+
+    this.policyConfig_['_auto_reject'] = rejectAllOnZero;
+
+    if (this.policyConfig_ && this.policyConfig_['default']) {
+      return;
+    }
+
     this.policyConfig_['default'] = defaultPolicy;
   }
 
@@ -474,8 +574,12 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.consentConfig_ = consents;
     if (config['postPromptUI']) {
-      this.postPromptUI_ = this.getAmpDoc().getElementById(
-          config['postPromptUI']);
+      const postPromptUI = config['postPromptUI'];
+      this.postPromptUI_ = this.getAmpDoc().getElementById(postPromptUI);
+      if (!this.postPromptUI_) {
+        this.user().error(TAG, 'postPromptUI element with ' +
+          `id=${postPromptUI} not found`);
+      }
     }
     this.policyConfig_ = config['policy'] || this.policyConfig_;
   }
@@ -511,10 +615,16 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise}
    */
   initPromptUI_(instanceId) {
-
     const promptUI = this.consentConfig_[instanceId]['promptUI'];
-    const element = this.getAmpDoc().getElementById(promptUI);
-    this.consentUI_[instanceId] = element;
+    if (promptUI) {
+      let element = this.getAmpDoc().getElementById(promptUI);
+      if (!element || !this.element.contains(element)) {
+        element = null;
+        this.user().error(TAG, 'child element of <amp-consent> with ' +
+          `promptUI id ${promptUI} not found`);
+      }
+      this.consentUI_[instanceId] = element;
+    }
 
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceState(instanceId)
@@ -568,7 +678,11 @@ export class AmpConsent extends AMP.BaseElement {
           classList.remove('amp-active');
         }
         this.getViewport().removeFromFixedLayer(this.element);
-        toggle(dev().assertElement(this.postPromptUI_), false);
+        // Cannot use #toggle() because Safari bug with version older than 10.3
+        // element.style['display] = 'none' cannot overwrite style set with
+        // !important.
+        setImportantStyles(dev().assertElement(this.postPromptUI_),
+            {display: 'none'});
       });
     });
   }

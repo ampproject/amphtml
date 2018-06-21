@@ -35,6 +35,7 @@ import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
 import {PageScalingService} from './page-scaling';
 import {Services} from '../../../src/services';
+import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
 import {
   closestBySelector,
   iterateCursor,
@@ -45,9 +46,6 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
 import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
@@ -57,7 +55,6 @@ import {upgradeBackgroundAudio} from './audio';
  * @const {string}
  */
 const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
-
 
 /**
  * Selectors for media elements
@@ -70,13 +67,21 @@ const Selectors = {
   ALL_VIDEO: 'video',
 };
 
-
 /** @private @const {string} */
 const TAG = 'amp-story-page';
 
 /** @private @const {string} */
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
+/**
+ * amp-story-page states.
+ * @enum {number}
+ */
+export const PageState = {
+  NOT_ACTIVE: 0, // Page is not displayed. Could still be visible on desktop.
+  ACTIVE: 1, // Page is currently the main page, and playing.
+  PAUSED: 2, // Page is currently the main page, but not playing.
+};
 
 /**
  * The <amp-story-page> custom element, which represents a single page of
@@ -92,6 +97,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
+
+    /** @const @private {!function()} */
+    this.debounceToggleLoadingSpinner_ = debounce(
+        this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
 
     /** @private {?Element} */
     this.loadingSpinner_ = null;
@@ -119,9 +128,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type');
 
-    /** @const @private {!function()} */
-    this.debounceToggleLoadingSpinner_ = debounce(
-        this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
+    /** @private {!PageState} */
+    this.state_ = PageState.NOT_ACTIVE;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -136,8 +144,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /*
-   * @return {?./animation.AnimationManager}
+  /**
    * @private
    */
   maybeCreateAnimationManager_() {
@@ -155,7 +162,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
-    this.ownVideoAutoplay_();
+    this.configureVideo_();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
@@ -170,20 +177,13 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /** @private */
-  ownVideoAutoplay_() {
+  configureVideo_() {
     const videos = this.element.querySelectorAll('amp-video');
     if (videos.length < 1) {
       return;
     }
-
-    // This service gets installed by all video instances.
-    // Executions of `installVideoManagerForDoc` following the first are NOOPs,
-    // so this only takes care of a race condition when the service has not yet
-    // been installed.
-    installVideoManagerForDoc(this.getAmpDoc());
-
     toArray(videos).forEach(el => {
-      Services.videoManagerForDoc(this.element).delegateAutoplay(el);
+      VideoServiceSync.delegateAutoplay(/** @type {!AmpElement} */ (el));
     });
   }
 
@@ -219,12 +219,49 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
+  /**
+   * Updates the state of the page.
+   * @param {!PageState} state
+   */
+  setState(state) {
+    switch (state) {
+      case PageState.NOT_ACTIVE:
+        this.element.removeAttribute('active');
+        this.pauseCallback();
+        this.state_ = state;
+        break;
+      case PageState.ACTIVE:
+        if (this.state_ === PageState.NOT_ACTIVE) {
+          this.element.setAttribute('active', '');
+          this.beforeVisible();
+          this.resumeCallback();
+        }
+
+        if (this.state_ === PageState.PAUSED) {
+          this.advancement_.start();
+          this.playAllMedia_();
+        }
+
+        this.state_ = state;
+        break;
+      case PageState.PAUSED:
+        this.advancement_.stop();
+        this.pauseAllMedia_(false /** rewindToBeginning */);
+        this.state_ = state;
+        break;
+      default:
+        dev().warn(TAG, `PageState ${state} does not exist`);
+        break;
+    }
+  }
+
+
   /** @override */
   pauseCallback() {
     this.advancement_.stop();
 
     this.stopListeningToVideoEvents_();
-    this.pauseAllMedia_(true /* rewindToBeginning */);
+    this.pauseAllMedia_(true /** rewindToBeginning */);
 
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
@@ -520,21 +557,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @param {boolean} isActive
-   */
-  setActive(isActive) {
-    if (isActive) {
-      this.element.setAttribute('active', '');
-      this.beforeVisible();
-      this.resumeCallback();
-    } else {
-      this.element.removeAttribute('active');
-      this.pauseCallback();
-    }
-  }
-
-
-  /**
    * @return {number} The distance from the current page to the active page.
    */
   getDistance() {
@@ -595,7 +617,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.getNextPageId(true /* opt_isAutomaticAdvance */);
     const manualAdvanceNext =
         this.getNextPageId(false /* opt_isAutomaticAdvance */);
-    const previous = this.getPreviousPageId_();
+    const previous = this.getPreviousPageId();
 
     if (autoAdvanceNext) {
       adjacentPageIds.push(autoAdvanceNext);
@@ -617,9 +639,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Gets the ID of the previous page in the story (before the current page).
    * @return {?string} Returns the ID of the next page in the story, or null if
    *     there isn't one.
-   * @private
    */
-  getPreviousPageId_() {
+  getPreviousPageId() {
     if (this.element.hasAttribute('i-amphtml-return-to')) {
       return this.element.getAttribute('i-amphtml-return-to');
     }
@@ -663,7 +684,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Navigates to the previous page in the story.
    */
   previous() {
-    const targetPageId = this.getPreviousPageId_();
+    const targetPageId = this.getPreviousPageId();
 
     if (targetPageId === null) {
       dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);

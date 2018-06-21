@@ -29,6 +29,7 @@ import {user} from '../src/log';
  *
  * @param {!Window} global
  * @param {function(!Object)} cb
+ * @param {string} locale
  */
 function getFacebookSdk(global, cb, locale) {
   loadScript(global, 'https://connect.facebook.net/' + locale + '/sdk.js', () => {
@@ -87,6 +88,12 @@ function getPageContainer(global, data) {
   container.setAttribute('data-hide-cta', data.hideCta);
   container.setAttribute('data-small-header', data.smallHeader);
   container.setAttribute('data-adapt-container-width', true);
+
+  const c = global.document.getElementById('c');
+  // Note: The facebook embed  allows a maximum width of 500px.
+  // If the container's width exceeds that, the embed's width will
+  // be clipped to 500px.
+  container.setAttribute('data-width', c./*OK*/offsetWidth);
   return container;
 }
 
@@ -103,6 +110,7 @@ function getCommentsContainer(global, data) {
   container.setAttribute('data-href', data.href);
   container.setAttribute('data-numposts', data.numposts || 10);
   container.setAttribute('data-colorscheme', data.colorscheme || 'light');
+  container.setAttribute('data-order-by', data.orderBy || 'social');
   container.setAttribute('data-width', '100%');
   return container;
 }

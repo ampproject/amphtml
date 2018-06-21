@@ -19,12 +19,12 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>Dynamically loads more documents recommendended for the user.
+    <td>Dynamically loads more documents recommended for the user.
     </td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a> <a href="https://github.com/ampproject/amphtml/blob/3a06c99f259b66998b61935a5ee5f0075481bfd2/tools/experiments/README.md#enable-an-experiment-for-a-particular-document"> (Document opt-in allowed)</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -51,9 +51,7 @@ limitations under the License.
 
 ## Behavior
 
-Given a list of pages, `amp-next-page` tries to load them after the current document, providing an infinite-scroll type experience.
-
-The `<amp-next-page>` tag should be placed as the last child of the `<body>`.
+Given a list of pages, `amp-next-page` tries to load them after the current document, providing an infinite-scroll type experience. 
 
 The pages should be inlined using a JSON format.
 ```html
@@ -66,11 +64,13 @@ The pages should be inlined using a JSON format.
 </amp-next-page>
 ```
 
+If loading the next document is successful, everything after the placement of `amp-next-page` is removed from the current document. Typical use would be to include `amp-next-page` directly after the unique content of a given page: for example, at the end of a news article or recipe, but before the footer or other content repeated across articles.
+
 ## Attributes
 
 N/A
 
-##### common attributes
+##### Common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

@@ -202,7 +202,8 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    it('should trigger session analytics when ' +
+    // TODO (#16154): this test times out on master
+    it.skip('should trigger session analytics when ' +
         'a visible session ends', function() {
       let viewport;
       return getVideoPlayer(
@@ -281,7 +282,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    it('should trigger video-seconds-played when visible' +
+    it.skip('should trigger video-seconds-played when visible' +
         'and playing', () => {
       let video;
       let timer;

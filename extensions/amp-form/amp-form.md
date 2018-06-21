@@ -62,7 +62,7 @@ Indicates where to display the form response after submitting the form. The valu
 
 ##### action
 
-Specifies a server endpoint to handle the form input. The value must be an `https` URL and must not be a link to a CDN.
+Specifies a server endpoint to handle the form input. The value must be an `https` URL (absolute or relative) and must not be a link to a CDN.
 
 This attribute is required for `method=GET`. For `method=POST`, the `action` attribute is invalid, use `action-xhr` instead.
 
@@ -104,12 +104,12 @@ See the [Custom Validation](#custom-validations) section for more details.
 **Allowed**:
 
 * Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
-* `<input type=password>` inside of `<form method=POST action-xhr>`.
+* `<input type=password>` and `<input type=file>` inside of `<form method=POST action-xhr>`.
 * [`amp-selector`](https://www.ampproject.org/docs/reference/components/amp-selector)
 
 **Not Allowed**:
 
-* `<input type=button>`, `<input type=file>`, `<input type=image>`
+* `<input type=button>`, `<input type=image>`
 * Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
 
 (Relaxing some of these rules might be reconsidered in the future - [please let us know](https://www.ampproject.org/support/developer/) if you require these and provide use cases).
@@ -200,7 +200,10 @@ You can configure your analytics to send these events as in the example below.
 </amp-analytics>
 ```
 
-The `amp-form-submit` event fires when a form request is initiated. The `amp-form-submit` event generates a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
+The `amp-form-submit` event fires when a form request is initiated.
+The `amp-form-submit-success` event fires when a successful response is received, that is when the response has a status of `2XX`. Any other status triggers the `amp-form-submit-error` event.
+
+All three events generate a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
 
 For example, the following form has one field:
 
@@ -210,7 +213,7 @@ For example, the following form has one field:
   <input type="submit" value="Comment" />
 </form>
 ```
-When the `amp-form-submit` event fires, it generates the following variables containing the values that were specified in the form:
+When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error` event fires, it generates the following variables containing the values that were specified in the form:
 
 * `formId`
 * `formFields[comment]`
@@ -220,7 +223,9 @@ When the `amp-form-submit` event fires, it generates the following variables con
 
 Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **direct child element of form** and include a `<template></template>` tag inside it, or a `template="id_of_other_template"` attribute, to render the response in it.
 
-The response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
+Using the `submitting` special marker attribute, publishers can also include a template to display a message when the form is submitting. The template for this attribute will have access to the form's input fields for any display purposes. Please see the full form example below for how to use the `submitting` attribute.
+
+For submit-success and submit-error, the response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
 
 **Success Response**
 ```json
@@ -241,13 +246,21 @@ The response is expected to be a valid JSON Object. For example, if the publishe
 
 Both success and error responses should have a `Content-Type: application/json` header. `submit-success` will render for all responses that has a status of `2XX`, all other statuses will render `submit-error`.
 
-Publishers can render these in a inlined template inside their forms as follows.
+Publishers can render these responses in a inlined template inside their forms as follows:
+
+*Note*: This form uses the `submitting` attribute to display a message to the user when the form is submitting. 
 
 ```html
 <form ...>
   <fieldset>
+    <input type="text" name="firstName" />
     ...
   </fieldset>
+  <div submitting>
+    <template type="amp-mustache">
+      Form submitting... Thank you for waiting {{firstName}}.
+    </template>
+  </div>
   <div submit-success>
     <template type="amp-mustache">
       Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
@@ -262,7 +275,7 @@ Publishers can render these in a inlined template inside their forms as follows.
 </form>
 ```
 
-  Publishers can render the responses in a referenced template defined earlier in the document by using the template's id as the value of the `template` attribute, set on the elements with the `submit-success` and `submit-error` attributes.
+Publishers can render the responses in a referenced template defined earlier in the document by using the template's id as the value of the `template` attribute, set on the elements with the `submit-success` and `submit-error` attributes.
 
 ```html
 <template type="amp-mustache" id="submit_success_template">

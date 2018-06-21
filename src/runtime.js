@@ -20,7 +20,7 @@ import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {childElementsByTag} from './dom';
+import {childElementsByTag, isConnectedNode} from './dom';
 import {
   createShadowDomWriter,
   createShadowRoot,
@@ -57,6 +57,7 @@ import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStylesForDoc} from './style-installer';
 import {installTemplatesService} from './service/template-impl';
 import {installTimerService} from './service/timer-impl';
+import {installUrlForDoc} from './service/url-impl';
 import {installUrlReplacementsServiceForDoc} from
   './service/url-replacements-impl';
 import {installViewerServiceForDoc, setViewerVisibilityState} from
@@ -105,6 +106,7 @@ export function installRuntimeServices(global) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
+  installUrlForDoc(ampdoc);
   installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
@@ -824,7 +826,7 @@ export class MultidocManager {
   purgeShadowRoots_() {
     this.shadowRoots_.forEach(shadowRoot => {
       // The shadow root has been disconnected. Force it closed.
-      if (!this.win.document.contains(shadowRoot.host)) {
+      if (!shadowRoot.host || !isConnectedNode(shadowRoot.host)) {
         user().warn(TAG, 'Shadow doc wasn\'t previously closed');
         this.removeShadowRoot_(shadowRoot);
         this.closeShadowRootAsync_(shadowRoot);
