@@ -1387,7 +1387,8 @@ export class AmpA4A extends AMP.BaseElement {
     return installFriendlyIframeEmbed(
         this.iframe, this.element, {
           host: this.element,
-          url: this.adUrl_,
+          // Need to guarantee that this is no longer null
+          url: /** @type {string} */ (this.adUrl_),
           html: creativeMetaData.minifiedCreative,
           extensionIds: creativeMetaData.customElementExtensions || [],
           fonts: fontsArray,
@@ -1499,7 +1500,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
-    /** @type {string} */
+    /** @type {?string} */
     const method = this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
