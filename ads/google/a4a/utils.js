@@ -428,7 +428,7 @@ function elapsedTimeWithCeiling(time, start) {
 /**
  * `nodeOrDoc` must be passed for correct behavior in shadow AMP (PWA) case.
  * @param {!Window} win
- * @param {(!Node|!../../../src/service/ampdoc-impl.AmpDoc)=} nodeOrDoc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string=} opt_cid
  * @return {number} The correlator.
  */
@@ -549,7 +549,7 @@ export function getCsiAmpAnalyticsConfig() {
  *     yet.
  */
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
-  const win = {a4a};
+  const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
   const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavStart(win);
