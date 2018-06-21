@@ -37,8 +37,12 @@ export const CONSENT_ITEM_STATE = {
 };
 
 export class ConsentStateManager {
+  /**
+   * Creates an instance of ConsentStateManager.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   constructor(ampdoc) {
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private {!Object<string, ConsentInstance>} */
@@ -164,6 +168,11 @@ export class ConsentStateManager {
  * @visibleForTesting
  */
 export class ConsentInstance {
+  /**
+   * Creates an instance of ConsentInstance.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} id
+   */
   constructor(ampdoc, id) {
     /** @public {?Promise<Object>} */
     this.sharedDataPromise = null;

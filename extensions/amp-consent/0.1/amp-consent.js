@@ -57,6 +57,11 @@ export const ACTION_TYPE = {
 
 
 export class AmpConsent extends AMP.BaseElement {
+  /**
+   * Creates an instance of AmpConsent.
+   * @param {!AmpElement} element
+   * @memberof AmpConsent
+   */
   constructor(element) {
     super(element);
 
@@ -103,6 +108,9 @@ export class AmpConsent extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
   }
 
+  /**
+   * @override
+   */
   getConsentPolicy() {
     // amp-consent should not be blocked by itself
     return null;
@@ -120,6 +128,11 @@ export class AmpConsent extends AMP.BaseElement {
     this.scheduleDisplay_(consentId);
   }
 
+  /**
+   * Builds callback
+   *
+   * @return {void}
+   */
   buildCallback() {
     if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
       return;

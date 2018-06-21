@@ -844,7 +844,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
   /**
    * Handles closing the lightbox when the ESC key is pressed.
-   * @param {!Event} event.
+   * @param {!Event} event
    * @private
    */
   closeOnEscape_(event) {

@@ -38,6 +38,12 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     this.unlistenMessage_ = null;
   }
 
+  /**
+   * Handles message.
+   *
+   * @param {QEvent} event
+   * @return {void}
+   */
   handleMessage_(event) {
     if (!this.iframe_ ||
         event.origin != 'https://www.riddle.com' ||
