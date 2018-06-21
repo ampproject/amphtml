@@ -12,7 +12,7 @@
 
   "canary": 0,
   "expAdsenseA4A": 0.01,
-  "a4aProfilingRate": 0.1,
+  "a4aProfilingRate": 0.01,
   "ad-type-custom": 1,
   "ios-embed-wrapper": 1,
   "amp-apester-media": 1,
