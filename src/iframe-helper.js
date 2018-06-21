@@ -20,6 +20,7 @@ import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
+import {toWin} from './types';
 import {tryParseJson} from './json';
 
 /**
@@ -253,7 +254,7 @@ export function listenFor(
   dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
   dev().assert(callback);
-  const parentWin = iframe.ownerDocument.defaultView;
+  const parentWin = toWin(iframe.ownerDocument.defaultView);
 
   registerGlobalListenerIfNeeded(parentWin);
 

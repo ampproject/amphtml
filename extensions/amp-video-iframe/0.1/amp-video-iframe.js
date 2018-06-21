@@ -38,6 +38,23 @@ import {removeElement} from '../../../src/dom';
 /** @private @const */
 const TAG = 'amp-video-iframe';
 
+/** @private @const */
+const sandbox = 'allow-scripts allow-same-origin';
+
+/** @private @const */
+const allowedEvents = [
+  'registered',
+  'load',
+  'playing',
+  'pause',
+  'ended',
+  'muted',
+  'unmuted',
+  'reloaded',
+  'ad_start',
+  'ad_end',
+];
+
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVideoIframe extends AMP.BaseElement {
@@ -51,6 +68,9 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isTrackingIframe_ = false;
+
+    /** @private {?Element} */
+    this.iframe_ = null;
 
     /** @private {!UnlistenDef|null} */
     this.unlistenFrame_ = null;
@@ -68,7 +88,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     this.embedReady_ = false;
 
     /** @private {boolean} */
-    this.playerReady_ = false;
+    this.canPlay_ = false;
 
     /**
      * @param {!Event} e
@@ -107,12 +127,9 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.iframe_ = createFrameFor(this, this.getSrc_(),
-        /* sandbox */ 'allow-scripts allow-same-origin');
+    this.iframe_ = createFrameFor(this, this.getSrc_(), sandbox);
     this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
-    return this.createReadyPromise_().then(() => {
-      this.onReady_();
-    });
+    return this.createReadyPromise_().then(() => this.onReady_());
   }
 
   /** @private */
@@ -150,11 +167,11 @@ class AmpVideoIframe extends AMP.BaseElement {
       this.unlistenFrame_();
       this.unlistenFrame_ = null;
       this.embedReady_ = false;
-      this.playerReady_ = false;
+      this.canPlay_ = false;
     }
   }
 
-  /** @override */
+  /** @private */
   getSrc_() {
     // TODO: assert https
     return this.element.getAttribute('src');
@@ -176,6 +193,10 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @param {!Event} event
    */
   onMessage_(event) {
+    if (!this.iframe_) {
+      return;
+    }
+
     if (!originMatches(event, this.iframe_, /.*/)) {
       return;
     }
@@ -189,27 +210,22 @@ class AmpVideoIframe extends AMP.BaseElement {
     const eventReceived = data['event'];
 
     this.embedReady_ = this.embedReady_ || eventReceived == 'embed-ready';
-    this.playerReady_ = this.playerReady_ || eventReceived == 'canplay';
+    this.canPlay_ = this.canPlay_ || eventReceived == 'canplay';
 
-
-    if (eventReceived == 'canplay' ||
-        eventReceived == 'embed-ready') {
-      if (this.embedReady_ &&
-          this.playerReady_) {
+    if (eventReceived == 'canplay' || eventReceived == 'embed-ready') {
+      if (this.embedReady_ && this.canPlay_) {
         dev().assert(this.readyResolver_).call();
-        return;
       }
+      return;
     }
 
-    Object.values(VideoEvents).forEach(e => {
-      if (eventReceived != e) {
-        return;
-      }
-      this.element.dispatchCustomEvent(eventReceived);
-    });
-
-    if (eventReceived == 'error' && (!this.embedReady_ || !this.playerReady)) {
+    if (eventReceived == 'error' && (!this.embedReady_ || !this.canPlay_)) {
       dev().assert(this.readyRejecter_).call();
+      return;
+    }
+
+    if (allowedEvents.indexOf(eventReceived) > -1) {
+      this.element.dispatchCustomEvent(eventReceived);
       return;
     }
   }
@@ -271,12 +287,12 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
-    return false;
+    return this.element.hasAttribute('implements-media-session');
   }
 
   /** @override */
   preimplementsAutoFullscreen() {
-    return false;
+    return this.element.hasAttribute('implements-rotate-to-fullscreen');
   }
 
   /** @override */
