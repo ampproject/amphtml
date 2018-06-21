@@ -142,6 +142,8 @@ export class FakeWindow {
         }
       },
     });
+    // Polyfill performance.now() with Date.now().
+    this.performance = {now: () => Date.now()};
 
     // Create element to enhance test elements.
     const nativeDocumentCreate = this.document.createElement;
@@ -172,7 +174,7 @@ export class FakeWindow {
     // Navigator.
     /** @const {!Navigator} */
     this.navigator = {
-      userAgent: spec.navigator && spec.navigator.userAgent ||
+      userAgent: (spec.navigator && spec.navigator.userAgent) ||
           window.navigator.userAgent,
     };
 
@@ -185,40 +187,22 @@ export class FakeWindow {
     /** @const */
     this.Date = window.Date;
 
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
+    /** polyfill setTimeout. */
     this.setTimeout = function() {
       return window.setTimeout.apply(window, arguments);
     };
 
-    /**
-     * @param {number} id
-     * @const
-     */
+    /** polyfill clearTimeout. */
     this.clearTimeout = function() {
       return window.clearTimeout.apply(window, arguments);
     };
 
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
+    /** polyfill setInterval. */
     this.setInterval = function() {
       return window.setInterval.apply(window, arguments);
     };
 
-    /**
-     * @param {number} id
-     * @const
-     */
+    /** polyfill clearInterval. */
     this.clearInterval = function() {
       return window.clearInterval.apply(window, arguments);
     };
@@ -239,18 +223,10 @@ export class FakeWindow {
     this.requestAnimationFrame = raf;
   }
 
-  /**
-   * @param {string} type
-   * @param {function(!Event)} handler
-   * @param {(boolean|!Object)=} captureOrOpts
-   */
+  /** polyfill addEventListener. */
   addEventListener() {}
 
-  /**
-   * @param {string} type
-   * @param {function(!Event)} handler
-   * @param {(boolean|!Object)=} captureOrOpts
-   */
+  /** polyfill removeEventListener. */
   removeEventListener() {}
 }
 
@@ -295,6 +271,7 @@ class EventListeners {
     };
   }
 
+  /** Creates an empty instance. */
   constructor() {
     /** @const {!Array<!EventListener>} */
     this.listeners = [];
