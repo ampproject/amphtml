@@ -75,7 +75,7 @@ export class Performance {
     this.win = win;
 
     /** @private @const {number} */
-    this.initTime_ = this.win.performance.now();
+    this.initTime_ = parseInt(this.win.performance.now(), 10);
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -154,7 +154,7 @@ export class Performance {
       this.isMessagingReady_ = true;
 
       // Tick the "messaging ready" signal.
-      this.tickDelta('msr', this.win.performance.now() - this.initTime_);
+      this.tickDelta('msr', this.getDomHighResTimeStamp_() - this.initTime_);
 
       // Forward all queued ticks to the viewer since messaging
       // is now ready.
@@ -172,6 +172,14 @@ export class Performance {
     this.tick('ol');
     this.tickLegacyFirstPaintTime_();
     this.flush();
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getDomHighResTimeStamp_() {
+    return parseInt(this.win.performance.now(), 10);
   }
 
   /**
@@ -249,14 +257,14 @@ export class Performance {
     // (hasn't been visible yet, ever at this point)
     if (didStartInPrerender) {
       this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = this.win.performance.now();
+        docVisibleTime = this.getDomHighResTimeStamp_();
       });
     }
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-          ? (this.win.performance.now() - docVisibleTime)
+          ? (this.getDomHighResTimeStamp_() - docVisibleTime)
           //  Prerender was complete before visibility.
           : 0;
         this.viewer_.whenFirstVisible().then(() => {
@@ -276,7 +284,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(this.win.performance.now() - docVisibleTime);
+        this.prerenderComplete_(this.getDomHighResTimeStamp_() - docVisibleTime);
       }
       this.flush();
     });
@@ -307,7 +315,7 @@ export class Performance {
    */
   tick(label, opt_delta) {
     const value = (opt_delta == undefined)
-      ? this.win.performance.now() : undefined;
+      ? this.getDomHighResTimeStamp_() : undefined;
 
     const data = dict({
       'label': label,
@@ -372,7 +380,7 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    */
   tickSinceVisible(label) {
-    const now = this.win.performance.now();
+    const now = this.getDomHighResTimeStamp_();
     const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);
