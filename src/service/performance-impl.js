@@ -175,6 +175,7 @@ export class Performance {
   }
 
   /**
+   * Return an int version of the DomHighResTimeStamp.
    * @return {number}
    * @private
    */
