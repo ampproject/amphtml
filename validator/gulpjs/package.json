@@ -20,12 +20,12 @@
     "url": "https://github.com/ampproject/amphtml/tree/master/validator/gulpjs"
   },
   "dependencies": {
-    "amphtml-validator": "1.0.21",
+    "amphtml-validator": "1.0.23",
     "through2": "^2.0.1"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "mocha": "^3.2.0"
+    "mocha": "^5.2.0"
   },
   "scripts": {
     "test": " ./node_modules/mocha/bin/mocha",
