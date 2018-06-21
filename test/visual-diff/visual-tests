@@ -402,6 +402,9 @@
       "name": "amp-selector - Amp By Example"
     },
     {
+      "flaky": true,
+      // Height change
+      // e.g., https://percy.io/ampproject/amphtml/builds/808417/view/45644238/1400?mode=diff&browser=firefox&snapshot=45644238
       "url": "examples/visual-tests/amp-by-example/components/amp-sidebar/index.html",
       "name": "amp-sidebar - Amp By Example"
     },
