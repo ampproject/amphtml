@@ -366,7 +366,8 @@ export class AmpConsent extends AMP.BaseElement {
     const initPromptPromises = [];
     for (let i = 0; i < instanceKeys.length; i++) {
       const instanceId = instanceKeys[i];
-      this.consentStateManager_.registerConsentInstance(instanceId);
+      this.consentStateManager_.registerConsentInstance(
+          instanceId, this.consentConfig_[instanceId]);
 
       const isConsentRequiredPromise = this.getConsentRequiredPromise_(
           instanceId, this.consentConfig_[instanceId]);
