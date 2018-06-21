@@ -41,7 +41,6 @@ import {
 } from '../service';
 import {isExperimentOn} from '../experiments';
 import {isProtocolValid} from '../url';
-import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -560,18 +559,15 @@ export class GlobalVariableSource extends VariableSource {
         'STORY_PAGE_ID'));
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return tryResolve(() =>
-        Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint());
+      return Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint();
     });
 
     this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return tryResolve(() =>
-        Services.performanceFor(this.ampdoc.win).getFirstViewportReady());
+      return Services.performanceFor(this.ampdoc.win).getFirstViewportReady();
     });
 
     this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return tryResolve(() =>
-        Services.performanceFor(this.ampdoc.win).getMakeBodyVisible());
+      return Services.performanceFor(this.ampdoc.win).getMakeBodyVisible();
     });
 
     this.setAsync('AMP_STATE', key => {
