@@ -75,7 +75,7 @@ export class Performance {
     this.win = win;
 
     /** @private @const {number} */
-    this.initTime_ = parseInt(this.win.performance.now(), 10);
+    this.initTime_ = this.win.performance.now();
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -154,7 +154,7 @@ export class Performance {
       this.isMessagingReady_ = true;
 
       // Tick the "messaging ready" signal.
-      this.tickDelta('msr', this.getDomHighResTimeStamp_() - this.initTime_);
+      this.tickDelta('msr', this.getDomHighResTimeStamp_(this.initTime_));
 
       // Forward all queued ticks to the viewer since messaging
       // is now ready.
@@ -175,12 +175,14 @@ export class Performance {
   }
 
   /**
-   * Return an int version of the DomHighResTimeStamp.
+   * Return an int version of the DomHighResTimeStamp. If timeSubtrahend
+   * is provided, it is subtracted from the current DomHighResTimeStamp.
+   * @param {?number} timeSubtrahend
    * @return {number}
    * @private
    */
-  getDomHighResTimeStamp_() {
-    return parseInt(this.win.performance.now(), 10);
+  getDomHighResTimeStamp_(timeSubtrahend) {
+    return Math.floor(this.win.performance.now()) - (timeSubtrahend || 0);
   }
 
   /**
@@ -265,7 +267,7 @@ export class Performance {
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-          ? (this.getDomHighResTimeStamp_() - docVisibleTime)
+          ? (this.getDomHighResTimeStamp_(docVisibleTime))
           //  Prerender was complete before visibility.
           : 0;
         this.viewer_.whenFirstVisible().then(() => {
@@ -285,7 +287,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(this.getDomHighResTimeStamp_() - docVisibleTime);
+        this.prerenderComplete_(this.getDomHighResTimeStamp_(docVisibleTime));
       }
       this.flush();
     });
