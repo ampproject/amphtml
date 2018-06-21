@@ -128,6 +128,7 @@ declareExtension('amp-izlesene', '0.1');
 declareExtension('amp-jwplayer', '0.1');
 declareExtension('amp-lightbox', '0.1', {hasCss: true});
 declareExtension('amp-lightbox-gallery', '0.1', {hasCss: true});
+declareExtension('amp-linkeddb-showmore', '0.1', {hasCss: true});
 declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
