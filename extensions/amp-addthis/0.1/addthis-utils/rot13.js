@@ -21,6 +21,8 @@ const CHAR_Z_UPPER = 90;
 /**
  * Rotate a string by 13 characters. Only applies to alphabetical characters.
  * For "good enough" obfuscation.
+ *
+ * @param {string} input
  * @private
  */
 const rot13 = input => {
@@ -39,7 +41,8 @@ const rot13 = input => {
 
 /**
  * Run rot13 on an array of strings.
- * @param input
+ * @param {!Array<string>} input
+ * @return {!Object}
  */
 export const rot13Array = input => {
   return input.reduce((rot13Map, str) => {
