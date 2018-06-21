@@ -134,7 +134,7 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
  */
 function setupPageLoadMetricsReporter_(ampElement) {
   const {win} = ampElement;
-  const correlator = getCorrelator(win);
+  const correlator = getCorrelator(win, ampElement.element);
   win.ampAnalyticsPageLoadMetricsConfig =
       win.ampAnalyticsPageLoadMetricsConfig ||
       dict({

@@ -139,7 +139,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.slotId_ = slotId;
 
     /** @private {number} @const */
-    this.correlator_ = getCorrelator(win, /* opt_cid */ undefined, element);
+    this.correlator_ = getCorrelator(win, element);
 
     // Contortions to convince the type checker that we're type-safe.
     let initTime;
