@@ -736,7 +736,7 @@ class VideoEntry {
       unlisteners.forEach(unlistener => {
         unlistener();
       });
-      const animation = element.querySelector('i-amphtml-video-eq');
+      const animation = element.querySelector('.amp-video-eq');
       const mask = element.querySelector('i-amphtml-video-mask');
       if (animation) {
         removeElement(animation);
