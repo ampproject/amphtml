@@ -98,6 +98,10 @@ export class WindowPortEmulator {
   postMessage(data) {
     this.target_./*OK*/postMessage(data, this.origin_);
   }
+
+  /**
+   * Starts the sending of messages queued on the port.
+   */
   start() {
   }
 }
