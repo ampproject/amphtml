@@ -15,7 +15,7 @@
     "preinstall": "node ../build-system/check-package-manager.js"
   },
   "devDependencies": {
-    "google-closure-compiler": "20180610.0.2",
+    "google-closure-compiler": "20180506.0.0",
     "google-closure-library": "20180506.0.0",
     "jasmine": "3.1.0"
   }
