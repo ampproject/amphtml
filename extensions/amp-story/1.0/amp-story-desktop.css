@@ -82,7 +82,7 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] amp-story-page {
-  transform: scale(1.0) translateX(300%) translateY(0%) !important;
+  transform: scale(1.0) translateX(50vw) translateY(0%) !important;
   opacity: .05 !important;
   transform-origin: left !important;
   border-radius: 16px !important;
@@ -142,7 +142,7 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] amp-story-page[i-amphtml-visited] {
-  transform: scale(0.9) translateX(-350%) translateY(0%) !important;
+  transform: scale(0.9) translateX(-200vw) translateY(0%) !important;
 }
 
 [desktop] amp-story-page[i-amphtml-previous-page],
@@ -167,7 +167,7 @@ amp-story[standalone][desktop] {
 Perhaps better to delete and start over when RTL implementation begins. There be
 dragons here. */
 [dir=rtl] [desktop] amp-story-page {
-  transform: scale(0.9) translateX(300%) translateY(0%) !important;
+  transform: scale(0.9) translateX(calc(50vw * 1.1)) translateY(0%) !important;
 }
 
 [dir=rtl] [desktop] amp-story-page[i-amphtml-previous-page] {
@@ -188,7 +188,7 @@ dragons here. */
 }
 
 [dir=rtl] [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(0.9) translateX(-350%) translateY(0%) !important;
+  transform: scale(0.9) translateX(-200vw) translateY(0%) !important;
 }
 
 [desktop] > amp-story-page,
