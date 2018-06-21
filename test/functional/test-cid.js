@@ -180,6 +180,8 @@ describe('cid', () => {
   });
 
   describe('with crypto stub', () => {
+    const doesNotProvideError = '[CID] Viewer does not provide cap=cid';
+    const invalidFormatError = '[CID] invalid cid format';
     beforeEach(() => {
       crypto.sha384Base64 = val => {
         if (val instanceof Uint8Array) {
@@ -297,6 +299,7 @@ describe('cid', () => {
     });
 
     it('should read from viewer storage if embedded', () => {
+      expectAsyncConsoleError(doesNotProvideError);
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
       viewerStorage = JSON.stringify({
@@ -321,6 +324,8 @@ describe('cid', () => {
 
     it('should read from viewer storage if embedded and convert cid to ' +
         'new format', () => {
+      expectAsyncConsoleError(doesNotProvideError);
+      expectAsyncConsoleError(invalidFormatError);
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
       // baseCid returned by legacy API
@@ -351,6 +356,7 @@ describe('cid', () => {
     });
 
     it('should store to viewer storage if embedded', () => {
+      expectAsyncConsoleError(doesNotProvideError, 2);
       fakeWin.parent = {};
       const expectedBaseCid = 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])';
       return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
@@ -386,7 +392,7 @@ describe('cid', () => {
       return compare('e2', expected).then(() => {
         clock.tick(364 * DAY);
         return compare('e2', expected).then(() => {
-          clock.tick(365 * DAY + 1);
+          clock.tick((365 * DAY) + 1);
           removeMemoryCacheOfCid();
           return compare(
               'e2',
@@ -400,6 +406,7 @@ describe('cid', () => {
     });
 
     it('should expire on read after 365 days when embedded', () => {
+      expectAsyncConsoleError(doesNotProvideError, 3);
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
       viewerStorage = JSON.stringify({
@@ -412,7 +419,7 @@ describe('cid', () => {
       return compare('e2', expectedIdFromViewer).then(() => {
         clock.tick(364 * DAY);
         return compare('e2', expectedIdFromViewer).then(() => {
-          clock.tick(365 * DAY + 1);
+          clock.tick((365 * DAY) + 1);
           removeMemoryCacheOfCid();
           return compare('e2', expectedNewId);
         });
@@ -441,6 +448,7 @@ describe('cid', () => {
     });
 
     it('should set last access time once a day when embedded', () => {
+      expectAsyncConsoleError(doesNotProvideError, 5);
       fakeWin.parent = {};
       const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
       function getStoredTime() {
@@ -527,6 +535,7 @@ describe('cid', () => {
     });
 
     it('should not wait persistence consent for viewer storage', () => {
+      expectAsyncConsoleError(doesNotProvideError, 2);
       fakeWin.parent = {};
       const persistencePromise = new Promise(() => {/* never resolves */});
       return cid.get({scope: 'e2'}, hasConsent, persistencePromise).then(() => {
@@ -707,6 +716,7 @@ describe('cid', () => {
 
 describe('getProxySourceOrigin', () => {
   it('should fail on non-proxy origin', () => {
+    expectAsyncConsoleError('[CID] Viewer does not provide cap=cid');
     allowConsoleError(() => { expect(() => {
       getProxySourceOrigin(parseUrlDeprecated('https://abc.org/v/foo.com/'));
     }).to.throw(/Expected proxy origin/); });
@@ -720,6 +730,7 @@ describes.realWin('cid', {amp: true}, env => {
   let sandbox;
   let clock;
   const hasConsent = Promise.resolve();
+  const doesNotProvideError = '[CID] Viewer does not provide cap=cid';
 
   beforeEach(() => {
     win = env.win;
@@ -763,6 +774,7 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('get method should time out when in Viewer', function *() {
+    expectAsyncConsoleError(doesNotProvideError);
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(new Promise(() => {}));
