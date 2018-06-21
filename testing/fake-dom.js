@@ -142,9 +142,7 @@ export class FakeWindow {
         }
       },
     });
-    // Polyfill performance.now() method as it would normally not be available
-    // in a non document environment. Used for tests using fakeWin that rely on
-    // the performance-impl service.
+    // Polyfill performance.now() with Date.now().
     this.performance = {now: () => Date.now()};
 
     // Create element to enhance test elements.
@@ -189,44 +187,23 @@ export class FakeWindow {
     /** @const */
     this.Date = window.Date;
 
+    /** polyfill setTimeout. */
     this.setTimeout = function() {
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
       return window.setTimeout.apply(window, arguments);
     };
 
     /** polyfill clearTimeout. */
     this.clearTimeout = function() {
-      /**
-       * @param {number} id
-       * @const
-       */
       return window.clearTimeout.apply(window, arguments);
     };
 
     /** polyfill setInterval. */
     this.setInterval = function() {
-      /**
-       * @param {function()} handler
-       * @param {number=} timeout
-       * @param {...*} var_args
-       * @return {number}
-       * @const
-       */
       return window.setInterval.apply(window, arguments);
     };
 
     /** polyfill clearInterval. */
     this.clearInterval = function() {
-    /**
-     * @param {number} id
-     * @const
-     */
       return window.clearInterval.apply(window, arguments);
     };
 
