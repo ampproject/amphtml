@@ -21,6 +21,7 @@ import {HeadingComponent, HeadingComponentDef} from './components/heading';
 import {LandscapeComponent, LandscapeComponentDef} from './components/landscape';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
 import {TextBoxComponent, TextBoxComponentDef} from './components/text-box';
+import {dev} from '../../../../src/log';
 import {htmlFor} from '../../../../src/static-template';
 
 /** @type {string} */
@@ -117,7 +118,9 @@ export class BookendComponent {
     return components.reduce((builtComponents, component) => {
       const componentBuilder = componentBuilderInstanceFor(component.type);
       if (!componentBuilder) {
-        return;
+        dev().error(TAG, 'Component type `' + component.type +
+        '` is not supported. Skipping invalid.');
+        return builtComponents;
       }
       componentBuilder.assertValidity(component, el);
       builtComponents.push(componentBuilder.build(component, el));
