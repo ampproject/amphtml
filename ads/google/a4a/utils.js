@@ -27,7 +27,6 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
