@@ -22,6 +22,7 @@ import {dict} from '../../../src/utils/object';
 import {getBinaryType} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {getTimingDataSync} from '../../../src/service/variable-source';
 import {
   isExperimentOn,
   toggleExperiment,
@@ -651,26 +652,25 @@ export function mergeExperimentIds(newIds, currentIdString) {
  * @param {!JsonObject} config The original config object.
  * @param {?string} qqid
  * @param {boolean} isVerifiedAmpCreative
- * @param {number} deltaTime The time difference, in ms, between the lifecycle
- *   reporter's initialization and now.
- * @param {number} initTime The initialization time, in ms, of the lifecycle
- *   reporter.
  * @return {?JsonObject} config or null if invalid/missing.
  */
-export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
-  qqid, isVerifiedAmpCreative, deltaTime, initTime) {
+export function addCsiSignalsToAmpAnalyticsConfig(
+  win, element, config, qqid, isVerifiedAmpCreative) {
   // Add CSI pingbacks.
   const correlator = getCorrelator(win);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
   const eids = encodeURIComponent(
       element.getAttribute(EXPERIMENT_ATTRIBUTE));
   const adType = element.getAttribute('type');
+  const initTime =
+      Number(getTimingDataSync(win, 'navigationStart') || Date.now());
+  const deltaTime = Math.round(win.performance && win.performance.now ?
+    win.performance.now() : (Date.now() - initTime));
   const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
       `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
       `&dt=${initTime}` +
       (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
       `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
-  deltaTime = Math.round(deltaTime);
   const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
   config['triggers']['continuousVisibleIniLoad'] = {
     'on': 'ini-load',

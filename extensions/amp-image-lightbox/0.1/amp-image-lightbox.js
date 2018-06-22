@@ -733,7 +733,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     /** @private {?Element} */
     this.captionElement_ = null;
 
-    /** @private {function(this:AmpImageLightbox, Event)} */
+    /** @private {function(AmpImageLightbox, Event)} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
   }
 
