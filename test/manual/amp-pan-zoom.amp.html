@@ -108,9 +108,9 @@
   </amp-pan-zoom>
 
   <h2>AMP Pan-Zoom Advanced Example</h2>
-  <p>Double tap or pinch to zoom in and out.</p>
+  <p>Double tap or pinch to zoom in and out. This tests all initial configurations. </p>
   <p [text]="'Current scale: ' + scale">Current scale: 1</p>
-      <amp-pan-zoom layout="responsive" height="3" width="4" max-scale="2" on="transformEnd:AMP.setState({scale: event.scale})">
+      <amp-pan-zoom layout="responsive" height="3" width="4" max-scale="5" initial-scale="2" initial-x="150" initial-y="100">
       <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
 
           <rect class="area-half" x="5" y="5" />

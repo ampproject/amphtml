@@ -321,6 +321,26 @@ export class AmpPanZoom extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Given a x offset relative to the viewport, return the x offset
+   * relative to the amp-pan-zoom component.
+   * @param {number} clientX
+   */
+  getOffsetX_(clientX) {
+    return (this.elementBox_.left - this.getViewport().getScrollLeft())
+      - clientX;
+  }
+
+  /**
+   * Given a y offset relative to the viewport, return the y offset
+   * relative to the amp-pan-zoom component.
+   * @param {number} clientY
+   */
+  getOffsetY_(clientY) {
+    return (this.elementBox_.top - this.getViewport().getScrollTop())
+        - clientY;
+  }
+
   /** @private */
   setupGestures_() {
     // TODO (#12881): this and the subsequent use of event.preventDefault
@@ -340,19 +360,10 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
-
       const {clientX, clientY} = e.data;
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-
-      // clientX and clientY returns values relative to top of viewport
-      // hence we have to substract the relative viewport offset to get
-      // values relative to the content dimensions.
-      const offsetX = (this.elementBox_.left -
-        this.getViewport().getScrollLeft()) - clientX;
-      const deltaX = (this.elementBox_.height / 2) + offsetX;
-      const offsetY = (this.elementBox_.top -
-        this.getViewport().getScrollTop()) - clientY;
-      const deltaY = (this.elementBox_.height / 2) + offsetY;
+      const deltaX = (this.elementBox_.height / 2) + this.getOffsetX_(clientX);
+      const deltaY = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
 
       this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true)
           .then(() => this.onZoomRelease_());
@@ -368,8 +379,9 @@ export class AmpPanZoom extends AMP.BaseElement {
         last,
       } = e.data;
 
-      // TODO: fix viewport offset bug
-      this.onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir);
+      const centerX = this.getOffsetX_(centerClientX);
+      const centerY = this.getOffsetY_(centerClientY);
+      this.onPinchZoom_(centerX, centerY, deltaX, deltaY, dir);
       if (last) {
         this.onZoomRelease_();
       }
@@ -479,7 +491,6 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     const minY = dh >= 0 ? 0 : dh / 2;
     const maxY = dh >= 0 ? 0 : -minY;
-
     const minX = dw >= 0 ? 0 : dw / 2;
     const maxX = dw >= 0 ? 0 : -minX;
 
