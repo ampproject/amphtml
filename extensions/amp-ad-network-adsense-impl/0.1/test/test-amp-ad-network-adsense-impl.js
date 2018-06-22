@@ -841,6 +841,17 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
       });
     });
+
+    it('should call divertExperiments after isResponsive', () => {
+      constructImpl({
+        width: '320',
+        height: '150',
+      });
+      const isResponsiveSpy = sinon.spy(impl, 'isResponsive_');
+      const divertExperimentsSpy = sinon.spy(impl, 'divertExperiments');
+      impl.buildCallback();
+      expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
+    });
   });
 
   describe('#onLayoutMeasure', () => {
