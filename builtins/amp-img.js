@@ -15,20 +15,15 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
-import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 
 /**
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-  'aria-describedby', 'aria-labelledby'];
-
-const EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE = ATTRIBUTES_TO_PROPAGATE
-    .concat(['srcset', 'src', 'sizes']);
+  'aria-describedby', 'aria-labelledby','srcset', 'src', 'sizes'];
 
 export class AmpImg extends BaseElement {
 
@@ -45,45 +40,16 @@ export class AmpImg extends BaseElement {
     /** @private {?Element} */
     this.img_ = null;
 
-    /** @private {?../src/srcset.Srcset} */
-    this.srcset_ = null;
-
-    /** @private @const {boolean} */
-    this.useNativeSrcset_ = isExperimentOn(this.win, 'amp-img-native-srcset');
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    let mutated = false;
-    if (!this.useNativeSrcset_) {
-      if (mutations['srcset'] !== undefined) {
-        // `srcset` mutations take precedence over `src` mutations.
-        this.srcset_ = srcsetFromElement(this.element);
-        mutated = true;
-      } else if (mutations['src'] !== undefined) {
-        // If only `src` is mutated, then ignore the existing `srcset` attribute
-        // value (may be set automatically as cache optimization).
-        this.srcset_ = srcsetFromSrc(this.element.getAttribute('src'));
-        mutated = true;
-      }
-      // This element may not have been laid out yet.
-      if (mutated && this.img_) {
-        this.updateImageSrc_();
-      }
-    }
-
     if (this.img_) {
-      const propAttrs = this.useNativeSrcset_ ?
-        EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE :
-        ATTRIBUTES_TO_PROPAGATE;
-      const attrs = propAttrs.filter(
+      const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
           value => mutations[value] !== undefined);
       this.propagateAttributes(
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
-
-      if (this.useNativeSrcset_) {
-        this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
-      }
+      this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
 
     }
   }
@@ -128,9 +94,6 @@ export class AmpImg extends BaseElement {
     if (this.img_) {
       return;
     }
-    if (!this.useNativeSrcset_ && !this.srcset_) {
-      this.srcset_ = srcsetFromElement(this.element);
-    }
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
     this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
@@ -156,17 +119,9 @@ export class AmpImg extends BaseElement {
         'be correctly propagated for the underlying <img> element.');
     }
 
-
-    if (this.useNativeSrcset_) {
-      this.propagateAttributes(EXPERIMENTAL_ATTRIBUTES_TO_PROPAGATE,
-          this.img_);
-      this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
-    } else {
-      this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
-    }
-
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+    this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
     this.applyFillContent(this.img_, true);
-
     this.element.appendChild(this.img_);
   }
 
@@ -227,19 +182,6 @@ export class AmpImg extends BaseElement {
   updateImageSrc_() {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
-    }
-
-    if (!this.useNativeSrcset_) {
-      const src = this.srcset_.select(
-          // The width should never be 0, but we fall back to the screen width
-          // just in case.
-          this.getViewport().getWidth() || this.win.screen.width,
-          this.getDpr());
-      if (src == this.img_.getAttribute('src')) {
-        return Promise.resolve();
-      }
-
-      this.img_.setAttribute('src', src);
     }
 
     return this.loadPromise(this.img_).then(() => {
