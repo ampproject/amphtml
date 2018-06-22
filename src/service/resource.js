@@ -698,7 +698,7 @@ export class Resource {
       // Despite type indicating object keys are numbers, JS stores them as
       // strings so they need to be coverted back to floats in order to be
       // used as numbers in isWithinViewportRatio.
-      const viewportNum = dev().assertNumber(parseFloat(keys[i], 10));
+      const viewportNum = dev().assertNumber(parseFloat(keys[i]));
       if (this.isWithinViewportRatio(viewportNum, viewportRatio)) {
         this.withViewportDeferreds_[viewportNum].resolve();
         delete this.withViewportDeferreds_[viewportNum];
