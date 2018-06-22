@@ -38,38 +38,53 @@ function getFacebookSdk(global, cb, locale) {
 }
 
 /**
- * Create DOM element for the Facebook embedded content plugin for videos or
- * posts.
+ * Create DOM element for all Facebook embeds.
+ * @param {!Window} global
+ * @param {string} classNameSuffix The suffix for the `fb-` class.
+ * @param {string} href
+ * @return {!Element} div
+ */
+function createContainer(global, classNameSuffix, href) {
+  const container = global.document.createElement('div');
+  container.className = 'fb-' + classNameSuffix;
+  container.setAttribute('data-href', href);
+  return container;
+}
+
+/**
+ * Create DOM element for the Facebook embedded content plugin for posts.
  * @see https://developers.facebook.com/docs/plugins/embedded-posts
- * @see https://developers.facebook.com/docs/plugins/embedded-video-player
  * @param {!Window} global
  * @param {!Object} data The element data
  * @return {!Element} div
  */
 function getPostContainer(global, data) {
-  const c = global.document.getElementById('c');
-  const shouldAlignCenter = data.alignCenter || false;
-  if (shouldAlignCenter) {
+  if (data.alignCenter) {
+    const c = global.document.getElementById('c');
     setStyle(c, 'text-align', 'center');
   }
-  const container = global.document.createElement('div');
-  let embedAs = data.embedAs || 'post';
-  user().assert(['post', 'video'].indexOf(embedAs) !== -1,
-      'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
-      ' "post" or "video" was: %s', embedAs);
+  return createContainer(global, 'post', data.href);
+}
+
+/**
+ * Create DOM element for the Facebook embedded content plugin for videos.
+ * @see https://developers.facebook.com/docs/plugins/embedded-video-player
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getVideoContainer(global, data) {
+  const container = createContainer(global, 'video', data.href);
   // If the user hasn't set the `data-embed-as` attribute and the provided href
   // is a video, Force the `data-embed-as` attribute to 'video' and make sure
   // to show the post's text.
-  if (data.href.match(/\/videos\/\d+\/?$/) && !data.embedAs) {
-    embedAs = 'video';
+  if (!data.embedAs) {
     container.setAttribute('data-embed-as', 'video');
     // Since 'data-embed-as="video"' disables post text, setting the
     // 'data-show-text' to 'true' enables the ability to see the text (changed
     // from the default 'false')
     container.setAttribute('data-show-text', 'true');
   }
-  container.className = 'fb-' + embedAs;
-  container.setAttribute('data-href', data.href);
   return container;
 }
 
@@ -83,12 +98,20 @@ function getPostContainer(global, data) {
  */
 function getCommentContainer(global, data) {
   const c = global.document.getElementById('c');
-  const container = global.document.createElement('div');
-  container.setAttribute('data-include-parent', data.includeParent || 'false');
+  const container = createContainer(global, 'comment-embed', data.href);
+  container.setAttribute(
+      'data-include-parent', data.includeCommentParent || 'false');
   container.setAttribute('data-width', c./*OK*/offsetWidth);
-  container.setAttribute('data-href', data.href);
-  container.className = 'fb-comment-embed';
   return container;
+}
+
+/**
+ * Gets the default type to embed as, if not specified.
+ * @param {string} href
+ * @return {string}
+ */
+function getDefaultEmbedAs(href) {
+  return href.match(/\/videos\/\d+\/?$/) ? 'video' : 'post';
 }
 
 /**
@@ -98,11 +121,20 @@ function getCommentContainer(global, data) {
  * @return {!Element} div
  */
 function getEmbedContainer(global, data) {
-  if (data.embedType == 'comment') {
-    return getCommentContainer(global, data);
-  }
+  const embedAs = data.embedAs || getDefaultEmbedAs(data.href);
 
-  return getPostContainer(global, data);
+  user().assert(['post', 'video', 'comment'].indexOf(embedAs) !== -1,
+      'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
+  ' "post", "video" or "comment" but was: %s', embedAs);
+
+  switch (embedAs) {
+    case 'comment':
+      return getCommentContainer(global, data);
+    case 'video':
+      return getVideoContainer(global, data);
+    default:
+      return getPostContainer(global, data);
+  }
 }
 
 /**
@@ -113,9 +145,7 @@ function getEmbedContainer(global, data) {
  * @return {!Element} div
  */
 function getPageContainer(global, data) {
-  const container = global.document.createElement('div');
-  container.className = 'fb-page';
-  container.setAttribute('data-href', data.href);
+  const container = createContainer(global, 'page', data.href);
   container.setAttribute('data-tabs', data.tabs);
   container.setAttribute('data-hide-cover', data.hideCover);
   container.setAttribute('data-show-facepile', data.showFacepile);
@@ -139,9 +169,7 @@ function getPageContainer(global, data) {
  * @return {!Element} div
  */
 function getCommentsContainer(global, data) {
-  const container = global.document.createElement('div');
-  container.className = 'fb-comments';
-  container.setAttribute('data-href', data.href);
+  const container = createContainer(global, 'comments', data.href);
   container.setAttribute('data-numposts', data.numposts || 10);
   container.setAttribute('data-colorscheme', data.colorscheme || 'light');
   container.setAttribute('data-order-by', data.orderBy || 'social');
@@ -157,11 +185,9 @@ function getCommentsContainer(global, data) {
  * @return {!Element} div
  */
 function getLikeContainer(global, data) {
-  const container = global.document.createElement('div');
-  container.className = 'fb-like';
+  const container = createContainer(global, 'like', data.href);
   container.setAttribute('data-action', data.action || 'like');
   container.setAttribute('data-colorscheme', data.colorscheme || 'light');
-  container.setAttribute('data-href', data.href);
   container.setAttribute('data-kd_site', data.kd_site || 'false');
   container.setAttribute('data-layout', data.layout || 'standard');
   container.setAttribute('data-ref', data.ref || '');

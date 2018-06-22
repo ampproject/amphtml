@@ -73,7 +73,7 @@ Renders as:
     data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
 </amp-facebook>
 
-#### Example: Embedding a comment
+#### Example: Embedding a comment on a post
 
 Code:
 ```html
@@ -100,20 +100,15 @@ The URL of the Facebook post/video/comment. For example, a post or video will lo
 
 ##### data-embed-as
 
-The value is either `post` or `video`.  The default is `post`.
+The value is either `post`, `video` or `comment`.  The default is `post`.
 
 Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos embeds the player of the video, and adds the accompanying post card with it. Setting `data-embed-as="post"` ignores the caption card. This is done to make sure we are zooming in on videos correctly.
 
-Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
+The `comment` value embeds a single comment (or reply to a comment) on a post. This is not to be confused with [amp-facebook-comments](https://ampbyexample.com/components/amp-facebook-comments/).
 
+Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts), [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player), and [comment embeds](https://developers.facebook.com/docs/plugins/embedded-comments).
 
-##### data-embed-type
-
-The value is either `post` or `comment`.  The default is `post`.
-
-Note: If you provide the `href` for a comment, but forget to specify `data-embed-type="post"`, the post itself will render instead of the comment.
-
-##### data-include-parent
+##### data-include-comment-parent
 
 The value is either `true` or `false`. The default is `false`.
 
