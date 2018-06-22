@@ -16,10 +16,6 @@
 
 import {EXPERIMENT_ATTRIBUTE} from '../utils';
 import {
-  RANDOM_NUMBER_GENERATORS,
-  toggleExperiment,
-} from '../../../../src/experiments';
-import {
   addExperimentIdToElement,
   isInExperiment,
   validateExperimentIds,

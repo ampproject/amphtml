@@ -24,18 +24,13 @@
 
 import {
   EXPERIMENT_ATTRIBUTE,
-  isGoogleAdsA4AValidEnvironment,
   mergeExperimentIds,
 } from './utils';
 import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
-  forceExperimentBranch,
-  getExperimentBranch,
   isExperimentOn,
-  randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
@@ -71,66 +66,6 @@ export function extractUrlExperimentId(win, element) {
     ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
       match[1]));
   return arg || null;
-}
-
-/**
- * Set experiment state from URL parameter, if present.  This looks for the
- * presence of a URL parameter of the form
- *   `exp=expt0:val0,expt1:val1,...,a4a:X,...,exptN:valN`
- * and interprets the X as one of the following:
- *   - `-1`: Manually-triggered experiment.  For testing only.  Sets
- *     `adtest=on` on the ad request, so that it will not bill or record
- *     user clicks as ad CTR.  Ad request will be accounted in a special
- *     'testing only' experiment statistic pool so that we can track usage
- *     of this feature.
- *   - `0`: Ad is explicitly opted out of the overall A4A-vs-3p iframe
- *     experiment.  Ad will serve into a 3p iframe, as traditional, but ad
- *     request and clicks will not be accounted in experiment statistics.
- *   - `1`: Ad is on the control branch of the overall A4A-vs-3p iframe
- *     experiment.  Ad will serve into a 3p iframe, and ad requests and
- *     clicks _will_ be accounted in experiment statistics.
- *   - `2`: Ad is on the experimental branch of the overall A4A-vs-3p iframe
- *     experiment.  Ad will render via the A4A path, including early ad
- *     request and (possibly) early rendering in shadow DOM or iframe.
- * Allows for per network selection using exp=aa:# for AdSense and exp=da:# for
- * Doubleclick.
- *
- * @param {!Window} win  Window.
- * @param {!Element} element Ad tag Element.
- * @param {string} experimentName  Name of the overall experiment.
- * @param {string} controlBranchId  Experiment ID string for control branch of
- *   the overall experiment.
- * @param {string} treatmentBranchId  Experiment ID string for the 'treatment'
- *   branch of the overall experiment.
- * @param {string} delayedTreatmentBrandId Experiment ID string for the
- *   'treatment' plus delayed request experiment.
- * @param {string} manualId  ID of the manual experiment.
- * @return {boolean}  Whether the experiment state was set from a command-line
- *   parameter or not.
- */
-function maybeSetExperimentFromUrl(win, element, experimentName,
-  controlBranchId, treatmentBranchId, delayedControlId,
-  delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
-  const argMapping = {
-    '-1': manualId,
-    '0': null,
-    '1': controlBranchId,
-    '2': treatmentBranchId,
-    '3': delayedControlId,
-    '4': delayedTreatmentBrandId,
-    '5': sfgControlId,
-    '6': sfgTreatmentId,
-  };
-  const arg = extractUrlExperimentId(win, element);
-  if (argMapping.hasOwnProperty(arg)) {
-    forceExperimentBranch(win, experimentName, argMapping[arg]);
-    return true;
-  } else {
-    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', arg,
-        ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
-        'branch), or 2 (a4a experiment branch)');
-    return false;
-  }
 }
 
 /**
