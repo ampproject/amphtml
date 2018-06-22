@@ -154,7 +154,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         children[0].tagName + ` is not supported by ${TAG}`
     );
     this.content_ = children[0];
-
+    this.content_.classList.add('i-amphtml-pan-zoom-child');
     this.maxScale_ = this.getNumberAttributeOr_('max-scale', DEFAULT_MAX_SCALE);
     this.initialScale_ = this.getNumberAttributeOr_('initial-scale', 1);
     this.initialX_ = this.getNumberAttributeOr_('initial-x', 0);
@@ -181,13 +181,11 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.content_.classList.add('i-amphtml-pan-zoom-child');
-    return this.resetContentDimensions_()
-        .then(() => {
-          if (!this.gestures_) {
-            this.setupGestures_();
-          }
-        });
+    return this.resetContentDimensions_().then(() => {
+      if (!this.gestures_) {
+        this.setupGestures_();
+      }
+    });
   }
 
   /** @override */
@@ -218,11 +216,6 @@ export class AmpPanZoom extends AMP.BaseElement {
       layout == Layout.FIXED_HEIGHT ||
       layout == Layout.FILL ||
       layout == Layout.RESPONSIVE;
-  }
-
-  /** @override */
-  isRelayoutNeeded() {
-    return true;
   }
 
   /**
