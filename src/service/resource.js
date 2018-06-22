@@ -695,10 +695,10 @@ export class Resource {
     const viewportRatio = this.getDistanceViewportRatio();
     const keys = Object.keys(this.withViewportDeferreds_);
     for (let i = 0; i < keys.length; i++) {
-      const viewportInt = dev().assertNumber(parseInt(keys[i], 10));
-      if (this.isWithinViewportRatio(viewportInt, viewportRatio)) {
-        this.withViewportDeferreds_[viewportInt].resolve();
-        delete this.withViewportDeferreds_[viewportInt];
+      const viewportNum = dev().assertNumber(parseFloat(keys[i], 10));
+      if (this.isWithinViewportRatio(viewportNum, viewportRatio)) {
+        this.withViewportDeferreds_[viewportNum].resolve();
+        delete this.withViewportDeferreds_[viewportNum];
       }
     }
   }
