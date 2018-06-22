@@ -440,7 +440,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           }
         },
         this.win,
-        this.iframe_,
+        /** @type {!Element}*/ (this.iframe_),
         this.unlisteners_
     );
     registerEvent(
@@ -452,7 +452,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           }
         },
         this.win,
-        this.iframe_,
+        /** @type {!Element}*/ (this.iframe_),
         this.unlisteners_
     );
     registerEvent(
@@ -463,7 +463,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           }
         },
         this.win,
-        this.iframe_,
+        /** @type {!Element}*/ (this.iframe_),
         this.unlisteners_
     );
   }
