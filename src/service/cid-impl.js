@@ -251,6 +251,13 @@ export class Cid {
     });
   }
 
+  /**
+   *
+   * @param {*} persistenceConsent
+   * @param {*} scope
+   * @param {string} url
+   * @return {*}
+   */
   scopeBaseCid_(persistenceConsent, scope, url) {
     return getBaseCid(this, persistenceConsent)
         .then(baseCid => {

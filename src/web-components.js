@@ -99,6 +99,12 @@ export function getShadowDomSupportedVersion(opt_elementClass) {
   return shadowDomSupportedVersion;
 }
 
+/**
+ * Returns shadow dom version.
+ *
+ * @param {!Element} element
+ * @return {string}
+ */
 function getShadowDomVersion(element) {
   if (!!element.prototype.attachShadow) {
     return ShadowDomVersion.V1;

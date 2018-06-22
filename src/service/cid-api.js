@@ -194,10 +194,17 @@ export class GoogleCidApi {
     return this.win_.Date.now() + time;
   }
 
+  /**
+   * @return {boolean}
+   */
   isReferrerProxyOrigin_() {
     return isProxyOrigin(WindowInterface.getDocumentReferrer(this.win_));
   }
 
+  /**
+   * @param {*} token
+   * @return {boolean}
+   */
   isStatusToken_(token) {
     return token && token[0] === '$';
   }

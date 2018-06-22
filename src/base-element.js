@@ -1051,6 +1051,9 @@ export class BaseElement {
    */
   onMeasureChanged() {}
 
+  /**
+   * @return {!Element}
+   */
   user() {
     return user(this.element);
   }

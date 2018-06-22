@@ -238,8 +238,8 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * Allows listening for message from the iframe. Returns an unlisten
  * function to remove the listener.
  *
- * @param {!Element} iframe.
- * @param {string} typeOfMessage.
+ * @param {!Element} iframe
+ * @param {string} typeOfMessage
  * @param {?function(!JsonObject, !Window, string)} callback Called when a
  *     message of this type arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
@@ -456,6 +456,9 @@ export class SubscriptionApi {
         this.is3p_);
   }
 
+  /**
+   * Destroys iframe.
+   */
   destroy() {
     this.unlisten_();
     this.clientWindows_.length = 0;
