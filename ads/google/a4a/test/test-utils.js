@@ -105,6 +105,15 @@ describe('Google A4A utils', () => {
   });
 
   describe('#ActiveView AmpAnalytics integration', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
 
     const builtConfig = {
       transport: {beacon: false, xhrpost: false},
@@ -176,6 +185,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should add the correct CSI signals', () => {
+      sandbox.stub(Services, 'documentInfoForDoc').returns({pageViewId: 777});
       const mockElement = {
         getAttribute: function(name) {
           switch (name) {
