@@ -186,13 +186,6 @@ export class AmpAdXOriginIframeHandler {
       }
       return timer.promise(10);
     });
-    if (this.baseInstance_.emitLifecycleEvent) {
-      // Only set up a load listener if we know that we can send lifecycle
-      // messages.
-      iframeLoadPromise.then(() => {
-        this.baseInstance_.emitLifecycleEvent('xDomIframeLoaded');
-      });
-    }
 
     // Calculate render-start and no-content signals.
     const {
@@ -258,7 +251,6 @@ export class AmpAdXOriginIframeHandler {
       // Set iframe initially hidden which will be removed on render-start or
       // load, whichever is earlier.
       setStyle(this.iframe, 'visibility', 'hidden');
-      this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
     }
 
     Promise.race([
@@ -268,9 +260,6 @@ export class AmpAdXOriginIframeHandler {
     ]).then(() => {
       if (this.iframe) {
         setStyle(this.iframe, 'visibility', '');
-        if (this.baseInstance_.emitLifecycleEvent) {
-          this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
-        }
       }
     });
 
@@ -319,9 +308,6 @@ export class AmpAdXOriginIframeHandler {
     const data = getData(opt_info);
     this.handleResize_(
         data['height'], data['width'], opt_info['source'], opt_info['origin']);
-    if (this.baseInstance_.emitLifecycleEvent) {
-      this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
-    }
   }
 
   /**
