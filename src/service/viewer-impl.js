@@ -22,12 +22,12 @@ import {dev, duplicateErrorIfNecessary} from '../log';
 import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
-  getFragment,
   getSourceOrigin,
   isProxyOrigin,
   parseQueryString,
   parseUrlDeprecated,
   removeFragment,
+  serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
@@ -183,6 +183,13 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
+    /**
+     * Subset of this.params_ that only contains parameters in the URL hash,
+     * e.g. "#foo=bar".
+     * @const @private {!Object<string, string>}
+     */
+    this.hashParams_ = {};
+
     /** @private {?Promise} */
     this.nextVisiblePromise_ = null;
 
@@ -225,7 +232,8 @@ export class Viewer {
         parseParams_(this.win.name.substring(SENTINEL_.length), this.params_);
       }
       if (this.win.location.hash) {
-        parseParams_(this.win.location.hash, this.params_);
+        parseParams_(this.win.location.hash, this.hashParams_);
+        Object.assign(this.params_, this.hashParams_);
       }
     }
 
@@ -259,7 +267,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isEmbedded_ = !!(
-      this.isIframed_ && !this.win.AMP_TEST_IFRAME
+      (this.isIframed_ && !this.win.AMP_TEST_IFRAME
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
         // There appears to be a bug under investigation where the
@@ -271,7 +279,7 @@ export class Viewer {
         && (this.params_['origin']
             || this.params_['visibilityState']
             // Parent asked for viewer JS. We must be embedded.
-            || (this.win.location.search.indexOf('amp_js_v') != -1))
+            || (this.win.location.search.indexOf('amp_js_v') != -1)))
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
@@ -295,6 +303,9 @@ export class Viewer {
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
+    const messagingDeferred = new Deferred();
+    this.messagingReadyResolver_ = messagingDeferred.resolve;
+
     /**
      * This promise will resolve when communications channel has been
      * established or timeout in 20 seconds. The timeout is needed to avoid
@@ -305,9 +316,7 @@ export class Viewer {
     this.messagingReadyPromise_ = this.isEmbedded_ ?
       Services.timerFor(this.win).timeoutPromise(
           20000,
-          new Promise(resolve => {
-            this.messagingReadyResolver_ = resolve;
-          })).catch(reason => {
+          messagingDeferred.promise).catch(reason => {
         throw getChannelError(/** @type {!Error|string|undefined} */ (
           reason));
       }) : null;
@@ -428,11 +437,12 @@ export class Viewer {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
-        // This is currently used my mode.js to infer development mode.
+        // This is currently used by mode.js to infer development mode.
         if (!this.win.location.originalHash) {
           this.win.location.originalHash = this.win.location.hash;
         }
         this.win.history.replaceState({}, '', newUrl);
+        delete this.hashParams_['click'];
         dev().fine(TAG_, 'replace fragment:' + this.win.location.href);
       }
     }
@@ -560,11 +570,10 @@ export class Viewer {
     const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc);
     const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
     if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
-      const oldFragment = getFragment(this.win.location.href);
-      const newFragment = 'ampshare=' + encodeURIComponent(canonicalUrl);
-      // Attempt to merge the fragments, if an old fragment was present.
+      this.hashParams_['ampshare'] = canonicalUrl;
       this.win.history.replaceState({}, '',
-          oldFragment ? `${oldFragment}&${newFragment}` : `#${newFragment}`);
+          '#' + serializeQueryString(
+              /** @type {!JsonObject} */ (this.hashParams_)));
     }
   }
 
@@ -1181,6 +1190,7 @@ function getChannelError(opt_reason) {
 
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.
+ * @param {!Viewer} viewer
  * @param {!VisibilityState} state
  * @restricted
  */
