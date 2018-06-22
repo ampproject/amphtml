@@ -157,7 +157,7 @@ export function composeEmbedUrl(options) {
 /**
  * Satizes URL
  *
- * @param {string} localtion
+ * @param {*} localtion
  * @return {string}
  */
 function sanitizeUrl(localtion) {
