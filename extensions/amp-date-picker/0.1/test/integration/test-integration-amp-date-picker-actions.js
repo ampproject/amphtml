@@ -16,7 +16,6 @@
 
 import * as lolex from 'lolex';
 import {poll} from '../../../../../testing/iframe';
-import {toggleExperiment} from '../../../../../src/experiments';
 
 const config = describe.configure().ifNewChrome();
 config.run('amp-date-picker', function() {
@@ -64,7 +63,6 @@ config.run('amp-date-picker', function() {
         target: win,
         now: new Date('2018-01-01T08:00:00Z'),
       });
-      toggleExperiment(win, 'amp-date-picker', true);
     });
 
     afterEach(() => {
@@ -128,7 +126,6 @@ config.run('amp-date-picker', function() {
         target: win,
         now: new Date('2018-01-01T08:00:00Z'),
       });
-      toggleExperiment(win, 'amp-date-picker', true);
     });
 
     afterEach(() => {
@@ -194,7 +191,6 @@ config.run('amp-date-picker', function() {
         target: win,
         now: new Date('2018-01-01T08:00:00Z'),
       });
-      toggleExperiment(win, 'amp-date-picker', true);
     });
 
     afterEach(() => {

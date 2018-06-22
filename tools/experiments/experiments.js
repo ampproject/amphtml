@@ -247,12 +247,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-date-picker',
-    name: 'Enables the amp-date-picker extension',
-    spec: 'https://github.com/ampproject/amphtml/issues/6469',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
-  },
-  {
     id: 'inline-styles',
     name: 'Enables the usage of inline styles for non fixed elements',
     spec: 'https://github.com/ampproject/amphtml/issues/11881',
