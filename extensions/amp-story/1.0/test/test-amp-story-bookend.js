@@ -27,12 +27,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 import {user} from '../../../../src/log';
 
-describes.realWin('amp-story-bookend', {
-  amp: {
-    runtimeOn: true,
-    extensions: ['amp-story:1.0'],
-  },
-}, env => {
+describes.realWin('amp-story-bookend', {amp: true}, env => {
   let win;
   let storyElem;
   let bookend;
@@ -868,5 +863,40 @@ describes.realWin('amp-story-bookend', {
         bookend.getShadowRoot().querySelector('[on$=".prompt"]');
 
     expect(promptButtonEl).to.be.null;
+  });
+
+  it('should skip invalid component name and continue building', () => {
+    const userJson = {
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
+        'email',
+        {'provider': 'facebook', 'app-id': '254325784911610'},
+        'whatsapp',
+      ],
+      'components': [
+        {
+          'type': 'invalid-type',
+          'title': 'test',
+        },
+        {
+          'type': 'small',
+          'title': 'This is an example article',
+          'domainName': 'example.com',
+          'url': 'http://example.com/article.html',
+          'image': 'http://placehold.it/256x128',
+        },
+      ],
+    };
+
+    sandbox.stub(bookend.requestService_, 'loadBookendConfig')
+        .resolves(userJson);
+
+    bookend.build();
+    expectAsyncConsoleError(/[Component `invalid-type` is not supported. Skipping invalid]/);
+
+    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
+      // Still builds rest of valid components.
+      expect(config.components[0]).to.deep.equal(userJson.components[1]);
+    });
   });
 });
