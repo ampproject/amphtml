@@ -22,7 +22,7 @@ import {requireExternal} from '../../../src/module';
  * A higher-order component that wraps a specific date-picker implmentation
  * with common functionality.
  * @param {function(new:React.Component, !Object)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, JsonObject)} A date picker component with common functionality
+ * @return {function(new:React.Component, !Object)} A date picker component with common functionality
  */
 export function withDatePickerCommon(WrappedComponent) {
   const {
@@ -76,7 +76,7 @@ export function withDatePickerCommon(WrappedComponent) {
   class Component extends React.Component {
     /**
      * Creates an instance of Component.
-     * @param {!JsonObject} props
+     * @param {!Object} props
      */
     constructor(props) {
       super(props);
