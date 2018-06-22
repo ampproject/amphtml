@@ -158,6 +158,7 @@ describes.fakeWin('AccessService', {
     });
     const service = new AccessService(ampdoc);
     expect(service.pubOrigin_).to.exist;
+    expect(service.pubOrigin_).to.match(/^http.*/);
   });
 
   it('should find and register vendor', () => {

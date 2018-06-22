@@ -34,10 +34,6 @@ describes.realWin('performance', {amp: true}, env => {
     ampdoc = env.ampdoc;
     clock = lolex.install({
       target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
-    // Bind window performance with the clock's implementation so that we can
-    // use date.now or clock.tick to manipulate its value in this test.
-    // See https://www.npmjs.com/package/lolex
-    win.performance.now = clock.performance.now;
     installPerformanceService(env.win);
     perf = Services.performanceFor(env.win);
   });

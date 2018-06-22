@@ -336,10 +336,11 @@ export class AccessService {
    * Returns the promise that resolves when all authorization work has
    * completed, including authorization endpoint call and UI update.
    * Note that this promise never fails.
+   * @param {boolean=} opt_disableFallback
    * @return {!Promise}
    * @private
    */
-  runAuthorization_() {
+  runAuthorization_(opt_disableFallback) {
     this.toggleTopClass_('amp-access-loading', true);
 
     const authorizations = this.viewer_.whenFirstVisible().then(() => {
