@@ -118,7 +118,7 @@ export class BookendComponent {
     return components.reduce((builtComponents, component) => {
       const componentBuilder = componentBuilderInstanceFor(component.type);
       if (!componentBuilder) {
-        dev().error('Component type `' + component.type +
+        dev().error(TAG, 'Component type `' + component.type +
         '` is not supported. Skipping invalid.');
         return builtComponents;
       }

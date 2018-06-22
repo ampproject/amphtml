@@ -865,7 +865,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     expect(promptButtonEl).to.be.null;
   });
 
-  it('should reject invalid component name', () => {
+  it('should skip invalid component name and continue building', () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -880,8 +880,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         },
         {
           'type': 'small',
+          'title': 'This is an example article',
+          'domainName': 'example.com',
           'url': 'http://example.com/article.html',
-          'title': 'example',
           'image': 'http://placehold.it/256x128',
         },
       ],
@@ -893,6 +894,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     bookend.build();
     expectAsyncConsoleError(/[Component `invalid-type` is not supported. Skipping invalid]/);
 
-    return bookend.loadConfigAndMaybeRenderBookend();
+    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
+      // Still builds rest of valid components.
+      expect(config.components[0]).to.deep.equal(userJson.components[1]);
+    });
   });
 });
