@@ -2027,5 +2027,17 @@ describe('Resource renderOutsideViewport', () => {
       sandbox.stub(resource, 'isLayoutPending').returns(false);
       return resource.whenWithinViewport();
     });
+
+    it('should resolve correctly with float', () => {
+      const isWithinViewportRatioStub =
+        sandbox.stub(resource, 'isWithinViewportRatio');
+      const ratio = {};
+      sandbox.stub(resource, 'getDistanceViewportRatio').returns(ratio);
+      isWithinViewportRatioStub.withArgs(1.25).returns(false);
+      isWithinViewportRatioStub.withArgs(1.25, ratio).returns(true);
+      const promise = resource.whenWithinViewport(1.25);
+      resource.resolveDeferredsWhenWithinViewports_();
+      return promise;
+    });
   });
 });
