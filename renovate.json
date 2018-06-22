@@ -6,8 +6,15 @@
   "ignoreDeps": [
     "babel-polyfill",
     "document-register-element",
+    "dompurify",
     "promise-pjs",
     "web-activities",
     "web-animations-js"
+  ],
+  "includePaths": [
+    "package.json",
+    "validator/package.json",
+    "validator/nodejs/package.json",
+    "validator/webui/package.json"
   ]
 }
