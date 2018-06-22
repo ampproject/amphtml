@@ -43,7 +43,6 @@ export class FocusHistory {
 
     /**
      * @private
-     * @const {function(!Event)}
      * @param {!Event} e
      */
     this.captureFocus_ = e => {
@@ -55,7 +54,6 @@ export class FocusHistory {
 
     /**
      * @private
-     * @const {function(!Event)}
      * @param {*} unusedE
      */
     this.captureBlur_ = unusedE => {

@@ -1181,6 +1181,7 @@ function getChannelError(opt_reason) {
 
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.
+ * @param {*} viewer
  * @param {!VisibilityState} state
  * @restricted
  */
