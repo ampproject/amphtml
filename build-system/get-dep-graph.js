@@ -167,12 +167,14 @@ exports.getBundleFlags = function(g) {
     let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend on _base.
     if (!isBase && g.bundles._base) {
-      if (videos.includes(originalName)) {
-        cmd += ':_base_videos';
+      if (media.includes(originalName) && false) {
+        cmd += ':_base_media';
+      } else if (ads.includes(originalName)) {
+        cmd += ':_base_ads';
       } else if (/extensions/.test(originalName)) {
         cmd += ':_base_ext';
       } else {
-        if (/_base_ext/.test(name)) {
+        if (/_base_ext|_base_media|_base_ads/.test(name)) {
           cmd += ':src-amp';
         } else {
           cmd += ':_base';
@@ -236,21 +238,21 @@ exports.getGraph = function(entryModules, config) {
         // The modules in the bundle.
         modules: [],
       },
-      _base_videos: {
-        isBase: true,
-        name: '_base_videos',
-        modules: [],
-      },
+      //_base_media: {
+        //isBase: true,
+        //name: '_base_media',
+        //modules: [],
+      //},
       //_base_common: {
         //isBase: true,
         //name: '_base_common',
         //modules: [],
       //},
-      //_base_ads: {
-        //isBase: true,
-        //name: '_base_ads',
-        //modules: [],
-      //},
+      _base_ads: {
+        isBase: true,
+        name: '_base_ads',
+        modules: [],
+      },
       //_base_all: {
         //isBase: true,
         //name: '_base_all',
@@ -384,14 +386,14 @@ function buildUpCommon(graph) {
     return;
   }
   let baseModules = graph.bundles._base.modules;
-  let videosModules = graph.bundles._base_videos.modules;
+  let mediaModules = graph.bundles._base_media.modules;
   let mainModuleDeps = graph.depOf['src/amp.js'];
   graph.bundles._base.modules = baseModules.filter(x => {
     const usedInMain = !!mainModuleDeps[x];
-    const usedInVideos = inAnyBundle(x, videos.map(x => graph.depOf[x]));
-    const shouldGoToVideoBundle = !usedInMain && usedInVideos;
-    if (shouldGoToVideoBundle && videosModules.indexOf(x) === -1) {
-      videosModules.push(x);
+    const usedInMedia = inAnyBundle(x, media.map(x => graph.depOf[x]));
+    const shouldGoToVideoBundle = !usedInMain && usedInMedia;
+    if (shouldGoToVideoBundle && mediaModules.indexOf(x) === -1) {
+      mediaModules.push(x);
     }
     return !shouldGoToVideoBundle;
   });
@@ -564,7 +566,7 @@ const ads = [
   'extensions/amp-auto-ads/0.1/amp-auto-ads.js',
 ];
 
-const videos = [
+const media = [
   'extensions/amp-brightcove/0.1/amp-brightcove.js',
   'extensions/amp-dailymotion/0.1/amp-dailymotion.js',
   'extensions/amp-ima-video/0.1/amp-ima-video.js',
@@ -582,24 +584,30 @@ const videos = [
   'extensions/amp-wistia-player/0.1/amp-wistia-player.js',
   'extensions/amp-youtube/0.1/amp-youtube.js',
   'extensions/amp-gfycat/0.1/amp-gfycat.js',
+  'extensions/amp-3d-gltf/0.1/amp-3d-gltf.js',
+  'extensions/amp-apester-media/0.1/amp-apester-media.js',
+  'extensions/amp-google-vrview-image/0.1/amp-google-vrview-image.js',
+  'extensions/amp-hulu/0.1/amp-hulu.js',
+  'extensions/amp-anim/0.1/amp-anim.js',
+  'extensions/amp-imgur/0.1/amp-imgur.js',
+  'extensions/amp-izlesene/0.1/amp-izlesene.js',
+  'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
+  'extensions/amp-soundcloud/0.1/amp-soundcloud.js',
+  'extensions/amp-audio/0.1/amp-audio.js',
+  'extensions/amp-bodymovin-animation/0.1/amp-bodymovin-animation.js',
 ];
 
 const all = [
-  'extensions/amp-3d-gltf/0.1/amp-3d-gltf.js',
   'extensions/amp-a4a/0.1/amp-a4a.js',
   'extensions/amp-access-laterpay/0.1/amp-access-laterpay.js',
   'extensions/amp-access-scroll/0.1/amp-access-scroll.js',
   'extensions/amp-access/0.1/amp-access.js',
   'extensions/amp-addthis/0.1/amp-addthis.js',
   'extensions/amp-analytics/0.1/amp-analytics.js',
-  'extensions/amp-anim/0.1/amp-anim.js',
   'extensions/amp-animation/0.1/amp-animation.js',
-  'extensions/amp-apester-media/0.1/amp-apester-media.js',
   'extensions/amp-app-banner/0.1/amp-app-banner.js',
-  'extensions/amp-audio/0.1/amp-audio.js',
   'extensions/amp-beopinion/0.1/amp-beopinion.js',
   'extensions/amp-bind/0.1/amp-bind.js',
-  'extensions/amp-bodymovin-animation/0.1/amp-bodymovin-animation.js',
   'extensions/amp-byside-content/0.1/amp-byside-content.js',
   'extensions/amp-call-tracking/0.1/amp-call-tracking.js',
   'extensions/amp-compare-slider/0.1/amp-compare-slider.js',
@@ -619,16 +627,12 @@ const all = [
   'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
   'extensions/amp-geo/0.1/amp-geo.js',
   'extensions/amp-gist/0.1/amp-gist.js',
-  'extensions/amp-google-vrview-image/0.1/amp-google-vrview-image.js',
   'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
-  'extensions/amp-hulu/0.1/amp-hulu.js',
   'extensions/amp-iframe/0.1/amp-iframe.js',
   'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
   'extensions/amp-image-viewer/0.1/amp-image-viewer.js',
-  'extensions/amp-imgur/0.1/amp-imgur.js',
   'extensions/amp-instagram/0.1/amp-instagram.js',
   'extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
-  'extensions/amp-izlesene/0.1/amp-izlesene.js',
   'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
   'extensions/amp-lightbox/0.1/amp-lightbox.js',
   'extensions/amp-list/0.1/amp-list.js',
@@ -637,7 +641,6 @@ const all = [
   'extensions/amp-mustache/0.1/amp-mustache.js',
   'extensions/amp-next-page/0.1/amp-next-page.js',
   'extensions/amp-pinterest/0.1/amp-pinterest.js',
-  'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
   'extensions/amp-position-observer/0.1/amp-position-observer.js',
   'extensions/amp-reddit/0.1/amp-reddit.js',
   'extensions/amp-riddle-quiz/0.1/amp-riddle-quiz.js',
@@ -646,7 +649,6 @@ const all = [
   'extensions/amp-sidebar/0.1/amp-sidebar.js',
   'extensions/amp-slides/0.1/amp-slides.js',
   'extensions/amp-social-share/0.1/amp-social-share.js',
-  'extensions/amp-soundcloud/0.1/amp-soundcloud.js',
   'extensions/amp-sticky-ad/1.0/amp-sticky-ad.js',
   'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js',
   'extensions/amp-story/0.1/amp-story.js',
@@ -663,7 +665,7 @@ const all = [
 
 
 exports.getFlags({
-  modules: ['src/amp.js'].concat(all, ads, common, videos),
+  modules: ['src/amp.js'].concat(all, ads, common, media),
   writeTo: './out/',
   externs,
 })
