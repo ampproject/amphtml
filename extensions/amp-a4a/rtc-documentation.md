@@ -264,7 +264,7 @@ By setting `sendRegardlessOfConsentState` to an array, this indicates that only 
             ]}'>
 </amp-ad>
 ```
-In this example, `sendRegardlessOfConsentState` is only set for one specific URL, the first URL in the array "urls". Take the case when the page state is `UNKNOWN`. In that case, the only RTC callout that would be sent is the one to "https://www.AmpPublisher.biz/targetingA".
+In this example, `sendRegardlessOfConsentState` is only set for one specific URL, the first URL in the array "urls". Take the case when the page state is `UNKNOWN`. In that case, the only RTC callout that would be sent is the one to `https://www.AmpPublisher.biz/targetingA`.
 
 You may of course also set `sendRegardlessOfConsentState` here to an array as well, such as: 
 
