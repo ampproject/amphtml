@@ -24,9 +24,11 @@ const COMMON_CHROME_FLAGS = [
 
 // Reduces the odds of Sauce labs timing out during tests. See #16135.
 // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
-const SAUCE_MAX_DURATION_SECS = 10 * 60;
-const SAUCE_COMMAND_TIMEOUT_SECS = 10 * 60;
-const SAUCE_IDLE_TIMEOUT_SECS = 5 * 60;
+const SAUCE_TIMEOUT_CONFIG = {
+  maxDuration: 10 * 60,
+  commandTimeout: 10 * 60,
+  idleTimeout: 5 * 60,
+};
 
 /**
  * @param {!Object} config
@@ -145,82 +147,55 @@ module.exports = {
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome_latest: {
+    SL_Chrome_latest: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
       version: 'latest',
-      maxDuration: SAUCE_MAX_DURATION_SECS,
-      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
-      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
-    },
-    SL_Chrome_android: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Chrome_android: Object.assign({
       base: 'SauceLabs',
       browserName: 'android',
       version: 'latest',
-      maxDuration: SAUCE_MAX_DURATION_SECS,
-      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
-      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
-    },
-    SL_Chrome_45: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Chrome_45: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
       version: '45',
-      maxDuration: SAUCE_MAX_DURATION_SECS,
-      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
-      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
-    },
-    SL_Android_latest: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Android_latest: Object.assign({
       base: 'SauceLabs',
       device: 'Android Emulator',
       browserName: 'android',
       platform: 'android',
       version: 'latest',
-      maxDuration: SAUCE_MAX_DURATION_SECS,
-      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
-      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
-    },
-    SL_iOS_latest: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_iOS_latest: Object.assign({
       base: 'SauceLabs',
       device: 'iPhone Simulator',
       browserName: 'iphone',
       platform: 'iOS',
-      version: '11.3',
-      maxDuration: SAUCE_MAX_DURATION_SECS,
-      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
-      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
-    },
-    SL_Firefox_latest: {
+      version: 'latest',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Firefox_latest: Object.assign({
       base: 'SauceLabs',
       browserName: 'firefox',
       version: 'latest',
-      maxDuration: SAUCE_MAX_DURATION_SECS,
-      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
-      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
-    },
-    SL_Safari_latest: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Safari_latest: Object.assign({
       base: 'SauceLabs',
       browserName: 'safari',
       version: 'latest',
-      maxDuration: SAUCE_MAX_DURATION_SECS,
-      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
-      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
-    },
-    SL_Edge_latest: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Edge_latest: Object.assign({
       base: 'SauceLabs',
       browserName: 'microsoftedge',
       version: 'latest',
-      maxDuration: SAUCE_MAX_DURATION_SECS,
-      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
-      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
-    },
-    SL_IE_11: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_IE_11: Object.assign({
       base: 'SauceLabs',
       browserName: 'internet explorer',
       version: 'latest',
-      maxDuration: SAUCE_MAX_DURATION_SECS,
-      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
-      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
-    },
+    }, SAUCE_TIMEOUT_CONFIG),
   },
 
   sauceLabs: {
