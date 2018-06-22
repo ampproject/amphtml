@@ -32,6 +32,10 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td>
+    <ul>
+    <li>Viqeo WordPress embedding demo: <a href="http://demo.viqeo.tv/2018/04/04/%D0%BF%D0%BE%D0%B4%D0%B2%D0%BE%D0%B4%D0%BD%D1%8B%D0%B9-%D1%81%D0%BA%D1%83%D1%82%D0%B5%D1%80-%D0%B4%D0%BB%D1%8F-%D0%B4%D0%B0%D0%B9%D0%B2%D0%B8%D0%BD%D0%B3%D0%B0-%D0%BA%D0%BE%D1%82%D0%BE%D1%80%D1%8B-2/">Aqua Scooter</a></li>
+    <li>The-Village: <a href="https://www.the-village.ru/village/food/place/316257-mesto">Pizza Resto Review</a></li>
+    <li>Kanobu.ru: <a href="https://kanobu.ru/reviews/retsenziya-na-deadpool-372034/">Deadpool game review</a></li>
     </ul>
     </td>
   </tr>
@@ -57,12 +61,15 @@ The `width` and `height` attributes determine the aspect ratio of the Viqeo embe
 
 ##### data-profileid
 
-The Viqeo profile ID.
+Viqeo is a registration only video platform for Publishers to add videos as illustrations. All videos are played automaticaly without sound and only when fully visible (minimum visible area possible is 50%).
+Detailed description of Viqeo is in presentation: https://docs.google.com/presentation/d/1P6DJTPJtfeMmPozv1pPz7Wner7NCcJ_DmlPOcVclgLE/present?slide=id.p
+
+To get data-profileid you need to login to Viqeo account (https://viqeo.tv) and press 'Get code' near the video you want to paste to website. You will get a code with data-profileid, data-videoid & width and height.
 
 ##### data-videoid
 
-The identifier of the video.
+The identifier of the video. All videos have unique id, and can be found in Viqeo account after authorisation. Viqeo do not let embed videos by 3rd party websites so only one way to get a data-videoid and other attributes to sign in to Viqeo account.
 
 ##### width and height
 
-The width and height attributes are special for the Viqeo embed.
+The width and height attributes are special for the Viqeo embed. Viqeo supports any proportions of videos. Basically Viqeo generates an unique code for each video depending on video size and proportions, but Viqeo user may change proportions in interface. Anyway after pressing 'Get code' button an unique code will be generated.
