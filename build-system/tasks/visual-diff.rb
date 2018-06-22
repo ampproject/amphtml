@@ -345,6 +345,10 @@ def generate_snapshots(page, webpages)
     Percy::Capybara.snapshot(page, name: 'Blank page')
   end
   cleanup_amp_config
+  num_flaky_tests = webpages.select { |webpage| webpage['flaky'] }.count
+  if num_flaky_tests > 0
+    log('info', 'Skipping ' + cyan("#{num_flaky_tests}") + ' flaky tests')
+  end
   CONFIGS.each do |config|
     apply_amp_config(config)
     log('verbose',
@@ -371,8 +375,9 @@ end
 # - webpages: JSON object containing details about the pages to snapshot.
 # - config: Config being used. One of 'canary' or 'prod'.
 def snapshot_webpages(page, webpages, config)
-  webpages.each do |webpage|
+  webpages.reject { |webpage| webpage['flaky'] }.each do |webpage|
     url = webpage['url']
+    # TODO(danielrozenberg, #16133): Remove after disabling all flaky tests.
     if url.include? 'examples/visual-tests/amp-by-example/' and
         !ARGV.include? '--master'
       next

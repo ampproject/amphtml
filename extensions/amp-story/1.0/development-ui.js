@@ -56,6 +56,9 @@ function createButton(win, classNameOrList, handler) {
 }
 
 
+/**
+ * Development mode logs buttons.
+ */
 export class DevelopmentModeLogButtonSet {
   /**
    * @param {!Window} win

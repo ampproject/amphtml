@@ -42,9 +42,10 @@ module.exports = {
     './testing/**/*.js': ['browserify'],
   },
 
-  // Sauce labs on Safari doesn't support 'localhost' addresses. See #14848.
+  // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
+  // 'localhost' addresses. See #14848 for more info.
   // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
-  hostname: process.platform === 'darwin' ? '127.0.0.1' : 'localhost',
+  hostname: 'localhost',
 
   browserify: {
     watch: true,

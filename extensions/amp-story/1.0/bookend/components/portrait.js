@@ -26,6 +26,7 @@ import {userAssertValidProtocol} from '../../utils';
  * @typedef {{
  *   type: string,
  *   category: string,
+ *   title: string,
  *   url: string,
  *   domainName: string,
  *   image: string
@@ -36,11 +37,12 @@ export let PortraitComponentDef;
 /**
  * @struct @typedef {{
  *   category: !Element,
+ *   title: !Element,
  *   image: !Element,
  *   meta: !Element,
  * }}
  */
-let portraitElsDef;
+let portraitElementsDef;
 
 /**
  * Builder class for the portrait component.
@@ -50,9 +52,15 @@ export class PortraitComponent {
 
   /** @override */
   assertValidity(portraitJson, element) {
-    user().assert('category' in portraitJson && 'image' in portraitJson &&
-      'url' in portraitJson, 'Portrait component must contain `category`, ' +
-      '`image`, and `url` fields, skipping invalid.');
+
+    const requiredFields = ['title', 'image', 'url'];
+    const hasAllRequiredFields =
+        !requiredFields.some(field => !(field in portraitJson));
+    user().assert(
+        hasAllRequiredFields,
+        'Portrait component must contain ' +
+        requiredFields.map(field => '`' + field + '`').join(', ') +
+        ' fields, skipping invalid.');
 
     userAssertValidProtocol(element, portraitJson['url']);
     userAssertValidProtocol(element, portraitJson['image']);
@@ -63,39 +71,54 @@ export class PortraitComponent {
     const url = portraitJson['url'];
     const {hostname: domainName} = Services.urlForDoc(element).parse(url);
 
-    return {
+    const portrait = {
       url,
       domainName,
       type: portraitJson['type'],
       category: portraitJson['category'],
+      title: portraitJson['title'],
       image: portraitJson['image'],
     };
+
+    if (portraitJson['amphtml']) {
+      portrait.amphtml = portraitJson['amphtml'];
+    }
+
+    return portrait;
   }
 
   /** @override */
-  buildTemplate(portraitData, doc) {
+  buildElement(portraitData, doc) {
     const html = htmlFor(doc);
-    const template =
+    const el =
         html`
         <a class="i-amphtml-story-bookend-portrait
           i-amphtml-story-bookend-component"
           target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
-          <amp-img class="i-amphtml-story-bookend-portrait-image"
-            layout="fixed" width="0" height="0" ref="image"></amp-img>
+          <h2 class="i-amphtml-story-bookend-article-heading"
+            ref="title"></h2>
+          <div class="i-amphtml-story-bookend-portrait-image">
+            <img ref="image"></img>
+          </div>
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    addAttributesToElement(template, dict({'href': portraitData.url}));
+    addAttributesToElement(el, dict({'href': portraitData.url}));
 
-    const {category, image, meta} =
-      /** @type {!portraitElsDef} */ (htmlRefs(template));
+    if (portraitData['amphtml'] === true) {
+      addAttributesToElement(el, dict({'rel': 'amphtml'}));
+    }
+
+    const {category, title, image, meta} =
+      /** @type {!portraitElementsDef} */ (htmlRefs(el));
 
     category.textContent = portraitData.category;
+    title.textContent = portraitData.title;
     addAttributesToElement(image, dict({'src': portraitData.image}));
     meta.textContent = portraitData.domainName;
 
-    return template;
+    return el;
   }
 }

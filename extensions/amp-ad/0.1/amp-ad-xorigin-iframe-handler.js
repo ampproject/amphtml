@@ -15,6 +15,10 @@
  */
 
 import {
+  ADSENSE_EXPERIMENTS,
+  ADSENSE_EXP_NAMES,
+} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+import {
   CONSTANTS,
   MessageType,
 } from '../../../src/3p-frame-messaging';
@@ -33,8 +37,11 @@ import {
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, loadPromise} from '../../../src/event-helper';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+} from '../../../src/experiments';
 import {getHtml} from '../../../src/get-html';
-import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {setStyle} from '../../../src/style';
@@ -114,17 +121,24 @@ export class AmpAdXOriginIframeHandler {
         this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
 
-    // To provide position to inabox.
-    if (isExperimentOn(this.win_, 'inabox-position-api')) {
+    // TODO(bradfrizzell): Would be better to turn this on if
+    // A4A.isXhrEnabled() is false, or if we simply decide it is
+    // ok to turn this on for all traffic.
+    if (getExperimentBranch(
+        this.win_, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ==
+       ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
+       getExperimentBranch(this.win_, ADSENSE_EXP_NAMES.CANONICAL) ==
+        ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
+       isExperimentOn(this.win_, 'inabox-position-api')) {
+      // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {
-            // TODO(@zhouyx): Make sendPosition_ only send to message origin
-            // iframe
+            // TODO(@zhouyx): Make sendPosition_ only send to
+            // message origin iframe
             this.sendPosition_();
             this.registerPosition_();
           });
     }
-
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
     listenForOncePromise(this.iframe, 'entity-id', true)
@@ -172,13 +186,6 @@ export class AmpAdXOriginIframeHandler {
       }
       return timer.promise(10);
     });
-    if (this.baseInstance_.emitLifecycleEvent) {
-      // Only set up a load listener if we know that we can send lifecycle
-      // messages.
-      iframeLoadPromise.then(() => {
-        this.baseInstance_.emitLifecycleEvent('xDomIframeLoaded');
-      });
-    }
 
     // Calculate render-start and no-content signals.
     const {
@@ -244,7 +251,6 @@ export class AmpAdXOriginIframeHandler {
       // Set iframe initially hidden which will be removed on render-start or
       // load, whichever is earlier.
       setStyle(this.iframe, 'visibility', 'hidden');
-      this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
     }
 
     Promise.race([
@@ -254,9 +260,6 @@ export class AmpAdXOriginIframeHandler {
     ]).then(() => {
       if (this.iframe) {
         setStyle(this.iframe, 'visibility', '');
-        if (this.baseInstance_.emitLifecycleEvent) {
-          this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
-        }
       }
     });
 
@@ -305,9 +308,6 @@ export class AmpAdXOriginIframeHandler {
     const data = getData(opt_info);
     this.handleResize_(
         data['height'], data['width'], opt_info['source'], opt_info['origin']);
-    if (this.baseInstance_.emitLifecycleEvent) {
-      this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
-    }
   }
 
   /**

@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import {ACTION_TYPE, AMP_CONSENT_EXPERIMENT, AmpConsent} from '../amp-consent';
+import {
+  ACTION_TYPE,
+  AMP_CONSENT_EXPERIMENT,
+  AmpConsent,
+  EXTERNAL_CONSENT_FLOW,
+} from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
 import {computedStyle} from '../../../../src/style';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
-
 import {
   registerServiceBuilder,
   resetServiceForTesting,
@@ -46,12 +50,13 @@ describes.realWin('amp-consent', {
     win = env.win;
     toggleExperiment(win, AMP_CONSENT_EXPERIMENT, true);
     toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
+    toggleExperiment(win, EXTERNAL_CONSENT_FLOW, true);
 
     storageValue = {};
     jsonMockResponses = {
-      'response1': '{"promptIfUnknown": true}',
-      'response2': '{}',
-      'response3': '{"promptIfUnknown": false}',
+      '//response1': '{"promptIfUnknown": true}',
+      '//response2': '{}',
+      '//response3': '{"promptIfUnknown": false}',
     };
 
     resetServiceForTesting(win, 'xhr');
@@ -98,10 +103,10 @@ describes.realWin('amp-consent', {
         defaultConfig = {
           'consents': {
             'ABC': {
-              'checkConsentHref': 'response1',
+              'checkConsentHref': '//response1',
             },
             'DEF': {
-              'checkConsentHref': 'response1',
+              'checkConsentHref': '//response1',
             },
           },
         };
@@ -162,7 +167,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
         },
       };
@@ -240,7 +245,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
@@ -258,7 +263,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response3',
+            'checkConsentHref': '//response3',
             'promptIfUnknownForGeoGroup': 'unknown',
           },
         },
@@ -276,7 +281,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response2',
+            'checkConsentHref': '//response2',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
@@ -299,10 +304,10 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
           'DEF': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
         },
       };
@@ -328,10 +333,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('create predefined _if_responded policy', function* () {
+    it('create predefined _till_responded policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_['_if_responded']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_till_responded']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -345,10 +350,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('create predefined _if_accepted policy', function* () {
+    it('create predefined _till_accepted policy', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_till_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
@@ -381,10 +386,10 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
           'DEF': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
         },
         'policy': {
@@ -404,12 +409,67 @@ describes.realWin('amp-consent', {
           'ABC': [],
         },
       });
-      expect(ampConsent.policyConfig_['_if_accepted']).to.deep.equal({
+      expect(ampConsent.policyConfig_['_till_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
         },
       });
+    });
+  });
+
+  describe('external consent action', () => {
+    let defaultConfig;
+    let ampConsent;
+    let actionSpy;
+    let event;
+    let ampIframe;
+    let iframe;
+    beforeEach(() => {
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': '//response1',
+          },
+        },
+      };
+      const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('id', 'amp-consent');
+      consentElement.setAttribute('layout', 'nodisplay');
+      const scriptElement = doc.createElement('script');
+      scriptElement.setAttribute('type', 'application/json');
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      doc.body.appendChild(consentElement);
+      ampConsent = new AmpConsent(consentElement);
+      actionSpy = sandbox.stub(ampConsent, 'handleAction_');
+      ampConsent.enableInteractions_();
+      ampIframe = document.createElement('amp-iframe');
+      iframe = doc.createElement('iframe');
+      ampIframe.appendChild(iframe);
+      ampConsent.element.appendChild(ampIframe);
+      ampConsent.currentDisplayInstance_ = 'ABC';
+      event = new Event('message');
+    });
+
+    it('listen to external consent response msg', () => {
+      event.data = {
+        'type': 'consent-response',
+        'action': 'accept',
+      };
+      event.source = iframe.contentWindow;
+      win.dispatchEvent(event);
+      expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT);
+    });
+
+    it('ignore msg from incorrect source', () => {
+      event.data = {
+        'type': 'consent-response',
+        'action': 'accept',
+      };
+      event.source = null;
+      win.dispatchEvent(event);
+      expect(actionSpy).to.not.be.called;
     });
   });
 
@@ -419,19 +479,20 @@ describes.realWin('amp-consent', {
     let ampConsent;
     let updateConsentInstanceStateSpy;
     let consentElement;
+    let postPromptUI;
     beforeEach(() => {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptUI': '123',
           },
           'DEF': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptUI': '123',
           },
           'GH': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptUI': '123',
           },
         },
@@ -447,6 +508,9 @@ describes.realWin('amp-consent', {
       uiElement.setAttribute('id', '123');
       consentElement.appendChild(uiElement);
       consentElement.appendChild(scriptElement);
+      postPromptUI = document.createElement('div');
+      postPromptUI.setAttribute('id', 'test');
+      consentElement.appendChild(postPromptUI);
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
@@ -512,12 +576,7 @@ describes.realWin('amp-consent', {
     });
 
     describe('postPromptUI', () => {
-      let postPromptUI;
-
       beforeEach(() => {
-        postPromptUI = document.createElement('div');
-        postPromptUI.setAttribute('id', 'test');
-        consentElement.appendChild(postPromptUI);
         storageValue = {
           'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
           'amp-consent:DEF': CONSENT_ITEM_STATE.ACCEPTED,
