@@ -75,7 +75,7 @@ export class Performance {
     this.win = win;
 
     /** @private @const {number} */
-    this.initTime_ = this.win.performance.now();
+    this.initTime_ = this.win.Date.now();
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -154,7 +154,7 @@ export class Performance {
       this.isMessagingReady_ = true;
 
       // Tick the "messaging ready" signal.
-      this.tickDelta('msr', this.win.performance.now() - this.initTime_);
+      this.tickDelta('msr', this.win.Date.now() - this.initTime_);
 
       // Forward all queued ticks to the viewer since messaging
       // is now ready.
@@ -165,9 +165,6 @@ export class Performance {
     });
   }
 
-  /**
-   * Fired on document ready.
-   */
   onload_() {
     this.tick('ol');
     this.tickLegacyFirstPaintTime_();
@@ -175,7 +172,7 @@ export class Performance {
   }
 
   /**
-   * Reports first paint and first contentful paint timings.
+   * Reports first pain and first contentful paint timings.
    * See https://github.com/WICG/paint-timing
    */
   registerPaintTimingObserver_() {
@@ -249,14 +246,14 @@ export class Performance {
     // (hasn't been visible yet, ever at this point)
     if (didStartInPrerender) {
       this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = this.win.performance.now();
+        docVisibleTime = this.win.Date.now();
       });
     }
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-          ? (this.win.performance.now() - docVisibleTime)
+          ? (this.win.Date.now() - docVisibleTime)
           //  Prerender was complete before visibility.
           : 0;
         this.viewer_.whenFirstVisible().then(() => {
@@ -276,7 +273,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(this.win.performance.now() - docVisibleTime);
+        this.prerenderComplete_(this.win.Date.now() - docVisibleTime);
       }
       this.flush();
     });
@@ -306,8 +303,7 @@ export class Performance {
    *     this directly.
    */
   tick(label, opt_delta) {
-    const value = (opt_delta == undefined)
-      ? this.win.performance.now() : undefined;
+    const value = (opt_delta == undefined) ? this.win.Date.now() : undefined;
 
     const data = dict({
       'label': label,
@@ -372,7 +368,7 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    */
   tickSinceVisible(label) {
-    const now = this.win.performance.now();
+    const now = this.win.Date.now();
     const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);

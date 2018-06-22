@@ -142,8 +142,6 @@ export class FakeWindow {
         }
       },
     });
-    // Polyfill performance.now() with Date.now().
-    this.performance = {now: () => Date.now()};
 
     // Create element to enhance test elements.
     const nativeDocumentCreate = this.document.createElement;
@@ -271,7 +269,7 @@ class EventListeners {
     };
   }
 
-  /** Creates an empty instance. */
+  /** Create empty instance. */
   constructor() {
     /** @const {!Array<!EventListener>} */
     this.listeners = [];
