@@ -22,6 +22,14 @@ const COMMON_CHROME_FLAGS = [
   '--autoplay-policy=no-user-gesture-required',
 ];
 
+// Reduces the odds of Sauce labs timing out during tests. See #16135.
+// Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
+const SAUCE_TIMEOUT_CONFIG = {
+  maxDuration: 10 * 60,
+  commandTimeout: 10 * 60,
+  idleTimeout: 5 * 60,
+};
+
 /**
  * @param {!Object} config
  */
@@ -139,55 +147,55 @@ module.exports = {
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome_latest: {
+    SL_Chrome_latest: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
       version: 'latest',
-    },
-    SL_Chrome_android: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Chrome_android: Object.assign({
       base: 'SauceLabs',
       browserName: 'android',
       version: 'latest',
-    },
-    SL_Chrome_45: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Chrome_45: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
       version: '45',
-    },
-    SL_Android_latest: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Android_latest: Object.assign({
       base: 'SauceLabs',
       device: 'Android Emulator',
       browserName: 'android',
       platform: 'android',
       version: 'latest',
-    },
-    SL_iOS_latest: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_iOS_latest: Object.assign({
       base: 'SauceLabs',
       device: 'iPhone Simulator',
       browserName: 'iphone',
       platform: 'iOS',
       version: 'latest',
-    },
-    SL_Firefox_latest: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Firefox_latest: Object.assign({
       base: 'SauceLabs',
       browserName: 'firefox',
       version: 'latest',
-    },
-    SL_Safari_latest: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Safari_latest: Object.assign({
       base: 'SauceLabs',
       browserName: 'safari',
       version: 'latest',
-    },
-    SL_Edge_latest: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Edge_latest: Object.assign({
       base: 'SauceLabs',
       browserName: 'microsoftedge',
       version: 'latest',
-    },
-    SL_IE_11: {
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_IE_11: Object.assign({
       base: 'SauceLabs',
       browserName: 'internet explorer',
       version: 'latest',
-    },
+    }, SAUCE_TIMEOUT_CONFIG),
   },
 
   sauceLabs: {
