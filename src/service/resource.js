@@ -695,6 +695,9 @@ export class Resource {
     const viewportRatio = this.getDistanceViewportRatio();
     const keys = Object.keys(this.withViewportDeferreds_);
     for (let i = 0; i < keys.length; i++) {
+      // Despite type indicating object keys are numbers, JS stores them as
+      // strings so they need to be coverted back to floats in order to be
+      // used as numbers in isWithinViewportRatio.
       const viewportNum = dev().assertNumber(parseFloat(keys[i], 10));
       if (this.isWithinViewportRatio(viewportNum, viewportRatio)) {
         this.withViewportDeferreds_[viewportNum].resolve();
