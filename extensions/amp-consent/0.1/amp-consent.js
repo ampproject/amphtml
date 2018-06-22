@@ -47,7 +47,6 @@ const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
 
 export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
-export const EXTERNAL_CONSENT_FLOW = 'external-consent-flow';
 
 /**
  * @enum {string}
@@ -204,10 +203,6 @@ export class AmpConsent extends AMP.BaseElement {
    * Listen to external consent flow iframe's response
    */
   enableExternalInteractions_() {
-    if (!isExperimentOn(this.win, EXTERNAL_CONSENT_FLOW)) {
-      return;
-    }
-
     this.win.addEventListener('message', event => {
       if (!this.currentDisplayInstance_) {
         return;
