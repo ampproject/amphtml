@@ -5,3 +5,5 @@ extraction:
   javascript:
     index:
       exclude: examples
+queries:
+  exclude: js/unused-local-variable
