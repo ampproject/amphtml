@@ -198,7 +198,7 @@ The error ping will be sent by creating an image pixel in the document. See `sen
 
 ### AMP Consent Integration
 
-The AMP-Consent extension provides publishers the ability to collect and store a user's consent through a UI control, while also providing the ability to block other AMP components based on the user's consent. See (here for documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md).
+The AMP-Consent extension provides publishers the ability to collect and store a user's consent through a UI control, while also providing the ability to block other AMP components based on the user's consent. See [here for documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md).
 
 Real Time Config supports integration with AMP-Consent. If the AMP-consent response is neither `SUFFICIENT` nor `UNKNOWN_NOT_REQUIRED`, then by default all RTC callouts are suppressed. However, you may optionally modify this setting, to whitelist specific RTC callouts that should be sent regardless of the consent state. You can modify this across all RTC requests for a given ad slot or on a per-RTC-callout basis. You also may either whitelist for all consent states, or only specific consent states, using the RTC Config attribute `sendRegardlessOfConsentState`. 
 
