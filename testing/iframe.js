@@ -388,6 +388,8 @@ export function expectPostMessage(sourceWin, targetwin, msg) {
   });
 }
 
+const POLL_INTERVAL = 8; // ms
+
 /**
  * Returns a promise for when the condition becomes true.
  * @param {string} description
@@ -403,23 +405,25 @@ export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
     const start = Date.now();
     const end = opt_timeout || 1600;
+    /**
+     * Poll
+     */
     function poll() {
       const ret = condition();
       if (ret) {
-        clearInterval(interval);
         resolve(ret);
       } else {
         if (Date.now() - start > end) {
-          clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());
             return;
           }
           reject(new Error('Timeout waiting for ' + description));
+        } else {
+          setTimeout(poll, POLL_INTERVAL);
         }
       }
     }
-    const interval = setInterval(poll, 8);
     poll();
   });
 }
