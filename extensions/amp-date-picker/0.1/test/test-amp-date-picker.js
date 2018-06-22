@@ -17,7 +17,6 @@ import '../../../../third_party/react-dates/bundle';
 import {AmpDatePicker} from '../amp-date-picker';
 import {createElementWithAttributes} from '../../../../src/dom.js';
 import {requireExternal} from '../../../../src/module';
-import {toggleExperiment} from '../../../../src/experiments';
 
 // TODO(cvializ): use fake time instead of real time
 
@@ -101,7 +100,6 @@ describes.realWin('amp-date-picker', {
   beforeEach(() => {
     win = env.win;
     document = env.win.document;
-    toggleExperiment(win, 'amp-date-picker', true);
   });
 
   it('should render in the simplest case', () => {
