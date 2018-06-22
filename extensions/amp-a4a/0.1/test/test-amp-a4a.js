@@ -301,18 +301,14 @@ describe('amp-a4a', () => {
   /**
    * @param {!AmpA4A} a4a
    * @param {!Function} triggerAnalyticsEventSpy
+   * @param {(string|Array<string>)=} additionalEvents
    */
-  function verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy) {
-    expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-request-start', {'time': sinon.match.number});
-    expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-response-end', {'time': sinon.match.number});
-    expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-render-start', {'time': sinon.match.number});
-    expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-render-end', {'time': sinon.match.number});
-    expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-iframe-loaded', {'time': sinon.match.number});
+  function verifyA4aAnalyticsTriggersWereFired(
+    a4a, triggerAnalyticsEventSpy, additionalEvents = []) {
+    ['ad-request-start', 'ad-response-end', 'ad-render-start',
+      'ad-render-end', 'ad-iframe-loaded'].concat(additionalEvents)
+        .forEach(evnt => expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            a4a.element, evnt, {'time': sinon.match.number}));
   }
 
   describe('ads are visible', () => {
@@ -339,15 +335,14 @@ describe('amp-a4a', () => {
       adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
       a4a.buildCallback();
       const lifecycleEventStub =
-          sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
+          sandbox.stub(a4a, 'maybeTriggerAnalyticsEvent_');
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
         expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
-        expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart',
-            {'isAmpCreative': false, 'releaseType': '0'});
+        expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart');
       });
     });
 
@@ -423,7 +418,7 @@ describe('amp-a4a', () => {
           () => iniLoadPromise);
       a4a.buildCallback();
       const lifecycleEventStub = sandbox.stub(
-          a4a, 'protectedEmitLifecycleEvent_');
+          a4a, 'maybeTriggerAnalyticsEvent_');
       a4a.onLayoutMeasure();
       const layoutPromise = a4a.layoutCallback();
       return Promise.resolve().then(() => {
@@ -597,7 +592,6 @@ describe('amp-a4a', () => {
   describe('cross-domain rendering', () => {
     let a4aElement;
     let a4a;
-    let lifecycleEventStub;
     beforeEach(() => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete adResponse.headers['AMP-Fast-Fetch-Signature'];
@@ -616,7 +610,6 @@ describe('amp-a4a', () => {
         a4a.createdCallback();
         a4a.firstAttachedCallback();
         a4a.buildCallback();
-        lifecycleEventStub = sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
         expect(onCreativeRenderSpy).to.not.be.called;
       });
     });
@@ -687,6 +680,8 @@ describe('amp-a4a', () => {
       });
 
       it('should render via cached iframe', () => {
+        const triggerAnalyticsEventSpy =
+            sandbox.spy(analytics, 'triggerAnalyticsEvent');
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL);
           // Should have reported an error.
@@ -694,19 +689,17 @@ describe('amp-a4a', () => {
           expect(devErrLogStub.getCall(0).args[1]).to.have.string(
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
-          expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',
-              {'isAmpCreative': false, 'releaseType': '0'});
+          verifyA4aAnalyticsTriggersWereFired(
+              a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded');
         });
       });
 
       it('should fire amp-analytics triggers for illegal render modes', () => {
         const triggerAnalyticsEventSpy =
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
-        return a4a.layoutCallback().then(() => {
-          verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
-          expect(lifecycleEventStub).to.be.calledWith(
-              'crossDomainIframeLoaded');
-        });
+        return a4a.layoutCallback().then(() =>
+          verifyA4aAnalyticsTriggersWereFired(
+              a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded'));
       });
     });
 
@@ -792,11 +785,9 @@ describe('amp-a4a', () => {
       it('should fire amp-analytics triggers for lifecycle stages', () => {
         const triggerAnalyticsEventSpy =
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
-        return a4a.layoutCallback().then(() => {
-          verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
-          expect(lifecycleEventStub).to.be.calledWith(
-              'crossDomainIframeLoaded');
-        });
+        return a4a.layoutCallback().then(() =>
+          verifyA4aAnalyticsTriggersWereFired(
+              a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded'));
       });
     });
 
@@ -900,11 +891,9 @@ describe('amp-a4a', () => {
       it('should fire amp-analytics triggers for lifecycle stages', () => {
         const triggerAnalyticsEventSpy =
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
-        return a4a.layoutCallback().then(() => {
-          verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
-          expect(lifecycleEventStub).to.be.calledWith(
-              'crossDomainIframeLoaded');
-        });
+        return a4a.layoutCallback().then(() =>
+          verifyA4aAnalyticsTriggersWereFired(
+              a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded'));
       });
     });
   });
@@ -1107,8 +1096,6 @@ describe('amp-a4a', () => {
         const preloadExtensionSpy =
             sandbox.spy(Extensions.prototype, 'preloadExtension');
         a4a.buildCallback();
-        const lifecycleEventStub =
-            sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(promiseResult => {
@@ -1160,11 +1147,6 @@ describe('amp-a4a', () => {
             expect(updateLayoutPriorityStub).to.be.calledOnce;
             expect(updateLayoutPriorityStub.args[0][0]).to.equal(
                 LayoutPriority.CONTENT);
-            expect(lifecycleEventStub).to.be.calledWith(
-                'adResponseValidateEnd', {
-                  'signatureValidationResult': 0,
-                  'releaseType': '0',
-                });
           });
         });
       });
@@ -1360,8 +1342,6 @@ describe('amp-a4a', () => {
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const onNetworkFailureSpy = sandbox.spy(a4a, 'onNetworkFailure');
         a4a.buildCallback();
-        const lifecycleEventStub = sandbox.stub(
-            a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
@@ -1374,7 +1354,6 @@ describe('amp-a4a', () => {
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe).to.be.visible;
           expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
-          expect(lifecycleEventStub).to.be.calledWith('networkError');
         });
       });
     });
@@ -1394,8 +1373,6 @@ describe('amp-a4a', () => {
             TEST_URL)
             .returns({adUrl: TEST_URL + '&err=true'});
         a4a.buildCallback();
-        const lifecycleEventStub = sandbox.stub(
-            a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
@@ -1407,7 +1384,6 @@ describe('amp-a4a', () => {
           expect(/&err=true/.test(iframe.src), iframe.src).to.be.true;
           expect(iframe).to.be.visible;
           expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
-          expect(lifecycleEventStub).to.be.calledWith('networkError');
         });
       });
     });
@@ -2336,18 +2312,6 @@ describe('amp-a4a', () => {
 
     afterEach(() => {
       sandbox.restore();
-    });
-
-    it('should emit upgradeDelay lifecycle ping', () => {
-      const emitLifecycleEventSpy =
-          sandbox.spy(MockA4AImpl.prototype, 'emitLifecycleEvent');
-      return createIframePromise().then(fixture => {
-        const a4a = new MockA4AImpl(createA4aElement(fixture.doc));
-        a4a.buildCallback();
-        expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
-          'forced_delta': 12345,
-        })).to.be.calledOnce;
-      });
     });
 
     it('should set isSinglePageStoryAd to false', () => {
