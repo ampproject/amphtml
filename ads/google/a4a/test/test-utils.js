@@ -192,8 +192,7 @@ describe('Google A4A utils', () => {
       const qqid = 'qqid_string';
       let newConfig = addCsiSignalsToAmpAnalyticsConfig(
           window, mockElement, builtConfig, qqid,
-          /* isVerifiedAmpCreative */ true,
-          /* lifecycle time events; not relevant here */ -1, -1);
+          /* isVerifiedAmpCreative */ true);
 
       expect(newConfig.requests.iniLoadCsi).to.not.be.null;
       expect(newConfig.requests.renderStartCsi).to.not.be.null;

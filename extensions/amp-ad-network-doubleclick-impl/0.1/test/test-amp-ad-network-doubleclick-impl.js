@@ -976,7 +976,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           height: 50,
         };
       });
-      sandbox.stub(impl, 'protectedEmitLifecycleEvent_').callsFake(() => {});
       sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
         impl.element.setAttribute('height', height);
         impl.element.setAttribute('width', width);
