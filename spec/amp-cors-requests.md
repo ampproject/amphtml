@@ -21,6 +21,8 @@ Cross-Origin Resource Sharing (CORS) requests.  This document explains the key
 aspects of using CORS in AMP.  To learn about CORS itself, see the
 [W3 CORS Spec](https://www.w3.org/TR/cors/). 
 
+<div class="noshowtoc">
+
 * [Why do I need CORS for my own origin?](#why-do-i-need-cors-for-my-own-origin)
 * [Utilizing cookies for CORS requests](#utilizing-cookies-for-cors-requests)
     * [Third-party cookie restrictions](#third-party-cookie-restrictions)
@@ -43,6 +45,8 @@ aspects of using CORS in AMP.  To learn about CORS itself, see the
     * [Verify your server response headers](#verify-your-server-response-headers)
         * [Test request from same origin](#test-request-from-same-origin)
         * [Test request from cached AMP page](#test-request-from-cached-amp-page)
+
+</div>
 
 ## Why do I need CORS for my own origin?
 
