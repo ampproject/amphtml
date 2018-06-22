@@ -307,8 +307,8 @@ describe('amp-a4a', () => {
     a4a, triggerAnalyticsEventSpy, additionalEvents = []) {
     ['ad-request-start', 'ad-response-end', 'ad-render-start',
       'ad-render-end', 'ad-iframe-loaded'].concat(additionalEvents)
-      .forEach(evnt => expect(triggerAnalyticsEventSpy).to.be.calledWith(
-          a4a.element, evnt, {'time': sinon.match.number}));
+        .forEach(evnt => expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            a4a.element, evnt, {'time': sinon.match.number}));
   }
 
   describe('ads are visible', () => {
@@ -690,7 +690,7 @@ describe('amp-a4a', () => {
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
           verifyA4aAnalyticsTriggersWereFired(
-            a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded');
+              a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded');
         });
       });
 
@@ -699,7 +699,7 @@ describe('amp-a4a', () => {
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
         return a4a.layoutCallback().then(() =>
           verifyA4aAnalyticsTriggersWereFired(
-            a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded'));
+              a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded'));
       });
     });
 
@@ -787,7 +787,7 @@ describe('amp-a4a', () => {
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
         return a4a.layoutCallback().then(() =>
           verifyA4aAnalyticsTriggersWereFired(
-            a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded'));
+              a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded'));
       });
     });
 
@@ -893,7 +893,7 @@ describe('amp-a4a', () => {
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
         return a4a.layoutCallback().then(() =>
           verifyA4aAnalyticsTriggersWereFired(
-            a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded'));
+              a4a, triggerAnalyticsEventSpy, 'ad-iframe-loaded'));
       });
     });
   });

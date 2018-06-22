@@ -664,8 +664,8 @@ export function addCsiSignalsToAmpAnalyticsConfig(
   const adType = element.getAttribute('type');
   const initTime =
       Number(getTimingDataSync(win, 'navigationStart') || Date.now());
-  const deltaTime = (Math.round((win.performance && win.performance.now) ?
-    win.performance.now.bind(win.performance) : () => Date.now()) - initTime);
+  const deltaTime = Math.round((win.performance && win.performance.no ?
+    win.performance.now() : Date.now()) - initTime);
   const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
       `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
       `&dt=${initTime}` +
