@@ -33,7 +33,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * Creates an instance of AmpAdNetworkBase.
-   * @param {HTMLElement} element
+   * @param {!AmpElement} element
    */
   constructor(element) {
     super(element);

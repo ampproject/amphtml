@@ -42,7 +42,6 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
    * Handles message.
    *
    * @param {Event} event
-   * @return {void}
    */
   handleMessage_(event) {
     if (!this.iframe_ ||

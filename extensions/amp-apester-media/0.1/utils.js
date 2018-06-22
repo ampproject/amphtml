@@ -94,7 +94,7 @@ export function setFullscreenOff(element) {
  * @param {string} eventName
  * @param {!Function} callback
  * @param {!EventTarget} win
- * @param {*} iframe
+ * @param {!Element} iframe
  * @param {!Array} unlisteners
  */
 export function registerEvent(eventName, callback, win, iframe, unlisteners) {

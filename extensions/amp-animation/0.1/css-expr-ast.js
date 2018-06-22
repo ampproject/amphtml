@@ -119,7 +119,7 @@ export class CssContext {
  */
 export class CssNode {
   /**
-   *Creates an instance of CssNode.
+   * Creates an instance of CssNode.
    */
   constructor() {}
 

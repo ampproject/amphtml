@@ -142,7 +142,6 @@ class Amp3QPlayer extends AMP.BaseElement {
    *
    * @param {!Event} event
    * @private
-   * @return {void}
    */
   sdnBridge_(event) {
     if (event.source) {

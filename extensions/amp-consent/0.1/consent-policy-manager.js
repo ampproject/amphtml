@@ -133,7 +133,8 @@ export class ConsentPolicyManager {
     });
   }
 
-  /** Inform consent policy manager that all consent instances
+  /**
+   * Inform consent policy manager that all consent instances
    * state has been initiated with remote value. And ready to start timeout
    */
   enableTimeout() {
@@ -231,7 +232,7 @@ export class ConsentPolicyManager {
 export class ConsentPolicyInstance {
   /**
    * Creates an instance of ConsentPolicyInstance.
-   * @param {JsonObject} config
+   * @param {!JsonObject} config
    */
   constructor(config) {
     /** !Array<string> */

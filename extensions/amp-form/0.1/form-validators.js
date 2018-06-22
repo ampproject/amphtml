@@ -134,7 +134,7 @@ export class DefaultValidator extends FormValidator {
 export class PolyfillDefaultValidator extends FormValidator {
 
   /**
-   *Creates an instance of PolyfillDefaultValidator.
+   * Creates an instance of PolyfillDefaultValidator.
    * @param {!HTMLFormElement} form
    */
   constructor(form) {
