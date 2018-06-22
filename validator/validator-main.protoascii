@@ -3214,14 +3214,6 @@ tags {  # <form method=GET ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
-  attrs: {
-    name: "verify-xhr"
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
@@ -3258,16 +3250,7 @@ tags {  # <form method=POST ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
-  attrs: {
-    name: "verify-xhr"
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
 }
-
 tags {
   tag_name: "DIV"
   spec_name: "FORM > DIV [submitting]"
@@ -3376,7 +3359,6 @@ attr_lists: {
   attrs: { name: "[size]" }
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[step]" }
-  attrs: { name: "[type]" }
   attrs: { name: "[value]" }
   attrs: { name: "[width]" }
 }
@@ -3511,6 +3493,8 @@ tags: {
 }
 # 4.10.5 The input element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "INPUT"
   attrs: {
     name: "type"
@@ -3523,6 +3507,9 @@ tags: {
   }
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
+  # Note that this amp-bind attribute is not available for the AMP4Email format
+  # thus we add this manually for the formats that should.
+  attrs: { name: "[type]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 tags: {
@@ -3553,6 +3540,24 @@ tags: {
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   mandatory_ancestor: "FORM [method=POST]"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+}
+# amp-bind usage of [type] is not allowed in AMP4EMAIL
+tags: {
+  html_format: AMP4EMAIL
+  tag_name: "INPUT"
+  spec_name: "INPUT (AMP4EMAIL)"
+  attrs: {
+    name: "type"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+        "button|"
+        "file|"
+        "image|"
+        "password|"
+        ")(\\s|$)"
+  }
+  attr_lists: "input-common-attr"
+  attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.6 The button element
@@ -4098,6 +4103,7 @@ tags: {  # <amp-img>
 tags: {  # <amp-layout>
   html_format: AMP
   html_format: AMP4ADS
+  html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "AMP-LAYOUT"
   attr_lists: "extended-amp-global"
