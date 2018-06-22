@@ -442,6 +442,25 @@ export function getCorrelator(win, nodeOrDoc, opt_cid) {
 }
 
 /**
+ * @param {(string|undefined)} clientId
+ * @param {string} pageViewId
+ * @return {number}
+ */
+function makeCorrelator(clientId, pageViewId) {
+  const pageViewIdNumeric = Number(pageViewId || 0);
+  if (clientId) {
+    return pageViewIdNumeric + (clientId.replace(/\D/g, '') % 1e6) * 1e6;
+  } else {
+    // In this case, pageViewIdNumeric is only 4 digits => too low entropy
+    // to be useful as a page correlator.  So synthesize one from scratch.
+    // 4503599627370496 == 2^52.  The guaranteed range of JS Number is at least
+    // 2^53 - 1.
+    return Math.floor(4503599627370496 * Math.random());
+  }
+}
+
+
+/**
  * Collect additional dimensions for the brdim parameter.
  * @param {!Window} win The window for which we read the browser dimensions.
  * @param {{width: number, height: number}|null} viewportSize
