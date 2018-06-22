@@ -18,7 +18,6 @@ import {
   ACTION_TYPE,
   AMP_CONSENT_EXPERIMENT,
   AmpConsent,
-  EXTERNAL_CONSENT_FLOW,
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
@@ -50,7 +49,6 @@ describes.realWin('amp-consent', {
     win = env.win;
     toggleExperiment(win, AMP_CONSENT_EXPERIMENT, true);
     toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
-    toggleExperiment(win, EXTERNAL_CONSENT_FLOW, true);
 
     storageValue = {};
     jsonMockResponses = {
