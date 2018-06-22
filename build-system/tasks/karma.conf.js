@@ -22,6 +22,12 @@ const COMMON_CHROME_FLAGS = [
   '--autoplay-policy=no-user-gesture-required',
 ];
 
+// Reduces the odds of Sauce labs timing out during tests. See #16135.
+// Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
+const SAUCE_MAX_DURATION_SECS = 10 * 60;
+const SAUCE_COMMAND_TIMEOUT_SECS = 10 * 60;
+const SAUCE_IDLE_TIMEOUT_SECS = 5 * 60;
+
 /**
  * @param {!Object} config
  */
@@ -143,16 +149,25 @@ module.exports = {
       base: 'SauceLabs',
       browserName: 'chrome',
       version: 'latest',
+      maxDuration: SAUCE_MAX_DURATION_SECS,
+      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
+      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
     },
     SL_Chrome_android: {
       base: 'SauceLabs',
       browserName: 'android',
       version: 'latest',
+      maxDuration: SAUCE_MAX_DURATION_SECS,
+      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
+      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
     },
     SL_Chrome_45: {
       base: 'SauceLabs',
       browserName: 'chrome',
       version: '45',
+      maxDuration: SAUCE_MAX_DURATION_SECS,
+      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
+      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
     },
     SL_Android_latest: {
       base: 'SauceLabs',
@@ -160,33 +175,51 @@ module.exports = {
       browserName: 'android',
       platform: 'android',
       version: 'latest',
+      maxDuration: SAUCE_MAX_DURATION_SECS,
+      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
+      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
     },
     SL_iOS_latest: {
       base: 'SauceLabs',
       device: 'iPhone Simulator',
       browserName: 'iphone',
       platform: 'iOS',
-      version: 'latest',
+      version: '11.3',
+      maxDuration: SAUCE_MAX_DURATION_SECS,
+      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
+      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
     },
     SL_Firefox_latest: {
       base: 'SauceLabs',
       browserName: 'firefox',
       version: 'latest',
+      maxDuration: SAUCE_MAX_DURATION_SECS,
+      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
+      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
     },
     SL_Safari_latest: {
       base: 'SauceLabs',
       browserName: 'safari',
       version: 'latest',
+      maxDuration: SAUCE_MAX_DURATION_SECS,
+      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
+      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
     },
     SL_Edge_latest: {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
       version: 'latest',
+      maxDuration: SAUCE_MAX_DURATION_SECS,
+      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
+      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
     },
     SL_IE_11: {
       base: 'SauceLabs',
       browserName: 'internet explorer',
       version: 'latest',
+      maxDuration: SAUCE_MAX_DURATION_SECS,
+      commandTimeout: SAUCE_COMMAND_TIMEOUT_SECS,
+      idleTimeout: SAUCE_IDLE_TIMEOUT_SECS,
     },
   },
 
