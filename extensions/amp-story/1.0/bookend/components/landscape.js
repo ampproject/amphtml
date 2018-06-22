@@ -40,7 +40,7 @@ export let LandscapeComponentDef;
  *   title: !Element,
  *   image: !Element,
  *   meta: !Element,
- *   domainName: string
+ *   domainName: string,
  * }}
  */
 let landscapeElementsDef;
