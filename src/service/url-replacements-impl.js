@@ -33,6 +33,7 @@ import {
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
+  removeSearch,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
 import {getTrackImpressionPromise} from '../impression.js';
@@ -196,9 +197,8 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the URL for this AMP document.
     this.set('AMPDOC_URL', () => {
       return removeFragment(
-          removeAmpJsParamsFromUrl(
-              this.mergeReplaceParamsIntoUrl_(
-                  this.ampdoc.win.location.href)));
+          this.mergeReplaceParamsIntoUrl_(
+              this.ampdoc.win.location.href));
     });
 
     // Returns the host of the URL for this AMP document.
@@ -217,14 +217,12 @@ export class GlobalVariableSource extends VariableSource {
     this.setBoth('SOURCE_URL', () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
       return removeFragment(
-          removeAmpJsParamsFromUrl(
-              this.mergeReplaceParamsIntoUrl_(docInfo.sourceUrl)));
+          this.mergeReplaceParamsIntoUrl_(docInfo.sourceUrl));
     }, () => {
       return getTrackImpressionPromise().then(() => {
         const docInfo = Services.documentInfoForDoc(this.ampdoc);
         return removeFragment(
-            removeAmpJsParamsFromUrl(
-                this.mergeReplaceParamsIntoUrl_(docInfo.sourceUrl)));
+            this.mergeReplaceParamsIntoUrl_(docInfo.sourceUrl));
       });
     });
 
@@ -601,9 +599,9 @@ export class GlobalVariableSource extends VariableSource {
   mergeReplaceParamsIntoUrl_(orig) {
     const {extraParams} =
         /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
-    const url = parseUrlDeprecated(orig);
+    const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
     const params = parseQueryString(url.search);
-    return addParamsToUrl(orig,
+    return addParamsToUrl(removeSearch(orig),
         /** @type {!JsonObject} **/ (Object.assign({}, extraParams, params)));
   }
 

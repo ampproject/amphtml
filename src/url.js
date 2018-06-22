@@ -414,6 +414,18 @@ export function removeAmpJsParamsFromUrl(url) {
 }
 
 /**
+ * Returns a URL without a query string.
+ * @param {string} url
+ * @return {string}
+ */
+export function removeSearch(url) {
+  const mainAndFragment = url.split('#', 2);
+  const mainAndQuery = mainAndFragment[0].split('?', 2);
+  return mainAndQuery[0] +
+      (mainAndFragment[1] ? `#${mainAndFragment[1]}` : '');
+}
+
+/**
  * Removes parameters that start with amp js parameter pattern and returns the
  * new search string.
  * @param {string} urlSearch
