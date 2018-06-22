@@ -93,9 +93,9 @@ export function parseExperimentIds(idString) {
  * value (possibly because the host page URL contains a 'exp=a4a:X' parameter
  * and #maybeSetExperimentFromUrl has added the appropriate EID).
  *
- * @param element  {!Element}  Element to check for membership in a specific
+ * @param {!Element} element Element to check for membership in a specific
  *   experiment.
- * @param id {?string} Experiment ID to check for on `element`.
+ * @param {?string} id Experiment ID to check for on `element`.
  * @return {boolean}
  */
 export function isInExperiment(element, id) {
@@ -154,7 +154,7 @@ export function validateExperimentIds(idList) {
  * No-ops if the experimentId is undefined.
  *
  * @param {string|undefined} experimentId  ID to add to the element.
- * @param element Element to add the experiment ID to.
+ * @param {Element} element to add the experiment ID to.
  */
 export function addExperimentIdToElement(experimentId, element) {
   if (!experimentId) {
