@@ -962,11 +962,11 @@ describe('Viewer', () => {
     });
 
     it('should NOT be CCT embedded if iframed regardless of "amp_gsa=1"',
-       () => {
-         windowApi.parent = {};
-         windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
-         expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
-       });
+        () => {
+          windowApi.parent = {};
+          windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
+          expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+        });
   });
 
   describe('isTrustedViewer', () => {
