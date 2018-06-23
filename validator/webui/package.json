@@ -36,7 +36,7 @@
     "@polymer/neon-animation": "0.0.3",
     "@polymer/paper-behaviors": "0.0.3",
     "@polymer/paper-button": "0.0.3",
-    "@polymer/paper-dropdown-menu": "0.0.3",
+    "@polymer/paper-dropdown-menu": "3.0.0-pre.21",
     "@polymer/paper-input": "0.0.3",
     "@polymer/paper-item": "0.0.3",
     "@polymer/paper-listbox": "0.0.3",
