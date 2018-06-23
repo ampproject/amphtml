@@ -309,6 +309,10 @@
   margin-bottom: 12px;
 }
 
+.i-amphtml-story-bookend-cta-link:nth-child(2n+1):last-child {
+  width: 100% !important;
+}
+
 .i-amphtml-story-bookend-cta-link-text {
   color: #FFFFFF !important;
   text-transform: uppercase !important;
