@@ -2,7 +2,11 @@
 # yarn lockfile v1
 
 
-"@polymer/font-roboto@0.0.3", "@polymer/font-roboto@^0.0.3":
+"@polymer/font-roboto@3.0.0-pre.21":
+  version "3.0.0-pre.21"
+  resolved "https://registry.yarnpkg.com/@polymer/font-roboto/-/font-roboto-3.0.0-pre.21.tgz#65674464138a51f57cfdfd043e394d8fe75990b3"
+
+"@polymer/font-roboto@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@polymer/font-roboto/-/font-roboto-0.0.3.tgz#9d58edb660bbed2d4bd29d3bf9b21c20bddd6187"
 
