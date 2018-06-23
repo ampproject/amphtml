@@ -29,7 +29,7 @@
     "@polymer/iron-input": "0.0.3",
     "@polymer/iron-menu-behavior": "0.0.3",
     "@polymer/iron-meta": "0.0.3",
-    "@polymer/iron-overlay-behavior": "0.0.3",
+    "@polymer/iron-overlay-behavior": "3.0.0-pre.21",
     "@polymer/iron-resizable-behavior": "0.0.3",
     "@polymer/iron-selector": "0.0.3",
     "@polymer/iron-validatable-behavior": "0.0.3",
