@@ -15,7 +15,7 @@
     "preinstall": "node ../../build-system/check-package-manager.js"
   },
   "dependencies": {
-    "@polymer/font-roboto": "0.0.3",
+    "@polymer/font-roboto": "3.0.0-pre.21",
     "@polymer/iron-a11y-announcer": "0.0.3",
     "@polymer/iron-a11y-keys-behavior": "0.0.3",
     "@polymer/iron-behaviors": "0.0.3",
