@@ -922,6 +922,7 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-FIT-TEXT': 0,
         'AMP-IMG': 0,
         'AMP-IMAGE-LIGHTBOX': 0,
+        'AMP-LAYOUT': 0,
         'AMP-LIGHTBOX': 0,
         'AMP-LIST': 0,
         'AMP-SELECTOR': 0,

@@ -346,6 +346,8 @@ export class Navigation {
    * @private
    */
   handleNavClick_(e, target, tgtLoc) {
+    // In test mode, we're not able to properly fix the anchor tag's base URL.
+    // So, we have to use the (mocked) window's location instead.
     const baseHref = getMode().test && !this.isEmbed_
       ? this.ampdoc.win.location.href
       : '';
