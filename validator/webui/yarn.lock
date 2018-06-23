@@ -73,6 +73,12 @@
   dependencies:
     "@polymer/polymer" "^1.2.5-npm-test.2"
 
+"@polymer/iron-flex-layout@^3.0.0-pre.21":
+  version "3.0.0-pre.21"
+  resolved "https://registry.yarnpkg.com/@polymer/iron-flex-layout/-/iron-flex-layout-3.0.0-pre.21.tgz#064bccb85ec2091b66366970e8867d3de7bb273d"
+  dependencies:
+    "@polymer/polymer" "^3.0.0"
+
 "@polymer/iron-form-element-behavior@0.0.3", "@polymer/iron-form-element-behavior@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@polymer/iron-form-element-behavior/-/iron-form-element-behavior-0.0.3.tgz#3564a2a51d8ccfdda4193d943d5fd0c12c463759"
@@ -87,7 +93,23 @@
     "@polymer/iron-meta" "^0.0.3"
     "@polymer/polymer" "^1.2.5-npm-test.2"
 
-"@polymer/iron-icons@0.0.3", "@polymer/iron-icons@^0.0.3":
+"@polymer/iron-icon@^3.0.0-pre.21":
+  version "3.0.0-pre.21"
+  resolved "https://registry.yarnpkg.com/@polymer/iron-icon/-/iron-icon-3.0.0-pre.21.tgz#5ef3e483f02823778e99c1b5e16ddac472b5dce5"
+  dependencies:
+    "@polymer/iron-flex-layout" "^3.0.0-pre.21"
+    "@polymer/iron-meta" "^3.0.0-pre.21"
+    "@polymer/polymer" "^3.0.0"
+
+"@polymer/iron-icons@3.0.0-pre.21":
+  version "3.0.0-pre.21"
+  resolved "https://registry.yarnpkg.com/@polymer/iron-icons/-/iron-icons-3.0.0-pre.21.tgz#71cfd157b21f55a931bcc101650aab15825010e4"
+  dependencies:
+    "@polymer/iron-icon" "^3.0.0-pre.21"
+    "@polymer/iron-iconset-svg" "^3.0.0-pre.21"
+    "@polymer/polymer" "^3.0.0"
+
+"@polymer/iron-icons@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@polymer/iron-icons/-/iron-icons-0.0.3.tgz#d672ab979bdcd4ded8027e8de23e8c51d0c7f4c6"
   dependencies:
@@ -101,6 +123,13 @@
   dependencies:
     "@polymer/iron-meta" "^0.0.3"
     "@polymer/polymer" "^1.2.5-npm-test.2"
+
+"@polymer/iron-iconset-svg@^3.0.0-pre.21":
+  version "3.0.0-pre.21"
+  resolved "https://registry.yarnpkg.com/@polymer/iron-iconset-svg/-/iron-iconset-svg-3.0.0-pre.21.tgz#1248f341837789801a9000cdd3b3453b59f91021"
+  dependencies:
+    "@polymer/iron-meta" "^3.0.0-pre.21"
+    "@polymer/polymer" "^3.0.0"
 
 "@polymer/iron-input@0.0.3", "@polymer/iron-input@^0.0.3":
   version "0.0.3"
@@ -122,6 +151,12 @@
   resolved "https://registry.yarnpkg.com/@polymer/iron-meta/-/iron-meta-0.0.3.tgz#a4cec8479bdaec66ff03749a59136f21fde01d70"
   dependencies:
     "@polymer/polymer" "^1.2.5-npm-test.2"
+
+"@polymer/iron-meta@^3.0.0-pre.21":
+  version "3.0.0-pre.21"
+  resolved "https://registry.yarnpkg.com/@polymer/iron-meta/-/iron-meta-3.0.0-pre.21.tgz#e74ab386a1b490031e329f7ec032316bec24fa2a"
+  dependencies:
+    "@polymer/polymer" "^3.0.0"
 
 "@polymer/iron-overlay-behavior@0.0.3", "@polymer/iron-overlay-behavior@^0.0.3":
   version "0.0.3"
@@ -280,6 +315,12 @@
   dependencies:
     webcomponents.js "^0.7.20"
 
+"@polymer/polymer@^3.0.0":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@polymer/polymer/-/polymer-3.0.2.tgz#626e6f9fae9716b0962ce0211e21df242153eab2"
+  dependencies:
+    "@webcomponents/shadycss" "^1.2.0"
+
 "@types/clone@^0.1.29":
   version "0.1.30"
   resolved "https://registry.yarnpkg.com/@types/clone/-/clone-0.1.30.tgz#e7365648c1b42136a59c7d5040637b3b5c83b614"
@@ -297,6 +338,10 @@
   resolved "https://registry.yarnpkg.com/@types/parse5/-/parse5-0.0.31.tgz#e827a493a443b156e1b582a2e4c3bdc0040f2ee7"
   dependencies:
     "@types/node" "6.0.*"
+
+"@webcomponents/shadycss@^1.2.0":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@webcomponents/shadycss/-/shadycss-1.3.1.tgz#9320a7a86c8abfec97d41a41e82691a0dfc3a13a"
 
 abbrev@1:
   version "1.1.1"
