@@ -39,7 +39,7 @@
     "@polymer/paper-dropdown-menu": "0.0.3",
     "@polymer/paper-input": "0.0.3",
     "@polymer/paper-item": "0.0.3",
-    "@polymer/paper-listbox": "0.0.3",
+    "@polymer/paper-listbox": "3.0.0-pre.21",
     "@polymer/paper-material": "0.0.3",
     "@polymer/paper-menu-button": "0.0.3",
     "@polymer/paper-ripple": "0.0.3",
