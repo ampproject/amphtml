@@ -17,9 +17,15 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
+import {dashToCamelCase} from '../../../src/string';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
+const DEVICE_REST_ORIENTATION_VALUES = {
+  alpha: 180,
+  beta: 0,
+  gamma: 0,
+};
 
 export class AmpOrientationObserver extends AMP.BaseElement {
 
@@ -43,13 +49,13 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     this.gammaRange_ = [-90, 90];
 
     /** @private {number} */
-    this.alphaValue_ = 180; // Set to the neutral resting position
+    this.alphaValue_ = DEVICE_REST_ORIENTATION_VALUES['alpha'];
 
     /** @private {number} */
-    this.betaValue_ = 0; // Set to the neutral resting position
+    this.betaValue_ = DEVICE_REST_ORIENTATION_VALUES['beta'];
 
     /** @private {number} */
-    this.gammaValue_ = 0; // Set to the neutral resting position
+    this.gammaValue_ = DEVICE_REST_ORIENTATION_VALUES['gamma'];
   }
 
   /** @override */
@@ -66,34 +72,27 @@ export class AmpOrientationObserver extends AMP.BaseElement {
    * @private
    */
   init_() {
-    this.parseAttributes_();
-
     user().assert(this.win.DeviceOrientationEvent,
         'The current browser doesn\'t support the ' +
       '`window.DeviceOrientationEvent`');
+
+    for (const range in ['alpha-range', 'beta-range', 'gamma-range']) {
+      this.parseAttributes_(range);
+    }
     this.win.addEventListener('deviceorientation', event => {
       this.deviceOrientationHandler_(event);
     }, true);
   }
 
   /**
-   * @private
+   * @private {string} range
    */
-  parseAttributes_() {
-    const alphaRange = this.element.getAttribute('alpha-range');
-    const betaRange = this.element.getAttribute('beta-range');
-    const gammaRange = this.element.getAttribute('gamma-range');
-    if (alphaRange) {
-      const range = alphaRange.trim().split(' ');
-      this.alphaRange_ = [parseInt(range[0], 10), parseInt(range[1], 10)];
-    }
-    if (betaRange) {
-      const range = betaRange.trim().split(' ');
-      this.betaRange_ = [parseInt(range[0], 10), parseInt(range[1], 10)];
-    }
-    if (gammaRange) {
-      const range = gammaRange.trim().split(' ');
-      this.gammaRange_ = [parseInt(range[0], 10), parseInt(range[1], 10)];
+  parseAttributes_(range) {
+    const providedRange = this.element.getAttribute(range);
+    if (providedRange) {
+      const rangeArray = providedRange.trim().split(' ');
+      this[dashToCamelCase(range) + '_'] =
+        [parseInt(rangeArray[0], 10), parseInt(rangeArray[1], 10)];
     }
   }
 
@@ -105,67 +104,33 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     if (event instanceof DeviceOrientationEvent) {
       if (event.alpha !== this.alphaValue_) {
         this.alphaValue_ = event.alpha;
-        this.triggerAlpha_();
+        this.triggerEvent_('alpha');
       }
       if (event.beta !== this.betaValue_) {
         this.betaValue_ = event.beta;
-        this.triggerBeta_();
+        this.triggerEvent_('beta');
       }
       if (event.gamma !== this.gammaValue_) {
         this.gammaValue_ = event.gamma;
-        this.triggerGamma_();
+        this.triggerEvent_('gamma');
       }
     }
   }
 
   /**
-   * Dispatches the `alpha` event to signify change in the device orientation
+   * Dispatches the event to signify change in the device orientation
    * along alpha axis.
+   * @private {string} eventName
    * @private
    */
-  triggerAlpha_() {
-    const name = 'alpha';
-    const percentValue = this.alphaRange_[0] < 0 ?
-      (this.alphaValue_ - this.alphaRange_[0]) :
-      this.alphaValue_;
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {
-      angle: this.alphaValue_,
-      percent: percentValue / (this.alphaRange_[1] - this.alphaRange_[0]),
-    });
-    this.action_.trigger(this.element, name, event, ActionTrust.LOW);
-  }
-
-  /**
-   * Dispatches the `beta` event to signify change in the device orientation
-   * along beta axis.
-   * @private
-   */
-  triggerBeta_() {
-    const name = 'beta';
-    const percentValue = this.betaRange_[0] < 0 ?
-      (this.betaValue_ - this.betaRange_[0]) :
-      this.betaValue_;
-    const eventValue = {
-      angle: this.betaValue_,
-      percent: percentValue / (this.betaRange_[1] - this.betaRange_[0]),
-    };
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, eventValue);
-    this.action_.trigger(this.element, name, event, ActionTrust.LOW);
-  }
-
-  /**
-   * Dispatches the `gamma` event to signify change in the device orientation
-   * along gamma axis.
-   * @private
-   */
-  triggerGamma_() {
-    const name = 'gamma';
-    const percentValue = this.gammaRange_[0] < 0 ?
-      (this.gammaValue_ - this.gammaRange_[0]) :
-      this.gammaValue_;
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {
-      angle: this.gammaValue_,
-      percent: percentValue / (this.gammaRange_[1] - this.gammaRange_[0]),
+  triggerEvent_(eventName) {
+    const percentValue = this[eventName + 'Range_'][0] < 0 ?
+      (this[eventName + 'Value_'] - this[eventName + 'Range_'][0]) :
+      this[eventName + 'Value_'];
+    const event = createCustomEvent(this.win, `${TAG}.${eventName}`, {
+      angle: this[eventName + 'Value_'],
+      percent: percentValue /
+        (this[eventName + 'Range_'][1] - this[eventName + 'Range_'][0]),
     });
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }

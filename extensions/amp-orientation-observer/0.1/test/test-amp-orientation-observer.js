@@ -16,11 +16,9 @@
 
 import {AmpOrientationObserver} from '../amp-orientation-observer';
 
-describes.sandboxed('amp-orientation-observer', {}, () => {
+describes.sandboxed('amp-orientation-observer', {}, env => {
   let impl;
-  let alphaSpy;
-  let betaSpy;
-  let gammaSpy;
+  let triggerEventSpy;
 
   function init() {
     const elem = {
@@ -42,9 +40,7 @@ describes.sandboxed('amp-orientation-observer', {}, () => {
 
     impl = new AmpOrientationObserver(elem);
     impl.init_();
-    alphaSpy = sandbox.stub(impl, 'triggerAlpha_');
-    betaSpy = sandbox.stub(impl, 'triggerBeta_');
-    gammaSpy = sandbox.stub(impl, 'triggerGamma_');
+    triggerEventSpy = env.sandbox.stub(impl, 'triggerEvent_');
   }
 
   function setOrientation(alpha = 180, beta = 0, gamma = 0) {
@@ -57,94 +53,84 @@ describes.sandboxed('amp-orientation-observer', {}, () => {
   }
 
   describe('no changes in device orientation', () => {
-	  it('should not trigger `alpha` event', () => {
-	    init();
-	    expect(alphaSpy).not.to.be.called;
+    it('should not trigger `alpha` event', () => {
+      init();
+      expect(triggerEventSpy).not.to.be.called;
 
-	    setOrientation(180);
-	    expect(alphaSpy).not.to.be.called;
-	  });
+      setOrientation(180);
+      expect(triggerEventSpy).not.to.be.called;
+    });
 
-	  it('should not trigger `beta` event', () => {
-	    init();
-	    expect(betaSpy).not.to.be.called;
+    it('should not trigger `beta` event', () => {
+      init();
+      expect(triggerEventSpy).not.to.be.called;
 
-	    setOrientation(180, 0);
-	    expect(betaSpy).not.to.be.called;
-	  });
+      setOrientation(180, 0);
+      expect(triggerEventSpy).not.to.be.called;
+    });
 
-	  it('should not trigger `gamma` event', () => {
-	    init();
-	    expect(gammaSpy).not.to.be.called;
+    it('should not trigger `gamma` event', () => {
+      init();
+      expect(triggerEventSpy).not.to.be.called;
 
-	    setOrientation(180, 0, 0);
-	    expect(gammaSpy).not.to.be.called;
-	  });
+      setOrientation(180, 0, 0);
+      expect(triggerEventSpy).not.to.be.called;
+    });
   });
 
   describe('changes in device orientation', () => {
-	  it('should trigger `alpha` event', () => {
-	    init();
-	    expect(alphaSpy).not.to.be.called;
+    it('should trigger `alpha` event', () => {
+      init();
+      expect(triggerEventSpy).not.to.be.called;
 
-      window.scrollTo(0, 0.5 * getViewportHeight(window));
-	    setOrientation(170);
-	    expect(alphaSpy).to.be.called;
-	  });
+      setOrientation(170);
+      expect(triggerEventSpy).to.be.called;
+      expect(triggerEventSpy).to.be.calledWith('alpha');
+    });
 
-	  it('should trigger `beta` event', () => {
-	    init();
-	    expect(betaSpy).not.to.be.called;
+    it('should trigger `beta` event', () => {
+      init();
+      expect(triggerEventSpy).not.to.be.called;
 
-	    setOrientation(180, 10);
-	    expect(betaSpy).to.be.called;
-	  });
+      setOrientation(180, 10);
+      expect(triggerEventSpy).to.be.called;
+      expect(triggerEventSpy).to.be.calledWith('beta');
+    });
 
-	  it('should trigger `gamma` event', () => {
-	    init();
-	    expect(gammaSpy).not.to.be.called;
+    it('should trigger `gamma` event', () => {
+      init();
+      expect(triggerEventSpy).not.to.be.called;
 
-	    setOrientation(180, 0, 10);
-	    expect(gammaSpy).to.be.called;
-	  });
+      setOrientation(180, 0, 10);
+      expect(triggerEventSpy).to.be.called;
+      expect(triggerEventSpy).to.be.calledWith('gamma');
+    });
   });
 
   describe('combined changes in device orientation', () => {
     it('should trigger `alpha` & `beta` event', () => {
       init();
-      expect(alphaSpy).not.to.be.called;
-      expect(betaSpy).not.to.be.called;
+      expect(triggerEventSpy).not.to.be.called;
 
-      window.scrollTo(0, 0.5 * getViewportHeight(window));
       setOrientation(170, 10);
-      expect(alphaSpy).to.be.called;
-      expect(betaSpy).to.be.called;
+      expect(triggerEventSpy).to.be.calledTwice;
     });
 
     it('should trigger `beta` & `gamma` event', () => {
       init();
-      expect(betaSpy).not.to.be.called;
-      expect(gammaSpy).not.to.be.called;
+      expect(triggerEventSpy).not.to.be.called;
 
       setOrientation(180, 10, 10);
-      expect(betaSpy).to.be.called;
-      expect(gammaSpy).to.be.called;
+      expect(triggerEventSpy).to.be.calledTwice;
     });
 
     it('should trigger `alpha` & `gamma` event', () => {
       init();
-      expect(alphaSpy).not.to.be.called;
-      expect(gammaSpy).not.to.be.called;
+      expect(triggerEventSpy).not.to.be.called;
 
       setOrientation(170, 0, 10);
-      expect(alphaSpy).to.be.called;
-      expect(gammaSpy).to.be.called;
+      expect(triggerEventSpy).to.be.calledTwice;
     });
   });
 
 });
-
-function getViewportHeight(win) {
-  return win.document.documentElement.offsetHeight;
-}
-

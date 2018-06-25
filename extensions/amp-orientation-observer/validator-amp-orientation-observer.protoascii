@@ -1,5 +1,5 @@
 #
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,23 @@
 
 tags: {  # amp-orientation-observer
   html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-orientation-observer"
     allowed_versions: "0.1"
     allowed_versions: "latest"
   }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-orientation-observer>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
+  tag_name: "AMP-ORIENTATION-OBSERVER"
+  requires_extension: "amp-orientation-observer"
+  attr_lists: "extended-amp-global"
   attrs: {
     name: "alpha-range"
     # Regex: (\d+)\s{1}(\d+)
@@ -40,15 +51,6 @@ tags: {  # amp-orientation-observer
     # Values such as: "100 100", "0 100", etc..
     value_regex: "(\\d+)\\s{1}(\\d+)"
   }
-  attr_lists: "common-extension-attrs"
-}
-tags: {  # <amp-orientation-observer>
-  html_format: AMP
-  html_format: AMP4ADS
-  html_format: EXPERIMENTAL
-  tag_name: "AMP-orientation-OBSERVER"
-  requires_extension: "amp-orientation-observer"
-  attr_lists: "extended-amp-global"
   amp_layout {
     supported_layouts: NODISPLAY
   }
