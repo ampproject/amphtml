@@ -32,6 +32,9 @@ const TAG = 'InaboxMessagingHost';
 /** Simple helper for named callbacks. */
 class NamedObservable {
 
+  /**
+   * Creates an instance of NamedObservable.
+   */
   constructor() {
     /** @private {!Object<string, !Function>} */
     this.map_ = {};
@@ -179,10 +182,10 @@ export class InaboxMessagingHost {
    * @param {!Window} source
    * @param {string} origin
    * @return {boolean}
+   * TODO(alanorozco):
+   * 1. Reject request if frame is out of focus
+   * 2. Disable zoom and scroll on parent doc
    */
-  // TODO(alanorozco):
-  // 1. Reject request if frame is out of focus
-  // 2. Disable zoom and scroll on parent doc
   handleEnterFullOverlay_(iframe, request, source, origin) {
     this.frameOverlayManager_.expandFrame(iframe, boxRect => {
       source./*OK*/postMessage(
@@ -241,8 +244,8 @@ export class InaboxMessagingHost {
    * Note: The sentinel should be unique to the source window, and the result
    * is cached using the sentinel as the key.
    *
-   * @param source {!Window}
-   * @param sentinel {string}
+   * @param {!Window} source
+   * @param {string} sentinel
    * @return {?HTMLIFrameElement}
    * @private
    */
@@ -251,7 +254,7 @@ export class InaboxMessagingHost {
       return this.iframeMap_[sentinel].measurableFrame;
     }
     const measurableFrame =
-        /** @type {HTMLIFrameElement} */(this.getMeasureableFrame(source));
+      /** @type {HTMLIFrameElement} */(this.getMeasureableFrame(source));
     const measurableWin = measurableFrame.contentWindow;
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];

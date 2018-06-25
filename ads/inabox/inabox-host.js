@@ -40,7 +40,9 @@ const INABOX_UNREGISTER_IFRAME = 'inaboxUnregisterIframe';
  * @visibleForTesting
  */
 export class InaboxHost {
-  /** @param win {!Window}  */
+  /**
+   * @param {!Window} win
+   */
   constructor(win) {
     // Prevent double initialization
     if (win[AMP_INABOX_INITIALIZED]) {
@@ -98,7 +100,7 @@ export class InaboxHost {
  * fields.
  *
  * @param {!Event} message
- * @returns {boolean} if the message is valid or not
+ * @return {boolean} if the message is valid or not
  */
 function validateMessage(message) {
   const valid = !!(message.source && message.source.postMessage);

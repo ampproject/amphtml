@@ -35,6 +35,10 @@ export function mantisDisplay(global, data) {
   loadScript(global, 'https://assets.mantisadnetwork.com/mantodea.min.js');
 }
 
+/**
+ * @param {!Window} global
+ * @param {!JsonObject} data
+ */
 export function mantisRecommend(global, data) {
   validateData(data, ['property'], ['css']);
 

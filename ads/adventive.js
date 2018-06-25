@@ -156,5 +156,10 @@ function reduceSearch(ns, placementId, click, referrer) {
   });
 }
 
-// eslint-disable-next-line no-unused-vars
-function logSuspiciousActivity(location, data, url) { /* todo implement */ }
+/**
+ * Logs suspicious activity
+ * @param {!Location} unusedLocation
+ * @param {!Object} unusedData
+ * @param {string} unusedUrl
+ */
+function logSuspiciousActivity(unusedLocation, unusedData, unusedUrl) { /* todo implement */ }
