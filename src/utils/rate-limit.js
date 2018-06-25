@@ -29,7 +29,7 @@ export function throttle(win, callback, minInterval) {
   let nextCallArgs = null;
 
   /**
-   * @param {*} args
+   * @param {!Object} args
    */
   function fire(args) {
     nextCallArgs = null;
@@ -75,7 +75,7 @@ export function debounce(win, callback, minInterval) {
   let nextCallArgs = null;
 
   /**
-   * @param {*} args
+   * @param {?Array} args
    */
   function fire(args) {
     nextCallArgs = null;

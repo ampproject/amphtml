@@ -114,7 +114,7 @@ export class JankMeter {
   /**
    * Returns if is enabled
    *
-   * @return {boolean}
+   * @return {?boolean}
    */
   isEnabled_() {
     return isJankMeterEnabled(this.win_)

@@ -456,7 +456,7 @@ class Chunks {
 export function onIdle(win, minimumTimeRemaining, timeout, fn) {
   const startTime = Date.now();
   /**
-   * @param {*} info
+   * @param {?IdleDeadline} info
    */
   function rIC(info) {
     if (info.timeRemaining() < minimumTimeRemaining) {

@@ -105,8 +105,8 @@ const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/
  * @return {number}
  */
 function getNavStart(win) {
-  return win['performance'] && win['performance']['timing'] &&
-      win['performance']['timing']['navigationStart'] || 0;
+  return (win['performance'] && win['performance']['timing'] &&
+      win['performance']['timing']['navigationStart']) || 0;
 }
 
 /**
@@ -264,7 +264,7 @@ export function googlePageParameters(a4a, startTime) {
             AmpAdImplementation.AMP_AD_IFRAME_GET,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
-          'c': getCorrelator(win, clientId, ampDoc),
+          'c': getCorrelator(win, ampDoc, clientId),
           'ga_cid': win.gaGlobal.cid || null,
           'ga_hid': win.gaGlobal.hid || null,
           'dt': startTime,
@@ -427,16 +427,16 @@ function elapsedTimeWithCeiling(time, start) {
 }
 
 /**
+ * `nodeOrDoc` must be passed for correct behavior in shadow AMP (PWA) case.
  * @param {!Window} win
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string=} opt_cid
- * @param {(!Node|!../../../src/service/ampdoc-impl.AmpDoc)=} opt_nodeOrDoc
  * @return {number} The correlator.
  */
-export function getCorrelator(win, opt_cid, opt_nodeOrDoc) {
+export function getCorrelator(win, nodeOrDoc, opt_cid) {
   if (!win.ampAdPageCorrelator) {
     win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid,
-        Services.documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
+        opt_cid, Services.documentInfoForDoc(nodeOrDoc).pageViewId);
   }
   return win.ampAdPageCorrelator;
 }
@@ -550,10 +550,12 @@ export function getCsiAmpAnalyticsConfig() {
  *     yet.
  */
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
-  const viewer = Services.viewerForDoc(a4a.getAmpDoc());
-  const navStart = getNavStart(a4a.win);
+  const {win} = a4a;
+  const ampdoc = a4a.getAmpDoc();
+  const viewer = Services.viewerForDoc(ampdoc);
+  const navStart = getNavStart(win);
   const vars = {
-    'correlator': getCorrelator(a4a.win),
+    'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
     'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
   };
@@ -657,7 +659,7 @@ export function mergeExperimentIds(newIds, currentIdString) {
 export function addCsiSignalsToAmpAnalyticsConfig(
   win, element, config, qqid, isVerifiedAmpCreative) {
   // Add CSI pingbacks.
-  const correlator = getCorrelator(win);
+  const correlator = getCorrelator(win, element);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
   const eids = encodeURIComponent(
       element.getAttribute(EXPERIMENT_ATTRIBUTE));

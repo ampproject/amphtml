@@ -253,9 +253,9 @@ export class Cid {
 
   /**
    *
-   * @param {*} persistenceConsent
+   * @param {!Promise} persistenceConsent
    * @param {*} scope
-   * @param {string} url
+   * @param {!Location} url
    * @return {*}
    */
   scopeBaseCid_(persistenceConsent, scope, url) {

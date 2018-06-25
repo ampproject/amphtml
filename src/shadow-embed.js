@@ -552,7 +552,7 @@ export class ShadowDomWriterStreamer {
 
     // Merge body children.
     if (this.targetBody_) {
-      const inputBody = dev().assert(this.parser_.body);
+      const inputBody = /** @type !Element */(dev().assert(this.parser_.body));
       const targetBody = dev().assert(this.targetBody_);
       let transferCount = 0;
       removeNoScriptElements(inputBody);
@@ -697,7 +697,7 @@ export class ShadowDomWriterBulk {
 }
 
 /**
- * Remove any noscript elements. @param {!Element} parent
+ * Remove any noscript elements.
  *
  * According to the spec
  * (https://w3c.github.io/DOM-Parsing/#the-domparser-interface), with

@@ -109,7 +109,8 @@ export class VideoUtils {
 /**
  * @param {!Element} element
  * @return {!Element}
- * Note: Not included in `VideoUtils` as we don't need to test a static selector.
+ * Note: Not included in `VideoUtils` as we don't need to test a
+ * static selector.
  */
 export function getInternalVideoElementFor(element) {
   return dev().assertElement(element.querySelector('video, iframe'));

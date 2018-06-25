@@ -60,7 +60,7 @@ export function installGlobalNavigationHandlerForDoc(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {*} e
+ * @param {!Event} e
  */
 export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
