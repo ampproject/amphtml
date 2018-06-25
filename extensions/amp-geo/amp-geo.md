@@ -142,7 +142,7 @@ The game is called <span class='football'></span>!
  IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.**
 
-In addition to user specifed country group `amp-geo` supports preset country lists. See [`amp-geo-presets.js`](./0.1/amp-geo-presets.js) for the available preset lists.
+In addition to user specifed country groups `amp-geo` supports preset country lists. See [`amp-geo-presets.js`](./0.1/amp-geo-presets.js) for the available preset lists.
 
 Additional countries may be included with the preset list as in the `myList` example below.
 
