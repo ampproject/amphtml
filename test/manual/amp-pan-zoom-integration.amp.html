@@ -83,20 +83,31 @@
     </script>
   </amp-state>
 
-  <amp-state id="scale">
+  <amp-state id="transform">
     <script type="application/json">
-      1
+      {
+        "scale": 1,
+        "y": 0,
+        "x": 0
+      }
     </script>
   </amp-state>
+
 <article>
   <h1>AMP Pan Zoom</h1>
-
     <h1>AMP Pan-Zoom with other content on page</h1>
-    <p [text]="'Current scale: ' + scale">Current scale: 1</p>
-    <amp-img [hidden]="scale > 1" id="img1"
+    <button class="zoom-button" on="tap:pan-zoom.transform(scale=1)" hidden [hidden]="transform.scale == 1">
+      -
+    </button>
+    <button class="zoom-button" on="tap:pan-zoom.transform(scale=3, x=50, y=10)" [hidden]="transform.scale > 1">
+      +
+    </button>
+    <p [text]="'Current scale: ' + transform.scale + ', x: ' + transform.x + ', y: ' + transform.y">Current scale: 1</p>
+    <amp-img [hidden]="transform.scale > 1" id="img1"
         src="/examples/img/sample.jpg"
         width="641" height="481" layout="fixed"></amp-img>
-    <amp-pan-zoom layout="responsive" width="1" height="1" on="transformEnd:AMP.setState({scale: event.scale})">
+    <amp-pan-zoom layout="responsive" width="1" height="1" id="pan-zoom"
+      on="transformEnd:AMP.setState({transform: {scale: event.scale, x: event.x, y: event.y}})">
       <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
         <rect class="area-half" x="5" y="5" />
         <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
