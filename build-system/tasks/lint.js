@@ -29,7 +29,6 @@ const watch = require('gulp-watch');
 const {gitDiffNameOnlyMaster} = require('../git');
 
 const isWatching = (argv.watch || argv.w) || false;
-const filesInARefactorPr = 15;
 const options = {
   fix: false,
 };
@@ -148,21 +147,6 @@ function eslintRulesChanged() {
 }
 
 /**
- * Checks if there are validator changes, in which case we don't do strict
- * linting.
- *
- * @return {boolean}
- */
-function validatorChanged() {
-  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
-    return false;
-  }
-  return gitDiffNameOnlyMaster().filter(function(file) {
-    return path.dirname(file).startsWith('validator');
-  }).length > 0;
-}
-
-/**
  * Sets the list of files to be linted.
  *
  * @param {!Array<string>} files
@@ -176,15 +160,6 @@ function setFilesToLint(files) {
       log(colors.cyan(file));
     });
   }
-}
-
-/**
- * Enables linting in strict mode.
- */
-function enableStrictLinting() {
-  // TODO(#14761, #15255): Remove these overrides and make the rules errors by
-  // default in .eslintrc after all code is fixed.
-  options['configFile'] = '.eslintrc-strict';
   collapseLintResults = false;
 }
 
@@ -198,9 +173,6 @@ function lint() {
   }
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
-    if (!eslintRulesChanged()) {
-      enableStrictLinting();
-    }
   } else if (!eslintRulesChanged() &&
       (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
        process.env.LOCAL_PR_CHECK ||
@@ -211,10 +183,6 @@ function lint() {
       return Promise.resolve();
     }
     setFilesToLint(jsFiles);
-    // For large refactors or validator changes, don't enable strict linting.
-    if (jsFiles.length <= filesInARefactorPr && !validatorChanged()) {
-      enableStrictLinting();
-    }
   }
   const basePath = '.';
   const stream = initializeStream(config.lintGlobs, {base: basePath});
