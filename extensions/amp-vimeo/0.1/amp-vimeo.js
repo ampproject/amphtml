@@ -40,13 +40,11 @@ import {user} from '../../../src/log';
 
 /**
  * Get the name of the method for a given getter or setter.
- *
+ * See https://developer.vimeo.com/player/js-api
  * @param {string} prop The name of the property.
  * @param {?string} optType Either “get” or “set”.
  * @return {string}
  */
-// See
-// https://developer.vimeo.com/player/js-api
 function getMethodName(prop, optType = null) {
   if (!optType) {
     return prop;

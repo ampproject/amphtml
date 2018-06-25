@@ -54,6 +54,9 @@ export let DocumentRef;
  * registered. All subsequent registrations will be ignored.
  */
 export class NextPageService {
+  /**
+   * Creates an instance of NextPageService.
+   */
   constructor() {
     /** @private {?Window} */
     this.win_ = null;

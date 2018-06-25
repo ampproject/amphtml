@@ -69,6 +69,9 @@ export class BaseSlides extends BaseCarousel {
     }, ActionTrust.LOW);
   }
 
+  /**
+   * Builds slides
+   */
   buildSlides() {
     // Subclasses may override
   }

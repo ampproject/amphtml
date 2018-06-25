@@ -416,7 +416,7 @@ export function instrumentationServicePromiseForDoc(nodeOrDoc) {
     getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
 }
 
-/*
+/**
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!InstrumentationService}
  */

@@ -39,7 +39,10 @@ export const CONSENT_ITEM_STATE = {
 };
 
 export class ConsentStateManager {
-  /** @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc*/
+  /**
+   * Creates an instance of ConsentStateManager.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   constructor(ampdoc) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;

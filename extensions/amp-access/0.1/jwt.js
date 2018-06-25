@@ -112,7 +112,9 @@ export class JwtHelper {
    * @private
    */
   decodeInternal_(encodedToken) {
-    // See https://jwt.io/introduction/
+    /**
+     * See https://jwt.io/introduction/
+     */
     function invalidToken() {
       throw new Error(`Invalid token: "${encodedToken}"`);
     }

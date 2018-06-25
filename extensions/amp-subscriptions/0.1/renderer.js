@@ -70,6 +70,11 @@ export class Renderer {
     });
   }
 
+  /**
+   * Adds a loading bar.
+   *
+   * @return {!Promise}
+   */
   addLoadingBar() {
     return this.ampdoc_.whenReady().then(() => {
       if (!this.ampdoc_.getBody().querySelector(
