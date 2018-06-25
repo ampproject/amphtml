@@ -28,7 +28,6 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
-const IDENTITY_FN = x => x;
 
 
 describes.realWin('amp-story', {
