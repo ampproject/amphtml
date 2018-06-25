@@ -234,6 +234,7 @@ describes.realWin('amp-iframe', {
         });
 
     it('should not render at the top', function* () {
+      expectAsyncConsoleError(/position/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -242,17 +243,10 @@ describes.realWin('amp-iframe', {
       }, 599, 1000);
       yield whenUpgradedToCustomElement(ampIframe);
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
-      return new Promise(resolve => {
-        try {
-          ampIframe.implementation_.layoutCallback();
-        } catch (e) {
-          expect(e.message).to.match(/position/);
-          resolve();
-        }
-      });
     });
 
     it('should respect translations', function* () {
+      expectAsyncConsoleError(/position/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -261,14 +255,6 @@ describes.realWin('amp-iframe', {
       }, 650, 1000, -600);
       yield whenUpgradedToCustomElement(ampIframe);
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
-      return new Promise(resolve => {
-        try {
-          ampIframe.implementation_.layoutCallback();
-        } catch (e) {
-          expect(e.message).to.match(/position/);
-          resolve();
-        }
-      });
     });
 
     it('should render if further than 75% vh away from top', function* () {
@@ -516,6 +502,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should not resize amp-iframe if request height is small', function* () {
+      expectAsyncConsoleError(/resize height is less than 100px/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -531,6 +518,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should not resize amp-iframe if it is non-resizable', function* () {
+      expectAsyncConsoleError(/iframe is not resizable/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -575,6 +563,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should detect tracking iframes', function* () {
+      expectAsyncConsoleError(/Only 1 analytics\/tracking iframe allowed/);
       const ampIframe1 = createAmpIframe(env, {
         src: clickableIframeSrc,
         sandbox: 'allow-scripts allow-same-origin',
@@ -620,6 +609,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should not detect traking iframe in amp container', function* () {
+      expectAsyncConsoleError(/Only 1 analytics\/tracking iframe allowed/);
       const ampIframeRealTracking = createAmpIframe(env, {
         src: iframeSrc,
         width: 5,
@@ -660,6 +650,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should not render fixed ad', function* () {
+      expectAsyncConsoleError(/not used for displaying fixed ad/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts allow-same-origin',
@@ -669,14 +660,6 @@ describes.realWin('amp-iframe', {
       }, 0);
       yield whenUpgradedToCustomElement(ampIframe);
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
-      return new Promise(resolve => {
-        try {
-          ampIframe.implementation_.layoutCallback();
-        } catch (e) {
-          expect(e.message).to.match(/not used for displaying fixed ad/);
-          resolve();
-        }
-      });
     });
 
     it('should not cache intersection box', function* () {

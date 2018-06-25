@@ -50,16 +50,32 @@ describes.realWin('amp-twitter', {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
+      expect(iframe.getAttribute('allowfullscreen')).to.equal('true');
     });
   });
 
-  it('adds tweet element correctly', () => {
+  it('adds tweet element correctly for a tweet', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
     doc.body.appendChild(div);
 
     twitter(win, {
       tweetid: tweetId,
+      width: 111,
+      height: 222,
+    });
+    const tweet = doc.body.querySelector('#tweet');
+    expect(tweet).not.to.be.undefined;
+  });
+
+  it('adds tweet element correctly for a moment', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    twitter(win, {
+      momentid: tweetId,
+      limit: 5,
       width: 111,
       height: 222,
     });
@@ -138,5 +154,4 @@ describes.realWin('amp-twitter', {
       expect(cleanupTweetId_(bad)).to.equal(tweetId);
     });
   });
-
 });

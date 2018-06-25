@@ -16,6 +16,7 @@
 
 import {AmpGeo, GEO_IN_GROUP} from '../amp-geo';
 import {Services} from '../../../../src/services';
+import {user} from '../../../../src/log';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
 
@@ -59,9 +60,11 @@ describes.realWin('amp-geo', {
   let ampdoc;
   let geo;
   let el;
+  let userErrorStub;
 
 
   beforeEach(() => {
+    userErrorStub = sandbox.stub(user(), 'error');
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
@@ -95,17 +98,19 @@ describes.realWin('amp-geo', {
     }
   }
 
-  it('should not throw on empty config', () => {
+  it('should not throw or error on empty config', () => {
     expect(() => {
       geo.buildCallback();
     }).to.not.throw();
+    expect(userErrorStub).to.not.be.called;
   });
 
-  it('should not throw on valid config', () => {
+  it('should not throw or error on valid config', () => {
     expect(() => {
       addConfigElement('script');
       geo.buildCallback();
     }).to.not.throw();
+    expect(userErrorStub).to.not.be.called;
   });
 
   it('should add classes to body element for the geo', () => {
@@ -374,13 +379,12 @@ describes.realWin('amp-geo', {
     }).to.throw(/application\/json/);
   });
 
-  it('should throw if the child script element has non-JSON content', () => {
+  it('should error if the child script element has non-JSON content', () => {
     expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
-      allowConsoleError(() => {
-        geo.buildCallback();
-      });
-    }).to.throw();
+      geo.buildCallback();
+    }).to.not.throw();
+    expect(userErrorStub).to.be.calledOnce;
   });
 
   it('should throw if the group name is not valid', () => {

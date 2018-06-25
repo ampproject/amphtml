@@ -23,7 +23,7 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
-import {Expander} from './url-expander/expander';
+import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
 import {
@@ -41,6 +41,7 @@ import {
 } from '../service';
 import {isExperimentOn} from '../experiments';
 import {isProtocolValid} from '../url';
+import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -49,10 +50,6 @@ const VARIANT_DELIMITER = '.';
 const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
-
-/** A whitelist for replacements whose values should not be %-encoded. */
-/** @private @const {Object<string, boolean>} */
-const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
 
 /** @const {string} */
 export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
@@ -563,15 +560,18 @@ export class GlobalVariableSource extends VariableSource {
         'STORY_PAGE_ID'));
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint();
+      return tryResolve(() =>
+        Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint());
     });
 
     this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(this.ampdoc.win).getFirstViewportReady();
+      return tryResolve(() =>
+        Services.performanceFor(this.ampdoc.win).getFirstViewportReady());
     });
 
     this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(this.ampdoc.win).getMakeBodyVisible();
+      return tryResolve(() =>
+        Services.performanceFor(this.ampdoc.win).getMakeBodyVisible());
     });
 
     this.setAsync('AMP_STATE', key => {
@@ -1026,8 +1026,8 @@ export class UrlReplacements {
         REPLACEMENT_EXP_NAME);
     if (isV2ExperimentOn) {
       // TODO(ccordy) support opt_collectVars && opt_whitelist
-      return this.expander_./*OK*/expand(url, opt_bindings, opt_sync,
-          opt_whiteList);
+      return this.expander_./*OK*/expand(url, opt_bindings, opt_collectVars,
+          opt_sync, opt_whiteList);
     }
 
     // existing parsing method

@@ -437,11 +437,11 @@ export class AmpStory extends AMP.BaseElement {
 
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
-      const {deltaX} = gesture.data;
+      const {deltaX, deltaY} = gesture.data;
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
         return;
       }
-      if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
+      if (!this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
         return;
       }
       if (!this.storeService_
@@ -455,11 +455,14 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {number} deltaX
+   * @param {number} deltaY
    * @return {boolean}
    * @private
    */
-  isSwipeLargeEnoughForHint_(deltaX) {
-    return (Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
+  isSwipeLargeEnoughForHint_(deltaX, deltaY) {
+    const sideSwipe = Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX;
+    const upSwipe = (-1 * deltaY) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX;
+    return sideSwipe || upSwipe;
   }
 
   /** @private */
@@ -837,7 +840,6 @@ export class AmpStory extends AMP.BaseElement {
    * @param {string} targetPageId
    * @return {!Promise}
    */
-  // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
@@ -1078,7 +1080,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return this.desktopMedia_.matches && !this.platform_.isBot();
+    return this.desktopMedia_.matches && !this.platform_.isBot() &&
+        !isExperimentOn(this.win, 'disable-amp-story-desktop');
   }
 
   /**

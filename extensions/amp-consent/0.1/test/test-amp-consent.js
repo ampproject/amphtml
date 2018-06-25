@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import {ACTION_TYPE, AMP_CONSENT_EXPERIMENT, AmpConsent} from '../amp-consent';
+import {
+  ACTION_TYPE,
+  AMP_CONSENT_EXPERIMENT,
+  AmpConsent,
+} from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
 import {computedStyle} from '../../../../src/style';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
-
 import {
   registerServiceBuilder,
   resetServiceForTesting,
@@ -49,9 +52,9 @@ describes.realWin('amp-consent', {
 
     storageValue = {};
     jsonMockResponses = {
-      'response1': '{"promptIfUnknown": true}',
-      'response2': '{}',
-      'response3': '{"promptIfUnknown": false}',
+      '//response1': '{"promptIfUnknown": true}',
+      '//response2': '{}',
+      '//response3': '{"promptIfUnknown": false}',
     };
 
     resetServiceForTesting(win, 'xhr');
@@ -98,10 +101,10 @@ describes.realWin('amp-consent', {
         defaultConfig = {
           'consents': {
             'ABC': {
-              'checkConsentHref': 'response1',
+              'checkConsentHref': '//response1',
             },
             'DEF': {
-              'checkConsentHref': 'response1',
+              'checkConsentHref': '//response1',
             },
           },
         };
@@ -162,7 +165,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
         },
       };
@@ -240,7 +243,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
@@ -258,7 +261,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response3',
+            'checkConsentHref': '//response3',
             'promptIfUnknownForGeoGroup': 'unknown',
           },
         },
@@ -276,7 +279,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response2',
+            'checkConsentHref': '//response2',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
@@ -299,10 +302,10 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
           'DEF': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
         },
       };
@@ -381,10 +384,10 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
           'DEF': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
           },
         },
         'policy': {
@@ -413,6 +416,61 @@ describes.realWin('amp-consent', {
     });
   });
 
+  describe('external consent action', () => {
+    let defaultConfig;
+    let ampConsent;
+    let actionSpy;
+    let event;
+    let ampIframe;
+    let iframe;
+    beforeEach(() => {
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': '//response1',
+          },
+        },
+      };
+      const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('id', 'amp-consent');
+      consentElement.setAttribute('layout', 'nodisplay');
+      const scriptElement = doc.createElement('script');
+      scriptElement.setAttribute('type', 'application/json');
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      doc.body.appendChild(consentElement);
+      ampConsent = new AmpConsent(consentElement);
+      actionSpy = sandbox.stub(ampConsent, 'handleAction_');
+      ampConsent.enableInteractions_();
+      ampIframe = document.createElement('amp-iframe');
+      iframe = doc.createElement('iframe');
+      ampIframe.appendChild(iframe);
+      ampConsent.element.appendChild(ampIframe);
+      ampConsent.currentDisplayInstance_ = 'ABC';
+      event = new Event('message');
+    });
+
+    it('listen to external consent response msg', () => {
+      event.data = {
+        'type': 'consent-response',
+        'action': 'accept',
+      };
+      event.source = iframe.contentWindow;
+      win.dispatchEvent(event);
+      expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT);
+    });
+
+    it('ignore msg from incorrect source', () => {
+      event.data = {
+        'type': 'consent-response',
+        'action': 'accept',
+      };
+      event.source = null;
+      win.dispatchEvent(event);
+      expect(actionSpy).to.not.be.called;
+    });
+  });
+
   describe('UI', () => {
     let uiElement;
     let defaultConfig;
@@ -424,15 +482,15 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptUI': '123',
           },
           'DEF': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptUI': '123',
           },
           'GH': {
-            'checkConsentHref': 'response1',
+            'checkConsentHref': '//response1',
             'promptUI': '123',
           },
         },
