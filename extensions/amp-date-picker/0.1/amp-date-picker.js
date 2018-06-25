@@ -33,7 +33,6 @@ import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent, isRTL, iterateCursor} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
 import {map} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 
@@ -446,9 +445,6 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} is disabled.`);
-
     this.action_ = Services.actionServiceForDoc(this.element);
 
     this.isRTL_ = isRTL(this.win.document);

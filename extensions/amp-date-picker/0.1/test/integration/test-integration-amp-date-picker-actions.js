@@ -16,10 +16,10 @@
 
 import * as lolex from 'lolex';
 import {poll} from '../../../../../testing/iframe';
-import {toggleExperiment} from '../../../../../src/experiments';
 
 const config = describe.configure().ifNewChrome();
-config.run('amp-date-picker', function() {
+config.skip('amp-date-picker', function() {
+  this.skip(); // TODO(cvializ): unskip
   this.timeout(10000);
 
   const extensions = ['amp-date-picker'];
@@ -64,7 +64,6 @@ config.run('amp-date-picker', function() {
         target: win,
         now: new Date('2018-01-01T08:00:00Z'),
       });
-      toggleExperiment(win, 'amp-date-picker', true);
     });
 
     afterEach(() => {
@@ -96,6 +95,7 @@ config.run('amp-date-picker', function() {
     it('sets the current date to today with a negative offset', () => {
       const picker = document.getElementById('picker');
       const yesterday = document.getElementById('yesterday');
+
       const promise = waitForAttribute(picker, 'date');
       yesterday.click();
       return promise.then(attribute => {
@@ -128,7 +128,6 @@ config.run('amp-date-picker', function() {
         target: win,
         now: new Date('2018-01-01T08:00:00Z'),
       });
-      toggleExperiment(win, 'amp-date-picker', true);
     });
 
     afterEach(() => {
@@ -194,7 +193,6 @@ config.run('amp-date-picker', function() {
         target: win,
         now: new Date('2018-01-01T08:00:00Z'),
       });
-      toggleExperiment(win, 'amp-date-picker', true);
     });
 
     afterEach(() => {
@@ -239,5 +237,5 @@ config.run('amp-date-picker', function() {
 function waitForAttribute(element, attribute) {
   return poll(`wait for attribute ${attribute} on ${element.tagName}`, () => {
     return element.getAttribute(attribute);
-  });
+  }, undefined, 8000);
 }
