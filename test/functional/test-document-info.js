@@ -232,7 +232,7 @@ describe('document-info', () => {
     });
   });
 
-  it('should provide the extraParams for an ad', () => {
+  it('should provide the extraParams for an AMP landing page', () => {
     const base = 'https://cdn.ampproject.org/a/www.origin.com/foo/';
     const win = {
       document: {
@@ -251,7 +251,7 @@ describe('document-info', () => {
         .to.deep.equal({'test': 'hello world'});
   });
 
-  it('should not provide the extraParams for a non-ad', () => {
+  it('should not have extraParams for non-AMP landing page', () => {
     const base = 'https://cdn.ampproject.org/v/www.origin.com/foo/';
     const win = {
       document: {

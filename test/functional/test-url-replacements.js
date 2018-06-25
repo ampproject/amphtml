@@ -379,25 +379,38 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   describe('SOURCE_URL', () => {
-    it('should replace SOURCE_URL and _HOST', () => {
+    it('should replace SOURCE_URL and SOURCE_HOST', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated('https://wrong.com');
       sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return Promise.resolve();
+        return new Promise(resolve => {
+          win.location = parseUrlDeprecated('https://example.com/test');
+          resolve();
+        });
       });
-      return expandUrlAsync('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
-        expect(res).to.not.match(/SOURCE_URL/);
-        expect(res).to.not.match(/SOURCE_HOST/);
-      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL&host=SOURCE_HOST')
+          .then(res => {
+            expect(res).to.equal(
+                '?url=https%3A%2F%2Fexample.com%2Ftest&host=example.com');
+          });
     });
 
-    it('should replace SOURCE_URL and _HOSTNAME', () => {
+    it('should replace SOURCE_URL and SOURCE_HOSTNAME', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated('https://wrong.com');
       sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return Promise.resolve();
+        return new Promise(resolve => {
+          win.location = parseUrlDeprecated('https://example.com/test');
+          resolve();
+        });
       });
-      return expandUrlAsync(
-          '?url=SOURCE_URL&host=SOURCE_HOSTNAME').then(res => {
-        expect(res).to.not.match(/SOURCE_URL/);
-        expect(res).to.not.match(/SOURCE_HOSTNAME/);
-      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL&hostname=SOURCE_HOSTNAME')
+          .then(res => {
+            expect(res).to.equal(
+                '?url=https%3A%2F%2Fexample.com%2Ftest&hostname=example.com');
+          });
     });
 
     it('should update SOURCE_URL after track impression', () => {
