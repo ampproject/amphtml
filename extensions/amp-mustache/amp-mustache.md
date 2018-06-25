@@ -37,6 +37,13 @@ limitations under the License.
 
 [TOC]
 
+## Version notes
+
+| Version | Description |
+| ------- | ----- |
+| 0.2 | Support for `<svg>` elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br>Internal improvements may cause minor breaking changes; we recommend testing your pages before adoption. |
+| 0.1 | Initial implementation. |
+
 ## Syntax
 
 Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/) for more details. Some of the core Mustache tags are:
