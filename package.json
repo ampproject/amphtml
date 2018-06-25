@@ -53,7 +53,7 @@
     "babel-core": "6.26.3",
     "babel-eslint": "8.2.3",
     "babel-plugin-transform-remove-strict-mode": "0.0.2",
-    "babel-preset-env": "1.6.1",
+    "babel-preset-env": "1.7.0",
     "babelify": "8.0.0",
     "baconipsum": "0.1.2",
     "bluebird": "3.5.1",
