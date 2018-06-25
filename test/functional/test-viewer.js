@@ -165,7 +165,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/';
     windowApi.location.hash = '';
-    windowApi.location.search = '?amp_gsa=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.isCctEmbedded()).to.be.true;
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
@@ -176,7 +176,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#test=1';
     windowApi.location.hash = '#test=1';
-    windowApi.location.search = '?amp_gsa=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
@@ -188,7 +188,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#test=1&ampshare=old';
     windowApi.location.hash = '#test=1&ampshare=old';
-    windowApi.location.search = '?amp_gsa=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
@@ -202,7 +202,7 @@ describe('Viewer', () => {
         'http://www.example.com/#test=1&ampshare=a&ampshare=b&ampshare=c';
     windowApi.location.hash =
         '#test=1&ampshare=a&ampshare=b&ampshare=c';
-    windowApi.location.search = '?amp_gsa=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
@@ -214,7 +214,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#ampshare=old&test=1';
     windowApi.location.hash = '#ampshare=old&test=1';
-    windowApi.location.search = '?amp_gsa=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
@@ -228,7 +228,7 @@ describe('Viewer', () => {
         'http://www.example.com/#note=ok&ampshare=old&test=1';
     windowApi.location.hash =
         '#note=ok&ampshare=old&test=1';
-    windowApi.location.search = '?amp_gsa=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.getParam('note')).to.equal('ok');
@@ -252,7 +252,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#click=abc';
     windowApi.location.hash = '#click=abc';
-    windowApi.location.search = '?amp_gsa=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         'http://www.example.com');
@@ -902,6 +902,12 @@ describe('Viewer', () => {
       windowApi.location.search = '?amp_js_v=1';
       expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
     });
+
+    it('should be embedded when isCctEmbedded', () => {
+      windowApi.parent = {};
+      windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+    });
   });
 
   describe('isWebviewEmbedded', () => {
@@ -928,6 +934,39 @@ describe('Viewer', () => {
       windowApi.location.hash = '#webview=1';
       expect(new Viewer(ampdoc).isEmbedded()).to.be.false;
     });
+  });
+
+  describe('isCctEmbedded', () => {
+    it('should be CCT embedded with "amp_gsa=1" and "amp_js_v=a\\d*"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.true;
+    });
+
+    it('should NOT be CCT embedded w/o "amp_gsa=1"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.search = '?amp_js_v=a0';
+      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+    });
+
+    it('should NOT be CCT embedded w/ "amp_gsa=0"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
+      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+    });
+
+    it('should NOT be CCT embedded w/ "amp_js_v" not starting with "a"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.search = '?amp_gsa=1&amp_js_v=0';
+      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+    });
+
+    it('should NOT be CCT embedded if iframed regardless of "amp_gsa=1"',
+        () => {
+          windowApi.parent = {};
+          windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
+          expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+        });
   });
 
   describe('isTrustedViewer', () => {
@@ -1055,6 +1094,52 @@ describe('Viewer', () => {
           expect(res).to.be.false;
         });
       });
+    });
+
+    describe('when isCctEmbedded', () => {
+      it('should decide trusted on connection with origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://google.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.true;
+        });
+      });
+
+      it('should NOT allow channel without origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        expect(() => {
+          viewer.setMessageDeliverer(() => {});
+        }).to.throw(/message channel must have an origin/);
+      });
+
+      it('should decide non-trusted on connection with wrong origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+
+      it('should NOT give precedence to ancestor', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+        windowApi.location.ancestorOrigins = ['https://google.com'];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+
     });
 
     describe('when in a fake webview (a bad actor iframe)', () => {
