@@ -792,27 +792,33 @@ describe('Google A4A utils', () => {
   });
 
   describe('#getCorrelator', () => {
+    let win;
+
+    beforeEach(() => {
+      win = Object.assign({}, window);
+    });
+
     afterEach(() => {
-      window.ampAdPageCorrelator = undefined;
-      toggleExperiment(window, 'exp-new-correlator', false);
+      win.ampAdPageCorrelator = undefined;
+      toggleExperiment(win, 'exp-new-correlator', false);
     });
 
     it('should return cached value if it exists', () => {
       const correlator = '12345678910';
-      window.ampAdPageCorrelator = correlator;
-      expect(getCorrelator(window, window.document)).to.equal(correlator);
+      win.ampAdPageCorrelator = correlator;
+      expect(getCorrelator(win, win.document)).to.equal(correlator);
     });
 
     it('should calculate correlator from PVID and CID if possible', () => {
-      const pid = Services.documentInfoForDoc(window.document).pageViewId;
+      const pid = Services.documentInfoForDoc(win.document).pageViewId;
       const cid = '12345678910';
-      const correlator = getCorrelator(window, window.document, cid);
+      const correlator = getCorrelator(win, win.document, cid);
       expect(String(correlator).match(pid)).to.be.ok;
     });
 
-    it('should calculale randomly if experiment on', () => {
-      toggleExperiment(window, 'exp-new-correlator', true);
-      const correlator = getCorrelator(window, window.document);
+    it('should calculate randomly if experiment on', () => {
+      toggleExperiment(win, 'exp-new-correlator', true);
+      const correlator = getCorrelator(win, win.document);
       expect(correlator).to.be.below(2 ** 52);
       expect(correlator).to.be.above(0);
     });
