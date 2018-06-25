@@ -45,9 +45,8 @@ export class Services {
    * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}
    */
   static accessServiceForDoc(elementOrAmpDoc) {
-    return (/** @type {!Promise<
-        !../extensions/amp-access/0.1/amp-access.AccessService>} */ (
-        getElementServiceForDoc(elementOrAmpDoc, 'access', 'amp-access')));
+    return (/** @type {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>} */ (
+      getElementServiceForDoc(elementOrAmpDoc, 'access', 'amp-access')));
   }
 
   /**
@@ -57,9 +56,9 @@ export class Services {
    * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
    */
   static accessServiceForDocOrNull(elementOrAmpDoc) {
-    return (/** @type {
-        !Promise<?../extensions/amp-access/0.1/amp-access.AccessService>} */ (
-        getElementServiceIfAvailableForDoc(elementOrAmpDoc, 'access', 'amp-access')));
+    return (/** @type {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>} */ (
+      getElementServiceIfAvailableForDoc(elementOrAmpDoc, 'access',
+          'amp-access')));
   }
 
   /**
@@ -137,11 +136,9 @@ export class Services {
       Services.extensionsFor(ampdoc.win)./*OK*/installExtensionForDoc(
           ampdoc, 'amp-analytics');
     }
-    return (
-      /** @type {!Promise<
-        !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-      >} */ (getElementServiceForDoc(
-          elementOrAmpDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+    return /** @type {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>} */ (
+      getElementServiceForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation',
+          'amp-analytics'));
   }
 
   /**
@@ -149,11 +146,9 @@ export class Services {
    * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
   static analyticsForDocOrNull(elementOrAmpDoc) {
-    return (
-      /** @type {!Promise<
-        ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-      >} */ (getElementServiceIfAvailableForDoc(
-          elementOrAmpDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+    return /** @type {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>} */ (
+      getElementServiceIfAvailableForDoc(elementOrAmpDoc,
+          'amp-analytics-instrumentation', 'amp-analytics'));
   }
 
   /**
@@ -284,7 +279,7 @@ export class Services {
   }
 
   /**
-   * TODO(choumx): Privileged.
+   * Uses getServiceForDocDeprecated() since Resources is a startup service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!./service/resources-impl.Resources}
    */
@@ -477,8 +472,8 @@ export class Services {
    */
   static consentPolicyServiceForDocOrNull(elementOrAmpDoc) {
     return (/** @type {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>} */
-      (getElementServiceIfAvailableForDoc(elementOrAmpDoc, 'consentPolicyManager',
-          'amp-consent')));
+      (getElementServiceIfAvailableForDoc(elementOrAmpDoc,
+          'consentPolicyManager', 'amp-consent')));
   }
 
   /**
@@ -489,7 +484,8 @@ export class Services {
    */
   static geoForDocOrNull(elementOrAmpDoc) {
     return /** @type {!Promise<?Object<string,(string|Array<string>)>>} */ (
-      getElementServiceIfAvailableForDoc(elementOrAmpDoc, 'geo', 'amp-geo', true));
+      getElementServiceIfAvailableForDoc(
+          elementOrAmpDoc, 'geo', 'amp-geo', true));
   }
 
   /**
@@ -525,7 +521,7 @@ export class Services {
   }
 
   /**
-   * TODO(choumx): Privileged.
+   * Uses getServiceForDocDeprecated() since Viewer is a startup service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!./service/viewer-impl.Viewer}
    */
@@ -556,7 +552,7 @@ export class Services {
   }
 
   /**
-   * TODO(choumx): Privileged.
+   * Uses getServiceForDocDeprecated() since Viewport is a startup service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!./service/viewport/viewport-impl.Viewport}
    */

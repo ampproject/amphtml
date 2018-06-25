@@ -43,6 +43,7 @@ const resolved = Promise.resolve();
  */
 function getChunkServiceForDoc_(nodeOrAmpDoc) {
   registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  // Uses getServiceForDocDeprecated() since Chunks is a startup service.
   return getServiceForDocDeprecated(nodeOrAmpDoc, 'chunk');
 }
 
@@ -106,6 +107,9 @@ export function deactivateChunking() {
   deactivated = true;
 }
 
+/**
+ * @visibleForTesting
+ */
 export function activateChunkingForTesting() {
   deactivated = false;
 }
@@ -452,6 +456,9 @@ class Chunks {
  */
 export function onIdle(win, minimumTimeRemaining, timeout, fn) {
   const startTime = Date.now();
+  /**
+   * @param {!IdleDeadline} info
+   */
   function rIC(info) {
     if (info.timeRemaining() < minimumTimeRemaining) {
       const remainingTimeout = timeout - (Date.now() - startTime);
