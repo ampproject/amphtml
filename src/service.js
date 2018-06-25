@@ -265,6 +265,7 @@ export function getServicePromiseOrNull(win, id) {
  * @template T
  */
 export function getServiceForDoc(nodeOrDoc, id) {
+  assertAmpDocOrElement(nodeOrDoc);
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   return getServiceInternal(holder, id);
@@ -280,6 +281,7 @@ export function getServiceForDoc(nodeOrDoc, id) {
  * @return {!Promise<!Object>}
  */
 export function getServicePromiseForDoc(nodeOrDoc, id) {
+  assertAmpDocOrElement(nodeOrDoc);
   return getServicePromiseInternal(
       getAmpdocServiceHolder(nodeOrDoc), id);
 }
@@ -293,6 +295,7 @@ export function getServicePromiseForDoc(nodeOrDoc, id) {
  * @return {?Promise<!Object>}
  */
 export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
+  assertAmpDocOrElement(nodeOrDoc);
   return getServicePromiseOrNullInternal(
       getAmpdocServiceHolder(nodeOrDoc), id);
 }
@@ -371,6 +374,18 @@ function getAmpdocServiceHolder(nodeOrDoc) {
   return ampdoc.isSingleDoc() ? ampdoc.win : ampdoc;
 }
 
+/**
+ * Passing an incorrect `nodeOrDoc` has been a source of bugs, e.g. passing
+ * window.document will break in the PWA use case. Eventually we'll refactor
+ * services API such that it's impossible to do the wrong thing. Until then,
+ * we have dev-only runtime assertions.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ */
+function assertAmpDocOrElement(nodeOrDoc) {
+  dev().assert(!nodeOrDoc.nodeType || nodeOrDoc.nodeType === Node.ELEMENT_NODE,
+      'Pass the closest element or an AmpDoc to service getters to ensure ' +
+      'correct behavior in shadow AMP (PWA). See #16233 for more details.');
+}
 
 /**
  * This is essentially a duplicate of `ampdoc.js`, but necessary to avoid
