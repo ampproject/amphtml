@@ -21,7 +21,7 @@ PR #<PR_NUMBER>
 
 Production Release? <YES/NO>  If yes, Type: Release Issue #<PRODUCTION_RELEASE_ISSUE>
 
-Canary release? <YES/NO>  If yes, Type: Release Issue #<CANARY_RELEASE_ISSUE>
+Canary release? <YES/NO>  If yes, Type: Release Issue #<CANARY_RELEASE_ISSUE>, otherwise <WHY_THIS_IS_NOT_NEEDED>
 
 
 *Why does this issue meet the [cherry pick criteria](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-pick-criteria)?  Be specific.*
