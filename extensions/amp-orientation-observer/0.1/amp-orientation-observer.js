@@ -85,15 +85,15 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     const gammaRange = this.element.getAttribute('gamma-range');
     if (alphaRange) {
       const range = alphaRange.trim().split(' ');
-      this.alphaRange_ = [parseInt(range[0], 2), parseInt(range[1], 2)];
+      this.alphaRange_ = [parseInt(range[0], 10), parseInt(range[1], 10)];
     }
     if (betaRange) {
       const range = betaRange.trim().split(' ');
-      this.betaRange_ = [parseInt(range[0], 2), parseInt(range[1], 2)];
+      this.betaRange_ = [parseInt(range[0], 10), parseInt(range[1], 10)];
     }
     if (gammaRange) {
       const range = gammaRange.trim().split(' ');
-      this.gammaRange_ = [parseInt(range[0], 2), parseInt(range[1], 2)];
+      this.gammaRange_ = [parseInt(range[0], 10), parseInt(range[1], 10)];
     }
   }
 
