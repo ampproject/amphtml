@@ -20,6 +20,7 @@ import {
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
+  getServiceForDocDeprecated,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -289,7 +290,7 @@ export class Services {
    */
   static resourcesForDoc(nodeOrDoc) {
     return /** @type {!./service/resources-impl.Resources} */ (
-      getServiceForDoc(nodeOrDoc, 'resources', /* assert */ false));
+      getServiceForDocDeprecated(nodeOrDoc, 'resources'));
   }
 
   /**
@@ -530,7 +531,7 @@ export class Services {
    */
   static viewerForDoc(nodeOrDoc) {
     return /** @type {!./service/viewer-impl.Viewer} */ (
-      getServiceForDoc(nodeOrDoc, 'viewer', /* assert */ false));
+      getServiceForDocDeprecated(nodeOrDoc, 'viewer'));
   }
 
   /**
@@ -561,7 +562,7 @@ export class Services {
    */
   static viewportForDoc(nodeOrDoc) {
     return /** @type {!./service/viewport/viewport-impl.Viewport} */ (
-      getServiceForDoc(nodeOrDoc, 'viewport', /* assert */ false));
+      getServiceForDocDeprecated(nodeOrDoc, 'viewport'));
   }
 
   /**

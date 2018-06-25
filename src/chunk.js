@@ -17,7 +17,7 @@
 import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
-import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
+import {getServiceForDocDeprecated, registerServiceBuilderForDoc} from './service';
 import {makeBodyVisible} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
@@ -43,7 +43,7 @@ const resolved = Promise.resolve();
  */
 function getChunkServiceForDoc_(nodeOrAmpDoc) {
   registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  return getServiceForDoc(nodeOrAmpDoc, 'chunk', /* assert*/ false);
+  return getServiceForDocDeprecated(nodeOrAmpDoc, 'chunk');
 }
 
 /**
