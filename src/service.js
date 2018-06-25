@@ -101,26 +101,26 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
 /**
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @param {boolean=} opt_fallbackToTopWin
  * @return {Object} The service.
  */
 export function getExistingServiceForDocInEmbedScope(
-  nodeOrDoc, id, opt_fallbackToTopWin) {
+  elementOrAmpDoc, id, opt_fallbackToTopWin) {
   // First, try to resolve via local (embed) window.
-  if (nodeOrDoc.nodeType) {
+  if (elementOrAmpDoc.nodeType) {
     // If a node is passed, try to resolve via this node.
     const win = toWin(/** @type {!Document} */ (
-      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
+      elementOrAmpDoc.ownerDocument || elementOrAmpDoc).defaultView);
     const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
     if (local) {
       return local;
     }
   }
   // If an ampdoc is passed or fallback is allowed, continue resolving.
-  if (!nodeOrDoc.nodeType || opt_fallbackToTopWin) {
-    return getServiceForDocDeprecated(nodeOrDoc, id);
+  if (!elementOrAmpDoc.nodeType || opt_fallbackToTopWin) {
+    return getServiceForDocDeprecated(elementOrAmpDoc, id);
   }
   return null;
 }
@@ -295,28 +295,26 @@ export function getServiceForDocDeprecated(nodeOrDoc, id) {
  * Returns a promise for a service for the given id and ampdoc. Also expects
  * a service that has the actual implementation. The promise resolves when
  * the implementation loaded.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {!Promise<!Object>}
  */
-export function getServicePromiseForDoc(nodeOrDoc, id) {
-  assertAmpDocOrElement(nodeOrDoc);
+export function getServicePromiseForDoc(elementOrAmpDoc, id) {
   return getServicePromiseInternal(
-      getAmpdocServiceHolder(nodeOrDoc), id);
+      getAmpdocServiceHolder(elementOrAmpDoc), id);
 }
 
 
 /**
  * Like getServicePromiseForDoc but returns null if the service was never
  * registered for this ampdoc.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {?Promise<!Object>}
  */
-export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
-  assertAmpDocOrElement(nodeOrDoc);
+export function getServicePromiseOrNullForDoc(elementOrAmpDoc, id) {
   return getServicePromiseOrNullInternal(
-      getAmpdocServiceHolder(nodeOrDoc), id);
+      getAmpdocServiceHolder(elementOrAmpDoc), id);
 }
 
 /**
@@ -393,18 +391,6 @@ function getAmpdocServiceHolder(nodeOrDoc) {
   return ampdoc.isSingleDoc() ? ampdoc.win : ampdoc;
 }
 
-/**
- * Passing an incorrect `nodeOrDoc` has been a source of bugs, e.g. passing
- * window.document will break in the PWA use case. Eventually we'll refactor
- * services API such that it's impossible to do the wrong thing. Until then,
- * we have dev-only runtime assertions.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- */
-function assertAmpDocOrElement(nodeOrDoc) {
-  dev().assert(!nodeOrDoc.nodeType || nodeOrDoc.nodeType === Node.ELEMENT_NODE,
-      'Pass the closest element or an AmpDoc to service getters to ensure ' +
-      'correct behavior in shadow AMP (PWA). See #16233 for more details.');
-}
 
 /**
  * This is essentially a duplicate of `ampdoc.js`, but necessary to avoid

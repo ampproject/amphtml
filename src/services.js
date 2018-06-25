@@ -84,14 +84,13 @@ export class Services {
   }
 
   /**
-   * Embed-scope services require support for passing `Node` vs. `Element`.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/action-impl.ActionService}
    */
-  static actionServiceForDoc(nodeOrDoc) {
+  static actionServiceForDoc(elementOrAmpDoc) {
     return /** @type {!./service/action-impl.ActionService} */ (
       getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'action', /* opt_fallbackToTopWin */ true));
+          elementOrAmpDoc, 'action', /* opt_fallbackToTopWin */ true));
   }
 
   /**
@@ -161,14 +160,13 @@ export class Services {
   }
 
   /**
-   * Embed-scope services require support for passing `Node` vs. `Element`.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>}
    */
-  static bindForDocOrNull(nodeOrDoc) {
+  static bindForDocOrNull(elementOrAmpDoc) {
     return /** @type {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
       getElementServiceIfAvailableForDocInEmbedScope(
-          nodeOrDoc, 'bind', 'amp-bind'));
+          elementOrAmpDoc, 'bind', 'amp-bind'));
   }
 
   /**
@@ -293,10 +291,9 @@ export class Services {
    * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
    */
   static shareTrackingForOrNull(win) {
-    return (/** @type {
-      !Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (
-        getElementServiceIfAvailable(win, 'share-tracking',
-            'amp-share-tracking', true)));
+    return (/** @type {!Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (
+      getElementServiceIfAvailable(win, 'share-tracking',
+          'amp-share-tracking', true)));
   }
 
   /**
@@ -444,14 +441,13 @@ export class Services {
   }
 
   /**
-   * Embed-scope services require support for passing `Node` vs. `Element`.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
-  static urlReplacementsForDoc(nodeOrDoc) {
+  static urlReplacementsForDoc(elementOrAmpDoc) {
     return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
       getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
+          elementOrAmpDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
   }
 
   /**
@@ -489,14 +485,13 @@ export class Services {
   }
 
   /**
-   * Embed-scope services require support for passing `Node` vs. `Element`.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/url-impl.Url}
    */
-  static urlForDoc(nodeOrDoc) {
+  static urlForDoc(elementOrAmpDoc) {
     return /** @type {!./service/url-impl.Url} */ (
       getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'url', /* opt_fallbackToTopWin */ true));
+          elementOrAmpDoc, 'url', /* opt_fallbackToTopWin */ true));
   }
 
   /**

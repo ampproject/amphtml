@@ -436,7 +436,7 @@ export class Navigation {
    * @private
    */
   parseUrl_(url) {
-    return Services.urlForDoc(this.rootNode_).parse(url);
+    return Services.urlForDoc(this.ampdoc).parse(url);
   }
 }
 
