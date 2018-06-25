@@ -593,6 +593,9 @@ class TimerEventHandler {
     }
   }
 
+  /**
+   * Unlistens for start and stop.
+   */
   dispose() {
     this.unlistenForStop_();
     this.unlistenForStart_();

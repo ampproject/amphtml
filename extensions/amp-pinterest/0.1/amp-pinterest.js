@@ -76,6 +76,10 @@ class AmpPinterest extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Renders the component
+   * @param {string} selector
+   */
   render(selector) {
     switch (selector) {
       case 'embedPin':

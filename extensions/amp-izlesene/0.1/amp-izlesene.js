@@ -22,6 +22,10 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 
 
 class AmpIzlesene extends AMP.BaseElement {
+  /**
+   *Creates an instance of AmpIzlesene.
+   * @param {!AmpElement} element
+   */
   constructor(element) {
     super(element);
     /** @private {?string}  */

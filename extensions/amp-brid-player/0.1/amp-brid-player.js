@@ -89,6 +89,11 @@ class AmpBridPlayer extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /**
+   * Gets the source of video
+   *
+   * @return {string}
+   */
   getVideoIframeSrc_() {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;

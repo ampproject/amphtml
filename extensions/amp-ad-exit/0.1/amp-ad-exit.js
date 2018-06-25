@@ -312,7 +312,6 @@ export class AmpAdExit extends AMP.BaseElement {
    * methods are stubbable.
    * @return {?string}
    * @private
-   * @VisibleForTesting
    */
   getAmpAdResourceId_() {
     return getAmpAdResourceId(this.element, this.win.top);

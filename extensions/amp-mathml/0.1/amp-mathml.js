@@ -30,10 +30,17 @@ export class AmpMathml extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
+  /**
+   * Adds a preconnect
+   *
+   */
   preconnectCallback() {
     this.preconnect.url('https://cdnjs.cloudflare.com');
   }
 
+  /**
+   * Adds a callback to mutateElement.
+   */
   buildCallback() {
     // Make the element minimally displayed to make sure that `layoutCallback`
     // is called.
@@ -49,6 +56,12 @@ export class AmpMathml extends AMP.BaseElement {
     });
 
   }
+
+  /**
+   * Adds a layout callback for mathml iframe.
+   *
+   * @return {!Promise}
+   */
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'mathml');
     this.applyFillContent(iframe);
@@ -66,6 +79,11 @@ export class AmpMathml extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 
+  /**
+   * Removes mathml iframe.
+   *
+   * @return {boolean}
+   */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);

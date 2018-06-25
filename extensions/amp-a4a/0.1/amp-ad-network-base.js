@@ -31,6 +31,10 @@ const TAG = 'amp-ad-network-base';
  */
 export class AmpAdNetworkBase extends AMP.BaseElement {
 
+  /**
+   * Creates an instance of AmpAdNetworkBase.
+   * @param {!AmpElement} element
+   */
   constructor(element) {
     super(element);
 

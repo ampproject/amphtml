@@ -74,6 +74,10 @@ export function withDatePickerCommon(WrappedComponent) {
   });
 
   class Component extends React.Component {
+    /**
+     * Creates an instance of Component.
+     * @param {!Object} props
+     */
     constructor(props) {
       super(props);
 

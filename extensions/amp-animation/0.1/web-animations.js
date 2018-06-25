@@ -412,6 +412,7 @@ export class Builder {
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
    * @param {?WebAnimationDef|undefined} args
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}

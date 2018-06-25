@@ -86,7 +86,10 @@ export class AmpImgur extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   * */
   handleImgurMessages_(event) {
     if (event.origin != 'https://imgur.com' ||
         event.source != this.iframe_.contentWindow) {

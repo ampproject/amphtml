@@ -277,6 +277,11 @@ class AmpPlaybuzz extends AMP.BaseElement {
     return embedUrl;
   }
 
+  /**
+   * Relays scroll data to iframe.
+   *
+   * @param {{height: number, left: number, relayoutAll: boolean, top: number, velocity: number, width: number }} changeEvent
+   */
   sendScrollDataToItem_(changeEvent) {
     if (!this.isInViewport()) {
       return;

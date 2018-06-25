@@ -694,6 +694,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Pauses lightbox childred.
+   */
   pauseLightboxChildren_() {
     const lbgId = this.currentLightboxGroupId_;
     const slides = this.elementsMetadata_[lbgId]
@@ -1017,8 +1020,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  // TODO (cathyxz): make this generalizable to more than just images
-  enter_() {
+  enter_() { // TODO (cathyxz): make this generalizable to more than just images
     const {sourceElement} = this.getCurrentElement_();
     if (!this.elementTypeCanBeAnimated_(sourceElement)) {
       return this.fade_(0, 1);

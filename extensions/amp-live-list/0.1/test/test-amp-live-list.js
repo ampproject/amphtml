@@ -88,7 +88,7 @@ describes.realWin('amp-live-list', {
   }
 
   /**
-   * @param {!Array<number>} childIds
+   * @param {!Array<number>} childAttrs
    * @param {!Element=} opt_pagination
    * @return {!Element<!Element>}
    */

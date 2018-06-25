@@ -733,7 +733,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     /** @private {?Element} */
     this.captionElement_ = null;
 
-    /** @private {function(this:AmpImageLightbox, Event)} */
+    /** @private {!Function} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
   }
 
@@ -844,7 +844,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
   /**
    * Handles closing the lightbox when the ESC key is pressed.
-   * @param {!Event} event.
+   * @param {!Event} event
    * @private
    */
   closeOnEscape_(event) {

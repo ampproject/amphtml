@@ -186,6 +186,12 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   }
 }
 
+/**
+ * Pushes item into array if it does not exist.
+ *
+ * @param {!Array} array
+ * @param {*} item
+ */
 function pushIfNotExist(array, item) {
   if (array.indexOf(item) < 0) {
     array.push(item);
