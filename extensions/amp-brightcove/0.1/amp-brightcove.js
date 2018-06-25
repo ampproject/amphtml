@@ -23,7 +23,6 @@ import {
   isJsonOrObj,
   mutedOrUnmutedEvent,
   objOrParseJson,
-  originMatches,
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, user} from '../../../src/log';
@@ -154,7 +153,7 @@ class AmpBrightcove extends AMP.BaseElement {
   handlePlayerMessage_(event) {
     const {element} = this;
 
-    if (originMatches(event, this.iframe_, 'https://players.brightcove.net')) {
+    if (event.source != this.iframe_.contentWindow) {
       return;
     }
 
