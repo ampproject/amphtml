@@ -98,7 +98,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
   }
 
   /**
-   * @param event {!Event}
+   * @param {!Event} event
    * @private
    */
   deviceOrientationHandler_(event) {
