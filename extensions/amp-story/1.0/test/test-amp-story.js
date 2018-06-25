@@ -28,7 +28,6 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
-const IDENTITY_FN = x => x;
 
 
 describes.realWin('amp-story', {
@@ -759,60 +758,5 @@ describes.realWin('amp-story', {
       };
       expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
     });
-  });
-});
-
-
-describes.realWin('amp-story origin whitelist', {
-  amp: {
-    extensions: ['amp-story:1.0'],
-  },
-}, env => {
-  let win;
-  let element;
-  let story;
-
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-story');
-    win.document.body.appendChild(element);
-
-    story = new AmpStory(element);
-    story.hashOrigin_ = IDENTITY_FN;
-  });
-
-  it('should allow exact whitelisted origin with https scheme', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('https://example.com')).to.be.true;
-  });
-
-  it('should allow exact whitelisted origin with http scheme', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('http://example.com')).to.be.true;
-  });
-
-  it('should allow www subdomain of origin', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('https://www.example.com')).to.be.true;
-  });
-
-  it('should allow subdomain of origin', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('https://foobar.example.com')).to.be.true;
-  });
-
-  it('should not allow exact whitelisted domain under different tld', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
-  });
-
-  it('should not allow exact whitelisted domain infixed in another tld', () => {
-    story.originWhitelist_ = ['example.co.uk'];
-    expect(story.isOriginWhitelisted_('https://example.co')).to.be.false;
-  });
-
-  it('should not allow domain that contains whitelisted domain', () => {
-    story.originWhitelist_ = ['example.co'];
-    expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
   });
 });

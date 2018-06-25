@@ -33,12 +33,6 @@ export default {
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'एएमपी परिणामों के बारे में अधिक जानकारी',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
-    string: 'सक्षम करें',
-  },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
-    string: 'प्रयोग सक्षम. कृपया पुनः लोड करें.',
-  },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Next टैप करें',
   },
