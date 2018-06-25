@@ -109,8 +109,8 @@ export function openx(global, data) {
 
 /**
  * @param {!Window} global
- * @param {*} jssdk
- * @param {*} dfpData
+ * @param {string} jssdk
+ * @param {!Object} dfpData
  */
 function standardImplementation(global, jssdk, dfpData) {
   writeScript(global, jssdk, () => {
@@ -121,8 +121,8 @@ function standardImplementation(global, jssdk, dfpData) {
 
 /**
  * @param {!Window} global
- * @param {*} jssdk
- * @param {*} dfpData
+ * @param {string} jssdk
+ * @param {!Object} dfpData
  * @param {*} data
  */
 function advanceImplementation(global, jssdk, dfpData, data) {

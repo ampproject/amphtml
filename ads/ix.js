@@ -83,7 +83,7 @@ function prepareData(data) {
  * @param {string} siteID
  * @param {string} slotID
  * @param {string} dfpSlot
- * @param {*} start
+ * @param {number} start
  * @param {number} code
  */
 function reportStats(siteID, slotID, dfpSlot, start, code) {

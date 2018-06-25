@@ -17,7 +17,7 @@ import {loadScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {*} data
+ * @param {!Object} data
  */
 export function nativo(global, data) {
   let ntvAd;
@@ -106,8 +106,8 @@ export function nativo(global, data) {
       setPercentageOfadViewed(
           (((coordinates.intersectionRect
               .height * 100) / coordinates
-              .boundingClientRect
-              .height) / 100));
+                .boundingClientRect
+                .height) / 100));
       global.PostRelease.checkIsAdVisible();
     }
     // Public

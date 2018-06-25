@@ -162,4 +162,6 @@ function reduceSearch(ns, placementId, click, referrer) {
  * @param {!Object} unusedData
  * @param {string} unusedUrl
  */
-function logSuspiciousActivity(unusedLocation, unusedData, unusedUrl) { /* todo implement */ }
+function logSuspiciousActivity(unusedLocation, unusedData, unusedUrl) {
+  /* todo implement */
+}

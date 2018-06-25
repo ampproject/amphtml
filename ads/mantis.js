@@ -37,7 +37,7 @@ export function mantisDisplay(global, data) {
 
 /**
  * @param {!Window} global
- * @param {!JsonObject} data
+ * @param {!Object} data
  */
 export function mantisRecommend(global, data) {
   validateData(data, ['property'], ['css']);

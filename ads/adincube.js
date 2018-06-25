@@ -42,7 +42,7 @@ export function adincube(global, data) {
 }
 
 /**
- * @param {!JsonObject} data
+ * @param {string} data
  * @return {string}
  */
 function parseParams(data) {

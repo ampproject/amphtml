@@ -443,7 +443,7 @@ export function imaVideo(global, data) {
 
 /**
  * @param {!Window} global
- * @param {!JsonData} data
+ * @param {!JsonObject} data
  */
 function onImaLoadSuccess(global, data) {
   // This is the first place where we have access to any IMA objects.
