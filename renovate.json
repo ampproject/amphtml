@@ -12,9 +12,6 @@
     "web-animations-js"
   ],
   "includePaths": [
-    "package.json",
-    "validator/package.json",
-    "validator/nodejs/package.json",
-    "validator/webui/package.json"
+    "package.json"
   ]
 }
