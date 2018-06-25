@@ -70,10 +70,6 @@ const coveragePaths = [
   },
 ];
 
-const simpleTestPath = [
-  'test/simple-test.js',
-];
-
 const testPaths = commonIntegrationTestPaths.concat([
   'test/**/*.js',
   'ads/**/test/test-*.js',
@@ -109,7 +105,6 @@ const integrationTestPaths = [
 
 /** @const  */
 module.exports = {
-  simpleTestPath,
   testPaths,
   a4aTestPaths,
   chaiAsPromised,
