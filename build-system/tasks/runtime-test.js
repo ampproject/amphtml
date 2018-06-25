@@ -94,6 +94,10 @@ function getConfig() {
   return karmaDefault;
 }
 
+/**
+ * Returns an array of ad types.
+ * @return {!Array<string>}
+ */
 function getAdTypes() {
   const namingExceptions = {
     // We recommend 3P ad networks use the same string for filename and type.
@@ -126,8 +130,10 @@ function getAdTypes() {
   return adTypes;
 }
 
-// Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
-// by refreshing the wd cache so that Karma can launch without an error.
+/**
+ * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
+ * by refreshing the wd cache so that Karma can launch without an error.
+ */
 function refreshKarmaWdCache() {
   exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
 }
@@ -303,9 +309,7 @@ function getTestsFor(srcFiles) {
  */
 function unitTestsToRun() {
   const filesChanged = gitDiffNameOnlyMaster();
-  // Adds a dummy always-passing test for avoiding spurious failure
-  // See comment in test/simple-test.js or #15935.
-  const testsToRun = ['test/simple-test.js'];
+  const testsToRun = [];
   const srcFiles = [];
   filesChanged.forEach(file => {
     if (isUnitTest(file)) {
@@ -395,12 +399,6 @@ function runTests() {
     c.files = c.files.concat(config.a4aTestPaths);
   } else {
     c.files = c.files.concat(config.testPaths);
-  }
-
-  // Include a simple passing test for sauce labs runs. This is done because
-  // running zero tests on a sauce labs browser throws an error. See #11494.
-  if (argv.saucelabs || argv.saucelabs_lite) {
-    c.files = c.files.concat(config.simpleTestPath);
   }
 
   // c.client is available in test browser via window.parent.karma.config

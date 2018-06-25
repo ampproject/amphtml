@@ -121,7 +121,10 @@ const actions = (state, action, data) => {
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.INFO_DIALOG_STATE]: !!data}));
+          {}, state, {
+            [StateProperty.INFO_DIALOG_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     // Shows or hides the audio controls.
     case Action.TOGGLE_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
@@ -141,7 +144,10 @@ const actions = (state, action, data) => {
           {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
+          {}, state, {
+            [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.SHARE_MENU_STATE]: !!data,
+          }));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CONSENT_ID]: data}));

@@ -26,7 +26,7 @@ min_validator_revision_required: 328
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 652
+spec_file_revision: 662
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -195,6 +195,10 @@ tags: {
         "stylesheet|"  # Handled separately below, has specific requirements.
         "subresource|"
         ")(\\s|$)"
+    # It is worth noting that user-authored tags for dns-prefectch, preconnect,
+    # prefetch, and prerender will be disabled by the transformations applied
+    # in the AMP Cache. Therefore, these hints will only be used on publisher
+    # origins, not on the AMP Cache.
   }
   attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1075,149 +1079,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       image_url_spec: {
         allowed_protocol: "https"
       }
-      # Allowed CSS properties in AMP4Email.
-      allowed_declarations: "azimuth"
-      allowed_declarations: "background"
-      allowed_declarations: "background-blend-mode"
-      allowed_declarations: "background-clip"
-      allowed_declarations: "background-color"
-      allowed_declarations: "background-image"
-      allowed_declarations: "background-origin"
-      allowed_declarations: "background-position"
-      allowed_declarations: "background-repeat"
-      allowed_declarations: "background-size"
-      allowed_declarations: "border"
-      allowed_declarations: "border-bottom"
-      allowed_declarations: "border-bottom-color"
-      allowed_declarations: "border-bottom-left-radius"
-      allowed_declarations: "border-bottom-right-radius"
-      allowed_declarations: "border-bottom-style"
-      allowed_declarations: "border-bottom-width"
-      allowed_declarations: "border-collapse"
-      allowed_declarations: "border-color"
-      allowed_declarations: "border-left"
-      allowed_declarations: "border-left-color"
-      allowed_declarations: "border-left-style"
-      allowed_declarations: "border-left-width"
-      allowed_declarations: "border-radius"
-      allowed_declarations: "border-right"
-      allowed_declarations: "border-right-color"
-      allowed_declarations: "border-right-style"
-      allowed_declarations: "border-right-width"
-      allowed_declarations: "border-spacing"
-      allowed_declarations: "border-style"
-      allowed_declarations: "border-top"
-      allowed_declarations: "border-top-color"
-      allowed_declarations: "border-top-left-radius"
-      allowed_declarations: "border-top-right-radius"
-      allowed_declarations: "border-top-style"
-      allowed_declarations: "border-top-width"
-      allowed_declarations: "border-width"
-      allowed_declarations: "box-sizing"
-      allowed_declarations: "break-after"
-      allowed_declarations: "break-before"
-      allowed_declarations: "break-inside"
-      allowed_declarations: "caption-side"
-      allowed_declarations: "clear"
-      allowed_declarations: "color"
-      allowed_declarations: "column-count"
-      allowed_declarations: "column-fill"
-      allowed_declarations: "column-gap"
-      allowed_declarations: "column-rule"
-      allowed_declarations: "column-rule-color"
-      allowed_declarations: "column-rule-style"
-      allowed_declarations: "column-rule-width"
-      allowed_declarations: "column-span"
-      allowed_declarations: "column-width"
-      allowed_declarations: "columns"
-      allowed_declarations: "direction"
-      allowed_declarations: "display"
-      allowed_declarations: "elevation"
-      allowed_declarations: "empty-cells"
-      allowed_declarations: "float"
-      allowed_declarations: "font"
-      allowed_declarations: "font-family"
-      allowed_declarations: "font-feature-settings"
-      allowed_declarations: "font-kerning"
-      allowed_declarations: "font-size"
-      allowed_declarations: "font-size-adjust"
-      allowed_declarations: "font-stretch"
-      allowed_declarations: "font-style"
-      allowed_declarations: "font-synthesis"
-      allowed_declarations: "font-variant"
-      allowed_declarations: "font-variant-alternates"
-      allowed_declarations: "font-variant-caps"
-      allowed_declarations: "font-variant-east-asian"
-      allowed_declarations: "font-variant-ligatures"
-      allowed_declarations: "font-variant-numeric"
-      allowed_declarations: "font-weight"
-      allowed_declarations: "height"
-      allowed_declarations: "image-orientation"
-      allowed_declarations: "image-resolution"
-      allowed_declarations: "isolation"
-      allowed_declarations: "letter-spacing"
-      allowed_declarations: "line-height"
-      allowed_declarations: "list-style"
-      allowed_declarations: "list-style-position"
-      allowed_declarations: "list-style-type"
-      allowed_declarations: "margin"
-      allowed_declarations: "margin-bottom"
-      allowed_declarations: "margin-left"
-      allowed_declarations: "margin-right"
-      allowed_declarations: "margin-top"
-      allowed_declarations: "max-height"
-      allowed_declarations: "max-width"
-      allowed_declarations: "min-height"
-      allowed_declarations: "min-width"
-      allowed_declarations: "mix-blend-mode"
-      allowed_declarations: "object-fit"
-      allowed_declarations: "object-position"
-      allowed_declarations: "opacity"
-      allowed_declarations: "outline"
-      allowed_declarations: "outline-color"
-      allowed_declarations: "outline-style"
-      allowed_declarations: "outline-width"
-      allowed_declarations: "overflow"
-      allowed_declarations: "padding"
-      allowed_declarations: "padding-bottom"
-      allowed_declarations: "padding-left"
-      allowed_declarations: "padding-right"
-      allowed_declarations: "padding-top"
-      allowed_declarations: "pause"
-      allowed_declarations: "pause-after"
-      allowed_declarations: "pause-before"
-      allowed_declarations: "pitch"
-      allowed_declarations: "pitch-range"
-      allowed_declarations: "quotes"
-      allowed_declarations: "richness"
-      allowed_declarations: "speak"
-      allowed_declarations: "speak-header"
-      allowed_declarations: "speak-numeral"
-      allowed_declarations: "speak-punctuation"
-      allowed_declarations: "speech-rate"
-      allowed_declarations: "stress"
-      allowed_declarations: "table-layout"
-      allowed_declarations: "text-align"
-      allowed_declarations: "text-combine-upright"
-      allowed_declarations: "text-decoration"
-      allowed_declarations: "text-decoration-color"
-      allowed_declarations: "text-decoration-line"
-      allowed_declarations: "text-decoration-skip"
-      allowed_declarations: "text-decoration-style"
-      allowed_declarations: "text-emphasis"
-      allowed_declarations: "text-emphasis-color"
-      allowed_declarations: "text-emphasis-style"
-      allowed_declarations: "text-indent"
-      allowed_declarations: "text-orientation"
-      allowed_declarations: "text-overflow"
-      allowed_declarations: "text-transform"
-      allowed_declarations: "text-underline-position"
-      allowed_declarations: "unicode-bidi"
-      allowed_declarations: "vertical-align"
-      allowed_declarations: "voice-family"
-      allowed_declarations: "width"
-      allowed_declarations: "word-spacing"
-      allowed_declarations: "writing-mode"
     }
     blacklisted_cdata_regex: {
       regex: "<!--"
@@ -3353,14 +3214,6 @@ tags {  # <form method=GET ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
-  attrs: {
-    name: "verify-xhr"
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
@@ -3397,16 +3250,7 @@ tags {  # <form method=POST ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
-  attrs: {
-    name: "verify-xhr"
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
 }
-
 tags {
   tag_name: "DIV"
   spec_name: "FORM > DIV [submitting]"
@@ -3515,7 +3359,6 @@ attr_lists: {
   attrs: { name: "[size]" }
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[step]" }
-  attrs: { name: "[type]" }
   attrs: { name: "[value]" }
   attrs: { name: "[width]" }
 }
@@ -3650,6 +3493,8 @@ tags: {
 }
 # 4.10.5 The input element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "INPUT"
   attrs: {
     name: "type"
@@ -3662,6 +3507,9 @@ tags: {
   }
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
+  # Note that this amp-bind attribute is not available for the AMP4Email format
+  # thus we add this manually for the formats that should.
+  attrs: { name: "[type]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 tags: {
@@ -3692,6 +3540,24 @@ tags: {
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   mandatory_ancestor: "FORM [method=POST]"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+}
+# amp-bind usage of [type] is not allowed in AMP4EMAIL
+tags: {
+  html_format: AMP4EMAIL
+  tag_name: "INPUT"
+  spec_name: "INPUT (AMP4EMAIL)"
+  attrs: {
+    name: "type"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+        "button|"
+        "file|"
+        "image|"
+        "password|"
+        ")(\\s|$)"
+  }
+  attr_lists: "input-common-attr"
+  attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.6 The button element
@@ -4237,6 +4103,7 @@ tags: {  # <amp-img>
 tags: {  # <amp-layout>
   html_format: AMP
   html_format: AMP4ADS
+  html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "AMP-LAYOUT"
   attr_lists: "extended-amp-global"

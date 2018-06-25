@@ -228,8 +228,9 @@ export class RealTimeConfigManager {
    * custom URL.
    */
   modifyRtcConfigForConsentStateSettings() {
-    if (!(this.consentState_ == CONSENT_POLICY_STATE.INSUFFICIENT ||
-          this.consentState_ == CONSENT_POLICY_STATE.UNKNOWN)) {
+    if (this.consentState_ == undefined ||
+        this.consentState_ == CONSENT_POLICY_STATE.SUFFICIENT ||
+        this.consentState_ == CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED) {
       return;
     }
 
