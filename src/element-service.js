@@ -154,8 +154,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
   }
   // Return embed-scope element service promise if scheduled.
   if (elementOrAmpDoc.nodeType) {
-    const win = toWin(/** @type {!Document} */ (
-      elementOrAmpDoc.ownerDocument || elementOrAmpDoc).defaultView);
+    const win = toWin(elementOrAmpDoc.ownerDocument.defaultView);
     const topWin = getTopWindow(win);
     // In embeds, doc-scope services are window-scope. But make sure to
     // only do this for embeds (not the top window), otherwise we'd grab

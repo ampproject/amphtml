@@ -111,8 +111,7 @@ export function getExistingServiceForDocInEmbedScope(
   // First, try to resolve via local (embed) window.
   if (elementOrAmpDoc.nodeType) {
     // If a node is passed, try to resolve via this node.
-    const win = toWin(/** @type {!Document} */ (
-      elementOrAmpDoc.ownerDocument || elementOrAmpDoc).defaultView);
+    const win = toWin(elementOrAmpDoc.ownerDocument.defaultView);
     const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
     if (local) {
       return local;
