@@ -33,8 +33,8 @@ describes.realWin('amp-geo', {
     ISOCountryGroups: {
       nafta: ['ca', 'mx', 'us', 'unknown'],
       unknown: ['unknown'],
-      gdpr: ['preset-gdpr'],
-      myGroup: ['preset-gdpr', 'us'],
+      eea: ['preset-eea'],
+      myGroup: ['preset-eea', 'us'],
       anz: ['au', 'nz'],
     },
   };
@@ -183,7 +183,7 @@ describes.realWin('amp-geo', {
         'amp-iso-country-unknown',
         'amp-geo-group-nafta',
         'amp-geo-no-group',
-        'amp-geo-group-gdpr',
+        'amp-geo-group-eea',
         'amp-geo-group-myGroup',
       ], false);
     });
@@ -198,7 +198,7 @@ describes.realWin('amp-geo', {
       expect(geo.ISOCountry).to.equal('fr');
       expectBodyHasClass([
         'amp-iso-country-fr',
-        'amp-geo-group-gdpr',
+        'amp-geo-group-eea',
         'amp-geo-group-myGroup',
       ], true);
       expectBodyHasClass([,
