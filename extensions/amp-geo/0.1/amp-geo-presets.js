@@ -83,7 +83,7 @@ export const ampGeoPresets = {
     'SJ', // Svalbard & Jan Mayen Islands
     'VA', // Vatican City
     'WF', // Wallis & Futuna Islands
-    'EZ', // Eurozone'
+    'EZ', // Eurozone
     /** END Machine Generated */
   ],
 };
