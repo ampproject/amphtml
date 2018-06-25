@@ -434,21 +434,23 @@ function elapsedTimeWithCeiling(time, start) {
  */
 export function getCorrelator(win, nodeOrDoc, opt_cid) {
   if (!win.ampAdPageCorrelator) {
-    win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid, Services.documentInfoForDoc(nodeOrDoc).pageViewId);
+    win.ampAdPageCorrelator = isExperimentOn(win, 'exp-new-correlator') ?
+      Math.floor(4503599627370496 * Math.random()) :
+      makeCorrelator(
+          Services.documentInfoForDoc(nodeOrDoc).pageViewId, opt_cid);
   }
   return win.ampAdPageCorrelator;
 }
 
 /**
- * @param {(string|undefined)} clientId
  * @param {string} pageViewId
+ * @param {string=} opt_clientId
  * @return {number}
  */
-function makeCorrelator(clientId, pageViewId) {
+function makeCorrelator(pageViewId, opt_clientId) {
   const pageViewIdNumeric = Number(pageViewId || 0);
-  if (clientId) {
-    return pageViewIdNumeric + ((clientId.replace(/\D/g, '') % 1e6) * 1e6);
+  if (opt_clientId) {
+    return pageViewIdNumeric + ((opt_clientId.replace(/\D/g, '') % 1e6) * 1e6);
   } else {
     // In this case, pageViewIdNumeric is only 4 digits => too low entropy
     // to be useful as a page correlator.  So synthesize one from scratch.
