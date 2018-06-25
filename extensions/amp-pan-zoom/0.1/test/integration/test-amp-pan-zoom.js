@@ -14,41 +14,29 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../../src/amp-events';
+import {createFixtureIframe} from '../../../../../testing/iframe';
+import {toggleExperiment} from '../../../../../src/experiments';
 
 describe.configure().ifNewChrome().run('amp-pan-zoom', function() {
-  this.timeout(10000);
-  const extensions = ['amp-pan-zoom'];
-  const experiments = ['amp-pan-zoom'];
-  const body = `
-  <amp-pan-zoom id="amp-pan-zoom" layout="fixed" width="300" height="241">
-    <amp-img id="img0"
-      src="/examples/img/sample.jpg"
-      width="641" height="481" layout="fixed"></amp-img>
-  </amp-pan-zoom>
-  `;
-  describes.integration('amp-pan-zoom basic functionality', {
-    body,
-    extensions,
-    experiments,
-  }, env => {
-    let win, doc, panZoom;
-    beforeEach(() => {
-      win = env.win;
-      win.AMP_MODE.localDev = true;
-      doc = win.document;
-      panZoom = doc.getElementById('amp-pan-zoom');
-      return panZoom.build().then(() => {
-        return panZoom.layoutCallback();
-      });
-    });
+  this.timeout(100000);
+  let fixture;
+  beforeEach(() => {
+    return createFixtureIframe('test/fixtures/amp-pan-zoom.html', 1000)
+        .then(f => {
+          fixture = f;
+          toggleExperiment(fixture.win, 'amp-pan-zoom', true, true);
+        });
+  });
 
-    it('should build correctly', () => {
-      expect(panZoom.children.length).to.equal(1);
-      const content = panZoom.children[0];
-      expect(content.classList.contains('i-amphtml-pan-zoom-child')).to.be.true;
-    });
+  it('two amp-pan-zoom should exist', () => {
+    expect(fixture.doc.querySelectorAll('amp-pan-zoom'))
+        .to.have.length.above(0);
+  });
 
-    it('should resize and center content', () => {
+  it('should resize and center content', () => {
+    return fixture.awaitEvent(AmpEvents.LOAD_END, 2).then(() => {
+      const panZoom = fixture.doc.querySelector('#amp-pan-zoom-1');
       const content = panZoom.children[0];
       expect(content.style.width).to.equal('300px');
       // 481 / 641 * 300 = 225
@@ -57,42 +45,14 @@ describe.configure().ifNewChrome().run('amp-pan-zoom', function() {
       expect(content.style.top).to.equal('8px');
       expect(content.style.left).to.equal('0px');
     });
-
   });
 
-  const bodyWithConfigs = `
-    <amp-pan-zoom id="amp-pan-zoom"
-      initial-x="10"
-      initial-y="5"
-      initial-scale="2"
-      max-scale="5"
-      layout="fixed"
-      width="300"
-      height="240">
-      <amp-img id="img0"
-        src="/examples/img/sample.jpg"
-        width="641" height="481" layout="fixed"></amp-img>
-    </amp-pan-zoom>`;
-
-  describes.integration('amp-pan-zoom basic functionality', {
-    body: bodyWithConfigs,
-    extensions,
-    experiments,
-  }, env => {
-    let win, doc, panZoom;
-    beforeEach(() => {
-      win = env.win;
-      win.AMP_MODE.localDev = true;
-      doc = win.document;
-      panZoom = doc.getElementById('amp-pan-zoom');
-      return panZoom.build().then(() => {
-        return panZoom.layoutCallback();
-      });
-    });
-
-    it('should apply initial configurations correctly', () => {
+  it('should apply initial configurations correctly', () => {
+    return fixture.awaitEvent(AmpEvents.LOAD_END, 4).then(() => {
+      const panZoom = fixture.doc.querySelector('#amp-pan-zoom-2');
       const content = panZoom.children[0];
-      expect(content.style.transform).to.equal('translate(10px, 5px) scale(2)');
+      expect(content.style.transform).to
+          .equal('translate(50px, 100px) scale(2)');
     });
   });
 });
