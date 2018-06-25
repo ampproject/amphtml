@@ -80,9 +80,11 @@ import {
 } from '../../../src/dom';
 import {
   computedStyle,
+  px,
   resetStyles,
   setImportantStyles,
   setStyle,
+  setStyles,
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
@@ -384,7 +386,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mutateElement(() => {
       styleEl.setAttribute('amp-story', storyId);
-      this.rewriteStyles_(styleEl, storyIdClassName);
+      this.rewriteStyles_(styleEl);
       Array.prototype.forEach.call(pageEls, pageEl => {
         pageEl.classList.add(storyIdClassName);
       });
@@ -394,13 +396,36 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {!Element} styleEl
-   * @param {string} storyIdClassName
    * @private
    */
-  rewriteStyles_(styleEl, storyIdClassName) {
+  rewriteStyles_(styleEl) {
     styleEl.textContent = styleEl.textContent
-        .replace(/^\s*(.*?)\s*\{$/gim, `.${storyIdClassName} $1,\n$1 .${storyIdClassName} {`)
-        .replace(/^\s*\*\s*(.*?)\s*\{/gim, '$1 {');
+        .replace(/([\d.]+)vh/gmi, 'calc($1 * var(--i-amphtml-story-vh))')
+        .replace(/([\d.]+)vw/gmi, 'calc($1 * var(--i-amphtml-story-vw))')
+        .replace(/([\d.]+)vmin/gmi, 'calc($1 * var(--i-amphtml-story-vmin))')
+        .replace(/([\d.]+)vmax/gmi, 'calc($1 * var(--i-amphtml-story-vmax))');
+  }
+
+
+  /**
+   * @private
+   */
+  updateViewportSizeStyles_() {
+    this.vsync_.run({
+      measure: state => {
+        state.vh = this.activePage_.element.clientHeight / 100;
+        state.vw = this.activePage_.element.clientWidth / 100;
+        state.vmin = Math.min(state.vh, state.vw);
+        state.vmax = Math.max(state.vh, state.vw);
+      },
+      mutate: state => {
+        this.element.setAttribute('style',
+            `--i-amphtml-story-vh: ${px(state.vh)};` +
+            `--i-amphtml-story-vw: ${px(state.vw)};` +
+            `--i-amphtml-story-vmin: ${px(state.vmin)};` +
+            `--i-amphtml-story-vmax: ${px(state.vmax)};`);
+      },
+    }, {});
   }
 
   /**
@@ -643,6 +668,7 @@ export class AmpStory extends AMP.BaseElement {
           });
         })
         .then(() => this.switchTo_(initialPageId))
+        .then(() => this.updateViewportSizeStyles_())
         .then(() => this.preloadPagesByDistance_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
@@ -1054,6 +1080,8 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
+    this.updateViewportSizeStyles_();
+
     const isDesktop = this.isDesktop_();
     this.storeService_.dispatch(Action.TOGGLE_DESKTOP, isDesktop);
 
