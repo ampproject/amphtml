@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- import {AmpOrientationObserver} from '../amp-orientation-observer';
+import {AmpOrientationObserver} from '../amp-orientation-observer';
 
 describes.sandboxed('amp-orientation-observer', {}, () => {
   let impl;
@@ -26,13 +26,13 @@ describes.sandboxed('amp-orientation-observer', {}, () => {
     const elem = {
       getAttribute(attr) {
         if (attr == 'alpha-range') {
-          return "0 360";
+          return '0 360';
         }
         if (attr == 'beta-range') {
-          return "-180 180";
+          return '-180 180';
         }
         if (attr == 'gamma-range') {
-          return "-90 90";
+          return '-90 90';
         }
       },
     };
@@ -47,18 +47,12 @@ describes.sandboxed('amp-orientation-observer', {}, () => {
     gammaSpy = sandbox.stub(impl, 'triggerGamma_');
   }
 
-  function resetSpies() {
-    alphaSpy.reset();
-    betaSpy.reset();
-    gammaSpy.reset();
-  }
-
   function setOrientation(alpha = 180, beta = 0, gamma = 0) {
-    const event = new DeviceOrientationEvent("deviceorientationevent", {
-      alpha, 
-      beta, 
-      gamma
-    })
+    const event = new DeviceOrientationEvent('deviceorientationevent', {
+      alpha,
+      beta,
+      gamma,
+    });
     impl.deviceOrientationHandler_(event);
   }
 
