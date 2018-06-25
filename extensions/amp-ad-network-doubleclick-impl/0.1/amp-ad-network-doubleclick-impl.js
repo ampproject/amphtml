@@ -126,6 +126,18 @@ export const RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES = {
   EXPERIMENT: 21062232,
 };
 
+/**
+ * @const {string}
+ * @visibleForTesting
+ */
+export const TFCD = 'tagForChildDirectedTreatment';
+
+/**
+ * Map of pageview tokens to the instances they belong to.
+ * @private {!Object{string: !AmpAdNetworkDoubleclickImpl}
+ */
+const pageviewStateTokens = {};
+
 /** @private {?Promise} */
 let sraRequests = null;
 
@@ -140,7 +152,6 @@ let TroubleshootDataDef;
 
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
-
 
 /**
  * @typedef
@@ -249,6 +260,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
+
+    // DO NOT SUBMIT. TESTING ONLY
+    pageviewStateTokens[[
+      'a', 'b', 'c', 'd', 'e'
+    ].map((el, index, array) => array[Math.floor(Math.random() * array.length)])
+                       .join('')] = this;
   }
 
   /**
@@ -409,7 +426,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
-  getPageParameters(consentState) {
+  getPageParameters(consentState, instances = [this]) {
     return {
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
@@ -417,6 +434,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
+      'psts': getPageviewStateTokensForAdRequest(instances),
     };
   }
 
@@ -737,6 +755,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     }
 
+    // If the response included a pageview state token, check for an existing
+    // token and remove it. Then save the new one to the module level object.
+    if (responseHeaders.get('_pvtoken_')) {
+      this.removePageviewStateToken();
+      this.setPageviewStateToken(
+          responseHeaders.get('_pvtoken_'));
+    }
+
     return size;
   }
 
@@ -779,6 +805,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = null;
     this.consentState = null;
     this.getAdUrlDeferred = new Deferred();
+    this.removePageviewToken();
   }
 
   /** @override */
@@ -1189,7 +1216,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       : super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
-
   /**
    * Note that location is parsed once on first access and cached.
    * @param {string} parameterName
@@ -1258,15 +1284,35 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
   }
 
-  /** @override */
-  getA4aAnalyticsVars(analyticsTrigger) {
-    return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
+  /**
+   * Sets the pageview state token associated with the slot. Token does not
+   * expire.
+   * @param {?string} token
+   */
+  setPageviewStateToken(token) {
+    pageviewStateTokens[token] = this;
+  }
+
+  /**
+   * Checks for the presence of a pageview token in the module level object
+   * and removes it if present.
+   */
+  removePageviewStateToken() {
+    for (const token in pageviewStateTokens) {
+      if (pageviewStateTokens[token] == this) {
+        delete pageviewStateTokens[token];
+        break;
+      }
+    }
   }
 
   /** @override */
-  getA4aAnalyticsConfig() {
-    return getCsiAmpAnalyticsConfig();
-  }
+  getA4aAnalyticsVars(analyticsTrigger) {
+    return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
+    }
+
+    /** @override */
+    getA4aAnalyticsConfig() { return getCsiAmpAnalyticsConfig(); }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
@@ -1306,14 +1352,92 @@ function constructSRARequest_(a4a, instances) {
   // TODO(bradfrizzell): Need to add support for RTC.
   dev().assert(instances && instances.length);
   const startTime = Date.now();
-  return Promise.all(
-      instances.map(instance => instance.getAdUrlDeferred.promise))
+  return Promise
+      .all(instances.map(instance => instance.getAdUrlDeferred.promise))
       .then(() => googlePageParameters(a4a, startTime))
       .then(googPageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
-        return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
+        return truncAndTimeUrl(
+            DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, googPageLevelParameters,
-                instances[0].getPageParameters(instances[0].consentState)),
+                          instances[0].getPageParameters(
+                              instances[0].consentState, instances)),
             startTime);
       });
+}
+
+/**
+ * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
+ * @return {!Object<string, *>}
+ * @visibleForTesting
+ */
+export function constructSRABlockParameters(instances) {
+  const parameters = {'output': 'ldjh', 'impl': 'fifs'};
+  BLOCK_SRA_COMBINERS_.forEach(
+      combiner => Object.assign(parameters, combiner(instances)));
+  return parameters;
+}
+
+/**
+ * @param {?Object<string, (!Array<string>|string)>} targeting
+ * @param {?(!Array<string>|string)} categoryExclusions
+ * @return {?string}
+ * @private
+ */
+function serializeTargeting_(targeting, categoryExclusions) {
+  const serialized = targeting ?
+    Object.keys(targeting).map(key => serializeItem_(key, targeting[key])) :
+    [];
+  if (categoryExclusions) {
+    serialized.push(serializeItem_('excl_cat', categoryExclusions));
+  }
+  return serialized.length ? serialized.join('&') : null;
+}
+
+/**
+ * @param {string} key
+ * @param {(!Array<string>|string)} value
+ * @return {string}
+ * @private
+ */
+function serializeItem_(key, value) {
+  const serializedValue =
+    (Array.isArray(value) ? value : [value]).map(encodeURIComponent).join();
+  return `${encodeURIComponent(key)}=${serializedValue}`;
+}
+
+/**
+ * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
+ * @param {function(AmpAdNetworkDoubleclickImpl):?T} extractFn
+ * @return {?T} value of first instance with non-null/undefined value or null
+ *    if none can be found
+ * @template T
+ * @private
+ */
+function getFirstInstanceValue_(instances, extractFn) {
+  for (let i = 0; i < instances.length; i++) {
+    const val = extractFn(instances[i]);
+    if (val) {
+      return val;
+    }
+  }
+  return null;
+}
+
+/**
+ * Returns the pageview tokens that should be included in the ad request. Tokens
+ * should come only from instances that are not being requested in this request.
+ * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instancesInAdRequest
+ * @return {!Array<string>} Array of pageview tokens to include in the ad
+ * request.
+ */
+function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
+  const pageviewStateTokensInAdRequest = [];
+  for (const token in pageviewStateTokens) {
+    if (!instancesInAdRequest.includes(
+            pageviewStateTokens[token])) {
+      pageviewStateTokensInAdRequest.push(token);
+    }
+  }
+  return pageviewStateTokensInAdRequest;
 }
