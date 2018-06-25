@@ -65,6 +65,9 @@ function findEngagedTimeBetween(activityEvent, time) {
 
 class ActivityHistory {
 
+  /**
+   * Creates an instance of ActivityHistory.
+   */
   constructor() {
     /** @private {number} */
     this.totalEngagedTime_ = 0;

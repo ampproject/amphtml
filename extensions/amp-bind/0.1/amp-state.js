@@ -133,7 +133,6 @@ export class AmpState extends AMP.BaseElement {
    * @param {!Element} element
    * @param {boolean} isInit
    * @return {!Promise}
-   * @visibleForTesting
    */
   fetch_(ampdoc, element, isInit) {
     const src = element.getAttribute('src');
@@ -151,7 +150,7 @@ export class AmpState extends AMP.BaseElement {
 
   /**
    * @param {boolean} isInit
-   * @returm {!Promise}
+   * @return {!Promise}
    * @private
    */
   fetchAndUpdate_(isInit) {

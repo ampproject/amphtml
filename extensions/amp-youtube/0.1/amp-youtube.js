@@ -309,6 +309,9 @@ class AmpYoutube extends AMP.BaseElement {
     return this.element.getAttribute('credentials') || 'include';
   }
 
+  /**
+   * @private
+   */
   assertDatasourceExists_() {
     const datasourceExists = !(this.videoid_ && this.liveChannelid_)
       && (this.videoid_ || this.liveChannelid_);

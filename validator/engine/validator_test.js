@@ -655,6 +655,7 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
     // Attribute Spec names are matched against lowercased attributes,
     // so the rules *must* also be lower case or non-cased.
     const attrSpecNameRegex = new RegExp('^[^A-Z]+$');
+
     expect(attrSpecNameRegex.test(attrSpec.name)).toBe(true);
   });
   if (attrSpec.valueUrl !== null) {

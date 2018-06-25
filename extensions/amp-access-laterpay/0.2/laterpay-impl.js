@@ -275,7 +275,7 @@ export class LaterpayVendor {
 
   /**
    * @param {Array<PurchaseOptionDef>} purchaseOptionsList
-   * @return Object
+   * @return {!Object}
    * @private
    */
   parseConfigIntoOptions_(purchaseOptionsList) {
@@ -296,6 +296,7 @@ export class LaterpayVendor {
   }
 
   /**
+   * @param {string} name
    * @return {!Element}
    * @private
    */
@@ -581,7 +582,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @return{!Promise}
+   * @return {!Promise}
    */
   pingback() {
     return Promise.resolve();

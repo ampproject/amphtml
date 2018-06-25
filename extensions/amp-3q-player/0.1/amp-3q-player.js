@@ -138,6 +138,11 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
   }
 
+  /**
+   *
+   * @param {!Event} event
+   * @private
+   */
   sdnBridge_(event) {
     if (event.source) {
       if (event.source != this.iframe_.contentWindow) {
@@ -165,6 +170,11 @@ class Amp3QPlayer extends AMP.BaseElement {
     });
   }
 
+  /**
+   *
+   * @private
+   * @param {string} message
+   */
   sdnPostMessage_(message) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {

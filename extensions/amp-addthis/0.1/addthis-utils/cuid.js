@@ -61,7 +61,7 @@ export const isDateInFuture = date => {
 
 /**
  * Check that the CUID is a 16 digit hex number that is not in the future.
- * @param cuid
+ * @param {string} cuid
  * @return {boolean}
  */
 export const isValidCUID = cuid => {

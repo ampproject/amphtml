@@ -244,7 +244,7 @@ class AmpLightbox extends AMP.BaseElement {
 
   /**
    * Handles closing the lightbox when the ESC key is pressed.
-   * @param {!Event} event.
+   * @param {!Event} event
    * @private
    */
   closeOnEscape_(event) {
@@ -254,7 +254,7 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
-   * Clean up when closing lightbox.
+   * Closes the lightbox.
    */
   close() {
     if (!this.active_) {
@@ -267,6 +267,9 @@ class AmpLightbox extends AMP.BaseElement {
         .then(() => this.finalizeClose_());
   }
 
+  /**
+   * Clean up when closing lightbox.
+   */
   finalizeClose_() {
     this./*OK*/collapse();
     if (this.historyId_ != -1) {
@@ -398,6 +401,11 @@ class AmpLightbox extends AMP.BaseElement {
     return this.size_;
   }
 
+  /**
+   * Returns the history for the ampdoc.
+   *
+   * @return {!../../../src/service/history-impl.History}
+   */
   getHistory_() {
     return Services.historyForDoc(this.getAmpDoc());
   }
@@ -417,6 +425,9 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
+   * Triggeres event to window.
+   *
+   * @param {string} name
    * @private
    */
   triggerEvent_(name) {

@@ -50,7 +50,7 @@ export function newResourceTimingSpec() {
  * @param {number} startTime
  * @param {number} duration
  * @param {number} bodySize
- * @param {boolean} cached;
+ * @param {boolean} cached
  * @return {!JsonObject}
  */
 export function newPerformanceResourceTiming(

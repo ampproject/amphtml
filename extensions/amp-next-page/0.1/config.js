@@ -76,6 +76,11 @@ const BANNED_SELECTOR_PATTERNS = [
   /(^|\W)i-amphtml-/,
 ];
 
+/**
+ * Asserts for valid selectors.
+ *
+ * @param {!Array<string>} selectors
+ */
 function assertSelectors(selectors) {
   selectors.forEach(selector => {
     BANNED_SELECTOR_PATTERNS.forEach(pattern => {

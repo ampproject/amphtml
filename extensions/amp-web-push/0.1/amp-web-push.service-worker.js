@@ -152,7 +152,9 @@ function onMessageReceivedUnsubscribe() {
 }
 
 /**
-  Sends a postMessage() to all window frames the service worker controls.
+ * Sends a postMessage() to all window frames the service worker controls.
+ * @param {string} command
+ * @param {!JsonObject} payload
  */
 function broadcastReply(command, payload) {
   self.clients.matchAll()

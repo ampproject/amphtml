@@ -100,6 +100,10 @@ export class AmpNextPage extends AMP.BaseElement {
     this.service_.setAppendPageHandler(element => this.appendPage_(element));
   }
 
+  /**
+   * Appends the element too page
+   * @param {!Element} element
+   */
   appendPage_(element) {
     return this.mutateElement(() => this.element.appendChild(element));
   }

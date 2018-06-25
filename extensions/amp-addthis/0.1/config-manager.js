@@ -41,6 +41,9 @@ const RequestStatus = {
  * element references).
  */
 export class ConfigManager {
+  /**
+   * Creates an instance of ConfigManager.
+   */
   constructor() {
     /**
      * @type {!Object<string, ConfigManager.PubIdData>}
@@ -64,6 +67,10 @@ export class ConfigManager {
   /**
    * Store the configuration received for the provided pubId, mark the request
    * for the config as completed, and broadcast the config to relevant iframes.
+   * @param {!Object} input
+   * @param {!Object} [input.config]
+   * @param {string} [input.pubId]
+   * @param {*} [input.source]
    */
   receiveConfiguration({config, pubId, source}) {
     // Check that the configuration event is coming from an iframe that
@@ -87,7 +94,15 @@ export class ConfigManager {
     });
   }
 
-  /** @private */
+  /**
+   * @param {!Object} input
+   * @param {*} [input.iframe]
+   * @param {string} [input.widgetId]
+   * @param {string} [input.pubId]
+   * @param {!Object} [input.shareConfig]
+   * @param {!Object} [input.atConfig]
+   * @private
+   */
   sendConfiguration_({iframe, widgetId, pubId, shareConfig, atConfig}) {
     const pubData = this.dataForPubId_[pubId];
     const {

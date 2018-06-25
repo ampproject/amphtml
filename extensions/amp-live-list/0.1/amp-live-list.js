@@ -890,6 +890,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /**
    * @param {!Element} elem
+   * @param {string} attr
    * @return {time}
    * @private
    */
@@ -938,6 +939,9 @@ export class AmpLiveList extends AMP.BaseElement {
     return this.updateTime_;
   }
 
+  /**
+   * Sends DOM_UPDATE event
+   */
   sendAmpDomUpdateEvent_() {
     const event = this.win.document.createEvent('Event');
     event.initEvent(AmpEvents.DOM_UPDATE, true, true);

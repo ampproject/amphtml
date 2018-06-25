@@ -84,6 +84,9 @@ export class AnchorAdStrategy {
     return false;
   }
 
+  /**
+   * @private
+   */
   placeStickyAd_() {
     const viewportWidth =
         Services.viewportForDoc(this.ampdoc).getWidth();

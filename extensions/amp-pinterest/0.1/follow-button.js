@@ -47,7 +47,7 @@ export class FollowButton {
 
   /**
    * Override the default href click handling to log and open popup
-   * @param {Event} event: the HTML event object
+   * @param {Event} event
    */
   handleClick(event) {
     event.preventDefault();
