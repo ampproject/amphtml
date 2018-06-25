@@ -28,7 +28,8 @@ limitations under the License.
   </amp-embed>
 ```
 
-The above code must be accompanied by AMP-enabled widgets delivered by Aja’s Account Management Team, do not directly install this code with existing widgets.
+The above code must be accompanied by AMP-enabled widgets delivered by Aja’s Account Management Team,
+do not directly install this code with existing widgets.
 
 ## Parameters
 
