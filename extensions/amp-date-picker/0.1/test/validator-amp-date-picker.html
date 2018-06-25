@@ -80,7 +80,25 @@
   <amp-date-picker layout="fixed-height" height="360"
       src="https://data.com/dates.json?ref=CANONICAL_URL">
   </amp-date-picker>
-
+  <!-- Valid: amp-date-picker with date template -->
+  <amp-date-picker layout="fixed-height" height="360">
+    <template type="amp-mustache" date-template default>{{D}}</template>
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with date-template and/or info-template -->
+  <amp-date-picker layout="fixed-height" height="360">
+    <template info-template type="amp-mustache"></template>
+    <template date-template default type="amp-mustache"></template>
+    <template date-template dates="2018-01-01" type="amp-mustache"></template>
+    <template date-template id="named" type="amp-mustache"></template>
+    <template date-template type="amp-mustache"></template>
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with date-template with mixed attributes -->
+  <amp-date-picker layout="fixed-height" height="360">
+    <template date-template default id="default-with-id" type="amp-mustache"></template>
+    <template date-template dates="2018-01-01" id="dates-with-id" type="amp-mustache"></template>
+    <template date-template dates="2018-01-01" default type="amp-mustache"></template>
+    <template date-template dates="2018-01-01" default id="dates-with-default-and-id" type="amp-mustache"></template>
+  </amp-date-picker>
 
   <!-- Invalid: single amp-date-picker with start-input-selector -->
   <amp-date-picker type="single" mode="static" start-input-selector="#a3" layout="fixed-height" height="360">
@@ -111,15 +129,6 @@
   <!-- Invalid: amp-date-picker with bad first-day-of-week -->
   <amp-date-picker type="range" layout="fixed-height" height="360"
       first-day-of-week="7">
-  </amp-date-picker>
-  <!-- Valid: amp-date-picker with date-template and/or info-template -->
-  <amp-date-picker layout="fixed-height" height="360">
-    <template info-template type="amp-mustache">
-    </template>
-    <template date-template default type="amp-mustache">
-    </template>
-    <template date-template dates="2018-01-01" type="amp-mustache" id="empty">
-    </template>
   </amp-date-picker>
   <!-- Invalid: amp-date-picker templates outside amp-date-picker -->
   <template info-template type="amp-mustache"></template>
