@@ -32,7 +32,7 @@
 export const ampGeoPresets = {
   /* Expanded EEA countries */
   'preset-eea': [
-    /** BEGIN Machine Generated: GDPR */
+    /** BEGIN Machine Generated: EEA */
     'AT', // Austria
     'BE', // Belgium
     'BG', // Bulgaria
