@@ -155,6 +155,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
+    console.log(this.element.getAttribute('background-audio'));
     this.ownVideoAutoplay_();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();

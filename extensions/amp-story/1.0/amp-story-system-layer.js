@@ -35,6 +35,7 @@ const AD_SHOWING_ATTRIBUTE = 'ad-showing';
 /** @private @const {string} */
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
 
+
 /** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
@@ -49,34 +50,67 @@ const TEMPLATE = {
   tag: 'aside',
   attrs: dict(
       {'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset'}),
-  children: [
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
-      children: [
+  children: [  
         {
           tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': UNMUTE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': MUTE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': SHARE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
+          attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({
+                'role': 'button',
+                'class': UNMUTE_CLASS + ' i-amphtml-story-button',
+              }),
+              
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'role': 'button',
+                'class': MUTE_CLASS + ' i-amphtml-story-button',
+              }),
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'role': 'button',
+                'class': SHARE_CLASS + ' i-amphtml-story-button',
+              }),
+            },
+        
       ],
     },
+    {tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-message-container',
+          }),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({
+                'class': 'i-amphtml-story-mute-text' ,
+              }),
+              localizedStringId:
+                  LocalizedStringId.AMP_STORY_MUTE_BUTTON_TEXT,
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'class': 'i-amphtml-story-unmute-sound-text',
+              }),
+              localizedStringId:
+                  LocalizedStringId.AMP_STORY_UNMUTE_SOUND_BUTTON_TEXT,
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'class': 'i-amphtml-story-unmute-no-sound-text' ,
+              }),
+              localizedStringId:
+                  LocalizedStringId.AMP_STORY_UNMUTE_NO_SOUND_BUTTON_TEXT,
+            },
+          ]
+        },
   ],
 };
 
@@ -159,6 +193,12 @@ export class SystemLayer {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win_);
+
+    /** @private {?(number|string)} */
+    this.muteMessageTimeout_ = null;
   }
 
   /**
@@ -183,6 +223,7 @@ export class SystemLayer {
     this.buttonsContainer_ =
         this.systemLayerEl_.querySelector(
             '.i-amphtml-story-system-layer-buttons');
+
 
     this.buildForDevelopmentMode_();
 
@@ -247,13 +288,14 @@ export class SystemLayer {
       this.onDesktopStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.HAS_AUDIO_STATE, hasAudio => {
+    this.storeService_.subscribe(StateProperty.STORY_HAS_AUDIO_STATE, hasAudio => {
       this.onHasAudioStateUpdate_(hasAudio);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
     }, true /** callToInitialize */);
+
   }
 
   /**
@@ -329,6 +371,7 @@ export class SystemLayer {
    * @private
    */
   onHasAudioStateUpdate_(hasAudio) {
+    console.log(hasAudio);
     this.vsync_.mutate(() => {
       this.getShadowRoot().classList.toggle('audio-playing', hasAudio);
     });
@@ -340,13 +383,32 @@ export class SystemLayer {
    * @private
    */
   onMutedStateUpdate_(isMuted) {
+    const hideTimeout = 1000;
+    this.getShadowRoot().setAttribute('messagedisplay', 'show');
     this.vsync_.mutate(() => {
-      isMuted ?
-        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
-        this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+      if(isMuted) {
+        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'muted');
+       } else if(this.storeService_.get(StateProperty.PAGE_HAS_AUDIO_STATE)) {
+        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'soundon');
+      } else {
+        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'nosound');
+      }
+      this.hideAfterTimeout_(hideTimeout);
     });
   }
 
+  hideAfterTimeout_(hideTimeout){
+    this.timer_.delay(() => this.hideInteral_(), hideTimeout);
+  }
+
+  hideInteral_() {
+    if(!this.isBuilt_){
+      return;
+    }
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().setAttribute('messagedisplay', 'noshow');
+    });
+  }
   /**
    * Handles click events on the mute button.
    * @private
@@ -355,6 +417,7 @@ export class SystemLayer {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, true);
   }
 
+  
   /**
    * Handles click events on the unmute button.
    * @private
