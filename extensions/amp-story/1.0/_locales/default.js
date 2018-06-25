@@ -33,6 +33,15 @@ export default {
   [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
     string: 'Experiment enabled.  Please reload.',
   },
+  [LocalizedStringId.AMP_STORY_MUTE_BUTTON_TEXT]: {
+    string: 'Sound off',
+  },
+  [LocalizedStringId.AMP_STORY_UNMUTE_SOUND_BUTTON_TEXT]: {
+    string: 'Sound on',
+  },
+  [LocalizedStringId.AMP_STORY_UNMUTE_NO_SOUND_BUTTON_TEXT]: {
+    string: 'This page has no sound',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: ':(',
   },

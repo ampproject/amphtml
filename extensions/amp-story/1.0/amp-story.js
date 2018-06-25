@@ -779,12 +779,11 @@ export class AmpStory extends AMP.BaseElement {
    * Advance to the next screen in the story, if there is one.
    * @param {boolean=} opt_isAutomaticAdvance Whether this navigation was caused
    *     by an automatic advancement after a timeout.
-   * @private
    */
   next_(opt_isAutomaticAdvance) {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to next page.');
-
+    
     const lastPage = this.pages_[this.getPageCount() - 1];
     if (activePage.element.hasAttribute(Attributes.ADVANCE_TO) ||
         activePage !== lastPage) {
@@ -796,6 +795,7 @@ export class AmpStory extends AMP.BaseElement {
         }
       });
     }
+    this.updateSoundPage_(); 
   }
 
 
@@ -807,6 +807,7 @@ export class AmpStory extends AMP.BaseElement {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to next page.');
     activePage.previous();
+    this.updateSoundPage_();
   }
 
 
@@ -1610,6 +1611,18 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_HAS_AUDIO,
         containsMediaElementWithAudio || hasStoryAudio);
+  }
+
+  /**
+   * 
+   * @private
+   */
+  updateSoundPage_() {
+    const hasPageAudio = this.activePage_.element.hasAttribute('background-audio');
+    this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO,
+      hasPageAudio);   
+    console.log(this.activePage_.element.getAttribute('background-audio')+ ": " + 
+    this.storeService_.get(StateProperty.PAGE_HAS_AUDIO_STATE));
   }
 
   /** @private */
