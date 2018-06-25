@@ -151,8 +151,8 @@ Additional countries may be included with the preset list as in the `myList` exa
   <script type="application/json">
   {
     "ISOCountryGroups": {
-      "gdpr": [ "preset-gdpr" ],
-      "myList": [ "preset-gdpr", "ca", "au" , nz" ]
+      "eea": [ "preset-eea" ],
+      "myList": [ "preset-eea", "ca", "au" , nz" ]
     }
   }
   </script>
