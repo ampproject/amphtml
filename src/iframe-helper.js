@@ -132,8 +132,7 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
     } else if (sentinel === 'amp') {
-      // A non-3P code path, origin must match.
-      if (we.origin === origin && contentWindow == triggerWin) {
+      if (contentWindow == triggerWin) {
         windowEvents = we;
         break;
       }
