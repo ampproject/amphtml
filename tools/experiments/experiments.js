@@ -224,12 +224,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'amp-story-v1',
-    name: 'Visual storytelling in AMP (v1.0)',
-    spec: 'https://github.com/ampproject/amphtml/issues/14357',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
-  },
-  {
     id: 'amp-story-scaling',
     name: 'Scale pages dynamically in amp-story by default',
     spec: 'https://github.com/ampproject/amphtml/issues/12902',

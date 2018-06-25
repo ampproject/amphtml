@@ -56,15 +56,6 @@ export default {
     description: 'Label for a link to documentation on how AMP links are ' +
         'handled.',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
-    string: 'Enable',
-    description: 'Label for a button that enables the amp-story experiment.',
-  },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
-    string: 'Experiment enabled.  Please reload.',
-    description: 'Text that is shown once the amp-story experiment has ' +
-        'been successfully enabled.',
-  },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Tap Next',
     description: 'Label indicating that users can navigate to the next ' +
