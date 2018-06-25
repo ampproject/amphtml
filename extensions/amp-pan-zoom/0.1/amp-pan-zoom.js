@@ -167,9 +167,9 @@ export class AmpPanZoom extends AMP.BaseElement {
       }
       const scale = args['scale'] || 1;
       this.updatePanZoomBounds_(scale);
-      const x = this.boundX_(args['x'] || 0);
-      const y = this.boundY_(args['y'] || 0);
-      this.set_(scale, x, y, /*animate*/true).then(() => {
+      const x = this.boundX_(args['x'] || 0, /*allowExtent*/ false);
+      const y = this.boundY_(args['y'] || 0, /*allowExtent*/ false);
+      return this.set_(scale, x, y, /*animate*/ true).then(() => {
         this.onZoomRelease_();
       });
     });
