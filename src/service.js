@@ -260,12 +260,15 @@ export function getServicePromiseOrNull(win, id) {
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
  * Expects service `id` to be registered.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {string} id of the service.
+ * @param {string} id Service identifier.
+ * @param {boolean} assert Assert that nodeOrDoc is an AmpDoc or an element.
  * @return {T}
  * @template T
  */
-export function getServiceForDoc(nodeOrDoc, id) {
-  assertAmpDocOrElement(nodeOrDoc);
+export function getServiceForDoc(nodeOrDoc, id, assert = true) {
+  if (assert) {
+    assertAmpDocOrElement(nodeOrDoc);
+  }
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   return getServiceInternal(holder, id);

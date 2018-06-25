@@ -43,7 +43,7 @@ const resolved = Promise.resolve();
  */
 function getChunkServiceForDoc_(nodeOrAmpDoc) {
   registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+  return getServiceForDoc(nodeOrAmpDoc, 'chunk', /* assert*/ false);
 }
 
 /**
