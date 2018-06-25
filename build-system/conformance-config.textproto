@@ -84,6 +84,12 @@ requirement: {
 # Object
 
 requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Object.prototype.hasOwnProperty is not allowed, use hasOwn from src/utils/object.js instead'
+  value: 'Object.prototype.hasOwnProperty'
+}
+
+requirement: {
   type: BANNED_NAME
   error_message: 'Object.values is not allowed'
   value: 'Object.values'

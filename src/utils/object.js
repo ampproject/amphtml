@@ -56,7 +56,7 @@ export function dict(opt_initial) {
  * Checks if the given key is a property in the map.
  *
  * @param {T}  obj a map like property.
- * @param {string}  key
+ * @param {?string}  key
  * @return {boolean}
  * @template T
  */
