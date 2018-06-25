@@ -791,11 +791,11 @@ describe('Google A4A utils', () => {
       it(test.in, () => expect(extractHost(test.in)).to.equal(test.out)));
   });
 
-  describe('#getCorrelator', () => {
+  describes.realWin('#getCorrelator', {}, env => {
     let win;
 
     beforeEach(() => {
-      win = Object.assign({}, window);
+      win = env.win;
     });
 
     afterEach(() => {
@@ -810,10 +810,13 @@ describe('Google A4A utils', () => {
     });
 
     it('should calculate correlator from PVID and CID if possible', () => {
-      const pid = Services.documentInfoForDoc(win.document).pageViewId;
+      const pageViewId = '818181';
+      sandbox.stub(Services, 'documentInfoForDoc').callsFake(() => {
+        return {pageViewId};
+      });
       const cid = '12345678910';
       const correlator = getCorrelator(win, win.document, cid);
-      expect(String(correlator).match(pid)).to.be.ok;
+      expect(String(correlator).match(pageViewId)).to.be.ok;
     });
 
     it('should calculate randomly if experiment on', () => {
