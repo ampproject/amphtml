@@ -41,6 +41,10 @@ export function adincube(global, data) {
   loadScript(global, url);
 }
 
+/**
+ * @param {!JsonObject} data
+ * @return {string}
+ */
 function parseParams(data) {
   try {
     const params = JSON.parse(data);
