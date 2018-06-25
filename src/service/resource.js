@@ -186,7 +186,11 @@ export class Resource {
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
 
-    /** @private {?Object<number, !Deferred>} */
+    /**
+     * Really, this is a <number, !Deferred> map,
+     * but CC's type system can't handle it.
+     * @private {?Object<string, !Deferred>}
+     */
     this.withViewportDeferreds_ = null;
 
     /** @private {?Promise<undefined>} */
@@ -673,18 +677,19 @@ export class Resource {
     }
     // See if pre-existing promise.
     const viewportNum = dev().assertNumber(viewport);
+    const key = String(viewportNum);
     if (this.withViewportDeferreds_ &&
-        this.withViewportDeferreds_[viewportNum]) {
-      return this.withViewportDeferreds_[viewportNum].promise;
+        this.withViewportDeferreds_[key]) {
+      return this.withViewportDeferreds_[key].promise;
     }
     // See if already within viewport multiplier.
-    if (this.isWithinViewportRatio(viewport)) {
+    if (this.isWithinViewportRatio(viewportNum)) {
       return Promise.resolve();
     }
     // return promise that will trigger when within viewport multiple.
     this.withViewportDeferreds_ = this.withViewportDeferreds_ || {};
-    this.withViewportDeferreds_[viewportNum] = new Deferred();
-    return this.withViewportDeferreds_[viewportNum].promise;
+    this.withViewportDeferreds_[key] = new Deferred();
+    return this.withViewportDeferreds_[key].promise;
   }
 
   /** @private resolves promises populated via whenWithinViewport. */
@@ -693,15 +698,10 @@ export class Resource {
       return;
     }
     const viewportRatio = this.getDistanceViewportRatio();
-    const keys = Object.keys(this.withViewportDeferreds_);
-    for (let i = 0; i < keys.length; i++) {
-      // Despite type indicating object keys are numbers, JS stores them as
-      // strings so they need to be coverted back to floats in order to be
-      // used as numbers in isWithinViewportRatio.
-      const viewportNum = dev().assertNumber(parseFloat(keys[i]));
-      if (this.isWithinViewportRatio(viewportNum, viewportRatio)) {
-        this.withViewportDeferreds_[viewportNum].resolve();
-        delete this.withViewportDeferreds_[viewportNum];
+    for (const key in this.withViewportDeferreds_) {
+      if (this.isWithinViewportRatio(parseFloat(key), viewportRatio)) {
+        this.withViewportDeferreds_[key].resolve();
+        delete this.withViewportDeferreds_[key];
       }
     }
   }
