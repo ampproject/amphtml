@@ -379,9 +379,8 @@ export class ShareWidget {
       }
 
       user().warn('AMP-STORY',
-          'Invalid amp-story bookend share configuration for %s. ' +
-          'Value must be `true` or a params object.',
-          type);
+          `Invalid share providers configuration for "${type}" in bookend. ` +
+          'Value must be `true` or a params object.');
     });
   }
 

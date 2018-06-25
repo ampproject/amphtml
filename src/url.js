@@ -424,6 +424,18 @@ export function removeSearch(url) {
 }
 
 /**
+ * Returns the URL without the protocol.
+ * @param {string} url
+ * @return {string}
+ */
+export function removeProtocol(url) {
+  if (!url) {
+    return '';
+  }
+  return url.replace(/(^\w+:|^)\/\//, '');
+}
+
+/**
  * Removes parameters that start with amp js parameter pattern and returns the
  * new search string.
  * @param {string} urlSearch
