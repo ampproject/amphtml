@@ -191,11 +191,11 @@ export class IntersectionObserverApi {
  */
 export class IntersectionObserverPolyfill {
   /**
-   * @param {function(?Array<!IntersectionObserverEntry>)} callback
+   * @param {function(!Array<!IntersectionObserverEntry>)} callback
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {
-    /** @private @const {function(?Array<!IntersectionObserverEntry>)} */
+    /** @private @const {function(!Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
     // The input threshold can be a number or an array of numbers.

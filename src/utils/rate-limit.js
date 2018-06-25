@@ -75,7 +75,7 @@ export function debounce(win, callback, minInterval) {
   let nextCallArgs = null;
 
   /**
-   * @param {!Object} args
+   * @param {?Array} args
    */
   function fire(args) {
     nextCallArgs = null;
