@@ -167,7 +167,7 @@ exports.getBundleFlags = function(g) {
     let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend on _base.
     if (!isBase && g.bundles._base) {
-      if (media.includes(originalName) && false) {
+      if (media.includes(originalName)) {
         cmd += ':_base_media';
       } else if (ads.includes(originalName)) {
         cmd += ':_base_ads';
@@ -238,26 +238,21 @@ exports.getGraph = function(entryModules, config) {
         // The modules in the bundle.
         modules: [],
       },
-      //_base_media: {
-        //isBase: true,
-        //name: '_base_media',
-        //modules: [],
-      //},
-      //_base_common: {
-        //isBase: true,
-        //name: '_base_common',
-        //modules: [],
-      //},
+      _base_media: {
+        isBase: true,
+        name: '_base_media',
+        modules: [],
+      },
+      _base_social_media: {
+        isBase: true,
+        name: '_base_social_media',
+        modules: [],
+      },
       _base_ads: {
         isBase: true,
         name: '_base_ads',
         modules: [],
       },
-      //_base_all: {
-        //isBase: true,
-        //name: '_base_all',
-        //modules: [],
-      //}
     },
     packages: {},
     browserMask: {},
@@ -595,6 +590,7 @@ const media = [
   'extensions/amp-soundcloud/0.1/amp-soundcloud.js',
   'extensions/amp-audio/0.1/amp-audio.js',
   'extensions/amp-bodymovin-animation/0.1/amp-bodymovin-animation.js',
+  'extensions/amp-vimeo/0.1/amp-vimeo.js',
 ];
 
 const all = [
@@ -656,7 +652,6 @@ const all = [
   'extensions/amp-twitter/0.1/amp-twitter.js',
   'extensions/amp-user-notification/0.1/amp-user-notification.js',
   'extensions/amp-viewer-integration/0.1/amp-viewer-integration.js',
-  'extensions/amp-vimeo/0.1/amp-vimeo.js',
   'extensions/amp-vine/0.1/amp-vine.js',
   'extensions/amp-viz-vega/0.1/amp-viz-vega.js',
   'extensions/amp-vk/0.1/amp-vk.js',
