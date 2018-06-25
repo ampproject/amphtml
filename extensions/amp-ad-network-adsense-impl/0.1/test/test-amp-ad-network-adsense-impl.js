@@ -847,8 +847,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
         width: '320',
         height: '150',
       });
-      const isResponsiveSpy = sinon.spy(impl, 'isResponsive_');
-      const divertExperimentsSpy = sinon.spy(impl, 'divertExperiments');
+      const isResponsiveSpy = sandbox.spy(impl, 'isResponsive_');
+      const divertExperimentsSpy = sandbox.spy(impl, 'divertExperiments');
       impl.buildCallback();
       expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
     });
