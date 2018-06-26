@@ -592,7 +592,7 @@ export class AmpForm {
   handleXhrSubmitSuccess_(response) {
     return response.json().then(json => {
       this.triggerAction_(/* success */ true, json);
-      this.analyticsEvent_('amp-form-submit-success');
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.setState_(FormState_.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
