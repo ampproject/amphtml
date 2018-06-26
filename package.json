@@ -136,7 +136,7 @@
     "postcss": "6.0.23",
     "postcss-import": "11.1.0",
     "preact": "8.2.9",
-    "preact-compat": "3.17.0",
+    "preact-compat": "3.18.0",
     "pretty-bytes": "5.1.0",
     "prop-types": "15.6.2",
     "react": "16.4.0",
