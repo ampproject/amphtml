@@ -132,7 +132,7 @@
     "multer": "1.3.0",
     "nodemon": "1.17.5",
     "path": "0.12.7",
-    "plugin-error": "0.1.2",
+    "plugin-error": "1.0.1",
     "postcss": "6.0.23",
     "postcss-import": "11.1.0",
     "preact": "8.2.9",
