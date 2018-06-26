@@ -51,6 +51,9 @@ export class AmpImg extends BaseElement {
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
       this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
 
+      if (mutations['src'] || mutations['srcset']) {
+        this.removeFallbackIfImageLoaded_();
+      }
     }
   }
 
@@ -143,7 +146,7 @@ export class AmpImg extends BaseElement {
   /** @override */
   layoutCallback() {
     this.initialize_();
-    let promise = this.updateImageSrc_();
+    let promise = this.removeFallbackIfImageLoaded_();
 
     // We only allow to fallback on error on the initial layoutCallback
     // or else this would be pretty expensive.
@@ -179,7 +182,7 @@ export class AmpImg extends BaseElement {
    * @return {!Promise}
    * @private
    */
-  updateImageSrc_() {
+  removeFallbackIfImageLoaded_() {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
