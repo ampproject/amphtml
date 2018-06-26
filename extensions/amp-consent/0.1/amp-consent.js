@@ -105,6 +105,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
+
+    /** @private {boolean} */
+    this.isPostPromptUIRequired_ = false;
   }
 
   /** @override */
@@ -625,12 +628,18 @@ export class AmpConsent extends AMP.BaseElement {
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceState(instanceId)
         .then(state => {
+          if (state == CONSENT_ITEM_STATE.ACCEPTED ||
+              state == CONSENT_ITEM_STATE.REJECTED) {
+            // Need to display post prompt ui if user previous made a decision
+            this.isPostPromptUIRequired_ = true;
+          }
           if (state == CONSENT_ITEM_STATE.UNKNOWN) {
             if (!this.consentRequired_[instanceId]) {
               this.consentStateManager_.updateConsentInstanceState(
                   instanceId, CONSENT_ITEM_STATE.NOT_REQUIRED);
               return;
             }
+            this.isPostPromptUIRequired_ = true;
             // TODO(@zhouyx):
             // 1. Race condition on consent state change between schedule to
             //    display and display. Add one more check before display
@@ -644,6 +653,10 @@ export class AmpConsent extends AMP.BaseElement {
    * Handles the display of postPromptUI
    */
   handlePostPromptUI_() {
+    if (!this.isPostPromptUIRequired_) {
+      return;
+    }
+
     const {classList} = this.element;
     this.notificationUiManager_.onQueueEmpty(() => {
       if (!this.postPromptUI_) {
