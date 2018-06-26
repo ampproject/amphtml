@@ -354,7 +354,7 @@ describes.realWin('amp-list component', {
         return list.layoutCallback().catch(() => {});
       });
 
-      it('should hide placeholder and display fallback on fetch failure', () => {
+      it('should hide placeholder and show fallback on fetch failure', () => {
         // Stub fetch_() to fail.
         listMock.expects('fetch_').returns(Promise.reject()).once();
 
@@ -424,7 +424,7 @@ describes.realWin('amp-list component', {
         toggleExperiment(win, 'fast-amp-list', true, true);
       });
 
-      it('should not call Bind.scanAndApply() before FIRST_MUTATE', function*() {
+      it('should not call scanAndApply() before FIRST_MUTATE', function*() {
         const items = [{title: 'Title1'}];
         const output = [doc.createElement('div')];
         const rendered = expectFetchAndRender(items, output);
@@ -433,7 +433,7 @@ describes.realWin('amp-list component', {
         expect(bind.scanAndApply).to.not.have.been.called;
       });
 
-      it('should call Bind.scanAndApply() after FIRST_MUTATE', function*() {
+      it('should call scanAndApply() after FIRST_MUTATE', function*() {
         bind.signals = () => {
           return {get: name => (name === 'FIRST_MUTATE')};
         };
