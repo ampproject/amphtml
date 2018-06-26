@@ -53,6 +53,12 @@ const rawCreative = `
       })), '*');
   </script>`;
 
+/**
+ * Sets up the necessary mocks and stubs to render a fake fluid creative in unit
+ * tests.
+ * @param {!AmpAdNetworkDoubleclickImpl} impl
+ * @param {!Object} sandbox Sinon sandbox to mock out properties.
+ */
 function createScaffoldingForFluidRendering(impl, sandbox) {
   impl.getVsync = () => {
     return {
@@ -73,7 +79,6 @@ function createScaffoldingForFluidRendering(impl, sandbox) {
       impl, true, impl.creativeSize_);
   sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
 }
-
 
 describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   let impl;
