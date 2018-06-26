@@ -28,7 +28,7 @@ import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
 } from '../../../src/url';
-import {Services} from '../../../src/services';
+import {Services, TemplateRendererHelper} from '../../../src/services';
 import {
   ancestorElementsByTag,
   childElementByAttr,
@@ -56,6 +56,7 @@ import {
 } from '../../../src/dom';
 import {toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -141,6 +142,10 @@ export class AmpForm {
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
+
+    /** @private {!../../../src/service/template-renderer-helper.TemplateRendererHelper}*/
+    this.templateRendererHelper_ =
+        new TemplateRendererHelper(TAG, this.viewer_, this.templates_);
 
     /** @const @private {boolean} */
     this.viewerCanRenderTemplate_ = this.viewer_.canRenderTemplates();
@@ -450,9 +455,8 @@ export class AmpForm {
         this.actions_.trigger(
             this.form_, 'submit', /* event */ null, trust);
       }).then(() => {
-        return this.viewer_.fetchAndRenderTemplate(
+        return this.templateRendererHelper_.fetchAndRenderTemplate(
             this.form_,
-            TAG,
             this.handleProxyRenderTemplateSuccess_,
             this.handleProxyRenderTemplateFailure_
         );

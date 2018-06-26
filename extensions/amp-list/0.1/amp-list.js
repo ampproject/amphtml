@@ -30,6 +30,7 @@ import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import { TemplateRendererHelper } from '../../../src/service/template-renderer-helper';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -90,6 +91,10 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private */
     this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+
+    /** @private */
+    this.templateRendererHelper_ =
+        new TemplateRendererHelper(TAG, this.viewer_, this.templates_);
   }
 
   /** @override */
@@ -210,8 +215,8 @@ export class AmpList extends AMP.BaseElement {
       removeChildren(dev().assertElement(this.container_));
     }
     if (this.viewer_.canRenderTemplates()) {
-      return this.viewer_.fetchAndRenderTemplate(
-          this.element, TAG).then(resp => {
+      return this.templateRendererHelper_.fetchAndRenderTemplate(
+          this.element).then(resp => {
         user().assert(
             resp && (typeof resp.renderedHtml !== 'undefined'),
             'Response must define the rendered html');
