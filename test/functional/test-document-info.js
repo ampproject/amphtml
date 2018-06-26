@@ -232,7 +232,7 @@ describe('document-info', () => {
     });
   });
 
-  it('should provide the extraParams for an AMP landing page', () => {
+  it('should provide the replaceParams for an AMP landing page', () => {
     const base = 'https://cdn.ampproject.org/a/www.origin.com/foo/';
     const win = {
       document: {
@@ -247,11 +247,11 @@ describe('document-info', () => {
     win.document.defaultView = win;
     installDocService(win, /* isSingleDoc */ true);
     installDocumentInfoServiceForDoc(win.document);
-    expect(Services.documentInfoForDoc(win.document).extraParams)
+    expect(Services.documentInfoForDoc(win.document).replaceParams)
         .to.deep.equal({'test': 'hello world'});
   });
 
-  it('should not have extraParams for non-AMP landing page', () => {
+  it('should not have replaceParams for non-AMP landing page', () => {
     const base = 'https://cdn.ampproject.org/v/www.origin.com/foo/';
     const win = {
       document: {
@@ -266,11 +266,11 @@ describe('document-info', () => {
     win.document.defaultView = win;
     installDocService(win, /* isSingleDoc */ true);
     installDocumentInfoServiceForDoc(win.document);
-    expect(Services.documentInfoForDoc(win.document).extraParams)
+    expect(Services.documentInfoForDoc(win.document).replaceParams)
         .to.deep.equal({});
   });
 
-  it('should not provide the extraParams if invalid', () => {
+  it('should not provide the replaceParams if invalid', () => {
     const base = 'https://cdn.ampproject.org/a/www.origin.com/foo/';
     const win = {
       document: {
@@ -285,7 +285,7 @@ describe('document-info', () => {
     win.document.defaultView = win;
     installDocService(win, /* isSingleDoc */ true);
     installDocumentInfoServiceForDoc(win.document);
-    expect(Services.documentInfoForDoc(win.document).extraParams)
+    expect(Services.documentInfoForDoc(win.document).replaceParams)
         .to.deep.equal({});
   });
 });

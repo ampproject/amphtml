@@ -352,7 +352,9 @@ export function isProxyOrigin(url) {
 }
 
 /**
- * Returns whether the URL corresponds to an advertisement with a proxy origin.
+ * For proxy-origin URLs, returns the serving type. Otherwise, returns null.
+ * E.g., 'https://amp-com.cdn.ampproject.org/a/s/amp.com/amp_document.html'
+ * returns 'a'.
  * @param {string|!Location} url URL of an AMP document.
  * @return {?string}
  */
@@ -363,7 +365,7 @@ export function getProxyServingType(url) {
   if (!isProxyOrigin(url)) {
     return null;
   }
-  const path = url.pathname.split('/');
+  const path = url.pathname.split('/', 2);
   return path[1];
 }
 
@@ -401,16 +403,10 @@ export function isProtocolValid(url) {
  * @return {string}
  */
 export function removeAmpJsParamsFromUrl(url) {
-  const mainAndFragment = url.split('#', 2);
-  const mainAndQuery = mainAndFragment[0].split('?', 2);
-  // No query string.
-  if (!mainAndQuery[1]) {
-    return url;
-  }
-  const filteredSearch = removeAmpJsParamsFromSearch(`?${mainAndQuery[1]}`);
-  let newUrl = mainAndQuery[0] + filteredSearch;
-  newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
-  return newUrl;
+  const parsed = parseUrlDeprecated(url);
+  const search = removeAmpJsParamsFromSearch(parsed.search);
+  return parsed.origin + parsed.pathname + search + parsed.hash;
+
 }
 
 /**
@@ -419,10 +415,12 @@ export function removeAmpJsParamsFromUrl(url) {
  * @return {string}
  */
 export function removeSearch(url) {
-  const mainAndFragment = url.split('#', 2);
-  const mainAndQuery = mainAndFragment[0].split('?', 2);
-  return mainAndQuery[0] +
-      (mainAndFragment[1] ? `#${mainAndFragment[1]}` : '');
+  const index = url.indexOf('?');
+  if (index == -1) {
+    return url;
+  }
+  const fragment = getFragment(url);
+  return url.substring(0, index) + fragment;
 }
 
 /**

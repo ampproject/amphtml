@@ -450,11 +450,11 @@ describe('removeSearch', () => {
     expect(removeSearch('https://twitter.com/path#f')).to.equal(
         'https://twitter.com/path#f');
   });
-  it('should remove empty fragment', () => {
+  it('should handle empty fragment', () => {
     expect(removeSearch('https://twitter.com/path#')).to.equal(
-        'https://twitter.com/path');
+        'https://twitter.com/path#');
     expect(removeSearch('https://twitter.com/path?#')).to.equal(
-        'https://twitter.com/path');
+        'https://twitter.com/path#');
   });
 });
 
@@ -850,32 +850,38 @@ describe('getCorsUrl', () => {
 
 
 describe('removeAmpJsParamsFromUrl', () => {
-  it('should leave unaffected URLs alone', () => {
+  it('should handle unaffected URLs', () => {
     expect(removeAmpJsParamsFromUrl('http://example.com'))
-        .to.equal('http://example.com');
+        .to.equal('http://example.com/');
     expect(removeAmpJsParamsFromUrl('http://example.com?x=123'))
-        .to.equal('http://example.com?x=123');
+        .to.equal('http://example.com/?x=123');
     expect(removeAmpJsParamsFromUrl('http://example.com#x=123'))
-        .to.equal('http://example.com#x=123');
+        .to.equal('http://example.com/#x=123');
     expect(removeAmpJsParamsFromUrl('http://example.com?y=abc#x=123'))
-        .to.equal('http://example.com?y=abc#x=123');
+        .to.equal('http://example.com/?y=abc#x=123');
   });
 
   it('should remove all internal params', () => {
     expect(removeAmpJsParamsFromUrl('http://example.com?amp_js=1&amp_gsa=2&amp_r=3&usqp=4'))
-        .to.equal('http://example.com');
+        .to.equal('http://example.com/');
     expect(removeAmpJsParamsFromUrl('http://example.com?amp_js&amp_gsa&amp_r&usqp'))
-        .to.equal('http://example.com');
+        .to.equal('http://example.com/');
   });
 
   it('should remove all internal params, leaving others intact', () => {
     expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e'))
-        .to.equal('http://example.com?a=a&b=b&c=c&d=d&e=e');
+        .to.equal('http://example.com/?a=a&b=b&c=c&d=d&e=e');
   });
 
   it('should preserve the fragment', () => {
     expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e#frag=yes'))
-        .to.equal('http://example.com?a=a&b=b&c=c&d=d&e=e#frag=yes');
+        .to.equal('http://example.com/?a=a&b=b&c=c&d=d&e=e#frag=yes');
+  });
+
+  it('should preserve the path', () => {
+    expect(
+        removeAmpJsParamsFromUrl('http://example.com/toast?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e#frag=yes'))
+        .to.equal('http://example.com/toast?a=a&b=b&c=c&d=d&e=e#frag=yes');
   });
 });
 

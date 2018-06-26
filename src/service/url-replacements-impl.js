@@ -197,7 +197,7 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the URL for this AMP document.
     this.set('AMPDOC_URL', () => {
       return removeFragment(
-          this.mergeReplaceParamsIntoUrl_(
+          this.addReplaceParamsIfMissing_(
               this.ampdoc.win.location.href));
     });
 
@@ -217,12 +217,12 @@ export class GlobalVariableSource extends VariableSource {
     this.setBoth('SOURCE_URL', () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
       return removeFragment(
-          this.mergeReplaceParamsIntoUrl_(docInfo.sourceUrl));
+          this.addReplaceParamsIfMissing_(docInfo.sourceUrl));
     }, () => {
       return getTrackImpressionPromise().then(() => {
         const docInfo = Services.documentInfoForDoc(this.ampdoc);
         return removeFragment(
-            this.mergeReplaceParamsIntoUrl_(docInfo.sourceUrl));
+            this.addReplaceParamsIfMissing_(docInfo.sourceUrl));
       });
     });
 
@@ -595,14 +595,15 @@ export class GlobalVariableSource extends VariableSource {
    * preferring values set in the original query string.
    * @param {string} orig The original URL
    * @return {string} The resulting URL
+   * @private
    */
-  mergeReplaceParamsIntoUrl_(orig) {
-    const {extraParams} =
+  addReplaceParamsIfMissing_(orig) {
+    const {replaceParams} =
         /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
     const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
     const params = parseQueryString(url.search);
     return addParamsToUrl(removeSearch(orig),
-        /** @type {!JsonObject} **/ (Object.assign({}, extraParams, params)));
+        /** @type {!JsonObject} **/ (Object.assign({}, replaceParams, params)));
   }
 
   /**
@@ -664,12 +665,14 @@ export class GlobalVariableSource extends VariableSource {
         removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
     const key = /** @type {string} */(param);
-    const {extraParams} = Services.documentInfoForDoc(this.ampdoc);
-    return (typeof params[key] !== 'undefined')
-      ? params[key]
-      : ((typeof extraParams[key] !== 'undefined')
-        ? extraParams[key]
-        : defaultValue);
+    const {replaceParams} = Services.documentInfoForDoc(this.ampdoc);
+    if (typeof params[key] !== 'undefined') {
+      return params[key];
+    }
+    if (typeof replaceParams[key] !== 'undefined') {
+      return /** @type {string} */(replaceParams[key]);
+    }
+    return defaultValue;
   }
 
   /**
