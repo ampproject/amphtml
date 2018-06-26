@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.22.13 */
+ /** Version: 0.1.22.14 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -2225,7 +2225,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.13',
+    '_client': 'SwG 0.1.22.14',
   });
 }
 
@@ -2287,6 +2287,12 @@ class PayStartFlow {
    */
   static preconnect(pre) {
     pre.prefetch(payUrl());
+    pre.prefetch(
+        'https://payments.google.com/payments/v4/js/integrator.js?ss=md');
+    pre.prefetch('https://clients2.google.com/gr/gr_full_2.0.6.js');
+    pre.preconnect('https://www.gstatic.com/');
+    pre.preconnect('https://fonts.googleapis.com/');
+    pre.preconnect('https://www.google.com/');
   }
 
   /**
