@@ -687,7 +687,7 @@ export class SafeframeHostApi {
       // TODO(levitzky) Add actual error handling here.
       this.baseInstance_.forceCollapse();
       return;
-    } debugger;
+    }
     this.baseInstance_.attemptChangeHeight(newHeight)
         .then(() => {
           this.checkStillCurrent_();
@@ -709,9 +709,7 @@ export class SafeframeHostApi {
    * @private
    */
   onFluidResize_(newHeight) {
-    const iframe = this.baseInstance_.iframe;
-    dev().assert(iframe,
-        'Attempting to resize fluid creative without creative iframe');
+    const iframe = dev().assertElement(this.baseInstance_.iframe);
     const iframeHeight = parseInt(getStyle(iframe, 'height'), 10) || 0;
     if (iframeHeight != newHeight) {
       setStyles(iframe, {height: `${newHeight}px`});
