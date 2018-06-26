@@ -56,12 +56,10 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {
   LocalizationService,
-  LocalizedStringId,
   createPseudoLocale,
 } from './localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
-import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
@@ -75,7 +73,6 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
-  removeElement,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {
@@ -90,10 +87,9 @@ import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMode} from '../../../src/mode';
-import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
-import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsDefault from './_locales/default';
@@ -261,9 +257,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?./pagination-buttons.PaginationButtons} */
     this.paginationButtons_ = null;
 
-    /** @private @const {!Array<string>} */
-    this.originWhitelist_ = ORIGIN_WHITELIST;
-
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win, this.element);
 
@@ -316,8 +309,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.assertAmpStoryExperiment_();
-
     if (this.element.hasAttribute(Attributes.STANDALONE)) {
       this.initializeStandaloneStory_();
     }
@@ -718,102 +709,6 @@ export class AmpStory extends AMP.BaseElement {
   prerenderAllowed() {
     return true;
   }
-
-
-  /** @private */
-  isAmpStoryEnabled_() {
-    const {win} = this;
-    const {location} = win;
-
-    if (isExperimentOn(win, 'amp-story-v1') || getMode().test ||
-        location.protocol === 'file:') {
-      return true;
-    }
-
-    const origin = Services.urlForDoc(this.element).getSourceOrigin(location);
-    return this.isOriginWhitelisted_(origin);
-  }
-
-
-  /**
-   * @param {string} domain The domain part of the origin, to be hashed.
-   * @return {string} The hashed origin.
-   * @private
-   */
-  hashOrigin_(domain) {
-    return stringHash32(domain.toLowerCase());
-  }
-
-
-  /**
-   * @param {string} origin The origin to check.
-   * @return {boolean} Whether the specified origin is whitelisted to use the
-   *     amp-story extension.
-   * @private
-   */
-  isOriginWhitelisted_(origin) {
-    const {hostname} = Services.urlForDoc(this.element).parse(origin);
-    const domains = hostname.split('.');
-
-    // Check all permutations of the domain to see if any level of the domain is
-    // whitelisted.  Taking the example of the whitelisted domain
-    // example.co.uk, if the page is served from www.example.co.uk/page.html:
-    //
-    //   www.example.co.uk => false
-    //   example.co.uk => true
-    //   co.uk => false
-    //   uk => false
-    //
-    // This is necessary, since we don't have any guarantees of which level of
-    // the domain is whitelisted.  For many domains (e.g. .com), the second
-    // level of the domain is likely to be whitelisted, whereas for others
-    // (e.g. .co.uk) the third level may be whitelisted.  Additionally, this
-    // allows subdomains to be whitelisted individually.
-    return domains.some((unusedDomain, index) => {
-      const domain = domains.slice(index, domains.length).join('.');
-      const domainHash = this.hashOrigin_(domain);
-      return this.originWhitelist_.includes(domainHash);
-    });
-  }
-
-
-  /** @private */
-  assertAmpStoryExperiment_() {
-    if (this.isAmpStoryEnabled_()) {
-      return;
-    }
-
-    const errorIconEl = this.win.document.createElement('div');
-    errorIconEl.classList.add('i-amphtml-story-experiment-icon');
-    errorIconEl.classList.add('i-amphtml-story-experiment-icon-error');
-
-    const errorMsgEl = this.win.document.createElement('span');
-    errorMsgEl.textContent = this.localizationService_.getLocalizedString(
-        LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT);
-
-    const experimentsLinkEl = this.win.document.createElement('button');
-    experimentsLinkEl.textContent = this.localizationService_
-        .getLocalizedString(
-            LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
-    experimentsLinkEl.addEventListener('click', () => {
-      toggleExperiment(this.win, 'amp-story-v1', true);
-      errorIconEl.classList.remove('i-amphtml-story-experiment-icon-error');
-      errorIconEl.classList.add('i-amphtml-story-experiment-icon-done');
-      errorMsgEl.textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT);
-      removeElement(experimentsLinkEl);
-    });
-
-    const errorEl = this.win.document.createElement('div');
-    errorEl.classList.add('i-amphtml-story-experiment-error');
-    errorEl.appendChild(errorIconEl);
-    errorEl.appendChild(errorMsgEl);
-    errorEl.appendChild(experimentsLinkEl);
-    this.element.appendChild(errorEl);
-
-    user().error(TAG, 'enable amp-story experiment');
-  }
-
 
   /** @private */
   initializePages_() {

@@ -484,57 +484,12 @@ function runYarnLockfileCheck() {
 }
 
 /**
- * Returns true if this is a PR build for a greenkeeper branch.
- */
-function isGreenkeeperPrBuild() {
-  return (process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
-      (process.env.TRAVIS_PULL_REQUEST_BRANCH.startsWith('greenkeeper/'));
-}
-
-/**
- * Returns true if this is a push build for a greenkeeper branch.
- */
-function isGreenkeeperPushBuild() {
-  return (process.env.TRAVIS_EVENT_TYPE == 'push') &&
-      (process.env.TRAVIS_BRANCH.startsWith('greenkeeper/'));
-}
-
-/**
- * Returns true if this is a push build for a lockfile update on a greenkeeper
- * branch.
- */
-function isGreenkeeperLockfilePushBuild() {
-  return isGreenkeeperPushBuild() &&
-      (process.env.TRAVIS_COMMIT_MESSAGE.startsWith(
-          'chore(package): update lockfile'));
-}
-
-/**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
  * @return {number}
  */
 function main() {
   const startTime = startTimer('pr-check.js');
-
-  if (isGreenkeeperPrBuild()) {
-    console.log(fileLogPrefix,
-        'This is a greenkeeper PR build. Tests will be run for the push ' +
-        'build with the lockfile update.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
-  }
-
-  if (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild()) {
-    console.log(fileLogPrefix,
-        'This is a greenkeeper push build. Updating and uploading lockfile...');
-    timedExec('./node_modules/.bin/greenkeeper-lockfile-update');
-    timedExec('./node_modules/.bin/greenkeeper-lockfile-upload');
-    console.log(fileLogPrefix, 'Lockfile updated and uploaded. Tests will be ' +
-        'run for the subsequent push build with the lockfile update.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
-  }
 
   // Make sure package.json and yarn.lock are in sync and up-to-date.
   runYarnIntegrityCheck();
