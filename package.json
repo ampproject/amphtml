@@ -138,7 +138,7 @@
     "preact": "8.2.9",
     "preact-compat": "3.17.0",
     "pretty-bytes": "5.1.0",
-    "prop-types": "15.6.1",
+    "prop-types": "15.6.2",
     "react": "16.4.0",
     "react-addons-shallow-compare": "15.6.2",
     "react-dates": "16.7.0",
