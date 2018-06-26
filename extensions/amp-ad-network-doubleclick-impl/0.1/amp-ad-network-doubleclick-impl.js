@@ -998,7 +998,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // TODO(@glevitzky, 11583) Remove this clause once we stop sending back
         // the size header for fluid ads. Fluid size headers always come back as
         // 0x0.
-        !(size.width == 0 && size.height == 0);
+        !(size.width == 0 && size.height == 0); debugger;
     setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
       height: `${size.height}px`,
