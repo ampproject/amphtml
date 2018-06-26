@@ -441,7 +441,8 @@ export class Navigation {
    * @private
    */
   parseUrl_(url) {
-    return Services.urlForDoc(this.ampdoc).parse(url);
+    // Must use URL parsing scoped to this.rootNode_ for correct FIE behavior.
+    return Services.urlForDoc(this.rootNode_).parse(url);
   }
 }
 

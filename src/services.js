@@ -84,13 +84,15 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * Unlike most service getters, passing `Node` is necessary for some FIE-scope
+   * services since sometimes we only have the FIE Document for context.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!./service/action-impl.ActionService}
    */
-  static actionServiceForDoc(elementOrAmpDoc) {
+  static actionServiceForDoc(nodeOrDoc) {
     return /** @type {!./service/action-impl.ActionService} */ (
       getExistingServiceForDocInEmbedScope(
-          elementOrAmpDoc, 'action', /* opt_fallbackToTopWin */ true));
+          nodeOrDoc, 'action', /* opt_fallbackToTopWin */ true));
   }
 
   /**
@@ -441,13 +443,15 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * Unlike most service getters, passing `Node` is necessary for some FIE-scope
+   * services since sometimes we only have the FIE Document for context.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
-  static urlReplacementsForDoc(elementOrAmpDoc) {
+  static urlReplacementsForDoc(nodeOrDoc) {
     return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
       getExistingServiceForDocInEmbedScope(
-          elementOrAmpDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
+          nodeOrDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
   }
 
   /**
@@ -485,13 +489,15 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * Unlike most service getters, passing `Node` is necessary for some FIE-scope
+   * services since sometimes we only have the FIE Document for context.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!./service/url-impl.Url}
    */
-  static urlForDoc(elementOrAmpDoc) {
+  static urlForDoc(nodeOrDoc) {
     return /** @type {!./service/url-impl.Url} */ (
       getExistingServiceForDocInEmbedScope(
-          elementOrAmpDoc, 'url', /* opt_fallbackToTopWin */ true));
+          nodeOrDoc, 'url', /* opt_fallbackToTopWin */ true));
   }
 
   /**

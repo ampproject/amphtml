@@ -68,8 +68,7 @@ export class StandardActions {
 
   /** @override */
   adoptEmbedWindow(embedWin) {
-    const ampdoc = getAmpdoc(embedWin.document);
-    this.installActions_(Services.actionServiceForDoc(ampdoc));
+    this.installActions_(Services.actionServiceForDoc(embedWin.document));
   }
 
   /**
