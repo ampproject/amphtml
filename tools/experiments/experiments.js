@@ -322,13 +322,6 @@ const EXPERIMENTS = [
     spec: 'TODO',
     cleanupIssue: 'TODO',
   },
-  {
-    id: 'amp-pan-zoom',
-    name: 'Enables zoom / pan manipulation of arbitrary elements' +
-      ' with amp-pan-zoom',
-    spec: 'https://github.com/ampproject/amphtml/issues/13602',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/15594',
-  },
 ];
 
 if (getMode().localDev) {
