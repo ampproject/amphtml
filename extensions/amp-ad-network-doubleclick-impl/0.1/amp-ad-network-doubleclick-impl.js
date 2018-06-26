@@ -152,9 +152,8 @@ let LayoutRectOrDimsDef;
 /**
  * @param {!Array<AmpAdNetworkDoubleclickImpl>} instances
  * @return {?Object<string,string>}
- * @visibleForTesting
  */
-export function combineInventoryUnits(instances) {
+function combineInventoryUnits(instances) {
   const uniqueIuNames = {};
   let uniqueIuNamesCount = 0;
   const prevIusEncoded = [];
@@ -181,88 +180,82 @@ export function combineInventoryUnits(instances) {
   };
 }
 
-/* eslint-disable jsdoc/require-param */
 /**
- * Array of functions used to combine block level request parameters for SRA
- * request.
- * @private @const {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>>}
+ * Given array of instances, having previous called populateAdUrlState, join
+ * block state into SRA parameter.
+ * @enum {function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>}
+ * @visibleForTesting
  */
-const BLOCK_SRA_COMBINERS_ = [
-  combineInventoryUnits,
-  // Although declared at a block-level, this is actually page level so
-  // return true if ANY indicate cookie opt out.
-  instances => getFirstInstanceValue_(instances, instance => {
-    return instance.jsonTargeting_ &&
-        instance.jsonTargeting_['cookieOptOut'] ? {'co': '1'} : null;
-  }),
-  instances => {
-    return {'adks': instances.map(instance => instance.adKey_).join()};
-  },
-  instances => {
-    return {'prev_iu_szs': instances.map(instance =>
-      instance.parameterSize_).join()};
-  },
-  // Although declared at a block-level, this is actually page level so
-  // return true if ANY indicate TFCD.
-  instances => getFirstInstanceValue_(instances, instance => {
-    return instance.jsonTargeting_ && instance.jsonTargeting_[TFCD] ?
-      {'tfcd': instance.jsonTargeting_[TFCD]} : null;
-  }),
-  // Although declared at a block-level, this is actually page level so
-  // return true if ANY indicate manual experiment.
-  instances => getFirstInstanceValue_(instances, instance => {
-    return isInManualExperiment(instance.element) ? {'adtest': 'on'} : null;
-  }),
-  instances => {
+export const SRA_JOINER = {
+  IU: combineInventoryUnits,
+  COOKIE_OPT_OUT: impls => getFirstInstanceValue_(impls, impl =>
+    impl.jsonTargeting_ &&
+        impl.jsonTargeting_['cookieOptOut'] ? {'co': '1'} : null),
+  ADK: impls => ({'adks': impls.map(impl => dev().assert(impl.adKey_)).join()}),
+  PREV_IU_SIZE: impls => ({'prev_iu_szs': impls.map(impl =>
+    dev().assert(impl.parameterSize_)).join()}),
+  TFCD: impls => getFirstInstanceValue_(impls, impl =>
+    impl.jsonTargeting_ && impl.jsonTargeting_[TFCD] ?
+      {'tfcd': impl.jsonTargeting_[TFCD]} : null),
+  ADTEST: impls => getFirstInstanceValue_(impls, impl =>
+    isInManualExperiment(impl.element) ? {'adtest': 'on'} : null),
+  SCP: impls => {
+    let hasScp = false;
     const scps = [];
-    instances.forEach(instance => {
-      if (instance.jsonTargeting_ && instance.jsonTargeting_['targeting'] &&
-        instance.jsonTargeting_['categoryExclusions']) {
+    impls.forEach(impl => {
+      if (impl.jsonTargeting_ && (impl.jsonTargeting_['targeting'] ||
+        impl.jsonTargeting_['categoryExclusions'])) {
+        hasScp = true;
         scps.push(serializeTargeting_(
-            instance.jsonTargeting_['targeting'] || null,
-            instance.jsonTargeting_['categoryExclusions'] || null));
+            impl.jsonTargeting_['targeting'] || null,
+            impl.jsonTargeting_['categoryExclusions'] || null));
+      } else {
+        scps.push('');
       }
     });
-    return scps.length ? {'prev_scp': scps.join('|')} : null;
+    return hasScp ? {'prev_scp': scps.join('|')} : null;
   },
-  instances => {
+  EID: impls => {
     const eids = {};
-    instances.forEach(instance => {
-      instance.experimentIds.forEach(eid => eids[eid] = 1);
-      const deid = /(?:#|,)deid=(\d+)/i.exec(instance.win.location.hash);
-      if (deid) {
-        eids[deid[1]] = 1;
-      }
-    });
-    return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
+    const deid = impls.length &&
+      /(?:#|,)deid=([\d,]+)/i.exec(impls[0].win.location.hash) || [];
+    (deid[1] || '').split(',').forEach(eid => eids[eid] = 1);
+    impls.forEach(impl => impl.experimentIds.forEach(eid => eids[eid] = 1));
+    const eidKeys = Object.keys(eids).join();
+    return eidKeys ? {'eid': eidKeys} : null;
   },
-  instances => getFirstInstanceValue_(instances,
-      instance => instance.buildIdentityParams_()),
-  instances => {
+  IDENTITY: impls => getFirstInstanceValue_(impls,
+      impl => impl.buildIdentityParams_()),
+  FORCE_SAFEFRAME: impls => {
     let safeframeForced = false;
     const forceSafeframes = [];
-    instances.forEach(instance => {
-      safeframeForced = safeframeForced || instance.forceSafeframe_;
-      forceSafeframes.push(Number(instance.forceSafeframe_));
+    impls.forEach(impl => {
+      safeframeForced = safeframeForced || impl.forceSafeframe_;
+      forceSafeframes.push(Number(impl.forceSafeframe_));
     });
-    return safeframeForced ? {'fsfs': forceSafeframes.join(',')} : null;
+    return safeframeForced ? {'fsfs': forceSafeframes.join()} : null;
   },
-  instances => ({'adxs':
-    instances.map(instance => instance.getPageLayoutBox().left).join()}),
-  instances => ({'adys':
-    instances.map(instance => instance.getPageLayoutBox().top).join()}),
-  instances => {
+  PAGE_OFFSET: impls => {
+    const adxs = [];
+    const adys = [];
+    impls.forEach(impl => {
+      const layoutBox = impl.getPageLayoutBox();
+      adxs.push(layoutBox.left);
+      adys.push(layoutBox.top);
+    });
+    return {'adxs': adxs.join(), 'adys': adys.join()};
+  },
+  CONTAINERS: impls => {
     let hasAmpContainer = false;
     const result = [];
-    instances.forEach(instance => {
-      const containers = getEnclosingContainerTypes(instance.element);
+    impls.forEach(impl => {
+      const containers = getEnclosingContainerTypes(impl.element);
       result.push(containers.join());
       hasAmpContainer = hasAmpContainer || !!containers.length;
     });
     return hasAmpContainer ? {'acts': result.join('|')} : null;
   },
-];
-/* eslint-enable jsdoc/require-param */
+};
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
@@ -1435,8 +1428,8 @@ function constructSRARequest_(a4a, instances) {
  */
 export function constructSRABlockParameters(instances) {
   const parameters = {'output': 'ldjh', 'impl': 'fifs'};
-  BLOCK_SRA_COMBINERS_.forEach(
-      combiner => Object.assign(parameters, combiner(instances)));
+  Object.keys(SRA_JOINER).forEach(
+      key => Object.assign(parameters, SRA_JOINER[key](instances)));
   return parameters;
 }
 

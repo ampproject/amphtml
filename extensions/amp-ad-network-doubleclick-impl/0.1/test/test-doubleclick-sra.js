@@ -23,8 +23,8 @@ import {
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAdNetworkDoubleclickImpl,
+  SRA_JOINER,
   TFCD,
-  combineInventoryUnits,
   constructSRABlockParameters,
   getNetworkId,
   resetSraStateForTesting,
@@ -91,6 +91,158 @@ describes.realWin('Doubleclick SRA', config , env => {
       expect(impl.useSra).to.be.true;
       impl.layoutCallback();
       expect(impl.refreshManager_).to.be.null;
+    });
+  });
+
+  describe('SRA_JOINER', () => {
+    Object.keys(SRA_JOINER).forEach(name => {
+      const joiner = SRA_JOINER[name];
+      const impls = [];
+      it(name, () => {
+        switch (name) {
+          case 'IU':
+            for (let i = 0; i < 2; i++) {
+              impls.push({
+                element: {
+                  getAttribute: name => {
+                    expect(name).to.equal('data-slot');
+                    return '/1234/foo.com/news/world/2018/06/17/article';
+                  },
+                },
+              });
+            }
+            expect(joiner(impls)).to.jsonEqual({
+              'iu_parts': '1234,foo.com,news,world,2018,06,17,article',
+              'enc_prev_ius': '0/1/2/3/4/5/6/7,0/1/2/3/4/5/6/7',
+            });
+            break;
+          case 'COOKIE_OPT_OUT':
+            expect(joiner(impls)).to.be.null;
+            impls[0] = {};
+            expect(joiner(impls)).to.be.null;
+            impls[1] = {jsonTargeting_: {}};
+            expect(joiner(impls)).to.be.null;
+            impls[2] = {jsonTargeting_: {'cookieOptOut': 1}};
+            expect(joiner(impls)).to.jsonEqual({'co': '1'});
+            break;
+          case 'ADK': {
+            expect(joiner(impls)).to.jsonEqual({'adks': ''});
+            const expected = [];
+            for (let i = 1; i <= 10; i++) {
+              impls.push({adKey_: i});
+              expected.push(i);
+            }
+            expect(joiner(impls)).to.jsonEqual({'adks': expected.join()});
+            break;
+          }
+          case 'PREV_IU_SIZE': {
+            expect(joiner(impls)).to.jsonEqual({'prev_iu_szs': ''});
+            const expected = [];
+            for (let i = 1; i <= 10; i++) {
+              impls.push({parameterSize_: i});
+              expected.push(i);
+            }
+            expect(joiner(impls)).to.jsonEqual(
+                {'prev_iu_szs': expected.join()});
+            break;
+          }
+          case 'TFCD':
+            expect(joiner(impls)).to.be.null;
+            expect(joiner([{}])).to.be.null;
+            impls[0] = {};
+            impls[1] = {jsonTargeting_: {}};
+            impls[2] = {jsonTargeting_: {[TFCD]: 'foo'}};
+            impls[3] = {jsonTargeting_: {[TFCD]: 'bar'}};
+            expect(joiner(impls)).to.jsonEqual({'tfcd': 'foo'});
+            break;
+          case 'ADTEST':
+            expect(joiner(impls)).to.be.null;
+            impls[0] = {
+              element: {
+                getAttribute: name => {
+                  expect(name).to.equal('data-experiment-id');
+                  return undefined;
+                },
+              },
+            };
+            impls[0] = {
+              element: {
+                getAttribute: name => {
+                  expect(name).to.equal('data-experiment-id');
+                  return undefined;
+                },
+              },
+            };
+            impls[1] = {
+              element: {
+                getAttribute: name => {
+                  expect(name).to.equal('data-experiment-id');
+                  return '123,117152632,456';
+                },
+              },
+            };
+            expect(joiner(impls)).to.jsonEqual({'adtest': 'on'});
+            break;
+          case 'SCP':
+            expect(joiner(impls)).to.be.null;
+            impls[0] = {jsonTargeting_: {}};
+            expect(joiner(impls)).to.be.null;
+            impls[1] = {jsonTargeting_: {targeting: {a: 1, b: 2}}};
+            expect(joiner(impls)).to.jsonEqual({'prev_scp': '|a=1&b=2'});
+            impls[2] = {jsonTargeting_: {targeting: {c: 1, d: 'l=d'},
+              categoryExclusions: ['a','b']}};
+            impls[3] = {};
+            expect(joiner(impls)).to.jsonEqual(
+                {'prev_scp': '|a=1&b=2|c=1&d=l%3Dd&excl_cat=a,b|'});
+            break;
+          case 'EID':
+            expect(joiner(impls)).to.be.null;
+            impls[0] = {win: {location: {hash: '#deid=123,456,7'}},
+              experimentIds: []};
+            // NOTE(keithwrightbos): let's hope this doesn't flake given eids
+            // are stored in object.
+            expect(joiner(impls)).to.jsonEqual({'eid': '7,123,456'});
+            impls[0].experimentIds = ['901', '902'];
+            expect(joiner(impls)).to.jsonEqual({'eid': '7,123,456,901,902'});
+            impls[1] = {experimentIds: ['902', '903']};
+            expect(joiner(impls)).to.jsonEqual(
+                {'eid': '7,123,456,901,902,903'});
+            break;
+          case 'IDENTITY':
+            impls[0] = {buildIdentityParams_: () => ({a: 123, b: 456})};
+            impls[1] = {buildIdentityParams_: () => {throw new Error();}};
+            expect(joiner(impls)).to.jsonEqual({a: 123, b: 456});
+            break;
+          case 'FORCE_SAFEFRAME':
+            expect(joiner(impls)).to.be.null;
+            impls[0] = {forceSafeframe_: false};
+            expect(joiner(impls)).to.be.null;
+            impls[1] = {forceSafeframe_: true};
+            expect(joiner(impls)).to.jsonEqual({'fsfs': '0,1'});
+            impls[2] = {forceSafeframe_: true};
+            expect(joiner(impls)).to.jsonEqual({'fsfs': '0,1,1'});
+            break;
+          case 'PAGE_OFFSET':
+            impls[0] = {getPageLayoutBox: () => ({left: 123, top: 456})};
+            expect(joiner(impls)).to.jsonEqual({'adxs': '123', 'adys': '456'});
+            impls[1] = {getPageLayoutBox: () => ({left: 123, top: 789})};
+            expect(joiner(impls)).to.jsonEqual(
+                {'adxs': '123,123', 'adys': '456,789'});
+            break;
+          case 'CONTAINERS':
+            expect(joiner(impls)).to.be.null;
+            impls[0] = {element: {}};
+            expect(joiner(impls)).to.be.null;
+            impls[1] = {element: {parentElement: {tagName: 'AMP-CAROUSEL'}}};
+            expect(joiner(impls)).to.jsonEqual({'acts': '|ac'});
+            impls[2] = {element: {parentElement: {tagName: 'AMP-CAROUSEL',
+              parentElement: {tagName: 'AMP-STICKY-AD'}}}};
+            expect(joiner(impls)).to.jsonEqual({'acts': '|ac|ac,sa'});
+            break;
+          default:
+            throw new Error(`no test for ${name}`);
+        }
+      });
     });
   });
 
@@ -478,25 +630,5 @@ describes.realWin('Doubleclick SRA', config , env => {
     it('should handle mixture of all possible scenarios', () => executeTest(
         [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
           {networkId: 8901, instances: 3, invalidInstances: 1}]));
-  });
-
-  describe('#combineInventoryUnits', () => {
-    it('should sort by index correctly for iu_parts', () => {
-      const instances = [];
-      for (let i = 0; i < 2; i++) {
-        instances.push({
-          element: {
-            getAttribute: name => {
-              expect(name).to.equal('data-slot');
-              return '/1234/foo.com/news/world/2018/06/17/article';
-            },
-          },
-        });
-      }
-      expect(combineInventoryUnits(instances)).to.jsonEqual({
-        'iu_parts': '1234,foo.com,news,world,2018,06,17,article',
-        'enc_prev_ius': '0/1/2/3/4/5/6/7,0/1/2/3/4/5/6/7',
-      });
-    });
   });
 });
