@@ -123,7 +123,7 @@ export class Url {
     return isProxyOrigin(url);
   }
 
-  /*
+  /**
    * Returns `true` if the URL is secure: either HTTPS or localhost (for
    * testing).
    * @param {string} url

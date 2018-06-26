@@ -17,6 +17,9 @@
 export const NOTIFICATION_UI_MANAGER = 'notificationUIManager';
 
 export class NotificationUiManager {
+  /**
+   * Creates an instance of NotificationUiManager.
+   */
   constructor() {
     /** @private {number} */
     this.queueSize_ = 0;
