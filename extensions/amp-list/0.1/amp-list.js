@@ -297,12 +297,16 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   updateBindingsForElements_(elements) {
-    // New default behavior is to _not_ block on retrieval of the Bind service
-    // before the first mutation (AMP.setState), because the rendered content
-    // can't be "out of date" if the bindable state hasn't changed.
-    // Allow a temporary opt-out to this behavior in case this causes breaking
-    // changes due to state-independent mutations, e.g. "[text]="1+1".
-    if (isExperimentOn(this.win, 'disable-faster-amp-list')) {
+    // Experiment to _not_ block on retrieval of the Bind service before the
+    // first mutation (AMP.setState). This is a breaking change and will require
+    // either an attribute opt-in or a version bump.
+    if (isExperimentOn(this.win, 'fast-amp-list')) {
+      if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
+        return this.updateBindingsWith_(this.bind_, elements);
+      } else {
+        return Promise.resolve(elements);
+      }
+    } else {
       return Services.bindForDocOrNull(this.element).then(bind => {
         if (bind) {
           return this.updateBindingsWith_(bind, elements);
@@ -310,12 +314,6 @@ export class AmpList extends AMP.BaseElement {
           return Promise.resolve(elements);
         }
       });
-    } else {
-      if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
-        return this.updateBindingsWith_(this.bind_, elements);
-      } else {
-        return Promise.resolve(elements);
-      }
     }
   }
 
