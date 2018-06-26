@@ -108,9 +108,11 @@ async function launchWebServer() {
     }
   });
 
-  process.on('exit', () => {
+  process.on('exit', async() => {
     if (gulpServeAsync.exitCode == null) {
       gulpServeAsync.kill();
+      // The child node process has an asynchronous stdout. See #10409.
+      await sleep(100);
     }
   });
 
@@ -176,7 +178,7 @@ async function runVisualTests(page, visualTestsConfig) {
   });
   await percy.startBuild();
   const {buildId} = percy;
-  fs.writeFileSync(path.resolve(__dirname, 'PERCY_BUILD_ID'), buildId);
+  fs.writeFileSync('PERCY_BUILD_ID', buildId);
   log('info', 'Started Percy build', colors.cyan(buildId));
 
   // Take the snapshots.
@@ -232,7 +234,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
     const name = `${webpage.name} (${config})`;
 
     await enableExperiments(page, webpage['experiments']);
-    log('verbose', 'Navigating to page', `${BASE_URL}/${url}`);
+    log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
     await page.goto(`${BASE_URL}/${url}`);
 
     await verifyCssElements(page, url, webpage.forbidden_css,
@@ -340,8 +342,8 @@ async function createEmptyBuild(page) {
  */
 async function visualDiffPuppeteer() {
   if (argv.verify) {
-    const buildId = fs.readFileSync('PERCY_BUILD_ID');
-    const status = waitForBuildCompletion(buildId);
+    const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
+    const status = await waitForBuildCompletion(buildId);
     verifyBuildStatus(status, buildId);
     return;
   }
@@ -392,11 +394,11 @@ function visualDiffCapybara() {
   execOrDie(cmd);
 }
 
-function visualDiff() {
+async function visualDiff() {
   setPercyBranch();
 
   if (argv.puppeteer) {
-    visualDiffPuppeteer();
+    await visualDiffPuppeteer();
   } else {
     visualDiffCapybara();
   }
