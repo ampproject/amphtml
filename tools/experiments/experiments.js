@@ -303,12 +303,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'svg-in-mustache',
-    name: 'Enables SVG support in amp-mustache templates',
-    spec: 'https://github.com/ampproject/amphtml/issues/15123',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15360',
-  },
-  {
     id: 'disable-faster-amp-list',
     name: 'Disables new default behavior where <amp-list> will not evaluate ' +
        'bindings on rendered children before first setState() mutation.',
