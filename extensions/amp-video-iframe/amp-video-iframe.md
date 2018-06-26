@@ -2,31 +2,18 @@
 
 The document living inside your document must include a small library:
 
-```js
-<script src="https://cdn.ampproject.org/v0/amp-video-iframe-integration.js" defer>
-```
+```html
+<script async src="https://cdn.ampproject.org/v0/video-iframe-integration-0.1.js">
 
-Once this library is loaded, it will trigger an `amp-videoIntegrationReady`
-event. Once triggered, you should instantiate an `AmpVideoIframeIntegration` object
-for the video inside the page. This object gives you all the necessary tools to
-integrate.
+<!-- Wait for API to initialize -->
+<script>
+(window.AmpVideoIframe = window.AmpVideoIframe || [])
+    .push(onAmpIntegrationReady);
 
-```js
-
-function onAmpIntegrationReady() {
-  var myIntegration = new AmpVideoIntegration();
-  // etc.
+function onAmpIntegrationReady(ampIntegration) {
+  // `ampIntegration` is an object containing the tools required to integrate.
 }
-
-// Since this library is defer-loaded, it might have already triggered the
-// event. In that case, call `ready` function immediately. Otherwise, listen to
-// the event.
-if (window.AmpVideoIntegration) {
-  onAmpIntegrationReady();
-} else {
-  window.addEventListener('amp-videoIntegrationReady', onAmpIntegrationReady);
-}
-
+</script>
 ```
 
 ## Simple integrations
@@ -35,15 +22,14 @@ If you're using a common video framework like Video.js or JwPlayer, you can
 simply call `listenTo` for a basic integration:
 
 ```js
-function onAmpIntegrationReady() {
-  var myIntegration = new AmpVideoIntegration();
+function onAmpIntegrationReady(ampIntegration) {
   var myVideo = document.querySelector('#my-video');
 
   // For video.js:
-  myIntegration.listenTo('videojs', myVideo);
+  ampIntegration.listenTo('videojs', myVideo);
 
   // ...or for JwPlayer:
-  myIntegration.listenTo('jwplayer', myVideo);
+  ampIntegration.listenTo('jwplayer', myVideo);
 }
 ```
 
@@ -57,7 +43,7 @@ with the host document by using the `method` and `postEvent` methods.
 Implements a method that calls playback functions on the video. For example:
 
 ```js
-myIntegration.method('play', function() {
+ampIntegration.method('play', function() {
   myVideo.play();
 });
 ```
@@ -86,7 +72,7 @@ Posts a playback event to the frame. For example:
 
 ```js
 myVideoElement.addEventListener('pause', function() {
-  myIntegration.postEvent('pause');
+  ampIntegration.postEvent('pause');
 });
 ```
 
