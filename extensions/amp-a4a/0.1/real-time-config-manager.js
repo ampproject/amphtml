@@ -235,10 +235,9 @@ export class RealTimeConfigManager {
     }
 
     const isGloballyValid = this.isValidCalloutForConsentState(this.rtcConfig_);
-    if (isArray(this.rtcConfig_.urls)) {
-      this.rtcConfig_.urls = this.rtcConfig_.urls.filter(
-          url => this.isValidCalloutForConsentState(url, isGloballyValid));
-    }
+    this.rtcConfig_.urls = (this.rtcConfig_.urls || []).filter(
+        url => this.isValidCalloutForConsentState(url, isGloballyValid));
+
     Object.keys(this.rtcConfig_.vendors || {}).forEach(vendor => {
       if (!this.isValidCalloutForConsentState(
           this.rtcConfig_.vendors[vendor], isGloballyValid)) {
