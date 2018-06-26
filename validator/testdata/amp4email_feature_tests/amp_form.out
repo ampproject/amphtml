@@ -81,5 +81,13 @@ amp4email_feature_tests/amp_form.html:62:2 The attribute 'xhr-verify' may not ap
 >>     ^~~~~~~~~
 amp4email_feature_tests/amp_form.html:67:4 The attribute '[type]' may not appear in tag 'INPUT (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
+|    <!-- Invalid: invalid usage of submitting attribute -->
+|    <form method="get" action-xhr="https://example.com/subscribe">
+|      <div submitting>
+>>     ^~~~~~~~~
+amp4email_feature_tests/amp_form.html:71:4 The attribute 'submitting' may not appear in tag 'div'. [DISALLOWED_HTML]
+|        Submitting form...
+|      </div>
+|    </form>
 |  </body>
 |  </html>

@@ -3252,6 +3252,9 @@ tags {  # <form method=POST ...>
   attrs: { name: "novalidate" }
 }
 tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "DIV"
   spec_name: "FORM > DIV [submitting]"
   mandatory_parent: "FORM"
