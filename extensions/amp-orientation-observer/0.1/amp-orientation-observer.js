@@ -17,7 +17,6 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dashToCamelCase} from '../../../src/string';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
@@ -76,24 +75,27 @@ export class AmpOrientationObserver extends AMP.BaseElement {
         'The current browser doesn\'t support the ' +
       '`window.DeviceOrientationEvent`');
 
-    for (const range in ['alpha-range', 'beta-range', 'gamma-range']) {
-      this.parseAttributes_(range);
-    }
+    this.alphaRange_ = this.parseAttributes_('alpha-range', this.alphaRange_);
+    this.betaRange_ = this.parseAttributes_('beta-range', this.betaRange_);
+    this.gammaRange_ = this.parseAttributes_('gamma-range', this.gammaRange_);
     this.win.addEventListener('deviceorientation', event => {
       this.deviceOrientationHandler_(event);
     }, true);
   }
 
   /**
-   * @private {string} range
+   * Parses the provided ranges
+   * @param {string} rangeName
+   * @param {Array} originalRange
+   * @private
    */
-  parseAttributes_(range) {
-    const providedRange = this.element.getAttribute(range);
+  parseAttributes_(rangeName, originalRange) {
+    const providedRange = this.element.getAttribute(rangeName);
     if (providedRange) {
       const rangeArray = providedRange.trim().split(' ');
-      this[dashToCamelCase(range) + '_'] =
-        [parseInt(rangeArray[0], 10), parseInt(rangeArray[1], 10)];
+      return [parseInt(rangeArray[0], 10), parseInt(rangeArray[1], 10)];
     }
+    return originalRange;
   }
 
   /**
@@ -104,15 +106,15 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     if (event instanceof DeviceOrientationEvent) {
       if (event.alpha !== this.alphaValue_) {
         this.alphaValue_ = event.alpha;
-        this.triggerEvent_('alpha');
+        this.triggerEvent_('alpha', this.alphaValue_, this.alphaRange_);
       }
       if (event.beta !== this.betaValue_) {
         this.betaValue_ = event.beta;
-        this.triggerEvent_('beta');
+        this.triggerEvent_('beta', this.betaValue_, this.betaRange_);
       }
       if (event.gamma !== this.gammaValue_) {
         this.gammaValue_ = event.gamma;
-        this.triggerEvent_('gamma');
+        this.triggerEvent_('gamma', this.gammaValue_, this.gammaRange_);
       }
     }
   }
@@ -120,19 +122,21 @@ export class AmpOrientationObserver extends AMP.BaseElement {
   /**
    * Dispatches the event to signify change in the device orientation
    * along alpha axis.
-   * @private {string} eventName
+   * @param {string} eventName
+   * @param {?number} eventValue
+   * @param {Array} eventRange
    * @private
    */
-  triggerEvent_(eventName) {
-    const percentValue = this[eventName + 'Range_'][0] < 0 ?
-      (this[eventName + 'Value_'] - this[eventName + 'Range_'][0]) :
-      this[eventName + 'Value_'];
+  triggerEvent_(eventName, eventValue, eventRange) {
+    const percentValue = eventRange[0] < 0 ?
+      (eventValue - eventRange[0]) :
+      eventValue;
     const event = createCustomEvent(this.win, `${TAG}.${eventName}`, {
-      angle: this[eventName + 'Value_'],
+      angle: eventValue,
       percent: percentValue /
-        (this[eventName + 'Range_'][1] - this[eventName + 'Range_'][0]),
+        (eventRange[1] - eventRange[0]),
     });
-    this.action_.trigger(this.element, name, event, ActionTrust.LOW);
+    this.action_.trigger(this.element, eventName, event, ActionTrust.LOW);
   }
 }
 AMP.extension(TAG, '0.1', AMP => {
