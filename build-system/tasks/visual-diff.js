@@ -99,6 +99,15 @@ function setPercyBranch() {
   }
 }
 
+/**
+ * Launches a background AMP webserver for unminified js using gulp.
+ *
+ * Waits until the server is up and reachable, and ties its lifecycle to this
+ * process's lifecycle.
+ *
+ * @return {!Promise} a Promise that resolves when the web server is launched
+ *     and reachable.
+ */
 async function launchWebServer() {
   const gulpServeAsync = execScriptAsync(
       `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
@@ -133,6 +142,12 @@ async function launchWebServer() {
   return deferred;
 }
 
+/**
+ * Checks the current status of a Percy build.
+ *
+ * @param {string} buildId ID of the ongoing Percy build.
+ * @return {!JsonObject} The full response from the build status server.
+ */
 async function getBuildStatus(buildId) {
   const statusUri = `${BUILD_STATUS_URL}?build_id=${buildId}`;
   const {body} = await request(statusUri, {json: true}).catch(error => {
@@ -141,6 +156,11 @@ async function getBuildStatus(buildId) {
   return body;
 }
 
+/**
+ * Waits for Percy to finish processing a build.
+ * @param {string} buildId ID of the ongoing Percy build.
+ * @return {!JsonObject} The eventual status of the Percy build.
+ */
 async function waitForBuildCompletion(buildId) {
   log('info', 'Waiting for Percy build', colors.cyan(buildId),
       'to be processed...');
@@ -163,6 +183,11 @@ async function waitForBuildCompletion(buildId) {
   return status;
 }
 
+/**
+ * Verifies that a Percy build succeeded and didn't contain any visual diffs.
+ * @param {!JsonObject} status The eventual status of the Percy build.
+ * @param {string} buildId ID of the Percy build.
+ */
 function verifyBuildStatus(status, buildId) {
   switch (status.state) {
     case 'finished':
@@ -213,6 +238,14 @@ function verifyBuildStatus(status, buildId) {
   }
 }
 
+/**
+ * Launches a Puppeteer controlled browser and returns a page handle.
+ *
+ * Waits until the browser is up and reachable, and ties its lifecycle to this
+ * process's lifecycle.
+ *
+ * @return {!puppeteer.Page} a Puppeteer control browser tab/page.
+ */
 async function launchBrowser() {
   const browserOptions = {
     args: ['--no-sandbox', '--disable-extensions'],
@@ -237,6 +270,13 @@ async function launchBrowser() {
   return page;
 }
 
+/**
+ * Runs the visual tests.
+ *
+ * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
+ * @param {!JsonObject} visualTestsConfig JSON object containing the config for
+ *     the visual tests.
+ */
 async function runVisualTests(page, visualTestsConfig) {
   // Create a Percy client and start a build.
   const buildDir = '../../' + visualTestsConfig.assets_dir;
@@ -263,6 +303,9 @@ async function runVisualTests(page, visualTestsConfig) {
       'is now being processed by Percy.');
 }
 
+/**
+ * Cleans up any existing AMP config from the runtime and 3p frame.
+ */
 function cleanupAmpConfig() {
   log('verbose', 'Cleaning up existing AMP config');
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
@@ -271,6 +314,11 @@ function cleanupAmpConfig() {
   });
 }
 
+/**
+ * Applies the AMP config to the runtime and 3p frame.
+ *
+ * @param {string} config Config to apply. One of 'canary' or 'prod'.
+ */
 function applyAmpConfig(config) {
   log('verbose', 'Switching to the', colors.cyan(config), 'AMP config');
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
@@ -280,6 +328,15 @@ function applyAmpConfig(config) {
   });
 }
 
+/**
+ * Sets the AMP config, launches a server, and generates Percy snapshots for a
+ * set of given webpages.
+ *
+ * @param {!Percy} percy a Percy-Puppeteer controller.
+ * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
+ * @param {!Array<JsonObject>} webpages an array of JSON objects containing
+ *     details about the pages to snapshot.
+ */
 async function generateSnapshots(percy, page, webpages) {
   if (argv.master) {
     await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
@@ -298,6 +355,15 @@ async function generateSnapshots(percy, page, webpages) {
   }
 }
 
+/**
+ * Generates Percy snapshots for a set of given webpages.
+ *
+ * @param {!Percy} percy a Percy-Puppeteer controller.
+ * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
+ * @param {!JsonObject} webpages a JSON objects containing details about the
+ *     pages to snapshot.
+ * @param {*} config Config being used. One of 'canary' or 'prod'.
+ */
 async function snapshotWebpages(percy, page, webpages, config) {
   webpages = webpages.filter(webpage => (!webpage.flaky &&
         !webpage.url.startsWith('examples/visual-tests/amp-by-example')));
@@ -316,6 +382,18 @@ async function snapshotWebpages(percy, page, webpages, config) {
   }
 }
 
+/**
+ * Verifies that all CSS elements are as expected before taking a snapshot.
+ *
+ * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
+ * @param {string} url URL to be snapshotted.
+ * @param {!Array<string>} forbiddenCss Array of CSS elements that must not be
+ *     found in the page.
+ * @param {!Array<string>} loadingIncompleteCss Array of CSS elements that must
+ *     eventually be removed from the page.
+ * @param {!Array<string>} loadingCompleteCss Array of CSS elements that must
+ *     eventually appear on the page.
+ */
 async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
   loadingCompleteCss) {
   // Wait for loader dot to be hidden.
@@ -363,6 +441,12 @@ async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
   }
 }
 
+/**
+ * Enables the given AMP experiments.
+ *
+ * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
+ * @param {*} experiments List of experiments to enable.
+ */
 async function enableExperiments(page, experiments) {
   if (experiments) {
     log('verbose', 'Setting AMP experiments',
@@ -375,10 +459,18 @@ async function enableExperiments(page, experiments) {
   }
 }
 
+/**
+ * Clears all AMP experiment cookies.
+ *
+ * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
+ */
 async function clearExperiments(page) {
   await page.deleteCookie({name: 'AMP_EXP', domain: HOST});
 }
 
+/**
+ * Enables debugging if requested via command line.
+ */
 function setDebuggingLevel() {
   process.env.WEBSERVER_QUIET = '--quiet';
 
@@ -392,6 +484,14 @@ function setDebuggingLevel() {
   }
 }
 
+/**
+ * Creates a Percy build with only a blank page for comparison.
+ *
+ * Enables us to require percy checks on GitHub, and yet, not have to do a full
+ * build for every PR.
+ *
+ * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
+ */
 async function createEmptyBuild(page) {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
   const blankAssetsDir = '../../examples/visual-tests/blank-page';
@@ -466,6 +566,9 @@ function visualDiffCapybara() {
   execOrDie(cmd);
 }
 
+/**
+ * Runs the AMP visual diff tests.
+ */
 async function visualDiff() {
   setPercyBranch();
 
