@@ -383,8 +383,7 @@ export class SystemLayer {
    * @private
    */
   onMutedStateUpdate_(isMuted) {
-    const hideTimeout = 1000;
-    this.getShadowRoot().setAttribute('messagedisplay', 'show');
+    
     this.vsync_.mutate(() => {
       if(isMuted) {
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'muted');
@@ -393,7 +392,7 @@ export class SystemLayer {
       } else {
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'nosound');
       }
-      this.hideAfterTimeout_(hideTimeout);
+      
     });
   }
 
@@ -414,7 +413,13 @@ export class SystemLayer {
    * @private
    */
   onMuteAudioClick_() {
+    console.log("mute");
     this.storeService_.dispatch(Action.TOGGLE_MUTED, true);
+    const hideTimeout = 1000;
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().setAttribute('messagedisplay', 'show');
+      this.hideAfterTimeout_(hideTimeout);
+    });
   }
 
   
@@ -423,7 +428,14 @@ export class SystemLayer {
    * @private
    */
   onUnmuteAudioClick_() {
+    console.log("unmute");
+
     this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+    const hideTimeout = 1000;
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().setAttribute('messagedisplay', 'show');
+      this.hideAfterTimeout_(hideTimeout);
+    });
   }
 
   /**

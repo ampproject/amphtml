@@ -117,7 +117,6 @@
  }
  
  [messagedisplay="noshow"] .i-amphtml-message-container {
-  opacity: 0 !important;
   transform: translateX(15%) !important;
  }
 
@@ -129,6 +128,7 @@
   transition-duration: 200ms !important;
   margin-top: 22px;
   float: right;
+  opacity: 0 !important;
 }
  
  [messagedisplay="show"] .i-amphtml-message-container {
