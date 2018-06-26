@@ -106,6 +106,9 @@ export function deactivateChunking() {
   deactivated = true;
 }
 
+/**
+ * Activates chunking for testing
+ */
 export function activateChunkingForTesting() {
   deactivated = false;
 }
@@ -452,6 +455,9 @@ class Chunks {
  */
 export function onIdle(win, minimumTimeRemaining, timeout, fn) {
   const startTime = Date.now();
+  /**
+   * @param {!IdleDeadline} info
+   */
   function rIC(info) {
     if (info.timeRemaining() < minimumTimeRemaining) {
       const remainingTimeout = timeout - (Date.now() - startTime);

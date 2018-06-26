@@ -417,9 +417,8 @@ function getServiceInternal(holder, id) {
  * @param {!Object} holder Object holding the service instance.
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {?function(new:Object, !Window)|
- *         ?function(new:Object, !./service/ampdoc-impl.AmpDoc)}
- *     ctor Constructor function to new the service. Called with context.
+ * @param {?function(new:Object, !Window)| ?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
+ * Constructor function to new the service. Called with context.
  */
 function registerServiceInternal(holder, context, id, ctor) {
   const services = getServices(holder);
