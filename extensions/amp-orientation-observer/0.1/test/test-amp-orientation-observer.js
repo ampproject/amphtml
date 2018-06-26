@@ -16,7 +16,12 @@
 
 import {AmpOrientationObserver} from '../amp-orientation-observer';
 
-describes.sandboxed('amp-orientation-observer', {}, env => {
+describes.realWin('Creates the relevant fx presets correctly', {
+  amp: {
+    ampdoc: 'single',
+    extensions: ['amp-orientation-observer'],
+  },
+}, env => {
   let impl;
   let triggerEventSpy;
 
@@ -35,7 +40,7 @@ describes.sandboxed('amp-orientation-observer', {}, env => {
       },
     };
     elem.ownerDocument = {
-      defaultView: window,
+      defaultView: env.win,
     };
 
     impl = new AmpOrientationObserver(elem);
