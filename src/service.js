@@ -105,25 +105,26 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
  * Unlike most service getters, passing `Node` is necessary for some FIE-scope
  * services since sometimes we only have the FIE Document for context.
  *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id
  * @param {boolean=} opt_fallbackToTopWin
  * @return {Object} The service.
  */
 export function getExistingServiceForDocInEmbedScope(
-  nodeOrAmpDoc, id, opt_fallbackToTopWin) {
+  nodeOrDoc, id, opt_fallbackToTopWin) {
   // First, try to resolve via local (embed) window.
-  if (nodeOrAmpDoc.nodeType) {
+  if (nodeOrDoc.nodeType) {
     // If a node is passed, try to resolve via this node.
-    const win = toWin((nodeOrAmpDoc.ownerDocument || nodeOrAmpDoc).defaultView);
+    const win = toWin(/** @type {!Document} */ (
+      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
     if (local) {
       return local;
     }
   }
   // If an ampdoc is passed or fallback is allowed, continue resolving.
-  if (!nodeOrAmpDoc.nodeType || opt_fallbackToTopWin) {
-    return getServiceForDocDeprecated(nodeOrAmpDoc, id);
+  if (!nodeOrDoc.nodeType || opt_fallbackToTopWin) {
+    return getServiceForDocDeprecated(nodeOrDoc, id);
   }
   return null;
 }
