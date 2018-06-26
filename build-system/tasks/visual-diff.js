@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const fancyLog = require('fancy-log');
 const fs = require('fs');
@@ -23,6 +24,8 @@ const gulp = require('gulp-help')(require('gulp'));
 const JSON5 = require('json5');
 const path = require('path');
 const puppeteer = require('puppeteer');
+const request = BBPromise.promisify(require('request'));
+const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
 const {execOrDie, execScriptAsync} = require('../exec');
 const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
@@ -43,9 +46,10 @@ const CSS_SELECTOR_TIMEOUT_MS = 5000;
 const AMP_RUNTIME_TARGET_FILES = [
   'dist/amp.js', 'dist.3p/current/integration.js'];
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
-const BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5; // Poll every 5 seconds
-const BUILD_PROCESSING_PROGRESS_POLLS = 12; // Print a message every minute
-const BUILD_PROCESSING_TIMEOUT_SECS = 60 * 10; // Wait for up to 10 minutes
+const BUILD_PROCESSING_POLLING_INTERVAL_MS = 5 * 1000; // Poll every 5 seconds
+const BUILD_PROCESSING_PROGRESS_REPORT_MS = 60 * 1 * 1000; // Print a message every minute
+const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
+const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 
 /**
@@ -129,16 +133,84 @@ async function launchWebServer() {
   return deferred;
 }
 
-function getBuildStatus(buildId) {
-  // TODO(danielrozenberg): get the build status
+async function getBuildStatus(buildId) {
+  const statusUri = `${BUILD_STATUS_URL}?build_id=${buildId}`;
+  const {body} = await request(statusUri, {json: true}).catch(error => {
+    log('fatal', 'Failed to query Percy build status:', error);
+  });
+  return body;
 }
 
-function waitForBuildCompletion(buildId) {
-  // TODO(danielrozenberg): wait for build completion
+async function waitForBuildCompletion(buildId) {
+  log('info', 'Waiting for Percy build', colors.cyan(buildId),
+      'to be processed...');
+  const startTime = Date.now();
+  let lastProgressUpdateTime = Date.now();
+  let status;
+  do {
+    status = await getBuildStatus(buildId);
+
+    if (Date.now() - lastProgressUpdateTime >=
+            BUILD_PROCESSING_PROGRESS_REPORT_MS) {
+      log('info', 'Still waiting for Percy build', colors.cyan(buildId),
+          'to be processed...');
+      lastProgressUpdateTime = Date.now();
+    }
+
+    await sleep(BUILD_PROCESSING_POLLING_INTERVAL_MS);
+  } while (status.state != 'finished' && status.state != 'failed' &&
+               Date.now() - startTime < BUILD_PROCESSING_TIMEOUT_MS);
+  return status;
 }
 
 function verifyBuildStatus(status, buildId) {
-  // TODO(danielrozenberg): verify build status
+  switch (status.state) {
+    case 'finished':
+      if (status.total_comparisons_diff > 0) {
+        if (MASTER_BRANCHES_REGEXP.test(status.branch)) {
+          // If there are visual diffs on master or a release branch, fail
+          // Travis. For master, print instructions for how to approve new
+          // visual changes.
+          if (status.branch == 'master') {
+            log('error', 'Found visual diffs. If the changes are intentional,',
+                'you must approve the build at',
+                colors.cyan(`${PERCY_BUILD_URL}/${buildId}`),
+                'in order to update the baseline snapshots.');
+          } else {
+            log('error', `Found visual diffs on branch ${status.branch}`);
+          }
+        } else {
+          // For PR branches, just print a warning since the diff may be into
+          // intentional, with instructions for how to approve the new snapshots
+          // so they are used as the baseline for future visual diff builds.
+          log('warning', 'Percy build', colors.cyan(buildId),
+              'contains visual diffs.');
+          log('warning', 'If they are intentional, you must first approve the',
+              'build at', colors.cyan(`${PERCY_BUILD_URL}/${buildId}`),
+              'to allow your PR to be merged.');
+          log('warning',
+              'You must then wait for your merged PR to be tested on master,',
+              'and approve the next "master" build at',
+              colors.cyan(PERCY_BUILD_URL),
+              'in order to update the visual diff baseline snapshots.');
+        }
+      } else {
+        log('info', 'Percy build', colors.cyan(buildId),
+            'contains no visual diffs.');
+      }
+      break;
+
+    case 'pending':
+    case 'processing':
+      log('error', 'Percy build not processed after',
+          `${BUILD_PROCESSING_TIMEOUT_MS}ms`);
+      break;
+
+    case 'failed':
+    default:
+      log('error', `Percy build failed: ${status.failure_reason}`);
+      break;
+  }
 }
 
 async function launchBrowser() {
