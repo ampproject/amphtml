@@ -20,7 +20,6 @@ import {BaseElement} from '../../src/base-element';
 import {LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 
 describe('amp-img', () => {
   let sandbox;
@@ -131,41 +130,8 @@ describe('amp-img', () => {
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
-      expect(img.hasAttribute('referrerpolicy')).to.be.false;
-    });
-  });
-
-  it('should load larger image on larger screen', () => {
-    windowWidth = 3000;
-    screenWidth = 300;
-    return getImg({
-      srcset: '/examples/img/sample.jpg?large 2000w, ' +
-          '/examples/img/small.jpg?small 1000w',
-      width: 300,
-      height: 200,
-    }).then(ampImg => {
-      const img = ampImg.querySelector('img');
-      expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal(
-          '/examples/img/sample.jpg?large');
-      expect(img.hasAttribute('referrerpolicy')).to.be.false;
-    });
-  });
-
-  it('should fall back to screen width for srcset', () => {
-    windowWidth = 0;
-    screenWidth = 3000;
-    return getImg({
-      srcset: '/examples/img/sample.jpg?large 2000w, ' +
-          '/examples/img/small.jpg?small 1000w',
-      width: 300,
-      height: 200,
-    }).then(ampImg => {
-      const img = ampImg.querySelector('img');
-      expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal(
-          '/examples/img/sample.jpg?large');
+      expect(img.getAttribute('srcset'))
+          .to.equal('bad.jpg 2000w, /examples/img/sample.jpg 1000w');
       expect(img.hasAttribute('referrerpolicy')).to.be.false;
     });
   });
@@ -212,9 +178,7 @@ describe('amp-img', () => {
     });
   });
 
-  // This test is relevant to the amp-img-native-srcset experiment
   it('should propagate srcset and sizes', () => {
-    toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
       src: '/examples/img/sample.jpg',
       srcset: SRCSET_STRING,
@@ -222,8 +186,6 @@ describe('amp-img', () => {
       width: 320,
       height: 240,
     }).then(ampImg => {
-      expect(isExperimentOn(iframe.win, 'amp-img-native-srcset'))
-          .to.equal(true);
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
       expect(img.getAttribute('sizes')).to
