@@ -92,7 +92,7 @@
     "gulp-ava": "0.19.0",
     "gulp-batch-replace": "0.0.0",
     "gulp-closure-compiler": "0.4.0",
-    "gulp-eslint": "4.0.1",
+    "gulp-eslint": "4.0.2",
     "gulp-eslint-if-fixed": "1.0.0",
     "gulp-exec": "3.0.1",
     "gulp-file": "0.4.0",
