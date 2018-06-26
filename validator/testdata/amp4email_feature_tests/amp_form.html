@@ -66,5 +66,11 @@
   <form method="get" action-xhr="https://example.com/subscribe">
     <input [type]="state.type" name="name">
   </form>
+  <!-- Invalid: invalid usage of submitting attribute -->
+  <form method="get" action-xhr="https://example.com/subscribe">
+    <div submitting>
+      Submitting form...
+    </div>
+  </form>
 </body>
 </html>
