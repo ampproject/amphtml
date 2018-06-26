@@ -279,7 +279,7 @@ describe('amp-img', () => {
       });
     });
 
-    it('should fallback only once', () => {
+    it('should fallback once and remove fallback once image loads', () => {
       const loadStub = sandbox.stub(impl, 'loadPromise');
       loadStub
           .onCall(0).returns(Promise.reject())
@@ -291,69 +291,30 @@ describe('amp-img', () => {
       expect(errorSpy).to.have.not.been.called;
       expect(toggleSpy).to.have.not.been.called;
       expect(toggleElSpy).to.have.not.been.called;
-
       return impl.layoutCallback().catch(() => {
         expect(errorSpy).to.be.calledOnce;
         expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
         expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.firstCall.args[0]).to.be.true;
-        expect(errorSpy).to.be.calledOnce;
+        expect(impl.img_).to.have.class('i-amphtml-ghost');
         return impl.layoutCallback();
       }).then(() => {
         expect(errorSpy).to.be.calledOnce;
-        expect(toggleSpy).to.be.calledOnce;
-        expect(toggleElSpy).to.be.calledOnce;
+        expect(toggleSpy).to.have.callCount(2);
+        expect(toggleSpy.getCall(1).args[0]).to.be.false;
+        expect(toggleElSpy).to.have.callCount(2);
+        expect(toggleElSpy.getCall(1).args[0]).to.be.false;
+        expect(impl.img_).to.not.have.class('i-amphtml-ghost');
         return impl.layoutCallback();
       }).then(() => {
         expect(errorSpy).to.be.calledOnce;
-        expect(toggleSpy).to.be.calledOnce;
-        expect(toggleElSpy).to.be.calledOnce;
+        expect(toggleSpy).to.have.callCount(2);
+        expect(toggleElSpy).to.have.callCount(2);
       });
     });
 
-    it('should remove the fallback if src is successfully updated', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise');
-      loadStub.onCall(0).returns(Promise.reject());
-      loadStub.returns(Promise.resolve());
-      impl.buildCallback();
-
-      expect(toggleElSpy).to.have.not.been.called;
-
-      return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy).to.be.calledOnce;
-        expect(toggleElSpy.getCall(0).args[0]).to.be.true;
-        expect(impl.img_).to.have.class('i-amphtml-ghost');
-        impl.img_.setAttribute('src', 'test-1000.jpg');
-        return impl.layoutCallback().then(() => {
-          expect(toggleElSpy).to.have.callCount(2);
-          expect(toggleElSpy.getCall(1).args[0]).to.be.false;
-          expect(impl.img_).to.not.have.class('i-amphtml-ghost');
-        });
-      });
-    });
-
-    it('should not remove the fallback if src is not updated', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise');
-      loadStub.onCall(0).returns(Promise.reject());
-      loadStub.returns(Promise.resolve());
-      impl.buildCallback();
-
-      expect(el).to.not.have.class('i-amphtml-ghost');
-      expect(toggleElSpy).to.have.not.been.called;
-      return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy).to.be.calledOnce;
-        expect(toggleElSpy.getCall(0).args[0]).to.be.true;
-        expect(impl.img_).to.have.class('i-amphtml-ghost');
-        return impl.layoutCallback().then(() => {
-          expect(toggleElSpy).to.be.calledOnce;
-          expect(impl.img_).to.have.class('i-amphtml-ghost');
-        });
-      });
-    });
-
-    it('should not remove the fallback if src is updated but ' +
-       'fails fetching', () => {
+    it('should not remove the fallback if fetching fails', () => {
       const loadStub = sandbox.stub(impl, 'loadPromise');
       loadStub.returns(Promise.reject());
       impl.buildCallback();
