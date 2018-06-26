@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev, user} from '../../../src/log';
-import {getSourceOrigin, isProtocolValid, parseUrlDeprecated, getSourceUrl, removeProtocol} from '../../../src/url';
+import {getSourceOrigin, isProtocolValid, parseUrlDeprecated, removeProtocol} from '../../../src/url';
 
 
 const TAG = 'amp-story';

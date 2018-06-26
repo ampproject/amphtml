@@ -32,11 +32,11 @@ import {
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
+  removeProtocol,
   removeSearch,
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
   serializeQueryString,
-  removeProtocol,
 } from '../../src/url';
 
 describe('getWinOrigin', () => {
