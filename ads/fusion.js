@@ -18,7 +18,7 @@ import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {string=} input
- * @return {!JsonObject}
+ * @return {JsonObject|undefined}
  */
 function queryParametersToObject(input) {
   if (!input) {
