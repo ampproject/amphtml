@@ -102,7 +102,7 @@ export function getShadowDomSupportedVersion(opt_elementClass) {
 /**
  * Returns shadow dom version.
  *
- * @param {!function(new:Element)} element
+ * @param {function(new:Element)} element
  * @return {ShadowDomVersion}
  */
 function getShadowDomVersion(element) {
