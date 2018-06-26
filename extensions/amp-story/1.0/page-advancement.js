@@ -16,7 +16,7 @@
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent} from '../../../src/dom';
+import {closest, escapeCssSelectorIdent, isRTL} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
@@ -329,26 +329,72 @@ class ManualAdvancement extends AdvancementConfig {
 
     event.stopPropagation();
 
-    // TODO(newmuis): This will need to be flipped for RTL.
-    const elRect = this.element_./*OK*/getBoundingClientRect();
+    const pageRect = this.element_./*OK*/getBoundingClientRect();
 
-    // Using `left` as a fallback since Safari returns a ClientRect in some
-    // cases.
-    const offsetLeft = ('x' in elRect) ? elRect.x : elRect.left;
-    const offsetWidth = elRect.width;
-
-    const nextScreenAreaMin = offsetLeft +
-        ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
-    const nextScreenAreaMax = offsetLeft + offsetWidth;
-
-    if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
+    if (this.isInNextScreenArea_(event.pageX, pageRect)) {
       this.onTapNavigation(TapNavigationDirection.NEXT);
-    } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
+    } else if (this.isInPreviousScreenArea_(event.pageX, pageRect)) {
       this.onTapNavigation(TapNavigationDirection.PREVIOUS);
     }
   }
-}
 
+  /**
+   * Checks if click is inside the next screen area.
+   * @param {number} clickPositionX
+   * @param {DOMRect} pageRect
+   * @return {boolean}
+   */
+  isInNextScreenArea_(clickPositionX, pageRect) {
+    // Using `left` as a fallback since Safari returns a ClientRect in some
+    // cases.
+    const offsetLeft = ('x' in pageRect) ? pageRect.x : pageRect.left;
+    const offsetWidth = pageRect.width;
+
+    let nextScreenAreaMin;
+    let nextScreenAreaMax;
+
+    if (isRTL(this.element_.ownerDocument)) {
+      nextScreenAreaMin = offsetLeft;
+      nextScreenAreaMax = offsetLeft + (NEXT_SCREEN_AREA_RATIO * offsetWidth);
+    } else {
+      nextScreenAreaMin =
+        offsetLeft + ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
+      nextScreenAreaMax = offsetLeft + offsetWidth;
+    }
+
+    return clickPositionX >= nextScreenAreaMin &&
+      clickPositionX < nextScreenAreaMax;
+  }
+
+  /**
+   * Checks if click is inside the previous screen area.
+   * @param {number} clickPositionX
+   * @param {DOMRect} pageRect
+   * @return {boolean}
+   */
+  isInPreviousScreenArea_(clickPositionX, pageRect) {
+    // Using `left` as a fallback since Safari returns a ClientRect in some
+    // cases.
+    const offsetLeft = ('x' in pageRect) ? pageRect.x : pageRect.left;
+    const offsetWidth = pageRect.width;
+
+    let previousScreenAreaMin;
+    let previousScreenAreaMax;
+
+    if (isRTL(this.element_.ownerDocument)) {
+      previousScreenAreaMin =
+        offsetLeft + (NEXT_SCREEN_AREA_RATIO * offsetWidth);
+      previousScreenAreaMax = offsetLeft + offsetWidth;
+    } else {
+      previousScreenAreaMin = offsetLeft;
+      previousScreenAreaMax =
+        offsetLeft + ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
+    }
+
+    return clickPositionX >= previousScreenAreaMin &&
+      clickPositionX < previousScreenAreaMax;
+  }
+}
 
 /**
  * Provides progress and advancement based on a fixed duration of time,
