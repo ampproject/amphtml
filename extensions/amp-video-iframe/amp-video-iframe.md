@@ -1,6 +1,8 @@
-# Integration
+# amp-video-iframe
 
-The document living inside your document must include a small library:
+## Integration
+
+The document living inside your framoe must include a small library:
 
 ```html
 <script async src="https://cdn.ampproject.org/v0/video-iframe-integration-0.1.js">
@@ -16,7 +18,7 @@ function onAmpIntegrationReady(ampIntegration) {
 </script>
 ```
 
-## Simple integrations
+### Simple integrations
 
 If you're using a common video framework like Video.js or JwPlayer, you can
 simply call `listenTo` for a basic integration:
@@ -33,12 +35,12 @@ function onAmpIntegrationReady(ampIntegration) {
 }
 ```
 
-## Custom integrations
+### Custom integrations
 
 It's possible to have more fine-grained control over how the video interacts
 with the host document by using the `method` and `postEvent` methods.
 
-### `method(name, callback)`
+#### `method(name, callback)`
 
 Implements a method that calls playback functions on the video. For example:
 
@@ -66,7 +68,7 @@ You can choose to only implement this interface partially, with a few caveats:
   shown. If you don't provide methods to hide and show controls, two sets of
   controls could be displayed at the same time, which is a poor user experience.
 
-### `postEvent(name)`
+#### `postEvent(name)`
 
 Posts a playback event to the frame. For example:
 
