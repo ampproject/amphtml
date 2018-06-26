@@ -38,6 +38,7 @@ describes.realWin('amp-subscriptions renderer before initialized', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    doc.body.parentNode.setAttribute('amp-version', '1');
     unrelated = createElementWithAttributes(doc, 'div', {});
     section = createElementWithAttributes(doc, 'div', {
       'subscriptions-section': '',
@@ -82,6 +83,7 @@ describes.realWin('amp-subscriptions renderer', {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    doc.body.parentNode.setAttribute('amp-version', '1');
 
     installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
 
