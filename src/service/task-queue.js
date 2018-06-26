@@ -46,6 +46,9 @@ let PeekStateDef;
  */
 export class TaskQueue {
 
+  /**
+   * Creates an instance of TaskQueue.
+   */
   constructor() {
     /** @private @const {!Array<!TaskDef>} */
     this.tasks_ = [];

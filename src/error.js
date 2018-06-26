@@ -539,6 +539,9 @@ export function detectNonAmpJs(win) {
   return false;
 }
 
+/**
+ * Resets accumulated error messages for testing
+ */
 export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
 }

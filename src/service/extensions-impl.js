@@ -99,6 +99,10 @@ let ExtensionDef;
  */
 let ExtensionHolderDef;
 
+/**
+ * @param {string} extensionId
+ * @return {boolean}
+ */
 export function isTemplateExtension(extensionId) {
   return CUSTOM_TEMPLATES.indexOf(extensionId) >= 0;
 }

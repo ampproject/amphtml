@@ -260,11 +260,25 @@ export class Srcset {
   }
 }
 
+/**
+ * Sorts by width
+ *
+ * @param {number} s1
+ * @param {number} s2
+ * @return {number}
+ */
 function sortByWidth(s1, s2) {
   user().assert(s1.width != s2.width, 'Duplicate width: %s', s1.width);
   return s1.width - s2.width;
 }
 
+/**
+ * Sorts by dpr
+ *
+ * @param {!Object} s1
+ * @param {!Object} s2
+ * @return {number}
+ */
 function sortByDpr(s1, s2) {
   user().assert(s1.dpr != s2.dpr, 'Duplicate dpr: %s', s1.dpr);
   return s1.dpr - s2.dpr;

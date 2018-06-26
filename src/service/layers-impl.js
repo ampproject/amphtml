@@ -290,7 +290,7 @@ export class LayoutLayers {
   /**
    * Dirties the element's parent layer, so remeasures will happen.
    *
-   * @parent {!Element} node
+   * @param {!Element} node
    */
   dirty(node) {
     // Find a parent layer, or fall back to the root scrolling layer in cases
@@ -608,7 +608,7 @@ export class LayoutElement {
   /**
    * Adds the child to the list of children of this layer.
    *
-   * @param {!LayoutElement} child;
+   * @param {!LayoutElement} child
    */
   add(child) {
     dev().assert(this.isLayer());
@@ -620,7 +620,7 @@ export class LayoutElement {
   /**
    * Removes the child from the list of children of this layer.
    *
-   * @param {!LayoutElement} child;
+   * @param {!LayoutElement} child
    */
   remove(child) {
     dev().assert(this.isLayer());
@@ -877,7 +877,7 @@ export class LayoutElement {
     return distance / parentHeight;
   }
 
-  /*
+  /**
    * Gets the current scrollTop of this layer.
    *
    * @return {number}
@@ -887,7 +887,7 @@ export class LayoutElement {
     return this.scrollTop_;
   }
 
-  /*
+  /**
    * Gets the current scrollLeft of this layer.
    *
    * @return {number}
