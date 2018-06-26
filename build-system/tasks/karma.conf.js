@@ -225,6 +225,7 @@ module.exports = {
   browserDisconnectTolerance: 2,
   browserNoActivityTimeout: 4 * 60 * 1000,
   captureTimeout: 4 * 60 * 1000,
+  failOnEmptyTestSuite: false,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
