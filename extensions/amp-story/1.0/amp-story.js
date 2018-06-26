@@ -399,6 +399,12 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   rewriteStyles_(styleEl) {
+    if (!isExperimentOn(this.win, 'amp-story-responsive-units')) {
+      return;
+    }
+
+    // TODO(#15955): Update this to use CssContext from
+    // ../../../extensions/amp-animation/0.1/web-animations.js
     styleEl.textContent = styleEl.textContent
         .replace(/([\d.]+)vh/gmi, 'calc($1 * var(--i-amphtml-story-vh))')
         .replace(/([\d.]+)vw/gmi, 'calc($1 * var(--i-amphtml-story-vw))')
