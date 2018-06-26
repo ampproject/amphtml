@@ -760,7 +760,7 @@ export function escapeHtml(text) {
 
 /**
  * @param {string} c
- * @return string
+ * @return {string}
  */
 function escapeHtmlChar(c) {
   return HTML_ESCAPE_CHARS[c];

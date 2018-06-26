@@ -18,6 +18,9 @@ if (isLongTaskApiSupported(self)) {
   detectLongTasks(self);
 }
 
+/**
+ * @param {!Window} win
+ */
 function detectLongTasks(win) {
   const observer = new win.PerformanceObserver(function(entryList) {
     const entries = entryList.getEntries();
@@ -49,6 +52,10 @@ function detectLongTasks(win) {
   observer.observe({entryTypes: ['longtask']});
 }
 
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
 function isLongTaskApiSupported(win) {
   return !!win.PerformanceObserver
       && !!win.TaskAttributionTiming

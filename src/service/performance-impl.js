@@ -165,6 +165,9 @@ export class Performance {
     });
   }
 
+  /**
+   * Callback for onload.
+   */
   onload_() {
     this.tick('ol');
     this.tickLegacyFirstPaintTime_();

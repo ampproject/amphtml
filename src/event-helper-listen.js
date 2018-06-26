@@ -38,8 +38,12 @@ export function internalListenImplementation(element, eventType, listener,
   opt_evtListenerOpts) {
   let localElement = element;
   let localListener = listener;
-  /** @type {?Function}  */
-  let wrapped = event => {
+  /**
+   * @type {?Function}
+   */
+  let wrapped;
+
+  wrapped = event => {
     try {
       return localListener(event);
     } catch (e) {

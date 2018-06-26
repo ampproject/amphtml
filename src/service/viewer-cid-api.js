@@ -23,6 +23,10 @@ import {parseUrlDeprecated} from '../url';
  */
 export class ViewerCidApi {
 
+  /**
+   * Creates an instance of ViewerCidApi.
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
   constructor(ampdoc) {
 
     /** @private {!./ampdoc-impl.AmpDoc} */

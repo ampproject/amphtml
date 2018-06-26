@@ -24,6 +24,9 @@ import {map} from './object';
  */
 export class Signals {
 
+  /**
+   * Creates an instance of Signals.
+   */
   constructor() {
     /**
      * A mapping from a signal name to the signal response: either time or

@@ -68,7 +68,9 @@ function isAutoplaySupportedImpl(win, isLiteViewer) {
 /** @private {?(function(Window, boolean):!Promise<boolean>)} */
 let isAutoplaySupported = null;
 
-
+/**
+ * Sets if autoplay is supported.
+ */
 function setIsAutoplaySupported() {
   isAutoplaySupported =
     /** @type {function(Window, boolean):!Promise<boolean>} */ (
@@ -107,8 +109,9 @@ export class VideoUtils {
 /**
  * @param {!Element} element
  * @return {!Element}
+ * Note: Not included in `VideoUtils` as we don't need to test a
+ * static selector.
  */
-// Not included in `VideoUtils` as we don't need to test a static selector.
 export function getInternalVideoElementFor(element) {
   return dev().assertElement(element.querySelector('video, iframe'));
 }

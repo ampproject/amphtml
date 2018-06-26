@@ -36,6 +36,9 @@
  * @template T
  */
 export class Deferred {
+  /**
+   * Creates an instance of Deferred.
+   */
   constructor() {
     let resolve, reject;
 
@@ -64,7 +67,7 @@ export class Deferred {
  * If fn sync throws, it will cause the promise to reject.
  *
  * @param {function():T} fn
- * @return !Promise<T>
+ * @return {!Promise<T>}
  * @template T
  */
 export function tryResolve(fn) {
