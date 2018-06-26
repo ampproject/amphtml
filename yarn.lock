@@ -6896,14 +6896,14 @@ liftoff@^2.1.0:
     rechoir "^0.6.2"
     resolve "^1.1.7"
 
-link-check@^4.4.1:
-  version "4.4.1"
-  resolved "https://registry.yarnpkg.com/link-check/-/link-check-4.4.1.tgz#273b22cf7e232a8e8f860a1473eb6e76a66f7413"
+link-check@^4.4.4:
+  version "4.4.4"
+  resolved "https://registry.yarnpkg.com/link-check/-/link-check-4.4.4.tgz#08dbb881b70c23f1c173889c3a34d682c2e68c1a"
   dependencies:
     is-relative-url "^2.0.0"
     isemail "^3.1.2"
     ms "^2.1.1"
-    request "^2.86.0"
+    request "^2.87.0"
 
 load-json-file@^1.0.0:
   version "1.1.0"
@@ -7389,22 +7389,22 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-markdown-link-check@3.5.3:
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.5.3.tgz#bbb6a2f7619dfde537b78e3e52af1c4bebf496f6"
+markdown-link-check@3.6.2:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.6.2.tgz#98c463cfdd563d3354d83642510033311f3a95f5"
   dependencies:
     async "^2.6.1"
     chalk "^2.4.1"
     commander "^2.15.1"
-    link-check "^4.4.1"
+    link-check "^4.4.4"
     lodash "^4.17.10"
-    markdown-link-extractor "^1.1.2"
+    markdown-link-extractor "^1.2.0"
     progress "^2.0.0"
     request "^2.87.0"
 
-markdown-link-extractor@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/markdown-link-extractor/-/markdown-link-extractor-1.1.2.tgz#5d8e940e1cac39734ad4e0defb1fce4d4da9c7e4"
+markdown-link-extractor@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/markdown-link-extractor/-/markdown-link-extractor-1.2.0.tgz#aecb2df2d811d9af1cc26b52de5073c2d7a9b05b"
   dependencies:
     marked "^0.4.0"
 
@@ -9844,7 +9844,7 @@ request@2.81.0:
     tunnel-agent "^0.6.0"
     uuid "^3.0.0"
 
-request@2.87.0, request@^2.86.0, request@^2.87.0:
+request@2.87.0, request@^2.87.0:
   version "2.87.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.87.0.tgz#32f00235cd08d482b4d0d68db93a829c0ed5756e"
   dependencies:
