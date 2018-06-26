@@ -16,7 +16,6 @@
 
 tags: {  # amp-orientation-observer
   html_format: AMP
-  html_format: AMP4ADS
   html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
@@ -28,7 +27,6 @@ tags: {  # amp-orientation-observer
 }
 tags: {  # <amp-orientation-observer>
   html_format: AMP
-  html_format: AMP4ADS
   html_format: EXPERIMENTAL
   tag_name: "AMP-ORIENTATION-OBSERVER"
   requires_extension: "amp-orientation-observer"
