@@ -88,7 +88,7 @@ function isNative(func) {
 
 /**
  * Returns the supported version of Shadow DOM spec.
- * @param {?function(new:Element)} opt_elementClass optional for testing
+ * @param {?function(new:Element)=} opt_elementClass optional for testing
  * @return {ShadowDomVersion}
  */
 export function getShadowDomSupportedVersion(opt_elementClass) {
@@ -102,7 +102,7 @@ export function getShadowDomSupportedVersion(opt_elementClass) {
 /**
  * Returns shadow dom version.
  *
- * @param {function(new:Element)=} element
+ * @param {?function(new:Element)=} element
  * @return {ShadowDomVersion}
  */
 function getShadowDomVersion(element) {
