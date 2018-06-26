@@ -5264,9 +5264,9 @@ gulp-replace@1.0.0:
     readable-stream "^2.0.1"
     replacestream "^4.0.0"
 
-gulp-sourcemaps@2.6.3:
-  version "2.6.3"
-  resolved "https://registry.yarnpkg.com/gulp-sourcemaps/-/gulp-sourcemaps-2.6.3.tgz#11b033f759f909e0a5f15b7bdf47ac29cc54efa4"
+gulp-sourcemaps@2.6.4:
+  version "2.6.4"
+  resolved "https://registry.yarnpkg.com/gulp-sourcemaps/-/gulp-sourcemaps-2.6.4.tgz#cbb2008450b1bcce6cd23bf98337be751bf6e30a"
   dependencies:
     "@gulp-sourcemaps/identity-map" "1.X"
     "@gulp-sourcemaps/map-sources" "1.X"
@@ -5276,7 +5276,7 @@ gulp-sourcemaps@2.6.3:
     debug-fabulous "1.X"
     detect-newline "2.X"
     graceful-fs "4.X"
-    source-map "0.X"
+    source-map "~0.6.0"
     strip-bom-string "1.X"
     through2 "2.X"
 
@@ -10558,10 +10558,6 @@ source-map-url@~0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/source-map-url/-/source-map-url-0.3.0.tgz#7ecaf13b57bcd09da8a40c5d269db33799d4aaf9"
 
-source-map@0.X, source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
-
 source-map@^0.1.38, source-map@~0.1.33:
   version "0.1.43"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.1.43.tgz#c24bc146ca517c1471f5dacbe2571b2b7f9e3346"
@@ -10577,6 +10573,10 @@ source-map@^0.4.2, source-map@^0.4.4:
 source-map@^0.5.0, source-map@^0.5.1, source-map@^0.5.3, source-map@^0.5.6, source-map@^0.5.7, source-map@~0.5.1, source-map@~0.5.3, source-map@~0.5.6:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
+
+source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.0, source-map@~0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
 
 source-map@~0.2.0:
   version "0.2.0"
