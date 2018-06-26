@@ -609,6 +609,9 @@ export const adConfig = {
       'https://deb.send.microad.jp',
     ],
   },
+  miximedia: {
+    renderStartImplemented: true,
+  },
 
   mixpo: {
     prefetch: 'https://cdn.mixpo.com/js/loader.js',

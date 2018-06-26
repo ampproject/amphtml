@@ -167,6 +167,7 @@ import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
+import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mytarget} from '../ads/mytarget';
@@ -253,6 +254,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   kuadio: true,
   'mantis-recommend': true,
+  miximedia: true,
   mywidget: true,
   outbrain: true,
   plista: true,
@@ -377,6 +379,7 @@ register('mediavine', mediavine);
 register('medyanet', medyanet);
 register('meg', meg);
 register('microad', microad);
+register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mytarget', mytarget);
