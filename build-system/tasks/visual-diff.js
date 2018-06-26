@@ -16,9 +16,70 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
+const fancyLog = require('fancy-log');
+const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
-const {execOrDie} = require('../exec');
+const JSON5 = require('json5');
+const path = require('path');
+const puppeteer = require('puppeteer');
+const tryConnect = require('try-net-connect');
+const {execOrDie, execScriptAsync} = require('../exec');
+const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
 const {gitBranchName, gitCommitterEmail} = require('../git');
+
+// CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
+const SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
+const SNAPSHOT_EMPTY_BUILD_OPTIONS = {widths: [375]};
+const VIEWPORT_WIDTH = 1400;
+const VIEWPORT_HEIGHT = 100000;
+const HOST = 'localhost';
+const PORT = 8000;
+const BASE_URL = `http://${HOST}:${PORT}`;
+const WEBSERVER_TIMEOUT_RETRIES = 10;
+const NAVIGATE_TIMEOUT_MS = 12000;
+const CONFIGS = ['canary', 'prod'];
+const CSS_SELECTOR_TIMEOUT_MS = 5000;
+const AMP_RUNTIME_TARGET_FILES = [
+  'dist/amp.js', 'dist.3p/current/integration.js'];
+const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
+const BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5; // Poll every 5 seconds
+const BUILD_PROCESSING_PROGRESS_POLLS = 12; // Print a message every minute
+const BUILD_PROCESSING_TIMEOUT_SECS = 60 * 10; // Wait for up to 10 minutes
+const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
+
+/**
+ * Logs a message to the console.
+ *
+ * @param {string} mode
+ * @param {!Array<string>} messages
+ */
+function log(mode, ...messages) {
+  switch (mode) {
+    case 'verbose':
+      if (process.env.TRAVIS) {
+        return;
+      }
+      messages.unshift(colors.green('VERBOSE:'));
+      break;
+    case 'info':
+      messages.unshift(colors.green('INFO:'));
+      break;
+    case 'warning':
+      messages.unshift(colors.yellow('YELLOW:'));
+      break;
+    case 'error':
+      messages.unshift(colors.red('ERROR:'));
+      break;
+    case 'fatal':
+      messages.unshift(colors.red('FATAL:'));
+  }
+  // eslint-disable-next-line amphtml-internal/no-spread
+  fancyLog(...messages);
+  if (mode == 'fatal') {
+    process.exit(1);
+  }
+}
 
 /**
  * Disambiguates branch names by decorating them with the commit author name.
@@ -34,11 +95,294 @@ function setPercyBranch() {
   }
 }
 
+async function launchWebServer() {
+  const gulpServeAsync = execScriptAsync(
+      `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
+      {stdio: 'inherit'});
+
+  gulpServeAsync.on('exit', code => {
+    if (code != 0) {
+      log('error', colors.cyan("'serve'"),
+          `errored with code ${code}. Cannot continue with visual diff tests`);
+      process.exit(code);
+    }
+  });
+
+  process.on('exit', () => {
+    if (gulpServeAsync.exitCode == null) {
+      gulpServeAsync.kill();
+    }
+  });
+
+  let resolver, rejecter;
+  const deferred = new Promise((resolverIn, rejecterIn) => {
+    resolver = resolverIn;
+    rejecter = rejecterIn;
+  });
+  tryConnect({
+    host: HOST,
+    port: PORT,
+    retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
+  }).on('connected', resolver).on('timeout', rejecter);
+  return deferred;
+}
+
+function getBuildStatus(buildId) {
+  // TODO(danielrozenberg): get the build status
+}
+
+function waitForBuildCompletion(buildId) {
+  // TODO(danielrozenberg): wait for build completion
+}
+
+function verifyBuildStatus(status, buildId) {
+  // TODO(danielrozenberg): verify build status
+}
+
+async function launchBrowser() {
+  const browserOptions = {
+    args: ['--no-sandbox', '--disable-extensions'],
+    dumpio: argv.chrome_debug,
+  };
+  browserOptions.headless = !!argv.headless;
+  if (argv.headless) {
+    browserOptions['args'].push('--disable-gpu');
+  }
+
+  const browser = await puppeteer.launch(browserOptions);
+  process.on('exit', browser.close);
+
+  const page = await browser.newPage();
+  await page.setViewport({
+    width: VIEWPORT_WIDTH,
+    height: VIEWPORT_HEIGHT,
+  });
+  page.setDefaultNavigationTimeout(NAVIGATE_TIMEOUT_MS);
+  page.setJavaScriptEnabled(true);
+
+  return page;
+}
+
+async function runVisualTests(page, visualTestsConfig) {
+  // Create a Percy client and start a build.
+  const buildDir = '../../' + visualTestsConfig.assets_dir;
+  const percy = new Percy({
+    loaders: [
+      new FileSystemAssetLoader({
+        buildDir: path.resolve(__dirname, buildDir),
+        mountPath: visualTestsConfig.assets_base_url,
+      }),
+    ],
+  });
+  await percy.startBuild();
+  const {buildId} = percy;
+  fs.writeFileSync(path.resolve(__dirname, 'PERCY_BUILD_ID'), buildId);
+  log('info', 'Started Percy build', colors.cyan(buildId));
+
+  // Take the snapshots.
+  await generateSnapshots(percy, page, visualTestsConfig.webpages);
+
+  // Tell Percy we're finished taking snapshots.
+  await percy.finalizeBuild();
+  // TODO(danielrozenberg): inspect result to check if the build failed fast
+  log('info', 'Build', colors.cyan(buildId),
+      'is now being processed by Percy.');
+}
+
+function cleanupAmpConfig() {
+  log('verbose', 'Cleaning up existing AMP config');
+  AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
+    execOrDie(
+        `gulp prepend-global --local_dev --target ${targetFile} --remove`);
+  });
+}
+
+function applyAmpConfig(config) {
+  log('verbose', 'Switching to the', colors.cyan(config), 'AMP config');
+  AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
+    execOrDie(
+        `gulp prepend-global --local_dev --target ${targetFile} ` +
+        `--${config}`);
+  });
+}
+
+async function generateSnapshots(percy, page, webpages) {
+  if (argv.master) {
+    await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+  }
+  cleanupAmpConfig();
+
+  const numFlakyTests = webpages.filter(webpage => webpage.flaky).length;
+  if (numFlakyTests > 0) {
+    log('info', 'Skipping', colors.cyan(numFlakyTests), 'flaky tests');
+  }
+  for (const config of CONFIGS) {
+    applyAmpConfig(config);
+    log('verbose',
+        'Generating snapshots using the', colors.cyan(config), 'AMP config');
+    await snapshotWebpages(percy, page, webpages, config);
+  }
+}
+
+async function snapshotWebpages(percy, page, webpages, config) {
+  webpages = webpages.filter(webpage => (!webpage.flaky &&
+        !webpage.url.startsWith('examples/visual-tests/amp-by-example')));
+  for (const webpage of webpages) {
+    const {url} = webpage;
+    const name = `${webpage.name} (${config})`;
+
+    await enableExperiments(page, webpage['experiments']);
+    log('verbose', 'Navigating to page', `${BASE_URL}/${url}`);
+    await page.goto(`${BASE_URL}/${url}`);
+
+    await verifyCssElements(page, url, webpage.forbidden_css,
+        webpage.loading_incomplete_css, webpage.loading_complete_css);
+    await percy.snapshot(name, page, SNAPSHOT_OPTIONS);
+    await clearExperiments(page);
+  }
+}
+
+async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
+  loadingCompleteCss) {
+  // Wait for loader dot to be hidden.
+  await page.waitForSelector('.i-amphtml-loader-dot', {
+    hidden: true,
+    timeout: CSS_SELECTOR_TIMEOUT_MS,
+  }).catch(() => {
+    log('fatal', colors.cyan(url),
+        `still has the AMP loader dot after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+  });
+
+  if (forbiddenCss) {
+    for (const css of forbiddenCss) {
+      if (await page.$(css) !== null) {
+        log('fatal', colors.cyan(url), 'has forbidden CSS element',
+            colors.cyan(css));
+      }
+    }
+  }
+
+  if (loadingIncompleteCss) {
+    for (const css of loadingIncompleteCss) {
+      log('verbose', `Waiting for invisibility of ${css}`);
+      await page.waitForSelector(css, {
+        hidden: true,
+        timeout: CSS_SELECTOR_TIMEOUT_MS,
+      }).catch(() => {
+        log('fatal', colors.cyan(url), 'still has CSS element',
+            colors.cyan(css), `after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+      });
+    }
+  }
+
+  if (loadingCompleteCss) {
+    for (const css of loadingCompleteCss) {
+      log('verbose', 'Waiting for visibility of', css);
+      await page.waitForSelector(css, {
+        visible: true,
+        timeout: CSS_SELECTOR_TIMEOUT_MS,
+      }).catch(() => {
+        log('fatal', colors.cyan(url), 'does not yet have CSS element',
+            colors.cyan(css), `after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+      });
+    }
+  }
+}
+
+async function enableExperiments(page, experiments) {
+  if (experiments) {
+    log('verbose', 'Setting AMP experiments',
+        colors.cyan(experiments.join(', ')));
+    await page.setCookie({
+      name: 'AMP_EXP',
+      value: experiments.join('%2C'),
+      domain: HOST,
+    });
+  }
+}
+
+async function clearExperiments(page) {
+  await page.deleteCookie({name: 'AMP_EXP', domain: HOST});
+}
+
+function setDebuggingLevel() {
+  process.env.WEBSERVER_QUIET = '--quiet';
+
+  if (argv.debug) {
+    // eslint-disable-next-line google-camelcase/google-camelcase
+    argv.chrome_debug = true;
+    process.env.WEBSERVER_QUIET = '';
+  }
+  if (argv.webserver_debug) {
+    process.env.WEBSERVER_QUIET = '';
+  }
+}
+
+async function createEmptyBuild(page) {
+  log('info', 'Skipping visual diff tests and generating a blank Percy build');
+  const blankAssetsDir = '../../examples/visual-tests/blank-page';
+  const percy = new Percy({
+    loaders: [
+      new FileSystemAssetLoader({
+        buildDir: path.resolve(__dirname, blankAssetsDir),
+        mountPath: '',
+      }),
+    ],
+  });
+  await percy.startBuild();
+  await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
+  await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+  await percy.finalizeBuild();
+}
+
 /**
- * Simple wrapper around the ruby based visual diff tests.
+ * Simple wrapper around the JS (Percy-Puppeteer) based visual diff tests.
  */
-function visualDiff() {
-  setPercyBranch();
+async function visualDiffPuppeteer() {
+  if (argv.verify) {
+    const buildId = fs.readFileSync('PERCY_BUILD_ID');
+    const status = waitForBuildCompletion(buildId);
+    verifyBuildStatus(status, buildId);
+    return;
+  }
+
+  if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
+    log('fatal', 'Could not find', colors.cyan('PERCY_PROJECT'), 'and',
+        colors.cyan('PERCY_TOKEN'), 'environment variables');
+  }
+  setDebuggingLevel();
+
+  // Launch a browser and local web server.
+  const page = await launchBrowser();
+  await launchWebServer().catch(reason => {
+    log('fatal', `Failed to start a web server: ${reason}`);
+  });
+
+  if (argv.skip) {
+    await createEmptyBuild(page);
+    // Explicitly exit, to trigger the webserver's exit event too.
+    process.exit();
+    return;
+  }
+
+  // Load and parse the config. Use JSON5 due to JSON comments in file.
+  const visualTestsConfig = JSON5.parse(
+      fs.readFileSync(
+          path.resolve(__dirname, '../../test/visual-diff/visual-tests'),
+          'utf8'));
+  await runVisualTests(page, visualTestsConfig);
+
+  // Explicitly exit, to trigger the webserver's exit event too.
+  process.exit();
+}
+
+/**
+ * Simple wrapper around the ruby (Percy-Capybara) based visual diff tests.
+ *
+ * This is the current default mode, which is actively being replace with a
+ * pure JS implementation.
+ */
+function visualDiffCapybara() {
   let cmd = 'ruby build-system/tasks/visual-diff.rb';
   for (const arg in argv) {
     if (arg !== '_') {
@@ -46,6 +390,16 @@ function visualDiff() {
     }
   }
   execOrDie(cmd);
+}
+
+function visualDiff() {
+  setPercyBranch();
+
+  if (argv.puppeteer) {
+    visualDiffPuppeteer();
+  } else {
+    visualDiffCapybara();
+  }
 }
 
 gulp.task(
@@ -58,10 +412,11 @@ gulp.task(
         'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
         'headless': '  Runs Chrome in headless mode',
-        'percy_debug': '  Prints debug info from Percy libraries',
+        'percy_debug': '  Prints debug info from Percy-Capybara libraries',
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
+        'puppeteer': '  [EXPERIMENTAL] Use Percy-Puppeteer (work in progress)',
       },
     }
 );

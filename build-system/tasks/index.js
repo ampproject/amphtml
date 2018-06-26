@@ -45,4 +45,3 @@ require('./todos');
 require('./update-packages');
 require('./validator');
 require('./visual-diff');
-require('./visual-diff-percy-puppeteer');
