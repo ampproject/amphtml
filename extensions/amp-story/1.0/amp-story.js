@@ -308,6 +308,7 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_
         .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
 
+    this.initialLoad_ = true;
     registerServiceBuilder(this.win, 'localization',
         () => this.localizationService_);
   }
@@ -860,11 +861,10 @@ export class AmpStory extends AMP.BaseElement {
         pageIndex,
         this.getPageCount(),
         targetPage.element.id);
-
     const oldPage = this.activePage_;
 
     this.activePage_ = targetPage;
-
+    this.updateSoundPage_();
     this.systemLayer_.resetDeveloperLogs();
     this.systemLayer_.setDeveloperLogContextString(
         this.activePage_.element.id);
@@ -1618,11 +1618,14 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateSoundPage_() {
+    if(1==2) {
+      this.initialLoad_ = false;
+    } else {
+    console.log("hello");
     const hasPageAudio = this.activePage_.element.hasAttribute('background-audio');
     this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO,
-      hasPageAudio);   
-    console.log(this.activePage_.element.getAttribute('background-audio')+ ": " + 
-    this.storeService_.get(StateProperty.PAGE_HAS_AUDIO_STATE));
+      hasPageAudio);
+    }
   }
 
   /** @private */
