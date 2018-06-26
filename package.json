@@ -32,15 +32,6 @@
     "web-activities": "1.13.0",
     "web-animations-js": "2.3.1"
   },
-  "greenkeeper": {
-    "ignore": [
-      "babel-polyfill",
-      "document-register-element",
-      "promise-pjs",
-      "web-activities",
-      "web-animations-js"
-    ]
-  },
   "devDependencies": {
     "acorn-globals": "4.1.0",
     "ajv": "6.5.1",
