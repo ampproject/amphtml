@@ -167,7 +167,7 @@ function setCustomVars(oxRequest, customVars) {
 
 /**
  * @param {!Object} customVars
- * @return {*}
+ * @return {!Object}
  */
 function filterCustomVar(customVars) {
   const filterPattern = /^[A-Za-z0-9._]{1,20}$/;

@@ -442,8 +442,8 @@ export function imaVideo(global, data) {
 }
 
 /**
- * @param {!Window} global
- * @param {!JsonObject} data
+ * @param {!Object} global
+ * @param {!Object} data
  */
 function onImaLoadSuccess(global, data) {
   // This is the first place where we have access to any IMA objects.
@@ -529,7 +529,7 @@ function htmlToElement(html) {
 }
 
 /**
- * @param {!Window} global
+ * @param {!Object} global
  * @param {string} name
  * @param {string} [fill='#FFFFFF']
  * @return {!Element}
