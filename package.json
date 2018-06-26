@@ -51,7 +51,7 @@
     "autoprefixer": "8.6.3",
     "ava": "0.25.0",
     "babel-core": "6.26.3",
-    "babel-eslint": "8.2.3",
+    "babel-eslint": "8.2.5",
     "babel-plugin-transform-remove-strict-mode": "0.0.2",
     "babel-preset-env": "1.7.0",
     "babelify": "8.0.0",
