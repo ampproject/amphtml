@@ -49,7 +49,7 @@ const rawCreative = `
   parent./*OK*/postMessage(
       JSON.stringify(/** @type {!JsonObject} */ ({
         s: 'creative_geometry_update',
-        p: '{"width":"1px","height":"1px","sentinel":"sentinel"}',
+        p: '{"width":"1px","height":"250px","sentinel":"sentinel"}',
       })), '*');
   </script>`;
 
@@ -234,7 +234,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     createScaffoldingForFluidRendering(impl, sandbox);
     return impl.adPromise_.then(() => {
       return impl.layoutCallback().then(() => {
-        expect(impl.element.style.height).to.equal(impl.iframe.style.height);
+        expect(impl.iframe.style.height).to.equal('250px');
       });
     });
   });
