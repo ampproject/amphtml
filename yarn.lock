@@ -9034,9 +9034,9 @@ postcss@^6.0.0, postcss@^6.0.1:
     source-map "^0.6.1"
     supports-color "^4.4.0"
 
-preact-compat@3.17.0:
-  version "3.17.0"
-  resolved "https://registry.yarnpkg.com/preact-compat/-/preact-compat-3.17.0.tgz#528cfdfc301190c1a0f47567336be1f4be0266b3"
+preact-compat@3.18.0:
+  version "3.18.0"
+  resolved "https://registry.yarnpkg.com/preact-compat/-/preact-compat-3.18.0.tgz#ca430cc1f67193fb9feaf7c510832957b2ebe701"
   dependencies:
     immutability-helper "^2.1.2"
     preact-render-to-string "^3.6.0"
