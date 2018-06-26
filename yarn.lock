@@ -2679,6 +2679,10 @@ commander@~2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.1.0.tgz#d121bbae860d9992a3d517ba96f56588e47c6781"
 
+commander@~2.14.1:
+  version "2.14.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.14.1.tgz#2235123e37af8ca3c65df45b026dbd357b01b9aa"
+
 comment-parser@^0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/comment-parser/-/comment-parser-0.4.2.tgz#fa5a3f78013070114866dc7b8e9cf317a9635f74"
@@ -11126,6 +11130,13 @@ ternary-stream@^2.0.1:
     merge-stream "^1.0.0"
     through2 "^2.0.1"
 
+terser@^3.7.5:
+  version "3.7.6"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-3.7.6.tgz#0b3c609f22278c089780ac1cdc63627071e3b96a"
+  dependencies:
+    commander "~2.14.1"
+    source-map "~0.6.1"
+
 text-encoding@^0.6.4:
   version "0.6.4"
   resolved "https://registry.yarnpkg.com/text-encoding/-/text-encoding-0.6.4.tgz#e399a982257a276dae428bb92845cb71bdc26d19"
@@ -11395,13 +11406,6 @@ ua-parser-js@^0.7.9:
   version "0.7.17"
   resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.17.tgz#e9ec5f9498b9ec910e7ae3ac626a805c4d09ecac"
 
-uglify-es@^3.0.15:
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/uglify-es/-/uglify-es-3.2.2.tgz#15c62b7775002c81b7987a1c49ecd3f126cace73"
-  dependencies:
-    commander "~2.12.1"
-    source-map "~0.6.1"
-
 uglify-js@1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-1.2.5.tgz#b542c2c76f78efb34b200b20177634330ff702b6"
@@ -11426,15 +11430,15 @@ uglify-to-browserify@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/uglify-to-browserify/-/uglify-to-browserify-1.0.2.tgz#6e0924d6bda6b5afe349e39a6d632850a0f882b7"
 
-uglifyify@5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/uglifyify/-/uglifyify-5.0.0.tgz#012948b682f62eff2a8246bb3ad5c771da22f274"
+uglifyify@5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/uglifyify/-/uglifyify-5.0.1.tgz#70b1d8b413c410348c8e35e7f8bd1330a422d5f6"
   dependencies:
     convert-source-map "~1.1.0"
     extend "^1.2.1"
     minimatch "^3.0.2"
+    terser "^3.7.5"
     through "~2.3.4"
-    uglify-es "^3.0.15"
 
 uid-number@^0.0.6:
   version "0.0.6"
