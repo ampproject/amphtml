@@ -37,6 +37,10 @@
   .spacer {
     margin-bottom: 360px;
   }
+
+  .fix-resize-bug .amp-date-picker-resize-bug .DayPicker_transitionContainer {
+    min-height: 372px;
+  }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
@@ -62,11 +66,10 @@
     locale="en"
     format="DD/MM/YYYY"
     number-of-months="1"
-    day-size="50"
+    day-size="42"
     start-input-selector="#start"
     end-input-selector="#end"
     mode="overlay"
-    layout="container"
     open-after-clear
     open-after-select
   >
@@ -197,6 +200,24 @@
 >
   <input type="date" id="start-date">
   <input type="date" id="end-date">
+</amp-date-picker>
+
+<h2>Day size expand bug</h2>
+
+<amp-state id="fix">
+  <script type="application/json">
+  {
+    "enabled": true
+  }
+  </script>
+</amp-state>
+
+<p>
+  <span [text]="fix.enabled ? 'The bug will not occur' : 'The bug will occur and warn in the console'">The bug will not occur</span>
+</p>
+<button on="tap:AMP.setState({fix: {enabled: !fix.enabled}})" [text]="(fix.enabled ? 'Cause' : 'Prevent') + ' bug'">Cause bug</button>
+<amp-date-picker  class="fix-resize-bug" [class]="fix.enabled ? 'fix-resize-bug' : ''" id="dseb" mode="overlay" day-size="42" input-selector="#dseb-input">
+  <input id="dseb-input" type="tel" placeholder="Date">
 </amp-date-picker>
 
 <h2>Lightbox date picker</h2>

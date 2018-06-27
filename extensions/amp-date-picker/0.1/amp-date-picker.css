@@ -252,8 +252,9 @@ amp-date-picker:not([allow-blocked-ranges]) .CalendarDay__blocked_calendar.Calen
  * TODO(cvializ): Fix bug where date picker renders when not visible and cannot measure height.
  * TODO(cvializ): Fix bug where date picker size adjusts one month behind where it should. (preact vs react difference).
  * Developers who change day-size will need to adjust this value manually in their styles until the above are resolved.
+ * NOTE: If this is updated, make sure to change DEFAULT_MIN_HEIGHT in amp-date-picker.js
  */
-.DayPicker_transitionContainer {
+.amp-date-picker-resize-bug .DayPicker_transitionContainer {
   min-height: 354px;
   max-width: 100%;
   border-radius: 0;
