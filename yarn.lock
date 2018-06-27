@@ -374,9 +374,9 @@ ansi-align@^2.0.0:
   dependencies:
     string-width "^2.0.0"
 
-ansi-colors@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-2.0.1.tgz#592299d94d1c403642098ec4fd7b7f2d8895a957"
+ansi-colors@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-2.0.2.tgz#1a95e0163c461846d44cbdea97bb2ac1aa35f1b2"
 
 ansi-colors@^1.0.1:
   version "1.1.0"
@@ -2368,7 +2368,7 @@ check-error@^1.0.1, check-error@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/check-error/-/check-error-1.0.2.tgz#574d312edd88bb5dd8912e9286dd6c0aed4aac82"
 
-chokidar@^1.0.0, chokidar@^1.0.1, chokidar@^1.4.2, chokidar@^1.6.1:
+chokidar@^1.0.0, chokidar@^1.0.1, chokidar@^1.4.2:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-1.7.0.tgz#798e689778151c8076b4b360e5edd28cda2bb468"
   dependencies:
@@ -2382,6 +2382,25 @@ chokidar@^1.0.0, chokidar@^1.0.1, chokidar@^1.4.2, chokidar@^1.6.1:
     readdirp "^2.0.0"
   optionalDependencies:
     fsevents "^1.0.0"
+
+chokidar@^2.0.0:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-2.0.4.tgz#356ff4e2b0e8e43e322d18a372460bbcf3accd26"
+  dependencies:
+    anymatch "^2.0.0"
+    async-each "^1.0.0"
+    braces "^2.3.0"
+    glob-parent "^3.1.0"
+    inherits "^2.0.1"
+    is-binary-path "^1.0.0"
+    is-glob "^4.0.0"
+    lodash.debounce "^4.0.8"
+    normalize-path "^2.1.1"
+    path-is-absolute "^1.0.0"
+    readdirp "^2.0.0"
+    upath "^1.0.5"
+  optionalDependencies:
+    fsevents "^1.2.2"
 
 chokidar@^2.0.2:
   version "2.0.2"
@@ -2678,6 +2697,10 @@ commander@^2.9.0, commander@~2.12.1:
 commander@~2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.1.0.tgz#d121bbae860d9992a3d517ba96f56588e47c6781"
+
+commander@~2.14.1:
+  version "2.14.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.14.1.tgz#2235123e37af8ca3c65df45b026dbd357b01b9aa"
 
 comment-parser@^0.4.2:
   version "0.4.2"
@@ -4781,7 +4804,7 @@ fsevents@^1.0.0:
     nan "^2.3.0"
     node-pre-gyp "^0.6.39"
 
-fsevents@^1.1.2:
+fsevents@^1.1.2, fsevents@^1.2.2:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-1.2.4.tgz#f41dcb1af2582af3692da36fc55cbd8e1041c426"
   dependencies:
@@ -5346,19 +5369,19 @@ gulp-util@^3.0.0, gulp-util@^3.0.6, gulp-util@^3.0.7:
     through2 "^2.0.0"
     vinyl "^0.5.0"
 
-gulp-watch@4.3.11:
-  version "4.3.11"
-  resolved "https://registry.yarnpkg.com/gulp-watch/-/gulp-watch-4.3.11.tgz#162fc563de9fc770e91f9a7ce3955513a9a118c0"
+gulp-watch@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/gulp-watch/-/gulp-watch-5.0.0.tgz#6fb03ab1735972e0d2866475b568555836dfd0eb"
   dependencies:
     anymatch "^1.3.0"
-    chokidar "^1.6.1"
+    chokidar "^2.0.0"
     glob-parent "^3.0.1"
     gulp-util "^3.0.7"
     object-assign "^4.1.0"
     path-is-absolute "^1.0.1"
     readable-stream "^2.2.2"
     slash "^1.0.0"
-    vinyl "^1.2.0"
+    vinyl "^2.1.0"
     vinyl-file "^2.0.0"
 
 gulp-webserver@0.9.1:
@@ -6750,9 +6773,9 @@ karma-super-dots-reporter@0.2.0:
     chalk "^0.5.1"
     log-symbols "^1.0.1"
 
-karma@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/karma/-/karma-2.0.3.tgz#4d5e13d25f5a51331c5378b24c4984709c01120b"
+karma@2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/karma/-/karma-2.0.4.tgz#b399785f57e9bab1d3c4384db33fef4dec8ae349"
   dependencies:
     bluebird "^3.3.0"
     body-parser "^1.16.1"
@@ -7053,7 +7076,7 @@ lodash.clonedeepwith@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.clonedeepwith/-/lodash.clonedeepwith-4.5.0.tgz#6ee30573a03a1a60d670a62ef33c10cf1afdbdd4"
 
-lodash.debounce@^4.0.3:
+lodash.debounce@^4.0.3, lodash.debounce@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
 
@@ -8726,7 +8749,16 @@ pkginfo@0.3.x:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/pkginfo/-/pkginfo-0.3.1.tgz#5b29f6a81f70717142e09e765bbeab97b4f81e21"
 
-plugin-error@0.1.2, plugin-error@^0.1.2:
+plugin-error@1.0.1, plugin-error@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/plugin-error/-/plugin-error-1.0.1.tgz#77016bd8919d0ac377fdcdd0322328953ca5781c"
+  dependencies:
+    ansi-colors "^1.0.1"
+    arr-diff "^4.0.0"
+    arr-union "^3.1.0"
+    extend-shallow "^3.0.2"
+
+plugin-error@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/plugin-error/-/plugin-error-0.1.2.tgz#3b9bb3335ccf00f425e07437e19276967da47ace"
   dependencies:
@@ -8735,15 +8767,6 @@ plugin-error@0.1.2, plugin-error@^0.1.2:
     arr-diff "^1.0.1"
     arr-union "^2.0.1"
     extend-shallow "^1.1.2"
-
-plugin-error@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/plugin-error/-/plugin-error-1.0.1.tgz#77016bd8919d0ac377fdcdd0322328953ca5781c"
-  dependencies:
-    ansi-colors "^1.0.1"
-    arr-diff "^4.0.0"
-    arr-union "^3.1.0"
-    extend-shallow "^3.0.2"
 
 plur@^2.0.0, plur@^2.1.2:
   version "2.1.2"
@@ -9030,9 +9053,9 @@ postcss@^6.0.0, postcss@^6.0.1:
     source-map "^0.6.1"
     supports-color "^4.4.0"
 
-preact-compat@3.17.0:
-  version "3.17.0"
-  resolved "https://registry.yarnpkg.com/preact-compat/-/preact-compat-3.17.0.tgz#528cfdfc301190c1a0f47567336be1f4be0266b3"
+preact-compat@3.18.0:
+  version "3.18.0"
+  resolved "https://registry.yarnpkg.com/preact-compat/-/preact-compat-3.18.0.tgz#ca430cc1f67193fb9feaf7c510832957b2ebe701"
   dependencies:
     immutability-helper "^2.1.2"
     preact-render-to-string "^3.6.0"
@@ -9421,9 +9444,9 @@ react-dates@17.0.0:
     react-with-styles "^3.2.0"
     react-with-styles-interface-css "^4.0.2"
 
-react-dom@16.4.0:
-  version "16.4.0"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.4.0.tgz#099f067dd5827ce36a29eaf9a6cdc7cbf6216b1e"
+react-dom@16.4.1:
+  version "16.4.1"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.4.1.tgz#7f8b0223b3a5fbe205116c56deb85de32685dad6"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -9485,9 +9508,9 @@ react-with-styles@^3.2.0:
     prop-types "^15.6.0"
     react-with-direction "^1.1.0"
 
-react@16.4.0:
-  version "16.4.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.4.0.tgz#402c2db83335336fba1962c08b98c6272617d585"
+react@16.4.1:
+  version "16.4.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.4.1.tgz#de51ba5764b5dbcd1f9079037b862bd26b82fe32"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -11126,6 +11149,13 @@ ternary-stream@^2.0.1:
     merge-stream "^1.0.0"
     through2 "^2.0.1"
 
+terser@^3.7.5:
+  version "3.7.6"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-3.7.6.tgz#0b3c609f22278c089780ac1cdc63627071e3b96a"
+  dependencies:
+    commander "~2.14.1"
+    source-map "~0.6.1"
+
 text-encoding@^0.6.4:
   version "0.6.4"
   resolved "https://registry.yarnpkg.com/text-encoding/-/text-encoding-0.6.4.tgz#e399a982257a276dae428bb92845cb71bdc26d19"
@@ -11395,13 +11425,6 @@ ua-parser-js@^0.7.9:
   version "0.7.17"
   resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.17.tgz#e9ec5f9498b9ec910e7ae3ac626a805c4d09ecac"
 
-uglify-es@^3.0.15:
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/uglify-es/-/uglify-es-3.2.2.tgz#15c62b7775002c81b7987a1c49ecd3f126cace73"
-  dependencies:
-    commander "~2.12.1"
-    source-map "~0.6.1"
-
 uglify-js@1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-1.2.5.tgz#b542c2c76f78efb34b200b20177634330ff702b6"
@@ -11426,15 +11449,15 @@ uglify-to-browserify@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/uglify-to-browserify/-/uglify-to-browserify-1.0.2.tgz#6e0924d6bda6b5afe349e39a6d632850a0f882b7"
 
-uglifyify@5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/uglifyify/-/uglifyify-5.0.0.tgz#012948b682f62eff2a8246bb3ad5c771da22f274"
+uglifyify@5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/uglifyify/-/uglifyify-5.0.1.tgz#70b1d8b413c410348c8e35e7f8bd1330a422d5f6"
   dependencies:
     convert-source-map "~1.1.0"
     extend "^1.2.1"
     minimatch "^3.0.2"
+    terser "^3.7.5"
     through "~2.3.4"
-    uglify-es "^3.0.15"
 
 uid-number@^0.0.6:
   version "0.0.6"
@@ -11555,6 +11578,10 @@ upath@^1.0.0:
     lodash.isfunction "^3.0.8"
     lodash.isstring "^4.0.1"
     lodash.startswith "^4.2.1"
+
+upath@^1.0.5:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/upath/-/upath-1.1.0.tgz#35256597e46a581db4793d0ce47fa9aebfc9fabd"
 
 update-notifier@^2.3.0:
   version "2.3.0"
@@ -11765,7 +11792,7 @@ vinyl@^0.5.0:
     clone-stats "^0.0.1"
     replace-ext "0.0.1"
 
-vinyl@^1.1.0, vinyl@^1.2.0:
+vinyl@^1.1.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/vinyl/-/vinyl-1.2.0.tgz#5c88036cf565e5df05558bfc911f8656df218884"
   dependencies:
