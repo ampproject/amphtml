@@ -359,6 +359,17 @@ Default styling is a blue dot on the date.
 
 The size in `px` of the date cells in the calendar view table. The default is `39`.
 
+Note: [due to a bug](https://github.com/ampproject/amphtml/issues/13897),
+a non-default `day-size` causes the date picker height to be incorrect on months
+that span more than 4 weeks. To prevent incorrect height, add a CSS rule to the
+document that sets a minimum height for the date picker.
+
+```css
+.amp-date-picker-resize-bug .DayPicker_transitionContainer {
+  min-height: 354px; /* 354px is the default. You must update it. */
+}
+```
+
 ##### allow-blocked-ranges
 
 If present, this attribute prevents the user from selecting a range with a blocked date.
@@ -670,7 +681,6 @@ rendered after the calendar view renders for the first time.
   <template type="amp-mustache" date-template default>{{DD}}</template>
 </amp-date-picker>
 ```
-
 
 ##### info-template
 

@@ -26,14 +26,21 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
+import {computedStyle} from '../../../src/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent, isRTL, iterateCursor} from '../../../src/dom';
+import {
+  escapeCssSelectorIdent,
+  isRTL,
+  iterateCursor,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
+import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
 
 
@@ -157,7 +164,23 @@ const DatePickerEvent = {
  * The size in PX of each calendar day. This value allows the date picker to
  * fit within a 320px wide viewport when fully rendered.
  */
-const DEFAULT_DATE_SIZE = 39;
+const DEFAULT_DAY_SIZE = 39;
+
+/**
+ * This is related to a bug in preact-compat impacting 'react-dates' rendering.
+ * NOTE: If this is updated, make sure to change .DayPicker_tranitionContainer
+ * min-height in amp-date-picker.css
+ * TODO(cvializ): remove this when #13897 is fixed.
+ */
+const DEFAULT_TRANSITION_CONTAINER_MIN_HEIGHT = '354px';
+
+/**
+ * TODO(cvializ): remove this when #13897 is fixed.
+ */
+const RESIZE_BUG_CSS = 'amp-date-picker-resize-bug';
+
+const TRANSITION_CONTAINER_SELECTOR =
+    `.${RESIZE_BUG_CSS} .DayPicker_transitionContainer`;
 
 const DEFAULT_FIRST_DAY_OF_WEEK = 0; // Sunday
 
@@ -237,7 +260,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private @const */
     this.daySize_ =
-        Number(this.element.getAttribute('day-size')) || DEFAULT_DATE_SIZE;
+        Number(this.element.getAttribute('day-size')) || DEFAULT_DAY_SIZE;
 
     const blocked = this.element.getAttribute('blocked');
     /** @private @const */
@@ -252,7 +275,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private @const */
     this.container_ = this.document_.createElement('div');
     this.container_.classList.add(
-        CALENDAR_CONTAINER_CSS, PRIVATE_CALENDAR_CONTAINER_CSS);
+        CALENDAR_CONTAINER_CSS, PRIVATE_CALENDAR_CONTAINER_CSS, RESIZE_BUG_CSS);
 
     /** @private @const */
     this.type_ = this.element.getAttribute('type') || DatePickerType.SINGLE;
@@ -344,13 +367,17 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private {?Object} */
     this.state_ = null;
+
+    /** @private @const */
+    this.warnDaySizeOnce_ =
+        once(this.warnDaySize_.bind(this));
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return this.mode_ == DatePickerMode.STATIC ?
       isLayoutSizeDefined(layout) :
-      Layout.CONTAINER;
+      layout == Layout.CONTAINER;
   }
 
   /** @override */
@@ -1503,6 +1530,31 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
+   * If the author changed the "day-size" attribute, warn them about the
+   * resize bug and give a workaround for it.
+   * Should only be called from within a `measureElement` block
+   * @param {!Element} container
+   */
+  warnDaySize_(container) {
+    if (this.daySize_ !== DEFAULT_DAY_SIZE) {
+      // Check to see if the publisher has fixed the bug by updating the height
+      const {minHeight} = computedStyle(this.win, container);
+      if (minHeight === DEFAULT_TRANSITION_CONTAINER_MIN_HEIGHT) {
+        user().warn(TAG,
+            this.element,
+            'The "day-size" attribute is changed from the default value ' +
+            `"${DEFAULT_DAY_SIZE}". You must specify a new "min-height" ` +
+            `for the "${TRANSITION_CONTAINER_SELECTOR}" element in your ` +
+            'AMP CSS.\n' +
+            'This is necessary due to a bug in the date-picker library. ' +
+            `When the bug is fixed, the "${RESIZE_BUG_CSS}" CSS class ` +
+            'will be removed.\n' +
+            'See https://github.com/ampproject/amphtml/issues/13897');
+      }
+    }
+  }
+
+  /**
    * Render the configured date picker component.
    * @param {?Object=} opt_additionalProps
    * @return {!Promise}
@@ -1514,10 +1566,11 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       if (Picker) {
-        // TODO(cvializ): When rendered with React, the picker expands to fit
-        // the number of weeks for that month. When rendered with Preact, the
-        // picker expands 1 behind where it should for the number of weeks in
-        // the month. Fix this.
+        // TODO(cvializ, #13897):
+        // When rendered with React, the picker expands to fit
+        // the number of weeks for that month. When rendered with preact-compat,
+        // the picker expands 1 behind where it should for the number of weeks
+        // in the month.
         this.reactRender_(
             this.react_.createElement(Picker, Object.assign({}, {
               date: props.date,
@@ -1541,6 +1594,23 @@ export class AmpDatePicker extends AMP.BaseElement {
       } else {
         this.reactRender_(null, this.container_);
       }
+    }).then(() => {
+      this.measureElement(() => {
+        const transitionContainer =
+            scopedQuerySelector(this.element, TRANSITION_CONTAINER_SELECTOR);
+        if (transitionContainer) {
+          this.warnDaySizeOnce_(transitionContainer);
+        }
+
+        if (this.mode_ === DatePickerMode.STATIC) {
+          const scrollHeight = this.container_./*OK*/scrollHeight;
+          const height = this.element./*OK*/offsetHeight;
+          if (scrollHeight > height) {
+            // Add 1px to allow the bottom border to show
+            this./*OK*/changeHeight(scrollHeight + 1);
+          }
+        }
+      });
     });
   }
 }
