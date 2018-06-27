@@ -134,7 +134,8 @@
       "loading_complete_css": [
         ".list1",
         ".list2"
-      ]
+      ],
+      "loading_incomplete_css": [".i-amphtml-loading-container"]
     },
     {
       "url": "examples/visual-tests/amp-lightbox-gallery.html",
