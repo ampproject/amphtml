@@ -299,14 +299,16 @@ function reportErrorToServer(message, filename, line, col, error) {
   if (getMode().localDev || getMode().development || getMode().test) {
     return;
   }
+  let hasShadowDomJs = false;
   let hasNonAmpJs = false;
   try {
     hasNonAmpJs = detectNonAmpJs(self);
+    hasShadowDomJs = detectAmpShadowJs(self);
   } catch (ignore) {
     // Ignore errors during error report generation.
   }
-  if (hasNonAmpJs && Math.random() > 0.01) {
-    // Only report 1% of errors on pages with non-AMP JS.
+  if (!hasShadowDomJs && hasNonAmpJs && Math.random() > 0.01) {
+    // Only report 1% of errors on pages with non-AMP JS and are not PWAs
     // These errors can almost never be acted upon, but spikes such as
     // due to buggy browser extensions may be helpful to notify authors.
     return;
@@ -543,6 +545,17 @@ export function detectNonAmpJs(win) {
     }
   }
   return false;
+}
+
+/**
+ * Returns true if the shadow DOM script is used.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function detectAmpShadowJs(win) {
+  const ampdocService = Services.ampdocServiceFor(win);
+  return !!ampdocService.getHeadNode().querySelector(
+      'script[src="https://cdn.ampproject.org/shadow-v0.js"]');
 }
 
 /**
