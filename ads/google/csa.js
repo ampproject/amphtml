@@ -261,6 +261,7 @@ export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
 
 /**
  * CSA callback function to resize the iframe when ads were returned
+ * @param {!Window} global
  * @param {string} containerName Name of the container ('csacontainer')
  * @visibleForTesting
  */

@@ -89,13 +89,13 @@
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
     "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
-    "jsdoc/check-param-names": 1,
-    "jsdoc/check-tag-names": 1,
-    "jsdoc/check-types": 1,
-    "jsdoc/require-param": 1,
-    "jsdoc/require-param-name": 1,
-    "jsdoc/require-param-type": 1,
-    "jsdoc/require-returns-type": 1,
+    "jsdoc/check-param-names": 2,
+    "jsdoc/check-tag-names": 2,
+    "jsdoc/check-types": 2,
+    "jsdoc/require-param": 2,
+    "jsdoc/require-param-name": 2,
+    "jsdoc/require-param-type": 2,
+    "jsdoc/require-returns-type": 2,
     "key-spacing": 2,
     "max-len": [2, 80, 4, {
       "ignoreTrailingComments": true,
@@ -144,7 +144,7 @@
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
-    "require-jsdoc": [1, {
+    "require-jsdoc": [2, {
       "require": {
         "FunctionDeclaration": true,
         "MethodDefinition": true,
@@ -170,9 +170,16 @@
   },
   "overrides": [
     {
-      "files": ["test/**/*.js", "extensions/**/test/**/*.js"],
+      "files": ["test/**/*.js", "extensions/**/test/**/*.js", "ads/**/test/**/*.js", "testing/**/*.js"],
       "rules": {
-        "require-jsdoc": 0
+        "require-jsdoc": 0,
+        "jsdoc/check-param-names": 0,
+        "jsdoc/check-tag-names": 0,
+        "jsdoc/check-types": 0,
+        "jsdoc/require-param": 0,
+        "jsdoc/require-param-name": 0,
+        "jsdoc/require-param-type": 0,
+        "jsdoc/require-returns-type": 0
       }
     }
   ]

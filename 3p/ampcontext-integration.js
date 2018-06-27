@@ -104,6 +104,9 @@ export class IntegrationAmpContext extends AbstractAmpContext {
     this.requestResize(width, height);
   }
 
+  /**
+   * Sends bootstrap loaded message.
+   */
   bootstrapLoaded() {
     this.client_.sendMessage('bootstrap-loaded');
   }

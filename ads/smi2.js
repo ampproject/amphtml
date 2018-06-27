@@ -20,7 +20,6 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function smi2(global, data) {
   validateData(data, ['blockid']);
   (global._smi2 = global._smi2 || {

@@ -67,6 +67,9 @@ export function imonomy(global, data) {
   }
 }
 
+/**
+ * @param {*} data
+ */
 function prepareData(data) {
   for (const attr in data) {
     if (data.hasOwnProperty(attr) && imonomyData.indexOf(attr) >= 0) {
@@ -77,6 +80,10 @@ function prepareData(data) {
   data.targeting['IMONOMY_AMP'] = '1';
 }
 
+/**
+ * @param {*} data
+ * @param {number} code
+ */
 function reportStats(data, code) {
   try {
     if (code == EVENT_BADTAG) { return; }

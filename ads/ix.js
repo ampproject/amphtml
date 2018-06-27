@@ -66,6 +66,9 @@ export function ix(global, data) {
   }
 }
 
+/**
+ * @param {!Object} data
+ */
 function prepareData(data) {
   for (const attr in data) {
     if (data.hasOwnProperty(attr) && /^ix[A-Z]/.test(attr)) {
@@ -76,6 +79,13 @@ function prepareData(data) {
   data.targeting['IX_AMP'] = '1';
 }
 
+/**
+ * @param {string} siteID
+ * @param {string} slotID
+ * @param {string} dfpSlot
+ * @param {number} start
+ * @param {number} code
+ */
 function reportStats(siteID, slotID, dfpSlot, start, code) {
   try {
     if (code == EVENT_BADTAG) { return; }

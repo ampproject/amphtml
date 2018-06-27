@@ -36,6 +36,9 @@ export function vmfive(global, data) {
   parallelDownloadScriptsAndExecuteInOrder(global);
 }
 
+/**
+ * @param {!Window} win
+ */
 function parallelDownloadScriptsAndExecuteInOrder(win) {
   [
     'https://vawpro.vm5apis.com/man.js',
@@ -48,6 +51,11 @@ function parallelDownloadScriptsAndExecuteInOrder(win) {
   });
 }
 
+/**
+ * @param {!Window} win
+ * @param {string} placementId
+ * @param {string} adType
+ */
 function createAdUnit(win, placementId, adType) {
   const el = document.createElement('vmfive-ad-unit');
   el.setAttribute('placement-id', placementId);
@@ -55,6 +63,10 @@ function createAdUnit(win, placementId, adType) {
   win.document.getElementById('c').appendChild(el);
 }
 
+/**
+ * @param {!Window} win
+ * @param {string} appKey
+ */
 function setupSDKReadyCallback(win, appKey) {
   win.onVM5AdSDKReady = sdk => sdk.init({appKey});
 }

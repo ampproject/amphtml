@@ -21,7 +21,6 @@ import {validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function medyanet(global, data) {
   validateData(data, ['slot', 'domain']);
 

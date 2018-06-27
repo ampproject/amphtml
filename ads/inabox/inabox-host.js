@@ -40,7 +40,9 @@ const INABOX_UNREGISTER_IFRAME = 'inaboxUnregisterIframe';
  * @visibleForTesting
  */
 export class InaboxHost {
-  /** @param win {!Window}  */
+  /**
+   * @param {!Window} win
+   */
   constructor(win) {
     // Prevent double initialization
     if (win[AMP_INABOX_INITIALIZED]) {
@@ -89,7 +91,7 @@ export class InaboxHost {
     // Empty and ensure that future messages are no longer stored in the array.
     win[PENDING_MESSAGES] = [];
     win[PENDING_MESSAGES]['push'] = () => {};
-    win.addEventListener('message', host.processMessage.bind(host));
+    win.addEventListener('message', /** @type function(Event)*/ (host.processMessage.bind(host)));
   }
 }
 
@@ -98,7 +100,7 @@ export class InaboxHost {
  * fields.
  *
  * @param {!Event} message
- * @returns {boolean} if the message is valid or not
+ * @return {boolean} if the message is valid or not
  */
 function validateMessage(message) {
   const valid = !!(message.source && message.source.postMessage);
