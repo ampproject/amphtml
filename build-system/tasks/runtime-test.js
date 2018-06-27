@@ -501,30 +501,19 @@ function runTests() {
     c.files = c.files.concat(config.coveragePaths);
     c.browserify.transform.push(
         ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
-    c.plugins.push('karma-coverage');
-    c.reporters = c.reporters.concat(['coverage']);
+    c.plugins.push('karma-coverage-istanbul-reporter');
+    c.reporters = c.reporters.concat(['coverage-istanbul']);
     if (c.preprocessors['src/**/*.js']) {
       c.preprocessors['src/**/*.js'].push('coverage');
     }
     c.preprocessors['extensions/**/*.js'] &&
         c.preprocessors['extensions/**/*.js'].push('coverage');
-    c.coverageReporter = {
+    c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      reporters: [
-        {type: 'html', subdir: 'report-html'},
-        {type: 'lcov', subdir: 'report-lcov'},
-        {type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt'},
-        {type: 'text', subdir: '.', file: 'text.txt'},
-        {type: 'text-summary', subdir: '.', file: 'text-summary.txt'},
-      ],
-      instrumenterOptions: {
-        istanbul: {
-          noCompact: true,
-        },
-      },
+      fixWebpackSourcePaths: true,
+      reports: ['cobertura', 'lcov', 'text', 'text-summary'],
+      skipFilesWithNoCoverage: true,
     };
-    // TODO(jonkeller): Add c.coverageReporter.check as shown in
-    // https://github.com/karma-runner/karma-coverage/blob/master/docs/configuration.md
   }
 
   // Run fake-server to test XHR responses.
