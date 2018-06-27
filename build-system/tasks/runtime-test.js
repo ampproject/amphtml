@@ -26,6 +26,7 @@ const Karma = require('karma').Server;
 const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
+const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
@@ -498,33 +499,13 @@ function runTests() {
   }
 
   if (argv.coverage) {
-    c.files = c.files.concat(config.coveragePaths);
-    c.browserify.transform.push(
-        ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
-    c.plugins.push('karma-coverage');
-    c.reporters = c.reporters.concat(['coverage']);
-    if (c.preprocessors['src/**/*.js']) {
-      c.preprocessors['src/**/*.js'].push('coverage');
-    }
-    c.preprocessors['extensions/**/*.js'] &&
-        c.preprocessors['extensions/**/*.js'].push('coverage');
-    c.coverageReporter = {
+    c.browserify.transform.push(['browserify-istanbul']);
+    c.plugins.push('karma-coverage-istanbul-reporter');
+    c.reporters = c.reporters.concat(['coverage-istanbul']);
+    c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      reporters: [
-        {type: 'html', subdir: 'report-html'},
-        {type: 'lcov', subdir: 'report-lcov'},
-        {type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt'},
-        {type: 'text', subdir: '.', file: 'text.txt'},
-        {type: 'text-summary', subdir: '.', file: 'text-summary.txt'},
-      ],
-      instrumenterOptions: {
-        istanbul: {
-          noCompact: true,
-        },
-      },
+      reports: ['html', 'text', 'text-summary'],
     };
-    // TODO(jonkeller): Add c.coverageReporter.check as shown in
-    // https://github.com/karma-runner/karma-coverage/blob/master/docs/configuration.md
   }
 
   // Run fake-server to test XHR responses.
@@ -564,6 +545,13 @@ function runTests() {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
+    }
+    if (argv.coverage) {
+      const coverageReportUrl =
+          'file://' + path.resolve('test/coverage/index.html');
+      log(green('INFO: ') + 'Generated code coverage report at ' +
+          cyan(coverageReportUrl));
+      opn(coverageReportUrl, {wait: false});
     }
     // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
     if (process.env.TRAVIS) {
