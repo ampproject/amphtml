@@ -91,7 +91,7 @@ export class InaboxHost {
     // Empty and ensure that future messages are no longer stored in the array.
     win[PENDING_MESSAGES] = [];
     win[PENDING_MESSAGES]['push'] = () => {};
-    win.addEventListener('message', host.processMessage.bind(host));
+    win.addEventListener('message', /** @type function(Event)*/ (host.processMessage.bind(host)));
   }
 }
 

@@ -25,7 +25,7 @@ export function nativo(global, data) {
     global
         .history
         .replaceState(null,
-            null,
+            '',
             location.pathname + location.hash.replace(/({).*(})/, ''));
     // Private
     let delayedAdLoad = false;

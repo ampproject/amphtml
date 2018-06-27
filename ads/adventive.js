@@ -116,16 +116,13 @@ function callback(id, ns) { ns.addInstance(id); }
  *    provided, otherwise false
  */
 function getUrl(context, data, ns) {
-  const {location} = context,
-      {mode} = ns,
+  const {mode} = ns,
       isDev = hasOwn(data, 'isDev'),
       sld_ = sld[!mode.dev],
       thld_ = thld[isDev && !mode.live],
       search = reduceSearch(ns, data.pid, data.click, context.referrer),
       url = search ?
         addParamsToUrl(`https://${thld_}.${sld_}.com/ad`, search) : false;
-
-  if (isDev && mode.live) { logSuspiciousActivity(location, data, url); }
   return url;
 }
 
@@ -154,14 +151,4 @@ function reduceSearch(ns, placementId, click, referrer) {
     'lib': !ns.isLibLoaded ? '1' : '', // may be prefetchable via _config
     'pid': needsRequest ? placementId : '',
   });
-}
-
-/**
- * Logs suspicious activity
- * @param {!Location} unusedLocation
- * @param {!Object} unusedData
- * @param {string} unusedUrl
- */
-function logSuspiciousActivity(unusedLocation, unusedData, unusedUrl) {
-  /* todo implement */
 }

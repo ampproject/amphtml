@@ -158,7 +158,7 @@ export class InaboxMessagingHost {
     this.iframeMap_[request.sentinel].observeUnregisterFn =
         this.iframeMap_[request.sentinel].observeUnregisterFn ||
         this.positionObserver_.observe(iframe, data =>
-          this.sendPosition_(request, source, origin, data));
+          this.sendPosition_(request, source, origin, /** @type ?JsonObject */(data)));
     return true;
   }
 
@@ -167,7 +167,7 @@ export class InaboxMessagingHost {
    * @param {!Object} request
    * @param {!Window} source
    * @param {string} origin
-   * @param {JsonObject} data
+   * @param {?JsonObject} data
    */
   sendPosition_(request, source, origin, data) {
     dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
@@ -244,7 +244,7 @@ export class InaboxMessagingHost {
    * Note: The sentinel should be unique to the source window, and the result
    * is cached using the sentinel as the key.
    *
-   * @param {!Window} source
+   * @param {?Window} source
    * @param {string} sentinel
    * @return {?HTMLIFrameElement}
    * @private
@@ -279,7 +279,7 @@ export class InaboxMessagingHost {
    * parent hierarchy until the top-most x-domain frame in the hierarchy
    * is found. Then, it returns the frame element for that window.
    * For when win is friendly framed, returns the frame element for win.
-   * @param {!Window} win
+   * @param {?Window} win
    * @return {?HTMLIFrameElement}
    * @visibleForTesting
    */
