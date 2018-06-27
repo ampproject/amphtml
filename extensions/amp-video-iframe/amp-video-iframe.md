@@ -20,7 +20,7 @@ function onAmpIntegrationReady(ampIntegration) {
 
 ### Simple integrations
 
-If you're using a common video framework like Video.js or JwPlayer, you can
+If you're using a common video framework like JwPlayer, you can
 simply call `listenTo` for a basic integration:
 
 ```js
