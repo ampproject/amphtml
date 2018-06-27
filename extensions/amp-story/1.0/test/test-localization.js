@@ -72,7 +72,7 @@ describes.fakeWin('localization', {}, env => {
     });
 
     it('should default to English', () => {
-      expect(getLanguageCodesFromString()).to.deep.equal(['en']);
+      expect(getLanguageCodesFromString()).to.deep.equal(['en', 'default']);
     });
   });
 

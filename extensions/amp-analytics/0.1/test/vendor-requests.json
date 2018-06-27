@@ -74,9 +74,10 @@
   "euleriananalytics": {
     "base": "https://$analyticsHost",
     "basePrefix": "-/_random_?euid-amp=_client_id_&url=_source_url_&",
-    "pageview": "https://$analyticsHost/col2/-/_random_?euid-amp=_client_id_&url=_source_url_&rf=_document_referrer_&sd=_screen_width_x_screen_height_&sd=_screen_color_depth_&elg=_browser_language_",
+    "pageview": "https://$analyticsHost/col2/-/_random_?euid-amp=_client_id_&url=_source_url_&rf=_external_referrer_&urlp=$pagePath&ss=_screen_width_x_screen_height_&sd=_screen_color_depth_",
     "action": "https://$analyticsHost/action/-/_random_?euid-amp=_client_id_&url=_source_url_&eact=$actionCode&actr=$actionRef",
-    "user": "https://$analyticsHost/uparam/-/_random_?euid-amp=_client_id_&url=_source_url_&euk$userParamKey=$userParamVal"
+    "user": "https://$analyticsHost/uparam/-/_random_?euid-amp=_client_id_&url=_source_url_&euk$userParamKey=$userParamVal",
+    "contextflag": "https://$analyticsHost/cflag2/-/_random_?euid-amp=_client_id_&url=_source_url_&ecf0k=$cflagKey&ecf0v=$cflagVal"
   },
   "facebookpixel": {
     "host": "https://www.facebook.com",
