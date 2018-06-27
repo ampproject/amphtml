@@ -165,6 +165,7 @@ declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
 declareExtension('amp-position-observer', '0.1');
+declareExtension('amp-orientation-observer', '0.1');
 declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions', '0.1', {hasCss: true});
