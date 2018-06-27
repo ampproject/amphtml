@@ -667,22 +667,6 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
         expect(allowedProtocolRegex.test(allowedProtocol)).toBe(true);
       }
     });
-    // If disallowed_domain is whatever.ampproject.org then
-    // allow_relative must be false. Otherwise relative URLs would be
-    // rejected for domain whatever.ampproject.org because that is
-    // used as the base URL to parse the relative URL.
-    if ((attrSpec.valueUrl.allowRelative !== null) &&
-        attrSpec.valueUrl.allowRelative) {
-      // allow_relative is true, check to see if whatever.ampproject.org is a
-      // disallowed_domain.
-      it('allow_relative can not be true if ' +
-          'disallowed_domain is whatever.ampproject.org',
-      () => {
-        for (const disallowedDomain of attrSpec.valueUrl.disallowedDomain) {
-          expect(disallowedDomain !== 'whatever.ampproject.org');
-        }
-      });
-    }
     // If allowed_protocol is http then allow_relative should not be false
     // except for `data-` attributes.
     if (!attrSpec.name.startsWith('data-')) {
