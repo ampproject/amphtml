@@ -229,9 +229,9 @@ const BLOCK_SRA_COMBINERS_ = [
     const eids = {};
     instances.forEach(instance => {
       instance.experimentIds.forEach(eid => eids[eid] = 1);
-      const deid = /(?:#|,)deid=(\d+)/i.exec(instance.win.location.hash);
-      if (deid) {
-        eids[deid[1]] = 1;
+      const deids = /(?:#|,)deid=([\d,]+)/i.exec(instance.win.location.hash);
+      if (deids) {
+        deids[1].split(",").forEach(deid => eids[deid] = 1);
       }
     });
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
