@@ -299,15 +299,15 @@ function reportErrorToServer(message, filename, line, col, error) {
   if (getMode().localDev || getMode().development || getMode().test) {
     return;
   }
-  let hasShadowDomJs = false;
+  let hasAmpShadowJs = false;
   let hasNonAmpJs = false;
   try {
     hasNonAmpJs = detectNonAmpJs(self);
-    hasShadowDomJs = detectAmpShadowJs(self);
+    hasAmpShadowJs = detectAmpShadowJs(self);
   } catch (ignore) {
     // Ignore errors during error report generation.
   }
-  if (!hasShadowDomJs && hasNonAmpJs && Math.random() > 0.01) {
+  if (!hasAmpShadowJs && hasNonAmpJs && Math.random() > 0.01) {
     // Only report 1% of errors on pages with non-AMP JS and are not PWAs
     // These errors can almost never be acted upon, but spikes such as
     // due to buggy browser extensions may be helpful to notify authors.
@@ -548,7 +548,7 @@ export function detectNonAmpJs(win) {
 }
 
 /**
- * Returns true if the shadow DOM script is used.
+ * Returns true if the AMP runtime support for shadow DOM is used.
  * @param {!Window} win
  * @return {boolean}
  */
