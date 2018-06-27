@@ -40,6 +40,7 @@ const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
 const tooManyTestsToFix = 15;
+const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
  * Read in and process the configuration settings for karma
@@ -164,8 +165,8 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
-    'local-changes': 'Running unit tests affected by the files changed in the' +
-        ' local branch.',
+    'local-changes': 'Running unit tests directly affected by the files' +
+        ' changed in the local branch.',
   };
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
@@ -248,13 +249,13 @@ function isUnitTest(file) {
 }
 
 /**
- * Returns the list of files imported by testFile
+ * Returns the list of files imported by a JS file
  *
- * @param {string} testFile
+ * @param {string} jsFile
  * @return {!Array<string>}
  */
-function getImports(testFile) {
-  const imports = findImports([testFile], {
+function getImports(jsFile) {
+  const imports = findImports([jsFile], {
     flatten: true,
     packageImports: false,
     absoluteImports: true,
@@ -262,9 +263,9 @@ function getImports(testFile) {
   });
   const files = [];
   const rootDir = path.dirname(path.dirname(__dirname));
-  const testFileDir = path.dirname(testFile);
+  const jsFileDir = path.dirname(jsFile);
   imports.forEach(function(file) {
-    const fullPath = path.resolve(testFileDir, file) + '.js';
+    const fullPath = path.resolve(jsFileDir, file) + '.js';
     if (fs.existsSync(fullPath)) {
       const relativePath = path.relative(rootDir, fullPath);
       files.push(relativePath);
@@ -302,20 +303,94 @@ function getTestsFor(srcFiles) {
 }
 
 /**
+ * Adds an entry that maps a CSS file to a JS file
+ *
+ * @param {!Object} cssData
+ * @param {string} cssBinaryName
+ * @param {!Object<string, string>} cssJsFileMap
+ */
+function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
+  const cssFilePath = 'extensions/' + cssData['name'] + '/' +
+      cssData['version'] + '/' + cssBinaryName + '.css';
+  const jsFilePath = 'build/' + cssBinaryName + '-' +
+      cssData['version'] + '.css.js';
+  cssJsFileMap[cssFilePath] = jsFilePath;
+}
+
+/**
+ * Extracts a mapping from CSS files to JS files from a well known file
+ * generated during `gulp css`.
+ *
+ * @return {!Object<string, string>}
+ */
+function extractCssJsFileMap() {
+  if (!fs.existsSync(extensionsCssMapPath)) {
+    log(red('ERROR:'), 'Could not find the file',
+        cyan(extensionsCssMapPath) + '.');
+    log('Make sure', cyan('gulp css'), 'was run prior to this.');
+    process.exit();
+  }
+  const extensionsCssMap = fs.readFileSync(extensionsCssMapPath, 'utf8');
+  const extensionsCssMapJson = JSON.parse(extensionsCssMap);
+  const extensions = Object.keys(extensionsCssMapJson);
+  const cssJsFileMap = {};
+  extensions.forEach(extension => {
+    const cssData = extensionsCssMapJson[extension];
+    if (cssData['hasCss']) {
+      addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
+      if (cssData.hasOwnProperty('cssBinaries')) {
+        const cssBinaries = cssData['cssBinaries'];
+        cssBinaries.forEach(cssBinary => {
+          addCssJsEntry(cssData, cssBinary, cssJsFileMap);
+        });
+      }
+    }
+  });
+  return cssJsFileMap;
+}
+
+/**
+ * Retrieves the set of JS source files that import the given CSS file.
+ *
+ * @param {string} cssFile
+ * @param {!Object<string, string>} cssJsFileMap
+ * @return {!Array<string>}
+ */
+function getJsFilesFor(cssFile, cssJsFileMap) {
+  const jsFiles = [];
+  if (cssJsFileMap.hasOwnProperty(cssFile)) {
+    const cssFileDir = path.dirname(cssFile);
+    const jsFilesInDir = fs.readdirSync(cssFileDir).filter(file => {
+      return path.extname(file) == '.js';
+    });
+    jsFilesInDir.forEach(jsFile => {
+      const jsFilePath = cssFileDir + '/' + jsFile;
+      if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
+        jsFiles.push(jsFilePath);
+      }
+    });
+  }
+  return jsFiles;
+}
+
+/**
  * Extracts the list of unit tests to run based on the changes in the local
  * branch.
  *
  * @return {!Array<string>}
  */
 function unitTestsToRun() {
+  const cssJsFileMap = extractCssJsFileMap();
   const filesChanged = gitDiffNameOnlyMaster();
   const testsToRun = [];
-  const srcFiles = [];
+  let srcFiles = [];
   filesChanged.forEach(file => {
     if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {
-      srcFiles.push(file);
+      srcFiles = srcFiles.concat([file]);
+    } else if (path.extname(file) == '.css') {
+      srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
     }
   });
   if (srcFiles.length > 0) {
@@ -372,7 +447,8 @@ function runTests() {
   } else if (argv['local-changes']) {
     const testsToRun = unitTestsToRun();
     if (testsToRun.length == 0) {
-      log(green('INFO: ') + 'No unit tests affected by local changes.');
+      log(green('INFO: ') +
+          'No unit tests were directly affected by local changes.');
       return Promise.resolve();
     } else {
       log(green('INFO: ') + 'Running the following unit tests:');
@@ -565,7 +641,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
-    'local-changes': '  Run unit tests affected by the files changed in the ' +
-        'local branch',
+    'local-changes': '  Run unit tests directly affected by the files ' +
+        'changed in the local branch',
   },
 });
