@@ -26,7 +26,7 @@ min_validator_revision_required: 334
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 666
+spec_file_revision: 667
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -2244,7 +2244,8 @@ attr_lists: {
   name: "svg-style-attr"
   attrs: {
     name: "style"
-    # From https://www.w3schools.com/cssref/default.asp
+    # CSS proprities: https://www.w3schools.com/cssref/default.asp
+    # SVG specific properties: https://www.w3.org/TR/SVG11/styling.html#SVGStylingProperties
     # Disallowed:
     # css_declaration: { name: "@charset" }
     # css_declaration: { name: "@font-face" }
@@ -2256,6 +2257,7 @@ attr_lists: {
     css_declaration: { name: "align-content" }
     css_declaration: { name: "align-items" }
     css_declaration: { name: "align-self" }
+    css_declaration: { name: "alignment-baseline" } # SVG
     css_declaration: { name: "all" }
     css_declaration: { name: "animation" }
     css_declaration: { name: "animation-delay" }
@@ -2277,6 +2279,7 @@ attr_lists: {
     css_declaration: { name: "background-position" }
     css_declaration: { name: "background-repeat" }
     css_declaration: { name: "background-size" }
+    css_declaration: { name: "baseline-shift" } # SVG
     css_declaration: { name: "border" }
     css_declaration: { name: "border-bottom" }
     css_declaration: { name: "border-bottom-color" }
@@ -2321,9 +2324,13 @@ attr_lists: {
     css_declaration: { name: "caret-color" }
     css_declaration: { name: "clear" }
     css_declaration: { name: "clip" }
-    # https://www.w3.org/TR/css-masking-1/#the-clip-rule
-    css_declaration: { name: "clip-rule" }
+    css_declaration: { name: "clip-path" } # SVG
+    css_declaration: { name: "clip-rule" } # SVG
     css_declaration: { name: "color" }
+    css_declaration: { name: "color-interpolation" } # SVG
+    css_declaration: { name: "color-interpolation-filters" } # SVG
+    css_declaration: { name: "color-profile" } # SVG
+    css_declaration: { name: "color-rendering" } # SVG
     css_declaration: { name: "column-count" }
     css_declaration: { name: "column-fill" }
     css_declaration: { name: "column-gap" }
@@ -2340,15 +2347,12 @@ attr_lists: {
     css_declaration: { name: "cursor" }
     css_declaration: { name: "direction" }
     css_declaration: { name: "display" }
+    css_declaration: { name: "dominant-baseline" } # SVG
     css_declaration: { name: "empty-cells" }
-    # https://www.w3.org/TR/SVG11/filters.html#AccessingBackgroundImage
-    css_declaration: { name: "enable-background" }
-    # https://www.w3.org/TR/fill-stroke-3/#fill-shorthand
-    css_declaration: { name: "fill" }
-    # https://www.w3.org/TR/fill-stroke-3/#fill-opacity
-    css_declaration: { name: "fill-opacity" }
-    # https://www.w3.org/TR/fill-stroke-3/#fill-rule
-    css_declaration: { name: "fill-rule" }
+    css_declaration: { name: "enable-background" } # SVG
+    css_declaration: { name: "fill" } # SVG
+    css_declaration: { name: "fill-opacity" } # SVG
+    css_declaration: { name: "fill-rule" } # SVG
     css_declaration: { name: "filter" }
     css_declaration: { name: "flex" }
     css_declaration: { name: "flex-basis" }
@@ -2358,6 +2362,8 @@ attr_lists: {
     css_declaration: { name: "flex-shrink" }
     css_declaration: { name: "flex-wrap" }
     css_declaration: { name: "float" }
+    css_declaration: { name: "flood-color" } # SVG
+    css_declaration: { name: "flood-opacity" } # SVG
     css_declaration: { name: "font" }
     css_declaration: { name: "font-family" }
     css_declaration: { name: "font-feature-settings" }
@@ -2376,6 +2382,8 @@ attr_lists: {
     css_declaration: { name: "font-variant-numeric" }
     css_declaration: { name: "font-variant-position" }
     css_declaration: { name: "font-weight" }
+    css_declaration: { name: "glyph-orientation-horizontal" } # SVG
+    css_declaration: { name: "glyph-orientation-vertical" } # SVG
     css_declaration: { name: "grid" }
     css_declaration: { name: "grid-area" }
     css_declaration: { name: "grid-auto-columns" }
@@ -2400,8 +2408,10 @@ attr_lists: {
     css_declaration: { name: "image-rendering" }
     css_declaration: { name: "isolation" }
     css_declaration: { name: "justify-content" }
+    css_declaration: { name: "kerning" } # SVG
     css_declaration: { name: "left" }
     css_declaration: { name: "letter-spacing" }
+    css_declaration: { name: "lighting-color" } # SVG
     css_declaration: { name: "line-break" }
     css_declaration: { name: "line-height" }
     css_declaration: { name: "list-style" }
@@ -2413,6 +2423,11 @@ attr_lists: {
     css_declaration: { name: "margin-left" }
     css_declaration: { name: "margin-right" }
     css_declaration: { name: "margin-top" }
+    css_declaration: { name: "marker" } # SVG
+    css_declaration: { name: "marker-end" } # SVG
+    css_declaration: { name: "marker-mid" } # SVG
+    css_declaration: { name: "marker-start" } # SVG
+    css_declaration: { name: "mask" } # SVG
     css_declaration: { name: "max-height" }
     css_declaration: { name: "max-width" }
     css_declaration: { name: "min-height" }
@@ -2443,7 +2458,7 @@ attr_lists: {
     css_declaration: { name: "perspective" }
     css_declaration: { name: "perspective-origin" }
     css_declaration: { name: "pointer-events" }
-    # CSS Property `position` with values `fixed` and `sticky are not allowed.
+    # CSS property `position` with values `fixed` and `sticky are not allowed.
     # From https://www.w3schools.com/cssref/pr_class_position.asp
     css_declaration: {
       name: "position"
@@ -2468,12 +2483,22 @@ attr_lists: {
     css_declaration: { name: "quotes" }
     css_declaration: { name: "resize" }
     css_declaration: { name: "right" }
-    # https://www.w3.org/TR/SVG/pservers.html#StopColorProperty
-    css_declaration: { name: "stop-color" }
+    css_declaration: { name: "shape-rendering" } # SVG
+    css_declaration: { name: "stop-color" } # SVG
+    css_declaration: { name: "stop-opacity" } # SVG
+    css_declaration: { name: "stroke" } # SVG
+    css_declaration: { name: "stroke-dasharray" } # SVG
+    css_declaration: { name: "stroke-dashoffset" } # SVG
+    css_declaration: { name: "stroke-linecap" } # SVG
+    css_declaration: { name: "stroke-linejoin" } # SVG
+    css_declaration: { name: "stroke-miterlimit" } # SVG
+    css_declaration: { name: "stroke-opacity" } # SVG
+    css_declaration: { name: "stroke-width" } # SVG
     css_declaration: { name: "tab-size" }
     css_declaration: { name: "table-layout" }
     css_declaration: { name: "text-align" }
     css_declaration: { name: "text-align-last" }
+    css_declaration: { name: "text-anchor" } # SVG
     css_declaration: { name: "text-combine-upright" }
     css_declaration: { name: "text-decoration" }
     css_declaration: { name: "text-decoration-color" }
@@ -2483,6 +2508,7 @@ attr_lists: {
     css_declaration: { name: "text-justify" }
     css_declaration: { name: "text-orientation" }
     css_declaration: { name: "text-overflow" }
+    css_declaration: { name: "text-rendering" } # SVG
     css_declaration: { name: "text-shadow" }
     css_declaration: { name: "text-transform" }
     css_declaration: { name: "text-underline-position" }
