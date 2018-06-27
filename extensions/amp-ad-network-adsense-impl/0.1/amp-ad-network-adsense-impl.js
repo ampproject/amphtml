@@ -509,8 +509,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Nudge into the correct horizontal position by changing side margin.
       this.getVsync().run({
         measure: state => {
+          // Check the parent element because amp-ad is explicitly styled to
+          // have direction: ltr.
           state.direction =
-            computedStyle(this.win, this.element)['direction'];
+            computedStyle(this.win,
+                dev().assertElement(this.element.parentElement))['direction'];
         },
         mutate: state => {
           if (state.direction == 'rtl') {
