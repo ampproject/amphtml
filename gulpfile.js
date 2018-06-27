@@ -543,6 +543,9 @@ function compileCss(watch, opt_compileAll) {
         }));
   }
 
+  // Used by `gulp test --local-changes` to map CSS files to JS files.
+  fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
+
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
       .then(css => writeCss(css, 'amp.css', 'css.js', 'v0.css'))
