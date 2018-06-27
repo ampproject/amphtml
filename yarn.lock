@@ -152,7 +152,7 @@
     pretty-ms "^0.2.1"
     text-table "^0.2.0"
 
-"@percy/puppeteer@^0.3.2":
+"@percy/puppeteer@0.3.2":
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/@percy/puppeteer/-/puppeteer-0.3.2.tgz#ef1218689884d0100612b4ab72cd23547156fc5d"
   dependencies:
@@ -6835,15 +6835,15 @@ json-stringify-safe@5.0.x, json-stringify-safe@~5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
 
-json5@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/json5/-/json5-0.5.1.tgz#1eade7acc012034ad84e2396767ead9fa5495821"
-
-json5@^1.0.1:
+json5@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/json5/-/json5-1.0.1.tgz#779fb0018604fa854eacbf6252180d83543e3dbe"
   dependencies:
     minimist "^1.2.0"
+
+json5@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/json5/-/json5-0.5.1.tgz#1eade7acc012034ad84e2396767ead9fa5495821"
 
 jsonfile@^4.0.0:
   version "4.0.0"
@@ -9697,7 +9697,7 @@ punycode@2.x.x, punycode@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.0.tgz#5f863edc89b96db09074bad7947bf09056ca4e7d"
 
-puppeteer@^1.5.0:
+puppeteer@1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-1.5.0.tgz#e35db3f3ba3d41013feb65be02bdaa727ec7b8ec"
   dependencies:
@@ -10915,7 +10915,7 @@ slash@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/slash/-/slash-1.0.0.tgz#c41f2f6c39fc16d1cd17ad4b5d896114ae470d55"
 
-sleep-promise@^8.0.1:
+sleep-promise@8.0.1:
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/sleep-promise/-/sleep-promise-8.0.1.tgz#8d795a27ea23953df6b52b91081e5e22665993c5"
 
@@ -11850,7 +11850,7 @@ trim-right@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/trim-right/-/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
 
-try-net-connect@^3.0.2:
+try-net-connect@3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/try-net-connect/-/try-net-connect-3.0.2.tgz#fbb081428fb347419573e14f3ebd72aff42ec65b"
   dependencies:
