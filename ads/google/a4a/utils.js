@@ -259,40 +259,40 @@ export function googlePageParameters(a4a, startTime) {
         const visibilityState = Services.viewerForDoc(ampDoc)
             .getVisibilityState();
         return {
-          'is_amp' : a4a.isXhrAllowed()
+          'is_amp': a4a.isXhrAllowed()
                          ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
                          : AmpAdImplementation.AMP_AD_IFRAME_GET,
-          'amp_v' : '$internalRuntimeVersion$',
-          'd_imp' : '1',
-          'c' : getCorrelator(win, ampDoc, clientId),
-          'ga_cid' : win.gaGlobal.cid || null,
-          'ga_hid' : win.gaGlobal.hid || null,
-          'dt' : startTime,
-          'biw' : viewportRect.width,
-          'bih' : viewportRect.height,
-          'u_aw' : screen ? screen.availWidth : null,
-          'u_ah' : screen ? screen.availHeight : null,
-          'u_cd' : screen ? screen.colorDepth : null,
-          'u_w' : screen ? screen.width : null,
-          'u_h' : screen ? screen.height : null,
-          'u_tz' : -new Date().getTimezoneOffset(),
-          'u_his' : getHistoryLength(win),
-          'isw' : win != win.top ? viewportSize.width : null,
-          'ish' : win != win.top ? viewportSize.height : null,
-          'art' : getAmpRuntimeTypeParameter(win),
-          'vis' : visibilityStateCodes[visibilityState] || '0',
-          'scr_x' : viewport.getScrollLeft(),
-          'scr_y' : viewport.getScrollTop(),
-          'bc' : getBrowserCapabilitiesBitmap(win) || null,
-          'debug_experiment_id' :
+          'amp_v': '$internalRuntimeVersion$',
+          'd_imp': '1',
+          'c': getCorrelator(win, ampDoc, clientId),
+          'ga_cid': win.gaGlobal.cid || null,
+          'ga_hid': win.gaGlobal.hid || null,
+          'dt': startTime,
+          'biw': viewportRect.width,
+          'bih': viewportRect.height,
+          'u_aw': screen ? screen.availWidth : null,
+          'u_ah': screen ? screen.availHeight : null,
+          'u_cd': screen ? screen.colorDepth : null,
+          'u_w': screen ? screen.width : null,
+          'u_h': screen ? screen.height : null,
+          'u_tz': -new Date().getTimezoneOffset(),
+          'u_his': getHistoryLength(win),
+          'isw': win != win.top ? viewportSize.width : null,
+          'ish': win != win.top ? viewportSize.height : null,
+          'art': getAmpRuntimeTypeParameter(win),
+          'vis': visibilityStateCodes[visibilityState] || '0',
+          'scr_x': viewport.getScrollLeft(),
+          'scr_y': viewport.getScrollTop(),
+          'bc': getBrowserCapabilitiesBitmap(win) || null,
+          'debug_experiment_id':
               (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] ||
                   null,
-          'url' : documentInfo.canonicalUrl,
-          'top' : win != win.top ? topWindowUrlOrDomain(win) : null,
-          'loc' : win.location.href == documentInfo.canonicalUrl
+          'url': documentInfo.canonicalUrl,
+          'top': win != win.top ? topWindowUrlOrDomain(win) : null,
+          'loc': win.location.href == documentInfo.canonicalUrl
                       ? null
                       : win.location.href,
-          'ref' : promiseResults[1] || null,
+          'ref': promiseResults[1] || null,
         };
       });
 }
