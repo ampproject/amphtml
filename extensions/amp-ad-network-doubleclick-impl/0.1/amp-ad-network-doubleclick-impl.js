@@ -219,7 +219,7 @@ export const SRA_JOINER = {
     const eids = {};
     const deid = impls.length &&
       /(?:#|,)deid=([\d,]+)/i.exec(impls[0].win.location.hash) || [];
-    (deid[1] || '').split(',').forEach(eid => eids[eid] = 1);
+    (deid[1] || '').split(',').forEach(eid => eid && (eids[eid] = 1));
     impls.forEach(impl => impl.experimentIds.forEach(eid => eids[eid] = 1));
     const eidKeys = Object.keys(eids).join();
     return eidKeys ? {'eid': eidKeys} : null;
