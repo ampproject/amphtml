@@ -214,13 +214,13 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the Source URL for this AMP document.
-    const getSourceUrl = () => {
+    const expandSourceUrl = () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
       return removeFragment(this.addReplaceParamsIfMissing_(docInfo.sourceUrl));
     };
     this.setBoth('SOURCE_URL',
-        () => getSourceUrl(),
-        () => getTrackImpressionPromise().then(() => getSourceUrl()));
+        () => expandSourceUrl(),
+        () => getTrackImpressionPromise().then(() => expandSourceUrl()));
 
     // Returns the host of the Source URL for this AMP document.
     this.set('SOURCE_HOST', this.getDocInfoUrl_('sourceUrl', 'host'));
@@ -656,7 +656,6 @@ export class GlobalVariableSource extends VariableSource {
     user().assert(param,
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
-    user().assert(typeof param == 'string', 'param should be a string');
     const url = parseUrlDeprecated(
         removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
