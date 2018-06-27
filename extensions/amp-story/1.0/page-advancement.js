@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {StateProperty} from './amp-story-store-service';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent, isRTL} from '../../../src/dom';
+import {closest, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
@@ -248,9 +249,8 @@ class MultipleAdvancementConfig extends AdvancementConfig {
 
 
 /**
- * Always provides a progress of 1.0.  Advances when the user taps the rightmost
- * 75% of the screen; triggers the previous listener when the user taps the
- * leftmost 25% of the screen.
+ * Always provides a progress of 1.0.  Advances when the user taps the
+ * corresponding section, depending on language settings.
  */
 class ManualAdvancement extends AdvancementConfig {
   /**
@@ -262,6 +262,10 @@ class ManualAdvancement extends AdvancementConfig {
     this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
     this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(
+        element.ownerDocument.defaultView);
   }
 
   /** @override */
@@ -331,68 +335,50 @@ class ManualAdvancement extends AdvancementConfig {
 
     const pageRect = this.element_./*OK*/getBoundingClientRect();
 
-    if (this.isInNextScreenArea_(event.pageX, pageRect)) {
-      this.onTapNavigation(TapNavigationDirection.NEXT);
-    } else if (this.isInPreviousScreenArea_(event.pageX, pageRect)) {
-      this.onTapNavigation(TapNavigationDirection.PREVIOUS);
-    }
-  }
-
-  /**
-   * Checks if click is inside the next screen area.
-   * @param {number} clickPositionX
-   * @param {DOMRect} pageRect
-   * @return {boolean}
-   */
-  isInNextScreenArea_(clickPositionX, pageRect) {
     // Using `left` as a fallback since Safari returns a ClientRect in some
     // cases.
     const offsetLeft = ('x' in pageRect) ? pageRect.x : pageRect.left;
     const offsetWidth = pageRect.width;
+    const bigArea = NEXT_SCREEN_AREA_RATIO * offsetWidth;
+    const smallArea = (1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth;
+    const isRtl = this.storeService_.get(StateProperty.IS_RTL_STATE);
 
-    let nextScreenAreaMin;
-    let nextScreenAreaMax;
+    const sections = {
+      // Offset starting left of the page.
+      offset: offsetLeft,
+      // Width and navigation direction of each section depend on whether the
+      // document is RTL or LTR.
+      left: {
+        width: isRtl ? bigArea : smallArea,
+        direction: isRtl ?
+          TapNavigationDirection.NEXT : TapNavigationDirection.PREVIOUS,
+      },
+      right: {
+        width: isRtl ? smallArea : bigArea,
+        direction: isRtl ?
+          TapNavigationDirection.PREVIOUS : TapNavigationDirection.NEXT,
+      },
+    };
 
-    if (isRTL(this.element_.ownerDocument)) {
-      nextScreenAreaMin = offsetLeft;
-      nextScreenAreaMax = offsetLeft + (NEXT_SCREEN_AREA_RATIO * offsetWidth);
-    } else {
-      nextScreenAreaMin =
-        offsetLeft + ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
-      nextScreenAreaMax = offsetLeft + offsetWidth;
-    }
-
-    return clickPositionX >= nextScreenAreaMin &&
-      clickPositionX < nextScreenAreaMax;
+    this.onTapNavigation(this.getTapDirection_(event.pageX, sections));
   }
 
   /**
-   * Checks if click is inside the previous screen area.
+   * Decides what direction to navigate depending on which
+   * section of the page was there a click. The navigation direction of each
+   * individual section has been previously defined depending on the language
+   * settings.
    * @param {number} clickPositionX
-   * @param {DOMRect} pageRect
-   * @return {boolean}
+   * @param {!Object} sections
    */
-  isInPreviousScreenArea_(clickPositionX, pageRect) {
-    // Using `left` as a fallback since Safari returns a ClientRect in some
-    // cases.
-    const offsetLeft = ('x' in pageRect) ? pageRect.x : pageRect.left;
-    const offsetWidth = pageRect.width;
+  getTapDirection_(clickPositionX, sections) {
+    const {offset, left, right} = sections;
 
-    let previousScreenAreaMin;
-    let previousScreenAreaMax;
-
-    if (isRTL(this.element_.ownerDocument)) {
-      previousScreenAreaMin =
-        offsetLeft + (NEXT_SCREEN_AREA_RATIO * offsetWidth);
-      previousScreenAreaMax = offsetLeft + offsetWidth;
-    } else {
-      previousScreenAreaMin = offsetLeft;
-      previousScreenAreaMax =
-        offsetLeft + ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
+    if (clickPositionX <= offset + left.width) {
+      return left.direction;
     }
 
-    return clickPositionX >= previousScreenAreaMin &&
-      clickPositionX < previousScreenAreaMax;
+    return right.direction;
   }
 }
 

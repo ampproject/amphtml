@@ -73,6 +73,7 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
+  isRTL,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {
@@ -580,6 +581,12 @@ export class AmpStory extends AMP.BaseElement {
 
     this.initializeBookend_();
 
+    const {document} = this.win;
+
+    if (isRTL(document)) {
+      this.storeService_.dispatch(Action.TOGGLE_RTL, true);
+    }
+
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => {
@@ -939,14 +946,15 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    switch (e.keyCode) {
-      // TODO(newmuis): This will need to be flipped for RTL.
-      case KeyCodes.LEFT_ARROW:
-        this.previous_();
-        break;
-      case KeyCodes.RIGHT_ARROW:
-        this.next_();
-        break;
+    const keyDirection = e.keyCode;
+    const isRtl = this.storeService_.get(StateProperty.IS_RTL_STATE);
+
+    if ((keyDirection == KeyCodes.LEFT_ARROW && isRtl) ||
+        (keyDirection == KeyCodes.RIGHT_ARROW && !isRtl)) {
+      this.next_();
+    } else if ((keyDirection == KeyCodes.RIGHT_ARROW && isRtl) ||
+        (keyDirection == KeyCodes.LEFT_ARROW && !isRtl)) {
+      this.previous_();
     }
   }
 
