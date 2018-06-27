@@ -47,7 +47,6 @@ const AMP_RUNTIME_TARGET_FILES = [
   'dist/amp.js', 'dist.3p/current/integration.js'];
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
 const BUILD_PROCESSING_POLLING_INTERVAL_MS = 5 * 1000; // Poll every 5 seconds
-const BUILD_PROCESSING_PROGRESS_REPORT_MS = 60 * 1 * 1000; // Print a message every minute
 const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
 const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
@@ -165,21 +164,12 @@ async function waitForBuildCompletion(buildId) {
   log('info', 'Waiting for Percy build', colors.cyan(buildId),
       'to be processed...');
   const startTime = Date.now();
-  let lastProgressUpdateTime = Date.now();
-  let status;
-  do {
-    status = await getBuildStatus(buildId);
-
-    if (Date.now() - lastProgressUpdateTime >=
-            BUILD_PROCESSING_PROGRESS_REPORT_MS) {
-      log('info', 'Still waiting for Percy build', colors.cyan(buildId),
-          'to be processed...');
-      lastProgressUpdateTime = Date.now();
-    }
-
+  let status = await getBuildStatus(buildId);
+  while (status.state != 'finished' && status.state != 'failed' &&
+             Date.now() - startTime < BUILD_PROCESSING_TIMEOUT_MS) {
     await sleep(BUILD_PROCESSING_POLLING_INTERVAL_MS);
-  } while (status.state != 'finished' && status.state != 'failed' &&
-               Date.now() - startTime < BUILD_PROCESSING_TIMEOUT_MS);
+    status = await getBuildStatus(buildId);
+  }
   return status;
 }
 
