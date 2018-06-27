@@ -323,6 +323,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13602',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/15594',
   },
+  {
+    id: 'amp-orientation-observer',
+    name: 'Enables actions based on the orientation of a mobile device',
+    spec: 'https://github.com/ampproject/amphtml/issues/14740',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/16075',
+  },
 ];
 
 if (getMode().localDev) {
