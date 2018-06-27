@@ -26,6 +26,7 @@ const Karma = require('karma').Server;
 const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
+const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
@@ -498,21 +499,12 @@ function runTests() {
   }
 
   if (argv.coverage) {
-    c.files = c.files.concat(config.coveragePaths);
-    c.browserify.transform.push(
-        ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
+    c.browserify.transform.push(['browserify-istanbul']);
     c.plugins.push('karma-coverage-istanbul-reporter');
     c.reporters = c.reporters.concat(['coverage-istanbul']);
-    if (c.preprocessors['src/**/*.js']) {
-      c.preprocessors['src/**/*.js'].push('coverage');
-    }
-    c.preprocessors['extensions/**/*.js'] &&
-        c.preprocessors['extensions/**/*.js'].push('coverage');
     c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      fixWebpackSourcePaths: true,
-      reports: ['cobertura', 'lcov', 'text', 'text-summary'],
-      skipFilesWithNoCoverage: true,
+      reports: ['html', 'text', 'text-summary'],
     };
   }
 
@@ -553,6 +545,13 @@ function runTests() {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
+    }
+    if (argv.coverage) {
+      const coverageReportUrl =
+          'file://' + path.resolve('test/coverage/index.html');
+      log(green('INFO: ') + 'Generated code coverage report at ' +
+          cyan(coverageReportUrl));
+      opn(coverageReportUrl, {wait: false});
     }
     // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
     if (process.env.TRAVIS) {
