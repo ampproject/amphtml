@@ -20,11 +20,9 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
-const DEVICE_REST_ORIENTATION_VALUES = {
-  alpha: 180,
-  beta: 0,
-  gamma: 0,
-};
+const DEVICE_REST_ORIENTATION_ALPHA_VALUE = 180;
+const DEVICE_REST_ORIENTATION_BETA_VALUE = 0;
+const DEVICE_REST_ORIENTATION_GAMMA_VALUE = 0;
 
 export class AmpOrientationObserver extends AMP.BaseElement {
 
@@ -48,13 +46,13 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     this.gammaRange_ = [-90, 90];
 
     /** @private {number} */
-    this.alphaValue_ = DEVICE_REST_ORIENTATION_VALUES['alpha'];
+    this.alphaValue_ = DEVICE_REST_ORIENTATION_ALPHA_VALUE;
 
     /** @private {number} */
-    this.betaValue_ = DEVICE_REST_ORIENTATION_VALUES['beta'];
+    this.betaValue_ = DEVICE_REST_ORIENTATION_BETA_VALUE;
 
     /** @private {number} */
-    this.gammaValue_ = DEVICE_REST_ORIENTATION_VALUES['gamma'];
+    this.gammaValue_ = DEVICE_REST_ORIENTATION_GAMMA_VALUE;
   }
 
   /** @override */
