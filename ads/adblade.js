@@ -20,6 +20,11 @@ const adbladeFields = ['width', 'height', 'cid'];
 const adbladeHostname = 'web.adblade.com';
 const industrybrainsHostname = 'web.industrybrains.com';
 
+/**
+ * @param {string} hostname
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 function addAdiantUnit(hostname, global, data) {
   validateData(data, adbladeFields, []);
 

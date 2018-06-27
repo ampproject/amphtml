@@ -20,7 +20,6 @@ import {loadScript} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function epeex(global, data) {
 
   (global._epeex = global._epeex || {

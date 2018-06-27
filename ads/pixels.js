@@ -16,6 +16,10 @@
 
 import {validateData, writeScript} from '../3p/3p';
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function pixels(global, data) {
   validateData(data,
       ['origin', 'sid', 'tag'],

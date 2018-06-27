@@ -36,7 +36,7 @@ const MIN_EVENT_INTERVAL_IN_MS = 100;
 export class PositionObserver {
 
   /**
-   * @param win {!Window}
+   * @param {!Window} win
    */
   constructor(win) {
     /** @private {!Window} */
@@ -52,8 +52,8 @@ export class PositionObserver {
   /**
    * Start to observe the target element's position change and trigger callback.
    * TODO: maybe take DOM mutation into consideration
-   * @param element {!Element}
-   * @param callback {function(!PositionEntryDef)}
+   * @param {!Element} element
+   * @param {function(!PositionEntryDef)} callback
    * @return {!UnlistenDef}
    */
   observe(element, callback) {
@@ -74,12 +74,15 @@ export class PositionObserver {
     });
   }
 
+  /**
+   * Updates viewport rect.
+   */
   update_() {
     this.viewportRect_ = this.getViewportRect();
   }
 
   /**
-   * @param element {!Element}
+   * @param {!Element} element
    * @return {!PositionEntryDef}
    * @private
    */
@@ -111,7 +114,7 @@ export class PositionObserver {
 }
 
 /**
- * @param win {!Window}
+ * @param {!Window} win
  * @return {!Element}
  */
 function getScrollingElement(win) {
@@ -133,7 +136,7 @@ function getScrollingElement(win) {
 
 /**
  * Whether the current browser is based on the WebKit engine.
- * @param ua {string}
+ * @param {string} ua
  * @return {boolean}
  */
 function isWebKit(ua) {

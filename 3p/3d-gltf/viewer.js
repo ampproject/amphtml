@@ -25,6 +25,11 @@ const CAMERA_NEAR_FACTOR = .1;
 
 
 export default class GltfViewer {
+  /**
+   * Creates an instance of GltfViewer.
+   * @param {!JsonObject} options
+   * @param {*} handlers
+   */
   constructor(options, handlers) {
     /** @private */
     this.options_ = options;

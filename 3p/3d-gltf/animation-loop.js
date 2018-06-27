@@ -15,6 +15,10 @@
  */
 
 export default class AnimationLoop {
+  /**
+   * Creates an instance of AnimationLoop.
+   * @param {!Function} task
+   */
   constructor(task) {
     /** @private */
     this.task_ = task;
@@ -32,6 +36,10 @@ export default class AnimationLoop {
     this.loop_ = this.loop_.bind(this);
   }
 
+  /**
+   * Runs the task
+   * @return {boolean}
+   */
   run() {
     if (this.isRunning_) {
       return false;
@@ -41,6 +49,9 @@ export default class AnimationLoop {
     return true;
   }
 
+  /**
+   * Stops the task execution.
+   */
   stop() {
     this.isRunning_ = false;
     if (this.currentRAF_ !== 0) {

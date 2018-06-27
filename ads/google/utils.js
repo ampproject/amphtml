@@ -121,8 +121,8 @@ export function getMultiSizeDimensions(
  * @param {(number|string)} height
  * @param {function((number|string)): boolean} widthCond
  * @param {function((number|string)): boolean} heightCond
- * @param {function(!Array<{dim: string, val: (number|string)}>): string=}
- *   errorBuilder A function that will produce an informative error message.
+ * @param {function(!Array<{dim: string, val: (number|string)}>): string=} errorBuilder
+ * A function that will produce an informative error message.
  * @return {boolean}
  */
 function validateDimensions(width, height, widthCond, heightCond, errorBuilder)
