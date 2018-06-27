@@ -34,27 +34,25 @@ import {isAdLike, looksLikeTrackingIframe} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 
-
 /** @private @const */
 const TAG = 'amp-video-iframe';
 
 /** @private @const */
 const SANDBOX = 'allow-scripts allow-same-origin';
 
-/** @private @const */
+/**
+ * Events allowed to be dispatched fro messages.
+ * @private @const
+ */
 const ALLOWED_EVENTS = [
-  'registered',
-  'load',
-  'playing',
-  'pause',
-  'ended',
-  'muted',
-  'unmuted',
-  'reloaded',
-  'ad_start',
-  'ad_end',
+  VideoEvents.PLAYING,
+  VideoEvents.PAUSE,
+  VideoEvents.ENDED,
+  VideoEvents.MUTED,
+  VideoEvents.UNMUTED,
+  VideoEvents.AD_START,
+  VideoEvents.AD_END,
 ];
-
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVideoIframe extends AMP.BaseElement {
@@ -187,13 +185,22 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {!Event} event
+   * @private
+   */
+  originMatches_(event) {
+    return originMatches(event, this.iframe_, /.*/);
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
    */
   onMessage_(event) {
     if (!this.iframe_) {
       return;
     }
 
-    if (!originMatches(event, this.iframe_, /.*/)) {
+    if (!this.originMatches_(event)) {
       return;
     }
 
@@ -236,12 +243,19 @@ class AmpVideoIframe extends AMP.BaseElement {
       if (!this.iframe_ || !this.iframe_.contentWindow) {
         return;
       }
-      const message = JSON.stringify(dict({
+      this.postMessage_(dict({
         'event': 'method',
         'method': method,
       }));
-      this.iframe_.contentWindow./*OK*/postMessage(message, '*');
     });
+  }
+
+  /**
+   * @param {!JsonObject} message
+   * @private
+   */
+  postMessage_(message) {
+    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(message), '*');
   }
 
   /** @override */

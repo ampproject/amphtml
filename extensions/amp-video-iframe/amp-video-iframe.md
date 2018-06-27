@@ -58,6 +58,8 @@ These are methods that should be implemented:
 - `unmute`
 - `showcontrols`
 - `hidecontrols`
+- `fullscreenenter`
+- `fullscreenexit`
 
 You can choose to only implement this interface partially, with a few caveats:
 
@@ -67,6 +69,10 @@ You can choose to only implement this interface partially, with a few caveats:
   example, when minimizing the video to the corner, a custom controls overlay is
   shown. If you don't provide methods to hide and show controls, two sets of
   controls could be displayed at the same time, which is a poor user experience.
+
+- `fullscreenenter` and `fullscreenexit` are required for best possible UX. For
+  example, for `rotate-to-fullscreen` or the fullscreen button on minimized
+  video.
 
 #### `postEvent(name)`
 
