@@ -15,7 +15,9 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {dev} from '../src/log';
 import {isLayoutSizeDefined} from '../src/layout';
+import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
 
 /**
@@ -40,6 +42,11 @@ export class AmpImg extends BaseElement {
     /** @private {?Element} */
     this.img_ = null;
 
+    /** @private {?UnlistenDef} */
+    this.unlistenLoad_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenError_ = null;
   }
 
   /** @override */
@@ -50,10 +57,6 @@ export class AmpImg extends BaseElement {
       this.propagateAttributes(
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
       this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
-
-      if (mutations['src'] || mutations['srcset']) {
-        this.removeFallbackIfImageLoaded_();
-      }
     }
   }
 
@@ -71,7 +74,7 @@ export class AmpImg extends BaseElement {
         return;
       }
       // We try to find the first url in the srcset
-      const srcseturl = /https?:\/\/\S+/.exec(srcset);
+      const srcseturl = /\S+/.exec(srcset);
       // Connect to the first url if it exists
       if (srcseturl) {
         this.preconnect.url(srcseturl[0], onLayout);
@@ -134,11 +137,6 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  isRelayoutNeeded() {
-    return true;
-  }
-
-  /** @override */
   reconstructWhenReparented() {
     return false;
   }
@@ -146,18 +144,26 @@ export class AmpImg extends BaseElement {
   /** @override */
   layoutCallback() {
     this.initialize_();
-    let promise = this.removeFallbackIfImageLoaded_();
-
-    // We only allow to fallback on error on the initial layoutCallback
-    // or else this would be pretty expensive.
-    if (this.allowImgLoadFallback_) {
-      promise = promise.catch(e => {
-        this.onImgLoadingError_();
-        throw e;
-      });
-      this.allowImgLoadFallback_ = false;
+    const img = dev().assertElement(this.img_);
+    this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
+    this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
+    if (this.getLayoutWidth() <= 0) {
+      return Promise.resolve();
     }
-    return promise;
+    return this.loadPromise(img);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.unlistenError_) {
+      this.unlistenError_();
+      this.unlistenError_ = null;
+    }
+    if (this.unlistenLoad_) {
+      this.unlistenLoad_();
+      this.unlistenLoad_ = null;
+    }
+    return true;
   }
 
   /**
@@ -179,38 +185,33 @@ export class AmpImg extends BaseElement {
   }
 
   /**
-   * @return {!Promise}
    * @private
    */
-  removeFallbackIfImageLoaded_() {
-    if (this.getLayoutWidth() <= 0) {
-      return Promise.resolve();
+  hideFallbackImg_() {
+    if (!this.allowImgLoadFallback_
+      && this.img_.classList.contains('i-amphtml-ghost')) {
+      this.getVsync().mutate(() => {
+        this.img_.classList.remove('i-amphtml-ghost');
+        this.toggleFallback(false);
+      });
     }
-
-    return this.loadPromise(this.img_).then(() => {
-      // Clean up the fallback if the src has changed.
-      if (!this.allowImgLoadFallback_ &&
-          this.img_.classList.contains('i-amphtml-ghost')) {
-        this.getVsync().mutate(() => {
-          this.img_.classList.remove('i-amphtml-ghost');
-          this.toggleFallback(false);
-        });
-      }
-    });
   }
 
   /**
-   * If the image fails to load, show a placeholder instead.
+   * If the image fails to load, show a fallback or placeholder instead.
    * @private
    */
   onImgLoadingError_() {
-    this.getVsync().mutate(() => {
-      this.img_.classList.add('i-amphtml-ghost');
-      this.toggleFallback(true);
-      // Hide placeholders, as browsers that don't support webp
-      // Would show the placeholder underneath a transparent fallback
-      this.togglePlaceholder(false);
-    });
+    if (this.allowImgLoadFallback_) {
+      this.getVsync().mutate(() => {
+        this.img_.classList.add('i-amphtml-ghost');
+        this.toggleFallback(true);
+        // Hide placeholders, as browsers that don't support webp
+        // Would show the placeholder underneath a transparent fallback
+        this.togglePlaceholder(false);
+      });
+      this.allowImgLoadFallback_ = false;
+    }
   }
 }
 

@@ -124,21 +124,20 @@ describe('amp-img', () => {
     windowWidth = 320;
     screenWidth = 4000;
     return getImg({
-      srcset: 'bad.jpg 2000w, /examples/img/sample.jpg 1000w',
+      srcset: SRCSET_STRING,
       width: 300,
       height: 200,
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('srcset'))
-          .to.equal('bad.jpg 2000w, /examples/img/sample.jpg 1000w');
+      expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
       expect(img.hasAttribute('referrerpolicy')).to.be.false;
     });
   });
 
   it('should preconnect to the the first srcset url if src is not set', () => {
     return getImg({
-      srcset: 'http://google.com/bad.jpg 2000w, /examples/img/sample.jpg 1000w',
+      srcset: SRCSET_STRING,
       width: 300,
       height: 200,
     }).then(ampImg => {
@@ -147,7 +146,7 @@ describe('amp-img', () => {
       impl.preconnectCallback(true);
       expect(impl.preconnect.url.called).to.be.true;
       expect(impl.preconnect.url).to.have.been.calledWith(
-          'http://google.com/bad.jpg'
+          '/examples/img/hero@1x.jpg'
       );
     });
   });
