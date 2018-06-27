@@ -538,7 +538,7 @@ async function visualDiffPuppeteer() {
 /**
  * Simple wrapper around the ruby (Percy-Capybara) based visual diff tests.
  *
- * This is the current default mode, which is actively being replace with a
+ * This is the current default mode, which is actively being replaced with a
  * pure JS implementation.
  */
 function visualDiffCapybara() {
