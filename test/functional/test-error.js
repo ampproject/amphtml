@@ -545,13 +545,15 @@ describe('reportErrorToServer', () => {
       };
       ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
       ampdocServiceForStub.returns({
-        getHeadNode: () => {
-          return {
-            querySelector: selector => {
-              expect(selector).to.equal(
-                  'script[src="https://cdn.ampproject.org/shadow-v0.js"]');
-              return scripts[0];
-            },
+        getAmpDoc: () => {
+          getHeadNode: () => {
+            return {
+              querySelector: selector => {
+                expect(selector).to.equal(
+                    'script[src="https://cdn.ampproject.org/shadow-v0.js"]');
+                return scripts[0];
+              },
+            };
           };
         },
       });

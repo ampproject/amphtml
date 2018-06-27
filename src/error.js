@@ -553,9 +553,8 @@ export function detectNonAmpJs(win) {
  * @return {boolean}
  */
 export function detectAmpShadowJs(win) {
-  const ampdocService = Services.ampdocServiceFor(win);
-  return !!ampdocService.getHeadNode().querySelector(
-      'script[src="https://cdn.ampproject.org/shadow-v0.js"]');
+  return !!Services.ampdocServiceFor(win).getAmpDoc().getHeadNode()
+      .querySelector('script[src="https://cdn.ampproject.org/shadow-v0.js"]');
 }
 
 /**
