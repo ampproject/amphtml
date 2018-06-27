@@ -81,6 +81,11 @@ function createContainer(global, data) {
   return container;
 }
 
+/**
+ * @param {*} global
+ * @param {*} accountId
+ * @return {!Function}
+ */
 function getBeOpinionAsyncInit(global, accountId) {
   const {context} = global;
   return function() {

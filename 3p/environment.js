@@ -189,6 +189,9 @@ function instrumentEntryPoints(win) {
   win.setInterval = function(fn) {
     const id = intervalId++;
     const args = Array.prototype.slice.call(arguments);
+    /**
+     * @return {*}
+     */
     function wrapper() {
       next();
       if (typeof fn == 'string') {
@@ -199,6 +202,9 @@ function instrumentEntryPoints(win) {
       }
     }
     args[0] = wrapper;
+    /**
+     *
+     */
     function next() {
       intervals[id] = win.setTimeout.apply(win, args);
     }
@@ -219,6 +225,9 @@ function instrumentEntryPoints(win) {
  */
 function blockSyncPopups(win) {
   let count = 0;
+  /**
+   * Checks for security error.
+   */
   function maybeThrow() {
     // Prevent deep recursion.
     if (count++ > 2) {
@@ -257,6 +266,9 @@ function minTime(time) {
   return time;
 }
 
+/**
+ *  Installs embed state listener.
+ */
 export function installEmbedStateListener() {
   listenParent(window, 'embed-state', function(data) {
     inViewport = data.inViewport;
