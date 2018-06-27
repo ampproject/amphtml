@@ -28,7 +28,7 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
   let line = '';
   /**
    * @param {string} text
-   * @param {*} done
+   * @param {boolean} done
    */
   function streamer(text, done) {
     const regex = /([^\n]*)(\n)?/g;
