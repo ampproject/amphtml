@@ -368,28 +368,14 @@ export class Bind {
    * @return {!Promise}
    */
   scanAndApply(added, removed, timeout = 2000) {
-    const beforeFirstMutate = !this.signals_.get('FIRST_MUTATE');
-
     const promise = this.removeBindingsForNodes_(removed)
         .then(() => this.addBindingsForNodes_(added))
         .then(numberOfBindingsAdded => {
           // Don't reevaluate/apply if there are no bindings.
-          if (numberOfBindingsAdded == 0) {
-            return;
+          if (numberOfBindingsAdded > 0) {
+            return this.evaluate_().then(results =>
+              this.applyElements_(results, added));
           }
-          return this.evaluate_().then(results => {
-            // Before first mutate, verify `added` elements and throw expected
-            // error to measure the impact of "faster-amp-list" breaking change.
-            if (beforeFirstMutate) {
-              const mismatches = this.verify_(results, added, /* warn */ false);
-              if (mismatches.length) {
-                // Cap size of mismatch string to 30 chars.
-                user().expectedError(TAG, 'Pre-gesture mismatch: '
-                    + String(mismatches).substr(0, 30));
-              }
-            }
-            return this.applyElements_(results, added);
-          });
         });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');

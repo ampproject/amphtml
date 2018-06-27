@@ -59,6 +59,10 @@ export function appnexus(global, data) {
 
 }
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 function appnexusAst(global, data) {
   validateData(data, ['adUnits']);
   let apntag;

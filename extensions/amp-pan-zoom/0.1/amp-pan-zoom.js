@@ -166,11 +166,12 @@ export class AmpPanZoom extends AMP.BaseElement {
         return;
       }
       const scale = args['scale'] || 1;
-      const x = args['x'] || 0;
-      const y = args['y'] || 0;
-      const deltaX = x - this.posX_;
-      const deltaY = y - this.posY_;
-      this.onZoom_(scale, deltaX, deltaY, true);
+      this.updatePanZoomBounds_(scale);
+      const x = this.boundX_(args['x'] || 0, /*allowExtent*/ false);
+      const y = this.boundY_(args['y'] || 0, /*allowExtent*/ false);
+      return this.set_(scale, x, y, /*animate*/ true).then(() => {
+        this.onZoomRelease_();
+      });
     });
   }
 
@@ -509,7 +510,6 @@ export class AmpPanZoom extends AMP.BaseElement {
         transform: translate(x, y) + ' ' + scale(s),
       });
     }, content);
-    this.triggerTransformEnd_(s, x, y);
   }
 
   /**
@@ -614,21 +614,20 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @param {number} deltaX
    * @param {number} deltaY
    * @param {boolean} animate
-   * @return {!Promise|undefined}
+   * @return {!Promise}
    * @private
    */
   onZoom_(scale, deltaX, deltaY, animate) {
     const newScale = this.boundScale_(scale, true);
     if (newScale == this.scale_) {
-      return;
+      return Promise.resolve();
     }
 
     this.updatePanZoomBounds_(newScale);
 
     const newPosX = this.boundX_(this.startX_ + (deltaX * newScale), false);
     const newPosY = this.boundY_(this.startY_ + (deltaY * newScale), false);
-    return /** @type {!Promise|undefined} */ (
-      this.set_(newScale, newPosX, newPosY, animate));
+    return this.set_(newScale, newPosX, newPosY, animate);
   }
 
   /**
@@ -683,12 +682,14 @@ export class AmpPanZoom extends AMP.BaseElement {
         this.posX_ = newPosX;
         this.posY_ = newPosY;
         this.updatePanZoom_();
+        this.triggerTransformEnd_(newScale, newPosX, newPosY);
       });
     } else {
       this.scale_ = newScale;
       this.posX_ = newPosX;
       this.posY_ = newPosY;
       this.updatePanZoom_();
+      this.triggerTransformEnd_(newScale, newPosX, newPosY);
       return Promise.resolve();
     }
   }
