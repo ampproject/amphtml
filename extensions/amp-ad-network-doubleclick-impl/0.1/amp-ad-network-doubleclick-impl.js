@@ -136,7 +136,7 @@ export const TFCD = 'tagForChildDirectedTreatment';
  * Map of pageview tokens to the instances they belong to.
  * @private {!Object{string: !AmpAdNetworkDoubleclickImpl}
  */
-const pageviewStateTokens = {};
+export const pageviewStateTokens = {};
 
 /** @private {?Promise} */
 let sraRequests = null;
@@ -159,6 +159,121 @@ let windowLocationQueryParameters;
  */
 let LayoutRectOrDimsDef;
 
+/**
+ * @param {!Array<AmpAdNetworkDoubleclickImpl>} instances
+ * @return {?Object<string,string>}
+ * @visibleForTesting
+ */
+export function combineInventoryUnits(instances) {
+  const uniqueIuNames = {};
+  let uniqueIuNamesCount = 0;
+  const prevIusEncoded = [];
+  instances.forEach(instance => {
+    const iu = dev().assert(instance.element.getAttribute('data-slot'));
+    const componentNames = (iu || '').split('/');
+    const encodedNames = [];
+    for (let i = 0; i < componentNames.length; i++) {
+      if (componentNames[i] == '') {
+        continue;
+      }
+      let index = uniqueIuNames[componentNames[i]];
+      if (index == undefined) {
+        uniqueIuNames[componentNames[i]] = (index = uniqueIuNamesCount++);
+      }
+      encodedNames.push(index);
+    }
+    prevIusEncoded.push(encodedNames.join('/'));
+  });
+  return {
+    'iu_parts': Object.keys(uniqueIuNames).sort((a, b) =>
+      uniqueIuNames[a] - uniqueIuNames[b]).join(),
+    'enc_prev_ius': prevIusEncoded.join(),
+  };
+}
+
+/* eslint-disable jsdoc/require-param */
+/**
+ * Array of functions used to combine block level request parameters for SRA
+ * request.
+ * @private @const {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>>}
+ */
+const BLOCK_SRA_COMBINERS_ = [
+  combineInventoryUnits,
+  // Although declared at a block-level, this is actually page level so
+  // return true if ANY indicate cookie opt out.
+  instances => getFirstInstanceValue_(instances, instance => {
+    return instance.jsonTargeting_ &&
+        instance.jsonTargeting_['cookieOptOut'] ? {'co': '1'} : null;
+  }),
+  instances => {
+    return {'adks': instances.map(instance => instance.adKey_).join()};
+  },
+  instances => {
+    return {'prev_iu_szs': instances.map(instance =>
+      instance.parameterSize_).join()};
+  },
+  // Although declared at a block-level, this is actually page level so
+  // return true if ANY indicate TFCD.
+  instances => getFirstInstanceValue_(instances, instance => {
+    return instance.jsonTargeting_ && instance.jsonTargeting_[TFCD] ?
+      {'tfcd': instance.jsonTargeting_[TFCD]} : null;
+  }),
+  // Although declared at a block-level, this is actually page level so
+  // return true if ANY indicate manual experiment.
+  instances => getFirstInstanceValue_(instances, instance => {
+    return isInManualExperiment(instance.element) ? {'adtest': 'on'} : null;
+  }),
+  instances => {
+    const scps = [];
+    instances.forEach(instance => {
+      if (instance.jsonTargeting_ && instance.jsonTargeting_['targeting'] &&
+        instance.jsonTargeting_['categoryExclusions']) {
+        scps.push(serializeTargeting_(
+            instance.jsonTargeting_['targeting'] || null,
+            instance.jsonTargeting_['categoryExclusions'] || null));
+      }
+    });
+    return scps.length ? {'prev_scp': scps.join('|')} : null;
+  },
+  instances => {
+    const eids = {};
+    instances.forEach(instance => {
+      instance.experimentIds.forEach(eid => eids[eid] = 1);
+      const deids = /(?:#|,)deid=([\d,]+)/i.exec(instance.win.location.hash);
+      if (deids) {
+        deids[1].split(",").forEach(deid => eids[deid] = 1);
+      }
+    });
+    return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
+  },
+  instances => getFirstInstanceValue_(instances,
+      instance => instance.buildIdentityParams_()),
+  instances => {
+    let safeframeForced = false;
+    const forceSafeframes = [];
+    instances.forEach(instance => {
+      safeframeForced = safeframeForced || instance.forceSafeframe_;
+      forceSafeframes.push(Number(instance.forceSafeframe_));
+    });
+    return safeframeForced ? {'fsfs': forceSafeframes.join(',')} : null;
+  },
+  instances => ({'adxs':
+    instances.map(instance => instance.getPageLayoutBox().left).join()}),
+  instances => ({'adys':
+    instances.map(instance => instance.getPageLayoutBox().top).join()}),
+  instances => {
+    let hasAmpContainer = false;
+    const result = [];
+    instances.forEach(instance => {
+      const containers = getEnclosingContainerTypes(instance.element);
+      result.push(containers.join());
+      hasAmpContainer = hasAmpContainer || !!containers.length;
+    });
+    return hasAmpContainer ? {'acts': result.join('|')} : null;
+  },
+];
+
+/* eslint-enable jsdoc/require-param */
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
@@ -260,12 +375,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
-
-    // DO NOT SUBMIT. TESTING ONLY
-    pageviewStateTokens[[
-      'a', 'b', 'c', 'd', 'e'
-    ].map((el, index, array) => array[Math.floor(Math.random() * array.length)])
-                       .join('')] = this;
   }
 
   /**
@@ -805,7 +914,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = null;
     this.consentState = null;
     this.getAdUrlDeferred = new Deferred();
-    this.removePageviewToken();
+    this.removePageviewStateToken();
   }
 
   /** @override */

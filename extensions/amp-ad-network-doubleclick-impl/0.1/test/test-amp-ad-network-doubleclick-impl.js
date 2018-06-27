@@ -472,6 +472,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('returns the right URL', () => {
       const impl = new AmpAdNetworkDoubleclickImpl(element);
+      const impl2 = new AmpAdNetworkDoubleclickImpl(element);
+      impl.setPageviewStateToken('abc');
+      impl2.setPageviewStateToken('def');
       impl.experimentIds = ['12345678'];
       return impl.getAdUrl().then(url => {
         [
@@ -511,6 +514,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
+          /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
       });
     });
