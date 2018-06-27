@@ -67,6 +67,9 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
   if (type == 'adsense') {
     return new AdSenseNetworkConfig(autoAmpAdsElement);
   }
+  if (type == 'doubleclick') {
+    return new DoubleclickNetworkConfig(autoAmpAdsElement);
+  }
   return null;
 }
 
@@ -107,6 +110,77 @@ class AdSenseNetworkConfig {
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
     });
+  }
+
+  /** @override */
+  getDefaultAdConstraints() {
+    const viewportHeight =
+        Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
+    return {
+      initialMinSpacing: viewportHeight,
+      subsequentMinSpacing: [
+        {adCount: 3, spacing: viewportHeight * 2},
+        {adCount: 6, spacing: viewportHeight * 3},
+      ],
+      maxAdCount: 8,
+    };
+  }
+}
+
+
+/**
+ * @implements {AdNetworkConfigDef}
+ */
+class DoubleclickNetworkConfig {
+  /**
+   * @param {!Element} autoAmpAdsElement
+   */
+  constructor(autoAmpAdsElement) {
+    this.autoAmpAdsElement_ = autoAmpAdsElement;
+  }
+
+  /**
+   * @param {!Window} win
+   */
+  isEnabled(win) {
+    const branch = getAdSenseAmpAutoAdsExpBranch(win);
+    return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
+  }
+
+  /** @override */
+  getConfigUrl() {
+    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
+    const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
+    return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', {
+      'client': this.autoAmpAdsElement_.getAttribute('data-ad-legacy-client'),
+      'plah': canonicalHostname,
+      'ama_t': 'amp',
+      'url': docInfo.canonicalUrl,
+    }, 4096);
+  }
+
+  /** @override */
+  getAttributes() {
+    let experimentJson = {};
+    try {
+      experimentJson = JSON.parse(
+        this.autoAmpAdsElement_.getAttribute('data-experiment'));
+    } catch (e) {}
+    const attributes = dict({
+      'type': 'doubleclick',
+      'data-slot': this.autoAmpAdsElement_.getAttribute('data-slot'),
+      'json': this.autoAmpAdsElement_.getAttribute('data-json')
+    });
+    if (experimentJson['height']) {
+      attributes['height'] = experimentJson['height'];
+    }
+    if (experimentJson['width']) {
+      attributes['width'] = experimentJson['width'];
+    }
+    if (experimentJson['layout']) {
+      attributes['layout'] = experimentJson['layout'];
+    }
+    return attributes;
   }
 
   /** @override */

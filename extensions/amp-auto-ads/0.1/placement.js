@@ -182,7 +182,8 @@ export class Placement {
         this.adElement_ = this.createAdElement_(baseAttributes);
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
-            TARGET_AD_HEIGHT_PX, undefined, this.margins_)
+            baseAttributes['height'] || TARGET_AD_HEIGHT_PX,
+            baseAttributes['width'], this.margins_)
             .then(() => {
               this.state_ = PlacementState.PLACED;
               return this.state_;
@@ -202,9 +203,9 @@ export class Placement {
   createAdElement_(baseAttributes) {
     const attributes = /** @type {!JsonObject} */ (Object.assign(dict({
       'layout': 'fixed-height',
-      'height': '0',
       'class': 'i-amphtml-layout-awaiting-size',
     }), baseAttributes, this.attributes_));
+    attributes['height'] = 0;
     return createElementWithAttributes(
         this.ampdoc.win.document, 'amp-ad', attributes);
   }

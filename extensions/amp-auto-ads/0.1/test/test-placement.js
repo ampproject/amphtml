@@ -250,6 +250,54 @@ describes.realWin('placement', {
           });
     });
 
+    it('should place an ad with fixed layouts', () => {
+      const anchor = doc.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(ampdoc, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+            },
+            pos: 2,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+
+      const baseAttributes = {
+        'type': 'ad-network-type',
+        'layout': 'fixed',
+        'width': 300, 
+        'height': 250,
+        'data-custom-att-1': 'val-1',
+        'data-custom-att-2': 'val-2',
+      };
+
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(baseAttributes, adTracker)
+          .then(() => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('layout')).to.equal('fixed');
+            expect(adElement.getAttribute('height')).to.equal('250');
+            expect(adElement.getAttribute('width')).to.equal('300');
+            expect(adElement.getAttribute('data-custom-att-1'))
+                .to.equal('val-1');
+            expect(adElement.getAttribute('data-custom-att-2'))
+                .to.equal('val-2');
+          });
+    });
+
+
     it('should place an ad with the correct placement attributes', () => {
       const anchor = doc.createElement('div');
       anchor.id = 'anId';
