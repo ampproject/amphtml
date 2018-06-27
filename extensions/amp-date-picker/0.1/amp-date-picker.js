@@ -167,7 +167,7 @@ const DatePickerEvent = {
 const DEFAULT_DAY_SIZE = 39;
 
 /**
- * This is related to a bug in preact.
+ * This is related to a bug in preact-compat impacting 'react-dates' rendering.
  * NOTE: If this is updated, make sure to change .DayPicker_tranitionContainer
  * min-height in amp-date-picker.css
  * TODO(cvializ): remove this when #13897 is fixed.
@@ -1568,9 +1568,9 @@ export class AmpDatePicker extends AMP.BaseElement {
       if (Picker) {
         // TODO(cvializ, #13897):
         // When rendered with React, the picker expands to fit
-        // the number of weeks for that month. When rendered with Preact, the
-        // picker expands 1 behind where it should for the number of weeks in
-        // the month.
+        // the number of weeks for that month. When rendered with preact-compat,
+        // the picker expands 1 behind where it should for the number of weeks
+        // in the month.
         this.reactRender_(
             this.react_.createElement(Picker, Object.assign({}, {
               date: props.date,
