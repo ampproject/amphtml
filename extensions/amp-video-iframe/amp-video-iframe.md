@@ -24,13 +24,9 @@ If you're using a common video framework like Video.js or JwPlayer, you can
 simply call `listenTo` for a basic integration:
 
 ```js
+// For JwPlayer:
 function onAmpIntegrationReady(ampIntegration) {
-  var myVideo = document.querySelector('#my-video');
-
-  // For video.js:
-  ampIntegration.listenTo('videojs', myVideo);
-
-  // ...or for JwPlayer:
+  var myVideo = jwplayer('#my-video');
   ampIntegration.listenTo('jwplayer', myVideo);
 }
 ```
