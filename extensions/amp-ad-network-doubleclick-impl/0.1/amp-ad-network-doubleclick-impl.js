@@ -654,9 +654,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           // On error/timeout, proceed.
           return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
         });
+    const checkStillCurrent = this.verifyStillCurrent();
     Promise.all([opt_rtcResponsesPromise, identityPromise])
         .then(results => {
-          this.verifyStillCurrent();
+          checkStillCurrent();
           const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
           googleAdUrl(
@@ -697,6 +698,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const ard = [];
     let exclusions;
     rtcResponseArray.forEach(rtcResponse => {
+      if (!rtcResponse) {
+        return;
+      }
       artc.push(rtcResponse.rtcTime);
       ati.push(rtcResponse.error || RTC_SUCCESS);
       ard.push(rtcResponse.callout);
