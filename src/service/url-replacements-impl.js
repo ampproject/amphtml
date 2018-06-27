@@ -214,17 +214,13 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the Source URL for this AMP document.
-    this.setBoth('SOURCE_URL', () => {
+    const getSourceUrl = () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      return removeFragment(
-          this.addReplaceParamsIfMissing_(docInfo.sourceUrl));
-    }, () => {
-      return getTrackImpressionPromise().then(() => {
-        const docInfo = Services.documentInfoForDoc(this.ampdoc);
-        return removeFragment(
-            this.addReplaceParamsIfMissing_(docInfo.sourceUrl));
-      });
-    });
+      return removeFragment(this.addReplaceParamsIfMissing_(docInfo.sourceUrl));
+    };
+    this.setBoth('SOURCE_URL',
+        () => getSourceUrl(),
+        () => getTrackImpressionPromise().then(() => getSourceUrl()));
 
     // Returns the host of the Source URL for this AMP document.
     this.set('SOURCE_HOST', this.getDocInfoUrl_('sourceUrl', 'host'));
@@ -664,7 +660,7 @@ export class GlobalVariableSource extends VariableSource {
     const url = parseUrlDeprecated(
         removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
-    const key = /** @type {string} */(param);
+    const key = user().assertString(param);
     const {replaceParams} = Services.documentInfoForDoc(this.ampdoc);
     if (typeof params[key] !== 'undefined') {
       return params[key];
