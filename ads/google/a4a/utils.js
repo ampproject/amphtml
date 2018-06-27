@@ -289,8 +289,8 @@ export function googlePageParameters(a4a, startTime) {
                   null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
-          'loc': win.location.href == documentInfo.canonicalUrl
-            ? null
+          'loc': win.location.href == documentInfo.canonicalUrl ?
+            null
             : win.location.href,
           'ref': promiseResults[1] || null,
         };
