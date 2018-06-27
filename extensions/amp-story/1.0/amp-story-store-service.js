@@ -109,7 +109,7 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.DESKTOP_STATE]: !!data}));
     // Shows or hides the audio controls.
-    case Action.TOGGLE_HAS_AUDIO:
+    case Action.TOGGLE_STORY_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.STORY_HAS_AUDIO_STATE]: !!data}));
     case Action.TOGGLE_LANDSCAPE:

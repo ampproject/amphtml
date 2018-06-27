@@ -415,7 +415,7 @@ export class SystemLayer {
   onMuteAudioClick_() {
     console.log("mute");
     this.storeService_.dispatch(Action.TOGGLE_MUTED, true);
-    const hideTimeout = 1000;
+    const hideTimeout = 1500;
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute('messagedisplay', 'show');
       this.hideAfterTimeout_(hideTimeout);
@@ -431,7 +431,7 @@ export class SystemLayer {
     console.log("unmute");
 
     this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
-    const hideTimeout = 1000;
+    const hideTimeout = 1500;
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute('messagedisplay', 'show');
       this.hideAfterTimeout_(hideTimeout);

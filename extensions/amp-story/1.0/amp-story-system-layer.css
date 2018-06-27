@@ -117,13 +117,13 @@
  }
  
  [messagedisplay="noshow"] .i-amphtml-message-container {
+  transition: opacity 0.5s cubic-bezier(0.4, 0.0, 1, 1), transform 0.1s cubic-bezier(0.4, 0.0, 1, 1) 0.5s; 
   transform: translateX(15%) !important;
  }
 
 
  .i-amphtml-message-container {
   width: max-content;
-  transition: opacity 15s cubic-bezier(0.4, 0.0, 1, 1), transform 2s cubic-bezier(0.4, 0.0, 1, 1);
   transition-property: opacity, transform !important;
   transition-duration: 200ms !important;
   margin-top: 22px;
@@ -132,6 +132,7 @@
 }
  
  [messagedisplay="show"] .i-amphtml-message-container {
+  transition: opacity 2s cubic-bezier(0.4, 0.0, 1, 1), transform 2s cubic-bezier(0.4, 0.0, 1, 1);
   opacity: 1 !important;
   transform: translateX(1%) !important;
  }

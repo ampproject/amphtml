@@ -308,7 +308,6 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_
         .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
 
-    this.initialLoad_ = true;
     registerServiceBuilder(this.win, 'localization',
         () => this.localizationService_);
   }
@@ -1609,7 +1608,7 @@ export class AmpStory extends AMP.BaseElement {
         'amp-audio, amp-video:not([noaudio]), [background-audio]');
     const hasStoryAudio = this.element.hasAttribute('background-audio');
 
-    this.storeService_.dispatch(Action.TOGGLE_HAS_AUDIO,
+    this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_AUDIO,
         containsMediaElementWithAudio || hasStoryAudio);
   }
 
@@ -1618,14 +1617,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateSoundPage_() {
-    if(1==2) {
-      this.initialLoad_ = false;
-    } else {
-    console.log("hello");
     const hasPageAudio = this.activePage_.element.hasAttribute('background-audio');
     this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO,
       hasPageAudio);
-    }
   }
 
   /** @private */
