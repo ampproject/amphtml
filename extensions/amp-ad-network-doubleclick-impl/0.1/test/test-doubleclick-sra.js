@@ -147,6 +147,8 @@ describes.realWin('Doubleclick SRA', config , env => {
         const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
         sandbox.stub(impl1, 'getPageLayoutBox').returns({top: 123, left: 456});
         impl1.experimentIds = [MANUAL_EXPERIMENT_ID];
+        sandbox.stub(impl1, 'getWindowHash_')
+            .returns('#deid=135792468,246813579');
         sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320')
             .returns('13579');
         impl1.populateAdUrlState();
@@ -189,7 +191,7 @@ describes.realWin('Doubleclick SRA', config , env => {
           adxs: '456,101',
           adys: '123,789',
           tfcd: 'some_tfcd',
-          eid: MANUAL_EXPERIMENT_ID,
+          eid: `${MANUAL_EXPERIMENT_ID},135792468,246813579`,
           output: 'ldjh',
           impl: 'fifs',
           adsid: 'abcdef',
