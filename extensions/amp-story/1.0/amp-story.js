@@ -33,6 +33,7 @@ import {
   StateProperty,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -818,8 +819,7 @@ export class AmpStory extends AMP.BaseElement {
     this.activePage_ = targetPage;
 
     this.systemLayer_.resetDeveloperLogs();
-    this.systemLayer_.setDeveloperLogContextString(
-        this.activePage_.element.id);
+    this.systemLayer_.setDeveloperLogContextString(this.activePage_.element.id);
 
     return targetPage.beforeVisible().then(() => {
       this.triggerActiveEventForPage_();
@@ -1698,9 +1698,10 @@ export class AmpStory extends AMP.BaseElement {
 
 AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
-  AMP.registerElement('amp-story-page', AmpStoryPage);
-  AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
-  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
+  AMP.registerElement('amp-story-access', AmpStoryAccess);
   AMP.registerElement('amp-story-bookend', AmpStoryBookend);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
+  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
+  AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
+  AMP.registerElement('amp-story-page', AmpStoryPage);
 });
