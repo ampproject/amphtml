@@ -135,13 +135,15 @@ describes.realWin('ad-network-config', {
 
     const TARGETING_JSON = {'Categories': 'A'};
 
-    const EXPERIMENT_SETTINGS = {'layout': 'fixed', 'width': 300, 'height': 250};
+    const EXPERIMENT_SETTINGS =
+        {'layout': 'fixed', 'width': 300, 'height': 250};
 
     const AD_SLOT = '1234/example.com/SLOT_1';
 
     beforeEach(() => {
       ampAutoAdsElem.setAttribute('data-ad-legacy-client', AD_LEGACY_CLIENT);
-      ampAutoAdsElem.setAttribute('data-experiment', JSON.stringify(EXPERIMENT_SETTINGS));
+      ampAutoAdsElem.setAttribute('data-experiment',
+          JSON.stringify(EXPERIMENT_SETTINGS));
       ampAutoAdsElem.setAttribute('data-json', JSON.stringify(TARGETING_JSON));
       ampAutoAdsElem.setAttribute('data-slot', AD_SLOT);
     });
@@ -203,7 +205,7 @@ describes.realWin('ad-network-config', {
         'data-slot': AD_SLOT,
         'layout': 'fixed',
         'width': 300,
-        'height': 250
+        'height': 250,
       });
     });
 

@@ -271,7 +271,7 @@ describes.realWin('placement', {
       const baseAttributes = {
         'type': 'ad-network-type',
         'layout': 'fixed',
-        'width': 300, 
+        'width': 300,
         'height': 250,
         'data-custom-att-1': 'val-1',
         'data-custom-att-2': 'val-2',

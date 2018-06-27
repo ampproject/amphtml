@@ -164,12 +164,12 @@ class DoubleclickNetworkConfig {
     let experimentJson = {};
     try {
       experimentJson = JSON.parse(
-        this.autoAmpAdsElement_.getAttribute('data-experiment'));
+          this.autoAmpAdsElement_.getAttribute('data-experiment'));
     } catch (e) {}
     const attributes = dict({
       'type': 'doubleclick',
       'data-slot': this.autoAmpAdsElement_.getAttribute('data-slot'),
-      'json': this.autoAmpAdsElement_.getAttribute('data-json')
+      'json': this.autoAmpAdsElement_.getAttribute('data-json'),
     });
     if (experimentJson['height']) {
       attributes['height'] = experimentJson['height'];
