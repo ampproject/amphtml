@@ -22,6 +22,7 @@ import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {dict} from '../../../src/utils/object';
 import {parseUrlDeprecated} from '../../../src/url';
+import {tryParseJson} from '../../../src/json';
 
 
 /**
@@ -161,24 +162,23 @@ class DoubleclickNetworkConfig {
 
   /** @override */
   getAttributes() {
-    let experimentJson = {};
-    try {
-      experimentJson = JSON.parse(
-          this.autoAmpAdsElement_.getAttribute('data-experiment'));
-    } catch (e) {}
     const attributes = dict({
       'type': 'doubleclick',
       'data-slot': this.autoAmpAdsElement_.getAttribute('data-slot'),
       'json': this.autoAmpAdsElement_.getAttribute('data-json'),
     });
-    if (experimentJson['height']) {
-      attributes['height'] = experimentJson['height'];
-    }
-    if (experimentJson['width']) {
-      attributes['width'] = experimentJson['width'];
-    }
-    if (experimentJson['layout']) {
-      attributes['layout'] = experimentJson['layout'];
+    const experimentJson = tryParseJson(
+        this.autoAmpAdsElement_.getAttribute('data-experiment'));
+    if (experimentJson) {
+      if (experimentJson['height']) {
+        attributes['height'] = experimentJson['height'];
+      }
+      if (experimentJson['width']) {
+        attributes['width'] = experimentJson['width'];
+      }
+      if (experimentJson['layout']) {
+        attributes['layout'] = experimentJson['layout'];
+      }
     }
     return attributes;
   }
