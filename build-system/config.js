@@ -61,15 +61,6 @@ const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
 const commonIntegrationTestPaths =
     initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
 
-const coveragePaths = [
-  {
-    pattern: 'test/coverage/**/*',
-    included: false,
-    nocache: false,
-    watched: false,
-  },
-];
-
 const testPaths = commonIntegrationTestPaths.concat([
   'test/**/*.js',
   'ads/**/test/test-*.js',
@@ -113,7 +104,6 @@ module.exports = {
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
-  coveragePaths,
   lintGlobs: [
     '**/*.js',
     '!**/*.extern.js',
@@ -129,7 +119,6 @@ module.exports = {
     '!extensions/amp-access/0.1/access-expr-impl.js',
     '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',
-    '!test/coverage/**/*.*',
   ],
   jsonGlobs: [
     '**/*.json',
