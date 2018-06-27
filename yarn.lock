@@ -2368,7 +2368,7 @@ check-error@^1.0.1, check-error@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/check-error/-/check-error-1.0.2.tgz#574d312edd88bb5dd8912e9286dd6c0aed4aac82"
 
-chokidar@^1.0.0, chokidar@^1.0.1, chokidar@^1.4.2, chokidar@^1.6.1:
+chokidar@^1.0.0, chokidar@^1.0.1, chokidar@^1.4.2:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-1.7.0.tgz#798e689778151c8076b4b360e5edd28cda2bb468"
   dependencies:
@@ -2382,6 +2382,25 @@ chokidar@^1.0.0, chokidar@^1.0.1, chokidar@^1.4.2, chokidar@^1.6.1:
     readdirp "^2.0.0"
   optionalDependencies:
     fsevents "^1.0.0"
+
+chokidar@^2.0.0:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-2.0.4.tgz#356ff4e2b0e8e43e322d18a372460bbcf3accd26"
+  dependencies:
+    anymatch "^2.0.0"
+    async-each "^1.0.0"
+    braces "^2.3.0"
+    glob-parent "^3.1.0"
+    inherits "^2.0.1"
+    is-binary-path "^1.0.0"
+    is-glob "^4.0.0"
+    lodash.debounce "^4.0.8"
+    normalize-path "^2.1.1"
+    path-is-absolute "^1.0.0"
+    readdirp "^2.0.0"
+    upath "^1.0.5"
+  optionalDependencies:
+    fsevents "^1.2.2"
 
 chokidar@^2.0.2:
   version "2.0.2"
@@ -4785,7 +4804,7 @@ fsevents@^1.0.0:
     nan "^2.3.0"
     node-pre-gyp "^0.6.39"
 
-fsevents@^1.1.2:
+fsevents@^1.1.2, fsevents@^1.2.2:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-1.2.4.tgz#f41dcb1af2582af3692da36fc55cbd8e1041c426"
   dependencies:
@@ -5350,19 +5369,19 @@ gulp-util@^3.0.0, gulp-util@^3.0.6, gulp-util@^3.0.7:
     through2 "^2.0.0"
     vinyl "^0.5.0"
 
-gulp-watch@4.3.11:
-  version "4.3.11"
-  resolved "https://registry.yarnpkg.com/gulp-watch/-/gulp-watch-4.3.11.tgz#162fc563de9fc770e91f9a7ce3955513a9a118c0"
+gulp-watch@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/gulp-watch/-/gulp-watch-5.0.0.tgz#6fb03ab1735972e0d2866475b568555836dfd0eb"
   dependencies:
     anymatch "^1.3.0"
-    chokidar "^1.6.1"
+    chokidar "^2.0.0"
     glob-parent "^3.0.1"
     gulp-util "^3.0.7"
     object-assign "^4.1.0"
     path-is-absolute "^1.0.1"
     readable-stream "^2.2.2"
     slash "^1.0.0"
-    vinyl "^1.2.0"
+    vinyl "^2.1.0"
     vinyl-file "^2.0.0"
 
 gulp-webserver@0.9.1:
@@ -7057,7 +7076,7 @@ lodash.clonedeepwith@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.clonedeepwith/-/lodash.clonedeepwith-4.5.0.tgz#6ee30573a03a1a60d670a62ef33c10cf1afdbdd4"
 
-lodash.debounce@^4.0.3:
+lodash.debounce@^4.0.3, lodash.debounce@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
 
@@ -11560,6 +11579,10 @@ upath@^1.0.0:
     lodash.isstring "^4.0.1"
     lodash.startswith "^4.2.1"
 
+upath@^1.0.5:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/upath/-/upath-1.1.0.tgz#35256597e46a581db4793d0ce47fa9aebfc9fabd"
+
 update-notifier@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/update-notifier/-/update-notifier-2.3.0.tgz#4e8827a6bb915140ab093559d7014e3ebb837451"
@@ -11769,7 +11792,7 @@ vinyl@^0.5.0:
     clone-stats "^0.0.1"
     replace-ext "0.0.1"
 
-vinyl@^1.1.0, vinyl@^1.2.0:
+vinyl@^1.1.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/vinyl/-/vinyl-1.2.0.tgz#5c88036cf565e5df05558bfc911f8656df218884"
   dependencies:
