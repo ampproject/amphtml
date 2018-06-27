@@ -7913,6 +7913,11 @@ inline-style-prefixer@^3.0.1:
     bowser "^1.7.3"
     css-in-js-utils "^2.0.0"
 
+inputmask@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/inputmask/-/inputmask-4.0.2.tgz#df85411fabdcad323606a045a055fea90d8d7afe"
+  integrity sha512-9m7Q/bb7HAkTCvX61Bynp+52QYi67pb4qTvpit+p3iovnJimDiwH6bWB0J9SMpCXMm39xLUoznDzEz8BiNj9MQ==
+
 inquirer@^3.0.6:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-3.3.0.tgz#9dd2f2ad765dcab1ff0443b491442a20ba227dc9"
@@ -15902,6 +15907,11 @@ validate-npm-package-license@^3.0.1:
   dependencies:
     spdx-correct "~1.0.0"
     spdx-expression-parse "~1.0.0"
+
+vanilla-text-mask@5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/vanilla-text-mask/-/vanilla-text-mask-5.0.2.tgz#ac5e5f881d25c484fe0588be7b9b27d7e587b79f"
+  integrity sha512-a/MAOh4Z43faltr9CBg371APQ7W3nL/yUm2Ntxhdcr0f4mgAwnJJJbvQ9FRNhqiRokQGjeK9rghfI6/85QNMEg==
 
 vargs@0.1.0:
   version "0.1.0"

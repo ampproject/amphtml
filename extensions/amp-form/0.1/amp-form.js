@@ -199,6 +199,7 @@ export class AmpForm {
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
     this.installEventHandlers_();
+    this.installInputMasking_();
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
@@ -366,6 +367,13 @@ export class AmpForm {
     this.form_.addEventListener('input', e => {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
+    });
+  }
+
+  /** @private */
+  installInputMasking_() {
+    Services.inputmaskServiceForDoc(this.form_).then(inputmaskService => {
+      inputmaskService.install();
     });
   }
 
