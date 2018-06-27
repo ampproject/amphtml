@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import {getSourceUrl, parseUrlDeprecated} from '../url';
+import {dict, map} from '../utils/object';
+import {
+  getProxyServingType,
+  getSourceUrl,
+  parseQueryString,
+  parseUrlDeprecated,
+} from '../url';
 import {isArray} from '../types';
-import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */
@@ -33,6 +38,8 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
  *     - metaTags: A map object of meta tag's name (key) and corresponding
  *       contents (value).
+ *     - replaceParams: A map object of extra query string parameter names (key)
+ *       to corresponding values, used for custom analytics.
  *
  * @typedef {{
  *   sourceUrl: string,
@@ -40,6 +47,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   pageViewId: string,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
+ *   replaceParams: !Object<string, string|!Array<string>>
  * }}
  */
 export let DocumentInfoDef;
@@ -84,6 +92,7 @@ export class DocInfo {
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
+    const replaceParams = getReplaceParams(ampdoc);
 
     return this.info_ = {
       /** @return {string} */
@@ -94,6 +103,7 @@ export class DocInfo {
       pageViewId,
       linkRels,
       metaTags,
+      replaceParams,
     };
   }
 }
@@ -180,4 +190,21 @@ function getMetaTags(doc) {
     }
   }
   return metaTags;
+}
+
+/**
+ * Attempts to retrieve extra parameters from the "amp_r" query param,
+ * returning an empty result if invalid.
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!JsonObject<string, string|!Array<string>>}
+ */
+function getReplaceParams(ampdoc) {
+  // The "amp_r" parameter is only supported for ads.
+  if (!ampdoc.isSingleDoc() ||
+      getProxyServingType(ampdoc.win.location.href) != 'a') {
+    return dict();
+  }
+  const url = parseUrlDeprecated(ampdoc.win.location.href);
+  const replaceRaw = parseQueryString(url.search)['amp_r'];
+  return parseQueryString(replaceRaw);
 }
