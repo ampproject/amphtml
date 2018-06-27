@@ -203,11 +203,6 @@ function verifyBuildStatus(status, buildId) {
           log('warning', 'If they are intentional, you must first approve the',
               'build at', colors.cyan(`${PERCY_BUILD_URL}/${buildId}`),
               'to allow your PR to be merged.');
-          log('warning',
-              'You must then wait for your merged PR to be tested on master,',
-              'and approve the next "master" build at',
-              colors.cyan(PERCY_BUILD_URL),
-              'in order to update the visual diff baseline snapshots.');
         }
       } else {
         log('info', 'Percy build', colors.cyan(buildId),
