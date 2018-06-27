@@ -259,9 +259,9 @@ export function googlePageParameters(a4a, startTime) {
         const visibilityState = Services.viewerForDoc(ampDoc)
             .getVisibilityState();
         return {
-          'is_amp': a4a.isXhrAllowed()
-                         ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
-                         : AmpAdImplementation.AMP_AD_IFRAME_GET,
+          'is_amp': a4a.isXhrAllowed() ?
+            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
+            AmpAdImplementation.AMP_AD_IFRAME_GET,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
           'c': getCorrelator(win, ampDoc, clientId),
@@ -290,8 +290,8 @@ export function googlePageParameters(a4a, startTime) {
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl
-                      ? null
-                      : win.location.href,
+            ? null
+            : win.location.href,
           'ref': promiseResults[1] || null,
         };
       });
