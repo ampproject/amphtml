@@ -79,7 +79,9 @@ export class AmpVideoIntegration {
     this.methods_ = {};
 
     /** @private @const {function()} */
-    this.listenToOnce_ = once(listenTo);
+    this.listenToOnce_ = once(() => {
+      listenTo(this.win_, e => this.onMessage_(e));
+    });
 
     /**
      * Used for checking callback return type.
@@ -94,10 +96,23 @@ export class AmpVideoIntegration {
    */
   method(name, callback) {
     userAssert(validMethods.indexOf(name) > -1, `Invalid method ${name}.`);
-
-    this.listenToOnce_(this.win_, this.methods_);
-
     this.methods_[name] = callback;
+    this.listenToOnce_();
+  }
+
+  /**
+   * @param {!JsonObject} data
+   * @private
+   */
+  onMessage_(data) {
+    if (data['event'] != 'method') {
+      return;
+    }
+    const method = data['method'];
+    if (!(method in this.methods_)) {
+      return;
+    }
+    this.methods_[method].call();
   }
 
   /**
@@ -173,19 +188,11 @@ export class AmpVideoIntegration {
 
 /**
  * @param {!Window} win
- * @param {!Object<string, function()>} methods
+ * @param {function(!JsonObject)} onMessage
  */
-function listenTo(win, methods) {
+function listenTo(win, onMessage) {
   listen(win, 'message', e => {
-    const data = tryParseJson(e.data);
-    if (data['event'] != 'method') {
-      return;
-    }
-    const method = data['method'];
-    if (!(method in methods)) {
-      return;
-    }
-    methods[method].call();
+    onMessage(tryParseJson(e.data));
   });
 }
 
@@ -194,13 +201,9 @@ function listenTo(win, methods) {
  * @visibleForTesting
  */
 export function adopt(global) {
-  global.AmpVideoIframe = global.AmpVideoIframe || [];
-
-  const exposed = global.AmpVideoIframe;
+  const exposed = (global.AmpVideoIframe = global.AmpVideoIframe || []);
   const integration = new AmpVideoIntegration(global);
-
   exposed.push = callback => callback(integration);
-
   exposed.forEach(exposed.push);
 }
 
