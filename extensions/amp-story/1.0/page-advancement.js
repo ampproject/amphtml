@@ -271,6 +271,24 @@ class ManualAdvancement extends AdvancementConfig {
       this.storeService_ =
         Services.storyStoreService(element.ownerDocument.defaultView);
     }
+
+    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
+    this.sections_ = {
+      // Width and navigation direction of each section depend on whether the
+      // document is RTL or LTR.
+      left: {
+        widthRatio: rtlState ?
+          NEXT_SCREEN_AREA_RATIO : PREVIOUS_SCREEN_AREA_RATIO,
+        direction: rtlState ?
+          TapNavigationDirection.NEXT : TapNavigationDirection.PREVIOUS,
+      },
+      right: {
+        widthRatio: rtlState ?
+          PREVIOUS_SCREEN_AREA_RATIO : NEXT_SCREEN_AREA_RATIO,
+        direction: rtlState ?
+          TapNavigationDirection.PREVIOUS : TapNavigationDirection.NEXT,
+      },
+    };
   }
 
   /** @override */
@@ -343,7 +361,6 @@ class ManualAdvancement extends AdvancementConfig {
     // Using `left` as a fallback since Safari returns a ClientRect in some
     // cases.
     const offsetLeft = ('x' in pageRect) ? pageRect.x : pageRect.left;
-    const RtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
     const page = {
       // Offset starting left of the page.
@@ -352,24 +369,7 @@ class ManualAdvancement extends AdvancementConfig {
       clickEventX: event.pageX,
     };
 
-    const sections = {
-      // Width and navigation direction of each section depend on whether the
-      // document is RTL or LTR.
-      left: {
-        widthRatio: RtlState ?
-          NEXT_SCREEN_AREA_RATIO : PREVIOUS_SCREEN_AREA_RATIO,
-        direction: RtlState ?
-          TapNavigationDirection.NEXT : TapNavigationDirection.PREVIOUS,
-      },
-      right: {
-        widthRatio: RtlState ?
-          PREVIOUS_SCREEN_AREA_RATIO : NEXT_SCREEN_AREA_RATIO,
-        direction: RtlState ?
-          TapNavigationDirection.PREVIOUS : TapNavigationDirection.NEXT,
-      },
-    };
-
-    this.onTapNavigation(this.getTapDirection_(page, sections));
+    this.onTapNavigation(this.getTapDirection_(page));
   }
 
   /**
@@ -378,10 +378,9 @@ class ManualAdvancement extends AdvancementConfig {
    * individual section has been previously defined depending on the language
    * settings.
    * @param {!Object} page
-   * @param {!Object} sections
    */
-  getTapDirection_(page, sections) {
-    const {left, right} = sections;
+  getTapDirection_(page) {
+    const {left, right} = this.sections_;
 
     if (page.clickEventX <= page.offset + (left.widthRatio * page.width)) {
       return left.direction;

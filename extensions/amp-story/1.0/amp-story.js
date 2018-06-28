@@ -945,14 +945,14 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const RtlState = this.storeService_.get(StateProperty.RTL_STATE);
+    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
     switch (e.keyCode) {
       case KeyCodes.LEFT_ARROW:
-        RtlState ? this.next_() : this.previous_();
+        rtlState ? this.next_() : this.previous_();
         break;
       case KeyCodes.RIGHT_ARROW:
-        RtlState ? this.previous_() : this.next_();
+        rtlState ? this.previous_() : this.next_();
         break;
     }
   }
