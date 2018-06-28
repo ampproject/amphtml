@@ -87,14 +87,25 @@ function onAmpIntegrationReady(ampIntegration) {
 
 ### Simple integrations
 
-If you're using a common video framework like JwPlayer, you can
+If you're using a common video framework like JwPlayer or Video.js, you can
 simply call `listenTo` for a basic integration:
+
+##### For JwPlayer:
+
+```js
+function onAmpIntegrationReady(ampIntegration) {
+  var myVideo = jwplayer('my-video');
+  ampIntegration.listenTo('jwplayer', myVideo);
+}
+```
+
+##### For Video.js:
 
 ```js
 // For JwPlayer:
 function onAmpIntegrationReady(ampIntegration) {
-  var myVideo = jwplayer('#my-video');
-  ampIntegration.listenTo('jwplayer', myVideo);
+  var myVideo = document.querySelector('#my-video');
+  ampIntegration.listenTo('videojs', myVideo);
 }
 ```
 

@@ -75,6 +75,12 @@ export class AmpVideoIntegration {
   /** @param {!Window} win */
   constructor(win) {
 
+    /**
+     * Used for checking callback return type.
+     * @visibleForTesting
+     */
+    this.isAmpVideoIntegration_ = true;
+
     /** @private @const */
     this.callCounter_ = 0;
 
@@ -92,11 +98,8 @@ export class AmpVideoIntegration {
       listenTo(this.win_, e => this.onMessage_(e));
     });
 
-    /**
-     * Used for checking callback return type.
-     * @visibleForTesting
-     */
-    this.isAmpVideoIntegration_ = true;
+    /** @private {boolean} */
+    this.muted_ = false;
   }
 
   /**
@@ -141,6 +144,9 @@ export class AmpVideoIntegration {
       case 'jwplayer':
         this.listenToJwPlayer_(obj);
         break;
+      case 'videojs':
+        this.listenToVideoJs_(obj);
+        break;
       default:
         userAssert(false, `Invalid listener type ${type}.`);
     }
@@ -148,6 +154,7 @@ export class AmpVideoIntegration {
 
   /**
    * @param {!JwplayerPartialInterfaceDef} player
+   * @private
    */
   listenToJwPlayer_(player) {
     ['error', 'setupError'].forEach(e => {
@@ -173,17 +180,64 @@ export class AmpVideoIntegration {
       player.on(e, () => this.postEvent(redispatchAs[e]));
     });
 
-    this.method('play', () => player.play());
-    this.method('pause', () => player.pause());
-    this.method('mute', () => player.setMute(true));
-    this.method('unmute', () => player.setMute(false));
-    this.method('showcontrols', () => player.setControls(true));
-    this.method('hidecontrols', () => player.setControls(false));
-    this.method('fullscreenenter', () => player.setFullscreen(true));
-    this.method('fullscreenexit', () => player.setFullscreen(false));
+    player.on('volume', e =>
+      this.onVolumeChange_(e.volume));
+
+    const method = (type, handler) => this.method(type, handler);
+
+    method('play', () => player.play());
+    method('pause', () => player.pause());
+    method('mute', () => player.setMute(true));
+    method('unmute', () => player.setMute(false));
+    method('showcontrols', () => player.setControls(true));
+    method('hidecontrols', () => player.setControls(false));
+    method('fullscreenenter', () => player.setFullscreen(true));
+    method('fullscreenexit', () => player.setFullscreen(false));
   }
 
-  // TODO(alanorozco): Video.js integration.
+  /**
+   * @param {!Element} element
+   * @private
+   */
+  listenToVideoJs_(element) {
+    // Retrieve lazily.
+    const player = once(() =>
+      this.win_.videojs.getPlayer(element));
+
+    ['canplay', 'playing', 'pause', 'ended'].forEach(e => {
+      listen(element, e, () => this.postEvent(e));
+    });
+
+    listen(element, 'volumechange', () =>
+      this.onVolumeChange_(player().getVolume()));
+
+    const method = (type, handler) => this.method(type, handler);
+
+    method('play', () => player().play());
+    method('pause', () => player().pause());
+    method('mute', () => player().muted(true));
+    method('unmute', () => player().muted(false));
+    method('showcontrols', () => player().controls(true));
+    method('hidecontrols', () => player().controls(false));
+    method('fullscreenenter', () => player().requestFullscreen());
+    method('fullscreenexit', () => player().exitFullscreen());
+  }
+
+  /**
+   * @param {number} newVolume
+   * @private
+   */
+  onVolumeChange_(newVolume) {
+    if (newVolume < 0.01) {
+      this.muted_ = true;
+      this.postEvent('muted');
+      return;
+    }
+    if (this.muted_) {
+      this.muted_ = false;
+      this.postEvent('unmuted');
+    }
+  }
 
   /**
    * Posts a playback event.
