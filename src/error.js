@@ -551,6 +551,7 @@ export function detectNonAmpJs(win) {
  * Returns true if the AMP runtime support for shadow DOM is used.
  * @param {!Window} win
  * @return {boolean}
+ * @visibleForTesting
  */
 export function detectAmpShadowJs(win) {
   const root = Services.ampdocServiceFor(win).getAmpDoc().getHeadNode();
