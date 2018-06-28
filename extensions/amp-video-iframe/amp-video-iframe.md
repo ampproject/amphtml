@@ -1,5 +1,7 @@
 # amp-video-iframe
 
+[TOC]
+
 ## Integration
 
 The document living inside your framoe must include a small library:
