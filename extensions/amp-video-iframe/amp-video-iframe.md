@@ -224,7 +224,7 @@ The valid events are as follows.
   </tbody>
 </table>
 
-#### getIntersection(callback)
+#### `getIntersection(callback)`
 
 Gets the [`IntersectionObserverEntry`](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) for
 the video element. This is useful for viewability information, e.g.
@@ -236,7 +236,7 @@ setInterval(function() {
 }, 2000);
 ```
 
-The [returned object](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) looks like this:
+The `callback` passed to the function will be executed with [the returned object](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) as the first argument. It looks like this:
 
 ```json
 {
