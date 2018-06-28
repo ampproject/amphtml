@@ -63,7 +63,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       rtcResponseArray, expectedParams, expectedJsonTargeting) {
       const rtcUrlParams = impl.mergeRtcResponses_(rtcResponseArray);
       expect(rtcUrlParams).to.deep.equal(expectedParams);
-      expect(impl.jsonTargeting_).to.deep.equal(expectedJsonTargeting);
+      expect(impl.jsonTargeting).to.deep.equal(expectedJsonTargeting);
     }
 
     it('should handle array with undefined', () => {
@@ -204,7 +204,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
 
 
     it('should properly merge mix of success and errors', () => {
-      impl.jsonTargeting_ = {targeting:
+      impl.jsonTargeting = {targeting:
                             {'abc': [1,2,3], 'b': {n: 'm'}, 'a': 'TEST'},
       categoryExclusions: ['sports']};
       const rtcResponseArray = [
