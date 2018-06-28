@@ -285,7 +285,8 @@ export function googlePageParameters(a4a, startTime) {
           'scr_y': viewport.getScrollTop(),
           'bc': getBrowserCapabilitiesBitmap(win) || null,
           'debug_experiment_id':
-              (/(?:#|,)deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
+              (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] ||
+                  null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
