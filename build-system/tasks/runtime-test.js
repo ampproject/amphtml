@@ -499,7 +499,21 @@ function runTests() {
   }
 
   if (argv.coverage) {
-    c.browserify.transform.push(['browserify-istanbul']);
+    c.browserify.transform = [
+      ['babelify', {
+        compact: false,
+        plugins: [
+          ['babel-plugin-istanbul', {
+            exclude: [
+              './test/**/*.js',
+              './ads/**/test/test-*.js',
+              './extensions/**/test/**/*.js',
+              './testing/**/*.js',
+            ],
+          }],
+        ],
+      }],
+    ];
     c.plugins.push('karma-coverage-istanbul-reporter');
     c.reporters = c.reporters.concat(['coverage-istanbul']);
     c.coverageIstanbulReporter = {
