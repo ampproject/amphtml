@@ -32,7 +32,6 @@ import {
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
-  removeProtocol,
   removeSearch,
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
