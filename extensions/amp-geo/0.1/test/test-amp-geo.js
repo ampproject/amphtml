@@ -366,7 +366,7 @@ describes.realWin('amp-geo', {
       expect(geo.ISOCountry).to.equal('unknown');
       expect(geo.matchedISOCountryGroups).to.deep.equal(['nafta', 'unknown']);
       expect(geo.allISOCountryGroups).to
-          .deep.equal(['nafta', 'unknown', 'anz']);
+          .deep.equal(['nafta', 'unknown', 'eea', 'myGroup', 'anz']);
       expect(geo.isInCountryGroup).to.be.a('function');
     });
   });
