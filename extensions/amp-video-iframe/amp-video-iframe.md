@@ -42,7 +42,7 @@ The reasons for this policy are that:
 - `amp-video-iframe` enforces sandboxing and the sandbox is also applied to child iframes. This means landing pages may be broken, even if the ad itself appears to work.
 - `amp-video-iframe` has controlled resize mechanism.
 
-# Attributes
+## Attributes
 
 ##### src (required)
 
