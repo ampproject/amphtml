@@ -80,10 +80,6 @@ describes.realWin('amp-video-iframe', {
     return env.sandbox./*OK*/stub(videoIframe.implementation_, 'postMessage_');
   }
 
-  function matchMethodMessage(method) {
-    return sinon.match({method, event: 'method'});
-  }
-
   describe('#onMessage_', () => {
 
     it('should load and register on canplay', function* () {
@@ -139,139 +135,37 @@ describes.realWin('amp-video-iframe', {
     });
   });
 
-  describe('#play', () => {
-    it('should trigger play', function* () {
-      const videoIframe = createVideoIframe();
+  const implementedVideoInterfaceMethods = [
+    'play',
+    'pause',
+    'mute',
+    'unmute',
+    'hideControls',
+    'showControls',
+    'fullscreenEnter',
+    'fullscreenExit',
+  ];
 
-      yield whenLoaded(videoIframe);
+  implementedVideoInterfaceMethods.forEach(method => {
+    describe(`#${method}`, () => {
+      const lowercaseMethod = method.toLowerCase();
 
-      const postMessage = stubPostMessage(videoIframe);
+      it(`should post '${lowercaseMethod}'`, function* () {
+        const videoIframe = createVideoIframe();
 
-      videoIframe.implementation_.play();
+        yield whenLoaded(videoIframe);
 
-      yield Promise.resolve();
+        const postMessage = stubPostMessage(videoIframe);
 
-      expect(postMessage.withArgs(matchMethodMessage('play')))
-          .to.have.been.calledOnce;
-    });
-  });
+        videoIframe.implementation_[method]();
 
-  describe('#pause', () => {
-    it('should trigger pause', function* () {
-      const videoIframe = createVideoIframe();
+        yield Promise.resolve();
 
-      yield whenLoaded(videoIframe);
-
-      const postMessage = stubPostMessage(videoIframe);
-
-      videoIframe.implementation_.pause();
-
-      yield Promise.resolve();
-
-      expect(postMessage.withArgs(matchMethodMessage('pause')))
-          .to.have.been.calledOnce;
-    });
-  });
-
-  describe('#mute', () => {
-    it('should trigger mute', function* () {
-      const videoIframe = createVideoIframe();
-
-      yield whenLoaded(videoIframe);
-
-      const postMessage = stubPostMessage(videoIframe);
-
-      videoIframe.implementation_.mute();
-
-      yield Promise.resolve();
-
-      expect(postMessage.withArgs(matchMethodMessage('mute')))
-          .to.have.been.calledOnce;
-    });
-  });
-
-  describe('#unmute', () => {
-    it('should trigger unmute', function* () {
-      const videoIframe = createVideoIframe();
-
-      yield whenLoaded(videoIframe);
-
-      const postMessage = stubPostMessage(videoIframe);
-
-      videoIframe.implementation_.unmute();
-
-      yield Promise.resolve();
-
-      expect(postMessage.withArgs(matchMethodMessage('unmute')))
-          .to.have.been.calledOnce;
-    });
-  });
-
-  describe('#hideControls', () => {
-    it('should trigger hidecontrols', function* () {
-      const videoIframe = createVideoIframe();
-
-      yield whenLoaded(videoIframe);
-
-      const postMessage = stubPostMessage(videoIframe);
-
-      videoIframe.implementation_.hideControls();
-
-      yield Promise.resolve();
-
-      expect(postMessage.withArgs(matchMethodMessage('hidecontrols')))
-          .to.have.been.calledOnce;
-    });
-  });
-
-  describe('#showControls', () => {
-    it('should trigger showcontrols', function* () {
-      const videoIframe = createVideoIframe();
-
-      yield whenLoaded(videoIframe);
-
-      const postMessage = stubPostMessage(videoIframe);
-
-      videoIframe.implementation_.showControls();
-
-      yield Promise.resolve();
-
-      expect(postMessage.withArgs(matchMethodMessage('showcontrols')))
-          .to.have.been.calledOnce;
-    });
-  });
-
-  describe('#fullscreenEnter', () => {
-    it('should trigger fullscreenenter', function* () {
-      const videoIframe = createVideoIframe();
-
-      yield whenLoaded(videoIframe);
-
-      const postMessage = stubPostMessage(videoIframe);
-
-      videoIframe.implementation_.fullscreenEnter();
-
-      yield Promise.resolve();
-
-      expect(postMessage.withArgs(matchMethodMessage('fullscreenenter')))
-          .to.have.been.calledOnce;
-    });
-  });
-
-  describe('#fullscreenExit', () => {
-    it('should trigger fullscreenexit', function* () {
-      const videoIframe = createVideoIframe();
-
-      yield whenLoaded(videoIframe);
-
-      const postMessage = stubPostMessage(videoIframe);
-
-      videoIframe.implementation_.fullscreenExit();
-
-      yield Promise.resolve();
-
-      expect(postMessage.withArgs(matchMethodMessage('fullscreenexit')))
-          .to.have.been.calledOnce;
+        expect(postMessage.withArgs(sinon.match({
+          event: 'method',
+          method: lowercaseMethod,
+        }))).to.have.been.calledOnce;
+      });
     });
   });
 });
