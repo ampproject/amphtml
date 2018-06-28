@@ -450,6 +450,18 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       );
     }
 
+    if (!watch || argv.with_video_iframe_integration) {
+      promises.push(
+          compileJs('./src/', 'video-iframe-integration.js', './dist', {
+            minifiedName: 'video-iframe-integration-v0.js',
+            includePolyfills: false,
+            checkTypes: opt_checkTypes,
+            watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+          }));
+    }
+
     if (!watch || argv.with_inabox) {
       promises.push(
           // Entry point for inabox runtime.
