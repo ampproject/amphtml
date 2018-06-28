@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {listen} from '../src/event-helper';
+import {dict} from '../src/utils/object';
+import {getData, listen} from '../src/event-helper';
+import {getMode} from '../src/mode';
+import {isFiniteNumber} from '../src/types';
 import {once} from '../src/utils/function';
 import {tryParseJson} from '../src/json';
 
@@ -112,7 +115,7 @@ export class AmpVideoIntegration {
    */
   onMessage_(data) {
     const id = data['id'];
-    if (id && this.callbacks_[id]) {
+    if (isFiniteNumber(id) && this.callbacks_[id]) {
       const callback = this.callbacks_[id];
       const args = data['args'];
       callback(args);
@@ -188,7 +191,7 @@ export class AmpVideoIntegration {
    */
   postEvent(event) {
     userAssert(validEvents.indexOf(event) > -1, `Invalid event ${event}`);
-    this.postToParent_({event});
+    this.postToParent_(dict({'event': event}));
   }
 
   /**
@@ -199,7 +202,11 @@ export class AmpVideoIntegration {
   postToParent_(data, optCallback = null) {
     const id = this.callCounter_++;
     const completeData = Object.assign({id}, data);
-    this.win_.parent./*OK*/postMessage(completeData, '*');
+
+    if (!getMode(this.win_).test) {
+      this.win_.parent./*OK*/postMessage(completeData, '*');
+    }
+
     if (optCallback) {
       this.callbacks_[id] = optCallback;
     }
@@ -221,7 +228,7 @@ export class AmpVideoIntegration {
    * @private
    */
   getIntersectionForTesting_(callback) {
-    return this.postToParent_({method: 'getIntersection'}, callback);
+    return this.postToParent_(dict({'method': 'getIntersection'}), callback);
   }
 }
 
@@ -230,9 +237,7 @@ export class AmpVideoIntegration {
  * @param {function(!JsonObject)} onMessage
  */
 function listenTo(win, onMessage) {
-  listen(win, 'message', e => {
-    onMessage(tryParseJson(e.data));
-  });
+  listen(win, 'message', e => onMessage(tryParseJson(getData(e))));
 }
 
 /**

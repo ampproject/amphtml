@@ -17,7 +17,7 @@ import * as sinon from 'sinon';
 
 import {AmpVideoIntegration, adopt} from '../../src/video-iframe-integration';
 
-describes.fakeWin('video-iframe-integration', {amp: false}, env => {
+describes.realWin('video-iframe-integration', {amp: false}, env => {
 
   function pushToGlobal(global, callback) {
     (global.AmpVideoIframe = global.AmpVideoIframe || []).push(callback);
@@ -50,6 +50,50 @@ describes.fakeWin('video-iframe-integration', {amp: false}, env => {
   });
 
   describe('AmpVideoIntegration', () => {
+    describe('#method', () => {
+      it('should execute on message', () => {
+        const integration = new AmpVideoIntegration();
+
+        const listenToOnce = env.sandbox.stub(integration, 'listenToOnce_');
+
+        const validMethods = [
+          'pause',
+          'play',
+          'mute',
+          'unmute',
+          'fullscreenenter',
+          'fullscreenexit',
+          'showcontrols',
+          'hidecontrols',
+        ];
+
+        validMethods.forEach(method => {
+          const spy = env.sandbox.spy();
+          integration.method(method, spy);
+          integration.onMessage_({event: 'method', method});
+          expect(spy).to.have.been.calledOnce;
+        });
+
+        expect(listenToOnce.callCount).to.equal(validMethods.length);
+      });
+
+      it('should reject invalid methods', () => {
+        const integration = new AmpVideoIntegration();
+
+        const listenToOnce = env.sandbox.stub(integration, 'listenToOnce_');
+
+        const invalidMethods = 'tacos al pastor'.split(' ');
+
+        invalidMethods.forEach(method => {
+          const spy = env.sandbox.spy();
+          expect(() => integration.method(method, spy))
+              .to.throw(/Invalid method/);
+        });
+
+        expect(listenToOnce).to.not.have.been.called;
+      });
+    });
+
     describe('#postEvent', () => {
       it('should reject invalid events', () => {
         const integration = new AmpVideoIntegration();
@@ -81,6 +125,27 @@ describes.fakeWin('video-iframe-integration', {amp: false}, env => {
           expect(postToParent.withArgs(sinon.match({event})))
               .to.have.been.calledOnce;
         }
+      });
+    });
+
+    describe('#getIntersection', () => {
+      it('should request and receive intersection', () => {
+        const integration = new AmpVideoIntegration(env.win);
+        const postToParent =
+            env.sandbox.spy(integration, 'postToParent_');
+
+        const callback = env.sandbox.spy();
+
+        const id = integration.getIntersectionForTesting_(callback);
+
+        expect(postToParent.withArgs(sinon.match({method: 'getIntersection'})))
+            .to.have.been.calledOnce;
+
+        const mockedIntersection = {tacos: 'al pastor'};
+
+        integration.onMessage_({id, args: mockedIntersection});
+
+        expect(callback.withArgs(mockedIntersection)).to.have.been.calledOnce;
       });
     });
   });
