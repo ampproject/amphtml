@@ -288,8 +288,10 @@ describes.realWin('placement', {
             expect(adElement.tagName).to.equal('AMP-AD');
             expect(adElement.getAttribute('type')).to.equal('ad-network-type');
             expect(adElement.getAttribute('layout')).to.equal('fixed');
-            expect(adElement.getAttribute('height')).to.equal('250');
+            expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.getAttribute('width')).to.equal('300');
+            expect(adElement.getAttribute('style'))
+                .to.equal('width: 300px; height: 250px;');
             expect(adElement.getAttribute('data-custom-att-1'))
                 .to.equal('val-1');
             expect(adElement.getAttribute('data-custom-att-2'))
