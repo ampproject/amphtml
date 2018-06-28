@@ -74,11 +74,12 @@ function getFirstInstanceValue_(impls, extractFn) {
  */
 export function combineInventoryUnits(impls) {
   const uniqueIuNames = {};
+  const iuNamesOutput = [];
   let uniqueIuNamesCount = 0;
   const prevIusEncoded = [];
   impls.forEach(instance => {
     const iu = dev().assert(instance.element.getAttribute('data-slot'));
-    const componentNames = (iu || '').split('/');
+    const componentNames = iu.split('/');
     const encodedNames = [];
     for (let i = 0; i < componentNames.length; i++) {
       if (componentNames[i] == '') {
@@ -86,6 +87,7 @@ export function combineInventoryUnits(impls) {
       }
       let index = uniqueIuNames[componentNames[i]];
       if (index == undefined) {
+        iuNamesOutput.push(componentNames[i]);
         uniqueIuNames[componentNames[i]] = (index = uniqueIuNamesCount++);
       }
       encodedNames.push(index);
@@ -93,8 +95,7 @@ export function combineInventoryUnits(impls) {
     prevIusEncoded.push(encodedNames.join('/'));
   });
   return {
-    'iu_parts': Object.keys(uniqueIuNames).sort((a, b) =>
-      uniqueIuNames[a] - uniqueIuNames[b]).join(),
+    'iu_parts': iuNamesOutput.join(),
     'enc_prev_ius': prevIusEncoded.join(),
   };
 }
