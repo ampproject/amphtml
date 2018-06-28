@@ -1878,6 +1878,20 @@ describe('Resources changeSize', () => {
     expect(resource1.changeSize.firstCall.args[1]).to.equal(222);
   });
 
+  it('should change size when only width changes', () => {
+    resources.scheduleChangeSize_(resource1, 111, 100, undefined, true);
+    resources.mutateWork_();
+    expect(resource1.changeSize).to.be.calledOnce;
+    expect(resource1.changeSize.firstCall).to.have.been.calledWith(111, 100);
+  });
+
+  it('should change size when only height changes', () => {
+    resources.scheduleChangeSize_(resource1, 100, 111, undefined, true);
+    resources.mutateWork_();
+    expect(resource1.changeSize).to.be.calledOnce;
+    expect(resource1.changeSize.firstCall).to.have.been.calledWith(100, 111);
+  });
+
   it('should pick the smallest relayoutTop', () => {
     resources.scheduleChangeSize_(resource2, 111, 222, undefined, true);
     resources.scheduleChangeSize_(resource1, 111, 222, undefined, true);

@@ -138,7 +138,10 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     return true;
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleBodymovinMessages_(event) {
     if (this.iframe_ && event.source != this.iframe_.contentWindow) {
       return;
@@ -195,7 +198,10 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.sendCommand_('stop');
   }
 
-  /** @private */
+  /**
+   * @param {Object} args
+   * @private
+   */
   seekTo_(args) {
     const time = parseFloat(args && args['time']);
     // time based seek

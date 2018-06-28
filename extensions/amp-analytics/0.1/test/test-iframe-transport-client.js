@@ -47,7 +47,7 @@ describe('iframe-transport-client', () => {
   /**
    * Sends a message from the current window to itself
    * @param {string} type Type of the message.
-   * @param {!JsonObject} object Message payload.
+   * @param {!JsonObject} data Message payload.
    */
   function send(type, data) {
     const object = {};

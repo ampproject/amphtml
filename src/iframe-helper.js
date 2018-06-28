@@ -39,7 +39,7 @@ let WindowEventsDef;
 /**
  * Returns a mapping from a URL's origin to an array of windows and their
  * listenFor listeners.
- * @param {!Window} parentWin the window that created the iframe
+ * @param {?Window} parentWin the window that created the iframe
  * @param {boolean=} opt_create create the mapping if it does not exist
  * @return {?Object<string, !Array<!WindowEventsDef>>}
  */
@@ -55,7 +55,7 @@ function getListenFors(parentWin, opt_create) {
 /**
  * Returns an array of WindowEventsDef that have had any listenFor listeners
  * registered for this sentinel.
- * @param {!Window} parentWin the window that created the iframe
+ * @param {?Window} parentWin the window that created the iframe
  * @param {string} sentinel the sentinel of the message
  * @param {boolean=} opt_create create the array if it does not exist
  * @return {?Array<!WindowEventsDef>}
@@ -75,7 +75,7 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
 
 /**
  * Returns an mapping of event names to listenFor listeners.
- * @param {!Window} parentWin the window that created the iframe
+ * @param {?Window} parentWin the window that created the iframe
  * @param {!Element} iframe the iframe element who's context will trigger the
  *     event
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
@@ -109,10 +109,10 @@ function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
 
 /**
  * Returns an mapping of event names to listenFor listeners.
- * @param {!Window} parentWin the window that created the iframe
+ * @param {?Window} parentWin the window that created the iframe
  * @param {string} sentinel the sentinel of the message
  * @param {string} origin the source window's origin
- * @param {!Window} triggerWin the window that triggered the event
+ * @param {?Window} triggerWin the window that triggered the event
  * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
  */
 function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
@@ -151,8 +151,8 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
 /**
  * Checks whether one window is a descendant of another by climbing
  * the parent chain.
- * @param {!Window} ancestor potential ancestor window
- * @param {!Window} descendant potential descendant window
+ * @param {?Window} ancestor potential ancestor window
+ * @param {?Window} descendant potential descendant window
  * @return {boolean}
  */
 function isDescendantWindow(ancestor, descendant) {
@@ -191,7 +191,7 @@ function dropListenSentinel(listenSentinel) {
 
 /**
  * Registers the global listenFor event listener if it has yet to be.
- * @param {!Window} parentWin
+ * @param {?Window} parentWin
  */
 function registerGlobalListenerIfNeeded(parentWin) {
   if (parentWin.listeningFors) {
@@ -238,8 +238,8 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * Allows listening for message from the iframe. Returns an unlisten
  * function to remove the listener.
  *
- * @param {!Element} iframe.
- * @param {string} typeOfMessage.
+ * @param {?Element} iframe
+ * @param {string} typeOfMessage
  * @param {?function(!JsonObject, !Window, string)} callback Called when a
  *     message of this type arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
@@ -456,8 +456,57 @@ export class SubscriptionApi {
         this.is3p_);
   }
 
+  /**
+   * Destroys iframe.
+   */
   destroy() {
     this.unlisten_();
     this.clientWindows_.length = 0;
   }
+}
+
+
+/**
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {boolean}
+ */
+export function looksLikeTrackingIframe(rect) {
+  // This heuristic is subject to change.
+  return rect.width <= 10 || rect.height <= 10;
+}
+
+
+// Most common ad sizes
+// Array of [width, height] pairs.
+const adSizes = [
+  [300, 250],
+  [320, 50],
+  [300, 50],
+  [320, 100],
+];
+
+/**
+ * Guess whether this element might be an ad.
+ * @param {!Element} element An amp-iframe element.
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isAdLike(element) {
+  const box = element.getLayoutBox();
+  const {height, width} = box;
+  for (let i = 0; i < adSizes.length; i++) {
+    const refWidth = adSizes[i][0];
+    const refHeight = adSizes[i][1];
+    if (refHeight > height) {
+      continue;
+    }
+    if (refWidth > width) {
+      continue;
+    }
+    // Fuzzy matching to account for padding.
+    if (height - refHeight <= 20 && width - refWidth <= 20) {
+      return true;
+    }
+  }
+  return false;
 }

@@ -14,32 +14,52 @@
  * limitations under the License.
  */
 import {loadScript} from '../3p/3p';
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function nativo(global, data) {
   let ntvAd;
   (function(ntvAd, global, data) {
     global
         .history
         .replaceState(null,
-            null,
+            '',
             location.pathname + location.hash.replace(/({).*(})/, ''));
     // Private
     let delayedAdLoad = false;
     let percentageOfadViewed;
     const loc = global.context.location;
+    /**
+     * @param {number} delay
+     * @return {boolean}
+     */
     function isValidDelayTime(delay) {
       return ((typeof delay != 'undefined'
         && !isNaN(delay)
         && parseInt(delay,10) >= 0));
     }
+    /**
+     * @param {!Object} data
+     * @return {boolean}
+     */
     function isDelayedTimeStart(data) {
       return (isValidDelayTime(data.delayByTime)
         && ('delay' in data)
         && !('delayByView' in data));
     }
+    /**
+     * @param {!Object} data
+     * @return {boolean}
+     */
     function isDelayedViewStart(data) {
       return (isValidDelayTime(data.delayByTime)
         && ('delayByView' in data));
     }
+    /**
+     * Loads ad when done.
+     */
     function loadAdWhenViewed() {
       const g = global;
       global.context.observeIntersection(function(positions) {
@@ -54,6 +74,9 @@ export function nativo(global, data) {
         }
       });
     }
+    /**
+     * Loads ad when timeouts.
+     */
     function loadAdWhenTimedout() {
       const g = global;
       setTimeout(function() {
@@ -61,14 +84,23 @@ export function nativo(global, data) {
         delayedAdLoad = true;
       }, parseInt(data.delayByTime, 10));
     }
+    /**
+     * @param {*} positions
+     */
     function getLastPositionCoordinates(positions) {
       return positions[positions.length - 1];
     }
+    /**
+     * @param {number} percentage
+     */
     function setPercentageOfadViewed(percentage) {
       percentageOfadViewed = percentage;
     }
-    // Used to track ad during scrolling event and trigger checkIsAdVisible
-    // method on PostRelease instance
+    /**
+     * Used to track ad during scrolling event and trigger checkIsAdVisible
+     * method on PostRelease instance
+     * @param {*} positions
+     */
     function viewabilityConfiguration(positions) {
       const coordinates = getLastPositionCoordinates(positions);
       setPercentageOfadViewed(

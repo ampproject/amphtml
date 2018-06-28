@@ -18,7 +18,6 @@ import {
   ACTION_TYPE,
   AMP_CONSENT_EXPERIMENT,
   AmpConsent,
-  EXTERNAL_CONSENT_FLOW,
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
@@ -50,7 +49,6 @@ describes.realWin('amp-consent', {
     win = env.win;
     toggleExperiment(win, AMP_CONSENT_EXPERIMENT, true);
     toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
-    toggleExperiment(win, EXTERNAL_CONSENT_FLOW, true);
 
     storageValue = {};
     jsonMockResponses = {
@@ -576,16 +574,13 @@ describes.realWin('amp-consent', {
     });
 
     describe('postPromptUI', () => {
-      beforeEach(() => {
+      it('handle postPromptUI', function* () {
         storageValue = {
           'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
           'amp-consent:DEF': CONSENT_ITEM_STATE.ACCEPTED,
           'amp-consent:GH': CONSENT_ITEM_STATE.ACCEPTED,
         };
         ampConsent.buildCallback();
-      });
-
-      it('handle postPromptUI', function* () {
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
             .to.equal('none');
@@ -602,6 +597,50 @@ describes.realWin('amp-consent', {
         ampConsent.scheduleDisplay_('ABC');
         expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
             ['display']).to.equal('none');
+      });
+
+      describe('hide/show postPromptUI', () => {
+        beforeEach(() => {
+          defaultConfig = {
+            'consents': {
+              'ABC': {
+                'checkConsentHref': '//response3',
+              },
+            },
+            'postPromptUI': 'test',
+          };
+          consentElement = doc.createElement('amp-consent');
+          consentElement.setAttribute('id', 'amp-consent');
+          consentElement.setAttribute('layout', 'nodisplay');
+          const scriptElement = doc.createElement('script');
+          scriptElement.setAttribute('type', 'application/json');
+          scriptElement.textContent = JSON.stringify(defaultConfig);
+          consentElement.appendChild(scriptElement);
+          postPromptUI = doc.createElement('div');
+          postPromptUI.setAttribute('id', 'test');
+          consentElement.appendChild(postPromptUI);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+        });
+
+        it('hide postPromptUI', function* () {
+          ampConsent.buildCallback();
+          expect(ampConsent.postPromptUI_).to.not.be.null;
+          yield macroTask();
+          expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
+              ['display']).to.equal('none');
+        });
+
+        it('show postPromptUI', function* () {
+          storageValue = {
+            'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
+          };
+          ampConsent.buildCallback();
+          expect(ampConsent.postPromptUI_).to.not.be.null;
+          yield macroTask();
+          expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
+              ['display']).to.not.equal('none');
+        });
       });
     });
   });

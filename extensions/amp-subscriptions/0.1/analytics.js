@@ -28,6 +28,10 @@ export const SubscriptionAnalyticsEvents = {
 
 export class SubscriptionAnalytics {
 
+  /**
+   * Creates an instance of SubscriptionAnalytics.
+   * @param {!Element} element
+   */
   constructor(element) {
     this.element_ = element;
   }

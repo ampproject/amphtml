@@ -63,12 +63,17 @@ export function redispatch(element, event, events) {
 /**
  * @param {!./base-element.BaseElement} video
  * @param {string} src
+ * @param {?string=} sandbox
  * @return {!Element}
  */
-export function createFrameFor(video, src) {
+export function createFrameFor(video, src, sandbox = null) {
   const {element} = video;
   const frame =
       htmlFor(element)`<iframe frameborder=0 allowfullscreen></iframe>`;
+
+  if (sandbox) {
+    frame.setAttribute('sandbox', sandbox);
+  }
 
   frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
 
