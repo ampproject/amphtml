@@ -24,7 +24,6 @@ import {
 } from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {tryParseJson} from '../../../../src/json';
 
 
 describes.realWin('amp-video-iframe', {
