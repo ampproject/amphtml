@@ -1132,7 +1132,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         this.win, response, slotCallback);
                   })
                   .catch(error => {
-                    console.log('error!', error);
                     const canceled = isCancellation(error);
                     if (canceled) {
                       typeInstances.forEach(instance =>
