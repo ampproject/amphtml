@@ -59,7 +59,7 @@ message UrlSpec {
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];
 
-  reserved 4;
+  // reserved 4;
 }
 
 // NEXT AVAILABLE TAG: 3
