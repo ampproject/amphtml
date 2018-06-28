@@ -23,9 +23,6 @@ import {
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAdNetworkDoubleclickImpl,
-  TFCD,
-  combineInventoryUnits,
-  constructSRABlockParameters,
   getNetworkId,
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
@@ -38,6 +35,22 @@ import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
+import {
+  TFCD,
+  combineInventoryUnits,
+  constructSRABlockParameters,
+  getAdks,
+  getContainers,
+  getCookieOptOut,
+  getExperimentIds,
+  getForceSafeframe,
+  getIdentity,
+  getPageOffsets,
+  getSizes,
+  getTargetingAndExclusions,
+  getTfcd,
+  isAdTest,
+} from '../sra-utils';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dev} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
@@ -91,6 +104,148 @@ describes.realWin('Doubleclick SRA', config , env => {
       expect(impl.useSra).to.be.true;
       impl.layoutCallback();
       expect(impl.refreshManager_).to.be.null;
+    });
+  });
+
+  describe('block parameter joining', () => {
+    let impls;
+    beforeEach(() => impls = []);
+
+    it('should join IUs', () => {
+      for (let i = 0; i < 2; i++) {
+        impls.push({
+          element: {
+            getAttribute: name => {
+              expect(name).to.equal('data-slot');
+              return '/1234/foo.com/news/world/2018/06/17/article';
+            },
+          },
+        });
+      }
+      expect(combineInventoryUnits(impls)).to.jsonEqual({
+        'iu_parts': '1234,foo.com,news,world,2018,06,17,article',
+        'enc_prev_ius': '0/1/2/3/4/5/6/7,0/1/2/3/4/5/6/7',
+      });
+    });
+    it('should determine cookie opt out', () => {
+      expect(getCookieOptOut(impls)).to.be.null;
+      impls[0] = {};
+      expect(getCookieOptOut(impls)).to.be.null;
+      impls[1] = {jsonTargeting: {}};
+      expect(getCookieOptOut(impls)).to.be.null;
+      impls[2] = {jsonTargeting: {'cookieOptOut': 1}};
+      expect(getCookieOptOut(impls)).to.jsonEqual({'co': '1'});
+    });
+    it('should combine adks', () => {
+      expect(getAdks(impls)).to.jsonEqual({'adks': ''});
+      const expected = [];
+      for (let i = 1; i <= 10; i++) {
+        impls.push({adKey: i});
+        expected.push(i);
+      }
+      expect(getAdks(impls)).to.jsonEqual({'adks': expected.join()});
+    });
+    it('should combine sizes', () => {
+      expect(getSizes(impls)).to.jsonEqual({'prev_iu_szs': ''});
+      const expected = [];
+      for (let i = 1; i <= 10; i++) {
+        impls.push({parameterSize: i});
+        expected.push(i);
+      }
+      expect(getSizes(impls)).to.jsonEqual(
+          {'prev_iu_szs': expected.join()});
+    });
+    it('should determine tagForChildDirectedTreatment', () => {
+      expect(getTfcd(impls)).to.be.null;
+      expect(getTfcd([{}])).to.be.null;
+      impls[0] = {};
+      impls[1] = {jsonTargeting: {}};
+      impls[2] = {jsonTargeting: {[TFCD]: 'foo'}};
+      impls[3] = {jsonTargeting: {[TFCD]: 'bar'}};
+      expect(getTfcd(impls)).to.jsonEqual({'tfcd': 'foo'});
+    });
+    it('should determine if ad test', () => {
+      expect(isAdTest(impls)).to.be.null;
+      impls[0] = {
+        element: {
+          getAttribute: name => {
+            expect(name).to.equal('data-experiment-id');
+            return undefined;
+          },
+        },
+      };
+      expect(isAdTest(impls)).to.be.null;
+      impls[1] = {
+        element: {
+          getAttribute: name => {
+            expect(name).to.equal('data-experiment-id');
+            return '123,117152632,456';
+          },
+        },
+      };
+      expect(isAdTest(impls)).to.jsonEqual({'adtest': 'on'});
+    });
+    it('should combine targeting and exclusions', () => {
+      expect(getTargetingAndExclusions(impls)).to.be.null;
+      impls[0] = {jsonTargeting: {}};
+      expect(getTargetingAndExclusions(impls)).to.be.null;
+      impls[1] = {jsonTargeting: {targeting: {a: 1, b: 2}}};
+      expect(getTargetingAndExclusions(impls)).to.jsonEqual(
+          {'prev_scp': '|a=1&b=2'});
+      impls[2] = {jsonTargeting: {targeting: {c: 1, d: 'l=d'},
+        categoryExclusions: ['a','b']}};
+      impls[3] = {};
+      expect(getTargetingAndExclusions(impls)).to.jsonEqual(
+          {'prev_scp': '|a=1&b=2|c=1&d=l%3Dd&excl_cat=a,b|'});
+    });
+    it('should determine experiment ids', () => {
+      expect(getExperimentIds(impls)).to.be.null;
+      impls[0] = {win: {location: {hash: '#deid=123,456,7'}},
+        experimentIds: []};
+      // NOTE(keithwrightbos): let's hope this doesn't flake given eids
+      // are stored in object.
+      expect(getExperimentIds(impls)).to.jsonEqual({'eid': '7,123,456'});
+      impls[0].experimentIds = ['901', '902'];
+      expect(getExperimentIds(impls)).to.jsonEqual(
+          {'eid': '7,123,456,901,902'});
+      impls[1] = {experimentIds: ['902', '903']};
+      expect(getExperimentIds(impls)).to.jsonEqual(
+          {'eid': '7,123,456,901,902,903'});
+    });
+    it('should determine identity', () => {
+      impls[0] = new AmpAdNetworkDoubleclickImpl(
+          env.win.document.createElement('span'));
+      impls[0].identityToken = {token: 'foo', jar: 'bar', pucrd: 'oof'};
+      impls[1] = {};
+      expect(getIdentity(impls)).to.jsonEqual(
+          {adsid: 'foo', jar: 'bar', pucrd: 'oof'});
+    });
+    it('should combine force safeframe', () => {
+      expect(getForceSafeframe(impls)).to.be.null;
+      impls[0] = {forceSafeframe: false};
+      expect(getForceSafeframe(impls)).to.be.null;
+      impls[1] = {forceSafeframe: true};
+      expect(getForceSafeframe(impls)).to.jsonEqual({'fsfs': '0,1'});
+      impls[2] = {forceSafeframe: true};
+      expect(getForceSafeframe(impls)).to.jsonEqual({'fsfs': '0,1,1'});
+    });
+    it('should combine page offsets', () => {
+      impls[0] = {getPageLayoutBox: () => ({left: 123, top: 456})};
+      expect(getPageOffsets(impls)).to.jsonEqual(
+          {'adxs': '123', 'adys': '456'});
+      impls[1] = {getPageLayoutBox: () => ({left: 123, top: 789})};
+      expect(getPageOffsets(impls)).to.jsonEqual(
+          {'adxs': '123,123', 'adys': '456,789'});
+    });
+    it('should combine contained state', () => {
+      expect(getContainers(impls)).to.be.null;
+      impls[0] = {element: {}};
+      expect(getContainers(impls)).to.be.null;
+      impls[1] = {element: {parentElement: {tagName: 'AMP-CAROUSEL'}}};
+      expect(getContainers(impls)).to.jsonEqual({'acts': '|ac'});
+      impls[2] = {element: {parentElement: {tagName: 'AMP-CAROUSEL',
+        parentElement: {tagName: 'AMP-STICKY-AD'}}}};
+      expect(getContainers(impls)).to.jsonEqual({'acts': '|ac|ac,sa'});
     });
   });
 
@@ -478,25 +633,5 @@ describes.realWin('Doubleclick SRA', config , env => {
     it('should handle mixture of all possible scenarios', () => executeTest(
         [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
           {networkId: 8901, instances: 3, invalidInstances: 1}]));
-  });
-
-  describe('#combineInventoryUnits', () => {
-    it('should sort by index correctly for iu_parts', () => {
-      const instances = [];
-      for (let i = 0; i < 2; i++) {
-        instances.push({
-          element: {
-            getAttribute: name => {
-              expect(name).to.equal('data-slot');
-              return '/1234/foo.com/news/world/2018/06/17/article';
-            },
-          },
-        });
-      }
-      expect(combineInventoryUnits(instances)).to.jsonEqual({
-        'iu_parts': '1234,foo.com,news,world,2018,06,17,article',
-        'enc_prev_ius': '0/1/2/3/4/5/6/7,0/1/2/3/4/5/6/7',
-      });
-    });
   });
 });
