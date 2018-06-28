@@ -20,7 +20,6 @@ import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
-import {toWin} from './types';
 import {tryParseJson} from './json';
 
 /**
@@ -239,7 +238,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * Allows listening for message from the iframe. Returns an unlisten
  * function to remove the listener.
  *
- * @param {!Element} iframe
+ * @param {?Element} iframe
  * @param {string} typeOfMessage
  * @param {?function(!JsonObject, !Window, string)} callback Called when a
  *     message of this type arrives for this iframe.
@@ -254,7 +253,7 @@ export function listenFor(
   dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
   dev().assert(callback);
-  const parentWin = toWin(iframe.ownerDocument.defaultView);
+  const parentWin = iframe.ownerDocument.defaultView;
 
   registerGlobalListenerIfNeeded(parentWin);
 
