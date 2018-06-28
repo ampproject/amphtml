@@ -60,7 +60,7 @@ describes.fakeWin('video-iframe-integration', {amp: false}, env => {
         }
       });
 
-      it('should post invalid events', () => {
+      it('should post valid events', () => {
         const integration = new AmpVideoIntegration();
 
         const postToParent = env.sandbox.stub(integration, 'postToParent_');
