@@ -23,9 +23,7 @@ import {
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAdNetworkDoubleclickImpl,
-  SRA_JOINER,
   TFCD,
-  constructSRABlockParameters,
   getNetworkId,
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
@@ -38,6 +36,21 @@ import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
+import {
+  combineInventoryUnits,
+  constructSRABlockParameters,
+  getAdks,
+  getContainers,
+  getCookieOptOut,
+  getExperimentIds,
+  getForceSafeframe,
+  getIdentity,
+  getPageOffsets,
+  getSizes,
+  getTargetingAndExclusions,
+  getTfcd,
+  isAdTest,
+} from '../sra-utils';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dev} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
@@ -94,155 +107,142 @@ describes.realWin('Doubleclick SRA', config , env => {
     });
   });
 
-  describe('SRA_JOINER', () => {
-    Object.keys(SRA_JOINER).forEach(name => {
-      const joiner = SRA_JOINER[name];
-      const impls = [];
-      it(name, () => {
-        switch (name) {
-          case 'IU':
-            for (let i = 0; i < 2; i++) {
-              impls.push({
-                element: {
-                  getAttribute: name => {
-                    expect(name).to.equal('data-slot');
-                    return '/1234/foo.com/news/world/2018/06/17/article';
-                  },
-                },
-              });
-            }
-            expect(joiner(impls)).to.jsonEqual({
-              'iu_parts': '1234,foo.com,news,world,2018,06,17,article',
-              'enc_prev_ius': '0/1/2/3/4/5/6/7,0/1/2/3/4/5/6/7',
-            });
-            break;
-          case 'COOKIE_OPT_OUT':
-            expect(joiner(impls)).to.be.null;
-            impls[0] = {};
-            expect(joiner(impls)).to.be.null;
-            impls[1] = {jsonTargeting_: {}};
-            expect(joiner(impls)).to.be.null;
-            impls[2] = {jsonTargeting_: {'cookieOptOut': 1}};
-            expect(joiner(impls)).to.jsonEqual({'co': '1'});
-            break;
-          case 'ADK': {
-            expect(joiner(impls)).to.jsonEqual({'adks': ''});
-            const expected = [];
-            for (let i = 1; i <= 10; i++) {
-              impls.push({adKey_: i});
-              expected.push(i);
-            }
-            expect(joiner(impls)).to.jsonEqual({'adks': expected.join()});
-            break;
-          }
-          case 'PREV_IU_SIZE': {
-            expect(joiner(impls)).to.jsonEqual({'prev_iu_szs': ''});
-            const expected = [];
-            for (let i = 1; i <= 10; i++) {
-              impls.push({parameterSize_: i});
-              expected.push(i);
-            }
-            expect(joiner(impls)).to.jsonEqual(
-                {'prev_iu_szs': expected.join()});
-            break;
-          }
-          case 'TFCD':
-            expect(joiner(impls)).to.be.null;
-            expect(joiner([{}])).to.be.null;
-            impls[0] = {};
-            impls[1] = {jsonTargeting_: {}};
-            impls[2] = {jsonTargeting_: {[TFCD]: 'foo'}};
-            impls[3] = {jsonTargeting_: {[TFCD]: 'bar'}};
-            expect(joiner(impls)).to.jsonEqual({'tfcd': 'foo'});
-            break;
-          case 'ADTEST':
-            expect(joiner(impls)).to.be.null;
-            impls[0] = {
-              element: {
-                getAttribute: name => {
-                  expect(name).to.equal('data-experiment-id');
-                  return undefined;
-                },
-              },
-            };
-            impls[0] = {
-              element: {
-                getAttribute: name => {
-                  expect(name).to.equal('data-experiment-id');
-                  return undefined;
-                },
-              },
-            };
-            impls[1] = {
-              element: {
-                getAttribute: name => {
-                  expect(name).to.equal('data-experiment-id');
-                  return '123,117152632,456';
-                },
-              },
-            };
-            expect(joiner(impls)).to.jsonEqual({'adtest': 'on'});
-            break;
-          case 'SCP':
-            expect(joiner(impls)).to.be.null;
-            impls[0] = {jsonTargeting_: {}};
-            expect(joiner(impls)).to.be.null;
-            impls[1] = {jsonTargeting_: {targeting: {a: 1, b: 2}}};
-            expect(joiner(impls)).to.jsonEqual({'prev_scp': '|a=1&b=2'});
-            impls[2] = {jsonTargeting_: {targeting: {c: 1, d: 'l=d'},
-              categoryExclusions: ['a','b']}};
-            impls[3] = {};
-            expect(joiner(impls)).to.jsonEqual(
-                {'prev_scp': '|a=1&b=2|c=1&d=l%3Dd&excl_cat=a,b|'});
-            break;
-          case 'EID':
-            expect(joiner(impls)).to.be.null;
-            impls[0] = {win: {location: {hash: '#deid=123,456,7'}},
-              experimentIds: []};
-            // NOTE(keithwrightbos): let's hope this doesn't flake given eids
-            // are stored in object.
-            expect(joiner(impls)).to.jsonEqual({'eid': '7,123,456'});
-            impls[0].experimentIds = ['901', '902'];
-            expect(joiner(impls)).to.jsonEqual({'eid': '7,123,456,901,902'});
-            impls[1] = {experimentIds: ['902', '903']};
-            expect(joiner(impls)).to.jsonEqual(
-                {'eid': '7,123,456,901,902,903'});
-            break;
-          case 'IDENTITY':
-            impls[0] = {buildIdentityParams_: () => ({a: 123, b: 456})};
-            impls[1] = {buildIdentityParams_: () => {throw new Error();}};
-            expect(joiner(impls)).to.jsonEqual({a: 123, b: 456});
-            break;
-          case 'FORCE_SAFEFRAME':
-            expect(joiner(impls)).to.be.null;
-            impls[0] = {forceSafeframe_: false};
-            expect(joiner(impls)).to.be.null;
-            impls[1] = {forceSafeframe_: true};
-            expect(joiner(impls)).to.jsonEqual({'fsfs': '0,1'});
-            impls[2] = {forceSafeframe_: true};
-            expect(joiner(impls)).to.jsonEqual({'fsfs': '0,1,1'});
-            break;
-          case 'PAGE_OFFSET':
-            impls[0] = {getPageLayoutBox: () => ({left: 123, top: 456})};
-            expect(joiner(impls)).to.jsonEqual({'adxs': '123', 'adys': '456'});
-            impls[1] = {getPageLayoutBox: () => ({left: 123, top: 789})};
-            expect(joiner(impls)).to.jsonEqual(
-                {'adxs': '123,123', 'adys': '456,789'});
-            break;
-          case 'CONTAINERS':
-            expect(joiner(impls)).to.be.null;
-            impls[0] = {element: {}};
-            expect(joiner(impls)).to.be.null;
-            impls[1] = {element: {parentElement: {tagName: 'AMP-CAROUSEL'}}};
-            expect(joiner(impls)).to.jsonEqual({'acts': '|ac'});
-            impls[2] = {element: {parentElement: {tagName: 'AMP-CAROUSEL',
-              parentElement: {tagName: 'AMP-STICKY-AD'}}}};
-            expect(joiner(impls)).to.jsonEqual({'acts': '|ac|ac,sa'});
-            break;
-          default:
-            throw new Error(`no test for ${name}`);
-        }
+  describe('block parameter joining', () => {
+    let impls;
+    beforeEach(() => impls = []);
+
+    it('should join IUs', () => {
+      for (let i = 0; i < 2; i++) {
+        impls.push({
+          element: {
+            getAttribute: name => {
+              expect(name).to.equal('data-slot');
+              return '/1234/foo.com/news/world/2018/06/17/article';
+            },
+          },
+        });
+      }
+      expect(combineInventoryUnits(impls)).to.jsonEqual({
+        'iu_parts': '1234,foo.com,news,world,2018,06,17,article',
+        'enc_prev_ius': '0/1/2/3/4/5/6/7,0/1/2/3/4/5/6/7',
       });
+    });
+    it('should determine cookie opt out', () => {
+      expect(getCookieOptOut(impls)).to.be.null;
+      impls[0] = {};
+      expect(getCookieOptOut(impls)).to.be.null;
+      impls[1] = {jsonTargeting: {}};
+      expect(getCookieOptOut(impls)).to.be.null;
+      impls[2] = {jsonTargeting: {'cookieOptOut': 1}};
+      expect(getCookieOptOut(impls)).to.jsonEqual({'co': '1'});
+    });
+    it('should combine adks', () => {
+      expect(getAdks(impls)).to.jsonEqual({'adks': ''});
+      const expected = [];
+      for (let i = 1; i <= 10; i++) {
+        impls.push({adKey: i});
+        expected.push(i);
+      }
+      expect(getAdks(impls)).to.jsonEqual({'adks': expected.join()});
+    });
+    it('should combine sizes', () => {
+      expect(getSizes(impls)).to.jsonEqual({'prev_iu_szs': ''});
+      const expected = [];
+      for (let i = 1; i <= 10; i++) {
+        impls.push({parameterSize: i});
+        expected.push(i);
+      }
+      expect(getSizes(impls)).to.jsonEqual(
+          {'prev_iu_szs': expected.join()});
+    });
+    it('should determine tagForChildDirectedTreatment', () => {
+      expect(getTfcd(impls)).to.be.null;
+      expect(getTfcd([{}])).to.be.null;
+      impls[0] = {};
+      impls[1] = {jsonTargeting: {}};
+      impls[2] = {jsonTargeting: {[TFCD]: 'foo'}};
+      impls[3] = {jsonTargeting: {[TFCD]: 'bar'}};
+      expect(getTfcd(impls)).to.jsonEqual({'tfcd': 'foo'});
+    });
+    it('should determine if ad test', () => {
+      expect(isAdTest(impls)).to.be.null;
+      impls[0] = {
+        element: {
+          getAttribute: name => {
+            expect(name).to.equal('data-experiment-id');
+            return undefined;
+          },
+        },
+      };
+      expect(isAdTest(impls)).to.be.null;
+      impls[1] = {
+        element: {
+          getAttribute: name => {
+            expect(name).to.equal('data-experiment-id');
+            return '123,117152632,456';
+          },
+        },
+      };
+      expect(isAdTest(impls)).to.jsonEqual({'adtest': 'on'});
+    });
+    it('should combine targeting and exclusions', () => {
+      expect(getTargetingAndExclusions(impls)).to.be.null;
+      impls[0] = {jsonTargeting: {}};
+      expect(getTargetingAndExclusions(impls)).to.be.null;
+      impls[1] = {jsonTargeting: {targeting: {a: 1, b: 2}}};
+      expect(getTargetingAndExclusions(impls)).to.jsonEqual(
+          {'prev_scp': '|a=1&b=2'});
+      impls[2] = {jsonTargeting: {targeting: {c: 1, d: 'l=d'},
+        categoryExclusions: ['a','b']}};
+      impls[3] = {};
+      expect(getTargetingAndExclusions(impls)).to.jsonEqual(
+          {'prev_scp': '|a=1&b=2|c=1&d=l%3Dd&excl_cat=a,b|'});
+    });
+    it('should determine experiment ids', () => {
+      expect(getExperimentIds(impls)).to.be.null;
+      impls[0] = {win: {location: {hash: '#deid=123,456,7'}},
+        experimentIds: []};
+      // NOTE(keithwrightbos): let's hope this doesn't flake given eids
+      // are stored in object.
+      expect(getExperimentIds(impls)).to.jsonEqual({'eid': '7,123,456'});
+      impls[0].experimentIds = ['901', '902'];
+      expect(getExperimentIds(impls)).to.jsonEqual(
+          {'eid': '7,123,456,901,902'});
+      impls[1] = {experimentIds: ['902', '903']};
+      expect(getExperimentIds(impls)).to.jsonEqual(
+          {'eid': '7,123,456,901,902,903'});
+    });
+    it('should determine identity', () => {
+      impls[0] = {identityToken: {a: 123, b: 456}};
+      impls[1] = {identityToken: {foo: 'bar'}};
+      expect(getIdentity(impls)).to.jsonEqual({a: 123, b: 456});
+    });
+    it('should combine force safeframe', () => {
+      expect(getForceSafeframe(impls)).to.be.null;
+      impls[0] = {forceSafeframe: false};
+      expect(getForceSafeframe(impls)).to.be.null;
+      impls[1] = {forceSafeframe: true};
+      expect(getForceSafeframe(impls)).to.jsonEqual({'fsfs': '0,1'});
+      impls[2] = {forceSafeframe: true};
+      expect(getForceSafeframe(impls)).to.jsonEqual({'fsfs': '0,1,1'});
+    });
+    it('should combine page offsets', () => {
+      impls[0] = {getPageLayoutBox: () => ({left: 123, top: 456})};
+      expect(getPageOffsets(impls)).to.jsonEqual(
+          {'adxs': '123', 'adys': '456'});
+      impls[1] = {getPageLayoutBox: () => ({left: 123, top: 789})};
+      expect(getPageOffsets(impls)).to.jsonEqual(
+          {'adxs': '123,123', 'adys': '456,789'});
+    });
+    it('should combine contained state', () => {
+      expect(getContainers(impls)).to.be.null;
+      impls[0] = {element: {}};
+      expect(getContainers(impls)).to.be.null;
+      impls[1] = {element: {parentElement: {tagName: 'AMP-CAROUSEL'}}};
+      expect(getContainers(impls)).to.jsonEqual({'acts': '|ac'});
+      impls[2] = {element: {parentElement: {tagName: 'AMP-CAROUSEL',
+        parentElement: {tagName: 'AMP-STICKY-AD'}}}};
+      expect(getContainers(impls)).to.jsonEqual({'acts': '|ac|ac,sa'});
     });
   });
 
