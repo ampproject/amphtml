@@ -16,48 +16,41 @@
 import * as sinon from 'sinon';
 
 import {AmpVideoIntegration, adopt} from '../../src/video-iframe-integration';
-import {Deferred} from '../../src/utils/promise';
 
-describes.fakeWin('video-iframe-integration', {
-  amp: {
-    runtimeOn: false,
-  },
-}, env => {
-
-  let win;
-  let doc;
-
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-  });
+describes.fakeWin('video-iframe-integration', {amp: false}, env => {
 
   function pushToGlobal(global, callback) {
-    global.AmpVideoIframe = global.AmpVideoIframe || [];
-    global.AmpVideoIframe.push(callback);
+    (global.AmpVideoIframe = global.AmpVideoIframe || []).push(callback);
+  }
+
+  const matchAmpVideoIntegration = sinon.match({isAmpVideoIntegration_: true});
+
+  function expectCalledWithAmpVideoIntegration(spy) {
+    expect(spy.withArgs(matchAmpVideoIntegration)).to.have.been.calledOnce;
   }
 
   describe('adopt(win)', () => {
+    describe('<script async> support', () => {
+      it('should execute callbacks pushed before adoption', () => {
+        const global = {};
+        const callback = env.sandbox.spy();
+        pushToGlobal(global, callback);
+        adopt(global);
+        expectCalledWithAmpVideoIntegration(callback);
+      });
 
-    it('should execute callbacks added before adoption', function* () {
-      const {promise, resolve} = new Deferred();
-      const global = {};
-      pushToGlobal(global, resolve);
-      adopt(global);
-      yield promise;
-    });
-
-    it('should execute callbacks added after adoption', function* () {
-      const {promise, resolve} = new Deferred();
-      const global = {};
-      adopt(global);
-      pushToGlobal(global, resolve);
-      yield promise;
+      it('should execute callbacks pushed after adoption', () => {
+        const global = {};
+        adopt(global);
+        const callback = env.sandbox.spy();
+        pushToGlobal(global, callback);
+        expectCalledWithAmpVideoIntegration(callback);
+      });
     });
   });
 
   describe('AmpVideoIntegration', () => {
-    describe('postEvent', () => {
+    describe('#postEvent', () => {
       it('should reject invalid events', () => {
         const integration = new AmpVideoIntegration();
         const invalidEvents = 'tacos al pastor'.split(' ');

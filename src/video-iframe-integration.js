@@ -65,6 +65,12 @@ export class AmpVideoIntegration {
 
     /** @private @const {function()} */
     this.listenToOnce_ = once(listenTo);
+
+    /**
+     * Used for checking callback return type.
+     * @visibleForTesting
+     */
+    this.isAmpVideoIntegration_ = true;
   }
 
   /**
