@@ -152,7 +152,7 @@ export class AmpVideoIntegration {
 
 /**
  * @param {!Window} win
- * @param {!Object<string, function()} methods
+ * @param {!Object<string, function()>} methods
  */
 function listenTo(win, methods) {
   listen(win, 'message', e => {
