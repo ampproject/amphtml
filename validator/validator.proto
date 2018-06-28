@@ -396,8 +396,8 @@ message HtmlFormat {
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
-  // If the repeated field is empty, this indicates that the TagSpec is allowed
-  // for all formats, rather than none.
+  // The repeated field is not allowed to be empty, it must have at least one
+  // HtmlFormat.
   repeated HtmlFormat.Code html_format = 21;
 
   // Use UPPER-CASE tag names only. If adding the same tag twice, then they must

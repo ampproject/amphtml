@@ -831,6 +831,10 @@ describe('ValidatorRulesMakeSense', () => {
     const tagSpecName =
         tagSpec.specName || tagSpec.tagName || 'UNKNOWN_TAGSPEC';
 
+    // html_format must be set.
+    it('\'' + tagSpecName + '\' must have at least one htmlFormat set', () => {
+      expect(tagSpec.htmlFormat.length).toBeGreaterThan(0);
+    });
     // html_format is never UNKNOWN_CODE.
     it('tagSpec.htmlFormat should never contain UNKNOWN_CODE', () => {
       expect(tagSpec.htmlFormat.indexOf(
@@ -859,9 +863,8 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // Verify AMP4ADS extensions are whitelisted.
     if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
-        ((tagSpec.htmlFormat.length === 0) ||
-         (tagSpec.htmlFormat.indexOf(
-             amp.validator.HtmlFormat.Code.AMP4ADS) !== -1))) {
+        (tagSpec.htmlFormat.indexOf(
+            amp.validator.HtmlFormat.Code.AMP4ADS) !== -1)) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
@@ -896,9 +899,8 @@ describe('ValidatorRulesMakeSense', () => {
     }
     // Verify AMP4EMAIL extensions are whitelisted.
     if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
-        ((tagSpec.htmlFormat.length === 0) ||
-         (tagSpec.htmlFormat.indexOf(
-             amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1))) {
+        (tagSpec.htmlFormat.indexOf(
+            amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1)) {
       // AMP4EMAIL format is the source of this whitelist.
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
