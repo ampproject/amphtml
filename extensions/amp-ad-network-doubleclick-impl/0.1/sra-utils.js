@@ -43,13 +43,15 @@ export function constructSRABlockParameters(impls) {
 }
 
 /**
-  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
-  * @param {function(!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl):?T} extractFn
-  * @return {?T} value of first instance with non-null/undefined value or null
-  *    if none can be found
-  * @template T
-  * @private
-  */
+ * Given array of instances, execute extractFn on each and return first non-
+ * falsey value or null if none are truthy.
+ * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
+ * @param {function(!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl):?T} extractFn
+ * @return {?T} value of first instance with non-null/undefined value or null
+ *    if none can be found
+ * @template T
+ * @private
+ */
 function getFirstInstanceValue_(impls, extractFn) {
   for (let i = 0; i < impls.length; i++) {
     const val = extractFn(impls[i]);
@@ -64,6 +66,8 @@ function getFirstInstanceValue_(impls, extractFn) {
  * Combines inventory unit paths for multiple blocks by building list of
  * unique path parts in iu_parts and then comma separated list of block
  * paths using index into iu_parts list.
+ * Example: /123/foo/bar and /blah/foo/bar/123 =>
+ *    iu_parts=123,foo,bar,blah & enc_prev_ius=/0/1/2,/3/1/2/0
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
  * @visibleForTesting
