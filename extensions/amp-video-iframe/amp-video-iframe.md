@@ -102,7 +102,6 @@ function onAmpIntegrationReady(ampIntegration) {
 ##### For Video.js:
 
 ```js
-// For JwPlayer:
 function onAmpIntegrationReady(ampIntegration) {
   var myVideo = document.querySelector('#my-video');
   ampIntegration.listenTo('videojs', myVideo);
