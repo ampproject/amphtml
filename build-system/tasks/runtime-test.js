@@ -505,8 +505,9 @@ function runTests() {
         plugins: [
           ['babel-plugin-istanbul', {
             exclude: [
+              './ads/**/*.js',
+              './third_party/**/*.js',
               './test/**/*.js',
-              './ads/**/test/test-*.js',
               './extensions/**/test/**/*.js',
               './testing/**/*.js',
             ],
