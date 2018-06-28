@@ -192,6 +192,7 @@ declareExtension('amp-viewer-integration', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-video', '0.1');
+declareExtension('amp-video-iframe', '0.1');
 declareExtension('amp-video-service', '0.1', {
   // `amp-video-service` provides analytics and autoplay for all videos. We need
   // those to be available asap. This service replaces a runtime-level provider,
@@ -449,6 +450,18 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
           })
       );
+    }
+
+    if (!watch || argv.with_video_iframe_integration) {
+      promises.push(
+          compileJs('./src/', 'video-iframe-integration.js', './dist', {
+            minifiedName: 'video-iframe-integration-v0.js',
+            includePolyfills: false,
+            checkTypes: opt_checkTypes,
+            watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+          }));
     }
 
     if (!watch || argv.with_inabox) {

@@ -196,6 +196,8 @@ exports.rules = [
           'src/service/video-service-interface.js',
       'extensions/amp-video/0.1/amp-video.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
