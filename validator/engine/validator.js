@@ -33,6 +33,7 @@ goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
 goog.require('amp.validator.AttrSpec');
 goog.require('amp.validator.CdataSpec');
+goog.require('amp.validator.CssDeclaration');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.ExtensionSpec');
@@ -57,6 +58,7 @@ goog.require('parse_css.ParsedCssUrl');
 goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
+goog.require('parse_css.parseInlineStyle');
 goog.require('parse_css.stripVendorPrefix');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.validateAmp4AdsCss');
@@ -207,30 +209,6 @@ class ParsedUrlSpec {
   isAllowedProtocol(protocol) {
     return protocol in this.allowedProtocols_;
   }
-
-  /**
-   * @param {string} domain
-   * @return {boolean}
-   */
-  isDisallowedDomain(domain) {
-    for (const disallowedDomain of this.spec_.disallowedDomain) {
-      if (goog.string./*OK*/ endsWith(domain, disallowedDomain)) {
-        // If here, then we have three possibilities. For example purposes,
-        // consider 'example.com' as the disallowedDomain.
-        // 1) domain === 'example.com'      ->  isDisallowedDomain = true
-        // 2) domain === 'www.example.com'  ->  isDisallowedDomain = true
-        // 3) domain === 'someexample.com'  ->  isDisallowedDomain = false
-        //
-        // Case 1:
-        if (domain === disallowedDomain) {return true;}
-
-        // Case 2/3, determine if the character before the matching suffix
-        // is a '.':
-        return domain[domain.length - 1 - disallowedDomain.length] === '.';
-      }
-    }
-    return false;
-  }
 }
 
 /** @private */
@@ -305,6 +283,18 @@ class ParsedAttrSpec {
      * @private
      */
     this.valueProperties_ = null;
+
+    /**
+     * @type {!Object<string, !amp.validator.CssDeclaration>}
+     * @private
+     */
+    this.cssDeclarationByName_ = Object.create(null);
+
+    for (const cssDeclaration of attrSpec.cssDeclaration) {
+      if (cssDeclaration.name) {
+        this.cssDeclarationByName_[cssDeclaration.name] = cssDeclaration;
+      }
+    }
   }
 
   /**
@@ -341,6 +331,13 @@ class ParsedAttrSpec {
           new ParsedValueProperties(this.spec_.valueProperties);
     }
     return this.valueProperties_;
+  }
+
+  /**
+   * @return {!Object<string, !amp.validator.CssDeclaration>}
+   */
+  getCssDeclarationByName() {
+    return this.cssDeclarationByName_;
   }
 }
 
@@ -2671,20 +2668,6 @@ class UrlErrorInStylesheetAdapter {
 
   /**
    * @param {!Context} context
-   * @param {string} domain
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  disallowedDomain(context, domain, tagSpec, result) {
-    context.addError(
-        amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN,
-        this.lineCol_,
-        /* params */[getTagSpecName(tagSpec), domain], getTagSpecUrl(tagSpec),
-        result);
-  }
-
-  /**
-   * @param {!Context} context
    * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
@@ -2743,20 +2726,6 @@ class UrlErrorInAttrAdapter {
         amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
         context.getLineCol(),
         /* params */[this.attrName_, getTagSpecName(tagSpec), protocol],
-        getTagSpecUrl(tagSpec), result);
-  }
-
-  /**
-   * @param {!Context} context
-   * @param {string} domain
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  disallowedDomain(context, domain, tagSpec, result) {
-    context.addError(
-        amp.validator.ValidationError.Code.DISALLOWED_DOMAIN,
-        context.getLineCol(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec), domain],
         getTagSpecUrl(tagSpec), result);
   }
 
@@ -2914,15 +2883,6 @@ function validateUrlAndProtocol(
       result.status = amp.validator.ValidationResult.Status.FAIL;
     } else {
       adapter.disallowedRelativeUrl(context, urlStr, tagSpec, result);
-    }
-    return;
-  }
-  const domain = url.host.toLowerCase();
-  if (domain.length > 0 && parsedUrlSpec.isDisallowedDomain(domain)) {
-    if (amp.validator.LIGHT) {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-    } else {
-      adapter.disallowedDomain(context, domain, tagSpec, result);
     }
     return;
   }
@@ -3987,6 +3947,92 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
 }
 
 /**
+ * Helper method for ValidateAttributes.
+ * @param {!ParsedAttrSpec} parsedAttrSpec
+ * @param {!Context} context
+ * @param {string} tagSpecName
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateAttrDeclaration(
+  parsedAttrSpec, context, tagSpecName, attrName, attrValue,
+  validationResult) {
+  /** @type {!Array<!parse_css.ErrorToken>} */
+  const cssErrors = [];
+  /** @type {!Array<!parse_css.Token>} */
+  const tokenList = parse_css.tokenize(
+      attrValue,
+      amp.validator.LIGHT ? undefined : context.getLineCol().getLine(),
+      amp.validator.LIGHT ? undefined : context.getLineCol().getCol(),
+      cssErrors);
+  if (amp.validator.LIGHT && cssErrors.length > 0) {
+    validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+    return;
+  }
+
+  /** @type {!Array<!parse_css.Declaration>} */
+  const declarations = parse_css.parseInlineStyle(tokenList, cssErrors);
+  if (amp.validator.LIGHT && cssErrors.length > 0) {
+    validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+    return;
+  }
+
+  if (!amp.validator.LIGHT) {
+    for (const errorToken of cssErrors) {
+      // Override the first parameter with the name of this style tag.
+      const {params} = errorToken;
+      // Override the first parameter with the name of this style tag.
+      params[0] = tagSpecName;
+      context.addError(
+          errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
+          /* url */ '', validationResult);
+    }
+  }
+
+  // If there were errors parsing, exit from validating further.
+  if (cssErrors.length > 0) { return; }
+
+  const cssDeclarationByName = parsedAttrSpec.getCssDeclarationByName();
+
+  for (const declaration of declarations) {
+    const declarationName =
+        parse_css.stripVendorPrefix(declaration.name.toLowerCase());
+    if (!(declarationName in cssDeclarationByName)) {
+      // Declaration not allowed.
+      if (amp.validator.LIGHT) {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+          context.getLineCol(),
+          /* params */[declaration.name, attrName, tagSpecName],
+          context.getRules().getStylesSpecUrl(), validationResult);
+    } else {
+      const cssDeclaration = cssDeclarationByName[declarationName];
+      if (cssDeclaration.valueCasei !== null) {
+        const firstIdent = declaration.firstIdent();
+        if (firstIdent.toLowerCase() !== cssDeclaration.valueCasei) {
+          // Declaration value not allowed.
+          if (amp.validator.LIGHT) {
+            validationResult.status =
+                amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
+          context.addError(
+              amp.validator.ValidationError.Code
+                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+              context.getLineCol(),
+              /* params */[tagSpecName, declaration.name, firstIdent],
+              context.getRules().getStylesSpecUrl(), validationResult);
+        }
+      }
+    }
+  }
+}
+
+/**
  * Validates whether the attributes set on |encountered_tag| conform to this
  * tag specification. All mandatory attributes must appear. Only attributes
  * explicitly mentioned by this tag spec may appear.
@@ -4096,6 +4142,11 @@ function validateAttributes(
     }
     if (attrSpec.requiresExtension.length > 0) {
       validateAttrRequiredExtensions(parsedAttrSpec, context, result);
+    }
+    if (attrSpec.cssDeclaration.length > 0) {
+      validateAttrDeclaration(
+          parsedAttrSpec, context, getTagSpecName(spec), attr.name, attr.value,
+          result);
     }
     if (!hasTemplateAncestor || !attrValueHasTemplateSyntax(attr.value)) {
       validateNonTemplateAttrValueAgainstSpec(
@@ -4627,8 +4678,7 @@ class ParsedValidatorRules {
         const castedHtmlFormat =
             /** @type {amp.validator.HtmlFormat.Code<string>} */ (
           /** @type {*} */ (htmlFormat));
-        return tagSpec.htmlFormat.length === 0 ||
-            tagSpec.htmlFormat.indexOf(castedHtmlFormat) !== -1;
+        return tagSpec.htmlFormat.indexOf(castedHtmlFormat) !== -1;
       };
 
       /**

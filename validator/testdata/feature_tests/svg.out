@@ -99,12 +99,33 @@ feature_tests/svg.html:87:2 The attribute 'xml:base' may not appear in tag 'svg'
 |      <a href="#"><circle r="10"></a>
 |    </svg>
 |  
+|    <!-- Valid: style attribute allowed in svgs. -->
+|    <svg>
+|      <g style="display: block; -webkit-box-shadow: 4px 6px 6px 4px #ccc"/>
+|    </svg>
+|  
+|    <!-- Invalid: these declarations are not allowed in style attributes. -->
+|    <svg>
+|      <g style="display: block; position: sticky;"/>
+>>     ^~~~~~~~~
+feature_tests/svg.html:98:4 CSS syntax error in tag 'g' - the property 'position' is set to the disallowed value 'sticky'. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
+|      <g style="DISPLAY:BLOCK;POSITION:STICKY;"/>
+>>     ^~~~~~~~~
+feature_tests/svg.html:99:4 CSS syntax error in tag 'g' - the property 'POSITION' is set to the disallowed value 'STICKY'. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
+|      <g style="foo:bar;"/>
+>>     ^~~~~~~~~
+feature_tests/svg.html:100:4 The property 'foo' in attribute 'style' in tag 'g' is disallowed. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
+|      <g style="@media only screen and (max-width: 600px)"/>
+>>     ^~~~~~~~~
+feature_tests/svg.html:101:4 CSS syntax error in tag 'g' - saw invalid at rule '@media'. [AUTHOR_STYLESHEET_PROBLEM]
+|    </svg>
+|  
 |    <!-- Invalid: style tag isn't allowed. Note this is really testing the
 |          parsing of a self closing style tag in an svg, not validity. -->
 |    <svg>
 |      <style/>
 >>     ^~~~~~~~~
-feature_tests/svg.html:94:4 The parent tag of tag 'style amp-custom' is 'svg', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/svg.html:107:4 The parent tag of tag 'style amp-custom' is 'svg', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
 |    </svg>
 |  </body>
 |  </html>
