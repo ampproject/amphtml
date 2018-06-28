@@ -35,11 +35,11 @@ const TAG = 'amp-story';
  *    bookendstate: boolean,
  *    desktopstate: boolean,
  *    infodialogstate: boolean,
- *    isrtlstate: boolean,
  *    hasaudiostate: boolean,
  *    landscapestate: boolean,
  *    mutedstate: boolean,
  *    pausedstate: boolean,
+ *    rtlstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
  *    consentid: ?string,
@@ -65,10 +65,10 @@ export const StateProperty = {
   DESKTOP_STATE: 'desktopstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
   INFO_DIALOG_STATE: 'infodialogstate',
-  IS_RTL_STATE: 'isrtlstate',
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
   PAUSED_STATE: 'pausedstate',
+  RTL_STATE: 'rtlstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
 
@@ -154,7 +154,7 @@ const actions = (state, action, data) => {
     // Triggers right to left experience.
     case Action.TOGGLE_RTL:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.IS_RTL_STATE]: data}));
+          {}, state, {[StateProperty.RTL_STATE]: data}));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CONSENT_ID]: data}));
@@ -261,7 +261,7 @@ export class AmpStoryStoreService {
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
-      [StateProperty.IS_RTL_STATE]: false,
+      [StateProperty.RTL_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,

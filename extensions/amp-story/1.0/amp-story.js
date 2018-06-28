@@ -314,6 +314,11 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeStandaloneStory_();
     }
 
+    // Check if story is RTL.
+    if (isRTL(this.win.document)) {
+      this.storeService_.dispatch(Action.TOGGLE_RTL, true);
+    }
+
     const pageEl = this.element.querySelector('amp-story-page');
     pageEl && pageEl.setAttribute('active', '');
 
@@ -580,12 +585,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.initializeBookend_();
-
-    const {document} = this.win;
-
-    if (isRTL(document)) {
-      this.storeService_.dispatch(Action.TOGGLE_RTL, true);
-    }
 
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
@@ -946,15 +945,15 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const keyDirection = e.keyCode;
-    const isRtl = this.storeService_.get(StateProperty.IS_RTL_STATE);
+    const RtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
-    if ((keyDirection == KeyCodes.LEFT_ARROW && isRtl) ||
-        (keyDirection == KeyCodes.RIGHT_ARROW && !isRtl)) {
-      this.next_();
-    } else if ((keyDirection == KeyCodes.RIGHT_ARROW && isRtl) ||
-        (keyDirection == KeyCodes.LEFT_ARROW && !isRtl)) {
-      this.previous_();
+    switch (e.keyCode) {
+      case KeyCodes.LEFT_ARROW:
+        RtlState ? this.next_() : this.previous_();
+        break;
+      case KeyCodes.RIGHT_ARROW:
+        RtlState ? this.previous_() : this.next_();
+        break;
     }
   }
 
