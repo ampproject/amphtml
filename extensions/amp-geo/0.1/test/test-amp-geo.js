@@ -357,6 +357,30 @@ describes.realWin('amp-geo', {
     });
   });
 
+
+  it('geo service should resolve correctly.', () => {
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('unknown');
+      expect(geo.matchedISOCountryGroups).to.deep.equal(['nafta', 'unknown']);
+      expect(geo.allISOCountryGroups).to
+          .deep.equal(['nafta', 'unknown', 'eea', 'myGroup', 'anz']);
+      expect(geo.isInCountryGroup).to.be.a('function');
+    });
+  });
+
+  it('geo service should return null on bad config. ', () => {
+    addConfigElement('script');
+    addConfigElement('script');
+    expect(() => allowConsoleError(() => {
+      geo.buildCallback();
+    })).to.throw();
+
+    return expect(Services.geoForDocOrNull(el)).to.eventually.equal(null);
+  });
+
   it('should throw if it has multiple script child elements', () => {
     expect(() => {
       addConfigElement('script');
@@ -389,8 +413,7 @@ describes.realWin('amp-geo', {
     expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
       geo.buildCallback();
-    }).to.not.throw();
-    expect(userErrorStub).to.be.calledOnce;
+    }).to.throw(/JSON/);
   });
 
   it('should throw if the group name is not valid', () => {
