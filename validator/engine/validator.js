@@ -3996,7 +3996,8 @@ function validateAttrDeclaration(
   const cssDeclarationByName = parsedAttrSpec.getCssDeclarationByName();
 
   for (const declaration of declarations) {
-    const declarationName = declaration.name.toLowerCase();
+    const declarationName =
+        parse_css.stripVendorPrefix(declaration.name.toLowerCase());
     if (!(declarationName in cssDeclarationByName)) {
       // Declaration not allowed.
       if (amp.validator.LIGHT) {
