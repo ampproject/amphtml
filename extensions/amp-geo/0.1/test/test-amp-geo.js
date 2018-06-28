@@ -152,6 +152,12 @@ describes.realWin('amp-geo', {
         JSON.stringify(configWithState));
     geo.buildCallback();
 
+    // Make an amp-state that should be removed and replaced.
+    const child = doc.createElement('amp-state');
+    child.setAttribute('id', 'ampGeo');
+    child.textContent = 'bad state';
+    doc.body.appendChild(child);
+
     return Services.geoForDocOrNull(el).then(() => {
       expect(win.document.getElementById('ampGeo').outerHTML)
           .to.equal(expectedState);
