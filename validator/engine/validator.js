@@ -3991,7 +3991,7 @@ function validateAttrDeclaration(
   }
 
   // If there were errors parsing, exit from validating further.
-  if (cssErrors.length > 0) { return };
+  if (cssErrors.length > 0) { return; }
 
   const cssDeclarationByName = parsedAttrSpec.getCssDeclarationByName();
 
