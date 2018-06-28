@@ -65,7 +65,7 @@ describes.realWin('amp-video-iframe', {
   }
 
   function acceptMockedMessages(videoIframe) {
-    env.sandbox.stub(videoIframe.implementation_, 'originMatches_')
+    env.sandbox./*OK*/stub(videoIframe.implementation_, 'originMatches_')
         .returns(true);
   }
 
@@ -77,7 +77,7 @@ describes.realWin('amp-video-iframe', {
   }
 
   function stubPostMessage(videoIframe) {
-    return env.sandbox.stub(videoIframe.implementation_, 'postMessage_');
+    return env.sandbox./*OK*/stub(videoIframe.implementation_, 'postMessage_');
   }
 
   function matchMethodMessage(method) {
