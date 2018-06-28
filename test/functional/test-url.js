@@ -629,31 +629,6 @@ describe('isProtocolValid', () => {
   testProtocolValid('vbscript:foo', false);
 });
 
-describe('removeProtocol', () => {
-  function testRemoveProtocol(url, result) {
-    it('should remove protocol from: ' + url, () => {
-      expect(removeProtocol(url)).to.equal(result);
-    });
-  }
-
-  testRemoveProtocol('http://foo.com', 'foo.com');
-  testRemoveProtocol('https://foo.com', 'foo.com');
-  testRemoveProtocol('https://es.foo.com', 'es.foo.com');
-  testRemoveProtocol('www.foo.com', 'www.foo.com');
-  testRemoveProtocol('2345_22://es.foo.com', 'es.foo.com');
-  testRemoveProtocol('localhost:8000', 'localhost:8000');
-  testRemoveProtocol('bar://es.foo.com', 'es.foo.com');
-  testRemoveProtocol('mailto:es.foo.com', 'mailto:es.foo.com');
-  testRemoveProtocol('', '');
-  testRemoveProtocol('./foo', './foo');
-  testRemoveProtocol('/foo', '/foo');
-  testRemoveProtocol('//foo.com', 'foo.com');
-  testRemoveProtocol(undefined, '');
-  testRemoveProtocol(null, '');
-  testRemoveProtocol('javascript:alert("hello world!");',
-      'javascript:alert("hello world!");');
-});
-
 describe('getSourceOrigin/Url', () => {
 
   function testOrigin(href, sourceHref) {

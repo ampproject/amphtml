@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev, user} from '../../../src/log';
-import {getSourceOrigin, isProtocolValid, parseUrlDeprecated, removeProtocol} from '../../../src/url';
+import {getSourceOrigin, isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 
 const TAG = 'amp-story';
@@ -60,8 +60,7 @@ function buildArticleFromJson_(articleJson) {
 
   let domain;
   try {
-    domain = getSourceOrigin(articleUrl);
-    domain = removeProtocol(domain);
+    domain = parseUrlDeprecated(getSourceOrigin(articleUrl)).hostname;
   } catch (e) {
     // Unknown path prefix in url.
     domain = parseUrlDeprecated(articleUrl).hostname;
