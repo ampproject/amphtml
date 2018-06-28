@@ -519,7 +519,7 @@ function runTests() {
     c.reporters = c.reporters.concat(['coverage-istanbul']);
     c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      reports: ['html', 'text', 'text-summary'],
+      reports: ['html', 'text', 'text-summary', 'lcov'],
     };
   }
 
@@ -562,11 +562,17 @@ function runTests() {
           yellow('Karma test failed with exit code ' + exitCode));
     }
     if (argv.coverage) {
-      const coverageReportUrl =
-          'file://' + path.resolve('test/coverage/index.html');
-      log(green('INFO: ') + 'Generated code coverage report at ' +
-          cyan(coverageReportUrl));
-      opn(coverageReportUrl, {wait: false});
+      if (process.env.TRAVIS) {
+        log(green('INFO: ') + 'Uploading code coverage report to' +
+            cyan('https://codecov.io/gh/ampproject/amphtml') + '...');
+        exec('./node_modules/.bin/codecov');
+      } else {
+        const coverageReportUrl =
+            'file://' + path.resolve('test/coverage/index.html');
+        log(green('INFO: ') + 'Generated code coverage report at ' +
+            cyan(coverageReportUrl));
+        opn(coverageReportUrl, {wait: false});
+      }
     }
     // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
     if (process.env.TRAVIS) {
