@@ -3956,8 +3956,8 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
  * @param {!amp.validator.ValidationResult} validationResult
  */
 function validateAttrDeclaration(
-    parsedAttrSpec, context, tagSpecName, attrName, attrValue,
-    validationResult) {
+  parsedAttrSpec, context, tagSpecName, attrName, attrValue,
+  validationResult) {
   /** @type {!Array<!parse_css.ErrorToken>} */
   const cssErrors = [];
   /** @type {!Array<!parse_css.Token>} */

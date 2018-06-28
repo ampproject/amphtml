@@ -162,7 +162,7 @@ parse_css.stripVendorPrefix = function(prefixedString) {
  * @return {!parse_css.Stylesheet}
  */
 parse_css.parseAStylesheet = function(
-    tokenList, atRuleSpec, defaultSpec, errors) {
+  tokenList, atRuleSpec, defaultSpec, errors) {
   const canonicalizer = new Canonicalizer(atRuleSpec, defaultSpec);
   const stylesheet = new parse_css.Stylesheet();
 
