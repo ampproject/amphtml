@@ -36,7 +36,8 @@ function onAmpIntegrationReady(ampIntegration) {
 ### Custom integrations
 
 It's possible to have more fine-grained control over how the video interacts
-with the host document by using the `method` and `postEvent` methods.
+with the host document by using the `method`, `postEvent` and `getIntersection`
+methods.
 
 #### `method(name, callback)`
 
@@ -148,3 +149,53 @@ The valid events are as follows.
   </tbody>
 </table>
 
+#### getIntersection(callback)
+
+Gets the [`IntersectionObserverEntry`](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) for
+the video element. This is useful for viewability information, e.g.
+
+```js
+// Will log intersection every 2 seconds
+setInterval(function() {
+  integration.getIntersection(console.log);
+}, 2000);
+```
+
+The [returned object](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) looks like this:
+
+```json
+{
+  "time": 16024.300000019139,
+  "rootBounds": {
+      "left": 0,
+      "top": 0,
+      "width": 806,
+      "height": 876,
+      "bottom": 876,
+      "right": 806,
+      "x": 0,
+      "y": 0
+  },
+  "boundingClientRect": {
+      "left": 40,
+      "top": 196,
+      "width": 726,
+      "height": 408,
+      "bottom": 604,
+      "right": 766,
+      "x": 40,
+      "y": 196
+  },
+  "intersectionRect": {
+      "left": 40,
+      "top": 196,
+      "width": 726,
+      "height": 408,
+      "bottom": 604,
+      "right": 766,
+      "x": 40,
+      "y": 196
+  },
+  "intersectionRatio": 1
+}
+```
