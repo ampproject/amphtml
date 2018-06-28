@@ -207,30 +207,6 @@ class ParsedUrlSpec {
   isAllowedProtocol(protocol) {
     return protocol in this.allowedProtocols_;
   }
-
-  /**
-   * @param {string} domain
-   * @return {boolean}
-   */
-  isDisallowedDomain(domain) {
-    for (const disallowedDomain of this.spec_.disallowedDomain) {
-      if (goog.string./*OK*/ endsWith(domain, disallowedDomain)) {
-        // If here, then we have three possibilities. For example purposes,
-        // consider 'example.com' as the disallowedDomain.
-        // 1) domain === 'example.com'      ->  isDisallowedDomain = true
-        // 2) domain === 'www.example.com'  ->  isDisallowedDomain = true
-        // 3) domain === 'someexample.com'  ->  isDisallowedDomain = false
-        //
-        // Case 1:
-        if (domain === disallowedDomain) {return true;}
-
-        // Case 2/3, determine if the character before the matching suffix
-        // is a '.':
-        return domain[domain.length - 1 - disallowedDomain.length] === '.';
-      }
-    }
-    return false;
-  }
 }
 
 /** @private */
@@ -2671,20 +2647,6 @@ class UrlErrorInStylesheetAdapter {
 
   /**
    * @param {!Context} context
-   * @param {string} domain
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  disallowedDomain(context, domain, tagSpec, result) {
-    context.addError(
-        amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN,
-        this.lineCol_,
-        /* params */[getTagSpecName(tagSpec), domain], getTagSpecUrl(tagSpec),
-        result);
-  }
-
-  /**
-   * @param {!Context} context
    * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
@@ -2743,20 +2705,6 @@ class UrlErrorInAttrAdapter {
         amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
         context.getLineCol(),
         /* params */[this.attrName_, getTagSpecName(tagSpec), protocol],
-        getTagSpecUrl(tagSpec), result);
-  }
-
-  /**
-   * @param {!Context} context
-   * @param {string} domain
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  disallowedDomain(context, domain, tagSpec, result) {
-    context.addError(
-        amp.validator.ValidationError.Code.DISALLOWED_DOMAIN,
-        context.getLineCol(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec), domain],
         getTagSpecUrl(tagSpec), result);
   }
 
@@ -2914,15 +2862,6 @@ function validateUrlAndProtocol(
       result.status = amp.validator.ValidationResult.Status.FAIL;
     } else {
       adapter.disallowedRelativeUrl(context, urlStr, tagSpec, result);
-    }
-    return;
-  }
-  const domain = url.host.toLowerCase();
-  if (domain.length > 0 && parsedUrlSpec.isDisallowedDomain(domain)) {
-    if (amp.validator.LIGHT) {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-    } else {
-      adapter.disallowedDomain(context, domain, tagSpec, result);
     }
     return;
   }
