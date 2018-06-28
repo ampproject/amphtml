@@ -75,7 +75,7 @@ export class AmpVideoIntegration {
     /** @private @const */
     this.callCounter_ = 0;
 
-    /** @private @const {!Object<number, function()} */
+    /** @private @const {!Object<number, function()>} */
     this.callbacks_ = {};
 
     /** @private @const {!Window} */
