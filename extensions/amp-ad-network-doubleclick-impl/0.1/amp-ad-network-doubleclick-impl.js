@@ -229,9 +229,9 @@ const BLOCK_SRA_COMBINERS_ = [
     const eids = {};
     instances.forEach(instance => {
       instance.experimentIds.forEach(eid => eids[eid] = 1);
-      const deid = /(?:#|,)deid=(\d+)/i.exec(instance.win.location.hash);
-      if (deid) {
-        eids[deid[1]] = 1;
+      const deids = /(?:#|,)deid=([\d,]+)/i.exec(instance.getWindowHash_());
+      if (deids) {
+        deids[1].split(",").forEach(deid => eids[deid] = 1);
       }
     });
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
@@ -365,6 +365,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
+  }
+
+  /**
+   */
+  getWindowHash_() {
+    return this.win.location.hash;
   }
 
   /**
