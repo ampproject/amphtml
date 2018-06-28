@@ -616,15 +616,17 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'euid-amp=${clientId(etuix)}&' +
         'url=${documentLocation}&',
       'pageview': '${base}/col2/${basePrefix}' +
-        'rf=${documentReferrer}&' +
-        'sd=${screenWidth}x${screenHeight}&' +
-        'sd=${screenColorDepth}&' +
-        'elg=${browserLanguage}',
+        'rf=${externalReferrer}&' +
+        'urlp=${pagePath}&' +
+        'ss=${screenWidth}x${screenHeight}&' +
+        'sd=${screenColorDepth}',
       'action': '${base}/action/${basePrefix}' +
         'eact=${actionCode}&' +
         'actr=${actionRef}',
       'user': '${base}/uparam/${basePrefix}' +
         'euk${userParamKey}=${userParamVal}',
+      'contextflag': '${base}/cflag2/${basePrefix}' +
+        'ecf0k=${cflagKey}&ecf0v=${cflagVal}',
     },
     'transport': {
       'beacon': false,
@@ -1764,7 +1766,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'commpar': 'AMP=1&RM=${random}' +
                  '&USER=${account}' +
                  '&PAG=${page}' +
-                 '&HR=${canonicalUrl}' +
+                 '&HR=${sourceUrl}' +
                  '&REFER=${documentReferrer}' +
                  '&RES=${screenWidth}X${screenHeight}' +
                  '&COLOR=${screenColorDepth}' +
