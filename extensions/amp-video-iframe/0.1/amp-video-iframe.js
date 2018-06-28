@@ -41,7 +41,7 @@ const TAG = 'amp-video-iframe';
 const SANDBOX = 'allow-scripts allow-same-origin';
 
 /**
- * Events allowed to be dispatched fro messages.
+ * Events allowed to be dispatched from messages.
  * @private @const
  */
 const ALLOWED_EVENTS = [
