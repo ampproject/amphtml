@@ -499,6 +499,7 @@ function runTests() {
   }
 
   if (argv.coverage) {
+    c.client.captureConsole = false;
     c.browserify.transform = [
       ['babelify', {
         compact: false,
@@ -544,7 +545,7 @@ function runTests() {
   // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
   // reporter for full unit test runs, since it likely contains copious amounts
   // of logs.
-  const shouldCollapseSummary = process.env.TRAVIS &&
+  const shouldCollapseSummary = process.env.TRAVIS && c.client.captureConsole &&
       c.reporters.includes('karmaSimpleReporter') && !argv['local-changes'];
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
