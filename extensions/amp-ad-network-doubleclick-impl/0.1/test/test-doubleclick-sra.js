@@ -23,7 +23,6 @@ import {
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAdNetworkDoubleclickImpl,
-  TFCD,
   getNetworkId,
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
@@ -37,6 +36,7 @@ import {
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
 import {
+  TFCD,
   combineInventoryUnits,
   constructSRABlockParameters,
   getAdks,
@@ -213,9 +213,12 @@ describes.realWin('Doubleclick SRA', config , env => {
           {'eid': '7,123,456,901,902,903'});
     });
     it('should determine identity', () => {
-      impls[0] = {identityToken: {a: 123, b: 456}};
-      impls[1] = {identityToken: {foo: 'bar'}};
-      expect(getIdentity(impls)).to.jsonEqual({a: 123, b: 456});
+      impls[0] = new AmpAdNetworkDoubleclickImpl(
+          env.win.document.createElement('span'));
+      impls[0].identityToken = {token: 'foo', jar: 'bar', pucrd: 'oof'};
+      impls[1] = {};
+      expect(getIdentity(impls)).to.jsonEqual(
+          {adsid: 'foo', jar: 'bar', pucrd: 'oof'});
     });
     it('should combine force safeframe', () => {
       expect(getForceSafeframe(impls)).to.be.null;
