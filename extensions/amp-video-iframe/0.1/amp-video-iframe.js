@@ -249,10 +249,10 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postIntersection_(messageId) {
-    this.postMessage_({
-      id: messageId,
-      args: this.element.getIntersectionChangeEntry(),
-    });
+    this.postMessage_(dict({
+      'id': messageId,
+      'args': this.element.getIntersectionChangeEntry(),
+    }));
   }
 
   /**
