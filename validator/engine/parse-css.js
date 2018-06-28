@@ -33,6 +33,7 @@ goog.provide('parse_css.extractAFunction');
 goog.provide('parse_css.extractASimpleBlock');
 goog.provide('parse_css.extractUrls');
 goog.provide('parse_css.parseAStylesheet');
+goog.provide('parse_css.parseInlineStyle');
 goog.provide('parse_css.parseMediaQueries');
 goog.provide('parse_css.stripVendorPrefix');
 goog.require('amp.validator.LIGHT');
@@ -173,6 +174,19 @@ parse_css.parseAStylesheet = function(
   stylesheet.eof = eof;
 
   return stylesheet;
+};
+
+/**
+ * Returns a array of Declaration objects.
+ *
+ * @param {!Array<!parse_css.Token>} tokenList
+ * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
+ * @return {!Array<!parse_css.Declaration>}
+ */
+parse_css.parseInlineStyle = function(tokenList, errors) {
+  const canonicalizer =
+      new Canonicalizer({}, parse_css.BlockType.PARSE_AS_DECLARATIONS);
+  return canonicalizer.parseAListOfDeclarations(tokenList, errors);
 };
 
 /**
@@ -324,6 +338,26 @@ parse_css.Declaration = class extends parse_css.Rule {
     this.important = false;
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.DECLARATION;
+  }
+
+  /**
+   * For a declaration, if the first non-whitespace token is an identifier,
+   * returns its string value. Otherwise, returns the empty string.
+   * @return {string}
+   */
+  firstIdent() {
+    if (this.value.length === 0) {
+      return '';
+    }
+    if (this.value[0].tokenType === parse_css.TokenType.IDENT) {
+      return /** @type {!parse_css.StringValuedToken} */ (this.value[0]).value;
+    }
+    if (this.value.length >= 2 &&
+        (this.value[0].tokenType === parse_css.TokenType.WHITESPACE) &&
+        this.value[1].tokenType === parse_css.TokenType.IDENT) {
+      return /** @type {!parse_css.StringValuedToken} */ (this.value[1]).value;
+    }
+    return '';
   }
 
   /** @inheritDoc */
