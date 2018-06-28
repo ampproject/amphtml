@@ -30,14 +30,16 @@ describes.repeated('', {
   'Minimize to corner': {
     useSlot: false,
     topBoundary: 0,
+    bottomBoundary: 400,
   },
   'Minimize to slot element': {
     useSlot: true,
     topBoundary: 20,
+    bottomBoundary: 880,
   },
 }, (name, variant) => {
 
-  const {useSlot, topBoundary} = variant;
+  const {useSlot, topBoundary, bottomBoundary} = variant;
 
   describes.realWin('↗ 🔲', {amp: true}, env => {
     let ampdoc;
@@ -90,18 +92,44 @@ describes.repeated('', {
       });
     }
 
-    function createSlotElement(rect, ratio = 0) {
+    function maybeCreateSlotElementLtwh(left, top, width, height, ratio = 0) {
+      if (!useSlot) {
+        return;
+      }
       const impl = createAmpElementMock('amp-layout');
       impl.element.id = slotId;
       impl.element.setAttribute('layout', 'fill');
-      stubLayoutBox(impl, rect, ratio);
+      stubLayoutBox(impl, layoutRectLtwh(left, top, width, height), ratio);
       env.win.document.body.appendChild(impl.element);
 
       querySelectorStub
           .withArgs('#' + slotId)
           .returns(impl.element);
+    }
 
-      return impl;
+    function setValidAreaWidth() {
+      mockAreaWidth(400);
+    }
+
+    function mockInvalidAreaWidth() {
+      const min = 320;
+      mockAreaWidth(min - 1);
+    }
+
+    function mockAreaWidth(width) {
+      sandbox.stub(docking, 'getAreaWidth_').returns(width);
+    }
+
+    function placeVideoLtwh(video, left, top, width, height, ratio = 0) {
+      stubLayoutBox(video, layoutRectLtwh(left, top, width, height), ratio);
+    }
+
+    function setScrollDirection(direction) {
+      docking.scrollDirection_ = direction;
+    }
+
+    function stubDock() {
+      return sandbox.stub(docking, 'dock_');
     }
 
     beforeEach(() => {
@@ -121,19 +149,16 @@ describes.repeated('', {
       });
 
       sandbox.stub();
-
-      if (useSlot) {
-        createSlotElement(layoutRectLtwh(190, topBoundary, 200, 100));
-      }
     });
 
     it(`should use a ${targetType} as target`, () => {
+      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
       const video = createVideo();
-      stubLayoutBox(video, layoutRectLtwh(0, -200, 400, 300));
+      placeVideoLtwh(video, 0, -200, 400, 300);
 
-      docking.scrollDirection_ = Direction.UP;
-
-      sandbox.stub(docking, 'getAreaWidth_').returns(400);
+      setScrollDirection(Direction.UP);
+      setValidAreaWidth();
 
       const target = docking.getTargetFor_(video);
 
@@ -151,11 +176,13 @@ describes.repeated('', {
     });
 
     it('should not dock if the viewport is too small', () => {
+      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
       const video = createVideo();
       const dock = sandbox.spy(docking, 'dock_');
 
-      sandbox.stub(docking, 'getAreaWidth_').returns(319);
-      stubLayoutBox(video, layoutRectLtwh(0, -200, 400, 300));
+      mockInvalidAreaWidth();
+      placeVideoLtwh(video, 0, -200, 400, 300);
 
       docking.updateOnPositionChange_(video);
 
@@ -163,11 +190,14 @@ describes.repeated('', {
     });
 
     it('should not dock if the video is portrait', () => {
-      const dock = sandbox.spy(docking, 'dock_');
+      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+      const dock = stubDock();
       const video = createVideo();
 
-      sandbox.stub(docking, 'getAreaWidth_').returns(400);
-      stubLayoutBox(video, layoutRectLtwh(0, -400, 300, 400));
+      setValidAreaWidth();
+
+      placeVideoLtwh(video, 0, -400, 300, 400);
 
       allowConsoleError(() => {
         // user().error() expected
@@ -178,11 +208,14 @@ describes.repeated('', {
     });
 
     it('should not dock if another video is docked', () => {
-      const dock = sandbox.spy(docking, 'dock_');
+      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+      const dock = stubDock();
       const video = createVideo();
 
-      sandbox.stub(docking, 'getAreaWidth_').returns(400);
-      stubLayoutBox(video, layoutRectLtwh(0, 0, 0, 0));
+      setValidAreaWidth();
+
+      placeVideoLtwh(video, 0, 0, 0, 0);
 
       docking.currentlyDocked_ = {video: createVideo()};
 
@@ -192,48 +225,51 @@ describes.repeated('', {
     });
 
     it('should dock if video is over top boundary', () => {
-      const dock = sandbox.stub(docking, 'dock_');
+      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+      const dock = stubDock();
       const video = createVideo();
 
-      docking.scrollDirection_ = Direction.UP;
+      setValidAreaWidth();
+      setScrollDirection(Direction.UP);
 
-      sandbox.stub(docking, 'getAreaWidth_').returns(400);
-      sandbox.stub(docking, 'getTopEdge_').returns(0);
-      stubLayoutBox(video, layoutRectLtwh(0, -250, 400, 300),
-          /* ratio */ 0.1667);
+      placeVideoLtwh(video, 0, -250, 400, 300, /* ratio */ 1 / 3);
+
+      sandbox.stub(docking, 'getTopEdge_').returns(topBoundary);
 
       docking.updateOnPositionChange_(video);
 
       expect(dock).to.have.been.calledOnce;
     });
 
-    if (!useSlot) {
-      // Slot elements only support one docking position.
-      it('should dock if video is under bottom boundary', () => {
-        const dock = sandbox.stub(docking, 'dock_');
-        const video = createVideo();
+    it('should dock if video is under bottom boundary', () => {
+      const videoTop = 650;
+      const slotHeight = 100;
+      const slotTop = bottomBoundary - slotHeight;
 
-        docking.scrollDirection_ = Direction.DOWN;
-
-        sandbox.stub(docking, 'getAreaWidth_').returns(400);
-        sandbox.stub(docking, 'getBottomEdge_').returns(400);
-        stubLayoutBox(video, layoutRectLtwh(0, 650, 400, 300),
-            /* ratio */ 0.1667);
-
-        docking.updateOnPositionChange_(video);
-
-        expect(dock).to.have.been.calledOnce;
-      });
-    }
-
-    it('should not dock if the video does not touch boundaries', () => {
-      const dock = sandbox.stub(docking, 'dock_');
+      maybeCreateSlotElementLtwh(190, slotTop, 200, slotHeight);
+      const dock = stubDock();
       const video = createVideo();
 
-      docking.scrollDirection_ = Direction.UP;
+      setValidAreaWidth();
+      placeVideoLtwh(video, 0, videoTop, 400, 300, /* ratio */ 1 / 3);
+      sandbox.stub(docking, 'getBottomEdge_').returns(bottomBoundary);
+      setScrollDirection(Direction.DOWN);
 
-      stubLayoutBox(video, layoutRectLtwh(0, topBoundary + 1, 400, 300));
-      sandbox.stub(docking, 'getAreaWidth_').returns(400);
+      docking.updateOnPositionChange_(video);
+
+      expect(dock).to.have.been.calledOnce;
+    });
+
+    it('should not dock if the video does not touch boundaries', () => {
+      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+      const dock = stubDock();
+      const video = createVideo();
+
+      setValidAreaWidth();
+      setScrollDirection(Direction.UP);
+      placeVideoLtwh(video, 0, topBoundary + 1, 400, 300);
 
       docking.updateOnPositionChange_(video);
 
