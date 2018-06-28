@@ -210,6 +210,19 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
+
+    const messageId = data['id'];
+    const methodReceived = data['method'];
+
+    if (methodReceived) {
+      if (methodReceived == 'getIntersection') {
+        this.postIntersection_(messageId);
+        return;
+      }
+      dev().assert(false, `Unknown method '${methodReceived}`);
+      return;
+    }
+
     const eventReceived = data['event'];
     const isCanPlayEvent = eventReceived == 'canplay';
 
@@ -232,22 +245,25 @@ class AmpVideoIframe extends AMP.BaseElement {
   }
 
   /**
+   * @param {number} messageId
+   * @private
+   */
+  postIntersection_(messageId) {
+    this.postMessage_({
+      id: messageId,
+      args: this.element.getIntersectionChangeEntry(),
+    });
+  }
+
+  /**
    * @param {string} method
    * @private
    */
   method_(method) {
-    if (!this.readyPromise_) {
-      return;
-    }
-    this.readyPromise_.then(() => {
-      if (!this.iframe_ || !this.iframe_.contentWindow) {
-        return;
-      }
-      this.postMessage_(dict({
-        'event': 'method',
-        'method': method,
-      }));
-    });
+    this.postMessage_(dict({
+      'event': 'method',
+      'method': method,
+    }));
   }
 
   /**
@@ -255,7 +271,16 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(message), '*');
+    if (!this.iframe_ || !this.iframe_.contentWindow) {
+      return;
+    }
+    if (!this.readyPromise_) {
+      return;
+    }
+    this.readyPromise_.then(() => {
+      this.iframe_.contentWindow./*OK*/postMessage(
+          JSON.stringify(message), '*');
+    });
   }
 
   /** @override */

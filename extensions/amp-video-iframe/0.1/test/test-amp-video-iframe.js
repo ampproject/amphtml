@@ -159,8 +159,6 @@ describes.realWin('amp-video-iframe', {
 
         videoIframe.implementation_[method]();
 
-        yield Promise.resolve();
-
         expect(postMessage.withArgs(sinon.match({
           event: 'method',
           method: lowercaseMethod,

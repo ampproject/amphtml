@@ -72,6 +72,12 @@ export class AmpVideoIntegration {
   /** @param {!Window} win */
   constructor(win) {
 
+    /** @private @const */
+    this.callCounter_ = 0;
+
+    /** @private @const {!Object<number, function()} */
+    this.callbacks_ = {};
+
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -105,6 +111,14 @@ export class AmpVideoIntegration {
    * @private
    */
   onMessage_(data) {
+    const id = data['id'];
+    if (id && this.callbacks_[id]) {
+      const callback = this.callbacks_[id];
+      const args = data['args'];
+      callback(args);
+      delete this.callbacks_[id];
+      return;
+    }
     if (data['event'] != 'method') {
       return;
     }
@@ -179,10 +193,35 @@ export class AmpVideoIntegration {
 
   /**
    * @param {!JsonObject} data
+   * @param {function()|undefined|null} optCallback
    * @private
    */
-  postToParent_(data) {
-    this.win_.parent./*OK*/postMessage(data, '*');
+  postToParent_(data, optCallback = null) {
+    const id = this.callCounter_++;
+    const completeData = Object.assign({id}, data);
+    this.win_.parent./*OK*/postMessage(completeData, '*');
+    if (optCallback) {
+      this.callbacks_[id] = optCallback;
+    }
+    return id;
+  }
+
+  /**
+   * Gets the video's intersection with the document's viewport.
+   * @param {function(!JsonObject)} callback
+   */
+  getIntersection(callback) {
+    this.getIntersectionForTesting_(callback);
+  }
+
+  /**
+   * Returns message id for testing. Private as message id is an implementation
+   * detail that others should not rely on.
+   * @param {function(!JsonObject)} callback
+   * @private
+   */
+  getIntersectionForTesting_(callback) {
+    return this.postToParent_({method: 'getIntersection'}, callback);
   }
 }
 
