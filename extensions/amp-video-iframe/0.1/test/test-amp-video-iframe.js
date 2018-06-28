@@ -133,6 +133,29 @@ describes.realWin('amp-video-iframe', {
         expect(dispatch.withArgs(event)).to.have.been.calledOnce;
       }
     });
+
+    it('should return intersection entry', function* () {
+      const id = 1234;
+      const intersectionEntry = {tacos: 'al pastor'};
+
+      const videoIframe = createVideoIframe();
+
+      yield whenLoaded(videoIframe);
+
+      const postMessage = stubPostMessage(videoIframe);
+
+      env.sandbox.stub(videoIframe, 'getIntersectionChangeEntry')
+          .returns(intersectionEntry);
+
+      acceptMockedMessages(videoIframe);
+
+      const message = {data: {id, method: 'getIntersection'}};
+
+      videoIframe.implementation_.onMessage_(message);
+
+      expect(postMessage.withArgs(sinon.match({id, args: intersectionEntry})))
+          .to.have.been.calledOnce;
+    });
   });
 
   const implementedVideoInterfaceMethods = [
