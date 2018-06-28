@@ -1,10 +1,71 @@
-# amp-video-iframe
+# <a name="amp-video-iframe"></a> amp-video-iframe
 
 [TOC]
 
+<table>
+  <tr>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>Displays an iframe containing a video player.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
+  </tr>
+</table>
+
+
+## Behavior
+
+`amp-video-iframe` has several important differences from vanilla iframes and `amp-iframe`.
+
+- `amp-video-iframe` implements all [Video Features](../../spec/video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
+- By default, an `amp-video-iframe` is sandboxed (see [details](#sandbox)).
+- An `amp-video-iframe` must only request resources via HTTPS.
+
+
+## Usage of amp-iframe for advertising
+
+`amp-video-iframe` **must not** be used for the primary purpose of displaying advertising. It is OK to use `amp-video-iframe` for the purpose of displaying videos, where part of the videos are advertising. This AMP policy may be enforced by not rendering the respective iframes.
+
+Advertising use cases should use [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad) instead.
+
+The reasons for this policy are that:
+
+- `amp-video-iframe` enforces sandboxing and the sandbox is also applied to child iframes. This means landing pages may be broken, even if the ad itself appears to work.
+- `amp-video-iframe` has controlled resize mechanism.
+
+# Attributes
+
+##### src (required)
+
+The `src` attribute behaves mainly like on a standard iframe with one exception: the `#amp=1` fragment is added to the URL to allow
+source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by `src` does
+not already have a fragment.
+
+#### poster (required)
+
+Points to an image URL that will be displayed while the video loads.
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+#### implements-media-session
+
+Set this attribute if the document inside the iframe implements the [MediaSession API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API) independently.
+
+#### implements-rotate-to-fullscreen
+
+Set this attribute if the document inside the iframe implements rotate-to-fullscreen independently.
+
 ## Integration
 
-The document living inside your framoe must include a small library:
+In order for the video integration to work, the document living inside your
+frame must include a small library:
 
 ```html
 <script async src="https://cdn.ampproject.org/v0/video-iframe-integration-0.1.js">
