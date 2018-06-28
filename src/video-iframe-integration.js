@@ -18,6 +18,20 @@ import {listen} from '../src/event-helper';
 import {once} from '../src/utils/function';
 import {tryParseJson} from '../src/json';
 
+
+/**
+ * @typedef {{
+ *   on: function(string, function()),
+ *   play: function(),
+ *   pause: function(),
+ *   setMuted: function(boolean),
+ *   setControls: function(boolean),
+ *   setFullscreen: function(boolean),
+ * }}
+ */
+let JwplayerPartialInterfaceDef;
+
+
 const validMethods = [
   'pause',
   'play',
@@ -28,6 +42,7 @@ const validMethods = [
   'showcontrols',
   'hidecontrols',
 ];
+
 
 const validEvents = [
   'canplay',
@@ -100,17 +115,21 @@ export class AmpVideoIntegration {
   }
 
   /**
-   * @param {*} player
+   * @param {!JwplayerPartialInterfaceDef} player
    */
   listenToJwPlayer_(player) {
-    // TODO: ad_start, ad_end
-
     ['error', 'setupError'].forEach(e => {
       player.on(e, () => {
         userAssert.apply(null, [false].concat(arguments));
         this.postEvent('error');
       });
     });
+
+    ['adSkipped', 'adComplete', 'adError'].forEach(e => {
+      player.on(e, () => this.postEvent('ad_end'));
+    });
+
+    player.on('adStarted', () => this.postEvent('ad_start'));
 
     const redispatchAs = {
       'play': 'playing',
@@ -128,6 +147,8 @@ export class AmpVideoIntegration {
     this.method('unmute', () => player.setMute(false));
     this.method('showcontrols', () => player.setControls(true));
     this.method('hidecontrols', () => player.setControls(false));
+    this.method('fullscreenenter', () => player.setFullscreen(true));
+    this.method('fullscreenexit', () => player.setFullscreen(false));
   }
 
   // TODO(alanorozco): Video.js integration.
@@ -184,4 +205,3 @@ export function adopt(global) {
 }
 
 adopt(self);
-
