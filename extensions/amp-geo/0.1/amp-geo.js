@@ -136,10 +136,10 @@ export class AmpGeo extends AMP.BaseElement {
   }
 
   /**
-   * resolves goDeferred with null if not shouldBeTrueish and then calls
-   * u8ser().assert() to hald the error as normal.
-   * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
-   *     not evaluate to true.
+   * resolves geoDeferred with null if not shouldBeTrueish and then calls
+   * user().assert() to deal with the error as normal.
+   * @param {T} shouldBeTrueish The value to assert.
+   *  The assert fails if it does not evaluate to true.
    * @param {string=} opt_message The assertion message
    * @return {T} The value of shouldBeTrueish.
    * @template T
@@ -148,8 +148,9 @@ export class AmpGeo extends AMP.BaseElement {
   assertWithErrorReturn_(shouldBeTrueish, opt_message) {
     if (!shouldBeTrueish) {
       geoDeferred.resolve(null);
+      return user().assert(shouldBeTrueish, opt_message);
     }
-    return user().assert(shouldBeTrueish, opt_message);
+    return shouldBeTrueish;
   }
 
 
