@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from './amp-story-store-service';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {StateProperty} from './amp-story-store-service';
 import {copyChildren, removeChildren} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
-
-/** @const {string} */
-const TAG = 'amp-story-access';
 
 /**
  * Story access template.
@@ -128,6 +125,8 @@ export class AmpStoryAccess extends AMP.BaseElement {
   onScroll_() {
     let isFullBleed;
 
+    // Toggles the fullbleed UI as soon as the scrollable container, which has a
+    // 88px margin top, reaches the top of the screen.
     const measurer =
         () => isFullBleed = this.scrollableEl_./*OK*/scrollTop > 88;
     const mutator = () => {

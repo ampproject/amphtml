@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Action, AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpStoryAccess} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -46,7 +46,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     // Publisher provided button is no longer a child of <amp-story-access>.
     expect(
-      storyAccess.element
+        storyAccess.element
             .querySelector('amp-story-access > .subscribe-button')).to.be.null;
 
     // But has been copied in the drawer.
