@@ -31,7 +31,7 @@
 - An `amp-video-iframe` must only request resources via HTTPS.
 
 
-## Usage of amp-iframe for advertising
+## Usage of amp-video-iframe for advertising
 
 `amp-video-iframe` **must not** be used for the primary purpose of displaying advertising. It is OK to use `amp-video-iframe` for the purpose of displaying videos, where part of the videos are advertising. This AMP policy may be enforced by not rendering the respective iframes.
 
