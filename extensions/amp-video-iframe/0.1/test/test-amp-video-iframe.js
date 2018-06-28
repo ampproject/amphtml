@@ -144,7 +144,7 @@ describes.realWin('amp-video-iframe', {
 
       const postMessage = stubPostMessage(videoIframe);
 
-      env.sandbox.stub(videoIframe, 'getIntersectionChangeEntry')
+      env.sandbox./*OK*/stub(videoIframe, 'getIntersectionChangeEntry')
           .returns(intersectionEntry);
 
       acceptMockedMessages(videoIframe);
