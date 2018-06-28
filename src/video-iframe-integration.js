@@ -209,7 +209,7 @@ export class AmpVideoIntegration {
     });
 
     listen(element, 'volumechange', () =>
-      this.onVolumeChange_(player().getVolume()));
+      this.onVolumeChange_(player().volume()));
 
     const method = (type, handler) => this.method(type, handler);
 
@@ -257,7 +257,7 @@ export class AmpVideoIntegration {
     const id = this.callCounter_++;
     const completeData = Object.assign({id}, data);
 
-    if (!getMode(this.win_).test) {
+    if (!getMode(this.win_).test && this.win_.parent) {
       this.win_.parent./*OK*/postMessage(completeData, '*');
     }
 
@@ -301,6 +301,7 @@ function listenTo(win, onMessage) {
 export function adopt(global) {
   const exposed = (global.AmpVideoIframe = global.AmpVideoIframe || []);
   const integration = new AmpVideoIntegration(global);
+  global.reportError = console.error.bind(console);
   exposed.push = callback => callback(integration);
   exposed.forEach(exposed.push);
 }
