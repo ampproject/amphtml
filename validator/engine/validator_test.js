@@ -667,22 +667,6 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
         expect(allowedProtocolRegex.test(allowedProtocol)).toBe(true);
       }
     });
-    // If disallowed_domain is whatever.ampproject.org then
-    // allow_relative must be false. Otherwise relative URLs would be
-    // rejected for domain whatever.ampproject.org because that is
-    // used as the base URL to parse the relative URL.
-    if ((attrSpec.valueUrl.allowRelative !== null) &&
-        attrSpec.valueUrl.allowRelative) {
-      // allow_relative is true, check to see if whatever.ampproject.org is a
-      // disallowed_domain.
-      it('allow_relative can not be true if ' +
-          'disallowed_domain is whatever.ampproject.org',
-      () => {
-        for (const disallowedDomain of attrSpec.valueUrl.disallowedDomain) {
-          expect(disallowedDomain !== 'whatever.ampproject.org');
-        }
-      });
-    }
     // If allowed_protocol is http then allow_relative should not be false
     // except for `data-` attributes.
     if (!attrSpec.name.startsWith('data-')) {
@@ -847,6 +831,10 @@ describe('ValidatorRulesMakeSense', () => {
     const tagSpecName =
         tagSpec.specName || tagSpec.tagName || 'UNKNOWN_TAGSPEC';
 
+    // html_format must be set.
+    it('\'' + tagSpecName + '\' must have at least one htmlFormat set', () => {
+      expect(tagSpec.htmlFormat.length).toBeGreaterThan(0);
+    });
     // html_format is never UNKNOWN_CODE.
     it('tagSpec.htmlFormat should never contain UNKNOWN_CODE', () => {
       expect(tagSpec.htmlFormat.indexOf(
@@ -875,9 +863,8 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // Verify AMP4ADS extensions are whitelisted.
     if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
-        ((tagSpec.htmlFormat.length === 0) ||
-         (tagSpec.htmlFormat.indexOf(
-             amp.validator.HtmlFormat.Code.AMP4ADS) !== -1))) {
+        (tagSpec.htmlFormat.indexOf(
+            amp.validator.HtmlFormat.Code.AMP4ADS) !== -1)) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
@@ -912,9 +899,8 @@ describe('ValidatorRulesMakeSense', () => {
     }
     // Verify AMP4EMAIL extensions are whitelisted.
     if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
-        ((tagSpec.htmlFormat.length === 0) ||
-         (tagSpec.htmlFormat.indexOf(
-             amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1))) {
+        (tagSpec.htmlFormat.indexOf(
+            amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1)) {
       // AMP4EMAIL format is the source of this whitelist.
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
