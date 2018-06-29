@@ -229,9 +229,9 @@ export class AmpGeo extends AMP.BaseElement {
     const expandedGroup = countryGroup.reduce((countries, country) => {
       // If it's a valid preset then we expand it.
       if (/^preset-/.test(country)) {
-        user().assert(
+        this.assertWithErrorReturn_(
             isArray(ampGeoPresets[country]),
-            '<amp-geo> preset ' + country + ' not found');
+            `<amp-geo> preset ${country} not found`);
         return countries.concat(ampGeoPresets[country]);
       }
       // Otherwise we add the country to the list
