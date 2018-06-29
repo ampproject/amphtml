@@ -54,13 +54,28 @@ describes.realWin('amp-twitter', {
     });
   });
 
-  it('adds tweet element correctly', () => {
+  it('adds tweet element correctly for a tweet', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
     doc.body.appendChild(div);
 
     twitter(win, {
       tweetid: tweetId,
+      width: 111,
+      height: 222,
+    });
+    const tweet = doc.body.querySelector('#tweet');
+    expect(tweet).not.to.be.undefined;
+  });
+
+  it('adds tweet element correctly for a moment', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    twitter(win, {
+      momentid: tweetId,
+      limit: 5,
       width: 111,
       height: 222,
     });
@@ -139,5 +154,4 @@ describes.realWin('amp-twitter', {
       expect(cleanupTweetId_(bad)).to.equal(tweetId);
     });
   });
-
 });

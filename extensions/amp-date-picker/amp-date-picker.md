@@ -24,10 +24,6 @@ limitations under the License.
     <td>Provides a widget to select dates. The date picker can render as an overlay relative to input fields, or as a static calendar widget.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a> <a href="https://github.com/ampproject/amphtml/blob/3a06c99f259b66998b61935a5ee5f0075481bfd2/tools/experiments/README.md#enable-an-experiment-for-a-particular-document"> (Document opt-in allowed)</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js">&lt;/script></code></td>
   </tr>
@@ -363,6 +359,17 @@ Default styling is a blue dot on the date.
 
 The size in `px` of the date cells in the calendar view table. The default is `39`.
 
+Note: [due to a bug](https://github.com/ampproject/amphtml/issues/13897),
+a non-default `day-size` causes the date picker height to be incorrect on months
+that span more than 4 weeks. To prevent incorrect height, add a CSS rule to the
+document that sets a minimum height for the date picker.
+
+```css
+.amp-date-picker-resize-bug .DayPicker_transitionContainer {
+  min-height: 354px; /* 354px is the default. You must update it. */
+}
+```
+
 ##### allow-blocked-ranges
 
 If present, this attribute prevents the user from selecting a range with a blocked date.
@@ -674,7 +681,6 @@ rendered after the calendar view renders for the first time.
   <template type="amp-mustache" date-template default>{{DD}}</template>
 </amp-date-picker>
 ```
-
 
 ##### info-template
 

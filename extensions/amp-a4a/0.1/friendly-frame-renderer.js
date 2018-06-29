@@ -39,6 +39,9 @@ export let CreativeData;
  */
 export class FriendlyFrameRenderer extends Renderer {
 
+  /**
+   * Creates an instance of FriendlyFrameRenderer.
+   */
   constructor() {
     super();
 

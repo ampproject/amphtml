@@ -31,6 +31,7 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    doc.body.parentNode.setAttribute('amp-version', '1');
     ampdoc = env.ampdoc;
     installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
     vsync = Services.vsyncFor(ampdoc.win);

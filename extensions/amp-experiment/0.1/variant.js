@@ -133,6 +133,10 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
       .then(hash => hash * 100);
 }
 
+/**
+ * Asserts if the nae is valid.
+ * @param {string} name
+ */
 function assertName(name) {
   user().assert(nameValidator.test(name),
       `Invalid name ${name}: %s. Allowed chars are [a-zA-Z0-9-_].`);

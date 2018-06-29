@@ -105,6 +105,15 @@ describe('Google A4A utils', () => {
   });
 
   describe('#ActiveView AmpAnalytics integration', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
 
     const builtConfig = {
       transport: {beacon: false, xhrpost: false},
@@ -176,6 +185,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should add the correct CSI signals', () => {
+      sandbox.stub(Services, 'documentInfoForDoc').returns({pageViewId: 777});
       const mockElement = {
         getAttribute: function(name) {
           switch (name) {
@@ -192,8 +202,7 @@ describe('Google A4A utils', () => {
       const qqid = 'qqid_string';
       let newConfig = addCsiSignalsToAmpAnalyticsConfig(
           window, mockElement, builtConfig, qqid,
-          /* isVerifiedAmpCreative */ true,
-          /* lifecycle time events; not relevant here */ -1, -1);
+          /* isVerifiedAmpCreative */ true);
 
       expect(newConfig.requests.iniLoadCsi).to.not.be.null;
       expect(newConfig.requests.renderStartCsi).to.not.be.null;
@@ -364,10 +373,10 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
         impl.win.AMP_CONFIG = {type: 'production'};
-        impl.win.location.hash = 'foo,deid=123456,bar';
+        impl.win.location.hash = 'foo,deid=123456,654321,bar';
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/[&?]debug_experiment_id=123456/);
+            expect(url1).to.match(/[&?]debug_experiment_id=123456%2C654321/);
           });
         });
       });
