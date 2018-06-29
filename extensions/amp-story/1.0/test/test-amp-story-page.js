@@ -16,7 +16,9 @@
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState} from '../amp-story-page';
+import {AmpStoryStoreService} from '../amp-story-store-service';
 import {MediaType} from '../media-pool';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 describes.realWin('amp-story-page', {amp: true}, env => {
@@ -34,6 +36,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
         [MediaType.AUDIO]: 8,
       }),
     };
+
+    const storeService = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => storeService);
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
