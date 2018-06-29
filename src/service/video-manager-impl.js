@@ -815,7 +815,8 @@ class VideoEntry {
       const {element} = this.video;
       const ratio = element.getIntersectionChangeEntry().intersectionRatio;
       this.isVisible_ =
-          (!isFiniteNumber(ratio) ? 0 : ratio) >= MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
+          (!isFiniteNumber(ratio) ? 0 : ratio) >=
+            MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
     }
 
     if (this.isVisible_ != wasVisible) {

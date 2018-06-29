@@ -21,7 +21,6 @@ import {
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {closestBySelector, removeElement} from '../../../src/dom';
 import {createCustomEvent, getData} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {endsWith} from '../../../src/string';
@@ -35,6 +34,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
+import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';

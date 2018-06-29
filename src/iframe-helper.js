@@ -521,11 +521,11 @@ export function isAdLike(element) {
  * @private
  */
 export function disableScrollingOnIframe(iframe) {
-  addAttributesToElement(iframe, {scrolling: "no"});
+  addAttributesToElement(iframe, dict({'scrolling': 'no'}));
 
   // This shouldn't work, but it does on Firefox.
   // https://stackoverflow.com/a/15494969
-  setStyle(iframe, {overflow: 'hidden'});
+  setStyle(iframe, 'overflow', 'hidden');
 
   return iframe;
 }

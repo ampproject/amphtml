@@ -23,10 +23,6 @@ import {tryParseJson} from '../src/json';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
-if (!getMode(self).test) {
-  adopt(self);
-}
-
 /**
  * @typedef {{
  *   on: function(string, function()),
@@ -335,4 +331,8 @@ export function adopt(global) {
 
   // Execute callbacks created before adoption.
   callbacks.forEach(callbacks.push);
+}
+
+if (!getMode(self).test) {
+  adopt(self);
 }

@@ -168,10 +168,12 @@ class AmpVideoIframe extends AMP.BaseElement {
     const src = urlService.assertHttpsUrl(element.getAttribute('src'), element);
 
     if (urlService.getSourceOrigin(src) === urlService.getWinOrigin(this.win)) {
-      this.user().warn('%s: Origin of the video-iframe and the page are the ' +
-        'same, which allows for same-origin behavior. However in AMP cache, ' +
-        'origins won\'t match. Please ensure you do not rely on any ' +
-        'same-origin privileges.', element);
+      this.user().warn(TAG,
+          'Origins of document inside amp-video-iframe and the host are the ' +
+          'same, which allows for same-origin behavior. However in AMP ' +
+          'cache, origins won\'t match. Please ensure you do not rely on any ' +
+          'same-origin privileges.',
+          element);
     }
 
     return src;
