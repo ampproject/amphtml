@@ -61,6 +61,7 @@ export function installGlobalNavigationHandlerForDoc(ampdoc) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Event} e
+ * @visibleForTesting
  */
 export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
@@ -440,6 +441,7 @@ export class Navigation {
    * @private
    */
   parseUrl_(url) {
+    // Must use URL parsing scoped to this.rootNode_ for correct FIE behavior.
     return Services.urlForDoc(this.rootNode_).parse(url);
   }
 }

@@ -64,7 +64,7 @@ export let FriendlyIframeSpec;
 
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let srcdocSupported;
 
@@ -584,13 +584,13 @@ export class FriendlyIframeEmbed {
 /**
  * Returns the promise that will be resolved when all content elements
  * have been loaded in the initially visible set.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {!Window} hostWin
  * @param {!./layout-rect.LayoutRectDef} rect
  * @return {!Promise}
  */
-export function whenContentIniLoad(context, hostWin, rect) {
-  return Services.resourcesForDoc(context)
+export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
+  return Services.resourcesForDoc(elementOrAmpDoc)
       .getResourcesInRect(hostWin, rect)
       .then(resources => {
         const promises = [];
