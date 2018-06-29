@@ -2,7 +2,7 @@
   "bookendVersion": "v1.0",
   "shareProviders": [
     "email",
-    {"provider": "facebook", "app-id": "254325784911610"},
+    {"provider": "facebook", "app_id": "254325784911610"},
     "whatsapp"
   ],
   "components": [
