@@ -478,7 +478,7 @@ export function looksLikeTrackingIframe(element) {
     return false;
   }
   // Iframe is not tracking iframe if open with user interaction
-  return !closestBySelector(this.element, '.i-amphtml-overlay');
+  return !closestBySelector(element, '.i-amphtml-overlay');
 }
 
 // Most common ad sizes
