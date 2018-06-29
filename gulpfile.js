@@ -138,6 +138,7 @@ declareExtension('amp-o2-player', '0.1');
 declareExtension('amp-ooyala-player', '0.1');
 declareExtension('amp-pinterest', '0.1', {hasCss: true});
 declareExtension('amp-playbuzz', '0.1', {hasCss: true});
+declareExtension('amp-poool', '0.1', {hasCss: true});
 declareExtension('amp-reach-player', '0.1');
 declareExtension('amp-reddit', '0.1');
 declareExtension('amp-riddle-quiz', '0.1');
