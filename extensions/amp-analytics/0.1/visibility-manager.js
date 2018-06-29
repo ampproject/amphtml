@@ -729,7 +729,7 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   }
 
   /** @override */
-  getRootLayoutBox() {
+  getRootOpacity() {
     const rootElement = dev().assertElement(this.embed.iframe);
     return Services.viewportForDoc(this.ampdoc).getOpacity(rootElement);
   }
