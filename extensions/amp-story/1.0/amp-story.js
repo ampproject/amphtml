@@ -367,30 +367,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializeStyles_() {
-    const storyId = this.getId();
-    const storyIdClassName = `i-amphtml-story-id-${storyId}`;
-    const pageEls = this.element.querySelectorAll('amp-story-page') || [];
-    const isStandalone = this.isStandalone_();
-    let styleEl;
-
-    if (isStandalone) {
-      styleEl = document.querySelector('style[amp-custom]');
-    } else {
-      styleEl = document.querySelector(
-          `style[amp-story="${escapeCssSelectorIdent(storyId)}"]`);
-    }
-
+    const styleEl = document.querySelector('style[amp-custom]');
     if (!styleEl) {
       return;
     }
 
-    this.mutateElement(() => {
-      styleEl.setAttribute('amp-story', storyId);
-      this.rewriteStyles_(styleEl);
-      Array.prototype.forEach.call(pageEls, pageEl => {
-        pageEl.classList.add(storyIdClassName);
-      });
-    });
+    this.rewriteStyles_(styleEl);
   }
 
 
@@ -405,11 +387,13 @@ export class AmpStory extends AMP.BaseElement {
 
     // TODO(#15955): Update this to use CssContext from
     // ../../../extensions/amp-animation/0.1/web-animations.js
-    styleEl.textContent = styleEl.textContent
-        .replace(/([\d.]+)vh/gmi, 'calc($1 * var(--i-amphtml-story-vh))')
-        .replace(/([\d.]+)vw/gmi, 'calc($1 * var(--i-amphtml-story-vw))')
-        .replace(/([\d.]+)vmin/gmi, 'calc($1 * var(--i-amphtml-story-vmin))')
-        .replace(/([\d.]+)vmax/gmi, 'calc($1 * var(--i-amphtml-story-vmax))');
+    this.mutateElement(() => {
+      styleEl.textContent = styleEl.textContent
+          .replace(/([\d.]+)vh/gmi, 'calc($1 * var(--i-amphtml-story-vh))')
+          .replace(/([\d.]+)vw/gmi, 'calc($1 * var(--i-amphtml-story-vw))')
+          .replace(/([\d.]+)vmin/gmi, 'calc($1 * var(--i-amphtml-story-vmin))')
+          .replace(/([\d.]+)vmax/gmi, 'calc($1 * var(--i-amphtml-story-vmax))');
+    });
   }
 
 
@@ -1619,13 +1603,6 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   getElement() {
     return this.element;
-  }
-
-  /**
-   * @return {string}
-   */
-  getId() {
-    return this.element.id || STANDALONE_STORY_ID;
   }
 
   /**
