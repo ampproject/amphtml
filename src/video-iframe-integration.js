@@ -311,6 +311,7 @@ function listenTo(win, onMessage) {
 
 /**
  * Adopt window asynchronously.
+ * This follows the same method as AMP.push (see runtime).
  * @param {!Window} global
  * @visibleForTesting
  */
@@ -323,13 +324,13 @@ export function adopt(global) {
 
   // Create array if the script loaded before callback push
   // (otherwise already created).
-  const exposed = (global.AmpVideoIframe = global.AmpVideoIframe || []);
+  const callbacks = (global.AmpVideoIframe = global.AmpVideoIframe || []);
 
   // Rewrite push to execute callbacks are added after adoption.
-  exposed.push = callback => callback(integration);
+  callbacks.push = callback => callback(integration);
 
   // Execute callbacks created before adoption.
-  exposed.forEach(exposed.push);
+  callbacks.forEach(callbacks.push);
 }
 
 adopt(self);
