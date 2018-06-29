@@ -408,20 +408,20 @@ export class AnalyticsGroup {
  * depends on it in multi-doc scope. Otherwise an element life-cycle could
  * resolve way before we have the service available.
  *
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Promise<InstrumentationService>}
  */
-export function instrumentationServicePromiseForDoc(nodeOrDoc) {
+export function instrumentationServicePromiseForDoc(elementOrAmpDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
-    getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation'));
 }
 
 /**
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!InstrumentationService}
  */
-export function instrumentationServiceForDocForTesting(nodeOrDoc) {
+export function instrumentationServiceForDocForTesting(elementOrAmpDoc) {
   registerServiceBuilderForDoc(
-      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
-  return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
+      elementOrAmpDoc, 'amp-analytics-instrumentation', InstrumentationService);
+  return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation');
 }
