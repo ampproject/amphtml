@@ -117,10 +117,14 @@ function onAmpIntegrationReady(ampIntegration) {
 ### Custom integrations
 
 It's possible to have more fine-grained control over how the video interacts
-with the host document by using the `method`, `postEvent` and `getIntersection`
-methods.
+with the host document by using the following methods:
 
-#### `method(name, callback)`
+- [`method`](#method)
+- [`postEvent`](#postEvent)
+- [`getIntersection`](#getIntersection)
+- [`getMetadata`](#getMetadata)
+
+#### <a name="method"></a> `method(name, callback)`
 
 Implements a method that calls playback functions on the video. For example:
 
@@ -154,7 +158,7 @@ You can choose to only implement this interface partially, with a few caveats:
   example, for `rotate-to-fullscreen` or the fullscreen button on minimized
   video.
 
-#### `postEvent(name)`
+#### <a name="postEvent"></a> `postEvent(name)`
 
 Posts a playback event to the frame. For example:
 
@@ -230,7 +234,7 @@ The valid events are as follows.
   </tbody>
 </table>
 
-#### `getIntersection(callback)`
+#### <a name="getIntersection"></a> `getIntersection(callback)`
 
 Gets the intersection ratio (between 0 and 1) for the video element. This is useful for viewability information, e.g.
 
@@ -254,3 +258,14 @@ like this:
 `intersectionRatio` will be 0 as long as the video is under 50% visible. This
 value is bound to change at any time, and the callbacks may be delayed or
 debounced.
+
+#### <a name="getMetadata"></a> `getMetadata(callback)`
+
+Gets an object containing metadata about the host document:
+
+```json
+{
+  "canonicalUrl": "foo.html",
+  "sourceUrl": "bar.html",
+}
+```
