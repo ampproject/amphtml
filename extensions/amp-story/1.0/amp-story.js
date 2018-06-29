@@ -74,7 +74,6 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
-  escapeCssSelectorIdent,
   isRTL,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -84,7 +83,6 @@ import {
   resetStyles,
   setImportantStyles,
   setStyle,
-  setStyles,
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
@@ -140,12 +138,6 @@ const Attributes = {
   NEXT: 'i-amphtml-next-page', // shown in right pane
   VISITED: 'i-amphtml-visited', // stacked offscreen to left
 };
-
-/**
- * The string used to identify a story that is standalone within a document.
- * @const {string}
- */
-const STANDALONE_STORY_ID = 'standalone';
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
