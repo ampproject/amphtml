@@ -148,6 +148,8 @@ export class AmpGeo extends AMP.BaseElement {
   assertWithErrorReturn_(shouldBeTrueish, opt_message) {
     if (!shouldBeTrueish) {
       geoDeferred.resolve(null);
+      // We know the assert ill always fail, we're just calling it
+      // as an entry point to the error handling and logging code.
       return user().assert(shouldBeTrueish, opt_message);
     }
     return shouldBeTrueish;
@@ -196,7 +198,7 @@ export class AmpGeo extends AMP.BaseElement {
     // ISOCountryGroups are optional but if specified at least one must exist
     const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */(
       config.ISOCountryGroups);
-    const errorPrefix = `<${TAG}> ISOCountryGroups`; // code size
+    const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       this.assertWithErrorReturn_(
           isObject(ISOCountryGroups),
@@ -224,18 +226,18 @@ export class AmpGeo extends AMP.BaseElement {
    * @return {boolean}
    */
   checkGroup_(countryGroup) {
-    let presetCountries = [];
-    countryGroup = countryGroup.map((country, idx) => {
+    countryGroup = countryGroup.reduce((countries, country) => {
+      // If it's a valid preset then we expand it.
       if (/^preset-/.test(country)) {
         user().assert(
             isArray(ampGeoPresets[country]),
-            `<${TAG}> preset ${country} not found`);
-        delete countryGroup[idx];
-        presetCountries = presetCountries.concat(ampGeoPresets[country]);
-        return;
+            '<amp-geo> preset ${country} not found');
+        return countries = countries.concat(ampGeoPresets[country]);
       }
-      return country.toLowerCase();
-    }).concat(presetCountries.map(c => c.toLowerCase()));
+      // Otherwise we add the countr to the list
+      countries.push(country);
+      return countries;
+    }, []).map(c => c.toLowerCase());
 
     return countryGroup.includes(this.country_);
   }
