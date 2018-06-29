@@ -232,7 +232,7 @@ export class AmpGeo extends AMP.BaseElement {
             '<amp-geo> preset ${country} not found');
         return countries = countries.concat(ampGeoPresets[country]);
       }
-      // Otherwise we add the countr to the list
+      // Otherwise we add the country to the list
       countries.push(country);
       return countries;
     }, []).map(c => c.toLowerCase());
