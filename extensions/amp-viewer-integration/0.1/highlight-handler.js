@@ -20,6 +20,7 @@ import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
+import {moveLayoutRect} from '../../../src/layout-rect';
 import {resetStyles, setStyles} from '../../../src/style';
 
 /**
@@ -214,12 +215,12 @@ export class HighlightHandler {
     let maxBottom = 0;
     const paddingTop = viewport.getPaddingTop();
     for (let i = 0; i < nodes.length; i++) {
-      const {top, bottom} = viewport.getLayoutRect(nodes[i]);
       // top and bottom returned by getLayoutRect includes the header padding
       // size. We need to cancel the padding to calculate the positions in
       // document.body like Viewport.animateScrollIntoView does.
-      minTop = Math.min(minTop, top - paddingTop);
-      maxBottom = Math.max(maxBottom, bottom - paddingTop);
+      const {top, bottom} = moveLayoutRect(viewport.getLayoutRect(nodes[i]), 0, -paddingTop);
+      minTop = Math.min(minTop, top);
+      maxBottom = Math.max(maxBottom, bottom);
     }
     if (minTop >= maxBottom) {
       return 0;

@@ -17,6 +17,7 @@
 import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 import {Services} from '../../../../src/services';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 describes.fakeWin('getHighlightParam', {
   amp: {
@@ -184,7 +185,7 @@ describes.realWin('HighlightHandler', {
     expect(handler.highlightedNodes_).not.to.be.null;
 
     const viewport = Services.viewportForDoc(env.ampdoc);
-    sandbox.stub(viewport, 'getLayoutRect').returns({top: 500, bottom: 550});
+    sandbox.stub(viewport, 'getLayoutRect').returns(layoutRectLtwh(0, 500, 100, 50));
     sandbox.stub(viewport, 'getHeight').returns(300);
     sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
@@ -198,7 +199,7 @@ describes.realWin('HighlightHandler', {
     expect(handler.highlightedNodes_).not.to.be.null;
 
     const viewport = Services.viewportForDoc(env.ampdoc);
-    sandbox.stub(viewport, 'getLayoutRect').returns({top: 500, bottom: 1000});
+    sandbox.stub(viewport, 'getLayoutRect').returns(layoutRectLtwh(0, 500, 100, 500));
     sandbox.stub(viewport, 'getHeight').returns(300);
     sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
