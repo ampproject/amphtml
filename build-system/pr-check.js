@@ -376,7 +376,7 @@ const command = {
           '. Skipping verification of visual diff tests.');
       return;
     }
-    timedExec('gulp visual-diff --puppeteer --verify');
+    timedExec('gulp visual-diff --puppeteer --verify_status');
   },
   runPresubmitTests: function() {
     timedExecOrDie('gulp presubmit');
