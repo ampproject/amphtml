@@ -29,8 +29,6 @@ import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../json';
-import {utf8Encode} from '../utils/bytes';
 
 /**
  * The "init" argument of the Fetch API. Currently, only "credentials: include"
@@ -66,7 +64,7 @@ export let FetchInitJsonDef;
 
 /**
  * A record version of `XMLHttpRequest` that has all the necessary properties
- * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
+ * and methods of `XMLHttpRequest` to construct a `Response` from a
  * serialized response returned by the viewer.
  * @typedef {{
  *   status: number,
@@ -83,12 +81,6 @@ const allowedMethods_ = ['GET', 'POST'];
 
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
-
-/** @private @enum {number} Allowed fetch responses. */
-const allowedFetchTypes_ = {
-  document: 1,
-  text: 2,
-};
 
 /** @private @const {string} */
 const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
@@ -128,7 +120,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!FetchInitDef} init
-   * @return {!Promise<!FetchResponse>|!Promise<!Response>}
+   * @return {!Promise<!Response>}
    * @private
    */
   fetch_(input, init) {
@@ -150,14 +142,7 @@ export class Xhr {
           if (isFormDataWrapper(init.body)) {
             init.body = init.body.getFormData();
           }
-          // Fallback to xhr polyfill since `fetch` api does not support
-          // responseType = 'document'. We do this so we don't have to do any
-          // parsing and document construction on the UI thread which would be
-          // expensive.
-          if (init.responseType == 'document') {
-            return fetchPolyfill(input, init);
-          }
-          return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+          return (this.win.fetch).apply(null, arguments);
         });
   }
 
@@ -174,7 +159,7 @@ export class Xhr {
    * @param {string} input The URL of the XHR which may get intercepted.
    * @param {!FetchInitDef} init The options of the XHR which may get
    *     intercepted.
-   * @return {!Promise<!FetchResponse|!Response|undefined>}
+   * @return {!Promise<!Response|undefined>}
    *     A response returned by the interceptor if XHR is intercepted or
    *     `Promise<undefined>` otherwise.
    * @private
@@ -287,7 +272,7 @@ export class Xhr {
    * 1. If the `Response` type is supported and `responseType` is not
    * document, pass `body` and `init` directly to the constructor of `Response`.
    *
-   * 2. Otherwise, populate a fake XHR object to pass to `FetchResponse` as if
+   * 2. Otherwise, populate a fake XHR object to pass to `Response` as if
    * the response is returned by the fetch polyfill.
    *
    * 3. If `responseType` is `document`, also parse the body and populate
@@ -297,7 +282,7 @@ export class Xhr {
    *     response to convert back to a regular Response.
    * @param {string|undefined} responseType The original response type used to
    *     initiate the XHR.
-   * @return {!FetchResponse|!Response} The deserialized regular response.
+   * @return {!Response} The deserialized regular response.
    * @private
    */
   fromStructuredCloneable_(response, responseType) {
@@ -306,7 +291,7 @@ export class Xhr {
     const isDocumentType = responseType == 'document';
     if (typeof this.win.Response === 'function' && !isDocumentType) {
       // Use native `Response` type if available for performance. If response
-      // type is `document`, we must fall back to `FetchResponse` polyfill
+      // type is `document`, we must fall back to `Response` polyfill
       // because callers would then rely on the `responseXML` property being
       // present, which is not supported by the Response type.
       return new this.win.Response(response['body'], response['init']);
@@ -349,7 +334,7 @@ export class Xhr {
           new DOMParser().parseFromString(data.responseText, 'text/html');
     }
 
-    return new FetchResponse(data);
+    return new Response(data);
   }
 
   /**
@@ -365,7 +350,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!FetchInitDef=} init
-   * @return {!Promise<!FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   fetchAmpCors_(input, init = {}) {
@@ -427,7 +412,7 @@ export class Xhr {
    * @param {string} input
    * @param {?FetchInitJsonDef=} opt_init
    * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
-   * @return {!Promise<!FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'application/json');
@@ -465,33 +450,16 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetchText(input, opt_init) {
     return this.fetch(input, setupInit(opt_init, 'text/plain'));
   }
 
   /**
-   * Creates an XHR request with responseType=document
-   * and returns a promise for the initialized `Document`.
-   * Note this does not return a `Response`, since this is not a standard
-   * Fetch response type.
-   *
-   * @param {string} input
-   * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!Document>}
-   */
-  fetchDocument(input, opt_init) {
-    const init = setupInit(opt_init, 'text/html');
-    init.responseType = 'document';
-    return this.fetch(input, init)
-        .then(response => response.document_());
-  }
-
-  /**
    * @param {string} input URL
    * @param {?FetchInitDef=} opt_init Fetch options object.
-   * @return {!Promise<!FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
@@ -567,90 +535,6 @@ function setupInit(opt_init, opt_accept) {
   return init;
 }
 
-
-/**
- * A minimal polyfill of Fetch API. It only polyfills what we currently use.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- *
- * Notice that the "fetch" method itself is not exported as that would require
- * us to immediately support a much wide API.
- *
- * @param {string} input
- * @param {!FetchInitDef} init
- * @return {!Promise<!FetchResponse>}
- * @private Visible for testing
- */
-export function fetchPolyfill(input, init) {
-  return new Promise(function(resolve, reject) {
-    const xhr = createXhrRequest(init.method || 'GET', input);
-
-    if (init.credentials == 'include') {
-      xhr.withCredentials = true;
-    }
-
-    if (init.responseType in allowedFetchTypes_) {
-      xhr.responseType = init.responseType;
-    }
-
-    if (init.headers) {
-      Object.keys(init.headers).forEach(function(header) {
-        xhr.setRequestHeader(header, init.headers[header]);
-      });
-    }
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
-        return;
-      }
-      if (xhr.status < 100 || xhr.status > 599) {
-        xhr.onreadystatechange = null;
-        reject(user().createExpectedError(`Unknown HTTP status ${xhr.status}`));
-        return;
-      }
-
-      // TODO(dvoytenko): This is currently simplified: we will wait for the
-      // whole document loading to complete. This is fine for the use cases
-      // we have now, but may need to be reimplemented later.
-      if (xhr.readyState == /* COMPLETE */ 4) {
-        resolve(new FetchResponse(xhr));
-      }
-    };
-    xhr.onerror = () => {
-      reject(user().createExpectedError('Network failure'));
-    };
-    xhr.onabort = () => {
-      reject(user().createExpectedError('Request aborted'));
-    };
-
-    if (init.method == 'POST') {
-      xhr.send(init.body);
-    } else {
-      xhr.send();
-    }
-  });
-}
-
-/**
- * @param {string} method
- * @param {string} url
- * @return {!XMLHttpRequest|!XDomainRequest}
- * @private
- */
-function createXhrRequest(method, url) {
-  let xhr = new XMLHttpRequest();
-  if ('withCredentials' in xhr) {
-    xhr.open(method, url, true);
-  } else if (typeof XDomainRequest != 'undefined') {
-    // IE-specific object.
-    xhr = new XDomainRequest();
-    xhr.open(method, url);
-  } else {
-    throw dev().createExpectedError('CORS is not supported');
-  }
-  return xhr;
-}
-
 /**
  * If 415 or in the 5xx range.
  * @param {number} status
@@ -662,8 +546,8 @@ function isRetriable(status) {
 
 /**
  * Returns the response if successful or otherwise throws an error.
- * @param {!FetchResponse} response
- * @return {!Promise<!FetchResponse>}
+ * @param {!Response} response
+ * @return {!Promise<!Response>}
  * @private Visible for testing
  */
 export function assertSuccess(response) {
@@ -681,132 +565,6 @@ export function assertSuccess(response) {
     throw err;
   });
 }
-
-
-/**
- * Response object in the Fetch API.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- */
-export class FetchResponse {
-  /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
-   */
-  constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
-    this.xhr_ = xhr;
-
-    /** @const {number} */
-    this.status = this.xhr_.status;
-
-    /** @const {boolean} */
-    this.ok = this.status >= 200 && this.status < 300;
-
-    /** @const {!FetchResponseHeaders} */
-    this.headers = new FetchResponseHeaders(xhr);
-
-    /** @type {boolean} */
-    this.bodyUsed = false;
-
-    /** @type {?ReadableStream} */
-    this.body = null;
-  }
-
-  /**
-   * Create a copy of the response and return it.
-   * @return {!FetchResponse}
-   */
-  clone() {
-    dev().assert(!this.bodyUsed, 'Body already used');
-    return new FetchResponse(this.xhr_);
-  }
-
-  /**
-   * Drains the response and returns the text.
-   * @return {!Promise<string>}
-   * @private
-   */
-  drainText_() {
-    dev().assert(!this.bodyUsed, 'Body already used');
-    this.bodyUsed = true;
-    return Promise.resolve(this.xhr_.responseText);
-  }
-
-  /**
-   * Drains the response and returns a promise that resolves with the response
-   * text.
-   * @return {!Promise<string>}
-   */
-  text() {
-    return this.drainText_();
-  }
-
-  /**
-   * Drains the response and returns the JSON object.
-   * @return {!Promise<!JsonObject>}
-   */
-  json() {
-    return /** @type {!Promise<!JsonObject>} */ (
-      this.drainText_().then(parseJson));
-  }
-
-  /**
-   * Reads the xhr responseXML.
-   * @return {!Promise<!Document>}
-   * @private
-   */
-  document_() {
-    dev().assert(!this.bodyUsed, 'Body already used');
-    this.bodyUsed = true;
-    user().assert(this.xhr_.responseXML,
-        'responseXML should exist. Make sure to return ' +
-        'Content-Type: text/html header.');
-    const doc = /** @type {!Document} */(dev().assert(this.xhr_.responseXML));
-    return Promise.resolve(doc);
-  }
-
-  /**
-   * Drains the response and returns a promise that resolves with the response
-   * ArrayBuffer.
-   * @return {!Promise<!ArrayBuffer>}
-   */
-  arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (
-      this.drainText_().then(utf8Encode));
-  }
-}
-
-
-/**
- * Provides access to the response headers as defined in the Fetch API.
- * @private Visible for testing.
- */
-export class FetchResponseHeaders {
-  /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
-   */
-  constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
-    this.xhr_ = xhr;
-  }
-
-  /**
-   * @param {string} name
-   * @return {string}
-   */
-  get(name) {
-    return this.xhr_.getResponseHeader(name);
-  }
-
-  /**
-   * @param {string} name
-   * @return {boolean}
-   */
-  has(name) {
-    return this.xhr_.getResponseHeader(name) != null;
-  }
-}
-
 
 /**
  * @param {!Window} window
