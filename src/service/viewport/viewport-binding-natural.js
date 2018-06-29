@@ -17,10 +17,10 @@
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {px, setImportantStyles} from '../../style';
 
 
 const TAG_ = 'Viewport';
@@ -203,6 +203,27 @@ export class ViewportBindingNatural_ {
     // scrollTop (as position relative to the viewport changes as you scroll).
     const rect = this.win.document.body./*OK*/getBoundingClientRect();
     return rect.height + rect.top + this.getScrollTop();
+  }
+
+  /** @override */
+  getElementOpacity(el) {
+    const win = window;
+    const fullyVisibleValue = 1;
+    const fullyHiddenValue = 0;
+
+    if (!el) { return fullyVisibleValue; }
+    const {visibility, opacity} = computedStyle(win, el);
+
+    if (visibility === 'hidden') {
+      return fullyHiddenValue;
+    }
+    const opacityValue = (opacity === '')
+      ? fullyVisibleValue
+      : parseFloat(opacity);
+
+    if (isNaN(opacityValue)) { return fullyVisibleValue; }
+
+    return opacityValue;
   }
 
   /** @override */

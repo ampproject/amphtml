@@ -167,6 +167,14 @@ export class VisibilityManager {
   isBackgroundedAtStart() {}
 
   /**
+  * Returns the root's, root's parent's and root's children's
+  * lowest opacity value
+  * @return {number}
+  * @abstract
+  */
+  getRootOpacity() {}
+
+  /**
    * Returns the root's layout rect.
    * @return {!../../../src/layout-rect.LayoutRectDef}}
    * @abstract
@@ -340,6 +348,10 @@ export class VisibilityManager {
       if (opt_element) {
         const resource =
             this.resources_.getResourceForElementOptional(opt_element);
+        state['opacity'] =
+              resource ?
+                resource.getOpacity() :
+                Services.viewportForDoc(this.ampdoc).getOpacity(opt_element);
         layoutBox =
             resource ?
               resource.getLayoutBox() :
@@ -352,6 +364,7 @@ export class VisibilityManager {
         });
 
       } else {
+        state['opacity'] = this.getRootOpacity();
         layoutBox = this.getRootLayoutBox();
       }
       model.maybeDispose();
@@ -496,6 +509,14 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   /** @override */
   isBackgroundedAtStart() {
     return this.backgroundedAtStart_;
+  }
+
+  /** @override */
+  getRootOpacity() {
+    const root = this.ampdoc.getRootNode();
+    const rootElement = dev().assertElement(
+        root.documentElement || root.body || root);
+    return this.viewport_.getOpacity(rootElement);
   }
 
   /** @override */
@@ -705,6 +726,12 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   /** @override */
   isBackgroundedAtStart() {
     return this.backgroundedAtStart_;
+  }
+
+  /** @override */
+  getRootLayoutBox() {
+    const rootElement = dev().assertElement(this.embed.iframe);
+    return Services.viewportForDoc(this.ampdoc).getOpacity(rootElement);
   }
 
   /**

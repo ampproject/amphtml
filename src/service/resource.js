@@ -471,6 +471,8 @@ export class Resource {
     const viewport = this.resources_.getViewport();
     const box = this.resources_.getViewport().getLayoutRect(this.element);
     this.layoutBox_ = box;
+    const opacity = this.resources_.getViewport().getOpacity(this.element);
+    this.opacity_ = opacity;
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
@@ -570,6 +572,14 @@ export class Resource {
    */
   requestMeasure() {
     this.isMeasureRequested_ = true;
+  }
+
+  /**
+    * Returns the min opacity among the element, element's parents and
+    * element's children
+    */
+  getOpacity() {
+    return this.opacity_;
   }
 
   /**

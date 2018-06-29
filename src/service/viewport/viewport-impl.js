@@ -225,6 +225,15 @@ export class Viewport {
     this.binding_.ensureReadyForElements();
   }
 
+  /**
+   * Returns the lowest Opacity css value among the element, element's parents
+   * and element's children.
+   * @return {number}
+   */
+  getOpacity() {
+    return this.opacity_;
+  }
+
   /** @private */
   updateVisibility_() {
     const visible = this.viewer_.isVisible();
@@ -392,6 +401,65 @@ export class Viewport {
           layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
     }
     return this.rect_;
+  }
+
+  /**
+  * Returns the node tree of the current element starting from the document root
+  * @param {element} el
+  * @return {Array} node list of the element's node tree
+  */
+  getElementNodeTree(el) {
+    const nodeList = [];
+    if (!el) { return nodeList; }
+
+    const CAP = 50;
+    const DOCUMENT_NODE_TYPE = 9;
+    const ELEMENT_WITH_PARENT_TYPE = 1;
+    let parent;
+    nodeList.push(el);
+
+    for (let i = 0; i < CAP; i++) {
+
+      parent = el.parentNode || el.parentElement;
+
+      if (parent && parent.nodeType == ELEMENT_WITH_PARENT_TYPE) {
+        el = parent;
+        nodeList.push(el);
+      } else if (parent && parent.nodeType == DOCUMENT_NODE_TYPE) {
+        parent = el.ownerDocument.defaultView.frameElement;
+
+        if (parent && parent.nodeType == ELEMENT_WITH_PARENT_TYPE) {
+          el = parent;
+          nodeList.push(el);
+        } else { break; }
+      } else { break; }
+    }
+
+    return nodeList;
+  }
+
+  /**
+   * Returns the min opacity found amongst the element, element's children
+   * and element's parents
+   * @param {element} el
+   * @return {number} minimum opacity value
+   */
+  getOpacity(el) {
+    const parentNodeTree = this.getElementNodeTree(el.parentElement);
+    parentNodeTree.push(el);
+    let minOpacityFound = 1;
+    let opacity;
+
+    for (let i = 0; i < parentNodeTree.length; i++) {
+      const node = parentNodeTree[i];
+      opacity = this.binding_.getElementOpacity(node);
+
+      if (opacity < minOpacityFound) { minOpacityFound = opacity; }
+
+      if (minOpacityFound === 0) { return minOpacityFound; }
+    }
+
+    return minOpacityFound;
   }
 
   /**
