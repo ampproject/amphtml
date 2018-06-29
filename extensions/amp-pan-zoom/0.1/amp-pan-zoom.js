@@ -169,9 +169,8 @@ export class AmpPanZoom extends AMP.BaseElement {
       this.updatePanZoomBounds_(scale);
       const x = this.boundX_(args['x'] || 0, /*allowExtent*/ false);
       const y = this.boundY_(args['y'] || 0, /*allowExtent*/ false);
-      return this.set_(scale, x, y, /*animate*/ true).then(() => {
-        this.onZoomRelease_();
-      });
+      return this.set_(scale, x, y, /*animate*/ true)
+          .then(() => this.onZoomRelease_());
     });
   }
 
@@ -689,7 +688,6 @@ export class AmpPanZoom extends AMP.BaseElement {
       this.posX_ = newPosX;
       this.posY_ = newPosY;
       this.updatePanZoom_();
-      this.triggerTransformEnd_(newScale, newPosX, newPosY);
       return Promise.resolve();
     }
   }
@@ -710,6 +708,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       this.startScale_ = this.scale_;
       this.startX_ = this.posX_;
       this.startY_ = this.posY_;
+      this.triggerTransformEnd_(this.scale_, this.posX_, this.posY_);
     });
   }
 }
