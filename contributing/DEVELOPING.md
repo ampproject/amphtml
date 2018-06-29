@@ -70,7 +70,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --integration --files=<test-files-path-glob>`                | Runs the integration tests from the specified files in Chrome.                                                 |
 | `gulp test [--unit\|--integration] --verbose`                           | Runs tests in Chrome with logging enabled.                            |
 | `gulp test [--unit\|--integration] --nobuild`                           | Runs tests without re-build.                                          |
-| `gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/report-html/index.html |
+| `gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/index.html |
 | `gulp test [--unit\|--integration] --watch`                             | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test [--unit\|--integration] --watch --verbose`                   | Same as `watch`, with logging enabled.                                 |
 | `gulp test [--integration] --saucelabs`                                 | Runs integration tests on saucelabs (requires [setup](#testing-on-sauce-labs)).                |
