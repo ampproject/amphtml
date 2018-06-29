@@ -56,6 +56,26 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
   });
 
   describe('AmpVideoIntegration', () => {
+    describe('#getMetadata', () => {
+      it('gets metadata from window name', () => {
+        const metadata = {
+          canonicalUrl: 'foo.html',
+          sourceUrl: 'bar.html',
+        };
+
+        const win = {name: JSON.stringify(metadata)};
+        const integration = new AmpVideoIntegration(win);
+
+        // Sinon does not support sinon.match on to.equal
+        const dummySpy = sandbox.spy();
+
+        dummySpy(integration.getMetadata());
+
+        expect(dummySpy.withArgs(sinon.match(metadata)))
+            .to.have.been.calledOnce;
+      });
+    });
+
     describe('#method', () => {
       it('should execute on message', () => {
         const integration = new AmpVideoIntegration();
@@ -152,6 +172,93 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
         integration.onMessage_({id, args: mockedIntersection});
 
         expect(callback.withArgs(mockedIntersection)).to.have.been.calledOnce;
+      });
+    });
+
+    describe('#listenTo', () => {
+      describe('jwplayer', () => {
+        it('registers all events and methods', () => {
+          const player = {
+            on: sandbox.spy(),
+            play: sandbox.spy(),
+            pause: sandbox.spy(),
+            setMuted: sandbox.spy(),
+            setControls: sandbox.spy(),
+            setFullscreen: sandbox.spy(),
+          };
+
+          const expectedEvents = [
+            'error',
+            'setupError',
+            'adSkipped',
+            'adComplete',
+            'adError',
+            'adStarted',
+            'play',
+            'ready',
+            'pause',
+            'volume',
+          ];
+
+          const expectedMethods = [
+            'play',
+            'pause',
+            'mute',
+            'unmute',
+            'showcontrols',
+            'hidecontrols',
+            'fullscreenenter',
+            'fullscreenexit',
+          ];
+
+          const integration = new AmpVideoIntegration();
+          const listenToOnce = sandbox.stub(integration, 'listenToOnce_');
+          const methodSpy = sandbox.spy(integration, 'method');
+
+          integration.listenTo('jwplayer', player);
+
+          expectedEvents.forEach(event => {
+            expect(player.on.withArgs(event, sinon.match.any))
+                .to.have.been.calledOnce;
+          });
+
+          expectedMethods.forEach(method => {
+            expect(methodSpy.withArgs(method, sinon.match.any))
+                .to.have.been.calledOnce;
+          });
+
+          expect(listenToOnce.callCount).to.equal(expectedMethods.length);
+        });
+      });
+
+      describe('video.js', () => {
+        it('registers all methods', () => {
+
+          const expectedMethods = [
+            'play',
+            'pause',
+            'mute',
+            'unmute',
+            'showcontrols',
+            'hidecontrols',
+            'fullscreenenter',
+            'fullscreenexit',
+          ];
+
+          const integration = new AmpVideoIntegration({videojs: {}});
+          const listenToOnce = sandbox.stub(integration, 'listenToOnce_');
+          const methodSpy = sandbox.spy(integration, 'method');
+          const dummyElement = env.win.document.createElement('video');
+
+          integration.listenTo('videojs', dummyElement);
+
+          expectedMethods.forEach(method => {
+            expect(methodSpy.withArgs(method, sinon.match.any))
+                .to.have.been.calledOnce;
+          });
+
+          expect(listenToOnce.callCount).to.equal(expectedMethods.length);
+        });
       });
     });
   });

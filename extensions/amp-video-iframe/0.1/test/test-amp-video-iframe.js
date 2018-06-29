@@ -24,6 +24,7 @@ import {
 } from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {tryParseJson} from '../../../../src/json';
 
 function getIntersectionMessage(id) {
   return {data: {id, method: 'getIntersection'}};
@@ -89,6 +90,30 @@ describes.realWin('amp-video-iframe', {
         .returns(entry);
     return entry;
   }
+
+  describe('#buildCallback', () => {
+    it('sets metadata', function* () {
+      const metadata = {
+        canonicalUrl: 'foo.html',
+        sourceUrl: 'bar.html',
+      };
+
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns(metadata);
+
+      const videoIframe = createVideoIframe();
+
+      yield whenLoaded(videoIframe);
+
+      const {name} = videoIframe.implementation_.iframe_;
+
+      // Sinon does not support sinon.match on to.equal
+      const dummySpy = sandbox.spy();
+
+      dummySpy(tryParseJson(name));
+
+      expect(dummySpy.withArgs(sinon.match(metadata))).to.have.been.calledOnce;
+    });
+  });
 
   describe('#onMessage_', () => {
 

@@ -325,6 +325,7 @@ export class AmpVideoIntegration {
    * @param {function(!JsonObject)} callback
    */
   getIntersection(callback) {
+    this.listenToOnce_();
     this.getIntersectionForTesting_(callback);
   }
 
