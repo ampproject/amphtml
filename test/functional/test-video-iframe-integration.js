@@ -19,6 +19,12 @@ import {AmpVideoIntegration, adopt} from '../../src/video-iframe-integration';
 
 describes.realWin('video-iframe-integration', {amp: false}, env => {
 
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = env.sandbox;
+  });
+
   function pushToGlobal(global, callback) {
     (global.AmpVideoIframe = global.AmpVideoIframe || []).push(callback);
   }
@@ -33,7 +39,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
     describe('<script async> support', () => {
       it('should execute callbacks pushed before adoption', () => {
         const global = {};
-        const callback = env.sandbox.spy();
+        const callback = sandbox.spy();
         pushToGlobal(global, callback);
         adopt(global);
         expectCalledWithAmpVideoIntegration(callback);
@@ -42,7 +48,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
       it('should execute callbacks pushed after adoption', () => {
         const global = {};
         adopt(global);
-        const callback = env.sandbox.spy();
+        const callback = sandbox.spy();
         pushToGlobal(global, callback);
         expectCalledWithAmpVideoIntegration(callback);
       });
@@ -54,7 +60,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
       it('should execute on message', () => {
         const integration = new AmpVideoIntegration();
 
-        const listenToOnce = env.sandbox.stub(integration, 'listenToOnce_');
+        const listenToOnce = sandbox.stub(integration, 'listenToOnce_');
 
         const validMethods = [
           'pause',
@@ -68,7 +74,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
         ];
 
         validMethods.forEach(method => {
-          const spy = env.sandbox.spy();
+          const spy = sandbox.spy();
           integration.method(method, spy);
           integration.onMessage_({event: 'method', method});
           expect(spy).to.have.been.calledOnce;
@@ -80,12 +86,12 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
       it('should reject invalid methods', () => {
         const integration = new AmpVideoIntegration();
 
-        const listenToOnce = env.sandbox.stub(integration, 'listenToOnce_');
+        const listenToOnce = sandbox.stub(integration, 'listenToOnce_');
 
         const invalidMethods = 'tacos al pastor'.split(' ');
 
         invalidMethods.forEach(method => {
-          const spy = env.sandbox.spy();
+          const spy = sandbox.spy();
           expect(() => integration.method(method, spy))
               .to.throw(/Invalid method/);
         });
@@ -107,7 +113,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
       it('should post valid events', () => {
         const integration = new AmpVideoIntegration();
 
-        const postToParent = env.sandbox.stub(integration, 'postToParent_');
+        const postToParent = sandbox.stub(integration, 'postToParent_');
 
         const validEvents = [
           'canplay',
@@ -130,11 +136,11 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
     describe('#getIntersection', () => {
       it('should request and receive intersection', () => {
-        const integration = new AmpVideoIntegration(env.win);
+        const integration = new AmpVideoIntegration();
         const postToParent =
-            env.sandbox.spy(integration, 'postToParent_');
+            sandbox.spy(integration, 'postToParent_');
 
-        const callback = env.sandbox.spy();
+        const callback = sandbox.spy();
 
         const id = integration.getIntersectionForTesting_(callback);
 

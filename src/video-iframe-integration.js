@@ -23,7 +23,9 @@ import {tryParseJson} from '../src/json';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
-adopt(self);
+if (!getMode(self).test) {
+  adopt(self);
+}
 
 /**
  * @typedef {{
@@ -77,13 +79,11 @@ export class AmpVideoIntegration {
   /** @param {!Window} win */
   constructor(win) {
 
-    if (getMode(win).test) {
-      /**
-       * Used for checking callback return type.
-       * @visibleForTesting
-       */
-      this.isAmpVideoIntegration_ = true;
-    }
+    /**
+     * Used for checking callback return type.
+     * @visibleForTesting
+     */
+    this.isAmpVideoIntegration_ = true;
 
     /** @private @const */
     this.callCounter_ = 0;
