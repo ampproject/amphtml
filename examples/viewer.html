@@ -146,6 +146,28 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="6"] #container6 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="6"] #show-container6-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="7"] #container7 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="7"] #show-container7-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -373,13 +395,6 @@
       });
     };
 
-    Viewer.prototype.renderMustacheTemplate_ = function(data) {
-      // XHR to fetch list items for amp list happens here and
-      // constructing of the contents of the mustache template.
-      // Just mock rendering the amp mustache templates here.
-      return Promise.resolve({renderedHtml: '<div>Hi aaron</div>'});
-    };
-
 
     Viewer.prototype.scrollAmpDoc = function(scrollTop) {
       log('viewer scroll amp doc: ', scrollTop);
@@ -420,24 +435,13 @@
           log('touch event!', name);
           return Promise.resolve();
         case 'viewerRenderTemplate':
-          log('handle renderTemplate');
-          if (data.sourceAmpComponent === 'amp-list') {
-            return this.renderMustacheTemplate_(data);
-          } else if (data.sourceAmpComponent == 'amp-form') {
-            // Viewer and amp doc communication for amp-form can
-            // result in two proxy requests. This is a naive example,
-            // as it always returns the same result. Normally, the
-            // initial request is for the data, then a subsequent
-            // request is for the forwarding the template and data
-            // which would the viewer would then sanitize and transform
-            // accordingly.
-            // TODO(alabiaga): This can be consolidated in one step
-            // in the component? which I didn't do this as it kept intact
-            // the original flow of the code.
-            return this.proxyRequest_(data);
-          } else {
-            return Promise.reject({error: 'source amp component is not valid'})
-          }
+        if (data.sourceAmpComponent === 'amp-list') {
+          return this.ssrRenderAmpListTemplate_(data);
+        } else if (data.sourceAmpComponent == 'amp-form') {
+          return this.ssrRenderAmpFormTemplate_(data);
+        } else {
+          return Promise.reject({error: 'source amp component is not valid'})
+        }
         case 'documentHeight':
         case 'setFlushParams':
         case 'prerenderComplete':
@@ -450,9 +454,14 @@
       }
     };
 
-    Viewer.prototype.proxyRequest_ = function(data) {
+    Viewer.prototype.ssrRenderAmpListTemplate_ = function(data) {
       // Mocked response.
-      return Promise.resolve({renderedHtml: "<div>Some search result</div>"});
+      return Promise.resolve({renderedHtml: "<div>Server side rendered response</div>"});
+    };
+
+    Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {
+      // Mocked response.
+      return Promise.resolve({renderedHtml: "<div>Server side rendered search result</div>"});
     };
 
     Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
@@ -507,17 +516,51 @@
       new Viewer(
           'container1',
           '1',
-          './mustache-to-amp-view-host.amp.html?amp_js_v=0.1?',
+          './everything.amp.html?amp_js_v=0.1',
           true).start();
       addShowContainer('1');
 
       new Viewer(
-        'container2',
-        '2',
-        './form-proxy-template-to-viewer-host.amp.html?amp_js_v=0.1?',
-        true).start();
-        
+          'container2',
+          '2',
+          './article.amp.html?amp_js_v=0.1',
+          false).start();
       addShowContainer('2');
+
+      new Viewer(
+          'container3',
+          '3',
+          './article-access.amp.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('3');
+
+      new Viewer(
+          'container4',
+          '4',
+          './alp.amp.html',
+          false).start();
+      addShowContainer('4');
+
+      new Viewer(
+          'container5',
+          '5',
+          './article-fixed-header.amp.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('5');
+
+      new Viewer(
+          'container6',
+          '6',
+          './mustache-to-amp-view-host.amp.html?amp_js_v=0.1?',
+          false).start();
+      addShowContainer('6');
+
+      new Viewer(
+          'container7',
+          '7',
+          './form-proxy-template-to-viewer-host.amp.html?amp_js_v=0.1?',
+          false).start();
+      addShowContainer('7');
 
       showContainer('1');
     }
@@ -558,6 +601,11 @@
       <h1>Viewer</h1>
       <a class="show-container-anchor" id="show-container1-anchor">One</a>
       <a class="show-container-anchor" id="show-container2-anchor">Two</a>
+      <a class="show-container-anchor" id="show-container3-anchor">Three</a>
+      <a class="show-container-anchor" id="show-container4-anchor">ALP</a>
+      <a class="show-container-anchor" id="show-container5-anchor">Five</a>
+      <a class="show-container-anchor" id="show-container6-anchor">Six</a>
+      <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -567,10 +615,35 @@
       </div>
     </container>
     <container id="container2">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container3">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container4">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container5">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container6">
         <div class="wait">
           Please wait, the AMP doc will appear here...
         </div>
-      </container>    
+    </container>
+    <container id="container7">
+    <div class="wait">
+      Please wait, the AMP doc will appear here...
+    </div>
+</container>
   </viewer>
 </body>
 </html>
