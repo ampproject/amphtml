@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {closestBySelector} from './dom';
+import {addAttributesToElement, closestBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
+import {setStyle} from '../../../src/style';
 import {tryParseJson} from './json';
 
 /**
@@ -466,7 +467,6 @@ export class SubscriptionApi {
   }
 }
 
-
 /**
  * @param {!Element} element
  * @return {boolean}
@@ -480,7 +480,6 @@ export function looksLikeTrackingIframe(element) {
   // Iframe is not tracking iframe if open with user interaction
   return !closestBySelector(this.element, '.i-amphtml-overlay');
 }
-
 
 // Most common ad sizes
 // Array of [width, height] pairs.
@@ -515,4 +514,18 @@ export function isAdLike(element) {
     }
   }
   return false;
+}
+
+/**
+ * @param {!Element} iframe
+ * @private
+ */
+export function disableScrollingOnIframe(iframe) {
+  addAttributesToElement(iframe, {scrolling: "no"});
+
+  // This shouldn't work, but it does on Firefox.
+  // https://stackoverflow.com/a/15494969
+  setStyle(iframe, {overflow: 'hidden'});
+
+  return iframe;
 }

@@ -26,15 +26,18 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {
+  disableScrollingOnIframe,
+  isAdLike,
+  looksLikeTrackingIframe,
+} from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {isAdLike, looksLikeTrackingIframe} from '../../../src/iframe-helper';
-import {isFullscreenElement} from '../../../src/dom';
+import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
@@ -113,7 +116,9 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.iframe_ = createFrameFor(this, this.getSrc_(), SANDBOX);
+    this.iframe_ =
+        disableScrollingOnIframe(createFrameFor(this, this.getSrc_(), SANDBOX));
+
     this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
     return this.createReadyPromise_().then(() => this.onReady_());
   }

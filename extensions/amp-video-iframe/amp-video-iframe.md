@@ -26,9 +26,10 @@
 
 `amp-video-iframe` has several important differences from vanilla iframes and `amp-iframe`.
 
-- `amp-video-iframe` implements all [Video Features](../../spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
 - By default, an `amp-video-iframe` is sandboxed (see [details](#sandbox)).
-- An `amp-video-iframe` must only request resources via HTTPS.
+- `amp-video-iframe` implements all [Video Features](../../spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
+- `amp-video-iframe` must only request resources via HTTPS.
+- `amp-video-iframe` is not scrollable.
 
 
 ## Usage of amp-video-iframe for advertising
