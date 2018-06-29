@@ -352,7 +352,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff --headless';
+    let cmd = 'gulp visual-diff --puppeteer --headless';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -376,7 +376,7 @@ const command = {
           '. Skipping verification of visual diff tests.');
       return;
     }
-    timedExec('gulp visual-diff --verify');
+    timedExec('gulp visual-diff --puppeteer --verify_status');
   },
   runPresubmitTests: function() {
     timedExecOrDie('gulp presubmit');

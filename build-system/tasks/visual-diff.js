@@ -498,7 +498,7 @@ async function createEmptyBuild(page) {
  * Simple wrapper around the JS (Percy-Puppeteer) based visual diff tests.
  */
 async function visualDiffPuppeteer() {
-  if (argv.verify) {
+  if (argv.verify_status) {
     const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
     const status = await waitForBuildCompletion(buildId);
     verifyBuildStatus(status, buildId);
@@ -571,7 +571,8 @@ gulp.task(
     {
       options: {
         'master': '  Includes a blank snapshot (baseline for skipped builds)',
-        'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
+        'verify_status':
+          '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
         'headless': '  Runs Chrome in headless mode',
         'percy_debug': '  Prints debug info from Percy-Capybara libraries',

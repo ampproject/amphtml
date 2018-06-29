@@ -504,7 +504,7 @@ end
 
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main
-  if ARGV.include? '--verify'
+  if ARGV.include? '--verify_status'
     build_id = File.open('PERCY_BUILD_ID', 'r').read
     status = wait_for_build_completion(build_id)
     verify_build_status(status, build_id)
