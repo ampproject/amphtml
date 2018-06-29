@@ -348,6 +348,36 @@ For instance, to show a "subscribe" action to non-subscribers:
 <button subscriptions-display="NOT subscribed" subscriptions-action="subscribe">Become a subscriber</button>
 ```
 
+## Analytics
+
+The `amp-subscriptions` triggers seven types of analytics signals during the different lifecycle of various subscriptions.
+Following are the events and the conditions when the events are triggered.
+
+1. PLATFORM_ACTIVATED:
+ - This event is fired when one of the platforms configured is selected and activated to be used(see [Selecting platform](#selecting-platform)).
+ - This event is fired with `serviceId` of the selected platform.
+2. PAYWALL_ACTIVATED
+ - After selecting a platform, if the entitlement of the platform does not grant access to the document then `PAYWALL_ACTIVATED` is triggered.
+ - This event is fired with `serviceId` of the selected platform.
+3. PLATFORM_REGISTERED
+ - Since a platform is free to initialize itself at anytime on the page, `PLATFORM_REGISTERED` event is triggered when `amp-subscriptions` is able to resolve the instance of the platform.
+ - This event is fired with `serviceId` of the selected platform.
+4. PLATFORM_REAUTHORIZED
+ - A platform can request for re-authorizing itself after any action performed e.g. `Login`. Once the re-authorization is complete and new entitlement is fetched for the platform `PLATFORM_REAUTHORIZED` is triggered.
+ - This event is fired with `serviceId` of the selected platform.
+5. ACTION_DELEGATED
+ - A platform can request its action to be delegated to another service, in such scenerio `ACTION_DELEGATED` is triggered just before handing over the event to the other platform.
+ - This event is fired with `serviceId` and `action` of the selected platform.
+6. ENTITLEMENT_RESOLVED
+ - Once the platform is registered, the entitlments from it are requested. `ENTITLEMENT_RESOLVED` event is triggered when the entitlement fetch from the platform is completed.
+ - This event is fired with `serviceId` and `action` of the selected platform.
+7. STARTED
+ - This event is triggered when `amp-subscriptions` is initialized.
+ - This event does not contain any data.
+8. `<ActionName>-`STARTED
+ - Whenever any action execution starts, And event with `<ActionName>-`STARTED is fired.
+ - This event does not contain any data.
+
 
 ## Available vendor services
 
