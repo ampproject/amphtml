@@ -219,25 +219,26 @@ export class AmpGeo extends AMP.BaseElement {
   }
 
   /**
-   * checkGroup_() does this.country_  match the group
+   * checkGroup_() does this.country_ match the group
+   * after expanding any presets and forceing to lower case.
    * @param {!Array<string>} countryGroup The group to match against
    * @return {boolean}
    */
   checkGroup_(countryGroup) {
-    countryGroup = countryGroup.reduce((countries, country) => {
+    /** @type {!Array<string>} */
+    const expandedGroup = countryGroup.reduce((countries, country) => {
       // If it's a valid preset then we expand it.
       if (/^preset-/.test(country)) {
         user().assert(
             isArray(ampGeoPresets[country]),
-            '<amp-geo> preset ${country} not found');
-        return countries = countries.concat(ampGeoPresets[country]);
+            '<amp-geo> preset ' + country + ' not found');
+        return countries.concat(ampGeoPresets[country]);
       }
       // Otherwise we add the country to the list
       countries.push(country);
       return countries;
     }, []).map(c => c.toLowerCase());
-
-    return countryGroup.includes(this.country_);
+    return expandedGroup.includes(this.country_);
   }
 
   /**
