@@ -79,7 +79,7 @@ export function createFrameFor(video, src, sandbox = null) {
       htmlFor(element)`<iframe frameborder=0 allowfullscreen></iframe>`;
 
   if (sandbox) {
-    frame.setAttribute('sandbox', sandbox);
+    frame.setAttribute('sandbox', sandbox.join(' '));
   }
 
   frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
