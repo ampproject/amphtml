@@ -69,6 +69,7 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from './experiments';
+import {overrideLogLevel} from './log';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
@@ -212,12 +213,18 @@ function adoptShared(global, callback) {
    * @return {boolean}
    */
   global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
+
   /**
    * @param {string} experimentId
    * @param {boolean=} opt_on
    * @return {boolean}
    */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
+
+  /**
+   * @param {!./log.LogLevel} level
+   */
+  global.AMP.setLogLevel = overrideLogLevel.bind(null, global);
 
   /**
    * Sets the function to forward tick events to.
