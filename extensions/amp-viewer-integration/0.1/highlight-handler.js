@@ -212,15 +212,19 @@ export class HighlightHandler {
     const viewport = Services.viewportForDoc(this.ampdoc_);
     let minTop = Number.MAX_VALUE;
     let maxBottom = 0;
+    const paddingTop = viewport.getPaddingTop();
     for (let i = 0; i < nodes.length; i++) {
       const {top, bottom} = viewport.getLayoutRect(nodes[i]);
-      minTop = Math.min(minTop, top);
-      maxBottom = Math.max(maxBottom, bottom);
+      // top and bottom returned by getLayoutRect includes the header padding
+      // size. We need to cancel the padding to calculate the positions in
+      // document.body like Viewport.animateScrollIntoView does.
+      minTop = Math.min(minTop, top - paddingTop);
+      maxBottom = Math.max(maxBottom, bottom - paddingTop);
     }
     if (minTop >= maxBottom) {
       return 0;
     }
-    const height = viewport.getHeight() - viewport.getPaddingTop();
+    const height = viewport.getHeight() - paddingTop;
     if (maxBottom - minTop > height) {
       return minTop;
     }
