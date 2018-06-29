@@ -425,4 +425,14 @@ describes.realWin('amp-geo', {
       });
     }).to.throw();
   });
+
+  it('should throw if the preset name is not valid', () => {
+    expect(() => {
+      addConfigElement('script', 'application/json',
+          {'ISOCountryGroups': {'foo': ['preset-foo']}});
+      allowConsoleError(() => {
+        geo.buildCallback();
+      });
+    }).to.throw();
+  });
 });
