@@ -185,7 +185,8 @@ describes.realWin('HighlightHandler', {
     expect(handler.highlightedNodes_).not.to.be.null;
 
     const viewport = Services.viewportForDoc(env.ampdoc);
-    sandbox.stub(viewport, 'getLayoutRect').returns(layoutRectLtwh(0, 500, 100, 50));
+    sandbox.stub(viewport, 'getLayoutRect').returns(
+        layoutRectLtwh(0, 500, 100, 50));
     sandbox.stub(viewport, 'getHeight').returns(300);
     sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
@@ -199,7 +200,8 @@ describes.realWin('HighlightHandler', {
     expect(handler.highlightedNodes_).not.to.be.null;
 
     const viewport = Services.viewportForDoc(env.ampdoc);
-    sandbox.stub(viewport, 'getLayoutRect').returns(layoutRectLtwh(0, 500, 100, 500));
+    sandbox.stub(viewport, 'getLayoutRect').returns(
+        layoutRectLtwh(0, 500, 100, 500));
     sandbox.stub(viewport, 'getHeight').returns(300);
     sandbox.stub(viewport, 'getPaddingTop').returns(50);
 

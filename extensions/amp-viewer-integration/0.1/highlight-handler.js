@@ -18,9 +18,9 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
+import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
-import {moveLayoutRect} from '../../../src/layout-rect';
 import {resetStyles, setStyles} from '../../../src/style';
 
 /**
@@ -218,7 +218,8 @@ export class HighlightHandler {
       // top and bottom returned by getLayoutRect includes the header padding
       // size. We need to cancel the padding to calculate the positions in
       // document.body like Viewport.animateScrollIntoView does.
-      const {top, bottom} = moveLayoutRect(viewport.getLayoutRect(nodes[i]), 0, -paddingTop);
+      const {top, bottom} = moveLayoutRect(viewport.getLayoutRect(nodes[i]),
+          0, -paddingTop);
       minTop = Math.min(minTop, top);
       maxBottom = Math.max(maxBottom, bottom);
     }
