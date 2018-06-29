@@ -119,16 +119,31 @@ export class AmpVideoIntegration {
   onMessage_(data) {
     const id = data['id'];
     if (isFiniteNumber(id) && this.callbacks_[id]) {
-      const callback = this.callbacks_[id];
-      const args = data['args'];
-      callback(args);
-      delete this.callbacks_[id];
+      this.handleResponse_(id, data['args']);
       return;
     }
-    if (data['event'] != 'method') {
-      return;
+
+    if (data['event'] == 'method') {
+      this.maybeExecute_(data['method']);
     }
-    const method = data['method'];
+  }
+
+  /**
+   * @param {number} id
+   * @param {!JsonObject} args
+   * @private
+   */
+  handleResponse_(id, args) {
+    const callback = this.callbacks_[id];
+    callback(args);
+    delete this.callbacks_[id];
+  }
+
+  /**
+   * @param {string} method
+   * @private
+   */
+  maybeExecute_(method) {
     if (!(method in this.methods_)) {
       return;
     }
