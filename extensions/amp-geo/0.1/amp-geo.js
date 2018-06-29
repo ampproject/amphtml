@@ -163,7 +163,7 @@ export class AmpGeo extends AMP.BaseElement {
     const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
 
     if (preRenderMatch &&
-        !Services.urlForDoc(doc).isProxyOrigin(doc.location)) {
+        !Services.urlForDoc(this.getAmpDoc()).isProxyOrigin(doc.location)) {
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
     } else {

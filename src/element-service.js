@@ -86,7 +86,7 @@ function isElementScheduled(win, elementName) {
  * implementation loaded. Users should typically wrap this as a special purpose
  * function (e.g. Services.viewportForDoc(...)) for type safety and because the
  * factory should not be passed around.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
@@ -94,16 +94,17 @@ function isElementScheduled(win, elementName) {
  *     not the extension.
  * @return {!Promise<*>}
  */
-export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
+export function getElementServiceForDoc(elementOrAmpDoc, id, extension,
+  opt_element) {
   return getElementServiceIfAvailableForDoc(
-      nodeOrDoc, id, extension, opt_element)
+      elementOrAmpDoc, id, extension, opt_element)
       .then(service => assertService(service, id, extension));
 }
 
 /**
  * Same as getElementService but produces null if the given element is not
  * actually available on the current page.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
@@ -112,9 +113,9 @@ export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDoc(
-  nodeOrDoc, id, extension, opt_element) {
-  const ampdoc = getAmpdoc(nodeOrDoc);
-  const s = getServicePromiseOrNullForDoc(nodeOrDoc, id);
+  elementOrAmpDoc, id, extension, opt_element) {
+  const ampdoc = getAmpdoc(elementOrAmpDoc);
+  const s = getServicePromiseOrNullForDoc(elementOrAmpDoc, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
   }
@@ -127,9 +128,9 @@ export function getElementServiceIfAvailableForDoc(
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
         if (opt_element) {
-          return getServicePromiseOrNullForDoc(nodeOrDoc, id);
+          return getServicePromiseOrNullForDoc(elementOrAmpDoc, id);
         } else if (isElementScheduled(ampdoc.win, extension)) {
-          return getServicePromiseForDoc(nodeOrDoc, id);
+          return getServicePromiseForDoc(elementOrAmpDoc, id);
         }
         return null;
       });
@@ -139,22 +140,21 @@ export function getElementServiceIfAvailableForDoc(
  * Returns a promise for service for the given id in the embed scope of
  * a given node, if it exists. Otherwise, falls back to ampdoc scope IFF
  * the given node is in the top-level window.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom element that provides
  *     the implementation of this service.
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDocInEmbedScope(
-  nodeOrDoc, id, extension) {
-  const s = getExistingServiceForDocInEmbedScope(nodeOrDoc, id);
+  elementOrAmpDoc, id, extension) {
+  const s = getExistingServiceForDocInEmbedScope(elementOrAmpDoc, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (Promise.resolve(s));
   }
   // Return embed-scope element service promise if scheduled.
-  if (nodeOrDoc.nodeType) {
-    const win = toWin(/** @type {!Document} */ (
-      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
+  if (elementOrAmpDoc.nodeType) {
+    const win = toWin(elementOrAmpDoc.ownerDocument.defaultView);
     const topWin = getTopWindow(win);
     // In embeds, doc-scope services are window-scope. But make sure to
     // only do this for embeds (not the top window), otherwise we'd grab
@@ -163,7 +163,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
       return getElementServicePromiseOrNull(win, id, extension);
     } else {
       // Fallback to ampdoc IFF the given node is _not_ FIE.
-      return getElementServiceIfAvailableForDoc(nodeOrDoc, id, extension);
+      return getElementServiceIfAvailableForDoc(elementOrAmpDoc, id, extension);
     }
   }
   return /** @type {!Promise<?Object>} */ (Promise.resolve(null));

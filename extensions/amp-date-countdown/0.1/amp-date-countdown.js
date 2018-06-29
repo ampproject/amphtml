@@ -121,7 +121,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    Services.viewerForDoc(this.win.document).whenFirstVisible().then(() => {
+    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
       const EPOCH = this.getEpoch_() + (this.offsetSeconds_ * 1000);
       this.tickCountDown_(new Date(EPOCH) - new Date());
     });
