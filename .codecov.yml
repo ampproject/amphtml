@@ -1,6 +1,6 @@
 # Settings for code coverage PR comments from https://codecov.io
 comment:
-  layout: "header, diff, footer"
+  layout: "header, diff, flags, footer"
   behavior: default
   require_base: no
   require_head: yes

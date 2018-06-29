@@ -333,13 +333,12 @@ const command = {
       cmd += ' --compiled';
     }
     if (process.env.TRAVIS) {
+      timedExecOrDie(cmd + ' --coverage');
       startSauceConnect();
-      cmd += ' --saucelabs';
-      timedExecOrDie(cmd);
+      timedExecOrDie(cmd + ' --saucelabs');
       stopSauceConnect();
     } else {
-      cmd += ' --headless';
-      timedExecOrDie(cmd);
+      timedExecOrDie(cmd + ' --headless');
     }
   },
   runVisualDiffTests: function(opt_mode) {
