@@ -111,16 +111,32 @@ class AmpVideoIframe extends AMP.BaseElement {
         '<amp-video-iframe> does not allow tracking iframes. ',
         'Please use amp-analytics instead.');
 
-    installVideoManagerForDoc(this.getAmpDoc());
+    installVideoManagerForDoc(element);
   }
 
   /** @override */
   layoutCallback() {
+    const name = JSON.stringify(this.getMetadata_());
+
     this.iframe_ =
-        disableScrollingOnIframe(createFrameFor(this, this.getSrc_(), SANDBOX));
+        disableScrollingOnIframe(
+            createFrameFor(this, this.getSrc_(), name, SANDBOX));
 
     this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
     return this.createReadyPromise_().then(() => this.onReady_());
+  }
+
+  /**
+   * @return {!JsonObject}
+   * @private
+   */
+  getMetadata_() {
+    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
+
+    return dict({
+      'sourceUrl': sourceUrl,
+      'canonicalUrl': canonicalUrl,
+    });
   }
 
   /** @private */

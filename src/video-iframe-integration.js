@@ -25,6 +25,14 @@ import {tryParseJson} from '../src/json';
 
 /**
  * @typedef {{
+ *   sourceUrl: string,
+ *   canonicalUrl: string,
+ * }}
+ */
+let DocMetadataDef;
+
+/**
+ * @typedef {{
  *   on: function(string, function()),
  *   play: function(),
  *   pause: function(),
@@ -93,6 +101,9 @@ export class AmpVideoIntegration {
     /** @private @const {!Object<string, function()>} */
     this.methods_ = {};
 
+    /** @private {?DocMetadataDef} */
+    this.metadata_ = null;
+
     /** @private @const {function()} */
     this.listenToOnce_ = once(() => {
       listenTo(this.win_, e => this.onMessage_(e));
@@ -100,6 +111,15 @@ export class AmpVideoIntegration {
 
     /** @private {boolean} */
     this.muted_ = false;
+  }
+
+  /** @return {!DocMetadataDef} */
+  getMetadata() {
+    if (!this.metadata_) {
+      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
+      return {canonicalUrl, sourceUrl};
+    }
+    return this.metadata_;
   }
 
   /**
@@ -197,16 +217,14 @@ export class AmpVideoIntegration {
 
     player.on('volume', e => this.onVolumeChange_(e.volume));
 
-    this.methods_({
-      'play': () => player.play(),
-      'pause': () => player.pause(),
-      'mute': () => player.setMute(true),
-      'unmute': () => player.setMute(false),
-      'showcontrols': () => player.setControls(true),
-      'hidecontrols': () => player.setControls(false),
-      'fullscreenenter': () => player.setFullscreen(true),
-      'fullscreenexit': () => player.setFullscreen(false),
-    });
+    this.method('play', () => player.play());
+    this.method('pause', () => player.pause());
+    this.method('mute', () => player.setMute(true));
+    this.method('unmute', () => player.setMute(false));
+    this.method('showcontrols', () => player.setControls(true));
+    this.method('hidecontrols', () => player.setControls(false));
+    this.method('fullscreenenter', () => player.setFullscreen(true));
+    this.method('fullscreenexit', () => player.setFullscreen(false));
   }
 
   /**
@@ -214,6 +232,8 @@ export class AmpVideoIntegration {
    * @private
    */
   listenToVideoJs_(element) {
+    userAssert(this.win_.videojs, 'Video.JS not imported.');
+
     // Retrieve lazily.
     const player = once(() =>
       this.win_.videojs.getPlayer(element));
@@ -225,16 +245,14 @@ export class AmpVideoIntegration {
     listen(element, 'volumechange', () =>
       this.onVolumeChange_(player().volume()));
 
-    this.methods_({
-      'play': () => player().play(),
-      'pause': () => player().pause(),
-      'mute': () => player().muted(true),
-      'unmute': () => player().muted(false),
-      'showcontrols': () => player().controls(true),
-      'hidecontrols': () => player().controls(false),
-      'fullscreenenter': () => player().requestFullscreen(),
-      'fullscreenexit': () => player().exitFullscreen(),
-    });
+    this.method('play', () => player().play());
+    this.method('pause', () => player().pause());
+    this.method('mute', () => player().muted(true));
+    this.method('unmute', () => player().muted(false));
+    this.method('showcontrols', () => player().controls(true));
+    this.method('hidecontrols', () => player().controls(false));
+    this.method('fullscreenenter', () => player().requestFullscreen());
+    this.method('fullscreenexit', () => player().exitFullscreen());
   }
 
   /**
@@ -251,14 +269,6 @@ export class AmpVideoIntegration {
       this.muted_ = false;
       this.postEvent('unmuted');
     }
-  }
-
-  /**
-   * @param {!Object<string, function()>} map
-   * @private
-   */
-  methods_(map) {
-    Object.keys(map).forEach(method => this.method(method, map[method]));
   }
 
   /**

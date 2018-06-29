@@ -70,13 +70,18 @@ export function redispatch(element, event, events) {
 /**
  * @param {!./base-element.BaseElement} video
  * @param {string} src
+ * @param {?string} name
  * @param {?Array<!SandboxOptions>=} sandbox
  * @return {!Element}
  */
-export function createFrameFor(video, src, sandbox = null) {
+export function createFrameFor(video, src, name = null, sandbox = null) {
   const {element} = video;
   const frame =
       htmlFor(element)`<iframe frameborder=0 allowfullscreen></iframe>`;
+
+  if (name) {
+    frame.setAttribute('name', name);
+  }
 
   if (sandbox) {
     frame.setAttribute('sandbox', sandbox.join(' '));
