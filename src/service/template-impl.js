@@ -76,15 +76,6 @@ export class BaseTemplate {
   }
 
   /**
-   * To be implemented by subclasses.
-   * @param {!JsonObject|string} unusedData
-   * @return {!Element}
-   */
-  renderHtml(unusedData) {
-    throw new Error('Not implemented');
-  }
-
-  /**
    * Helps the template implementation to unwrap the root element. The root
    * element can be unwrapped only when it contains a single element or a
    * single element surrounded by empty text nodes.
@@ -350,16 +341,6 @@ export class Templates {
    */
   render_(impl, data) {
     return impl.render(data);
-  }
-
-  /**
-   * @param {!BaseTemplate} parent
-   * @param {!HTML} html
-   * @return {!Promise}
-   */
-  renderHtml(parent, html) {
-    return this.getImplementation_(this.findTemplate(parent))
-        .then(impl => impl.renderHtml(html));
   }
 }
 

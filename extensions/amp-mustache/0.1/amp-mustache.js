@@ -72,19 +72,24 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   render(data) {
-    let mustacheData = data;
-    if (typeof data === 'object') {
-      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+    let html = data;
+    if (!this.viewerCanRenderTemplates()) {
+      let mustacheData = data;
+      if (typeof data === 'object') {
+        mustacheData = Object.assign({}, data, this.nestedTemplates_);
+      }
+      html = mustacheRender(this.template_, mustacheData);
     }
-    const html = mustacheRender(this.template_, mustacheData);
-    const sanitized = sanitizeHtml(html);
-    const root = this.win.document.createElement('div');
-    root./*OK*/innerHTML = sanitized;
-    return this.unwrap(root);
+    return this.serializeHtml_(html);
   }
 
-  /** @override */
-  renderHtml(html) {
+  /**
+   * Sanitizes the html and inserts it in the DOM.
+   * @param {!HTML} html
+   * @return {!Element}
+   * @private
+   */
+  serializeHtml_(html) {
     const root = this.win.document.createElement('div');
     const sanitized = sanitizeHtml(html);
     root./*OK*/innerHTML = sanitized;

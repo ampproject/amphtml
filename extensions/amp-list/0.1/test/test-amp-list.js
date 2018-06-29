@@ -38,6 +38,7 @@ describes.realWin('amp-list component', {
     doc = win.document;
     ampdoc = env.ampdoc;
     ampdoc.isSingleDoc = () => true;
+
     const templates = Services.templatesFor(win);
     templatesMock = sandbox.mock(templates);
 
@@ -63,7 +64,6 @@ describes.realWin('amp-list component', {
 
   afterEach(() => {
     templatesMock.verify();
-    viewerMock.verify();
     listMock.verify();
   });
 
@@ -117,7 +117,7 @@ describes.realWin('amp-list component', {
   function expectViewerProxiedFetchAndRender(
     fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     const fetch = Promise.resolve(fetched);
-    viewerMock.expects('canRenderTemplates').returns(true).twice();
+    viewerMock.expects('isSupported').returns(true).twice();
     viewerMock.expects('fetchAndRenderTemplate')
         .withExactArgs(element, 'amp-list').returns(fetch).once();
     if (opts.resetOnRefresh) {
@@ -131,64 +131,44 @@ describes.realWin('amp-list component', {
         .withExactArgs(element, fetched.renderedHtml)
         .returns(render).once(1);
 
-
     return Promise.all([fetch, render]);
   }
 
-  it('should fetch and render', () => {
-    const items = [
-      {title: 'Title1'},
-    ];
-    const itemElement = doc.createElement('div');
-    const rendered = expectFetchAndRender(items, [itemElement]);
-    return list.layoutCallback().then(() => rendered).then(() => {
-      expect(list.container_.contains(itemElement)).to.be.true;
+  describe('without amp-bind', () => {
+    beforeEach(() => {
+      setBindService(null);
     });
 
-  describe('Viewer render template', () => {
-    it('should proxy rendering to viewer', () => {
-      const resp = {renderedHtml: '<div>Rendered template</div>'};
+    it('should fetch and render', () => {
+      const items = [
+        {title: 'Title1'},
+      ];
       const itemElement = doc.createElement('div');
-      const rendered = expectViewerProxiedFetchAndRender(resp, [itemElement]);
+      const rendered = expectFetchAndRender(items, [itemElement]);
       return list.layoutCallback().then(() => rendered).then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
       });
     });
 
-    it('should error if viewer does not define response renderedHtml', () => {
-      viewerMock.expects('canRenderTemplates').returns(true);
-      viewerMock.expects('fetchAndRenderTemplate').returns(Promise.resolve({}));
-      templatesMock.expects('renderHtml').never();
-      listMock.expects('toggleLoading').withExactArgs(false).once();
-      return expect(list.layoutCallback()).to.eventually.be
-          .rejectedWith(/Response must define the rendered html/);
-    });
-  });
+    describe('Viewer render template', () => {
+      it('should proxy rendering to viewer', () => {
+        const resp = {renderedHtml: '<div>Rendered template</div>'};
+        const itemElement = doc.createElement('div');
+        const rendered = expectViewerProxiedFetchAndRender(resp, [itemElement]);
+        return list.layoutCallback().then(() => rendered).then(() => {
+          expect(list.container_.contains(itemElement)).to.be.true;
+        });
+      });
 
-  it('should attemptChangeHeight after render', () => {
-    const items = [
-      {title: 'Title1'},
-    ];
-    const itemElement = doc.createElement('div');
-    itemElement.style.height = '1337px';
-
-    const rendered = expectFetchAndRender(items, [itemElement]);
-
-    let measureFunc;
-    listMock.expects('getVsync').returns({
-      measure: func => {
-        measureFunc = func;
-      },
-    }).once();
-
-    listMock.expects('attemptChangeHeight')
-        .withExactArgs(1337)
-        .returns(Promise.resolve());
-
-    return list.layoutCallback().then(() => rendered).then(() => {
-      expect(list.container_.contains(itemElement)).to.be.true;
-      expect(measureFunc).to.exist;
-      measureFunc();
+      it('should error if viewer does not define response renderedHtml', () => {
+        viewerMock.expects('canRenderTemplates').returns(true);
+        viewerMock.expects('fetchAndRenderTemplate')
+            .returns(Promise.resolve({}));
+        templatesMock.expects('renderHtml').never();
+        listMock.expects('toggleLoading').withExactArgs(false).once();
+        return expect(list.layoutCallback()).to.eventually.be
+            .rejectedWith(/Response must define the rendered html/);
+      });
     });
 
     it('should attemptChangeHeight after render', () => {
@@ -197,6 +177,7 @@ describes.realWin('amp-list component', {
       ];
       const itemElement = doc.createElement('div');
       itemElement.style.height = '1337px';
+<<<<<<< HEAD
 
       expectFetchAndRender(items, [itemElement]);
 
@@ -225,12 +206,60 @@ describes.realWin('amp-list component', {
 
       expectFetchAndRender(
           items, [itemElement], {expr: 'items', singleItem: true});
+=======
+
+      const rendered = expectFetchAndRender(items, [itemElement]);
+
+      let measureFunc;
+      listMock.expects('getVsync').returns({
+        measure: func => {
+          measureFunc = func;
+        },
+      }).once();
+
+      listMock.expects('attemptChangeHeight')
+          .withExactArgs(1337)
+          .returns(Promise.resolve());
 
       return list.layoutCallback().then(() => {
+        expect(list.container_.contains(itemElement)).to.be.true;
+        expect(measureFunc).to.exist;
+        measureFunc();
+      });
+    });
+
+    it('should fetch and render non-array if single-item is set', () => {
+      const items = {title: 'Title1'};
+      const itemElement = doc.createElement('div');
+      element.setAttribute('single-item', 'true');
+
+      const rendered = expectFetchAndRender(
+          items, [itemElement], {expr: 'items', singleItem: true});
+
+      return list.layoutCallback().then(() => rendered).then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
       });
     });
 
+    it('should trim the results to max-items', () => {
+      const items = [
+        {title: 'Title1'},
+        {title: 'Title2'},
+        {title: 'Title3'},
+      ];
+      const itemElement = doc.createElement('div');
+      element.setAttribute('max-items', '2');
+
+      const rendered = expectFetchAndRender(
+          items, [itemElement], {expr: 'items', maxItems: 2});
+>>>>>>> address comments and clean up
+
+      return list.layoutCallback().then(() => rendered).then(() => {
+        expect(list.container_.contains(itemElement)).to.be.true;
+      });
+    });
+
+<<<<<<< HEAD
     it('should trim the results to max-items', () => {
       const items = [
         {title: 'Title1'},
@@ -248,6 +277,8 @@ describes.realWin('amp-list component', {
       });
     });
 
+=======
+>>>>>>> address comments and clean up
     it('should dispatch DOM_UPDATE event after render', () => {
       const spy = sandbox.spy(list.container_, 'dispatchEvent');
 
@@ -415,6 +446,7 @@ describes.realWin('amp-list component', {
           mutate: block => block(),
         }).atLeast(1);
       });
+<<<<<<< HEAD
 
       it('should hide fallback element on fetch success', () => {
         // Stub fetch and render to succeed.
@@ -433,6 +465,26 @@ describes.realWin('amp-list component', {
         // Stub fetch_() to fail.
         listMock.expects('fetch_').returns(Promise.reject()).once();
 
+=======
+
+      it('should hide fallback element on fetch success', () => {
+        // Stub fetch and render to succeed.
+        listMock.expects('fetch_').returns(Promise.resolve([])).once();
+        templatesMock.expects('findAndRenderTemplateArray')
+            .returns(Promise.resolve([]));
+        // Act as if a fallback is already displayed.
+        sandbox.stub(list, 'fallbackDisplayed_').callsFake(true);
+
+        listMock.expects('togglePlaceholder').never();
+        listMock.expects('toggleFallback').withExactArgs(false).once();
+        return list.layoutCallback().catch(() => {});
+      });
+
+      it('should hide placeholder and show fallback on fetch failure', () => {
+        // Stub fetch_() to fail.
+        listMock.expects('fetch_').returns(Promise.reject()).once();
+
+>>>>>>> address comments and clean up
         listMock.expects('togglePlaceholder').withExactArgs(false).once();
         listMock.expects('toggleFallback').withExactArgs(true).once();
         return list.layoutCallback().catch(() => {});

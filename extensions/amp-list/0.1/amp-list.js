@@ -19,6 +19,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {Deferred} from '../../../src/utils/promise';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
@@ -30,7 +31,6 @@ import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import { TemplateRendererHelper } from '../../../src/service/template-renderer-helper';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -89,12 +89,12 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    /** @private */
+    /** @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
 
-    /** @private */
-    this.templateRendererHelper_ =
-        new TemplateRendererHelper(TAG, this.viewer_, this.templates_);
+    /** @private {!../../../src/SsrTemplateHelper} */
+    this.ssrTemplateHelper_ = new SsrTemplateHelper(
+        TAG, this.viewer_, this.templates_);
   }
 
   /** @override */
@@ -214,17 +214,8 @@ export class AmpList extends AMP.BaseElement {
       // Remove any previous items before the reload
       removeChildren(dev().assertElement(this.container_));
     }
-    if (this.viewer_.canRenderTemplates()) {
-      return this.templateRendererHelper_.fetchAndRenderTemplate(
-          this.element).then(resp => {
-        user().assert(
-            resp && (typeof resp.renderedHtml !== 'undefined'),
-            'Response must define the rendered html');
-        return this.scheduleRender_(resp.renderedHtml);
-      }, error => {
-        throw user().createError('Error proxying amp-list templates', error);
-      }).then(
-          handleFallbackSuccess_.bind(this), handleFallbackError_.bind(this));
+    if (this.ssrTemplateHelper_.isSupported()) {
+      this.ssrTemplate_();
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
       return this.fetch_(itemsExpr).then(items => {
@@ -246,9 +237,25 @@ export class AmpList extends AMP.BaseElement {
         return this.scheduleRender_(items);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
-      }).then(handleFallbackSuccess_.bind(this),
-          handleFallbackError_.bind(this));
+      }).then(onFetchSuccess_.bind(this),
+          onFetchError_.bind(this));
     }
+  }
+
+  /**
+   * Proxies the template rendering to the viewer.
+   */
+  ssrTemplate_() {
+    return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+        this.element).then(resp => {
+      user().assert(
+          resp && (typeof resp.renderedHtml !== 'undefined'),
+          'Response must define the rendered html');
+      return this.scheduleRender_(resp.renderedHtml);
+    }, error => {
+      throw user().createError('Error proxying amp-list templates', error);
+    }).then(
+        onFetchSuccess_.bind(this), onFetchError_.bind(this));
   }
 
   /**
@@ -286,18 +293,20 @@ export class AmpList extends AMP.BaseElement {
         this.renderItems_ = null;
       }
     };
-    if (this.viewer_.canRenderTemplates()) {
+    const onFulfilledCallback = () => {
+      scheduleNextPass();
+      current.resolver();
+    };
+    const onRejectedCallback = () => {
+      scheduleNextPass();
+      current.rejecter();
+    };
+    if (this.ssrTemplateHelper_.isSupported()) {
       // TODO(alabiaga): should call updatebindings as below?
-      this.templates_.renderHtml(
+      this.templates_.findAndRenderTemplate(
           this.element, /** @type {!HTML} */ (current.data))
           .then(element => this.container_.appendChild(element))
-          .then(/* onFulfilled */ () => {
-            scheduleNextPass();
-            current.resolver();
-          }, /* onRejected */ () => {
-            scheduleNextPass();
-            current.rejecter();
-          });
+          .then(onFulfilledCallback, onRejectedCallback);
     } else {
       this.templates_.findAndRenderTemplateArray(
           this.element, /** @type {!Array} */ (current.data))
@@ -402,9 +411,8 @@ export class AmpList extends AMP.BaseElement {
   }
 }
 
-
-/**` @private */
-function handleFallbackSuccess_() {
+/** @private */
+function onFetchSuccess_() {
   if (this.getFallback()) {
     // Hide in case fallback was displayed for a previous fetch.
     this.toggleFallbackInMutate_(false);
@@ -416,8 +424,9 @@ function handleFallbackSuccess_() {
 /**
  * @param {!Error} error
  * @private
+ * @throws {!Error} throws error if fallback element is not present.
  */
-function handleFallbackError_(error) {
+function onFetchError_(error) {
   this.toggleLoading(false);
   if (this.getFallback()) {
     this.toggleFallbackInMutate_(true);

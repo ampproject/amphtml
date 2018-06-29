@@ -28,7 +28,8 @@ import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
 } from '../../../src/url';
-import {Services, TemplateRendererHelper} from '../../../src/services';
+import {Services} from '../../../src/services';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
@@ -143,12 +144,9 @@ export class AmpForm {
     /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
 
-    /** @private {!../../../src/service/template-renderer-helper.TemplateRendererHelper}*/
-    this.templateRendererHelper_ =
-        new TemplateRendererHelper(TAG, this.viewer_, this.templates_);
-
-    /** @const @private {boolean} */
-    this.viewerCanRenderTemplate_ = this.viewer_.canRenderTemplates();
+    /** @private {!../../../src/service/ssr-template-helper.SsrTemplateHelper}*/
+    this.ssrTemplateHelper_ = new SsrTemplateHelper(
+        TAG, this.viewer_, this.templates_);
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
@@ -277,7 +275,7 @@ export class AmpForm {
     }, true);
 
     // If the viewer can render templates, then form verifier is not applicable.
-    if (!this.viewerCanRenderTemplate_) {
+    if (!this.ssrTemplateHelper_.isSupported()) {
       const afterVerifierCommit = () => {
         // Move from the VERIFYING state back to INITIAL
         if (this.state_ === FormState_.VERIFYING) {
@@ -304,14 +302,15 @@ export class AmpForm {
   /**
    * Triggers 'amp-form-submit' event in 'amp-analytics' and
    * generates variables for form fields to be accessible in analytics
-   * Not applicable if viewer can render template.
    *
    * @param {string} eventType
    * @private
    */
   triggerFormSubmitInAnalytics_(eventType) {
-    if (this.viewerCanRenderTemplate_) {
-      return;
+    // Not applicable if viewer can render template.
+    if (this.ssrTemplateHelper_.isSupported()) {
+      this.assertSsrTemplate_('Analytics not supported for viewers with '
+          + 'viewerRenderTemplate capability');
     }
     const formDataForAnalytics = {};
     const formObject = this.getFormAsObject_();
@@ -402,14 +401,13 @@ export class AmpForm {
 
   /**
    * Helper method that actual handles the different cases (post, get, xhr...).
-   * @param {!Event} event
    * @param {ActionTrust} trust
    * @private
    */
-  submit_(event, trust) {
+  submit_(trust) {
     const varSubsFields = this.getVarSubsFields_();
     if (this.xhrAction_) {
-      this.handleXhrSubmit_(varSubsFields, event, trust);
+      this.handleXhrSubmit_(varSubsFields, trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
@@ -450,15 +448,15 @@ export class AmpForm {
   handleXhrSubmit_(varSubsFields, trust) {
     this.setState_(FormState_.SUBMITTING);
     const varSubPromise = this.doVarSubs_(varSubsFields);
-    if (this.viewerCanRenderTemplate_) {
+    if (this.ssrTemplateHelper_.isSupported()) {
       varSubPromise.then(() => {
         this.actions_.trigger(
             this.form_, 'submit', /* event */ null, trust);
       }).then(() => {
         return this.templateRendererHelper_.fetchAndRenderTemplate(
             this.form_,
-            this.handleProxyRenderTemplateSuccess_,
-            this.handleProxyRenderTemplateFailure_
+            this.handleSsrTemplateSuccess_,
+            this.handleSsrTemplateFailure_
         );
       });
     } else {
@@ -481,7 +479,7 @@ export class AmpForm {
    * Handles viewer render template success.
    * @param {!JsonObject} response
    */
-  handleProxyRenderTemplateSuccess_(response) {
+  handleSsrTemplateSuccess_(response) {
     this.setState_(FormState_.SUBMIT_SUCCESS);
     this.renderTemplate_(response.renderedHtml || {});
   }
@@ -490,7 +488,7 @@ export class AmpForm {
    * Handles viewer render template failure.
    * @param {!JsonObject} error
    */
-  handleProxyRenderTemplateFailure_(error) {
+  handleSsrTemplateFailure_(error) {
     this.triggerAction_(/* success */ false, error); // do we need this?
     this.setState_(FormState_.SUBMIT_ERROR);
     this.renderTemplate_(error || {});
@@ -555,9 +553,9 @@ export class AmpForm {
    * @private
    */
   doXhr_(url, method, opt_extraFields) {
-    if (this.viewerCanRenderTemplate_) {
-      dev().error(TAG, 'Viewer has renderTemplate capabilities. XHRs should '
-          + 'be proxied to the viewer.');
+    if (this.ssrTemplateHelper_.isSupported()) {
+      this.assertSsrTemplate_('Viewer has viewerRenderTemplate capabilities. '
+          + 'XHRs should be proxied to the viewer.');
     }
     let xhrUrl, body;
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
@@ -642,10 +640,10 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
-    if (this.viewerCanRenderTemplate_) {
-      dev().error(TAG,
-          'Non-XHR requests are not supported for viewers with renderTemplate '
-          + 'capabilities.');
+    if (this.ssrTemplateHelper_.isSupported()) {
+      this.assertSsrTemplate_('Non-XHR requests are not supported for viewers '
+          + 'with renderTemplate capabilities');
+      return;
     }
     this.assertNoSensitiveFields_();
     // Non-xhr GET requests replacement should happen synchronously.
@@ -653,6 +651,16 @@ export class AmpForm {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
     }
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
+  }
+
+  /**
+   * Throws an error related to viewer render template handling.
+   * supported.
+   * @param {string} msg
+   * @private
+   */
+  assertSsrTemplate_(msg) {
+    user().assert(true, msg);
   }
 
   /**
@@ -692,7 +700,9 @@ export class AmpForm {
    * @private
    */
   maybeHandleRedirect_(response) {
-    if (this.viewerCanRenderTemplate_) {
+    if (this.ssrTemplaterHelper_.isSupported()) {
+      this.assertSsrTemplate_(
+          'Redirects not supported for viewerRenderTemplate capability');
       return;
     }
     if (!response || !response.headers) {
@@ -793,21 +803,18 @@ export class AmpForm {
       container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
-        /**
-         * @param {!HTML} rendered The rendered amp mustache.
-         */
-        const renderedCallback = function(rendered) {
-          rendered.setAttribute('i-amphtml-rendered', '');
-          container.appendChild(rendered);
-          const renderedEvent = createCustomEvent(
-              this.win_,
-              AmpEvents.DOM_UPDATE,
-              /* detail */ null,
-              {bubbles: true});
-          container.dispatchEvent(renderedEvent);
-        };
         p = this.templates_.findAndRenderTemplate(container, data)
-            .then(renderedCallback.bind(this));
+            .then(rendered => {
+              rendered.id = messageId;
+              rendered.setAttribute('i-amphtml-rendered', '');
+              container.appendChild(rendered);
+              const renderedEvent = createCustomEvent(
+                  this.win_,
+                  AmpEvents.DOM_UPDATE,
+                  /* detail */ null,
+                  {bubbles: true});
+              container.dispatchEvent(renderedEvent);
+            });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
         // this container are now visible so they get scheduled for layout.
