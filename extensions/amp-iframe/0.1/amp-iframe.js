@@ -288,7 +288,7 @@ export class AmpIframe extends AMP.BaseElement {
     const {element} = this;
 
     this.isAdLike_ = isAdLike(element);
-    this.isTrackingFrame_ = looksLikeTrackingIframe(element);
+    this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
     this.isDisallowedAsAd_ = this.isAdLike_ &&
         !isAdPositionAllowed(element, this.win);
 
@@ -298,6 +298,15 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.intersectionObserverApi_) {
       this.intersectionObserverApi_.fire();
     }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  looksLikeTrackingIframe_() {
+    // It may be tempting to inline this method, but it's referenced in tests.
+    return looksLikeTrackingIframe(this.element);
   }
 
   /**
