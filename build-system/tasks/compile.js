@@ -229,18 +229,24 @@ function compile(entryModuleFilenames, outputDir,
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
     if (options.includeOnlyESMLevelPolyfills) {
+      const polyfillsShadowList = [
+        'array-includes.js',
+        'document-contains.js',
+        'domtokenlist-toggle.js',
+        'math-sign.js',
+        'object-assign.js',
+        'promise.js',
+      ];
       srcs.push(
           '!build/fake-module/src/polyfills.js',
           '!build/fake-module/src/polyfills/**/*.js',
           '!build/fake-polyfills/src/polyfills.js',
           '!src/polyfills/*.js',
           'build/fake-polyfills/**/*.js');
-      fs.writeFileSync('build/fake-polyfills/src/polyfills/array-includes.js', 'export function install() {}');
-      fs.writeFileSync('build/fake-polyfills/src/polyfills/document-contains.js', 'export function install() {}');
-      fs.writeFileSync('build/fake-polyfills/src/polyfills/domtokenlist-toggle.js', 'export function install() {}');
-      fs.writeFileSync('build/fake-polyfills/src/polyfills/math-sign.js', 'export function install() {}');
-      fs.writeFileSync('build/fake-polyfills/src/polyfills/object-assign.js', 'export function install() {}');
-      fs.writeFileSync('build/fake-polyfills/src/polyfills/promise.js', 'export function install() {}');
+      polyfillsShadowList.forEach(polyfillFile => {
+        fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
+            'export function install() {}');
+      });
     } else if (options.includePolyfills) {
       srcs.push(
           '!build/fake-module/src/polyfills.js',
