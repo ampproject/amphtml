@@ -195,19 +195,18 @@ export class AmpVideoIntegration {
       player.on(e, () => this.postEvent(redispatchAs[e]));
     });
 
-    player.on('volume', e =>
-      this.onVolumeChange_(e.volume));
+    player.on('volume', e => this.onVolumeChange_(e.volume));
 
-    const method = (type, handler) => this.method(type, handler);
-
-    method('play', () => player.play());
-    method('pause', () => player.pause());
-    method('mute', () => player.setMute(true));
-    method('unmute', () => player.setMute(false));
-    method('showcontrols', () => player.setControls(true));
-    method('hidecontrols', () => player.setControls(false));
-    method('fullscreenenter', () => player.setFullscreen(true));
-    method('fullscreenexit', () => player.setFullscreen(false));
+    this.methods_({
+      'play': () => player.play(),
+      'pause': () => player.pause(),
+      'mute': () => player.setMute(true),
+      'unmute': () => player.setMute(false),
+      'showcontrols': () => player.setControls(true),
+      'hidecontrols': () => player.setControls(false),
+      'fullscreenenter': () => player.setFullscreen(true),
+      'fullscreenexit': () => player.setFullscreen(false),
+    });
   }
 
   /**
@@ -226,16 +225,16 @@ export class AmpVideoIntegration {
     listen(element, 'volumechange', () =>
       this.onVolumeChange_(player().volume()));
 
-    const method = (type, handler) => this.method(type, handler);
-
-    method('play', () => player().play());
-    method('pause', () => player().pause());
-    method('mute', () => player().muted(true));
-    method('unmute', () => player().muted(false));
-    method('showcontrols', () => player().controls(true));
-    method('hidecontrols', () => player().controls(false));
-    method('fullscreenenter', () => player().requestFullscreen());
-    method('fullscreenexit', () => player().exitFullscreen());
+    this.methods_({
+      'play': () => player().play(),
+      'pause': () => player().pause(),
+      'mute': () => player().muted(true),
+      'unmute': () => player().muted(false),
+      'showcontrols': () => player().controls(true),
+      'hidecontrols': () => player().controls(false),
+      'fullscreenenter': () => player().requestFullscreen(),
+      'fullscreenexit': () => player().exitFullscreen(),
+    });
   }
 
   /**
@@ -252,6 +251,14 @@ export class AmpVideoIntegration {
       this.muted_ = false;
       this.postEvent('unmuted');
     }
+  }
+
+  /**
+   * @param {!Object<string, function()>} map
+   * @private
+   */
+  methods_(map) {
+    Object.keys(map).forEach(method => this.method(method, map[method]));
   }
 
   /**
