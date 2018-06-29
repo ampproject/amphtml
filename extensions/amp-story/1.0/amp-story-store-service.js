@@ -154,7 +154,7 @@ const actions = (state, action, data) => {
     // Triggers right to left experience.
     case Action.TOGGLE_RTL:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.RTL_STATE]: data}));
+          {}, state, {[StateProperty.RTL_STATE]: !!data}));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CONSENT_ID]: data}));
@@ -261,11 +261,11 @@ export class AmpStoryStoreService {
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
-      [StateProperty.RTL_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAUSED_STATE]: false,
+      [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.CONSENT_ID]: null,
