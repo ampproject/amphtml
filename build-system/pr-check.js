@@ -333,7 +333,10 @@ const command = {
       cmd += ' --compiled';
     }
     if (process.env.TRAVIS) {
-      timedExecOrDie(cmd + ' --coverage');
+      // TODO(rsimha, #16462): compiled + coverage is flaky
+      if (!compiled) {
+        timedExecOrDie(cmd + ' --coverage');
+      }
       startSauceConnect();
       timedExecOrDie(cmd + ' --saucelabs');
       stopSauceConnect();
