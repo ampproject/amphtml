@@ -21,7 +21,7 @@ import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
-import {setStyle} from '../../../src/style';
+import {setStyle} from './style';
 import {tryParseJson} from './json';
 
 /**
