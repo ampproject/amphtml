@@ -37,7 +37,7 @@ const allowedFetchTypes_ = {
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */
-export function fetchPolyfill(input, init) {
+function fetchPolyfill(input, init) {
   return new Promise(function(resolve, reject) {
     const xhr = createXhrRequest(init.method || 'GET', input);
 
@@ -92,7 +92,7 @@ export function fetchPolyfill(input, init) {
  *
  * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
  */
-export class FetchResponse {
+class FetchResponse {
   /**
    * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
    */
@@ -157,6 +157,7 @@ export class FetchResponse {
   /**
    * Reads the xhr responseXML.
    * @return {!Promise<!Document>}
+   * @visibleForTesting
    * @private
    */
   document_() {
@@ -184,7 +185,7 @@ export class FetchResponse {
  * Provides access to the response headers as defined in the Fetch API.
  * @private Visible for testing.
  */
-export class FetchResponseHeaders {
+class FetchResponseHeaders {
   /**
    * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
    */
@@ -244,11 +245,4 @@ export function install(win) {
   if (!win.Headers) {
     win.Response = FetchResponseHeaders;
   }
-}
-
-/**
- * @return {!XMLHttpRequestDef}
- */
-export function XMLHttpRequestDefForTesting() {
-  return XMLHttpRequestDef;
 }
