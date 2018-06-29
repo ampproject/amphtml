@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {closestBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {dict} from './utils/object';
@@ -467,12 +468,17 @@ export class SubscriptionApi {
 
 
 /**
- * @param {!./layout-rect.LayoutRectDef} rect
+ * @param {!Element} element
  * @return {boolean}
  */
-export function looksLikeTrackingIframe(rect) {
+export function looksLikeTrackingIframe(element) {
+  const box = element.getLayoutBox();
   // This heuristic is subject to change.
-  return rect.width <= 10 || rect.height <= 10;
+  if (box.width > 10 || box.height > 10) {
+    return false;
+  }
+  // Iframe is not tracking iframe if open with user interaction
+  return !closestBySelector(this.element, '.i-amphtml-overlay');
 }
 
 

@@ -116,9 +116,6 @@ export class AmpIframe extends AMP.BaseElement {
      */
     this.container_ = null;
 
-    /** @private {boolean|undefined} */
-    this.isInContainer_ = undefined;
-
     /**
      * The origin of URL at `src` attr, if available. Otherwise, null.
      * @private {?string}
@@ -140,7 +137,7 @@ export class AmpIframe extends AMP.BaseElement {
    */
   assertSource_(src, containerSrc, sandbox = '') {
     const {element} = this;
-    const urlService = Services.urlForDoc(this.element);
+    const urlService = Services.urlForDoc(element);
     const url = urlService.parse(src);
     const {hostname, protocol, origin} = url;
     // Some of these can be easily circumvented with redirects.
@@ -288,10 +285,12 @@ export class AmpIframe extends AMP.BaseElement {
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
 
-    this.isAdLike_ = isAdLike(this.element);
-    this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
+    const {element} = this;
+
+    this.isAdLike_ = isAdLike(element);
+    this.isTrackingFrame_ = looksLikeTrackingIframe(element);
     this.isDisallowedAsAd_ = this.isAdLike_ &&
-        !isAdPositionAllowed(this.element, this.win);
+        !isAdPositionAllowed(element, this.win);
 
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed. This can be done by
@@ -574,23 +573,6 @@ export class AmpIframe extends AMP.BaseElement {
           + 'no width or height value is provided',
           this.element);
     }
-  }
-
-  /**
-   * Whether this is iframe may have tracking as its primary use case.
-   * @return {boolean}
-   * @private
-   */
-  looksLikeTrackingIframe_() {
-    if (!looksLikeTrackingIframe(this.element.getLayoutBox())) {
-      return false;
-    }
-    // Iframe is not tracking iframe if open with user interaction
-    if (this.isInContainer_ === undefined) {
-      this.isInContainer_ =
-          !!closestBySelector(this.element, '.i-amphtml-overlay');
-    }
-    return !this.isInContainer_;
   }
 
   /**

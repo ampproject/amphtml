@@ -22,6 +22,13 @@ import {startsWith} from './string';
 import {tryParseJson} from './json';
 
 
+/** @enum {string} */
+export const SandboxOptions = {
+  ALLOW_SCRIPTS: 'allow-scripts',
+  ALLOW_SAME_ORIGIN: 'allow-same-origin',
+};
+
+
 /**
  * @param {!Event} event
  * @param {?Element} iframe
@@ -63,7 +70,7 @@ export function redispatch(element, event, events) {
 /**
  * @param {!./base-element.BaseElement} video
  * @param {string} src
- * @param {?string=} sandbox
+ * @param {?Array<!SandboxOptions>=} sandbox
  * @return {!Element}
  */
 export function createFrameFor(video, src, sandbox = null) {

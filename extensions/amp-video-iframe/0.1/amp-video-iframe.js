@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 import {Deferred} from '../../../src/utils/promise';
-import {LayoutPriority} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {MIN_RATIO} from '../../../src/service/video/autoplay';
 import {
+  SandboxOptions,
   createFrameFor,
   isJsonOrObj,
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
@@ -31,6 +32,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isAdLike, looksLikeTrackingIframe} from '../../../src/iframe-helper';
+import {isFullscreenElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 
@@ -38,7 +40,10 @@ import {removeElement} from '../../../src/dom';
 const TAG = 'amp-video-iframe';
 
 /** @private @const */
-const SANDBOX = 'allow-scripts allow-same-origin';
+const SANDBOX = [
+  SandboxOptions.ALLOW_SCRIPTS,
+  SandboxOptions.ALLOW_SAME_ORIGIN,
+];
 
 /**
  * Events allowed to be dispatched from messages.
@@ -60,12 +65,6 @@ class AmpVideoIframe extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {boolean} */
-    this.isAdLike_ = false;
-
-    /** @private {boolean} */
-    this.isTrackingIframe_ = false;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -98,25 +97,17 @@ class AmpVideoIframe extends AMP.BaseElement {
   }
 
   /** @override */
-  onLayoutMeasure() {
-    const {element} = this;
-    this.isAdLike_ = isAdLike(element);
-    this.isTrackingIframe_ = looksLikeTrackingIframe(element.getLayoutBox());
-  }
-
-  /** @override */
-  getLayoutPriority() {
-    if (this.isAdLike_) {
-      return LayoutPriority.ADS; // See AmpAd3PImpl.
-    }
-    if (this.isTrackingIframe_) {
-      return LayoutPriority.METADATA;
-    }
-    return super.getLayoutPriority();
-  }
-
-  /** @override */
   buildCallback() {
+    const {element} = this;
+
+    this.user().assert(!isAdLike(element),
+        '<amp-video-iframe> does not allow ad iframes. ',
+        'Please use amp-ad instead.');
+
+    this.user().assert(!looksLikeTrackingIframe(element),
+        '<amp-video-iframe> does not allow tracking iframes. ',
+        'Please use amp-analytics instead.');
+
     installVideoManagerForDoc(this.getAmpDoc());
   }
 
@@ -167,8 +158,18 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @private */
   getSrc_() {
-    // TODO: assert https
-    return this.element.getAttribute('src');
+    const {element} = this;
+    const urlService = Services.urlForDoc(element);
+    const src = urlService.assertHttpsUrl(element.getAttribute('src'), element);
+
+    if (urlService.getSourceOrigin(src) === urlService.getWinOrigin(this.win)) {
+      this.user().warn('%s: Origin of the video-iframe and the page are the ' +
+        'same, which allows for same-origin behavior. However in AMP cache, ' +
+        'origins won\'t match. Please ensure you do not rely on any ' +
+        'same-origin privileges.', element);
+    }
+
+    return src;
   }
 
   /**
@@ -249,9 +250,18 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postIntersection_(messageId) {
+    const {time, intersectionRatio} = this.element.getIntersectionChangeEntry();
+
+    // Only post ratio > 0 when in autoplay range to prevent internal autoplay
+    // implementations that differ from ours.
+    const postedRatio = intersectionRatio < MIN_RATIO ? 0 : intersectionRatio;
+
     this.postMessage_(dict({
       'id': messageId,
-      'args': this.element.getIntersectionChangeEntry(),
+      'args': {
+        'intersectionRatio': postedRatio,
+        'time': time,
+      },
     }));
   }
 
@@ -340,7 +350,11 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @override */
   isFullscreen() {
-    return false;
+    // TODO(alanorozco): Make this accurate on iOS (i.e. async API).
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
   }
 
   /** @override */

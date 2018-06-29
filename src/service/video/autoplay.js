@@ -46,7 +46,7 @@ export const AutoplayEvents = {
  * Minimum visibility ratio required to trigger autoplay.
  * @private @const {number}
  */
-const MIN_RATIO = 0.5;
+export const MIN_RATIO = 0.5;
 
 
 /**
