@@ -27,8 +27,11 @@
 `amp-video-iframe` has several important differences from vanilla iframes and `amp-iframe`.
 
 - By default, an `amp-video-iframe` is sandboxed (see [details](#sandbox)).
+
 - `amp-video-iframe` implements all [Video Features](../../spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
+
 - `amp-video-iframe` must only request resources via HTTPS.
+
 - `amp-video-iframe` is not scrollable.
 
 
@@ -38,10 +41,12 @@
 
 Advertising use cases should use [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad) instead.
 
+
 The reasons for this policy are that:
 
 - `amp-video-iframe` enforces sandboxing and the sandbox is also applied to child iframes. This means landing pages may be broken, even if the ad itself appears to work.
-- `amp-video-iframe` has controlled resize mechanism.
+
+- `amp-video-iframe` has no controlled resize mechanism.
 
 ## Attributes
 
