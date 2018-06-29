@@ -568,7 +568,13 @@ function runTests() {
             cyan('https://codecov.io/gh/ampproject/amphtml') + '...');
         const codecovCmd =
             './node_modules/.bin/codecov --file=test/coverage/lcov.info';
-        const output = getStdout(codecovCmd);
+        let flags = '';
+        if (argv.unit) {
+          flags = ' --flags=unit_tests';
+        } else if (argv.integration) {
+          flags = ' --flags=integration_tests';
+        }
+        const output = getStdout(codecovCmd + flags);
         const viewReportPrefix = 'View report at: ';
         const viewReport = output.match(viewReportPrefix + '.*');
         if (viewReport && viewReport.length > 0) {
