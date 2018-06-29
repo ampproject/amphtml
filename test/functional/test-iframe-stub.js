@@ -19,8 +19,7 @@ import {
   expectPostMessage,
 } from '../../testing/iframe';
 
-// TODO(lannka, #12499): Make this work with latest mocha / karma.
-describe.skip('test-iframe-createIframeWithMessageStub', () => {
+describe('test-iframe-createIframeWithMessageStub', () => {
 
   const data1 = {
     foo: 'bar',
