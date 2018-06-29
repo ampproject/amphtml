@@ -46,6 +46,7 @@ tags: {  # <amp-pan-zoom>
   }
   attrs: {
     name: "reset-on-resize"
+    value: ""
   }
   attr_lists: "extended-amp-global"
    amp_layout: {
