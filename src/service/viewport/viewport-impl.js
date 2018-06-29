@@ -41,7 +41,7 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {setStyle} from '../../style';
+import {setImportantStyles, setStyle} from '../../style';
 
 
 const TAG_ = 'Viewport';
@@ -203,6 +203,15 @@ export class Viewport {
     }
     if (viewer.getParam('webview') === '1') {
       this.globalDoc_.documentElement.classList.add('i-amphtml-webview');
+      // Pages that have a <body> height of 0 (e.g. if content is in a
+      // position:absolute wrapper) will be hidden due to `overflow-x:hidden` in
+      // `i-amphtml-webview` CSS. Detect and fix by setting height to 100vh.
+      // See b/74541306.
+      this.ampdoc.whenBodyAvailable().then(body => {
+        if (body./*OK*/getBoundingClientRect().height == 0) {
+          setImportantStyles(body, {'height': '100vh'});
+        }
+      });
     }
 
     // To avoid browser restore scroll position when traverse history
