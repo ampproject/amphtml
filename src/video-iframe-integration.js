@@ -20,6 +20,7 @@ import {getMode} from '../src/mode';
 import {isFiniteNumber} from '../src/types';
 import {once} from '../src/utils/function';
 import {tryParseJson} from '../src/json';
+import {tryResolve} from '../src/utils/promise';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
@@ -128,7 +129,13 @@ export class AmpVideoIntegration {
    */
   method(name, callback) {
     userAssert(validMethods.indexOf(name) > -1, `Invalid method ${name}.`);
-    this.methods_[name] = callback;
+
+    const wrappedCallback =
+        (name == 'play' || name == 'pause') ?
+          this.safePlayOrPause_(callback) :
+          callback;
+
+    this.methods_[name] = wrappedCallback;
     this.listenToOnce_();
   }
 
@@ -269,6 +276,20 @@ export class AmpVideoIntegration {
       this.muted_ = false;
       this.postEvent('unmuted');
     }
+  }
+
+  /**
+   * @param {function()} callback
+   * @private
+   */
+  safePlayOrPause_(callback) {
+    return () => {
+      try {
+        tryResolve(() => callback());
+      } catch (e) {
+        // OK to dismiss errors as they are expected.
+      }
+    };
   }
 
   /**
