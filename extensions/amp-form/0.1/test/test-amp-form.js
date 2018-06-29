@@ -23,6 +23,7 @@ import {
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
+import {Capability} from '../../../../src/service/viewer-impl';
 import {FormDataWrapper} from '../../../../src/form-data-wrapper';
 import {Services} from '../../../../src/services';
 import {
@@ -120,6 +121,37 @@ describes.repeated('', {
       // Reset supported state for checkValidity and reportValidity.
       setCheckValiditySupportedForTesting(undefined);
       setReportValiditySupportedForTesting(undefined);
+    });
+
+    describe('Server side template rendering', () => {
+      it('should throw error if using non-xhr get', () => {
+        return getAmpForm(getForm()).then(ampForm => {
+          const form = ampForm.form_;
+          form.id = 'registration';
+          const event = {
+            stopImmediatePropagation: sandbox.spy(),
+            target: form,
+            preventDefault: sandbox.spy(),
+          };
+          const emailInput = createElement('input');
+          emailInput.setAttribute('name', 'email');
+          emailInput.setAttribute('type', 'email');
+          emailInput.setAttribute('value', 'j@hnmiller.com');
+          form.appendChild(emailInput);
+
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = null;
+          sandbox.stub(form, 'submit');
+          sandbox.stub(form, 'checkValidity').returns(true);
+          sandbox.stub(ampForm, 'analyticsEvent_');
+          sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(true);
+          const errorRe =
+            /Non-XHR requests are not supported for viewers with renderTemplate capabilities./;
+          allowConsoleError(() => {
+            expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+          });
+        });
+      });
     });
 
     it('should assert valid action-xhr when provided', () => {

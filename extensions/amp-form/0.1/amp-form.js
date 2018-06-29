@@ -660,7 +660,7 @@ export class AmpForm {
    * @private
    */
   assertSsrTemplate_(msg) {
-    user().assert(true, msg);
+    user().assert(false, msg);
   }
 
   /**
@@ -700,7 +700,7 @@ export class AmpForm {
    * @private
    */
   maybeHandleRedirect_(response) {
-    if (this.ssrTemplaterHelper_.isSupported()) {
+    if (this.ssrTemplateHelper_.isSupported()) {
       this.assertSsrTemplate_(
           'Redirects not supported for viewerRenderTemplate capability');
       return;
