@@ -799,7 +799,6 @@ describe('Google A4A utils', () => {
     });
 
     afterEach(() => {
-      win.ampAdPageCorrelator = undefined;
       toggleExperiment(win, 'exp-new-correlator', false);
     });
 
@@ -816,7 +815,7 @@ describe('Google A4A utils', () => {
       });
       const cid = '12345678910';
       const correlator = getCorrelator(win, win.document, cid);
-      expect(String(correlator).match(pageViewId)).to.be.ok;
+      expect(String(correlator)).to.match(pageViewId);
     });
 
     it('should calculate randomly if experiment on', () => {
