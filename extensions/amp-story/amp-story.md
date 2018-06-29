@@ -446,6 +446,36 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
   </noscript>
 </amp-img>
 
+**AMP-to-AMP linking**
+
+You can use AMP-to-AMP linking in the components that support a url by including `'amphtml': true` inside the component linking to another AMP document. For example:
+
+```json
+...
+{
+  "type": "small",
+  "title": "This is India an the best places you should go",
+  "url": "http://example.com/my-amp-document.html",
+  "image": "http://placehold.it/256x128",
+  "amphtml": true
+},
+{
+  "type": "cta-link",
+  "links": [
+    {
+      "text": "Sign Up",
+      "url": "example.com/signup",
+      "amphtml": true
+    },
+    {
+      "text": "Subscribe",
+      "url": "example.com/subscribe"
+    }
+  ]
+},
+...
+```
+
 #### Social sharing
 
 The configuration for social sharing is defined in the `shareProviders` field of the response object, and it's optional.
