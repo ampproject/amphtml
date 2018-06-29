@@ -39,6 +39,14 @@ exports.rules = [
   // Global rules
   {
     filesMatching: '**/*.js',
+    mustNotDependOn: 'src/video-iframe-integration.js',
+    whitelist: [
+      // Do not extend this whitelist.
+      // video-iframe-integration.js is an entry point.
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
       // DEPRECATED! Do not extend this whitelist. Use src/purifier.js instead.

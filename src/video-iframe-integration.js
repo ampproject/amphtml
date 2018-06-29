@@ -21,6 +21,9 @@ import {isFiniteNumber} from '../src/types';
 import {once} from '../src/utils/function';
 import {tryParseJson} from '../src/json';
 
+/** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
+
+adopt(self);
 
 /**
  * @typedef {{
@@ -34,6 +37,18 @@ import {tryParseJson} from '../src/json';
  */
 let JwplayerPartialInterfaceDef;
 
+/**
+ * @param {T} shouldBeTrueish
+ * @param {...*} args
+ * @return {T}
+ * @template T
+ */
+function userAssert(shouldBeTrueish, ...args) {
+  if (!shouldBeTrueish) {
+    throw new Error(args.join(' '));
+  }
+  return shouldBeTrueish;
+}
 
 const validMethods = [
   'pause',
@@ -46,7 +61,6 @@ const validMethods = [
   'hidecontrols',
 ];
 
-
 const validEvents = [
   'canplay',
   'load',
@@ -57,29 +71,19 @@ const validEvents = [
   'unmuted',
 ];
 
-
-/**
- * @param {*} shouldBeTrueish
- * @param {...*} args
- */
-function userAssert(shouldBeTrueish, ...args) {
-  if (!shouldBeTrueish) {
-    throw new Error(args.join(' '));
-  }
-  return shouldBeTrueish;
-}
-
 /** @visibleForTesting */
 export class AmpVideoIntegration {
 
   /** @param {!Window} win */
   constructor(win) {
 
-    /**
-     * Used for checking callback return type.
-     * @visibleForTesting
-     */
-    this.isAmpVideoIntegration_ = true;
+    if (getMode(win).test) {
+      /**
+       * Used for checking callback return type.
+       * @visibleForTesting
+       */
+      this.isAmpVideoIntegration_ = true;
+    }
 
     /** @private @const */
     this.callCounter_ = 0;
@@ -332,5 +336,3 @@ export function adopt(global) {
   // Execute callbacks created before adoption.
   callbacks.forEach(callbacks.push);
 }
-
-adopt(self);
