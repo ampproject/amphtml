@@ -19,7 +19,7 @@ import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
-import {registerServiceBuilderForDoc} from '../service';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {startsWith} from '../string';
 import {toWin} from '../types';
 import {tryFocus} from '../dom';
@@ -105,7 +105,8 @@ export class StandardActions {
     switch (method) {
       case 'pushState':
       case 'setState':
-        return Services.bindForDocOrNull(node).then(bind => {
+        const ampdoc = getAmpdoc(node);
+        return Services.bindForDocOrNull(ampdoc).then(bind => {
           user().assert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });

@@ -94,7 +94,7 @@ export class VideoServiceSync {
     const ampdoc = getAmpdoc(nodeOrDoc);
     return extensions.installExtensionForDoc(ampdoc, EXTENSION)
         .then(() => /** @type {!Promise<!VideoServiceDef>} */ (
-          getElementServiceForDoc(nodeOrDoc, 'video-service', EXTENSION)));
+          getElementServiceForDoc(ampdoc, 'video-service', EXTENSION)));
   }
 
   /** @override */
