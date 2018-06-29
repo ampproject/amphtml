@@ -34,7 +34,8 @@ describe.configure().ifNewChrome().run('amp-pan-zoom', function() {
         .to.have.length.above(0);
   });
 
-  it('should resize and center content', () => {
+  // TODO(cathyxz): Flaky on Chrome 67 on Windows 7.
+  it.skip('should resize and center content', () => {
     return fixture.awaitEvent(AmpEvents.LOAD_END, 2).then(() => {
       const panZoom = fixture.doc.querySelector('#amp-pan-zoom-1');
       const content = panZoom.children[0];
