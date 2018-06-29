@@ -16,6 +16,7 @@
 
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
+import {Capability} from '../../../../src/service/viewer-impl';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -32,12 +33,16 @@ describes.realWin('amp-list component', {
   let listMock;
   let viewerMock;
   let setBindService;
+  let template;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    const ownerDoc = document.ownerDocument || document;
     ampdoc.isSingleDoc = () => true;
+
+    const createTextNode = ownerDoc.createTextNode.bind(ownerDoc);
 
     const templates = Services.templatesFor(win);
     templatesMock = sandbox.mock(templates);
@@ -49,6 +54,14 @@ describes.realWin('amp-list component', {
     element.setAttribute('src', 'https://data.com/list.json');
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
+
+    template = doc.createElement('template');
+    template.setAttribute('type', 'amp-mustache');
+    template.content.appendChild(createTextNode('Some {{template}}'));
+    element.appendChild(template);
+
+    element.setAttribute('max-items', 5);
+    element.setAttribute('height', '100px');
 
     const {promise, resolve} = new Deferred();
     sandbox.stub(Services, 'bindForDocOrNull').returns(promise);
@@ -117,9 +130,20 @@ describes.realWin('amp-list component', {
   function expectViewerProxiedFetchAndRender(
     fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     const fetch = Promise.resolve(fetched);
-    viewerMock.expects('isSupported').returns(true).twice();
-    viewerMock.expects('fetchAndRenderTemplate')
-        .withExactArgs(element, 'amp-list').returns(fetch).once();
+    viewerMock.expects('canRenderTemplates').returns(true).twice();
+    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
+        Capability.VIEWER_RENDER_TEMPLATE,
+        {
+          // Expect only the whitelisted attributes to be present.
+          data: {
+            'inputData': { },
+            'src': 'https://data.com/list.json',
+            'max-items': '5',
+          },
+          mustacheTemplate: '<template xmlns="http://www.w3.org/1999/xhtml" type="amp-mustache">Some {{template}}</template>',
+          sourceAmpComponent: 'amp-list',
+        })
+        .returns(fetch).once();
     if (opts.resetOnRefresh) {
       listMock.expects('togglePlaceholder').withExactArgs(true).once();
       listMock.expects('toggleLoading').withExactArgs(true, true).once();
@@ -127,9 +151,9 @@ describes.realWin('amp-list component', {
     listMock.expects('toggleLoading').withExactArgs(false).once();
     listMock.expects('togglePlaceholder').withExactArgs(false).once();
     const render = Promise.resolve(rendered);
-    templatesMock.expects('renderHtml')
+    templatesMock.expects('findAndRenderTemplate')
         .withExactArgs(element, fetched.renderedHtml)
-        .returns(render).once(1);
+        .returns(render).atLeast(1);
 
     return Promise.all([fetch, render]);
   }
@@ -154,7 +178,7 @@ describes.realWin('amp-list component', {
       it('should proxy rendering to viewer', () => {
         const resp = {renderedHtml: '<div>Rendered template</div>'};
         const itemElement = doc.createElement('div');
-        const rendered = expectViewerProxiedFetchAndRender(resp, [itemElement]);
+        const rendered = expectViewerProxiedFetchAndRender(resp, itemElement);
         return list.layoutCallback().then(() => rendered).then(() => {
           expect(list.container_.contains(itemElement)).to.be.true;
         });
@@ -162,9 +186,19 @@ describes.realWin('amp-list component', {
 
       it('should error if viewer does not define response renderedHtml', () => {
         viewerMock.expects('canRenderTemplates').returns(true);
-        viewerMock.expects('fetchAndRenderTemplate')
+        viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
+            Capability.VIEWER_RENDER_TEMPLATE,
+            {
+              data: {
+                'inputData': { },
+                'src': 'https://data.com/list.json',
+                'max-items': '5',
+              },
+              mustacheTemplate: '<template xmlns="http://www.w3.org/1999/xhtml" type="amp-mustache">Some {{template}}</template>',
+              sourceAmpComponent: 'amp-list',
+            })
             .returns(Promise.resolve({}));
-        templatesMock.expects('renderHtml').never();
+        templatesMock.expects('findAndRenderTemplate').never();
         listMock.expects('toggleLoading').withExactArgs(false).once();
         return expect(list.layoutCallback()).to.eventually.be
             .rejectedWith(/Response must define the rendered html/);

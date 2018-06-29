@@ -215,7 +215,7 @@ export class AmpList extends AMP.BaseElement {
       removeChildren(dev().assertElement(this.container_));
     }
     if (this.ssrTemplateHelper_.isSupported()) {
-      this.ssrTemplate_();
+      return this.ssrTemplate_();
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
       return this.fetch_(itemsExpr).then(items => {
@@ -244,6 +244,7 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Proxies the template rendering to the viewer.
+   * @return {!Promise}
    */
   ssrTemplate_() {
     return this.ssrTemplateHelper_.fetchAndRenderTemplate(
@@ -305,8 +306,11 @@ export class AmpList extends AMP.BaseElement {
       // TODO(alabiaga): should call updatebindings as below?
       this.templates_.findAndRenderTemplate(
           this.element, /** @type {!HTML} */ (current.data))
-          .then(element => this.container_.appendChild(element))
-          .then(onFulfilledCallback, onRejectedCallback);
+          .then(element => {
+            console.log(element);
+            this.container_.appendChild(element);
+          })
+          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
     } else {
       this.templates_.findAndRenderTemplateArray(
           this.element, /** @type {!Array} */ (current.data))

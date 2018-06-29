@@ -16,6 +16,12 @@
 
 import {Capability} from './service/viewer-impl';
 
+/** The attributes we allow to be sent in the XHR payload. */
+const WHITELISTED_ATTRS = {
+  'amp-list': ['src', 'single-item', 'max-items'],
+  'amp-form': ['action-xhr'],
+};
+
 /**
  * Helper, that manages the proxying of template rendering to the viewer.
  */
@@ -38,9 +44,6 @@ export class SsrTemplateHelper {
     this.xmls_ = new XMLSerializer();
 
     this.sourceComponent = sourceComponent;
-
-    /** @const @private {boolean} */
-    this.viewerCanRenderTemplate_ = this.viewer_.canRenderTemplates();
   }
 
   /**
@@ -48,7 +51,7 @@ export class SsrTemplateHelper {
    * @return {boolean}
    */
   isSupported() {
-    return this.viewerCanRenderTemplate_;
+    return this.viewer_.canRenderTemplates();
   }
 
   /**
@@ -66,7 +69,8 @@ export class SsrTemplateHelper {
     renderTemplateSuccessCallback,
     renderTemplateFailureCallback) {
     const inputsAsJson = this.getElementInputsAsJson_(element);
-    const elementAttrsAsJson = this.getElementAttributesAsJson_(element);
+    const elementAttrsAsJson =
+        this.getElementAttributesAsJson_(this.sourceComponent, element);
     elementAttrsAsJson.inputData = inputsAsJson;
     const mustacheTemplate = this.xmls_.serializeToString(
         this.templates_.findTemplate(element));
@@ -116,16 +120,22 @@ export class SsrTemplateHelper {
 
   /**
    * Returns the element's attributes in json format.
+   * @param {string} sourceComponent
    * @param {!HtmlElement} element
    * @return {!JsonObject}
    */
-  getElementAttributesAsJson_(element) {
+  getElementAttributesAsJson_(sourceComponent, element) {
     const attrsAsJson = {};
     if (element.attributes) {
       const {attributes} = element;
+      // Include commonly shared allowed attributes.
+      const whiteList = WHITELISTED_ATTRS[sourceComponent]
+          .concat('inputData', 'mustacheTemplate');
       for (let i = 0, len = attributes.length; i < len; i++) {
         const keyValue = attributes[i];
-        attrsAsJson[keyValue.name] = keyValue.value;
+        if (whiteList.includes(keyValue.name)) {
+          attrsAsJson[keyValue.name] = keyValue.value;
+        }
       }
     }
     return attrsAsJson;
