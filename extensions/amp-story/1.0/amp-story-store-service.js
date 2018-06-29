@@ -39,6 +39,7 @@ const TAG = 'amp-story';
  *    landscapestate: boolean,
  *    mutedstate: boolean,
  *    pausedstate: boolean,
+ *    rtlstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
  *    consentid: ?string,
@@ -67,6 +68,7 @@ export const StateProperty = {
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
   PAUSED_STATE: 'pausedstate',
+  RTL_STATE: 'rtlstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
 
@@ -89,6 +91,7 @@ export const Action = {
   TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
   TOGGLE_PAUSED: 'togglepaused',
+  TOGGLE_RTL: 'togglertl',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
 };
@@ -148,6 +151,10 @@ const actions = (state, action, data) => {
             [StateProperty.PAUSED_STATE]: !!data,
             [StateProperty.SHARE_MENU_STATE]: !!data,
           }));
+    // Triggers right to left experience.
+    case Action.TOGGLE_RTL:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.RTL_STATE]: !!data}));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CONSENT_ID]: data}));
@@ -258,6 +265,7 @@ export class AmpStoryStoreService {
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAUSED_STATE]: false,
+      [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.CONSENT_ID]: null,
