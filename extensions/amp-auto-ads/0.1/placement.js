@@ -205,7 +205,7 @@ export class Placement {
       'layout': 'fixed-height',
       'class': 'i-amphtml-layout-awaiting-size',
     }), baseAttributes, this.attributes_));
-    attributes['height'] = 0;
+    attributes['height'] = '0';
     return createElementWithAttributes(
         this.ampdoc.win.document, 'amp-ad', attributes);
   }
