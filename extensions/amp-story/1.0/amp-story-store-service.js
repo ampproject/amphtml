@@ -31,6 +31,7 @@ const TAG = 'amp-story';
  *    canshowpreviouspagehelp: boolean,
  *    canshowsharinguis: boolean,
  *    canshowsystemlayerbuttons: boolean,
+ *    accessstate: boolean,
  *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
@@ -60,6 +61,7 @@ export const StateProperty = {
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
 
   // App States.
+  ACCESS_STATE: 'accessstate', // amp-access paywall.
   AD_STATE: 'adstate',
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
@@ -83,6 +85,7 @@ export const StateProperty = {
 export const Action = {
   CHANGE_PAGE: 'setcurrentpageid',
   SET_CONSENT_ID: 'setconsentid',
+  TOGGLE_ACCESS: 'toggleaccess',
   TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
@@ -106,6 +109,13 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    // Triggers the amp-acess paywall.
+    case Action.TOGGLE_ACCESS:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.ACCESS_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
       return /** @type {!State} */ (Object.assign(
@@ -257,6 +267,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
