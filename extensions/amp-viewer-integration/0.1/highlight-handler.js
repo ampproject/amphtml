@@ -161,7 +161,7 @@ export class HighlightHandler {
    * @private
    */
   initHighlight_(highlightInfo) {
-    if (!!this.ampdoc_.win.document.querySelector('script[id="amp-access"]')) {
+    if (this.ampdoc_.win.document.querySelector('script[id="amp-access"]')) {
       // Disable highlighting if <amp-access> is used because highlighting
       // interacts badily with UI reflows by <amp-access>.
       // TODO(yunabe): Remove this once <amp-access> provides an API to delay
