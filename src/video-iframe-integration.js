@@ -295,14 +295,25 @@ function listenTo(win, onMessage) {
 }
 
 /**
+ * Adopt window asynchronously.
  * @param {!Window} global
  * @visibleForTesting
  */
 export function adopt(global) {
-  const exposed = (global.AmpVideoIframe = global.AmpVideoIframe || []);
-  const integration = new AmpVideoIntegration(global);
+  // Hacky way to make AMP errors (e.g. from listenFor) do *something*.
   global.reportError = console.error.bind(console);
+
+  // Initialize one object per frame.
+  const integration = new AmpVideoIntegration(global);
+
+  // Create array if the script loaded before callback push
+  // (otherwise already created).
+  const exposed = (global.AmpVideoIframe = global.AmpVideoIframe || []);
+
+  // Rewrite push to execute callbacks are added after adoption.
   exposed.push = callback => callback(integration);
+
+  // Execute callbacks created before adoption.
   exposed.forEach(exposed.push);
 }
 
